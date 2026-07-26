@@ -331,3 +331,7 @@
 - 2026-07-26T17:32:46.153677+00:00 START G2-P3-B12
 
 - 2026-07-26T17:45:56.594284+00:00 PASS G2-P3-B12 evidence=['semantic equivalent of absent pnpm test:pm2-adapter-e2e: TEST_DATABASE_URL=<redacted-local-postgres> node tests/pm2-adapter-e2e/run-real-pm2-e2e.mjs (real isolated PM2 7.0.3 + built Runtime + mock Adapter + real local PostgreSQL; start/inspect/SIGKILL restart/live+ready/stop/delete/sentinel isolation PASS; reports/evidence/G2-P3-B12-real-pm2-e2e.json); pnpm build PASS; pnpm test:pm2-adapter (6 files/37 tests); pnpm --filter @sdar/runtime-config-client test (2 files/14 tests); tsc --noEmit; eslint targeted; secret scan clean; .codex/reports/goal2-P3.md']
+
+- 2026-07-26T17:46:22.895229+00:00 START G2-P4-B01
+
+- 2026-07-26T17:50:58.391999+00:00 PASS G2-P4-B01 evidence=['pnpm --filter @sdar/runtime-registration test (1 file/5 tests: expected-instance-only registration, identity/version/protocol mismatch, duplicate idempotency, ordered heartbeat, TTL stale detection, exact DTO validation); tsc --noEmit; eslint package; git diff --check']

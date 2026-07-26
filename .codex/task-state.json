@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T17:45:56.594343+00:00",
+  "updatedAt": "2026-07-26T17:50:58.392068+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -301,14 +301,16 @@
       "reason": null
     },
     "G2-P4-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T17:46:22.895162+00:00",
+      "completedAt": "2026-07-26T17:50:58.391934+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/runtime-registration test (1 file/5 tests: expected-instance-only registration, identity/version/protocol mismatch, duplicate idempotency, ordered heartbeat, TTL stale detection, exact DTO validation); tsc --noEmit; eslint package; git diff --check"
+      ],
       "reason": null
     },
     "G2-P4-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

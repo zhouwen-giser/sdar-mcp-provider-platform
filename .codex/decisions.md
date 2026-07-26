@@ -233,3 +233,10 @@ initialization. Change only those two imports to the equivalent repository-relat
 which TypeScript preserves as a resolvable relative path in `dist`. This is the minimum out-of-range
 runtime dependency fix needed to execute the mandated built Runtime; it changes no configuration,
 hashing, authority, PM2, protocol, or secret behavior.
+
+## 2026-07-26 — G2-P4-B01 Runtime Registration workspace lock importer
+
+The new dependency-free `packages/runtime-registration` workspace requires an empty importer in
+`pnpm-lock.yaml` for the mandatory filtered test and frozen workspace validation. Add only that
+generated importer outside the card allowlist. It introduces no external dependency, persistence,
+API, Provider creation capability, heartbeat transport, or later Catalog/Registry behavior.
