@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  loadRuntimeBootstrapEnvironment,
+  RuntimeBootstrapResolvedSchema,
+} from "../../../packages/runtime-configuration-contract/src/runtime/bootstrap.js";
 
 const BooleanEnvironmentSchema = z
   .union([z.string(), z.boolean()])
@@ -6,11 +10,8 @@ const BooleanEnvironmentSchema = z
 
 const EnvironmentSchema = z
   .object({
-    RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
-    HOST: z.string().default("0.0.0.0"),
-    PORT: z.coerce.number().int().min(1).max(65_535).default(8080),
+    ...RuntimeBootstrapResolvedSchema.shape,
     LOG_LEVEL: z.string().default("info"),
-    PROVIDER_ID: z.string().min(1).max(128).default("mock-provider"),
     OTEL_ENABLED: BooleanEnvironmentSchema.default(false),
     OTEL_EXPORTER_OTLP_ENDPOINT: z.url().default("http://127.0.0.1:4318"),
     OTEL_EXPORTER_OTLP_TLS_MODE: z.enum(["disabled", "required"]).default("disabled"),
@@ -37,13 +38,6 @@ const EnvironmentSchema = z
     PROVIDER_TELEMETRY_MAX_DEPTH: z.coerce.number().int().min(1).max(64).default(16),
     PROVIDER_TELEMETRY_MAX_NODES: z.coerce.number().int().min(16).max(100_000).default(4_096),
     PROVIDER_TELEMETRY_RATE_LIMIT: z.coerce.number().int().min(1).max(100_000).default(600),
-    DATABASE_URL: z.url().default("postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime"),
-    ADAPTER_ENDPOINT: z.string().refine(validAdapterEndpoint).default("127.0.0.1:7001"),
-    ADAPTER_TLS_MODE: z.enum(["disabled", "required"]).default("disabled"),
-    ADAPTER_TLS_CA_PATH: z.string().min(1).optional(),
-    ADAPTER_TLS_CERT_PATH: z.string().min(1).optional(),
-    ADAPTER_TLS_KEY_PATH: z.string().min(1).optional(),
-    ADAPTER_RPC_TIMEOUT_MS: z.coerce.number().int().positive().max(60_000).default(5_000),
     AUTH_MODE: z.enum(["development", "trusted_headers", "jwt_hs256"]).default("development"),
     MCP_LEGACY_ENDPOINT_ENABLED: BooleanEnvironmentSchema.default(false),
     BUSINESS_EVENTS_ENABLED: BooleanEnvironmentSchema.default(false),
@@ -135,7 +129,6 @@ const EnvironmentSchema = z
     RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(100_000).default(300),
     RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(60_000),
     RATE_LIMIT_MAX_KEYS: z.coerce.number().int().min(16).max(1_000_000).default(10_000),
-    DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
     IDEMPOTENCY_LEASE_MS: z.coerce.number().int().min(1_000).max(300_000).default(30_000),
     IDEMPOTENCY_WAIT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(10_000),
     IDEMPOTENCY_POLL_MS: z.coerce.number().int().min(5).max(1_000).default(20),
@@ -258,7 +251,8 @@ export type RuntimeConfig = z.infer<typeof EnvironmentSchema> & {
 };
 
 export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
-  const value = EnvironmentSchema.parse(environment);
+  const bootstrap = loadRuntimeBootstrapEnvironment(environment);
+  const value = EnvironmentSchema.parse({ ...environment, ...bootstrap });
   const commandClaimLeaseMinimum =
     2 * value.ADAPTER_RPC_TIMEOUT_MS +
     value.DB_PUBLICATION_BUDGET_MS +
@@ -325,10 +319,4 @@ export function parseBooleanEnv(value: string | boolean): boolean {
     default:
       throw new Error(`INVALID_BOOLEAN_ENV:${value}`);
   }
-}
-
-function validAdapterEndpoint(value: string): boolean {
-  if (!/^(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\]):\d{1,5}$/.test(value)) return false;
-  const port = Number(value.slice(value.lastIndexOf(":") + 1));
-  return Number.isInteger(port) && port >= 1 && port <= 65_535;
 }

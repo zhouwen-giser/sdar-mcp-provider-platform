@@ -91,3 +91,7 @@
 - 2026-07-26T10:29:01.581236+00:00 START G1-P3-B02
 
 - 2026-07-26T10:35:54.762524+00:00 PASS G1-P3-B02 evidence=['pnpm --filter @sdar/runtime-configuration-contract test: PASS 1 file/7 tests; pnpm typecheck: PASS; model covers schema/defaults/secretPaths, 4 Apply Modes, 6 target types, inheritance, per-field metadata and override policy; invalid Apply Mode and consistency violations expose stable codes; canonical JSON exact string and SHA-256 locked, cycles/non-JSON rejected; eslint, prettier, git diff --check PASS; pnpm-lock only adds workspace importer']
+
+- 2026-07-26T10:39:36.691362+00:00 START G1-P3-B03
+
+- 2026-07-26T10:43:39.830965+00:00 PASS G1-P3-B03 evidence=['pnpm --filter @sdar/runtime-configuration-contract test (2 files, 14 tests); pnpm exec vitest run tests/unit/config.test.ts tests/security/production-config.test.ts (2 files, 30 tests; semantic equivalent because @sdar/runtime has no test script); pnpm typecheck; pnpm lint; pnpm build; git diff --check']
