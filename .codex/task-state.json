@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:02:22.354363+00:00",
+  "updatedAt": "2026-07-26T10:06:03.196042+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -130,28 +130,30 @@
       "reason": null
     },
     "G1-P2-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:02:53.436132+00:00",
+      "completedAt": "2026-07-26T10:06:03.195858+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/provider-package-registry test: PASS 1 file/5 tests; pnpm typecheck: PASS; Ajv Draft 2020-12 and strict Zod validators both accept valid package and reject missing required fields, unknown/duplicate hosting modes, and additional properties; normalized JSON diff against task-package ProviderPackage.schema.json: exact semantic match; eslint, prettier, git diff --check: PASS"
+      ],
+      "reason": null
+    },
+    "G1-P2-B02": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P2-B02": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P2-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
     "G1-P2-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

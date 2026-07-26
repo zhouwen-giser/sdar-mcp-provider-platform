@@ -167,6 +167,8 @@ importers:
 
   packages/provider-adapter-kit: {}
 
+  packages/provider-package-registry: {}
+
   packages/task-engine: {}
 
   packages/vehicle-device-mcp-client: {}

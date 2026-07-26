@@ -55,3 +55,7 @@
 - 2026-07-26T09:57:51.355169+00:00 START G1-P1-B08
 
 - 2026-07-26T10:02:22.354251+00:00 PASS G1-P1-B08 evidence=['docs/database/MIGRATION_SET_UPGRADE.md; .codex/reports/phase-P1.md; rg "migrations" apps packages | head -200: PASS (explicit set directories/containment only, no production root SQL scan); pnpm test:migration-isolation with local PostgreSQL: PASS 1/1; pnpm build: PASS; stale NPC report path corrected; node --check, prettier --check, git diff --check: PASS']
+
+- 2026-07-26T10:02:53.436209+00:00 START G1-P2-B01
+
+- 2026-07-26T10:06:03.195943+00:00 PASS G1-P2-B01 evidence=['pnpm --filter @sdar/provider-package-registry test: PASS 1 file/5 tests; pnpm typecheck: PASS; Ajv Draft 2020-12 and strict Zod validators both accept valid package and reject missing required fields, unknown/duplicate hosting modes, and additional properties; normalized JSON diff against task-package ProviderPackage.schema.json: exact semantic match; eslint, prettier, git diff --check: PASS']
