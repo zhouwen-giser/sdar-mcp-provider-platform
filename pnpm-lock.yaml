@@ -141,6 +141,15 @@ importers:
 
   apps/npc-tank-provider-adapter: {}
 
+  apps/pms-api:
+    dependencies:
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../../packages/pms-domain
+      fastify:
+        specifier: 5.10.0
+        version: 5.10.0
+
   apps/pms-worker:
     dependencies:
       '@sdar/pms-application':

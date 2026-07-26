@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T12:10:01.120754+00:00",
+  "updatedAt": "2026-07-26T12:15:51.891476+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -346,28 +346,30 @@
       "reason": null
     },
     "G1-P5-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T12:10:48.021220+00:00",
+      "completedAt": "2026-07-26T12:15:51.891365+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-api test: PASS 1 file/5 tests; pnpm typecheck: PASS; Fastify app.ready and inject startup PASS; /health/live 200 and dependency-aware /health/ready 503 covered; /api/v1 plus deterministic /api/v1/openapi.json OpenAPI 3.1 covered; safe requestId/correlationId/actor context and response headers covered; uniform 404/500 envelopes exclude URL query Secret, raw error, SQL text, stack and connection string; eslint, prettier, full build, frozen lockfile and git diff --check PASS"
+      ],
+      "reason": null
+    },
+    "G1-P5-B02": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P5-B02": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P5-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
     "G1-P5-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

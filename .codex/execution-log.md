@@ -151,3 +151,7 @@
 - 2026-07-26T12:04:05.797723+00:00 START G1-P4-B07
 
 - 2026-07-26T12:10:01.120682+00:00 PASS G1-P4-B07 evidence=['pnpm --filter @sdar/pms-worker test: PASS 1 file/5 tests; pnpm build: PASS; secret-file-only config and inline database URL rejection covered; sorted job allowlist and duplicate rejection covered; claim-handler-complete loop and package sync actor/fencing correlation covered; SIGTERM/SIGINT path aborts polling delay, drains current work, closes Pool, and repeated stop is safe; worker source PM2/RuntimeDeployment scan clean; P4 regression pnpm test:pms PASS 13/13 and full migrations PASS 4/4; typecheck, eslint, prettier, frozen lockfile, git diff --check PASS; docs/operations/PMS_WORKER.md and .codex/reports/phase-P4.md']
+
+- 2026-07-26T12:10:48.021311+00:00 START G1-P5-B01
+
+- 2026-07-26T12:15:51.891431+00:00 PASS G1-P5-B01 evidence=['pnpm --filter @sdar/pms-api test: PASS 1 file/5 tests; pnpm typecheck: PASS; Fastify app.ready and inject startup PASS; /health/live 200 and dependency-aware /health/ready 503 covered; /api/v1 plus deterministic /api/v1/openapi.json OpenAPI 3.1 covered; safe requestId/correlationId/actor context and response headers covered; uniform 404/500 envelopes exclude URL query Secret, raw error, SQL text, stack and connection string; eslint, prettier, full build, frozen lockfile and git diff --check PASS']
