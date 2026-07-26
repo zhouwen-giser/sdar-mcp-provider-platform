@@ -1,5 +1,5 @@
 export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
-  return Object.freeze({
+  const document = {
     openapi: "3.1.0",
     info: {
       title: "SDAR MCP Provider Management Service API",
@@ -265,6 +265,12 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         },
       },
       securitySchemes: {
+        managementToken: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "opaque-management-token",
+          "x-sdar-roles": ["reader", "administrator"],
+        },
         runtimeConfigToken: {
           type: "http",
           scheme: "bearer",
@@ -272,5 +278,27 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         },
       },
     },
-  });
+  };
+  applyManagementSecurity(document.paths);
+  return Object.freeze(document);
+}
+
+function applyManagementSecurity(
+  paths: Record<string, Record<string, Record<string, unknown>>>,
+): void {
+  const prefixes = [
+    "/api/v1/provider-packages",
+    "/api/v1/provider-types",
+    "/api/v1/providers",
+    "/api/v1/resources",
+    "/api/v1/config-drafts",
+  ];
+  for (const [path, operations] of Object.entries(paths)) {
+    if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;
+    for (const [method, operation] of Object.entries(operations)) {
+      operation.security = [{ managementToken: [] }];
+      operation["x-sdar-required-role"] =
+        method === "get" ? "reader_or_administrator" : "administrator";
+    }
+  }
 }

@@ -10,6 +10,7 @@ import {
   type PmsRepositoryErrorCode,
 } from "../../../packages/pms-domain/src/index.js";
 import { requestContext } from "./context.js";
+import { PmsApiAuthorizationError, type PmsApiAuthorizationErrorCode } from "./authorization.js";
 
 export interface PmsErrorEnvelope {
   readonly error: {
@@ -62,7 +63,35 @@ function classifyError(error: FastifyError): PublicError {
   if (error instanceof PmsDomainError) return domainError(error.code);
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
   if (error instanceof ConfigurationCenterError) return configurationError(error.code);
+  if (error instanceof PmsApiAuthorizationError) return authorizationError(error.code);
+  if (error.code === "FST_ERR_CTP_BODY_TOO_LARGE") {
+    return {
+      statusCode: 413,
+      code: "REQUEST_BODY_TOO_LARGE",
+      message: "Request body exceeds the allowed size",
+    };
+  }
+  if (
+    error.code === "FST_ERR_CTP_INVALID_JSON_BODY" ||
+    error.code === "FST_ERR_CTP_EMPTY_JSON_BODY"
+  ) {
+    return { statusCode: 400, code: "INVALID_JSON", message: "Request body is not valid JSON" };
+  }
+  if (error instanceof SyntaxError && error.statusCode === 400) {
+    return { statusCode: 400, code: "INVALID_JSON", message: "Request body is not valid JSON" };
+  }
   return { statusCode: 500, code: "INTERNAL_ERROR", message: "An internal error occurred" };
+}
+
+function authorizationError(code: PmsApiAuthorizationErrorCode): PublicError {
+  return {
+    statusCode: code === "MANAGEMENT_AUTHENTICATION_REQUIRED" ? 401 : 403,
+    code,
+    message:
+      code === "MANAGEMENT_AUTHENTICATION_REQUIRED"
+        ? "Management authentication is required"
+        : "The authenticated management principal is not authorized",
+  };
 }
 
 function configurationError(code: ConfigurationCenterErrorCode): PublicError {

@@ -55,17 +55,20 @@ describe("Runtime Config latest API", () => {
   let pool: Pool;
   let checksum: string;
   let revisionId: string;
+  let publicationCenter: ConfigurationCenter;
+  let publicationService: ConfigurationPublicationService;
 
   beforeAll(async () => {
     await admin.query(`CREATE SCHEMA ${schema}`);
     pool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     await runPmsMigrations(pool, workspaceRoot);
-    const center = deploymentDraft();
-    const validated = center.validateDraft("deployment-config");
-    const published = await new ConfigurationPublicationService(
-      center,
+    publicationCenter = deploymentDraft();
+    const validated = publicationCenter.validateDraft("deployment-config");
+    publicationService = new ConfigurationPublicationService(
+      publicationCenter,
       new PostgresPmsUnitOfWork(pool),
-    ).publish(
+    );
+    const published = await publicationService.publish(
       {
         draftId: "deployment-config",
         expectedDraftVersion: validated.version,
@@ -386,6 +389,74 @@ describe("Runtime Config latest API", () => {
     });
     expect(unsafe.statusCode).toBe(400);
     expect(unsafe.body).not.toContain("do-not-echo");
+    await app.close();
+  });
+
+  it("closes update→validate→publish→rollback→latest through HTTP", async () => {
+    const app = createPmsApi({
+      configurationCenter: publicationCenter,
+      configurationPublication: publicationService,
+      runtimeConfigQuery: new RuntimeConfigQueryService(new PostgresPmsUnitOfWork(pool)),
+      runtimeConfigAuthorizer: { authorize: validAuthorizer() },
+    });
+    const adminHeaders = {
+      "x-actor-id": "admin-1",
+      "x-correlation-id": "rollback-e2e",
+    };
+    const updated = await app.inject({
+      method: "PATCH",
+      url: "/api/v1/config-drafts/deployment-config",
+      headers: adminHeaders,
+      payload: {
+        expectedVersion: 2,
+        content: {
+          FEATURE_ENABLED: false,
+          API_TOKEN_FILE: { secretRef: "local/runtime/api-token" },
+        },
+      },
+    });
+    expect(updated.statusCode).toBe(200);
+    const validated = await app.inject({
+      method: "POST",
+      url: "/api/v1/config-drafts/deployment-config/validate",
+      headers: adminHeaders,
+    });
+    expect(validated.json()).toMatchObject({ status: "validated", version: 4 });
+    const second = await app.inject({
+      method: "POST",
+      url: "/api/v1/config-drafts/deployment-config/publish",
+      headers: adminHeaders,
+      payload: { expectedDraftVersion: 4, expectedPublishedRevision: 1 },
+    });
+    expect(second.json()).toMatchObject({
+      outcome: "published",
+      revision: { revision: 2 },
+    });
+
+    const rollback = await app.inject({
+      method: "POST",
+      url: "/api/v1/config-drafts/deployment-config/rollback",
+      headers: adminHeaders,
+      payload: {
+        expectedDraftVersion: 4,
+        expectedPublishedRevision: 2,
+        sourceRevisionId: revisionId,
+      },
+    });
+    expect(rollback.json()).toMatchObject({
+      outcome: "published",
+      revision: { revision: 3, checksum },
+    });
+    const latest = await app.inject({
+      method: "GET",
+      url: latestUrl(),
+      headers: { authorization: "Bearer runtime-client-token" },
+    });
+    expect(latest.json()).toMatchObject({
+      revision: 3,
+      checksum,
+      content: { FEATURE_ENABLED: true },
+    });
     await app.close();
   });
 });

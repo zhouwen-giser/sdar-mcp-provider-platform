@@ -1,4 +1,5 @@
 export * from "./app.js";
+export * from "./authorization.js";
 export * from "./configuration-routes.js";
 export * from "./context.js";
 export * from "./errors.js";

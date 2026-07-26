@@ -18,6 +18,7 @@ import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
 import { registerManagementRoutes } from "./management-routes.js";
 import { registerRuntimeConfigRoutes } from "./runtime-config-routes.js";
+import { authorizeManagementRequest, type PmsApiRoleAuthorizer } from "./authorization.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -34,6 +35,7 @@ export interface PmsApiOptions {
   readonly runtimeConfigAuthorizer?: RuntimeConfigClientAuthorizer;
   readonly runtimeConfigWatch?: RuntimeConfigWatchHub;
   readonly runtimeConfigAcknowledgements?: RuntimeConfigAcknowledgementService;
+  readonly managementAuthorizer?: PmsApiRoleAuthorizer;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -45,6 +47,12 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
     attachRequestContext(request, reply);
     done();
   });
+  const managementAuthorizer = options.managementAuthorizer;
+  if (managementAuthorizer !== undefined) {
+    app.addHook("preHandler", (request) =>
+      authorizeManagementRequest(request, managementAuthorizer),
+    );
+  }
   app.setErrorHandler(sendPmsError);
   app.setNotFoundHandler(notFoundError);
 

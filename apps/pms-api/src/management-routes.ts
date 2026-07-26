@@ -162,13 +162,21 @@ function registerProviderRoutes(app: FastifyInstance, service: ProviderManagemen
             packageId: identifierSchema(),
             packageVersion: { type: "string", minLength: 1, maxLength: 64 },
             hostingMode: { enum: ["vendor_managed", "platform_managed"] },
-            adapterEndpoint: { type: "string", minLength: 1, maxLength: 2048 },
+            adapterEndpoint: {
+              type: "string",
+              minLength: 3,
+              maxLength: 320,
+              pattern: "^(?:[A-Za-z0-9.-]+|\\[[0-9A-Fa-f:]+\\]):[0-9]{1,5}$",
+            },
           },
           ["providerId", "providerTypeId"],
         ),
       },
     },
     async (request, reply) => {
+      if (request.body.adapterEndpoint !== undefined) {
+        assertSafeAdapterEndpoint(request.body.adapterEndpoint);
+      }
       const result = await service.createProvider(request.body, writeAudit(request));
       void reply.status(201);
       return result;
@@ -207,6 +215,15 @@ function registerProviderRoutes(app: FastifyInstance, service: ProviderManagemen
         writeAudit(request),
       ),
   );
+}
+
+function assertSafeAdapterEndpoint(value: string): void {
+  const port = Number(value.slice(value.lastIndexOf(":") + 1));
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
+    throw new PmsDomainError("INVALID_DOMAIN_VALUE", "Adapter endpoint port is invalid", {
+      field: "adapterEndpoint",
+    });
+  }
 }
 
 function registerResourceRoutes(app: FastifyInstance, service: ProviderManagementService): void {

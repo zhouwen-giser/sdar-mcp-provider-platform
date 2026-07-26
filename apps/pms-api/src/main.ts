@@ -18,6 +18,7 @@ import {
   RuntimeConfigWatchHub,
 } from "../../../packages/configuration-center/src/index.js";
 import { createPmsApi } from "./app.js";
+import { DenyPmsApiRoleAuthorizer } from "./authorization.js";
 
 const port = boundedPort(process.env.PMS_API_PORT);
 const host = process.env.PMS_API_HOST ?? "127.0.0.1";
@@ -27,6 +28,7 @@ const unitOfWork = new PostgresPmsUnitOfWork(pool);
 const configurationCenter = createDefaultConfigurationCenter();
 const runtimeConfigWatch = new RuntimeConfigWatchHub();
 const app = createPmsApi({
+  managementAuthorizer: new DenyPmsApiRoleAuthorizer(),
   providerPackages: await loadProviderPackageQueryService(),
   management: new ProviderManagementService(unitOfWork),
   configurationCenter,
