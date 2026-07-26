@@ -219,3 +219,7 @@
 - 2026-07-26T14:33:34.073662+00:00 START G2-P1-B01
 
 - 2026-07-26T14:40:32.085757+00:00 PASS G2-P1-B01 evidence=['@sdar/runtime-deployment aggregate/IDs/spec/status/CAS/domain events; mandatory filtered test PASS 1 file/10 tests; root test:runtime-deployment PASS 1/10; illegal jumps/state+revision conflicts/repeated transition+desired command idempotency/drain-stop-degrade-fail-retry covered; full typecheck, package ESLint/Prettier, offline frozen lock, git diff check PASS; package dependency and source scan confirms no pm2/pg/Fastify dependencies']
+
+- 2026-07-26T14:41:16.646060+00:00 START G2-P1-B02
+
+- 2026-07-26T14:43:28.892078+00:00 PASS G2-P1-B02 evidence=['RuntimeProcess stable identity and observation projection; PM2/PID/port/heartbeat/version/config/registration/catalog fields; observed health matrix and stale heartbeat boundary; PM2 online-only NOT_READY; PID changes preserve instanceId; identical observation idempotent and changed stale revision rejected; mandatory filtered and root runtime-deployment gates PASS 2 files/34 tests; typecheck/ESLint/Prettier/git diff check/dependency scan PASS']

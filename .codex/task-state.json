@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:40:32.085839+00:00",
+  "updatedAt": "2026-07-26T14:43:28.892139+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -49,14 +49,16 @@
       "reason": null
     },
     "G2-P1-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:41:16.645972+00:00",
+      "completedAt": "2026-07-26T14:43:28.892015+00:00",
+      "evidence": [
+        "RuntimeProcess stable identity and observation projection; PM2/PID/port/heartbeat/version/config/registration/catalog fields; observed health matrix and stale heartbeat boundary; PM2 online-only NOT_READY; PID changes preserve instanceId; identical observation idempotent and changed stale revision rejected; mandatory filtered and root runtime-deployment gates PASS 2 files/34 tests; typecheck/ESLint/Prettier/git diff check/dependency scan PASS"
+      ],
       "reason": null
     },
     "G2-P1-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
@@ -189,7 +191,7 @@
       "reason": null
     },
     "G2-P3-B05": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

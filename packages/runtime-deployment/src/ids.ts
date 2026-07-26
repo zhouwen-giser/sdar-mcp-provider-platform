@@ -6,6 +6,7 @@ type BrandedId<Name extends string> = string & {
 };
 
 export type RuntimeDeploymentId = BrandedId<"RuntimeDeploymentId">;
+export type RuntimeInstanceId = BrandedId<"RuntimeInstanceId">;
 export type RuntimeProviderId = BrandedId<"RuntimeProviderId">;
 export type RuntimeEnvironmentId = BrandedId<"RuntimeEnvironmentId">;
 export type DatabaseProfileId = BrandedId<"DatabaseProfileId">;
@@ -16,6 +17,10 @@ const EnvironmentPattern = /^[a-z][a-z0-9-]{0,62}$/;
 
 export function runtimeDeploymentId(value: string): RuntimeDeploymentId {
   return parseIdentifier(value, "RuntimeDeploymentId", LogicalIdPattern) as RuntimeDeploymentId;
+}
+
+export function runtimeInstanceId(value: string): RuntimeInstanceId {
+  return parseIdentifier(value, "RuntimeInstanceId", LogicalIdPattern) as RuntimeInstanceId;
 }
 
 export function runtimeProviderId(value: string): RuntimeProviderId {
