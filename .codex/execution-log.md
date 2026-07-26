@@ -63,3 +63,7 @@
 - 2026-07-26T10:06:31.954969+00:00 START G1-P2-B02
 
 - 2026-07-26T10:08:45.933319+00:00 PASS G1-P2-B02 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/ugv/provider-package.json against schemas/provider-package-v1.json; entry, 3 evidence refs, and migrations/providers/ugv/024_ugv_provider.sql resolve: PASS; configSchemaId=provider.ugv, migrationSet=provider:ugv, realResourceStatus=pending; pnpm --filter @sdar/provider-package-registry test: PASS 5/5; prettier and git diff --check: PASS']
+
+- 2026-07-26T10:09:09.054006+00:00 START G1-P2-B03
+
+- 2026-07-26T10:10:07.970279+00:00 PASS G1-P2-B03 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/npc-tank/provider-package.json; entry, 5 evidence refs, and migrations/providers/npc-tank/025_npc_tank_provider.sql resolve: PASS; configSchemaId=provider.npcTank, migrationSet=provider:npc-tank, componentStatus=passed against Mock Level 1, realResourceStatus=pending; registry tests PASS 5/5; prettier and git diff --check PASS']
