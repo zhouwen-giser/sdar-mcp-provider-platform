@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:23:49.758506+00:00",
+  "updatedAt": "2026-07-26T09:25:52.449392+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -49,14 +49,16 @@
       "reason": null
     },
     "G1-P0-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:24:26.012461+00:00",
+      "completedAt": "2026-07-26T09:25:52.449280+00:00",
+      "evidence": [
+        ".codex/reports/phase-P0.md; git diff --check; taskctl status; commits 3513476,50ecf47,87644e1,107940a,e659697"
+      ],
       "reason": null
     },
     "G1-P1-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

@@ -19,3 +19,7 @@
 - 2026-07-26T09:20:13.175814+00:00 START G1-P0-B05
 
 - 2026-07-26T09:23:49.758454+00:00 PASS G1-P0-B05 evidence=['docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json; pnpm test:unit (29 files/121 tests PASS); pnpm test:contract (4 files/18 tests PASS); UGV 9 unit + 4 contract PASS; NPC 11 unit + 5 contract PASS; HA 4 files/7 tests PASS; prettier check; git diff --check']
+
+- 2026-07-26T09:24:26.012537+00:00 START G1-P0-B06
+
+- 2026-07-26T09:25:52.449340+00:00 PASS G1-P0-B06 evidence=['.codex/reports/phase-P0.md; git diff --check; taskctl status; commits 3513476,50ecf47,87644e1,107940a,e659697']
