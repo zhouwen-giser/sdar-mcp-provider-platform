@@ -87,6 +87,78 @@ describe("PMS Web API client", () => {
       status: 502,
     });
   });
+
+  it("projects Runtime status without PM2 names or environment internals", async () => {
+    const client = new PmsWebApiClient({
+      fetch: response({
+        items: [
+          {
+            instanceId: "instance-1",
+            deploymentId: "deployment-1",
+            pm2Name: "sdar-runtime-private",
+            pid: 1201,
+            port: 3101,
+            processState: "online",
+            livenessState: "live",
+            readinessState: "not_ready",
+            observedHealth: "NOT_READY",
+            readyForActive: false,
+            healthReasonCode: "READINESS_FAILED",
+            configState: "restart_required",
+            configRevision: 4,
+            runtimeVersion: "0.1.0",
+            restartCount: 1,
+          },
+        ],
+      }),
+    });
+
+    const processes = await client.runtimeProcesses("provider-1", "deployment-1");
+
+    expect(processes.items[0]).toMatchObject({
+      processState: "online",
+      readinessState: "not_ready",
+      observedHealth: "NOT_READY",
+      readyForActive: false,
+      configState: "restart_required",
+    });
+    expect(JSON.stringify(processes)).not.toContain("pm2Name");
+    expect(JSON.stringify(processes)).not.toContain('"pid"');
+  });
+
+  it("sends revision-guarded Runtime actions with actor context", async () => {
+    const fetchMock = vi.fn<typeof fetch>(() =>
+      Promise.resolve(
+        jsonResponse({
+          operationId: "operation-restart",
+          deployment: {
+            deploymentId: "deployment-1",
+            providerId: "provider-1",
+            environment: "production",
+            desiredState: "running",
+            desiredReplicas: 1,
+            runtimeVersion: "0.1.0",
+            status: "REQUESTED",
+            desiredRevision: 4,
+            observedRevision: 3,
+          },
+        }),
+      ),
+    );
+    const client = new PmsWebApiClient({
+      actorId: () => "admin-1",
+      fetch: fetchMock,
+    });
+
+    await client.commandRuntime("deployment-1", "restart", "provider-1", 3);
+
+    const call = fetchMock.mock.calls[0];
+    expect(call?.[0]).toBe("/api/v1/runtime-deployments/deployment-1/restart");
+    expect(call?.[1]?.body).toBe(
+      JSON.stringify({ providerId: "provider-1", expectedDesiredRevision: 3 }),
+    );
+    expect(new Headers(call?.[1]?.headers).get("x-actor-id")).toBe("admin-1");
+  });
 });
 
 function response(body: unknown): typeof fetch {

@@ -1,4 +1,13 @@
-import type { ProviderPackageSummary, ProviderSummary, ResourceSummary } from "./model.js";
+import type {
+  ConfigurationDraftSummary,
+  ConfigurationFieldMetadata,
+  EffectiveConfigurationSummary,
+  ProviderPackageSummary,
+  ProviderSummary,
+  ResourceSummary,
+  RuntimeDeploymentSummary,
+  RuntimeProcessSummary,
+} from "./model.js";
 
 export function shell(content: string, active: string): string {
   return `<div class="shell">
@@ -8,6 +17,8 @@ export function shell(content: string, active: string): string {
         ${nav("/providers", "Providers", active === "providers")}
         ${nav("/packages", "Packages", active === "packages")}
         ${nav("/resources?environment=production", "Resources", active === "resources")}
+        ${nav("/configuration", "Configuration", active === "configuration")}
+        ${nav("/runtime", "Runtime", active === "runtime")}
       </nav>
       <p class="rail-note">Runtime governance<br><span>Control plane</span></p>
     </aside>
@@ -94,6 +105,87 @@ export function resourcesView(resources: readonly ResourceSummary[], environment
   );
 }
 
+export function configurationView(
+  fields: readonly ConfigurationFieldMetadata[],
+  draft?: ConfigurationDraftSummary,
+  effective?: EffectiveConfigurationSummary,
+): string {
+  const summary =
+    draft === undefined
+      ? ""
+      : `<section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">Draft ${escapeHtml(draft.status)}</p><h2>${escapeHtml(draft.draftId)}</h2></div>
+          ${badge(draft.applyMode ?? "not validated", draft.applyMode ?? "pending")}</div>
+        ${restartNotice(draft.applyMode)}
+        <div class="config-actions">
+          <form data-form="validate-config"><input type="hidden" name="draftId" value="${escapeAttribute(draft.draftId)}"><button>Validate</button></form>
+          <form data-form="publish-config" data-danger="Publish this configuration revision? Runtime restart may be required.">
+            <input type="hidden" name="draftId" value="${escapeAttribute(draft.draftId)}">
+            <input type="hidden" name="draftVersion" value="${String(draft.version)}">
+            <label>Current published revision<input name="publishedRevision" inputmode="numeric" placeholder="None"></label>
+            <button class="danger">Publish</button>
+          </form>
+        </div>
+        ${configurationDiff(draft, effective)}
+        ${
+          draft.validationIssues.length === 0
+            ? ""
+            : `<div class="issue-list">${draft.validationIssues
+                .map((issue) => `<p>${escapeHtml(issue.code)} · ${escapeHtml(issue.path)}</p>`)
+                .join("")}</div>`
+        }
+      </section>`;
+  return (
+    pageHeader(
+      "Configuration",
+      "Metadata-driven drafts, safe publication, and effective-value diff.",
+    ) +
+    `<section class="notice"><strong>SecretRef only</strong><span>Secret values are never loaded or displayed. Secret fields accept reference paths and are sent as SecretRef objects.</span></section>
+    ${summary}
+    <section class="panel create-panel config-editor">
+      <div><p class="eyebrow">Draft</p><h2>Runtime bootstrap</h2><p class="muted">Field behavior and restart impact come from configuration metadata.</p></div>
+      <form data-form="create-config">
+        ${textField("Draft ID", "draftId", true, draft?.draftId)}
+        ${textField("Deployment ID", "targetId", true, draft?.targetId)}
+        ${textField("Environment", "environment", true, draft?.environment ?? "production")}
+        ${fields.map(configurationField).join("")}
+        <button type="submit">Save Draft</button><p class="form-status" role="status"></p>
+      </form>
+    </section>`
+  );
+}
+
+export function runtimeView(
+  providerId: string | undefined,
+  deployments: readonly RuntimeDeploymentSummary[],
+  processes: readonly RuntimeProcessSummary[],
+  selectedDeploymentId?: string,
+): string {
+  const scope = `<section class="panel"><form class="runtime-scope-form">
+    ${textField("Provider ID", "providerId", true, providerId)}
+    ${textField("Deployment ID (optional)", "deploymentId", false, selectedDeploymentId)}
+    <button>Load Runtime state</button>
+  </form></section>`;
+  if (providerId === undefined) {
+    return (
+      pageHeader("Runtime", "Provider-scoped deployment and process control.") +
+      scope +
+      `<section class="empty panel"><p>Enter a Provider ID to load Runtime state.</p></section>`
+    );
+  }
+  return (
+    pageHeader("Runtime", "Desired deployment state and independently observed process health.") +
+    scope +
+    `<section class="panel"><div class="panel-head"><div><p class="eyebrow">Desired state</p><h2>Deployments</h2></div></div>
+      ${deployments.length === 0 ? empty("No Runtime Deployments found.") : deploymentTable(deployments)}
+    </section>
+    <section class="panel"><div class="panel-head"><div><p class="eyebrow">Observed state</p><h2>Processes & readiness</h2></div></div>
+      <div class="notice compact"><strong>PM2 online ≠ Runtime ACTIVE</strong><span>ACTIVE requires live and ready health plus registration, Catalog, and configuration acknowledgement.</span></div>
+      ${selectedDeploymentId === undefined ? empty("Choose a Deployment to inspect its processes.") : processTable(processes)}
+    </section>`
+  );
+}
+
 function createProviderForm(): string {
   return `<section class="panel create-panel" id="create-provider">
     <div><p class="eyebrow">Create</p><h2>New Provider</h2><p class="muted">Production defaults to vendor managed.</p></div>
@@ -107,6 +199,98 @@ function createProviderForm(): string {
       <p class="form-status" role="status"></p>
     </form>
   </section>`;
+}
+
+function deploymentTable(items: readonly RuntimeDeploymentSummary[]): string {
+  return `<div class="table-wrap"><table><thead><tr><th>Deployment</th><th>Desired</th><th>Governed status</th><th>Revision</th><th>Actions</th></tr></thead><tbody>${items
+    .map(
+      (item) =>
+        `<tr><td><a href="/runtime?providerId=${encodeURIComponent(item.providerId)}&deploymentId=${encodeURIComponent(item.deploymentId)}" data-link>${escapeHtml(item.deploymentId)}</a><small>${escapeHtml(item.runtimeVersion)}</small></td>
+      <td>${badge(item.desiredState, item.desiredState)}</td><td>${badge(item.status, item.status.toLowerCase())}</td>
+      <td>${String(item.observedRevision)} / ${String(item.desiredRevision)}</td><td><div class="row-actions">
+        ${runtimeAction(item, "start")}${runtimeAction(item, "stop", true)}${runtimeAction(item, "restart", true)}
+      </div></td></tr>`,
+    )
+    .join("")}</tbody></table></div>`;
+}
+
+function runtimeAction(
+  item: RuntimeDeploymentSummary,
+  action: "start" | "stop" | "restart",
+  dangerous = false,
+): string {
+  return `<form data-form="runtime-action"${
+    dangerous
+      ? ` data-danger="${action === "stop" ? "Stop" : "Restart"} Runtime ${escapeAttribute(item.deploymentId)}?"`
+      : ""
+  }>
+    <input type="hidden" name="providerId" value="${escapeAttribute(item.providerId)}">
+    <input type="hidden" name="deploymentId" value="${escapeAttribute(item.deploymentId)}">
+    <input type="hidden" name="revision" value="${String(item.desiredRevision)}">
+    <input type="hidden" name="action" value="${action}">
+    <button${dangerous ? ' class="danger secondary"' : ' class="secondary"'}>${action}</button>
+  </form>`;
+}
+
+function processTable(items: readonly RuntimeProcessSummary[]): string {
+  if (items.length === 0) return empty("No Runtime process observations found.");
+  return `<div class="table-wrap"><table><thead><tr><th>Instance</th><th>PM2 process</th><th>Liveness</th><th>Readiness</th><th>Governed health</th><th>Config ACK</th></tr></thead><tbody>${items
+    .map(
+      (item) =>
+        `<tr><td>${escapeHtml(item.instanceId)}<small>${escapeHtml(item.runtimeVersion ?? "version unknown")}</small></td>
+      <td>${badge(item.processState, item.processState)}</td><td>${badge(item.livenessState, item.livenessState)}</td>
+      <td>${badge(item.readinessState, item.readinessState)}</td><td>${badge(item.observedHealth, item.readyForActive ? "ready" : "degraded")}<small>${escapeHtml(item.healthReasonCode)}</small></td>
+      <td>${badge(item.configState, item.configState)}<small>revision ${item.configRevision === null ? "unknown" : String(item.configRevision)}</small></td></tr>`,
+    )
+    .join("")}</tbody></table></div>`;
+}
+
+function configurationField(field: ConfigurationFieldMetadata): string {
+  const name = field.path.slice(1);
+  return `<label>${escapeHtml(field.displayName)}
+    <input name="config:${escapeAttribute(name)}"${
+      field.required ? " required" : ""
+    } autocomplete="off" placeholder="${field.secret ? "SecretRef path" : ""}">
+    <small>${escapeHtml(field.description)} · ${escapeHtml(field.applyMode)}${
+      field.secret ? " · SecretRef" : ""
+    }</small>
+  </label>`;
+}
+
+function configurationDiff(
+  draft: ConfigurationDraftSummary,
+  effective: EffectiveConfigurationSummary | undefined,
+): string {
+  if (effective === undefined) {
+    return `<p class="muted">Validate the Draft to preview its diff.</p>`;
+  }
+  const keys = [...new Set([...draft.configuredKeys, ...effective.keys])].sort();
+  return `<div class="config-diff"><h3>Draft → effective diff</h3>${keys
+    .map((key) => {
+      const secret = draft.secretConfiguredKeys.includes(key);
+      const source = effective.sources[`/${key}`] ?? effective.sources[key] ?? "draft";
+      return `<div><code>${escapeHtml(key)}</code><span>${
+        secret ? "SecretRef configured" : "Configured"
+      } · source ${escapeHtml(source)}</span></div>`;
+    })
+    .join("")}</div>`;
+}
+
+function restartNotice(applyMode: ConfigurationDraftSummary["applyMode"]): string {
+  return applyMode === "restart_required"
+    ? `<div class="warning"><strong>Restart required</strong><span>Publishing does not make the Runtime current until a controlled restart and subsequent ready acknowledgement.</span></div>`
+    : "";
+}
+
+function textField(
+  label: string,
+  name: string,
+  required: boolean,
+  value: string | undefined,
+): string {
+  return `<label>${escapeHtml(label)}<input name="${escapeAttribute(name)}"${
+    required ? " required" : ""
+  }${value === undefined ? "" : ` value="${escapeAttribute(value)}"`} autocomplete="off"></label>`;
 }
 
 function providerTable(items: readonly ProviderSummary[]): string {

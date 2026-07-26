@@ -7,7 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.stylisticTypeChecked,
   {
     ignores: [
-      "dist/**",
+      "**/dist/**",
       "coverage/**",
       "node_modules/**",
       "packages/adapter-protocol/generated/**",

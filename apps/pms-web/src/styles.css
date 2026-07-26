@@ -31,6 +31,23 @@ select {
   font: inherit;
 }
 
+button.secondary {
+  padding: 6px 9px;
+  color: #146f68;
+  background: #e5f4f1;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+button.danger {
+  background: #a43d3d;
+}
+
+button.danger.secondary {
+  color: #983434;
+  background: #fbe7e7;
+}
+
 .shell {
   min-height: 100vh;
   display: grid;
@@ -232,6 +249,13 @@ td a {
   font-weight: 700;
 }
 
+td small {
+  display: block;
+  margin-top: 5px;
+  color: #718092;
+  font-size: 10px;
+}
+
 .badge {
   display: inline-flex;
   padding: 5px 9px;
@@ -351,6 +375,82 @@ select {
 }
 
 .notice span {
+  color: #667386;
+}
+
+.notice.compact {
+  margin-bottom: 18px;
+  box-shadow: none;
+}
+
+.warning {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  border-radius: 9px;
+  padding: 13px 15px;
+  color: #77500b;
+  background: #fff2d5;
+  font-size: 13px;
+}
+
+.config-actions,
+.row-actions,
+.runtime-scope-form {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.config-actions {
+  margin-bottom: 22px;
+}
+
+.config-actions form {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.row-actions form {
+  margin: 0;
+}
+
+.runtime-scope-form label {
+  min-width: 230px;
+}
+
+.config-editor form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.config-editor label small {
+  color: #7a8795;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.config-diff {
+  border-top: 1px solid #edf0f2;
+  padding-top: 18px;
+}
+
+.config-diff h3 {
+  margin-top: 0;
+}
+
+.config-diff div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 9px 0;
+  border-bottom: 1px solid #edf0f2;
+  font-size: 12px;
+}
+
+.config-diff span,
+.issue-list {
   color: #667386;
 }
 

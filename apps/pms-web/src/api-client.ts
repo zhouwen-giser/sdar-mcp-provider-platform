@@ -1,9 +1,14 @@
 import type {
   CreateProviderInput,
+  CreateConfigurationDraftInput,
+  ConfigurationDraftSummary,
+  EffectiveConfigurationSummary,
   Page,
   ProviderPackageSummary,
   ProviderSummary,
   ResourceSummary,
+  RuntimeDeploymentSummary,
+  RuntimeProcessSummary,
 } from "./model.js";
 
 export interface PmsWebClientOptions {
@@ -74,6 +79,103 @@ export class PmsWebApiClient {
         body: JSON.stringify(input),
       }),
     );
+  }
+
+  async configurationDraft(draftId: string): Promise<ConfigurationDraftSummary> {
+    return configurationDraft(
+      await this.#request(`/api/v1/config-drafts/${encodeURIComponent(draftId)}`),
+    );
+  }
+
+  async effectiveConfiguration(draftId: string): Promise<EffectiveConfigurationSummary> {
+    return effectiveConfiguration(
+      await this.#request(`/api/v1/config-drafts/${encodeURIComponent(draftId)}/effective`),
+    );
+  }
+
+  async createConfigurationDraft(
+    input: CreateConfigurationDraftInput,
+  ): Promise<ConfigurationDraftSummary> {
+    return configurationDraft(
+      await this.#write("/api/v1/config-drafts", input, { method: "POST" }),
+    );
+  }
+
+  async validateConfigurationDraft(draftId: string): Promise<ConfigurationDraftSummary> {
+    return configurationDraft(
+      await this.#write(
+        `/api/v1/config-drafts/${encodeURIComponent(draftId)}/validate`,
+        {},
+        {
+          method: "POST",
+        },
+      ),
+    );
+  }
+
+  async publishConfigurationDraft(
+    draftId: string,
+    expectedDraftVersion: number,
+    expectedPublishedRevision: number | null,
+  ): Promise<void> {
+    await this.#write(
+      `/api/v1/config-drafts/${encodeURIComponent(draftId)}/publish`,
+      { expectedDraftVersion, expectedPublishedRevision },
+      { method: "POST" },
+    );
+  }
+
+  async runtimeDeployments(providerId: string): Promise<Page<RuntimeDeploymentSummary>> {
+    return page(
+      await this.#request(
+        `/api/v1/runtime-deployments?providerId=${encodeURIComponent(providerId)}&limit=100`,
+      ),
+      runtimeDeployment,
+    );
+  }
+
+  async runtimeProcesses(
+    providerId: string,
+    deploymentId: string,
+  ): Promise<Page<RuntimeProcessSummary>> {
+    return page(
+      await this.#request(
+        `/api/v1/runtime-processes?providerId=${encodeURIComponent(providerId)}&deploymentId=${encodeURIComponent(deploymentId)}&limit=100`,
+      ),
+      runtimeProcess,
+    );
+  }
+
+  async commandRuntime(
+    deploymentId: string,
+    action: "start" | "stop" | "restart",
+    providerId: string,
+    expectedDesiredRevision: number,
+  ): Promise<RuntimeDeploymentSummary> {
+    const response = record(
+      await this.#write(
+        `/api/v1/runtime-deployments/${encodeURIComponent(deploymentId)}/${action}`,
+        { providerId, expectedDesiredRevision },
+        { method: "POST" },
+      ),
+    );
+    return runtimeDeployment(response.deployment);
+  }
+
+  async #write(path: string, body: unknown, init: RequestInit): Promise<unknown> {
+    const actorId = this.#actorId();
+    if (actorId === undefined || actorId.trim().length === 0) {
+      throw new PmsWebApiError(0, "PMS_WEB_ACTOR_REQUIRED");
+    }
+    return this.#request(path, {
+      ...init,
+      headers: {
+        "content-type": "application/json",
+        "x-actor-id": actorId,
+        "x-correlation-id": crypto.randomUUID(),
+      },
+      body: JSON.stringify(body),
+    });
   }
 
   async #request(path: string, init: RequestInit = {}): Promise<unknown> {
@@ -163,6 +265,108 @@ function resource(value: unknown): ResourceSummary {
   };
 }
 
+function configurationDraft(value: unknown): ConfigurationDraftSummary {
+  const input = record(value);
+  const key = record(input.key);
+  const content = record(input.content);
+  if (!Array.isArray(input.validationIssues)) throw invalidProjection();
+  const secretConfiguredKeys = Object.entries(content)
+    .filter(([, candidate]) => isSecretRef(candidate))
+    .map(([name]) => name);
+  return {
+    draftId: text(input.draftId),
+    definitionId: text(input.definitionId),
+    environment: text(key.environment),
+    targetType: text(key.targetType),
+    targetId: text(key.targetId),
+    configGroup: text(key.configGroup),
+    dataId: text(key.dataId),
+    version: integer(input.version),
+    status: oneOf(input.status, ["draft", "validated", "invalid"]),
+    ...(input.applyMode === undefined
+      ? {}
+      : {
+          applyMode: oneOf(input.applyMode, [
+            "hot_reload",
+            "reconnect_required",
+            "restart_required",
+            "immutable",
+          ]),
+        }),
+    configuredKeys: Object.keys(content),
+    secretConfiguredKeys,
+    validationIssues: input.validationIssues.map((issue) => {
+      const item = record(issue);
+      return { code: text(item.code), path: text(item.path) };
+    }),
+  };
+}
+
+function effectiveConfiguration(value: unknown): EffectiveConfigurationSummary {
+  const input = record(value);
+  const content = record(input.content);
+  const sources = record(input.sources);
+  return {
+    applyMode: oneOf(input.applyMode, [
+      "hot_reload",
+      "reconnect_required",
+      "restart_required",
+      "immutable",
+    ]),
+    valid: boolean(input.valid),
+    keys: Object.keys(content),
+    sources: Object.fromEntries(
+      Object.entries(sources).map(([key, source]) => [key, text(source)]),
+    ),
+  };
+}
+
+function runtimeDeployment(value: unknown): RuntimeDeploymentSummary {
+  const input = record(value);
+  return {
+    deploymentId: text(input.deploymentId),
+    providerId: text(input.providerId),
+    environment: text(input.environment),
+    desiredState: oneOf(input.desiredState, ["running", "stopped"]),
+    desiredReplicas: integer(input.desiredReplicas),
+    runtimeVersion: text(input.runtimeVersion),
+    status: text(input.status),
+    desiredRevision: integer(input.desiredRevision),
+    observedRevision: integer(input.observedRevision),
+  };
+}
+
+function runtimeProcess(value: unknown): RuntimeProcessSummary {
+  const input = record(value);
+  return {
+    instanceId: text(input.instanceId),
+    deploymentId: text(input.deploymentId),
+    processState: oneOf(input.processState, [
+      "missing",
+      "starting",
+      "online",
+      "stopping",
+      "stopped",
+      "errored",
+    ]),
+    livenessState: oneOf(input.livenessState, ["unknown", "live", "dead"]),
+    readinessState: oneOf(input.readinessState, ["unknown", "ready", "not_ready"]),
+    observedHealth: text(input.observedHealth),
+    readyForActive: boolean(input.readyForActive),
+    healthReasonCode: text(input.healthReasonCode),
+    configState: oneOf(input.configState, [
+      "unknown",
+      "current",
+      "stale",
+      "rejected",
+      "restart_required",
+    ]),
+    configRevision: input.configRevision === null ? null : integer(input.configRevision),
+    runtimeVersion: input.runtimeVersion === null ? null : text(input.runtimeVersion),
+    restartCount: integer(input.restartCount),
+  };
+}
+
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw invalidProjection();
@@ -173,6 +377,24 @@ function record(value: unknown): Record<string, unknown> {
 function text(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) throw invalidProjection();
   return value;
+}
+
+function integer(value: unknown): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw invalidProjection();
+  }
+  return value;
+}
+
+function boolean(value: unknown): boolean {
+  if (typeof value !== "boolean") throw invalidProjection();
+  return value;
+}
+
+function isSecretRef(value: unknown): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.secretRef === "string";
 }
 
 function oneOf<const Values extends readonly string[]>(

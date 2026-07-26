@@ -299,3 +299,15 @@ The mandatory `pnpm test:provider-platform-ha` command does not exist. Add one r
 local PostgreSQL and running only the task-owned Home Assistant platform integration directory.
 The suite uses a local Fake Home Assistant service, so component status may be proven while
 real-resource qualification remains pending.
+
+# Goal 2 — Runtime Governance and Delivery
+
+## G2-P5-B05 — Ignore nested application build output
+
+- **Decision:** ESLint ignores `**/dist/**`, not only the repository-root `dist/**`.
+- **Reason:** `@sdar/pms-web` produces its static deployment artifact under
+  `apps/pms-web/dist`. Linting generated JavaScript as source caused browser
+  globals to fail the repository Node-oriented lint rules after the required
+  build command.
+- **Scope:** Tooling only. Source lint coverage remains unchanged and generated
+  output is still verified by the PMS Web build command.

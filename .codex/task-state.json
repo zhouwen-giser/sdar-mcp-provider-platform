@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T19:00:09.462293+00:00",
+  "updatedAt": "2026-07-26T19:08:25.704711+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -409,14 +409,16 @@
       "reason": null
     },
     "G2-P5-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T19:00:26.450003+00:00",
+      "completedAt": "2026-07-26T19:08:25.704566+00:00",
+      "evidence": [
+        "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (12 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed"
+      ],
       "reason": null
     },
     "G2-P5-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
