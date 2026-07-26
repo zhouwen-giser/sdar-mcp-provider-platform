@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:09:25.286785+00:00",
+  "updatedAt": "2026-07-26T09:13:14.064577+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -13,14 +13,16 @@
       "reason": null
     },
     "G1-P0-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:10:05.186998+00:00",
+      "completedAt": "2026-07-26T09:13:14.064248+00:00",
+      "evidence": [
+        "docs/baseline/SOURCE_LOCK.json; git status --short; git log --oneline -3; bash .codex/task-package/scripts/verify_source_baseline.sh; source-lock JSON/commit/tree/branch validation"
+      ],
       "reason": null
     },
     "G1-P0-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
