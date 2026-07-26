@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.local/schemas/goal1-handoff-v1.json",
+  "title": "Goal1Handoff",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "goalId",
+    "status",
+    "sourceBaselineSha256",
+    "gitCommit",
+    "taskSummary",
+    "gates",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "goalId": {
+      "const": "goal-01"
+    },
+    "status": {
+      "const": "PASSED"
+    },
+    "sourceBaselineSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "gitCommit": {
+      "type": "string",
+      "minLength": 7
+    },
+    "taskSummary": {
+      "type": "object",
+      "required": [
+        "total",
+        "passed"
+      ],
+      "properties": {
+        "total": {
+          "const": 50
+        },
+        "passed": {
+          "const": 50
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "migrationIsolation",
+        "configE2E",
+        "runtimeRegression"
+      ],
+      "properties": {
+        "migrationIsolation": {
+          "const": "PASSED"
+        },
+        "configE2E": {
+          "const": "PASSED"
+        },
+        "runtimeRegression": {
+          "enum": [
+            "PASSED",
+            "PASSED_WITH_RECORDED_EXTERNAL_GAPS"
+          ]
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string"
+    }
+  }
+}

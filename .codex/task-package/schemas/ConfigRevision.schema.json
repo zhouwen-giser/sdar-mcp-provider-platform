@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.local/schemas/config-revision-v1.json",
+  "title": "ConfigRevision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "environment",
+    "targetType",
+    "targetId",
+    "configGroup",
+    "dataId",
+    "revision",
+    "checksum",
+    "status",
+    "content"
+  ],
+  "properties": {
+    "environment": {
+      "type": "string"
+    },
+    "targetType": {
+      "enum": [
+        "environment",
+        "provider_type",
+        "provider",
+        "runtime_deployment",
+        "runtime_instance",
+        "collector"
+      ]
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "configGroup": {
+      "type": "string"
+    },
+    "dataId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "published",
+        "superseded",
+        "rolled_back"
+      ]
+    },
+    "content": {
+      "type": "object"
+    }
+  }
+}

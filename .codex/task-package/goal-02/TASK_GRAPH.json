@@ -1,0 +1,426 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-02",
+  "taskCount": 50,
+  "tasks": [
+    {
+      "id": "G2-P0-B01",
+      "title": "验证 Goal 1 Handoff 与仓库门禁",
+      "phase": "P0 Goal 2 预检",
+      "dependencies": []
+    },
+    {
+      "id": "G2-P0-B02",
+      "title": "确认 PM2/PostgreSQL 环境与 Fake 策略",
+      "phase": "P0 Goal 2 预检",
+      "dependencies": [
+        "G2-P0-B01"
+      ]
+    },
+    {
+      "id": "G2-P0-B03",
+      "title": "冻结 Goal 2 领域决策与 ADR",
+      "phase": "P0 Goal 2 预检",
+      "dependencies": [
+        "G2-P0-B01"
+      ]
+    },
+    {
+      "id": "G2-P0-B04",
+      "title": "建立 Goal 2 阶段门禁与报告骨架",
+      "phase": "P0 Goal 2 预检",
+      "dependencies": [
+        "G2-P0-B02",
+        "G2-P0-B03"
+      ]
+    },
+    {
+      "id": "G2-P1-B01",
+      "title": "定义 RuntimeDeployment 聚合与状态机",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P0-B04"
+      ]
+    },
+    {
+      "id": "G2-P1-B02",
+      "title": "定义 RuntimeProcess 投影与实际状态",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B01"
+      ]
+    },
+    {
+      "id": "G2-P1-B03",
+      "title": "增加 RuntimeDeployment PMS Migration",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B01",
+        "G2-P1-B02"
+      ]
+    },
+    {
+      "id": "G2-P1-B04",
+      "title": "实现 Deployment Repository 与并发更新",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B03"
+      ]
+    },
+    {
+      "id": "G2-P1-B05",
+      "title": "实现 RuntimeDeployment Application Use Cases",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B04"
+      ]
+    },
+    {
+      "id": "G2-P1-B06",
+      "title": "实现 RuntimeDeployment 管理 API",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B05"
+      ]
+    },
+    {
+      "id": "G2-P1-B07",
+      "title": "实现 RuntimeProcess 查询与日志引用 API",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B04"
+      ]
+    },
+    {
+      "id": "G2-P1-B08",
+      "title": "完成 RuntimeDeployment 契约与阶段门禁",
+      "phase": "P1 RuntimeDeployment",
+      "dependencies": [
+        "G2-P1-B06",
+        "G2-P1-B07"
+      ]
+    },
+    {
+      "id": "G2-P2-B01",
+      "title": "定义 DatabaseProfile 与 SecretRef 模型",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P1-B08"
+      ]
+    },
+    {
+      "id": "G2-P2-B02",
+      "title": "增加 DatabaseProfile PMS Migration 与 Repository",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B01"
+      ]
+    },
+    {
+      "id": "G2-P2-B03",
+      "title": "定义 PostgresProvisioner Port 与错误模型",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B01"
+      ]
+    },
+    {
+      "id": "G2-P2-B04",
+      "title": "实现 PostgreSQL Provisioner",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B02",
+        "G2-P2-B03"
+      ]
+    },
+    {
+      "id": "G2-P2-B05",
+      "title": "实现 File Secret Store Adapter",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B04"
+      ]
+    },
+    {
+      "id": "G2-P2-B06",
+      "title": "实现 Runtime Migration Runner 编排",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B04"
+      ]
+    },
+    {
+      "id": "G2-P2-B07",
+      "title": "实现数据库准备 Application Job",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B05",
+        "G2-P2-B06"
+      ]
+    },
+    {
+      "id": "G2-P2-B08",
+      "title": "增加数据库权限与隔离 E2E",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B07"
+      ]
+    },
+    {
+      "id": "G2-P2-B09",
+      "title": "完成数据库自动准备阶段门禁",
+      "phase": "P2 数据库自动准备",
+      "dependencies": [
+        "G2-P2-B08"
+      ]
+    },
+    {
+      "id": "G2-P3-B01",
+      "title": "定义 RuntimeInfrastructureAdapter Port",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P2-B09"
+      ]
+    },
+    {
+      "id": "G2-P3-B02",
+      "title": "实现 BootstrapConfigRenderer",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P2-B05",
+        "G2-P3-B01"
+      ]
+    },
+    {
+      "id": "G2-P3-B03",
+      "title": "实现 PM2 Process Manager 基础封装",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B01"
+      ]
+    },
+    {
+      "id": "G2-P3-B04",
+      "title": "实现 Runtime 版本与入口解析",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B02"
+      ]
+    },
+    {
+      "id": "G2-P3-B05",
+      "title": "实现端口分配与实例命名",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P1-B02"
+      ]
+    },
+    {
+      "id": "G2-P3-B06",
+      "title": "实现 Runtime Start/Stop/Restart/Delete",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B02",
+        "G2-P3-B03",
+        "G2-P3-B04",
+        "G2-P3-B05"
+      ]
+    },
+    {
+      "id": "G2-P3-B07",
+      "title": "实现 Runtime Health Probe",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B06"
+      ]
+    },
+    {
+      "id": "G2-P3-B08",
+      "title": "扩展 Runtime Bootstrap 身份与 Secret File 支持",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B02"
+      ]
+    },
+    {
+      "id": "G2-P3-B09",
+      "title": "实现 RuntimeDeployment Reconcile Worker",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P2-B07",
+        "G2-P3-B06",
+        "G2-P3-B07"
+      ]
+    },
+    {
+      "id": "G2-P3-B10",
+      "title": "实现崩溃恢复与重启策略",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B09"
+      ]
+    },
+    {
+      "id": "G2-P3-B11",
+      "title": "实现停止与排空流程",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B09"
+      ]
+    },
+    {
+      "id": "G2-P3-B12",
+      "title": "完成真实 PM2 集成与 P3 门禁",
+      "phase": "P3 PM2 与运行对账",
+      "dependencies": [
+        "G2-P3-B07",
+        "G2-P3-B08",
+        "G2-P3-B10",
+        "G2-P3-B11"
+      ]
+    },
+    {
+      "id": "G2-P4-B01",
+      "title": "定义 Runtime Registration 与 Heartbeat 模型",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P3-B12"
+      ]
+    },
+    {
+      "id": "G2-P4-B02",
+      "title": "实现 Runtime Registration/Heartbeat API 与 Client",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B01"
+      ]
+    },
+    {
+      "id": "G2-P4-B03",
+      "title": "实现 Provider 身份三方校验",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B02"
+      ]
+    },
+    {
+      "id": "G2-P4-B04",
+      "title": "实现 Catalog Discovery Client 与验证",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B03"
+      ]
+    },
+    {
+      "id": "G2-P4-B05",
+      "title": "持久化不可变 CatalogSnapshot",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B04"
+      ]
+    },
+    {
+      "id": "G2-P4-B06",
+      "title": "实现 Registry Snapshot 构建与持久化",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B05"
+      ]
+    },
+    {
+      "id": "G2-P4-B07",
+      "title": "实现 Registry API/Watch/Bootstrap 与 SDAR 适配材料",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B06"
+      ]
+    },
+    {
+      "id": "G2-P4-B08",
+      "title": "完成 Ready→Catalog→Registry 自动编排门禁",
+      "phase": "P4 注册、Catalog 与 Registry",
+      "dependencies": [
+        "G2-P4-B07"
+      ]
+    },
+    {
+      "id": "G2-P5-B01",
+      "title": "集成 vendor_managed UGV Runtime 部署",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P4-B08"
+      ]
+    },
+    {
+      "id": "G2-P5-B02",
+      "title": "集成 vendor_managed NPC Tank Runtime 部署",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P4-B08"
+      ]
+    },
+    {
+      "id": "G2-P5-B03",
+      "title": "集成 Home Assistant Climate Runtime 部署",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P4-B08"
+      ]
+    },
+    {
+      "id": "G2-P5-B04",
+      "title": "实现 PMS Web 基础框架与 Provider 页面",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P1-B07"
+      ]
+    },
+    {
+      "id": "G2-P5-B05",
+      "title": "实现配置中心与 Runtime Deployment 页面",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P5-B04",
+        "G2-P1-B06"
+      ]
+    },
+    {
+      "id": "G2-P5-B06",
+      "title": "实现 Catalog、Registry、Audit 页面",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P5-B05",
+        "G2-P4-B07"
+      ]
+    },
+    {
+      "id": "G2-P5-B07",
+      "title": "完成平台安全与故障注入测试",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P5-B01",
+        "G2-P5-B02",
+        "G2-P5-B03"
+      ]
+    },
+    {
+      "id": "G2-P5-B08",
+      "title": "执行 SDAR 真实/受控 Interop E2E",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P4-B07",
+        "G2-P5-B01"
+      ]
+    },
+    {
+      "id": "G2-P5-B09",
+      "title": "完成 V0.1 全量验收、发布与交付",
+      "phase": "P5 Provider 集成与交付",
+      "dependencies": [
+        "G2-P5-B06",
+        "G2-P5-B07",
+        "G2-P5-B08"
+      ]
+    }
+  ]
+}

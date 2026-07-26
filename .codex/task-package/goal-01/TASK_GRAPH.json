@@ -1,0 +1,423 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-01",
+  "taskCount": 50,
+  "tasks": [
+    {
+      "id": "G1-P0-B01",
+      "title": "校验离线交付来源并生成基线清单",
+      "phase": "P0 基线锁定",
+      "dependencies": []
+    },
+    {
+      "id": "G1-P0-B02",
+      "title": "建立 Git 基线与来源追踪",
+      "phase": "P0 基线锁定",
+      "dependencies": [
+        "G1-P0-B01"
+      ]
+    },
+    {
+      "id": "G1-P0-B03",
+      "title": "建立平台命名与仓库元数据",
+      "phase": "P0 基线锁定",
+      "dependencies": [
+        "G1-P0-B02"
+      ]
+    },
+    {
+      "id": "G1-P0-B04",
+      "title": "固化 Runtime 冻结协议回归门禁",
+      "phase": "P0 基线锁定",
+      "dependencies": [
+        "G1-P0-B03"
+      ]
+    },
+    {
+      "id": "G1-P0-B05",
+      "title": "固化 UGV/NPC/HA Provider 回归门禁",
+      "phase": "P0 基线锁定",
+      "dependencies": [
+        "G1-P0-B03"
+      ]
+    },
+    {
+      "id": "G1-P0-B06",
+      "title": "发布 P0 基线阶段报告",
+      "phase": "P0 基线锁定",
+      "dependencies": [
+        "G1-P0-B04",
+        "G1-P0-B05"
+      ]
+    },
+    {
+      "id": "G1-P1-B01",
+      "title": "建立 Migration 所有权与路径映射",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P0-B06"
+      ]
+    },
+    {
+      "id": "G1-P1-B02",
+      "title": "物理拆分 Runtime Migration 集合",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B01"
+      ]
+    },
+    {
+      "id": "G1-P1-B03",
+      "title": "物理拆分 Provider Migration 集合",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B02"
+      ]
+    },
+    {
+      "id": "G1-P1-B04",
+      "title": "实现显式 MigrationSet 解析器",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B03"
+      ]
+    },
+    {
+      "id": "G1-P1-B05",
+      "title": "改造 Runtime Migration Runner",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B04"
+      ]
+    },
+    {
+      "id": "G1-P1-B06",
+      "title": "改造 UGV 与 NPC Provider Migration Runner",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B04"
+      ]
+    },
+    {
+      "id": "G1-P1-B07",
+      "title": "增加 Migration 隔离集成测试",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B05",
+        "G1-P1-B06"
+      ]
+    },
+    {
+      "id": "G1-P1-B08",
+      "title": "完成 Migration 兼容与阶段门禁",
+      "phase": "P1 Migration 隔离",
+      "dependencies": [
+        "G1-P1-B07"
+      ]
+    },
+    {
+      "id": "G1-P2-B01",
+      "title": "定义 ProviderPackage 领域模型和 JSON Schema",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P1-B08"
+      ]
+    },
+    {
+      "id": "G1-P2-B02",
+      "title": "创建 UGV Provider Package 描述",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B01"
+      ]
+    },
+    {
+      "id": "G1-P2-B03",
+      "title": "创建 NPC Tank Provider Package 描述",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B01"
+      ]
+    },
+    {
+      "id": "G1-P2-B04",
+      "title": "创建 Home Assistant Climate Provider Package 描述",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B01"
+      ]
+    },
+    {
+      "id": "G1-P2-B05",
+      "title": "实现 Provider Package Loader 与 Registry",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B02",
+        "G1-P2-B03",
+        "G1-P2-B04"
+      ]
+    },
+    {
+      "id": "G1-P2-B06",
+      "title": "隔离 Mock Fixtures 与资格状态",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B05"
+      ]
+    },
+    {
+      "id": "G1-P2-B07",
+      "title": "提供 Provider Package Self-check CLI 与阶段报告",
+      "phase": "P2 Provider Package",
+      "dependencies": [
+        "G1-P2-B05",
+        "G1-P2-B06"
+      ]
+    },
+    {
+      "id": "G1-P3-B01",
+      "title": "盘点现有 Runtime 与 Provider 配置",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P2-B07"
+      ]
+    },
+    {
+      "id": "G1-P3-B02",
+      "title": "定义共享 ConfigurationDefinition 基础类型",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B01"
+      ]
+    },
+    {
+      "id": "G1-P3-B03",
+      "title": "抽取 Runtime 身份与数据库配置契约",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B04",
+      "title": "抽取 Runtime Observability 配置契约",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B05",
+      "title": "抽取 Runtime Worker 与 Business Events 配置",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B06",
+      "title": "抽取 UGV Provider 配置契约",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B07",
+      "title": "抽取 NPC Tank Provider 配置契约",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B08",
+      "title": "抽取 Home Assistant Climate 配置契约",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B02"
+      ]
+    },
+    {
+      "id": "G1-P3-B09",
+      "title": "生成 JSON Schema 与 PMS 表单元数据",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B03",
+        "G1-P3-B04",
+        "G1-P3-B05",
+        "G1-P3-B06",
+        "G1-P3-B07",
+        "G1-P3-B08"
+      ]
+    },
+    {
+      "id": "G1-P3-B10",
+      "title": "完成配置兼容回归与阶段门禁",
+      "phase": "P3 共享配置契约",
+      "dependencies": [
+        "G1-P3-B09"
+      ]
+    },
+    {
+      "id": "G1-P4-B01",
+      "title": "建立 PMS Domain 包与核心值对象",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P3-B10"
+      ]
+    },
+    {
+      "id": "G1-P4-B02",
+      "title": "设计 PMS Control Plane 初始 Migration",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P4-B01"
+      ]
+    },
+    {
+      "id": "G1-P4-B03",
+      "title": "定义 PMS Repository Ports 与事务边界",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P4-B01"
+      ]
+    },
+    {
+      "id": "G1-P4-B04",
+      "title": "实现 PostgreSQL PMS Persistence",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P4-B02",
+        "G1-P4-B03"
+      ]
+    },
+    {
+      "id": "G1-P4-B05",
+      "title": "实现 Provider Package 导入投影",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P2-B07",
+        "G1-P4-B04"
+      ]
+    },
+    {
+      "id": "G1-P4-B06",
+      "title": "实现 Audit 与 Job Lease 基础能力",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P4-B04"
+      ]
+    },
+    {
+      "id": "G1-P4-B07",
+      "title": "建立 PMS Worker 基础骨架与 P4 门禁",
+      "phase": "P4 PMS 核心与持久化",
+      "dependencies": [
+        "G1-P4-B05",
+        "G1-P4-B06"
+      ]
+    },
+    {
+      "id": "G1-P5-B01",
+      "title": "建立 PMS API 应用骨架与错误合同",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P4-B07"
+      ]
+    },
+    {
+      "id": "G1-P5-B02",
+      "title": "实现 Provider Package 查询 API",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B01"
+      ]
+    },
+    {
+      "id": "G1-P5-B03",
+      "title": "实现 Provider/Resource 管理 API",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B01"
+      ]
+    },
+    {
+      "id": "G1-P5-B04",
+      "title": "实现 Config Draft 与 Validate",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P3-B10",
+        "G1-P5-B01"
+      ]
+    },
+    {
+      "id": "G1-P5-B05",
+      "title": "实现 Config Publish、No-op 与 Rollback",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B04"
+      ]
+    },
+    {
+      "id": "G1-P5-B06",
+      "title": "实现 Runtime Config Latest 与 ETag",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B05"
+      ]
+    },
+    {
+      "id": "G1-P5-B07",
+      "title": "实现 Runtime Config Watch 与 Ack",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B06"
+      ]
+    },
+    {
+      "id": "G1-P5-B08",
+      "title": "完成 API 安全、OpenAPI 与 P5 阶段门禁",
+      "phase": "P5 API 与配置中心",
+      "dependencies": [
+        "G1-P5-B02",
+        "G1-P5-B03",
+        "G1-P5-B07"
+      ]
+    },
+    {
+      "id": "G1-P6-B01",
+      "title": "实现 Runtime Config Client Pull 与本地 Cache",
+      "phase": "P6 Runtime Config Client",
+      "dependencies": [
+        "G1-P5-B06"
+      ]
+    },
+    {
+      "id": "G1-P6-B02",
+      "title": "实现 Watch、Apply、Ack 与 LKG 状态机",
+      "phase": "P6 Runtime Config Client",
+      "dependencies": [
+        "G1-P5-B07",
+        "G1-P6-B01"
+      ]
+    },
+    {
+      "id": "G1-P6-B03",
+      "title": "接入 Runtime 的首个可验证动态配置闭环",
+      "phase": "P6 Runtime Config Client",
+      "dependencies": [
+        "G1-P3-B04",
+        "G1-P6-B02"
+      ]
+    },
+    {
+      "id": "G1-P6-B04",
+      "title": "完成 Goal 1 验收与 Handoff",
+      "phase": "P6 Runtime Config Client",
+      "dependencies": [
+        "G1-P6-B03"
+      ]
+    }
+  ]
+}

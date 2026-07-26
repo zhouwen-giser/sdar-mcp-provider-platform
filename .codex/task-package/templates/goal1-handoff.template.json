@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-01",
+  "status": "PASSED",
+  "sourceBaselineSha256": "000a46f7452eadac986de3f142dde6358a590c5c372bee2e09793fe9396ad6e3",
+  "gitCommit": "REPLACE",
+  "taskSummary": {
+    "total": 50,
+    "passed": 50
+  },
+  "gates": {
+    "migrationIsolation": "PASSED",
+    "configE2E": "PASSED",
+    "runtimeRegression": "PASSED"
+  },
+  "generatedAt": "REPLACE",
+  "artifacts": [],
+  "externalGaps": []
+}

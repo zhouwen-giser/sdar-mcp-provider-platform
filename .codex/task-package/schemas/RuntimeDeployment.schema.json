@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.local/schemas/runtime-deployment-v1.json",
+  "title": "RuntimeDeployment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deploymentId",
+    "providerId",
+    "environment",
+    "desiredState",
+    "desiredReplicas",
+    "runtimeVersion",
+    "databaseProfileId",
+    "configProfileId"
+  ],
+  "properties": {
+    "deploymentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providerId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "desiredState": {
+      "enum": [
+        "running",
+        "stopped",
+        "draining"
+      ]
+    },
+    "desiredReplicas": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 32
+    },
+    "runtimeVersion": {
+      "type": "string"
+    },
+    "databaseProfileId": {
+      "type": "string"
+    },
+    "configProfileId": {
+      "type": "string"
+    },
+    "adapterEndpoint": {
+      "type": "string"
+    },
+    "desiredRevision": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
