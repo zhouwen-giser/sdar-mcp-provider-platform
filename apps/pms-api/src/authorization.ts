@@ -64,5 +64,6 @@ function isProtectedManagementPath(url: string): boolean {
     "/api/v1/config-drafts",
     "/api/v1/runtime-deployments",
     "/api/v1/runtime-processes",
+    "/api/v1/registry",
   ].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }

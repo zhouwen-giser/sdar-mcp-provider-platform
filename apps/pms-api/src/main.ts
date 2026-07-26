@@ -6,6 +6,7 @@ import {
   ProviderManagementService,
 } from "../../../packages/pms-application/src/index.js";
 import {
+  PostgresRegistrySnapshotRepository,
   PostgresPmsUnitOfWork,
   runPmsMigrations,
 } from "../../../packages/pms-persistence-postgres/src/index.js";
@@ -39,6 +40,7 @@ const app = createPmsApi({
   runtimeConfigAuthorizer: new DenyRuntimeConfigClientAuthorizer(),
   runtimeConfigWatch,
   runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(unitOfWork),
+  registrySnapshots: new PostgresRegistrySnapshotRepository(pool),
   readiness: async () => {
     await pool.query("SELECT 1");
     return { ready: true, checks: { database: "ready" } };

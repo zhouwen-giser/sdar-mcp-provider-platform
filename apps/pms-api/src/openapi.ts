@@ -348,6 +348,42 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/registry/{environment}/latest": {
+        get: {
+          operationId: "getLatestRegistrySnapshot",
+          responses: {
+            "200": { description: "Latest immutable SDAR Registry Snapshot" },
+            "304": { description: "The consumer already has this checksum" },
+            "404": { description: "No Registry Snapshot has been published" },
+          },
+        },
+      },
+      "/api/v1/registry/{environment}/history": {
+        get: {
+          operationId: "getRegistrySnapshotHistory",
+          responses: { "200": { description: "Immutable Registry Snapshot history" } },
+        },
+      },
+      "/api/v1/registry/{environment}/diff": {
+        get: {
+          operationId: "diffRegistrySnapshots",
+          responses: { "200": { description: "Provider projection changes between revisions" } },
+        },
+      },
+      "/api/v1/registry/{environment}/watch": {
+        get: {
+          operationId: "watchRegistrySnapshots",
+          responses: { "200": { description: "SSE revision and checksum hints only" } },
+        },
+      },
+      "/api/v1/registry/{environment}/bootstrap": {
+        get: {
+          operationId: "bootstrapRegistrySnapshot",
+          responses: {
+            "200": { description: "Latest LKG or explicit empty safe bootstrap projection" },
+          },
+        },
+      },
     },
     components: {
       schemas: {

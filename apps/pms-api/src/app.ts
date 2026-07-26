@@ -30,6 +30,8 @@ import type {
   RuntimeRegistrationAuthorizer,
   RuntimeRegistrationService,
 } from "../../../packages/runtime-registration/src/index.js";
+import type { RegistrySnapshotRepository } from "../../../packages/registry-snapshot/src/index.js";
+import { registerRegistryRoutes } from "./registry-routes.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -50,6 +52,8 @@ export interface PmsApiOptions {
   readonly runtimeConfigAuthorizer?: RuntimeConfigClientAuthorizer;
   readonly runtimeConfigWatch?: RuntimeConfigWatchHub;
   readonly runtimeConfigAcknowledgements?: RuntimeConfigAcknowledgementService;
+  readonly registrySnapshots?: RegistrySnapshotRepository;
+  readonly registryWatchPollIntervalMs?: number;
   readonly managementAuthorizer?: PmsApiRoleAuthorizer;
 }
 
@@ -116,6 +120,13 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
       options.runtimeConfigWatch,
       options.runtimeConfigAcknowledgements,
     );
+  }
+  if (options.registrySnapshots !== undefined) {
+    registerRegistryRoutes(app, options.registrySnapshots, {
+      ...(options.registryWatchPollIntervalMs === undefined
+        ? {}
+        : { pollIntervalMs: options.registryWatchPollIntervalMs }),
+    });
   }
 
   return app;

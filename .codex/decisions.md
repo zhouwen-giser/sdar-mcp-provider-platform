@@ -255,3 +255,10 @@ Registry persistence appends `008_registry_snapshot.sql` without modifying migra
 `007`. Update only the existing PMS migration suite's exact file and table expectations as the
 minimum out-of-range maintenance needed to preserve the repeat-application and Runtime-table
 isolation gate.
+
+## 2026-07-26 — G2-P4-B07 Registry API E2E command wiring
+
+The mandatory `pnpm test:registry-e2e` command does not exist. Add one root script that requires the
+local PostgreSQL test URL and runs the explicit Registry API E2E suite. This minimum out-of-range
+verification wiring is not an empty success shim and does not add Registry behavior outside the
+card's PMS API implementation.
