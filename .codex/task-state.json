@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:57:26.008496+00:00",
+  "updatedAt": "2026-07-26T10:02:22.354363+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -121,14 +121,16 @@
       "reason": null
     },
     "G1-P1-B08": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:57:51.355110+00:00",
+      "completedAt": "2026-07-26T10:02:22.354133+00:00",
+      "evidence": [
+        "docs/database/MIGRATION_SET_UPGRADE.md; .codex/reports/phase-P1.md; rg \"migrations\" apps packages | head -200: PASS (explicit set directories/containment only, no production root SQL scan); pnpm test:migration-isolation with local PostgreSQL: PASS 1/1; pnpm build: PASS; stale NPC report path corrected; node --check, prettier --check, git diff --check: PASS"
+      ],
       "reason": null
     },
     "G1-P2-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

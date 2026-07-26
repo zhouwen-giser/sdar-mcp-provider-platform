@@ -51,3 +51,7 @@
 - 2026-07-26T09:54:49.359137+00:00 START G1-P1-B07
 
 - 2026-07-26T09:57:26.008337+00:00 PASS G1-P1-B07 evidence=['reports/evidence/migration-isolation.json; TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:migration-isolation: PASS 1/1; three temporary schemas, each set executed twice; runtime migration count 24; representative cross-set tables absent; post-test schema cleanup count 0; jq evidence validation, typecheck, eslint, prettier, git diff --check: PASS']
+
+- 2026-07-26T09:57:51.355169+00:00 START G1-P1-B08
+
+- 2026-07-26T10:02:22.354251+00:00 PASS G1-P1-B08 evidence=['docs/database/MIGRATION_SET_UPGRADE.md; .codex/reports/phase-P1.md; rg "migrations" apps packages | head -200: PASS (explicit set directories/containment only, no production root SQL scan); pnpm test:migration-isolation with local PostgreSQL: PASS 1/1; pnpm build: PASS; stale NPC report path corrected; node --check, prettier --check, git diff --check: PASS']
