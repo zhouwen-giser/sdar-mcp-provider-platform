@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:53:40.741691+00:00",
+  "updatedAt": "2026-07-26T10:57:16.368338+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -238,10 +238,12 @@
       "reason": null
     },
     "G1-P3-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:54:42.376226+00:00",
+      "completedAt": "2026-07-26T10:57:16.368230+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/ugv-provider-adapter test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (5 files, 26 tests including UGV legacy fixture, 50-field inventory, secrets, production); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/ugv-provider-security.test.ts (3 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check"
+      ],
       "reason": null
     },
     "G1-P3-B07": {
