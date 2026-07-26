@@ -149,9 +149,15 @@ importers:
       '@sdar/pms-domain':
         specifier: workspace:*
         version: link:../../packages/pms-domain
+      '@sdar/pms-persistence-postgres':
+        specifier: workspace:*
+        version: link:../../packages/pms-persistence-postgres
       fastify:
         specifier: 5.10.0
         version: 5.10.0
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
 
   apps/pms-worker:
     dependencies:

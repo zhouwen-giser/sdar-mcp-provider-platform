@@ -70,6 +70,88 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/provider-types": {
+        get: {
+          operationId: "listProviderTypes",
+          responses: { "200": { description: "Provider Types" } },
+        },
+        post: {
+          operationId: "createProviderType",
+          responses: { "201": { description: "Provider Type created" } },
+        },
+      },
+      "/api/v1/provider-types/{providerTypeId}": {
+        get: {
+          operationId: "getProviderType",
+          responses: { "200": { description: "Provider Type" } },
+        },
+      },
+      "/api/v1/provider-types/{providerTypeId}/status": {
+        patch: {
+          operationId: "updateProviderTypeStatus",
+          responses: { "200": { description: "Provider Type status updated" } },
+        },
+      },
+      "/api/v1/providers": {
+        get: {
+          operationId: "listProviders",
+          responses: { "200": { description: "Providers" } },
+        },
+        post: {
+          operationId: "createProvider",
+          responses: { "201": { description: "Provider created" } },
+        },
+      },
+      "/api/v1/providers/{providerId}": {
+        get: {
+          operationId: "getProvider",
+          responses: { "200": { description: "Provider" } },
+        },
+      },
+      "/api/v1/providers/{providerId}/status": {
+        patch: {
+          operationId: "updateProviderStatus",
+          responses: { "200": { description: "Provider status updated" } },
+        },
+      },
+      "/api/v1/resources": {
+        get: {
+          operationId: "listResources",
+          responses: { "200": { description: "Environment-scoped Resources" } },
+        },
+        post: {
+          operationId: "createResource",
+          responses: { "201": { description: "Resource created" } },
+        },
+      },
+      "/api/v1/resources/{environment}/{resourceId}": {
+        get: {
+          operationId: "getResource",
+          responses: { "200": { description: "Resource" } },
+        },
+      },
+      "/api/v1/resources/{environment}/{resourceId}/status": {
+        patch: {
+          operationId: "updateResourceStatus",
+          responses: { "200": { description: "Resource status updated" } },
+        },
+      },
+      "/api/v1/providers/{providerId}/resource-bindings": {
+        get: {
+          operationId: "listProviderResourceBindings",
+          responses: { "200": { description: "Provider Resource bindings" } },
+        },
+        post: {
+          operationId: "bindProviderResource",
+          responses: { "201": { description: "Provider Resource binding created" } },
+        },
+      },
+      "/api/v1/providers/{providerId}/resource-bindings/{environment}/{resourceId}": {
+        delete: {
+          operationId: "unbindProviderResource",
+          responses: { "204": { description: "Provider Resource binding removed" } },
+        },
+      },
     },
     components: {
       schemas: {

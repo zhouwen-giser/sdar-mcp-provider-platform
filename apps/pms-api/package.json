@@ -12,6 +12,8 @@
   "dependencies": {
     "@sdar/pms-application": "workspace:*",
     "@sdar/pms-domain": "workspace:*",
-    "fastify": "5.10.0"
+    "@sdar/pms-persistence-postgres": "workspace:*",
+    "fastify": "5.10.0",
+    "pg": "8.22.0"
   }
 }

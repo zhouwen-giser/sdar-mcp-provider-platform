@@ -67,3 +67,11 @@ an Audit update or delete. Do not modify prior migrations; append PMS migration
 existing real `test:pms` wiring and migration-set expectation for the new concurrency/security
 suite. These minimal migration and verification changes are necessary to prove the card's explicit
 append-only acceptance criterion.
+
+## 2026-07-26 — G1-P5-B03 expose optimistic tokens on managed aggregates
+
+ProviderType, Provider, and Resource tables already carry `updated_at`, and their repository update
+ports require it, but read models did not return the token. A management client therefore could not
+perform a valid optimistic status update. Add optional validated `updatedAt` values to these pure
+entities and map the existing columns in PostgreSQL. This minimal domain/persistence correction is
+outside the API card allowlist but introduces no schema or future capability.

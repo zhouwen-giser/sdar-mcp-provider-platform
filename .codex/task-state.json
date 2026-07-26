@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T12:21:04.710927+00:00",
+  "updatedAt": "2026-07-26T12:29:59.661291+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -364,10 +364,12 @@
       "reason": null
     },
     "G1-P5-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T12:22:12.315136+00:00",
+      "completedAt": "2026-07-26T12:29:59.661175+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-api test: PASS 2 files/14 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 4 files/16 tests; ProviderType/Provider/Resource create-list-get-status routes and application use cases covered; Provider defaults vendor_managed; successful writes refetch and return millisecond-safe updatedAt optimistic token; invalid Provider/Resource/ProviderType lifecycle rejected; two Providers/two Resources demonstrate true N:N with no Provider.resourceId; every create/status/bind/unbind writes Audit in same UoW; missing ProviderType rolls back with no Provider or Audit; API requires actor/correlation context; OpenAPI management paths covered; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P5-B04": {

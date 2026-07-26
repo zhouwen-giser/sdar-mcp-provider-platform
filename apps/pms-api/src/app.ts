@@ -1,11 +1,13 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import type {
+  ProviderManagementService,
   ProviderPackageListFilter,
   ProviderPackageQueryService,
 } from "../../../packages/pms-application/src/index.js";
 import { attachRequestContext, requestContext } from "./context.js";
 import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
+import { registerManagementRoutes } from "./management-routes.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -15,6 +17,7 @@ export interface PmsReadiness {
 export interface PmsApiOptions {
   readonly readiness?: () => Promise<PmsReadiness>;
   readonly providerPackages?: ProviderPackageQueryService;
+  readonly management?: ProviderManagementService;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -43,6 +46,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   app.get("/api/v1/openapi.json", () => pmsOpenApiDocument());
   if (options.providerPackages !== undefined) {
     registerProviderPackageRoutes(app, options.providerPackages);
+  }
+  if (options.management !== undefined) {
+    registerManagementRoutes(app, options.management);
   }
 
   return app;

@@ -44,6 +44,7 @@ interface ProviderTypeRow extends QueryResultRow {
   provider_type_id: string;
   display_name: string;
   status: ProviderType["status"];
+  updated_at: Date;
 }
 
 export class PostgresProviderTypeRepository implements ProviderTypeRepository {
@@ -51,7 +52,8 @@ export class PostgresProviderTypeRepository implements ProviderTypeRepository {
 
   async get(id: ProviderType["providerTypeId"]): Promise<ProviderType | null> {
     const result = await this.db.query<ProviderTypeRow>(
-      `SELECT provider_type_id,display_name,status FROM provider_type WHERE provider_type_id=$1`,
+      `SELECT provider_type_id,display_name,status,updated_at
+         FROM provider_type WHERE provider_type_id=$1`,
       [id],
     );
     return result.rows[0] === undefined ? null : providerTypeFromRow(result.rows[0]);
@@ -59,7 +61,7 @@ export class PostgresProviderTypeRepository implements ProviderTypeRepository {
 
   async list(query: ProviderTypeQuery): Promise<Page<ProviderType>> {
     const result = await this.db.query<ProviderTypeRow>(
-      `SELECT provider_type_id,display_name,status
+      `SELECT provider_type_id,display_name,status,updated_at
          FROM provider_type
         WHERE ($1::text IS NULL OR status=$1)
         ORDER BY provider_type_id
@@ -189,6 +191,7 @@ interface ProviderRow extends QueryResultRow {
   hosting_mode: Provider["hostingMode"];
   adapter_endpoint: string | null;
   status: Provider["status"];
+  updated_at: Date;
 }
 
 export class PostgresProviderRepository implements ProviderRepository {
@@ -197,7 +200,7 @@ export class PostgresProviderRepository implements ProviderRepository {
   async get(id: Provider["providerId"]): Promise<Provider | null> {
     const result = await this.db.query<ProviderRow>(
       `SELECT provider_id,provider_type_id,package_id,package_version,
-              hosting_mode,adapter_endpoint,status
+              hosting_mode,adapter_endpoint,status,updated_at
          FROM provider WHERE provider_id=$1`,
       [id],
     );
@@ -207,7 +210,7 @@ export class PostgresProviderRepository implements ProviderRepository {
   async list(query: ProviderQuery): Promise<Page<Provider>> {
     const result = await this.db.query<ProviderRow>(
       `SELECT provider_id,provider_type_id,package_id,package_version,
-              hosting_mode,adapter_endpoint,status
+              hosting_mode,adapter_endpoint,status,updated_at
          FROM provider
         WHERE ($1::text IS NULL OR provider_type_id=$1)
           AND ($2::text IS NULL OR hosting_mode=$2)
@@ -260,6 +263,7 @@ interface ResourceRow extends QueryResultRow {
   resource_type: string;
   metadata: Resource["metadata"];
   status: Resource["status"];
+  updated_at: Date;
 }
 
 export class PostgresResourceRepository implements ResourceRepository {
@@ -267,7 +271,7 @@ export class PostgresResourceRepository implements ResourceRepository {
 
   async get(key: ResourceKey): Promise<Resource | null> {
     const result = await this.db.query<ResourceRow>(
-      `SELECT environment,resource_id,resource_type,metadata,status
+      `SELECT environment,resource_id,resource_type,metadata,status,updated_at
          FROM resource WHERE environment=$1 AND resource_id=$2`,
       [key.environment, key.resourceId],
     );
@@ -276,7 +280,7 @@ export class PostgresResourceRepository implements ResourceRepository {
 
   async list(query: ResourceQuery): Promise<Page<Resource>> {
     const result = await this.db.query<ResourceRow>(
-      `SELECT environment,resource_id,resource_type,metadata,status
+      `SELECT environment,resource_id,resource_type,metadata,status,updated_at
          FROM resource
         WHERE environment=$1
           AND ($2::text IS NULL OR resource_type=$2)
@@ -379,6 +383,7 @@ function providerTypeFromRow(row: ProviderTypeRow): ProviderType {
     providerTypeId: providerTypeId(row.provider_type_id),
     displayName: row.display_name,
     status: row.status,
+    updatedAt: row.updated_at,
   });
 }
 
@@ -413,6 +418,7 @@ function providerFromRow(row: ProviderRow): Provider {
     hostingMode: row.hosting_mode,
     ...(row.adapter_endpoint === null ? {} : { adapterEndpoint: row.adapter_endpoint }),
     status: row.status,
+    updatedAt: row.updated_at,
   });
 }
 
@@ -435,6 +441,7 @@ function resourceFromRow(row: ResourceRow): Resource {
     resourceType: row.resource_type,
     metadata: row.metadata,
     status: row.status,
+    updatedAt: row.updated_at,
   });
 }
 

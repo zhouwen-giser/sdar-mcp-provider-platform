@@ -36,6 +36,7 @@ export interface ProviderType {
   readonly providerTypeId: ProviderTypeId;
   readonly displayName: string;
   readonly status: ProviderTypeStatus;
+  readonly updatedAt?: Date;
 }
 
 export interface ProviderPackage {
@@ -57,6 +58,7 @@ export interface Provider {
   readonly hostingMode: ProviderHostingMode;
   readonly adapterEndpoint?: string;
   readonly status: ProviderStatus;
+  readonly updatedAt?: Date;
 }
 
 export interface Resource {
@@ -65,6 +67,7 @@ export interface Resource {
   readonly resourceType: string;
   readonly metadata: JsonObject;
   readonly status: ResourceStatus;
+  readonly updatedAt?: Date;
 }
 
 export interface ConfigurationTarget {
@@ -99,7 +102,11 @@ export interface AuditEvent {
 
 export function createProviderType(input: ProviderType): ProviderType {
   requireNonEmpty(input.displayName, "displayName");
-  return Object.freeze({ ...input });
+  if (input.updatedAt !== undefined) requireValidDate(input.updatedAt, "updatedAt");
+  return Object.freeze({
+    ...input,
+    ...(input.updatedAt === undefined ? {} : { updatedAt: new Date(input.updatedAt) }),
+  });
 }
 
 export function createProviderPackage(input: ProviderPackage): ProviderPackage {
@@ -130,14 +137,25 @@ export function createProvider(
   if ((input.packageId === undefined) !== (input.packageVersion === undefined))
     throw invalidValue("providerPackage");
   if (input.packageVersion !== undefined) requireSemver(input.packageVersion);
+  if (input.updatedAt !== undefined) requireValidDate(input.updatedAt, "updatedAt");
   if (hostingMode === "vendor_managed" && input.adapterEndpoint?.trim().length === 0)
     throw invalidValue("adapterEndpoint");
-  return Object.freeze({ ...input, hostingMode, status });
+  return Object.freeze({
+    ...input,
+    hostingMode,
+    status,
+    ...(input.updatedAt === undefined ? {} : { updatedAt: new Date(input.updatedAt) }),
+  });
 }
 
 export function createResource(input: Resource): Resource {
   requireNonEmpty(input.resourceType, "resourceType");
-  return Object.freeze({ ...input, metadata: Object.freeze({ ...input.metadata }) });
+  if (input.updatedAt !== undefined) requireValidDate(input.updatedAt, "updatedAt");
+  return Object.freeze({
+    ...input,
+    metadata: Object.freeze({ ...input.metadata }),
+    ...(input.updatedAt === undefined ? {} : { updatedAt: new Date(input.updatedAt) }),
+  });
 }
 
 export function createConfigRevision(input: ConfigRevision): ConfigRevision {
