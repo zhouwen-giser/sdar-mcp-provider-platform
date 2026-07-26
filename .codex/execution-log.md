@@ -275,3 +275,7 @@
 - 2026-07-26T16:12:41.934012+00:00 START G2-P2-B07
 
 - 2026-07-26T16:18:17.366088+00:00 PASS G2-P2-B07 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run packages/pms-application/test/runtime-database-preparation.test.ts apps/pms-worker/test/runtime-database-preparation-job.test.ts (2 files/5 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T16:18:57.290837+00:00 START G2-P2-B08
+
+- 2026-07-26T16:23:03.559047+00:00 PASS G2-P2-B08 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); reports/evidence/G2-P2-B08-database-isolation.json; pnpm test:db-provisioner (3 files/21 tests); tsc --noEmit; eslint targeted']

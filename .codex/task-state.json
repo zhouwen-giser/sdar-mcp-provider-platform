@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T16:18:17.366161+00:00",
+  "updatedAt": "2026-07-26T16:23:03.559103+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -175,14 +175,16 @@
       "reason": null
     },
     "G2-P2-B08": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T16:18:57.290778+00:00",
+      "completedAt": "2026-07-26T16:23:03.558977+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); reports/evidence/G2-P2-B08-database-isolation.json; pnpm test:db-provisioner (3 files/21 tests); tsc --noEmit; eslint targeted"
+      ],
       "reason": null
     },
     "G2-P2-B09": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

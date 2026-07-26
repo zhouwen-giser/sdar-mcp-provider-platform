@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "taskId": "G2-P2-B08",
+  "status": "PASS",
+  "verificationKind": "local-postgresql-e2e",
+  "assertions": {
+    "providerDatabasesProvisioned": true,
+    "providerACannotReadProviderB": true,
+    "pmsCannotReadOrCreateInRuntimeDatabase": true,
+    "runtimeMigrationsApplied": true,
+    "secretsRedacted": true,
+    "cleanupVerified": true
+  },
+  "secretOutput": "<redacted>"
+}
