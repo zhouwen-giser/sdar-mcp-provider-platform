@@ -75,3 +75,7 @@
 - 2026-07-26T10:12:06.928739+00:00 START G1-P2-B05
 
 - 2026-07-26T10:14:21.041841+00:00 PASS G1-P2-B05 evidence=['pnpm --filter @sdar/provider-package-registry test: PASS 2 files/11 tests; pnpm typecheck: PASS; eslint and prettier: PASS; controlled provider-packages root loads 3 built-ins in stable order; list/get/listByProviderType/validate APIs covered; duplicate ID+version, ambiguous unversioned get, invalid JSON/schema, and symlink entries/descriptors rejected; git diff --check PASS']
+
+- 2026-07-26T10:14:55.536350+00:00 START G1-P2-B06
+
+- 2026-07-26T10:16:03.709157+00:00 PASS G1-P2-B06 evidence=['semantic equivalent for B07-owned pnpm test:provider-packages: pnpm --filter @sdar/provider-package-registry test PASS 2 files/13 tests; controlled loader rejects mock directory/packageId/providerType/adapter-entry references; production list has 3 non-mock packages; qualification projection exposes exact component/realResource statuses and evidence only, with no certified/systemStatus fields; pnpm typecheck, eslint, prettier, git diff --check PASS']

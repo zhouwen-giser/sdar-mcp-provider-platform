@@ -11,6 +11,7 @@ export type ProviderPackageRegistryErrorCode =
   | "PACKAGE_DESCRIPTOR_UNAVAILABLE"
   | "PACKAGE_JSON_INVALID"
   | "PACKAGE_SCHEMA_INVALID"
+  | "TEST_FIXTURE_PACKAGE_REJECTED"
   | "DUPLICATE_PACKAGE_VERSION"
   | "AMBIGUOUS_PACKAGE_ID";
 
@@ -167,8 +168,11 @@ async function loadDescriptor(root: string, directoryName: string): Promise<Prov
     );
   }
   try {
-    return validateProviderPackage(input);
+    const providerPackage = validateProviderPackage(input);
+    assertProductionPackage(providerPackage, directoryName);
+    return providerPackage;
   } catch (error) {
+    if (error instanceof ProviderPackageRegistryError) throw error;
     if (!(error instanceof ZodError)) throw error;
     throw new ProviderPackageRegistryError(
       "PACKAGE_SCHEMA_INVALID",
@@ -177,6 +181,28 @@ async function loadDescriptor(root: string, directoryName: string): Promise<Prov
       { cause: error },
     );
   }
+}
+
+function assertProductionPackage(providerPackage: ProviderPackage, directoryName: string): void {
+  const mockReference =
+    identifierContainsMock(directoryName) ||
+    identifierContainsMock(providerPackage.packageId) ||
+    identifierContainsMock(providerPackage.providerType) ||
+    providerPackage.adapter.entry.split("/").some((segment) => identifierContainsMock(segment));
+  if (!mockReference) return;
+  throw new ProviderPackageRegistryError(
+    "TEST_FIXTURE_PACKAGE_REJECTED",
+    `Mock fixture must not be loaded as a production Provider Package: ${directoryName}`,
+    {
+      directory: directoryName,
+      packageId: providerPackage.packageId,
+      entry: providerPackage.adapter.entry,
+    },
+  );
+}
+
+function identifierContainsMock(value: string): boolean {
+  return value.toLowerCase().split(/[._-]/u).includes("mock");
 }
 
 function assertUniquePackageVersions(packages: readonly ProviderPackage[]): void {

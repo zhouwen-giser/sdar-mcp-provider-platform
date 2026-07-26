@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:14:21.041893+00:00",
+  "updatedAt": "2026-07-26T10:16:03.709214+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -175,14 +175,16 @@
       "reason": null
     },
     "G1-P2-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:14:55.536270+00:00",
+      "completedAt": "2026-07-26T10:16:03.709083+00:00",
+      "evidence": [
+        "semantic equivalent for B07-owned pnpm test:provider-packages: pnpm --filter @sdar/provider-package-registry test PASS 2 files/13 tests; controlled loader rejects mock directory/packageId/providerType/adapter-entry references; production list has 3 non-mock packages; qualification projection exposes exact component/realResource statuses and evidence only, with no certified/systemStatus fields; pnpm typecheck, eslint, prettier, git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P2-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

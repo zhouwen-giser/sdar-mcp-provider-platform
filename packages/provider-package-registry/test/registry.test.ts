@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   ProviderPackageRegistry,
   loadProviderPackageRegistry,
+  projectProviderQualification,
   validateProviderPackage,
   type ProviderPackage,
 } from "../src/index.js";
@@ -94,6 +95,40 @@ describe("ProviderPackage Registry", () => {
   it("exposes strict standalone validation", () => {
     expect(validateProviderPackage(packageFixture()).packageId).toBe("builtin.test.provider");
     expect(() => validateProviderPackage({ ...packageFixture(), unknown: true })).toThrow();
+  });
+
+  it("excludes mock fixtures from the controlled production package root", async () => {
+    const root = await fixtureRoot();
+    await writeDescriptor(
+      root,
+      "mock-ugv-device",
+      JSON.stringify({
+        ...packageFixture(),
+        packageId: "builtin.mock.ugv-device",
+        adapter: {
+          ...packageFixture().adapter,
+          entry: "apps/mock-ugv-device-mcp/src/main.ts",
+        },
+      }),
+    );
+
+    await expect(loadProviderPackageRegistry(root)).rejects.toMatchObject({
+      code: "TEST_FIXTURE_PACKAGE_REJECTED",
+    });
+  });
+
+  it("projects auditable qualification statuses without certification claims", async () => {
+    const workspaceRoot = resolve(import.meta.dirname, "../../..");
+    const registry = await loadProviderPackageRegistry(workspaceRoot);
+    const projections = registry.list().map(projectProviderQualification);
+
+    expect(projections).toHaveLength(3);
+    expect(projections.every(({ realResourceStatus }) => realResourceStatus === "pending")).toBe(
+      true,
+    );
+    expect(projections.every(({ evidenceRefs }) => evidenceRefs.length > 0)).toBe(true);
+    expect(JSON.stringify(projections).toLowerCase()).not.toContain("certified");
+    expect(JSON.stringify(projections)).not.toContain("systemStatus");
   });
 });
 

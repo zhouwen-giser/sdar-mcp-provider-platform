@@ -11,6 +11,10 @@ export {
   type RealResourceQualificationStatus,
 } from "./model.js";
 export {
+  projectProviderQualification,
+  type ProviderQualificationProjection,
+} from "./qualification.js";
+export {
   ProviderPackageRegistry,
   ProviderPackageRegistryError,
   loadProviderPackageRegistry,
