@@ -184,3 +184,11 @@ complete version evidence, timeout evidence, and concurrent single execution. Ex
 per-file `applied`/`already_applied` result; existing callers may continue ignoring the return.
 Update its focused unit test and add only the new workspace lock importer. Do not alter any
 Migration SQL, set mapping, version key, checksum rule, transaction boundary, or rollback behavior.
+
+## 2026-07-26 — G2-P3-B01 infrastructure Port package export
+
+The card limits implementation to `packages/runtime-deployment/src/ports/**`, but later composite
+adapters must consume the infrastructure-neutral Port through the workspace package contract. Add
+only the corresponding export line to `packages/runtime-deployment/src/index.ts`. This minimal
+out-of-range wiring exposes types and validation only; it adds no PM2 dependency, command surface,
+process implementation, network listener, or infrastructure authority.

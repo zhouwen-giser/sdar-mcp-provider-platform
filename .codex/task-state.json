@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T16:26:15.655838+00:00",
+  "updatedAt": "2026-07-26T16:29:33.081574+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -193,21 +193,23 @@
       "reason": null
     },
     "G2-P3-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T16:26:41.687596+00:00",
+      "completedAt": "2026-07-26T16:29:33.081433+00:00",
+      "evidence": [
+        "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime-deployment test (3 files/37 tests); tsc --noEmit; eslint targeted; PM2/script/cwd/command surface scan clean"
+      ],
+      "reason": null
+    },
+    "G2-P3-B02": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G2-P3-B02": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G2-P3-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

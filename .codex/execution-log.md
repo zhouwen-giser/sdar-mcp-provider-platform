@@ -283,3 +283,7 @@
 - 2026-07-26T16:23:32.363103+00:00 START G2-P2-B09
 
 - 2026-07-26T16:26:15.655764+00:00 PASS G2-P2-B09 evidence=['.codex/reports/goal2-P2.md; docs/operations/DATABASE_PROVISIONING_RUNBOOK.md; TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); pnpm build; database preparation unit/worker tests (2 files/5 tests)']
+
+- 2026-07-26T16:26:41.687661+00:00 START G2-P3-B01
+
+- 2026-07-26T16:29:33.081493+00:00 PASS G2-P3-B01 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime-deployment test (3 files/37 tests); tsc --noEmit; eslint targeted; PM2/script/cwd/command surface scan clean']
