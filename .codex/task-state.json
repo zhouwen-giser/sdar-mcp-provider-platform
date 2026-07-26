@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:29:20.327729+00:00",
+  "updatedAt": "2026-07-26T09:31:05.588494+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -67,14 +67,16 @@
       "reason": null
     },
     "G1-P1-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:29:50.471526+00:00",
+      "completedAt": "2026-07-26T09:31:05.588318+00:00",
+      "evidence": [
+        "python3 verify_migration_source_map.py (26 valid); 24 Runtime hashes/path states validated; git diff HEAD --summary (24 x 100% rename); root SQL only 024/025; prettier check; git diff --check"
+      ],
       "reason": null
     },
     "G1-P1-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
