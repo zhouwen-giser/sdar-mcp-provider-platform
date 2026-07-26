@@ -1,17 +1,19 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:00:38.351835+00:00",
+  "updatedAt": "2026-07-26T09:09:25.286785+00:00",
   "tasks": {
     "G1-P0-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:07:03.283900+00:00",
+      "completedAt": "2026-07-26T09:09:25.286602+00:00",
+      "evidence": [
+        "docs/baseline/BASELINE_INVENTORY.json; docs/baseline/BASELINE_REPORT.md; bash .codex/task-package/scripts/verify_source_baseline.sh; node inventory structure/count validation"
+      ],
       "reason": null
     },
     "G1-P0-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

@@ -11,3 +11,4 @@ examples/mock-adapter-python/__pycache__/
 examples/mock-adapter-python/**/__pycache__/
 examples/mock-adapter-python/generated/*_pb2*.py
 generated-python/
+.codex/
