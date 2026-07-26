@@ -141,6 +141,21 @@ importers:
 
   apps/npc-tank-provider-adapter: {}
 
+  apps/pms-worker:
+    dependencies:
+      '@sdar/pms-application':
+        specifier: workspace:*
+        version: link:../../packages/pms-application
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../../packages/pms-domain
+      '@sdar/pms-persistence-postgres':
+        specifier: workspace:*
+        version: link:../../packages/pms-persistence-postgres
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
   apps/runtime: {}
 
   apps/ugv-provider-adapter: {}

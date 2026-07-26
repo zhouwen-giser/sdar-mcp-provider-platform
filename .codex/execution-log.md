@@ -147,3 +147,7 @@
 - 2026-07-26T11:59:11.530544+00:00 START G1-P4-B06
 
 - 2026-07-26T12:02:49.257741+00:00 PASS G1-P4-B06 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 3 files/13 tests; AuditService requires actorId/correlationId and persists both; migration 003 DB trigger rejects direct Audit UPDATE and DELETE with SQLSTATE 55000; two concurrent workers claim one job exactly once; expired lease reclaimed by new owner with incremented fencing token; stale owner renew/release rejected; renew expiry verified against database clock; full 001+002+003 migration repeated-apply test PASS 4/4; typecheck, eslint, prettier, build and git diff --check PASS']
+
+- 2026-07-26T12:04:05.797723+00:00 START G1-P4-B07
+
+- 2026-07-26T12:10:01.120682+00:00 PASS G1-P4-B07 evidence=['pnpm --filter @sdar/pms-worker test: PASS 1 file/5 tests; pnpm build: PASS; secret-file-only config and inline database URL rejection covered; sorted job allowlist and duplicate rejection covered; claim-handler-complete loop and package sync actor/fencing correlation covered; SIGTERM/SIGINT path aborts polling delay, drains current work, closes Pool, and repeated stop is safe; worker source PM2/RuntimeDeployment scan clean; P4 regression pnpm test:pms PASS 13/13 and full migrations PASS 4/4; typecheck, eslint, prettier, frozen lockfile, git diff --check PASS; docs/operations/PMS_WORKER.md and .codex/reports/phase-P4.md']

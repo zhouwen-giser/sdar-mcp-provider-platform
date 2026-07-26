@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T12:02:49.257838+00:00",
+  "updatedAt": "2026-07-26T12:10:01.120754+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -337,14 +337,16 @@
       "reason": null
     },
     "G1-P4-B07": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T12:04:05.797639+00:00",
+      "completedAt": "2026-07-26T12:10:01.120613+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-worker test: PASS 1 file/5 tests; pnpm build: PASS; secret-file-only config and inline database URL rejection covered; sorted job allowlist and duplicate rejection covered; claim-handler-complete loop and package sync actor/fencing correlation covered; SIGTERM/SIGINT path aborts polling delay, drains current work, closes Pool, and repeated stop is safe; worker source PM2/RuntimeDeployment scan clean; P4 regression pnpm test:pms PASS 13/13 and full migrations PASS 4/4; typecheck, eslint, prettier, frozen lockfile, git diff --check PASS; docs/operations/PMS_WORKER.md and .codex/reports/phase-P4.md"
+      ],
       "reason": null
     },
     "G1-P5-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
