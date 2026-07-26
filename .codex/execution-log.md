@@ -211,3 +211,7 @@
 - 2026-07-26T14:27:22.903377+00:00 START G2-P0-B03
 
 - 2026-07-26T14:28:47.442856+00:00 PASS G2-P0-B03 evidence=['docs/adr/0001 through 0005: Accepted; process authority, PM2 single-node Fork Mode, per-logical-Provider Runtime DB, Collector-only ClickHouse path, vendor_managed and single-replica defaults frozen; task-package design/guardrail alignment review PASS; prettier and git diff --check PASS']
+
+- 2026-07-26T14:30:11.790507+00:00 START G2-P0-B04
+
+- 2026-07-26T14:31:50.325869+00:00 PASS G2-P0-B04 evidence=['package.json five Goal 2 gate commands; scripts/run-goal2-test-gate.mjs; all empty gates fail closed with exit 1 and stable NOT_IMPLEMENTED message; unknown gate rejected exit 2; Vitest entry exists; .codex/reports/goal2-P0.md and goal2-phase-template.md; Node v22.23.1/pnpm 11.13.1; syntax/prettier/git diff check PASS']
