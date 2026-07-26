@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:31:50.325927+00:00",
+  "updatedAt": "2026-07-26T14:40:32.085839+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -40,14 +40,16 @@
       "reason": null
     },
     "G2-P1-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:33:34.073600+00:00",
+      "completedAt": "2026-07-26T14:40:32.085670+00:00",
+      "evidence": [
+        "@sdar/runtime-deployment aggregate/IDs/spec/status/CAS/domain events; mandatory filtered test PASS 1 file/10 tests; root test:runtime-deployment PASS 1/10; illegal jumps/state+revision conflicts/repeated transition+desired command idempotency/drain-stop-degrade-fail-retry covered; full typecheck, package ESLint/Prettier, offline frozen lock, git diff check PASS; package dependency and source scan confirms no pm2/pg/Fastify dependencies"
+      ],
       "reason": null
     },
     "G2-P1-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

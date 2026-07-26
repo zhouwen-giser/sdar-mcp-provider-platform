@@ -251,6 +251,8 @@ importers:
 
   packages/runtime-configuration-contract: {}
 
+  packages/runtime-deployment: {}
+
   packages/task-engine: {}
 
   packages/vehicle-device-mcp-client: {}

@@ -106,3 +106,11 @@ Adding the new `packages/runtime-config-client` workspace requires pnpm to recor
 existing shared Runtime Configuration Contract. Update only the generated workspace importer in
 `pnpm-lock.yaml`. This minimal out-of-range metadata change is required for the mandatory filtered
 test and frozen installation; it introduces no external dependency or later P6 behavior.
+
+## 2026-07-26 — G2-P1-B01 RuntimeDeployment workspace lock importer
+
+Adding the dependency-free `packages/runtime-deployment` workspace makes pnpm's dependency-state
+check invoke installation unless the workspace has an importer in `pnpm-lock.yaml`. Add only the
+empty `packages/runtime-deployment: {}` importer. This minimal out-of-range lock metadata is needed
+for the card's mandatory filtered test and frozen installation; it adds no dependency or later
+Runtime process, persistence, PM2, or provisioning capability.

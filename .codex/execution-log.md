@@ -215,3 +215,7 @@
 - 2026-07-26T14:30:11.790507+00:00 START G2-P0-B04
 
 - 2026-07-26T14:31:50.325869+00:00 PASS G2-P0-B04 evidence=['package.json five Goal 2 gate commands; scripts/run-goal2-test-gate.mjs; all empty gates fail closed with exit 1 and stable NOT_IMPLEMENTED message; unknown gate rejected exit 2; Vitest entry exists; .codex/reports/goal2-P0.md and goal2-phase-template.md; Node v22.23.1/pnpm 11.13.1; syntax/prettier/git diff check PASS']
+
+- 2026-07-26T14:33:34.073662+00:00 START G2-P1-B01
+
+- 2026-07-26T14:40:32.085757+00:00 PASS G2-P1-B01 evidence=['@sdar/runtime-deployment aggregate/IDs/spec/status/CAS/domain events; mandatory filtered test PASS 1 file/10 tests; root test:runtime-deployment PASS 1/10; illegal jumps/state+revision conflicts/repeated transition+desired command idempotency/drain-stop-degrade-fail-retry covered; full typecheck, package ESLint/Prettier, offline frozen lock, git diff check PASS; package dependency and source scan confirms no pm2/pg/Fastify dependencies']
