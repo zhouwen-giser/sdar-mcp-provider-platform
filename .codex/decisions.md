@@ -262,3 +262,10 @@ The mandatory `pnpm test:registry-e2e` command does not exist. Add one root scri
 local PostgreSQL test URL and runs the explicit Registry API E2E suite. This minimum out-of-range
 verification wiring is not an empty success shim and does not add Registry behavior outside the
 card's PMS API implementation.
+
+## 2026-07-26 — G2-P4-B08 Catalog/Registry E2E command wiring
+
+The mandatory `pnpm test:catalog-registry-e2e` command does not exist. Add one root script that
+requires the local PostgreSQL test URL and runs only `tests/catalog-registry-e2e`. This is the
+minimum out-of-range command wiring needed to execute the task-owned integration suite; it is not
+an empty or mocked-success command.

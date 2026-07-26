@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T18:34:02.587036+00:00",
+  "updatedAt": "2026-07-26T18:40:20.763491+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -364,28 +364,30 @@
       "reason": null
     },
     "G2-P4-B08": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T18:34:22.236697+00:00",
+      "completedAt": "2026-07-26T18:40:20.763387+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local> pnpm test:catalog-registry-e2e (1 file/4 tests); pnpm build; pnpm --filter @sdar/pms-worker test (3 files/9 tests); tsc --noEmit; eslint; git diff --check; .codex/reports/goal2-P4.md"
+      ],
+      "reason": null
+    },
+    "G2-P5-B01": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G2-P5-B01": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G2-P5-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
     "G2-P5-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

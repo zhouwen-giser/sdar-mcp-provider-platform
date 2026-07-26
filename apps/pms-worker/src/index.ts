@@ -1,4 +1,5 @@
 export * from "./bootstrap.js";
+export * from "./catalog-registry-phase.js";
 export * from "./config.js";
 export * from "./health.js";
 export * from "./job-registry.js";
