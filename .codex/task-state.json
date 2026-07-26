@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:50:46.139286+00:00",
+  "updatedAt": "2026-07-26T09:54:24.875777+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -103,14 +103,16 @@
       "reason": null
     },
     "G1-P1-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:51:10.710303+00:00",
+      "completedAt": "2026-07-26T09:54:24.875622+00:00",
+      "evidence": [
+        "pnpm typecheck: PASS; pnpm test:unit: PASS 30 files/123 tests; focused provider-migration-entrypoints: PASS 2/2 (UGV only provider:ugv, NPC only provider:npc-tank, no cross-provider/runtime SQL); eslint selected files, prettier --check, git diff --check: PASS"
+      ],
       "reason": null
     },
     "G1-P1-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

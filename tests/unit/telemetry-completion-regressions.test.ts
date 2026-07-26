@@ -51,7 +51,7 @@ describe("v1.1 telemetry completion regression guards", () => {
   });
 
   it("defines the durable audit migration and Runtime-hosted Provider ingress protocol", () => {
-    const migrations = root("migrations/017_provider_ops_audit_delivery.sql");
+    const migrations = root("migrations/runtime/017_provider_ops_audit_delivery.sql");
     const protoGeneration = root("scripts/generate-proto.mjs");
     expect(migrations).toContain("provider_ops_delivery");
     expect(protoGeneration).toContain("provider_telemetry.proto");

@@ -43,3 +43,7 @@
 - 2026-07-26T09:44:51.432418+00:00 START G1-P1-B05
 
 - 2026-07-26T09:50:46.139167+00:00 PASS G1-P1-B05 evidence=['pnpm db:migrate --help || true: PASS (CLI build/migrate compatible); pnpm --filter @sdar/persistence-postgres test: PASS 1/1; pnpm typecheck: PASS; TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime vitest migration-upgrade+rc2+business-events: PASS 3 files/6 tests; fresh-schema migration-upgrade assertion: PASS 1/1, 24 runtime migrations and no ugv_/npc_tank_ tables; prettier --check and git diff --check: PASS']
+
+- 2026-07-26T09:51:10.710363+00:00 START G1-P1-B06
+
+- 2026-07-26T09:54:24.875691+00:00 PASS G1-P1-B06 evidence=['pnpm typecheck: PASS; pnpm test:unit: PASS 30 files/123 tests; focused provider-migration-entrypoints: PASS 2/2 (UGV only provider:ugv, NPC only provider:npc-tank, no cross-provider/runtime SQL); eslint selected files, prettier --check, git diff --check: PASS']
