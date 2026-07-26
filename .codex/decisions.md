@@ -269,3 +269,10 @@ The mandatory `pnpm test:catalog-registry-e2e` command does not exist. Add one r
 requires the local PostgreSQL test URL and runs only `tests/catalog-registry-e2e`. This is the
 minimum out-of-range command wiring needed to execute the task-owned integration suite; it is not
 an empty or mocked-success command.
+
+## 2026-07-26 — G2-P5-B01 UGV platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-ugv` command does not exist. Add one root script that
+requires the local PostgreSQL URL and runs only the task-owned UGV platform integration directory.
+The suite starts the real local UGV Adapter and Runtime but uses Mock device resources, so its
+evidence remains component/platform integration and does not claim real-resource certification.

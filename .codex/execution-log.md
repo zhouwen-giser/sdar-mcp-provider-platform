@@ -363,3 +363,7 @@
 - 2026-07-26T18:34:22.236755+00:00 START G2-P4-B08
 
 - 2026-07-26T18:40:20.763450+00:00 PASS G2-P4-B08 evidence=['TEST_DATABASE_URL=<local> pnpm test:catalog-registry-e2e (1 file/4 tests); pnpm build; pnpm --filter @sdar/pms-worker test (3 files/9 tests); tsc --noEmit; eslint; git diff --check; .codex/reports/goal2-P4.md']
+
+- 2026-07-26T18:40:58.693297+00:00 START G2-P5-B01
+
+- 2026-07-26T18:46:29.900714+00:00 PASS G2-P5-B01 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ugv (1 file/2 tests; real local UGV Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, Catalog/Registry; Provider DB provision calls=0); tsc --noEmit; eslint; git diff --check']
