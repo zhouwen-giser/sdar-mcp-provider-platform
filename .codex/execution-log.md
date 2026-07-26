@@ -11,3 +11,7 @@
 - 2026-07-26T09:13:38.162105+00:00 START G1-P0-B03
 
 - 2026-07-26T09:15:25.462138+00:00 PASS G1-P0-B03 evidence=['README.md; docs/architecture/platform-scope.md; package.json compatibility validation (116 scripts retained); pnpm format:check || true (dependency store unavailable); git diff --check']
+
+- 2026-07-26T09:15:52.412615+00:00 START G1-P0-B04
+
+- 2026-07-26T09:19:48.787102+00:00 PASS G1-P0-B04 evidence=['docs/baseline/FROZEN_PROTOCOL_GATE.md; pnpm protocol:check (11 schemas, 74 catalog cases, 38 lock files); TEST_DATABASE_URL=<local> pnpm test:frozen-74 (74/74 PASS); tracked report summary validation; git diff --check']

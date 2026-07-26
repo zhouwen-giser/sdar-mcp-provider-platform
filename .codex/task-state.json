@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:15:25.462197+00:00",
+  "updatedAt": "2026-07-26T09:19:48.787155+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -31,10 +31,12 @@
       "reason": null
     },
     "G1-P0-B04": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:15:52.412548+00:00",
+      "completedAt": "2026-07-26T09:19:48.787042+00:00",
+      "evidence": [
+        "docs/baseline/FROZEN_PROTOCOL_GATE.md; pnpm protocol:check (11 schemas, 74 catalog cases, 38 lock files); TEST_DATABASE_URL=<local> pnpm test:frozen-74 (74/74 PASS); tracked report summary validation; git diff --check"
+      ],
       "reason": null
     },
     "G1-P0-B05": {
