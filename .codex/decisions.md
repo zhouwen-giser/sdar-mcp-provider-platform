@@ -99,3 +99,10 @@ the local PostgreSQL test URL and runs the explicit Runtime Config latest API E2
 minimum out-of-range wiring needed to prove authenticated deployment fallback, ETag/304, SecretRef
 projection, and authoritative identity projection against a real Published revision; it is not an
 empty or mocked-success command.
+
+## 2026-07-26 — G1-P6-B01 Runtime Config Client workspace lock importer
+
+Adding the new `packages/runtime-config-client` workspace requires pnpm to record its link to the
+existing shared Runtime Configuration Contract. Update only the generated workspace importer in
+`pnpm-lock.yaml`. This minimal out-of-range metadata change is required for the mandatory filtered
+test and frozen installation; it introduces no external dependency or later P6 behavior.

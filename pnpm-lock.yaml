@@ -243,6 +243,12 @@ importers:
 
   packages/provider-package-registry: {}
 
+  packages/runtime-config-client:
+    dependencies:
+      '@sdar/runtime-configuration-contract':
+        specifier: workspace:*
+        version: link:../runtime-configuration-contract
+
   packages/runtime-configuration-contract: {}
 
   packages/task-engine: {}

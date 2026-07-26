@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T13:23:36.433126+00:00",
+  "updatedAt": "2026-07-26T13:29:53.074673+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -418,14 +418,16 @@
       "reason": null
     },
     "G1-P6-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T13:24:06.524605+00:00",
+      "completedAt": "2026-07-26T13:29:53.074565+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/runtime-config-client test: PASS 1 file/7 tests; HTTP port abstraction with bounded Fetch adapter; 200 requires ETag/checksum metadata, schema validator and target identity match before write; valid remote commits self-checksummed LKG through 0600 same-directory staging, fsync and atomic rename; 304 sends If-None-Match and performs zero writes; checksum/schema/identity-invalid downloads return existing LKG and never overwrite; PMS outage returns LKG with stable fallback reason; no-LKG timeout returns RUNTIME_CONFIG_PULL_TIMEOUT; transient retry recovers; corrupted artifact detected; typecheck, eslint, prettier, full build, frozen lockfile and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P6-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
