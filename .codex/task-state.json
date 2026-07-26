@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T16:11:33.274036+00:00",
+  "updatedAt": "2026-07-26T16:18:17.366161+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -166,14 +166,16 @@
       "reason": null
     },
     "G2-P2-B07": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T16:12:41.933954+00:00",
+      "completedAt": "2026-07-26T16:18:17.366028+00:00",
+      "evidence": [
+        "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run packages/pms-application/test/runtime-database-preparation.test.ts apps/pms-worker/test/runtime-database-preparation-job.test.ts (2 files/5 tests); tsc --noEmit; eslint targeted"
+      ],
       "reason": null
     },
     "G2-P2-B08": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

@@ -271,3 +271,7 @@
 - 2026-07-26T16:01:01.994090+00:00 START G2-P2-B06
 
 - 2026-07-26T16:11:33.273948+00:00 PASS G2-P2-B06 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/runtime-migration-runner test PASS 1 file/4 tests; real PostgreSQL concurrent full runtime set: 24 applied vs 24 already_applied under advisory lock; 64-hex checksum/version evidence and no Provider 024/025; 100ms lock timeout stable/retryable evidence; injected failure preserves sentinel table and history with no cleanup/rollback SQL; persistence engine unit PASS 1 file/2 tests; 0 temporary migration databases; migrations unchanged; frozen offline install, typecheck, ESLint, Prettier, git diff check PASS']
+
+- 2026-07-26T16:12:41.934012+00:00 START G2-P2-B07
+
+- 2026-07-26T16:18:17.366088+00:00 PASS G2-P2-B07 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run packages/pms-application/test/runtime-database-preparation.test.ts apps/pms-worker/test/runtime-database-preparation-job.test.ts (2 files/5 tests); tsc --noEmit; eslint targeted']
