@@ -16,6 +16,7 @@ import { canonicalSha256 } from "@sdar/runtime-configuration-contract";
 import type { ConfigurationCenter } from "./center.js";
 import { ConfigurationCenterError } from "./errors.js";
 import type { ConfigurationBusinessKey, ConfigurationPublicationSnapshot } from "./model.js";
+import type { ConfigurationPublishedEvent } from "./watch.js";
 
 export interface ConfigurationPublicationContext {
   readonly actorId: string;
@@ -43,11 +44,13 @@ export interface ConfigurationPublicationResult {
 export interface ConfigurationPublicationOptions {
   readonly now?: () => Date;
   readonly newId?: () => string;
+  readonly onPublished?: (event: ConfigurationPublishedEvent) => void;
 }
 
 export class ConfigurationPublicationService {
   readonly #now: () => Date;
   readonly #newId: () => string;
+  readonly #onPublished: ((event: ConfigurationPublishedEvent) => void) | undefined;
 
   constructor(
     private readonly center: ConfigurationCenter,
@@ -56,6 +59,7 @@ export class ConfigurationPublicationService {
   ) {
     this.#now = options.now ?? (() => new Date());
     this.#newId = options.newId ?? randomUUID;
+    this.#onPublished = options.onPublished;
   }
 
   async publish(
@@ -66,7 +70,7 @@ export class ConfigurationPublicationService {
     validExpectedRevision(input.expectedPublishedRevision);
     const snapshot = this.center.publicationSnapshot(input.draftId, input.expectedDraftVersion);
     const checksum = canonicalSha256(snapshot.effectiveContent);
-    return this.#withConcurrencyRetry((repositories) =>
+    const result = await this.#withConcurrencyRetry((repositories) =>
       this.#publishSnapshot(
         repositories,
         snapshot,
@@ -75,6 +79,8 @@ export class ConfigurationPublicationService {
         context,
       ),
     );
+    this.#notifyPublished(snapshot.draft.key, snapshot.draft.ancestorTargetIds, result);
+    return result;
   }
 
   async rollback(
@@ -91,7 +97,7 @@ export class ConfigurationPublicationService {
       );
     }
     const sourceRevisionId = configRevisionId(input.sourceRevisionId);
-    return this.#withConcurrencyRetry(async (repositories) => {
+    const result = await this.#withConcurrencyRetry(async (repositories) => {
       const source = await repositories.configuration.getRevision(sourceRevisionId);
       if (source === null || !["published", "superseded"].includes(source.status)) {
         throw new ConfigurationCenterError(
@@ -128,6 +134,8 @@ export class ConfigurationPublicationService {
         source.revisionId,
       );
     });
+    this.#notifyPublished(draft.key, draft.ancestorTargetIds, result);
+    return result;
   }
 
   async #publishSnapshot(
@@ -270,6 +278,38 @@ export class ConfigurationPublicationService {
       "CONFIGURATION_PUBLISH_CONFLICT",
       "The configuration publication conflicted with another writer",
     );
+  }
+
+  #notifyPublished(
+    key: ConfigurationBusinessKey,
+    ancestors: ConfigurationPublicationSnapshot["draft"]["ancestorTargetIds"],
+    result: ConfigurationPublicationResult,
+  ): void {
+    if (
+      result.outcome !== "published" ||
+      (key.targetType !== "runtime_deployment" && key.targetType !== "runtime_instance")
+    ) {
+      return;
+    }
+    if (this.#onPublished === undefined) return;
+    const event: ConfigurationPublishedEvent = {
+      environment: key.environment,
+      targetType: key.targetType,
+      targetId: key.targetId,
+      ...(key.targetType === "runtime_instance" && ancestors.runtime_deployment !== undefined
+        ? { deploymentId: ancestors.runtime_deployment }
+        : {}),
+      configGroup: key.configGroup,
+      dataId: key.dataId,
+      revisionId: result.revision.revisionId,
+      revision: result.revision.revision,
+      checksum: result.revision.checksum,
+    };
+    try {
+      this.#onPublished(event);
+    } catch {
+      // Publication is already committed; a best-effort hint must not turn success into failure.
+    }
   }
 }
 

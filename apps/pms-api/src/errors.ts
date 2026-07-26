@@ -76,12 +76,14 @@ function configurationError(code: ConfigurationCenterErrorCode): PublicError {
           : code === "CONFIGURATION_DEFINITION_NOT_FOUND" ||
               code === "CONFIGURATION_DRAFT_NOT_FOUND" ||
               code === "CONFIGURATION_REVISION_NOT_FOUND" ||
-              code === "RUNTIME_CONFIG_NOT_FOUND"
+              code === "RUNTIME_CONFIG_NOT_FOUND" ||
+              code === "RUNTIME_CONFIG_ACK_REVISION_NOT_FOUND"
             ? 404
             : code === "CONFIGURATION_BUSINESS_KEY_CONFLICT" ||
                 code === "CONFIGURATION_DRAFT_VERSION_CONFLICT" ||
                 code === "CONFIGURATION_DRAFT_NOT_VALIDATED" ||
-                code === "CONFIGURATION_PUBLISH_CONFLICT"
+                code === "CONFIGURATION_PUBLISH_CONFLICT" ||
+                code === "RUNTIME_CONFIG_ACK_CONFLICT"
               ? 409
               : 400;
   return { statusCode, code, message: CONFIGURATION_MESSAGES[code] };
@@ -131,5 +133,10 @@ const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, stri
     "The Runtime Config client is not authorized for the requested target",
   RUNTIME_CONFIG_NOT_FOUND: "No published Runtime configuration exists for this target",
   RUNTIME_CONFIG_PROJECTION_INVALID: "Published Runtime configuration cannot be projected safely",
+  RUNTIME_CONFIG_ACK_INVALID: "Runtime configuration acknowledgement is invalid",
+  RUNTIME_CONFIG_ACK_CONFLICT:
+    "The Runtime instance already acknowledged this revision differently",
+  RUNTIME_CONFIG_ACK_REVISION_NOT_FOUND:
+    "The acknowledged Runtime configuration revision does not exist",
   CONFIGURATION_INPUT_INVALID: "A configuration input is invalid",
 };

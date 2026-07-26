@@ -218,6 +218,30 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/watch": {
+        get: {
+          operationId: "watchRuntimeConfiguration",
+          security: [{ runtimeConfigToken: [] }],
+          responses: {
+            "200": { description: "SSE stream containing revision/checksum hints only" },
+            "401": { description: "Runtime Config client authentication failed" },
+          },
+        },
+      },
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/revisions/{revisionId}/acks":
+        {
+          post: {
+            operationId: "acknowledgeRuntimeConfiguration",
+            security: [{ runtimeConfigToken: [] }],
+            responses: {
+              "200": { description: "Idempotent structured Runtime acknowledgement" },
+              "400": { description: "Invalid acknowledgement status or checksum" },
+              "403": { description: "Runtime instance identity mismatch" },
+              "404": { description: "Published revision does not exist" },
+              "409": { description: "Conflicting duplicate acknowledgement" },
+            },
+          },
+        },
     },
     components: {
       schemas: {

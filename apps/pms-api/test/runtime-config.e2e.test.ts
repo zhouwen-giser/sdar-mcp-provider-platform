@@ -6,7 +6,9 @@ import {
   ConfigurationCenter,
   ConfigurationCenterError,
   ConfigurationPublicationService,
+  RuntimeConfigAcknowledgementService,
   RuntimeConfigQueryService,
+  RuntimeConfigWatchHub,
   type RuntimeConfigClientAuthorizer,
 } from "../../../packages/configuration-center/src/index.js";
 import {
@@ -52,6 +54,7 @@ describe("Runtime Config latest API", () => {
   const schema = `pms_runtime_config_${randomUUID().replaceAll("-", "")}`;
   let pool: Pool;
   let checksum: string;
+  let revisionId: string;
 
   beforeAll(async () => {
     await admin.query(`CREATE SCHEMA ${schema}`);
@@ -71,6 +74,7 @@ describe("Runtime Config latest API", () => {
       { actorId: "admin-1", correlationId: "runtime-config-seed" },
     );
     checksum = published.revision.checksum;
+    revisionId = published.revision.revisionId;
   });
 
   afterAll(async () => {
@@ -225,6 +229,165 @@ describe("Runtime Config latest API", () => {
     expect(response.body).not.toContain("legacy-plaintext-secret");
     await app.close();
   });
+
+  it("emits a revision/checksum-only hint after a committed publication", async () => {
+    const center = new ConfigurationCenter([definition]);
+    center.createDraft({
+      draftId: "watch-publication",
+      definitionId: definition.definitionId,
+      key: {
+        environment: "production",
+        targetType: "runtime_deployment",
+        targetId: "deployment-watch",
+        configGroup: definition.configGroup,
+        dataId: "main",
+      },
+      content: { FEATURE_ENABLED: true },
+    });
+    const validated = center.validateDraft("watch-publication");
+    const hub = new RuntimeConfigWatchHub();
+    const subscription = hub.subscribe({
+      environment: "production",
+      deploymentId: "deployment-watch",
+      instanceId: "instance-watch",
+      configGroup: definition.configGroup,
+      dataId: "main",
+    });
+    const service = new ConfigurationPublicationService(center, new PostgresPmsUnitOfWork(pool), {
+      onPublished: (event) => hub.publish(event),
+    });
+
+    const published = await service.publish(
+      {
+        draftId: "watch-publication",
+        expectedDraftVersion: validated.version,
+        expectedPublishedRevision: null,
+      },
+      { actorId: "admin-1", correlationId: "watch-publication" },
+    );
+    const hint = await subscription.next();
+
+    expect(hint).toEqual({
+      revisionId: published.revision.revisionId,
+      revision: published.revision.revision,
+      checksum: published.revision.checksum,
+    });
+    expect(hint).not.toHaveProperty("content");
+    subscription.close();
+  });
+
+  it("streams an SSE hint without config and supports disconnect-to-latest recovery", async () => {
+    const app = createPmsApi({
+      runtimeConfigQuery: new RuntimeConfigQueryService(new PostgresPmsUnitOfWork(pool)),
+      runtimeConfigAuthorizer: { authorize: validAuthorizer() },
+      runtimeConfigWatch: new RuntimeConfigWatchHub(),
+    });
+    const address = await app.listen({ host: "127.0.0.1", port: 0 });
+    const response = await fetch(
+      `${address}/api/v1/runtime-config/deployments/deployment-1/instances/instance-1/watch?environment=production&configGroup=runtime.e2e&dataId=main`,
+      {
+        headers: { authorization: "Bearer runtime-client-token" },
+        signal: AbortSignal.timeout(5_000),
+      },
+    );
+    const reader = response.body?.getReader();
+    if (reader === undefined) throw new Error("SSE_RESPONSE_BODY_MISSING");
+    const first = await reader.read();
+    if (!(first.value instanceof Uint8Array)) throw new Error("SSE_FRAME_MISSING");
+    const frame = new TextDecoder().decode(first.value);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/event-stream");
+    expect(frame).toContain("event: revision");
+    expect(frame).toContain(`id: ${checksum}`);
+    expect(frame).toContain(`"revisionId":"${revisionId}"`);
+    for (const forbidden of [
+      "content",
+      "API_TOKEN_FILE",
+      "secretRef",
+      "FEATURE_ENABLED",
+      "local/runtime/api-token",
+    ]) {
+      expect(frame).not.toContain(forbidden);
+    }
+    await reader.cancel();
+    await app.close();
+
+    const recovery = createPmsApi({
+      runtimeConfigQuery: new RuntimeConfigQueryService(new PostgresPmsUnitOfWork(pool)),
+      runtimeConfigAuthorizer: { authorize: validAuthorizer() },
+    });
+    const latest = await recovery.inject({
+      method: "GET",
+      url: latestUrl(),
+      headers: { authorization: "Bearer runtime-client-token" },
+    });
+    expect(latest.statusCode).toBe(200);
+    expect(latest.json()).toMatchObject({ checksum });
+    await recovery.close();
+  });
+
+  it("stores identical Ack idempotently and rejects conflicts or illegal revisions", async () => {
+    const app = createPmsApi({
+      runtimeConfigQuery: new RuntimeConfigQueryService(new PostgresPmsUnitOfWork(pool)),
+      runtimeConfigAuthorizer: { authorize: validAuthorizer() },
+      runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(
+        new PostgresPmsUnitOfWork(pool),
+      ),
+    });
+    const url = ackUrl(revisionId);
+    const headers = { authorization: "Bearer runtime-client-token" };
+    const payload = {
+      status: "applied",
+      appliedChecksum: checksum,
+      details: { applyMode: "hot_reload" },
+    };
+    const first = await app.inject({ method: "POST", url, headers, payload });
+    const duplicate = await app.inject({ method: "POST", url, headers, payload });
+
+    expect(first.statusCode).toBe(200);
+    expect(duplicate.statusCode).toBe(200);
+    expect(duplicate.json()).toMatchObject({ ackId: first.json<{ ackId: string }>().ackId });
+    const stored = await pool.query<{ count: string }>(
+      "SELECT count(*) FROM config_ack WHERE revision_id=$1 AND runtime_instance_id='instance-1'",
+      [revisionId],
+    );
+    expect(stored.rows[0]?.count).toBe("1");
+
+    const conflict = await app.inject({
+      method: "POST",
+      url,
+      headers,
+      payload: { status: "stale", details: {} },
+    });
+    expect(conflict.statusCode).toBe(409);
+    expect(conflict.json()).toMatchObject({ error: { code: "RUNTIME_CONFIG_ACK_CONFLICT" } });
+
+    const missing = await app.inject({
+      method: "POST",
+      url: ackUrl(randomUUID()),
+      headers,
+      payload,
+    });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.json()).toMatchObject({
+      error: { code: "RUNTIME_CONFIG_ACK_REVISION_NOT_FOUND" },
+    });
+
+    const unsafe = await app.inject({
+      method: "POST",
+      url,
+      headers,
+      payload: {
+        status: "rejected",
+        reasonCode: "APPLY_FAILED",
+        details: { token: "do-not-echo" },
+      },
+    });
+    expect(unsafe.statusCode).toBe(400);
+    expect(unsafe.body).not.toContain("do-not-echo");
+    await app.close();
+  });
 });
 
 function deploymentDraft(): ConfigurationCenter {
@@ -260,6 +423,10 @@ function validAuthorizer() {
 
 function latestUrl(instanceId = "instance-1"): string {
   return `/api/v1/runtime-config/deployments/deployment-1/instances/${instanceId}/latest?environment=production&configGroup=runtime.e2e&dataId=main`;
+}
+
+function ackUrl(targetRevisionId: string): string {
+  return `/api/v1/runtime-config/deployments/deployment-1/instances/instance-1/revisions/${targetRevisionId}/acks?environment=production&configGroup=runtime.e2e&dataId=main`;
 }
 
 function field(

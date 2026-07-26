@@ -13,7 +13,9 @@ import {
   ConfigurationPublicationService,
   createDefaultConfigurationCenter,
   DenyRuntimeConfigClientAuthorizer,
+  RuntimeConfigAcknowledgementService,
   RuntimeConfigQueryService,
+  RuntimeConfigWatchHub,
 } from "../../../packages/configuration-center/src/index.js";
 import { createPmsApi } from "./app.js";
 
@@ -23,13 +25,18 @@ const pool = new Pool({ connectionString: await databaseUrl() });
 await runPmsMigrations(pool);
 const unitOfWork = new PostgresPmsUnitOfWork(pool);
 const configurationCenter = createDefaultConfigurationCenter();
+const runtimeConfigWatch = new RuntimeConfigWatchHub();
 const app = createPmsApi({
   providerPackages: await loadProviderPackageQueryService(),
   management: new ProviderManagementService(unitOfWork),
   configurationCenter,
-  configurationPublication: new ConfigurationPublicationService(configurationCenter, unitOfWork),
+  configurationPublication: new ConfigurationPublicationService(configurationCenter, unitOfWork, {
+    onPublished: (event) => runtimeConfigWatch.publish(event),
+  }),
   runtimeConfigQuery: new RuntimeConfigQueryService(unitOfWork),
   runtimeConfigAuthorizer: new DenyRuntimeConfigClientAuthorizer(),
+  runtimeConfigWatch,
+  runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(unitOfWork),
   readiness: async () => {
     await pool.query("SELECT 1");
     return { ready: true, checks: { database: "ready" } };
