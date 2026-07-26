@@ -143,6 +143,9 @@ importers:
 
   apps/pms-api:
     dependencies:
+      '@sdar/pms-application':
+        specifier: workspace:*
+        version: link:../../packages/pms-application
       '@sdar/pms-domain':
         specifier: workspace:*
         version: link:../../packages/pms-domain

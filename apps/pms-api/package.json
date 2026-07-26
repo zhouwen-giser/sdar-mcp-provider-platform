@@ -10,6 +10,7 @@
     "test": "vitest run test"
   },
   "dependencies": {
+    "@sdar/pms-application": "workspace:*",
     "@sdar/pms-domain": "workspace:*",
     "fastify": "5.10.0"
   }

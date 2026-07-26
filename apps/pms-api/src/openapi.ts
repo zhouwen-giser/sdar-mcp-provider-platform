@@ -33,6 +33,43 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           responses: { "200": { description: "OpenAPI 3.1 document" } },
         },
       },
+      "/api/v1/provider-packages": {
+        get: {
+          operationId: "listProviderPackages",
+          parameters: [
+            { name: "providerType", in: "query", schema: { type: "string" } },
+            {
+              name: "hostingMode",
+              in: "query",
+              schema: { enum: ["vendor_managed", "platform_managed"] },
+            },
+            {
+              name: "componentStatus",
+              in: "query",
+              schema: { enum: ["passed", "partial", "pending", "failed"] },
+            },
+            {
+              name: "realResourceStatus",
+              in: "query",
+              schema: { enum: ["qualified", "pending", "failed", "not_applicable"] },
+            },
+          ],
+          responses: { "200": { description: "Stable Provider Package projections" } },
+        },
+      },
+      "/api/v1/provider-packages/{packageId}": {
+        get: {
+          operationId: "getProviderPackage",
+          parameters: [
+            { name: "packageId", in: "path", required: true, schema: { type: "string" } },
+            { name: "version", in: "query", schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Provider Package projection" },
+            "404": { description: "Provider Package not found" },
+          },
+        },
+      },
     },
     components: {
       schemas: {

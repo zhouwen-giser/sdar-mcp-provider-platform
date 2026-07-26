@@ -1,4 +1,8 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import type {
+  ProviderPackageListFilter,
+  ProviderPackageQueryService,
+} from "../../../packages/pms-application/src/index.js";
 import { attachRequestContext, requestContext } from "./context.js";
 import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
@@ -10,6 +14,7 @@ export interface PmsReadiness {
 
 export interface PmsApiOptions {
   readonly readiness?: () => Promise<PmsReadiness>;
+  readonly providerPackages?: ProviderPackageQueryService;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -36,6 +41,80 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
     links: { openapi: "/api/v1/openapi.json" },
   }));
   app.get("/api/v1/openapi.json", () => pmsOpenApiDocument());
+  if (options.providerPackages !== undefined) {
+    registerProviderPackageRoutes(app, options.providerPackages);
+  }
 
   return app;
+}
+
+interface PackageListQuery {
+  readonly providerType?: string;
+  readonly hostingMode?: ProviderPackageListFilter["hostingMode"];
+  readonly componentStatus?: ProviderPackageListFilter["componentStatus"];
+  readonly realResourceStatus?: ProviderPackageListFilter["realResourceStatus"];
+}
+
+interface PackageDetailParameters {
+  readonly packageId: string;
+}
+
+interface PackageDetailQuery {
+  readonly version?: string;
+}
+
+function registerProviderPackageRoutes(
+  app: FastifyInstance,
+  packages: ProviderPackageQueryService,
+): void {
+  app.get<{ Querystring: PackageListQuery }>(
+    "/api/v1/provider-packages",
+    {
+      schema: {
+        querystring: {
+          type: "object",
+          properties: {
+            providerType: { type: "string", minLength: 1, maxLength: 128 },
+            hostingMode: { enum: ["vendor_managed", "platform_managed"] },
+            componentStatus: { enum: ["passed", "partial", "pending", "failed"] },
+            realResourceStatus: {
+              enum: ["qualified", "pending", "failed", "not_applicable"],
+            },
+          },
+          additionalProperties: false,
+        },
+      },
+    },
+    (request) => ({ items: packages.list(packageFilter(request.query)) }),
+  );
+  app.get<{ Params: PackageDetailParameters; Querystring: PackageDetailQuery }>(
+    "/api/v1/provider-packages/:packageId",
+    {
+      schema: {
+        params: {
+          type: "object",
+          required: ["packageId"],
+          properties: { packageId: { type: "string", minLength: 1, maxLength: 128 } },
+          additionalProperties: false,
+        },
+        querystring: {
+          type: "object",
+          properties: { version: { type: "string", minLength: 1, maxLength: 64 } },
+          additionalProperties: false,
+        },
+      },
+    },
+    (request) => packages.get(request.params.packageId, request.query.version),
+  );
+}
+
+function packageFilter(query: PackageListQuery): ProviderPackageListFilter {
+  return {
+    ...(query.providerType === undefined ? {} : { providerType: query.providerType }),
+    ...(query.hostingMode === undefined ? {} : { hostingMode: query.hostingMode }),
+    ...(query.componentStatus === undefined ? {} : { componentStatus: query.componentStatus }),
+    ...(query.realResourceStatus === undefined
+      ? {}
+      : { realResourceStatus: query.realResourceStatus }),
+  };
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T12:15:51.891476+00:00",
+  "updatedAt": "2026-07-26T12:21:04.710927+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -355,10 +355,12 @@
       "reason": null
     },
     "G1-P5-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T12:16:37.271900+00:00",
+      "completedAt": "2026-07-26T12:21:04.710782+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-api test: PASS 1 file/9 tests; GET /api/v1/provider-packages returns exactly 3 production packages in stable order; hostingMode/componentStatus filters deterministic; versioned detail projection covered; mock fixtures absent; public projection contains no evidence refs/counts, adapter entry, migration set, docs/apps/reports paths or certification claims; invalid filter returns stable INVALID_REQUEST 400 and missing package ENTITY_NOT_FOUND 404 with request context; OpenAPI list/detail operation tests PASS; Provider Registry regression 13/13; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P5-B03": {

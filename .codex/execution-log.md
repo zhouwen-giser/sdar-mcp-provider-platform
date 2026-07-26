@@ -155,3 +155,7 @@
 - 2026-07-26T12:10:48.021311+00:00 START G1-P5-B01
 
 - 2026-07-26T12:15:51.891431+00:00 PASS G1-P5-B01 evidence=['pnpm --filter @sdar/pms-api test: PASS 1 file/5 tests; pnpm typecheck: PASS; Fastify app.ready and inject startup PASS; /health/live 200 and dependency-aware /health/ready 503 covered; /api/v1 plus deterministic /api/v1/openapi.json OpenAPI 3.1 covered; safe requestId/correlationId/actor context and response headers covered; uniform 404/500 envelopes exclude URL query Secret, raw error, SQL text, stack and connection string; eslint, prettier, full build, frozen lockfile and git diff --check PASS']
+
+- 2026-07-26T12:16:37.271972+00:00 START G1-P5-B02
+
+- 2026-07-26T12:21:04.710869+00:00 PASS G1-P5-B02 evidence=['pnpm --filter @sdar/pms-api test: PASS 1 file/9 tests; GET /api/v1/provider-packages returns exactly 3 production packages in stable order; hostingMode/componentStatus filters deterministic; versioned detail projection covered; mock fixtures absent; public projection contains no evidence refs/counts, adapter entry, migration set, docs/apps/reports paths or certification claims; invalid filter returns stable INVALID_REQUEST 400 and missing package ENTITY_NOT_FOUND 404 with request context; OpenAPI list/detail operation tests PASS; Provider Registry regression 13/13; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS']

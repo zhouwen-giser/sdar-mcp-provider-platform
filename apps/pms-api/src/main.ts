@@ -1,8 +1,11 @@
 import { createPmsApi } from "./app.js";
+import { loadProviderPackageQueryService } from "../../../packages/pms-application/src/index.js";
 
 const port = boundedPort(process.env.PMS_API_PORT);
 const host = process.env.PMS_API_HOST ?? "127.0.0.1";
-const app = createPmsApi();
+const app = createPmsApi({
+  providerPackages: await loadProviderPackageQueryService(),
+});
 
 await app.listen({ host, port });
 
