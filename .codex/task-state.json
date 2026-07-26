@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:48:08.747769+00:00",
+  "updatedAt": "2026-07-26T14:54:55.872924+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -67,14 +67,16 @@
       "reason": null
     },
     "G2-P1-B04": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:49:45.245430+00:00",
+      "completedAt": "2026-07-26T14:54:55.872696+00:00",
+      "evidence": [
+        "PostgresRuntimeDeployment/RuntimeProcess/Action repositories plus transactional UoW; mandatory @sdar/pms-persistence-postgres PostgreSQL suite PASS 4 files/20 tests; conflicting deployment CAS one winner/stable conflict; identical save and heartbeat retries no-op; changed stale heartbeat conflict; all reads Provider-scoped; action append idempotency and divergent reuse rejection; commit/rollback across deployment/process/action; typecheck/ESLint/Prettier/offline frozen lock/git diff/authority+secret scan PASS"
+      ],
       "reason": null
     },
     "G2-P1-B05": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
@@ -88,7 +90,7 @@
       "reason": null
     },
     "G2-P1-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

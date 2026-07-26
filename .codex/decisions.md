@@ -124,3 +124,11 @@ allowlist to recognize append-only migration `005`, the three new control-plane 
 exercise Provider FK, desired replica consistency, PM2-name uniqueness, stable instance linkage,
 action idempotency, and an upgrade from the exact migration-004 schema while preserving existing
 Provider rows. This does not weaken or skip any existing assertion.
+
+## 2026-07-26 — G2-P1-B04 RuntimeDeployment persistence workspace dependency
+
+The persistence adapter now maps the pure `@sdar/runtime-deployment` aggregate and process
+projection. Add that existing workspace package to
+`packages/pms-persistence-postgres/package.json` and only its generated workspace link to
+`pnpm-lock.yaml`. The package remains an infrastructure adapter depending inward on a pure domain
+package; no PM2 or PostgreSQL type enters the RuntimeDeployment domain.

@@ -12,6 +12,7 @@
   "dependencies": {
     "@sdar/database-migration-runner": "workspace:*",
     "@sdar/pms-domain": "workspace:*",
+    "@sdar/runtime-deployment": "workspace:*",
     "pg": "8.22.0"
   }
 }

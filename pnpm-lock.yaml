@@ -235,6 +235,9 @@ importers:
       '@sdar/pms-domain':
         specifier: workspace:*
         version: link:../pms-domain
+      '@sdar/runtime-deployment':
+        specifier: workspace:*
+        version: link:../runtime-deployment
       pg:
         specifier: 8.22.0
         version: 8.22.0

@@ -227,3 +227,7 @@
 - 2026-07-26T14:44:24.351660+00:00 START G2-P1-B03
 
 - 2026-07-26T14:48:08.747631+00:00 PASS G2-P1-B03 evidence=['append-only migrations/pms/005_runtime_deployment.sql; migration-004 existing PMS schema upgrade preserves Provider row and creates deployment/process/action tables; mandatory PostgreSQL pms-migrations PASS 1 file/6 tests including repeated apply, provider FK, revision/replica checks, stable instance/PM2/port constraints and action idempotency; PMS regression PASS 4 files/16 tests; migration resolver PASS 1/9; old migrations 001-004 git diff clean; typecheck/prettier/git diff/secret scan PASS']
+
+- 2026-07-26T14:49:45.245499+00:00 START G2-P1-B04
+
+- 2026-07-26T14:54:55.872806+00:00 PASS G2-P1-B04 evidence=['PostgresRuntimeDeployment/RuntimeProcess/Action repositories plus transactional UoW; mandatory @sdar/pms-persistence-postgres PostgreSQL suite PASS 4 files/20 tests; conflicting deployment CAS one winner/stable conflict; identical save and heartbeat retries no-op; changed stale heartbeat conflict; all reads Provider-scoped; action append idempotency and divergent reuse rejection; commit/rollback across deployment/process/action; typecheck/ESLint/Prettier/offline frozen lock/git diff/authority+secret scan PASS']
