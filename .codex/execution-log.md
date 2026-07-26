@@ -119,3 +119,7 @@
 - 2026-07-26T11:04:56.887905+00:00 START G1-P3-B09
 
 - 2026-07-26T11:10:09.480625+00:00 PASS G1-P3-B09 evidence=['pnpm config:schema:generate twice (18 artifacts each); pnpm config:schema:check (CONFIGURATION_SCHEMA_CHECK_OK); pnpm --filter @sdar/runtime-configuration-contract test (8 files, 36 tests including negative drift); prettier check generated schemas; secret literal scan clean; pnpm typecheck; pnpm lint; pnpm build; git diff --check']
+
+- 2026-07-26T11:11:13.423407+00:00 START G1-P3-B10
+
+- 2026-07-26T11:14:03.944864+00:00 PASS G1-P3-B10 evidence=['pnpm test:config-compat (8 compatibility tests + 36 shared-contract/provider config tests); every inventory default compared, legacy secret defaults SHA-256 compared; pnpm config:schema:check (OK); pnpm build; pnpm typecheck; pnpm lint; git diff --check; .codex/reports/phase-P3.md']

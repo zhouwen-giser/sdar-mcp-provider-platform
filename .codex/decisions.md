@@ -6,3 +6,10 @@ The task requires `pnpm config:schema:generate` and `pnpm config:schema:check`, 
 root command exists. Add only these two script entries to the root `package.json`, pointing at the
 generator under the card's allowed `scripts/**` range. This is the minimum out-of-range change
 needed to make the mandatory verification reproducible; it adds no dependency or future capability.
+
+## 2026-07-26 — G1-P3-B10 compatibility command wiring
+
+The mandatory `pnpm test:config-compat` command does not exist. Add one root script that runs the
+new `tests/config-compat/**` matrix and then the existing shared-contract package suite. This is the
+minimum out-of-range wiring needed to cover all four configuration classes and all Provider config
+tests without adding an empty or always-successful command.
