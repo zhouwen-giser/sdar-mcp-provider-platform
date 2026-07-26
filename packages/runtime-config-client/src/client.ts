@@ -38,6 +38,27 @@ export class RuntimeConfigClient {
   }
 
   async pull(target: RuntimeConfigTarget): Promise<RuntimeConfigPullResult> {
+    const result = await this.pullCandidate(target);
+    if (result.source !== "remote") return result;
+    try {
+      await this.cache.write(createRuntimeConfigCacheArtifact(result.etag, result.document));
+    } catch (error) {
+      throw new RuntimeConfigClientError(
+        "RUNTIME_CONFIG_CACHE_WRITE_FAILED",
+        "Runtime Config LKG could not be committed atomically",
+        false,
+        { cause: error },
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Fetches and validates the latest candidate without promoting it to LKG.
+   * Lifecycle coordinators must call the apply handler successfully before writing
+   * the returned candidate to the cache store.
+   */
+  async pullCandidate(target: RuntimeConfigTarget): Promise<RuntimeConfigPullResult> {
     let cached: RuntimeConfigCacheArtifact | null = null;
     let cacheFailure: RuntimeConfigClientError | undefined;
     try {
@@ -88,17 +109,6 @@ export class RuntimeConfigClient {
         } else {
           const document = parseDocument(response.body, response.etag, this.validator);
           assertTargetIdentity(document, target);
-          const artifact = cacheArtifact(response.etag, document);
-          try {
-            await this.cache.write(artifact);
-          } catch (error) {
-            throw new RuntimeConfigClientError(
-              "RUNTIME_CONFIG_CACHE_WRITE_FAILED",
-              "Runtime Config LKG could not be committed atomically",
-              false,
-              { cause: error },
-            );
-          }
           return {
             source: "remote",
             changed: cached?.etag !== response.etag,
@@ -174,7 +184,10 @@ function parseDocument(
   return structuredClone(input) as unknown as RuntimeConfigDocument;
 }
 
-function cacheArtifact(etag: string, document: RuntimeConfigDocument): RuntimeConfigCacheArtifact {
+export function createRuntimeConfigCacheArtifact(
+  etag: string,
+  document: RuntimeConfigDocument,
+): RuntimeConfigCacheArtifact {
   const payload = { formatVersion: 1 as const, etag, document };
   return { ...payload, artifactChecksum: canonicalSha256(payload) };
 }

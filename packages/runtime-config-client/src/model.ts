@@ -71,6 +71,49 @@ export interface RuntimeConfigPullResult {
   readonly fallbackReason?: RuntimeConfigClientErrorCode;
 }
 
+export interface RuntimeConfigWatchHint {
+  readonly revisionId: string;
+  readonly revision: number;
+  readonly checksum: string;
+}
+
+export interface RuntimeConfigWatchPort {
+  watch(target: RuntimeConfigTarget, signal: AbortSignal): AsyncIterable<RuntimeConfigWatchHint>;
+}
+
+export type RuntimeConfigAckStatus =
+  "applied" | "rejected" | "restart_required" | "stale" | "unavailable";
+
+export interface RuntimeConfigAcknowledgement {
+  readonly revisionId: string;
+  readonly status: RuntimeConfigAckStatus;
+  readonly appliedChecksum?: string;
+  readonly reasonCode?: string;
+  readonly details?: Readonly<Record<string, string | number | boolean | null>>;
+}
+
+export interface RuntimeConfigAcknowledgementPort {
+  acknowledge(
+    target: RuntimeConfigTarget,
+    acknowledgement: RuntimeConfigAcknowledgement,
+  ): Promise<void>;
+}
+
+export interface RuntimeConfigApplyHandler {
+  apply(document: RuntimeConfigDocument, mode: "hot_reload" | "reconnect_required"): Promise<void>;
+}
+
+export interface RuntimeConfigAckOutboxRecord {
+  readonly target: RuntimeConfigTarget;
+  readonly acknowledgement: RuntimeConfigAcknowledgement;
+}
+
+export interface RuntimeConfigAckOutbox {
+  list(): Promise<readonly RuntimeConfigAckOutboxRecord[]>;
+  put(record: RuntimeConfigAckOutboxRecord): Promise<void>;
+  remove(revisionId: string): Promise<void>;
+}
+
 export type RuntimeConfigClientErrorCode =
   | "RUNTIME_CONFIG_PULL_TIMEOUT"
   | "RUNTIME_CONFIG_PULL_UNAVAILABLE"
