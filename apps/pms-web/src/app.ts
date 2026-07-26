@@ -7,6 +7,8 @@ import type {
 } from "./model.js";
 import { matchRoute } from "./router.js";
 import {
+  auditView,
+  catalogView,
   configurationView,
   errorView,
   loading,
@@ -14,6 +16,7 @@ import {
   providerDetailView,
   providersView,
   resourcesView,
+  registryView,
   runtimeView,
   shell,
 } from "./views.js";
@@ -75,6 +78,33 @@ export class PmsWebApplication {
               ? []
               : (await this.api.runtimeProcesses(route.providerId, route.deploymentId)).items;
           content = runtimeView(route.providerId, deployments, processes, route.deploymentId);
+          break;
+        }
+        case "catalog": {
+          const snapshot = await this.api.registryLatest(route.environment);
+          content = catalogView(route.environment, snapshot.providers, route.providerId);
+          break;
+        }
+        case "registry": {
+          const history = await this.api.registryHistory(route.environment);
+          const diff =
+            route.fromRevision === undefined || route.toRevision === undefined
+              ? undefined
+              : await this.api.registryDiff(
+                  route.environment,
+                  route.fromRevision,
+                  route.toRevision,
+                );
+          content = registryView(route.environment, history, diff);
+          break;
+        }
+        case "audit": {
+          const filters = {
+            ...(route.subjectType === undefined ? {} : { subjectType: route.subjectType }),
+            ...(route.subjectId === undefined ? {} : { subjectId: route.subjectId }),
+            ...(route.correlationId === undefined ? {} : { correlationId: route.correlationId }),
+          };
+          content = auditView((await this.api.auditEvents(filters)).items, filters);
           break;
         }
       }
@@ -188,6 +218,51 @@ export class PmsWebApplication {
         }`,
       );
       await this.render();
+      return;
+    }
+    if (form.matches(".catalog-scope-form")) {
+      const data = new FormData(form);
+      const environment = requiredValue(data, "environment");
+      const providerId = value(data, "providerId");
+      history.pushState(
+        {},
+        "",
+        `/catalog?environment=${encodeURIComponent(environment)}${
+          providerId.length === 0 ? "" : `&providerId=${encodeURIComponent(providerId)}`
+        }`,
+      );
+      await this.render();
+      return;
+    }
+    if (form.matches(".registry-scope-form")) {
+      const data = new FormData(form);
+      const environment = requiredValue(data, "environment");
+      const fromRevision = value(data, "fromRevision");
+      const toRevision = value(data, "toRevision");
+      if ((fromRevision.length === 0) !== (toRevision.length === 0)) {
+        throw new Error("REGISTRY_DIFF_REVISIONS_REQUIRED_TOGETHER");
+      }
+      history.pushState(
+        {},
+        "",
+        `/registry?environment=${encodeURIComponent(environment)}${
+          fromRevision.length === 0
+            ? ""
+            : `&fromRevision=${String(requiredInteger(data, "fromRevision"))}&toRevision=${String(requiredInteger(data, "toRevision"))}`
+        }`,
+      );
+      await this.render();
+      return;
+    }
+    if (form.matches(".audit-filter-form")) {
+      const data = new FormData(form);
+      const query = new URLSearchParams();
+      for (const name of ["subjectType", "subjectId", "correlationId"]) {
+        const candidate = value(data, name);
+        if (candidate.length > 0) query.set(name, candidate);
+      }
+      history.pushState({}, "", `/audit${query.size === 0 ? "" : `?${query.toString()}`}`);
+      await this.render();
     }
   }
 }
@@ -279,5 +354,11 @@ function title(page: ReturnType<typeof matchRoute>["page"]): string {
       return "Configuration";
     case "runtime":
       return "Runtime";
+    case "catalog":
+      return "Catalog";
+    case "registry":
+      return "Registry";
+    case "audit":
+      return "Audit";
   }
 }

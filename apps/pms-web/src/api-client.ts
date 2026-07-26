@@ -1,5 +1,8 @@
 import type {
   CreateProviderInput,
+  AuditEventSummary,
+  AuditFilters,
+  CatalogToolSummary,
   CreateConfigurationDraftInput,
   ConfigurationDraftSummary,
   EffectiveConfigurationSummary,
@@ -7,6 +10,9 @@ import type {
   ProviderPackageSummary,
   ProviderSummary,
   ResourceSummary,
+  RegistryDiffSummary,
+  RegistryProviderSummary,
+  RegistrySnapshotSummary,
   RuntimeDeploymentSummary,
   RuntimeProcessSummary,
 } from "./model.js";
@@ -160,6 +166,40 @@ export class PmsWebApiClient {
       ),
     );
     return runtimeDeployment(response.deployment);
+  }
+
+  async registryLatest(environment: string): Promise<RegistrySnapshotSummary> {
+    return registrySnapshot(
+      await this.#request(`/api/v1/registry/${encodeURIComponent(environment)}/latest`),
+    );
+  }
+
+  async registryHistory(environment: string): Promise<readonly RegistrySnapshotSummary[]> {
+    const input = record(
+      await this.#request(`/api/v1/registry/${encodeURIComponent(environment)}/history?limit=100`),
+    );
+    if (!Array.isArray(input.items)) throw invalidProjection();
+    return input.items.map(registrySnapshot);
+  }
+
+  async registryDiff(
+    environment: string,
+    fromRevision: number,
+    toRevision: number,
+  ): Promise<RegistryDiffSummary> {
+    return registryDiff(
+      await this.#request(
+        `/api/v1/registry/${encodeURIComponent(environment)}/diff?fromRevision=${String(fromRevision)}&toRevision=${String(toRevision)}`,
+      ),
+    );
+  }
+
+  async auditEvents(filters: AuditFilters): Promise<Page<AuditEventSummary>> {
+    const query = new URLSearchParams({ limit: "100" });
+    if (filters.subjectType !== undefined) query.set("subjectType", filters.subjectType);
+    if (filters.subjectId !== undefined) query.set("subjectId", filters.subjectId);
+    if (filters.correlationId !== undefined) query.set("correlationId", filters.correlationId);
+    return page(await this.#request(`/api/v1/audit-events?${query.toString()}`), auditEvent);
   }
 
   async #write(path: string, body: unknown, init: RequestInit): Promise<unknown> {
@@ -367,6 +407,84 @@ function runtimeProcess(value: unknown): RuntimeProcessSummary {
   };
 }
 
+function registrySnapshot(value: unknown): RegistrySnapshotSummary {
+  const input = record(value);
+  const document = record(input.document);
+  if (!Array.isArray(document.providers)) throw invalidProjection();
+  return {
+    environment: text(input.environment),
+    revision: integer(input.revision),
+    checksum: checksum(input.checksum),
+    publishedAt: timestamp(input.publishedAt),
+    providers: document.providers.map(registryProvider),
+  };
+}
+
+function registryProvider(value: unknown): RegistryProviderSummary {
+  const input = record(value);
+  if (!Array.isArray(input.tools)) throw invalidProjection();
+  return {
+    providerId: text(input.providerId),
+    serverId: text(input.serverId),
+    protocolMode: oneOf(input.protocolMode, ["frozen_v1"]),
+    catalogRevision: integer(input.catalogRevision),
+    tools: input.tools.map(catalogTool),
+  };
+}
+
+function catalogTool(value: unknown): CatalogToolSummary {
+  const input = record(value);
+  const taskExecution = record(input.taskExecution);
+  const resourceBinding =
+    input.resourceBinding === undefined ? undefined : record(input.resourceBinding);
+  return {
+    name: text(input.name),
+    description: text(input.description),
+    inputSchema: safeSchema(record(input.inputSchema)),
+    outputSchema: safeSchema(record(input.outputSchema)),
+    taskBehavior: oneOf(taskExecution.taskBehavior, [
+      "synchronous_only",
+      "server_directed",
+      "task_required",
+    ]),
+    ...(resourceBinding === undefined
+      ? {}
+      : { resourceBindingMode: oneOf(resourceBinding.mode, ["NONE", "ARGUMENT_REFERENCE"]) }),
+  };
+}
+
+function registryDiff(value: unknown): RegistryDiffSummary {
+  const input = record(value);
+  if (
+    !Array.isArray(input.added) ||
+    !Array.isArray(input.removed) ||
+    !Array.isArray(input.changed)
+  ) {
+    throw invalidProjection();
+  }
+  return {
+    environment: text(input.environment),
+    fromRevision: integer(input.fromRevision),
+    toRevision: integer(input.toRevision),
+    addedProviderIds: input.added.map((item) => text(record(item).providerId)),
+    removedProviderIds: input.removed.map((item) => text(record(item).providerId)),
+    changedProviderIds: input.changed.map((item) => text(record(item).providerId)),
+  };
+}
+
+function auditEvent(value: unknown): AuditEventSummary {
+  const input = record(value);
+  return {
+    auditEventId: text(input.auditEventId),
+    action: text(input.action),
+    actorId: text(input.actorId),
+    correlationId: text(input.correlationId),
+    subjectType: text(input.subjectType),
+    subjectId: text(input.subjectId),
+    occurredAt: timestamp(input.occurredAt),
+  };
+}
+
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw invalidProjection();
@@ -391,10 +509,41 @@ function boolean(value: unknown): boolean {
   return value;
 }
 
+function checksum(value: unknown): string {
+  const candidate = text(value);
+  if (!/^[a-f0-9]{64}$/i.test(candidate)) throw invalidProjection();
+  return candidate;
+}
+
+function timestamp(value: unknown): string {
+  const candidate = text(value);
+  if (!Number.isFinite(Date.parse(candidate))) throw invalidProjection();
+  return candidate;
+}
+
 function isSecretRef(value: unknown): boolean {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   return typeof candidate.secretRef === "string";
+}
+
+function safeSchema(schema: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> {
+  return Object.fromEntries(
+    Object.entries(schema)
+      .filter(
+        ([key]) =>
+          !["default", "example", "examples", "x-internal", "x-secret-value"].includes(key),
+      )
+      .map(([key, value]) => [key, safeSchemaValue(value)]),
+  );
+}
+
+function safeSchemaValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(safeSchemaValue);
+  if (typeof value === "object" && value !== null) {
+    return safeSchema(value as Record<string, unknown>);
+  }
+  return value;
 }
 
 function oneOf<const Values extends readonly string[]>(

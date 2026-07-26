@@ -117,3 +117,53 @@ export interface RuntimeProcessSummary {
   readonly runtimeVersion: string | null;
   readonly restartCount: number;
 }
+
+export interface CatalogToolSummary {
+  readonly name: string;
+  readonly description: string;
+  readonly inputSchema: Readonly<Record<string, unknown>>;
+  readonly outputSchema: Readonly<Record<string, unknown>>;
+  readonly taskBehavior: "synchronous_only" | "server_directed" | "task_required";
+  readonly resourceBindingMode?: "NONE" | "ARGUMENT_REFERENCE";
+}
+
+export interface RegistryProviderSummary {
+  readonly providerId: string;
+  readonly serverId: string;
+  readonly protocolMode: "frozen_v1";
+  readonly catalogRevision: number;
+  readonly tools: readonly CatalogToolSummary[];
+}
+
+export interface RegistrySnapshotSummary {
+  readonly environment: string;
+  readonly revision: number;
+  readonly checksum: string;
+  readonly publishedAt: string;
+  readonly providers: readonly RegistryProviderSummary[];
+}
+
+export interface RegistryDiffSummary {
+  readonly environment: string;
+  readonly fromRevision: number;
+  readonly toRevision: number;
+  readonly addedProviderIds: readonly string[];
+  readonly removedProviderIds: readonly string[];
+  readonly changedProviderIds: readonly string[];
+}
+
+export interface AuditEventSummary {
+  readonly auditEventId: string;
+  readonly action: string;
+  readonly actorId: string;
+  readonly correlationId: string;
+  readonly subjectType: string;
+  readonly subjectId: string;
+  readonly occurredAt: string;
+}
+
+export interface AuditFilters {
+  readonly subjectType?: string;
+  readonly subjectId?: string;
+  readonly correlationId?: string;
+}

@@ -396,7 +396,10 @@ select {
 
 .config-actions,
 .row-actions,
-.runtime-scope-form {
+.runtime-scope-form,
+.catalog-scope-form,
+.registry-scope-form,
+.audit-filter-form {
   display: flex;
   align-items: end;
   flex-wrap: wrap;
@@ -419,6 +422,12 @@ select {
 
 .runtime-scope-form label {
   min-width: 230px;
+}
+
+.catalog-scope-form label,
+.registry-scope-form label,
+.audit-filter-form label {
+  min-width: 190px;
 }
 
 .config-editor form {
@@ -452,6 +461,65 @@ select {
 .config-diff span,
 .issue-list {
   color: #667386;
+}
+
+.catalog-stack {
+  display: grid;
+  gap: 20px;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.tool-card {
+  border: 1px solid #e1e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  background: #f9fbfc;
+}
+
+.tool-card h3 {
+  margin: 0 0 8px;
+}
+
+.tool-card > p:not(.eyebrow) {
+  color: #667386;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+details {
+  margin-top: 9px;
+  border-top: 1px solid #e4e9ed;
+  padding-top: 9px;
+}
+
+summary {
+  color: #146f68;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+pre {
+  max-height: 320px;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 13px;
+  color: #dce7ed;
+  background: #132131;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.registry-diff small {
+  display: block;
+  margin-top: 8px;
+  color: #718092;
+  font-size: 11px;
 }
 
 .loading {

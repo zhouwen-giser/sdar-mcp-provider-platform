@@ -8,6 +8,19 @@ export type PmsWebRoute =
       readonly page: "runtime";
       readonly providerId?: string;
       readonly deploymentId?: string;
+    }
+  | { readonly page: "catalog"; readonly environment: string; readonly providerId?: string }
+  | {
+      readonly page: "registry";
+      readonly environment: string;
+      readonly fromRevision?: number;
+      readonly toRevision?: number;
+    }
+  | {
+      readonly page: "audit";
+      readonly subjectType?: string;
+      readonly subjectId?: string;
+      readonly correlationId?: string;
     };
 
 export function matchRoute(pathname: string, search = ""): PmsWebRoute {
@@ -36,5 +49,48 @@ export function matchRoute(pathname: string, search = ""): PmsWebRoute {
       ...(deploymentId === null ? {} : { deploymentId }),
     };
   }
+  if (pathname === "/catalog") {
+    const query = new URLSearchParams(search);
+    const providerId = query.get("providerId");
+    return {
+      page: "catalog",
+      environment: query.get("environment") ?? "production",
+      ...(providerId === null ? {} : { providerId }),
+    };
+  }
+  if (pathname === "/registry") {
+    const query = new URLSearchParams(search);
+    const fromRevision = positiveInteger(query.get("fromRevision"));
+    const toRevision = positiveInteger(query.get("toRevision"));
+    return {
+      page: "registry",
+      environment: query.get("environment") ?? "production",
+      ...(fromRevision === undefined ? {} : { fromRevision }),
+      ...(toRevision === undefined ? {} : { toRevision }),
+    };
+  }
+  if (pathname === "/audit") {
+    const query = new URLSearchParams(search);
+    return {
+      page: "audit",
+      ...optionalQuery(query, "subjectType"),
+      ...optionalQuery(query, "subjectId"),
+      ...optionalQuery(query, "correlationId"),
+    };
+  }
   return { page: "providers" };
+}
+
+function positiveInteger(value: string | null): number | undefined {
+  if (value === null || !/^[1-9][0-9]*$/.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : undefined;
+}
+
+function optionalQuery(
+  query: URLSearchParams,
+  name: "subjectType" | "subjectId" | "correlationId",
+): Partial<Record<typeof name, string>> {
+  const value = query.get(name);
+  return value === null || value.length === 0 ? {} : { [name]: value };
 }

@@ -1,10 +1,16 @@
 import type {
+  AuditEventSummary,
+  AuditFilters,
+  CatalogToolSummary,
   ConfigurationDraftSummary,
   ConfigurationFieldMetadata,
   EffectiveConfigurationSummary,
   ProviderPackageSummary,
   ProviderSummary,
   ResourceSummary,
+  RegistryDiffSummary,
+  RegistryProviderSummary,
+  RegistrySnapshotSummary,
   RuntimeDeploymentSummary,
   RuntimeProcessSummary,
 } from "./model.js";
@@ -19,6 +25,9 @@ export function shell(content: string, active: string): string {
         ${nav("/resources?environment=production", "Resources", active === "resources")}
         ${nav("/configuration", "Configuration", active === "configuration")}
         ${nav("/runtime", "Runtime", active === "runtime")}
+        ${nav("/catalog?environment=production", "Catalog", active === "catalog")}
+        ${nav("/registry?environment=production", "Registry", active === "registry")}
+        ${nav("/audit", "Audit", active === "audit")}
       </nav>
       <p class="rail-note">Runtime governance<br><span>Control plane</span></p>
     </aside>
@@ -186,6 +195,62 @@ export function runtimeView(
   );
 }
 
+export function catalogView(
+  environment: string,
+  providers: readonly RegistryProviderSummary[],
+  providerId?: string,
+): string {
+  const selected =
+    providerId === undefined
+      ? providers
+      : providers.filter((provider) => provider.providerId === providerId);
+  return (
+    pageHeader("Operation Catalog", "Read-only Runtime discovery and tool schemas.") +
+    governanceScope("catalog-scope-form", environment, providerId) +
+    `<section class="notice"><strong>Authoritative source</strong><span>Catalog entries originate only from Runtime server/discover + tools/list and cannot be edited here.</span></section>
+    <section class="catalog-stack">${
+      selected.length === 0
+        ? empty("No authoritative Catalog is available for this scope.")
+        : selected.map(catalogProvider).join("")
+    }</section>`
+  );
+}
+
+export function registryView(
+  environment: string,
+  history: readonly RegistrySnapshotSummary[],
+  diff?: RegistryDiffSummary,
+): string {
+  return (
+    pageHeader("Registry", "Immutable environment snapshots, revision history, and safe diff.") +
+    `<section class="panel"><form class="registry-scope-form">
+      ${textField("Environment", "environment", true, environment)}
+      ${textField("From revision", "fromRevision", false, diff?.fromRevision.toString())}
+      ${textField("To revision", "toRevision", false, diff?.toRevision.toString())}
+      <button>Load history / diff</button>
+    </form></section>
+    ${diff === undefined ? "" : registryDiffView(diff)}
+    <section class="panel"><div class="panel-head"><div><p class="eyebrow">Immutable history</p><h2>${escapeHtml(environment)}</h2></div></div>
+      ${history.length === 0 ? empty("No Registry revisions have been published.") : registryHistory(history)}
+    </section>`
+  );
+}
+
+export function auditView(events: readonly AuditEventSummary[], filters: AuditFilters): string {
+  return (
+    pageHeader("Audit", "Trace operations by actor, subject, correlation, and time.") +
+    `<section class="panel"><form class="audit-filter-form">
+      ${textField("Subject type", "subjectType", false, filters.subjectType)}
+      ${textField("Subject ID", "subjectId", false, filters.subjectId)}
+      ${textField("Correlation ID", "correlationId", false, filters.correlationId)}
+      <button>Apply filters</button>
+    </form></section>
+    <section class="panel"><div class="panel-head"><div><p class="eyebrow">Trace</p><h2>Audit events</h2></div></div>
+      ${events.length === 0 ? empty("No matching Audit events.") : auditTable(events)}
+    </section>`
+  );
+}
+
 function createProviderForm(): string {
   return `<section class="panel create-panel" id="create-provider">
     <div><p class="eyebrow">Create</p><h2>New Provider</h2><p class="muted">Production defaults to vendor managed.</p></div>
@@ -199,6 +264,62 @@ function createProviderForm(): string {
       <p class="form-status" role="status"></p>
     </form>
   </section>`;
+}
+
+function governanceScope(formClass: string, environment: string, providerId?: string): string {
+  return `<section class="panel"><form class="${formClass}">
+    ${textField("Environment", "environment", true, environment)}
+    ${textField("Provider ID (optional)", "providerId", false, providerId)}
+    <button>Load Catalog</button>
+  </form></section>`;
+}
+
+function catalogProvider(provider: RegistryProviderSummary): string {
+  return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">Catalog revision ${String(provider.catalogRevision)}</p><h2>${escapeHtml(provider.providerId)}</h2><p class="muted">${escapeHtml(provider.serverId)} · ${escapeHtml(provider.protocolMode)}</p></div>${badge(`${String(provider.tools.length)} tools`, "active")}</div>
+    <div class="tool-grid">${provider.tools.map(catalogTool).join("")}</div>
+  </section>`;
+}
+
+function catalogTool(tool: CatalogToolSummary): string {
+  return `<article class="tool-card"><p class="eyebrow">${escapeHtml(tool.taskBehavior)}</p><h3>${escapeHtml(tool.name)}</h3><p>${escapeHtml(tool.description)}</p>
+    <div class="badges">${badge(tool.resourceBindingMode ?? "NONE", "pending")}</div>
+    ${schemaViewer("Input schema", tool.inputSchema)}
+    ${schemaViewer("Output schema", tool.outputSchema)}
+  </article>`;
+}
+
+function schemaViewer(label: string, schema: Readonly<Record<string, unknown>>): string {
+  return `<details><summary>${escapeHtml(label)}</summary><pre aria-label="${escapeAttribute(label)} read-only">${escapeHtml(JSON.stringify(schema, null, 2))}</pre></details>`;
+}
+
+function registryDiffView(diff: RegistryDiffSummary): string {
+  return `<section class="metrics registry-diff">
+    ${changeMetric("Added", diff.addedProviderIds)}
+    ${changeMetric("Changed", diff.changedProviderIds)}
+    ${changeMetric("Removed", diff.removedProviderIds)}
+  </section>`;
+}
+
+function changeMetric(label: string, providerIds: readonly string[]): string {
+  return `<article><span>${escapeHtml(label)}</span><strong>${String(providerIds.length)}</strong><small>${providerIds.map(escapeHtml).join(", ") || "None"}</small></article>`;
+}
+
+function registryHistory(history: readonly RegistrySnapshotSummary[]): string {
+  return `<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Published</th><th>Providers</th><th>Checksum</th></tr></thead><tbody>${history
+    .map(
+      (snapshot) =>
+        `<tr><td>${String(snapshot.revision)}</td><td>${escapeHtml(snapshot.publishedAt)}</td><td>${String(snapshot.providers.length)}</td><td><code>${escapeHtml(snapshot.checksum.slice(0, 16))}…</code></td></tr>`,
+    )
+    .join("")}</tbody></table></div>`;
+}
+
+function auditTable(events: readonly AuditEventSummary[]): string {
+  return `<div class="table-wrap"><table><thead><tr><th>Occurred</th><th>Action</th><th>Subject</th><th>Actor</th><th>Correlation</th></tr></thead><tbody>${events
+    .map(
+      (event) =>
+        `<tr><td>${escapeHtml(event.occurredAt)}</td><td>${escapeHtml(event.action)}</td><td>${escapeHtml(event.subjectType)}<small>${escapeHtml(event.subjectId)}</small></td><td>${escapeHtml(event.actorId)}</td><td><code>${escapeHtml(event.correlationId)}</code><small>${escapeHtml(event.auditEventId)}</small></td></tr>`,
+    )
+    .join("")}</tbody></table></div>`;
 }
 
 function deploymentTable(items: readonly RuntimeDeploymentSummary[]): string {

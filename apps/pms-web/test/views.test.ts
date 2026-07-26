@@ -4,10 +4,13 @@ import { RUNTIME_BOOTSTRAP_FIELDS } from "../src/configuration-metadata.js";
 import { matchRoute } from "../src/router.js";
 import {
   configurationView,
+  auditView,
+  catalogView,
   errorView,
   loading,
   packagesView,
   providersView,
+  registryView,
   runtimeView,
 } from "../src/views.js";
 
@@ -31,6 +34,22 @@ describe("PMS Web routes and views", () => {
       page: "runtime",
       providerId: "p-1",
       deploymentId: "d-1",
+    });
+    expect(matchRoute("/catalog", "?environment=staging&providerId=p-1")).toEqual({
+      page: "catalog",
+      environment: "staging",
+      providerId: "p-1",
+    });
+    expect(matchRoute("/registry", "?environment=production&fromRevision=1&toRevision=2")).toEqual({
+      page: "registry",
+      environment: "production",
+      fromRevision: 1,
+      toRevision: 2,
+    });
+    expect(matchRoute("/audit", "?subjectType=runtime&correlationId=trace-1")).toEqual({
+      page: "audit",
+      subjectType: "runtime",
+      correlationId: "trace-1",
     });
   });
 
@@ -156,5 +175,75 @@ describe("PMS Web routes and views", () => {
     expect(html).toContain("Config ACK");
     expect(html).toContain('data-danger="Stop Runtime deployment-1?"');
     expect(html).toContain('data-danger="Restart Runtime deployment-1?"');
+  });
+
+  it("renders authoritative Catalog schemas in a read-only viewer", () => {
+    const html = catalogView("production", [
+      {
+        providerId: "provider-1",
+        serverId: "server-1",
+        protocolMode: "frozen_v1",
+        catalogRevision: 3,
+        tools: [
+          {
+            name: "observe",
+            description: "Observe safely",
+            inputSchema: { type: "object", properties: { resourceId: { type: "string" } } },
+            outputSchema: { type: "object" },
+            taskBehavior: "synchronous_only",
+            resourceBindingMode: "ARGUMENT_REFERENCE",
+          },
+        ],
+      },
+    ]);
+
+    expect(html).toContain("server/discover + tools/list");
+    expect(html).toContain("Input schema");
+    expect(html).toContain("resourceId");
+    expect(html).not.toMatch(/textarea|contenteditable/i);
+  });
+
+  it("renders safe Registry diff/history and traceable Audit filters", () => {
+    const registry = registryView(
+      "production",
+      [
+        {
+          environment: "production",
+          revision: 2,
+          checksum: "a".repeat(64),
+          publishedAt: "2026-07-27T00:00:00.000Z",
+          providers: [],
+        },
+      ],
+      {
+        environment: "production",
+        fromRevision: 1,
+        toRevision: 2,
+        addedProviderIds: ["provider-2"],
+        removedProviderIds: [],
+        changedProviderIds: ["provider-1"],
+      },
+    );
+    const audit = auditView(
+      [
+        {
+          auditEventId: "audit-1",
+          action: "runtime.restart",
+          actorId: "admin-1",
+          correlationId: "trace-1",
+          subjectType: "runtime_deployment",
+          subjectId: "deployment-1",
+          occurredAt: "2026-07-27T00:00:00.000Z",
+        },
+      ],
+      { correlationId: "trace-1" },
+    );
+
+    expect(registry).toContain("provider-2");
+    expect(registry).toContain(`${"a".repeat(16)}…`);
+    expect(registry).not.toMatch(/effectiveEndpoint|credential|secret/i);
+    expect(audit).toContain("trace-1");
+    expect(audit).toContain("admin-1");
+    expect(audit).toContain('name="correlationId"');
   });
 });

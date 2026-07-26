@@ -159,6 +159,81 @@ describe("PMS Web API client", () => {
     );
     expect(new Headers(call?.[1]?.headers).get("x-actor-id")).toBe("admin-1");
   });
+
+  it("projects Registry Catalog data without endpoints or schema defaults", async () => {
+    const client = new PmsWebApiClient({
+      fetch: response({
+        environment: "production",
+        revision: 3,
+        checksum: "a".repeat(64),
+        publishedAt: "2026-07-27T00:00:00.000Z",
+        createdAt: "2026-07-27T00:00:00.000Z",
+        document: {
+          environment: "production",
+          providers: [
+            {
+              providerId: "provider-1",
+              serverId: "server-1",
+              protocolMode: "frozen_v1",
+              effectiveEndpoint: "https://internal.example.test?token=secret",
+              catalogRevision: 2,
+              tools: [
+                {
+                  name: "observe",
+                  description: "Observe",
+                  inputSchema: {
+                    type: "object",
+                    default: { token: "secret-value" },
+                    properties: { resourceId: { type: "string" } },
+                  },
+                  outputSchema: { type: "object" },
+                  taskExecution: { taskBehavior: "synchronous_only" },
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    });
+
+    const snapshot = await client.registryLatest("production");
+
+    expect(snapshot.providers[0]?.tools[0]?.inputSchema).toEqual({
+      type: "object",
+      properties: { resourceId: { type: "string" } },
+    });
+    expect(JSON.stringify(snapshot)).not.toContain("effectiveEndpoint");
+    expect(JSON.stringify(snapshot)).not.toContain("secret-value");
+  });
+
+  it("drops Audit metadata while retaining trace identity", async () => {
+    const client = new PmsWebApiClient({
+      fetch: response({
+        items: [
+          {
+            auditEventId: "audit-1",
+            action: "runtime.restart",
+            actorId: "admin-1",
+            correlationId: "trace-1",
+            subjectType: "runtime_deployment",
+            subjectId: "deployment-1",
+            occurredAt: "2026-07-27T00:00:00.000Z",
+            metadata: { databaseUrl: "postgresql://secret", token: "secret" },
+          },
+        ],
+      }),
+    });
+
+    const events = await client.auditEvents({ correlationId: "trace-1" });
+
+    expect(events.items[0]).toMatchObject({
+      auditEventId: "audit-1",
+      correlationId: "trace-1",
+      actorId: "admin-1",
+    });
+    expect(JSON.stringify(events)).not.toContain("metadata");
+    expect(JSON.stringify(events)).not.toContain("secret");
+  });
 });
 
 function response(body: unknown): typeof fetch {
