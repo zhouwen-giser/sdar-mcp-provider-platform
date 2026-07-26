@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-01",
+  "status": "PASSED",
+  "sourceBaselineSha256": "000a46f7452eadac986de3f142dde6358a590c5c372bee2e09793fe9396ad6e3",
+  "gitCommit": "459c3f9c881816066dfc887e50d7a309733887f2",
+  "taskSummary": {
+    "total": 50,
+    "passed": 50
+  },
+  "gates": {
+    "migrationIsolation": "PASSED",
+    "configE2E": "PASSED",
+    "runtimeRegression": "PASSED"
+  },
+  "generatedAt": "2026-07-26T13:58:00Z",
+  "artifacts": [
+    ".codex/reports/goal-01-final.md",
+    ".codex/handoff/goal1-delivery-report.md",
+    "docs/baseline/SOURCE_LOCK.json",
+    "docs/database/migration-ownership.md",
+    "docs/database/MIGRATION_SET_UPGRADE.md",
+    "docs/database/PMS_SCHEMA.md",
+    "docs/providers/qualification.md",
+    "docs/configuration/CONFIG_INVENTORY.json",
+    "docs/api/PMS_API.md",
+    "docs/operations/PMS_WORKER.md",
+    "migrations/migration-source-map.json",
+    "reports/evidence/migration-isolation.json"
+  ],
+  "externalGaps": [
+    "Real UGV and NPC Tank devices and ISR MQTT feeds were unavailable; real-resource qualification remains pending.",
+    "An independently managed Home Assistant deployment and physical climate resources were unavailable; real-resource qualification remains pending."
+  ],
+  "goal2Inputs": {
+    "applications": [
+      "apps/pms-api",
+      "apps/pms-worker",
+      "apps/runtime"
+    ],
+    "packages": [
+      "packages/configuration-center",
+      "packages/database-migration-runner",
+      "packages/pms-application",
+      "packages/pms-domain",
+      "packages/pms-persistence-postgres",
+      "packages/provider-package-registry",
+      "packages/runtime-config-client",
+      "packages/runtime-configuration-contract"
+    ],
+    "pmsTables": [
+      "pms_schema_migration",
+      "provider_type",
+      "provider_package",
+      "provider",
+      "resource",
+      "provider_resource_binding",
+      "config_definition",
+      "config_revision",
+      "config_ack",
+      "audit",
+      "job_lease"
+    ],
+    "apiPaths": [
+      "/api/v1",
+      "/api/v1/openapi.json",
+      "/api/v1/provider-packages",
+      "/api/v1/provider-packages/{packageId}",
+      "/api/v1/provider-types",
+      "/api/v1/provider-types/{providerTypeId}",
+      "/api/v1/provider-types/{providerTypeId}/status",
+      "/api/v1/providers",
+      "/api/v1/providers/{providerId}",
+      "/api/v1/providers/{providerId}/status",
+      "/api/v1/resources",
+      "/api/v1/resources/{environment}/{resourceId}",
+      "/api/v1/resources/{environment}/{resourceId}/status",
+      "/api/v1/providers/{providerId}/resource-bindings",
+      "/api/v1/providers/{providerId}/resource-bindings/{environment}/{resourceId}",
+      "/api/v1/config-drafts",
+      "/api/v1/config-drafts/{draftId}",
+      "/api/v1/config-drafts/{draftId}/validate",
+      "/api/v1/config-drafts/{draftId}/effective",
+      "/api/v1/config-drafts/{draftId}/publish",
+      "/api/v1/config-drafts/{draftId}/rollback",
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/latest",
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/watch",
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/revisions/{revisionId}/acks"
+    ],
+    "migrationSets": {
+      "runtime": "migrations/runtime",
+      "provider:ugv": "migrations/providers/ugv",
+      "provider:npc-tank": "migrations/providers/npc-tank",
+      "pms": "migrations/pms"
+    },
+    "authorityBoundaries": [
+      "PMS is the control plane and must not read or write Runtime Task Authority business tables.",
+      "Runtime remains Task Authority and the MCP data plane and must cold-start without PMS.",
+      "Provider Adapters remain the device/domain execution plane and vendor_managed is the production default.",
+      "Operation Catalog authority remains Runtime server/discover plus tools/list.",
+      "Secrets cross deployment boundaries only as SecretRef or *_FILE paths."
+    ],
+    "goal2NonGoalsAlreadyExcluded": [
+      "No RuntimeDeployment orchestration or PM2 lifecycle API was implemented in Goal 1.",
+      "No arbitrary script, cwd, environment, or command execution surface was introduced.",
+      "No PMS table or API was made authoritative for Runtime Task, Command, Scheduler, Recovery, or Outbox state."
+    ]
+  }
+}
