@@ -4,6 +4,7 @@ export * from "./catalog-snapshot-repository.js";
 export * from "./configuration-repository.js";
 export * from "./database-profile-repository.js";
 export * from "./migrations.js";
+export * from "./registry-snapshot-repository.js";
 export * from "./runtime-deployment-repositories.js";
 export * from "./runtime-instance-allocator.js";
 export * from "./unit-of-work.js";

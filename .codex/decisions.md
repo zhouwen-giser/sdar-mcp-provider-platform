@@ -248,3 +248,10 @@ and requires every migration to be safe when applied repeatedly. Append only
 `007_catalog_snapshot.sql`; update the suite's two expected lists as the minimum out-of-range test
 maintenance. Do not alter migrations `001` through `006`. The new migration uses idempotent DDL and
 an immutable-history trigger, while the active pointer remains the only mutable Catalog relation.
+
+## 2026-07-26 — G2-P4-B06 Registry migration regression expectation
+
+Registry persistence appends `008_registry_snapshot.sql` without modifying migrations `001` through
+`007`. Update only the existing PMS migration suite's exact file and table expectations as the
+minimum out-of-range maintenance needed to preserve the repeat-application and Runtime-table
+isolation gate.

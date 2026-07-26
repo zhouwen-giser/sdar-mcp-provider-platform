@@ -351,3 +351,7 @@
 - 2026-07-26T18:17:50.613187+00:00 START G2-P4-B05
 
 - 2026-07-26T18:22:45.968565+00:00 PASS G2-P4-B05 evidence=['pnpm --filter @sdar/catalog-manager test (1 file/10 tests); TEST_DATABASE_URL=<local> pnpm exec vitest run packages/pms-persistence-postgres/test/catalog-snapshot.test.ts tests/pms-migrations/pms-migrations.test.ts (2 files/11 tests); TEST_DATABASE_URL=<local> pnpm --filter @sdar/pms-persistence-postgres test (6 files/26 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:23:03.330627+00:00 START G2-P4-B06
+
+- 2026-07-26T18:28:27.385430+00:00 PASS G2-P4-B06 evidence=['TEST_DATABASE_URL=<local> pnpm test:registry (2 files/12 tests); TEST_DATABASE_URL=<local> pnpm exec vitest run tests/pms-migrations/pms-migrations.test.ts packages/pms-persistence-postgres/test/catalog-snapshot.test.ts (2 files/11 tests); TEST_DATABASE_URL=<local> pnpm --filter @sdar/pms-persistence-postgres test (6 files/26 tests); tsc --noEmit; eslint; git diff --check']

@@ -6,6 +6,7 @@ import { resolveMigrationSet } from "../../packages/database-migration-runner/sr
 
 const EXPECTED_TABLES = [
   "active_catalog_snapshot",
+  "active_registry_snapshot",
   "audit",
   "catalog_snapshot",
   "config_ack",
@@ -18,6 +19,7 @@ const EXPECTED_TABLES = [
   "provider_package",
   "provider_resource_binding",
   "provider_type",
+  "registry_snapshot",
   "resource",
   "runtime_deployment",
   "runtime_deployment_action",
@@ -64,6 +66,7 @@ describe("PMS control-plane migration set", () => {
       "005_runtime_deployment.sql",
       "006_database_profile.sql",
       "007_catalog_snapshot.sql",
+      "008_registry_snapshot.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
