@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:16:03.709214+00:00",
+  "updatedAt": "2026-07-26T10:22:41.358045+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -184,14 +184,16 @@
       "reason": null
     },
     "G1-P2-B07": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:17:00.881204+00:00",
+      "completedAt": "2026-07-26T10:22:41.357914+00:00",
+      "evidence": [
+        "pnpm test:provider-packages: PASS before and after build, 2 files/13 tests plus JSON self-check status PASS for 3 packages; pnpm build: PASS; CLI validates 3 entries, config sources, UGV/NPC migration sets (1 file each), Climate null migration, and 11 evidence refs; invalid JSON/schema/duplicate/symlink/mock fixtures fail in suite; missing workspace emits WORKSPACE_ROOT_UNAVAILABLE JSON and exit 1; prettier, eslint, typecheck, git diff --check PASS; .codex/reports/phase-P2.md"
+      ],
       "reason": null
     },
     "G1-P3-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

@@ -79,3 +79,7 @@
 - 2026-07-26T10:14:55.536350+00:00 START G1-P2-B06
 
 - 2026-07-26T10:16:03.709157+00:00 PASS G1-P2-B06 evidence=['semantic equivalent for B07-owned pnpm test:provider-packages: pnpm --filter @sdar/provider-package-registry test PASS 2 files/13 tests; controlled loader rejects mock directory/packageId/providerType/adapter-entry references; production list has 3 non-mock packages; qualification projection exposes exact component/realResource statuses and evidence only, with no certified/systemStatus fields; pnpm typecheck, eslint, prettier, git diff --check PASS']
+
+- 2026-07-26T10:17:00.881267+00:00 START G1-P2-B07
+
+- 2026-07-26T10:22:41.357979+00:00 PASS G1-P2-B07 evidence=['pnpm test:provider-packages: PASS before and after build, 2 files/13 tests plus JSON self-check status PASS for 3 packages; pnpm build: PASS; CLI validates 3 entries, config sources, UGV/NPC migration sets (1 file each), Climate null migration, and 11 evidence refs; invalid JSON/schema/duplicate/symlink/mock fixtures fail in suite; missing workspace emits WORKSPACE_ROOT_UNAVAILABLE JSON and exit 1; prettier, eslint, typecheck, git diff --check PASS; .codex/reports/phase-P2.md']
