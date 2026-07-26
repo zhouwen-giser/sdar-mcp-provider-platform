@@ -107,3 +107,7 @@
 - 2026-07-26T10:54:42.376281+00:00 START G1-P3-B06
 
 - 2026-07-26T10:57:16.368294+00:00 PASS G1-P3-B06 evidence=['pnpm --filter @sdar/ugv-provider-adapter test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (5 files, 26 tests including UGV legacy fixture, 50-field inventory, secrets, production); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/ugv-provider-security.test.ts (3 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check']
+
+- 2026-07-26T10:58:05.760752+00:00 START G1-P3-B07
+
+- 2026-07-26T11:00:23.886703+00:00 PASS G1-P3-B07 evidence=['pnpm --filter @sdar/npc-tank-provider-adapter test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (6 files, 30 tests including NPC legacy capability combinations, 52-field inventory, secrets, production); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/npc-tank-provider-security.test.ts tests/contract/npc-tank-provider-contract.test.ts (9 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check']

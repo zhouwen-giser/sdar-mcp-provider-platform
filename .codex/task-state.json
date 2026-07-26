@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:57:16.368338+00:00",
+  "updatedAt": "2026-07-26T11:00:23.886784+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -247,10 +247,12 @@
       "reason": null
     },
     "G1-P3-B07": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:58:05.760693+00:00",
+      "completedAt": "2026-07-26T11:00:23.886639+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/npc-tank-provider-adapter test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (6 files, 30 tests including NPC legacy capability combinations, 52-field inventory, secrets, production); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/npc-tank-provider-security.test.ts tests/contract/npc-tank-provider-contract.test.ts (9 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check"
+      ],
       "reason": null
     },
     "G1-P3-B08": {
