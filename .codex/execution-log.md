@@ -375,3 +375,7 @@
 - 2026-07-26T18:49:41.157589+00:00 START G2-P5-B03
 
 - 2026-07-26T18:52:57.609806+00:00 PASS G2-P5-B03 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ha (1 file/2 tests; Fake HA + real local Climate Adapter + Runtime + PostgreSQL, 4 Operations, resource binding, Catalog/Registry); pnpm test:protocol:frozen (14 files/71 tests); pnpm --filter @sdar/catalog-manager test (1 file/10 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:53:19.046049+00:00 START G2-P5-B04
+
+- 2026-07-26T19:00:09.462253+00:00 PASS G2-P5-B04 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (7 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed']
