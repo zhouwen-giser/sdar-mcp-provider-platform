@@ -10,6 +10,20 @@ const RUNTIME_ENTRY = "dist/apps/runtime/src/main.js";
 const PROCESS_NAME = /^sdar-runtime-[a-z0-9][a-z0-9-]{0,112}$/;
 const RUNTIME_VERSION = /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/;
 
+export interface RuntimeCrashRecoveryPolicy {
+  readonly restartDelayMs: number;
+  readonly maxRestarts: number;
+  readonly maxMemoryBytes: number;
+  readonly minUptimeMs: number;
+}
+
+export const DEFAULT_RUNTIME_CRASH_RECOVERY_POLICY: RuntimeCrashRecoveryPolicy = Object.freeze({
+  restartDelayMs: 5_000,
+  maxRestarts: 5,
+  maxMemoryBytes: 512 * 1024 * 1024,
+  minUptimeMs: 10_000,
+});
+
 export interface Pm2ProcessDescription {
   readonly name?: string;
   readonly pid?: number;
@@ -28,6 +42,10 @@ export interface Pm2StartOptions {
   readonly exec_mode: "fork";
   readonly instances: 1;
   readonly autorestart: true;
+  readonly restart_delay: number;
+  readonly max_restarts: number;
+  readonly max_memory_restart: number;
+  readonly min_uptime: number;
   readonly env: Readonly<Record<string, string>>;
 }
 
@@ -71,6 +89,7 @@ export type Pm2ProcessManagerErrorCode =
   | "PM2_PROCESS_NAME_FORBIDDEN"
   | "PM2_RUNTIME_RELEASE_INVALID"
   | "PM2_BOOTSTRAP_INVALID"
+  | "PM2_RECOVERY_POLICY_INVALID"
   | "PM2_CONNECTION_FAILED"
   | "PM2_PROCESS_NOT_FOUND"
   | "PM2_OPERATION_FAILED";
@@ -89,15 +108,18 @@ export class Pm2ProcessManagerError extends Error {
 
 export class Pm2ProcessManager {
   readonly #releaseRoot: string;
+  readonly #recoveryPolicy: RuntimeCrashRecoveryPolicy;
 
   constructor(
     private readonly api: Pm2JavascriptApi,
     releaseRoot: string,
+    recoveryPolicy: RuntimeCrashRecoveryPolicy = DEFAULT_RUNTIME_CRASH_RECOVERY_POLICY,
   ) {
     if (!isAbsolute(releaseRoot)) {
       throw new Pm2ProcessManagerError("PM2_RUNTIME_RELEASE_INVALID", "connect", false);
     }
     this.#releaseRoot = resolve(releaseRoot);
+    this.#recoveryPolicy = validateRecoveryPolicy(recoveryPolicy);
   }
 
   start(request: Pm2RuntimeStartRequest): Promise<Pm2RuntimeProcessResult> {
@@ -242,6 +264,10 @@ export class Pm2ProcessManager {
       exec_mode: "fork",
       instances: 1,
       autorestart: true,
+      restart_delay: this.#recoveryPolicy.restartDelayMs,
+      max_restarts: this.#recoveryPolicy.maxRestarts,
+      max_memory_restart: this.#recoveryPolicy.maxMemoryBytes,
+      min_uptime: this.#recoveryPolicy.minUptimeMs,
       env: request.bootstrap.environment,
     });
   }
@@ -426,4 +452,20 @@ function validPid(value: number | undefined): value is number {
 
 function safeCount(value: number | undefined): number {
   return value !== undefined && Number.isSafeInteger(value) && value >= 0 ? value : 0;
+}
+
+function validateRecoveryPolicy(policy: RuntimeCrashRecoveryPolicy): RuntimeCrashRecoveryPolicy {
+  if (
+    !boundedInteger(policy.restartDelayMs, 1_000, 300_000) ||
+    !boundedInteger(policy.maxRestarts, 1, 20) ||
+    !boundedInteger(policy.maxMemoryBytes, 64 * 1024 * 1024, 8 * 1024 * 1024 * 1024) ||
+    !boundedInteger(policy.minUptimeMs, 1_000, 300_000)
+  ) {
+    throw new Pm2ProcessManagerError("PM2_RECOVERY_POLICY_INVALID", "connect", false);
+  }
+  return Object.freeze({ ...policy });
+}
+
+function boundedInteger(value: number, minimum: number, maximum: number): boolean {
+  return Number.isSafeInteger(value) && value >= minimum && value <= maximum;
 }

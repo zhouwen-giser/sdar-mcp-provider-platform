@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T17:19:02.609916+00:00",
+  "updatedAt": "2026-07-26T17:27:05.277685+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -274,10 +274,12 @@
       "reason": null
     },
     "G2-P3-B10": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T17:19:59.378653+00:00",
+      "completedAt": "2026-07-26T17:27:05.277573+00:00",
+      "evidence": [
+        "pnpm test:pm2-adapter (6 files/36 tests); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm exec vitest run tests/recovery/runtime-recovery-postgres.test.ts (1 file/9 tests, real PostgreSQL Runtime persistence recovery; not real PM2 certification); tsc --noEmit; eslint targeted; git diff --check"
+      ],
       "reason": null
     },
     "G2-P3-B11": {

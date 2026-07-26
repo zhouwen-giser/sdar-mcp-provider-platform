@@ -21,6 +21,11 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       cwd: "/opt/sdar/runtime-releases/2.0.0-rc.1",
       exec_mode: "fork",
       instances: 1,
+      autorestart: true,
+      restart_delay: 5_000,
+      max_restarts: 5,
+      max_memory_restart: 512 * 1024 * 1024,
+      min_uptime: 10_000,
     });
     expect(fake.disconnect).toHaveBeenCalledOnce();
   });
@@ -32,6 +37,25 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
     expect(() => manager.stop("unrelated-process")).toThrow(
       expect.objectContaining({
         code: "PM2_PROCESS_NAME_FORBIDDEN",
+      }),
+    );
+    expect(fake.connect).not.toHaveBeenCalled();
+  });
+
+  it("rejects recovery policies that permit rapid or unbounded restart loops", () => {
+    const fake = new FakePm2Api();
+
+    expect(
+      () =>
+        new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases", {
+          restartDelayMs: 0,
+          maxRestarts: 100,
+          maxMemoryBytes: 32,
+          minUptimeMs: 0,
+        }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "PM2_RECOVERY_POLICY_INVALID",
       }),
     );
     expect(fake.connect).not.toHaveBeenCalled();
