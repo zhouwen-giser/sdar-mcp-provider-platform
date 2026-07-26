@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-26T14:25:00Z",
+  "goalId": "goal-02",
+  "taskId": "G2-P0-B02",
+  "host": {
+    "node": {
+      "version": "v22.23.1",
+      "satisfiesRepositoryEngine": true
+    },
+    "pnpm": {
+      "version": "11.13.1",
+      "satisfiesRepositoryEngine": true
+    }
+  },
+  "pm2": {
+    "cli": {
+      "available": false,
+      "probe": "pm2 --version"
+    },
+    "javascriptApi": {
+      "available": false,
+      "probe": "node import('pm2')"
+    },
+    "realE2EReady": false,
+    "unlockActions": [
+      "Add the repository-pinned PM2 dependency when the PM2 adapter task authorizes dependency changes.",
+      "Use an isolated writable PM2_HOME for tests.",
+      "Build an allowlisted Runtime release entry before lifecycle E2E.",
+      "Run lifecycle tests against only the sdar-runtime-* namespace."
+    ]
+  },
+  "postgresql": {
+    "clientTools": {
+      "psql": false,
+      "pg_isready": false,
+      "initdb": false,
+      "postgres": false
+    },
+    "nodeClient": {
+      "package": "pg",
+      "available": true
+    },
+    "environmentVariables": {
+      "TEST_DATABASE_URL": "UNSET",
+      "DATABASE_URL": "UNSET",
+      "POSTGRES_URL": "UNSET"
+    },
+    "docker": {
+      "cliVersion": "29.6.1",
+      "composeVersion": "v5.3.1",
+      "daemonAvailable": true,
+      "composeService": "postgres",
+      "image": "postgres:17-alpine",
+      "serverVersion": "17.10",
+      "health": "healthy"
+    },
+    "ports": {
+      "5432": "OPEN_COMPOSE_POSTGRES",
+      "54329": "AVAILABLE_AT_CAPTURE"
+    },
+    "testProvisioningRole": {
+      "source": "repository Compose secret",
+      "connection": "<local-postgres>",
+      "canCreateDatabase": true,
+      "canCreateRole": true,
+      "isSuperuser": true,
+      "productionSuitability": "TEST_ONLY_EXCEEDS_LEAST_PRIVILEGE"
+    },
+    "realE2EReady": true,
+    "unlockActions": [
+      "Inject TEST_DATABASE_URL from an external secret using the healthy Compose PostgreSQL service.",
+      "Use the Node pg client because host PostgreSQL CLI tools are absent.",
+      "Create a non-superuser provisioning fixture with only CREATEDB and CREATEROLE for least-privilege E2E.",
+      "Keep provisioning and Runtime credentials separate and redact all connection material."
+    ]
+  },
+  "portStrategy": {
+    "database": {
+      "composePostgres": 5432,
+      "previousTestPort": 54329
+    },
+    "runtime": {
+      "unitAndComponent": "ephemeral loopback ports",
+      "managedRange": "TO_BE_FROZEN_BY_G2-P3-B05",
+      "conflictBehavior": "fail with a stable conflict code; never steal an unrelated listener"
+    }
+  },
+  "fakeStrategy": {
+    "FakePm2": {
+      "scope": "unit and component tests only",
+      "model": "deterministic in-memory process records keyed by allowlisted sdar-runtime-* names",
+      "behaviors": [
+        "idempotent start, stop, restart, delete, and inspect",
+        "configurable online, stopped, crashed, missing, timeout, and stable error-code outcomes",
+        "reject arbitrary script, cwd, environment key, and non-platform process name",
+        "record calls and restart counts without spawning operating-system processes",
+        "keep PM2 online separate from live, ready, identity, and Catalog state"
+      ]
+    },
+    "FakeProvisioner": {
+      "scope": "unit and component tests only",
+      "model": "deterministic in-memory database and role inventory keyed by idempotency key",
+      "behaviors": [
+        "return SecretRef metadata and never plaintext credentials",
+        "record create database, create role, grant, and verification order",
+        "inject stable already-exists, permission, timeout, conflict, and unavailable outcomes",
+        "prove provisioning credentials are not returned as Runtime credentials",
+        "preserve failed database state for inspection instead of simulating destructive cleanup"
+      ]
+    },
+    "certificationLimit": "Fake results are Component evidence only and cannot be reported as real PM2, real PostgreSQL provisioning, real-resource qualification, or system Interop certification."
+  },
+  "developmentDecision": {
+    "unitDevelopmentCanContinue": true,
+    "goalBlocked": false,
+    "reason": "Ports and Docker PostgreSQL are available for controlled integration; deterministic fakes cover PM2 and provisioning port development until their implementation tasks authorize dependencies."
+  }
+}

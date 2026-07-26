@@ -203,3 +203,7 @@
 - 2026-07-26T14:19:42.021272+00:00 START G2-P0-B01
 
 - 2026-07-26T14:23:43.074380+00:00 PASS G2-P0-B01 evidence=['python3 .codex/task-package/scripts/verify_goal1_handoff.py --repo .: PASS on clean Goal 1 baseline; .codex/reports/goal-02-baseline.md; .codex/handoff/goal1-test-evidence.json; Goal1Handoff schema PASS; migration source map 26 files PASS; protocol 74 frozen cases PASS; provider packages 13/13 PASS; config compatibility 8/8 + 36/36 PASS; runtime config E2E 3/3 PASS; unit 123/123 PASS; local PostgreSQL rerun unavailable with ECONNREFUSED and not claimed as fresh PASS']
+
+- 2026-07-26T14:24:11.519524+00:00 START G2-P0-B02
+
+- 2026-07-26T14:26:54.958382+00:00 PASS G2-P0-B02 evidence=['docs/baseline/GOAL2_ENVIRONMENT.json; node v22.23.1 PASS; pnpm 11.13.1 PASS; pm2 CLI and JS API unavailable; Docker 29.6.1/Compose v5.3.1 daemon available; PostgreSQL 17.10 Compose service healthy on 5432; redacted test role can CREATEDB/CREATEROLE but is test-only superuser; FakePm2/FakeProvisioner strategy and real E2E unlock actions recorded; JSON/prettier/secret scan/git diff check PASS']

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:23:43.074495+00:00",
+  "updatedAt": "2026-07-26T14:26:54.958462+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -13,10 +13,12 @@
       "reason": null
     },
     "G2-P0-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:24:11.519451+00:00",
+      "completedAt": "2026-07-26T14:26:54.958300+00:00",
+      "evidence": [
+        "docs/baseline/GOAL2_ENVIRONMENT.json; node v22.23.1 PASS; pnpm 11.13.1 PASS; pm2 CLI and JS API unavailable; Docker 29.6.1/Compose v5.3.1 daemon available; PostgreSQL 17.10 Compose service healthy on 5432; redacted test role can CREATEDB/CREATEROLE but is test-only superuser; FakePm2/FakeProvisioner strategy and real E2E unlock actions recorded; JSON/prettier/secret scan/git diff check PASS"
+      ],
       "reason": null
     },
     "G2-P0-B03": {
