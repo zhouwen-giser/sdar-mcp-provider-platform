@@ -1,0 +1,19 @@
+{
+  "taskId": "G2-P5-B07",
+  "evidenceScope": "component-and-fake-adapter",
+  "claims": {
+    "realExternalResourceAuthentication": false,
+    "interopCertified": false
+  },
+  "gates": ["pnpm test:platform-security", "pnpm test:fault-injection"],
+  "coverage": [
+    "secret-redaction",
+    "pm2-command-and-path-allowlist",
+    "adapter-endpoint-policy",
+    "database-secret-separation",
+    "pms-outage-lkg",
+    "adapter-readiness-failure",
+    "runtime-crash-recovery",
+    "migration-database-failure"
+  ]
+}

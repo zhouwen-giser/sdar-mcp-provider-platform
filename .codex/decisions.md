@@ -311,3 +311,13 @@ real-resource qualification remains pending.
   build command.
 - **Scope:** Tooling only. Source lint coverage remains unchanged and generated
   output is still verified by the PMS Web build command.
+
+## G2-P5-B07 — Expose mandatory platform test gates
+
+- **Decision:** Add the two task-mandated root scripts `test:platform-security`
+  and `test:fault-injection`, each running only its task-owned test directory.
+- **Reason:** No semantically equivalent existing script selected these new
+  platform suites. The scripts fail when tests fail and are not empty
+  placeholders.
+- **Scope:** Root command routing only; test implementation and evidence remain
+  in the task's allowed directories.

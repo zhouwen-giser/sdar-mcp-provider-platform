@@ -387,3 +387,7 @@
 - 2026-07-26T19:08:40.039943+00:00 START G2-P5-B06
 
 - 2026-07-26T19:13:16.976740+00:00 PASS G2-P5-B06 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (16 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:13:33.513922+00:00 START G2-P5-B07
+
+- 2026-07-26T19:17:10.358374+00:00 PASS G2-P5-B07 evidence=['reports/evidence/G2-P5-B07-platform-security.json; pnpm test:platform-security (4 passed); pnpm test:fault-injection (4 passed); root tsc/eslint/git diff --check passed']
