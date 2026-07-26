@@ -174,3 +174,13 @@ external package version or authority.
 The dependency-free `packages/secret-store` workspace requires an empty importer in
 `pnpm-lock.yaml` for frozen workspace validation. Add only that generated importer; the adapter uses
 Node filesystem primitives and introduces no external dependency.
+
+## 2026-07-26 — G2-P2-B06 existing Runtime migration engine evidence and timeout
+
+The delivered Runtime engine owns advisory locking and checksum history, but returns no per-file
+result and waits indefinitely for the lock. The B06 card explicitly requires using that engine,
+complete version evidence, timeout evidence, and concurrent single execution. Extend
+`runMigrations` compatibly with an optional positive statement timeout and a returned immutable
+per-file `applied`/`already_applied` result; existing callers may continue ignoring the return.
+Update its focused unit test and add only the new workspace lock importer. Do not alter any
+Migration SQL, set mapping, version key, checksum rule, transaction boundary, or rollback behavior.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T16:00:21.454666+00:00",
+  "updatedAt": "2026-07-26T16:11:33.274036+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -157,14 +157,16 @@
       "reason": null
     },
     "G2-P2-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T16:01:01.994022+00:00",
+      "completedAt": "2026-07-26T16:11:33.273880+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/runtime-migration-runner test PASS 1 file/4 tests; real PostgreSQL concurrent full runtime set: 24 applied vs 24 already_applied under advisory lock; 64-hex checksum/version evidence and no Provider 024/025; 100ms lock timeout stable/retryable evidence; injected failure preserves sentinel table and history with no cleanup/rollback SQL; persistence engine unit PASS 1 file/2 tests; 0 temporary migration databases; migrations unchanged; frozen offline install, typecheck, ESLint, Prettier, git diff check PASS"
+      ],
       "reason": null
     },
     "G2-P2-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

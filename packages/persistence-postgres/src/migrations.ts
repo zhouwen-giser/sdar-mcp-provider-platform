@@ -12,19 +12,47 @@ interface MigrationSourceFile {
   readonly absolutePath: string;
 }
 
+export interface RuntimeMigrationEngineOptions {
+  readonly timeoutMs?: number;
+  readonly workspaceRoot?: string;
+}
+
+export interface RuntimeMigrationEngineEntry {
+  readonly version: string;
+  readonly checksum: string;
+  readonly outcome: "applied" | "already_applied";
+}
+
+export interface RuntimeMigrationEngineResult {
+  readonly migrations: readonly RuntimeMigrationEngineEntry[];
+}
+
 export async function listRuntimeMigrations(
   workspaceRoot = process.cwd(),
 ): Promise<readonly MigrationFile[]> {
   return resolveMigrationSet(workspaceRoot, "runtime");
 }
 
-export async function runMigrations(pool: Pool, compatibilityDirectory?: string): Promise<void> {
+export async function runMigrations(
+  pool: Pool,
+  compatibilityDirectory?: string,
+  options: RuntimeMigrationEngineOptions = {},
+): Promise<RuntimeMigrationEngineResult> {
   const files =
     compatibilityDirectory === undefined
-      ? await listRuntimeMigrations()
+      ? await listRuntimeMigrations(options.workspaceRoot)
       : await listCompatibilityDirectory(compatibilityDirectory);
   const client = await pool.connect();
+  const results: RuntimeMigrationEngineEntry[] = [];
   try {
+    if (options.timeoutMs !== undefined) {
+      if (!Number.isSafeInteger(options.timeoutMs) || options.timeoutMs < 1) {
+        throw new TypeError("Runtime migration timeoutMs must be a positive integer");
+      }
+      await client.query("SELECT set_config('statement_timeout',$1,false)", [
+        `${String(options.timeoutMs)}ms`,
+      ]);
+    }
     await client.query("SELECT pg_advisory_lock(hashtext('sdar_runtime_migrations'))");
     await client.query(`
       CREATE TABLE IF NOT EXISTS runtime_schema_migration (
@@ -48,6 +76,13 @@ export async function runMigrations(pool: Pool, compatibilityDirectory?: string)
           existing.rows[0]?.checksum !== legacyCheckoutChecksum
         )
           throw new Error(`MIGRATION_CHECKSUM_MISMATCH:${file.filename}`);
+        results.push(
+          Object.freeze({
+            version: file.filename,
+            checksum: existing.rows[0].checksum,
+            outcome: "already_applied",
+          }),
+        );
         continue;
       }
       await client.query("BEGIN");
@@ -58,15 +93,24 @@ export async function runMigrations(pool: Pool, compatibilityDirectory?: string)
           [file.filename, checksum],
         );
         await client.query("COMMIT");
+        results.push(
+          Object.freeze({
+            version: file.filename,
+            checksum,
+            outcome: "applied",
+          }),
+        );
       } catch (error) {
         await client.query("ROLLBACK");
         throw error;
       }
     }
   } finally {
+    await client.query("SELECT set_config('statement_timeout','0',false)").catch(() => undefined);
     await client.query("SELECT pg_advisory_unlock(hashtext('sdar_runtime_migrations'))");
     client.release();
   }
+  return Object.freeze({ migrations: Object.freeze(results) });
 }
 
 async function listCompatibilityDirectory(
