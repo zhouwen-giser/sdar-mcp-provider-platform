@@ -10,6 +10,7 @@ import type {
   ConfigurationBusinessKey,
   ConfigurationContent,
   ConfigurationDraft,
+  ConfigurationPublicationSnapshot,
   ConfigurationValidationIssue,
   ConfigurationValue,
   CreateConfigurationDraft,
@@ -123,6 +124,10 @@ export class ConfigurationCenter {
     return cloneDraft(this.#draft(draftId));
   }
 
+  definitionForDraft(draftId: string): ConfigurationDefinition {
+    return structuredClone(this.#definition(this.#draft(draftId).definitionId));
+  }
+
   validateDraft(draftId: string): ConfigurationDraft {
     const current = this.#draft(draftId);
     const preview = this.#preview(current);
@@ -153,8 +158,63 @@ export class ConfigurationCenter {
     return cloneDraft(draft);
   }
 
+  publicationSnapshot(
+    draftId: string,
+    expectedDraftVersion: number,
+  ): ConfigurationPublicationSnapshot {
+    const draft = this.#draft(draftId);
+    if (draft.version !== expectedDraftVersion) {
+      throw new ConfigurationCenterError(
+        "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+        "The configuration draft changed; reload and retry",
+      );
+    }
+    if (draft.status !== "validated") {
+      throw new ConfigurationCenterError(
+        "CONFIGURATION_DRAFT_NOT_VALIDATED",
+        "Only a validated configuration draft can be published",
+      );
+    }
+    const definition = this.#definition(draft.definitionId);
+    const resolved = this.#resolve(draft, definition);
+    if (resolved.issues.length > 0) {
+      throw new ConfigurationCenterError(
+        "CONFIGURATION_DRAFT_NOT_VALIDATED",
+        "The effective configuration no longer passes validation",
+      );
+    }
+    return structuredClone({
+      draft,
+      definition,
+      effectiveContent: resolved.effective,
+      applyMode: resolved.applyMode,
+    });
+  }
+
   #preview(draft: ConfigurationDraft): EffectiveConfigurationPreview {
     const definition = this.#definition(draft.definitionId);
+    const resolved = this.#resolve(draft, definition);
+    return {
+      draftId: draft.draftId,
+      definitionId: definition.definitionId,
+      definitionVersion: definition.definitionVersion,
+      content: redactSecrets(definition, resolved.effective),
+      sources: resolved.sources,
+      applyMode: resolved.applyMode,
+      valid: resolved.issues.length === 0,
+      issues: resolved.issues,
+    };
+  }
+
+  #resolve(
+    draft: ConfigurationDraft,
+    definition: ConfigurationDefinition,
+  ): {
+    readonly effective: ConfigurationContent;
+    readonly sources: Readonly<Record<string, "system_default" | ConfigurationTargetType>>;
+    readonly applyMode: ConfigurationApplyMode;
+    readonly issues: readonly ConfigurationValidationIssue[];
+  } {
     const sources: Record<string, "system_default" | ConfigurationTargetType> = {};
     let effective = cloneContent(definition.defaults as ConfigurationContent);
     for (const field of definition.fields) {
@@ -187,13 +247,9 @@ export class ConfigurationCenter {
       ...schemaIssues(this.#validators.get(definition.definitionId), definition, effective),
     ];
     return {
-      draftId: draft.draftId,
-      definitionId: definition.definitionId,
-      definitionVersion: definition.definitionVersion,
-      content: redactSecrets(definition, effective),
+      effective,
       sources,
       applyMode: applyMode(definition.fields, draft.content),
-      valid: issues.length === 0,
       issues,
     };
   }

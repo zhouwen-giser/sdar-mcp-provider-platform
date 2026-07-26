@@ -82,3 +82,12 @@ The mandatory `pnpm test:pms-config` command does not exist. Add one root script
 Configuration Center contract suite and the PMS Config Draft API suite using explicit TypeScript
 test paths. This is the minimum out-of-range verification wiring and avoids root Vitest discovering
 stale compiled test copies; it adds no empty success shim or publication capability.
+
+## 2026-07-26 — G1-P5-B05 database-enforced revision history
+
+The card allows PostgreSQL persistence changes, but the append-only PMS migration set lives at the
+repository-level `migrations/pms/**` path. Do not modify delivered migrations `001` through `003`;
+append migration `004_config_revision_history_guard.sql` to reject revision deletion, payload
+mutation, and invalid lifecycle transitions in the database. Extend the real `test:pms-config`
+command with a PostgreSQL integration suite because in-memory tests cannot establish concurrent
+publish safety or database-enforced immutable history.

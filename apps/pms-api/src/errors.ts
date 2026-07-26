@@ -67,11 +67,14 @@ function classifyError(error: FastifyError): PublicError {
 
 function configurationError(code: ConfigurationCenterErrorCode): PublicError {
   const statusCode =
-    code === "CONFIGURATION_DEFINITION_NOT_FOUND" || code === "CONFIGURATION_DRAFT_NOT_FOUND"
+    code === "CONFIGURATION_DEFINITION_NOT_FOUND" ||
+    code === "CONFIGURATION_DRAFT_NOT_FOUND" ||
+    code === "CONFIGURATION_REVISION_NOT_FOUND"
       ? 404
       : code === "CONFIGURATION_BUSINESS_KEY_CONFLICT" ||
           code === "CONFIGURATION_DRAFT_VERSION_CONFLICT" ||
-          code === "CONFIGURATION_DRAFT_NOT_VALIDATED"
+          code === "CONFIGURATION_DRAFT_NOT_VALIDATED" ||
+          code === "CONFIGURATION_PUBLISH_CONFLICT"
         ? 409
         : 400;
   return { statusCode, code, message: CONFIGURATION_MESSAGES[code] };
@@ -112,5 +115,9 @@ const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, stri
   CONFIGURATION_DRAFT_NOT_FOUND: "The configuration draft does not exist",
   CONFIGURATION_DRAFT_VERSION_CONFLICT: "The draft changed; reload and retry",
   CONFIGURATION_DRAFT_NOT_VALIDATED: "The draft must pass validation before publication",
+  CONFIGURATION_PUBLISH_CONFLICT: "The published configuration changed; reload and retry",
+  CONFIGURATION_REVISION_NOT_FOUND: "The configuration revision does not exist",
+  CONFIGURATION_ROLLBACK_TARGET_MISMATCH:
+    "The rollback source belongs to a different configuration target",
   CONFIGURATION_INPUT_INVALID: "A configuration input is invalid",
 };

@@ -1,5 +1,6 @@
 import type {
   ConfigurationApplyMode,
+  ConfigurationDefinition,
   ConfigurationTargetType,
 } from "@sdar/runtime-configuration-contract";
 
@@ -64,6 +65,13 @@ export interface EffectiveConfigurationPreview {
   readonly applyMode: ConfigurationApplyMode;
   readonly valid: boolean;
   readonly issues: readonly ConfigurationValidationIssue[];
+}
+
+export interface ConfigurationPublicationSnapshot {
+  readonly draft: ConfigurationDraft;
+  readonly definition: ConfigurationDefinition;
+  readonly effectiveContent: ConfigurationContent;
+  readonly applyMode: ConfigurationApplyMode;
 }
 
 export interface CreateConfigurationDraft {

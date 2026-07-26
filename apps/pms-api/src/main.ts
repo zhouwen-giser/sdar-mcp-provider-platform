@@ -9,7 +9,10 @@ import {
   PostgresPmsUnitOfWork,
   runPmsMigrations,
 } from "../../../packages/pms-persistence-postgres/src/index.js";
-import { createDefaultConfigurationCenter } from "../../../packages/configuration-center/src/index.js";
+import {
+  ConfigurationPublicationService,
+  createDefaultConfigurationCenter,
+} from "../../../packages/configuration-center/src/index.js";
 import { createPmsApi } from "./app.js";
 
 const port = boundedPort(process.env.PMS_API_PORT);
@@ -17,10 +20,12 @@ const host = process.env.PMS_API_HOST ?? "127.0.0.1";
 const pool = new Pool({ connectionString: await databaseUrl() });
 await runPmsMigrations(pool);
 const unitOfWork = new PostgresPmsUnitOfWork(pool);
+const configurationCenter = createDefaultConfigurationCenter();
 const app = createPmsApi({
   providerPackages: await loadProviderPackageQueryService(),
   management: new ProviderManagementService(unitOfWork),
-  configurationCenter: createDefaultConfigurationCenter(),
+  configurationCenter,
+  configurationPublication: new ConfigurationPublicationService(configurationCenter, unitOfWork),
   readiness: async () => {
     await pool.query("SELECT 1");
     return { ready: true, checks: { database: "ready" } };

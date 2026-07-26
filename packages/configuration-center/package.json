@@ -10,6 +10,7 @@
     "test": "vitest run test"
   },
   "dependencies": {
+    "@sdar/pms-domain": "workspace:*",
     "@sdar/runtime-configuration-contract": "workspace:*",
     "ajv": "8.18.0"
   }

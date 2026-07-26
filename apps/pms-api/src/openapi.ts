@@ -180,6 +180,24 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           responses: { "200": { description: "Redacted effective configuration preview" } },
         },
       },
+      "/api/v1/config-drafts/{draftId}/publish": {
+        post: {
+          operationId: "publishConfigurationDraft",
+          responses: {
+            "200": { description: "Published revision or canonical checksum no-op" },
+            "409": { description: "Optimistic publication conflict" },
+          },
+        },
+      },
+      "/api/v1/config-drafts/{draftId}/rollback": {
+        post: {
+          operationId: "rollbackConfiguration",
+          responses: {
+            "200": { description: "New revision created from explicit historical revision" },
+            "409": { description: "Optimistic publication conflict" },
+          },
+        },
+      },
     },
     components: {
       schemas: {

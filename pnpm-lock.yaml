@@ -189,6 +189,9 @@ importers:
 
   packages/configuration-center:
     dependencies:
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
       '@sdar/runtime-configuration-contract':
         specifier: workspace:*
         version: link:../runtime-configuration-contract

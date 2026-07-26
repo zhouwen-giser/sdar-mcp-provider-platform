@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { RuntimeObservabilityConfigurationDefinition } from "../../../packages/runtime-configuration-contract/src/runtime/observability.js";
-import { ConfigurationCenter } from "../../../packages/configuration-center/src/index.js";
+import {
+  ConfigurationCenter,
+  type ConfigurationPublicationService,
+} from "../../../packages/configuration-center/src/index.js";
 import { createPmsApi, pmsOpenApiDocument } from "../src/index.js";
 
 describe("PMS configuration draft API", () => {
@@ -97,9 +100,68 @@ describe("PMS configuration draft API", () => {
       "/api/v1/config-drafts/{draftId}",
       "/api/v1/config-drafts/{draftId}/validate",
       "/api/v1/config-drafts/{draftId}/effective",
+      "/api/v1/config-drafts/{draftId}/publish",
+      "/api/v1/config-drafts/{draftId}/rollback",
     ]) {
       expect(document.paths).toHaveProperty(path);
     }
+    await app.close();
+  });
+
+  it("routes optimistic publish and explicit rollback with audit context", async () => {
+    const publish = vi.fn(() =>
+      Promise.resolve({
+        outcome: "published",
+        revision: { revision: 2, revisionId: "00000000-0000-4000-8000-000000000002" },
+      }),
+    );
+    const rollback = vi.fn(() =>
+      Promise.resolve({
+        outcome: "published",
+        revision: { revision: 3, revisionId: "00000000-0000-4000-8000-000000000003" },
+      }),
+    );
+    const center = new ConfigurationCenter([RuntimeObservabilityConfigurationDefinition]);
+    const app = createPmsApi({
+      configurationCenter: center,
+      configurationPublication: { publish, rollback } as unknown as ConfigurationPublicationService,
+    });
+    const headers = { "x-actor-id": "admin-1", "x-correlation-id": "publish-flow" };
+
+    const published = await app.inject({
+      method: "POST",
+      url: "/api/v1/config-drafts/otel-production/publish",
+      headers,
+      payload: { expectedDraftVersion: 2, expectedPublishedRevision: 1 },
+    });
+    expect(published.statusCode).toBe(200);
+    expect(publish).toHaveBeenCalledWith(
+      {
+        draftId: "otel-production",
+        expectedDraftVersion: 2,
+        expectedPublishedRevision: 1,
+      },
+      { actorId: "admin-1", correlationId: "publish-flow" },
+    );
+
+    const rolledBack = await app.inject({
+      method: "POST",
+      url: "/api/v1/config-drafts/otel-production/rollback",
+      headers,
+      payload: {
+        expectedDraftVersion: 2,
+        expectedPublishedRevision: 2,
+        sourceRevisionId: "00000000-0000-4000-8000-000000000001",
+      },
+    });
+    expect(rolledBack.statusCode).toBe(200);
+    expect(rollback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: "otel-production",
+        sourceRevisionId: "00000000-0000-4000-8000-000000000001",
+      }),
+      { actorId: "admin-1", correlationId: "publish-flow" },
+    );
     await app.close();
   });
 });

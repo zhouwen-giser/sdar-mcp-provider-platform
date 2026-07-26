@@ -3,6 +3,7 @@ import type {
   ConfigurationBusinessKey,
   ConfigurationCenter,
   ConfigurationContent,
+  ConfigurationPublicationService,
 } from "../../../packages/configuration-center/src/index.js";
 import { PmsDomainError } from "../../../packages/pms-domain/src/index.js";
 import type { ConfigurationTargetType } from "../../../packages/runtime-configuration-contract/src/index.js";
@@ -30,6 +31,15 @@ interface UpdateDraftBody {
   readonly content: ConfigurationContent;
 }
 
+interface PublishBody {
+  readonly expectedDraftVersion: number;
+  readonly expectedPublishedRevision: number | null;
+}
+
+interface RollbackBody extends PublishBody {
+  readonly sourceRevisionId: string;
+}
+
 const identifier = { type: "string", minLength: 1, maxLength: 128 } as const;
 const targetTypes = [
   "environment",
@@ -49,6 +59,7 @@ const content = { type: "object", additionalProperties: true } as const;
 export function registerConfigurationRoutes(
   app: FastifyInstance,
   center: ConfigurationCenter,
+  publication?: ConfigurationPublicationService,
 ): void {
   app.post<{ Body: DraftBody }>(
     "/api/v1/config-drafts",
@@ -153,6 +164,53 @@ export function registerConfigurationRoutes(
     { schema: { params: draftParams() } },
     (request) => center.effectivePreview(request.params.draftId),
   );
+
+  if (publication !== undefined) registerPublicationRoutes(app, publication);
+}
+
+function registerPublicationRoutes(
+  app: FastifyInstance,
+  publication: ConfigurationPublicationService,
+): void {
+  app.post<{ Params: DraftParameters; Body: PublishBody }>(
+    "/api/v1/config-drafts/:draftId/publish",
+    {
+      schema: {
+        params: draftParams(),
+        body: publicationBody(),
+      },
+    },
+    (request) =>
+      publication.publish(
+        { draftId: request.params.draftId, ...request.body },
+        publicationContext(request),
+      ),
+  );
+  app.post<{ Params: DraftParameters; Body: RollbackBody }>(
+    "/api/v1/config-drafts/:draftId/rollback",
+    {
+      schema: {
+        params: draftParams(),
+        body: {
+          ...publicationBody(),
+          required: ["expectedDraftVersion", "expectedPublishedRevision", "sourceRevisionId"],
+          properties: {
+            ...publicationBody().properties,
+            sourceRevisionId: {
+              type: "string",
+              pattern:
+                "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            },
+          },
+        },
+      },
+    },
+    (request) =>
+      publication.rollback(
+        { draftId: request.params.draftId, ...request.body },
+        publicationContext(request),
+      ),
+  );
 }
 
 function draftParams() {
@@ -162,6 +220,30 @@ function draftParams() {
     properties: { draftId: identifier },
     additionalProperties: false,
   } as const;
+}
+
+function publicationBody() {
+  return {
+    type: "object",
+    required: ["expectedDraftVersion", "expectedPublishedRevision"],
+    properties: {
+      expectedDraftVersion: { type: "integer", minimum: 1 },
+      expectedPublishedRevision: {
+        anyOf: [{ type: "integer", minimum: 1 }, { type: "null" }],
+      },
+    },
+    additionalProperties: false,
+  } as const;
+}
+
+function publicationContext(request: FastifyRequest) {
+  const context = requestContext(request);
+  if (context.actorId === undefined) {
+    throw new PmsDomainError("INVALID_DOMAIN_VALUE", "Actor header is required", {
+      field: "x-actor-id",
+    });
+  }
+  return { actorId: context.actorId, correlationId: context.correlationId };
 }
 
 function requireActor(request: FastifyRequest): void {
