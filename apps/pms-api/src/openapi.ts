@@ -152,6 +152,34 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           responses: { "204": { description: "Provider Resource binding removed" } },
         },
       },
+      "/api/v1/config-drafts": {
+        post: {
+          operationId: "createConfigurationDraft",
+          responses: { "201": { description: "Configuration Draft created" } },
+        },
+      },
+      "/api/v1/config-drafts/{draftId}": {
+        get: {
+          operationId: "getConfigurationDraft",
+          responses: { "200": { description: "Configuration Draft" } },
+        },
+        patch: {
+          operationId: "updateConfigurationDraft",
+          responses: { "200": { description: "Configuration Draft updated" } },
+        },
+      },
+      "/api/v1/config-drafts/{draftId}/validate": {
+        post: {
+          operationId: "validateConfigurationDraft",
+          responses: { "200": { description: "Configuration Draft validation result" } },
+        },
+      },
+      "/api/v1/config-drafts/{draftId}/effective": {
+        get: {
+          operationId: "previewEffectiveConfiguration",
+          responses: { "200": { description: "Redacted effective configuration preview" } },
+        },
+      },
     },
     components: {
       schemas: {

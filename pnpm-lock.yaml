@@ -143,6 +143,9 @@ importers:
 
   apps/pms-api:
     dependencies:
+      '@sdar/configuration-center':
+        specifier: workspace:*
+        version: link:../../packages/configuration-center
       '@sdar/pms-application':
         specifier: workspace:*
         version: link:../../packages/pms-application
@@ -183,6 +186,15 @@ importers:
   examples/mock-adapter-typescript: {}
 
   packages/adapter-protocol: {}
+
+  packages/configuration-center:
+    dependencies:
+      '@sdar/runtime-configuration-contract':
+        specifier: workspace:*
+        version: link:../runtime-configuration-contract
+      ajv:
+        specifier: 8.18.0
+        version: 8.18.0
 
   packages/conformance-testkit: {}
 
@@ -2421,8 +2433,8 @@ snapshots:
 
   '@fastify/ajv-compiler@4.0.5':
     dependencies:
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
       fast-uri: 3.1.4
 
   '@fastify/error@4.2.0': {}
@@ -3031,6 +3043,10 @@ snapshots:
 
   agent-base@7.1.4: {}
 
+  ajv-formats@3.0.1(ajv@8.18.0):
+    optionalDependencies:
+      ajv: 8.18.0
+
   ajv-formats@3.0.1(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -3378,8 +3394,8 @@ snapshots:
   fast-json-stringify@7.0.1:
     dependencies:
       '@fastify/merge-json-schemas': 0.2.1
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
       fast-uri: 4.1.1
       json-schema-ref-resolver: 3.0.0
       rfdc: 1.4.1

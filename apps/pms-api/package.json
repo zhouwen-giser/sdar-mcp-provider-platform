@@ -10,6 +10,7 @@
     "test": "vitest run test"
   },
   "dependencies": {
+    "@sdar/configuration-center": "workspace:*",
     "@sdar/pms-application": "workspace:*",
     "@sdar/pms-domain": "workspace:*",
     "@sdar/pms-persistence-postgres": "workspace:*",

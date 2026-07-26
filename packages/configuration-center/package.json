@@ -1,0 +1,16 @@
+{
+  "name": "@sdar/configuration-center",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run test"
+  },
+  "dependencies": {
+    "@sdar/runtime-configuration-contract": "workspace:*",
+    "ajv": "8.18.0"
+  }
+}

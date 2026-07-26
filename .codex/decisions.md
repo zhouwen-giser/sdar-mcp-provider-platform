@@ -75,3 +75,10 @@ ports require it, but read models did not return the token. A management client 
 perform a valid optimistic status update. Add optional validated `updatedAt` values to these pure
 entities and map the existing columns in PostgreSQL. This minimal domain/persistence correction is
 outside the API card allowlist but introduces no schema or future capability.
+
+## 2026-07-26 — G1-P5-B04 configuration verification wiring
+
+The mandatory `pnpm test:pms-config` command does not exist. Add one root script that runs the
+Configuration Center contract suite and the PMS Config Draft API suite using explicit TypeScript
+test paths. This is the minimum out-of-range verification wiring and avoids root Vitest discovering
+stale compiled test copies; it adds no empty success shim or publication capability.

@@ -4,6 +4,8 @@ import type {
   ProviderPackageListFilter,
   ProviderPackageQueryService,
 } from "../../../packages/pms-application/src/index.js";
+import type { ConfigurationCenter } from "../../../packages/configuration-center/src/index.js";
+import { registerConfigurationRoutes } from "./configuration-routes.js";
 import { attachRequestContext, requestContext } from "./context.js";
 import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
@@ -18,6 +20,7 @@ export interface PmsApiOptions {
   readonly readiness?: () => Promise<PmsReadiness>;
   readonly providerPackages?: ProviderPackageQueryService;
   readonly management?: ProviderManagementService;
+  readonly configurationCenter?: ConfigurationCenter;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -49,6 +52,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.management !== undefined) {
     registerManagementRoutes(app, options.management);
+  }
+  if (options.configurationCenter !== undefined) {
+    registerConfigurationRoutes(app, options.configurationCenter);
   }
 
   return app;

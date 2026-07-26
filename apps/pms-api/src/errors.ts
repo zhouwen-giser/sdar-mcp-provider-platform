@@ -1,5 +1,9 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 import {
+  ConfigurationCenterError,
+  type ConfigurationCenterErrorCode,
+} from "../../../packages/configuration-center/src/index.js";
+import {
   PmsDomainError,
   PmsRepositoryError,
   type PmsDomainErrorCode,
@@ -57,7 +61,20 @@ function classifyError(error: FastifyError): PublicError {
   }
   if (error instanceof PmsDomainError) return domainError(error.code);
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
+  if (error instanceof ConfigurationCenterError) return configurationError(error.code);
   return { statusCode: 500, code: "INTERNAL_ERROR", message: "An internal error occurred" };
+}
+
+function configurationError(code: ConfigurationCenterErrorCode): PublicError {
+  const statusCode =
+    code === "CONFIGURATION_DEFINITION_NOT_FOUND" || code === "CONFIGURATION_DRAFT_NOT_FOUND"
+      ? 404
+      : code === "CONFIGURATION_BUSINESS_KEY_CONFLICT" ||
+          code === "CONFIGURATION_DRAFT_VERSION_CONFLICT" ||
+          code === "CONFIGURATION_DRAFT_NOT_VALIDATED"
+        ? 409
+        : 400;
+  return { statusCode, code, message: CONFIGURATION_MESSAGES[code] };
 }
 
 function domainError(code: PmsDomainErrorCode): PublicError {
@@ -86,4 +103,14 @@ const REPOSITORY_MESSAGES: Readonly<Record<PmsRepositoryErrorCode, string>> = {
   ENTITY_NOT_FOUND: "The entity does not exist",
   OPTIMISTIC_CONCURRENCY_CONFLICT: "The entity changed; reload and retry",
   LEASE_NOT_OWNED: "The lease is stale or is not owned",
+};
+
+const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, string>> = {
+  CONFIGURATION_DEFINITION_NOT_FOUND: "The configuration definition does not exist",
+  CONFIGURATION_TARGET_NOT_ALLOWED: "The configuration target is not allowed",
+  CONFIGURATION_BUSINESS_KEY_CONFLICT: "A draft already exists for this configuration target",
+  CONFIGURATION_DRAFT_NOT_FOUND: "The configuration draft does not exist",
+  CONFIGURATION_DRAFT_VERSION_CONFLICT: "The draft changed; reload and retry",
+  CONFIGURATION_DRAFT_NOT_VALIDATED: "The draft must pass validation before publication",
+  CONFIGURATION_INPUT_INVALID: "A configuration input is invalid",
 };

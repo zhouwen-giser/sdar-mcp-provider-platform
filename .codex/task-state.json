@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T12:29:59.661291+00:00",
+  "updatedAt": "2026-07-26T12:43:46.035670+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -373,14 +373,16 @@
       "reason": null
     },
     "G1-P5-B04": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T12:30:53.001150+00:00",
+      "completedAt": "2026-07-26T12:43:46.035558+00:00",
+      "evidence": [
+        "pnpm test:pms-config: PASS 2 files/9 tests; shared definitions load; business key create/update and optimistic version reset covered; provider > provider_type > system_default inheritance and sources covered; JSON Schema invalid draft remains non-publishable through validated-only gate; immutable override rejected; plaintext secret rejected before storage/API reflection; SecretRef effective preview redacted; PMS Config Draft create/get/update/validate/effective routes and actor requirement/OpenAPI covered; existing PMS API regression PASS 14/14; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P5-B05": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
