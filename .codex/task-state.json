@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "1.0",
+  "activeGoal": "goal-01",
+  "updatedAt": "2026-07-26T09:00:38.351835+00:00",
+  "tasks": {
+    "G1-P0-B01": {
+      "status": "READY",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P0-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P0-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P0-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P0-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P0-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B07": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P1-B08": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P2-B07": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B07": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B08": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B09": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P3-B10": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P4-B07": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B05": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B06": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B07": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P5-B08": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P6-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P6-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P6-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G1-P6-B04": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    }
+  }
+}
