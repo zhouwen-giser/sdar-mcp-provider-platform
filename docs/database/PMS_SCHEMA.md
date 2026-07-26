@@ -9,7 +9,8 @@ Provider Adapter business tables.
 PMS migrations are append-only SQL files in `migrations/pms/`, starting with
 `001_control_plane_foundation.sql`. Migration `002_provider_package_source_projection.sql` adds the
 lossless source descriptor projection and aligns Provider Type IDs with the underscores used by the
-delivered packages. A PMS migration runner must:
+delivered packages. Migration `003_audit_append_only.sql` rejects Audit updates and deletes at the
+database boundary. A PMS migration runner must:
 
 1. resolve only the `pms` migration set;
 2. serialize runners with a PMS-specific advisory lock;
@@ -23,19 +24,19 @@ the authoritative application and checksum record.
 
 ## Tables and ownership
 
-| Table                       | Purpose                                                  | Key boundary                              |
-| --------------------------- | -------------------------------------------------------- | ----------------------------------------- |
-| `pms_schema_migration`      | PMS migration filename, checksum, and application time   | PMS-only metadata                         |
-| `provider_type`             | Provider taxonomy and lifecycle                          | Logical type ID                           |
-| `provider_package`          | Versioned built-in/offline package descriptor            | Package ID, version, immutable checksum   |
-| `provider`                  | Logical Provider and hosting mode                        | Vendor-managed by default                 |
-| `resource`                  | Environment-scoped resource inventory                    | `(environment, resource_id)`              |
-| `provider_resource_binding` | Provider–Resource many-to-many relation                  | No single-resource field on Provider      |
-| `config_definition`         | Configuration target, schema, defaults, and field policy | Unique configuration business key         |
-| `config_revision`           | Immutable configuration content and publication state    | Monotonic revision per definition         |
-| `config_ack`                | Runtime application result for a revision                | One Ack per Runtime instance and revision |
-| `audit`                     | Append-only-shaped control-plane audit event             | Correlation and subject indexes           |
-| `job_lease`                 | Short PMS worker claim with fencing token                | No external work inside DB transactions   |
+| Table                       | Purpose                                                  | Key boundary                                |
+| --------------------------- | -------------------------------------------------------- | ------------------------------------------- |
+| `pms_schema_migration`      | PMS migration filename, checksum, and application time   | PMS-only metadata                           |
+| `provider_type`             | Provider taxonomy and lifecycle                          | Logical type ID                             |
+| `provider_package`          | Versioned built-in/offline package descriptor            | Package ID, version, immutable checksum     |
+| `provider`                  | Logical Provider and hosting mode                        | Vendor-managed by default                   |
+| `resource`                  | Environment-scoped resource inventory                    | `(environment, resource_id)`                |
+| `provider_resource_binding` | Provider–Resource many-to-many relation                  | No single-resource field on Provider        |
+| `config_definition`         | Configuration target, schema, defaults, and field policy | Unique configuration business key           |
+| `config_revision`           | Immutable configuration content and publication state    | Monotonic revision per definition           |
+| `config_ack`                | Runtime application result for a revision                | One Ack per Runtime instance and revision   |
+| `audit`                     | Append-only control-plane audit event                    | Mutation-blocking trigger and query indexes |
+| `job_lease`                 | Short PMS worker claim with fencing token                | No external work inside DB transactions     |
 
 No table named `provider_task`, `task_command`, `task_observation`, `scheduler`, `recovery`,
 `outbox_event`, or other Runtime business table is present. Runtime and Provider migration sets

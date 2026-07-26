@@ -143,3 +143,7 @@
 - 2026-07-26T11:50:55.096879+00:00 START G1-P4-B05
 
 - 2026-07-26T11:58:15.073654+00:00 PASS G1-P4-B05 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 2 files/9 tests; first sync imports exactly UGV/NPC Tank/Home Assistant packages and provider types in one UoW; identical checksum rerun unchanged=3 with zero audit noise; DB checksum/source_document drift overwritten from controlled file with audit; damaged descriptor rejected before transaction and counts unchanged; full 001+002 PMS migration test PASS 4/4 including repeated apply; Provider Registry/Domain regression PASS 28/28; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS; application source contains no SQL']
+
+- 2026-07-26T11:59:11.530544+00:00 START G1-P4-B06
+
+- 2026-07-26T12:02:49.257741+00:00 PASS G1-P4-B06 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 3 files/13 tests; AuditService requires actorId/correlationId and persists both; migration 003 DB trigger rejects direct Audit UPDATE and DELETE with SQLSTATE 55000; two concurrent workers claim one job exactly once; expired lease reclaimed by new owner with incremented fencing token; stale owner renew/release rejected; renew expiry verified against database clock; full 001+002+003 migration repeated-apply test PASS 4/4; typecheck, eslint, prettier, build and git diff --check PASS']

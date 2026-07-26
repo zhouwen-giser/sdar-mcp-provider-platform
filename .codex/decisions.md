@@ -58,3 +58,12 @@ changes outside the card allowlist, not future platform capability.
 The mandatory root `pnpm test:pms` command was also absent. Add one real database-gated script that
 runs the PMS application and persistence integration suites; update the existing PMS migration-set
 expectation for the append-only `002` file. This is verification wiring, not an empty success shim.
+
+## 2026-07-26 — G1-P4-B06 database-enforced append-only Audit
+
+An append-only repository interface alone cannot prevent a privileged application path from issuing
+an Audit update or delete. Do not modify prior migrations; append PMS migration
+`003_audit_append_only.sql` with a database trigger that rejects both operations. Extend the
+existing real `test:pms` wiring and migration-set expectation for the new concurrency/security
+suite. These minimal migration and verification changes are necessary to prove the card's explicit
+append-only acceptance criterion.

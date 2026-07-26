@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T11:58:15.073719+00:00",
+  "updatedAt": "2026-07-26T12:02:49.257838+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -328,14 +328,16 @@
       "reason": null
     },
     "G1-P4-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T11:59:11.530485+00:00",
+      "completedAt": "2026-07-26T12:02:49.257666+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 3 files/13 tests; AuditService requires actorId/correlationId and persists both; migration 003 DB trigger rejects direct Audit UPDATE and DELETE with SQLSTATE 55000; two concurrent workers claim one job exactly once; expired lease reclaimed by new owner with incremented fencing token; stale owner renew/release rejected; renew expiry verified against database clock; full 001+002+003 migration repeated-apply test PASS 4/4; typecheck, eslint, prettier, build and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P4-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

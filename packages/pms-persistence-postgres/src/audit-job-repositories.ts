@@ -151,7 +151,7 @@ export class PostgresJobLeaseRepository implements JobLeaseRepository {
           AND lease_token=$3 AND fencing_token=$4
           AND lease_expires_at>clock_timestamp()
        RETURNING *`,
-      identityValues(identity, leaseDurationMs),
+      [...identityValues(identity), leaseDurationMs],
     );
     const row = result.rows[0];
     if (row === undefined) throw leaseNotOwned(identity.jobId);
@@ -166,7 +166,7 @@ export class PostgresJobLeaseRepository implements JobLeaseRepository {
               updated_at=clock_timestamp()
         WHERE job_id=$1 AND status='leased' AND lease_owner=$2
           AND lease_token=$3 AND fencing_token=$4`,
-      identityValues(identity, availableAt ?? null),
+      [...identityValues(identity), availableAt ?? null],
     );
     assertLeaseResult(result.rowCount, identity.jobId);
   }
@@ -178,7 +178,7 @@ export class PostgresJobLeaseRepository implements JobLeaseRepository {
               updated_at=clock_timestamp()
         WHERE job_id=$1 AND status='leased' AND lease_owner=$2
           AND lease_token=$3 AND fencing_token=$4`,
-      identityValues(identity, null),
+      identityValues(identity),
     );
     assertLeaseResult(result.rowCount, identity.jobId);
   }
@@ -191,7 +191,7 @@ export class PostgresJobLeaseRepository implements JobLeaseRepository {
               updated_at=clock_timestamp()
         WHERE job_id=$1 AND status='leased' AND lease_owner=$2
           AND lease_token=$3 AND fencing_token=$4`,
-      identityValues(identity, availableAt),
+      [...identityValues(identity), availableAt],
     );
     assertLeaseResult(result.rowCount, identity.jobId);
   }
@@ -245,8 +245,8 @@ function leaseFromRow(row: LeaseRow): JobLease {
   });
 }
 
-function identityValues(identity: LeaseIdentity, fifth: unknown): unknown[] {
-  return [identity.jobId, identity.owner, identity.token, identity.fencingToken.toString(), fifth];
+function identityValues(identity: LeaseIdentity): unknown[] {
+  return [identity.jobId, identity.owner, identity.token, identity.fencingToken.toString()];
 }
 
 function leaseNotOwned(jobId: string): PmsRepositoryError {

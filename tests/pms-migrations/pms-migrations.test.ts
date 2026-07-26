@@ -53,6 +53,7 @@ describe("PMS control-plane migration set", () => {
     expect(files.map(({ filename }) => filename)).toEqual([
       "001_control_plane_foundation.sql",
       "002_provider_package_source_projection.sql",
+      "003_audit_append_only.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
