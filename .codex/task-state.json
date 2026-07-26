@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T11:32:00.956514+00:00",
+  "updatedAt": "2026-07-26T11:37:31.075316+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -301,14 +301,16 @@
       "reason": null
     },
     "G1-P4-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T11:32:58.822744+00:00",
+      "completedAt": "2026-07-26T11:37:31.075170+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-domain test: PASS 2 files/14 tests; CRUD/query ports cover provider type/package/provider/resource/N:N/config; mutable aggregate saves require updatedAt optimistic precondition and config revision creation requires expected latest revision; UoW callback commit/rollback contract explicit; append-only audit and DB-time fenced Job Lease ports defined; pg/Fastify/persistence type scan clean; full TypeScript, eslint, prettier and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P4-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

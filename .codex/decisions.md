@@ -28,3 +28,11 @@ validates a PMS schema because the Migration set was previously empty. Add one r
 focused PostgreSQL test outside the card's production-file allowlist. The test applies the real SQL
 twice in an isolated schema, checks the exact table boundary, and exercises representative UUID,
 checksum, JSONB, and Job Lease constraints; it is not an empty success shim.
+
+## 2026-07-26 — G1-P4-B03 ports public export and contract test
+
+Repository ports under the allowed `src/ports/**` path would not be consumable through the package's
+existing root export, and the mandatory package test would not exercise type-only contracts.
+Export the ports from `src/index.ts` and add one compile-time/runtime contract test under the
+existing package test directory. These are the smallest out-of-range wiring changes; they add no
+implementation or infrastructure dependency.
