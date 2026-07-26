@@ -169,6 +169,8 @@ importers:
 
   packages/provider-package-registry: {}
 
+  packages/runtime-configuration-contract: {}
+
   packages/task-engine: {}
 
   packages/vehicle-device-mcp-client: {}

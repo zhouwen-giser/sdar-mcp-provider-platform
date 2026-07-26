@@ -87,3 +87,7 @@
 - 2026-07-26T10:23:04.028819+00:00 START G1-P3-B01
 
 - 2026-07-26T10:28:21.385067+00:00 PASS G1-P3-B01 evidence=['python3 .codex/task-package/scripts/verify_config_inventory.py: PASS, 226 items; independent TypeScript AST key-set audit: expected=226 actual=226 unique=226 (runtime 98, UGV 50, NPC 52, Climate 26); source line/default/required/validator audit: PASS 226/226; 22 Secret-bearing fields identified; 3 connection-string defaults redacted in evidence and SHA-256 matched to source; bootstrap/runtime/provider/collector groups explicit, collector=0; unknown apply modes conservatively restart_required pending review; prettier and git diff --check PASS']
+
+- 2026-07-26T10:29:01.581236+00:00 START G1-P3-B02
+
+- 2026-07-26T10:35:54.762524+00:00 PASS G1-P3-B02 evidence=['pnpm --filter @sdar/runtime-configuration-contract test: PASS 1 file/7 tests; pnpm typecheck: PASS; model covers schema/defaults/secretPaths, 4 Apply Modes, 6 target types, inheritance, per-field metadata and override policy; invalid Apply Mode and consistency violations expose stable codes; canonical JSON exact string and SHA-256 locked, cycles/non-JSON rejected; eslint, prettier, git diff --check PASS; pnpm-lock only adds workspace importer']
