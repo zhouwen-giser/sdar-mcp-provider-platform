@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:43:28.892139+00:00",
+  "updatedAt": "2026-07-26T14:48:08.747769+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -58,14 +58,16 @@
       "reason": null
     },
     "G2-P1-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:44:24.351583+00:00",
+      "completedAt": "2026-07-26T14:48:08.747547+00:00",
+      "evidence": [
+        "append-only migrations/pms/005_runtime_deployment.sql; migration-004 existing PMS schema upgrade preserves Provider row and creates deployment/process/action tables; mandatory PostgreSQL pms-migrations PASS 1 file/6 tests including repeated apply, provider FK, revision/replica checks, stable instance/PM2/port constraints and action idempotency; PMS regression PASS 4 files/16 tests; migration resolver PASS 1/9; old migrations 001-004 git diff clean; typecheck/prettier/git diff/secret scan PASS"
+      ],
       "reason": null
     },
     "G2-P1-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

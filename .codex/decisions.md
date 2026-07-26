@@ -114,3 +114,13 @@ check invoke installation unless the workspace has an importer in `pnpm-lock.yam
 empty `packages/runtime-deployment: {}` importer. This minimal out-of-range lock metadata is needed
 for the card's mandatory filtered test and frozen installation; it adds no dependency or later
 Runtime process, persistence, PM2, or provisioning capability.
+
+## 2026-07-26 — G2-P1-B03 RuntimeDeployment migration constraint coverage
+
+The card permits the new PMS SQL and schema documentation, while its completion criteria require
+constraint coverage and the mandatory existing PMS migration suite hard-codes both the migration
+list and table boundary. Update only `tests/pms-migrations/pms-migrations.test.ts` outside the
+allowlist to recognize append-only migration `005`, the three new control-plane tables, and to
+exercise Provider FK, desired replica consistency, PM2-name uniqueness, stable instance linkage,
+action idempotency, and an upgrade from the exact migration-004 schema while preserving existing
+Provider rows. This does not weaken or skip any existing assertion.

@@ -16,6 +16,9 @@ const EXPECTED_TABLES = [
   "provider_resource_binding",
   "provider_type",
   "resource",
+  "runtime_deployment",
+  "runtime_deployment_action",
+  "runtime_process",
 ] as const;
 
 const RUNTIME_TABLES = [
@@ -55,6 +58,7 @@ describe("PMS control-plane migration set", () => {
       "002_provider_package_source_projection.sql",
       "003_audit_append_only.sql",
       "004_config_revision_history_guard.sql",
+      "005_runtime_deployment.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
@@ -76,6 +80,53 @@ describe("PMS control-plane migration set", () => {
       [schema],
     );
     expect(tables.rows.map(({ tablename }) => tablename)).toEqual(EXPECTED_TABLES);
+  });
+
+  it("upgrades an existing migration-004 PMS schema without losing control-plane rows", async () => {
+    const upgradeSchema = `pms_upgrade_${randomUUID().replaceAll("-", "")}`;
+    const files = await resolveMigrationSet(process.cwd(), "pms");
+    const sql = await Promise.all(files.map(({ absolutePath }) => readFile(absolutePath, "utf8")));
+
+    await client.query(`CREATE SCHEMA ${upgradeSchema}`);
+    try {
+      await client.query(`SET search_path TO ${upgradeSchema}`);
+      for (const migration of sql.slice(0, 4)) await client.query(migration);
+      await client.query(
+        `INSERT INTO provider_type(provider_type_id, display_name, status)
+         VALUES ('isr.vehicle.ugv', 'UGV', 'active')`,
+      );
+      await client.query(
+        `INSERT INTO provider(provider_id, provider_type_id, hosting_mode, status)
+         VALUES ('provider:upgrade', 'isr.vehicle.ugv', 'vendor_managed', 'active')`,
+      );
+
+      const runtimeDeploymentMigration = sql[4];
+      if (runtimeDeploymentMigration === undefined) {
+        throw new Error("runtime deployment migration is missing");
+      }
+      await client.query(runtimeDeploymentMigration);
+
+      const result = await client.query<{ provider_id: string }>(
+        `SELECT provider_id FROM provider WHERE provider_id = 'provider:upgrade'`,
+      );
+      expect(result.rows).toEqual([{ provider_id: "provider:upgrade" }]);
+      const tables = await client.query<{ table_name: string }>(
+        `SELECT table_name
+           FROM information_schema.tables
+          WHERE table_schema = $1
+            AND table_name = ANY($2::text[])
+          ORDER BY table_name`,
+        [upgradeSchema, ["runtime_deployment", "runtime_process", "runtime_deployment_action"]],
+      );
+      expect(tables.rows.map(({ table_name }) => table_name)).toEqual([
+        "runtime_deployment",
+        "runtime_deployment_action",
+        "runtime_process",
+      ]);
+    } finally {
+      await client.query(`SET search_path TO ${schema}`);
+      await client.query(`DROP SCHEMA IF EXISTS ${upgradeSchema} CASCADE`);
+    }
   });
 
   it("contains no Runtime Task Authority business tables", async () => {
@@ -125,6 +176,96 @@ describe("PMS control-plane migration set", () => {
          VALUES ('job-1', 'config.publish', '{}'::jsonb, 'leased')`,
       ),
     ).rejects.toMatchObject({ code: "23514" });
+  });
+
+  it("enforces RuntimeDeployment provider, revision, identity, port, and action constraints", async () => {
+    await client.query(
+      `INSERT INTO provider(
+         provider_id, provider_type_id, hosting_mode, status
+       ) VALUES (
+         'provider:ugv1', 'isr.vehicle.ugv', 'vendor_managed', 'active'
+       ) ON CONFLICT (provider_id) DO NOTHING`,
+    );
+
+    await expect(
+      client.query(
+        `INSERT INTO runtime_deployment(
+           deployment_id, provider_id, environment, desired_state, desired_replicas,
+           runtime_version, database_profile_id, config_profile_id, status
+         ) VALUES (
+           'deployment-missing-provider', 'provider:missing', 'production', 'running', 1,
+           '2.0.0-rc.1', 'db-profile-1', 'config-profile-1', 'REQUESTED'
+         )`,
+      ),
+    ).rejects.toMatchObject({ code: "23503" });
+
+    await expect(
+      client.query(
+        `INSERT INTO runtime_deployment(
+           deployment_id, provider_id, environment, desired_state, desired_replicas,
+           runtime_version, database_profile_id, config_profile_id, status
+         ) VALUES (
+           'deployment-invalid-replicas', 'provider:ugv1', 'production', 'running', 0,
+           '2.0.0-rc.1', 'db-profile-1', 'config-profile-1', 'REQUESTED'
+         )`,
+      ),
+    ).rejects.toMatchObject({ code: "23514" });
+
+    await client.query(
+      `INSERT INTO runtime_deployment(
+         deployment_id, provider_id, environment, desired_state, desired_replicas,
+         runtime_version, database_profile_id, config_profile_id, status
+       ) VALUES (
+         'deployment-1', 'provider:ugv1', 'production', 'running', 1,
+         '2.0.0-rc.1', 'db-profile-1', 'config-profile-1', 'REQUESTED'
+       )`,
+    );
+    await client.query(
+      `INSERT INTO runtime_process(
+         runtime_instance_id, deployment_id, environment, pm2_name, pid, port,
+         process_state, liveness_state, readiness_state, registration_state,
+         catalog_state, config_state
+       ) VALUES (
+         'instance-01', 'deployment-1', 'production', 'sdar-runtime-production-ugv-01',
+         101, 30001, 'online', 'live', 'ready', 'registered', 'valid', 'current'
+       )`,
+    );
+
+    await expect(
+      client.query(
+        `INSERT INTO runtime_process(
+           runtime_instance_id, deployment_id, environment, pm2_name, port,
+           process_state, liveness_state, readiness_state, registration_state,
+           catalog_state, config_state
+         ) VALUES (
+           'instance-02', 'deployment-1', 'production', 'sdar-runtime-production-ugv-01',
+           30002, 'starting', 'unknown', 'unknown', 'unregistered', 'unknown', 'unknown'
+         )`,
+      ),
+    ).rejects.toMatchObject({ code: "23505" });
+
+    await client.query(
+      `INSERT INTO runtime_deployment_action(
+         action_id, deployment_id, runtime_instance_id, action_type, idempotency_key,
+         status, expected_revision, resulting_revision, actor_id, correlation_id, completed_at
+       ) VALUES (
+         '11111111-1111-4111-8111-111111111111', 'deployment-1', 'instance-01',
+         'START', 'start-revision-0', 'succeeded', 0, 1, 'admin-1', 'request-1',
+         clock_timestamp()
+       )`,
+    );
+    await expect(
+      client.query(
+        `INSERT INTO runtime_deployment_action(
+           action_id, deployment_id, action_type, idempotency_key,
+           status, actor_id, correlation_id, completed_at
+         ) VALUES (
+           '22222222-2222-4222-8222-222222222222', 'deployment-1',
+           'START', 'start-revision-0', 'noop', 'admin-1', 'request-2',
+           clock_timestamp()
+         )`,
+      ),
+    ).rejects.toMatchObject({ code: "23505" });
   });
 });
 

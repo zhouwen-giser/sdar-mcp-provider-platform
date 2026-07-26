@@ -223,3 +223,7 @@
 - 2026-07-26T14:41:16.646060+00:00 START G2-P1-B02
 
 - 2026-07-26T14:43:28.892078+00:00 PASS G2-P1-B02 evidence=['RuntimeProcess stable identity and observation projection; PM2/PID/port/heartbeat/version/config/registration/catalog fields; observed health matrix and stale heartbeat boundary; PM2 online-only NOT_READY; PID changes preserve instanceId; identical observation idempotent and changed stale revision rejected; mandatory filtered and root runtime-deployment gates PASS 2 files/34 tests; typecheck/ESLint/Prettier/git diff check/dependency scan PASS']
+
+- 2026-07-26T14:44:24.351660+00:00 START G2-P1-B03
+
+- 2026-07-26T14:48:08.747631+00:00 PASS G2-P1-B03 evidence=['append-only migrations/pms/005_runtime_deployment.sql; migration-004 existing PMS schema upgrade preserves Provider row and creates deployment/process/action tables; mandatory PostgreSQL pms-migrations PASS 1 file/6 tests including repeated apply, provider FK, revision/replica checks, stable instance/PM2/port constraints and action idempotency; PMS regression PASS 4 files/16 tests; migration resolver PASS 1/9; old migrations 001-004 git diff clean; typecheck/prettier/git diff/secret scan PASS']
