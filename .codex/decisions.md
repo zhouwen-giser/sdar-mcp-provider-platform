@@ -161,3 +161,10 @@ not be consumable through the package root and the mandatory package command onl
 existing `test/**` directory. Add one root index export and one focused Port contract test outside
 the allowlist. These are minimal public wiring and verification changes: they add no PostgreSQL
 driver, Secret resolver, network behavior, or Provisioner implementation.
+
+## 2026-07-26 — G2-P2-B04 Provisioner workspace lock importer
+
+The new `packages/postgres-provisioner` workspace consumes the existing pure Provisioner Port and
+the repository's existing `pg` version. Add only its generated workspace importer to
+`pnpm-lock.yaml`. This is required for filtered tests and frozen installation; it adds no new
+external package version or authority.

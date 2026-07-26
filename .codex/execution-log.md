@@ -259,3 +259,7 @@
 - 2026-07-26T15:33:15.995895+00:00 START G2-P2-B03
 
 - 2026-07-26T15:35:21.536574+00:00 PASS G2-P2-B03 evidence=['@sdar/runtime-deployment mandatory test PASS 3 files/37 tests; FakeProvisioner deterministic replay/dry-run/inspect contract; explicit deletion policy target binding; retryable error classification; no admin URL/connection string/secret value fields; pnpm typecheck; git diff --check']
+
+- 2026-07-26T15:35:45.627586+00:00 START G2-P2-B04
+
+- 2026-07-26T15:51:22.670267+00:00 PASS G2-P2-B04 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/postgres-provisioner test PASS 1 file/8 tests; controlled PostgreSQL 17 integration with temporary NOSUPERUSER CREATEDB/CREATEROLE provisioner and restricted Runtime role; idempotent role/database/grant; Runtime SELECT+DDL verify; SQL injection rejected before query; credential rotation hook; explicit guarded delete; cleanup audit 0 temporary roles/0 databases; frozen offline install, typecheck, ESLint, Prettier, secret-output scan, git diff check PASS']
