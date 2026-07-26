@@ -299,3 +299,7 @@
 - 2026-07-26T16:42:28.169190+00:00 START G2-P3-B04
 
 - 2026-07-26T16:45:31.057914+00:00 PASS G2-P3-B04 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (3 files/19 tests); tsc --noEmit; eslint targeted; temporary-filesystem release containment/mode contract']
+
+- 2026-07-26T16:47:37.088134+00:00 START G2-P3-B05
+
+- 2026-07-26T16:51:55.830243+00:00 PASS G2-P3-B05 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:runtime-deployment (7 files/49 tests); TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run packages/pms-persistence-postgres/test/runtime-instance-allocator.test.ts (1 file/1 concurrency integration); tsc --noEmit; eslint targeted']
