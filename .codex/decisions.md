@@ -200,3 +200,11 @@ such package and the mandatory filtered test cannot resolve it. Add only the min
 manifest, root source export, focused Bootstrap renderer test, and generated lock importer outside
 `src/bootstrap/**`. The package consumes the existing infrastructure-neutral type contract and
 adds no PM2 library, process control, arbitrary environment, script, cwd, or command capability.
+
+## 2026-07-26 — G2-P3-B03 Process Manager export and Fake API contract
+
+The card restricts implementation to `src/pm2/**`; expose the manager through the package root and
+add a focused Fake JavaScript-API contract test so the mandatory filtered command exercises
+namespace denial, idempotency, Fork Mode, error mapping, and disconnect cleanup. The adapter takes
+an injected callback-compatible PM2 API rather than adding a shell command or an unneeded external
+dependency in this task. These minimal out-of-range files do not claim real PM2 certification.
