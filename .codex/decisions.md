@@ -132,3 +132,11 @@ projection. Add that existing workspace package to
 `packages/pms-persistence-postgres/package.json` and only its generated workspace link to
 `pnpm-lock.yaml`. The package remains an infrastructure adapter depending inward on a pure domain
 package; no PM2 or PostgreSQL type enters the RuntimeDeployment domain.
+
+## 2026-07-26 — G2-P1-B05 application workspace and mandatory test wiring
+
+RuntimeDeployment application use cases depend on the existing pure domain workspace, so add its
+workspace link to `packages/pms-application` and the generated lock importer. The mandatory root
+`pnpm test:pms` command previously listed explicit files and would omit the new use-case suite;
+append that real suite to the command. These are minimal wiring changes, not PM2 integration or an
+empty success script.

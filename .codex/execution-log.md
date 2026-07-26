@@ -231,3 +231,7 @@
 - 2026-07-26T14:49:45.245499+00:00 START G2-P1-B04
 
 - 2026-07-26T14:54:55.872806+00:00 PASS G2-P1-B04 evidence=['PostgresRuntimeDeployment/RuntimeProcess/Action repositories plus transactional UoW; mandatory @sdar/pms-persistence-postgres PostgreSQL suite PASS 4 files/20 tests; conflicting deployment CAS one winner/stable conflict; identical save and heartbeat retries no-op; changed stale heartbeat conflict; all reads Provider-scoped; action append idempotency and divergent reuse rejection; commit/rollback across deployment/process/action; typecheck/ESLint/Prettier/offline frozen lock/git diff/authority+secret scan PASS']
+
+- 2026-07-26T14:55:45.874390+00:00 START G2-P1-B05
+
+- 2026-07-26T14:59:55.969649+00:00 PASS G2-P1-B05 evidence=['RuntimeDeployment create/start/stop/restart/scale/reconcile desired-intent use cases; Provider/config/database prerequisites; stop sets draining; replicas>1 rejected without gateway; jobs and Audit appended through application UoW; no PM2/process-manager calls or secret payloads; mandatory pnpm test:pms PASS 5 files/22 tests including new 6/6; typecheck/ESLint/Prettier/offline frozen lock/git diff scans PASS']

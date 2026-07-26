@@ -12,6 +12,7 @@
   "dependencies": {
     "@sdar/pms-domain": "workspace:*",
     "@sdar/provider-package-registry": "workspace:*",
+    "@sdar/runtime-deployment": "workspace:*",
     "pg": "8.22.0"
   }
 }

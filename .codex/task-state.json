@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:54:55.872924+00:00",
+  "updatedAt": "2026-07-26T14:59:55.969755+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -76,14 +76,16 @@
       "reason": null
     },
     "G2-P1-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:55:45.874320+00:00",
+      "completedAt": "2026-07-26T14:59:55.969547+00:00",
+      "evidence": [
+        "RuntimeDeployment create/start/stop/restart/scale/reconcile desired-intent use cases; Provider/config/database prerequisites; stop sets draining; replicas>1 rejected without gateway; jobs and Audit appended through application UoW; no PM2/process-manager calls or secret payloads; mandatory pnpm test:pms PASS 5 files/22 tests including new 6/6; typecheck/ESLint/Prettier/offline frozen lock/git diff scans PASS"
+      ],
       "reason": null
     },
     "G2-P1-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

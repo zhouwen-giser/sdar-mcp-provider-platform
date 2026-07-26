@@ -221,6 +221,9 @@ importers:
       '@sdar/provider-package-registry':
         specifier: workspace:*
         version: link:../provider-package-registry
+      '@sdar/runtime-deployment':
+        specifier: workspace:*
+        version: link:../runtime-deployment
       pg:
         specifier: 8.22.0
         version: 8.22.0
