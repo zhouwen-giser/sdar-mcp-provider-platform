@@ -53,6 +53,16 @@ describe("PMS control-plane domain", () => {
     ).toBe("platform_managed");
   });
 
+  it("requires a complete package identity when a Provider comes from a package", () => {
+    expect(() =>
+      createProvider({
+        providerId: firstProvider,
+        providerTypeId: providerType,
+        packageId: providerPackageId("builtin.isr.vehicle.ugv"),
+      }),
+    ).toThrow(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
+  });
+
   it("models Provider to Resource as a true many-to-many binding", () => {
     const bindings = new ProviderResourceBindings();
     bindings.bind({

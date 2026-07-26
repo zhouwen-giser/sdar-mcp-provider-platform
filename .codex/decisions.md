@@ -36,3 +36,11 @@ existing root export, and the mandatory package test would not exercise type-onl
 Export the ports from `src/index.ts` and add one compile-time/runtime contract test under the
 existing package test directory. These are the smallest out-of-range wiring changes; they add no
 implementation or infrastructure dependency.
+
+## 2026-07-26 — G1-P4-B04 Provider Package composite identity
+
+The committed PMS schema correctly keys Provider Packages by `(package_id, package_version)`, while
+the initial Provider domain value carried only `packageId`. Persistence cannot safely choose a
+version implicitly when more than one version exists. Add the paired optional `packageVersion`
+field and validation to the Provider entity, with a regression test. This minimal domain correction
+keeps package selection explicit and avoids a lossy PostgreSQL mapping.

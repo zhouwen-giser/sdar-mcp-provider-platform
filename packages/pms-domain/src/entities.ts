@@ -51,6 +51,7 @@ export interface Provider {
   readonly providerId: ProviderId;
   readonly providerTypeId: ProviderTypeId;
   readonly packageId?: ProviderPackageId;
+  readonly packageVersion?: string;
   readonly hostingMode: ProviderHostingMode;
   readonly adapterEndpoint?: string;
   readonly status: ProviderStatus;
@@ -116,6 +117,9 @@ export function createProvider(
 ): Provider {
   const hostingMode = input.hostingMode ?? "vendor_managed";
   const status = input.status ?? "draft";
+  if ((input.packageId === undefined) !== (input.packageVersion === undefined))
+    throw invalidValue("providerPackage");
+  if (input.packageVersion !== undefined) requireSemver(input.packageVersion);
   if (hostingMode === "vendor_managed" && input.adapterEndpoint?.trim().length === 0)
     throw invalidValue("adapterEndpoint");
   return Object.freeze({ ...input, hostingMode, status });

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T11:37:31.075316+00:00",
+  "updatedAt": "2026-07-26T11:49:58.473648+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -310,21 +310,23 @@
       "reason": null
     },
     "G1-P4-B04": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T11:38:28.321333+00:00",
+      "completedAt": "2026-07-26T11:49:58.473478+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-persistence-postgres test: PASS 1 file/5 integration tests; PMS migrations applied idempotently with checksum metadata; provider type/package/provider/resource/N:N/config revision+ack/audit/job repositories exercised; unique 23505 mapped to ENTITY_ALREADY_EXISTS; millisecond-safe stale update mapped to OPTIMISTIC_CONCURRENCY_CONFLICT; UoW commit and rollback verified; no Runtime tables in isolated schema; production source has no Pool construction/connection string/Runtime table names; domain tests 15/15, full typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS"
+      ],
+      "reason": null
+    },
+    "G1-P4-B05": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P4-B05": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P4-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

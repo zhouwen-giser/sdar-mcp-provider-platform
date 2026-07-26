@@ -135,3 +135,7 @@
 - 2026-07-26T11:32:58.822883+00:00 START G1-P4-B03
 
 - 2026-07-26T11:37:31.075240+00:00 PASS G1-P4-B03 evidence=['pnpm --filter @sdar/pms-domain test: PASS 2 files/14 tests; CRUD/query ports cover provider type/package/provider/resource/N:N/config; mutable aggregate saves require updatedAt optimistic precondition and config revision creation requires expected latest revision; UoW callback commit/rollback contract explicit; append-only audit and DB-time fenced Job Lease ports defined; pg/Fastify/persistence type scan clean; full TypeScript, eslint, prettier and git diff --check PASS']
+
+- 2026-07-26T11:38:28.321400+00:00 START G1-P4-B04
+
+- 2026-07-26T11:49:58.473559+00:00 PASS G1-P4-B04 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-persistence-postgres test: PASS 1 file/5 integration tests; PMS migrations applied idempotently with checksum metadata; provider type/package/provider/resource/N:N/config revision+ack/audit/job repositories exercised; unique 23505 mapped to ENTITY_ALREADY_EXISTS; millisecond-safe stale update mapped to OPTIMISTIC_CONCURRENCY_CONFLICT; UoW commit and rollback verified; no Runtime tables in isolated schema; production source has no Pool construction/connection string/Runtime table names; domain tests 15/15, full typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS']

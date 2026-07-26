@@ -167,6 +167,18 @@ importers:
 
   packages/pms-domain: {}
 
+  packages/pms-persistence-postgres:
+    dependencies:
+      '@sdar/database-migration-runner':
+        specifier: workspace:*
+        version: link:../database-migration-runner
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
   packages/provider-adapter-kit: {}
 
   packages/provider-package-registry: {}
