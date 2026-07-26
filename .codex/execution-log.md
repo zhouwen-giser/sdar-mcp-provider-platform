@@ -199,3 +199,7 @@
 - 2026-07-26T13:54:53.050573+00:00 START G1-P6-B04
 
 - 2026-07-26T14:00:15.971051+00:00 PASS G1-P6-B04 evidence=['Acceptance matrix PASS: source baseline exact SHA; pnpm build PASS; protocol:check PASS 11 schemas/74 cases/38 locked files; TEST_DATABASE_URL=<local-postgres> pnpm test:migration-isolation PASS 1/1; pnpm test:provider-packages PASS 13/13 plus 3-package self-check; pnpm test:config-compat PASS 8/8 plus contract 36/36; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations PASS 4/4; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-config-e2e PASS 8/8; pnpm exec vitest run tests/runtime-config-e2e PASS 3/3; pnpm test:unit PASS 30 files/123 tests; pnpm test:frozen-74 PASS; terminal verify_goal1_handoff.py is intentionally sequenced after 50/50 state, handoff commit, and clean-worktree precondition']
+
+- 2026-07-26T14:19:42.021272+00:00 START G2-P0-B01
+
+- 2026-07-26T14:23:43.074380+00:00 PASS G2-P0-B01 evidence=['python3 .codex/task-package/scripts/verify_goal1_handoff.py --repo .: PASS on clean Goal 1 baseline; .codex/reports/goal-02-baseline.md; .codex/handoff/goal1-test-evidence.json; Goal1Handoff schema PASS; migration source map 26 files PASS; protocol 74 frozen cases PASS; provider packages 13/13 PASS; config compatibility 8/8 + 36/36 PASS; runtime config E2E 3/3 PASS; unit 123/123 PASS; local PostgreSQL rerun unavailable with ECONNREFUSED and not claimed as fresh PASS']

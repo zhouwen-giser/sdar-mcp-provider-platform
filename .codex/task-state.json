@@ -1,24 +1,26 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:19:16.415929+00:00",
+  "updatedAt": "2026-07-26T14:23:43.074495+00:00",
   "tasks": {
     "G2-P0-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:19:42.021181+00:00",
+      "completedAt": "2026-07-26T14:23:43.074292+00:00",
+      "evidence": [
+        "python3 .codex/task-package/scripts/verify_goal1_handoff.py --repo .: PASS on clean Goal 1 baseline; .codex/reports/goal-02-baseline.md; .codex/handoff/goal1-test-evidence.json; Goal1Handoff schema PASS; migration source map 26 files PASS; protocol 74 frozen cases PASS; provider packages 13/13 PASS; config compatibility 8/8 + 36/36 PASS; runtime config E2E 3/3 PASS; unit 123/123 PASS; local PostgreSQL rerun unavailable with ECONNREFUSED and not claimed as fresh PASS"
+      ],
+      "reason": null
+    },
+    "G2-P0-B02": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G2-P0-B02": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G2-P0-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
