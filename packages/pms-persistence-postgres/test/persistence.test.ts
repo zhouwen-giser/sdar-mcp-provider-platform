@@ -6,6 +6,7 @@ import {
   auditEventId,
   configRevisionId,
   createAuditEvent,
+  createDatabaseProfile,
   createProvider,
   createProviderPackage,
   createProviderType,
@@ -15,9 +16,15 @@ import {
   providerPackageId,
   providerTypeId,
   resourceId,
+  secretRef,
   type ConfigurationDefinition,
 } from "@sdar/pms-domain";
-import { PostgresPmsUnitOfWork, postgresRepositories, runPmsMigrations } from "../src/index.js";
+import {
+  PostgresDatabaseProfileRepository,
+  PostgresPmsUnitOfWork,
+  postgresRepositories,
+  runPmsMigrations,
+} from "../src/index.js";
 
 const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const providerType = providerTypeId("isr.vehicle.ugv");
@@ -128,6 +135,112 @@ describe("PostgreSQL PMS persistence", () => {
         { expectedUpdatedAt },
       ),
     ).rejects.toMatchObject({ code: "OPTIMISTIC_CONCURRENCY_CONFLICT" });
+  });
+
+  it("persists Provider/Environment-scoped DatabaseProfile refs and audited provision results", async () => {
+    const repository = new PostgresDatabaseProfileRepository(pool);
+    await pool.query(
+      `INSERT INTO provider_type(provider_type_id,display_name,status)
+       VALUES ($1,'UGV','active') ON CONFLICT (provider_type_id) DO NOTHING`,
+      [providerType],
+    );
+    await pool.query(
+      `INSERT INTO provider(provider_id,provider_type_id,hosting_mode,status)
+       VALUES ($1,$2,'vendor_managed','active') ON CONFLICT (provider_id) DO NOTHING`,
+      [provider, providerType],
+    );
+    const auditIds = [
+      "21111111-1111-4111-8111-111111111111",
+      "22222222-2222-4222-8222-222222222222",
+      "23333333-3333-4333-8333-333333333333",
+    ];
+    for (const [index, auditId] of auditIds.entries()) {
+      await pool.query(
+        `INSERT INTO audit(
+           audit_event_id,action,actor_id,correlation_id,subject_type,subject_id
+         ) VALUES ($1,$2,'admin-1',$3,'database_profile','database-profile-1')`,
+        [
+          auditId,
+          index === 0 ? "database_profile.created" : "database_profile.provision_updated",
+          `database-profile-${index}`,
+        ],
+      );
+    }
+    const profile = createDatabaseProfile({
+      profileId: "database-profile-1",
+      providerId: provider,
+      environment,
+      clusterRef: "postgres-primary",
+      host: "postgres.internal",
+      adminSecretRef: secretRef("vault/postgres/provisioner"),
+      runtimeSecretRef: secretRef("vault/runtime/ugv-provider-1"),
+    });
+    await repository.insert(profile, auditIds[0] as string);
+
+    expect(await repository.get(provider, environment)).toMatchObject({
+      profile: {
+        providerId: provider,
+        environment,
+        databaseName: profile.databaseName,
+        runtimeRoleName: profile.runtimeRoleName,
+        adminSecretRef: { secretRef: "vault/postgres/provisioner" },
+        runtimeSecretRef: { secretRef: "vault/runtime/ugv-provider-1" },
+      },
+      provisionStatus: "pending",
+      createdAuditEventId: auditIds[0],
+      revision: 0,
+    });
+    expect(await repository.get("another-provider", environment)).toBeNull();
+    expect(await repository.get(provider, "staging")).toBeNull();
+
+    const provisioning = await repository.updateProvisionResult({
+      profileId: profile.profileId,
+      providerId: provider,
+      environment,
+      status: "provisioning",
+      auditEventId: auditIds[1] as string,
+      expectedRevision: 0,
+    });
+    const ready = await repository.updateProvisionResult({
+      profileId: profile.profileId,
+      providerId: provider,
+      environment,
+      status: "ready",
+      provisionedAt: new Date("2026-07-26T00:00:00.000Z"),
+      auditEventId: auditIds[2] as string,
+      expectedRevision: provisioning.revision,
+    });
+    expect(ready).toMatchObject({
+      provisionStatus: "ready",
+      lastAuditEventId: auditIds[2],
+      revision: 2,
+    });
+    await expect(
+      repository.updateProvisionResult({
+        profileId: profile.profileId,
+        providerId: provider,
+        environment,
+        status: "failed",
+        lastErrorCode: "DATABASE_UNAVAILABLE",
+        auditEventId: auditIds[2] as string,
+        expectedRevision: 0,
+      }),
+    ).rejects.toMatchObject({ code: "OPTIMISTIC_CONCURRENCY_CONFLICT" });
+
+    const columns = await pool.query<{ column_name: string }>(
+      `SELECT column_name
+         FROM information_schema.columns
+        WHERE table_schema=current_schema() AND table_name='database_profile'
+        ORDER BY ordinal_position`,
+    );
+    expect(columns.rows.map(({ column_name }) => column_name)).toEqual(
+      expect.arrayContaining(["admin_secret_ref", "runtime_secret_ref"]),
+    );
+    expect(
+      columns.rows
+        .map(({ column_name }) => column_name)
+        .filter((name) => /password|credential|connection|database_url/i.test(name)),
+    ).toEqual([]);
   });
 
   it("commits and rolls back one shared Unit of Work", async () => {

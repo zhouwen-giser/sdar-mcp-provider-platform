@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T15:20:20.468018+00:00",
+  "updatedAt": "2026-07-26T15:32:48.927107+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -121,10 +121,12 @@
       "reason": null
     },
     "G2-P2-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T15:20:49.094546+00:00",
+      "completedAt": "2026-07-26T15:32:48.926888+00:00",
+      "evidence": [
+        "migrations/pms/006_database_profile.sql; PostgresDatabaseProfileRepository; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations PASS 1 file/7 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms PASS 5 files/23 tests; @sdar/pms-domain PASS 3 files/24 tests; pnpm typecheck; old migrations 001-005 unchanged; plaintext column scan and git diff check PASS"
+      ],
       "reason": null
     },
     "G2-P2-B03": {

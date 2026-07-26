@@ -9,6 +9,7 @@ const EXPECTED_TABLES = [
   "config_ack",
   "config_definition",
   "config_revision",
+  "database_profile",
   "job_lease",
   "pms_schema_migration",
   "provider",
@@ -59,6 +60,7 @@ describe("PMS control-plane migration set", () => {
       "003_audit_append_only.sql",
       "004_config_revision_history_guard.sql",
       "005_runtime_deployment.sql",
+      "006_database_profile.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
@@ -266,6 +268,96 @@ describe("PMS control-plane migration set", () => {
          )`,
       ),
     ).rejects.toMatchObject({ code: "23505" });
+  });
+
+  it("enforces scoped SecretRef-only DatabaseProfile and audited result constraints", async () => {
+    await client.query(
+      `INSERT INTO provider_type(provider_type_id,display_name,status)
+       VALUES ('isr.vehicle.ugv','UGV','active')
+       ON CONFLICT (provider_type_id) DO NOTHING`,
+    );
+    await client.query(
+      `INSERT INTO provider(
+         provider_id,provider_type_id,hosting_mode,status
+       ) VALUES (
+         'provider:ugv1','isr.vehicle.ugv','vendor_managed','active'
+       ) ON CONFLICT (provider_id) DO NOTHING`,
+    );
+    await client.query(
+      `INSERT INTO audit(
+         audit_event_id,action,actor_id,correlation_id,subject_type,subject_id
+       ) VALUES (
+         '31111111-1111-4111-8111-111111111111','database_profile.created',
+         'admin-1','database-profile-1','database_profile','database-profile-1'
+       )`,
+    );
+    await client.query(
+      `INSERT INTO database_profile(
+         profile_id,provider_id,environment,cluster_ref,host,port,database_mode,
+         database_name,runtime_role_name,ssl_mode,admin_secret_ref,runtime_secret_ref,
+         created_audit_event_id,last_audit_event_id
+       ) VALUES (
+         'database-profile-1','provider:ugv1','production','postgres-primary',
+         'postgres.internal',5432,'provisioned','sdar_rt_provider_ugv1_111111111111',
+         'sdar_rt_provider_ugv1_111111111111_app','verify-full',
+         'vault/postgres/provisioner','vault/runtime/provider-ugv1',
+         '31111111-1111-4111-8111-111111111111',
+         '31111111-1111-4111-8111-111111111111'
+       )`,
+    );
+
+    await expect(
+      client.query(
+        `INSERT INTO database_profile(
+           profile_id,provider_id,environment,cluster_ref,host,port,database_mode,
+           database_name,runtime_role_name,ssl_mode,admin_secret_ref,runtime_secret_ref,
+           created_audit_event_id,last_audit_event_id
+         ) VALUES (
+           'database-profile-duplicate','provider:ugv1','production','postgres-primary',
+           'postgres.internal',5432,'provisioned','sdar_rt_provider_ugv1_222222222222',
+           'sdar_rt_provider_ugv1_222222222222_app','verify-full',
+           'vault/postgres/provisioner','vault/runtime/provider-ugv1-duplicate',
+           '31111111-1111-4111-8111-111111111111',
+           '31111111-1111-4111-8111-111111111111'
+         )`,
+      ),
+    ).rejects.toMatchObject({ code: "23505" });
+    await expect(
+      client.query(
+        `UPDATE database_profile
+            SET provision_status='failed',last_error_code=NULL
+          WHERE profile_id='database-profile-1'`,
+      ),
+    ).rejects.toMatchObject({ code: "23514" });
+    await expect(
+      client.query(
+        `UPDATE database_profile
+            SET last_audit_event_id='39999999-9999-4999-8999-999999999999'
+          WHERE profile_id='database-profile-1'`,
+      ),
+    ).rejects.toMatchObject({ code: "23503" });
+
+    const columns = await client.query<{ column_name: string }>(
+      `SELECT column_name
+         FROM information_schema.columns
+        WHERE table_schema=$1 AND table_name='database_profile'
+        ORDER BY ordinal_position`,
+      [schema],
+    );
+    expect(columns.rows.map(({ column_name }) => column_name)).toEqual(
+      expect.arrayContaining([
+        "provider_id",
+        "environment",
+        "admin_secret_ref",
+        "runtime_secret_ref",
+        "last_audit_event_id",
+      ]),
+    );
+    expect(
+      columns.rows
+        .map(({ column_name }) => column_name)
+        .filter((name) => /password|credential|connection|database_url/i.test(name)),
+    ).toEqual([]);
   });
 });
 

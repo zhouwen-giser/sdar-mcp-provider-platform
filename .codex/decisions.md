@@ -140,3 +140,16 @@ workspace link to `packages/pms-application` and the generated lock importer. Th
 `pnpm test:pms` command previously listed explicit files and would omit the new use-case suite;
 append that real suite to the command. These are minimal wiring changes, not PM2 integration or an
 empty success script.
+
+## 2026-07-26 — G2-P2-B02 DatabaseProfile environment scope and migration verification
+
+The B02 acceptance criterion requires DatabaseProfile persistence to be scoped by both Provider and
+Environment, while the B01 card listed Provider-specific naming but did not explicitly name an
+environment field. Add `environment` to the already delivered pure DatabaseProfile value and its
+focused test as the minimum dependency correction; do not introduce provisioning behavior there.
+
+The mandatory root `test:pms-migrations` suite also hard-codes the append-only migration list and
+control-plane table boundary outside this card's allowlist. Update only that existing test to
+recognize migration `006`, validate its Provider/Environment uniqueness, SecretRef-only columns,
+status/error constraints, and audit reference. These changes strengthen existing verification and
+do not relax or skip prior migration assertions.

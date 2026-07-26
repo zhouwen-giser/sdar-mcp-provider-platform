@@ -251,3 +251,7 @@
 - 2026-07-26T15:16:59.255714+00:00 START G2-P2-B01
 
 - 2026-07-26T15:20:20.467960+00:00 PASS G2-P2-B01 evidence=['@sdar/pms-domain DatabaseProfile/SecretRef/name-policy tests PASS 3 files/24 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms PASS 5 files/22 tests; pnpm typecheck; pnpm test:runtime-deployment PASS 5 files/42 tests; production model scan has no password/connectionString/databaseUrl fields; git diff --check']
+
+- 2026-07-26T15:20:49.094648+00:00 START G2-P2-B02
+
+- 2026-07-26T15:32:48.926976+00:00 PASS G2-P2-B02 evidence=['migrations/pms/006_database_profile.sql; PostgresDatabaseProfileRepository; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations PASS 1 file/7 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms PASS 5 files/23 tests; @sdar/pms-domain PASS 3 files/24 tests; pnpm typecheck; old migrations 001-005 unchanged; plaintext column scan and git diff check PASS']

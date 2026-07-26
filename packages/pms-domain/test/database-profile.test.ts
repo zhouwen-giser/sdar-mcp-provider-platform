@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createDatabaseProfile,
+  environmentId,
   providerDatabaseNames,
   providerId,
   secretRef,
@@ -11,6 +12,7 @@ describe("DatabaseProfile and SecretRef", () => {
     const profile = createDatabaseProfile({
       profileId: "database-profile-1",
       providerId: providerId("Provider:North/1".replace("/", ":")),
+      environment: environmentId("production"),
       clusterRef: "postgres-primary",
       host: "Postgres.Internal",
       adminSecretRef: secretRef("vault/postgres/provisioner"),
@@ -20,6 +22,7 @@ describe("DatabaseProfile and SecretRef", () => {
     expect(profile).toMatchObject({
       profileId: "database-profile-1",
       providerId: "Provider:North:1",
+      environment: "production",
       clusterRef: "postgres-primary",
       host: "postgres.internal",
       port: 5432,
@@ -55,6 +58,7 @@ describe("DatabaseProfile and SecretRef", () => {
       createDatabaseProfile({
         profileId: "database-profile-1",
         providerId: providerId("provider-1"),
+        environment: environmentId("production"),
         clusterRef: "postgres-primary",
         host,
         adminSecretRef: secretRef("vault/postgres/provisioner"),
@@ -69,6 +73,7 @@ describe("DatabaseProfile and SecretRef", () => {
       createDatabaseProfile({
         profileId: "database-profile-1",
         providerId: providerId("provider-1"),
+        environment: environmentId("production"),
         clusterRef: "postgres-primary",
         host: "db.internal",
         port: 0,
@@ -85,6 +90,7 @@ describe("DatabaseProfile and SecretRef", () => {
     const profile = createDatabaseProfile({
       profileId: "database-profile-1",
       providerId: providerId("provider-1"),
+      environment: environmentId("production"),
       clusterRef: "postgres-primary",
       host: "db.internal",
       databaseMode: "preexisting",

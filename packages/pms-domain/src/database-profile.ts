@@ -1,5 +1,5 @@
 import { PmsDomainError } from "./errors.js";
-import type { ProviderId } from "./ids.js";
+import type { EnvironmentId, ProviderId } from "./ids.js";
 
 declare const databaseProfileBrand: unique symbol;
 export type DatabaseProfileId = string & {
@@ -25,6 +25,7 @@ export type PostgresSslMode = (typeof POSTGRES_SSL_MODES)[number];
 export interface DatabaseProfile {
   readonly profileId: DatabaseProfileId;
   readonly providerId: ProviderId;
+  readonly environment: EnvironmentId;
   readonly clusterRef: DatabaseClusterRef;
   readonly host: string;
   readonly port: number;
@@ -39,6 +40,7 @@ export interface DatabaseProfile {
 export interface CreateDatabaseProfileInput {
   readonly profileId: string;
   readonly providerId: ProviderId;
+  readonly environment: EnvironmentId;
   readonly clusterRef: string;
   readonly host: string;
   readonly port?: number;
@@ -107,6 +109,7 @@ export function createDatabaseProfile(input: CreateDatabaseProfileInput): Databa
   return Object.freeze({
     profileId,
     providerId: input.providerId,
+    environment: input.environment,
     clusterRef,
     host,
     port,
