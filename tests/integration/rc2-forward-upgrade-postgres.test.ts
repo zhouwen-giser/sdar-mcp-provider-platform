@@ -21,7 +21,7 @@ let rc2Migrations: string;
 beforeAll(async () => {
   await adminPool.query(`CREATE SCHEMA ${schema}`);
   rc2Migrations = await mkdtemp(resolve(tmpdir(), "sdar-rc2-migrations-"));
-  const migrations = resolve(process.cwd(), "migrations");
+  const migrations = resolve(process.cwd(), "migrations/runtime");
   for (const file of await readdir(migrations)) {
     const version = Number.parseInt(file.slice(0, 3), 10);
     if (/^\d{3}[a-z]?_.+\.sql$/.test(file) && version <= 13) {

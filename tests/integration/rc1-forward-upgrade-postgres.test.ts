@@ -161,7 +161,7 @@ describe("T-047 rc.1 full-state database forward migration", () => {
   it("preserves and backfills every required rc.1 fixture", async () => {
     for (const [file, expected] of Object.entries(publishedRc1Checksums)) {
       const source = (
-        await readFile(resolve(process.cwd(), "migrations", file), "utf8")
+        await readFile(resolve(process.cwd(), "migrations/runtime", file), "utf8")
       ).replaceAll("\r\n", "\n");
       expect(createHash("sha256").update(source).digest("hex")).toBe(expected);
       expect(
@@ -258,7 +258,7 @@ describe("T-047 rc.1 full-state database forward migration", () => {
 
 async function copyMigrationsThrough(maximum: number): Promise<string> {
   const target = await mkdtemp(resolve(tmpdir(), "sdar-rc1-full-migrations-"));
-  const source = resolve(process.cwd(), "migrations");
+  const source = resolve(process.cwd(), "migrations/runtime");
   for (const file of await readdir(source)) {
     const version = Number.parseInt(file.slice(0, 3), 10);
     if (/^\d{3}_.+\.sql$/.test(file) && version <= maximum) {

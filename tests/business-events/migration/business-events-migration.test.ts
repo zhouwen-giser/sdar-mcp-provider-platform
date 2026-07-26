@@ -16,9 +16,9 @@ describe("Business Events migration 023", () => {
     );
     expect(applied.rows).toHaveLength(24);
     expect(applied.rows.at(-1)?.version).toBe("023_business_events_profile_v1.sql");
-    expect(readdirSync(resolve("migrations")).filter((name) => name.startsWith("023_"))).toEqual([
-      "023_business_events_profile_v1.sql",
-    ]);
+    expect(
+      readdirSync(resolve("migrations/runtime")).filter((name) => name.startsWith("023_")),
+    ).toEqual(["023_business_events_profile_v1.sql"]);
   });
 
   it("creates every durable authority and no second cursor table", async () => {
@@ -59,12 +59,12 @@ describe("Business Events migration 023", () => {
   });
 
   it("keeps historical migration bytes outside the new 023 file", () => {
-    const migrations = readdirSync(resolve("migrations")).filter((name) =>
+    const migrations = readdirSync(resolve("migrations/runtime")).filter((name) =>
       /^0(?:0[1-9]|1[0-9]|2[0-2])_/.test(name),
     );
     expect(migrations).toHaveLength(23);
-    expect(migrations.every((name) => readFileSync(resolve("migrations", name)).length > 0)).toBe(
-      true,
-    );
+    expect(
+      migrations.every((name) => readFileSync(resolve("migrations/runtime", name)).length > 0),
+    ).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:43:27.455196+00:00",
+  "updatedAt": "2026-07-26T09:50:46.139286+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -94,10 +94,12 @@
       "reason": null
     },
     "G1-P1-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:44:51.432351+00:00",
+      "completedAt": "2026-07-26T09:50:46.139095+00:00",
+      "evidence": [
+        "pnpm db:migrate --help || true: PASS (CLI build/migrate compatible); pnpm --filter @sdar/persistence-postgres test: PASS 1/1; pnpm typecheck: PASS; TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime vitest migration-upgrade+rc2+business-events: PASS 3 files/6 tests; fresh-schema migration-upgrade assertion: PASS 1/1, 24 runtime migrations and no ugv_/npc_tank_ tables; prettier --check and git diff --check: PASS"
+      ],
       "reason": null
     },
     "G1-P1-B06": {

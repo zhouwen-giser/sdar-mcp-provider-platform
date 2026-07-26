@@ -21,7 +21,7 @@ let rc1Migrations: string;
 beforeAll(async () => {
   await adminPool.query(`CREATE SCHEMA ${schema}`);
   rc1Migrations = await mkdtemp(resolve(tmpdir(), "sdar-rc1-migrations-"));
-  const migrations = resolve(process.cwd(), "migrations");
+  const migrations = resolve(process.cwd(), "migrations/runtime");
   for (const file of (await readdir(migrations)).filter((name) =>
     /^0(?:0[1-9]|1[01])_.+\.sql$/.test(name),
   )) {
@@ -109,5 +109,13 @@ describe("pre-012 database forward upgrade", () => {
       "SELECT count(*) FROM runtime_schema_migration",
     );
     expect(current.rows[0]?.count).toBe("24");
+    const providerTables = await upgradePool.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema=$1
+         AND (table_name LIKE 'ugv_%' OR table_name LIKE 'npc_tank_%')
+       ORDER BY table_name`,
+      [schema],
+    );
+    expect(providerTables.rows).toEqual([]);
   });
 });
