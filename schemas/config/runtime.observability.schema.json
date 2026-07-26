@@ -1,0 +1,39 @@
+{
+  "$id": "https://schemas.sdar.dev/config/runtime.observability/v1",
+  "additionalProperties": false,
+  "properties": {
+    "LOG_LEVEL": { "type": "string" },
+    "OTEL_ENABLED": { "type": "boolean" },
+    "OTEL_EXPORTER_OTLP_CA_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "OTEL_EXPORTER_OTLP_CERT_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "OTEL_EXPORTER_OTLP_ENDPOINT": { "format": "uri", "type": "string" },
+    "OTEL_EXPORTER_OTLP_HEADERS_FILE": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "OTEL_EXPORTER_OTLP_KEY_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "OTEL_EXPORTER_OTLP_TIMEOUT_MS": { "maximum": 60000, "minimum": 100, "type": "integer" },
+    "OTEL_EXPORTER_OTLP_TLS_MODE": { "enum": ["disabled", "required"] },
+    "OTEL_SERVICE_INSTANCE_ID": { "maxLength": 256, "minLength": 1, "type": "string" }
+  },
+  "title": "runtime.observability",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}

@@ -1,0 +1,438 @@
+{
+  "$id": "https://schemas.sdar.dev/config/runtime.workerEvents/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ADAPTER_HEALTH_FAILURE_THRESHOLD": {
+      "default": 2,
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "ADAPTER_HEALTH_POLL_MS": {
+      "default": 5000,
+      "maximum": 300000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "ADAPTER_MANIFEST_POLL_MS": {
+      "default": 60000,
+      "maximum": 3600000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "ALLOW_WEAK_LEASE_CONFIGURATION": { "type": "boolean" },
+    "ARGUMENT_MAX_BYTES": {
+      "default": 1048576,
+      "maximum": 8388608,
+      "minimum": 256,
+      "type": "integer"
+    },
+    "ARGUMENT_MAX_DEPTH": { "default": 32, "maximum": 64, "minimum": 1, "type": "integer" },
+    "ARGUMENT_MAX_NODES": { "default": 10000, "maximum": 100000, "minimum": 16, "type": "integer" },
+    "AUTH_MODE": {
+      "default": "development",
+      "enum": ["development", "trusted_headers", "jwt_hs256"],
+      "type": "string"
+    },
+    "BUSINESS_EVENT_CLOCK_SKEW_SAFETY_MS": {
+      "default": 300000,
+      "maximum": 3600000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "BUSINESS_EVENT_MAPPING_DEADLINE_MS": {
+      "default": 60000,
+      "maximum": 300000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "BUSINESS_EVENT_MAX_FUTURE_SKEW_MS": {
+      "default": 300000,
+      "maximum": 3600000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_ENABLED": { "type": "boolean" },
+    "BUSINESS_EVENTS_MAX_EVENT_BYTES": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 1024,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_PAYLOAD_DEPTH": {
+      "default": 16,
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_PAYLOAD_NODES": {
+      "default": 4096,
+      "maximum": 100000,
+      "minimum": 16,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_PAYLOAD_STRING_BYTES": {
+      "default": 16384,
+      "maximum": 1048576,
+      "minimum": 64,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_QUEUE_BYTES": {
+      "default": 1048576,
+      "maximum": 16777216,
+      "minimum": 4096,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_QUEUE_MESSAGES": {
+      "default": 64,
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_STREAM_DURATION_MS": {
+      "default": 3600000,
+      "maximum": 86400000,
+      "minimum": 60000,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_SUBSCRIPTIONS": {
+      "default": 256,
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_MAX_SUBSCRIPTIONS_PER_AUTH": {
+      "default": 32,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_POLL_INTERVAL_MS": {
+      "default": 500,
+      "maximum": 10000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_REPLAY_BATCH_SIZE": {
+      "default": 256,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY": { "type": "boolean" },
+    "BUSINESS_EVENTS_RETENTION_MS": {
+      "default": 604800000,
+      "maximum": 7776000000,
+      "minimum": 60000,
+      "type": "integer"
+    },
+    "COMMAND_CLAIM_LEASE_MS": {
+      "default": 30000,
+      "maximum": 300000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "COMMAND_DISPATCH_CONCURRENCY": {
+      "default": 8,
+      "maximum": 128,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "DB_PUBLICATION_BUDGET_MS": {
+      "default": 1000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "HTTP_BODY_LIMIT_BYTES": {
+      "default": 1048576,
+      "maximum": 16777216,
+      "minimum": 1024,
+      "type": "integer"
+    },
+    "IDEMPOTENCY_LEASE_MS": {
+      "default": 30000,
+      "maximum": 300000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "IDEMPOTENCY_POLL_MS": { "default": 20, "maximum": 1000, "minimum": 5, "type": "integer" },
+    "IDEMPOTENCY_WAIT_TIMEOUT_MS": {
+      "default": 10000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "INTERNAL_ADMIN_TOKEN": {
+      "minLength": 32,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "INTERNAL_ENDPOINTS_ENABLED": { "type": "boolean" },
+    "JWT_AUDIENCE": { "minLength": 1, "type": "string" },
+    "JWT_HS256_SECRET": {
+      "minLength": 32,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "JWT_ISSUER": { "minLength": 1, "type": "string" },
+    "LEASE_SAFETY_MARGIN_MS": {
+      "default": 500,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "MCP_LEGACY_ENDPOINT_ENABLED": { "type": "boolean" },
+    "OUTBOX_BATCH_SIZE": { "default": 100, "maximum": 10000, "minimum": 1, "type": "integer" },
+    "OUTBOX_CLEANER_POLL_MS": {
+      "default": 60000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "OUTBOX_POLL_MS": { "default": 1000, "maximum": 300000, "minimum": 100, "type": "integer" },
+    "OUTBOX_PUBLISHED_RETENTION_MS": {
+      "default": 86400000,
+      "maximum": 7776000000,
+      "minimum": 60000,
+      "type": "integer"
+    },
+    "OUTBOX_SINK": {
+      "default": "internal_noop",
+      "enum": ["internal_noop", "webhook"],
+      "type": "string"
+    },
+    "OUTBOX_WEBHOOK_TIMEOUT_MS": {
+      "default": 5000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "OUTBOX_WEBHOOK_URL": { "format": "uri", "type": "string" },
+    "PROVIDER_TELEMETRY_HOST": {
+      "default": "127.0.0.1",
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "PROVIDER_TELEMETRY_INGRESS_ENABLED": { "type": "boolean" },
+    "PROVIDER_TELEMETRY_MAX_BATCH": {
+      "default": 100,
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_MAX_DEPTH": {
+      "default": 16,
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_MAX_EVENT_BYTES": {
+      "default": 65536,
+      "maximum": 8388608,
+      "minimum": 256,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_MAX_NODES": {
+      "default": 4096,
+      "maximum": 100000,
+      "minimum": 16,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_PORT": {
+      "default": 7002,
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_RATE_LIMIT": {
+      "default": 600,
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "PROVIDER_TELEMETRY_TLS_CA_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_CERT_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_KEY_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "RATE_LIMIT_MAX": { "default": 300, "maximum": 100000, "minimum": 1, "type": "integer" },
+    "RATE_LIMIT_MAX_KEYS": {
+      "default": 10000,
+      "maximum": 1000000,
+      "minimum": 16,
+      "type": "integer"
+    },
+    "RATE_LIMIT_WINDOW_MS": {
+      "default": 60000,
+      "maximum": 3600000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "RECOVERY_LEASE_MS": {
+      "default": 30000,
+      "maximum": 300000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "RECOVERY_POLL_MS": { "default": 5000, "maximum": 300000, "minimum": 500, "type": "integer" },
+    "SCHEDULE_CLAIM_LEASE_MS": {
+      "default": 30000,
+      "maximum": 300000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "SCHEDULER_CONCURRENCY": { "default": 8, "maximum": 128, "minimum": 1, "type": "integer" },
+    "SCHEDULER_POLL_MS": { "default": 1000, "maximum": 60000, "minimum": 100, "type": "integer" },
+    "TASK_NOTIFICATION_BATCH_SIZE": {
+      "default": 256,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_MAX_QUEUE_BYTES": {
+      "default": 1048576,
+      "maximum": 16777216,
+      "minimum": 4096,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_MAX_QUEUE_MESSAGES": {
+      "default": 64,
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_MAX_SUBSCRIPTIONS": {
+      "default": 256,
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_MAX_SUBSCRIPTIONS_PER_AUTH": {
+      "default": 32,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_MAX_TASK_BINDINGS": {
+      "default": 4096,
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "TASK_NOTIFICATION_POLL_INTERVAL_MS": {
+      "default": 500,
+      "maximum": 10000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "TTL_CLEANER_BATCH_SIZE": { "default": 128, "maximum": 10000, "minimum": 1, "type": "integer" },
+    "TTL_CLEANER_POLL_MS": {
+      "default": 60000,
+      "maximum": 3600000,
+      "minimum": 500,
+      "type": "integer"
+    },
+    "TTL_PURGE_GRACE_MS": {
+      "default": 86400000,
+      "maximum": 604800000,
+      "minimum": 1000,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "PROVIDER_TELEMETRY_INGRESS_ENABLED",
+    "PROVIDER_TELEMETRY_HOST",
+    "PROVIDER_TELEMETRY_PORT",
+    "PROVIDER_TELEMETRY_TLS_MODE",
+    "PROVIDER_TELEMETRY_MAX_BATCH",
+    "PROVIDER_TELEMETRY_MAX_EVENT_BYTES",
+    "PROVIDER_TELEMETRY_MAX_DEPTH",
+    "PROVIDER_TELEMETRY_MAX_NODES",
+    "PROVIDER_TELEMETRY_RATE_LIMIT",
+    "AUTH_MODE",
+    "MCP_LEGACY_ENDPOINT_ENABLED",
+    "BUSINESS_EVENTS_ENABLED",
+    "BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY",
+    "BUSINESS_EVENTS_RETENTION_MS",
+    "BUSINESS_EVENTS_POLL_INTERVAL_MS",
+    "BUSINESS_EVENTS_MAX_SUBSCRIPTIONS",
+    "BUSINESS_EVENTS_MAX_SUBSCRIPTIONS_PER_AUTH",
+    "BUSINESS_EVENTS_MAX_QUEUE_MESSAGES",
+    "BUSINESS_EVENTS_MAX_QUEUE_BYTES",
+    "BUSINESS_EVENTS_REPLAY_BATCH_SIZE",
+    "BUSINESS_EVENTS_MAX_STREAM_DURATION_MS",
+    "BUSINESS_EVENTS_MAX_EVENT_BYTES",
+    "BUSINESS_EVENTS_MAX_PAYLOAD_DEPTH",
+    "BUSINESS_EVENTS_MAX_PAYLOAD_NODES",
+    "BUSINESS_EVENTS_MAX_PAYLOAD_STRING_BYTES",
+    "BUSINESS_EVENT_MAPPING_DEADLINE_MS",
+    "BUSINESS_EVENT_MAX_FUTURE_SKEW_MS",
+    "BUSINESS_EVENT_CLOCK_SKEW_SAFETY_MS",
+    "TASK_NOTIFICATION_POLL_INTERVAL_MS",
+    "TASK_NOTIFICATION_MAX_SUBSCRIPTIONS",
+    "TASK_NOTIFICATION_MAX_SUBSCRIPTIONS_PER_AUTH",
+    "TASK_NOTIFICATION_MAX_TASK_BINDINGS",
+    "TASK_NOTIFICATION_MAX_QUEUE_MESSAGES",
+    "TASK_NOTIFICATION_MAX_QUEUE_BYTES",
+    "TASK_NOTIFICATION_BATCH_SIZE",
+    "HTTP_BODY_LIMIT_BYTES",
+    "ARGUMENT_MAX_BYTES",
+    "ARGUMENT_MAX_DEPTH",
+    "ARGUMENT_MAX_NODES",
+    "RATE_LIMIT_MAX",
+    "RATE_LIMIT_WINDOW_MS",
+    "RATE_LIMIT_MAX_KEYS",
+    "IDEMPOTENCY_LEASE_MS",
+    "IDEMPOTENCY_WAIT_TIMEOUT_MS",
+    "IDEMPOTENCY_POLL_MS",
+    "COMMAND_CLAIM_LEASE_MS",
+    "SCHEDULE_CLAIM_LEASE_MS",
+    "RECOVERY_LEASE_MS",
+    "LEASE_SAFETY_MARGIN_MS",
+    "DB_PUBLICATION_BUDGET_MS",
+    "ALLOW_WEAK_LEASE_CONFIGURATION",
+    "INTERNAL_ENDPOINTS_ENABLED",
+    "ADAPTER_HEALTH_POLL_MS",
+    "ADAPTER_HEALTH_FAILURE_THRESHOLD",
+    "ADAPTER_MANIFEST_POLL_MS",
+    "SCHEDULER_POLL_MS",
+    "COMMAND_DISPATCH_CONCURRENCY",
+    "SCHEDULER_CONCURRENCY",
+    "OUTBOX_CLEANER_POLL_MS",
+    "RECOVERY_POLL_MS",
+    "TTL_CLEANER_POLL_MS",
+    "TTL_PURGE_GRACE_MS",
+    "OUTBOX_PUBLISHED_RETENTION_MS",
+    "TTL_CLEANER_BATCH_SIZE",
+    "OUTBOX_SINK",
+    "OUTBOX_POLL_MS",
+    "OUTBOX_BATCH_SIZE",
+    "OUTBOX_WEBHOOK_TIMEOUT_MS"
+  ],
+  "title": "runtime.workerEvents",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}

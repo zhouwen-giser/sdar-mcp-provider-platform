@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-26T09:56:34.750Z",
+  "status": "PASS",
+  "database": {
+    "implementation": "PostgreSQL",
+    "connection": "TEST_DATABASE_URL (credentials redacted)",
+    "isolation": "three temporary schemas"
+  },
+  "repeatedRunsPerSet": 2,
+  "sets": {
+    "runtime": {
+      "migrationCount": 24,
+      "representativePresent": [
+        "provider_task",
+        "runtime_schema_migration"
+      ],
+      "representativeAbsent": [
+        "ugv_execution",
+        "npc_tank_execution"
+      ],
+      "tableCount": 24
+    },
+    "provider:ugv": {
+      "representativePresent": [
+        "ugv_execution"
+      ],
+      "representativeAbsent": [
+        "provider_task",
+        "runtime_schema_migration",
+        "npc_tank_execution"
+      ],
+      "tableCount": 6
+    },
+    "provider:npc-tank": {
+      "representativePresent": [
+        "npc_tank_execution"
+      ],
+      "representativeAbsent": [
+        "provider_task",
+        "runtime_schema_migration",
+        "ugv_execution"
+      ],
+      "tableCount": 6
+    }
+  }
+}

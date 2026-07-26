@@ -1,6 +1,38 @@
-# SDAR MCP Tasks Provider Runtime
+# SDAR MCP Provider Platform
 
-An independently deployable, language-neutral Runtime for the SEP-2663 task lifecycle and the `io.sdar/taskExecution` Provider Profile. The Runtime is implemented in strict TypeScript and delegates resource facts and side effects to versioned gRPC/Protobuf Adapters.
+SDAR MCP Provider Platform is the Provider-side control plane and standard
+runtime platform being built from the delivered **SDAR MCP Tasks Provider
+Runtime** repository. It keeps the existing independently deployable,
+language-neutral Runtime for the SEP-2663 task lifecycle and the
+`io.sdar/taskExecution` Provider Profile, while adding Provider management,
+configuration, deployment governance, Catalog/Registry publication, and
+Provider Package capabilities in the same monorepo.
+
+The repository is unified; authority and process boundaries are not. PMS owns
+desired state and control-plane data, Runtime remains the Task Authority and
+MCP data plane, and Provider Adapters retain device facts and side effects.
+See [Platform scope and compatibility](docs/architecture/platform-scope.md)
+before changing those boundaries.
+
+## Platform upgrade status
+
+The current platform work starts from the immutable offline Runtime/Provider
+delivery recorded in
+[`SOURCE_LOCK.json`](docs/baseline/SOURCE_LOCK.json). Existing workspace
+package names, `@sdar/*` package identities, Runtime entry points, and root
+scripts remain compatible during the upgrade; new platform packages are added
+incrementally instead of renaming the delivered Runtime tree in bulk.
+
+Goal 1 establishes the platform foundation: Migration ownership, Provider
+Packages, shared configuration contracts, PMS control-plane foundations, and
+the Runtime configuration client. Automated PM2 Runtime deployment,
+Catalog/Registry governance, and the Console belong to Goal 2 and are not
+claimed by the current foundation.
+
+## Delivered Runtime baseline
+
+The baseline Runtime is implemented in strict TypeScript and delegates resource
+facts and side effects to versioned gRPC/Protobuf Adapters.
 
 The current development target is `v2.0.0-rc.1`, migrating the primary `/mcp` endpoint to the
 frozen SDAR MCP Tasks Unified Protocol Profile V1.0 while retaining the `1.1.0` Provider Ops Wire

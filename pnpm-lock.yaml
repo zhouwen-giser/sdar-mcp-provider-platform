@@ -141,6 +141,42 @@ importers:
 
   apps/npc-tank-provider-adapter: {}
 
+  apps/pms-api:
+    dependencies:
+      '@sdar/configuration-center':
+        specifier: workspace:*
+        version: link:../../packages/configuration-center
+      '@sdar/pms-application':
+        specifier: workspace:*
+        version: link:../../packages/pms-application
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../../packages/pms-domain
+      '@sdar/pms-persistence-postgres':
+        specifier: workspace:*
+        version: link:../../packages/pms-persistence-postgres
+      fastify:
+        specifier: 5.10.0
+        version: 5.10.0
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
+  apps/pms-worker:
+    dependencies:
+      '@sdar/pms-application':
+        specifier: workspace:*
+        version: link:../../packages/pms-application
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../../packages/pms-domain
+      '@sdar/pms-persistence-postgres':
+        specifier: workspace:*
+        version: link:../../packages/pms-persistence-postgres
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
   apps/runtime: {}
 
   apps/ugv-provider-adapter: {}
@@ -151,7 +187,21 @@ importers:
 
   packages/adapter-protocol: {}
 
+  packages/configuration-center:
+    dependencies:
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
+      '@sdar/runtime-configuration-contract':
+        specifier: workspace:*
+        version: link:../runtime-configuration-contract
+      ajv:
+        specifier: 8.18.0
+        version: 8.18.0
+
   packages/conformance-testkit: {}
+
+  packages/database-migration-runner: {}
 
   packages/domain: {}
 
@@ -163,7 +213,43 @@ importers:
 
   packages/persistence-postgres: {}
 
+  packages/pms-application:
+    dependencies:
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
+      '@sdar/provider-package-registry':
+        specifier: workspace:*
+        version: link:../provider-package-registry
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
+  packages/pms-domain: {}
+
+  packages/pms-persistence-postgres:
+    dependencies:
+      '@sdar/database-migration-runner':
+        specifier: workspace:*
+        version: link:../database-migration-runner
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
   packages/provider-adapter-kit: {}
+
+  packages/provider-package-registry: {}
+
+  packages/runtime-config-client:
+    dependencies:
+      '@sdar/runtime-configuration-contract':
+        specifier: workspace:*
+        version: link:../runtime-configuration-contract
+
+  packages/runtime-configuration-contract: {}
 
   packages/task-engine: {}
 
@@ -2356,8 +2442,8 @@ snapshots:
 
   '@fastify/ajv-compiler@4.0.5':
     dependencies:
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
       fast-uri: 3.1.4
 
   '@fastify/error@4.2.0': {}
@@ -2966,6 +3052,10 @@ snapshots:
 
   agent-base@7.1.4: {}
 
+  ajv-formats@3.0.1(ajv@8.18.0):
+    optionalDependencies:
+      ajv: 8.18.0
+
   ajv-formats@3.0.1(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -3313,8 +3403,8 @@ snapshots:
   fast-json-stringify@7.0.1:
     dependencies:
       '@fastify/merge-json-schemas': 0.2.1
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
       fast-uri: 4.1.1
       json-schema-ref-resolver: 3.0.0
       rfdc: 1.4.1

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-26T09:12:30Z",
+  "repository": {
+    "initialImport": {
+      "commit": "ad199f508cf67dbe77491cf90569daf5da8197bb",
+      "tree": "65ea47d8fda126563a88ff799bed2fbca31268da",
+      "parent": null,
+      "subject": "chore: import offline runtime provider baseline",
+      "authorDate": "2026-07-26T17:00:38+08:00",
+      "commitDate": "2026-07-26T17:00:38+08:00"
+    },
+    "mainAtLock": "3513476ab0a9524ca621a7f2638415bfb8349398",
+    "goalBranch": "codex/goal-01-platform-foundation",
+    "goalBranchAtLock": "a63e834511c5514198530ff05b0ed9ab2d3b1dae",
+    "historyPolicy": "append-only; no history rewrite"
+  },
+  "source": {
+    "archiveName": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1-work-delivery.zip",
+    "archivePath": ".codex/task-package/inputs/source/sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1-work-delivery.zip",
+    "sha256": "000a46f7452eadac986de3f142dde6358a590c5c372bee2e09793fe9396ad6e3",
+    "topLevelDirectory": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1",
+    "deliveryGeneratedAt": "2026-07-23T03:25:02Z",
+    "canonicalProjectTreeSha256": "fde5b26b671b6f1d6143c1ef81cb0d24b01c1b77de8acb5b0d35992867e57ca3"
+  }
+}

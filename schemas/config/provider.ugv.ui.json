@@ -1,0 +1,704 @@
+{
+  "configGroup": "provider.ugv",
+  "definitionId": "provider.ugv",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "immutable",
+      "description": "UGV Provider provider_id setting.",
+      "displayName": "PROVIDER_ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "UGV Provider provider_version setting.",
+      "displayName": "PROVIDER_VERSION",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_VERSION",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_host setting.",
+      "displayName": "ADAPTER_HOST",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_HOST",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_port setting.",
+      "displayName": "ADAPTER_PORT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_PORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_tls_mode setting.",
+      "displayName": "ADAPTER_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_tls_ca_path setting.",
+      "displayName": "ADAPTER_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_tls_cert_path setting.",
+      "displayName": "ADAPTER_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider adapter_tls_key_path setting.",
+      "displayName": "ADAPTER_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_adapter_store_mode setting.",
+      "displayName": "UGV_ADAPTER_STORE_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_ADAPTER_STORE_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_adapter_database_url setting.",
+      "displayName": "UGV_ADAPTER_DATABASE_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_ADAPTER_DATABASE_URL",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_adapter_database_pool_max setting.",
+      "displayName": "UGV_ADAPTER_DATABASE_POOL_MAX",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_ADAPTER_DATABASE_POOL_MAX",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_url setting.",
+      "displayName": "UGV_MQTT_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_client_id setting.",
+      "displayName": "UGV_MQTT_CLIENT_ID",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_CLIENT_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_username setting.",
+      "displayName": "UGV_MQTT_USERNAME",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_USERNAME",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_password_file setting.",
+      "displayName": "UGV_MQTT_PASSWORD_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_PASSWORD_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_tls_mode setting.",
+      "displayName": "UGV_MQTT_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_tls_ca_path setting.",
+      "displayName": "UGV_MQTT_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_tls_cert_path setting.",
+      "displayName": "UGV_MQTT_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_tls_key_path setting.",
+      "displayName": "UGV_MQTT_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_session_mode setting.",
+      "displayName": "UGV_MQTT_SESSION_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_SESSION_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_reconnect_min_ms setting.",
+      "displayName": "UGV_MQTT_RECONNECT_MIN_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_RECONNECT_MIN_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_reconnect_max_ms setting.",
+      "displayName": "UGV_MQTT_RECONNECT_MAX_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_RECONNECT_MAX_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_max_payload_bytes setting.",
+      "displayName": "UGV_MQTT_MAX_PAYLOAD_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_MAX_PAYLOAD_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_max_json_depth setting.",
+      "displayName": "UGV_MQTT_MAX_JSON_DEPTH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_MAX_JSON_DEPTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_max_json_nodes setting.",
+      "displayName": "UGV_MQTT_MAX_JSON_NODES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_MAX_JSON_NODES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_max_string_bytes setting.",
+      "displayName": "UGV_MQTT_MAX_STRING_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_MAX_STRING_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mqtt_wire_mode setting.",
+      "displayName": "UGV_MQTT_WIRE_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MQTT_WIRE_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_chassis_freshness_ms setting.",
+      "displayName": "UGV_CHASSIS_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_CHASSIS_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_mission_freshness_ms setting.",
+      "displayName": "UGV_MISSION_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_MISSION_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_health_freshness_ms setting.",
+      "displayName": "UGV_HEALTH_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_HEALTH_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_target_freshness_ms setting.",
+      "displayName": "UGV_TARGET_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_TARGET_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_payload_freshness_ms setting.",
+      "displayName": "UGV_PAYLOAD_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_PAYLOAD_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_url setting.",
+      "displayName": "UGV_DEVICE_MCP_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_timeout_ms setting.",
+      "displayName": "UGV_DEVICE_MCP_TIMEOUT_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_tls_mode setting.",
+      "displayName": "UGV_DEVICE_MCP_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_headers_file setting.",
+      "displayName": "UGV_DEVICE_MCP_HEADERS_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_HEADERS_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_max_response_bytes setting.",
+      "displayName": "UGV_DEVICE_MCP_MAX_RESPONSE_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_MAX_RESPONSE_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_allow_mock_contract setting.",
+      "displayName": "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_contract_report_path setting.",
+      "displayName": "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_allow_navigation_with_recon setting.",
+      "displayName": "UGV_ALLOW_NAVIGATION_WITH_RECON",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_ALLOW_NAVIGATION_WITH_RECON",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_fire_requires_chassis_stopped setting.",
+      "displayName": "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_execution_poll_interval_ms setting.",
+      "displayName": "UGV_EXECUTION_POLL_INTERVAL_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_EXECUTION_POLL_INTERVAL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_enabled setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_endpoint setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENDPOINT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENDPOINT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_tls_mode setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_tls_ca_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_tls_cert_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider provider_telemetry_tls_key_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider runtime_env setting.",
+      "displayName": "RUNTIME_ENV",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/RUNTIME_ENV",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider log_level setting.",
+      "displayName": "LOG_LEVEL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/LOG_LEVEL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": { "enabled": true, "order": ["provider", "provider_type", "system_default"] },
+  "schemaVersion": "1.0",
+  "targetTypes": ["provider_type", "provider"]
+}

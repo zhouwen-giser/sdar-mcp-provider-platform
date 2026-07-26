@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.local/schemas/provider-package-v1.json",
+  "title": "ProviderPackage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageVersion",
+    "providerType",
+    "hostingModes",
+    "adapter",
+    "runtime",
+    "qualification"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "packageId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]+$"
+    },
+    "packageVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providerType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hostingModes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["vendor_managed", "platform_managed"]
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry", "configSchemaId"],
+      "properties": {
+        "entry": {
+          "type": "string"
+        },
+        "configSchemaId": {
+          "type": "string"
+        },
+        "migrationSet": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatibleRuntimeVersion"],
+      "properties": {
+        "compatibleRuntimeVersion": {
+          "type": "string"
+        },
+        "protocolMode": {
+          "type": "string",
+          "default": "frozen_v1"
+        }
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["componentStatus", "realResourceStatus"],
+      "properties": {
+        "componentStatus": {
+          "enum": ["passed", "partial", "pending", "failed"]
+        },
+        "realResourceStatus": {
+          "enum": ["qualified", "pending", "failed", "not_applicable"]
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

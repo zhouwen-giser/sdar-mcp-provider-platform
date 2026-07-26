@@ -67,7 +67,7 @@ await json("architecture.json", {
   },
   persistence: {
     engine: "PostgreSQL",
-    migration: "migrations/025_npc_tank_provider.sql",
+    migration: "migrations/providers/npc-tank/025_npc_tank_provider.sql",
     tablePrefix: "npc_tank_",
     isolatedFromUgv: true,
   },

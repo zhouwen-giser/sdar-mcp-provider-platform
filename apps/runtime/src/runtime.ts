@@ -24,7 +24,10 @@ import {
   ProviderTelemetry,
   RuntimeMetrics,
 } from "../../../packages/observability/src/index.js";
-import type { RuntimeLogger } from "../../../packages/observability/src/index.js";
+import type {
+  BusinessEventMetricOtlpSink,
+  RuntimeLogger,
+} from "../../../packages/observability/src/index.js";
 import { OperationRegistry } from "../../../packages/operation-registry/src/index.js";
 import type { ValidatedManifest } from "../../../packages/operation-registry/src/index.js";
 import {
@@ -93,6 +96,8 @@ export interface RuntimeApplication {
   pool: Pool;
   dependencies: RuntimeDependencies;
   initialize(): Promise<ProviderManifest>;
+  applyOtelEnabled(enabled: boolean): Promise<void>;
+  telemetryEnabled(): boolean;
 }
 
 export function createRuntime(config: RuntimeConfig): RuntimeApplication {
@@ -107,7 +112,14 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   const metrics = new RuntimeMetrics();
   const telemetrySelfGauges: Record<string, number> = {};
   const telemetryInstanceId = config.OTEL_SERVICE_INSTANCE_ID ?? randomUUID();
+  let otelEnabled = config.OTEL_ENABLED;
   let telemetry: ProviderTelemetry | undefined;
+  const dynamicBusinessEventTelemetry: BusinessEventMetricOtlpSink = {
+    metric: (name, value, attributes, kind) => telemetry?.metric(name, value, attributes, kind),
+    event: (name, body, attributes) => telemetry?.event(name, body, attributes),
+    trace: (name, attributes, operation) =>
+      telemetry?.trace(name, attributes, operation) ?? operation(),
+  };
   let businessEventTelemetry: BusinessEventTelemetryBridge | undefined;
   let businessEventSourceIds: string[] = [];
   let providerTelemetryServer: ProviderTelemetryGrpcServer | undefined;
@@ -173,6 +185,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     businessEventProjection: config.BUSINESS_EVENTS_ENABLED ? "starting" : "disabled",
   };
   let manifest: ProviderManifest | undefined;
+  let validatedManifest: ValidatedManifest | undefined;
   let mcpRouter: ProtocolRouter | undefined;
   let schedulerTimer: NodeJS.Timeout | undefined;
   let recoveryTimer: NodeJS.Timeout | undefined;
@@ -383,34 +396,41 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     await pool.end();
   });
 
+  function buildProviderTelemetry(
+    validated: ValidatedManifest,
+    enabled: boolean,
+  ): ProviderTelemetry {
+    const security = loadOtlpExporterSecurity(config, enabled);
+    return new ProviderTelemetry({
+      enabled,
+      otlpEndpoint: config.OTEL_EXPORTER_OTLP_ENDPOINT,
+      otlpTimeoutMillis: config.OTEL_EXPORTER_OTLP_TIMEOUT_MS,
+      ...security,
+      boundedDynamicMetricValues: {
+        sourceId: new Set(validated.businessEventSources.map((source) => source.sourceId)),
+      },
+      resource: {
+        serviceVersion: RUNTIME_VERSION,
+        instanceId: telemetryInstanceId,
+        deploymentEnvironment: config.RUNTIME_ENV,
+        providerId: validated.providerId,
+        providerVersion: validated.providerVersion,
+      },
+      onSelfMetric: (name, value, attributes, kind) => {
+        const labels = Object.fromEntries(
+          Object.entries(attributes).map(([key, label]) => [key, String(label)]),
+        );
+        const metricName = prometheusMetricKey(name, labels);
+        if (kind === "gauge") telemetrySelfGauges[metricName] = value;
+        else metrics.increment(name, labels, value);
+      },
+    });
+  }
+
   function initializeProviderTelemetry(validated: ValidatedManifest): void {
     if (telemetry !== undefined) return;
     try {
-      const security = loadOtlpExporterSecurity(config);
-      const candidate = new ProviderTelemetry({
-        enabled: config.OTEL_ENABLED,
-        otlpEndpoint: config.OTEL_EXPORTER_OTLP_ENDPOINT,
-        otlpTimeoutMillis: config.OTEL_EXPORTER_OTLP_TIMEOUT_MS,
-        ...security,
-        boundedDynamicMetricValues: {
-          sourceId: new Set(validated.businessEventSources.map((source) => source.sourceId)),
-        },
-        resource: {
-          serviceVersion: RUNTIME_VERSION,
-          instanceId: telemetryInstanceId,
-          deploymentEnvironment: config.RUNTIME_ENV,
-          providerId: validated.providerId,
-          providerVersion: validated.providerVersion,
-        },
-        onSelfMetric: (name, value, attributes, kind) => {
-          const labels = Object.fromEntries(
-            Object.entries(attributes).map(([key, label]) => [key, String(label)]),
-          );
-          const metricName = prometheusMetricKey(name, labels);
-          if (kind === "gauge") telemetrySelfGauges[metricName] = value;
-          else metrics.increment(name, labels, value);
-        },
-      });
+      const candidate = buildProviderTelemetry(validated, otelEnabled);
       candidate.start();
       telemetry = candidate;
     } catch (error) {
@@ -436,6 +456,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         );
       }
       const validated = new OperationRegistry().validate(manifest);
+      validatedManifest = validated;
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
         throw new Error("BUSINESS_EVENTS_ENABLED_REQUIRES_SOURCE");
       }
@@ -469,7 +490,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       const businessEventMetricPolicy = new BusinessEventMetricPolicy(businessEventSourceIds);
       businessEventTelemetry = new BusinessEventTelemetryBridge(
         metrics,
-        telemetry,
+        dynamicBusinessEventTelemetry,
         businessEventMetricPolicy,
         telemetrySelfGauges,
       );
@@ -973,7 +994,35 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     return manifest;
   }
 
-  return { app, gateway, pool, dependencies, initialize };
+  async function applyOtelEnabled(enabled: boolean): Promise<void> {
+    if (enabled === otelEnabled) return;
+    const previous = telemetry;
+    if (enabled) {
+      if (validatedManifest === undefined) {
+        otelEnabled = true;
+        return;
+      }
+      const candidate = buildProviderTelemetry(validatedManifest, true);
+      candidate.start();
+      telemetry = candidate;
+      otelEnabled = true;
+      await previous?.shutdown();
+      return;
+    }
+    telemetry = undefined;
+    otelEnabled = false;
+    await previous?.shutdown();
+  }
+
+  return {
+    app,
+    gateway,
+    pool,
+    dependencies,
+    initialize,
+    applyOtelEnabled,
+    telemetryEnabled: () => otelEnabled,
+  };
 }
 
 function requiredOutboxWebhookUrl(config: RuntimeConfig): string {
@@ -1074,11 +1123,14 @@ function prometheusMetricKey(name: string, labels: Record<string, string>): stri
     .join(",")}}`;
 }
 
-export function loadOtlpExporterSecurity(config: RuntimeConfig): {
+export function loadOtlpExporterSecurity(
+  config: RuntimeConfig,
+  enabled = config.OTEL_ENABLED,
+): {
   otlpHeaders?: Record<string, string>;
   otlpTls?: { ca: Buffer; cert: Buffer; key: Buffer };
 } {
-  if (!config.OTEL_ENABLED) return {};
+  if (!enabled) return {};
   let otlpHeaders: Record<string, string> | undefined;
   if (config.OTEL_EXPORTER_OTLP_HEADERS_FILE !== undefined) {
     const content = readFileSync(config.OTEL_EXPORTER_OTLP_HEADERS_FILE, "utf8");

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "packageId": "builtin.home-assistant.climate",
+  "packageVersion": "0.1.0",
+  "providerType": "home_assistant.climate",
+  "hostingModes": ["vendor_managed"],
+  "adapter": {
+    "entry": "apps/home-assistant-climate-provider/src/main.ts",
+    "configSchemaId": "provider.climate",
+    "migrationSet": null
+  },
+  "runtime": {
+    "compatibleRuntimeVersion": "2.0.0-rc.1",
+    "protocolMode": "frozen_v1"
+  },
+  "qualification": {
+    "componentStatus": "passed",
+    "realResourceStatus": "pending",
+    "evidenceRefs": [
+      "docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json",
+      "reports/home-assistant-climate/provider-conformance.json",
+      "reports/home-assistant-climate/final-delivery-report.md"
+    ]
+  }
+}
