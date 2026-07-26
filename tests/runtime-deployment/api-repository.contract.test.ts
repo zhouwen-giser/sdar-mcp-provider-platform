@@ -22,7 +22,7 @@ const deployment = {
 
 describe("RuntimeDeployment API/domain/repository contract", () => {
   it("keeps API action names aligned with the application command vocabulary", async () => {
-    const command = vi.fn(() => Promise.resolve(deployment));
+    const command = vi.fn((_input: unknown, _context: unknown) => Promise.resolve(deployment));
     const service = {
       create: vi.fn(),
       command,
@@ -65,47 +65,46 @@ describe("RuntimeDeployment API/domain/repository contract", () => {
   });
 
   it("binds deployment and process detail repository reads to Provider scope", async () => {
-    const deploymentQuery = vi.fn(() =>
-      Promise.resolve({
-        rows: [
-          {
-            deployment_id: "deployment-1",
-            provider_id: "provider-1",
-            environment: "production",
-            desired_state: "running",
-            desired_replicas: 1,
-            runtime_version: "0.1.0",
-            database_profile_id: "database-1",
-            config_profile_id: "config-1",
-            adapter_endpoint: null,
-            status: "REQUESTED",
-            desired_revision: "0",
-            observed_revision: "0",
-          },
-        ],
-        rowCount: 1,
-      }),
-    );
-    const processQuery = vi.fn(() =>
-      Promise.resolve({
-        rows: [],
-        rowCount: 0,
-      }),
-    );
-    await new PostgresRuntimeDeploymentRepository({
-      query: deploymentQuery,
-    }).get("provider-1", "deployment-1");
-    await new PostgresRuntimeProcessRepository({
-      query: processQuery,
-    }).get("provider-1", "instance-1");
+    const deploymentCalls: [string, readonly unknown[] | undefined][] = [];
+    const processCalls: [string, readonly unknown[] | undefined][] = [];
+    const deploymentDb = {
+      query(sql: string, values?: readonly unknown[]) {
+        deploymentCalls.push([sql, values]);
+        return Promise.resolve({
+          rows: [
+            {
+              deployment_id: "deployment-1",
+              provider_id: "provider-1",
+              environment: "production",
+              desired_state: "running",
+              desired_replicas: 1,
+              runtime_version: "0.1.0",
+              database_profile_id: "database-1",
+              config_profile_id: "config-1",
+              adapter_endpoint: null,
+              status: "REQUESTED",
+              desired_revision: "0",
+              observed_revision: "0",
+            },
+          ],
+          rowCount: 1,
+        });
+      },
+    } as unknown as ConstructorParameters<typeof PostgresRuntimeDeploymentRepository>[0];
+    const processDb = {
+      query(sql: string, values?: readonly unknown[]) {
+        processCalls.push([sql, values]);
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      },
+    } as unknown as ConstructorParameters<typeof PostgresRuntimeProcessRepository>[0];
+    await new PostgresRuntimeDeploymentRepository(deploymentDb).get("provider-1", "deployment-1");
+    await new PostgresRuntimeProcessRepository(processDb).get("provider-1", "instance-1");
 
-    expect(deploymentQuery.mock.calls[0]?.[0]).toContain(
-      "WHERE provider_id=$1 AND deployment_id=$2",
-    );
-    expect(deploymentQuery.mock.calls[0]?.[1]).toEqual(["provider-1", "deployment-1"]);
-    expect(processQuery.mock.calls[0]?.[0]).toContain(
+    expect(deploymentCalls[0]?.[0]).toContain("WHERE provider_id=$1 AND deployment_id=$2");
+    expect(deploymentCalls[0]?.[1]).toEqual(["provider-1", "deployment-1"]);
+    expect(processCalls[0]?.[0]).toContain(
       "WHERE deployment.provider_id=$1 AND process.runtime_instance_id=$2",
     );
-    expect(processQuery.mock.calls[0]?.[1]).toEqual(["provider-1", "instance-1"]);
+    expect(processCalls[0]?.[1]).toEqual(["provider-1", "instance-1"]);
   });
 });
