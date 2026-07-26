@@ -26,6 +26,7 @@ const secondResource = resourceId("vehicle:ugv2");
 describe("PMS control-plane domain", () => {
   it("constructs branded identifiers and rejects malformed values", () => {
     expect(providerType).toBe("isr.vehicle.ugv");
+    expect(providerTypeId("home_assistant.climate")).toBe("home_assistant.climate");
     expect(() => providerTypeId("UGV")).toThrow(
       expect.objectContaining({ code: "INVALID_IDENTIFIER" }),
     );

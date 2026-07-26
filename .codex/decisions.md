@@ -44,3 +44,17 @@ the initial Provider domain value carried only `packageId`. Persistence cannot s
 version implicitly when more than one version exists. Add the paired optional `packageVersion`
 field and validation to the Provider entity, with a regression test. This minimal domain correction
 keeps package selection explicit and avoids a lossy PostgreSQL mapping.
+
+## 2026-07-26 — G1-P4-B05 lossless package projection compatibility migration
+
+The three delivered production descriptors use Provider Type segments with underscores, while the
+initial domain/SQL regex accepted only hyphens. The initial package table also cannot retain the
+complete authoritative descriptor. Do not edit committed migration `001`; append PMS migration
+`002_provider_package_source_projection.sql` to align the identifier constraint and add a checked
+JSONB `source_document`. Extend the pure package value with optional projection/timestamp fields so
+sync can overwrite drift using an explicit optimistic token. These are required compatibility
+changes outside the card allowlist, not future platform capability.
+
+The mandatory root `pnpm test:pms` command was also absent. Add one real database-gated script that
+runs the PMS application and persistence integration suites; update the existing PMS migration-set
+expectation for the append-only `002` file. This is verification wiring, not an empty success shim.

@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import { Pool, type PoolClient } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { resolveMigrationSet } from "../../packages/database-migration-runner/src/index.js";
@@ -51,20 +50,21 @@ describe("PMS control-plane migration set", () => {
   it("resolves only the append-only PMS migration set", async () => {
     const files = await resolveMigrationSet(process.cwd(), "pms");
 
-    expect(files.map(({ filename }) => filename)).toEqual(["001_control_plane_foundation.sql"]);
+    expect(files.map(({ filename }) => filename)).toEqual([
+      "001_control_plane_foundation.sql",
+      "002_provider_package_source_projection.sql",
+    ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
     );
   });
 
   it("creates an empty schema and is safe to apply repeatedly", async () => {
-    const sql = await readFile(
-      resolve(process.cwd(), "migrations/pms/001_control_plane_foundation.sql"),
-      "utf8",
-    );
+    const files = await resolveMigrationSet(process.cwd(), "pms");
+    const sql = await Promise.all(files.map(({ absolutePath }) => readFile(absolutePath, "utf8")));
 
-    await client.query(sql);
-    await client.query(sql);
+    for (const migration of sql) await client.query(migration);
+    for (const migration of sql) await client.query(migration);
 
     const tables = await client.query<{ tablename: string }>(
       `SELECT tablename

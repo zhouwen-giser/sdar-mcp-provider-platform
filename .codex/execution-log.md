@@ -139,3 +139,7 @@
 - 2026-07-26T11:38:28.321400+00:00 START G1-P4-B04
 
 - 2026-07-26T11:49:58.473559+00:00 PASS G1-P4-B04 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-persistence-postgres test: PASS 1 file/5 integration tests; PMS migrations applied idempotently with checksum metadata; provider type/package/provider/resource/N:N/config revision+ack/audit/job repositories exercised; unique 23505 mapped to ENTITY_ALREADY_EXISTS; millisecond-safe stale update mapped to OPTIMISTIC_CONCURRENCY_CONFLICT; UoW commit and rollback verified; no Runtime tables in isolated schema; production source has no Pool construction/connection string/Runtime table names; domain tests 15/15, full typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS']
+
+- 2026-07-26T11:50:55.096879+00:00 START G1-P4-B05
+
+- 2026-07-26T11:58:15.073654+00:00 PASS G1-P4-B05 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 2 files/9 tests; first sync imports exactly UGV/NPC Tank/Home Assistant packages and provider types in one UoW; identical checksum rerun unchanged=3 with zero audit noise; DB checksum/source_document drift overwritten from controlled file with audit; damaged descriptor rejected before transaction and counts unchanged; full 001+002 PMS migration test PASS 4/4 including repeated apply; Provider Registry/Domain regression PASS 28/28; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS; application source contains no SQL']

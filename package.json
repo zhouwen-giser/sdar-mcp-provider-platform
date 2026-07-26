@@ -74,6 +74,7 @@
     "test:integration": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/integration",
     "test:migration-isolation": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/migration-isolation",
     "test:pms-migrations": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/pms-migrations",
+    "test:pms": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run packages/pms-application/test/provider-package-sync.test.ts packages/pms-persistence-postgres/test/persistence.test.ts",
     "test:provider-packages": "vitest run packages/provider-package-registry/test/model.test.ts packages/provider-package-registry/test/registry.test.ts && node --import tsx scripts/provider-package-self-check.mjs",
     "test:recovery": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/recovery",
     "test:security": "vitest run tests/security",

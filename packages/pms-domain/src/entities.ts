@@ -45,6 +45,8 @@ export interface ProviderPackage {
   readonly hostingModes: readonly ProviderHostingMode[];
   readonly checksum: string;
   readonly status: ProviderPackageStatus;
+  readonly sourceDocument?: JsonObject;
+  readonly updatedAt?: Date;
 }
 
 export interface Provider {
@@ -108,7 +110,15 @@ export function createProviderPackage(input: ProviderPackage): ProviderPackage {
     new Set(input.hostingModes).size !== input.hostingModes.length
   )
     throw invalidValue("hostingModes");
-  return Object.freeze({ ...input, hostingModes: Object.freeze([...input.hostingModes]) });
+  if (input.updatedAt !== undefined) requireValidDate(input.updatedAt, "updatedAt");
+  return Object.freeze({
+    ...input,
+    hostingModes: Object.freeze([...input.hostingModes]),
+    ...(input.sourceDocument === undefined
+      ? {}
+      : { sourceDocument: Object.freeze({ ...input.sourceDocument }) }),
+    ...(input.updatedAt === undefined ? {} : { updatedAt: new Date(input.updatedAt) }),
+  });
 }
 
 export function createProvider(

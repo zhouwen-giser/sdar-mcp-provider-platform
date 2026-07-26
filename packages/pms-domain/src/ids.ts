@@ -12,7 +12,7 @@ export type AuditEventId = Branded<string, "AuditEventId">;
 export type EnvironmentId = Branded<string, "EnvironmentId">;
 
 const LogicalIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
-const ProviderTypePattern = /^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+$/;
+const ProviderTypePattern = /^[a-z][a-z0-9_-]*(?:\.[a-z0-9_-]+)+$/;
 const PackageIdPattern = /^[a-z0-9][a-z0-9._-]{2,127}$/;
 const UuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EnvironmentPattern = /^[a-z][a-z0-9-]{0,62}$/;

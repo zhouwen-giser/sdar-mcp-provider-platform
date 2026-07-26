@@ -10,6 +10,7 @@ import {
   providerTypeId,
   resourceId,
   type LastModifiedPrecondition,
+  type JsonObject,
   type Page,
   type Provider,
   type ProviderPackage,
@@ -101,6 +102,8 @@ interface ProviderPackageRow extends QueryResultRow {
   hosting_modes: ProviderPackage["hostingModes"];
   checksum: string;
   status: ProviderPackage["status"];
+  source_document: ProviderPackage["sourceDocument"];
+  updated_at: Date;
 }
 
 export class PostgresProviderPackageRepository implements ProviderPackageRepository {
@@ -108,7 +111,8 @@ export class PostgresProviderPackageRepository implements ProviderPackageReposit
 
   async get(key: ProviderPackageKey): Promise<ProviderPackage | null> {
     const result = await this.db.query<ProviderPackageRow>(
-      `SELECT package_id,package_version,provider_type_id,hosting_modes,checksum,status
+      `SELECT package_id,package_version,provider_type_id,hosting_modes,checksum,status,
+              source_document,updated_at
          FROM provider_package WHERE package_id=$1 AND package_version=$2`,
       [key.packageId, key.packageVersion],
     );
@@ -117,7 +121,8 @@ export class PostgresProviderPackageRepository implements ProviderPackageReposit
 
   async list(query: ProviderPackageQuery): Promise<Page<ProviderPackage>> {
     const result = await this.db.query<ProviderPackageRow>(
-      `SELECT package_id,package_version,provider_type_id,hosting_modes,checksum,status
+      `SELECT package_id,package_version,provider_type_id,hosting_modes,checksum,status,
+              source_document,updated_at
          FROM provider_package
         WHERE ($1::text IS NULL OR provider_type_id=$1)
           AND ($2::text IS NULL OR status=$2)
@@ -129,24 +134,30 @@ export class PostgresProviderPackageRepository implements ProviderPackageReposit
   }
 
   async save(value: ProviderPackage, precondition: SavePrecondition): Promise<void> {
+    const source = value.sourceDocument ?? {};
+    const adapter = objectField(source, "adapter");
+    const qualification = objectField(source, "qualification");
+    const runtime = objectField(source, "runtime");
     const packageDocument = [
       value.packageId,
       value.packageVersion,
       value.providerTypeId,
       value.hostingModes,
-      json({ kind: "registered" }),
-      json({}),
-      json({}),
+      json(adapter),
+      json({ id: stringField(adapter, "configSchemaId") }),
+      stringField(adapter, "migrationSet"),
+      json({ ...qualification, runtime }),
       value.checksum,
       value.status,
+      json(source),
     ];
     if (precondition.mode === "insert") {
       try {
         await this.db.query(
           `INSERT INTO provider_package(
              package_id,package_version,provider_type_id,hosting_modes,adapter_entry,
-             config_schema,qualification,checksum,status
-           ) VALUES ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8,$9)`,
+             config_schema,migration_set,qualification,checksum,status,source_document
+           ) VALUES ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8::jsonb,$9,$10,$11::jsonb)`,
           packageDocument,
         );
       } catch (error) {
@@ -156,12 +167,14 @@ export class PostgresProviderPackageRepository implements ProviderPackageReposit
     }
     const result = await this.db.query(
       `UPDATE provider_package
-          SET hosting_modes=$4,checksum=$8,status=$9,
+          SET hosting_modes=$4,adapter_entry=$5::jsonb,config_schema=$6::jsonb,
+              migration_set=$7,qualification=$8::jsonb,checksum=$9,status=$10,
+              source_document=$11::jsonb,
               updated_at=GREATEST(
                 clock_timestamp(),date_trunc('milliseconds',updated_at)+interval '1 millisecond'
               )
         WHERE package_id=$1 AND package_version=$2 AND provider_type_id=$3
-          AND updated_at>=$10 AND updated_at<$10+interval '1 millisecond'`,
+          AND updated_at>=$12 AND updated_at<$12+interval '1 millisecond'`,
       [...packageDocument, precondition.expectedUpdatedAt],
     );
     if (result.rowCount !== 1) throw concurrencyConflict("ProviderPackage");
@@ -377,6 +390,8 @@ function providerPackageFromRow(row: ProviderPackageRow): ProviderPackage {
     hostingModes: row.hosting_modes,
     checksum: row.checksum,
     status: row.status,
+    ...(row.source_document === undefined ? {} : { sourceDocument: row.source_document }),
+    updatedAt: row.updated_at,
   });
 }
 
@@ -440,4 +455,16 @@ function bindingFromRow(row: BindingRow): ProviderResourceBinding {
     resourceId: resourceId(row.resource_id),
     boundAt: new Date(row.bound_at),
   });
+}
+
+function objectField(object: JsonObject, key: string): JsonObject {
+  const value = object[key];
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as JsonObject)
+    : {};
+}
+
+function stringField(object: Readonly<Record<string, unknown>>, key: string): string | null {
+  const value = object[key];
+  return typeof value === "string" ? value : null;
 }

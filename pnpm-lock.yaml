@@ -165,6 +165,18 @@ importers:
 
   packages/persistence-postgres: {}
 
+  packages/pms-application:
+    dependencies:
+      '@sdar/pms-domain':
+        specifier: workspace:*
+        version: link:../pms-domain
+      '@sdar/provider-package-registry':
+        specifier: workspace:*
+        version: link:../provider-package-registry
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+
   packages/pms-domain: {}
 
   packages/pms-persistence-postgres:

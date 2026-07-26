@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T11:49:58.473648+00:00",
+  "updatedAt": "2026-07-26T11:58:15.073719+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -319,10 +319,12 @@
       "reason": null
     },
     "G1-P4-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T11:50:55.096810+00:00",
+      "completedAt": "2026-07-26T11:58:15.073572+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm test:pms: PASS 2 files/9 tests; first sync imports exactly UGV/NPC Tank/Home Assistant packages and provider types in one UoW; identical checksum rerun unchanged=3 with zero audit noise; DB checksum/source_document drift overwritten from controlled file with audit; damaged descriptor rejected before transaction and counts unchanged; full 001+002 PMS migration test PASS 4/4 including repeated apply; Provider Registry/Domain regression PASS 28/28; typecheck, eslint, prettier, build, frozen lockfile and git diff --check PASS; application source contains no SQL"
+      ],
       "reason": null
     },
     "G1-P4-B06": {
