@@ -101,6 +101,7 @@ export interface RuntimeApplication {
   telemetryEnabled(): boolean;
   beginDrain(): boolean;
   drainState(): "accepting" | "draining" | "closed";
+  registrationReadiness(): "ready" | "not_ready";
 }
 
 export function createRuntime(config: RuntimeConfig): RuntimeApplication {
@@ -260,9 +261,11 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     ];
     const ready =
       drain.acceptingInvocations &&
-      coreStatuses.every((status) => status === "ready") &&
-      (!config.BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY ||
-        businessEventStatuses.every((status) => status === "ready"));
+      runtimeDependenciesReady(
+        coreStatuses,
+        businessEventStatuses,
+        config.BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY,
+      );
     return reply
       .code(ready ? 200 : 503)
       .send({ status: ready ? "ready" : "not_ready", dependencies });
@@ -1034,10 +1037,48 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     dependencies,
     beginDrain: () => drain.beginDrain(),
     drainState: () => drain.state,
+    registrationReadiness: () =>
+      runtimeDependenciesReady(
+        [
+          dependencies.database,
+          dependencies.adapter,
+          dependencies.adapterManifest,
+          dependencies.recovery,
+          dependencies.scheduler,
+          dependencies.commandDispatcher,
+          dependencies.ttlCleaner,
+          dependencies.outboxPublisher,
+          dependencies.outboxCleaner,
+          dependencies.providerTelemetryIngress,
+        ],
+        [
+          dependencies.businessEventPersistence,
+          dependencies.businessEventReplay,
+          dependencies.businessEventIngest,
+          dependencies.businessEventFinalizer,
+          dependencies.businessEventRetention,
+          dependencies.businessEventProjection,
+          ...Object.values(dependencies.businessEventAdapterSources),
+        ],
+        config.BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY,
+      )
+        ? "ready"
+        : "not_ready",
     initialize,
     applyOtelEnabled,
     telemetryEnabled: () => otelEnabled,
   };
+}
+
+function runtimeDependenciesReady(
+  coreStatuses: readonly string[],
+  businessEventStatuses: readonly string[],
+  businessEventsRequired: boolean,
+): boolean {
+  return (
+    coreStatuses.every((status) => status === "ready") &&
+    (!businessEventsRequired || businessEventStatuses.every((status) => status === "ready"))
+  );
 }
 
 function requiredOutboxWebhookUrl(config: RuntimeConfig): string {

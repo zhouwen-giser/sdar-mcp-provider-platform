@@ -335,3 +335,7 @@
 - 2026-07-26T17:46:22.895229+00:00 START G2-P4-B01
 
 - 2026-07-26T17:50:58.391999+00:00 PASS G2-P4-B01 evidence=['pnpm --filter @sdar/runtime-registration test (1 file/5 tests: expected-instance-only registration, identity/version/protocol mismatch, duplicate idempotency, ordered heartbeat, TTL stale detection, exact DTO validation); tsc --noEmit; eslint package; git diff --check']
+
+- 2026-07-26T17:51:20.925398+00:00 START G2-P4-B02
+
+- 2026-07-26T18:03:54.779611+00:00 PASS G2-P4-B02 evidence=['semantic equivalent of absent pnpm test:runtime-registration: pnpm --filter @sdar/runtime-registration test (3 files/10 tests) + pnpm exec vitest run apps/pms-api/test/runtime-registration.test.ts (1 file/3 tests) + pnpm --filter @sdar/runtime test (3 files/12 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm --filter @sdar/pms-api test (8 files/47 tests); dedicated runtime:register/runtime:heartbeat bearer scopes; token file read; audit correlation; bounded retry and PMS outage tolerance; tsc --noEmit; eslint targeted; git diff --check']

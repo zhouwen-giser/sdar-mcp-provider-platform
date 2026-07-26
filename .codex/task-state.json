@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T17:50:58.392068+00:00",
+  "updatedAt": "2026-07-26T18:03:54.779659+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -310,14 +310,16 @@
       "reason": null
     },
     "G2-P4-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T17:51:20.925329+00:00",
+      "completedAt": "2026-07-26T18:03:54.779551+00:00",
+      "evidence": [
+        "semantic equivalent of absent pnpm test:runtime-registration: pnpm --filter @sdar/runtime-registration test (3 files/10 tests) + pnpm exec vitest run apps/pms-api/test/runtime-registration.test.ts (1 file/3 tests) + pnpm --filter @sdar/runtime test (3 files/12 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm --filter @sdar/pms-api test (8 files/47 tests); dedicated runtime:register/runtime:heartbeat bearer scopes; token file read; audit correlation; bounded retry and PMS outage tolerance; tsc --noEmit; eslint targeted; git diff --check"
+      ],
       "reason": null
     },
     "G2-P4-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

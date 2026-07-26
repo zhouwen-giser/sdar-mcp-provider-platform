@@ -24,7 +24,12 @@ import {
   type RuntimeDeploymentManagementPort,
 } from "./runtime-deployment-routes.js";
 import { registerRuntimeProcessRoutes } from "./runtime-process-routes.js";
+import { registerRuntimeRegistrationRoutes } from "./runtime-registration-routes.js";
 import { authorizeManagementRequest, type PmsApiRoleAuthorizer } from "./authorization.js";
+import type {
+  RuntimeRegistrationAuthorizer,
+  RuntimeRegistrationService,
+} from "../../../packages/runtime-registration/src/index.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -37,6 +42,8 @@ export interface PmsApiOptions {
   readonly management?: ProviderManagementService;
   readonly runtimeDeployments?: RuntimeDeploymentManagementPort;
   readonly runtimeProcesses?: RuntimeProcessQueryService;
+  readonly runtimeRegistration?: RuntimeRegistrationService;
+  readonly runtimeRegistrationAuthorizer?: RuntimeRegistrationAuthorizer;
   readonly configurationCenter?: ConfigurationCenter;
   readonly configurationPublication?: ConfigurationPublicationService;
   readonly runtimeConfigQuery?: RuntimeConfigQueryService;
@@ -87,6 +94,16 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.runtimeProcesses !== undefined) {
     registerRuntimeProcessRoutes(app, options.runtimeProcesses);
+  }
+  if (
+    options.runtimeRegistration !== undefined &&
+    options.runtimeRegistrationAuthorizer !== undefined
+  ) {
+    registerRuntimeRegistrationRoutes(
+      app,
+      options.runtimeRegistration,
+      options.runtimeRegistrationAuthorizer,
+    );
   }
   if (options.configurationCenter !== undefined) {
     registerConfigurationRoutes(app, options.configurationCenter, options.configurationPublication);

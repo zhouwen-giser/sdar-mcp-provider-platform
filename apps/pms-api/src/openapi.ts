@@ -320,6 +320,34 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
             },
           },
         },
+      "/api/v1/runtime-registration/deployments/{deploymentId}/instances/{instanceId}/register": {
+        post: {
+          operationId: "registerRuntimeInstance",
+          security: [{ runtimeRegistrationToken: [] }],
+          "x-sdar-required-scope": "runtime:register",
+          responses: {
+            "200": { description: "Idempotent expected-instance registration" },
+            "401": { description: "Runtime registration authentication failed" },
+            "403": { description: "Token target or scope mismatch" },
+            "404": { description: "Expected Runtime instance does not exist" },
+            "409": { description: "Registration identity or replay conflict" },
+          },
+        },
+      },
+      "/api/v1/runtime-registration/deployments/{deploymentId}/instances/{instanceId}/heartbeat": {
+        post: {
+          operationId: "heartbeatRuntimeInstance",
+          security: [{ runtimeRegistrationToken: [] }],
+          "x-sdar-required-scope": "runtime:heartbeat",
+          responses: {
+            "200": { description: "Ordered idempotent Runtime heartbeat" },
+            "401": { description: "Runtime heartbeat authentication failed" },
+            "403": { description: "Token target or scope mismatch" },
+            "404": { description: "Expected Runtime instance does not exist" },
+            "409": { description: "Heartbeat session or sequence conflict" },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -353,6 +381,12 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           type: "http",
           scheme: "bearer",
           bearerFormat: "opaque-runtime-config-token",
+        },
+        runtimeRegistrationToken: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "opaque-file-backed-runtime-token",
+          "x-sdar-scopes": ["runtime:register", "runtime:heartbeat"],
         },
       },
     },

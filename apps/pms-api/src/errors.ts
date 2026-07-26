@@ -21,6 +21,12 @@ import {
 } from "../../../packages/runtime-deployment/src/index.js";
 import { requestContext } from "./context.js";
 import { PmsApiAuthorizationError, type PmsApiAuthorizationErrorCode } from "./authorization.js";
+import {
+  RuntimeRegistrationAuthorizationError,
+  RuntimeRegistrationError,
+  type RuntimeRegistrationAuthorizationErrorCode,
+  type RuntimeRegistrationErrorCode,
+} from "../../../packages/runtime-registration/src/index.js";
 
 export interface PmsErrorEnvelope {
   readonly error: {
@@ -79,6 +85,10 @@ function classifyError(error: FastifyError): PublicError {
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
   if (error instanceof ConfigurationCenterError) return configurationError(error.code);
   if (error instanceof PmsApiAuthorizationError) return authorizationError(error.code);
+  if (error instanceof RuntimeRegistrationAuthorizationError) {
+    return runtimeRegistrationAuthorizationError(error.code);
+  }
+  if (error instanceof RuntimeRegistrationError) return runtimeRegistrationError(error.code);
   if (error.code === "FST_ERR_CTP_BODY_TOO_LARGE") {
     return {
       statusCode: 413,
@@ -96,6 +106,31 @@ function classifyError(error: FastifyError): PublicError {
     return { statusCode: 400, code: "INVALID_JSON", message: "Request body is not valid JSON" };
   }
   return { statusCode: 500, code: "INTERNAL_ERROR", message: "An internal error occurred" };
+}
+
+function runtimeRegistrationAuthorizationError(
+  code: RuntimeRegistrationAuthorizationErrorCode,
+): PublicError {
+  return {
+    statusCode: code === "RUNTIME_REGISTRATION_UNAUTHORIZED" ? 401 : 403,
+    code,
+    message:
+      code === "RUNTIME_REGISTRATION_UNAUTHORIZED"
+        ? "Runtime registration authentication failed"
+        : "Runtime registration token is not authorized for this instance and scope",
+  };
+}
+
+function runtimeRegistrationError(code: RuntimeRegistrationErrorCode): PublicError {
+  const statusCode = code === "RUNTIME_REGISTRATION_EXPECTED_INSTANCE_NOT_FOUND" ? 404 : 409;
+  return {
+    statusCode,
+    code,
+    message:
+      code === "RUNTIME_REGISTRATION_EXPECTED_INSTANCE_NOT_FOUND"
+        ? "The expected Runtime instance does not exist"
+        : "Runtime registration state does not match the expected instance",
+  };
 }
 
 function runtimeDeploymentApplicationError(

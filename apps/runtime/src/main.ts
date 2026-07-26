@@ -2,6 +2,10 @@ import { loadRuntimeConfig } from "./config.js";
 import { createRuntime } from "./runtime.js";
 import { loadRuntimeConfigClientBootstrap, RuntimeConfigIntegration } from "./runtime-config.js";
 import { createRuntimeShutdown } from "./shutdown.js";
+import {
+  loadRuntimeRegistrationBootstrap,
+  RuntimeRegistrationIntegration,
+} from "./runtime-registration.js";
 
 const config = loadRuntimeConfig();
 const runtime = createRuntime(config);
@@ -10,6 +14,18 @@ const runtimeConfig =
   runtimeConfigBootstrap === null
     ? null
     : new RuntimeConfigIntegration(runtimeConfigBootstrap, runtime, runtime.app.log);
+const runtimeRegistrationBootstrap = loadRuntimeRegistrationBootstrap(config);
+const runtimeRegistration =
+  runtimeRegistrationBootstrap === null
+    ? null
+    : new RuntimeRegistrationIntegration(
+        runtimeRegistrationBootstrap,
+        () => ({
+          configRevision: runtimeConfig?.currentRevision() ?? 0,
+          readinessState: runtime.registrationReadiness(),
+        }),
+        runtime.app.log,
+      );
 
 async function initializeWithRetry(attempts = 20): Promise<void> {
   let lastError: unknown;
@@ -30,7 +46,12 @@ const shutdown = createRuntimeShutdown({
   beginDrain: () => {
     runtime.beginDrain();
   },
-  stopConfig: () => runtimeConfig?.stop() ?? Promise.resolve(),
+  stopConfig: async () => {
+    await Promise.all([
+      runtimeConfig?.stop() ?? Promise.resolve(),
+      runtimeRegistration?.stop() ?? Promise.resolve(),
+    ]);
+  },
   closeRuntime: () => runtime.app.close(),
   onBegin: (signal) =>
     runtime.app.log.info({ signal }, "runtime draining before graceful shutdown"),
@@ -50,9 +71,11 @@ try {
   await initializeWithRetry();
   runtimeConfig?.start();
   await runtime.app.listen({ host: config.HOST, port: config.PORT });
+  runtimeRegistration?.start();
 } catch (error) {
   runtime.app.log.fatal({ err: error }, "runtime failed to start");
   await runtimeConfig?.stop();
+  await runtimeRegistration?.stop();
   await runtime.app.close();
   process.exitCode = 1;
 }

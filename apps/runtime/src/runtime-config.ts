@@ -125,6 +125,7 @@ function mergePlatformIdentity(
 export class RuntimeConfigIntegration {
   readonly #controller = new AbortController();
   readonly #workflow: RuntimeConfigWorkflow;
+  #currentRevision = 0;
   #running: Promise<void> | undefined;
 
   constructor(
@@ -163,6 +164,7 @@ export class RuntimeConfigIntegration {
       apply: async (document) => {
         const content = RuntimeObservabilityResolvedSchema.parse(document.content);
         await control.applyOtelEnabled(content.OTEL_ENABLED);
+        this.#currentRevision = document.revision;
       },
     });
     this.#workflow = new RuntimeConfigWorkflow(
@@ -177,8 +179,16 @@ export class RuntimeConfigIntegration {
     );
   }
 
-  syncOnce(): Promise<RuntimeConfigSyncResult> {
-    return this.#workflow.syncOnce();
+  async syncOnce(): Promise<RuntimeConfigSyncResult> {
+    const result = await this.#workflow.syncOnce();
+    if (result.state === "applied" || result.state === "unchanged" || result.state === "lkg") {
+      this.#currentRevision = result.document.revision;
+    }
+    return result;
+  }
+
+  currentRevision(): number {
+    return this.#currentRevision;
   }
 
   start(): void {
