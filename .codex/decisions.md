@@ -153,3 +153,11 @@ control-plane table boundary outside this card's allowlist. Update only that exi
 recognize migration `006`, validate its Provider/Environment uniqueness, SecretRef-only columns,
 status/error constraints, and audit reference. These changes strengthen existing verification and
 do not relax or skip prior migration assertions.
+
+## 2026-07-26 — G2-P2-B03 provisioning Port export and executable contract
+
+The card limits production code to `packages/runtime-deployment/src/ports/**`, but the Port would
+not be consumable through the package root and the mandatory package command only discovers its
+existing `test/**` directory. Add one root index export and one focused Port contract test outside
+the allowlist. These are minimal public wiring and verification changes: they add no PostgreSQL
+driver, Secret resolver, network behavior, or Provisioner implementation.

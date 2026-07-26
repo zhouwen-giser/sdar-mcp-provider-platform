@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T15:32:48.927107+00:00",
+  "updatedAt": "2026-07-26T15:35:21.536630+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -130,14 +130,16 @@
       "reason": null
     },
     "G2-P2-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T15:33:15.995836+00:00",
+      "completedAt": "2026-07-26T15:35:21.536509+00:00",
+      "evidence": [
+        "@sdar/runtime-deployment mandatory test PASS 3 files/37 tests; FakeProvisioner deterministic replay/dry-run/inspect contract; explicit deletion policy target binding; retryable error classification; no admin URL/connection string/secret value fields; pnpm typecheck; git diff --check"
+      ],
       "reason": null
     },
     "G2-P2-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
