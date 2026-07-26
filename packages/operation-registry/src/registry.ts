@@ -206,7 +206,12 @@ export class OperationRegistry {
               },
               ...(operation.resourceBinding === undefined
                 ? {}
-                : { "io.sdar/resourceBinding": operation.resourceBinding }),
+                : {
+                    "io.sdar/resourceBinding":
+                      operation.resourceBinding.mode === "NONE"
+                        ? { mode: "NONE" }
+                        : operation.resourceBinding,
+                  }),
             },
           },
         };

@@ -391,3 +391,7 @@
 - 2026-07-26T19:13:33.513922+00:00 START G2-P5-B07
 
 - 2026-07-26T19:17:10.358374+00:00 PASS G2-P5-B07 evidence=['reports/evidence/G2-P5-B07-platform-security.json; pnpm test:platform-security (4 passed); pnpm test:fault-injection (4 passed); root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:17:24.165032+00:00 START G2-P5-B08
+
+- 2026-07-26T19:27:26.612202+00:00 PASS G2-P5-B08 evidence=['reports/evidence/sdar-interop.json; TEST_DATABASE_URL=<redacted> pnpm test:sdar-interop (1 controlled E2E passed); @sdar/catalog-manager 10 passed; frozen protocol 71 passed; external SDAR gate BLOCKED_EXTERNAL']

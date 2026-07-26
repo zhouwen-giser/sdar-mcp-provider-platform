@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T19:17:10.358457+00:00",
+  "updatedAt": "2026-07-26T19:27:26.612239+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -436,14 +436,16 @@
       "reason": null
     },
     "G2-P5-B08": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T19:17:24.164968+00:00",
+      "completedAt": "2026-07-26T19:27:26.612140+00:00",
+      "evidence": [
+        "reports/evidence/sdar-interop.json; TEST_DATABASE_URL=<redacted> pnpm test:sdar-interop (1 controlled E2E passed); @sdar/catalog-manager 10 passed; frozen protocol 71 passed; external SDAR gate BLOCKED_EXTERNAL"
+      ],
       "reason": null
     },
     "G2-P5-B09": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

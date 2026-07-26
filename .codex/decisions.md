@@ -321,3 +321,25 @@ real-resource qualification remains pending.
   placeholders.
 - **Scope:** Root command routing only; test implementation and evidence remain
   in the task's allowed directories.
+
+## G2-P5-B08 — Controlled SDAR Interop gate
+
+- **Decision:** Add the task-mandated `test:sdar-interop` script and require an
+  explicit `TEST_DATABASE_URL`.
+- **Reason:** Controlled Interop starts a real local Runtime, imports a Registry
+  Snapshot, and exercises the frozen MCP Task/notification protocol against
+  PostgreSQL. It must never silently fall back to an in-memory success.
+- **Evidence boundary:** This proves a controlled SDAR-consumer contract only.
+  External SDAR access remains `BLOCKED_EXTERNAL` and is not certified.
+
+### ResourceBinding NONE normalization
+
+- **Observed contract difference:** gRPC decoding with defaults materializes
+  `resourceIdJsonPointer: ""` for `mode: "NONE"`, while the public Catalog
+  contract requires the pointer to be absent in NONE mode.
+- **Decision:** Normalize only the Runtime tool projection at the Operation
+  Registry boundary. `NONE` publishes `{ "mode": "NONE" }`; argument-reference
+  bindings retain their validated pointer.
+- **Why this cross-range fix is required:** Without normalization, authoritative
+  Runtime `tools/list` output is rejected by the existing Catalog importer, so
+  Registry-based SDAR Interop cannot proceed.
