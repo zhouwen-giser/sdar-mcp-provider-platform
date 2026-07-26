@@ -4,6 +4,7 @@ import type {
   RuntimeInfrastructureProcessState,
 } from "@sdar/runtime-deployment";
 import type { RenderedBootstrapConfig } from "../bootstrap/renderer.js";
+import type { ResolvedRuntimeRelease } from "../releases/resolver.js";
 
 const RUNTIME_ENTRY = "dist/apps/runtime/src/main.js";
 const PROCESS_NAME = /^sdar-runtime-[a-z0-9][a-z0-9-]{0,112}$/;
@@ -30,6 +31,11 @@ export interface Pm2StartOptions {
   readonly env: Readonly<Record<string, string>>;
 }
 
+export interface Pm2RestartOptions {
+  readonly updateEnv: true;
+  readonly env: Readonly<Record<string, string>>;
+}
+
 export interface Pm2JavascriptApi {
   connect(callback: (error?: Error) => void): void;
   disconnect(): void;
@@ -38,11 +44,7 @@ export interface Pm2JavascriptApi {
     callback: (error: Error | null, descriptions?: readonly Pm2ProcessDescription[]) => void,
   ): void;
   stop(name: string, callback: (error?: Error) => void): void;
-  restart(
-    name: string,
-    options: { readonly updateEnv: true },
-    callback: (error?: Error) => void,
-  ): void;
+  restart(name: string, options: Pm2RestartOptions, callback: (error?: Error) => void): void;
   delete(name: string, callback: (error?: Error) => void): void;
   describe(
     name: string,
@@ -57,6 +59,7 @@ export interface Pm2RuntimeStartRequest {
   readonly processName: string;
   readonly runtimeVersion: string;
   readonly bootstrap: RenderedBootstrapConfig;
+  readonly release: ResolvedRuntimeRelease;
 }
 
 export interface Pm2RuntimeProcessResult {
@@ -106,7 +109,7 @@ export class Pm2ProcessManager {
       }
       if (existing !== null) {
         await callbackVoid("restart", (done) =>
-          this.api.restart(request.processName, { updateEnv: true }, done),
+          this.api.restart(request.processName, { updateEnv: true, env: options.env }, done),
         );
         return Object.freeze({
           outcome: "changed" as const,
@@ -146,14 +149,14 @@ export class Pm2ProcessManager {
   }
 
   restart(request: Pm2RuntimeStartRequest): Promise<Pm2RuntimeProcessResult> {
-    this.startOptions(request);
+    const options = this.startOptions(request);
     return this.withConnection(async () => {
       const existing = await this.describeConnected(request.processName);
       if (existing === null) {
         throw new Pm2ProcessManagerError("PM2_PROCESS_NOT_FOUND", "restart", false);
       }
       await callbackVoid("restart", (done) =>
-        this.api.restart(request.processName, { updateEnv: true }, done),
+        this.api.restart(request.processName, { updateEnv: true, env: options.env }, done),
       );
       return Object.freeze({
         outcome: "changed" as const,
@@ -220,16 +223,21 @@ export class Pm2ProcessManager {
     }
     if (
       request.bootstrap.target.processName !== request.processName ||
-      request.bootstrap.target.runtimeVersion !== request.runtimeVersion
+      request.bootstrap.target.runtimeVersion !== request.runtimeVersion ||
+      request.release.version !== request.runtimeVersion
     ) {
       throw new Pm2ProcessManagerError("PM2_BOOTSTRAP_INVALID", "start", false);
     }
     validateEnvironment(request.bootstrap.environment);
     const cwd = resolve(this.#releaseRoot, request.runtimeVersion);
     assertContained(this.#releaseRoot, cwd);
+    const script = resolve(cwd, RUNTIME_ENTRY);
+    if (request.release.releaseDirectory !== cwd || request.release.runtimeEntry !== script) {
+      throw new Pm2ProcessManagerError("PM2_RUNTIME_RELEASE_INVALID", "start", false);
+    }
     return Object.freeze({
       name: request.processName,
-      script: resolve(cwd, RUNTIME_ENTRY),
+      script,
       cwd,
       exec_mode: "fork",
       instances: 1,

@@ -259,6 +259,9 @@ importers:
       '@sdar/runtime-deployment':
         specifier: workspace:*
         version: link:../runtime-deployment
+      '@sdar/secret-store':
+        specifier: workspace:*
+        version: link:../secret-store
 
   packages/provider-adapter-kit: {}
 

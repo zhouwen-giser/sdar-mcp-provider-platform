@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Pm2JavascriptApi, Pm2ProcessDescription, Pm2StartOptions } from "../src/index.js";
+import type {
+  Pm2JavascriptApi,
+  Pm2ProcessDescription,
+  Pm2RestartOptions,
+  Pm2StartOptions,
+} from "../src/index.js";
 import { Pm2ProcessManager, Pm2ProcessManagerError } from "../src/index.js";
 
 describe("Pm2ProcessManager Fake JavaScript API contract", () => {
@@ -30,6 +35,20 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       }),
     );
     expect(fake.connect).not.toHaveBeenCalled();
+  });
+
+  it("restarts with only the rendered environment and explicit updateEnv", async () => {
+    const fake = new FakePm2Api();
+    fake.processes.set("sdar-runtime-provider-a-0", description("stopped"));
+    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+
+    await manager.restart(request());
+
+    expect(fake.restartOptions).toEqual({
+      updateEnv: true,
+      env: request().bootstrap.environment,
+    });
+    expect(fake.restartOptions?.env).not.toHaveProperty("NODE_OPTIONS");
   });
 
   it("makes repeated stop and delete idempotent", async () => {
@@ -80,6 +99,7 @@ class FakePm2Api implements Pm2JavascriptApi {
   readonly connect = vi.fn((callback: (error?: Error) => void) => callback());
   readonly disconnect = vi.fn();
   startOptions?: Pm2StartOptions;
+  restartOptions?: Pm2RestartOptions;
   listError?: Error;
 
   start(
@@ -97,11 +117,8 @@ class FakePm2Api implements Pm2JavascriptApi {
     callback();
   }
 
-  restart(
-    name: string,
-    _options: { readonly updateEnv: true },
-    callback: (error?: Error) => void,
-  ): void {
+  restart(name: string, options: Pm2RestartOptions, callback: (error?: Error) => void): void {
+    this.restartOptions = options;
     this.processes.set(name, description("online"));
     callback();
   }
@@ -153,6 +170,12 @@ function request() {
         DATABASE_URL_FILE: "/run/sdar/database-url",
       },
       redactedPreview: { DATABASE_URL_FILE: "<secret-file>" },
+    },
+    release: {
+      version: target.runtimeVersion,
+      releaseDirectory: "/opt/sdar/runtime-releases/2.0.0-rc.1",
+      runtimeEntry: "/opt/sdar/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js",
+      manifestDigest: "b".repeat(64),
     },
   };
 }

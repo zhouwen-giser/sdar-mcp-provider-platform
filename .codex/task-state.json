@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T16:51:55.830326+00:00",
+  "updatedAt": "2026-07-26T17:01:06.949650+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -238,14 +238,16 @@
       "reason": null
     },
     "G2-P3-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T16:52:34.270816+00:00",
+      "completedAt": "2026-07-26T17:01:06.949503+00:00",
+      "evidence": [
+        "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:pm2-adapter (4 files/23 tests, Fake PM2 component contract); tsc --noEmit; eslint targeted; lifecycle timeout/idempotency/state/audit/controlled-updateEnv/secret-cleanup tests"
+      ],
       "reason": null
     },
     "G2-P3-B07": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
