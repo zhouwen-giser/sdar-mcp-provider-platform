@@ -127,3 +127,7 @@
 - 2026-07-26T11:15:29.309847+00:00 START G1-P4-B01
 
 - 2026-07-26T11:23:59.504045+00:00 PASS G1-P4-B01 evidence=['pnpm --filter @sdar/pms-domain test: PASS 1 file/9 tests; pnpm typecheck: PASS; eslint packages/pms-domain: PASS; prettier --check packages/pms-domain: PASS; full build: PASS; infra dependency scan: clean; git diff --check: PASS; branded IDs/status, vendor-managed hosting default, Provider-Resource N:N and invalid lifecycle transitions covered']
+
+- 2026-07-26T11:24:42.918989+00:00 START G1-P4-B02
+
+- 2026-07-26T11:32:00.956470+00:00 PASS G1-P4-B02 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations: PASS 1 file/4 tests; empty isolated schema create PASS; identical SQL applied twice PASS; exact 11-table PMS boundary and zero Runtime Task Authority tables PASS; representative UUID/checksum/JSONB/Job Lease constraint rejection PASS; database-migration-runner suite PASS 9/9; pnpm-equivalent tsc typecheck PASS; eslint/prettier/git diff --check PASS']

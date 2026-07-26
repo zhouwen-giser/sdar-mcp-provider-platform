@@ -20,3 +20,11 @@ Adding `packages/pms-domain` makes pnpm treat the lockfile as stale unless the n
 workspace has an empty importer. Add only `packages/pms-domain: {}` to `pnpm-lock.yaml`. This
 minimal out-of-range lock metadata prevents mandatory filtered tests from invoking dependency
 resolution; it adds no package or infrastructure dependency.
+
+## 2026-07-26 — G1-P4-B02 PostgreSQL migration verification wiring
+
+The mandatory `pnpm test:pms-migrations` command does not exist, and no existing test command
+validates a PMS schema because the Migration set was previously empty. Add one root script and one
+focused PostgreSQL test outside the card's production-file allowlist. The test applies the real SQL
+twice in an isolated schema, checks the exact table boundary, and exercises representative UUID,
+checksum, JSONB, and Job Lease constraints; it is not an empty success shim.
