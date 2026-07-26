@@ -222,3 +222,14 @@ The card correctly limits implementation to `src/health/**`; add only its packag
 focused injected-fetch test outside the allowlist so the mandatory package gate exercises fixed
 loopback endpoints, timeout, schema validation, and dependency classification. The tests perform
 no external network call and do not claim real Runtime or PM2 qualification.
+
+## 2026-07-26 — G2-P3-B12 built Runtime workspace import resolution
+
+The real PM2 E2E starts the fixed production entry `dist/apps/runtime/src/main.js` and exposed that
+two compiled Runtime Config Client files retain a bare workspace import for
+`@sdar/runtime-configuration-contract`. The source workspace has a package-local pnpm link, but the
+compiled `dist/packages/runtime-config-client` tree does not, so Node fails before Runtime
+initialization. Change only those two imports to the equivalent repository-relative contract entry,
+which TypeScript preserves as a resolvable relative path in `dist`. This is the minimum out-of-range
+runtime dependency fix needed to execute the mandated built Runtime; it changes no configuration,
+hashing, authority, PM2, protocol, or secret behavior.

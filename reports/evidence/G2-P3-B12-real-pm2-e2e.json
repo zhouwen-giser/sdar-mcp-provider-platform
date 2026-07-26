@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G2-P3-B12",
+  "generatedAt": "2026-07-26T17:44:11.392Z",
+  "resourceClassification": {
+    "pm2": "real",
+    "runtime": "built SDAR Runtime",
+    "adapter": "mock Adapter",
+    "database": "real local PostgreSQL",
+    "certificationClaim": "component E2E; not provider Interop Certified"
+  },
+  "pm2": {
+    "version": "7.0.3",
+    "isolatedHome": true,
+    "processName": "sdar-runtime-e2e-baseline-0",
+    "mode": "fork_mode",
+    "initialStatus": "online",
+    "initialPid": 595694,
+    "restartStatus": "online",
+    "restartedPid": 595894,
+    "restartCount": 1,
+    "stoppedStatus": "stopped",
+    "deleted": true,
+    "nonPlatformSentinel": {
+      "name": "unrelated-e2e-sentinel",
+      "statusBefore": "online",
+      "statusAfterPlatformDelete": "online"
+    }
+  },
+  "health": {
+    "initial": {
+      "live": true,
+      "ready": true
+    },
+    "afterCrashRecovery": {
+      "live": true,
+      "ready": true
+    }
+  },
+  "security": {
+    "databaseCredentialTransport": "DATABASE_URL_FILE",
+    "plaintextDatabaseUrlInEvidence": false,
+    "pm2HomeIsolated": true
+  }
+}

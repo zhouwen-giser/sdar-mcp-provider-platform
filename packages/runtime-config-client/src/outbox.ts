@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, stat, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { canonicalSha256 } from "@sdar/runtime-configuration-contract";
+import { canonicalSha256 } from "../../runtime-configuration-contract/src/index.js";
 import type { RuntimeConfigAckOutbox, RuntimeConfigAckOutboxRecord } from "./model.js";
 
 interface OutboxArtifact {
