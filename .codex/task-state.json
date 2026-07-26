@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:26:54.958462+00:00",
+  "updatedAt": "2026-07-26T14:28:47.442919+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -22,14 +22,16 @@
       "reason": null
     },
     "G2-P0-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T14:27:22.903313+00:00",
+      "completedAt": "2026-07-26T14:28:47.442788+00:00",
+      "evidence": [
+        "docs/adr/0001 through 0005: Accepted; process authority, PM2 single-node Fork Mode, per-logical-Provider Runtime DB, Collector-only ClickHouse path, vendor_managed and single-replica defaults frozen; task-package design/guardrail alignment review PASS; prettier and git diff --check PASS"
+      ],
       "reason": null
     },
     "G2-P0-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
