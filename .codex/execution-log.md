@@ -343,3 +343,7 @@
 - 2026-07-26T18:04:22.810636+00:00 START G2-P4-B03
 
 - 2026-07-26T18:12:07.028578+00:00 PASS G2-P4-B03 evidence=['pnpm exec vitest run packages/pms-application/test/provider-identity.test.ts packages/pms-application/test/runtime-reconcile.test.ts (2 files/9 tests); pnpm --filter @sdar/runtime test (4 files/16 tests); pnpm --filter @sdar/runtime-registration test (3 files/10 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:12:34.225939+00:00 START G2-P4-B04
+
+- 2026-07-26T18:17:35.041161+00:00 PASS G2-P4-B04 evidence=['pnpm --filter @sdar/catalog-manager test (1 file/10 tests); tsc --noEmit; eslint packages/catalog-manager; git diff --check']
