@@ -276,3 +276,10 @@ The mandatory `pnpm test:provider-platform-ugv` command does not exist. Add one 
 requires the local PostgreSQL URL and runs only the task-owned UGV platform integration directory.
 The suite starts the real local UGV Adapter and Runtime but uses Mock device resources, so its
 evidence remains component/platform integration and does not claim real-resource certification.
+
+## 2026-07-27 — G2-P5-B02 NPC Tank platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-npc` command does not exist. Add one root script that
+requires local PostgreSQL and runs only the task-owned NPC Tank platform integration directory. The
+suite uses the real local NPC Tank Adapter and Runtime with a Mock device client; qualification
+therefore remains component passed and real-resource pending.

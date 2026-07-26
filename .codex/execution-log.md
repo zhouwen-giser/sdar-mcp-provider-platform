@@ -367,3 +367,7 @@
 - 2026-07-26T18:40:58.693297+00:00 START G2-P5-B01
 
 - 2026-07-26T18:46:29.900714+00:00 PASS G2-P5-B01 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ugv (1 file/2 tests; real local UGV Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, Catalog/Registry; Provider DB provision calls=0); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:46:48.934261+00:00 START G2-P5-B02
+
+- 2026-07-26T18:49:22.562239+00:00 PASS G2-P5-B02 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-npc (1 file/2 tests; real local NPC Tank Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, conditional circular EO capability, Catalog/Registry); tsc --noEmit; eslint; git diff --check']
