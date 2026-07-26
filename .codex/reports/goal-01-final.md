@@ -1,6 +1,6 @@
 # Goal 1 final acceptance
 
-Status: PENDING TERMINAL HANDOFF VALIDATION
+Status: PASSED
 
 ## Acceptance checklist
 
@@ -17,7 +17,7 @@ Status: PENDING TERMINAL HANDOFF VALIDATION
 | Runtime ETag/staging/LKG/Ack/outage complete | PASS | client 14/14 and Runtime E2E 3/3 |
 | `OTEL_ENABLED` loop does not affect Task Engine | PASS | Runtime E2E and unit 123/123 |
 | 50 task states PASSED | PASS | `.codex/task-state.json` |
-| Handoff validator returns 0 on clean worktree | PENDING | terminal post-commit command |
+| Handoff validator returns 0 on clean worktree | PASS | `Goal 1 handoff valid` at `604bd09` |
 
 ## Final gate summary
 
@@ -28,9 +28,9 @@ Status: PENDING TERMINAL HANDOFF VALIDATION
 - PostgreSQL Migration isolation, PMS migration, and PMS configuration E2E gates passed.
 - Provider Package, configuration compatibility, Runtime Config E2E, and unit gates passed.
 
-The Handoff validator intentionally runs after this report, task state, and Handoff JSON are
-committed because it requires both 50 PASSED states and a clean Git worktree. Goal 1 must not be
-announced complete unless that command returns 0.
+The Handoff validator ran after the report, task state, and Handoff JSON were committed because it
+requires both 50 PASSED states and a clean Git worktree. It returned 0 with
+`Goal 1 handoff valid`.
 
 ## External gaps
 

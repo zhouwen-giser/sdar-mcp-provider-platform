@@ -8,8 +8,8 @@ Migration authorities, strict Provider Packages, shared configuration contracts,
 plane and persistence, the PMS API/configuration center, and a Runtime Config Client with the first
 real `OTEL_ENABLED` dynamic apply loop.
 
-All 50 atomic task states are PASSED. Goal completion remains conditional on the terminal Handoff
-validator returning 0 against the committed, clean worktree.
+All 50 atomic task states are PASSED. The terminal Handoff validator returned 0 against clean
+commit `604bd09`.
 
 ## Baseline and versions
 
