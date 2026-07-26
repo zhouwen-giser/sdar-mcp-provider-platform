@@ -67,16 +67,23 @@ function classifyError(error: FastifyError): PublicError {
 
 function configurationError(code: ConfigurationCenterErrorCode): PublicError {
   const statusCode =
-    code === "CONFIGURATION_DEFINITION_NOT_FOUND" ||
-    code === "CONFIGURATION_DRAFT_NOT_FOUND" ||
-    code === "CONFIGURATION_REVISION_NOT_FOUND"
-      ? 404
-      : code === "CONFIGURATION_BUSINESS_KEY_CONFLICT" ||
-          code === "CONFIGURATION_DRAFT_VERSION_CONFLICT" ||
-          code === "CONFIGURATION_DRAFT_NOT_VALIDATED" ||
-          code === "CONFIGURATION_PUBLISH_CONFLICT"
-        ? 409
-        : 400;
+    code === "RUNTIME_CONFIG_UNAUTHORIZED"
+      ? 401
+      : code === "RUNTIME_CONFIG_PROJECTION_INVALID"
+        ? 500
+        : code === "RUNTIME_CONFIG_IDENTITY_MISMATCH"
+          ? 403
+          : code === "CONFIGURATION_DEFINITION_NOT_FOUND" ||
+              code === "CONFIGURATION_DRAFT_NOT_FOUND" ||
+              code === "CONFIGURATION_REVISION_NOT_FOUND" ||
+              code === "RUNTIME_CONFIG_NOT_FOUND"
+            ? 404
+            : code === "CONFIGURATION_BUSINESS_KEY_CONFLICT" ||
+                code === "CONFIGURATION_DRAFT_VERSION_CONFLICT" ||
+                code === "CONFIGURATION_DRAFT_NOT_VALIDATED" ||
+                code === "CONFIGURATION_PUBLISH_CONFLICT"
+              ? 409
+              : 400;
   return { statusCode, code, message: CONFIGURATION_MESSAGES[code] };
 }
 
@@ -119,5 +126,10 @@ const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, stri
   CONFIGURATION_REVISION_NOT_FOUND: "The configuration revision does not exist",
   CONFIGURATION_ROLLBACK_TARGET_MISMATCH:
     "The rollback source belongs to a different configuration target",
+  RUNTIME_CONFIG_UNAUTHORIZED: "Runtime Config client authentication failed",
+  RUNTIME_CONFIG_IDENTITY_MISMATCH:
+    "The Runtime Config client is not authorized for the requested target",
+  RUNTIME_CONFIG_NOT_FOUND: "No published Runtime configuration exists for this target",
+  RUNTIME_CONFIG_PROJECTION_INVALID: "Published Runtime configuration cannot be projected safely",
   CONFIGURATION_INPUT_INVALID: "A configuration input is invalid",
 };

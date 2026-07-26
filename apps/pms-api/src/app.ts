@@ -7,12 +7,15 @@ import type {
 import type {
   ConfigurationCenter,
   ConfigurationPublicationService,
+  RuntimeConfigClientAuthorizer,
+  RuntimeConfigQueryService,
 } from "../../../packages/configuration-center/src/index.js";
 import { registerConfigurationRoutes } from "./configuration-routes.js";
 import { attachRequestContext, requestContext } from "./context.js";
 import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
 import { registerManagementRoutes } from "./management-routes.js";
+import { registerRuntimeConfigRoutes } from "./runtime-config-routes.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -25,6 +28,8 @@ export interface PmsApiOptions {
   readonly management?: ProviderManagementService;
   readonly configurationCenter?: ConfigurationCenter;
   readonly configurationPublication?: ConfigurationPublicationService;
+  readonly runtimeConfigQuery?: RuntimeConfigQueryService;
+  readonly runtimeConfigAuthorizer?: RuntimeConfigClientAuthorizer;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -59,6 +64,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.configurationCenter !== undefined) {
     registerConfigurationRoutes(app, options.configurationCenter, options.configurationPublication);
+  }
+  if (options.runtimeConfigQuery !== undefined && options.runtimeConfigAuthorizer !== undefined) {
+    registerRuntimeConfigRoutes(app, options.runtimeConfigQuery, options.runtimeConfigAuthorizer);
   }
 
   return app;

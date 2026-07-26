@@ -198,6 +198,26 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/runtime-config/deployments/{deploymentId}/instances/{instanceId}/latest": {
+        get: {
+          operationId: "getLatestRuntimeConfiguration",
+          security: [{ runtimeConfigToken: [] }],
+          parameters: [
+            { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
+            { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
+            { name: "environment", in: "query", required: true, schema: { type: "string" } },
+            { name: "configGroup", in: "query", required: true, schema: { type: "string" } },
+            { name: "dataId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Latest authorized Published Effective Config" },
+            "304": { description: "The Runtime already has this checksum" },
+            "401": { description: "Runtime Config client authentication failed" },
+            "403": { description: "Runtime Config client target mismatch" },
+            "404": { description: "No Published Effective Config" },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -218,6 +238,13 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
             },
           },
           additionalProperties: false,
+        },
+      },
+      securitySchemes: {
+        runtimeConfigToken: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "opaque-runtime-config-token",
         },
       },
     },

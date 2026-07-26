@@ -12,6 +12,8 @@ import {
 import {
   ConfigurationPublicationService,
   createDefaultConfigurationCenter,
+  DenyRuntimeConfigClientAuthorizer,
+  RuntimeConfigQueryService,
 } from "../../../packages/configuration-center/src/index.js";
 import { createPmsApi } from "./app.js";
 
@@ -26,6 +28,8 @@ const app = createPmsApi({
   management: new ProviderManagementService(unitOfWork),
   configurationCenter,
   configurationPublication: new ConfigurationPublicationService(configurationCenter, unitOfWork),
+  runtimeConfigQuery: new RuntimeConfigQueryService(unitOfWork),
+  runtimeConfigAuthorizer: new DenyRuntimeConfigClientAuthorizer(),
   readiness: async () => {
     await pool.query("SELECT 1");
     return { ready: true, checks: { database: "ready" } };

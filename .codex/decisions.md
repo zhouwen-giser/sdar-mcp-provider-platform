@@ -91,3 +91,11 @@ append migration `004_config_revision_history_guard.sql` to reject revision dele
 mutation, and invalid lifecycle transitions in the database. Extend the real `test:pms-config`
 command with a PostgreSQL integration suite because in-memory tests cannot establish concurrent
 publish safety or database-enforced immutable history.
+
+## 2026-07-26 — G1-P5-B06 Runtime Config E2E verification wiring
+
+The mandatory `pnpm test:pms-config-e2e` command does not exist. Add one root script that requires
+the local PostgreSQL test URL and runs the explicit Runtime Config latest API E2E test. This is the
+minimum out-of-range wiring needed to prove authenticated deployment fallback, ETag/304, SecretRef
+projection, and authoritative identity projection against a real Published revision; it is not an
+empty or mocked-success command.
