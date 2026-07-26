@@ -204,6 +204,9 @@ export class OperationRegistry {
                 supportsInputRequired: operation.capabilities.inputRequired,
                 idempotency: operation.capabilities.idempotency ? "server_managed" : "none",
               },
+              ...(operation.resourceBinding === undefined
+                ? {}
+                : { "io.sdar/resourceBinding": operation.resourceBinding }),
             },
           },
         };

@@ -371,3 +371,7 @@
 - 2026-07-26T18:46:48.934261+00:00 START G2-P5-B02
 
 - 2026-07-26T18:49:22.562239+00:00 PASS G2-P5-B02 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-npc (1 file/2 tests; real local NPC Tank Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, conditional circular EO capability, Catalog/Registry); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:49:41.157589+00:00 START G2-P5-B03
+
+- 2026-07-26T18:52:57.609806+00:00 PASS G2-P5-B03 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ha (1 file/2 tests; Fake HA + real local Climate Adapter + Runtime + PostgreSQL, 4 Operations, resource binding, Catalog/Registry); pnpm test:protocol:frozen (14 files/71 tests); pnpm --filter @sdar/catalog-manager test (1 file/10 tests); tsc --noEmit; eslint; git diff --check']

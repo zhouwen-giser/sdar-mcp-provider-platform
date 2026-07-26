@@ -283,3 +283,19 @@ The mandatory `pnpm test:provider-platform-npc` command does not exist. Add one 
 requires local PostgreSQL and runs only the task-owned NPC Tank platform integration directory. The
 suite uses the real local NPC Tank Adapter and Runtime with a Mock device client; qualification
 therefore remains component passed and real-resource pending.
+
+## 2026-07-27 — G2-P5-B03 authoritative resource-binding projection
+
+The Climate Adapter manifest contains the required `ARGUMENT_REFERENCE` resource binding, but the
+existing Runtime Operation Registry omitted it from `tools/list`. Catalog discovery cannot infer
+this authoritative field from Provider Package data. Add only the corresponding
+`io.sdar/resourceBinding` Tool metadata projection in Operation Registry, preserving all frozen
+Task fields and behavior. The task-owned platform E2E proves the binding reaches Catalog and
+Registry.
+
+## 2026-07-27 — G2-P5-B03 Home Assistant platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-ha` command does not exist. Add one root script requiring
+local PostgreSQL and running only the task-owned Home Assistant platform integration directory.
+The suite uses a local Fake Home Assistant service, so component status may be proven while
+real-resource qualification remains pending.
