@@ -6,6 +6,7 @@ import type {
   RuntimeInfrastructureOperationContext,
   RuntimeInfrastructureProcessObservation,
 } from "../../runtime-deployment/src/index.js";
+import type { ProviderIdentityVerification } from "./provider-identity.js";
 
 export interface RuntimeReconcileInstance {
   readonly target: RuntimeInfrastructureInstanceTarget;
@@ -97,6 +98,15 @@ export interface RuntimeReconcileProcessInventoryPort {
   list(): Promise<readonly RuntimeInfrastructureProcessObservation[]>;
 }
 
+export interface RuntimeReconcileProviderIdentityPort {
+  verify(input: {
+    readonly expectedProviderId: string;
+    readonly target: RuntimeInfrastructureInstanceTarget;
+    readonly timeoutMs: number;
+    readonly signal: AbortSignal;
+  }): Promise<ProviderIdentityVerification>;
+}
+
 export interface RuntimeDeploymentReconcileInput {
   readonly providerId: string;
   readonly deploymentId: string;
@@ -132,6 +142,7 @@ export class RuntimeDeploymentReconciler {
     private readonly lifecycle: RuntimeReconcileLifecyclePort,
     private readonly health: RuntimeReconcileHealthPort,
     private readonly inventory: RuntimeReconcileProcessInventoryPort,
+    private readonly providerIdentity?: RuntimeReconcileProviderIdentityPort,
   ) {}
 
   async reconcile(
@@ -188,6 +199,29 @@ export class RuntimeDeploymentReconciler {
           }
           case "HEALTH_CHECKING": {
             const instance = await this.store.ensureInstance(deployment.snapshot, 0);
+            if (this.providerIdentity !== undefined) {
+              const verification = await this.providerIdentity.verify({
+                expectedProviderId: input.providerId,
+                target: instance.target,
+                timeoutMs: input.context.timeoutMs,
+                signal: input.context.signal,
+              });
+              if (!verification.valid) {
+                await this.store.fail(
+                  input.providerId,
+                  input.deploymentId,
+                  deployment.snapshot.status,
+                  deployment.snapshot.observedRevision,
+                  verification.reasonCode,
+                );
+                deployment = await this.requireDeployment(input);
+                return {
+                  deployment: deployment.snapshot,
+                  progressed: true,
+                  orphanProcessNames: orphans,
+                };
+              }
+            }
             const result = await this.health.probe({
               target: instance.target,
               httpPort: instance.httpPort,
@@ -224,12 +258,42 @@ export class RuntimeDeploymentReconciler {
               orphanProcessNames: orphans,
             };
           }
-          case "DISCOVERING":
+          case "DISCOVERING": {
+            if (this.providerIdentity === undefined) {
+              return {
+                deployment: deployment.snapshot,
+                progressed,
+                orphanProcessNames: orphans,
+              };
+            }
+            const instance = await this.store.ensureInstance(deployment.snapshot, 0);
+            const verification = await this.providerIdentity.verify({
+              expectedProviderId: input.providerId,
+              target: instance.target,
+              timeoutMs: input.context.timeoutMs,
+              signal: input.context.signal,
+            });
+            if (!verification.valid) {
+              await this.store.fail(
+                input.providerId,
+                input.deploymentId,
+                deployment.snapshot.status,
+                deployment.snapshot.observedRevision,
+                verification.reasonCode,
+              );
+              deployment = await this.requireDeployment(input);
+              return {
+                deployment: deployment.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
             return {
               deployment: deployment.snapshot,
               progressed,
               orphanProcessNames: orphans,
             };
+          }
           case "STOPPED":
           case "DRAINING":
             return {

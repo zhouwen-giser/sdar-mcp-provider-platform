@@ -16,6 +16,7 @@ import {
   RuntimeDeploymentReconciler,
   type RuntimeReconcileHealthResult,
   type RuntimeReconcileInstance,
+  type RuntimeReconcileProviderIdentityPort,
   type RuntimeReconcileStore,
 } from "../src/index.js";
 
@@ -101,6 +102,37 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(store.failureCodes).toEqual(["RUNTIME_RECONCILE_OPERATION_FAILED"]);
     expect(JSON.stringify(store.failureCodes)).not.toContain("private");
     expect(database).not.toHaveProperty("delete");
+  });
+
+  it("blocks health/ACTIVE progression on structured Provider identity mismatch", async () => {
+    const store = new MemoryReconcileStore(deployment("HEALTH_CHECKING"));
+    const health = readyHealth();
+    const verify = vi.fn<RuntimeReconcileProviderIdentityPort["verify"]>(() =>
+      Promise.resolve({
+        valid: false as const,
+        reasonCode: "PROVIDER_ID_MISMATCH" as const,
+        mismatchRelations: ["pms_adapter_manifest" as const],
+        retryable: true as const,
+      }),
+    );
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      health,
+      inventory([]),
+      { verify },
+    );
+
+    const result = await reconciler.reconcile(input("identity-mismatch"));
+
+    expect(result.deployment.status).toBe("FAILED");
+    expect(store.failureCodes).toEqual(["PROVIDER_ID_MISMATCH"]);
+    expect(health.probe).not.toHaveBeenCalled();
+    expect(store.transitions).not.toContain("DISCOVERING");
+    expect(store.transitions).not.toContain("ACTIVE");
+    expect(verify.mock.calls[0]?.[0].expectedProviderId).toBe("provider-a");
+    expect(verify.mock.calls[0]?.[0].target.providerId).toBe("provider-a");
   });
 });
 

@@ -61,6 +61,12 @@ import { BoundedRateLimiter } from "./rate-limiter.js";
 import { AdapterManifestWatcher } from "./manifest-watcher.js";
 import { AdapterBusinessEventSourceClient } from "./business-events/source-client.js";
 import { RuntimeDrainController } from "./shutdown.js";
+import {
+  assertRuntimeProviderIdentity,
+  pendingRuntimeProviderIdentity,
+  verifyRuntimeProviderIdentity,
+  type RuntimeProviderIdentitySnapshot,
+} from "./provider-identity.js";
 
 function createHttpServer(logger: RuntimeLogger, bodyLimit: number) {
   return Fastify({ loggerInstance: logger, bodyLimit });
@@ -102,6 +108,7 @@ export interface RuntimeApplication {
   beginDrain(): boolean;
   drainState(): "accepting" | "draining" | "closed";
   registrationReadiness(): "ready" | "not_ready";
+  providerIdentityEvidence(): RuntimeProviderIdentitySnapshot;
 }
 
 export function createRuntime(config: RuntimeConfig): RuntimeApplication {
@@ -114,6 +121,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   }
   const app = createHttpServer(logger, config.HTTP_BODY_LIMIT_BYTES);
   const drain = new RuntimeDrainController();
+  let providerIdentity = pendingRuntimeProviderIdentity(config.PROVIDER_ID);
   const metrics = new RuntimeMetrics();
   const telemetrySelfGauges: Record<string, number> = {};
   const telemetryInstanceId = config.OTEL_SERVICE_INSTANCE_ID ?? randomUUID();
@@ -342,6 +350,22 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     if (manifest === undefined) return reply.code(503).send({ error: "manifest_not_loaded" });
     return manifest;
   });
+  app.get("/internal/provider-identity", async (request, reply) => {
+    if (!config.INTERNAL_ENDPOINTS_ENABLED) {
+      return reply.code(404).send({ error: "internal_endpoints_disabled" });
+    }
+    const header =
+      typeof request.headers["x-sdar-admin-token"] === "string"
+        ? request.headers["x-sdar-admin-token"]
+        : "";
+    if (header.length === 0) {
+      return reply.code(401).send({ error: "admin_token_required" });
+    }
+    if (!isValidInternalAdminToken(header, config.INTERNAL_ADMIN_TOKEN ?? "")) {
+      return reply.code(403).send({ error: "invalid_admin_token" });
+    }
+    return providerIdentity;
+  });
   const handleMcp = async (
     path: "/mcp" | "/mcp/legacy",
     request: FastifyRequest,
@@ -466,11 +490,8 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
 
     try {
       manifest = await gateway.describeProvider();
-      if (manifest.providerId !== config.PROVIDER_ID) {
-        throw new Error(
-          `Adapter provider id ${manifest.providerId} does not match configured ${config.PROVIDER_ID}`,
-        );
-      }
+      providerIdentity = verifyRuntimeProviderIdentity(config.PROVIDER_ID, manifest.providerId);
+      assertRuntimeProviderIdentity(providerIdentity);
       const validated = new OperationRegistry().validate(manifest);
       validatedManifest = validated;
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
@@ -960,9 +981,11 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         void gateway
           .describeProvider()
           .then((description) => {
-            if (description.providerId !== config.PROVIDER_ID) {
-              throw new Error("ADAPTER_HEALTH_IDENTITY_MISMATCH");
-            }
+            providerIdentity = verifyRuntimeProviderIdentity(
+              config.PROVIDER_ID,
+              description.providerId,
+            );
+            assertRuntimeProviderIdentity(providerIdentity);
             adapterHealthFailures = 0;
             dependencies.adapter = "ready";
           })
@@ -1064,6 +1087,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       )
         ? "ready"
         : "not_ready",
+    providerIdentityEvidence: () => providerIdentity,
     initialize,
     applyOtelEnabled,
     telemetryEnabled: () => otelEnabled,

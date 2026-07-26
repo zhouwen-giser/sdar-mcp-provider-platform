@@ -68,10 +68,10 @@ process.once("SIGINT", () => onSignal("SIGINT"));
 process.once("SIGTERM", () => onSignal("SIGTERM"));
 
 try {
-  await initializeWithRetry();
-  runtimeConfig?.start();
   await runtime.app.listen({ host: config.HOST, port: config.PORT });
   runtimeRegistration?.start();
+  await initializeWithRetry();
+  runtimeConfig?.start();
 } catch (error) {
   runtime.app.log.fatal({ err: error }, "runtime failed to start");
   await runtimeConfig?.stop();
