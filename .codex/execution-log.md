@@ -315,3 +315,7 @@
 - 2026-07-26T17:09:05.926008+00:00 START G2-P3-B08
 
 - 2026-07-26T17:11:02.490910+00:00 PASS G2-P3-B08 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime test (1 file/5 tests); pnpm test:config-compat (1 file/8 tests + runtime configuration contract 8 files/36 tests); pnpm exec vitest run tests/runtime-config-e2e/runtime-config.e2e.test.ts (1 file/3 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T17:11:59.620289+00:00 START G2-P3-B09
+
+- 2026-07-26T17:19:02.609862+00:00 PASS G2-P3-B09 evidence=['semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm --filter @sdar/pms-worker test (3 files/9 tests); pnpm test:runtime-deployment (7 files/49 tests); tsc --noEmit; eslint targeted']

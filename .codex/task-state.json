@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T17:11:02.490975+00:00",
+  "updatedAt": "2026-07-26T17:19:02.609916+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -265,21 +265,23 @@
       "reason": null
     },
     "G2-P3-B09": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T17:11:59.620230+00:00",
+      "completedAt": "2026-07-26T17:19:02.609796+00:00",
+      "evidence": [
+        "semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm --filter @sdar/pms-worker test (3 files/9 tests); pnpm test:runtime-deployment (7 files/49 tests); tsc --noEmit; eslint targeted"
+      ],
+      "reason": null
+    },
+    "G2-P3-B10": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G2-P3-B10": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G2-P3-B11": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

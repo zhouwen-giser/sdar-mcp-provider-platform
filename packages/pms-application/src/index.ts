@@ -5,3 +5,4 @@ export * from "./provider-management.js";
 export * from "./runtime-deployment.js";
 export * from "./runtime-database-preparation.js";
 export * from "./runtime-process-query.js";
+export * from "./runtime-reconcile.js";
