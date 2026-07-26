@@ -254,6 +254,12 @@ importers:
         specifier: 8.22.0
         version: 8.22.0
 
+  packages/pm2-runtime-adapter:
+    dependencies:
+      '@sdar/runtime-deployment':
+        specifier: workspace:*
+        version: link:../runtime-deployment
+
   packages/provider-adapter-kit: {}
 
   packages/provider-package-registry: {}

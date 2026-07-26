@@ -287,3 +287,7 @@
 - 2026-07-26T16:26:41.687661+00:00 START G2-P3-B01
 
 - 2026-07-26T16:29:33.081493+00:00 PASS G2-P3-B01 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime-deployment test (3 files/37 tests); tsc --noEmit; eslint targeted; PM2/script/cwd/command surface scan clean']
+
+- 2026-07-26T16:30:01.986114+00:00 START G2-P3-B02
+
+- 2026-07-26T16:36:32.447944+00:00 PASS G2-P3-B02 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (1 file/7 tests); tsc --noEmit; eslint targeted; deterministic/redaction/unknown-env/secret-file tests']

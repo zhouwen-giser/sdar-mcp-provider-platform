@@ -192,3 +192,11 @@ adapters must consume the infrastructure-neutral Port through the workspace pack
 only the corresponding export line to `packages/runtime-deployment/src/index.ts`. This minimal
 out-of-range wiring exposes types and validation only; it adds no PM2 dependency, command surface,
 process implementation, network listener, or infrastructure authority.
+
+## 2026-07-26 — G2-P3-B02 PM2 adapter workspace bootstrap
+
+The card's source allowlist assumes `packages/pm2-runtime-adapter` exists, but the workspace has no
+such package and the mandatory filtered test cannot resolve it. Add only the minimal package
+manifest, root source export, focused Bootstrap renderer test, and generated lock importer outside
+`src/bootstrap/**`. The package consumes the existing infrastructure-neutral type contract and
+adds no PM2 library, process control, arbitrary environment, script, cwd, or command capability.
