@@ -168,3 +168,9 @@ The new `packages/postgres-provisioner` workspace consumes the existing pure Pro
 the repository's existing `pg` version. Add only its generated workspace importer to
 `pnpm-lock.yaml`. This is required for filtered tests and frozen installation; it adds no new
 external package version or authority.
+
+## 2026-07-26 — G2-P2-B05 Secret Store workspace lock importer
+
+The dependency-free `packages/secret-store` workspace requires an empty importer in
+`pnpm-lock.yaml` for frozen workspace validation. Add only that generated importer; the adapter uses
+Node filesystem primitives and introduces no external dependency.

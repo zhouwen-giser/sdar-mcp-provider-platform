@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T15:51:22.670354+00:00",
+  "updatedAt": "2026-07-26T16:00:21.454666+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -148,10 +148,12 @@
       "reason": null
     },
     "G2-P2-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T15:52:29.978927+00:00",
+      "completedAt": "2026-07-26T16:00:21.454529+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/secret-store test PASS 1 file/9 tests; atomic wx+fsync+rename and no staging residue; file 0600/directories 0700; deployment+instance containment; forged ref/traversal/target+parent symlink/relaxed permission rejection; exact explicit cleanup policy and idempotent missing outcome; redacted inspect no path/content/length and no logging; frozen offline install, typecheck, ESLint, Prettier, git diff check PASS"
+      ],
       "reason": null
     },
     "G2-P2-B06": {
