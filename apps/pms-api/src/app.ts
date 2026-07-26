@@ -3,6 +3,7 @@ import type {
   ProviderManagementService,
   ProviderPackageListFilter,
   ProviderPackageQueryService,
+  RuntimeProcessQueryService,
 } from "../../../packages/pms-application/src/index.js";
 import type {
   ConfigurationCenter,
@@ -22,6 +23,7 @@ import {
   registerRuntimeDeploymentRoutes,
   type RuntimeDeploymentManagementPort,
 } from "./runtime-deployment-routes.js";
+import { registerRuntimeProcessRoutes } from "./runtime-process-routes.js";
 import { authorizeManagementRequest, type PmsApiRoleAuthorizer } from "./authorization.js";
 
 export interface PmsReadiness {
@@ -34,6 +36,7 @@ export interface PmsApiOptions {
   readonly providerPackages?: ProviderPackageQueryService;
   readonly management?: ProviderManagementService;
   readonly runtimeDeployments?: RuntimeDeploymentManagementPort;
+  readonly runtimeProcesses?: RuntimeProcessQueryService;
   readonly configurationCenter?: ConfigurationCenter;
   readonly configurationPublication?: ConfigurationPublicationService;
   readonly runtimeConfigQuery?: RuntimeConfigQueryService;
@@ -81,6 +84,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.runtimeDeployments !== undefined) {
     registerRuntimeDeploymentRoutes(app, options.runtimeDeployments);
+  }
+  if (options.runtimeProcesses !== undefined) {
+    registerRuntimeProcessRoutes(app, options.runtimeProcesses);
   }
   if (options.configurationCenter !== undefined) {
     registerConfigurationRoutes(app, options.configurationCenter, options.configurationPublication);

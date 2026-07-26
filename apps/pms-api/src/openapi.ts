@@ -150,6 +150,48 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         },
       },
       ...runtimeDeploymentActionPaths(),
+      "/api/v1/runtime-processes": {
+        get: {
+          operationId: "listRuntimeProcesses",
+          parameters: [
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+            { name: "deploymentId", in: "query", required: true, schema: { type: "string" } },
+            { name: "processState", in: "query", schema: { type: "string" } },
+            { name: "observedHealth", in: "query", schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Runtime process projections with evaluated stale state" },
+          },
+        },
+      },
+      "/api/v1/runtime-processes/{instanceId}": {
+        get: {
+          operationId: "getRuntimeProcess",
+          parameters: [
+            { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Runtime process projection without environment or secrets" },
+            "404": { description: "Runtime process not found in Provider scope" },
+          },
+        },
+      },
+      "/api/v1/runtime-processes/{instanceId}/logs": {
+        get: {
+          operationId: "getRuntimeProcessLogReference",
+          parameters: [
+            { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": {
+              description: "Opaque controlled log reference; file content is never returned",
+            },
+            "404": { description: "Runtime process not found in Provider scope" },
+          },
+        },
+      },
       "/api/v1/resources": {
         get: {
           operationId: "listResources",
@@ -329,6 +371,7 @@ function applyManagementSecurity(
     "/api/v1/resources",
     "/api/v1/config-drafts",
     "/api/v1/runtime-deployments",
+    "/api/v1/runtime-processes",
   ];
   for (const [path, operations] of Object.entries(paths)) {
     if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;

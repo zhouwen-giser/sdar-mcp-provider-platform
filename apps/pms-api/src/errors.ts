@@ -5,7 +5,9 @@ import {
 } from "../../../packages/configuration-center/src/index.js";
 import {
   RuntimeDeploymentApplicationError,
+  RuntimeProcessQueryError,
   type RuntimeDeploymentApplicationErrorCode,
+  type RuntimeProcessQueryErrorCode,
 } from "../../../packages/pms-application/src/index.js";
 import {
   PmsDomainError,
@@ -72,6 +74,7 @@ function classifyError(error: FastifyError): PublicError {
   if (error instanceof RuntimeDeploymentApplicationError) {
     return runtimeDeploymentApplicationError(error.code);
   }
+  if (error instanceof RuntimeProcessQueryError) return runtimeProcessQueryError(error.code);
   if (error instanceof RuntimeDeploymentError) return runtimeDeploymentError(error.code);
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
   if (error instanceof ConfigurationCenterError) return configurationError(error.code);
@@ -115,6 +118,10 @@ function runtimeDeploymentError(code: RuntimeDeploymentErrorCode): PublicError {
       ? 409
       : 400;
   return { statusCode, code, message: RUNTIME_DEPLOYMENT_MESSAGES[code] };
+}
+
+function runtimeProcessQueryError(code: RuntimeProcessQueryErrorCode): PublicError {
+  return { statusCode: 404, code, message: RUNTIME_PROCESS_QUERY_MESSAGES[code] };
 }
 
 function authorizationError(code: PmsApiAuthorizationErrorCode): PublicError {
@@ -205,6 +212,10 @@ const RUNTIME_DEPLOYMENT_MESSAGES: Readonly<Record<RuntimeDeploymentErrorCode, s
   RUNTIME_DEPLOYMENT_REVISION_CONFLICT:
     "The RuntimeDeployment desired revision changed; reload and retry",
   RUNTIME_PROCESS_REVISION_CONFLICT: "The Runtime process revision changed; reload and retry",
+};
+
+const RUNTIME_PROCESS_QUERY_MESSAGES: Readonly<Record<RuntimeProcessQueryErrorCode, string>> = {
+  RUNTIME_PROCESS_NOT_FOUND: "The Runtime process does not exist in Provider scope",
 };
 
 const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, string>> = {
