@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.local/schemas/runtime-deployment-v1.json",
+  "title": "RuntimeDeploymentSnapshot",
+  "$ref": "#/$defs/runtimeDeployment",
+  "$defs": {
+    "logicalId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "nonNegativeRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "runtimeDeployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentId",
+        "providerId",
+        "environment",
+        "desiredState",
+        "desiredReplicas",
+        "runtimeVersion",
+        "databaseProfileId",
+        "configProfileId",
+        "status",
+        "desiredRevision",
+        "observedRevision"
+      ],
+      "properties": {
+        "deploymentId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "providerId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "environment": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "desiredState": {
+          "enum": ["running", "stopped", "draining"]
+        },
+        "desiredReplicas": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "runtimeVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "databaseProfileId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "configProfileId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "adapterEndpoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "status": {
+          "enum": [
+            "REQUESTED",
+            "DATABASE_PROVISIONING",
+            "MIGRATING",
+            "CONFIG_PREPARING",
+            "STARTING",
+            "HEALTH_CHECKING",
+            "DISCOVERING",
+            "ACTIVE",
+            "STOPPED",
+            "DRAINING",
+            "DEGRADED",
+            "FAILED"
+          ]
+        },
+        "desiredRevision": {
+          "$ref": "#/$defs/nonNegativeRevision"
+        },
+        "observedRevision": {
+          "$ref": "#/$defs/nonNegativeRevision"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "desiredState": {
+                "const": "running"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "desiredReplicas": {
+                "const": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "desiredReplicas": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "runtimeProcess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instanceId",
+        "deploymentId",
+        "pm2Name",
+        "pid",
+        "port",
+        "processState",
+        "livenessState",
+        "readinessState",
+        "registrationState",
+        "catalogState",
+        "configState",
+        "lastHeartbeatAt",
+        "runtimeVersion",
+        "configRevision",
+        "restartCount",
+        "observedRevision"
+      ],
+      "properties": {
+        "instanceId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "deploymentId": {
+          "$ref": "#/$defs/logicalId"
+        },
+        "pm2Name": {
+          "type": "string",
+          "pattern": "^sdar-runtime-[a-z0-9][a-z0-9-]{0,126}$"
+        },
+        "pid": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "processState": {
+          "enum": ["missing", "starting", "online", "stopping", "stopped", "errored"]
+        },
+        "livenessState": {
+          "enum": ["unknown", "live", "dead"]
+        },
+        "readinessState": {
+          "enum": ["unknown", "ready", "not_ready"]
+        },
+        "registrationState": {
+          "enum": ["unregistered", "registered", "identity_mismatch"]
+        },
+        "catalogState": {
+          "enum": ["unknown", "pending", "valid", "invalid"]
+        },
+        "configState": {
+          "enum": ["unknown", "current", "stale", "rejected", "restart_required"]
+        },
+        "lastHeartbeatAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "runtimeVersion": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "configRevision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nonNegativeRevision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restartCount": {
+          "$ref": "#/$defs/nonNegativeRevision"
+        },
+        "observedRevision": {
+          "$ref": "#/$defs/nonNegativeRevision"
+        }
+      }
+    }
+  }
+}

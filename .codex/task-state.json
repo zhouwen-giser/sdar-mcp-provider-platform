@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T15:12:05.843892+00:00",
+  "updatedAt": "2026-07-26T15:16:27.296711+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -103,14 +103,16 @@
       "reason": null
     },
     "G2-P1-B08": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T15:12:27.209671+00:00",
+      "completedAt": "2026-07-26T15:16:27.296527+00:00",
+      "evidence": [
+        "schemas/runtime-deployment-v1.json; tests/runtime-deployment/; .codex/reports/goal2-P1.md; pnpm test:runtime-deployment (5 files, 42 tests passed); pnpm build; Prettier check; git diff --check"
+      ],
       "reason": null
     },
     "G2-P2-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

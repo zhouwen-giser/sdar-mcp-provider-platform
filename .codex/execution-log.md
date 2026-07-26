@@ -243,3 +243,7 @@
 - 2026-07-26T15:07:08.827525+00:00 START G2-P1-B07
 
 - 2026-07-26T15:12:05.843795+00:00 PASS G2-P1-B07 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-api test (7 files, 44 tests passed); pnpm exec vitest run packages/pms-application/test/runtime-process-query.test.ts apps/pms-api/test/runtime-process.test.ts (7 tests passed); pnpm typecheck; git diff --check']
+
+- 2026-07-26T15:12:27.209730+00:00 START G2-P1-B08
+
+- 2026-07-26T15:16:27.296603+00:00 PASS G2-P1-B08 evidence=['schemas/runtime-deployment-v1.json; tests/runtime-deployment/; .codex/reports/goal2-P1.md; pnpm test:runtime-deployment (5 files, 42 tests passed); pnpm build; Prettier check; git diff --check']
