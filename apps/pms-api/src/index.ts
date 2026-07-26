@@ -6,3 +6,4 @@ export * from "./errors.js";
 export * from "./management-routes.js";
 export * from "./openapi.js";
 export * from "./runtime-config-routes.js";
+export * from "./runtime-deployment-routes.js";

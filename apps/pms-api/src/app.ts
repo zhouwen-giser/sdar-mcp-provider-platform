@@ -18,6 +18,10 @@ import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
 import { registerManagementRoutes } from "./management-routes.js";
 import { registerRuntimeConfigRoutes } from "./runtime-config-routes.js";
+import {
+  registerRuntimeDeploymentRoutes,
+  type RuntimeDeploymentManagementPort,
+} from "./runtime-deployment-routes.js";
 import { authorizeManagementRequest, type PmsApiRoleAuthorizer } from "./authorization.js";
 
 export interface PmsReadiness {
@@ -29,6 +33,7 @@ export interface PmsApiOptions {
   readonly readiness?: () => Promise<PmsReadiness>;
   readonly providerPackages?: ProviderPackageQueryService;
   readonly management?: ProviderManagementService;
+  readonly runtimeDeployments?: RuntimeDeploymentManagementPort;
   readonly configurationCenter?: ConfigurationCenter;
   readonly configurationPublication?: ConfigurationPublicationService;
   readonly runtimeConfigQuery?: RuntimeConfigQueryService;
@@ -73,6 +78,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.management !== undefined) {
     registerManagementRoutes(app, options.management);
+  }
+  if (options.runtimeDeployments !== undefined) {
+    registerRuntimeDeploymentRoutes(app, options.runtimeDeployments);
   }
   if (options.configurationCenter !== undefined) {
     registerConfigurationRoutes(app, options.configurationCenter, options.configurationPublication);

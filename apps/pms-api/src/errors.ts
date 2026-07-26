@@ -4,11 +4,19 @@ import {
   type ConfigurationCenterErrorCode,
 } from "../../../packages/configuration-center/src/index.js";
 import {
+  RuntimeDeploymentApplicationError,
+  type RuntimeDeploymentApplicationErrorCode,
+} from "../../../packages/pms-application/src/index.js";
+import {
   PmsDomainError,
   PmsRepositoryError,
   type PmsDomainErrorCode,
   type PmsRepositoryErrorCode,
 } from "../../../packages/pms-domain/src/index.js";
+import {
+  RuntimeDeploymentError,
+  type RuntimeDeploymentErrorCode,
+} from "../../../packages/runtime-deployment/src/index.js";
 import { requestContext } from "./context.js";
 import { PmsApiAuthorizationError, type PmsApiAuthorizationErrorCode } from "./authorization.js";
 
@@ -61,6 +69,10 @@ function classifyError(error: FastifyError): PublicError {
     return { statusCode: 400, code: "INVALID_REQUEST", message: "Request validation failed" };
   }
   if (error instanceof PmsDomainError) return domainError(error.code);
+  if (error instanceof RuntimeDeploymentApplicationError) {
+    return runtimeDeploymentApplicationError(error.code);
+  }
+  if (error instanceof RuntimeDeploymentError) return runtimeDeploymentError(error.code);
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
   if (error instanceof ConfigurationCenterError) return configurationError(error.code);
   if (error instanceof PmsApiAuthorizationError) return authorizationError(error.code);
@@ -81,6 +93,28 @@ function classifyError(error: FastifyError): PublicError {
     return { statusCode: 400, code: "INVALID_JSON", message: "Request body is not valid JSON" };
   }
   return { statusCode: 500, code: "INTERNAL_ERROR", message: "An internal error occurred" };
+}
+
+function runtimeDeploymentApplicationError(
+  code: RuntimeDeploymentApplicationErrorCode,
+): PublicError {
+  const statusCode =
+    code === "RUNTIME_DEPLOYMENT_NOT_FOUND"
+      ? 404
+      : code === "RUNTIME_DEPLOYMENT_REVISION_CONFLICT"
+        ? 409
+        : code === "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED"
+          ? 400
+          : 409;
+  return { statusCode, code, message: RUNTIME_DEPLOYMENT_APPLICATION_MESSAGES[code] };
+}
+
+function runtimeDeploymentError(code: RuntimeDeploymentErrorCode): PublicError {
+  const statusCode =
+    code === "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" || code === "RUNTIME_DEPLOYMENT_STATE_CONFLICT"
+      ? 409
+      : 400;
+  return { statusCode, code, message: RUNTIME_DEPLOYMENT_MESSAGES[code] };
 }
 
 function authorizationError(code: PmsApiAuthorizationErrorCode): PublicError {
@@ -144,6 +178,33 @@ const REPOSITORY_MESSAGES: Readonly<Record<PmsRepositoryErrorCode, string>> = {
   ENTITY_NOT_FOUND: "The entity does not exist",
   OPTIMISTIC_CONCURRENCY_CONFLICT: "The entity changed; reload and retry",
   LEASE_NOT_OWNED: "The lease is stale or is not owned",
+};
+
+const RUNTIME_DEPLOYMENT_APPLICATION_MESSAGES: Readonly<
+  Record<RuntimeDeploymentApplicationErrorCode, string>
+> = {
+  RUNTIME_DEPLOYMENT_NOT_FOUND: "The RuntimeDeployment does not exist in Provider scope",
+  RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE:
+    "The Provider prerequisite is unavailable for this RuntimeDeployment",
+  RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE:
+    "The configuration prerequisite is unavailable for this RuntimeDeployment",
+  RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE:
+    "The database prerequisite is unavailable for this RuntimeDeployment",
+  RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED:
+    "The requested Runtime replica count is unsupported",
+  RUNTIME_DEPLOYMENT_REVISION_CONFLICT:
+    "The RuntimeDeployment desired revision changed; reload and retry",
+};
+
+const RUNTIME_DEPLOYMENT_MESSAGES: Readonly<Record<RuntimeDeploymentErrorCode, string>> = {
+  INVALID_RUNTIME_DEPLOYMENT_IDENTIFIER: "A RuntimeDeployment identifier is invalid",
+  INVALID_RUNTIME_DEPLOYMENT_SPEC: "The RuntimeDeployment specification is invalid",
+  INVALID_RUNTIME_DEPLOYMENT_TRANSITION: "The RuntimeDeployment transition is invalid",
+  INVALID_RUNTIME_PROCESS_PROJECTION: "The Runtime process projection is invalid",
+  RUNTIME_DEPLOYMENT_STATE_CONFLICT: "The RuntimeDeployment state changed; reload and retry",
+  RUNTIME_DEPLOYMENT_REVISION_CONFLICT:
+    "The RuntimeDeployment desired revision changed; reload and retry",
+  RUNTIME_PROCESS_REVISION_CONFLICT: "The Runtime process revision changed; reload and retry",
 };
 
 const CONFIGURATION_MESSAGES: Readonly<Record<ConfigurationCenterErrorCode, string>> = {

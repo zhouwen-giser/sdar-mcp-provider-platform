@@ -114,6 +114,42 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           responses: { "200": { description: "Provider status updated" } },
         },
       },
+      "/api/v1/runtime-deployments": {
+        get: {
+          operationId: "listRuntimeDeployments",
+          parameters: [
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+            { name: "environment", in: "query", schema: { type: "string" } },
+            { name: "status", in: "query", schema: { type: "string" } },
+            { name: "limit", in: "query", schema: { type: "integer", default: 100 } },
+            { name: "cursor", in: "query", schema: { type: "string" } },
+          ],
+          responses: { "200": { description: "Provider-scoped RuntimeDeployments" } },
+        },
+        post: {
+          operationId: "createRuntimeDeployment",
+          responses: {
+            "202": {
+              description: "RuntimeDeployment desired state accepted with an operation ID",
+            },
+            "409": { description: "A prerequisite is unavailable or state conflicts" },
+          },
+        },
+      },
+      "/api/v1/runtime-deployments/{deploymentId}": {
+        get: {
+          operationId: "getRuntimeDeployment",
+          parameters: [
+            { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "RuntimeDeployment desired and observed state" },
+            "404": { description: "RuntimeDeployment not found in Provider scope" },
+          },
+        },
+      },
+      ...runtimeDeploymentActionPaths(),
       "/api/v1/resources": {
         get: {
           operationId: "listResources",
@@ -292,6 +328,7 @@ function applyManagementSecurity(
     "/api/v1/providers",
     "/api/v1/resources",
     "/api/v1/config-drafts",
+    "/api/v1/runtime-deployments",
   ];
   for (const [path, operations] of Object.entries(paths)) {
     if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;
@@ -301,4 +338,26 @@ function applyManagementSecurity(
         method === "get" ? "reader_or_administrator" : "administrator";
     }
   }
+}
+
+function runtimeDeploymentActionPaths(): Record<string, Record<string, Record<string, unknown>>> {
+  return Object.fromEntries(
+    ["start", "stop", "restart", "scale", "reconcile"].map((action) => [
+      `/api/v1/runtime-deployments/{deploymentId}/${action}`,
+      {
+        post: {
+          operationId: `${action}RuntimeDeployment`,
+          parameters: [
+            { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "202": {
+              description: "RuntimeDeployment desired-state operation accepted",
+            },
+            "409": { description: "Desired revision conflict" },
+          },
+        },
+      },
+    ]),
+  );
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T14:59:55.969755+00:00",
+  "updatedAt": "2026-07-26T15:06:36.961837+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -85,10 +85,12 @@
       "reason": null
     },
     "G2-P1-B06": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T15:01:25.850058+00:00",
+      "completedAt": "2026-07-26T15:06:36.961709+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-api test (6 files, 40 tests passed); pnpm typecheck; git diff --check"
+      ],
       "reason": null
     },
     "G2-P1-B07": {
