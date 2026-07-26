@@ -111,3 +111,7 @@
 - 2026-07-26T10:58:05.760752+00:00 START G1-P3-B07
 
 - 2026-07-26T11:00:23.886703+00:00 PASS G1-P3-B07 evidence=['pnpm --filter @sdar/npc-tank-provider-adapter test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (6 files, 30 tests including NPC legacy capability combinations, 52-field inventory, secrets, production); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/npc-tank-provider-security.test.ts tests/contract/npc-tank-provider-contract.test.ts (9 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check']
+
+- 2026-07-26T11:01:06.898080+00:00 START G1-P3-B08
+
+- 2026-07-26T11:03:59.283790+00:00 PASS G1-P3-B08 evidence=['pnpm --filter @sdar/home-assistant-climate-provider test (package has no test script; empty result); pnpm --filter @sdar/runtime-configuration-contract test (7 files, 33 tests including HA 26-field inventory, token redaction, stable file errors); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/home-assistant-climate-security.test.ts tests/integration/home-assistant-climate-provider.test.ts (sandbox listen EPERM, identical escalated loopback rerun 2 files/3 tests passed); pnpm typecheck; pnpm lint; pnpm build; git diff --check']
