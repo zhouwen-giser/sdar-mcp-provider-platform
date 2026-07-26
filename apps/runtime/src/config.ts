@@ -41,12 +41,21 @@ const EnvironmentSchema = z
     }
   });
 
+const PlatformIdentifierSchema = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/);
+
+export interface RuntimePlatformIdentity {
+  readonly deploymentId: string;
+  readonly instanceId: string;
+}
+
 export type RuntimeConfig = z.infer<typeof EnvironmentSchema> & {
   leaseValidationMode: "strict" | "degraded";
   leaseValidationMessage: string | null;
+  platformIdentity: RuntimePlatformIdentity | null;
 };
 
 export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
+  const platformIdentity = resolveRuntimePlatformIdentity(environment);
   const bootstrap = loadRuntimeBootstrapEnvironment(environment);
   const observability = loadRuntimeObservabilityEnvironment(environment);
   const workerEvents = loadRuntimeWorkerEventsEnvironment(environment);
@@ -104,9 +113,32 @@ export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env):
       ...value,
       leaseValidationMode: "degraded",
       leaseValidationMessage: violations.join("; "),
+      platformIdentity,
     };
   }
-  return { ...value, leaseValidationMode: "strict", leaseValidationMessage: null };
+  return {
+    ...value,
+    leaseValidationMode: "strict",
+    leaseValidationMessage: null,
+    platformIdentity,
+  };
+}
+
+export function resolveRuntimePlatformIdentity(
+  environment: NodeJS.ProcessEnv,
+): RuntimePlatformIdentity | null {
+  const pms = identityPair(environment.PMS_DEPLOYMENT_ID, environment.PMS_INSTANCE_ID, "PMS");
+  const runtime = identityPair(
+    environment.RUNTIME_DEPLOYMENT_ID,
+    environment.RUNTIME_INSTANCE_ID,
+    "RUNTIME",
+  );
+  if (pms === null) return runtime;
+  if (runtime === null) return pms;
+  if (pms.deploymentId !== runtime.deploymentId || pms.instanceId !== runtime.instanceId) {
+    throw new Error("RUNTIME_PLATFORM_IDENTITY_CONFLICT");
+  }
+  return pms;
 }
 
 export function parseBooleanEnv(value: string | boolean): boolean {
@@ -121,4 +153,21 @@ export function parseBooleanEnv(value: string | boolean): boolean {
     default:
       throw new Error(`INVALID_BOOLEAN_ENV:${value}`);
   }
+}
+
+function identityPair(
+  deploymentId: string | undefined,
+  instanceId: string | undefined,
+  prefix: "PMS" | "RUNTIME",
+): RuntimePlatformIdentity | null {
+  if (deploymentId === undefined && instanceId === undefined) return null;
+  if (
+    deploymentId === undefined ||
+    instanceId === undefined ||
+    !PlatformIdentifierSchema.safeParse(deploymentId).success ||
+    !PlatformIdentifierSchema.safeParse(instanceId).success
+  ) {
+    throw new Error(`RUNTIME_PLATFORM_IDENTITY_${prefix}_INVALID`);
+  }
+  return Object.freeze({ deploymentId, instanceId });
 }

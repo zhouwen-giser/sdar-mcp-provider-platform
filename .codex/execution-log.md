@@ -311,3 +311,7 @@
 - 2026-07-26T17:02:06.218406+00:00 START G2-P3-B07
 
 - 2026-07-26T17:07:27.854741+00:00 PASS G2-P3-B07 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:pm2-adapter (5 files/30 tests, injected-fetch/Fake PM2 component contract); tsc --noEmit; eslint targeted; fixed-loopback SSRF/timeout/schema/dependency-classification tests']
+
+- 2026-07-26T17:09:05.926008+00:00 START G2-P3-B08
+
+- 2026-07-26T17:11:02.490910+00:00 PASS G2-P3-B08 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime test (1 file/5 tests); pnpm test:config-compat (1 file/8 tests + runtime configuration contract 8 files/36 tests); pnpm exec vitest run tests/runtime-config-e2e/runtime-config.e2e.test.ts (1 file/3 tests); tsc --noEmit; eslint targeted']
