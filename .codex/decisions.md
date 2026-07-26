@@ -240,3 +240,11 @@ The new dependency-free `packages/runtime-registration` workspace requires an em
 `pnpm-lock.yaml` for the mandatory filtered test and frozen workspace validation. Add only that
 generated importer outside the card allowlist. It introduces no external dependency, persistence,
 API, Provider creation capability, heartbeat transport, or later Catalog/Registry behavior.
+
+## 2026-07-26 — G2-P4-B05 Catalog migration regression expectation
+
+The existing PMS migration suite freezes the exact append-only migration and resulting table lists
+and requires every migration to be safe when applied repeatedly. Append only
+`007_catalog_snapshot.sql`; update the suite's two expected lists as the minimum out-of-range test
+maintenance. Do not alter migrations `001` through `006`. The new migration uses idempotent DDL and
+an immutable-history trigger, while the active pointer remains the only mutable Catalog relation.

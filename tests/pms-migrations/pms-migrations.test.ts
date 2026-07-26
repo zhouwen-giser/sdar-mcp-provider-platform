@@ -5,7 +5,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { resolveMigrationSet } from "../../packages/database-migration-runner/src/index.js";
 
 const EXPECTED_TABLES = [
+  "active_catalog_snapshot",
   "audit",
+  "catalog_snapshot",
   "config_ack",
   "config_definition",
   "config_revision",
@@ -61,6 +63,7 @@ describe("PMS control-plane migration set", () => {
       "004_config_revision_history_guard.sql",
       "005_runtime_deployment.sql",
       "006_database_profile.sql",
+      "007_catalog_snapshot.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
