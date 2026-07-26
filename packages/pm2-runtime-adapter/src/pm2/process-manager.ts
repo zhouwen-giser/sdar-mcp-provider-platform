@@ -24,6 +24,14 @@ export const DEFAULT_RUNTIME_CRASH_RECOVERY_POLICY: RuntimeCrashRecoveryPolicy =
   minUptimeMs: 10_000,
 });
 
+export interface RuntimeShutdownPolicy {
+  readonly killTimeoutMs: number;
+}
+
+export const DEFAULT_RUNTIME_SHUTDOWN_POLICY: RuntimeShutdownPolicy = Object.freeze({
+  killTimeoutMs: 30_000,
+});
+
 export interface Pm2ProcessDescription {
   readonly name?: string;
   readonly pid?: number;
@@ -46,6 +54,7 @@ export interface Pm2StartOptions {
   readonly max_restarts: number;
   readonly max_memory_restart: number;
   readonly min_uptime: number;
+  readonly kill_timeout: number;
   readonly env: Readonly<Record<string, string>>;
 }
 
@@ -109,17 +118,20 @@ export class Pm2ProcessManagerError extends Error {
 export class Pm2ProcessManager {
   readonly #releaseRoot: string;
   readonly #recoveryPolicy: RuntimeCrashRecoveryPolicy;
+  readonly #shutdownPolicy: RuntimeShutdownPolicy;
 
   constructor(
     private readonly api: Pm2JavascriptApi,
     releaseRoot: string,
     recoveryPolicy: RuntimeCrashRecoveryPolicy = DEFAULT_RUNTIME_CRASH_RECOVERY_POLICY,
+    shutdownPolicy: RuntimeShutdownPolicy = DEFAULT_RUNTIME_SHUTDOWN_POLICY,
   ) {
     if (!isAbsolute(releaseRoot)) {
       throw new Pm2ProcessManagerError("PM2_RUNTIME_RELEASE_INVALID", "connect", false);
     }
     this.#releaseRoot = resolve(releaseRoot);
     this.#recoveryPolicy = validateRecoveryPolicy(recoveryPolicy);
+    this.#shutdownPolicy = validateShutdownPolicy(shutdownPolicy);
   }
 
   start(request: Pm2RuntimeStartRequest): Promise<Pm2RuntimeProcessResult> {
@@ -268,6 +280,7 @@ export class Pm2ProcessManager {
       max_restarts: this.#recoveryPolicy.maxRestarts,
       max_memory_restart: this.#recoveryPolicy.maxMemoryBytes,
       min_uptime: this.#recoveryPolicy.minUptimeMs,
+      kill_timeout: this.#shutdownPolicy.killTimeoutMs,
       env: request.bootstrap.environment,
     });
   }
@@ -468,4 +481,11 @@ function validateRecoveryPolicy(policy: RuntimeCrashRecoveryPolicy): RuntimeCras
 
 function boundedInteger(value: number, minimum: number, maximum: number): boolean {
   return Number.isSafeInteger(value) && value >= minimum && value <= maximum;
+}
+
+function validateShutdownPolicy(policy: RuntimeShutdownPolicy): RuntimeShutdownPolicy {
+  if (!boundedInteger(policy.killTimeoutMs, 1_000, 300_000)) {
+    throw new Pm2ProcessManagerError("PM2_RECOVERY_POLICY_INVALID", "connect", false);
+  }
+  return Object.freeze({ ...policy });
 }

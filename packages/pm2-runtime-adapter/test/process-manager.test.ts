@@ -26,6 +26,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       max_restarts: 5,
       max_memory_restart: 512 * 1024 * 1024,
       min_uptime: 10_000,
+      kill_timeout: 30_000,
     });
     expect(fake.disconnect).toHaveBeenCalledOnce();
   });
@@ -59,6 +60,29 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       }),
     );
     expect(fake.connect).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unsafe graceful shutdown timeout", () => {
+    const fake = new FakePm2Api();
+
+    expect(
+      () =>
+        new Pm2ProcessManager(
+          fake,
+          "/opt/sdar/runtime-releases",
+          {
+            restartDelayMs: 5_000,
+            maxRestarts: 5,
+            maxMemoryBytes: 512 * 1024 * 1024,
+            minUptimeMs: 10_000,
+          },
+          { killTimeoutMs: 0 },
+        ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "PM2_RECOVERY_POLICY_INVALID",
+      }),
+    );
   });
 
   it("restarts with only the rendered environment and explicit updateEnv", async () => {

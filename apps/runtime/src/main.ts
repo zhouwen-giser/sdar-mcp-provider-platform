@@ -1,6 +1,7 @@
 import { loadRuntimeConfig } from "./config.js";
 import { createRuntime } from "./runtime.js";
 import { loadRuntimeConfigClientBootstrap, RuntimeConfigIntegration } from "./runtime-config.js";
+import { createRuntimeShutdown } from "./shutdown.js";
 
 const config = loadRuntimeConfig();
 const runtime = createRuntime(config);
@@ -25,14 +26,25 @@ async function initializeWithRetry(attempts = 20): Promise<void> {
   throw lastError;
 }
 
-async function shutdown(signal: string): Promise<void> {
-  runtime.app.log.info({ signal }, "runtime shutting down");
-  await runtimeConfig?.stop();
-  await runtime.app.close();
+const shutdown = createRuntimeShutdown({
+  beginDrain: () => {
+    runtime.beginDrain();
+  },
+  stopConfig: () => runtimeConfig?.stop() ?? Promise.resolve(),
+  closeRuntime: () => runtime.app.close(),
+  onBegin: (signal) =>
+    runtime.app.log.info({ signal }, "runtime draining before graceful shutdown"),
+});
+
+function onSignal(signal: "SIGINT" | "SIGTERM"): void {
+  void shutdown(signal).catch((error: unknown) => {
+    runtime.app.log.error({ err: error, signal }, "runtime graceful shutdown failed");
+    process.exitCode = 1;
+  });
 }
 
-process.once("SIGINT", () => void shutdown("SIGINT"));
-process.once("SIGTERM", () => void shutdown("SIGTERM"));
+process.once("SIGINT", () => onSignal("SIGINT"));
+process.once("SIGTERM", () => onSignal("SIGTERM"));
 
 try {
   await initializeWithRetry();

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-02",
-  "updatedAt": "2026-07-26T17:27:05.277685+00:00",
+  "updatedAt": "2026-07-26T17:32:24.823419+00:00",
   "tasks": {
     "G2-P0-B01": {
       "status": "PASSED",
@@ -283,14 +283,16 @@
       "reason": null
     },
     "G2-P3-B11": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T17:27:33.891089+00:00",
+      "completedAt": "2026-07-26T17:32:24.823309+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/runtime test (2 files/8 tests: drain admission, idempotent SIGTERM cleanup order, active tasks persist for same-authority recovery); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm test:runtime-deployment (8 files/54 tests: all-stop DB switch guard); pnpm test:pm2-adapter (6 files/37 tests: bounded kill_timeout); tsc --noEmit; eslint changed files; git diff --check"
+      ],
       "reason": null
     },
     "G2-P3-B12": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

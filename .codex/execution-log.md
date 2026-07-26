@@ -323,3 +323,7 @@
 - 2026-07-26T17:19:59.378719+00:00 START G2-P3-B10
 
 - 2026-07-26T17:27:05.277640+00:00 PASS G2-P3-B10 evidence=['pnpm test:pm2-adapter (6 files/36 tests); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm exec vitest run tests/recovery/runtime-recovery-postgres.test.ts (1 file/9 tests, real PostgreSQL Runtime persistence recovery; not real PM2 certification); tsc --noEmit; eslint targeted; git diff --check']
+
+- 2026-07-26T17:27:33.891181+00:00 START G2-P3-B11
+
+- 2026-07-26T17:32:24.823370+00:00 PASS G2-P3-B11 evidence=['pnpm --filter @sdar/runtime test (2 files/8 tests: drain admission, idempotent SIGTERM cleanup order, active tasks persist for same-authority recovery); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm test:runtime-deployment (8 files/54 tests: all-stop DB switch guard); pnpm test:pm2-adapter (6 files/37 tests: bounded kill_timeout); tsc --noEmit; eslint changed files; git diff --check']

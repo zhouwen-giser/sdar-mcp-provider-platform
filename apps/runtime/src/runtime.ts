@@ -60,6 +60,7 @@ import type { RuntimeConfig } from "./config.js";
 import { BoundedRateLimiter } from "./rate-limiter.js";
 import { AdapterManifestWatcher } from "./manifest-watcher.js";
 import { AdapterBusinessEventSourceClient } from "./business-events/source-client.js";
+import { RuntimeDrainController } from "./shutdown.js";
 
 function createHttpServer(logger: RuntimeLogger, bodyLimit: number) {
   return Fastify({ loggerInstance: logger, bodyLimit });
@@ -98,6 +99,8 @@ export interface RuntimeApplication {
   initialize(): Promise<ProviderManifest>;
   applyOtelEnabled(enabled: boolean): Promise<void>;
   telemetryEnabled(): boolean;
+  beginDrain(): boolean;
+  drainState(): "accepting" | "draining" | "closed";
 }
 
 export function createRuntime(config: RuntimeConfig): RuntimeApplication {
@@ -109,6 +112,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     );
   }
   const app = createHttpServer(logger, config.HTTP_BODY_LIMIT_BYTES);
+  const drain = new RuntimeDrainController();
   const metrics = new RuntimeMetrics();
   const telemetrySelfGauges: Record<string, number> = {};
   const telemetryInstanceId = config.OTEL_SERVICE_INSTANCE_ID ?? randomUUID();
@@ -255,6 +259,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       ...Object.values(dependencies.businessEventAdapterSources),
     ];
     const ready =
+      drain.acceptingInvocations &&
       coreStatuses.every((status) => status === "ready") &&
       (!config.BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY ||
         businessEventStatuses.every((status) => status === "ready"));
@@ -339,6 +344,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     request: FastifyRequest,
     reply: FastifyReply,
   ): Promise<unknown> => {
+    if (!drain.acceptingInvocations) {
+      return reply.code(503).send({
+        jsonrpc: "2.0",
+        error: { code: -32_003, message: "Runtime is draining." },
+        id: null,
+      });
+    }
     if (request.method !== "POST") {
       return reply.code(405).send({
         jsonrpc: "2.0",
@@ -373,6 +385,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   app.all("/mcp/legacy", (request, reply) => handleMcp("/mcp/legacy", request, reply));
 
   app.addHook("onClose", async () => {
+    drain.closed();
     if (schedulerTimer !== undefined) clearInterval(schedulerTimer);
     if (recoveryTimer !== undefined) clearInterval(recoveryTimer);
     if (commandDispatcherTimer !== undefined) clearInterval(commandDispatcherTimer);
@@ -1019,6 +1032,8 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     gateway,
     pool,
     dependencies,
+    beginDrain: () => drain.beginDrain(),
+    drainState: () => drain.state,
     initialize,
     applyOtelEnabled,
     telemetryEnabled: () => otelEnabled,

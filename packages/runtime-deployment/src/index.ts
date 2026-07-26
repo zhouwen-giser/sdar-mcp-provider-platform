@@ -1,3 +1,4 @@
+export * from "./database-switch.js";
 export * from "./errors.js";
 export * from "./ids.js";
 export * from "./instance-allocation.js";
