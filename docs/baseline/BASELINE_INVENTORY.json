@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-26T09:08:08Z",
+  "source": {
+    "archive": ".codex/task-package/inputs/source/sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1-work-delivery.zip",
+    "archiveName": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1-work-delivery.zip",
+    "sha256": "000a46f7452eadac986de3f142dde6358a590c5c372bee2e09793fe9396ad6e3",
+    "sizeBytes": 3206351,
+    "topLevelDirectory": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1",
+    "fileCount": 803,
+    "projectTreeSha256": "fde5b26b671b6f1d6143c1ef81cb0d24b01c1b77de8acb5b0d35992867e57ca3",
+    "manifest": {
+      "path": "WORK_DELIVERY_MANIFEST.json",
+      "sha256": "db457a8739ecdffea84fd4442156c3d89f2d5a409f01a90af893721627e4fb8d",
+      "schemaVersion": "1.0",
+      "projectName": "sdar-mcp-tasks-provider-runtime",
+      "deliveryName": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1",
+      "generatedAt": "2026-07-23T03:25:02Z"
+    },
+    "checksums": {
+      "path": "SHA256SUMS.txt",
+      "sha256": "745d323b88be215bb272eb874da954ec9f201add466fa5f268186b8d2f5b59b4",
+      "canonicalProjectTreeSha256": "fde5b26b671b6f1d6143c1ef81cb0d24b01c1b77de8acb5b0d35992867e57ca3"
+    }
+  },
+  "counts": {
+    "apps": 8,
+    "packages": 13,
+    "migrationFiles": 26,
+    "testFiles": 125,
+    "filesUnderTests": 131,
+    "protocolFiles": 34
+  },
+  "apps": [
+    "home-assistant-climate-provider",
+    "mock-npc-tank-device-mcp",
+    "mock-npc-tank-mqtt-publisher",
+    "mock-ugv-device-mcp",
+    "mock-ugv-mqtt-publisher",
+    "npc-tank-provider-adapter",
+    "runtime",
+    "ugv-provider-adapter"
+  ],
+  "packages": [
+    "adapter-protocol",
+    "conformance-testkit",
+    "domain",
+    "mcp-protocol",
+    "observability",
+    "operation-registry",
+    "persistence-postgres",
+    "provider-adapter-kit",
+    "provider-telemetry",
+    "task-engine",
+    "vehicle-device-mcp-client",
+    "vehicle-mqtt-ingress",
+    "vehicle-provider-core"
+  ],
+  "migrations": [
+    "001_operation_snapshot.sql",
+    "002_task_lifecycle.sql",
+    "003_idempotency.sql",
+    "004_durable_timing.sql",
+    "005_task_controls.sql",
+    "006_recovery_hardening.sql",
+    "007_durable_command_dispatch.sql",
+    "008_start_window_and_schedule_retry.sql",
+    "009_observation_revision_and_outbox_keys.sql",
+    "010_adapter_execution_identity.sql",
+    "011_task_handle_retention.sql",
+    "012_idempotency_claim_lease.sql",
+    "013_single_claimed_command.sql",
+    "014_observation_pagination.sql",
+    "014_start_confirmation_watchdog.sql",
+    "015_recovery_backoff.sql",
+    "016_command_claim_lease_consistency.sql",
+    "017_provider_ops_audit_delivery.sql",
+    "018_runtime_trace_context.sql",
+    "019_runtime_revision.sql",
+    "020_frozen_protocol_mrtr.sql",
+    "021_frozen_reservation_ref.sql",
+    "022_mrtr_response_inbox.sql",
+    "023_business_events_profile_v1.sql",
+    "024_ugv_provider.sql",
+    "025_npc_tank_provider.sql"
+  ],
+  "tests": {
+    "filePattern": "tests/**/*.test.ts",
+    "fileCount": 125,
+    "byTopLevelSuite": {
+      "business-events": 23,
+      "contract": 4,
+      "e2e": 3,
+      "integration": 26,
+      "protocol-conformance": 14,
+      "rc2": 1,
+      "recovery": 1,
+      "runtime-conformance-closure": 7,
+      "runtime-conformance-followup": 9,
+      "security": 8,
+      "unit": 29
+    },
+    "deliveryManifestResults": {
+      "provenance": "Historical claims copied from WORK_DELIVERY_MANIFEST.json; not rerun by G1-P0-B01.",
+      "passEntries": 11,
+      "partialEnvironmentBlockedEntries": 3
+    }
+  },
+  "versions": {
+    "project": "2.0.0-rc.1",
+    "packageManagerDeclared": "pnpm@11.13.1",
+    "engines": {
+      "node": ">=22 <23",
+      "pnpm": ">=11 <12"
+    },
+    "lockfileVersion": "9.0",
+    "observedToolchain": {
+      "node": "v22.23.1",
+      "pnpm": "11.13.1",
+      "python": "3.10.12",
+      "git": "2.34.1",
+      "dockerCli": "29.6.1",
+      "dockerCompose": "v5.3.1"
+    }
+  },
+  "environment": {
+    "testDatabaseUrlConfigured": false,
+    "dockerCliAvailable": true,
+    "dockerDaemonReachable": false,
+    "dockerDaemonDetail": "Permission denied connecting to /var/run/docker.sock.",
+    "psqlAvailable": false,
+    "pm2Available": false
+  }
+}
