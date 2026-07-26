@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:54:24.875777+00:00",
+  "updatedAt": "2026-07-26T09:57:26.008496+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -112,14 +112,16 @@
       "reason": null
     },
     "G1-P1-B07": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:54:49.359049+00:00",
+      "completedAt": "2026-07-26T09:57:26.008230+00:00",
+      "evidence": [
+        "reports/evidence/migration-isolation.json; TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:migration-isolation: PASS 1/1; three temporary schemas, each set executed twice; runtime migration count 24; representative cross-set tables absent; post-test schema cleanup count 0; jq evidence validation, typecheck, eslint, prettier, git diff --check: PASS"
+      ],
       "reason": null
     },
     "G1-P1-B08": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

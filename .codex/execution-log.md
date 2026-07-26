@@ -47,3 +47,7 @@
 - 2026-07-26T09:51:10.710363+00:00 START G1-P1-B06
 
 - 2026-07-26T09:54:24.875691+00:00 PASS G1-P1-B06 evidence=['pnpm typecheck: PASS; pnpm test:unit: PASS 30 files/123 tests; focused provider-migration-entrypoints: PASS 2/2 (UGV only provider:ugv, NPC only provider:npc-tank, no cross-provider/runtime SQL); eslint selected files, prettier --check, git diff --check: PASS']
+
+- 2026-07-26T09:54:49.359137+00:00 START G1-P1-B07
+
+- 2026-07-26T09:57:26.008337+00:00 PASS G1-P1-B07 evidence=['reports/evidence/migration-isolation.json; TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:migration-isolation: PASS 1/1; three temporary schemas, each set executed twice; runtime migration count 24; representative cross-set tables absent; post-test schema cleanup count 0; jq evidence validation, typecheck, eslint, prettier, git diff --check: PASS']

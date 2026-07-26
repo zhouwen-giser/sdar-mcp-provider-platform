@@ -71,6 +71,7 @@
     "test:contract": "vitest run tests/contract",
     "test:rc2:red": "vitest run tests/rc2/rc1-red-regressions.test.ts",
     "test:integration": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/integration",
+    "test:migration-isolation": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/migration-isolation",
     "test:recovery": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/recovery",
     "test:security": "vitest run tests/security",
     "test:e2e": "vitest run tests/e2e",
