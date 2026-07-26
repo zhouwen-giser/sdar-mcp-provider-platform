@@ -3,6 +3,10 @@ import {
   loadRuntimeBootstrapEnvironment,
   RuntimeBootstrapResolvedSchema,
 } from "../../../packages/runtime-configuration-contract/src/runtime/bootstrap.js";
+import {
+  loadRuntimeObservabilityEnvironment,
+  RuntimeObservabilityResolvedSchema,
+} from "../../../packages/runtime-configuration-contract/src/runtime/observability.js";
 
 const BooleanEnvironmentSchema = z
   .union([z.string(), z.boolean()])
@@ -11,16 +15,22 @@ const BooleanEnvironmentSchema = z
 const EnvironmentSchema = z
   .object({
     ...RuntimeBootstrapResolvedSchema.shape,
-    LOG_LEVEL: z.string().default("info"),
-    OTEL_ENABLED: BooleanEnvironmentSchema.default(false),
-    OTEL_EXPORTER_OTLP_ENDPOINT: z.url().default("http://127.0.0.1:4318"),
-    OTEL_EXPORTER_OTLP_TLS_MODE: z.enum(["disabled", "required"]).default("disabled"),
-    OTEL_EXPORTER_OTLP_CA_PATH: z.string().min(1).optional(),
-    OTEL_EXPORTER_OTLP_CERT_PATH: z.string().min(1).optional(),
-    OTEL_EXPORTER_OTLP_KEY_PATH: z.string().min(1).optional(),
-    OTEL_EXPORTER_OTLP_HEADERS_FILE: z.string().min(1).optional(),
-    OTEL_EXPORTER_OTLP_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(10_000),
-    OTEL_SERVICE_INSTANCE_ID: z.string().min(1).max(256).optional(),
+    LOG_LEVEL: RuntimeObservabilityResolvedSchema.shape.LOG_LEVEL,
+    OTEL_ENABLED: RuntimeObservabilityResolvedSchema.shape.OTEL_ENABLED,
+    OTEL_EXPORTER_OTLP_ENDPOINT:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_ENDPOINT,
+    OTEL_EXPORTER_OTLP_TLS_MODE:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_TLS_MODE,
+    OTEL_EXPORTER_OTLP_CA_PATH: RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_CA_PATH,
+    OTEL_EXPORTER_OTLP_CERT_PATH:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_CERT_PATH,
+    OTEL_EXPORTER_OTLP_KEY_PATH:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_KEY_PATH,
+    OTEL_EXPORTER_OTLP_HEADERS_FILE:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_HEADERS_FILE,
+    OTEL_EXPORTER_OTLP_TIMEOUT_MS:
+      RuntimeObservabilityResolvedSchema.shape.OTEL_EXPORTER_OTLP_TIMEOUT_MS,
+    OTEL_SERVICE_INSTANCE_ID: RuntimeObservabilityResolvedSchema.shape.OTEL_SERVICE_INSTANCE_ID,
     PROVIDER_TELEMETRY_INGRESS_ENABLED: BooleanEnvironmentSchema.default(false),
     PROVIDER_TELEMETRY_HOST: z.string().min(1).max(255).default("127.0.0.1"),
     PROVIDER_TELEMETRY_PORT: z.coerce.number().int().min(1).max(65_535).default(7002),
@@ -209,23 +219,6 @@ const EnvironmentSchema = z
           message: "production forbids weak lease configuration",
         });
       }
-      if (
-        value.OTEL_ENABLED &&
-        !value.OTEL_EXPORTER_OTLP_ENDPOINT.toLowerCase().startsWith("https://")
-      ) {
-        context.addIssue({ code: "custom", message: "production OTLP requires HTTPS" });
-      }
-    }
-    if (
-      value.OTEL_EXPORTER_OTLP_TLS_MODE === "required" &&
-      (value.OTEL_EXPORTER_OTLP_CA_PATH === undefined ||
-        value.OTEL_EXPORTER_OTLP_CERT_PATH === undefined ||
-        value.OTEL_EXPORTER_OTLP_KEY_PATH === undefined)
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "OTLP mTLS requires CA, certificate, and key paths",
-      });
     }
     if (value.OUTBOX_SINK === "webhook" && value.OUTBOX_WEBHOOK_URL === undefined) {
       context.addIssue({ code: "custom", message: "webhook Outbox requires OUTBOX_WEBHOOK_URL" });
@@ -252,7 +245,8 @@ export type RuntimeConfig = z.infer<typeof EnvironmentSchema> & {
 
 export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const bootstrap = loadRuntimeBootstrapEnvironment(environment);
-  const value = EnvironmentSchema.parse({ ...environment, ...bootstrap });
+  const observability = loadRuntimeObservabilityEnvironment(environment);
+  const value = EnvironmentSchema.parse({ ...environment, ...bootstrap, ...observability });
   const commandClaimLeaseMinimum =
     2 * value.ADAPTER_RPC_TIMEOUT_MS +
     value.DB_PUBLICATION_BUDGET_MS +
