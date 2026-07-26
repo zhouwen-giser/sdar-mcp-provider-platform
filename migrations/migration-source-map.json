@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "1.0",
+  "mappingState": "pre_split",
+  "pathSemantics": {
+    "oldPath": "Immutable path in the delivered offline baseline.",
+    "newPath": "Current hash-verifiable path; replaced with plannedPath by the physical split task.",
+    "plannedPath": "Owner-specific authoritative path after the physical split.",
+    "sequence": "Unique deterministic order across all 26 delivered files.",
+    "legacyVersion": "Original numeric filename prefix; not unique because the delivery contains two independent 014 files."
+  },
+  "migrationSets": {
+    "runtime": {
+      "owner": "runtime",
+      "plannedDirectory": "migrations/runtime",
+      "deliveredFiles": 24
+    },
+    "provider:ugv": {
+      "owner": "provider:ugv",
+      "plannedDirectory": "migrations/providers/ugv",
+      "deliveredFiles": 1
+    },
+    "provider:npc-tank": {
+      "owner": "provider:npc-tank",
+      "plannedDirectory": "migrations/providers/npc-tank",
+      "deliveredFiles": 1
+    },
+    "pms": {
+      "owner": "pms",
+      "plannedDirectory": "migrations/pms",
+      "deliveredFiles": 0,
+      "namingRule": "NNN_lower_snake_case_description.sql",
+      "versionScope": "Unique and append-only within the pms set, starting at 001."
+    }
+  },
+  "migrations": [
+    {
+      "sequence": 1,
+      "legacyVersion": "001",
+      "owner": "runtime",
+      "oldPath": "migrations/001_operation_snapshot.sql",
+      "newPath": "migrations/001_operation_snapshot.sql",
+      "plannedPath": "migrations/runtime/001_operation_snapshot.sql",
+      "pathState": "legacy_root",
+      "sha256": "fb130bdd77c67e9bcfc37e609a82d4fe67fba17e9058ce709ecb3bfe75a47c28"
+    },
+    {
+      "sequence": 2,
+      "legacyVersion": "002",
+      "owner": "runtime",
+      "oldPath": "migrations/002_task_lifecycle.sql",
+      "newPath": "migrations/002_task_lifecycle.sql",
+      "plannedPath": "migrations/runtime/002_task_lifecycle.sql",
+      "pathState": "legacy_root",
+      "sha256": "656c286e7b9c9d3a7bc45de56589738b3e15c6f9237065889f2815d194832e78"
+    },
+    {
+      "sequence": 3,
+      "legacyVersion": "003",
+      "owner": "runtime",
+      "oldPath": "migrations/003_idempotency.sql",
+      "newPath": "migrations/003_idempotency.sql",
+      "plannedPath": "migrations/runtime/003_idempotency.sql",
+      "pathState": "legacy_root",
+      "sha256": "91ef8d20caea9fd321fa8aec0eaab17dd2e741732d7181f36d2256f6b663d5ad"
+    },
+    {
+      "sequence": 4,
+      "legacyVersion": "004",
+      "owner": "runtime",
+      "oldPath": "migrations/004_durable_timing.sql",
+      "newPath": "migrations/004_durable_timing.sql",
+      "plannedPath": "migrations/runtime/004_durable_timing.sql",
+      "pathState": "legacy_root",
+      "sha256": "dd5fc0cd4cbfde7c695d6cfe8bef3001076e39a744bb22ab8a251764843782c4"
+    },
+    {
+      "sequence": 5,
+      "legacyVersion": "005",
+      "owner": "runtime",
+      "oldPath": "migrations/005_task_controls.sql",
+      "newPath": "migrations/005_task_controls.sql",
+      "plannedPath": "migrations/runtime/005_task_controls.sql",
+      "pathState": "legacy_root",
+      "sha256": "4566c30477428c20e375b200ffa3b144ca88617af122e28e5039173b77389516"
+    },
+    {
+      "sequence": 6,
+      "legacyVersion": "006",
+      "owner": "runtime",
+      "oldPath": "migrations/006_recovery_hardening.sql",
+      "newPath": "migrations/006_recovery_hardening.sql",
+      "plannedPath": "migrations/runtime/006_recovery_hardening.sql",
+      "pathState": "legacy_root",
+      "sha256": "9c613b678a99742201c512cfcb0f42b091ff860bfd0bf73f3cc79a2a58370f47"
+    },
+    {
+      "sequence": 7,
+      "legacyVersion": "007",
+      "owner": "runtime",
+      "oldPath": "migrations/007_durable_command_dispatch.sql",
+      "newPath": "migrations/007_durable_command_dispatch.sql",
+      "plannedPath": "migrations/runtime/007_durable_command_dispatch.sql",
+      "pathState": "legacy_root",
+      "sha256": "d07aa4904c511d7360458520ca3a3ffddb63edef0ec842934260e9d91398267a"
+    },
+    {
+      "sequence": 8,
+      "legacyVersion": "008",
+      "owner": "runtime",
+      "oldPath": "migrations/008_start_window_and_schedule_retry.sql",
+      "newPath": "migrations/008_start_window_and_schedule_retry.sql",
+      "plannedPath": "migrations/runtime/008_start_window_and_schedule_retry.sql",
+      "pathState": "legacy_root",
+      "sha256": "050f2a50f30b35fc7f302657ae798f7034a71f52aa31d53b315a0801db361c75"
+    },
+    {
+      "sequence": 9,
+      "legacyVersion": "009",
+      "owner": "runtime",
+      "oldPath": "migrations/009_observation_revision_and_outbox_keys.sql",
+      "newPath": "migrations/009_observation_revision_and_outbox_keys.sql",
+      "plannedPath": "migrations/runtime/009_observation_revision_and_outbox_keys.sql",
+      "pathState": "legacy_root",
+      "sha256": "bc63f39b8cc702d4e5b877001b0ca40193fe296d6f07ae38d89a8bc7506101a9"
+    },
+    {
+      "sequence": 10,
+      "legacyVersion": "010",
+      "owner": "runtime",
+      "oldPath": "migrations/010_adapter_execution_identity.sql",
+      "newPath": "migrations/010_adapter_execution_identity.sql",
+      "plannedPath": "migrations/runtime/010_adapter_execution_identity.sql",
+      "pathState": "legacy_root",
+      "sha256": "be8e0bb022c0d062e64a14194c29d18014a03c087b2dd58731d35e2c56d92bda"
+    },
+    {
+      "sequence": 11,
+      "legacyVersion": "011",
+      "owner": "runtime",
+      "oldPath": "migrations/011_task_handle_retention.sql",
+      "newPath": "migrations/011_task_handle_retention.sql",
+      "plannedPath": "migrations/runtime/011_task_handle_retention.sql",
+      "pathState": "legacy_root",
+      "sha256": "cf268f6db9b838479b18701f9155823bd1e93b848ddf689190484315ae7d1da5"
+    },
+    {
+      "sequence": 12,
+      "legacyVersion": "012",
+      "owner": "runtime",
+      "oldPath": "migrations/012_idempotency_claim_lease.sql",
+      "newPath": "migrations/012_idempotency_claim_lease.sql",
+      "plannedPath": "migrations/runtime/012_idempotency_claim_lease.sql",
+      "pathState": "legacy_root",
+      "sha256": "bddb59a95bfe349ee69ee449309563850725d9a246d5dc0f9d30ae8d12c53c2e"
+    },
+    {
+      "sequence": 13,
+      "legacyVersion": "013",
+      "owner": "runtime",
+      "oldPath": "migrations/013_single_claimed_command.sql",
+      "newPath": "migrations/013_single_claimed_command.sql",
+      "plannedPath": "migrations/runtime/013_single_claimed_command.sql",
+      "pathState": "legacy_root",
+      "sha256": "0462556befd931f932dba3ec71b4587592d61febebfac3eaa0b06a5c0f0c65fc"
+    },
+    {
+      "sequence": 14,
+      "legacyVersion": "014",
+      "owner": "runtime",
+      "oldPath": "migrations/014_observation_pagination.sql",
+      "newPath": "migrations/014_observation_pagination.sql",
+      "plannedPath": "migrations/runtime/014_observation_pagination.sql",
+      "pathState": "legacy_root",
+      "sha256": "df7d010260a9bf51e78ba7d260927e7f46731191cab9a6f18d7e9b8bfc0cdfef"
+    },
+    {
+      "sequence": 15,
+      "legacyVersion": "014",
+      "owner": "runtime",
+      "oldPath": "migrations/014_start_confirmation_watchdog.sql",
+      "newPath": "migrations/014_start_confirmation_watchdog.sql",
+      "plannedPath": "migrations/runtime/014_start_confirmation_watchdog.sql",
+      "pathState": "legacy_root",
+      "sha256": "11fd1be2cd88a05f812e8ce0ecb861401d085f8af00538af0da73bf9046bb245"
+    },
+    {
+      "sequence": 16,
+      "legacyVersion": "015",
+      "owner": "runtime",
+      "oldPath": "migrations/015_recovery_backoff.sql",
+      "newPath": "migrations/015_recovery_backoff.sql",
+      "plannedPath": "migrations/runtime/015_recovery_backoff.sql",
+      "pathState": "legacy_root",
+      "sha256": "9e9bcddd5150730f56c29b0bb4fbd33d689f4a411cf67af6f19da18309e56fda"
+    },
+    {
+      "sequence": 17,
+      "legacyVersion": "016",
+      "owner": "runtime",
+      "oldPath": "migrations/016_command_claim_lease_consistency.sql",
+      "newPath": "migrations/016_command_claim_lease_consistency.sql",
+      "plannedPath": "migrations/runtime/016_command_claim_lease_consistency.sql",
+      "pathState": "legacy_root",
+      "sha256": "f7ce61648299c3fa81e42fe9eaa6833d0e98db3ebcee0e11045eda6ceeacbcbf"
+    },
+    {
+      "sequence": 18,
+      "legacyVersion": "017",
+      "owner": "runtime",
+      "oldPath": "migrations/017_provider_ops_audit_delivery.sql",
+      "newPath": "migrations/017_provider_ops_audit_delivery.sql",
+      "plannedPath": "migrations/runtime/017_provider_ops_audit_delivery.sql",
+      "pathState": "legacy_root",
+      "sha256": "c19afbc927ceac63c7aa43169f576caba8179132907310629a0e340980423596"
+    },
+    {
+      "sequence": 19,
+      "legacyVersion": "018",
+      "owner": "runtime",
+      "oldPath": "migrations/018_runtime_trace_context.sql",
+      "newPath": "migrations/018_runtime_trace_context.sql",
+      "plannedPath": "migrations/runtime/018_runtime_trace_context.sql",
+      "pathState": "legacy_root",
+      "sha256": "1c03f35743425f94139bd9d7aa6c68bb39cb27d5c15f3b5d89aacbb53513667a"
+    },
+    {
+      "sequence": 20,
+      "legacyVersion": "019",
+      "owner": "runtime",
+      "oldPath": "migrations/019_runtime_revision.sql",
+      "newPath": "migrations/019_runtime_revision.sql",
+      "plannedPath": "migrations/runtime/019_runtime_revision.sql",
+      "pathState": "legacy_root",
+      "sha256": "8bbce4951ec7c1730de712292a3832fa0438db1742e647c5fba8869bccfc23b1"
+    },
+    {
+      "sequence": 21,
+      "legacyVersion": "020",
+      "owner": "runtime",
+      "oldPath": "migrations/020_frozen_protocol_mrtr.sql",
+      "newPath": "migrations/020_frozen_protocol_mrtr.sql",
+      "plannedPath": "migrations/runtime/020_frozen_protocol_mrtr.sql",
+      "pathState": "legacy_root",
+      "sha256": "3ebd512a04266ed1ca84f484670ef4156b2485e80fad93e0808bf38a64562eee"
+    },
+    {
+      "sequence": 22,
+      "legacyVersion": "021",
+      "owner": "runtime",
+      "oldPath": "migrations/021_frozen_reservation_ref.sql",
+      "newPath": "migrations/021_frozen_reservation_ref.sql",
+      "plannedPath": "migrations/runtime/021_frozen_reservation_ref.sql",
+      "pathState": "legacy_root",
+      "sha256": "bda96734808eee2f73b4da4d44ae7b8292b32bda0706eeb90728087e5764f0f0"
+    },
+    {
+      "sequence": 23,
+      "legacyVersion": "022",
+      "owner": "runtime",
+      "oldPath": "migrations/022_mrtr_response_inbox.sql",
+      "newPath": "migrations/022_mrtr_response_inbox.sql",
+      "plannedPath": "migrations/runtime/022_mrtr_response_inbox.sql",
+      "pathState": "legacy_root",
+      "sha256": "16d6da827dbe2c02ac7585b25e3370b47d55cbdb46f8f2ed5c77b271bf0e4343"
+    },
+    {
+      "sequence": 24,
+      "legacyVersion": "023",
+      "owner": "runtime",
+      "oldPath": "migrations/023_business_events_profile_v1.sql",
+      "newPath": "migrations/023_business_events_profile_v1.sql",
+      "plannedPath": "migrations/runtime/023_business_events_profile_v1.sql",
+      "pathState": "legacy_root",
+      "sha256": "b978e71aacbfcfe6b3d948758e9c32e209180fbb3d283370cdaf41551463bead"
+    },
+    {
+      "sequence": 25,
+      "legacyVersion": "024",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/024_ugv_provider.sql",
+      "newPath": "migrations/024_ugv_provider.sql",
+      "plannedPath": "migrations/providers/ugv/024_ugv_provider.sql",
+      "pathState": "legacy_root",
+      "sha256": "05d6e1ec15187fbc96d96db8a6ee3d8d7edc33ff1840c2dc91fd7f104be805a2"
+    },
+    {
+      "sequence": 26,
+      "legacyVersion": "025",
+      "owner": "provider:npc-tank",
+      "oldPath": "migrations/025_npc_tank_provider.sql",
+      "newPath": "migrations/025_npc_tank_provider.sql",
+      "plannedPath": "migrations/providers/npc-tank/025_npc_tank_provider.sql",
+      "pathState": "legacy_root",
+      "sha256": "55cba8544325d1e07aa9660453d8763992698d23fb7d8327cbb11c02bdbbb58b"
+    }
+  ]
+}

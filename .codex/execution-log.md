@@ -23,3 +23,7 @@
 - 2026-07-26T09:24:26.012537+00:00 START G1-P0-B06
 
 - 2026-07-26T09:25:52.449340+00:00 PASS G1-P0-B06 evidence=['.codex/reports/phase-P0.md; git diff --check; taskctl status; commits 3513476,50ecf47,87644e1,107940a,e659697']
+
+- 2026-07-26T09:26:17.577939+00:00 START G1-P1-B01
+
+- 2026-07-26T09:29:20.327651+00:00 PASS G1-P1-B01 evidence=['migrations/migration-source-map.json; docs/database/migration-ownership.md; verify_migration_source_map.py (26 files); coverage/order/path/hash/owner validation; prettier check; git diff --check']

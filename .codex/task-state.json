@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:25:52.449392+00:00",
+  "updatedAt": "2026-07-26T09:29:20.327729+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -58,14 +58,16 @@
       "reason": null
     },
     "G1-P1-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:26:17.577879+00:00",
+      "completedAt": "2026-07-26T09:29:20.327590+00:00",
+      "evidence": [
+        "migrations/migration-source-map.json; docs/database/migration-ownership.md; verify_migration_source_map.py (26 files); coverage/order/path/hash/owner validation; prettier check; git diff --check"
+      ],
       "reason": null
     },
     "G1-P1-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
