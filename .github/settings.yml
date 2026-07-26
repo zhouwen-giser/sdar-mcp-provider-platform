@@ -1,6 +1,7 @@
 # Configuration for the GitHub Settings app (https://github.com/repository-settings/app).
 # Apply this file with an administrator token when the repository is connected to GitHub.
 repository:
+  description: SDAR MCP Provider Platform control plane and standard MCP Tasks Runtime
   allow_squash_merge: true
   allow_merge_commit: false
   allow_rebase_merge: false

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased - SDAR MCP Provider Platform
+
+- Began the additive upgrade from the locked SDAR MCP Tasks Provider Runtime
+  delivery to the SDAR MCP Provider Platform monorepo.
+- Established the platform presentation name and documented its control-plane,
+  Runtime Task Authority, and Provider Adapter responsibility boundaries.
+- Retained the root package name, workspace package identities, Runtime entry
+  points, Node.js/pnpm constraints, and existing scripts for compatibility.
+
 ## 1.1.0 - 2026-07-18
 
 - Added optional OpenTelemetry traces, stable Provider Ops events and low-cardinality metrics

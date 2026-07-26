@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:13:14.064577+00:00",
+  "updatedAt": "2026-07-26T09:15:25.462197+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -22,21 +22,23 @@
       "reason": null
     },
     "G1-P0-B03": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:13:38.162031+00:00",
+      "completedAt": "2026-07-26T09:15:25.462069+00:00",
+      "evidence": [
+        "README.md; docs/architecture/platform-scope.md; package.json compatibility validation (116 scripts retained); pnpm format:check || true (dependency store unavailable); git diff --check"
+      ],
+      "reason": null
+    },
+    "G1-P0-B04": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P0-B04": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P0-B05": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
