@@ -7,6 +7,7 @@ import {
 } from "../../../packages/pms-application/src/index.js";
 import {
   PostgresRegistrySnapshotRepository,
+  PostgresAuditRepository,
   PostgresPmsUnitOfWork,
   runPmsMigrations,
 } from "../../../packages/pms-persistence-postgres/src/index.js";
@@ -41,6 +42,7 @@ const app = createPmsApi({
   runtimeConfigWatch,
   runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(unitOfWork),
   registrySnapshots: new PostgresRegistrySnapshotRepository(pool),
+  audit: new PostgresAuditRepository(pool),
   readiness: async () => {
     await pool.query("SELECT 1");
     return { ready: true, checks: { database: "ready" } };

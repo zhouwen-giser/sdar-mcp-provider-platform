@@ -64,7 +64,7 @@ describe("DatabaseProfile and SecretRef", () => {
         adminSecretRef: secretRef("vault/postgres/provisioner"),
         runtimeSecretRef: secretRef("vault/runtime/provider-1"),
       }),
-    ).toThrowError(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
+    ).toThrow(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
   });
 
   it("rejects reused secret authority, invalid references, and invalid ports", () => {
@@ -80,8 +80,8 @@ describe("DatabaseProfile and SecretRef", () => {
         adminSecretRef: shared,
         runtimeSecretRef: shared,
       }),
-    ).toThrowError(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
-    expect(() => secretRef("postgresql://user:credential@db/runtime")).toThrowError(
+    ).toThrow(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
+    expect(() => secretRef("postgresql://user:credential@db/runtime")).toThrow(
       expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }),
     );
   });

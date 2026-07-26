@@ -1,13 +1,22 @@
 # Changelog
 
-## Unreleased - SDAR MCP Provider Platform
+## 0.1.0 - 2026-07-27 - SDAR MCP Provider Platform
 
-- Began the additive upgrade from the locked SDAR MCP Tasks Provider Runtime
-  delivery to the SDAR MCP Provider Platform monorepo.
+- Completed the additive upgrade from the locked SDAR MCP Tasks Provider
+  Runtime delivery to the SDAR MCP Provider Platform monorepo.
 - Established the platform presentation name and documented its control-plane,
   Runtime Task Authority, and Provider Adapter responsibility boundaries.
 - Retained the root package name, workspace package identities, Runtime entry
   points, Node.js/pnpm constraints, and existing scripts for compatibility.
+- Added revision-safe RuntimeDeployment orchestration, isolated Runtime database
+  preparation and migration, governed PM2 lifecycle, live/ready reconciliation,
+  Runtime registration, authoritative Catalog discovery, Registry snapshots,
+  Provider integrations, and the PMS Web console.
+- Added one reproducible `verify:platform` gate spanning frozen protocol,
+  migrations, configuration compatibility, real local PostgreSQL, real PM2,
+  security, fault injection, and controlled system interoperability.
+- Real UGV, NPC Tank, and Home Assistant resources remain unqualified; V0.1
+  makes no external-resource or Interop Certified claim.
 
 ## 1.1.0 - 2026-07-18
 

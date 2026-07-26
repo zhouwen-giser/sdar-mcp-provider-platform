@@ -22,7 +22,11 @@ const deployment = {
 
 describe("RuntimeDeployment API/domain/repository contract", () => {
   it("keeps API action names aligned with the application command vocabulary", async () => {
-    const command = vi.fn((_input: unknown, _context: unknown) => Promise.resolve(deployment));
+    const command = vi.fn((input: unknown, context: unknown) => {
+      void input;
+      void context;
+      return Promise.resolve(deployment);
+    });
     const service = {
       create: vi.fn(),
       command,

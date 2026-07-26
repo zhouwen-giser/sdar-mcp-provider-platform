@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
+import process from "node:process";
 
 const gateDefinitions = Object.freeze({
   "runtime-deployment": ["packages/runtime-deployment/test", "tests/runtime-deployment"],
@@ -12,7 +13,13 @@ const gateDefinitions = Object.freeze({
   ],
   "pm2-adapter": ["packages/pm2-runtime-adapter/test", "tests/pm2-adapter"],
   registry: ["packages/registry-snapshot/test", "tests/registry"],
-  "platform-e2e": ["tests/platform-e2e"],
+  "platform-e2e": [
+    "tests/provider-platform-e2e/ugv",
+    "tests/provider-platform-e2e/npc-tank",
+    "tests/provider-platform-e2e/home-assistant",
+    "tests/catalog-registry-e2e",
+    "tests/sdar-interop",
+  ],
 });
 
 const isTestFile = (path) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(path);
@@ -37,16 +44,16 @@ const gate = process.argv[2];
 const roots = gateDefinitions[gate];
 
 if (!roots) {
-  console.error(
-    `UNKNOWN_GOAL2_TEST_GATE: ${gate ?? "<missing>"}; expected one of ${Object.keys(gateDefinitions).join(", ")}`,
+  process.stderr.write(
+    `UNKNOWN_GOAL2_TEST_GATE: ${gate ?? "<missing>"}; expected one of ${Object.keys(gateDefinitions).join(", ")}\n`,
   );
   process.exit(2);
 }
 
 const tests = [...new Set(roots.flatMap(collectTests))].sort();
 if (tests.length === 0) {
-  console.error(
-    `GOAL2_TEST_GATE_NOT_IMPLEMENTED: ${gate}; no test files found under ${roots.join(", ")}`,
+  process.stderr.write(
+    `GOAL2_TEST_GATE_NOT_IMPLEMENTED: ${gate}; no test files found under ${roots.join(", ")}\n`,
   );
   process.exit(1);
 }
@@ -58,7 +65,7 @@ const result = spawnSync(process.execPath, ["node_modules/vitest/vitest.mjs", "r
 });
 
 if (result.error) {
-  console.error(`GOAL2_TEST_GATE_EXECUTION_FAILED: ${gate}: ${result.error.message}`);
+  process.stderr.write(`GOAL2_TEST_GATE_EXECUTION_FAILED: ${gate}: ${result.error.message}\n`);
   process.exit(1);
 }
 

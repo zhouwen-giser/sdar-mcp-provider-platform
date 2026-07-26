@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-02",
+  "version": "0.1.0",
+  "generatedAt": "2026-07-26T19:42:18Z",
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "database": "<local-postgres>",
+    "secretsRedacted": true
+  },
+  "terminalGate": {
+    "command": "TEST_DATABASE_URL=<local-postgres> pnpm verify:platform",
+    "status": "PASSED",
+    "checks": [
+      "format",
+      "lint",
+      "typecheck",
+      "build",
+      "frozen protocol and lock",
+      "273-component SBOM",
+      "migration isolation",
+      "configuration compatibility",
+      "PMS configuration E2E",
+      "RuntimeDeployment",
+      "database provisioner",
+      "PM2 adapter",
+      "Registry",
+      "Runtime registration",
+      "Catalog",
+      "PMS API, Worker, and Web",
+      "real PM2 Runtime lifecycle",
+      "platform security",
+      "fault injection",
+      "provider, Catalog/Registry, and controlled SDAR system E2E"
+    ]
+  },
+  "selectedResults": [
+    {
+      "gate": "runtime-deployment",
+      "result": "8 files, 54 tests",
+      "status": "PASSED"
+    },
+    {
+      "gate": "database-provisioner",
+      "result": "3 files, 21 tests",
+      "status": "PASSED"
+    },
+    {
+      "gate": "pm2-adapter",
+      "result": "6 files, 37 tests",
+      "status": "PASSED"
+    },
+    {
+      "gate": "pms-api",
+      "result": "10 files, 53 tests",
+      "status": "PASSED"
+    },
+    {
+      "gate": "real-pm2",
+      "result": "real PM2 7.0.3, built Runtime, real local PostgreSQL; restart and unrelated-process isolation passed",
+      "status": "PASSED",
+      "source": "reports/evidence/G2-P3-B12-real-pm2-e2e.json"
+    },
+    {
+      "gate": "security-and-fault",
+      "result": "4 security tests and 4 fault-injection tests",
+      "status": "PASSED"
+    },
+    {
+      "gate": "platform-e2e",
+      "result": "5 files, 11 tests",
+      "status": "PASSED"
+    }
+  ],
+  "qualificationBoundary": {
+    "controlledSdarInterop": "PASSED",
+    "externalSdarInterop": "BLOCKED_EXTERNAL",
+    "realResourceQualification": "PENDING",
+    "certificationClaim": "none"
+  }
+}

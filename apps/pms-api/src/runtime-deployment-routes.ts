@@ -223,7 +223,7 @@ function registerAction(
           command: action,
           expectedDesiredRevision: request.body.expectedDesiredRevision,
           ...(action === "scale"
-            ? { desiredReplicas: request.body.desiredReplicas as number }
+            ? { desiredReplicas: requireDesiredReplicas(request.body.desiredReplicas) }
             : {}),
         },
         context,
@@ -232,6 +232,13 @@ function registerAction(
       return intentResponse(deployment, context.correlationId);
     },
   );
+}
+
+function requireDesiredReplicas(value: number | undefined): number {
+  if (value === undefined) {
+    throw new TypeError("desiredReplicas is required for scale");
+  }
+  return value;
 }
 
 function intentResponse(deployment: RuntimeDeploymentView, operationId: string) {

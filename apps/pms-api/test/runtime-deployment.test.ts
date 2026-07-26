@@ -234,5 +234,5 @@ function service(
     get: vi.fn(),
     list: vi.fn(),
     ...overrides,
-  } as RuntimeDeploymentManagementPort;
+  };
 }

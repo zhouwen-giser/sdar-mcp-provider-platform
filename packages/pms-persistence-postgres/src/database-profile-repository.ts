@@ -121,7 +121,7 @@ export class PostgresDatabaseProfileRepository {
     );
     if (result.rowCount !== 1) throw concurrencyConflict("DatabaseProfile");
     const current = await this.get(update.providerId, update.environment);
-    if (current === null || current.profile.profileId !== update.profileId) {
+    if (current?.profile.profileId !== update.profileId) {
       throw concurrencyConflict("DatabaseProfile");
     }
     return current;

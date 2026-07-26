@@ -131,7 +131,6 @@ export function assertPostgresDatabaseDeletionPolicy(
   policy: PostgresDatabaseDeletionPolicy,
 ): void {
   if (
-    policy.kind !== "explicit-provider-database-delete" ||
     policy.profileId !== spec.profileId ||
     policy.providerId !== spec.providerId ||
     policy.environment !== spec.environment ||

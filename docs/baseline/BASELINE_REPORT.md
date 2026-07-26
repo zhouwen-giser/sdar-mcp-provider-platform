@@ -20,14 +20,14 @@ Source baseline OK: 000a46f7452eadac986de3f142dde6358a590c5c372bee2e09793fe9396a
 
 ## Imported tree inventory
 
-| Category | Count | Notes |
-|---|---:|---|
-| Applications | 8 | Direct child directories of `apps/` |
-| Packages | 13 | Direct child directories of `packages/` |
-| Migrations | 26 | SQL files in `migrations/`; numbering spans 001–025 and contains two distinct 014 files |
-| Tests | 125 | Files matching `tests/**/*.test.ts` |
-| Test assets | 131 | All files below `tests/`, including fixtures |
-| Protocol assets | 34 | All files below `protocol/` |
+| Category        | Count | Notes                                                                                   |
+| --------------- | ----: | --------------------------------------------------------------------------------------- |
+| Applications    |     8 | Direct child directories of `apps/`                                                     |
+| Packages        |    13 | Direct child directories of `packages/`                                                 |
+| Migrations      |    26 | SQL files in `migrations/`; numbering spans 001–025 and contains two distinct 014 files |
+| Tests           |   125 | Files matching `tests/**/*.test.ts`                                                     |
+| Test assets     |   131 | All files below `tests/`, including fixtures                                            |
+| Protocol assets |    34 | All files below `protocol/`                                                             |
 
 The application, package, Migration, and test-suite breakdown is recorded in
 `BASELINE_INVENTORY.json`.

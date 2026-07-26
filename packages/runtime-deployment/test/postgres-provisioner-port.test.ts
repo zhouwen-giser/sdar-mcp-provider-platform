@@ -66,7 +66,7 @@ describe("PostgresProvisioner Port", () => {
         ...policy,
         databaseName: "another_database",
       }),
-    ).toThrowError(
+    ).toThrow(
       expect.objectContaining({
         code: "POSTGRES_DELETE_POLICY_REQUIRED",
         retryable: false,

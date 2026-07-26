@@ -82,6 +82,7 @@
     "test:platform-security": "vitest run tests/security-platform",
     "test:fault-injection": "vitest run tests/fault-injection",
     "test:sdar-interop": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/sdar-interop",
+    "verify:platform": "node scripts/require-env.mjs TEST_DATABASE_URL && pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm protocol:check && pnpm sbom:check && pnpm test:migration-isolation && pnpm test:config-compat && pnpm test:pms-config-e2e && pnpm test:runtime-deployment && pnpm test:db-provisioner && pnpm test:pm2-adapter && pnpm test:registry && pnpm --filter @sdar/runtime-registration test && pnpm --filter @sdar/catalog-manager test && pnpm --filter @sdar/pms-api test && pnpm --filter @sdar/pms-worker test && pnpm --filter @sdar/pms-web test && pnpm --filter @sdar/pms-web build && node tests/pm2-adapter-e2e/run-real-pm2-e2e.mjs && pnpm test:platform-security && pnpm test:fault-injection && pnpm test:platform-e2e",
     "test:config-compat": "vitest run tests/config-compat && pnpm --filter @sdar/runtime-configuration-contract test",
     "test:rc2:red": "vitest run tests/rc2/rc1-red-regressions.test.ts",
     "test:integration": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/integration",

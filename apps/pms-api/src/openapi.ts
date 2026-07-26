@@ -384,6 +384,22 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/audit-events": {
+        get: {
+          operationId: "listAuditEvents",
+          parameters: [
+            { name: "subjectType", in: "query", schema: { type: "string" } },
+            { name: "subjectId", in: "query", schema: { type: "string" } },
+            { name: "correlationId", in: "query", schema: { type: "string" } },
+            {
+              name: "occurredBefore",
+              in: "query",
+              schema: { type: "string", format: "date-time" },
+            },
+          ],
+          responses: { "200": { description: "Redacted traceable Audit event projections" } },
+        },
+      },
     },
     components: {
       schemas: {
@@ -442,6 +458,8 @@ function applyManagementSecurity(
     "/api/v1/config-drafts",
     "/api/v1/runtime-deployments",
     "/api/v1/runtime-processes",
+    "/api/v1/registry",
+    "/api/v1/audit-events",
   ];
   for (const [path, operations] of Object.entries(paths)) {
     if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;

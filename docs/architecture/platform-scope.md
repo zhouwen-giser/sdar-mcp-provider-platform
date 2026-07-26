@@ -19,11 +19,11 @@ V0.1 platform scope includes:
 
 The platform keeps these authority boundaries:
 
-| Component | Authority | Must not own |
-|---|---|---|
-| PMS | Desired state, configuration, deployment, Catalog, Registry, audit | Runtime Task, Command, Scheduler, Recovery, or Outbox business data |
-| Runtime | MCP data plane, Task Authority, Scheduler, Recovery, Command, Notification, Adapter Gateway | PMS persistence or Provider device control |
-| Provider Adapter | Device connection, Resource facts, Operation side effects, device safety | Runtime Task Authority or PMS control-plane state |
+| Component        | Authority                                                                                   | Must not own                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| PMS              | Desired state, configuration, deployment, Catalog, Registry, audit                          | Runtime Task, Command, Scheduler, Recovery, or Outbox business data |
+| Runtime          | MCP data plane, Task Authority, Scheduler, Recovery, Command, Notification, Adapter Gateway | PMS persistence or Provider device control                          |
+| Provider Adapter | Device connection, Resource facts, Operation side effects, device safety                    | Runtime Task Authority or PMS control-plane state                   |
 
 PMS and Runtime share a repository but run as separate processes. Runtime does
 not require PMS as its only cold-start dependency. A logical Provider's Runtime

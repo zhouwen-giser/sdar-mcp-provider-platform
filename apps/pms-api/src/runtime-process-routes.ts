@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { RuntimeProcessQueryService } from "../../../packages/pms-application/src/index.js";
+import type { RuntimeProcessQueryService } from "../../../packages/pms-application/src/index.js";
 import type {
   RuntimeObservedHealth,
   RuntimeProcessState,

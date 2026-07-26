@@ -96,10 +96,7 @@ export function createDatabaseProfile(input: CreateDatabaseProfileInput): Databa
   if (!DATABASE_MODES.includes(databaseMode)) invalid("databaseMode");
   const sslMode = input.sslMode ?? "verify-full";
   if (!POSTGRES_SSL_MODES.includes(sslMode)) invalid("sslMode");
-  if (
-    typeof input.adminSecretRef?.secretRef !== "string" ||
-    typeof input.runtimeSecretRef?.secretRef !== "string"
-  ) {
+  if (!hasSecretRef(input.adminSecretRef) || !hasSecretRef(input.runtimeSecretRef)) {
     invalid("secretRef");
   }
   if (input.adminSecretRef.secretRef === input.runtimeSecretRef.secretRef) {
@@ -119,6 +116,15 @@ export function createDatabaseProfile(input: CreateDatabaseProfileInput): Databa
     adminSecretRef: secretRef(String(input.adminSecretRef.secretRef)),
     runtimeSecretRef: secretRef(String(input.runtimeSecretRef.secretRef)),
   });
+}
+
+function hasSecretRef(value: unknown): value is SecretRef {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "secretRef" in value &&
+    typeof value.secretRef === "string"
+  );
 }
 
 function normalizeHost(value: string): string {

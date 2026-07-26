@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "product": "SDAR MCP Provider Platform",
+  "version": "0.1.0",
+  "goalId": "goal-02",
+  "branch": "codex/goal-02-runtime-governance",
+  "sourceCommit": "1a710c38ba2ae3c549fac165c4ee9cc8d9d79fc7",
+  "releaseCommit": "commit-containing-this-manifest",
+  "generatedAt": "2026-07-26T19:42:18Z",
+  "toolchain": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "pm2": "7.0.3"
+  },
+  "taskSummary": {
+    "total": 50,
+    "passed": 50,
+    "terminalTask": "G2-P5-B09",
+    "terminalTaskStatus": "PASSED"
+  },
+  "gates": {
+    "verifyPlatform": "PASSED",
+    "frozenProtocol": "PASSED",
+    "migrationIsolation": "PASSED",
+    "realPm2": "PASSED",
+    "security": "PASSED",
+    "faultInjection": "PASSED",
+    "controlledSdarInterop": "PASSED",
+    "externalInterop": "BLOCKED_EXTERNAL"
+  },
+  "artifacts": [
+    "CHANGELOG.md",
+    "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
+    "docs/operations/PLATFORM_V0_1_UPGRADE.md",
+    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
+    "reports/platform-v0.1/TEST_EVIDENCE.json",
+    "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
+    "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
+    "reports/platform-v0.1/CHECKSUMS.sha256",
+    "reports/sbom/runtime-v1.cdx.json",
+    ".codex/handoff/goal2-handoff.json"
+  ],
+  "secretsRedacted": true
+}

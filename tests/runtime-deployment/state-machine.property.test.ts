@@ -57,9 +57,7 @@ describe("RuntimeDeployment state-machine properties", () => {
               { expectedStatus: current, expectedRevision: 7 },
               new Date(),
             ),
-          ).toThrowError(
-            expect.objectContaining({ code: "INVALID_RUNTIME_DEPLOYMENT_TRANSITION" }),
-          );
+          ).toThrow(expect.objectContaining({ code: "INVALID_RUNTIME_DEPLOYMENT_TRANSITION" }));
         }
       }
     }
@@ -67,7 +65,7 @@ describe("RuntimeDeployment state-machine properties", () => {
 
   it("never permits stale desired or observed revision writes", () => {
     const desired = atStatus("REQUESTED");
-    expect(() => desired.changeDesiredState("draining", 0, 6, new Date())).toThrowError(
+    expect(() => desired.changeDesiredState("draining", 0, 6, new Date())).toThrow(
       expect.objectContaining({ code: "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" }),
     );
 
@@ -78,7 +76,7 @@ describe("RuntimeDeployment state-machine properties", () => {
         { expectedStatus: "REQUESTED", expectedRevision: 6 },
         new Date(),
       ),
-    ).toThrowError(expect.objectContaining({ code: "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" }));
+    ).toThrow(expect.objectContaining({ code: "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" }));
   });
 });
 

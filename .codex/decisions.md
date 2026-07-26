@@ -343,3 +343,61 @@ real-resource qualification remains pending.
 - **Why this cross-range fix is required:** Without normalization, authoritative
   Runtime `tools/list` output is rejected by the existing Catalog importer, so
   Registry-based SDAR Interop cannot proceed.
+
+## G2-P5-B09 — Close the PMS Web Audit integration contract
+
+- **Observed gap:** The delivered read-only Audit page called
+  `/api/v1/audit-events`, but PMS API had no matching route.
+- **Decision:** Add a reader-protected, filterable, paginated Audit query route
+  backed by the existing PMS `AuditRepository`. Its public projection omits
+  metadata entirely and exposes only trace identity and timestamp fields.
+- **Why this cross-range fix is required:** Shipping a UI that deterministically
+  returns 404 would fail the V0.1 system acceptance claim. No new database table
+  or write authority is introduced.
+
+### Final platform gate composition
+
+- **Decision:** Add the task-mandated `verify:platform` command and replace the
+  fail-closed `tests/platform-e2e` placeholder with the five delivered system
+  suites: UGV, NPC Tank, Home Assistant, Catalog/Registry, and controlled SDAR
+  Interop.
+- **Reason:** The terminal task requires one reproducible V0.1 gate. The command
+  preserves the existing focused gates and adds formatting, lint, typecheck,
+  build, frozen protocol, SBOM, migration/config compatibility, PMS components,
+  real PM2, security, fault injection, and system E2E checks. It performs no
+  empty or unconditional-success validation.
+
+### Terminal formatting repair
+
+- **Decision:** Apply Prettier-only changes to three previously delivered
+  Markdown files and the migration-isolation evidence JSON.
+- **Reason:** `verify:platform` correctly failed closed at `format:check`.
+  The changes alter neither architecture nor evidence values and are the
+  smallest repair needed to execute the remaining terminal gates.
+
+### Terminal lint repair
+
+- **Decision:** Correct strict-lint findings in previously delivered Goal 2
+  domain, persistence, RuntimeDeployment, and contract-test files.
+- **Reason:** These files passed their focused tests but failed the terminal
+  all-repository lint gate. Repairs are limited to type narrowing, tuple
+  indexing, equivalent Vitest matchers, and removal of a comparison made
+  impossible by a literal type; no runtime authority or protocol behavior is
+  changed.
+
+### V0.1 SBOM refresh
+
+- **Decision:** Regenerate `reports/sbom/runtime-v1.cdx.json` with the existing
+  repository generator.
+- **Reason:** The terminal SBOM check found the artifact stale after Goal 2
+  added production packages and applications. The refreshed CycloneDX document
+  contains 273 production components and passes `pnpm sbom:check`.
+
+### Terminal acceptance record
+
+- **Decision:** Mark the Goal 2 acceptance checklist complete only after the
+  full `pnpm verify:platform` command returned exit code 0, and include the
+  checklist in the terminal delivery commit.
+- **Reason:** The checklist is the Goal-level acceptance authority and must
+  reflect the verified terminal state even though it sits outside the task
+  card's ordinary artifact paths.

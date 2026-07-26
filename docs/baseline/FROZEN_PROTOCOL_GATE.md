@@ -10,13 +10,13 @@
 The delivered repository already exposes the required gates; no package script,
 protocol asset, test, or assertion was changed.
 
-| Script | Coverage |
-|---|---|
-| `protocol:check:frozen` | Verifies the exact frozen profile bytes and SHA-256 sidecar |
-| `protocol:check` | Verifies the frozen profile, pinned upstream MCP Schema, 11 generated schemas, 74-case catalog, and 38-file protocol lock |
-| `test:protocol:frozen` | Runs the database-independent protocol-conformance tests |
-| `test:frozen-74` | Runs the complete catalog against protocol tests and PostgreSQL lifecycle integration |
-| `verify:frozen-protocol` | Composes `protocol:check` and protocol conformance |
+| Script                   | Coverage                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `protocol:check:frozen`  | Verifies the exact frozen profile bytes and SHA-256 sidecar                                                               |
+| `protocol:check`         | Verifies the frozen profile, pinned upstream MCP Schema, 11 generated schemas, 74-case catalog, and 38-file protocol lock |
+| `test:protocol:frozen`   | Runs the database-independent protocol-conformance tests                                                                  |
+| `test:frozen-74`         | Runs the complete catalog against protocol tests and PostgreSQL lifecycle integration                                     |
+| `verify:frozen-protocol` | Composes `protocol:check` and protocol conformance                                                                        |
 
 ## Protocol lock result
 

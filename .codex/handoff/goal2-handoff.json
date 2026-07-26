@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-02",
+  "status": "PASSED",
+  "product": "SDAR MCP Provider Platform",
+  "version": "0.1.0",
+  "branch": "codex/goal-02-runtime-governance",
+  "sourceCommit": "1a710c38ba2ae3c549fac165c4ee9cc8d9d79fc7",
+  "releaseCommit": "commit-containing-this-handoff",
+  "generatedAt": "2026-07-26T19:42:18Z",
+  "taskSummary": {
+    "total": 50,
+    "passed": 50
+  },
+  "gates": {
+    "verifyPlatform": "PASSED",
+    "frozenProtocol": "PASSED",
+    "migrationIsolation": "PASSED",
+    "realPm2": "PASSED",
+    "platformSecurity": "PASSED",
+    "faultInjection": "PASSED",
+    "controlledSdarInterop": "PASSED"
+  },
+  "authorityBoundaries": [
+    "PMS owns control-plane state and does not access Runtime Task Authority business tables.",
+    "Runtime remains Task Authority and can cold-start without PMS.",
+    "Provider Adapters own device side effects and default to vendor_managed.",
+    "Operation Catalog authority is Runtime server/discover plus tools/list.",
+    "Secrets use SecretRef or *_FILE transport only.",
+    "PM2 online does not imply Runtime ACTIVE."
+  ],
+  "artifacts": [
+    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
+    "reports/platform-v0.1/RELEASE_MANIFEST.json",
+    "reports/platform-v0.1/TEST_EVIDENCE.json",
+    "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
+    "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
+    "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
+    "docs/operations/PLATFORM_V0_1_UPGRADE.md",
+    "reports/sbom/runtime-v1.cdx.json"
+  ],
+  "externalGaps": [
+    "External SDAR was unavailable; controlled interoperability passed without an Interop Certified claim.",
+    "Real UGV, NPC Tank, ISR MQTT, Home Assistant, and physical climate resources remain unqualified."
+  ],
+  "secretsRedacted": true
+}

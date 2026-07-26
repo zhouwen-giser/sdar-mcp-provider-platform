@@ -153,7 +153,7 @@ describe("PostgreSQL PMS persistence", () => {
       "21111111-1111-4111-8111-111111111111",
       "22222222-2222-4222-8222-222222222222",
       "23333333-3333-4333-8333-333333333333",
-    ];
+    ] as const;
     for (const [index, auditId] of auditIds.entries()) {
       await pool.query(
         `INSERT INTO audit(
@@ -162,7 +162,7 @@ describe("PostgreSQL PMS persistence", () => {
         [
           auditId,
           index === 0 ? "database_profile.created" : "database_profile.provision_updated",
-          `database-profile-${index}`,
+          `database-profile-${String(index)}`,
         ],
       );
     }
@@ -175,7 +175,7 @@ describe("PostgreSQL PMS persistence", () => {
       adminSecretRef: secretRef("vault/postgres/provisioner"),
       runtimeSecretRef: secretRef("vault/runtime/ugv-provider-1"),
     });
-    await repository.insert(profile, auditIds[0] as string);
+    await repository.insert(profile, auditIds[0]);
 
     expect(await repository.get(provider, environment)).toMatchObject({
       profile: {
@@ -198,7 +198,7 @@ describe("PostgreSQL PMS persistence", () => {
       providerId: provider,
       environment,
       status: "provisioning",
-      auditEventId: auditIds[1] as string,
+      auditEventId: auditIds[1],
       expectedRevision: 0,
     });
     const ready = await repository.updateProvisionResult({
@@ -207,7 +207,7 @@ describe("PostgreSQL PMS persistence", () => {
       environment,
       status: "ready",
       provisionedAt: new Date("2026-07-26T00:00:00.000Z"),
-      auditEventId: auditIds[2] as string,
+      auditEventId: auditIds[2],
       expectedRevision: provisioning.revision,
     });
     expect(ready).toMatchObject({
@@ -222,7 +222,7 @@ describe("PostgreSQL PMS persistence", () => {
         environment,
         status: "failed",
         lastErrorCode: "DATABASE_UNAVAILABLE",
-        auditEventId: auditIds[2] as string,
+        auditEventId: auditIds[2],
         expectedRevision: 0,
       }),
     ).rejects.toMatchObject({ code: "OPTIMISTIC_CONCURRENCY_CONFLICT" });
