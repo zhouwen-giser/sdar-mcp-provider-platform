@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "component": "adapter-python",
+  "claim": "Business Events Adapter Component Conformant",
+  "capabilities": {
+    "durableAtLeastOnce": "passed",
+    "bestEffortLive": "passed"
+  },
+  "evidence": {
+    "name": "source-conformance",
+    "testName": "pnpm exec vitest run tests/business-events/adapter-contract tests/business-events/source tests/business-events/fencing tests/business-events/poison",
+    "status": "pass",
+    "durationMs": 5192,
+    "databaseMode": "local-postgresql",
+    "replicaCount": 2,
+    "sourceDeliveryMode": "durable_and_best_effort",
+    "implementationCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+    "reportCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+    "ciRun": "local",
+    "exitCode": 0
+  }
+}

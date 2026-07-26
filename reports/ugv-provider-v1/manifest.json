@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "providerId": "isr.vehicle.ugv.ugv1",
+  "resourceId": "vehicle:ugv1",
+  "operationCount": 9,
+  "operations": [
+    "vehicle_get_state",
+    "vehicle_get_payload_status",
+    "vehicle_get_targets",
+    "vehicle_laser_range",
+    "vehicle_navigate",
+    "vehicle_area_recon",
+    "vehicle_track_target",
+    "vehicle_fire_weapon",
+    "vehicle_emergency_stop"
+  ],
+  "businessEventSources": ["vehicle.execution", "vehicle.health", "vehicle.target"],
+  "evidence": [
+    "apps/ugv-provider-adapter/src/manifest.ts",
+    "pnpm test:ugv-provider:contract: 4 passed",
+    "gRPC E2E DescribeProvider returned 9 operations"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-tasks-provider-runtime",
+  "baseBranch": "main",
+  "baseSha": "8db97c7030f09b2a17c1821b80747f67ff885639",
+  "baseTree": "2d2097f7fa0eba88511f62493dc87ebfc3cf1916",
+  "minimumRequiredAncestor": "8db97c7030f09b2a17c1821b80747f67ff885639",
+  "runtimeVersion": "2.0.0-rc.1",
+  "protocolVersion": "2026-07-28",
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+  "protectedInteropChanges": [
+    "official tools/list result",
+    "base-only CreateTaskResult",
+    "explicit Availability reservationMode",
+    "additive reservation Adapter Proto",
+    "PR16 protocol schema lock"
+  ]
+}

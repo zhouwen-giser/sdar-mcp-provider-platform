@@ -1,0 +1,15 @@
+{
+  "phase": "N9",
+  "name": "Final ZIP Delivery",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:08:48Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/final-delivery-report.md",
+    "reports/npc-tank-provider-v1/final-delivery-summary.json",
+    "WORK_DELIVERY_MANIFEST.json",
+    "SHA256SUMS.txt",
+    "first-pass packaging: single root, exclusions, file count, project tree hash, extraction and ZIP SHA-256 verified"
+  ],
+  "finalZipSha256Location": "authoritative external .zip.sha256 sidecar",
+  "gitOperationsPerformed": false
+}

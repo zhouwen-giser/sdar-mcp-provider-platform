@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "sourceArchive": {
+    "name": "docs.zip",
+    "sha256": "4f33efaeca7440f7ea4ff6570aa6751972fac0dae66ce97648a0c9f9e03f3106"
+  },
+  "interfaceDocument": {
+    "path": "docs/requirements/ISR-Simulation_UGV_NPC_Tank_Interface.md",
+    "expectedSha256": "a67b7909ec7af7b3757e77cbaf5bae1c600fe348daa7faf239d8715d89fa375c",
+    "actualSha256": "a67b7909ec7af7b3757e77cbaf5bae1c600fe348daa7faf239d8715d89fa375c",
+    "normalization": "removed_one_terminal_lf_only",
+    "semanticContentChanged": false,
+    "normalizationEvidence": "docs/requirements/UGV_REQUIREMENTS_COPY_NORMALIZATION.json"
+  },
+  "taskPackageSha256": "2a17349cfebc6764175a59eca41b1811460d74c102201c86bf2b65ca1728eb3c",
+  "protocolProfileSha256": "b1700a78e18fc2d510a461abcc454b4aa81dbe7bbdc8b891d9e09726e11187f6"
+}

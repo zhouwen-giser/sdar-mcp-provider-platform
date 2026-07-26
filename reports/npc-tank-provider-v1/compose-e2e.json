@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PARTIAL_ENVIRONMENT_BLOCKED",
+  "composeProfile": "npc-tank-provider",
+  "services": [
+    "postgres-npc-runtime",
+    "postgres-npc-adapter",
+    "mqtt-npc-test",
+    "mock-npc-device-mcp",
+    "npc-tank-adapter",
+    "npc-tank-runtime"
+  ],
+  "simultaneousWithUgvProfile": true,
+  "ports": {
+    "adapter": 7013,
+    "runtime": 19103,
+    "deviceMcp": 19003
+  },
+  "independentDatabases": ["npc_runtime", "npc_adapter"],
+  "composeConfigCheck": {
+    "status": "NOT_RUN_ENVIRONMENT_UNAVAILABLE",
+    "reason": "docker command not installed"
+  },
+  "composeUp": {
+    "status": "NOT_RUN_ENVIRONMENT_UNAVAILABLE",
+    "reason": "docker command not installed"
+  },
+  "inProcessGrpcE2e": {
+    "status": "PASS",
+    "tests": 1
+  },
+  "mockDeviceHttpMcpSmoke": {
+    "status": "PASS",
+    "tools": 23,
+    "navigationTool": "npc_tank_path_follow_mission",
+    "circularScanSupported": true
+  },
+  "scenarioCoverage": {
+    "navigationPrimary": "PASS",
+    "navigationFallback": "PASS",
+    "areaRecon": "PASS",
+    "circularScanConditional": "PASS",
+    "fireBoundary": "PASS",
+    "stateAuthority": "PASS",
+    "restart": "PASS",
+    "ugvFullRegression": "PASS"
+  }
+}

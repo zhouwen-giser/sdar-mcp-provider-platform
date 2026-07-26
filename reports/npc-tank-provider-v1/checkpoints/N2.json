@@ -1,0 +1,11 @@
+{
+  "phase": "N2",
+  "name": "NPC MQTT Profile",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/mqtt-contract.json",
+    "reports/npc-tank-provider-v1/external-contract/npc-tank-mqtt-topics.json"
+  ],
+  "gitOperationsPerformed": false
+}

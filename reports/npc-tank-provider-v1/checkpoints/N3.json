@@ -1,0 +1,12 @@
+{
+  "phase": "N3",
+  "name": "NPC Device MCP Mapping",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/device-mcp-contract.json",
+    "reports/npc-tank-provider-v1/navigation-tool-selection.json",
+    "reports/npc-tank-provider-v1/eo-scan-capability.json"
+  ],
+  "gitOperationsPerformed": false
+}

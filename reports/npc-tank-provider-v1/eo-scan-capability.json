@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "advertised": true,
+  "requiredTools": ["npc_tank_eo_scan_start", "npc_tank_eo_scan_stop", "npc_tank_eo_set_angle"],
+  "rule": "Advertise circular scan only when all three tool contracts are valid objects.",
+  "negativeScenarioCovered": true
+}

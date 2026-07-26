@@ -1,0 +1,13 @@
+{
+  "schema": "sdar-business-events-relation-v1.schema.json",
+  "definition": "response",
+  "instance": {
+    "resultType": "complete",
+    "streamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+    "eventId": "nZ_hzhW-zrueWt69x9wP5gq-T_rLs_WgSgyTE7jER_o",
+    "projectionToken": "gBPxViIkwV7OC0RjF7VKaw",
+    "items": ["task-001"],
+    "total": 620,
+    "nextAfterTaskId": "task-001"
+  }
+}

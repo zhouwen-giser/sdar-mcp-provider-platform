@@ -1,0 +1,20 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "taskEvent",
+  "instance": {
+    "jsonrpc": "2.0",
+    "method": "notifications/io.sdar/businessEvents",
+    "params": {
+      "streamId": "NOT-A-UUID",
+      "eventId": "short",
+      "sequence": "9223372036854775808",
+      "sourceId": "-bad",
+      "eventType": "bad event",
+      "occurredAt": "invalid",
+      "scope": "task",
+      "description": "",
+      "taskId": "",
+      "_meta": {}
+    }
+  }
+}

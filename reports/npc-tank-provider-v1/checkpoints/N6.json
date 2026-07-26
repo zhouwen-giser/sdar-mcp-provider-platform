@@ -1,0 +1,11 @@
+{
+  "phase": "N6",
+  "name": "Business Events / Evidence / Telemetry",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/business-events.json",
+    "reports/npc-tank-provider-v1/telemetry.json"
+  ],
+  "gitOperationsPerformed": false
+}

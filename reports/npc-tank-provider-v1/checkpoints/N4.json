@@ -1,0 +1,11 @@
+{
+  "phase": "N4",
+  "name": "Manifest / State / Query",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/manifest.json",
+    "reports/npc-tank-provider-v1/component.json"
+  ],
+  "gitOperationsPerformed": false
+}

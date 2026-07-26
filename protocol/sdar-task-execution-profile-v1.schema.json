@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.dev/protocol/v1/sdar-task-execution-profile-v1.schema.json",
+  "title": "SDAR Task Execution Profile V1",
+  "type": "object",
+  "required": [
+    "profileVersion",
+    "taskBehavior",
+    "availability",
+    "supportsScheduling",
+    "supportsMaxElapsed",
+    "supportsObservations",
+    "supportsInputRequired",
+    "idempotency"
+  ],
+  "properties": {
+    "profileVersion": {
+      "const": "1.0"
+    },
+    "taskBehavior": {
+      "enum": [
+        "synchronous_only",
+        "server_directed",
+        "task_required"
+      ]
+    },
+    "availability": {
+      "enum": [
+        "not_supported",
+        "dynamic"
+      ]
+    },
+    "supportsScheduling": {
+      "type": "boolean"
+    },
+    "supportsMaxElapsed": {
+      "type": "boolean"
+    },
+    "supportsObservations": {
+      "type": "boolean"
+    },
+    "supportsInputRequired": {
+      "type": "boolean"
+    },
+    "idempotency": {
+      "enum": [
+        "none",
+        "client_request_key",
+        "server_managed",
+        "unknown"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

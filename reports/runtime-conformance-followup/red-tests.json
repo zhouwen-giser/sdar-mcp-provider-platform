@@ -1,0 +1,247 @@
+{
+  "generatedFrom": "vitest-json-reporter",
+  "testOnlyCommit": "f43b0d7ca49f0957ef7d3acce8458a65a44d9539",
+  "summary": {
+    "total": 29,
+    "passed": 4,
+    "failed": 25
+  },
+  "infrastructureFailures": [
+    "notification-index-plan report directory absent at test-only commit",
+    "follow-up baseline report absent at test-only commit"
+  ],
+  "tests": [
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation maps invalid client content to invalid_params using the locked schema",
+      "status": "failed",
+      "durationMs": 10.269363999999996,
+      "failureMessage": "Error: expected TypeError: this[#repository].listInputReq… to match object { kind: 'invalid_params', …(1) }\n    at _Assertion.__VITEST_REJECTS__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts:25:6\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation maps an invalid Provider schema to adapter_contract",
+      "status": "failed",
+      "durationMs": 1.3722700000000145,
+      "failureMessage": "Error: expected TypeError: this[#repository].listInputReq… to match object { kind: 'adapter_contract', …(1) }\n    at _Assertion.__VITEST_REJECTS__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts:36:6\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation does not invoke the validator for ANSWERED requests",
+      "status": "failed",
+      "durationMs": 3.876306999999997,
+      "failureMessage": "Error: promise rejected \"TypeError: this[#repository].listInputReq…\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts:50:8\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2027:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation does not invoke the validator for SUPERSEDED requests",
+      "status": "failed",
+      "durationMs": 3.32362599999999,
+      "failureMessage": "Error: promise rejected \"TypeError: this[#repository].listInputReq…\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts:50:8\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2027:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order validates against a schema committed while acceptance waits on the Task lock",
+      "status": "failed",
+      "durationMs": 104.31544600000007,
+      "failureMessage": "Error: promise resolved \"{ acceptedKeys: [ 'approval' ], …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/mrtr-lock-order.test.ts:38:28\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "real-postgresql-concurrency"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order ignores a response when SUPERSEDED commits before its lock is acquired",
+      "status": "passed",
+      "durationMs": 68.49724299999991,
+      "failureMessage": null,
+      "databaseMode": "real-postgresql-concurrency"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order allows only one UPDATE promotion and one Adapter side effect across replicas",
+      "status": "passed",
+      "durationMs": 179.56089100000008,
+      "failureMessage": null,
+      "databaseMode": "real-postgresql-concurrency"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_POLL_INTERVAL_MS",
+      "status": "failed",
+      "durationMs": 11.886357000000004,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:17:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_MAX_SUBSCRIPTIONS",
+      "status": "failed",
+      "durationMs": 2.697874999999982,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:18:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_MAX_SUBSCRIPTIONS_PER_AUTH",
+      "status": "failed",
+      "durationMs": 1.7411129999999844,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:18:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_MAX_TASK_BINDINGS",
+      "status": "failed",
+      "durationMs": 1.4330899999999929,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:18:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_MAX_QUEUE_MESSAGES",
+      "status": "failed",
+      "durationMs": 2.8274249999999768,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:18:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_MAX_QUEUE_BYTES",
+      "status": "failed",
+      "durationMs": 2.330997999999994,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:17:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+      "testTitle": "notification configuration frozen bounds accepts exact limits for TASK_NOTIFICATION_BATCH_SIZE",
+      "status": "failed",
+      "durationMs": 2.665559000000002,
+      "failureMessage": "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1552:16)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-config-bounds.test.ts:18:70\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-index-plan.test.ts",
+      "testTitle": "notification UUID batch plans uses indexes for 256 UUIDs without disabling sequential scans",
+      "status": "failed",
+      "durationMs": 472.317174,
+      "failureMessage": "Error: ENOENT: no such file or directory, open 'reports/runtime-conformance-followup/uuid-index-plan.json'\n    at open (node:internal/fs/promises:639:25)\n    at writeFile (node:internal/fs/promises:1222:14)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-index-plan.test.ts:66:5\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "real-postgresql-integration"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies sent, closed, and replica-limit outcomes without identities",
+      "status": "failed",
+      "durationMs": 13.97510699999998,
+      "failureMessage": "AssertionError: expected \"vi.fn()\" to be called with arguments: [ …(3) ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"sdar_task_notification_events_total\",\n-   {\n-     \"outcome\": \"sent\",\n-   },\n+   \"sdar_task_notification_poll_batches_total\",\n    1,\n  ]\n\n  2nd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_events_total\",\n-   {\n-     \"outcome\": \"sent\",\n-   },\n+   \"sdar_task_notification_poll_tasks_total\",\n    1,\n  ]\n\n  3rd vi.fn() call:\n\n  [\n    \"sdar_task_notification_events_total\",\n-   {\n-     \"outcome\": \"sent\",\n-   },\n    1,\n  ]\n\n  4th vi.fn() call:\n\n  [\n-   \"sdar_task_notification_events_total\",\n-   {\n-     \"outcome\": \"sent\",\n-   },\n+   \"sdar_task_notification_rejections_total\",\n    1,\n  ]\n\n  5th vi.fn() call:\n\n  [\n-   \"sdar_task_notification_events_total\",\n-   {\n-     \"outcome\": \"sent\",\n-   },\n-   1,\n+   \"sdar_task_notification_stream_duration_seconds\",\n+   0.003,\n  ]\n\n\nNumber of calls: 5\n\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:28:23\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics keeps subscription behavior fail-open when metrics throw",
+      "status": "failed",
+      "durationMs": 2.487844999999993,
+      "failureMessage": "Error: promise rejected \"Error: collector unavailable\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1570:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1659:22)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:65:6\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies authorization_limit capacity rejection",
+      "status": "failed",
+      "durationMs": 2.089190999999971,
+      "failureMessage": "AssertionError: expected \"vi.fn()\" to be called with arguments: [ …(3) ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"authorization_limit\",\n-   },\n+   \"sdar_task_notification_poll_batches_total\",\n    1,\n  ]\n\n  2nd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"authorization_limit\",\n-   },\n+   \"sdar_task_notification_poll_tasks_total\",\n    1,\n  ]\n\n  3rd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"authorization_limit\",\n-   },\n+   \"sdar_task_notification_events_total\",\n    1,\n  ]\n\n  4th vi.fn() call:\n\n  [\n    \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"authorization_limit\",\n-   },\n    1,\n  ]\n\n\nNumber of calls: 4\n\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:84:23\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies binding_limit capacity rejection",
+      "status": "failed",
+      "durationMs": 1.4204349999999977,
+      "failureMessage": "AssertionError: expected \"vi.fn()\" to be called with arguments: [ …(3) ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"binding_limit\",\n-   },\n+   \"sdar_task_notification_poll_batches_total\",\n    1,\n  ]\n\n  2nd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"binding_limit\",\n-   },\n+   \"sdar_task_notification_poll_tasks_total\",\n    1,\n  ]\n\n  3rd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"binding_limit\",\n-   },\n+   \"sdar_task_notification_events_total\",\n    1,\n  ]\n\n  4th vi.fn() call:\n\n  [\n    \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"binding_limit\",\n-   },\n    1,\n  ]\n\n\nNumber of calls: 4\n\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:84:23\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies queue_message_limit overflow",
+      "status": "failed",
+      "durationMs": 1.6880210000000488,
+      "failureMessage": "AssertionError: expected \"vi.fn()\" to be called with arguments: [ …(3) ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_message_limit\",\n-   },\n+   \"sdar_task_notification_poll_batches_total\",\n    1,\n  ]\n\n  2nd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_message_limit\",\n-   },\n-   1,\n+   \"sdar_task_notification_poll_tasks_total\",\n+   2,\n  ]\n\n  3rd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_message_limit\",\n-   },\n+   \"sdar_task_notification_events_total\",\n    1,\n  ]\n\n  4th vi.fn() call:\n\n  [\n    \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_message_limit\",\n-   },\n    1,\n  ]\n\n  5th vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_message_limit\",\n-   },\n-   1,\n+   \"sdar_task_notification_stream_duration_seconds\",\n+   0,\n  ]\n\n\nNumber of calls: 5\n\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:103:23\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies queue_byte_limit overflow",
+      "status": "failed",
+      "durationMs": 1.5511089999999967,
+      "failureMessage": "AssertionError: expected \"vi.fn()\" to be called with arguments: [ …(3) ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_byte_limit\",\n-   },\n+   \"sdar_task_notification_poll_batches_total\",\n    1,\n  ]\n\n  2nd vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_byte_limit\",\n-   },\n+   \"sdar_task_notification_poll_tasks_total\",\n    1,\n  ]\n\n  3rd vi.fn() call:\n\n  [\n    \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_byte_limit\",\n-   },\n    1,\n  ]\n\n  4th vi.fn() call:\n\n  [\n-   \"sdar_task_notification_rejections_total\",\n-   {\n-     \"reason\": \"queue_byte_limit\",\n-   },\n-   1,\n+   \"sdar_task_notification_stream_duration_seconds\",\n+   0,\n  ]\n\n\nNumber of calls: 4\n\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:103:23\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies same-revision suppression as deduplicated",
+      "status": "failed",
+      "durationMs": 515.3398,
+      "failureMessage": "Error: EXPECTED_NOTIFICATION_METRIC:deduplicated\n    at waitForMetric (/tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:198:9)\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at listOnTimeout (node:internal/timers:547:9)\n    at processTimers (node:internal/timers:521:7)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/notification-metrics.test.ts:123:5\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/permanent-update-rejection.test.ts",
+      "testTitle": "permanent UPDATE rejection contract atomically fails Task, Command and MRTR rows and prevents replay",
+      "status": "failed",
+      "durationMs": 128.04013099999997,
+      "failureMessage": "TypeError: repository.rejectInputResponseAndFailTask is not a function\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/permanent-update-rejection.test.ts:25:24\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "real-postgresql-integration"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/pr16-interop-regression.test.ts",
+      "testTitle": "PR16 strict interop projections keeps CreateTaskResult base-only",
+      "status": "passed",
+      "durationMs": 2.519061000000022,
+      "failureMessage": null,
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/pr16-interop-regression.test.ts",
+      "testTitle": "PR16 strict interop projections requires reservationRef only for guaranteed availability",
+      "status": "passed",
+      "durationMs": 1.1436669999999935,
+      "failureMessage": null,
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/report-integrity.test.ts",
+      "testTitle": "follow-up report integrity records the execution baseline and honest database classification",
+      "status": "failed",
+      "durationMs": 4.4164209999999855,
+      "failureMessage": "Error: ENOENT: no such file or directory, open 'reports/runtime-conformance-followup/baseline.json'\n    at open (node:internal/fs/promises:639:25)\n    at readFile (node:internal/fs/promises:1252:14)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/report-integrity.test.ts:7:7\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "unit-mock"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against acknowledge",
+      "status": "failed",
+      "durationMs": 215.9292999999999,
+      "failureMessage": "AssertionError: expected { command_state: 'EXHAUSTED', …(3) } to match object { command_state: 'EXHAUSTED', …(3) }\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1283:10)\n    at Proxy.<anonymous> (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+expect@4.1.10/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/update-cancel-lock-order.test.ts:57:9\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "real-postgresql-concurrency"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against reject",
+      "status": "failed",
+      "durationMs": 105.38486199999988,
+      "failureMessage": "TypeError: repository.rejectInputResponseAndFailTask is not a function\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/update-cancel-lock-order.test.ts:30:26\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
+      "databaseMode": "real-postgresql-concurrency"
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against delivery",
+      "status": "failed",
+      "durationMs": 15001.493353,
+      "failureMessage": "Error: STACK_TRACE_ERROR\n    at beforeEach (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:719:26)\n    at /tmp/sdar-followup-red-vC7A0a/tests/runtime-conformance-followup/update-cancel-lock-order.test.ts:10:1\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at VitestModuleEvaluator._runInlinedModule (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.1_@types+node@22.20.1_vite@8.1.4_@types+node@22.20_a52fc10cc7694ed42097e983cd9f3717/node_modules/vitest/dist/module-evaluator.js:206:4)\n    at VitestModuleRunner.directRequest (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/vite@8.1.4_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1259:59)\n    at VitestModuleRunner.cachedRequest (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/vite@8.1.4_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1166:73)\n    at VitestModuleRunner.import (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/vite@8.1.4_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1120:10)\n    at file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2457:5\n    at collectTests (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2433:3)\n    at startTests (file:///home/zhouwen/web-download/sdar-mcp-tasks-provider-runtime/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:3278:17)",
+      "databaseMode": "real-postgresql-concurrency"
+    }
+  ]
+}

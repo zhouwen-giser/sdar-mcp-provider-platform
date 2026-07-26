@@ -1,0 +1,31 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": { "name": "sdar-runtime", "namespace": "sdar-system" },
+  "spec": {
+    "podSelector": { "matchLabels": { "app.kubernetes.io/name": "sdar-runtime" } },
+    "policyTypes": ["Ingress", "Egress"],
+    "ingress": [
+      {
+        "from": [{ "namespaceSelector": {} }],
+        "ports": [{ "protocol": "TCP", "port": 8080 }]
+      }
+    ],
+    "egress": [
+      {
+        "to": [{ "namespaceSelector": {} }],
+        "ports": [
+          { "protocol": "TCP", "port": 5432 },
+          { "protocol": "TCP", "port": 7001 }
+        ]
+      },
+      {
+        "to": [{ "namespaceSelector": {} }],
+        "ports": [
+          { "protocol": "UDP", "port": 53 },
+          { "protocol": "TCP", "port": 53 }
+        ]
+      }
+    ]
+  }
+}

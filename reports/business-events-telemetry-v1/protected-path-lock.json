@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "baseSha": "8a81b1b02971fb124ed96372c440c449f9087c99",
+  "files": {
+    "protocol/sdar-business-events-v1.schema.json": "dceb9ee64e414890813b784880a2d90f710c93faa0c8aaa8b4f2b7d6ba9b7e6f",
+    "protocol/sdar-business-events-continuity-v1.schema.json": "f92d0ad364a2f4ec068f99a0501a74a2d38748244ba6a04a85893527263807f0",
+    "protocol/sdar-business-events-relation-v1.schema.json": "7e3bbe9d9ac96d10b4ab399cf5c90621a070959c3bdfb092327400c96a216dc4",
+    "proto/io/sdar/mcp/tasks/adapter/v1/adapter.proto": "d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603",
+    "docs/requirements/SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md": "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
+    "packages/observability/src/event-envelope.ts": "df56c9972c916fb99f5e0f4d8e188698896e823aa4a1cc87c4a77f4c89fbf9b1",
+    "proto/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry.proto": "7c0623b7620d2ea50c9b317071d1d2bffceef5125debf74ed889133302008674"
+  }
+}

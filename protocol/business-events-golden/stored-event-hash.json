@@ -1,0 +1,10 @@
+{
+  "input": {
+    "sourceCanonicalHash": "sha256:6aeb2c339dd4fd6f931ac618e5cbeff181ef10275482561950e270afd6cab72e",
+    "eventId": "nZ_hzhW-zrueWt69x9wP5gq-T_rLs_WgSgyTE7jER_o",
+    "taskId": "task-42",
+    "candidateRelatedTaskIds": [],
+    "candidateRelatedTaskCount": 0
+  },
+  "expectedHash": "sha256:a148ce2ecbe1865fe8bc7a6236d4025c97e34008c0f508a048eb88e3ff193bc3"
+}

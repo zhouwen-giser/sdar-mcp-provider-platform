@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm verify:business-events && pnpm verify:v2",
+  "startedAt": "2026-07-22T13:28:45.000Z",
+  "endedAt": "2026-07-22T13:35:25.000Z",
+  "durationMs": 400000,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": {
+    "frozen": "74/74",
+    "runtimeClosure": "29/29",
+    "runtimeFollowup": "29/29",
+    "pr16Regression": "19/19",
+    "verifyBusinessEvents": "PASS",
+    "verifyV2": "PASS"
+  },
+  "evidenceFiles": [
+    "reports/protocol-v1-migration/conformance-74.json",
+    "tests/runtime-conformance-closure",
+    "tests/runtime-conformance-followup",
+    "tests/runtime-conformance-followup/pr16-interop-regression.test.ts",
+    "tests/business-events/telemetry",
+    "tests/security/business-event-telemetry-security.test.ts",
+    "reports/business-events-telemetry-v1"
+  ]
+}

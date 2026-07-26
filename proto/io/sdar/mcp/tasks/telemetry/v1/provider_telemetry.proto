@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package io.sdar.mcp.tasks.telemetry.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+// Runtime-hosted ingress called by a Resource Provider. This is intentionally
+// separate from ResourceProviderAdapter, whose call direction is Runtime to Adapter.
+service ProviderTelemetryIngress {
+  rpc EmitProviderEvents(EmitProviderEventsRequest) returns (EmitProviderEventsResponse);
+}
+
+message EmitProviderEventsRequest {
+  string provider_id = 1;
+  repeated ProviderTelemetryEvent events = 2;
+}
+
+message EmitProviderEventsResponse {
+  repeated ProviderTelemetryEventResult results = 1;
+}
+
+message ProviderTelemetryEvent {
+  string provider_event_id = 1;
+  uint64 provider_event_sequence = 2;
+  ProviderTelemetryEventType event_type = 3;
+  string resource_id = 4;
+  string resource_type = 5;
+  string task_id = 6;
+  string external_execution_id = 7;
+  string operation_name = 8;
+  google.protobuf.Timestamp occurred_at = 9;
+  google.protobuf.Struct attributes = 10;
+  google.protobuf.Struct payload = 11;
+  string traceparent = 12;
+  string tracestate = 13;
+}
+
+enum ProviderTelemetryEventType {
+  PROVIDER_TELEMETRY_EVENT_TYPE_UNSPECIFIED = 0;
+  RESOURCE_STATE = 1;
+  RESOURCE_METRIC = 2;
+  RESOURCE_HEALTH = 3;
+  EXECUTION_PROGRESS = 4;
+}
+
+message ProviderTelemetryEventResult {
+  string provider_event_id = 1;
+  bool accepted = 2;
+  bool duplicate = 3;
+  string record_id = 4;
+  string reason_code = 5;
+  string message = 6;
+}

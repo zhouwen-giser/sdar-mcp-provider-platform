@@ -1,0 +1,23 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "ack",
+  "instance": {
+    "jsonrpc": "2.0",
+    "method": "notifications/io.sdar/businessEvents/acknowledged",
+    "params": {
+      "profileVersion": "1.0",
+      "streamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+      "generationStatus": "replayable_closed",
+      "acceptedAfterSequence": "9",
+      "earliestAvailableSequence": "1",
+      "currentSequence": "10",
+      "sourceContinuity": {
+        "continuityClass": "all_durable",
+        "status": "continuous",
+        "continuousSinceSequence": "1",
+        "degradedSourceIds": ["adapter.vehicle"]
+      },
+      "_meta": { "io.modelcontextprotocol/subscriptionId": "sub-31" }
+    }
+  }
+}

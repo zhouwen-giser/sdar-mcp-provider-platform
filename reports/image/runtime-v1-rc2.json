@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-07-17T07:08:41+08:00",
+  "measurementEnvironment": "GitHub Actions ubuntu-24.04 Docker Engine",
+  "image": "sdar-runtime:rc2-audit-primary",
+  "base": "node:22-bookworm-slim",
+  "sizeBytes": 327026557,
+  "maximumBytes": 350000000,
+  "user": "node",
+  "layers": 11,
+  "frozenLockfile": true,
+  "productionDependenciesOnly": true,
+  "containsTestsDocsOrReferences": false,
+  "containsTypescriptOrVitest": false,
+  "containsProtoAndMigrations": true,
+  "reproducibleFilesystemAndConfig": true
+}

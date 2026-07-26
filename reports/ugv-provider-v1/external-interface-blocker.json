@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "status": "BLOCKED",
+  "capability": [
+    "real UGV Device MCP contract conformance",
+    "real ISR MQTT schema conformance",
+    "real interface smoke"
+  ],
+  "requiredInput": [
+    "ISR_SIMULATION_REPO",
+    "ISR_MQTT_URL",
+    "ISR_MQTT_USERNAME",
+    "ISR_MQTT_PASSWORD_FILE",
+    "UGV_DEVICE_MCP_URL"
+  ],
+  "commandsAttempted": [
+    "inspect environment for ISR_SIMULATION_REPO/ISR_MQTT_URL/UGV_DEVICE_MCP_URL",
+    "curl --max-time 2 http://127.0.0.1:19000/health",
+    "TCP probe 127.0.0.1:1883"
+  ],
+  "pathsSearched": ["environment variables", "http://127.0.0.1:19000", "mqtt://127.0.0.1:1883"],
+  "evidence": [
+    "required external environment variables absent",
+    "127.0.0.1:19000 connection refused outside mock smoke",
+    "127.0.0.1:1883 unavailable"
+  ],
+  "reasonCodes": ["UGV_DEVICE_MCP_UNAVAILABLE", "UGV_MQTT_UNAVAILABLE"],
+  "impact": "Real tools/list, real input schemas, real MQTT samples and real-interface smoke could not be verified.",
+  "allowedClaim": "Mock Level 1 component and protocol implementation complete; real ISR interface conformance not claimed."
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm test:business-events:telemetry:unit",
+  "startedAt": "2026-07-22T12:45:47.000Z",
+  "endedAt": "2026-07-22T12:45:50.000Z",
+  "durationMs": 2300,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": { "testFiles": 8, "tests": 15, "sourceRosterMaximum": 16, "frozenMetrics": 15 },
+  "evidenceFiles": [
+    "tests/unit/business-event-metric-policy.test.ts",
+    "tests/unit/business-event-multi-series-gauge.test.ts",
+    "packages/observability/src/business-event-metrics.ts"
+  ]
+}

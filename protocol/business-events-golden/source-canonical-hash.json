@@ -1,0 +1,19 @@
+{
+  "input": {
+    "providerId": "provider.demo",
+    "sourceId": "adapter.vehicle",
+    "sourceStreamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+    "sourceEventId": "evt-0001",
+    "sourceSequence": "9007199254740993",
+    "scope": "task",
+    "externalExecutionId": "exec-42",
+    "eventType": "vehicle.connectivity.lost",
+    "occurredAt": "2026-07-22T01:00:00.1234Z",
+    "description": "Vehicle connection was lost.",
+    "severityHint": "warning",
+    "reasonCode": "LINK_DOWN",
+    "rawPayload": { "z": 2, "a": "é" }
+  },
+  "expectedCanonicalJson": "{\"description\":\"Vehicle connection was lost.\",\"eventType\":\"vehicle.connectivity.lost\",\"externalExecutionId\":\"exec-42\",\"occurredAt\":\"2026-07-22T01:00:00.1234Z\",\"providerId\":\"provider.demo\",\"rawPayload\":{\"a\":\"é\",\"z\":2},\"reasonCode\":\"LINK_DOWN\",\"scope\":\"task\",\"severityHint\":\"warning\",\"sourceEventId\":\"evt-0001\",\"sourceId\":\"adapter.vehicle\",\"sourceSequence\":\"9007199254740993\",\"sourceStreamId\":\"018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001\"}",
+  "expectedHash": "sha256:6aeb2c339dd4fd6f931ac618e5cbeff181ef10275482561950e270afd6cab72e"
+}

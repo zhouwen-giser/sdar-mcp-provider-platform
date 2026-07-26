@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "comparedTo": "UGV Provider V1",
+  "differences": {
+    "providerId": "isr.vehicle.npc-tank.npc-tank1",
+    "resourceId": "vehicle:npc_tank1",
+    "mqttPrefix": "/npc_tank1/",
+    "deviceMcpPort": 19003,
+    "adapterPort": 7013,
+    "runtimePort": 19103,
+    "deviceToolCount": 23,
+    "navigationFallback": "npc_tank_send_waypoints",
+    "circularScan": "conditional three-tool capability",
+    "tablePrefix": "npc_tank_"
+  },
+  "sharedOperationCount": 9
+}

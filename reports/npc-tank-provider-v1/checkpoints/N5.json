@@ -1,0 +1,11 @@
+{
+  "phase": "N5",
+  "name": "Long-running Operations",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/component.json",
+    "reports/npc-tank-provider-v1/recovery.json"
+  ],
+  "gitOperationsPerformed": false
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "component": "stream-conformance",
+  "evidence": [
+    {
+      "name": "stream-conformance",
+      "testName": "pnpm exec vitest run tests/business-events/stream tests/business-events/replay tests/business-events/continuity",
+      "status": "pass",
+      "durationMs": 2662,
+      "databaseMode": "local-postgresql",
+      "replicaCount": 2,
+      "sourceDeliveryMode": "durable_and_best_effort",
+      "implementationCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+      "reportCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+      "ciRun": "local",
+      "exitCode": 0
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

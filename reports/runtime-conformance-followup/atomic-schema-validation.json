@@ -1,0 +1,51 @@
+{
+  "generatedFrom": "vitest-json-reporter",
+  "category": "MRTR Unit/Mock Tests",
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation maps invalid client content to invalid_params using the locked schema",
+      "status": "passed",
+      "durationMs": 44.470639000000006,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation maps an invalid Provider schema to adapter_contract",
+      "status": "passed",
+      "durationMs": 18.850078000000053,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation does not invoke the validator for ANSWERED requests",
+      "status": "passed",
+      "durationMs": 1.6533170000000155,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+      "testTitle": "MRTR atomic locked-schema validation does not invoke the validator for SUPERSEDED requests",
+      "status": "passed",
+      "durationMs": 1.0413149999999973,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "protocolVersion": "2026-07-28",
+  "sourceRepository": "modelcontextprotocol/modelcontextprotocol",
+  "sourceCommit": "26897cc322f356487da89113451bd16b520b9288",
+  "sourceSchemaPath": "schema/draft/schema.json",
+  "sourceSchemaGitBlob": "cc44564e33305dbc07e820cdd0a97648f3852019",
+  "sourceSchemaSha256": "9281c4890630e2d1e61792fa23b4084c4ea360cd58519610cd050545ab7b8708",
+  "sep2663Status": "Final",
+  "sep986Status": "Final",
+  "sdarProfileVersion": "1.0",
+  "evidenceBindingMode": "type_only",
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845"
+}

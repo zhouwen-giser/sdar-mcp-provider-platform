@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://io.sdar/protocol/sdar-business-events-relation-v1.schema.json",
+  "title": "SDAR Business Event Relation Query 1.0",
+  "$defs": {
+    "uuid": { "type": "string", "format": "uuid" },
+    "eventId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+    "params": {
+      "type": "object",
+      "required": ["streamId", "eventId", "limit", "_meta"],
+      "properties": {
+        "streamId": { "$ref": "#/$defs/uuid" },
+        "eventId": { "$ref": "#/$defs/eventId" },
+        "projectionToken": { "type": "string", "minLength": 22, "maxLength": 256, "pattern": "^[A-Za-z0-9_-]+$" },
+        "afterTaskId": { "type": "string", "minLength": 1 },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "_meta": { "type": "object" }
+      },
+      "dependentRequired": { "afterTaskId": ["projectionToken"], "projectionToken": ["afterTaskId"] },
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "type": ["string", "integer"] },
+        "method": { "const": "io.sdar/businessEvents/relatedTasks/list" },
+        "params": { "$ref": "#/$defs/params" }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["resultType", "streamId", "eventId", "projectionToken", "items", "total"],
+      "properties": {
+        "resultType": { "const": "complete" },
+        "streamId": { "$ref": "#/$defs/uuid" },
+        "eventId": { "$ref": "#/$defs/eventId" },
+        "projectionToken": { "type": "string", "minLength": 22 },
+        "items": { "type": "array", "maxItems": 256, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "total": { "type": "integer", "minimum": 0 },
+        "nextAfterTaskId": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [{ "$ref": "#/$defs/request" }, { "$ref": "#/$defs/response" }]
+}

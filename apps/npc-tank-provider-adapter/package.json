@@ -1,0 +1,6 @@
+{
+  "name": "@sdar/npc-tank-provider-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module"
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-07-22T02:38:00+08:00",
+  "implementationCommit": "7d2ee42f4aed0493c0adfd4ca439b3cfc0d32324",
+  "database": {
+    "engine": "PostgreSQL 16",
+    "mode": "real isolated container",
+    "database": "sdar_runtime_closure"
+  },
+  "frozenConformance": { "total": 74, "passed": 74, "failed": 0 },
+  "closure": { "files": 7, "tests": 29, "passed": 29, "failed": 0 },
+  "mrtr": { "files": 2, "tests": 10, "passed": 10, "failed": 0 },
+  "notificationCapacity": { "files": 4, "tests": 16, "passed": 16, "failed": 0 },
+  "twoReplicaHttpSse": { "files": 1, "tests": 6, "passed": 6, "failed": 0 },
+  "verifyV2": {
+    "status": "passed",
+    "unit": 78,
+    "contract": 9,
+    "integration": 199,
+    "recovery": 9,
+    "security": 29,
+    "e2e": 6,
+    "dependencyAudit": "no known vulnerabilities",
+    "capacityBaseline": "passed"
+  },
+  "claim": "Runtime Component Conformant"
+}

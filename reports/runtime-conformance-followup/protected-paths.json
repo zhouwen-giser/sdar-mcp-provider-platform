@@ -1,0 +1,14 @@
+{
+  "baseSha": "8db97c7030f09b2a17c1821b80747f67ff885639",
+  "checkedAtImplementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+  "status": "pass",
+  "changedFiles": [],
+  "protectedGroups": [
+    "frozen protocol and protocol lock",
+    "Proto and Adapter Protocol",
+    "TypeScript and Python reference Adapters",
+    "Home Assistant Climate Provider source, tests and reports",
+    "migrations 001 through 022",
+    "source lock and OSS intake"
+  ]
+}

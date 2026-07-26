@@ -1,0 +1,62 @@
+[
+  {
+    "relativePath": "docs/requirements/SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md",
+    "sizeBytes": 54102,
+    "sha256": "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/observability/src/event-envelope.ts",
+    "sizeBytes": 3184,
+    "sha256": "df56c9972c916fb99f5e0f4d8e188698896e823aa4a1cc87c4a77f4c89fbf9b1",
+    "category": "source"
+  },
+  {
+    "relativePath": "proto/io/sdar/mcp/tasks/adapter/v1/adapter.proto",
+    "sizeBytes": 11705,
+    "sha256": "d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "proto/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry.proto",
+    "sizeBytes": 1479,
+    "sha256": "7c0623b7620d2ea50c9b317071d1d2bffceef5125debf74ed889133302008674",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/frozen/SDAR_MCP_Tasks_Unified_Protocol_Profile_V1.0.md",
+    "sizeBytes": 58890,
+    "sha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/frozen/SDAR_MCP_Tasks_Unified_Protocol_Profile_V1.0.md.sha256",
+    "sizeBytes": 114,
+    "sha256": "03c71af30874db22e8ed8bff0bea2069dc4d9c2e03cc2e54ec71f3025f5822c1",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-continuity-v1.schema.json",
+    "sizeBytes": 1857,
+    "sha256": "f92d0ad364a2f4ec068f99a0501a74a2d38748244ba6a04a85893527263807f0",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-relation-v1.schema.json",
+    "sizeBytes": 2119,
+    "sha256": "7e3bbe9d9ac96d10b4ab399cf5c90621a070959c3bdfb092327400c96a216dc4",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-v1.schema.json",
+    "sizeBytes": 9635,
+    "sha256": "dceb9ee64e414890813b784880a2d90f710c93faa0c8aaa8b4f2b7d6ba9b7e6f",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/upstream/mcp-2026-07-28/schema.json",
+    "sizeBytes": 180695,
+    "sha256": "9281c4890630e2d1e61792fa23b4084c4ea360cd58519610cd050545ab7b8708",
+    "category": "protocol"
+  }
+]

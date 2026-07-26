@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PARTIAL_ENVIRONMENT_BLOCKED",
+  "composeProfile": "ugv-provider",
+  "services": [
+    "postgres-ugv-runtime",
+    "postgres-ugv-adapter",
+    "mqtt-ugv-test",
+    "mock-ugv-device-mcp",
+    "mock-ugv-mqtt-publisher",
+    "ugv-adapter",
+    "ugv-runtime"
+  ],
+  "composeConfigCheck": {
+    "status": "NOT_RUN_ENVIRONMENT_UNAVAILABLE",
+    "reason": "docker command not installed"
+  },
+  "composeUp": {
+    "status": "NOT_RUN_ENVIRONMENT_UNAVAILABLE",
+    "reason": "docker command not installed"
+  },
+  "inProcessGrpcE2e": { "status": "PASS", "tests": 1 },
+  "scenarioCoverage": {
+    "navigate": "PASS",
+    "pauseResume": "PASS",
+    "cancel": "PASS",
+    "areaRecon": "PASS",
+    "trackTarget": "PASS",
+    "fireBoundary": "PASS",
+    "emergencyStop": "PASS",
+    "restart": "PASS"
+  },
+  "mockDeviceHttpMcpSmoke": "PASS"
+}

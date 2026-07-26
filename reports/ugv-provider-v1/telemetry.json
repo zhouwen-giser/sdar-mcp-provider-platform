@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "protocol": "Provider Telemetry gRPC",
+  "eventClasses": ["EXECUTION_PROGRESS", "PROVIDER_DIAGNOSTIC", "DEPENDENCY_HEALTH"],
+  "privacy": {
+    "credentialsIncluded": false,
+    "rawTargetPayloadIncluded": false,
+    "fireVerdictIncluded": false,
+    "boundedLabels": true
+  },
+  "evidence": [
+    "pnpm test:business-events:telemetry:unit: 15 passed",
+    "pnpm test:business-events:telemetry:security: 2 passed",
+    "pnpm test:ugv-provider:security: 3 passed"
+  ]
+}

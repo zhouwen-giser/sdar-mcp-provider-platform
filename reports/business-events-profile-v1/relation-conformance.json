@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "component": "relation-conformance",
+  "evidence": [
+    {
+      "name": "relation-conformance",
+      "testName": "pnpm exec vitest run tests/business-events/relation",
+      "status": "pass",
+      "durationMs": 2718,
+      "databaseMode": "local-postgresql",
+      "replicaCount": 2,
+      "sourceDeliveryMode": "mixed",
+      "implementationCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+      "reportCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+      "ciRun": "local",
+      "exitCode": 0
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

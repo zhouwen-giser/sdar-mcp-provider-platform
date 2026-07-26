@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "status": "blocked",
+  "claimLevel": "Level 2 Component Conformance",
+  "interopCertified": false,
+  "reason": "Neither SDAR_INTEROP_COMMAND nor SDAR_INTEROP_REPO is available.",
+  "unexecutedMatrix": [
+    "strict discovery",
+    "header",
+    "empty stream",
+    "cursor resume",
+    "task event",
+    "resource event",
+    "relation pagination",
+    "mixed continuity",
+    "source gap",
+    "rotated drain",
+    "stream reset",
+    "notification independence",
+    "provider relation but SDAR impact=false"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "status": "MOCK_CONTRACT_PASS_REAL_INTERFACE_BLOCKED",
+  "transport": "MCP Streamable HTTP",
+  "startupSequence": ["initialize", "tools/list"],
+  "allowlistCount": 18,
+  "capture": "reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json",
+  "mockSmoke": {
+    "status": "PASS",
+    "toolCount": 18,
+    "laserResult": { "distance_m": 120.5, "valid": true },
+    "health": { "status": "ready" }
+  },
+  "realInterface": {
+    "status": "BLOCKED",
+    "reasonCode": "UGV_DEVICE_MCP_UNAVAILABLE"
+  }
+}

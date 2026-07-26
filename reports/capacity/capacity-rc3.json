@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0-rc.3",
+  "generatedAt": "2026-07-17T15:47:49.822Z",
+  "environment": {
+    "node": "v22.14.0",
+    "platform": "win32/x64",
+    "cpuLogicalCount": 16,
+    "memoryBytes": 34085838848,
+    "database": "TEST_DATABASE_URL target (credentials redacted)",
+    "topology": "two Runtime replicas, shared PostgreSQL, single TypeScript Adapter"
+  },
+  "workloads": {
+    "synchronousTool": {
+      "iterations": 100,
+      "durationMs": 1135.7287000000015,
+      "throughputPerSecond": 88.04919696050639,
+      "latencyMs": {
+        "p50": 11.212799999997515,
+        "p95": 14.004499999999098,
+        "p99": 16.230200000001787,
+        "max": 22.42630000000281
+      }
+    },
+    "concurrentTaskAdmission": {
+      "tasks": 1000,
+      "runtimeReplicas": 2,
+      "durationMs": 28576.2682,
+      "tasksPerSecond": 34.99407245904838
+    },
+    "slowAdapterDatabaseAvailability": {
+      "adapterResponseDelayMs": 15000,
+      "databaseQueryDurationMs": 0.9311999999999898,
+      "databaseQueryCompletedBeforeAdapterResponse": true,
+      "taskId": "5da523ef-010f-48b6-a91c-32d9d850eaef"
+    },
+    "durableCommandDispatcher": {
+      "commands": 500,
+      "runtimeReplicas": 2,
+      "duplicateAdapterSideEffects": 0,
+      "durationMs": 23198.690500000004,
+      "commandsPerSecond": 21.55294067137108,
+      "result": {
+        "claimed": 484,
+        "acknowledged": 484,
+        "retried": 0,
+        "rejected": 0,
+        "exhausted": 0,
+        "terminal": 0,
+        "durableAcknowledged": 500
+      }
+    },
+    "scheduledScan": {
+      "futureTasks": 32,
+      "durationMs": 6.919799999988754,
+      "result": {
+        "started": 0,
+        "missed": 0,
+        "deferred": 0,
+        "deadlineStops": 0,
+        "watchdogStops": 0,
+        "reconciled": 0
+      }
+    },
+    "watchdogScan": {
+      "overdueTasks": 16,
+      "durationMs": 508.9021999999968,
+      "result": {
+        "watchdogStops": 16,
+        "reconciled": 0,
+        "durableStopRequests": 16
+      }
+    },
+    "recoveryCandidateScans": {
+      "100": {
+        "requested": 100,
+        "returned": 100,
+        "durationMs": 3.4571999999898253,
+        "candidatesPerSecond": 28925.14173327962
+      },
+      "500": {
+        "requested": 500,
+        "returned": 500,
+        "durationMs": 9.189599999997881,
+        "candidatesPerSecond": 54409.332288686695
+      },
+      "1000": {
+        "requested": 1000,
+        "returned": 1000,
+        "durationMs": 17.527899999986403,
+        "candidatesPerSecond": 57051.90011357754
+      }
+    },
+    "observationOutboxGrowth": {
+      "observations": {
+        "before": {
+          "rows": 0,
+          "bytes": 32768
+        },
+        "after": {
+          "rows": 1581,
+          "bytes": 565248
+        },
+        "rows": 1581,
+        "bytes": 532480
+      },
+      "outbox": {
+        "before": {
+          "rows": 0,
+          "bytes": 32768
+        },
+        "after": {
+          "rows": 1581,
+          "bytes": 1777664
+        },
+        "rows": 1581,
+        "bytes": 1744896
+      }
+    },
+    "runtimeImage": {
+      "schemaVersion": 1,
+      "measuredAt": "2026-07-17T15:44:39.581Z",
+      "measurementEnvironment": "win32/x64 Docker Engine",
+      "image": "sdar-runtime:rc3-audit-primary",
+      "base": "node:22-bookworm-slim",
+      "sizeBytes": 97177354,
+      "maximumBytes": 350000000,
+      "user": "node",
+      "layers": 11,
+      "frozenLockfile": true,
+      "productionDependenciesOnly": true,
+      "containsTestsDocsOrReferences": false,
+      "containsTypescriptOrVitest": false,
+      "containsProtoAndMigrations": true,
+      "reproducibleFilesystemAndConfig": true
+    }
+  },
+  "interpretation": {
+    "productionSlo": false,
+    "recoveryScope": "Measures the real PostgreSQL candidate-selection/materialization path; Adapter reconciliation latency is resource-specific.",
+    "thresholds": "Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and image policy."
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "providerId": "isr.vehicle.npc-tank.npc-tank1",
+  "resourceId": "vehicle:npc_tank1",
+  "providerType": "isr.vehicle.npc_tank",
+  "executionMode": "simulation",
+  "runtimeEndpoint": "http://npc-tank-runtime:19103/mcp",
+  "adapterEndpoint": "npc-tank-adapter:7013",
+  "deviceMcpEndpoint": "http://mock-npc-device-mcp:19003/mcp",
+  "reuse": {
+    "sharedCore": "packages/vehicle-provider-core",
+    "sharedAdapter": "packages/provider-adapter-kit",
+    "sharedMqtt": "packages/vehicle-mqtt-ingress",
+    "sharedDeviceMcp": "packages/vehicle-device-mcp-client",
+    "npcProfile": "apps/npc-tank-provider-adapter"
+  },
+  "persistence": {
+    "engine": "PostgreSQL",
+    "migration": "migrations/025_npc_tank_provider.sql",
+    "tablePrefix": "npc_tank_",
+    "isolatedFromUgv": true
+  },
+  "truthBoundary": {
+    "authoritativeTaskState": [
+      "MissionState",
+      "status.chassis_task",
+      "public EO/weapon task tracks"
+    ],
+    "nonAuthoritativeFields": ["run_state", "mode"],
+    "stateConflictReasonCode": "NPC_TASK_STATE_CONFLICT",
+    "refereeDataAllowed": false,
+    "fireVerdictDataAllowed": false
+  }
+}

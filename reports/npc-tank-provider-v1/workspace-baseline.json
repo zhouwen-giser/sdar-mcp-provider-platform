@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS_WITH_INHERITED_DOCUMENT_METADATA_DRIFT",
+  "capturedAt": "2026-07-23T05:23:04Z",
+  "workspaceRoot": "/workspace/scratch/5e9da65efa11/npc_tank_work/sdar-mcp-tasks-provider-runtime-ugv-provider-v1",
+  "sourceType": "UGV_WORK_DELIVERY_ZIP",
+  "inputZip": "sdar-mcp-tasks-provider-runtime-ugv-provider-v1-work-delivery.zip",
+  "inputZipSha256": "353974a29ea5a33c4d243be03bde2fd1c2184a2b7dec0e70e586905d8b60efd6",
+  "fileCount": 736,
+  "baselineFileManifest": {
+    "path": "reports/npc-tank-provider-v1/workspace-baseline-files.sha256",
+    "sha256": "7a2e9711b08b8c9f9f3d3f75476d957406b6b342d3a3821b8848e2bfb371be05",
+    "entryCount": 736
+  },
+  "detachedWorkCopy": true,
+  "gitMetadataPresent": false,
+  "gitOperationsPerformed": false,
+  "ugvProviderFiles": [
+    "apps/ugv-provider-adapter",
+    "apps/mock-ugv-device-mcp",
+    "apps/mock-ugv-mqtt-publisher",
+    "migrations/024_ugv_provider.sql"
+  ],
+  "sharedPackageFiles": [
+    "packages/provider-adapter-kit",
+    "packages/vehicle-provider-core",
+    "packages/vehicle-mqtt-ingress",
+    "packages/vehicle-device-mcp-client"
+  ],
+  "protectedProtocolFiles": {
+    "manifest": "reports/ugv-provider-v1/work-locks/protected-file-hashes.json",
+    "count": 10
+  },
+  "ugvReportFiles": {
+    "root": "reports/ugv-provider-v1",
+    "count": 29
+  },
+  "requiredCapabilities": {
+    "ugvAdapterApp": true,
+    "ugvManifest": true,
+    "ugvMqttIngress": true,
+    "ugvDeviceMcpMapping": true,
+    "vehicleProviderCore": true,
+    "executionLedger": true,
+    "businessEvents": true,
+    "telemetry": true,
+    "verifyUgvProviderScript": true,
+    "ugvReports": true
+  },
+  "inheritedDocumentMetadataDrift": {
+    "path": "docs/requirements/SDAR_UGV_Provider_Codex_Work_Task_Package_V1.1.md",
+    "expectedByNpcTaskSha256": "5a7339cacd0f216094c244c10b79701fef2a767d9acce88d28123b4c815c1f53",
+    "actualSuppliedUgvWorkspaceSha256": "2a17349cfebc6764175a59eca41b1811460d74c102201c86bf2b65ca1728eb3c",
+    "priorUgvEvidence": "reports/ugv-provider-v1/protocol-input-lock.json",
+    "impact": "The completed UGV workspace already records this supplied-document metadata drift; no source or frozen protocol file is rewritten."
+  }
+}

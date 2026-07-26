@@ -1,0 +1,18 @@
+{
+  "schema": "sdar-business-events-continuity-v1.schema.json",
+  "instance": {
+    "jsonrpc": "2.0",
+    "method": "notifications/io.sdar/businessEvents/continuity",
+    "params": {
+      "profileVersion": "1.0",
+      "previousStreamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+      "newStreamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0002",
+      "reasonCode": "SOURCE_CURSOR_EXPIRED",
+      "affectedSourceIds": ["adapter.vehicle"],
+      "gapDetectedAt": "2026-07-22T01:00:00Z",
+      "lastReplayableSequence": "10",
+      "lastContinuousSequence": "9",
+      "_meta": { "io.modelcontextprotocol/subscriptionId": 31 }
+    }
+  }
+}

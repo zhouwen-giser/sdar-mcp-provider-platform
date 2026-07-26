@@ -1,0 +1,485 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.dev/protocol/v1/sdar-availability-v1.schema.json",
+  "title": "SDAR Availability V1",
+  "$defs": {
+    "RequestMeta": {
+      "type": "object",
+      "required": [
+        "io.modelcontextprotocol/protocolVersion",
+        "io.modelcontextprotocol/clientInfo",
+        "io.modelcontextprotocol/clientCapabilities"
+      ],
+      "properties": {
+        "io.modelcontextprotocol/protocolVersion": {
+          "const": "2026-07-28"
+        },
+        "io.modelcontextprotocol/clientInfo": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "io.modelcontextprotocol/clientCapabilities": {
+          "type": "object",
+          "properties": {
+            "extensions": {
+              "type": "object",
+              "properties": {
+                "io.modelcontextprotocol/tasks": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "io.modelcontextprotocol/logLevel": {
+          "type": "string"
+        },
+        "io.sdar/taskExecution": {
+          "type": "object"
+        },
+        "progressToken": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "Check": {
+      "type": "object",
+      "required": [
+        "requestId",
+        "operationName",
+        "arguments"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$"
+        },
+        "operationName": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,63}$"
+        },
+        "arguments": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "state",
+                "value"
+              ],
+              "properties": {
+                "state": {
+                  "const": "complete"
+                },
+                "value": {}
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "state",
+                "knownValue",
+                "unresolvedPaths"
+              ],
+              "properties": {
+                "state": {
+                  "const": "partial"
+                },
+                "knownValue": {},
+                "unresolvedPaths": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 128,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "pattern": "^(?:|(?:/(?:[^~/]|~[01])*)*)$"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "timing": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "mode"
+                  ],
+                  "properties": {
+                    "mode": {
+                      "const": "immediate"
+                    },
+                    "startToleranceMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 86400000
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "mode",
+                    "scheduledAt"
+                  ],
+                  "properties": {
+                    "mode": {
+                      "const": "scheduled"
+                    },
+                    "scheduledAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "startToleranceMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 86400000
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "maxElapsedMs": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31536000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "Result": {
+      "type": "object",
+      "required": [
+        "requestId",
+        "operationName",
+        "availability",
+        "riskLevel",
+        "reservationMode"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "operationName": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,63}$"
+        },
+        "availability": {
+          "enum": [
+            "available",
+            "restricted",
+            "disabled",
+            "unknown"
+          ]
+        },
+        "riskLevel": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "earliestStartTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nextAvailableWindows": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": [
+              "startTime",
+              "endTime"
+            ],
+            "properties": {
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "estimatedDelayMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reservationMode": {
+          "enum": [
+            "none",
+            "best_effort",
+            "guaranteed"
+          ]
+        },
+        "reservationRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "possibleEffects": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "task_preemption",
+              "task_pause",
+              "start_rejection",
+              "start_window_missed",
+              "deadline_reached",
+              "partial_completion"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "availability": {
+                "const": "restricted"
+              }
+            },
+            "required": [
+              "availability"
+            ]
+          },
+          "then": {
+            "required": [
+              "validUntil"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "earliestStartTime"
+                ]
+              },
+              {
+                "required": [
+                  "nextAvailableWindows"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reservationMode": {
+                "const": "guaranteed"
+              }
+            },
+            "required": [
+              "reservationMode"
+            ]
+          },
+          "then": {
+            "required": [
+              "reservationRef"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "reservationRef"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "method",
+        "params"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "method": {
+          "const": "io.sdar/taskExecution/checkAvailability"
+        },
+        "params": {
+          "type": "object",
+          "required": [
+            "profileVersion",
+            "checks",
+            "_meta"
+          ],
+          "properties": {
+            "profileVersion": {
+              "const": "1.0"
+            },
+            "checks": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "items": {
+                "$ref": "#/$defs/Check"
+              }
+            },
+            "_meta": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/protocolVersion",
+                "io.modelcontextprotocol/clientInfo",
+                "io.modelcontextprotocol/clientCapabilities"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/protocolVersion": {
+                  "const": "2026-07-28"
+                },
+                "io.modelcontextprotocol/clientInfo": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "version"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "version": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/clientCapabilities": {
+                  "type": "object",
+                  "properties": {
+                    "extensions": {
+                      "type": "object",
+                      "properties": {
+                        "io.modelcontextprotocol/tasks": {
+                          "type": "object"
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/logLevel": {
+                  "type": "string"
+                },
+                "io.sdar/taskExecution": {
+                  "type": "object"
+                },
+                "progressToken": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "resultType",
+        "profileVersion",
+        "results"
+      ],
+      "properties": {
+        "resultType": {
+          "const": "complete"
+        },
+        "profileVersion": {
+          "const": "1.0"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/Result"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

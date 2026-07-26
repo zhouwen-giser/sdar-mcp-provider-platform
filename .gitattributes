@@ -1,0 +1,8 @@
+protocol/frozen/* -text -diff
+protocol/upstream/mcp-2026-07-28/schema.json -text -diff
+protocol/*.schema.json text eol=lf
+protocol/conformance-cases/*.json text eol=lf
+protocol/protocol-baseline.json text eol=lf
+protocol/protocol-baseline.lock.json text eol=lf
+packages/adapter-protocol/generated/** text eol=lf
+reports/**/*.json text eol=lf

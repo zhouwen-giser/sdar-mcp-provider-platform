@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://io.sdar/protocol/sdar-business-events-continuity-v1.schema.json",
+  "title": "SDAR Business Events Continuity Notification 1.0",
+  "type": "object",
+  "required": ["jsonrpc", "method", "params"],
+  "properties": {
+    "jsonrpc": { "const": "2.0" },
+    "method": { "const": "notifications/io.sdar/businessEvents/continuity" },
+    "params": {
+      "type": "object",
+      "required": ["profileVersion", "previousStreamId", "newStreamId", "reasonCode", "affectedSourceIds", "gapDetectedAt", "lastReplayableSequence", "_meta"],
+      "properties": {
+        "profileVersion": { "const": "1.0" },
+        "previousStreamId": { "type": "string", "format": "uuid" },
+        "newStreamId": { "type": "string", "format": "uuid" },
+        "reasonCode": { "enum": ["SOURCE_CURSOR_EXPIRED", "SOURCE_STREAM_RESET", "SOURCE_DATA_LOSS", "SOURCE_SEQUENCE_REGRESSION", "SOURCE_IDENTITY_CONFLICT", "SOURCE_POISON_EVENT", "TASK_MAPPING_FAILED", "SOURCE_ROSTER_CHANGED", "OPERATOR_ROTATION"] },
+        "affectedSourceIds": { "type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" } },
+        "gapDetectedAt": { "type": "string", "format": "date-time" },
+        "lastReplayableSequence": { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" },
+        "lastContinuousSequence": { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" },
+        "_meta": {
+          "type": "object",
+          "required": ["io.modelcontextprotocol/subscriptionId"],
+          "properties": { "io.modelcontextprotocol/subscriptionId": { "type": ["string", "integer"] } },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

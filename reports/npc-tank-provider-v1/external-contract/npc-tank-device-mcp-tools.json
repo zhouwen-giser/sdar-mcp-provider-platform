@@ -1,0 +1,472 @@
+{
+  "mode": "captured",
+  "capturedAt": "2026-07-23T06:01:13.850Z",
+  "serverInfo": {
+    "name": "mock-npc-tank-device-mcp",
+    "version": "1.0.0"
+  },
+  "protocolVersion": "2025-11-25",
+  "tools": [
+    {
+      "name": "npc_tank_send_waypoints",
+      "description": "Mock-only NPC Tank fixture npc_tank_send_waypoints.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "waypoints": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {}
+            }
+          },
+          "speed_limit_kmh": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "stop_on_obstacle": {
+            "type": "boolean"
+          }
+        },
+        "required": ["waypoints", "speed_limit_kmh", "stop_on_obstacle"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "28074562ee179416749d191a7f4ef4650de5ce2bf192897073d152bc63bee504"
+    },
+    {
+      "name": "npc_tank_path_follow_mission",
+      "description": "Mock-only NPC Tank fixture npc_tank_path_follow_mission.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "waypoints": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {}
+            }
+          },
+          "speed_limit_kmh": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "stop_on_obstacle": {
+            "type": "boolean"
+          }
+        },
+        "required": ["waypoints", "speed_limit_kmh", "stop_on_obstacle"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "28074562ee179416749d191a7f4ef4650de5ce2bf192897073d152bc63bee504"
+    },
+    {
+      "name": "npc_tank_move_distance",
+      "description": "Mock-only NPC Tank fixture npc_tank_move_distance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": ["forward", "backward", "left", "right"]
+          },
+          "distance_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": ["direction", "distance_m"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "40c69196acd00422e6ce6be3d29771e53a1699c147f3fabe621c2164057f155e"
+    },
+    {
+      "name": "npc_tank_return_home",
+      "description": "Mock-only NPC Tank fixture npc_tank_return_home.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_mission_control",
+      "description": "Mock-only NPC Tank fixture npc_tank_mission_control.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["start", "pause", "resume", "terminate", "cancel", "stop"]
+          }
+        },
+        "required": ["action"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "e3ba1b677b246195e984bb4ce66bd472cd80c06cd97dfccfd839f5083dba3952"
+    },
+    {
+      "name": "npc_tank_stop",
+      "description": "Mock-only NPC Tank fixture npc_tank_stop.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_cancel_mission",
+      "description": "Mock-only NPC Tank fixture npc_tank_cancel_mission.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_attack_target",
+      "description": "Mock-only NPC Tank fixture npc_tank_attack_target.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["target_id"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "94ddb54334a8e3c7d5341483173efe2537c9bb237f48e9c111ec82174cbf019f"
+    },
+    {
+      "name": "npc_tank_area_recon_configure",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_configure.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {}
+          },
+          "scan_mode": {
+            "type": "string",
+            "enum": ["area", "sector"]
+          },
+          "scan_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "zoom": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "stop_on_target": {
+            "type": "boolean"
+          },
+          "target_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["area", "scan_mode", "scan_count", "zoom", "stop_on_target", "target_types"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "0e61a083a9a894a104fda1735bf975279066b8e05bccd83aebf96b23b5d363e6"
+    },
+    {
+      "name": "npc_tank_area_recon_lock",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_lock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["target_id"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "94ddb54334a8e3c7d5341483173efe2537c9bb237f48e9c111ec82174cbf019f"
+    },
+    {
+      "name": "npc_tank_area_recon_unlock",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_unlock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_gimbal_move",
+      "description": "Mock-only NPC Tank fixture npc_tank_gimbal_move.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": ["absolute", "relative", "velocity", "reset"]
+          },
+          "yaw": {
+            "type": "number"
+          },
+          "pitch": {
+            "type": "number"
+          },
+          "angle_unit": {
+            "type": "string",
+            "enum": ["rad", "deg"]
+          }
+        },
+        "required": ["mode"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "fd11179f71bcd1600400582c1e55eb5f76c262e57fa86c0a102fac32bd7ec88d"
+    },
+    {
+      "name": "npc_tank_area_recon_attack_confirm",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_attack_confirm.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": ["target_id", "confirmed"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "5bfb92067df9f9c6449d639ef65310f70a979fb479f92d728049a2a6cff955e3"
+    },
+    {
+      "name": "npc_tank_area_recon_control",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_control.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "anyOf": [
+              {
+                "type": "number",
+                "const": 1
+              },
+              {
+                "type": "number",
+                "const": 2
+              },
+              {
+                "type": "number",
+                "const": 3
+              },
+              {
+                "type": "number",
+                "const": 4
+              }
+            ]
+          }
+        },
+        "required": ["command"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "b300b4ab183718c3d591e61711ee66b2aafaab32be94c8f13c69742663f14bd2"
+    },
+    {
+      "name": "npc_tank_area_recon_reset",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_reset.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_area_recon_get_status",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_get_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_area_recon_get_targets",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_get_targets.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_area_recon_get_exceptions",
+      "description": "Mock-only NPC Tank fixture npc_tank_area_recon_get_exceptions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_laser_range",
+      "description": "Mock-only NPC Tank fixture npc_tank_laser_range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_eo_scan_start",
+      "description": "Mock-only NPC Tank fixture npc_tank_eo_scan_start.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "circular"
+          },
+          "zoom": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": ["mode"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "e4894a9f2c8cb79b307c06ad333e9362dc32a649a5eeac2e1b77ce84f8368522"
+    },
+    {
+      "name": "npc_tank_eo_scan_stop",
+      "description": "Mock-only NPC Tank fixture npc_tank_eo_scan_stop.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    },
+    {
+      "name": "npc_tank_eo_set_angle",
+      "description": "Mock-only NPC Tank fixture npc_tank_eo_set_angle.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "angle": {
+            "type": "number"
+          },
+          "angle_unit": {
+            "type": "string",
+            "enum": ["rad", "deg"]
+          }
+        },
+        "required": ["angle", "angle_unit"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "029d18c9ebbd980df35f65ab88e9306f123e586aae22a10479901036f4b8bd34"
+    },
+    {
+      "name": "npc_tank_get_capabilities",
+      "description": "Mock-only NPC Tank fixture npc_tank_get_capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "capturedAt": "2026-07-23T06:01:13.842Z",
+      "schemaHash": "f973399805c1c233633f5196cf8e2ad40ee100b94996d711dcd030813b671bc5"
+    }
+  ],
+  "callableTools": [
+    "npc_tank_send_waypoints",
+    "npc_tank_path_follow_mission",
+    "npc_tank_move_distance",
+    "npc_tank_return_home",
+    "npc_tank_mission_control",
+    "npc_tank_stop",
+    "npc_tank_cancel_mission",
+    "npc_tank_attack_target",
+    "npc_tank_area_recon_configure",
+    "npc_tank_area_recon_lock",
+    "npc_tank_area_recon_unlock",
+    "npc_tank_gimbal_move",
+    "npc_tank_area_recon_attack_confirm",
+    "npc_tank_area_recon_control",
+    "npc_tank_area_recon_reset",
+    "npc_tank_area_recon_get_status",
+    "npc_tank_area_recon_get_targets",
+    "npc_tank_area_recon_get_exceptions",
+    "npc_tank_laser_range",
+    "npc_tank_eo_scan_start",
+    "npc_tank_eo_scan_stop",
+    "npc_tank_eo_set_angle",
+    "npc_tank_get_capabilities"
+  ]
+}

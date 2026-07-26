@@ -1,0 +1,485 @@
+{
+  "profileVersion": "1.0",
+  "cases": [
+    {
+      "caseId": "BE-C001",
+      "pdr": "PDR-BE-01",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C002",
+      "pdr": "PDR-BE-02",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C003",
+      "pdr": "PDR-BE-03",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C004",
+      "pdr": "PDR-BE-04",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C005",
+      "pdr": "PDR-BE-05",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C006",
+      "pdr": "PDR-BE-06",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C007",
+      "pdr": "PDR-BE-07",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C008",
+      "pdr": "PDR-BE-08",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C009",
+      "pdr": "PDR-BE-09",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C010",
+      "pdr": "PDR-BE-10",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C011",
+      "pdr": "PDR-BE-11",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C012",
+      "pdr": "PDR-BE-12",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C013",
+      "pdr": "PDR-BE-13",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C014",
+      "pdr": "PDR-BE-14",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C015",
+      "pdr": "PDR-BE-01",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C016",
+      "pdr": "PDR-BE-02",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C017",
+      "pdr": "PDR-BE-03",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C018",
+      "pdr": "PDR-BE-04",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C019",
+      "pdr": "PDR-BE-05",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C020",
+      "pdr": "PDR-BE-06",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C021",
+      "pdr": "PDR-BE-07",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C022",
+      "pdr": "PDR-BE-08",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C023",
+      "pdr": "PDR-BE-09",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C024",
+      "pdr": "PDR-BE-10",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C025",
+      "pdr": "PDR-BE-11",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C026",
+      "pdr": "PDR-BE-12",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C027",
+      "pdr": "PDR-BE-13",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C028",
+      "pdr": "PDR-BE-14",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C029",
+      "pdr": "PDR-BE-01",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C030",
+      "pdr": "PDR-BE-02",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C031",
+      "pdr": "PDR-BE-03",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C032",
+      "pdr": "PDR-BE-04",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C033",
+      "pdr": "PDR-BE-05",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C034",
+      "pdr": "PDR-BE-06",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C035",
+      "pdr": "PDR-BE-07",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C036",
+      "pdr": "PDR-BE-08",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C037",
+      "pdr": "PDR-BE-09",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C038",
+      "pdr": "PDR-BE-10",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C039",
+      "pdr": "PDR-BE-11",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C040",
+      "pdr": "PDR-BE-12",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C041",
+      "pdr": "PDR-BE-13",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C042",
+      "pdr": "PDR-BE-14",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C043",
+      "pdr": "PDR-BE-01",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C044",
+      "pdr": "PDR-BE-02",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C045",
+      "pdr": "PDR-BE-03",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C046",
+      "pdr": "PDR-BE-04",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C047",
+      "pdr": "PDR-BE-05",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C048",
+      "pdr": "PDR-BE-06",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C049",
+      "pdr": "PDR-BE-07",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C050",
+      "pdr": "PDR-BE-08",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C051",
+      "pdr": "PDR-BE-09",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C052",
+      "pdr": "PDR-BE-10",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C053",
+      "pdr": "PDR-BE-11",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C054",
+      "pdr": "PDR-BE-12",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C055",
+      "pdr": "PDR-BE-13",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C056",
+      "pdr": "PDR-BE-14",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C057",
+      "pdr": "PDR-BE-01",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C058",
+      "pdr": "PDR-BE-02",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C059",
+      "pdr": "PDR-BE-03",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C060",
+      "pdr": "PDR-BE-04",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C061",
+      "pdr": "PDR-BE-05",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C062",
+      "pdr": "PDR-BE-06",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C063",
+      "pdr": "PDR-BE-07",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C064",
+      "pdr": "PDR-BE-08",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C065",
+      "pdr": "PDR-BE-09",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C066",
+      "pdr": "PDR-BE-10",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C067",
+      "pdr": "PDR-BE-11",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C068",
+      "pdr": "PDR-BE-12",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C069",
+      "pdr": "PDR-BE-13",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C070",
+      "pdr": "PDR-BE-14",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C071",
+      "pdr": "PDR-BE-01",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C072",
+      "pdr": "PDR-BE-02",
+      "category": "relation-pagination",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C073",
+      "pdr": "PDR-BE-03",
+      "category": "requirements-lock",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C074",
+      "pdr": "PDR-BE-04",
+      "category": "wire-schema",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C075",
+      "pdr": "PDR-BE-05",
+      "category": "cursor-sequence",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C076",
+      "pdr": "PDR-BE-06",
+      "category": "canonical-identity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C077",
+      "pdr": "PDR-BE-07",
+      "category": "source-ordering",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C078",
+      "pdr": "PDR-BE-08",
+      "category": "scope-isolation",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C079",
+      "pdr": "PDR-BE-09",
+      "category": "continuity",
+      "status": "required"
+    },
+    {
+      "caseId": "BE-C080",
+      "pdr": "PDR-BE-10",
+      "category": "relation-pagination",
+      "status": "required"
+    }
+  ]
+}

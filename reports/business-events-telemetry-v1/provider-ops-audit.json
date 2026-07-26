@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm test:business-events:telemetry:integration",
+  "startedAt": "2026-07-22T12:45:50.000Z",
+  "endedAt": "2026-07-22T12:45:56.000Z",
+  "durationMs": 5000,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": {
+    "testFiles": 5,
+    "tests": 7,
+    "schemaVersion": "1.1.0",
+    "transactional": true,
+    "publisherRetry": true
+  },
+  "evidenceFiles": [
+    "tests/business-events/telemetry/provider-ops-transaction.test.ts",
+    "tests/business-events/telemetry/provider-ops-idempotency.test.ts",
+    "tests/business-events/telemetry/rotation-audit.test.ts",
+    "tests/business-events/telemetry/lease-audit.test.ts",
+    "tests/business-events/telemetry/audit-publisher-retry.test.ts"
+  ]
+}

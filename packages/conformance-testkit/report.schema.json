@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://io.sdar/schemas/mcp-tasks-conformance-report-v1.json",
+  "type": "object",
+  "required": [
+    "profileVersion",
+    "adapterLanguage",
+    "providerId",
+    "generatedAt",
+    "status",
+    "scopes",
+    "groups"
+  ],
+  "properties": {
+    "profileVersion": { "const": "1.0" },
+    "adapterLanguage": { "enum": ["typescript", "python"] },
+    "providerId": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["passed", "failed"] },
+    "scopes": {
+      "type": "object",
+      "required": ["runtimeProfile", "adapterProtocol", "resourceSpecificSafety"],
+      "properties": {
+        "runtimeProfile": { "$ref": "#/$defs/scope" },
+        "adapterProtocol": { "$ref": "#/$defs/scope" },
+        "resourceSpecificSafety": { "$ref": "#/$defs/scope" }
+      },
+      "additionalProperties": false
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "tests"],
+        "properties": {
+          "id": { "enum": ["P0", "P1", "P2", "P3", "P4"] },
+          "status": { "enum": ["passed", "failed"] },
+          "tests": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["name", "status", "durationMs"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "status": { "enum": ["passed", "failed"] },
+                "durationMs": { "type": "number", "minimum": 0 },
+                "error": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "scope": {
+      "type": "object",
+      "required": ["status", "basis"],
+      "properties": {
+        "status": { "enum": ["passed", "failed", "partial", "not_claimed"] },
+        "basis": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

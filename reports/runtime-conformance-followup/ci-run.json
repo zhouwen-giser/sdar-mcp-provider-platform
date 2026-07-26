@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "recorded_at": "2026-07-22T03:30:24Z",
+  "repository": "zhouwen-giser/sdar-mcp-tasks-provider-runtime",
+  "pull_request": {
+    "number": 17,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-tasks-provider-runtime/pull/17",
+    "state": "OPEN",
+    "draft": true,
+    "base": "main",
+    "head": "fix/frozen-runtime-conformance-followup"
+  },
+  "workflow_run": {
+    "id": 29888399421,
+    "attempt": 1,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-tasks-provider-runtime/actions/runs/29888399421",
+    "head_sha": "1768a4f613685fc925757566df2351b9e9c0a861",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-07-22T03:25:12Z",
+    "started_at": "2026-07-22T03:25:12Z",
+    "updated_at": "2026-07-22T03:30:24Z",
+    "jobs": [
+      {
+        "id": 88823721500,
+        "name": "runtime-ci",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-07-22T03:25:15Z",
+        "completed_at": "2026-07-22T03:30:23Z",
+        "url": "https://github.com/zhouwen-giser/sdar-mcp-tasks-provider-runtime/actions/runs/29888399421/job/88823721500"
+      },
+      {
+        "id": 88823721483,
+        "name": "runtime-compose",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-07-22T03:25:15Z",
+        "completed_at": "2026-07-22T03:26:12Z",
+        "url": "https://github.com/zhouwen-giser/sdar-mcp-tasks-provider-runtime/actions/runs/29888399421/job/88823721483"
+      }
+    ]
+  },
+  "delivery_constraints": {
+    "auto_merge": false,
+    "tag_created": false
+  }
+}

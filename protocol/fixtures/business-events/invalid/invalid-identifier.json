@@ -1,0 +1,17 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "discoveryExtension",
+  "instance": {
+    "profileVersion": "1.0",
+    "delivery": "post_sse",
+    "scopes": ["task", "resource"],
+    "resumeMode": "stream_sequence",
+    "maxRelatedTaskIds": 256,
+    "retentionMs": 604800000,
+    "authorizationModel": "subscription_snapshot_projection",
+    "relationOverflow": "paged_query",
+    "streamCancellation": "connection_close",
+    "continuityClass": "all_durable",
+    "sources": [{ "sourceId": "bad source", "deliverySemantics": "durable_at_least_once" }]
+  }
+}

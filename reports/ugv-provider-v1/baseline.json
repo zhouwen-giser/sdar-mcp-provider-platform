@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "capturedAt": "2026-07-23T03:07:53Z",
+  "source": {
+    "kind": "github-main-archive",
+    "repository": "https://github.com/zhouwen-giser/sdar-mcp-tasks-provider-runtime",
+    "archiveSha256": "fe0191def9f524c6692d5d37ca9c5af955e1fb188466eaeeb5c8459c7aa6be1c",
+    "referenceRevisionHint": "9f4ac6b302b5541793aca7285da3765ba6e84f8a",
+    "revisionHintVerified": false,
+    "verificationReason": "Work-mode rules prohibit Git history inspection."
+  },
+  "detachedWorkCopy": true,
+  "gitMetadataPresent": false,
+  "gitOperationsPerformed": false,
+  "baselineFileCount": 641,
+  "protectedFileCount": 10,
+  "requiredCapabilities": {
+    "businessEventsProfileV1": true,
+    "businessEventsTelemetryV1": true,
+    "observabilityPackage": true,
+    "postgresPersistencePackage": true,
+    "runtimeApp": true,
+    "packageAndLockfile": true
+  },
+  "evidence": [
+    "reports/ugv-provider-v1/work-locks/baseline-file-manifest.json",
+    "reports/ugv-provider-v1/work-locks/protected-file-hashes.json",
+    "pnpm protocol:business-events:check: 81 passed",
+    "pnpm test:business-events:adapter-contract: 5 passed",
+    "pnpm test:business-events:telemetry:unit: 15 passed",
+    "pnpm test:business-events:telemetry:security: 2 passed"
+  ]
+}

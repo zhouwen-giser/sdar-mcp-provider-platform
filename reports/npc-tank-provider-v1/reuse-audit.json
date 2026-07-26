@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "finding": "NPC differences are expressed through profiles, exact allowlists, mappings and schemas.",
+  "sharedAbstractions": [
+    "VehicleSnapshot and execution state mapping",
+    "TrackArbiter and availability",
+    "VehicleBusinessEventHub",
+    "VehicleTelemetry",
+    "Vehicle gRPC Adapter server",
+    "ProviderStore with fixed UGV/NPC table scopes",
+    "Vehicle MQTT ingress/client profiles",
+    "Vehicle Device MCP client profiles"
+  ],
+  "npcSpecificSurfaces": [
+    "identity/resource/type",
+    "12-topic allowlist",
+    "23-tool allowlist and mappings",
+    "primary/fallback navigation selection",
+    "conditional circular EO scan",
+    "npc_tank_ PostgreSQL tables"
+  ],
+  "duplicatedUgvFramework": false
+}

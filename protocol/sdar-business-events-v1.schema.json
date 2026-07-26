@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://io.sdar/protocol/sdar-business-events-v1.schema.json",
+  "title": "SDAR Business Events Profile 1.0",
+  "$defs": {
+    "decimalSequence": { "type": "string", "pattern": "^[1-9][0-9]{0,18}$" },
+    "cursorSequence": { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "eventId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+    "sourceId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "eventType": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$" },
+    "description": { "type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]*$" },
+    "subscriptionMeta": {
+      "type": "object",
+      "required": ["io.modelcontextprotocol/subscriptionId"],
+      "properties": {
+        "io.modelcontextprotocol/subscriptionId": { "type": ["string", "integer"] },
+        "io.sdar/businessEvents": {
+          "type": "object",
+          "required": ["profileVersion"],
+          "properties": { "profileVersion": { "const": "1.0" } },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "clientMeta": {
+      "type": "object",
+      "required": ["io.modelcontextprotocol/clientCapabilities"],
+      "properties": {
+        "io.modelcontextprotocol/clientCapabilities": {
+          "type": "object",
+          "required": ["extensions"],
+          "properties": {
+            "extensions": {
+              "type": "object",
+              "required": ["io.sdar/businessEvents"],
+              "properties": {
+                "io.sdar/businessEvents": {
+                  "type": "object",
+                  "required": ["profileVersion"],
+                  "properties": { "profileVersion": { "const": "1.0" } },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "object",
+      "required": ["sourceId", "deliverySemantics"],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/sourceId" },
+        "deliverySemantics": { "enum": ["durable_at_least_once", "best_effort_live"] }
+      },
+      "additionalProperties": false
+    },
+    "discoveryExtension": {
+      "type": "object",
+      "required": ["profileVersion", "delivery", "scopes", "resumeMode", "maxRelatedTaskIds", "retentionMs", "authorizationModel", "relationOverflow", "streamCancellation", "continuityClass", "sources"],
+      "properties": {
+        "profileVersion": { "const": "1.0" },
+        "delivery": { "const": "post_sse" },
+        "scopes": { "const": ["task", "resource"] },
+        "resumeMode": { "const": "stream_sequence" },
+        "maxRelatedTaskIds": { "const": 256 },
+        "retentionMs": { "type": "integer", "minimum": 60000, "maximum": 7776000000 },
+        "authorizationModel": { "const": "subscription_snapshot_projection" },
+        "relationOverflow": { "const": "paged_query" },
+        "streamCancellation": { "const": "connection_close" },
+        "continuityClass": { "enum": ["all_durable", "mixed", "best_effort_only"] },
+        "sources": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "$ref": "#/$defs/source" } }
+      },
+      "additionalProperties": false
+    },
+    "listenRequest": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "type": ["string", "integer"] },
+        "method": { "const": "io.sdar/businessEvents/listen" },
+        "params": {
+          "type": "object",
+          "required": ["_meta"],
+          "properties": {
+            "cursor": {
+              "type": "object",
+              "required": ["streamId", "afterSequence"],
+              "properties": { "streamId": { "$ref": "#/$defs/uuid" }, "afterSequence": { "$ref": "#/$defs/cursorSequence" } },
+              "additionalProperties": false
+            },
+            "startPosition": { "enum": ["latest", "earliest_available"] },
+            "_meta": { "$ref": "#/$defs/clientMeta" }
+          },
+          "oneOf": [{ "required": ["cursor"] }, { "required": ["startPosition"] }],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "ack": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "method": { "const": "notifications/io.sdar/businessEvents/acknowledged" },
+        "params": {
+          "type": "object",
+          "required": ["profileVersion", "streamId", "generationStatus", "acceptedAfterSequence", "earliestAvailableSequence", "currentSequence", "sourceContinuity", "_meta"],
+          "properties": {
+            "profileVersion": { "const": "1.0" },
+            "streamId": { "$ref": "#/$defs/uuid" },
+            "generationStatus": { "enum": ["current", "replayable_closed"] },
+            "acceptedAfterSequence": { "$ref": "#/$defs/cursorSequence" },
+            "earliestAvailableSequence": { "$ref": "#/$defs/decimalSequence" },
+            "currentSequence": { "$ref": "#/$defs/cursorSequence" },
+            "sourceContinuity": {
+              "type": "object",
+              "required": ["continuityClass", "status", "degradedSourceIds"],
+              "properties": {
+                "continuityClass": { "enum": ["all_durable", "mixed", "best_effort_only"] },
+                "status": { "enum": ["continuous", "best_effort"] },
+                "continuousSinceSequence": { "$ref": "#/$defs/decimalSequence" },
+                "degradedSourceIds": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/sourceId" }, "uniqueItems": true }
+              },
+              "additionalProperties": false
+            },
+            "_meta": { "$ref": "#/$defs/subscriptionMeta" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "commonEventParams": {
+      "type": "object",
+      "required": ["streamId", "eventId", "sequence", "sourceId", "eventType", "occurredAt", "scope", "description", "_meta"],
+      "properties": {
+        "streamId": { "$ref": "#/$defs/uuid" },
+        "eventId": { "$ref": "#/$defs/eventId" },
+        "sequence": { "$ref": "#/$defs/decimalSequence" },
+        "sourceId": { "$ref": "#/$defs/sourceId" },
+        "eventType": { "$ref": "#/$defs/eventType" },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "scope": { "enum": ["task", "resource"] },
+        "description": { "$ref": "#/$defs/description" },
+        "reasonCode": { "$ref": "#/$defs/eventType" },
+        "severityHint": { "enum": ["info", "warning", "critical"] },
+        "rawPayload": true,
+        "taskId": { "type": "string", "minLength": 1 },
+        "resourceRef": { "type": "string", "minLength": 1, "maxLength": 512, "pattern": "^[!-~]+$" },
+        "relatedTaskIds": { "type": "array", "maxItems": 256, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "relatedTaskCount": { "type": "integer", "minimum": 0 },
+        "relationTruncated": { "type": "boolean" },
+        "_meta": { "$ref": "#/$defs/subscriptionMeta" }
+      }
+    },
+    "taskEvent": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "method": { "const": "notifications/io.sdar/businessEvents" },
+        "params": { "$ref": "#/$defs/commonEventParams", "required": ["taskId"], "properties": { "scope": { "const": "task" } }, "not": { "anyOf": [{ "required": ["resourceRef"] }, { "required": ["relatedTaskIds"] }, { "required": ["relatedTaskCount"] }, { "required": ["relationTruncated"] }] }, "unevaluatedProperties": false }
+      },
+      "additionalProperties": false
+    },
+    "resourceEvent": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "method": { "const": "notifications/io.sdar/businessEvents" },
+        "params": { "$ref": "#/$defs/commonEventParams", "required": ["resourceRef", "relatedTaskIds", "relatedTaskCount", "relationTruncated"], "properties": { "scope": { "const": "resource" } }, "not": { "required": ["taskId"] }, "unevaluatedProperties": false }
+      },
+      "additionalProperties": false
+    },
+    "errorData": {
+      "type": "object",
+      "required": ["reasonCode", "retryable", "recoveryAction"],
+      "properties": {
+        "reasonCode": { "type": "string", "pattern": "^BUSINESS_EVENT_[A-Z0-9_]+$" },
+        "retryable": { "type": "boolean" },
+        "recoveryAction": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "streamResetData": {
+      "allOf": [
+        { "$ref": "#/$defs/errorData" },
+        { "type": "object", "required": ["currentStreamId"], "properties": { "reasonCode": { "const": "BUSINESS_EVENT_STREAM_RESET" }, "currentStreamId": { "$ref": "#/$defs/uuid" } } }
+      ]
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/discoveryExtension" },
+    { "$ref": "#/$defs/listenRequest" },
+    { "$ref": "#/$defs/ack" },
+    { "$ref": "#/$defs/taskEvent" },
+    { "$ref": "#/$defs/resourceEvent" },
+    { "$ref": "#/$defs/errorData" }
+  ]
+}

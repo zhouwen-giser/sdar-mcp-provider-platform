@@ -1,0 +1,130 @@
+import pino from "pino";
+import {
+  MemoryProviderStore,
+  PostgresProviderStore,
+} from "../../../packages/provider-adapter-kit/src/index.js";
+import { StreamableHttpUgvDeviceMcpClient } from "../../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  UgvMqttClient,
+  VehicleMqttIngress,
+} from "../../../packages/vehicle-mqtt-ingress/src/index.js";
+import { UgvBusinessEventHub } from "./business-events.js";
+import { loadUgvProviderConfig } from "./config.js";
+import { UgvProviderRuntime } from "./runtime.js";
+import { UgvProviderServer } from "./server.js";
+import { UgvTelemetry } from "./telemetry.js";
+
+const config = loadUgvProviderConfig();
+const logger = pino({
+  level: config.LOG_LEVEL,
+  redact: {
+    paths: ["password", "authorization", "headers", "*.password", "*.authorization", "*.headers"],
+    censor: "[REDACTED]",
+  },
+});
+const store =
+  config.UGV_ADAPTER_STORE_MODE === "postgres"
+    ? new PostgresProviderStore(
+        config.UGV_ADAPTER_DATABASE_URL,
+        config.UGV_ADAPTER_DATABASE_POOL_MAX,
+      )
+    : new MemoryProviderStore();
+const ingress = new VehicleMqttIngress(config.UGV_MQTT_WIRE_MODE, {
+  maxPayloadBytes: config.UGV_MQTT_MAX_PAYLOAD_BYTES,
+  maxDepth: config.UGV_MQTT_MAX_JSON_DEPTH,
+  maxNodes: config.UGV_MQTT_MAX_JSON_NODES,
+  maxStringBytes: config.UGV_MQTT_MAX_STRING_BYTES,
+});
+const mqtt = new UgvMqttClient(
+  {
+    url: config.UGV_MQTT_URL,
+    clientId: config.UGV_MQTT_CLIENT_ID,
+    ...(config.UGV_MQTT_USERNAME ? { username: config.UGV_MQTT_USERNAME } : {}),
+    ...(config.UGV_MQTT_PASSWORD_FILE ? { passwordFile: config.UGV_MQTT_PASSWORD_FILE } : {}),
+    tlsMode: config.UGV_MQTT_TLS_MODE,
+    ...(config.UGV_MQTT_TLS_CA_PATH ? { tlsCaPath: config.UGV_MQTT_TLS_CA_PATH } : {}),
+    ...(config.UGV_MQTT_TLS_CERT_PATH ? { tlsCertPath: config.UGV_MQTT_TLS_CERT_PATH } : {}),
+    ...(config.UGV_MQTT_TLS_KEY_PATH ? { tlsKeyPath: config.UGV_MQTT_TLS_KEY_PATH } : {}),
+    sessionMode: config.UGV_MQTT_SESSION_MODE,
+    reconnectMinMs: config.UGV_MQTT_RECONNECT_MIN_MS,
+    reconnectMaxMs: config.UGV_MQTT_RECONNECT_MAX_MS,
+  },
+  ingress,
+);
+const device = new StreamableHttpUgvDeviceMcpClient(
+  {
+    url: config.UGV_DEVICE_MCP_URL,
+    timeoutMs: config.UGV_DEVICE_MCP_TIMEOUT_MS,
+    ...(config.UGV_DEVICE_MCP_HEADERS_FILE
+      ? { headersFile: config.UGV_DEVICE_MCP_HEADERS_FILE }
+      : {}),
+    maxResponseBytes: config.UGV_DEVICE_MCP_MAX_RESPONSE_BYTES,
+    contractReportPath: config.UGV_DEVICE_MCP_CONTRACT_REPORT_PATH,
+    useMockContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT,
+  },
+  store,
+);
+const telemetry = new UgvTelemetry({
+  providerId: config.PROVIDER_ID,
+  enabled: config.PROVIDER_TELEMETRY_ENABLED,
+  endpoint: config.PROVIDER_TELEMETRY_ENDPOINT,
+  tlsMode: config.PROVIDER_TELEMETRY_TLS_MODE,
+  ...(config.PROVIDER_TELEMETRY_TLS_CA_PATH
+    ? { caPath: config.PROVIDER_TELEMETRY_TLS_CA_PATH }
+    : {}),
+  ...(config.PROVIDER_TELEMETRY_TLS_CERT_PATH
+    ? { certPath: config.PROVIDER_TELEMETRY_TLS_CERT_PATH }
+    : {}),
+  ...(config.PROVIDER_TELEMETRY_TLS_KEY_PATH
+    ? { keyPath: config.PROVIDER_TELEMETRY_TLS_KEY_PATH }
+    : {}),
+});
+const businessEvents = new UgvBusinessEventHub(store);
+const runtime = new UgvProviderRuntime(
+  {
+    providerId: config.PROVIDER_ID,
+    freshness: {
+      chassis: config.UGV_CHASSIS_FRESHNESS_MS,
+      mission: config.UGV_MISSION_FRESHNESS_MS,
+      health: config.UGV_HEALTH_FRESHNESS_MS,
+      target: config.UGV_TARGET_FRESHNESS_MS,
+      payload: config.UGV_PAYLOAD_FRESHNESS_MS,
+    },
+    allowNavigationWithRecon: config.UGV_ALLOW_NAVIGATION_WITH_RECON,
+    fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
+    pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
+  },
+  store,
+  ingress,
+  device,
+  businessEvents,
+  telemetry,
+);
+const server = new UgvProviderServer(
+  {
+    providerId: config.PROVIDER_ID,
+    providerVersion: config.PROVIDER_VERSION,
+    host: config.ADAPTER_HOST,
+    port: config.ADAPTER_PORT,
+    tlsMode: config.ADAPTER_TLS_MODE,
+    ...(config.ADAPTER_TLS_CA_PATH ? { tlsCaPath: config.ADAPTER_TLS_CA_PATH } : {}),
+    ...(config.ADAPTER_TLS_CERT_PATH ? { tlsCertPath: config.ADAPTER_TLS_CERT_PATH } : {}),
+    ...(config.ADAPTER_TLS_KEY_PATH ? { tlsKeyPath: config.ADAPTER_TLS_KEY_PATH } : {}),
+  },
+  runtime,
+  store,
+  businessEvents,
+);
+
+await runtime.initialize();
+mqtt.start();
+const port = await server.start();
+logger.info({ providerId: config.PROVIDER_ID, port }, "UGV Provider Adapter started");
+const stop = async () => {
+  await mqtt.stop();
+  await server.close();
+  telemetry.close();
+  await runtime.close();
+};
+process.once("SIGINT", () => void stop());
+process.once("SIGTERM", () => void stop());

@@ -1,0 +1,12 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-tasks-provider-runtime",
+  "baseBranch": "main",
+  "baseSha": "c5594e4cb59f77421a8aa107defa6054ca61a768",
+  "baseTree": "56cef1496a5b55faa36add465ccb5ffd75a6bcdd",
+  "minimumRequiredAncestor": "c5594e4cb59f77421a8aa107defa6054ca61a768",
+  "protocolVersion": "2026-07-28",
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+  "runtimeVersion": "2.0.0-rc.1",
+  "includedProviders": ["home-assistant-climate"],
+  "excludedOpenProviderBranches": ["feature/home-assistant-light-provider"]
+}

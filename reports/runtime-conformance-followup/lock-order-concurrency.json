@@ -1,0 +1,71 @@
+{
+  "generatedFrom": "vitest-json-reporter",
+  "category": "MRTR Real PostgreSQL Concurrency Tests",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order validates against a schema committed while acceptance waits on the Task lock",
+      "status": "passed",
+      "durationMs": 90.46826600000009,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order ignores a response when SUPERSEDED commits before its lock is acquired",
+      "status": "passed",
+      "durationMs": 71.83539700000006,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+      "testTitle": "MRTR canonical lock order allows only one UPDATE promotion and one Adapter side effect across replicas",
+      "status": "passed",
+      "durationMs": 161.28940099999988,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against acknowledge",
+      "status": "passed",
+      "durationMs": 173.0870379999999,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against reject",
+      "status": "passed",
+      "durationMs": 157.8516300000001,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+      "testTitle": "UPDATE acknowledgement and safe-stop lock order lets safe stop win against delivery",
+      "status": "passed",
+      "durationMs": 133.51497599999993,
+      "databaseMode": "real-postgresql-concurrency",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    }
+  ]
+}

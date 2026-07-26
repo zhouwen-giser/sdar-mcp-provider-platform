@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.dev/protocol/v1/sdar-evidence-v1.schema.json",
+  "title": "SDAR Evidence Profile V1 type_only",
+  "type": "object",
+  "required": [
+    "profileVersion",
+    "items"
+  ],
+  "properties": {
+    "profileVersion": {
+      "const": "1.0"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "required": [
+          "evidenceId",
+          "evidenceType",
+          "observedAt",
+          "payloadRef"
+        ],
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "evidenceType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subjectRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "payloadRef": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "jsonPointer"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "structured_content"
+                  },
+                  "jsonPointer": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "pattern": "^(?:|(?:/(?:[^~/]|~[01])*)*)$"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "uri"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "uri"
+                  },
+                  "uri": {
+                    "type": "string",
+                    "maxLength": 2048,
+                    "pattern": "^(https|s3|gs|azblob|urn):"
+                  },
+                  "mediaType": {
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "producer": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "EvidencePayloadRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "jsonPointer"
+          ],
+          "properties": {
+            "kind": {
+              "const": "structured_content"
+            },
+            "jsonPointer": {
+              "type": "string",
+              "maxLength": 512,
+              "pattern": "^(?:|(?:/(?:[^~/]|~[01])*)*)$"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "uri"
+          ],
+          "properties": {
+            "kind": {
+              "const": "uri"
+            },
+            "uri": {
+              "type": "string",
+              "maxLength": 2048,
+              "pattern": "^(https|s3|gs|azblob|urn):"
+            },
+            "mediaType": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "EvidenceItem": {
+      "type": "object",
+      "required": [
+        "evidenceId",
+        "evidenceType",
+        "observedAt",
+        "payloadRef"
+      ],
+      "properties": {
+        "evidenceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "evidenceType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "subjectRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "payloadRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "jsonPointer"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "structured_content"
+                },
+                "jsonPointer": {
+                  "type": "string",
+                  "maxLength": 512,
+                  "pattern": "^(?:|(?:/(?:[^~/]|~[01])*)*)$"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "uri"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "uri"
+                },
+                "uri": {
+                  "type": "string",
+                  "maxLength": 2048,
+                  "pattern": "^(https|s3|gs|azblob|urn):"
+                },
+                "mediaType": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "producer": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

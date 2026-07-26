@@ -1,0 +1,16 @@
+schemaVersion: 1
+sources:
+  - name: fast-uri
+    version: 3.1.4
+    repository: https://github.com/fastify/fast-uri.git
+    commit: 6aeece669e4166b2446a89f17c07a3b15dfb7ed4
+    license: BSD-3-Clause
+    integrity: sha512-8JnbkQ4juDyvYs4mgFGQqg4yCYtFDtUtmp2QIQq11ZZe5CFQ5wcqm1rqDgAh/QdMySuBnPzMUiJUNZG5N/AiQw==
+    classification: transitive-production-dependency
+  - name: fast-uri
+    version: 4.1.1
+    repository: https://github.com/fastify/fast-uri.git
+    commit: f3e437f7c79431c8b646bbba45e7cb1b4df708ed
+    license: BSD-3-Clause
+    integrity: sha512-YPOs1zD5TG2+EZt+r88LwF6mclA7TPkpwMP7ZN3TO2HiHS8TXvq7QA/17iJsV9dubcLo/f8eEYqMBruyQV21hQ==
+    classification: transitive-production-dependency

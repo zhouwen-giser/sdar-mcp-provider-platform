@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS_MOCK_PROFILE",
+  "wireModes": ["ros_message_json", "direct_domain_json", "auto"],
+  "topicShapes": {
+    "gnss": ["latitude", "longitude", "altitude?"],
+    "imu": ["yaw", "pitch", "roll"],
+    "speed": ["speed_kmh"],
+    "status": ["chassis_task?", "eo_task?", "weapon_task?", "speed_kmh?"],
+    "system_state": ["run_state", "mode", "speed_limit", "err_list"],
+    "component_status": ["power_battery", "lvbattery", "fuel", "sensor", "weapon", "navigation"],
+    "battery_range_km": ["range_km"],
+    "mission_state": ["state", "progress?", "mission_id?"],
+    "nav_state": ["position_x?", "position_y?", "position_z?", "speed_kmh?"],
+    "detected_objects": ["objects[]"],
+    "target_detected": ["identity and observation metadata"],
+    "target_gnss": ["identity and target coordinates"]
+  },
+  "identityValues": ["npc_tank1", "npc-tank1", "npc_tank"]
+}

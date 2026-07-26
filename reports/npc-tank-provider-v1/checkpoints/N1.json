@@ -1,0 +1,11 @@
+{
+  "phase": "N1",
+  "name": "Reuse Audit",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/reuse-audit.json",
+    "reports/npc-tank-provider-v1/shared-code-diff.json"
+  ],
+  "gitOperationsPerformed": false
+}

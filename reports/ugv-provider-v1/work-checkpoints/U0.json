@@ -1,0 +1,21 @@
+{
+  "phase": "U0",
+  "startedAt": "2026-07-23T03:07:44Z",
+  "completedAt": "2026-07-23T03:20:14Z",
+  "status": "COMPLETE_WITH_EXTERNAL_BLOCKERS",
+  "filesCreated": [
+    "docs/requirements/ISR-Simulation_UGV_NPC_Tank_Interface.md",
+    "docs/requirements/ISR-Simulation_UGV_NPC_Tank_Interface.md.sha256",
+    "reports/ugv-provider-v1/work-locks/baseline-file-manifest.json",
+    "reports/ugv-provider-v1/work-locks/protected-file-hashes.json",
+    "reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json"
+  ],
+  "filesModified": [".prettierignore"],
+  "testsRun": [
+    "baseline capability inspection",
+    "Business Events contract and telemetry baseline tests"
+  ],
+  "testResults": ["PASS: 81+5+15+2 tests"],
+  "remainingRisks": ["source revision hint cannot be verified without prohibited Git history"],
+  "externalBlockers": ["UGV_DEVICE_MCP_UNAVAILABLE", "UGV_MQTT_UNAVAILABLE"]
+}

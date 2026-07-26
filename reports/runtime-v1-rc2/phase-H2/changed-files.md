@@ -1,0 +1,21 @@
+# H2 Changed Files
+
+- `docs/database/migrations.md`
+- `docs/decisions/ADR-005-start-window-and-scheduled-retry.md`
+- `examples/mock-adapter-typescript/src/server.ts`
+- `migrations/008_start_window_and_schedule_retry.sql`
+- `packages/adapter-protocol/src/gateway.ts`
+- `packages/domain/src/task.ts`
+- `packages/domain/src/timing.ts`
+- `packages/persistence-postgres/src/tasks.ts`
+- `packages/task-engine/src/command-dispatcher.ts`
+- `packages/task-engine/src/engine.ts`
+- `packages/task-engine/src/scheduler.ts`
+- `tests/integration/task-lifecycle-postgres.test.ts`
+- `tests/rc2/rc1-red-regressions.test.ts`
+- `tests/unit/timing.test.ts`
+- `vitest.config.ts`
+- synchronized `.github/REPOSITORY_POLICY.md` and immutable-tag ruleset formatting
+- `docs/implementation/runtime-rc2-hardening-exec-plan.md`
+- `docs/implementation/runtime-rc2-requirement-traceability.md`
+- `reports/runtime-v1-rc2/phase-H2/*`

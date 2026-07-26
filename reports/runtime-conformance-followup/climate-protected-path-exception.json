@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "recorded_on": "2026-07-22",
+  "authorization": {
+    "source": "user",
+    "scope": "Allow updating the protected Home Assistant Climate provider conformance report",
+    "affected_path": "reports/home-assistant-climate/provider-conformance.json"
+  },
+  "generator": "node scripts/provider-conformance-report.mjs --provider home-assistant-climate --write",
+  "verification": {
+    "command": "pnpm protocol:ha-climate:check",
+    "status": "pass",
+    "cases_passed": 8,
+    "cases_total": 8
+  },
+  "unchanged_scope": [
+    "Home Assistant Climate provider implementation",
+    "Home Assistant Climate provider tests",
+    "Provider conformance report generator"
+  ]
+}

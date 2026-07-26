@@ -1,0 +1,7 @@
+{
+  "providerId": "provider.demo",
+  "sourceId": "adapter.vehicle",
+  "sourceStreamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+  "sourceEventId": "evt-0001",
+  "expectedEventId": "nZ_hzhW-zrueWt69x9wP5gq-T_rLs_WgSgyTE7jER_o"
+}

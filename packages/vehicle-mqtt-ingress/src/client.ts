@@ -1,0 +1,100 @@
+import { readFileSync } from "node:fs";
+import { connect, type IClientOptions, type MqttClient } from "mqtt";
+import type { VehicleSnapshot } from "../../vehicle-provider-core/src/index.js";
+import type { VehicleMqttIngress } from "./ingress.js";
+import {
+  assertExactNpcTankSubscriptions,
+  assertExactSubscriptions,
+  NPC_TANK_MQTT_TOPICS,
+  UGV_MQTT_TOPICS,
+} from "./topics.js";
+
+export interface UgvMqttClientOptions {
+  url: string;
+  clientId: string;
+  username?: string;
+  passwordFile?: string;
+  tlsMode: "disabled" | "required";
+  tlsCaPath?: string;
+  tlsCertPath?: string;
+  tlsKeyPath?: string;
+  sessionMode: "clean" | "persistent";
+  reconnectMinMs: number;
+  reconnectMaxMs: number;
+}
+
+export class VehicleMqttClient {
+  #client: MqttClient | undefined;
+  constructor(
+    readonly options: UgvMqttClientOptions,
+    readonly ingress: VehicleMqttIngress<VehicleSnapshot>,
+    readonly topics: readonly string[],
+    readonly validateSubscriptions: (topics: readonly string[]) => void,
+    readonly errorPrefix: "UGV" | "NPC_TANK",
+  ) {}
+  start(): void {
+    if (this.#client !== undefined) return;
+    this.validateSubscriptions(this.topics);
+    const client = connect(this.options.url, mqttOptions(this.options));
+    this.#client = client;
+    client.on("connect", () => {
+      this.ingress.setConnected(true);
+      for (const topic of this.topics)
+        client.subscribe(topic, { qos: topic.endsWith("/speed") ? 0 : 1 });
+    });
+    client.on("offline", () => this.ingress.setConnected(false));
+    client.on("close", () => this.ingress.setConnected(false));
+    client.on("message", (topic, payload, packet) => {
+      try {
+        this.ingress.handle(topic, payload, packet.retain);
+      } catch {
+        // Malformed messages are isolated; callers observe rejection telemetry separately.
+      }
+    });
+  }
+  async stop(): Promise<void> {
+    const client = this.#client;
+    this.#client = undefined;
+    if (client !== undefined)
+      await new Promise<void>((resolve, reject) =>
+        client.end(false, {}, (error) => (error === undefined ? resolve() : reject(error))),
+      );
+    this.ingress.setConnected(false);
+  }
+}
+
+export class UgvMqttClient extends VehicleMqttClient {
+  constructor(options: UgvMqttClientOptions, ingress: VehicleMqttIngress) {
+    super(options, ingress, UGV_MQTT_TOPICS, assertExactSubscriptions, "UGV");
+  }
+}
+
+export class NpcTankMqttClient extends VehicleMqttClient {
+  constructor(options: UgvMqttClientOptions, ingress: VehicleMqttIngress<VehicleSnapshot>) {
+    super(options, ingress, NPC_TANK_MQTT_TOPICS, assertExactNpcTankSubscriptions, "NPC_TANK");
+  }
+}
+
+function mqttOptions(options: UgvMqttClientOptions): IClientOptions {
+  if (!options.clientId) throw new Error("UGV_MQTT_CLIENT_ID_REQUIRED");
+  if (
+    options.tlsMode === "required" &&
+    (!options.tlsCaPath || !options.tlsCertPath || !options.tlsKeyPath)
+  )
+    throw new Error("UGV_MQTT_MTLS_FILES_REQUIRED");
+  return {
+    clientId: options.clientId,
+    clean: options.sessionMode === "clean",
+    reconnectPeriod: options.reconnectMinMs,
+    connectTimeout: options.reconnectMaxMs,
+    ...(options.username === undefined ? {} : { username: options.username }),
+    ...(options.passwordFile === undefined
+      ? {}
+      : { password: readFileSync(options.passwordFile, "utf8").trim() }),
+    ...(options.tlsCaPath === undefined ? {} : { ca: readFileSync(options.tlsCaPath) }),
+    ...(options.tlsCertPath === undefined ? {} : { cert: readFileSync(options.tlsCertPath) }),
+    ...(options.tlsKeyPath === undefined ? {} : { key: readFileSync(options.tlsKeyPath) }),
+    rejectUnauthorized: options.tlsMode === "required",
+    resubscribe: true,
+  };
+}

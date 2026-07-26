@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "status": "MOCK_CONTRACT_PASS_REAL_INTERFACE_BLOCKED",
+  "wireModes": ["auto", "ros_message_json", "direct_domain_json"],
+  "exactTopicCount": 12,
+  "topics": [
+    "/ugv/gnss",
+    "/ugv/odom",
+    "/ugv/imu",
+    "/ugv/chassis_state",
+    "/ugv/component_status",
+    "/ugv/system_health",
+    "/ugv/mission_state",
+    "/ugv/nav_state",
+    "/ugv/status",
+    "/ugv/detected_objects",
+    "/ugv/target_detected",
+    "/ugv/target/gnss"
+  ],
+  "wildcardsAllowed": false,
+  "guards": [
+    "payload_bytes",
+    "json_depth",
+    "json_nodes",
+    "string_bytes",
+    "entity_identity",
+    "dedupe",
+    "older_observation"
+  ],
+  "tests": "pnpm test:ugv-provider:unit and pnpm test:ugv-provider:security: 12 passed",
+  "realInterface": { "status": "BLOCKED", "reasonCode": "UGV_MQTT_UNAVAILABLE" }
+}

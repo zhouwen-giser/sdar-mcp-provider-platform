@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "providerId": "isr.vehicle.npc-tank.npc-tank1",
+  "resourceId": "vehicle:npc_tank1",
+  "providerType": "isr.vehicle.npc_tank",
+  "operationCount": 9,
+  "operations": [
+    "vehicle_get_state",
+    "vehicle_get_payload_status",
+    "vehicle_get_targets",
+    "vehicle_laser_range",
+    "vehicle_navigate",
+    "vehicle_area_recon",
+    "vehicle_track_target",
+    "vehicle_fire_weapon",
+    "vehicle_emergency_stop"
+  ],
+  "businessEventSources": ["vehicle.execution", "vehicle.health", "vehicle.target"],
+  "conditionalCapabilities": {
+    "circularEoScan": true,
+    "navigationTool": "npc_tank_path_follow_mission"
+  },
+  "evidence": [
+    "apps/npc-tank-provider-adapter/src/manifest.ts",
+    "pnpm test:npc-tank-provider:contract: 5 passed",
+    "gRPC E2E DescribeProvider returned 9 operations"
+  ]
+}

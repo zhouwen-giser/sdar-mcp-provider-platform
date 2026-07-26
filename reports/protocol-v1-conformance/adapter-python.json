@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": "2026-07-28",
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+  "component": "adapter-python",
+  "claim": "Python Adapter Component Conformant",
+  "scope": {
+    "adapterProtocol": "passed",
+    "runtimeProfile": "partial",
+    "resourceSpecificSafety": "not_claimed"
+  },
+  "summary": {
+    "total": 20,
+    "passed": 20,
+    "failed": 0,
+    "missing": 0
+  },
+  "results": [
+    {
+      "caseId": "ADAPTER-P0-001",
+      "title": "P0 protocol/catalog and synchronous Tool",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P0",
+          "title": "P0 protocol/catalog and synchronous Tool",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P0-002",
+      "title": "P0 persisted task_required lifecycle and terminal read",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P0",
+          "title": "P0 persisted task_required lifecycle and terminal read",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P1-001",
+      "title": "P1 checkAvailability four states, risk and windows",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P1",
+          "title": "P1 checkAvailability four states, risk and windows",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P2-001",
+      "title": "P2 scheduled start is durable and never early",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P2",
+          "title": "P2 scheduled start is durable and never early",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P2-002",
+      "title": "P2 retryable start rejection has a bounded retry identity",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P2",
+          "title": "P2 retryable start rejection has a bounded retry identity",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P3-001",
+      "title": "P3 restricted arbitration accepts or rejects without ambiguity",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P3",
+          "title": "P3 restricted arbitration accepts or rejects without ambiguity",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P3-002",
+      "title": "P3 pause/resume acknowledgements preserve a working execution",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P3",
+          "title": "P3 pause/resume acknowledgements preserve a working execution",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-001",
+      "title": "P4 input_required and multi-round update",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 input_required and multi-round update",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-002",
+      "title": "P4 cancel Ack, safe stop proof and duplicate idempotency",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 cancel Ack, safe stop proof and duplicate idempotency",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-003",
+      "title": "P4 invocation idempotency duplicate and conflict",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 invocation idempotency duplicate and conflict",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-004",
+      "title": "P4 frozen reservation reference is bound to Start identity",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 frozen reservation reference is bound to Start identity",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-005",
+      "title": "P4 frozen MRTR request and keyed response",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 frozen MRTR request and keyed response",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-006",
+      "title": "P4 frozen type-only Evidence projection",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 frozen type-only Evidence projection",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-007",
+      "title": "P4 response-loss Reconcile without duplicate identity",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 response-loss Reconcile without duplicate identity",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-008",
+      "title": "P4 Adapter task/argument identity conflict",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 Adapter task/argument identity conflict",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-009",
+      "title": "P4 Adapter output mismatch becomes a failed Task",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 Adapter output mismatch becomes a failed Task",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-010",
+      "title": "P4 command sequence mismatch is observable",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 command sequence mismatch is observable",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-011",
+      "title": "P4 safe-stop permanent, retryable and transport rejection",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 safe-stop permanent, retryable and transport rejection",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-012",
+      "title": "P4 Adapter process restart retains execution binding",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 Adapter process restart retains execution binding",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "caseId": "ADAPTER-P4-013",
+      "title": "P4 terminal irreversibility and observation/outbox idempotency",
+      "status": "pass",
+      "component": "adapter-python",
+      "evidence": [
+        {
+          "file": "reports/conformance/python.json",
+          "group": "P4",
+          "title": "P4 terminal irreversibility and observation/outbox idempotency",
+          "status": "pass"
+        }
+      ]
+    }
+  ]
+}

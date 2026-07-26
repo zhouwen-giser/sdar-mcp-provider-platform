@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdar.dev/protocol/v1/mcp-stateless-base.schema.json",
+  "title": "Frozen MCP Stateless Base 2026-07-28",
+  "$defs": {
+    "RequestMeta": {
+      "type": "object",
+      "required": [
+        "io.modelcontextprotocol/protocolVersion",
+        "io.modelcontextprotocol/clientInfo",
+        "io.modelcontextprotocol/clientCapabilities"
+      ],
+      "properties": {
+        "io.modelcontextprotocol/protocolVersion": {
+          "const": "2026-07-28"
+        },
+        "io.modelcontextprotocol/clientInfo": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "io.modelcontextprotocol/clientCapabilities": {
+          "type": "object",
+          "properties": {
+            "extensions": {
+              "type": "object",
+              "properties": {
+                "io.modelcontextprotocol/tasks": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "io.modelcontextprotocol/logLevel": {
+          "type": "string"
+        },
+        "io.sdar/taskExecution": {
+          "type": "object"
+        },
+        "progressToken": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "TaskRequestMeta": {
+      "type": "object",
+      "required": [
+        "io.modelcontextprotocol/protocolVersion",
+        "io.modelcontextprotocol/clientInfo",
+        "io.modelcontextprotocol/clientCapabilities"
+      ],
+      "properties": {
+        "io.modelcontextprotocol/protocolVersion": {
+          "const": "2026-07-28"
+        },
+        "io.modelcontextprotocol/clientInfo": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "io.modelcontextprotocol/clientCapabilities": {
+          "type": "object",
+          "properties": {
+            "extensions": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/tasks"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/tasks": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true,
+          "required": [
+            "extensions"
+          ]
+        },
+        "io.modelcontextprotocol/logLevel": {
+          "type": "string"
+        },
+        "io.sdar/taskExecution": {
+          "type": "object"
+        },
+        "progressToken": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "CompleteResult": {
+      "type": "object",
+      "required": [
+        "resultType"
+      ],
+      "properties": {
+        "resultType": {
+          "const": "complete"
+        },
+        "_meta": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "DiscoverRequest": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "method",
+        "params"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "method": {
+          "const": "server/discover"
+        },
+        "params": {
+          "type": "object",
+          "properties": {
+            "_meta": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/protocolVersion",
+                "io.modelcontextprotocol/clientInfo",
+                "io.modelcontextprotocol/clientCapabilities"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/protocolVersion": {
+                  "const": "2026-07-28"
+                },
+                "io.modelcontextprotocol/clientInfo": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "version"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "version": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/clientCapabilities": {
+                  "type": "object",
+                  "properties": {
+                    "extensions": {
+                      "type": "object",
+                      "properties": {
+                        "io.modelcontextprotocol/tasks": {
+                          "type": "object"
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/logLevel": {
+                  "type": "string"
+                },
+                "io.sdar/taskExecution": {
+                  "type": "object"
+                },
+                "progressToken": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "_meta"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiscoverResult": {
+      "type": "object",
+      "required": [
+        "resultType",
+        "supportedVersions",
+        "capabilities",
+        "_meta",
+        "ttlMs",
+        "cacheScope"
+      ],
+      "properties": {
+        "resultType": {
+          "const": "complete"
+        },
+        "supportedVersions": {
+          "const": [
+            "2026-07-28"
+          ]
+        },
+        "capabilities": {
+          "type": "object",
+          "required": [
+            "tools",
+            "extensions"
+          ],
+          "properties": {
+            "tools": {
+              "type": "object"
+            },
+            "extensions": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/tasks",
+                "io.sdar/taskExecution"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/tasks": {
+                  "type": "object"
+                },
+                "io.sdar/taskExecution": {
+                  "type": "object",
+                  "required": [
+                    "profileVersion",
+                    "taskNotifications"
+                  ],
+                  "properties": {
+                    "profileVersion": {
+                      "const": "1.0"
+                    },
+                    "taskNotifications": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "_meta": {
+          "type": "object",
+          "required": [
+            "io.modelcontextprotocol/serverInfo"
+          ],
+          "properties": {
+            "io.modelcontextprotocol/serverInfo": {
+              "type": "object",
+              "required": [
+                "name",
+                "version"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "ttlMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cacheScope": {
+          "const": "public"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/DiscoverRequest"
+    },
+    {
+      "$ref": "#/$defs/DiscoverResult"
+    }
+  ]
+}

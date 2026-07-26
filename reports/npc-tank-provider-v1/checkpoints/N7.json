@@ -1,0 +1,11 @@
+{
+  "phase": "N7",
+  "name": "Recovery / Isolation",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/recovery.json",
+    "reports/npc-tank-provider-v1/security.json"
+  ],
+  "gitOperationsPerformed": false
+}

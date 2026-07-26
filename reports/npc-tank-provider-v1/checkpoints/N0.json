@@ -1,0 +1,15 @@
+{
+  "phase": "N0",
+  "name": "Workspace Baseline",
+  "status": "PASS_WITH_INHERITED_DOCUMENT_METADATA_DRIFT",
+  "completedAt": "2026-07-23T05:23:04Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/workspace-baseline.json",
+    "reports/npc-tank-provider-v1/workspace-baseline-files.sha256",
+    "reports/npc-tank-provider-v1/source-document-lock.json",
+    "reports/npc-tank-provider-v1/protocol-input-lock.json",
+    "reports/ugv-provider-v1/final-delivery-summary.json"
+  ],
+  "gitOperationsPerformed": false,
+  "next": "N1 Reuse Audit"
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "providerId": "isr.vehicle.ugv.ugv1",
+  "resourceId": "vehicle:ugv1",
+  "executionMode": "simulation",
+  "runtimeEndpoint": "http://ugv-runtime:19100/mcp",
+  "adapterEndpoint": "ugv-adapter:7010",
+  "deviceMcpEndpoint": "http://mock-ugv-device-mcp:19000/mcp",
+  "components": [
+    "apps/ugv-provider-adapter",
+    "packages/provider-adapter-kit",
+    "packages/vehicle-provider-core",
+    "packages/vehicle-mqtt-ingress",
+    "packages/vehicle-device-mcp-client",
+    "apps/mock-ugv-device-mcp",
+    "apps/mock-ugv-mqtt-publisher"
+  ],
+  "persistence": {
+    "engine": "PostgreSQL",
+    "migration": "packages/provider-adapter-kit/migrations/024_ugv_provider.sql",
+    "stores": ["execution", "command_ack", "device_tool_call", "snapshot", "business_event_source"]
+  },
+  "truthBoundary": {
+    "stateSources": ["MQTT", "UGV Device MCP"],
+    "videoStored": false,
+    "refereeDataAllowed": false,
+    "fireVerdictDataAllowed": false
+  }
+}

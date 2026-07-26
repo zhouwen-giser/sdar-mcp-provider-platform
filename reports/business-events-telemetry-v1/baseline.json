@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "8a81b1b02971fb124ed96372c440c449f9087c99",
+  "reportCommit": "29ed5a5800bc04ad0b11fd4f6bcb7c49ac441c18",
+  "ciRun": null,
+  "testCommand": "git status --porcelain && git merge-base --is-ancestor 8a81b1b02971fb124ed96372c440c449f9087c99 origin/main && sha256sum docs/requirements/SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md",
+  "startedAt": "2026-07-22T00:00:00.000Z",
+  "endedAt": "2026-07-22T00:00:01.000Z",
+  "durationMs": 1000,
+  "exitCode": 0,
+  "status": "PASS",
+  "baseSha": "8a81b1b02971fb124ed96372c440c449f9087c99",
+  "baseTree": "d2ce09003960815eeda29600fa107b2b94ba32b9",
+  "minimumRequiredAncestor": "8a81b1b02971fb124ed96372c440c449f9087c99",
+  "requirementsSha256": "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
+  "featureDefault": false,
+  "gaps": [
+    "business event metrics do not enter ProviderTelemetry",
+    "business event labels are not runtime bounded",
+    "ProviderTelemetry gauge retains only one attribute series",
+    "publication barrier gauge is not reset on every terminal path",
+    "business event authoritative transactions do not capture Provider Ops audit rows",
+    "StreamBusinessEvents has no streaming client trace hook",
+    "business event flows lack dedicated safe trace and diagnostic events",
+    "telemetry initialization occurs after business event worker construction"
+  ],
+  "evidenceFiles": [
+    "apps/runtime/src/runtime.ts",
+    "apps/runtime/src/business-events/source-client.ts",
+    "packages/observability/src/telemetry.ts",
+    "packages/persistence-postgres/src/business-events.ts",
+    "packages/adapter-protocol/src/gateway.ts"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-07-22T02:38:00+08:00",
+  "scenario": "one authorization scope with 256 unique Task bindings",
+  "batchSize": 256,
+  "taskQueries": 1,
+  "inputRequestQueries": 1,
+  "totalRepositoryQueries": 2,
+  "individualTaskQueries": 0,
+  "pollLoopsPerRuntime": 1,
+  "evidence": "tests/runtime-conformance-closure/notification-batch.test.ts",
+  "status": "passed"
+}

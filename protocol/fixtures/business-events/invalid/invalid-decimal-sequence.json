@@ -1,0 +1,17 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "listenRequest",
+  "instance": {
+    "jsonrpc": "2.0",
+    "id": 30,
+    "method": "io.sdar/businessEvents/listen",
+    "params": {
+      "cursor": { "streamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001", "afterSequence": "01" },
+      "_meta": {
+        "io.modelcontextprotocol/clientCapabilities": {
+          "extensions": { "io.sdar/businessEvents": { "profileVersion": "1.0" } }
+        }
+      }
+    }
+  }
+}

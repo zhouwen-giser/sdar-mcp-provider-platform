@@ -1,0 +1,86 @@
+name: runtime-ci
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-ci:
+    name: runtime-ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_runtime_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_runtime_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          version: 1.57.2
+          github_token: ${{ github.token }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:v2
+      - run: buf lint proto
+      - name: Check Protobuf compatibility against rc.1
+        run: buf breaking proto --against '.git#tag=v1.0.0-rc.1,subdir=proto'
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-reports
+          path: reports/conformance/*.json
+          if-no-files-found: warn
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence
+          path: |
+            reports/capacity/*.json
+            reports/runtime-conformance-followup/**
+            reports/protocol-v1-conformance/*
+            reports/protocol-v1-migration/*.json
+            reports/sbom/*.json
+            reports/business-events-profile-v1/**
+          if-no-files-found: warn
+
+  runtime-compose:
+    name: runtime-compose
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config -q
+      - run: docker compose build runtime adapter-typescript
+      - run: docker compose --profile python-adapter build adapter-python
+      - run: docker compose up --detach --wait --wait-timeout 120
+      - run: curl --fail --silent --show-error http://127.0.0.1:8080/health/ready
+      - run: docker compose down --volumes
+      - run: docker compose --profile business-events up --detach --wait --wait-timeout 120 runtime-business-events
+      - run: curl --fail --silent --show-error http://127.0.0.1:8081/health/ready
+      - if: always()
+        run: docker compose down --volumes

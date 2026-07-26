@@ -1,0 +1,229 @@
+{
+  "mode": "captured",
+  "capturedAt": "2026-07-23T03:19:18.411Z",
+  "serverInfo": {
+    "name": "mock-ugv-device-mcp",
+    "version": "1.0.0"
+  },
+  "protocolVersion": "2025-11-25",
+  "tools": [
+    {
+      "name": "ugv_path_follow_mission",
+      "description": "Mock-only UGV fixture tool ugv_path_follow_mission.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_return_home",
+      "description": "Mock-only UGV fixture tool ugv_return_home.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_move_distance",
+      "description": "Mock-only UGV fixture tool ugv_move_distance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_mission_control",
+      "description": "Mock-only UGV fixture tool ugv_mission_control.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_stop",
+      "description": "Mock-only UGV fixture tool ugv_stop.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_attack_target",
+      "description": "Mock-only UGV fixture tool ugv_attack_target.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_configure",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_configure.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_lock",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_lock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_unlock",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_unlock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_gimbal_move",
+      "description": "Mock-only UGV fixture tool ugv_gimbal_move.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_attack_confirm",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_attack_confirm.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_control",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_control.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_reset",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_reset.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_get_status",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_get_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_get_targets",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_get_targets.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_area_recon_get_exceptions",
+      "description": "Mock-only UGV fixture tool ugv_area_recon_get_exceptions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_laser_range",
+      "description": "Mock-only UGV fixture tool ugv_laser_range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    },
+    {
+      "name": "ugv_get_capabilities",
+      "description": "Mock-only UGV fixture tool ugv_get_capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "capturedAt": "2026-07-23T03:19:18.404Z",
+      "schemaHash": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15"
+    }
+  ],
+  "callableTools": [
+    "ugv_path_follow_mission",
+    "ugv_return_home",
+    "ugv_move_distance",
+    "ugv_mission_control",
+    "ugv_stop",
+    "ugv_attack_target",
+    "ugv_area_recon_configure",
+    "ugv_area_recon_lock",
+    "ugv_area_recon_unlock",
+    "ugv_gimbal_move",
+    "ugv_area_recon_attack_confirm",
+    "ugv_area_recon_control",
+    "ugv_area_recon_reset",
+    "ugv_area_recon_get_status",
+    "ugv_area_recon_get_targets",
+    "ugv_area_recon_get_exceptions",
+    "ugv_laser_range",
+    "ugv_get_capabilities"
+  ]
+}

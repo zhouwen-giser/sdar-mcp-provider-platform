@@ -1,0 +1,20 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "discoveryExtension",
+  "instance": {
+    "profileVersion": "1.0",
+    "delivery": "post_sse",
+    "scopes": ["task", "resource"],
+    "resumeMode": "stream_sequence",
+    "maxRelatedTaskIds": 256,
+    "retentionMs": 604800000,
+    "authorizationModel": "subscription_snapshot_projection",
+    "relationOverflow": "paged_query",
+    "streamCancellation": "connection_close",
+    "continuityClass": "mixed",
+    "sources": [
+      { "sourceId": "adapter.live", "deliverySemantics": "best_effort_live" },
+      { "sourceId": "adapter.vehicle", "deliverySemantics": "durable_at_least_once" }
+    ]
+  }
+}

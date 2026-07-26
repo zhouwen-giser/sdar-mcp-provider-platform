@@ -1,0 +1,22 @@
+{
+  "databaseMode": "real-postgresql",
+  "tableRowCount": {
+    "provider_task": 5000,
+    "task_input_request": 5000
+  },
+  "requestedTaskCount": 256,
+  "providerTask": {
+    "planNode": "Index Scan",
+    "indexName": "provider_task_pkey",
+    "executionTimeMs": 0.127,
+    "sharedHitBlocks": 16,
+    "sharedReadBlocks": 0
+  },
+  "taskInputRequest": {
+    "planNode": "Bitmap Heap Scan",
+    "indexName": "task_input_request_pkey",
+    "executionTimeMs": 0.209,
+    "sharedHitBlocks": 9,
+    "sharedReadBlocks": 0
+  }
+}

@@ -1,0 +1,473 @@
+syntax = "proto3";
+
+package io.sdar.mcp.tasks.adapter.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+// Language-neutral boundary between the SDAR Runtime and one resource Adapter.
+service ResourceProviderAdapter {
+  rpc DescribeProvider(DescribeProviderRequest) returns (ProviderManifest);
+  rpc CheckAvailability(CheckAvailabilityRequest) returns (CheckAvailabilityResponse);
+  rpc StartOperation(StartOperationRequest) returns (StartOperationResponse);
+  rpc GetExecution(GetExecutionRequest) returns (ExecutionSnapshot);
+  rpc RequestCancel(RequestCancelRequest) returns (CommandAck);
+  rpc ReconcileExecution(ReconcileExecutionRequest) returns (ReconcileExecutionResponse);
+  rpc UpdateExecution(UpdateExecutionRequest) returns (CommandAck);
+  rpc PauseExecution(PauseExecutionRequest) returns (CommandAck);
+  rpc ResumeExecution(ResumeExecutionRequest) returns (CommandAck);
+  rpc StreamExecutionEvents(StreamExecutionEventsRequest) returns (stream ExecutionEvent);
+  rpc StreamBusinessEvents(StreamBusinessEventsRequest) returns (stream AdapterBusinessEvent);
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse);
+}
+
+enum ExecutionMode {
+  EXECUTION_MODE_UNSPECIFIED = 0;
+  LIVE = 1;
+  SIMULATION = 2;
+  HISTORICAL_REPLAY = 3;
+}
+
+enum OperationExecution {
+  OPERATION_EXECUTION_UNSPECIFIED = 0;
+  SYNCHRONOUS = 1;
+  TASK_CAPABLE = 2;
+  TASK_REQUIRED = 3;
+}
+
+enum InventoryMode {
+  INVENTORY_MODE_UNSPECIFIED = 0;
+  RUNTIME_VISIBLE = 1;
+  OPAQUE = 2;
+}
+
+enum AvailabilityState {
+  AVAILABILITY_STATE_UNSPECIFIED = 0;
+  AVAILABLE = 1;
+  RESTRICTED = 2;
+  DISABLED = 3;
+  UNKNOWN = 4;
+}
+
+enum RiskLevel {
+  RISK_LEVEL_UNSPECIFIED = 0;
+  LOW = 1;
+  MEDIUM = 2;
+  HIGH = 3;
+  CRITICAL = 4;
+}
+
+enum ReservationMode {
+  RESERVATION_MODE_UNSPECIFIED = 0;
+  NONE = 1;
+  BEST_EFFORT = 2;
+  GUARANTEED = 3;
+}
+
+enum AdapterExecutionState {
+  ADAPTER_EXECUTION_STATE_UNSPECIFIED = 0;
+  ACCEPTED = 1;
+  SCHEDULED = 2;
+  QUEUED = 3;
+  RUNNING = 4;
+  PAUSED = 5;
+  RESUMING = 6;
+  WAITING_INPUT = 7;
+  STOPPING = 8;
+  SUCCEEDED = 20;
+  BUSINESS_FAILED = 21;
+  PARTIALLY_COMPLETED = 22;
+  CANCELLED = 23;
+  TECHNICAL_FAILED = 24;
+}
+
+enum StopReason {
+  STOP_REASON_UNSPECIFIED = 0;
+  USER_REQUESTED = 1;
+  DEADLINE_REACHED = 2;
+  START_WINDOW_MISSED = 3;
+  RUNTIME_SHUTDOWN = 4;
+}
+
+enum ReconcileStatus {
+  RECONCILE_STATUS_UNSPECIFIED = 0;
+  FOUND = 1;
+  NOT_FOUND = 2;
+  TRANSIENT_UNAVAILABLE = 3;
+  CONFLICT = 4;
+}
+
+message RequestMetadata {
+  string adapter_protocol_version = 1;
+  string provider_id = 2;
+  string correlation_id = 3;
+}
+
+message ExecutionContext {
+  string authorization_context_hash = 1;
+  ExecutionMode execution_mode = 2;
+  string simulation_id = 3;
+  string correlation_id = 4;
+}
+
+message OperationCapabilities {
+  bool availability = 1;
+  bool scheduling = 2;
+  bool max_elapsed = 3;
+  bool cancel = 4;
+  bool pause_resume = 5;
+  bool input_required = 6;
+  bool idempotency = 7;
+  bool observations = 8;
+}
+
+message ResourceBinding {
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+    NONE = 1;
+    ARGUMENT_REFERENCE = 2;
+  }
+  Mode mode = 1;
+  string resource_id_json_pointer = 2;
+}
+
+message OperationDefinition {
+  string name = 1;
+  string description = 2;
+  OperationExecution execution = 3;
+  google.protobuf.Struct input_schema = 4;
+  google.protobuf.Struct output_schema = 5;
+  OperationCapabilities capabilities = 6;
+  ResourceBinding resource_binding = 7;
+}
+
+message DescribeProviderRequest {
+  RequestMetadata metadata = 1;
+}
+
+message ProviderManifest {
+  string adapter_protocol_version = 1;
+  string provider_id = 2;
+  string provider_type = 3;
+  string provider_version = 4;
+  InventoryMode inventory_mode = 5;
+  repeated OperationDefinition operations = 6;
+  repeated BusinessEventSourceCapability business_event_sources = 7;
+}
+
+message BusinessEventSourceCapability {
+  string source_id = 1;
+  string source_stream_id = 2;
+  string delivery_semantics = 3;
+  bool replay_supported = 4;
+  uint64 source_retention_ms = 5;
+  uint64 max_event_bytes = 6;
+  uint32 max_payload_depth = 7;
+  uint32 max_payload_nodes = 8;
+  uint64 max_payload_string_bytes = 9;
+}
+
+message StreamBusinessEventsRequest {
+  RequestMetadata metadata = 1;
+  string source_id = 2;
+  string source_stream_id = 3;
+  optional uint64 after_source_sequence = 4;
+}
+
+message AdapterBusinessEvent {
+  string source_event_id = 1;
+  uint64 source_sequence = 2;
+  string source_stream_id = 3;
+  string scope = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string event_type = 6;
+  string description = 7;
+  optional string external_execution_id = 8;
+  optional string resource_ref = 9;
+  string severity_hint = 10;
+  string reason_code = 11;
+  google.protobuf.Struct raw_payload = 12;
+}
+
+message TaskStart {
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+    IMMEDIATE = 1;
+    SCHEDULED = 2;
+  }
+  Mode mode = 1;
+  google.protobuf.Timestamp scheduled_at = 2;
+  uint64 start_tolerance_ms = 3;
+}
+
+message TaskTiming {
+  TaskStart start = 1;
+  optional uint64 max_elapsed_ms = 2;
+}
+
+message UnresolvedArguments {
+  google.protobuf.Struct known_arguments = 1;
+  repeated string unresolved_paths = 2;
+}
+
+message AvailabilityCheck {
+  string request_id = 1;
+  string operation_name = 2;
+  oneof arguments_value {
+    google.protobuf.Struct arguments = 3;
+    UnresolvedArguments unresolved_arguments = 4;
+  }
+  TaskTiming timing = 5;
+}
+
+message CheckAvailabilityRequest {
+  RequestMetadata metadata = 1;
+  ExecutionContext execution_context = 2;
+  repeated AvailabilityCheck checks = 3;
+}
+
+message AvailableWindow {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+}
+
+message AvailabilityResult {
+  string request_id = 1;
+  string operation_name = 2;
+  AvailabilityState availability = 3;
+  RiskLevel risk_level = 4;
+  string reason_code = 5;
+  string description = 6;
+  google.protobuf.Timestamp valid_until = 7;
+  google.protobuf.Timestamp earliest_start_time = 8;
+  repeated AvailableWindow next_available_windows = 9;
+  uint64 estimated_delay_ms = 10;
+  repeated string possible_effects = 11;
+  ReservationMode reservation_mode = 12;
+  optional string reservation_ref = 13;
+}
+
+message CheckAvailabilityResponse {
+  string profile_version = 1;
+  google.protobuf.Timestamp checked_at = 2;
+  repeated AvailabilityResult checks = 3;
+}
+
+message StartOperationRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string operation_name = 3;
+  google.protobuf.Struct arguments = 4;
+  TaskTiming timing = 5;
+  ExecutionContext execution_context = 6;
+  string argument_hash = 7;
+  uint32 invocation_attempt = 8;
+  optional string reservation_ref = 9;
+}
+
+message Alternative {
+  google.protobuf.Timestamp suggested_start_time = 1;
+  string operation_name = 2;
+  google.protobuf.Struct arguments = 3;
+  string description = 4;
+}
+
+message AdmissionRejected {
+  string reason_code = 1;
+  string message = 2;
+  bool retryable = 3;
+  repeated Alternative alternatives = 4;
+}
+
+message Progress {
+  optional double current = 1;
+  optional double total = 2;
+  string unit = 3;
+  optional double percentage = 4;
+}
+
+message InputRequest {
+  option deprecated = true;
+  string key = 1;
+  string description = 2;
+  google.protobuf.Struct input_schema = 3;
+  bool required = 4;
+}
+
+message McpTaskInputRequest {
+  string key = 1;
+  string method = 2;
+  google.protobuf.Struct params = 3;
+}
+
+message McpTaskInputResponse {
+  string key = 1;
+  google.protobuf.Struct result = 2;
+}
+
+message EvidencePayloadRef {
+  string kind = 1;
+  optional string json_pointer = 2;
+  optional string uri = 3;
+  optional string media_type = 4;
+  optional string sha256 = 5;
+}
+
+message EvidenceItem {
+  string evidence_id = 1;
+  string evidence_type = 2;
+  string observed_at = 3;
+  optional string subject_ref = 4;
+  EvidencePayloadRef payload_ref = 5;
+  repeated string producer = 6;
+}
+
+message ExecutionSnapshot {
+  string task_id = 1;
+  string external_execution_id = 2;
+  AdapterExecutionState state = 3;
+  uint64 revision = 4;
+  string reason_code = 5;
+  string message = 6;
+  Progress progress = 7;
+  repeated InputRequest input_requests = 8 [deprecated = true];
+  google.protobuf.Struct result = 9;
+  bool retryable = 10;
+  repeated Alternative alternatives = 11;
+  google.protobuf.Timestamp observed_at = 12;
+  string operation_name = 13;
+  string argument_hash = 14;
+  ExecutionContext execution_context = 15;
+  repeated EvidenceItem evidence = 16;
+  repeated McpTaskInputRequest mcp_input_requests = 17;
+}
+
+message ExecutionAccepted {
+  string external_execution_id = 1;
+  ExecutionSnapshot initial_snapshot = 2;
+}
+
+message StartOperationResponse {
+  // All operation execution kinds use this RPC. SYNCHRONOUS requires an
+  // accepted terminal initial_snapshot and never publishes an MCP Task.
+  // TASK_CAPABLE publishes only nonterminal accepted snapshots.
+  // TASK_REQUIRED always publishes after acceptance, including terminal initial
+  // snapshots. Scheduled acceptance always publishes a Task; the Runtime calls
+  // this method no earlier than scheduled_at.
+  oneof result {
+    ExecutionAccepted accepted = 1;
+    AdmissionRejected rejected = 2;
+  }
+}
+
+message GetExecutionRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string external_execution_id = 3;
+  ExecutionContext execution_context = 4;
+}
+
+message SideEffectIdentity {
+  string task_id = 1;
+  string operation_name = 2;
+  string argument_hash = 3;
+  ExecutionContext execution_context = 4;
+  uint64 command_sequence = 5;
+  string external_execution_id = 6;
+}
+
+message RequestCancelRequest {
+  RequestMetadata metadata = 1;
+  SideEffectIdentity identity = 2;
+  StopReason reason = 3;
+}
+
+message UpdateValue {
+  option deprecated = true;
+  string input_request_key = 1;
+  google.protobuf.Value value = 2;
+  string answer_hash = 3;
+}
+
+message UpdateExecutionRequest {
+  RequestMetadata metadata = 1;
+  SideEffectIdentity identity = 2;
+  repeated UpdateValue inputs = 3 [deprecated = true];
+  repeated McpTaskInputResponse input_responses = 4;
+}
+
+message PauseExecutionRequest {
+  RequestMetadata metadata = 1;
+  SideEffectIdentity identity = 2;
+  string reason_code = 3;
+}
+
+message ResumeExecutionRequest {
+  RequestMetadata metadata = 1;
+  SideEffectIdentity identity = 2;
+  string reason_code = 3;
+}
+
+message CommandAck {
+  bool accepted = 1;
+  string reason_code = 2;
+  string message = 3;
+  uint64 command_sequence = 4;
+  SideEffectIdentity identity = 5;
+}
+
+message ReconcileExecutionRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string operation_name = 3;
+  string argument_hash = 4;
+  ExecutionContext execution_context = 5;
+  string external_execution_id = 6;
+}
+
+message ReconcileExecutionResponse {
+  ReconcileStatus status = 1;
+  ExecutionSnapshot snapshot = 2;
+  string external_execution_id = 3;
+  string reason_code = 4;
+  string message = 5;
+  bool retryable = 6;
+}
+
+message StreamExecutionEventsRequest {
+  GetExecutionRequest execution = 1;
+  uint64 after_revision = 2;
+}
+
+message ExecutionEvent {
+  string task_id = 1;
+  uint64 revision = 2;
+  string type = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  string reason_code = 5;
+  Progress progress = 6;
+  ExecutionSnapshot snapshot = 7;
+}
+
+message ListResourcesRequest {
+  RequestMetadata metadata = 1;
+  ExecutionContext execution_context = 2;
+  string page_token = 3;
+  uint32 page_size = 4;
+}
+
+message ResourceInstance {
+  string resource_id = 1;
+  string display_name = 2;
+  string resource_type = 3;
+  bool enabled = 4;
+  string health = 5;
+  map<string, string> labels = 6;
+  google.protobuf.Struct metadata = 7;
+  google.protobuf.Timestamp last_seen_at = 8;
+}
+
+message ListResourcesResponse {
+  repeated ResourceInstance resources = 1;
+  string next_page_token = 2;
+}

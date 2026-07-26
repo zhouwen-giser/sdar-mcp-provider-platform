@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "selectionTime": "startup",
+  "selected": "npc_tank_path_follow_mission",
+  "primaryValid": true,
+  "fallbackValid": true,
+  "reasonCode": "NPC_TANK_NAVIGATION_PRIMARY_SELECTED",
+  "contractHash": "bf523897b6522065324685ccc9ec80e6f182360dd9388beffb5d0eeb8a779081",
+  "rule": "Prefer npc_tank_path_follow_mission; use npc_tank_send_waypoints only when primary contract is invalid or absent.",
+  "evidenceMode": "captured Streamable HTTP Mock MCP tools/list"
+}

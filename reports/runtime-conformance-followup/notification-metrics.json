@@ -1,0 +1,81 @@
+{
+  "generatedFrom": "vitest-json-reporter",
+  "category": "MRTR Unit/Mock Tests",
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies sent, closed, and replica-limit outcomes without identities",
+      "status": "passed",
+      "durationMs": 7.995601000000022,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics keeps subscription behavior fail-open when metrics throw",
+      "status": "passed",
+      "durationMs": 1.5046140000000037,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies authorization_limit capacity rejection",
+      "status": "passed",
+      "durationMs": 2.3507250000000113,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies binding_limit capacity rejection",
+      "status": "passed",
+      "durationMs": 2.1551660000000084,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies queue_message_limit overflow",
+      "status": "passed",
+      "durationMs": 0.9068429999999807,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies queue_byte_limit overflow",
+      "status": "passed",
+      "durationMs": 0.7883709999999837,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    },
+    {
+      "testFile": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+      "testTitle": "notification low-cardinality metrics classifies same-revision suppression as deduplicated",
+      "status": "passed",
+      "durationMs": 10.297742999999969,
+      "databaseMode": "unit-mock",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    }
+  ]
+}

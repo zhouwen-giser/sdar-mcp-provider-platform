@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "status": "MOCK_CONTRACT_PASS_REAL_INTERFACE_BLOCKED",
+  "transport": "MCP Streamable HTTP",
+  "endpointPort": 19003,
+  "startupSequence": ["initialize", "tools/list"],
+  "allowlistCount": 23,
+  "capture": "reports/npc-tank-provider-v1/external-contract/npc-tank-device-mcp-tools.json",
+  "mockSmoke": {
+    "status": "PASS",
+    "mode": "captured",
+    "toolCount": 23,
+    "laserResult": {
+      "distance_m": 95.5,
+      "valid": true
+    },
+    "navigation": {
+      "selected": "npc_tank_path_follow_mission",
+      "primaryValid": true,
+      "fallbackValid": true,
+      "reasonCode": "NPC_TANK_NAVIGATION_PRIMARY_SELECTED",
+      "contractHash": "bf523897b6522065324685ccc9ec80e6f182360dd9388beffb5d0eeb8a779081"
+    },
+    "circularScanSupported": true
+  },
+  "realInterface": {
+    "status": "BLOCKED",
+    "reasonCode": "NPC_DEVICE_MCP_UNAVAILABLE"
+  }
+}

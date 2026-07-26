@@ -1,0 +1,6 @@
+{
+  "name": "@sdar/task-engine",
+  "version": "2.0.0-rc.1",
+  "private": true,
+  "type": "module"
+}

@@ -1,0 +1,21 @@
+# H1 Changed Files
+
+- `apps/runtime/src/runtime.ts`
+- `docs/database/migrations.md`
+- `docs/decisions/ADR-004-durable-control-command-dispatch.md`
+- `examples/mock-adapter-typescript/src/server.ts`
+- `migrations/007_durable_command_dispatch.sql`
+- `packages/conformance-testkit/src/runner.ts`
+- `packages/persistence-postgres/src/tasks.ts`
+- `packages/task-engine/src/command-dispatcher.ts`
+- `packages/task-engine/src/engine.ts`
+- `packages/task-engine/src/index.ts`
+- `packages/task-engine/src/recovery.ts`
+- `packages/task-engine/src/scheduler.ts`
+- `tests/contract/adapter-proto.test.ts`
+- `tests/integration/task-lifecycle-postgres.test.ts`
+- `tests/rc2/rc1-red-regressions.test.ts`
+- `tests/recovery/runtime-recovery-postgres.test.ts`
+- `docs/implementation/runtime-rc2-hardening-exec-plan.md`
+- `docs/implementation/runtime-rc2-requirement-traceability.md`
+- `reports/runtime-v1-rc2/phase-H1/*`

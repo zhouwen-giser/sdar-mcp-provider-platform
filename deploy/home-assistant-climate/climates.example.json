@@ -1,0 +1,12 @@
+{
+  "resources": [
+    {
+      "resourceId": "living-room-air-conditioner",
+      "entityId": "climate.living_room_air_conditioner",
+      "displayName": "Living room air conditioner",
+      "enabled": true,
+      "temperatureRange": { "minimum": 16, "maximum": 30 },
+      "allowedHvacModes": ["cool", "heat", "dry", "fan_only", "auto"]
+    }
+  ]
+}

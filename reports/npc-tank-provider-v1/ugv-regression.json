@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "command": "pnpm verify:ugv-provider",
+  "staticChecks": ["format", "eslint", "typescript", "build", "generated self-check"],
+  "tests": {
+    "unit": 9,
+    "contract": 4,
+    "integration": 6,
+    "security": 3,
+    "e2e": 1,
+    "total": 23
+  },
+  "protectedFiles": {
+    "status": "PASS",
+    "count": 10
+  },
+  "npcIsolationCovered": true
+}

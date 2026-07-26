@@ -1,0 +1,12 @@
+{
+  "name": "immutable-v-tags",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/tags/v*"],
+      "exclude": []
+    }
+  },
+  "rules": [{ "type": "update" }, { "type": "deletion" }]
+}

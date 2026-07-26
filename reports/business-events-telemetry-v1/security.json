@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm test:business-events:telemetry:security",
+  "startedAt": "2026-07-22T12:45:56.000Z",
+  "endedAt": "2026-07-22T12:45:57.000Z",
+  "durationMs": 466,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": {
+    "actualOtelExporters": true,
+    "forbiddenFieldsAbsent": true,
+    "forbiddenLabelsRejected": true
+  },
+  "evidenceFiles": [
+    "tests/security/business-event-telemetry-security.test.ts",
+    "packages/observability/src/business-event-sanitizer.ts"
+  ]
+}

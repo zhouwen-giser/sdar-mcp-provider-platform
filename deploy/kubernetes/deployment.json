@@ -1,0 +1,94 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "sdar-runtime",
+    "namespace": "sdar-system",
+    "labels": { "app.kubernetes.io/name": "sdar-runtime" }
+  },
+  "spec": {
+    "replicas": 2,
+    "strategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": { "maxUnavailable": 0, "maxSurge": 1 }
+    },
+    "selector": { "matchLabels": { "app.kubernetes.io/name": "sdar-runtime" } },
+    "template": {
+      "metadata": { "labels": { "app.kubernetes.io/name": "sdar-runtime" } },
+      "spec": {
+        "serviceAccountName": "sdar-runtime",
+        "automountServiceAccountToken": false,
+        "terminationGracePeriodSeconds": 30,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "runAsUser": 1000,
+          "runAsGroup": 1000,
+          "fsGroup": 1000
+        },
+        "containers": [
+          {
+            "name": "runtime",
+            "image": "ghcr.io/zhouwen-giser/sdar-mcp-tasks-provider-runtime:v2.0.0-rc.1",
+            "imagePullPolicy": "IfNotPresent",
+            "ports": [{ "name": "http", "containerPort": 8080, "protocol": "TCP" }],
+            "envFrom": [
+              { "configMapRef": { "name": "sdar-runtime-config" } },
+              { "secretRef": { "name": "sdar-runtime-secrets" } }
+            ],
+            "resources": {
+              "requests": { "cpu": "250m", "memory": "256Mi" },
+              "limits": { "cpu": "1", "memory": "512Mi" }
+            },
+            "startupProbe": {
+              "httpGet": { "path": "/health/ready", "port": "http" },
+              "periodSeconds": 2,
+              "failureThreshold": 60
+            },
+            "readinessProbe": {
+              "httpGet": { "path": "/health/ready", "port": "http" },
+              "periodSeconds": 5,
+              "timeoutSeconds": 2,
+              "failureThreshold": 3
+            },
+            "livenessProbe": {
+              "httpGet": { "path": "/health/live", "port": "http" },
+              "periodSeconds": 10,
+              "timeoutSeconds": 2,
+              "failureThreshold": 3
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": { "drop": ["ALL"] },
+              "seccompProfile": { "type": "RuntimeDefault" }
+            },
+            "volumeMounts": [
+              {
+                "name": "adapter-mtls",
+                "mountPath": "/var/run/secrets/sdar-adapter",
+                "readOnly": true
+              },
+              {
+                "name": "otel-headers",
+                "mountPath": "/var/run/secrets/sdar-otel-headers",
+                "readOnly": true
+              },
+              {
+                "name": "otel-mtls",
+                "mountPath": "/var/run/secrets/sdar-otel-tls",
+                "readOnly": true
+              },
+              { "name": "tmp", "mountPath": "/tmp" }
+            ]
+          }
+        ],
+        "volumes": [
+          { "name": "adapter-mtls", "secret": { "secretName": "sdar-adapter-mtls" } },
+          { "name": "otel-headers", "secret": { "secretName": "sdar-otel-headers" } },
+          { "name": "otel-mtls", "secret": { "secretName": "sdar-otel-mtls" } },
+          { "name": "tmp", "emptyDir": {} }
+        ]
+      }
+    }
+  }
+}

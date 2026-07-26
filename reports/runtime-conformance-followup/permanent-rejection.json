@@ -1,0 +1,21 @@
+{
+  "generatedFrom": "vitest-json-reporter",
+  "category": "MRTR Real PostgreSQL Integration Tests",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "testFile": "tests/runtime-conformance-followup/permanent-update-rejection.test.ts",
+      "testTitle": "permanent UPDATE rejection contract atomically fails Task, Command and MRTR rows and prevents replay",
+      "status": "passed",
+      "durationMs": 158.84926700000005,
+      "databaseMode": "real-postgresql-integration",
+      "implementationCommit": "44eaab3c2e768c7acb789aad3eea7c429d7b35fa",
+      "reportCommit": "40155670ce311cd8957d49fdb8977101f3f9a52f",
+      "ciRun": null
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "sources": [
+    { "sourceId": "vehicle.execution", "delivery": "durable", "scope": "task" },
+    { "sourceId": "vehicle.health", "delivery": "durable", "scope": "resource" },
+    { "sourceId": "vehicle.target", "delivery": "best_effort", "scope": "resource" }
+  ],
+  "replay": true,
+  "refereeEventsAllowed": false,
+  "evidence": [
+    "pnpm protocol:business-events:check: 81 passed",
+    "pnpm test:business-events:adapter-contract: 5 passed",
+    "pnpm test:ugv-provider:integration: durable replay covered"
+  ]
+}

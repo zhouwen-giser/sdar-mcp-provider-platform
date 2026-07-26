@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "caseId": "C-001",
+      "title": "embodied.move exact discovery",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-002",
+      "title": "tool name containing dot",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-003",
+      "title": "tool name containing slash",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-004",
+      "title": "server discover fixed supportedVersions",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-005",
+      "title": "server discover tasks and notification capabilities",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-006",
+      "title": "source commit or schema hash mismatch rejected",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-007",
+      "title": "request missing protocolVersion",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-008",
+      "title": "request missing clientCapabilities",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-009",
+      "title": "SDAR request missing clientInfo",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-010",
+      "title": "client omits tasks extension",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-011",
+      "title": "task_required without tasks extension",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-012",
+      "title": "server returns synchronous result",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-013",
+      "title": "server returns flat CreateTaskResult",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-014",
+      "title": "created task immediately queryable",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-015",
+      "title": "legacy nested task rejected",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-016",
+      "title": "tasks/get working",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-017",
+      "title": "tasks/get input_required",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-018",
+      "title": "partial tasks/update",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-019",
+      "title": "unknown input key ignored",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-020",
+      "title": "answered input key repeated",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-021",
+      "title": "input key reuse detected",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-022",
+      "title": "cancel acknowledgement",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-023",
+      "title": "working after cancel",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-024",
+      "title": "cancelled after cancel",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-025",
+      "title": "completed after cancel",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-026",
+      "title": "ttlMs null",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-027",
+      "title": "TTL extension updates wire value",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-028",
+      "title": "dynamic pollIntervalMs",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-029",
+      "title": "completed with isError false",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-030",
+      "title": "completed with isError true",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-031",
+      "title": "failed with JSON-RPC error",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-032",
+      "title": "evidence hard gate passes",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-033",
+      "title": "evidence missing",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-034",
+      "title": "evidence pointer missing",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-035",
+      "title": "URI evidence missing SHA",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-036",
+      "title": "tasks/observations namespace collision",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-037",
+      "title": "PMS detects legacy tasks",
+      "status": "required",
+      "components": [
+        "runtime",
+        "pms"
+      ]
+    },
+    {
+      "caseId": "C-038",
+      "title": "task queryable after Runtime restart",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-039",
+      "title": "SDAR resumes query after restart",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-040",
+      "title": "sync and async evidence shapes equal",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-041",
+      "title": "HTTP missing MCP-Protocol-Version",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-042",
+      "title": "HTTP missing Mcp-Method",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-043",
+      "title": "applicable request missing Mcp-Name",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-044",
+      "title": "header and body mismatch",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-045",
+      "title": "subscriptions/listen establishes SSE",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-046",
+      "title": "task subscription missing capability",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-047",
+      "title": "subscription acknowledgement is first",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-048",
+      "title": "ack includes only authorized accepted task IDs",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-049",
+      "title": "subscription messages contain subscriptionId",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-050",
+      "title": "current DetailedTask sent after ack",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-051",
+      "title": "input_required notification has full input requests",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-052",
+      "title": "completed notification has result and evidence",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-053",
+      "title": "failed notification has JSON-RPC error",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-054",
+      "title": "duplicate notification idempotent",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-055",
+      "title": "runtime revision does not regress",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-056",
+      "title": "no non-terminal notification after terminal",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-057",
+      "title": "HTTP SSE close releases subscription",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-058",
+      "title": "STDIO cancelled notification stops subscription",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-059",
+      "title": "reconnect fills gap with tasks/get",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-060",
+      "title": "slow consumer closes without blocking task",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-061",
+      "title": "task stream excludes progress notifications",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-062",
+      "title": "task stream excludes message notifications",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-063",
+      "title": "concurrent subscriptions route by request ID",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-064",
+      "title": "unknown or unauthorized tasks not disclosed",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-065",
+      "title": "notification equals tasks/get at same revision",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-066",
+      "title": "missing clientInfo returns Invalid Params",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-067",
+      "title": "CallToolResult missing resultType rejected",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-068",
+      "title": "task_required synchronous success rejected",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-069",
+      "title": "task_required admission_rejected allowed",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-070",
+      "title": "runtime revision consistent across create get notification",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-071",
+      "title": "Provider evidence requirementId rejected",
+      "status": "required",
+      "components": [
+        "runtime",
+        "pms"
+      ]
+    },
+    {
+      "caseId": "C-072",
+      "title": "SDAR binds requirement locally by evidenceType",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    },
+    {
+      "caseId": "C-073",
+      "title": "restricted availability requires valid hint",
+      "status": "required",
+      "components": [
+        "runtime"
+      ]
+    },
+    {
+      "caseId": "C-074",
+      "title": "URI hard-gate evidence requires valid SHA-256",
+      "status": "required",
+      "components": [
+        "runtime",
+        "adapter-typescript",
+        "adapter-python"
+      ]
+    }
+  ]
+}

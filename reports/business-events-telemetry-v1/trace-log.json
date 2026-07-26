@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm exec vitest run tests/unit/business-event-telemetry-export.test.ts tests/business-events/adapter-contract/adapter-source.test.ts tests/business-events/source/source-worker-grpc.test.ts tests/business-events/stream tests/business-events/replay tests/business-events/relation",
+  "startedAt": "2026-07-22T12:37:08.000Z",
+  "endedAt": "2026-07-22T12:37:35.000Z",
+  "durationMs": 27200,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": {
+    "w3cPropagation": true,
+    "grpcClientSpan": true,
+    "safeLogs": true,
+    "regressionTests": 14
+  },
+  "evidenceFiles": [
+    "tests/unit/business-event-telemetry-export.test.ts",
+    "packages/adapter-protocol/src/gateway.ts",
+    "apps/runtime/src/business-events/source-client.ts",
+    "packages/mcp-protocol/src/business-events.ts"
+  ]
+}

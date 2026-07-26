@@ -1,0 +1,33 @@
+services:
+  home-assistant-climate-provider:
+    build:
+      context: ../..
+      target: home-assistant-climate-provider
+    environment:
+      PROVIDER_ID: home-assistant-climate
+      ADAPTER_PORT: 7020
+      HOME_ASSISTANT_URL: ${HOME_ASSISTANT_URL}
+      HOME_ASSISTANT_TOKEN_FILE: /run/secrets/home-assistant-token
+      CLIMATE_RESOURCES_FILE: /app/config/climates.json
+      PROVIDER_STATE_PATH: /var/lib/sdar/state.json
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: runtime:7002
+      RUNTIME_ENV: production
+    volumes:
+      - ./climates.json:/app/config/climates.json:ro
+      - climate-provider-state:/var/lib/sdar
+    secrets:
+      - home-assistant-token
+  runtime:
+    environment:
+      PROVIDER_ID: home-assistant-climate
+      ADAPTER_ENDPOINT: home-assistant-climate-provider:7020
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+    depends_on:
+      home-assistant-climate-provider:
+        condition: service_started
+volumes:
+  climate-provider-state:
+secrets:
+  home-assistant-token:
+    file: ./home-assistant-token.txt

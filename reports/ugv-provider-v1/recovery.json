@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "covered": [
+    "restart_reconcile",
+    "no_duplicate_side_effect",
+    "mqtt_disconnect_availability",
+    "device_timeout_safe_failure",
+    "stale_state_rejection",
+    "missing_tool_contract_drift",
+    "device_ack_not_terminal",
+    "cancel_waits_for_device_confirmation"
+  ],
+  "uncertainMapping": {
+    "internalReasonCode": "UNCERTAIN_EXECUTION_STATE",
+    "frozenWireState": "TRANSIENT_UNAVAILABLE",
+    "reason": "The frozen Adapter Protocol has no UNCERTAIN enum."
+  },
+  "evidence": "pnpm test:ugv-provider:integration and pnpm test:ugv-provider:security: 9 passed"
+}

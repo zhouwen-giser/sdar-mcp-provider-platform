@@ -1,0 +1,26 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "resourceEvent",
+  "instance": {
+    "jsonrpc": "2.0",
+    "method": "notifications/io.sdar/businessEvents",
+    "params": {
+      "streamId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+      "eventId": "nZ_hzhW-zrueWt69x9wP5gq-T_rLs_WgSgyTE7jER_o",
+      "sequence": "2",
+      "sourceId": "adapter.vehicle",
+      "eventType": "vehicle.battery.low",
+      "occurredAt": "2026-07-22T01:00:00Z",
+      "scope": "resource",
+      "description": "Battery is low.",
+      "resourceRef": "vehicle:42",
+      "relatedTaskIds": ["task-1", "task-2"],
+      "relatedTaskCount": 300,
+      "relationTruncated": true,
+      "_meta": {
+        "io.modelcontextprotocol/subscriptionId": 31,
+        "io.sdar/businessEvents": { "profileVersion": "1.0" }
+      }
+    }
+  }
+}

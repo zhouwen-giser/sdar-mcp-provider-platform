@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS_WITH_DOCUMENT_METADATA_DRIFT",
+  "inputs": [
+    {
+      "path": "docs/requirements/SDAR_UGV_Provider_Codex_Work_Task_Package_V1.1.md",
+      "sha256": "2a17349cfebc6764175a59eca41b1811460d74c102201c86bf2b65ca1728eb3c"
+    },
+    {
+      "path": "docs/requirements/SDAR_UGV_Provider_Interface_Protocol_Profile_V1.0.md",
+      "sha256": "b1700a78e18fc2d510a461abcc454b4aa81dbe7bbdc8b891d9e09726e11187f6"
+    }
+  ],
+  "metadataDrift": {
+    "description": "The protocol profile embeds a task-package hash that does not match the supplied task-package bytes.",
+    "impact": "Recorded as provenance drift; implementation follows the supplied V1.1 task package and does not rewrite either input document."
+  },
+  "frozenProtocolCheck": "pnpm test:protocol:frozen: 71 passed",
+  "protectedFileCheck": "PASS, 10 files"
+}

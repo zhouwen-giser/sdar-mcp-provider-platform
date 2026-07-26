@@ -1,0 +1,7 @@
+.git
+node_modules
+dist
+coverage
+.runtime-data
+reports/runtime-v1/generated
+examples/mock-adapter-python/.venv

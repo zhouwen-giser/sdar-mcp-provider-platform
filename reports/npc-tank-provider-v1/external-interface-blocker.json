@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "status": "BLOCKED",
+  "capability": [
+    "real NPC Tank Device MCP contract conformance",
+    "real ISR NPC MQTT schema conformance",
+    "real interface smoke"
+  ],
+  "requiredInput": [
+    "ISR_SIMULATION_REPO",
+    "ISR_MQTT_URL",
+    "ISR_MQTT_USERNAME",
+    "ISR_MQTT_PASSWORD_FILE",
+    "NPC_TANK_DEVICE_MCP_URL"
+  ],
+  "evidence": [
+    "required external environment variables absent",
+    "Mock Level 1 Streamable HTTP MCP smoke passed with 23 tools",
+    "real MQTT samples unavailable"
+  ],
+  "reasonCodes": ["NPC_DEVICE_MCP_UNAVAILABLE", "NPC_MQTT_UNAVAILABLE"],
+  "impact": "Real tools/list, real input schemas, real MQTT samples and real-interface smoke were unavailable.",
+  "allowedClaim": "NPC Tank Provider component complete against supplied protocol and Mock Level 1 contract; real ISR interface conformance not claimed."
+}

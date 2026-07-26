@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "selected": "npc_tank_path_follow_mission",
+  "primaryValid": true,
+  "fallbackValid": true,
+  "reasonCode": "NPC_TANK_NAVIGATION_PRIMARY_SELECTED",
+  "contractHash": "bf523897b6522065324685ccc9ec80e6f182360dd9388beffb5d0eeb8a779081"
+}

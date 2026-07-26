@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "requirementsSha256": "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
+  "evidence": {
+    "name": "protocol-contract",
+    "testName": "node scripts/protocol/run-business-events-contract-catalog.mjs",
+    "status": "pass",
+    "durationMs": 1237,
+    "databaseMode": "local-postgresql",
+    "replicaCount": 1,
+    "sourceDeliveryMode": "mixed",
+    "implementationCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+    "reportCommit": "936381a66b90b3fcd165457bc5b840183f9d6023",
+    "ciRun": "local",
+    "exitCode": 0
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "1.0",
+  "projectName": "sdar-mcp-tasks-provider-runtime",
+  "deliveryName": "sdar-mcp-tasks-provider-runtime-ugv-npc-provider-v1",
+  "sourceProvenanceHint": "Continued from the verified detached UGV Work delivery ZIP; no Git metadata or Git operations used.",
+  "sourceInterfaceSha256": "a7b9e05744e17c413e2f6f8c74c4337b20d3c5a24f2bc7004c9deb47ce22e0dd",
+  "bundledInterfaceSha256": {
+    "npcTank": "a7b9e05744e17c413e2f6f8c74c4337b20d3c5a24f2bc7004c9deb47ce22e0dd",
+    "ugv": "b1700a78e18fc2d510a461abcc454b4aa81dbe7bbdc8b891d9e09726e11187f6",
+    "isrSimulation": "a67b7909ec7af7b3757e77cbaf5bae1c600fe348daa7faf239d8715d89fa375c"
+  },
+  "generatedAt": "2026-07-23T03:25:02Z",
+  "workMode": true,
+  "gitOperationsPerformed": false,
+  "tests": [
+    {
+      "command": "pnpm verify:ugv-provider",
+      "status": "PASS",
+      "tests": 23
+    },
+    {
+      "command": "pnpm verify:npc-tank-provider",
+      "status": "PASS",
+      "tests": 28
+    },
+    {
+      "command": "pnpm work:protected:check",
+      "status": "PASS",
+      "protectedFiles": 10
+    },
+    {
+      "command": "pnpm protocol:business-events:check",
+      "status": "PASS",
+      "tests": 81
+    },
+    {
+      "command": "pnpm test:business-events:contract",
+      "status": "PASS",
+      "tests": 81
+    },
+    {
+      "command": "pnpm test:business-events:adapter-contract",
+      "status": "PASS",
+      "tests": 5
+    },
+    {
+      "command": "pnpm test:business-events:telemetry:unit",
+      "status": "PASS",
+      "tests": 15
+    },
+    {
+      "command": "pnpm test:business-events:stream/replay/continuity",
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm verify:frozen-protocol",
+      "status": "PASS",
+      "tests": 71
+    },
+    {
+      "command": "pnpm verify:business-events",
+      "status": "PARTIAL_ENVIRONMENT_BLOCKED",
+      "reason": "TEST_DATABASE_URL absent at migration gate"
+    },
+    {
+      "command": "pnpm verify:business-events:telemetry",
+      "status": "PARTIAL_ENVIRONMENT_BLOCKED",
+      "reason": "TEST_DATABASE_URL absent at integration gate"
+    },
+    {
+      "command": "pnpm verify:v2",
+      "status": "PARTIAL_ENVIRONMENT_BLOCKED",
+      "reason": "TEST_DATABASE_URL absent after frozen protocol gate"
+    },
+    {
+      "command": "Mock NPC Device MCP Streamable HTTP smoke",
+      "status": "PASS",
+      "tools": 23
+    },
+    {
+      "command": "pnpm work:npc-tank:delivery:package",
+      "status": "PASS",
+      "evidence": "single root, required paths, exclusions, file count, project tree hash, extraction and ZIP SHA-256 verified"
+    }
+  ],
+  "claims": [
+    "UGV Provider regression complete",
+    "NPC Tank Provider Component Complete against supplied protocol and Mock Level 1 contract"
+  ],
+  "blockers": [
+    "NPC_DEVICE_MCP_UNAVAILABLE",
+    "NPC_MQTT_UNAVAILABLE",
+    "DOCKER_COMPOSE_UNAVAILABLE",
+    "TEST_DATABASE_URL_UNAVAILABLE"
+  ],
+  "includedFileCount": 803,
+  "includedBytes": 6738472,
+  "excludedPatterns": [
+    ".git/",
+    ".github/worktrees/",
+    "node_modules/",
+    "dist/",
+    "coverage/",
+    ".pnpm-store/",
+    ".cache/",
+    "tmp/",
+    "*.log",
+    ".env",
+    ".env.* except .env.example",
+    "private keys and runtime databases"
+  ],
+  "projectTreeSha256": "fde5b26b671b6f1d6143c1ef81cb0d24b01c1b77de8acb5b0d35992867e57ca3",
+  "projectTreeHashScope": "all delivery files except the two self-referential envelope files WORK_DELIVERY_MANIFEST.json and SHA256SUMS.txt",
+  "zipSha256": "external-sidecar"
+}

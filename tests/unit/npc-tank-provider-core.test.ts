@@ -1,0 +1,187 @@
+import { describe, expect, it } from "vitest";
+import { loadNpcTankProviderConfig } from "../../apps/npc-tank-provider-adapter/src/config.js";
+import {
+  mockNpcTankToolContracts,
+  npcCircularScanSupported,
+  npcStartDeviceCalls,
+  selectNpcNavigationTool,
+} from "../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  checkVehicleAvailability,
+  createNpcTankSnapshot,
+  mapVehicleTaskState,
+  sanitizeFireResult,
+  TrackArbiter,
+} from "../../packages/vehicle-provider-core/src/index.js";
+import {
+  assertExactNpcTankSubscriptions,
+  exactNpcTankTopic,
+  NPC_TANK_MQTT_TOPICS,
+  npcTankMqttProfile,
+  VehicleMqttIngress,
+} from "../../packages/vehicle-mqtt-ingress/src/index.js";
+
+const limits = { maxPayloadBytes: 4096, maxDepth: 8, maxNodes: 128, maxStringBytes: 256 };
+
+describe("NPC Tank profile, topic and normalization unit contract", () => {
+  it("loads the fixed identity and independent endpoints", () => {
+    const config = loadNpcTankProviderConfig({});
+    expect(config).toMatchObject({
+      PROVIDER_ID: "isr.vehicle.npc-tank.npc-tank1",
+      ADAPTER_PORT: 7013,
+      NPC_TANK_DEVICE_MCP_URL: "http://127.0.0.1:19003/mcp",
+    });
+    expect(config.NPC_TANK_ADAPTER_DATABASE_URL).toContain("npc_adapter");
+    expect(config.NPC_TANK_ADAPTER_DATABASE_URL).not.toContain("ugv_adapter");
+  });
+
+  it("allows exactly 12 NPC topics and rejects UGV, referee and wildcard topics", () => {
+    expect(NPC_TANK_MQTT_TOPICS).toHaveLength(12);
+    expect(() => assertExactNpcTankSubscriptions(NPC_TANK_MQTT_TOPICS)).not.toThrow();
+    for (const topic of ["/ugv/status", "/npc_tank1/referee/status", "/npc_tank1/#", "#"])
+      expect(exactNpcTankTopic(topic)).toBe(false);
+    expect(() => assertExactNpcTankSubscriptions(["/npc_tank1/#"])).toThrow(
+      "NPC_TANK_MQTT_TOPIC_NOT_ALLOWED",
+    );
+  });
+
+  it("normalizes NPC identity and preserves mission state as authority", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.handle(
+      "/npc_tank1/mission_state",
+      Buffer.from('{"entity_id":"npc_tank1","id":"mission-1","type":1,"state":1,"progress":25}'),
+    );
+    ingress.handle(
+      "/npc_tank1/system_state",
+      Buffer.from(
+        '{"entity_id":"npc_tank1","run_state":4,"mode":9,"speed_limit":20,"err_list":[]}',
+      ),
+    );
+    expect(ingress.snapshot()).toMatchObject({
+      identity: {
+        resourceId: "vehicle:npc_tank1",
+        entityId: "npc_tank1",
+        vehicleType: "npc_tank",
+      },
+      chassis: { mission: { state: 1, progress: 25 } },
+      health: { runState: 4, mode: 9 },
+    });
+  });
+
+  it("detects conflicts only between authoritative public task tracks", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.handle(
+      "/npc_tank1/mission_state",
+      Buffer.from('{"entity_id":"npc_tank1","state":1,"progress":10}'),
+    );
+    ingress.handle(
+      "/npc_tank1/status",
+      Buffer.from(
+        '{"vehicle_id":"npc_tank1","role_name":"npc_tank1","chassis_task":{"state":5,"progress":10},"available":true}',
+      ),
+    );
+    expect(ingress.stateConflict()).toBe(true);
+  });
+});
+
+describe("NPC Tank navigation, EO, availability and safety", () => {
+  it("selects primary navigation and freezes fallback only when primary is missing", () => {
+    const contracts = mockNpcTankToolContracts("2026-07-23T00:00:00.000Z");
+    expect(selectNpcNavigationTool(contracts).selected).toBe("npc_tank_path_follow_mission");
+    const fallback = selectNpcNavigationTool(
+      contracts.filter((contract) => contract.name !== "npc_tank_path_follow_mission"),
+    );
+    expect(fallback.selected).toBe("npc_tank_send_waypoints");
+    expect(fallback.reasonCode).toBe("NPC_TANK_NAVIGATION_FALLBACK_SELECTED");
+  });
+
+  it("advertises circular scan only when all three schemas exist", () => {
+    const contracts = mockNpcTankToolContracts();
+    expect(npcCircularScanSupported(contracts)).toBe(true);
+    expect(
+      npcCircularScanSupported(
+        contracts.filter((contract) => contract.name !== "npc_tank_eo_set_angle"),
+      ),
+    ).toBe(false);
+  });
+
+  it("maps point navigation to the startup-selected tool", () => {
+    const selection = selectNpcNavigationTool(mockNpcTankToolContracts());
+    expect(
+      npcStartDeviceCalls(
+        "vehicle_navigate",
+        {
+          mission: {
+            type: "point",
+            target: { latitude: 30, longitude: 114 },
+          },
+          speedLimitKmh: 20,
+          stopOnObstacle: true,
+        },
+        selection,
+        true,
+      )[0]?.name,
+    ).toBe("npc_tank_path_follow_mission");
+  });
+
+  it("keeps active -1 in reconcile and uses NPC reason prefixes", () => {
+    expect(mapVehicleTaskState(-1, true, "NPC_TANK")).toEqual({
+      state: "RECONCILE",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+    const arbiter = new TrackArbiter(true, "NPC_TANK");
+    expect(arbiter.acquire("one", "vehicle_navigate").accepted).toBe(true);
+    expect(arbiter.acquire("two", "vehicle_navigate").reasonCode).toBe(
+      "NPC_TANK_CHASSIS_TRACK_BUSY",
+    );
+  });
+
+  it("honors the navigation-with-recon policy in both directions", () => {
+    const exclusive = new TrackArbiter(false, "NPC_TANK");
+    expect(exclusive.acquire("recon", "vehicle_area_recon").accepted).toBe(true);
+    expect(exclusive.acquire("nav", "vehicle_navigate").reasonCode).toBe("NPC_TANK_EO_TRACK_BUSY");
+    exclusive.release("recon");
+    expect(exclusive.acquire("nav", "vehicle_navigate").accepted).toBe(true);
+    expect(exclusive.acquire("recon", "vehicle_area_recon").reasonCode).toBe(
+      "NPC_TANK_CHASSIS_TRACK_BUSY",
+    );
+
+    const concurrent = new TrackArbiter(true, "NPC_TANK");
+    expect(concurrent.acquire("recon", "vehicle_area_recon").accepted).toBe(true);
+    expect(concurrent.acquire("nav", "vehicle_navigate").accepted).toBe(true);
+  });
+
+  it("returns NPC unknown availability when disconnected", () => {
+    expect(
+      checkVehicleAvailability({
+        operationName: "vehicle_navigate",
+        snapshot: createNpcTankSnapshot(),
+        freshness: {
+          chassis: 3000,
+          mission: 3000,
+          health: 5000,
+          target: 3000,
+          payload: 3000,
+        },
+        occupiedTracks: new Set(),
+        requiredToolsPresent: true,
+        allowNavigationWithRecon: true,
+        fireRequiresChassisStopped: true,
+        reasonPrefix: "NPC_TANK",
+      }),
+    ).toMatchObject({
+      availability: "UNKNOWN",
+      reasonCode: "NPC_TANK_MQTT_UNAVAILABLE",
+    });
+  });
+
+  it("recursively strips verdict, referee and outcome truth fields", () => {
+    const sanitized = sanitizeFireResult({
+      accepted: true,
+      verdict: { hit: true, destroyed: true },
+      nested: { damage: 50, remainingHp: 0, referee: { alive: false }, local: true },
+    });
+    expect(JSON.stringify(sanitized.value)).toBe('{"accepted":true,"nested":{"local":true}}');
+    expect(sanitized.strippedFields).toBeGreaterThanOrEqual(4);
+  });
+});

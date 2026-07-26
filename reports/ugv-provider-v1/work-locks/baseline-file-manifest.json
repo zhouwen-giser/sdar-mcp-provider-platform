@@ -1,0 +1,3848 @@
+[
+  {
+    "relativePath": ".dockerignore",
+    "sizeBytes": 110,
+    "sha256": "2469420d0e26ef016e4a3ce6055b8eb943d950affdd7274548f9f54fa9b4d436",
+    "category": "other"
+  },
+  {
+    "relativePath": ".env.example",
+    "sizeBytes": 2649,
+    "sha256": "a1e7d35c02e9a9cbce00f1636b8a7f7a49fb5f8e81b6f2abc4d77c3f11d2afe2",
+    "category": "configuration"
+  },
+  {
+    "relativePath": ".gitattributes",
+    "sizeBytes": 342,
+    "sha256": "94d3e3b6815c46ce78851e76d13eb8c59cdfddae18d08b5763d549dfdd0ede20",
+    "category": "other"
+  },
+  {
+    "relativePath": ".github/REPOSITORY_POLICY.md",
+    "sizeBytes": 805,
+    "sha256": "2dc02d5269386e24985ef50f947b612630315ab1ccbc35e24597dbe1c06df620",
+    "category": "other"
+  },
+  {
+    "relativePath": ".github/rulesets/immutable-v-tags.json",
+    "sizeBytes": 240,
+    "sha256": "abbef01e40abce882c8f6b91f86c21a098e7322ee52ea6fd694fe8614a000db4",
+    "category": "other"
+  },
+  {
+    "relativePath": ".github/settings.yml",
+    "sizeBytes": 708,
+    "sha256": "64765f402f114dab1f01d91520cb93755e99ce5d01970512eca5063414fe20c0",
+    "category": "other"
+  },
+  {
+    "relativePath": ".github/workflows/ci.yml",
+    "sizeBytes": 2691,
+    "sha256": "c68440464c29c0ddad68fc87f4c22ef43179ff3aa49b96a1202449ef4a3594e2",
+    "category": "other"
+  },
+  {
+    "relativePath": ".gitignore",
+    "sizeBytes": 290,
+    "sha256": "8b46a305c2f98ac50880fad07e0d810b7e54621f3a49375f8857b6cae4f0be33",
+    "category": "other"
+  },
+  {
+    "relativePath": ".npmrc",
+    "sizeBytes": 35,
+    "sha256": "3b88d1057add6f92ec23dc22dd017e312ded13a042deb0ba6f08bad85d936456",
+    "category": "other"
+  },
+  {
+    "relativePath": ".nvmrc",
+    "sizeBytes": 3,
+    "sha256": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
+    "category": "other"
+  },
+  {
+    "relativePath": ".prettierignore",
+    "sizeBytes": 504,
+    "sha256": "f9b94c674cea14ec1444c8a06a4f6c88aec9c0be1c18c64744b8c471fbccc6e4",
+    "category": "other"
+  },
+  {
+    "relativePath": ".prettierrc.json",
+    "sizeBytes": 116,
+    "sha256": "14ab8008b3e2d858698cec63766fd19e0ab71a8239b412f1372f30faa9ad2ff3",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/config/climates.example.json",
+    "sizeBytes": 350,
+    "sha256": "f1ae1c5354d68d4e124277f0fee2a704f81d8ddb92e29cd05198025ad6f70b30",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/Dockerfile",
+    "sizeBytes": 1006,
+    "sha256": "397cfce8cf3fc837181bb8e7b4065be36f08300b38710db578ae6d53fb0c0e1e",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/package.json",
+    "sizeBytes": 115,
+    "sha256": "918c6771ef5b07dfeebab19e6195337278cfd1b224113a8d4c46bb1d1be1eef5",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/README.md",
+    "sizeBytes": 280,
+    "sha256": "e411a4ae986867abd15b8d936213884189f7f34a0ef6f631d482e694fb1bfb1a",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/config.ts",
+    "sizeBytes": 3489,
+    "sha256": "064fb2e7af1c6f3155ceee383ee0ef6330a2b98ec7b41953816509cedcead28f",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/errors.ts",
+    "sizeBytes": 1052,
+    "sha256": "53222fe5e16cfbabd093d4ecedb6f4cfc3667ebf6898fc6e4d3ccd213807cca9",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/execution.ts",
+    "sizeBytes": 10513,
+    "sha256": "3a5eef59ad1e84c06a05ab1f84d33f68816c73b8c5a75ca200b79ebddeb1fc8d",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/home-assistant.ts",
+    "sizeBytes": 7381,
+    "sha256": "502d516e1da7d7c0f85e5a274edc1bb8e1640418bde638e32bc0cff22dab54ca",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/main.ts",
+    "sizeBytes": 3408,
+    "sha256": "ed9e98679fa73eb00fdc44d6168d8c4b1612efa1e3c3168caca2573233c83e13",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/manifest.ts",
+    "sizeBytes": 4419,
+    "sha256": "1657a8332c8cec694ff69451fadbd70c856504d39babf3bbc526c4d5ef9e086c",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/resources.ts",
+    "sizeBytes": 2085,
+    "sha256": "5d7f4e64cb7042215f87a55acc55c4aeb60e99b71bdd69bc6769daa94be6465a",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/server.ts",
+    "sizeBytes": 13934,
+    "sha256": "7b7eb3d2c6ad53bc4c6b6ff34319d5bbf37c94446748f28808261b97f1b96aa2",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/store.ts",
+    "sizeBytes": 3160,
+    "sha256": "b9b445c7148fb592adcd25ded7e798a0333abe42b1d885fe258902550467f5c0",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/telemetry.ts",
+    "sizeBytes": 8784,
+    "sha256": "7cb3bdd508bf32c26d316ae9eaad43d8dfb27876627aeb7cdc10886dfd8819c9",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/home-assistant-climate-provider/src/types.ts",
+    "sizeBytes": 1828,
+    "sha256": "4d1b9f188eb4352db22f49fd22b3397fdac9d33549f66637e40a9f6751bf68ec",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/package.json",
+    "sizeBytes": 96,
+    "sha256": "1b51ba45cd1119f2eafee6a31ad17daa33cd9816a37f92db9cb305c5dc8174f9",
+    "category": "other"
+  },
+  {
+    "relativePath": "apps/runtime/src/business-events/rotate.ts",
+    "sizeBytes": 2024,
+    "sha256": "999dc3871858df545137f0dbc9116619fc9a68ae4d7745dfa3d8d29cdc4e7f23",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/business-events/rotation-service.ts",
+    "sizeBytes": 1233,
+    "sha256": "1e20c35085e1ba48147b5dc7530d35256c50ac6bbca67aabc67a1d81a5316f78",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/business-events/source-client.ts",
+    "sizeBytes": 12857,
+    "sha256": "c685e2dedbecddffad057a5dd93b8632a01ca169cc12e443886c757c612ca8a7",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/config.ts",
+    "sizeBytes": 14798,
+    "sha256": "4e4e3258c52085cb9add5ae567c6412f0def04f16d21257997f511142b1c704a",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/main.ts",
+    "sizeBytes": 1155,
+    "sha256": "501d23c618d4e875b5ad15e5d7c0276f6ab701fedf573c7ab07d528570161aa7",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/manifest-watcher.ts",
+    "sizeBytes": 930,
+    "sha256": "a5d83b385168767238523ce14cfd1369a160f555ead3ef289722e9510618c7b9",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/migrate.ts",
+    "sizeBytes": 596,
+    "sha256": "9599dd0888129f2975c5dc5169966740face185ec842af38dd4586d811a05ef6",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/rate-limiter.ts",
+    "sizeBytes": 1401,
+    "sha256": "d8c2b80e810ae16e781d492dbe6e1e29a09221b1c75f481540d5f8e2c097f749",
+    "category": "source"
+  },
+  {
+    "relativePath": "apps/runtime/src/runtime.ts",
+    "sizeBytes": 45968,
+    "sha256": "78aa7dd240971a0458d5aff311dbf0bb333d4d8a1f6b229e19c31fbadcc797fd",
+    "category": "source"
+  },
+  {
+    "relativePath": "CHANGELOG.md",
+    "sizeBytes": 3840,
+    "sha256": "76a1ef6f14d8ae41cf00be5eae45bc048e406a8033c048698a5ba3818ea141d8",
+    "category": "other"
+  },
+  {
+    "relativePath": "CODEX_GOAL_PROMPT.md",
+    "sizeBytes": 1461,
+    "sha256": "930e402f10d8c5a7dfc738d12a3de842d093009d47bbced0d05d21416cc8e7d5",
+    "category": "other"
+  },
+  {
+    "relativePath": "compose.yaml",
+    "sizeBytes": 3049,
+    "sha256": "0f604761b7a27f85b00f09ce24f90a9068e59f0b9f9dfd65edd82578dc38f564",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "compose.yml",
+    "sizeBytes": 98,
+    "sha256": "c0a0962bc366485f127d4072bec47aa9e279e11a85815521eb6804de5749c05f",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "deploy/home-assistant-climate/climates.example.json",
+    "sizeBytes": 350,
+    "sha256": "f1ae1c5354d68d4e124277f0fee2a704f81d8ddb92e29cd05198025ad6f70b30",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/home-assistant-climate/compose.override.yaml",
+    "sizeBytes": 1077,
+    "sha256": "46921ba531e347986b893aee176522b3c638a5548596f4703cf14a1ec75a2326",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/config-map.json",
+    "sizeBytes": 3215,
+    "sha256": "8cd26d22728ee9cee5edd5a8655a63dfffdc2c7e5e4194fc21f637ff7d27a6b2",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/deployment.json",
+    "sizeBytes": 3319,
+    "sha256": "35d8428dbc19db030af988a21b578a7cc28f5aabc5b77ba769e36002f2889530",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/namespace.json",
+    "sizeBytes": 160,
+    "sha256": "b4f5ce29afb04955987bf5c61407a44060226059c89459ae8cdbdf9da82623b2",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/network-policy.json",
+    "sizeBytes": 810,
+    "sha256": "cf2eea4ad45a7de7c83131b1cc48c8925e8e98d228e7884e2f31a9a4a9c4578d",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/otel-headers-secret.example.json",
+    "sizeBytes": 250,
+    "sha256": "40e4980fb53f2fe01e61943f97be2ef477fd95f67cd0ceb7355af301bd924b5c",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/otel-tls-secret.example.json",
+    "sizeBytes": 340,
+    "sha256": "04fd4a3de92a0e206426a8c4f4b96801f083a52c6a5326f59ff5acdfa313c7e1",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/pod-disruption-budget.json",
+    "sizeBytes": 255,
+    "sha256": "f8283dd4219b80b44696354138ef66b8c95e1b3d4d22ec0d57ea222a9a142efd",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/README.md",
+    "sizeBytes": 2977,
+    "sha256": "0d3a8e1052a5e981bb1caa6b9aca5d034a3364e0998f3d80ed5b1a0d311693da",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/secret.example.json",
+    "sizeBytes": 346,
+    "sha256": "2474794c13902a3e8bf06a0333a7c045fb2377950b8b1866b1cce1c4a0d23c01",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/service-account.json",
+    "sizeBytes": 234,
+    "sha256": "1d0caa6e6f0f8321d06b8c3594f7fdd00b0679af467426ed5ea4fc8333d7d476",
+    "category": "other"
+  },
+  {
+    "relativePath": "deploy/kubernetes/service.json",
+    "sizeBytes": 379,
+    "sha256": "9f6d516e594a87da8f71c4270bb06e8c696060a690d5430e37fd1ce18925663a",
+    "category": "other"
+  },
+  {
+    "relativePath": "Dockerfile",
+    "sizeBytes": 1959,
+    "sha256": "6634edb7634172c6a15af8689a4bafb80f7db6bd5421c3eed32a12e2b1b73bcc",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/adapter/quick-start.md",
+    "sizeBytes": 3735,
+    "sha256": "77acd9a9edcccc181bd731004b500e509ca2f8f84d05426e93252ec49f4535a3",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/architecture/business-events-observability.md",
+    "sizeBytes": 2215,
+    "sha256": "69513b3bf426f4d1dd419cdabc0bf13252a26b21c22abac7b13f73107bb766b3",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/architecture/observability.md",
+    "sizeBytes": 2980,
+    "sha256": "6becfc58d6f2c64f433045050f970f50345daf69762b614e73ec38af7b25f9b1",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/conformance/adapter-testkit.md",
+    "sizeBytes": 2914,
+    "sha256": "886e0c4bb6007e61ba5cbd947dcb7407a2a80b0ad7466386aaeb3db7b999a86f",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/database/migrations.md",
+    "sizeBytes": 11224,
+    "sha256": "89da335e001d4baec0ae55b8ed9f449c97e2fb3c9cc5ab65c307c526cb330629",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/database/upgrade.md",
+    "sizeBytes": 2788,
+    "sha256": "3415a7eb3576e2d6b8e456e1f3cec9af80a92bc2f97f76980217a11ac730c492",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-001-runtime-stack.md",
+    "sizeBytes": 1365,
+    "sha256": "89b0883c8db8f5682a0ceaec80473815441d7fd19078a0a430fdf0e4692212a4",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-002-task-persistence-and-scheduler.md",
+    "sizeBytes": 1716,
+    "sha256": "798e70b50024c36babb7abf0a9b8fe1069ec172a73fb280ef22039bcc7115e11",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-003-adapter-protocol.md",
+    "sizeBytes": 2580,
+    "sha256": "5765b357ffb0c5e0e1efa0e6bc8a60369e6c1c75feb1398aad9ae4f3da3fe3d2",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-004-durable-control-command-dispatch.md",
+    "sizeBytes": 2833,
+    "sha256": "19a25d3a3cd97a2d8d2ce0106658642ef63c0e09f60f8fb28808dd39ffab4e14",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-005-start-window-and-scheduled-retry.md",
+    "sizeBytes": 3633,
+    "sha256": "9481629bc810c6b1593ede137242053def45748033c669271eca6fa78942e102",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-006-runtime-observation-and-outbox.md",
+    "sizeBytes": 3843,
+    "sha256": "ba3315aa9b4a6ff30b777de53bd9cbed3d956cbbce7b3ee5c9b5870a24855222",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-007-immutable-operation-snapshot-and-adapter-identity.md",
+    "sizeBytes": 3081,
+    "sha256": "3735dfc159222a30631ad55df55a2779f8d47ec13ddac44628e39251e5fc1a35",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-008-task-handle-retention-and-reliable-read.md",
+    "sizeBytes": 3213,
+    "sha256": "e6bcfe0f5a2a4f6adf6af0db91480b21400326c7312760f1da1e464c45b2f411",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-009-mcp-errors-results-and-task-field-compatibility.md",
+    "sizeBytes": 3855,
+    "sha256": "8623c9cfd531d52ee15189ace7d6c01c461d5307ec586c2219b063bd5092adf2",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-010-stateless-streamable-http-and-runtime-hardening.md",
+    "sizeBytes": 3665,
+    "sha256": "15ddff437fe57a04d4b25bfba440ac35caafe5350faabf196373ad3bc5bd79f7",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-011-frozen-interop-projection-and-reservation.md",
+    "sizeBytes": 2431,
+    "sha256": "7c1bca6cd6734739d0a220be3b7ce199db10f301caa34a30b550cc1b169c2f70",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/decisions/ADR-012-pin-patched-fast-uri.md",
+    "sizeBytes": 955,
+    "sha256": "241d22fc6ceec73e972b75820348e4eb3695018157ff1f2c9e988dfc11e2b9ae",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/current-repository-assessment.md",
+    "sizeBytes": 6520,
+    "sha256": "ccff2100aa92468b20b0be5cfb8374f78d9394ea342971e86d2ef3271aecaacb",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/frozen-protocol-v1-exec-plan.md",
+    "sizeBytes": 10967,
+    "sha256": "de9dd4d72984fd8c9fef94da6ba8ba561a5b4ce17033bb2be615862bf629dd57",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/home-assistant-climate-provider-exec-plan.md",
+    "sizeBytes": 3135,
+    "sha256": "cbb92d6404670ac3954fea36bd73d582564bb820a309a42dead09eeabbeda202",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/requirement-traceability.md",
+    "sizeBytes": 7052,
+    "sha256": "77b02a3031c99d236783bf7b2f664455c346b9eff63cfae7ebda0cc574aa63e8",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-conformance-closure-exec-plan.md",
+    "sizeBytes": 5553,
+    "sha256": "d431684f056a0e6822e919c46f53ab988c7013b56366c2e7bb8236d69b228d09",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-database-lock-order.md",
+    "sizeBytes": 621,
+    "sha256": "cf0c4c3f88d41e1ec75815d8d244e39b30a397a96b0b17e48a1903cba226c60c",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-exec-plan.md",
+    "sizeBytes": 13547,
+    "sha256": "040348928c50fb585c044a06ff61a0df880c6b636d422dfa9e192e9dd4659d31",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-rc2-baseline-assessment.md",
+    "sizeBytes": 4379,
+    "sha256": "2d077067029efb86014487c4475b7c8d5162742d239c6bb6589f409f944e1067",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-rc2-hardening-exec-plan.md",
+    "sizeBytes": 14297,
+    "sha256": "ad8ac26191f35e702b0010b8388d06c8c3231372f0fd34d381775930ad432045",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-rc2-requirement-traceability.md",
+    "sizeBytes": 5531,
+    "sha256": "7046e5e934514e7fb4e7efebbec3693441877c803ca622ef0efa23f7a4470297",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-rc2-test-traceability.md",
+    "sizeBytes": 7338,
+    "sha256": "68e526a0e4e144d4d92b24e5665244d05a185a23d85c18e9c3de4d5430a56ca1",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-rc3-hardening-plan.md",
+    "sizeBytes": 5403,
+    "sha256": "fd7142670498de173d6ae0927ded25f32a551fab24880dc8cd3fa22a8f693e5e",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-v1.1-telemetry-completion-plan.md",
+    "sizeBytes": 8246,
+    "sha256": "0772d7c3adb6d769c38d40e364a75389a6349501029351aba858a717e5d0e47f",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/runtime-v1.1-telemetry-exec-plan.md",
+    "sizeBytes": 5984,
+    "sha256": "8d18dc547b717d933b885b35e5bf55ef32c22bbcd1e465d1ac2a06a6a12c3721",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/state-reason-mapping.md",
+    "sizeBytes": 3038,
+    "sha256": "9e40459e4cf2726d0089270bc7701892b1395453c3cec40b1112ec29b11a2b16",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/implementation/task-state-machine.md",
+    "sizeBytes": 2724,
+    "sha256": "5e07a448881ca457a84cc20cc4d8cac81130a9120d81f1c8fea3b85058705903",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/business-events-recovery.md",
+    "sizeBytes": 1632,
+    "sha256": "de6e1a7e1d70df303c80b3ce2a17cc26f633f4ad202394c04a4ce9ef7513c415",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/business-events-telemetry.md",
+    "sizeBytes": 2468,
+    "sha256": "4465a1eb1a9c4f28776e272d90379a00d65fbe1bcf56f380a53204662dd6298e",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/capacity-baseline.md",
+    "sizeBytes": 1853,
+    "sha256": "a0e811cae70bf80a1c8a37ac8b4c502c5cb7117a2e4757d69c540cdca8b4f309",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/configuration.md",
+    "sizeBytes": 16789,
+    "sha256": "25b5f45842407164631b21247f337ee283bfc19eb337717f7e4795de182b597d",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/provider-ops-telemetry.md",
+    "sizeBytes": 7600,
+    "sha256": "eb1dee5d80b8ca9778cc96c787ce52ff97be17e2554fb697b1e1fa2f688e2546",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/runbook.md",
+    "sizeBytes": 5432,
+    "sha256": "5110f3ab9ecde14a414478c0be82f927be1616c08d83915c7a8e5fd99286bbf6",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/operations/security-recovery.md",
+    "sizeBytes": 4584,
+    "sha256": "1e6ac291ea576b782b4cfc611cb7c88bd1ed4019ea12af2dd03587a34234e03f",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/oss-intake/fast-uri-security-patch.md",
+    "sizeBytes": 1190,
+    "sha256": "f491d878c9f821f2d9b9d769f50e707e412a00c2cc1328159b83966756aa8039",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/protocol/adapter-v1.md",
+    "sizeBytes": 3200,
+    "sha256": "2a03f3b4c63e9ca31da1a61cdee6ec1904f793ebb9cdb6013f6c0ef014d8970c",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/protocol/api-reference.md",
+    "sizeBytes": 11059,
+    "sha256": "7b15806ea6228a9f22cdbe807a5f1c58f47fa541b7d1299b9199272d97c9a582",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/protocol/mcp-runtime.md",
+    "sizeBytes": 8351,
+    "sha256": "edb87b5fbc2172f80052a3042eef3b6914869fa35f7d92e45f04ce2f9de3152b",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/protocol/provider-telemetry-ingress.md",
+    "sizeBytes": 17279,
+    "sha256": "c9e78b1b32ac0e27c48774a818465151657ffa7201e037ae07d35cc27a1a7872",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/protocol/SDAR_BUSINESS_EVENTS_PROFILE_V1_0.md",
+    "sizeBytes": 3348,
+    "sha256": "86bbbd931510d6fb30334723f5da98ce2da5deeb0c45018d8370cd9d063048f9",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/providers/home-assistant-climate-provider.md",
+    "sizeBytes": 3188,
+    "sha256": "aa51d34bad22ac13bc7ce19239b7e6377cf0e1827436926a387165523f7912c5",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/requirements/SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md",
+    "sizeBytes": 54102,
+    "sha256": "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/requirements/SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md.sha256",
+    "sizeBytes": 134,
+    "sha256": "3b644da8c4baf55c4cecba9ee86e60e586fe778855548d5e074ed8e37f6327df",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/CODEX_GOAL_PROMPT.md",
+    "sizeBytes": 2615,
+    "sha256": "e1b145cc41ca200e3e2659eedc87e3fcd2594ad46cb9e1d61f744415e815be31",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/README.md",
+    "sizeBytes": 1151,
+    "sha256": "0d4df69f3457115aa1de3757728964c031bac5aec1f36332cd84512a864fdb69",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/references/SDAR_MCP_Tasks_Adapter_Design_V1.0.docx",
+    "sizeBytes": 276258,
+    "sha256": "b12b0aa5366eef7eaa35d2c0efa8b98a1cb8fbd6a006ffecf22fe03c42d62c67",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/references/SDAR_MCP_Tasks_Provider_Profile_V1.0.md",
+    "sizeBytes": 30022,
+    "sha256": "beecab77ed0034718b63fa4f473627cfa4ea27a74e5d5235841eafa843316a86",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/references/SDAR_MCP_Tasks_Runtime_Codex_Goal_Task_Package_V1.0.md",
+    "sizeBytes": 30658,
+    "sha256": "06728063dfcb0ff450f73bd1c0b8a2114807abd9153829461b8d832338deb308",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/references/SDAR_MCP_Tasks_Runtime_Design_V1.0.docx",
+    "sizeBytes": 316301,
+    "sha256": "ad29ec20187a4ea71714685e477b6f5fb692fe30e380e9005fede515f02ab27d",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/REGRESSION_TEST_MATRIX.md",
+    "sizeBytes": 5503,
+    "sha256": "5071dcfbd87adc09ddba1d648cf8ba86c0045fb46a89332f7bd763a4fe471c77",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/REQUIREMENT_TRACEABILITY_SEED.md",
+    "sizeBytes": 1298,
+    "sha256": "043e75a2def5b7b3750b86402d933d39080c08849b5c981fff1a9ed49644cd37",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/REVIEW_FINDINGS_RC1.md",
+    "sizeBytes": 8500,
+    "sha256": "4651ee408cacbce9d3292a48ce5bad90b403fc5935ca6928570c3f8f03080827",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0.md",
+    "sizeBytes": 31008,
+    "sha256": "cf5ebb4afd5afb325b968828f089b0a984a2ddfe1459c5327ae40fdec834e412",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SHA256SUMS.txt",
+    "sizeBytes": 1401,
+    "sha256": "6a0e72b13690ac3ca1b39bb3ce5f7cb3bae6e6bd3271828ab6ef442580f78c8b",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/templates/BLOCKER_REPORT_TEMPLATE.md",
+    "sizeBytes": 406,
+    "sha256": "2d9c49f9fbd7fbd12fb6ea4a45435d15ed33a269d43feae8529115b70958bbdc",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/templates/FINAL_DELIVERY_REPORT_TEMPLATE.md",
+    "sizeBytes": 733,
+    "sha256": "d15792589dd662cc5a067dfe69c0ac9c8c4b1057e5bdbc32b8d6145fa5223aa4",
+    "category": "other"
+  },
+  {
+    "relativePath": "docs/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/SDAR_MCP_Tasks_Runtime_RC2_Hardening_Codex_Goal_Task_Package_V1.0/templates/PHASE_REPORT_TEMPLATE.md",
+    "sizeBytes": 688,
+    "sha256": "7e8d42edeff7c5f77469414737bd3e0a514e592f8b7d1ad73e443823ee5b780f",
+    "category": "other"
+  },
+  {
+    "relativePath": "eslint.config.js",
+    "sizeBytes": 924,
+    "sha256": "99ab7fede82f84d43d4c6ebca2397684cc15c315457329c203d25646dedb7e85",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/adapter.py",
+    "sizeBytes": 37282,
+    "sha256": "85d3ebc91861f54387995d05384fadea20ab9e95bb45736e1beb61815dc834b1",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/business_events.py",
+    "sizeBytes": 1383,
+    "sha256": "bbd6b9d2195c8d2f9854c970b36048e5e41cc1ed2e36ae320e2787918c8ef11c",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/Dockerfile",
+    "sizeBytes": 1492,
+    "sha256": "1ecb0583ccc3027d592ce1e82b0fc225a70f48e5beade0fe370c9368f7360a6a",
+    "category": "other"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/generated/__init__.py",
+    "sizeBytes": 77,
+    "sha256": "606a499e068b552deeefa4152658db092082bd36948bf34e9532dbf8a6db4514",
+    "category": "generated"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/package.json",
+    "sizeBytes": 88,
+    "sha256": "4e4b600b4a35536f392299a33fd0e352c7f1d4a285f702665184c7c9ff9acad3",
+    "category": "other"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/provider_telemetry.py",
+    "sizeBytes": 3397,
+    "sha256": "56e8e5f394731c2f08c1b4a09ecd2be42bf64bd08e9f93923189c482f22966bd",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-python/requirements.txt",
+    "sizeBytes": 53,
+    "sha256": "0c5f57e800a30347e6e31b09166dbdcbbf433be713b8c16383578ac477ad5036",
+    "category": "other"
+  },
+  {
+    "relativePath": "examples/mock-adapter-typescript/package.json",
+    "sizeBytes": 112,
+    "sha256": "7b6def660fdcaa30f1287226a39f45a8431975cc0a4a1b4b294aaa17604ba831",
+    "category": "other"
+  },
+  {
+    "relativePath": "examples/mock-adapter-typescript/src/main.ts",
+    "sizeBytes": 1765,
+    "sha256": "11538d243dbeda5f9b00d9497d91e887b4c90d8667965b3e88500ada26a313e3",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-typescript/src/provider-telemetry.ts",
+    "sizeBytes": 3903,
+    "sha256": "d3863959c661dca9b3ad6e75959eea8fae5cba2d64c484858e0d6346f8d41fb4",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-typescript/src/server.ts",
+    "sizeBytes": 36158,
+    "sha256": "bef6df005130a825ac499d7896bc321ab970c8cbaec35d1d11290f8f4539aa4a",
+    "category": "source"
+  },
+  {
+    "relativePath": "examples/mock-adapter-typescript/src/store.ts",
+    "sizeBytes": 1525,
+    "sha256": "f3b2d73ae595050f81c7ed6823a5423f280b3d31e757eaf4b26763b4e76dc0c7",
+    "category": "source"
+  },
+  {
+    "relativePath": "LICENSE",
+    "sizeBytes": 11357,
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "category": "other"
+  },
+  {
+    "relativePath": "Makefile",
+    "sizeBytes": 214,
+    "sha256": "4feb5646c4051ecc86df2ff5e5eb3e13d987d8d4f11fce07c97d0ed20b1ecaf1",
+    "category": "other"
+  },
+  {
+    "relativePath": "migrations/001_operation_snapshot.sql",
+    "sizeBytes": 676,
+    "sha256": "fb130bdd77c67e9bcfc37e609a82d4fe67fba17e9058ce709ecb3bfe75a47c28",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/002_task_lifecycle.sql",
+    "sizeBytes": 5248,
+    "sha256": "656c286e7b9c9d3a7bc45de56589738b3e15c6f9237065889f2815d194832e78",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/003_idempotency.sql",
+    "sizeBytes": 1007,
+    "sha256": "91ef8d20caea9fd321fa8aec0eaab17dd2e741732d7181f36d2256f6b663d5ad",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/004_durable_timing.sql",
+    "sizeBytes": 714,
+    "sha256": "dd5fc0cd4cbfde7c695d6cfe8bef3001076e39a744bb22ab8a251764843782c4",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/005_task_controls.sql",
+    "sizeBytes": 1058,
+    "sha256": "4566c30477428c20e375b200ffa3b144ca88617af122e28e5039173b77389516",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/006_recovery_hardening.sql",
+    "sizeBytes": 1165,
+    "sha256": "9c613b678a99742201c512cfcb0f42b091ff860bfd0bf73f3cc79a2a58370f47",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/007_durable_command_dispatch.sql",
+    "sizeBytes": 1676,
+    "sha256": "d07aa4904c511d7360458520ca3a3ffddb63edef0ec842934260e9d91398267a",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/008_start_window_and_schedule_retry.sql",
+    "sizeBytes": 820,
+    "sha256": "050f2a50f30b35fc7f302657ae798f7034a71f52aa31d53b315a0801db361c75",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/009_observation_revision_and_outbox_keys.sql",
+    "sizeBytes": 1813,
+    "sha256": "bc63f39b8cc702d4e5b877001b0ca40193fe296d6f07ae38d89a8bc7506101a9",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/010_adapter_execution_identity.sql",
+    "sizeBytes": 168,
+    "sha256": "be8e0bb022c0d062e64a14194c29d18014a03c087b2dd58731d35e2c56d92bda",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/011_task_handle_retention.sql",
+    "sizeBytes": 1328,
+    "sha256": "cf268f6db9b838479b18701f9155823bd1e93b848ddf689190484315ae7d1da5",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/012_idempotency_claim_lease.sql",
+    "sizeBytes": 1104,
+    "sha256": "bddb59a95bfe349ee69ee449309563850725d9a246d5dc0f9d30ae8d12c53c2e",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/013_single_claimed_command.sql",
+    "sizeBytes": 126,
+    "sha256": "0462556befd931f932dba3ec71b4587592d61febebfac3eaa0b06a5c0f0c65fc",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/014_observation_pagination.sql",
+    "sizeBytes": 101,
+    "sha256": "df7d010260a9bf51e78ba7d260927e7f46731191cab9a6f18d7e9b8bfc0cdfef",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/014_start_confirmation_watchdog.sql",
+    "sizeBytes": 935,
+    "sha256": "11fd1be2cd88a05f812e8ce0ecb861401d085f8af00538af0da73bf9046bb245",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/015_recovery_backoff.sql",
+    "sizeBytes": 400,
+    "sha256": "9e9bcddd5150730f56c29b0bb4fbd33d689f4a411cf67af6f19da18309e56fda",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/016_command_claim_lease_consistency.sql",
+    "sizeBytes": 252,
+    "sha256": "f7ce61648299c3fa81e42fe9eaa6833d0e98db3ebcee0e11045eda6ceeacbcbf",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/017_provider_ops_audit_delivery.sql",
+    "sizeBytes": 1473,
+    "sha256": "c19afbc927ceac63c7aa43169f576caba8179132907310629a0e340980423596",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/018_runtime_trace_context.sql",
+    "sizeBytes": 919,
+    "sha256": "1c03f35743425f94139bd9d7aa6c68bb39cb27d5c15f3b5d89aacbb53513667a",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/019_runtime_revision.sql",
+    "sizeBytes": 252,
+    "sha256": "8bbce4951ec7c1730de712292a3832fa0438db1742e647c5fba8869bccfc23b1",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/020_frozen_protocol_mrtr.sql",
+    "sizeBytes": 1114,
+    "sha256": "3ebd512a04266ed1ca84f484670ef4156b2485e80fad93e0808bf38a64562eee",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/021_frozen_reservation_ref.sql",
+    "sizeBytes": 401,
+    "sha256": "bda96734808eee2f73b4da4d44ae7b8292b32bda0706eeb90728087e5764f0f0",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/022_mrtr_response_inbox.sql",
+    "sizeBytes": 1234,
+    "sha256": "16d6da827dbe2c02ac7585b25e3370b47d55cbdb46f8f2ed5c77b271bf0e4343",
+    "category": "source"
+  },
+  {
+    "relativePath": "migrations/023_business_events_profile_v1.sql",
+    "sizeBytes": 15219,
+    "sha256": "b978e71aacbfcfe6b3d948758e9c32e209180fbb3d283370cdaf41551463bead",
+    "category": "source"
+  },
+  {
+    "relativePath": "package.json",
+    "sizeBytes": 12606,
+    "sha256": "d090895298fa4bd2548928d337c248e2accee00c4f555e7327e7288d9f31568f",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_grpc_pb.d.ts",
+    "sizeBytes": 31192,
+    "sha256": "0f78ac04fbb1557021d5e2dd76d2809055ef8262ea304ffc0c0505c7f36494d7",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_grpc_pb.js",
+    "sizeBytes": 19694,
+    "sha256": "b2aa7ad698feedd59c9e71ab43e6315a84e432d9653a4f923d67f93d6bde1b64",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_pb.d.ts",
+    "sizeBytes": 75607,
+    "sha256": "5357152711d97248b1cea7dc1f30bbaf1722e281d38af66023f40615a0c0cc7a",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_pb.js",
+    "sizeBytes": 468329,
+    "sha256": "e2ae1173913b886779db7998359a1ef7600f2baf172435fc67b20214443164a4",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry_grpc_pb.d.ts",
+    "sizeBytes": 4122,
+    "sha256": "e2666e4c960bfdc6f5a017218803a3c6bab835e1620c8a6cf8e4723cd69ffe58",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry_grpc_pb.js",
+    "sizeBytes": 2705,
+    "sha256": "265a050fc797f69b3bc5adb79659ed8cfdb7a4aecd81ab4cd4ff7237b1f1cbcf",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry_pb.d.ts",
+    "sizeBytes": 7629,
+    "sha256": "8e29ed0cad52b49d51ba97f147dc926f9cbc6869a9c582eeb4a47474a6b50b40",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry_pb.js",
+    "sizeBytes": 44145,
+    "sha256": "0d39377a52f36541c300b323c00c685cc7f5bafa4ee3b34e197714698cb45e6e",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/generated/package.json",
+    "sizeBytes": 20,
+    "sha256": "dbf8353f77358bc12169b7bb7301e1978d5b503e002ee927229a8993672818fc",
+    "category": "generated"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/package.json",
+    "sizeBytes": 105,
+    "sha256": "03fb3f4727ce4a4ad5aa821f159d6f89cef90de4b50fec43f03f057610af6b10",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/business-events.ts",
+    "sizeBytes": 4847,
+    "sha256": "e7f8cbcf894e1022480d67bd370d41b03f103be86ace26ebf3dadabf1eae284c",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/gateway.ts",
+    "sizeBytes": 16184,
+    "sha256": "e122af1e967cd9e7d37d1c45541c408fb697ffaaa7f4dab0728c081fc474606e",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/identity.ts",
+    "sizeBytes": 2265,
+    "sha256": "7ba14ae5ae28f6da1def2a2420f28f70c604238db488fa5e4c8914b95004524d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/index.ts",
+    "sizeBytes": 212,
+    "sha256": "64803773047ee3618aa2d9e2311de5152f9f83c090a52669494a5507b192edd1",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/paths.ts",
+    "sizeBytes": 412,
+    "sha256": "d155286781a3c85fa369bde7582299ce055a3e289073eec5b6310f96647b52d1",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/proto.ts",
+    "sizeBytes": 1121,
+    "sha256": "8cdf470981aa8ed091970187ea03317451103c3ad7d955b9916f181b3f70a06d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/struct.ts",
+    "sizeBytes": 1799,
+    "sha256": "7935798203463b9e3018b1fe51a26384c15bb5fc16e46da91f919dbcac6e5fc4",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/adapter-protocol/src/types.ts",
+    "sizeBytes": 4890,
+    "sha256": "1822a9e6fc5bbe74688ada303c454a6a8a07f130eb914229e85d841bd32f5bd7",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/conformance-testkit/package.json",
+    "sizeBytes": 108,
+    "sha256": "3bd2dc71c7d8d03adfc4103df0386fbbc33b5c4602dfc05495ebd0b09a257d67",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/conformance-testkit/report.schema.json",
+    "sizeBytes": 2214,
+    "sha256": "27cdd02556af2e38b7bb03c04efc01f5830aafa2933cca50d62e5a6555045475",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/conformance-testkit/src/index.ts",
+    "sizeBytes": 29,
+    "sha256": "bd881428261719f444159f40a791ed40555012f927dedcfa9cb31343f143b0a0",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/conformance-testkit/src/runner.ts",
+    "sizeBytes": 29516,
+    "sha256": "8909e7ff92ed5ebaeedd9d168e773165c36c4e5ab130620fb8fa84bd65400bfd",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/package.json",
+    "sizeBytes": 95,
+    "sha256": "d2b80410cbb7f7fc99fe5d06b86361e68b0710189c54a519a219475ef853e3b4",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/domain/src/availability.ts",
+    "sizeBytes": 5052,
+    "sha256": "e731ee0cd3779e5f24182c32174d25197b3dc4ad9dcaf3ec1870a8f18166db40",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/src/errors.ts",
+    "sizeBytes": 3415,
+    "sha256": "46e935cedad74c045903c18aa178ab9bc02dd369dafda9e3fdc81cccf16f85d5",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/src/index.ts",
+    "sizeBytes": 150,
+    "sha256": "4de2c24dc2341db839ce87de64646797c5795271fa93f09683f17a1a788e2f22",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/src/task.ts",
+    "sizeBytes": 7219,
+    "sha256": "66915d20ade8005adbf6393a038555b4b353f2801a5bc0098bdc5fd8270b1a64",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/src/timing.ts",
+    "sizeBytes": 2178,
+    "sha256": "9be7b8b92bd429f8ce727a365d170e82019351ae608e791dd0fe1dfc7468e5d8",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/domain/src/version.ts",
+    "sizeBytes": 45,
+    "sha256": "04b802960befcf948193c69f0903f99e04dac490ae9a647f5b9f27dbef61a388",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/package.json",
+    "sizeBytes": 101,
+    "sha256": "1f1b110f4cd40ad3d88051ce9835512e074be9cc34bfc7348528d31f11dba2a5",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/business-events.ts",
+    "sizeBytes": 28851,
+    "sha256": "0c4f8384fd0d195658af5c41a4aa01786bd3e0030f699f6f76db7d0ede697ba1",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/handler.ts",
+    "sizeBytes": 20420,
+    "sha256": "0060508a90abb6311c927759697ee8d9f6ffa96e45c4fb79772c2f4d4cb492a8",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/index.ts",
+    "sizeBytes": 632,
+    "sha256": "dcb3911f990190b94760a215afe42f49e1d08615f71ee660c88b2b9513719f65",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/legacy/handler.ts",
+    "sizeBytes": 80,
+    "sha256": "8ec907dedb4bf220fe1d299124ca145683355372ca180e285d87b242638b8160",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/protocol-router.ts",
+    "sizeBytes": 895,
+    "sha256": "47705bc36f42eb50e4d63660a7757d74b12f9d5014f0d16953894973d9289a9a",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/security.ts",
+    "sizeBytes": 5244,
+    "sha256": "d70f72c0ea31217eb6a5bf7bb54e863295f5296a8512a28c59b4efb4c609c776",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/availability.ts",
+    "sizeBytes": 5829,
+    "sha256": "3075a33ba4ebbfb39f0114a195927481334372838cb00354b684ff139f4babb4",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/consumer-validation.ts",
+    "sizeBytes": 4578,
+    "sha256": "04881cae8e05ffdef1739e57c43f3e8bf280863893ad5c4ef6d80afde649377c",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/discovery.ts",
+    "sizeBytes": 898,
+    "sha256": "ef6376ad0fe92367143f3d283408403e8a6a5e9b3f62cb90617bd15fb70b714d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/error-mapper.ts",
+    "sizeBytes": 1412,
+    "sha256": "6b19f3eaef9222763426f117b98dca03b53a702cafb6b352aa7ce37a158c6300",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/errors.ts",
+    "sizeBytes": 965,
+    "sha256": "b7ad98c936b500a535005458ce7602f803631a19afcc22ad30fd50fd823a643e",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/handler.ts",
+    "sizeBytes": 9809,
+    "sha256": "a4f122ed055121d0d42644e49891b46a15a3499353141ad60cd30b392834caa4",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/headers.ts",
+    "sizeBytes": 2709,
+    "sha256": "ef6edb3aa2d32fbe1fe4e7d54ed8438e5783ba83272c687996796647e886f7b2",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/notifications.ts",
+    "sizeBytes": 20412,
+    "sha256": "16a884e77ab8918a10d0b42293299c1cb568228b307c7b71a55e144bb31a24e9",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/request-validator.ts",
+    "sizeBytes": 2933,
+    "sha256": "ca7b45e5f6f931b3f6cd6aa34f8b85789cc6ecdabe75e938a951595a3f6fd7e2",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/tasks.ts",
+    "sizeBytes": 2990,
+    "sha256": "27eaa0e4c14ddf4fbf30a5a3b396b808ffde2d6a5692ae8beb3c18db0791bc3b",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/mcp-protocol/src/sep2663/tools-call.ts",
+    "sizeBytes": 5721,
+    "sha256": "97e898da6558eeb8b5696256d65c0b2df6ed751d31e132984d88320351a02e1c",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/package.json",
+    "sizeBytes": 102,
+    "sha256": "a3fba84c01fdf60c49ac7fb977b7a2c30ca11675ddfb1735cc4c51257003dd60",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/observability/src/business-event-metrics.ts",
+    "sizeBytes": 11747,
+    "sha256": "dfc963fce3c2d3b7077086c22d9b439c3975261c3fbd0802e1a3a76ea75c176b",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/business-event-provider-ops.ts",
+    "sizeBytes": 2739,
+    "sha256": "2d9e4bca3cbbaa6d2bfee4a8ad7712c48fb9bfb94ed85bb7de49aa208e423e00",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/business-event-sanitizer.ts",
+    "sizeBytes": 3508,
+    "sha256": "badc599e3542409ea7fc3ad10bae440e6e8414345c9c0af6bf7daac304da934d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/event-envelope.ts",
+    "sizeBytes": 3184,
+    "sha256": "df56c9972c916fb99f5e0f4d8e188698896e823aa4a1cc87c4a77f4c89fbf9b1",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/hash.ts",
+    "sizeBytes": 2025,
+    "sha256": "d139152e30b54a5e837ae53b6e78e84caeedccb28852be92e8b4db49ef5b6395",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/index.ts",
+    "sizeBytes": 379,
+    "sha256": "05cd753fe15e9058d1f49b21862c079db57da2c2378e40fece31b83bf1627e54",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/logger.ts",
+    "sizeBytes": 508,
+    "sha256": "7df4da50b6f16f8eae2b4be95826eeffeed0804c2790bd1a4e2d547bc726343d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/metrics.ts",
+    "sizeBytes": 1726,
+    "sha256": "59cbae626309ab31f6c1167f6afab78d1459e3c5d8bd434e57b123e98023fc72",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/provider-resource.ts",
+    "sizeBytes": 735,
+    "sha256": "e643441fb12fb4cc87eb9092348919370f5efe6ed93f49b6e4498c75fc3d039a",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/telemetry-sanitizer.ts",
+    "sizeBytes": 4754,
+    "sha256": "b79310565ea11b4712f6a5dc6565d187565123743b506dfbf6bfd7887c8f8376",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/observability/src/telemetry.ts",
+    "sizeBytes": 31280,
+    "sha256": "2ff6ad98e3bd160e706f392d614885bb47c0d078478f577a538c94083bb8314a",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/operation-registry/package.json",
+    "sizeBytes": 107,
+    "sha256": "1ff7c2eb6847a2f4dadfdf02e50a19a6d99d72e869873c8b5066b9739f9d29df",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/operation-registry/src/index.ts",
+    "sizeBytes": 31,
+    "sha256": "fcd5e8b4f9fd6e47acdf8213b6e84d838fc3607bb194b3706dadd775ce6e5c7c",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/operation-registry/src/registry.ts",
+    "sizeBytes": 10152,
+    "sha256": "5de830535ef9b1028bbe5fcb8103424d54890c948f03cbc9bc224f2600cfba32",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/package.json",
+    "sizeBytes": 109,
+    "sha256": "27f35db73499b3f7cd711194e1e0daf90ce2bda6a59335a13fccbc2b78291f71",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/business-event-provider-ops.ts",
+    "sizeBytes": 1359,
+    "sha256": "3a3264219182f800b295d31b4afb100ba7e77a9b3f427e2c67a26d10bda55980",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/business-events.ts",
+    "sizeBytes": 66552,
+    "sha256": "a58b3de8da1daffdbd473ccaef6e0a274c7b63be16182ea7c400b247c4e2f2f0",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/idempotency.ts",
+    "sizeBytes": 8087,
+    "sha256": "8931a109d2e7e1460aae88fbc76b8286c3069370885cc854d0e8acf4c6d76d01",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/index.ts",
+    "sizeBytes": 298,
+    "sha256": "ba1326a10531171772e9c678a63fa456a54de859177ea275f988bed5d4149acb",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/migrations.ts",
+    "sizeBytes": 2018,
+    "sha256": "986b426a28938baeec07fea51303ee425f514b1a6362d308f2996a5e2a53151a",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/operation-snapshots.ts",
+    "sizeBytes": 2845,
+    "sha256": "8ee90682d5a2aab418e35cc814627e9cf0ae70f2c0fc8cc3adeeeae59049ad1d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/outbox.ts",
+    "sizeBytes": 1874,
+    "sha256": "ab175b9d6ac16f15501e2e2c1dfb1bc45e0dd4f12ecd1f232b61c64ea1e1102f",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+    "sizeBytes": 6365,
+    "sha256": "1be589a7be3cafb9fde28ec4a64f3bbda0e3759e9394752fc02d3dafdf8360a4",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/persistence-postgres/src/tasks.ts",
+    "sizeBytes": 169757,
+    "sha256": "ff43f710868c8de2e9f437218d20b5456b8c881ca9b6eb59864388add6e455e8",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/provider-telemetry/src/index.ts",
+    "sizeBytes": 86,
+    "sha256": "b4005bc99d6038309ced9b0788b5ae0098ef25e7a23183779a5668fc8e428523",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/provider-telemetry/src/ingress.ts",
+    "sizeBytes": 17897,
+    "sha256": "7245e8f94d8ed9a787caaf10b5a6cd1a698dbf2c15cfe3e72dfa7c866903d597",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/provider-telemetry/src/proto.ts",
+    "sizeBytes": 1339,
+    "sha256": "f62697e62e11e2274e393d7073b3c328db8ce007128310ac9d7eb2c69734c595",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/provider-telemetry/src/types.ts",
+    "sizeBytes": 1081,
+    "sha256": "c7c933ac1594d24b003c99c00af8080801cf48779dc7e2e5bc5986bb8626f310",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/package.json",
+    "sizeBytes": 100,
+    "sha256": "1c3e6039303fca24f0c8296243b8fd809b8b8567ea9cccfbce42fa69190ea6de",
+    "category": "other"
+  },
+  {
+    "relativePath": "packages/task-engine/src/bound-execution-watchdog.ts",
+    "sizeBytes": 5413,
+    "sha256": "37b84a2df51e16af195d8c2ebbb6f6ef82ab3d9e26d85bc51eab3398fb221c2e",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/command-dispatcher.ts",
+    "sizeBytes": 19654,
+    "sha256": "110303f38914861c2fec0b06ae04f34f9d7774749164f1f0fa354087dfa49c7c",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/detailed-task.ts",
+    "sizeBytes": 2672,
+    "sha256": "88372278dbbad902e63e795a077daf4018fbb7f89fd5e179e1c2131625af8139",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/durable-provider-ops-publisher.ts",
+    "sizeBytes": 2245,
+    "sha256": "b3956e98c9de03e949232a2b07e584c2c6d9f8242b39b2d8921f2395bcc1d104",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/engine.ts",
+    "sizeBytes": 57020,
+    "sha256": "a651473a188ed587cf3225746d68bdba8bf7e6debb798a060ff45893d300bdb2",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/index.ts",
+    "sizeBytes": 426,
+    "sha256": "aa544d6c0a3f9a763c794bf8c654e6a52563190558c27d56a2e0b72c55de7bb0",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/lease-heartbeat.ts",
+    "sizeBytes": 1074,
+    "sha256": "1cc7ca8fed48ac7b7ba6229e3408f5014726c24e2bfbb636cfa0b2a38e47f9bc",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/outbox-cleaner.ts",
+    "sizeBytes": 2299,
+    "sha256": "1e6497b356da3a526784d5d85beaef9a31c1f00ce7eb332ea71862564bf8399d",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/outbox-publisher.ts",
+    "sizeBytes": 1790,
+    "sha256": "83e20b969165372c36c8d39b13ccc81c355d0fe40e758d55500fd9d7575cd59a",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/provider-ops-outbox-sink.ts",
+    "sizeBytes": 7121,
+    "sha256": "3dd521a178e700b8ca5bbfd50f0aa0caa403debb756e92d6471fa7e5a92681c5",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/recovery.ts",
+    "sizeBytes": 3718,
+    "sha256": "776c2274cafcf19f41306e7304b2a088cfbc732bb40fb75efa7a6fa00bc588de",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/result-contract.ts",
+    "sizeBytes": 10479,
+    "sha256": "ea8b9735fb56943ea9b22efb99a2772f67173c0e0703feaa80d012d118082c42",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/scheduler.ts",
+    "sizeBytes": 14194,
+    "sha256": "7791372a5bc7a939c0bd09c595fa93f36170c8c889b8bafbb7d8927399e20634",
+    "category": "source"
+  },
+  {
+    "relativePath": "packages/task-engine/src/ttl-cleaner.ts",
+    "sizeBytes": 14069,
+    "sha256": "95a238b52f72e7e8e9409d0ab914c3903cf78f9cd25c35e13d5f98e21b7123d9",
+    "category": "source"
+  },
+  {
+    "relativePath": "pnpm-lock.yaml",
+    "sizeBytes": 132816,
+    "sha256": "c31b75d67f13ef4b0c2094d601054e4cf679afdbe1e2609a7485938e412393ef",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "pnpm-workspace.yaml",
+    "sizeBytes": 199,
+    "sha256": "708301bfd8800b16d37dfb3447d30c4a41d41471bf0069844ef377afddf5902f",
+    "category": "other"
+  },
+  {
+    "relativePath": "proto/buf.yaml",
+    "sizeBytes": 88,
+    "sha256": "9451f398d1d769fd41c39d903961c887da8cc6066ca6a02fa6ba3583243fbb7e",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "proto/io/sdar/mcp/tasks/adapter/v1/adapter.proto",
+    "sizeBytes": 11705,
+    "sha256": "d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "proto/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry.proto",
+    "sizeBytes": 1479,
+    "sha256": "7c0623b7620d2ea50c9b317071d1d2bffceef5125debf74ed889133302008674",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/business-events-golden/event-id.json",
+    "sizeBytes": 228,
+    "sha256": "7d8cb292a0c1aa552051146e9d4c2a3ec3482fab1ced74799078d4a1bc357542",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/business-events-golden/source-canonical-hash.json",
+    "sizeBytes": 1144,
+    "sha256": "005431fb1cda9f96aed7d5198b90460d96f8d9aaf63421c7a6c3c727ca133962",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/business-events-golden/stored-event-hash.json",
+    "sizeBytes": 373,
+    "sha256": "1df268d09282d3c689308c385addca1fa2acac0e6a6d91b621bd7144c2197c40",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/business-events-golden/timestamp-normalization.json",
+    "sizeBytes": 196,
+    "sha256": "67c3c1c265f67933b22f1a8cd9c4e27419240ffa6f7e0f9fc62e42ee655cb21d",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/conformance-cases/cases.json",
+    "sizeBytes": 12858,
+    "sha256": "e6dc1c2e0d398ed829e60a143aa393b41f248141332c354c8bbcb5e3470be891",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/invalid/invalid-decimal-sequence.json",
+    "sizeBytes": 481,
+    "sha256": "ade4ede1589142750113c52487e3364eac93bb94047537ca31349760bee2bb8a",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/invalid/invalid-headers.json",
+    "sizeBytes": 238,
+    "sha256": "0b1782dd39c6e40bbaa2bb0f0598b7a3eec1e0ec6bb63660215182401c6b272f",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/invalid/invalid-identifier.json",
+    "sizeBytes": 580,
+    "sha256": "548248bec6ae7b0cc11a6db2a71c5084d46e944faf0a218374eacba11862c68a",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/invalid/invalid-scope.json",
+    "sizeBytes": 694,
+    "sha256": "a4a2e69add2a999d1ee5c6787be898593ed1fc1ce438317e4c5936fc6b7b06b3",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/invalid/poison-boundaries.json",
+    "sizeBytes": 476,
+    "sha256": "924af1c3c4adad410ae4fa6755d9c994435ff7f127ca8846d84968a51ad0759d",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/continuity-notification.json",
+    "sizeBytes": 632,
+    "sha256": "a81b4c30ca8b8fc1883b0cfb7883acc823b52318a586a099ed0cd30ee0bd6ba0",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/current-cursor.json",
+    "sizeBytes": 517,
+    "sha256": "c2b55dcb1d1871b01085abe26c1e28ac139971b389b4d0f59422ca7adb895099",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/empty-stream.json",
+    "sizeBytes": 688,
+    "sha256": "16cad9c8c0185cd53ad7d6a51a21bdbaa04141865e32ef2fe0eb6c7b0bd34c68",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/mixed-continuity.json",
+    "sizeBytes": 670,
+    "sha256": "961e0a1953a3d8164dace44969657172afade6d539dbc2d881ac19f360a8291f",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/relation-truncated.json",
+    "sizeBytes": 388,
+    "sha256": "da58e9e46695107c686faacdb5b540d427d901ecfa0a42463cb9e4dc06430674",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/resource-scope.json",
+    "sizeBytes": 827,
+    "sha256": "a803abfabc2e76360b3c3f3fa93e78eb8f7bf58f8ccaf02cb06f485a8ce1bb55",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/rotated-drain.json",
+    "sizeBytes": 722,
+    "sha256": "41e6a76d0dc099337cf85443fe03ef988b389b31105b419f578398d219a350b0",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/fixtures/business-events/valid/task-scope.json",
+    "sizeBytes": 720,
+    "sha256": "eef8c26500de23e8b5728e44e66c7d83655051cd64b3a6f0fac964d901b73749",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/frozen/SDAR_MCP_Tasks_Unified_Protocol_Profile_V1.0.md",
+    "sizeBytes": 58890,
+    "sha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/frozen/SDAR_MCP_Tasks_Unified_Protocol_Profile_V1.0.md.sha256",
+    "sizeBytes": 114,
+    "sha256": "03c71af30874db22e8ed8bff0bea2069dc4d9c2e03cc2e54ec71f3025f5822c1",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/mcp-stateless-base.schema.json",
+    "sizeBytes": 8968,
+    "sha256": "83e92ff147f8367eef563ffa474b5d2dd1144a85f5afaaa5dd05e7860a47ff73",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/mcp-streamable-http-routing.schema.json",
+    "sizeBytes": 1791,
+    "sha256": "fe67f2ff51906319c27f432c350b84877b5daed10ef0888998375e0fea11b135",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/mcp-task-notifications-sep2663.schema.json",
+    "sizeBytes": 35001,
+    "sha256": "2d5f0bc358460232e54408465e7d045a5ef7b8491d81cd1f428ba1dc1240fcb2",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/mcp-tasks-sep2663.schema.json",
+    "sizeBytes": 41066,
+    "sha256": "54e754fe1eda17a31c7c9fba4b13844a838a28c43166ec26af24eb95176a77ef",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/pms-mismatch.schema.json",
+    "sizeBytes": 3481,
+    "sha256": "aaeeb21b55b671dc5960e874de787967c09e1e8f49396c58b9c7767064b899aa",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/protocol-baseline.json",
+    "sizeBytes": 596,
+    "sha256": "65a580fd775c1e8815794a95077c1272749be48ca1898f9be666aef9d5012344",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/protocol-baseline.lock.json",
+    "sizeBytes": 7165,
+    "sha256": "01f4c5bdaf942f8d74ee67a0c3c892363dec4201bc405198845e4e810de50932",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-availability-v1.schema.json",
+    "sizeBytes": 12385,
+    "sha256": "6b14556b083e0e1f4bf72eff5fa2a838220baf6d0fc5063b191329a5bad01a9f",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-continuity-v1.schema.json",
+    "sizeBytes": 1857,
+    "sha256": "f92d0ad364a2f4ec068f99a0501a74a2d38748244ba6a04a85893527263807f0",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-relation-v1.schema.json",
+    "sizeBytes": 2119,
+    "sha256": "7e3bbe9d9ac96d10b4ab399cf5c90621a070959c3bdfb092327400c96a216dc4",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-business-events-v1.schema.json",
+    "sizeBytes": 9635,
+    "sha256": "dceb9ee64e414890813b784880a2d90f710c93faa0c8aaa8b4f2b7d6ba9b7e6f",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-evidence-v1.schema.json",
+    "sizeBytes": 6024,
+    "sha256": "fd951257333c4b7fdba5cbb9ff1087bdfc7808415d83a4957a4aded728f161fa",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/sdar-task-execution-profile-v1.schema.json",
+    "sizeBytes": 1141,
+    "sha256": "3118db54e7eb65b26c57bbea1525fcd74caace4f330922a3f5378f73770b99e1",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "protocol/upstream/mcp-2026-07-28/schema.json",
+    "sizeBytes": 180695,
+    "sha256": "9281c4890630e2d1e61792fa23b4084c4ea360cd58519610cd050545ab7b8708",
+    "category": "protocol"
+  },
+  {
+    "relativePath": "QUICK_START_CODEX.md",
+    "sizeBytes": 854,
+    "sha256": "4830960c6e723cee276d980683919ebc38d9a5b378f307978fb08a687f99937f",
+    "category": "other"
+  },
+  {
+    "relativePath": "README.md",
+    "sizeBytes": 4956,
+    "sha256": "5af63a7ac1ac146d5125970bf7b60bcc36a0c68efefa24dbb344a6c7358d5f6c",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/adapter_media/media/image1.png",
+    "sizeBytes": 126985,
+    "sha256": "96d249952adcc4f7d3ac16c13917daf4752821bf2a0e7d6b4e49c65ff947b9b6",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/adapter_media/media/image2.png",
+    "sizeBytes": 124241,
+    "sha256": "b09c0dd8c8aef528713321375cd170d3dbedf8fc5a2556116f2e32d99a39b5df",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/runtime_media/media/image1.png",
+    "sizeBytes": 156029,
+    "sha256": "41eda9b640f95f5ca353226dd508426b2c4a620a7ad584516a70c9ad6ccee4e0",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/runtime_media/media/image2.png",
+    "sizeBytes": 139385,
+    "sha256": "397e5b2473a70e9e63ac63c9c0f6caf8300adb658cbe6e5105a8099d434896f2",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/SDAR_MCP_Tasks_Adapter_Design_V1.0.docx",
+    "sizeBytes": 276258,
+    "sha256": "b12b0aa5366eef7eaa35d2c0efa8b98a1cb8fbd6a006ffecf22fe03c42d62c67",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/SDAR_MCP_Tasks_Adapter_Design_V1.0.md",
+    "sizeBytes": 27314,
+    "sha256": "98719a323086ec098fee84dbe5c33e1ac6975b74e93084fc9b25c296fd2678a4",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/SDAR_MCP_Tasks_Provider_Profile_V1.0.md",
+    "sizeBytes": 30022,
+    "sha256": "beecab77ed0034718b63fa4f473627cfa4ea27a74e5d5235841eafa843316a86",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/SDAR_MCP_Tasks_Runtime_Design_V1.0.docx",
+    "sizeBytes": 316301,
+    "sha256": "ad29ec20187a4ea71714685e477b6f5fb692fe30e380e9005fede515f02ab27d",
+    "category": "other"
+  },
+  {
+    "relativePath": "references/SDAR_MCP_Tasks_Runtime_Design_V1.0.md",
+    "sizeBytes": 26080,
+    "sha256": "6dc0b329276ad6cb4f2b5dd6dfc73aa2a33bb7171b4aae650e9efa89f5119221",
+    "category": "other"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/baseline.json",
+    "sizeBytes": 228,
+    "sha256": "bbb2d39b1a4f2d9994a4eec0ba0bafea4108ddc68d71eeb85efc111327a0a8e6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/capacity.json",
+    "sizeBytes": 591,
+    "sha256": "f25131c2a2e31c7ff858cb588b57d02216f6bcc03ad28fad88dbe9ad508ebd8f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/final-delivery-report.md",
+    "sizeBytes": 4754,
+    "sha256": "2393400e528678e4dc34094af0876f02d39cf4c963b427e64feb8677287dde40",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/interop-blocker.json",
+    "sizeBytes": 543,
+    "sha256": "3dc8b3490706474fc7a20b1407eab4e5bc4a88b0f15d07da165d3b90f44f9042",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/migration-report.json",
+    "sizeBytes": 608,
+    "sha256": "2dc8f3074df1faf5a584dffdb388d36b0932a5ce5f67eff4f1524d8550c48047",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/persistence-report.json",
+    "sizeBytes": 646,
+    "sha256": "7877c9f6d76a6c29de30fe16918316fb9a3a4e4621e14929c5a99baf831dc121",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/protocol-contract.json",
+    "sizeBytes": 620,
+    "sha256": "0deaf55d1e7471fb3a779d32847c338efa7c31b729a7153f7d50df5298569ac7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/python-adapter.json",
+    "sizeBytes": 769,
+    "sha256": "b76b3a59db9789b0dc1a5827a3dd09d206c8a181f167f0c00d7e5b8d9e43616c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/relation-conformance.json",
+    "sizeBytes": 615,
+    "sha256": "5f7dde10a245e3eafcfc74cbc5b6ce0d8da23ac6bb6c1450486096fab8ed6d91",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/requirements-lock.json",
+    "sizeBytes": 573,
+    "sha256": "7d9f8387214bbcc6d53d8a41ced80a8cfb8626761521dfd5be98ea303c2667af",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/rotation-concurrency.json",
+    "sizeBytes": 699,
+    "sha256": "40231b440b62e65e8613cdc247ccbdae73117d66889abe6378fe174dd44af9cf",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/runtime-component.json",
+    "sizeBytes": 5040,
+    "sha256": "89256d60cfb1199e78b142cef61284d152f11b183897514c8efdfbcae85bf480",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/security.json",
+    "sizeBytes": 591,
+    "sha256": "6d94345d864b61138d579a1ff61439da3e8ed33a1b85a367fffebb43dad5c726",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/source-conformance.json",
+    "sizeBytes": 725,
+    "sha256": "db81cabd2ab3e5b6e03596b46b88ea3c91a72d4e15dc7c985e59fe7dd7656153",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/stream-conformance.json",
+    "sizeBytes": 689,
+    "sha256": "c4227d7ff3fb86d6bae5eb7b09df9caf3fe2b5aa700a99d1b66626973a9293aa",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-profile-v1/typescript-adapter.json",
+    "sizeBytes": 773,
+    "sha256": "1f05b424e41844f0aad432f6235f5d326817edfaee7199ac54836a1089e63740",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/baseline.json",
+    "sizeBytes": 1700,
+    "sha256": "93b6c0d0a2ad6ef3d72793ec4cbb2264e9e26514ec6926ac4a690190c49f1b8b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/failure-isolation.json",
+    "sizeBytes": 921,
+    "sha256": "86e1fe12a5a002dc7fdc9333627df0db9c2592009a3c9215a35bf4eb8376bb11",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/final-delivery-report.md",
+    "sizeBytes": 2252,
+    "sha256": "756c2b523ac92ecf8b47995586b20b9dbf837f78c226690e028dabec0dffb1d4",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/metric-policy.json",
+    "sizeBytes": 681,
+    "sha256": "13f0d6daa0b3b507b388c2050a2acf1170198f80ff465d32ae5a116c16f31e54",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/protected-path-lock.json",
+    "sizeBytes": 1027,
+    "sha256": "ecd870218450f103774ccea90eaae0f04626fbad8eea686102d67f66bf20f928",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/protocol-zero-diff.json",
+    "sizeBytes": 983,
+    "sha256": "e30ecd9710db2cf1c554ab52fb47fdfad0e3d82335bd811a982654a6d103d101",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/provider-ops-audit.json",
+    "sizeBytes": 893,
+    "sha256": "b63df9449d9e0ef40ad2d595372925e26c25b3d6d8849eab587624adae1a8d3f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/runtime-verification.json",
+    "sizeBytes": 976,
+    "sha256": "a41645a9f763e5364bb74f7d5eaa287bb910304ff9fdb8d931bb92d08e18f26c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/security.json",
+    "sizeBytes": 665,
+    "sha256": "ae5d75396ee8aa2374d4370c6a9ff4f4fbb9bb9828cb356f5e09a06a9bb6d52b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/business-events-telemetry-v1/trace-log.json",
+    "sizeBytes": 990,
+    "sha256": "915b80d444f5e483c2d578ddee9c204af15bab1e6aacc4b27b43695c5b6fdbbc",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/capacity/capacity-rc3.json",
+    "sizeBytes": 4023,
+    "sha256": "65b01451f48eee4acc3a98f5802321c0d5bbb3e0abc6d2eeef0dd2379efc0d79",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/capacity/capacity-v1.1.json",
+    "sizeBytes": 4027,
+    "sha256": "0c45d9b8d0a300be49e838c516cf472110b37da85e51c273a3b68c11937e8a75",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/capacity/capacity-v2.json",
+    "sizeBytes": 3974,
+    "sha256": "3ad3418188ce643d8b2e84888916b2197b68e6c7eca8029cec1d2078a0f251d6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/capacity/runtime-v1.json",
+    "sizeBytes": 4155,
+    "sha256": "81dad0d56dfba47d98735a15b532c0542152e715df629b5e6712420cb361d527",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/conformance/python.json",
+    "sizeBytes": 4466,
+    "sha256": "25356b1714ea13fef432038f086e163afcdf9eee8ec3a30fb273f464abc38596",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/conformance/typescript.json",
+    "sizeBytes": 4474,
+    "sha256": "8e06b082fb5375f66e02abb0bbb57572534faa340db63f807fa318096a6846e1",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/home-assistant-climate/final-delivery-report.md",
+    "sizeBytes": 4531,
+    "sha256": "b26b90ee4c3a06027a248ba0db2cf179b0834fd5dda066c716e0016cc20bcc21",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/home-assistant-climate/protocol-v1-migration-report.md",
+    "sizeBytes": 2169,
+    "sha256": "131075aa2207c9e4d2315be555f493bbc3e0dfa52c989fe008f4f4d223d3cf26",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/home-assistant-climate/provider-conformance.json",
+    "sizeBytes": 7809,
+    "sha256": "2549fa04074ab539a611de6dcb7e3cdd10821a438a87d374fb4c13d6d71aebef",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/image/runtime-v1-rc2.json",
+    "sizeBytes": 538,
+    "sha256": "c0e49c590ce0a7c39948cafe6bef1853769192e94e729dd9430d650761f508ae",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/image/runtime-v1-rc3.json",
+    "sizeBytes": 518,
+    "sha256": "f3452c5df40b93cb54a5ce9f994f0a865a7fb66ba5b45d3f190a80a206e6e765",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/image/runtime-v1.1.json",
+    "sizeBytes": 519,
+    "sha256": "73a5068b67503d89a9f3c537872a928ee8b550c76cb4b003b3aaf68afffe7f7c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/image/runtime-v2.json",
+    "sizeBytes": 473,
+    "sha256": "360aa7adbcaf0bd9c324bd616a9ffd32f8c73008977d1e2e51e22a05fc256226",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-conformance/adapter-python.json",
+    "sizeBytes": 8547,
+    "sha256": "0d15ba710e8b930e15915453d31d259f7a3e0f9ddb0d09795dae1c3c65b698e4",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-conformance/adapter-typescript.json",
+    "sizeBytes": 8715,
+    "sha256": "5af9f4e75cb3d3e1d82ab3147ab6a944fb3d4b57ccc41ccbf0b20e7a3ed4a76a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-conformance/runtime.json",
+    "sizeBytes": 31324,
+    "sha256": "0267ae2ff8ca3ad404746e6cb4401c9d8a622d304ce055c5d1bd9b84441da020",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-conformance/summary.md",
+    "sizeBytes": 576,
+    "sha256": "f2462b9c547633777ba72c4268b40916247acc4c46dc49f8e6c278263b51b37c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-migration/blockers/2026-07-18-missing-frozen-contract.md",
+    "sizeBytes": 2193,
+    "sha256": "ab7141d0064d986e3c262de2dc09f0449fe90742880bdf0c95136233d7d5647e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-migration/branch-inventory.md",
+    "sizeBytes": 4147,
+    "sha256": "74c78994661b01c489da0d4bf4f02996c7044ab2dea9a544100d8d3881bf44b8",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-migration/conformance-74.json",
+    "sizeBytes": 32406,
+    "sha256": "67cf52f6add353975f922035bcc50838996f1cd088be1f1bcf908f605d7e7c2c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-migration/final-delivery-report.md",
+    "sizeBytes": 3404,
+    "sha256": "542886126544826d0b52c0b7a9eb9fab0cf501cbd9f41b497a22f15750f4eef7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/protocol-v1-migration/test-matrix.md",
+    "sizeBytes": 4185,
+    "sha256": "3b82b67fc8d81f7c8a288995a961d985fab7477820ff3b67f2b91f16729eb591",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/baseline.json",
+    "sizeBytes": 571,
+    "sha256": "b122364dfe81085d1ce9ad725e9ef092205e6698ac5bd2cc3b31ba3628223e18",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/changed-files.md",
+    "sizeBytes": 2756,
+    "sha256": "a728e8d88e8afcd30d4bf5016c1f61af4bd8bf4cc47dbd69d513d2894e3491ab",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/failing-cases.md",
+    "sizeBytes": 4215,
+    "sha256": "da4587e32012ed0b8f65fee066f99382f51349ce3dea3806cc57f63a5b7ad482",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/final-delivery-report.md",
+    "sizeBytes": 2640,
+    "sha256": "a9dd5bc9717fb292112192b2db03c52cc1ab693be1bc3aa08053a78d00c494cd",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/notification-capacity.json",
+    "sizeBytes": 707,
+    "sha256": "6fc63453b98f7bfa71fa01df043bd6b940c71af0e7d02963fd1e0a5d644d2e08",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/regression-results.json",
+    "sizeBytes": 915,
+    "sha256": "46a49894b0a9f85371b83d40f4c703fe58f5f1cf45006cebdd920ccf7cd1a374",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/sql-query-baseline.json",
+    "sizeBytes": 398,
+    "sha256": "03035e8f73611827d6cfbd772a35d14bc3e5a1bb6ac03c006d5bc201b290d180",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-closure/upstream-merges.md",
+    "sizeBytes": 909,
+    "sha256": "c32c792af4a05d6bc7575220a89391a8da6b836d54cf912caa35843a278f4248",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/atomic-schema-validation.json",
+    "sizeBytes": 2078,
+    "sha256": "a36360acf4220f255a199fecea3ee8169c02acca92876c2b5d501c7a1589b6e8",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/baseline.json",
+    "sizeBytes": 666,
+    "sha256": "b76544949367a11c05e88737a08f3ae5a82b8d3f1cae4e7b6c9959f9be84eee5",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/ci-run.json",
+    "sizeBytes": 1609,
+    "sha256": "458c2d4e0476abd982b6e41450576b7e31ad2cf1d20378425a8558952929acd6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/climate-protected-path-exception.json",
+    "sizeBytes": 701,
+    "sha256": "35f48ffca6b92af9685b4e61b51aed666f210b0f42a613487df3b34147b9d132",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/final-delivery-report.md",
+    "sizeBytes": 3270,
+    "sha256": "0a3a9a74c6747880d682b33502d783237d4cb76733e54e6550c1683da503d790",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/final-report.md",
+    "sizeBytes": 1408,
+    "sha256": "dc2a13f1d0cc6d0de955e57dbcec93f22b85bce426016a96e18d8955178a136d",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/lock-order-audit.md",
+    "sizeBytes": 6005,
+    "sha256": "54f80abc13cb07c9fdd5f222e47a7b879173af10c2afa4b72ddb47e1ba424ca0",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/lock-order-concurrency.json",
+    "sizeBytes": 3131,
+    "sha256": "b91d6c5bd823bed092f31b9eb5702e4175a97b2bbeabee4f14f8326067d1b95c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/notification-config-bounds.json",
+    "sizeBytes": 3591,
+    "sha256": "cecb666bc6e8d90b10915af6a8aea727144c30c9269b19eadf83a04637459d40",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/notification-metrics.json",
+    "sizeBytes": 3447,
+    "sha256": "4e03f75a391065c91cb3d33e4bf4f9d4e45d98502259763b5b8f1388c84df19e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/permanent-rejection.json",
+    "sizeBytes": 694,
+    "sha256": "0319095a2b2b80618be4004c982238cb00780d79fca0f898652e0a32d58ed0f7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/protected-paths.json",
+    "sizeBytes": 464,
+    "sha256": "2e94d142ff22c2569ee81c70bd23e10b77c975a386328a7bfb9866a481ec2a05",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/red-tests.json",
+    "sizeBytes": 44538,
+    "sha256": "2d1e5f7d90970fc6bc1e0e283a4c5fe46daf27ae03e5e4178f3171467e4e5383",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/report-correction.md",
+    "sizeBytes": 647,
+    "sha256": "47b2d47ecc48b93988623dd1ed416796554699e8f93ffc89b350f78ce717e660",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/test-execution.json",
+    "sizeBytes": 14131,
+    "sha256": "28a1d80fcbf768cd539d96f5f51b1a86d5eb0f0833b881945dc7b085caf6f307",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/upstream-merges.md",
+    "sizeBytes": 321,
+    "sha256": "d09552cedf2dc11ab46f1fe2cc6270dfa0720cd352530ba308c94348e1b03d50",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-conformance-followup/uuid-index-plan.json",
+    "sizeBytes": 521,
+    "sha256": "5283bfeafa5f5b2541f5b985ac6e9fbff8520935433fd6606079279be2d41879",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/blockers/2026-07-17-merged-pr1-check-rollup.md",
+    "sizeBytes": 1383,
+    "sha256": "5ff7455a5d0ba80e55ea3a7491677d151e0d6f34ea2fb749dcf3e7343c53e953",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/final-delivery-report.md",
+    "sizeBytes": 8519,
+    "sha256": "b0c100b6d0c2f3ef9cad387b40879100974a4aa1162dd9e7ae961ad405a510c1",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H0/changed-files.md",
+    "sizeBytes": 508,
+    "sha256": "5d617d9cd8d2d56910826f0aa16ab0d93b8afcb228c3362af1ddd49a9596d28d",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H0/implementation.md",
+    "sizeBytes": 571,
+    "sha256": "d8586693511d7496c4fbfdfe4e22e733a2b5c56eb8c4179520e9a31581249f3e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H0/known-issues.md",
+    "sizeBytes": 766,
+    "sha256": "a94da7be9931672ae9339dae33672dbb6ed4334b86935496a6cbb99724e45abb",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H0/test-results.md",
+    "sizeBytes": 2942,
+    "sha256": "85476876d3cac72bdab0fbad4558c3e323e4e76503ccd2af4a69cb9730da19a8",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H0/upstream-sync.md",
+    "sizeBytes": 770,
+    "sha256": "00832a36bcdb2d7fb9f1fabe008a6808c24879283380ae8d90e5ba04391418e5",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H1/changed-files.md",
+    "sizeBytes": 902,
+    "sha256": "ea8cbfd77e852af45ee54baa1527b1cfb081becfc8812542a5316c84d65154d6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H1/implementation.md",
+    "sizeBytes": 5119,
+    "sha256": "bf463f8a96bbe13ee4d2c9db4126b56af70a01c5178f63daba747eaab35eb946",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H1/known-issues.md",
+    "sizeBytes": 785,
+    "sha256": "77c7f3156e187110597460369ba02ea15970a72ff710f3cef4e26af3a60c5e15",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H1/test-results.md",
+    "sizeBytes": 3223,
+    "sha256": "00f3573e66fc6530bed8313297996a18e9e5948eae243624eb055dc55255172a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H1/upstream-sync.md",
+    "sizeBytes": 638,
+    "sha256": "ff05face169ff9bbc8d6c170d3bcca8a79c03f58fa57f6adce456af12ad9b0fe",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H2/changed-files.md",
+    "sizeBytes": 902,
+    "sha256": "dd4e773a6622663c2fae5b82a95f53cfef9b1511b2210b89822565c65daa2ab1",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H2/implementation.md",
+    "sizeBytes": 5400,
+    "sha256": "4de5986682ad65ce9551c693ee23ef4859f4d0df13d813939ff2bff9399683f7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H2/known-issues.md",
+    "sizeBytes": 770,
+    "sha256": "a9dd826cc1eec4f3177e03d4cca17420dcfd4f71190fc26b3ab6deb98bdf9d44",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H2/test-results.md",
+    "sizeBytes": 3272,
+    "sha256": "8a8596f7d8127afbaf1121bb7b1b8692961d89163bdec12fb4012524cb1f9612",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H2/upstream-sync.md",
+    "sizeBytes": 893,
+    "sha256": "ac0997d93a7502e936294b041a582f33dac2749ee88f8552239a89bff384668a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H3/changed-files.md",
+    "sizeBytes": 548,
+    "sha256": "f975a10e2af8e0daa3ef1b338b0159317d74d45dbf4455a40808294b96e166bc",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H3/implementation.md",
+    "sizeBytes": 5058,
+    "sha256": "55f4b5e3af65a8a11838483b9de7eeb2812a1072bd2e162a190de21ba449f7e7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H3/known-issues.md",
+    "sizeBytes": 583,
+    "sha256": "7e93c8c288fc2cb64ad57059871c3cddffdf2e1dd4d745a4a350c73e48c7ab5a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H3/test-results.md",
+    "sizeBytes": 3806,
+    "sha256": "0935e006927a079275968c7bb05cd06e913eee21dc3d79068db6ad8daafd8561",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H3/upstream-sync.md",
+    "sizeBytes": 1176,
+    "sha256": "203fb4a1c5751880c4273c97c1bda1d80c42957ddae0257247382e657147d54b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H4/changed-files.md",
+    "sizeBytes": 1004,
+    "sha256": "af28dc142eb34b16de3c9062d86a54378406af986aed9e92d3cda66028c1e14c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H4/implementation.md",
+    "sizeBytes": 5013,
+    "sha256": "722ed50034db8140c5c652bae945856c2c3fda90c5f0786073f67cdf633cebae",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H4/known-issues.md",
+    "sizeBytes": 793,
+    "sha256": "a95b1c4d1639c024fd0c804aa5c16cf7a02116b4a96de8f908c2115428f35d96",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H4/test-results.md",
+    "sizeBytes": 4509,
+    "sha256": "f52124b69dd3f826e90a85aa8e5b66514e884c4341b65e76a788c5794aff01fb",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H4/upstream-sync.md",
+    "sizeBytes": 1086,
+    "sha256": "71d54ef64ed10085fed7c1dfb9cdc7ea2ac327caaa1859f7cb0a6f43becc391f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H5/changed-files.md",
+    "sizeBytes": 880,
+    "sha256": "4755900814a7b7490ae7b6581723aeec462f048a644ca1f40aa6b32bea86025d",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H5/implementation.md",
+    "sizeBytes": 5579,
+    "sha256": "a807b936aac5aa883828b1f6f9be4c48227fdb7ed69c9d72470e4e8fd8f157cc",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H5/known-issues.md",
+    "sizeBytes": 971,
+    "sha256": "1b5b4e747284ba1cb5a84bc8f5d1fce962ae39a8135aeb01b50c5f42db44881d",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H5/test-results.md",
+    "sizeBytes": 4773,
+    "sha256": "9b76637ac87ecb4443285fa10a736c5ddf6eb3a5676b1937ea92e1d6b3e27c4e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H5/upstream-sync.md",
+    "sizeBytes": 1194,
+    "sha256": "78b77f5ef13e359605da557e7d3cb48980ef11db36e9e5b75dc3c8a6aa860249",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H6/changed-files.md",
+    "sizeBytes": 1125,
+    "sha256": "10123700f1c59fdf9dfec5062d39b18ce33c2dd6417c06f25e7dbac9c80d4988",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H6/implementation.md",
+    "sizeBytes": 6276,
+    "sha256": "7198cad1e95cae8aeb01f2516fa9e356e3cb73ad1f806304ba5a1021742419bd",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H6/known-issues.md",
+    "sizeBytes": 1157,
+    "sha256": "88ae0e2f086f587c3603f715ebada1259d668cfb9764d4b8005c6f126fab45e7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H6/test-results.md",
+    "sizeBytes": 3868,
+    "sha256": "514bf09fa01d4745cb0bd518113fa7a3eef136787822717b2578e7dff0310c89",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H6/upstream-sync.md",
+    "sizeBytes": 1097,
+    "sha256": "3f91340bcb330e3226f86a210624a6569500c240b99a6baba4a98ea7e195ed59",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H7/changed-files.md",
+    "sizeBytes": 724,
+    "sha256": "5a037280d22e4b2f9a36662ff327c4848b1fb9893f7d89b7167d751b6a02087a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H7/implementation.md",
+    "sizeBytes": 3269,
+    "sha256": "f30e84441b2cf10f397dcb4701f1cdefb73d24a6901a039996029ebedced8ea7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H7/known-issues.md",
+    "sizeBytes": 1074,
+    "sha256": "edd9bc8cbbc237296b9c375ce9b7e7d39894dc28e9a3b3d61df1e4ad64b9dbf6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H7/test-results.md",
+    "sizeBytes": 3144,
+    "sha256": "7226fe390109112a775c5cfc9fedadf2859820cdf3297e5378b33083756022df",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H7/upstream-sync.md",
+    "sizeBytes": 773,
+    "sha256": "9206212b651d5b84b0d4c8ccd8a07d784fd7e90a2e7e889ba5fd9193debee54b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H8/changed-files.md",
+    "sizeBytes": 615,
+    "sha256": "6d7b2e73e90e95a6def0139c49c5c5e59646eb51e1730b9ee405137f05c3b712",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H8/implementation.md",
+    "sizeBytes": 2449,
+    "sha256": "757bed503f067b195dd225132e17804d29cf9d8c3ce446e9f1f5aae3cd8436ab",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H8/known-issues.md",
+    "sizeBytes": 991,
+    "sha256": "8b6d58a560777b8eb4e18bac99bc656eb8cf0c61b72da8963e52a66f0c1b8b07",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H8/test-results.md",
+    "sizeBytes": 3014,
+    "sha256": "db17811cb9c05a428177eba858421f144647ba0e615a96ef381221605472b1ac",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H8/upstream-sync.md",
+    "sizeBytes": 851,
+    "sha256": "bb6b3a32eaa5c0a80cdc6e846d6bb45c9d9a6e9d75ee6b42dc7a4b4d6fad08c4",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H9/changed-files.md",
+    "sizeBytes": 512,
+    "sha256": "23714cfaa2728a32accf7cf60903604bf454f54f4a354a1cde7128d38a7d3a2f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H9/implementation.md",
+    "sizeBytes": 4604,
+    "sha256": "b9f20bbf9fc0e0a0e35909f8fc170245638f497129c1b78615802903be446964",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H9/known-issues.md",
+    "sizeBytes": 656,
+    "sha256": "761103ff77aac741f9159e2d22d8b59bd8f4b80363e236bc437aac8679aac32b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H9/test-results.md",
+    "sizeBytes": 634,
+    "sha256": "9792831e31b20881fe5b6e11068d751356c95fa12ff8c658a9f5567a54b53bd6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc2/phase-H9/upstream-sync.md",
+    "sizeBytes": 836,
+    "sha256": "88b01802fc6b370410d49b09ff2f031715c3ff3574a9fecf1de97e68dcfc3abf",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc3/final-delivery-report.md",
+    "sizeBytes": 1684,
+    "sha256": "8717c5c11e83fa3f67e105f8f0012deb5ebc9077442b8c306a5bd73d8356c963",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc3/migration-report.md",
+    "sizeBytes": 1348,
+    "sha256": "3794ee65fb0295a52a9e6a267310cea2a2a0dce4f62e4fff0fa4657638e22921",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc3/security-report.md",
+    "sizeBytes": 1293,
+    "sha256": "2859b374e70b4efed17866ccdb260d0971b868acb5d6112d41fed0aaaff6b229",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1-rc3/test-matrix.md",
+    "sizeBytes": 3372,
+    "sha256": "f6bbbcc23d98ac5ef5601d21f06ffc7dd0262a7c1112414a918f78debc7a98a0",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1.1/final-delivery-report.md",
+    "sizeBytes": 1951,
+    "sha256": "16f755e5d3ba32becc5effe34d1b1eaa720c769b97ea6155fcac1be25398d650",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1.1/release-evidence.md",
+    "sizeBytes": 2907,
+    "sha256": "bce4300eb2fff4f8a7195a891831307243168c380d094cc526443eb7f08a413b",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1.1/security-privacy-report.md",
+    "sizeBytes": 1464,
+    "sha256": "4c79c45c5a07846f03f0ebc61f9745765335566786644b61566254eff5dd8e53",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1.1/test-matrix.md",
+    "sizeBytes": 3471,
+    "sha256": "6773b6c886e0e166510995aea62d5a030d4ae1686b29191ac9118391ae48dba5",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/blockers/2026-07-16-docker-socket-permission.md",
+    "sizeBytes": 1689,
+    "sha256": "2a52981b5b8a2590c75d793b896ec5476d7c6fa23f76d4b5c3a85f3c82e5d607",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/final-delivery-report.md",
+    "sizeBytes": 13719,
+    "sha256": "50c02b3a692b912ebcb731a3532ba6f1b91a3a2a1086147d71630e89e141fb57",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R0/changed-files.md",
+    "sizeBytes": 700,
+    "sha256": "596306a65326cb4cdef4882edb411859b9da3bc188d47e887546d40f9f30149e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R0/implementation.md",
+    "sizeBytes": 1573,
+    "sha256": "c0d5a4672cc2f4db65f3dc6c759a039839000540d6d58ad37386a55b911da168",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R0/known-issues.md",
+    "sizeBytes": 664,
+    "sha256": "5d6ef7d4ce49ae23be09d1dc8531ce9b6793f9ba6908b3385b5f0eaea4627c35",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R0/test-results.md",
+    "sizeBytes": 1157,
+    "sha256": "f832f505ca629016622fe90311e6dfd707b22e02f7ab2f3ebb23e24ad8e127ed",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R0/upstream-sync.md",
+    "sizeBytes": 712,
+    "sha256": "b490d7bca0f6fac0c8dea2d6741067a6aacae12ae8a0d42a8b1ae5c33e20f81c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R1/changed-files.md",
+    "sizeBytes": 921,
+    "sha256": "b0a253424d2100ab1703ce031dcd77d9b36299401569b02da8c807e533ec387c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R1/implementation.md",
+    "sizeBytes": 1714,
+    "sha256": "42fb3553f61995480cf012395bbe001732b205fc69282964db71fb897c0fa108",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R1/known-issues.md",
+    "sizeBytes": 635,
+    "sha256": "2b1b95e143ebc3ce12e76e0a4e78366781b86be293408b46739fad7ac2b2e0ee",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R1/test-results.md",
+    "sizeBytes": 2017,
+    "sha256": "92cc6db0e10aee229acd712441afa295a6adc764f2c4c7060535d9d501fe3db8",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R1/upstream-sync.md",
+    "sizeBytes": 533,
+    "sha256": "3bec972a37d91ab2f3da8b1d0d27788220c828546b77ae4ef119cd3c028c8f70",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R2/changed-files.md",
+    "sizeBytes": 597,
+    "sha256": "1a4c1d26f0018e754c707f76f561c1e3f1b0380668cbd25d2b5eafcde94b4d08",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R2/implementation.md",
+    "sizeBytes": 789,
+    "sha256": "8b7ab15ccfb0c088238b07335685f249b54d9a586d6124ab81aff79bed2e9953",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R2/known-issues.md",
+    "sizeBytes": 338,
+    "sha256": "55031b13f92cc7376fb5ff19b182f3bcba2add0006f023a7cf75a58dbace9ea7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R2/test-results.md",
+    "sizeBytes": 1304,
+    "sha256": "682b29ad0c849c1637139d381145fa2cff3f20e33399083f0d90539e40ba38e6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R2/upstream-sync.md",
+    "sizeBytes": 391,
+    "sha256": "1e5741fd904c016caf38730ba511e27aa1524927c74c442c54bf1e47a1510602",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R3/changed-files.md",
+    "sizeBytes": 1039,
+    "sha256": "4b38a9243f6967d6f162e141e4d9bb858364e9b36fc9a1e90e72cb05e028e8de",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R3/implementation.md",
+    "sizeBytes": 1379,
+    "sha256": "e00cdce797d9f63a2b3757e0d29c6dc6e965db82f12c4451a6c27d871b859c87",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R3/known-issues.md",
+    "sizeBytes": 723,
+    "sha256": "5c3386f8b4cd56be661409023463cbe22f7519603dd44139d8b6386ee91105d1",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R3/test-results.md",
+    "sizeBytes": 1847,
+    "sha256": "0bf429b25a856d43bd02f92cf71c6ee3c68491b014da82bb95525d1c09fb2534",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R3/upstream-sync.md",
+    "sizeBytes": 625,
+    "sha256": "e56ac54d9cedcac56786c93070df50aaed7d0d3e1298ef69282d3ebab562d789",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R4/changed-files.md",
+    "sizeBytes": 928,
+    "sha256": "b5bcbdb7d9a282f684c7b965e627e66ed0cadbaf7072f2541b873b4d7f7413e3",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R4/implementation.md",
+    "sizeBytes": 1591,
+    "sha256": "1320fd5b90cd59deb621033bd8b76001a5578a550df6860b953818073b57804e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R4/known-issues.md",
+    "sizeBytes": 565,
+    "sha256": "1b606a60f20cf3f67be09098cba8bd8726407fda8efb040bd3211e10c7f105e2",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R4/test-results.md",
+    "sizeBytes": 2069,
+    "sha256": "cce3aa99b48f64df34c6f404b18ab5159eb6b32899aec1483c46d391e0b3910a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R4/upstream-sync.md",
+    "sizeBytes": 613,
+    "sha256": "1cf43d2dbbfd73f57f826500c5b527510cc302416b87cf9be0153f0963337ba7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R5/changed-files.md",
+    "sizeBytes": 873,
+    "sha256": "771a16c046361d6b2432869415e66ec8795b262781c676735c31367abb99b254",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R5/implementation.md",
+    "sizeBytes": 1487,
+    "sha256": "7ae87ff50d55a5d807f97b7c1437460cf8f7c3f5c6491f87cb78e8b2ca4fcac7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R5/known-issues.md",
+    "sizeBytes": 607,
+    "sha256": "552328011e6e5f2eae9e6131dcf761c2bff338640c6ce133f5eec565fae42e3f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R5/test-results.md",
+    "sizeBytes": 1372,
+    "sha256": "3503693462a4c83764db02bb7361daed61af3984a40c6069d4f0af3ead72c9d4",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R5/upstream-sync.md",
+    "sizeBytes": 428,
+    "sha256": "caf241d4c0698f3b8f4be903ec87b01bfe5f8c52ac988233a9c588766eaf3eb6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R6/changed-files.md",
+    "sizeBytes": 978,
+    "sha256": "4ca115eb2461a7c711dc810ace9c3661c28d13e028e427b8150ddd56d5f1dcb3",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R6/implementation.md",
+    "sizeBytes": 1562,
+    "sha256": "32fbf230c215325eccae6035d2fcd5ab95ec2410528257932f328548038d0eb6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R6/known-issues.md",
+    "sizeBytes": 420,
+    "sha256": "91642e432504a9b8db04998112421b271d5619a2ff4c8dbf842e800635e1038f",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R6/test-results.md",
+    "sizeBytes": 1276,
+    "sha256": "d5b23671d5e804bd77f7d6b37c60c4a27191697822faf8fb1fb7f7181644eae8",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R6/upstream-sync.md",
+    "sizeBytes": 522,
+    "sha256": "ea7f4a8fdecc3d27cc78003033a64302b8cc93e80134bfc18305b7e6bd0b08d0",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R7/changed-files.md",
+    "sizeBytes": 913,
+    "sha256": "6a69a2a7df11c38e94a90dd9fc9feba135458a7718c057ddc213d4119f7ceb8c",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R7/implementation.md",
+    "sizeBytes": 1616,
+    "sha256": "453de9d19a74e3c28d16ba449b5ab7ac8412fde77d8fb86ea1ac3cf7005e50d6",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R7/known-issues.md",
+    "sizeBytes": 605,
+    "sha256": "6e129b18f49dcf82d90839e14c22b74a8afa973ec3b959a0554c41d216abb846",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R7/test-results.md",
+    "sizeBytes": 1306,
+    "sha256": "8bdbbcf64542b7090c1035c53e7e06c42336f191da8fc1a504ef97b2771132af",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R7/upstream-sync.md",
+    "sizeBytes": 493,
+    "sha256": "ea6c3e8111c64f9193a90d07066145f0c9280d58106f8f676f1cbb2c6f79c0a7",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R8/changed-files.md",
+    "sizeBytes": 707,
+    "sha256": "1a02232da8c1a4952ebeb6f3e998132cfc871b7b0c8e3e4e537193d2ae10df73",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R8/implementation.md",
+    "sizeBytes": 1461,
+    "sha256": "358ee817368ddf86daac7d7a7205fe22c020ee791cc1c64b714552936edfe652",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R8/known-issues.md",
+    "sizeBytes": 519,
+    "sha256": "25ee1a8d6bfee7e8d8aad72e715ec70a8071f3f7f82256e860616f3582f69531",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R8/test-results.md",
+    "sizeBytes": 1117,
+    "sha256": "19a6ade811a01f880700f276c59ce589f5b8c6e43295a00dcd789e944581b7cf",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R8/upstream-sync.md",
+    "sizeBytes": 411,
+    "sha256": "3eebe053cba4cbfdda2834ab37ea14bdb6aa03909e5f3872679dfe787142bd6e",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R9/changed-files.md",
+    "sizeBytes": 845,
+    "sha256": "7f163ace9b9b4fc388e59479ba7dbb0e5d73e9c139cc7bedfd99daef15325eb5",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R9/implementation.md",
+    "sizeBytes": 1241,
+    "sha256": "b5eedaf1fb09a2c16b998c9bb65e583faaf22553848adbd54f08661054aefcf0",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R9/known-issues.md",
+    "sizeBytes": 533,
+    "sha256": "842ab3ed9c94b1bc2a6d4a0a5496178f220c843bf0a3eeb2649a45a6605caf0a",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R9/test-results.md",
+    "sizeBytes": 2403,
+    "sha256": "fafd7a39bf2637b2b11b50e208f8ac63e764c3536df97f9fb2f781fb463d0fec",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/runtime-v1/phase-R9/upstream-sync.md",
+    "sizeBytes": 643,
+    "sha256": "b80b6142c1589eed4eea00d945c65859c8f7496eb13e3574ca6caefa3eee33eb",
+    "category": "report"
+  },
+  {
+    "relativePath": "reports/sbom/runtime-v1.cdx.json",
+    "sizeBytes": 32144,
+    "sha256": "fb73ce4d58dddf2dfe8d7f5ef1396177c4b531a3875d07711e653542c1be5eb2",
+    "category": "report"
+  },
+  {
+    "relativePath": "scripts/check-kubernetes.mjs",
+    "sizeBytes": 2034,
+    "sha256": "6e34abc75c1f5ff95e7a11114b17eb14e9741a8fb62f9270f4efd39408a776d6",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/check-runtime-image.mjs",
+    "sizeBytes": 3103,
+    "sha256": "9f7897631a8f775c0df42f32956206f2f09b6ba6852bb45e2307e77b08dcfa08",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/generate-proto.mjs",
+    "sizeBytes": 4073,
+    "sha256": "8b0119ecfcfac12d85b33b24ccc2b902f63b4a6d9d9c7c74076d4f0ceb4218c7",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/generate-sbom.mjs",
+    "sizeBytes": 2782,
+    "sha256": "9300137bb4668d981bfbb89cbdbd43ec7dc4fa90dcc4695bc66310c1f69738ad",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/check-frozen-contract.mjs",
+    "sizeBytes": 1230,
+    "sha256": "8f78145522063bc84cd35852683c7963a9c32805ca67620d11f07451c66faaa1",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/component-conformance-reports.mjs",
+    "sizeBytes": 4158,
+    "sha256": "d2e051706cbae1ef2e3649c5d176a565003daad3b3c2cbca1323e1cf9e98c7d6",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/fetch-pinned-mcp-schema.mjs",
+    "sizeBytes": 2652,
+    "sha256": "46b652a33b633ed5d25315ceb87125ca999a05e652fa36edf251aa6e6f3124bb",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/generate-protocol-schemas.mjs",
+    "sizeBytes": 1579,
+    "sha256": "bca377a7e979629955d9bd310bf106ca3f1c3224c47fa3686a587567995ed146",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/run-business-events-contract-catalog.mjs",
+    "sizeBytes": 321,
+    "sha256": "5eeee8a2eafe31c429cf742b7da943e5ed9837ab398c1e22a6b810b69650a0c7",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/run-frozen-conformance.mjs",
+    "sizeBytes": 3212,
+    "sha256": "f814b54313e611a293ba0c02b985cc04576a808dccc8fb75edf10418bb40a464",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/schema-definitions.mjs",
+    "sizeBytes": 30738,
+    "sha256": "c1c9f5a08883dc1ada7d03e1994db7780277bac514af155ffc4f214cbb4022bd",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/validate-business-events-schemas.mjs",
+    "sizeBytes": 1660,
+    "sha256": "0d64a1d64f0037a084ebd718d8f045391f5b236859a361a4883e650e47513bd8",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/validate-protocol-schemas.mjs",
+    "sizeBytes": 1573,
+    "sha256": "c41181e2ea5be0cd266ff4b40259b2b0602d5ab5162904b51442e419d6ca60ae",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/verify-business-events-conformance-reports.mjs",
+    "sizeBytes": 1647,
+    "sha256": "a7c80abd35e7600dc63c80de594f875e39d0e56ddac84b75f04cf5426291894e",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/verify-business-events-requirements-lock.mjs",
+    "sizeBytes": 1132,
+    "sha256": "0c0a637b9649438eb5f4a295e53808bff6c8b5b407186ac00f1a8685aafabe53",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/verify-business-events-telemetry-reports.mjs",
+    "sizeBytes": 1425,
+    "sha256": "c4a4b0f1010c757722cc6904af5a991fe52515b8a6ecfd85f2e70f5b0c310ba9",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/verify-component-conformance-reports.mjs",
+    "sizeBytes": 2381,
+    "sha256": "050fd63af64b6cef8a7e0fe160dd15c89604f28219a3bce8e8a3563723b4c6df",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/protocol/verify-protocol-lock.mjs",
+    "sizeBytes": 2124,
+    "sha256": "93f9358fea97ddaafe0d92e000db9c10729dfc36022c5ac0ff79f30ba276c685",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/provider-conformance-report.mjs",
+    "sizeBytes": 7748,
+    "sha256": "3cceafc762cca41f49572b225cd9579bd3c5d160f3db52b758d51e5e509d6d48",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/python-adapter-smoke.mjs",
+    "sizeBytes": 3388,
+    "sha256": "2fb5db8d27aa7067a00e45abd645e9b74a1e5cb2659572a1c2da6bfe5bb905f6",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/require-env.mjs",
+    "sizeBytes": 253,
+    "sha256": "b4c35afa750f6fd8889146538f0057a12db30a578130f19f45c5fa81498cd156",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/run-business-events-conformance.mjs",
+    "sizeBytes": 5529,
+    "sha256": "0c74156e9abe221c069b450600d1feee6b939055b3e03e3f8c8e6cc39d7d3eee",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/run-business-events-interop.mjs",
+    "sizeBytes": 2509,
+    "sha256": "cefe9645d9b728b573088ad63a3194bc69ecd038e83f6cb24636ee2fc45b500b",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/run-capacity-baseline.mjs",
+    "sizeBytes": 20348,
+    "sha256": "233687ff8ff2e71a9a733c6151bb3392d9c031d799fc04063410811fa9ff4085",
+    "category": "source"
+  },
+  {
+    "relativePath": "scripts/run-conformance.mjs",
+    "sizeBytes": 10474,
+    "sha256": "fed57f402c680efa3110567951c25cb0a9e27242855f7b5480306f9a9bad8ad0",
+    "category": "source"
+  },
+  {
+    "relativePath": "SDAR_MCP_Tasks_Runtime_Codex_Goal_Task_Package_V1.0.md",
+    "sizeBytes": 30658,
+    "sha256": "06728063dfcb0ff450f73bd1c0b8a2114807abd9153829461b8d832338deb308",
+    "category": "other"
+  },
+  {
+    "relativePath": "TASK_TRACEABILITY_MATRIX.md",
+    "sizeBytes": 2614,
+    "sha256": "d6e59213daf494ef57f1f49ec23ae9e2a9b830478f6b9b1dbf1363d7382076ad",
+    "category": "other"
+  },
+  {
+    "relativePath": "templates/BLOCKER_REPORT_TEMPLATE.md",
+    "sizeBytes": 401,
+    "sha256": "bde3059762977d813b92b36ef6f1fa2d94429d077210876b7d85882f2479909e",
+    "category": "other"
+  },
+  {
+    "relativePath": "templates/FINAL_DELIVERY_REPORT_TEMPLATE.md",
+    "sizeBytes": 423,
+    "sha256": "c307efeb8942ae04ef82706ab10efadbc861e80d0e892faf04a842093757e470",
+    "category": "other"
+  },
+  {
+    "relativePath": "templates/PHASE_REPORT_TEMPLATE.md",
+    "sizeBytes": 532,
+    "sha256": "d2a67bc036177f0db9435a8ac76d8970b4bd00da652336ae72e80b8586eb0d0d",
+    "category": "other"
+  },
+  {
+    "relativePath": "tests/business-events/adapter-contract/adapter-source.test.ts",
+    "sizeBytes": 7349,
+    "sha256": "97e76e8270449d0aeaa785bc4d021f2c0b6a50d908086e96a70fc1f78a260e3f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/capacity/business-events-capacity.test.ts",
+    "sizeBytes": 2812,
+    "sha256": "45c4b9f3d5c83e96b30178d7e30915cdc194f5015a7b361de7c73335ce7445be",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/concurrency/business-event-concurrency.test.ts",
+    "sizeBytes": 5158,
+    "sha256": "dacedaf0611c76c90ba14c8b074a3d87f82a40d9b3fed9863e18522a213e5897",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/continuity/business-event-continuity.test.ts",
+    "sizeBytes": 1646,
+    "sha256": "3967d3cfbff5377a03f46793c3197591749fa606f5d75c5fa4b49982bee41e0e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/contract/business-events-contract.test.ts",
+    "sizeBytes": 4442,
+    "sha256": "26df7be6bab576fd6a564c1ed56f22b1e1ac1f1f74dae6471d28003385bf14c7",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/contract/catalog.json",
+    "sizeBytes": 10447,
+    "sha256": "08677b725863508d03da92c6ca89635b7e30bd907caad5b9f7b6bcb0cdbf54cc",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/fencing/source-fencing.test.ts",
+    "sizeBytes": 2095,
+    "sha256": "88104f3e0de70bbe0d59699b3562e5648efad3e59332b98ed3ea7d04b21cb5c7",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/finalizer/business-event-finalizer.test.ts",
+    "sizeBytes": 6423,
+    "sha256": "3e9947f16d19b28af5f4bf70d9b57724cdf7b01ecfdf72a75d4a823bb64767e2",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/migration/business-events-migration.test.ts",
+    "sizeBytes": 3046,
+    "sha256": "e28ff82582f0b6b8a24031eb8842e10c1feb14592ccb304debeefe53b2db5cd0",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/persistence/business-events-persistence.test.ts",
+    "sizeBytes": 4419,
+    "sha256": "5ef4ebe1bf83b0015a83253f88b643c876aad71b1b615b75325f709910ca91d2",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/poison/source-poison.test.ts",
+    "sizeBytes": 4086,
+    "sha256": "96a3a7cbd3a45f573f324183b50a46c2ff67d299c0e08e6826898d4c4a2ada51",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/postgres-harness.ts",
+    "sizeBytes": 964,
+    "sha256": "24518801a8dc69640e0667bf511425855928f9df839edbdf3557f7e90f0b3192",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/relation/business-event-relation.test.ts",
+    "sizeBytes": 9446,
+    "sha256": "de4324ef18c7d1d98c8b6bb7e447f20c2d0e5c4a94cca5a39ce7bbe41fba9296",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/replay/business-event-replay.test.ts",
+    "sizeBytes": 2281,
+    "sha256": "7a43473491360c18a439dacb5ea633d5672f81d0d182adacebad63ed7c4ebc5e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/retention/task-resource-binding.test.ts",
+    "sizeBytes": 4736,
+    "sha256": "f59cbd6a2ee95c4cc36de62fc821587186f9ef700f8af1d7f7f4c12f3bffe8df",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/rotation/business-event-rotation.test.ts",
+    "sizeBytes": 6027,
+    "sha256": "01c9902e1e0ad5c16675f4bf620107eb7f42d62166637b1504b3bbc7669c437f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/runtime-fixtures.ts",
+    "sizeBytes": 1636,
+    "sha256": "40609af24568ab621d6f03c1a40470902022557d2be6bb7171795a56863c4f1c",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/security/business-events-security.test.ts",
+    "sizeBytes": 2146,
+    "sha256": "1b2e59ce9e05f5da109ca71b9713afdc59c3297c619d2ce1f0d00d47e73516ab",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/source/source-intake.test.ts",
+    "sizeBytes": 5387,
+    "sha256": "0efbd8ee891ded4aef469256665c43c14655349748e00dcdb27ffa9bb07ac727",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/source/source-worker-grpc.test.ts",
+    "sizeBytes": 3430,
+    "sha256": "a57b2459a132dd60b48f1dccf926931955ed048249d050b9a6a6812681809cc1",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/sse-fixtures.ts",
+    "sizeBytes": 5023,
+    "sha256": "489bb875101da04996eec41e92cfab2383c3ee87cf2370406bfe51520aaa99c7",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/stream/business-event-stream.test.ts",
+    "sizeBytes": 1930,
+    "sha256": "2f71a7fd8f6838c5f81b1f4b8f81b68c3fe389cd38e191f7e62d578fda083d23",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/telemetry/audit-publisher-retry.test.ts",
+    "sizeBytes": 1861,
+    "sha256": "eacb5a1ecb374328a8aabb4a68270c485a371d4a94ac4350334e931c582a3578",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/telemetry/lease-audit.test.ts",
+    "sizeBytes": 1989,
+    "sha256": "15d35845b6f4ca69d99a6db69b8015e1fb8ebd6adb7bb01213b5e609bcc050bc",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/telemetry/provider-ops-idempotency.test.ts",
+    "sizeBytes": 1795,
+    "sha256": "6037c59b06471760b7bab781da92b5313a80073a29d12caabd6bda72d8450cc3",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/telemetry/provider-ops-transaction.test.ts",
+    "sizeBytes": 5462,
+    "sha256": "d577ccd3a6a8265a1216c7a9f41248fe33b81d0e6041c134b56fc88cc5f8c5c9",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/business-events/telemetry/rotation-audit.test.ts",
+    "sizeBytes": 2107,
+    "sha256": "2a41082c97e3834db2bdc90611533b24f8e9b51b3884ffd06d3a0cc0513f18fe",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/contract/adapter-proto.test.ts",
+    "sizeBytes": 3229,
+    "sha256": "eac9a7025f7a6c6cf7c2e2f8cad36cab8a2307a97f4eb890a89c6597ce7263cb",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/contract/provider-telemetry-examples.test.ts",
+    "sizeBytes": 1212,
+    "sha256": "101983532b9f8db5647dca70d9c53f1546110d4b803da39ddfb1f09edcc02112",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/e2e/runtime-stack.test.ts",
+    "sizeBytes": 17511,
+    "sha256": "e556cd36b71f38024e601358aabc20500a733754acbf55c0bbe262a38cee38f1",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/fixtures/fake-home-assistant-climate.ts",
+    "sizeBytes": 5632,
+    "sha256": "814e69f76e9baaea3504ad3eb25d9014c2a0e692e8239996318d96f8c4844bf5",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/adapter-foundation.test.ts",
+    "sizeBytes": 2639,
+    "sha256": "f81bfd930d3d383bd7cd939966f5f328c5e83a3d58ae0356d2d75e2e12e9f3ba",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/home-assistant-climate-provider.test.ts",
+    "sizeBytes": 6173,
+    "sha256": "024647bee2e1efcfa3fcf25786bcb67185c6562e6df685d04841c512b5852525",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/home-assistant-climate-recovery.test.ts",
+    "sizeBytes": 3159,
+    "sha256": "d5b49a1ffed16d19594225aa95f8fea1569f27269047c2a32bc6ec27c4b5b240",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
+    "sizeBytes": 14559,
+    "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/lease-expiry-race.test.ts",
+    "sizeBytes": 6743,
+    "sha256": "6a1856fc59b7c55bb8387731020123788a4e75d5c25d07c8ff59ae6fc1742372",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/manifest-drift.test.ts",
+    "sizeBytes": 1915,
+    "sha256": "9d4f38ca4a8bdb2e020746bec5314264a7785b0e933f4d2f3c2300002d5321df",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/mcp-catalog.test.ts",
+    "sizeBytes": 2945,
+    "sha256": "0d2998adc85ed44acc216e44adda0ef1caac92d44e8c2033b26ef6b2597eb6b4",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/mcp-wire-contract-postgres.test.ts",
+    "sizeBytes": 24663,
+    "sha256": "e5fb51134ab6bb09262b4c3bc90d2c0d5664d1136684af402e97095fb6e6d0b9",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/migration-upgrade-postgres.test.ts",
+    "sizeBytes": 4287,
+    "sha256": "56b6fe7272eef6aef44fc0b73ede428e46af6f19f61be747db2652a5529b0973",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/observation-pagination.test.ts",
+    "sizeBytes": 1543,
+    "sha256": "1ebb3fad13df2942e5b22c8fdbb914e1c66c2020edfc12ab2e2f6827ed585810",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/operation-snapshot-postgres.test.ts",
+    "sizeBytes": 3213,
+    "sha256": "af6a59b582d8a47d71e43975f04bf4baa8b755b1959736d8ca8328204d390b3f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/outbox-publish-lifecycle.test.ts",
+    "sizeBytes": 2617,
+    "sha256": "9ea9440345fba9f0e88f5f357fc613f9dca8b64c5d81fe50bcd8030019b2819f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/provider-ops-delivery-postgres.test.ts",
+    "sizeBytes": 6569,
+    "sha256": "5365c86ad10ecce473213cff6df341c2f2169eb8db9fd1ba18343f5dd3011c04",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/provider-telemetry-ingress-postgres.test.ts",
+    "sizeBytes": 10285,
+    "sha256": "0fab13c8894d5c4a3b80d5b9ef41e28d5075c1cc5f306da1bc80b4f9474f8c4e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/rc1-forward-upgrade-postgres.test.ts",
+    "sizeBytes": 13951,
+    "sha256": "861b87dc443efe6dda711a65d08758052575150d982b062bcbebede6b4494f45",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/rc2-forward-upgrade-postgres.test.ts",
+    "sizeBytes": 5032,
+    "sha256": "2b385e9d2aab3e1164f1c97ddfac191c695a3444a268fcf9e735f2db2d7acedf",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/recovery-fairness.test.ts",
+    "sizeBytes": 3935,
+    "sha256": "fb4a0febbd44f6965f5b4053c885965cd8fb50845632a86fa389b3e1d3f939bd",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/result-contract-hardening.test.ts",
+    "sizeBytes": 2533,
+    "sha256": "d34e4aa66bfba5d270aff55e00f173b0f2a82f908411c437c40a816e6dea17c2",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/runtime-hardening-postgres.test.ts",
+    "sizeBytes": 4149,
+    "sha256": "d2c7c47499a9cb84e8329359135334ea83b71ff7a22ffb67a7306be15c7e6e21",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/start-window-race.test.ts",
+    "sizeBytes": 6272,
+    "sha256": "393b4511fa8d5964110a8330f3fd098bc62e53e4f6b3f039733350689f4a7fcb",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/stopping-state-regression.test.ts",
+    "sizeBytes": 1781,
+    "sha256": "130b4fb2d4b6cc760f412c94ba5fb19c5c1ebc2790274a6ed9ec1724aec1decb",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/task-lifecycle-postgres.test.ts",
+    "sizeBytes": 183565,
+    "sha256": "0c09c6ea6356f5bf682ce759634a3e27e7383210a97ffe4da8ce097ccedd6171",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/telemetry-commit-boundary-postgres.test.ts",
+    "sizeBytes": 3075,
+    "sha256": "d333340fb94650f6f3d33ac10cfa78b214191703bf631ee261a44c3d8cc1fcd9",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/integration/telemetry-committed-lifecycle.test.ts",
+    "sizeBytes": 5247,
+    "sha256": "6d94d7d38b07cec6e9abd186c23cc17dc1c1171ae3621211cbad3a1b8f00908a",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/availability.test.ts",
+    "sizeBytes": 3590,
+    "sha256": "66a9f73c6c20a2df0326977f3867ed6521634b8ff318271d60337f1bda042e2c",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/baseline.test.ts",
+    "sizeBytes": 2307,
+    "sha256": "42be14b05a55b78c6316155d86ed2a51fe59839cb07dc72419ed3f24fc5b546d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/consumer-validation.test.ts",
+    "sizeBytes": 4346,
+    "sha256": "1a85b1496a9e46d75b883b8d069c52399918fb6b0c6705c0990b8b6d3795f149",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/detailed-task.test.ts",
+    "sizeBytes": 5364,
+    "sha256": "4e3dae04fe5c0c5735d19eec641ba004c8d36455ae96a0a5e7b77332e90db0b7",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/discovery.test.ts",
+    "sizeBytes": 927,
+    "sha256": "7213d4c4b8efa13922fc317e478fe92d4e02a5a8a881731be1298d545cdfede5",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/evidence.test.ts",
+    "sizeBytes": 4463,
+    "sha256": "57542bc873110e5c442a0e8d2400252d472ccb870ba63752bade04894a3ea40e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/headers.test.ts",
+    "sizeBytes": 2691,
+    "sha256": "3f0345c49bcb49554f83c1fd9a5b87f71deaad962ddabf01727f92508d8b0ef1",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/legacy-isolation.test.ts",
+    "sizeBytes": 895,
+    "sha256": "67088fbe69d411b84606c608d1899d1bd6ccb86829247f872b65e39d96bb33d2",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/mrtr.test.ts",
+    "sizeBytes": 1423,
+    "sha256": "def6c1bca2bd1d9ddf9e5333980a51d60d7cb1b6682402cd1cc22f280345623f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/notifications.test.ts",
+    "sizeBytes": 12595,
+    "sha256": "30f5852358118fc303f0d0e2e4d52cd21c001102b8c6c850b55835b2d7994709",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/request-meta.test.ts",
+    "sizeBytes": 2206,
+    "sha256": "d18ebe88f868b3d3f70361f125e89e2e2084f3225cde09f08a3095bc611ec7e9",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/task-acks.test.ts",
+    "sizeBytes": 4170,
+    "sha256": "deed5264684cc2a2859d6fb4164cbc1b78a44d96b10c841017a552f5b92b4aa5",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/tools-call.test.ts",
+    "sizeBytes": 7117,
+    "sha256": "b1ee49ed12ee614f4e6b9da41d4e93e9e82898b15c98d835c6a3a27556cadacd",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/protocol-conformance/tools.test.ts",
+    "sizeBytes": 3844,
+    "sha256": "615771232b41b6c7c24149cf66f4d1bbe6602f12c0531c175e652c6141aeae04",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/rc2/rc1-red-regressions.test.ts",
+    "sizeBytes": 2912,
+    "sha256": "ed74c14a92fff65ccc350f8696a6c11a023261adecd5f1838c8378d44bf96fa0",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/recovery/runtime-recovery-postgres.test.ts",
+    "sizeBytes": 16145,
+    "sha256": "eb7d54ae2a44d5af0ce76b7e8e5a22a5850b442d6b5ceaf3955f53e2b30ac074",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/error-mapping.test.ts",
+    "sizeBytes": 2412,
+    "sha256": "851f5b98ed9f3c7add8b7db1ac7a17dd925de3cb8ba71fa3a14c75937ac0b62a",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/mrtr-inbox.test.ts",
+    "sizeBytes": 4688,
+    "sha256": "47ec66c358c68bff5bf2c044ec59ebb310167c84b6d1d79e736e9afe92da53ba",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/mrtr-recovery.test.ts",
+    "sizeBytes": 9311,
+    "sha256": "82a79d8930342fa1ace5822685c4740adc61cf0a0812bf8d784a2733b590f492",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/notification-batch.test.ts",
+    "sizeBytes": 3360,
+    "sha256": "b0abea009d96bba692bb755cb16f9631b583c0ac5ae87c864d52623fe7cbb26f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/notification-capacity.test.ts",
+    "sizeBytes": 8458,
+    "sha256": "180a931fbc070f28b51e1a6f087fc7d0465b25035503e077ae00b1fa963c8cb6",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/notification-equality.test.ts",
+    "sizeBytes": 3591,
+    "sha256": "2cddafe38ca84a2238f405c558c993374353f567b28f334d17c1e63b768fe316",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-closure/notification-identity.test.ts",
+    "sizeBytes": 5343,
+    "sha256": "4e49434cbd5116efcd18001919992eb310b903ba1b9443ffedc7927e2c678b6d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/mrtr-atomic-validation.test.ts",
+    "sizeBytes": 3661,
+    "sha256": "f39e10ee8e1a0839c652b6cbeda3a649f5c98dde326b2d3583c8a8c9eddb01c5",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/mrtr-lock-order.test.ts",
+    "sizeBytes": 4884,
+    "sha256": "58cdec11db053d3701328bcf85c1810c7388db7284c36622e438fb6315c1e6b3",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/notification-config-bounds.test.ts",
+    "sizeBytes": 1103,
+    "sha256": "feb55bece0d5170b2ac176b1466db8a882585f68647a74e6fe1d734193c4b9aa",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/notification-index-plan.test.ts",
+    "sizeBytes": 5178,
+    "sha256": "1c13d8ccb3644d36734b575dbba4d3b582a80181e7153be23578180da59013d7",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/notification-metrics.test.ts",
+    "sizeBytes": 7371,
+    "sha256": "9012adf1e6a6c6bbb52c1eefc11938b1c48f0207a6890d4c87d94f1a40465be3",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/permanent-update-rejection.test.ts",
+    "sizeBytes": 2729,
+    "sha256": "76e0c45a6365c7bcf99a8a63e108312701a124ce3e41b0e6b9ffc823453eb56d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/postgres-harness.ts",
+    "sizeBytes": 3205,
+    "sha256": "7248ff2f92d9b1d37ccd161981b93a48412592b70e258c6d11a44c4275daad74",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/pr16-interop-regression.test.ts",
+    "sizeBytes": 1916,
+    "sha256": "1ad94711b374a4fe2fc7e998c56255c60c2c1ee82fa27d4e7f395b200794bd0c",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/report-integrity.test.ts",
+    "sizeBytes": 888,
+    "sha256": "5d52370fb502e4b0535a324a68bc9055bbb30f3b54ff766b91f23b27aca25c76",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/runtime-conformance-followup/update-cancel-lock-order.test.ts",
+    "sizeBytes": 4274,
+    "sha256": "96bfb6a98116e8d23533ae1e1c342f8e7e943d10c34614dc73c17f4dce09a223",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/business-event-telemetry-security.test.ts",
+    "sizeBytes": 5138,
+    "sha256": "ab2433873e1948ffa686b1fba06634bc72d2f3fda4954551e37ace6be8bfc58a",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/home-assistant-climate-security.test.ts",
+    "sizeBytes": 2521,
+    "sha256": "39c9d1a1f2e26a29dea721b02b21da91c9afbf814a94ad87e940aa41982585e8",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/manifest-security.test.ts",
+    "sizeBytes": 2178,
+    "sha256": "7a56d5b6c89cef00dffe73c253c0519436db71ef00e0bf31e460b53723041e66",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/production-config.test.ts",
+    "sizeBytes": 5178,
+    "sha256": "a477eab68c2dba152fd837c322ef913a542dc4ac48a7632f08821f8104d542a0",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/runtime-security.test.ts",
+    "sizeBytes": 4432,
+    "sha256": "4baa7c9cbcdf5a8fb5fe05f938114908dad2fee01d4c46f835beb7eb83118799",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/security/telemetry-sanitizer.test.ts",
+    "sizeBytes": 4078,
+    "sha256": "b82fb92bb8a91c55a16163a529878fffa4cabe1a1677054c0747b7525ef5b75f",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/adapter-rpc-span.test.ts",
+    "sizeBytes": 5145,
+    "sha256": "1db6d7228445f5d477b8d0693d01a12ec68ad0c63aed453bea73240d83229b34",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/availability.test.ts",
+    "sizeBytes": 4257,
+    "sha256": "1cf0e1521256b41f5928420ce6c6b7c9d759e9c93856e95cb000b8625839912e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-metric-policy.test.ts",
+    "sizeBytes": 1450,
+    "sha256": "1630374293e4cc83462944a5fc02e38323f03e6f86cbfd8c46bde6cb15985070",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-multi-series-gauge.test.ts",
+    "sizeBytes": 2045,
+    "sha256": "6b7203ccd37e94c63a47a42d7f4163e195deb27e6e7e1c59e6b8e2c5022be0ae",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-provider-ops.test.ts",
+    "sizeBytes": 1407,
+    "sha256": "9089c52c1ee42ec29d9e5fee50e54557b066c6606fa6f0c1b47ca79ebc61040b",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-safe-error.test.ts",
+    "sizeBytes": 770,
+    "sha256": "275a7e5e30ef11be25690db8b50ac6a6982d7dd46ca1797fa01b16c397c8629d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-telemetry-bridge.test.ts",
+    "sizeBytes": 1464,
+    "sha256": "aeacde321fd5656333847ce82db761635b911b1b62f46778d196693772d5935d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-telemetry-export.test.ts",
+    "sizeBytes": 4220,
+    "sha256": "2e3fc1ffd76d23362c3276389168bb72171441e69ea4b55e3accf3c95e990699",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-telemetry-failure-isolation.test.ts",
+    "sizeBytes": 2234,
+    "sha256": "40880d5eb218172dbb02b2adf1a3e2d2a2f729e6a3dafd0a8f99f04609260e6a",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/business-event-telemetry-sanitizer.test.ts",
+    "sizeBytes": 1315,
+    "sha256": "8b11b928c9c1e30a683432d6ea1a8e42ed5b33bc765473fad886762f7bd0096e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/canonical-json.test.ts",
+    "sizeBytes": 687,
+    "sha256": "1c29fbe8ba06360302850787eb0ef68e0363d1f350d84c6a7b80fb6e35b0beb6",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/command-envelope.test.ts",
+    "sizeBytes": 1849,
+    "sha256": "399833d08bf28458c74ff78ba35c8fa8fb7ce5fd68231f7af2a17ed39a4d7023",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/config.test.ts",
+    "sizeBytes": 6542,
+    "sha256": "35b81fff09cb229d32888748002f832bd19842ef40a51d1820fd08ef880b5e76",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/event-envelope.test.ts",
+    "sizeBytes": 2465,
+    "sha256": "6f1d19cd3c78f0c7cd1647539aa505eeb431849a3b61faec6fa17d491ca37fbf",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/health.test.ts",
+    "sizeBytes": 1487,
+    "sha256": "22af3ef35a2db75f200a0af6a0dc7e3b3d3292c1aa7621e08268c692038354a6",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/home-assistant-climate-core.test.ts",
+    "sizeBytes": 2977,
+    "sha256": "9ce94921c5114988c4c0096492c91c64d04372b7d900da1956a01409ef95250d",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/operation-registry.test.ts",
+    "sizeBytes": 5082,
+    "sha256": "86a6a300f887b91ea2d95b97f11c521c0b1dd15717b646cdbc76919cbe743224",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/provider-metrics.test.ts",
+    "sizeBytes": 6476,
+    "sha256": "a6dc271acff31fad21248694db96048e7e3aafc06ad95ca6bfc4deb5881ac1af",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/rate-limiter.test.ts",
+    "sizeBytes": 847,
+    "sha256": "618aefbecb5fc85ee4dbfaab6671a06530dc54a0dfc0b33ae769a82fe0ba2b8c",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/resource-attribute.test.ts",
+    "sizeBytes": 821,
+    "sha256": "9e456157189f099a86fccde0ea38097df7e68716fee1e027b3df719bde34c243",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/runtime-version.test.ts",
+    "sizeBytes": 451,
+    "sha256": "f658cbc8ee918b2542f04807931a7030ed5c4640b242e24da7c88deca817d277",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/shutdown-flush.test.ts",
+    "sizeBytes": 1611,
+    "sha256": "0354a78d642bfd60e2cefafee2c64b550e50209d4fb7aef387015c7992629e39",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/task-state.test.ts",
+    "sizeBytes": 1911,
+    "sha256": "25b1125e20eaa4adea724c0c18413f367bacfd406408fc9bb6c0d6f66c6915c1",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/telemetry-completion-regressions.test.ts",
+    "sizeBytes": 6347,
+    "sha256": "2a0ba28148466b08c62e90617582bc10b938bf96a58cfdd3f87c286dd5817d8b",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/telemetry-failure-isolation.test.ts",
+    "sizeBytes": 4075,
+    "sha256": "b306a267b9b670302cb92697573836e31cc9c0ec3f0d1bacf6170ee1e4592c3e",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/telemetry-init.test.ts",
+    "sizeBytes": 3382,
+    "sha256": "375be9c839dffee1a81f188fc7a78384c203e22940e0e4e73f0d2f3d3827b083",
+    "category": "test"
+  },
+  {
+    "relativePath": "tests/unit/timing.test.ts",
+    "sizeBytes": 2394,
+    "sha256": "091181b60880c407322ac02d2dc94cf2a6ff4a6d3bf0e7bc7585103fdeb07de2",
+    "category": "test"
+  },
+  {
+    "relativePath": "third_party/sources.lock.yaml",
+    "sizeBytes": 700,
+    "sha256": "899d7bee7c5c85949129e269bd6f457616af1de825f284ecfc3e673a2dc25133",
+    "category": "other"
+  },
+  {
+    "relativePath": "tsconfig.build.json",
+    "sizeBytes": 332,
+    "sha256": "9c8286b4fd71e12ff0db834b8934b991d41f04163dfbebeabbb7ec6617c1f577",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "tsconfig.json",
+    "sizeBytes": 821,
+    "sha256": "5e45cffca4afa445ec0ed727705bc8a070e5cb58c48d59777e7dcdf9d32467f5",
+    "category": "configuration"
+  },
+  {
+    "relativePath": "vitest.config.ts",
+    "sizeBytes": 258,
+    "sha256": "01b982a497ccb2936adf31964488fad28ad9ea5cc7536204412a95ce5d8f597f",
+    "category": "source"
+  }
+]

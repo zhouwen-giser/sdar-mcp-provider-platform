@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "controls": [
+    "exact NPC MQTT topic allowlist",
+    "UGV and referee topics rejected",
+    "23-tool Device MCP allowlist",
+    "bounded JSON and MCP responses",
+    "NPC identity validation",
+    "production TLS and mTLS guards",
+    "independent NPC PostgreSQL scope",
+    "recursive referee and fire-verdict field stripping"
+  ],
+  "forbiddenFireFields": [
+    "hit",
+    "miss",
+    "destroyed",
+    "damage",
+    "remaining_hp",
+    "remainingHp",
+    "hp",
+    "alive",
+    "referee",
+    "verdict"
+  ],
+  "evidence": [
+    "pnpm test:npc-tank-provider:security: 4 passed",
+    "fire confirmation and recursive sanitizer integration passed",
+    "pnpm test:business-events:telemetry:security passed"
+  ]
+}

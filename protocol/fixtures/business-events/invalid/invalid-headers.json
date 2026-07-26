@@ -1,0 +1,10 @@
+{
+  "schema": "sdar-business-events-v1.schema.json",
+  "definition": "listenRequest",
+  "instance": {
+    "jsonrpc": "2.0",
+    "id": 30,
+    "method": "notifications/tasks",
+    "params": { "startPosition": "latest", "_meta": {} }
+  }
+}

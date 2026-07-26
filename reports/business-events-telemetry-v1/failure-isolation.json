@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "implementationCommit": "1739418854284dd9acb04916d639715718c51918",
+  "reportCommit": "1739418854284dd9acb04916d639715718c51918",
+  "ciRun": "local",
+  "testCommand": "pnpm exec vitest run tests/unit/business-event-telemetry-failure-isolation.test.ts tests/unit/telemetry-failure-isolation.test.ts tests/business-events/telemetry/audit-publisher-retry.test.ts",
+  "startedAt": "2026-07-22T12:45:47.000Z",
+  "endedAt": "2026-07-22T12:45:57.000Z",
+  "durationMs": 10000,
+  "exitCode": 0,
+  "status": "PASS",
+  "summary": {
+    "metricFailOpen": true,
+    "logFailOpen": true,
+    "traceFailOpen": true,
+    "auditRetry": true,
+    "businessOperationExactlyOnce": true
+  },
+  "evidenceFiles": [
+    "tests/unit/business-event-telemetry-failure-isolation.test.ts",
+    "tests/unit/telemetry-failure-isolation.test.ts",
+    "tests/business-events/telemetry/audit-publisher-retry.test.ts"
+  ]
+}

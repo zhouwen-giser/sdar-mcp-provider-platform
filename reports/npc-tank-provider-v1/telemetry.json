@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS_WITH_DATABASE_GATE_ENVIRONMENT_BLOCKED",
+  "protocol": "Provider Telemetry gRPC",
+  "eventClasses": ["EXECUTION_PROGRESS", "PROVIDER_DIAGNOSTIC", "DEPENDENCY_HEALTH"],
+  "privacy": {
+    "credentialsIncluded": false,
+    "rawTargetPayloadIncluded": false,
+    "fireVerdictIncluded": false,
+    "boundedLabelsAndAttributes": true
+  },
+  "evidence": [
+    "pnpm test:business-events:telemetry:unit: 15 passed",
+    "pnpm test:business-events:telemetry:security: passed",
+    "pnpm test:npc-tank-provider:security: 4 passed"
+  ],
+  "databaseIntegration": {
+    "status": "BLOCKED",
+    "reason": "TEST_DATABASE_URL absent"
+  }
+}

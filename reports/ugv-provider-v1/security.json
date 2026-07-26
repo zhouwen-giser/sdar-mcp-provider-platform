@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "controls": [
+    "exact MQTT topic allowlist",
+    "Device MCP tool allowlist",
+    "bounded JSON and MCP responses",
+    "entity identity validation",
+    "production TLS and mTLS configuration guards",
+    "no secret values in telemetry",
+    "recursive referee and fire-verdict field stripping",
+    "no Base64 image persistence"
+  ],
+  "forbiddenFireFields": ["hit", "miss", "destroyed", "damage", "remaining_hp", "friendly_fire"],
+  "tests": [
+    "pnpm test:ugv-provider:security: 3 passed",
+    "pnpm test:security: 34 passed",
+    "fire boundary integration test passed"
+  ]
+}

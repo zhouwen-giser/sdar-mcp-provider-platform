@@ -1,0 +1,420 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: sdar
+      POSTGRES_PASSWORD: sdar
+      POSTGRES_DB: sdar_runtime
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdar -d sdar_runtime"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    volumes:
+      - runtime-postgres:/var/lib/postgresql/data
+
+  adapter-typescript:
+    build:
+      context: .
+      target: adapter-ts
+    environment:
+      PROVIDER_ID: mock-provider
+      ADAPTER_PORT: 7001
+      ADAPTER_STATE_PATH: /var/lib/sdar/adapter-state.json
+    expose:
+      - "7001"
+    volumes:
+      - adapter-typescript-state:/var/lib/sdar
+
+  runtime:
+    build:
+      context: .
+      target: runtime
+    environment:
+      PROVIDER_ID: mock-provider
+      DATABASE_URL: postgresql://sdar:sdar@postgres:5432/sdar_runtime
+      ADAPTER_ENDPOINT: adapter-typescript:7001
+      ADAPTER_TLS_MODE: disabled
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "false"
+      OUTBOX_PUBLISHED_RETENTION_MS: 86400000
+      OTEL_ENABLED: "false"
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      adapter-typescript:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  adapter-python:
+    profiles: ["python-adapter"]
+    build:
+      context: .
+      dockerfile: examples/mock-adapter-python/Dockerfile
+    environment:
+      PROVIDER_ID: mock-provider-python
+      ADAPTER_PORT: 7001
+    ports:
+      - "7002:7001"
+
+  adapter-business-events:
+    profiles: ["business-events"]
+    build:
+      context: .
+      target: adapter-ts
+    environment:
+      PROVIDER_ID: mock-provider-business-events
+      ADAPTER_PORT: 7001
+      BUSINESS_EVENT_SOURCE_ID: mock.durable
+      BUSINESS_EVENT_SOURCE_STREAM_ID: 018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001
+    expose:
+      - "7001"
+
+  runtime-business-events:
+    profiles: ["business-events"]
+    build:
+      context: .
+      target: runtime
+    environment:
+      PROVIDER_ID: mock-provider-business-events
+      DATABASE_URL: postgresql://sdar:sdar@postgres:5432/sdar_runtime
+      ADAPTER_ENDPOINT: adapter-business-events:7001
+      ADAPTER_TLS_MODE: disabled
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "false"
+      PORT: 8080
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      adapter-business-events:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  postgres-ugv-runtime:
+    profiles: ["ugv-provider"]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ugv_runtime
+      POSTGRES_PASSWORD: ugv_runtime
+      POSTGRES_DB: ugv_runtime
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_runtime -d ugv_runtime"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - ugv-runtime-postgres:/var/lib/postgresql/data
+
+  postgres-ugv-adapter:
+    profiles: ["ugv-provider"]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ugv_adapter
+      POSTGRES_PASSWORD: ugv_adapter
+      POSTGRES_DB: ugv_adapter
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_adapter -d ugv_adapter"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - ugv-adapter-postgres:/var/lib/postgresql/data
+
+  mqtt-ugv-test:
+    profiles: ["ugv-provider"]
+    image: eclipse-mosquitto:2.0
+    command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
+    volumes:
+      - ./deploy/ugv-provider/mosquitto.conf:/mosquitto-no-auth.conf:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -t '$$SYS/broker/version' -C 1 -W 2 >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mock-ugv-device-mcp:
+    profiles: ["ugv-provider"]
+    build:
+      context: .
+      target: mock-ugv-device-mcp
+    environment:
+      MOCK_UGV_DEVICE_MCP_PORT: 19000
+    expose:
+      - "19000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:19000/health').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  mock-ugv-mqtt-publisher:
+    profiles: ["ugv-provider"]
+    build:
+      context: .
+      target: mock-ugv-mqtt-publisher
+    environment:
+      UGV_MQTT_URL: mqtt://mqtt-ugv-test:1883
+    depends_on:
+      mqtt-ugv-test:
+        condition: service_healthy
+
+  ugv-adapter:
+    profiles: ["ugv-provider"]
+    build:
+      context: .
+      target: ugv-provider-adapter
+    command:
+      [
+        "sh",
+        "-c",
+        "node dist/apps/ugv-provider-adapter/src/migrate.js && exec node dist/apps/ugv-provider-adapter/src/main.js",
+      ]
+    environment:
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      ADAPTER_PORT: 7010
+      UGV_ADAPTER_STORE_MODE: postgres
+      UGV_ADAPTER_DATABASE_URL: postgresql://ugv_adapter:ugv_adapter@postgres-ugv-adapter:5432/ugv_adapter
+      UGV_MQTT_URL: mqtt://mqtt-ugv-test:1883
+      UGV_MQTT_CLIENT_ID: sdar-ugv-adapter-ugv1
+      UGV_MQTT_WIRE_MODE: direct_domain_json
+      UGV_DEVICE_MCP_URL: http://mock-ugv-device-mcp:19000/mcp
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: ugv-runtime:7002
+      RUNTIME_ENV: development
+    expose:
+      - "7010"
+    depends_on:
+      postgres-ugv-adapter:
+        condition: service_healthy
+      mqtt-ugv-test:
+        condition: service_healthy
+      mock-ugv-device-mcp:
+        condition: service_healthy
+
+  ugv-runtime:
+    profiles: ["ugv-provider"]
+    build:
+      context: .
+      target: runtime
+    environment:
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      DATABASE_URL: postgresql://ugv_runtime:ugv_runtime@postgres-ugv-runtime:5432/ugv_runtime
+      ADAPTER_ENDPOINT: ugv-adapter:7010
+      ADAPTER_TLS_MODE: disabled
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: 7002
+      OTEL_ENABLED: "false"
+      PORT: 8080
+    ports:
+      - "19100:8080"
+    depends_on:
+      postgres-ugv-runtime:
+        condition: service_healthy
+      ugv-adapter:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 45
+
+  postgres-npc-runtime:
+    profiles: ["npc-tank-provider"]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: npc_runtime
+      POSTGRES_PASSWORD: npc_runtime
+      POSTGRES_DB: npc_runtime
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_runtime -d npc_runtime"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - npc-runtime-postgres:/var/lib/postgresql/data
+
+  postgres-npc-adapter:
+    profiles: ["npc-tank-provider"]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: npc_adapter
+      POSTGRES_PASSWORD: npc_adapter
+      POSTGRES_DB: npc_adapter
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_adapter -d npc_adapter"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - npc-adapter-postgres:/var/lib/postgresql/data
+
+  mqtt-npc-test:
+    profiles: ["npc-tank-provider"]
+    image: eclipse-mosquitto:2.0
+    command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
+    volumes:
+      - ./deploy/ugv-provider/mosquitto.conf:/mosquitto-no-auth.conf:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -t '$$SYS/broker/version' -C 1 -W 2 >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mock-npc-device-mcp:
+    profiles: ["npc-tank-provider"]
+    build:
+      context: .
+      target: mock-npc-tank-device-mcp
+    environment:
+      MOCK_NPC_TANK_DEVICE_MCP_PORT: 19003
+      MOCK_NPC_TANK_SCENARIO: primary
+    expose:
+      - "19003"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:19003/health').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  mock-npc-mqtt-publisher:
+    profiles: ["npc-tank-provider"]
+    build:
+      context: .
+      target: mock-npc-tank-mqtt-publisher
+    environment:
+      NPC_TANK_MQTT_URL: mqtt://mqtt-npc-test:1883
+    depends_on:
+      mqtt-npc-test:
+        condition: service_healthy
+
+  npc-tank-adapter:
+    profiles: ["npc-tank-provider"]
+    build:
+      context: .
+      target: npc-tank-provider-adapter
+    command:
+      [
+        "sh",
+        "-c",
+        "node dist/apps/npc-tank-provider-adapter/src/migrate.js && exec node dist/apps/npc-tank-provider-adapter/src/main.js",
+      ]
+    environment:
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      PROVIDER_VERSION: 0.1.0
+      ADAPTER_PORT: 7013
+      NPC_TANK_ADAPTER_STORE_MODE: postgres
+      NPC_TANK_ADAPTER_DATABASE_URL: postgresql://npc_adapter:npc_adapter@postgres-npc-adapter:5432/npc_adapter
+      NPC_TANK_MQTT_URL: mqtt://mqtt-npc-test:1883
+      NPC_TANK_MQTT_CLIENT_ID: sdar-npc-tank-adapter-npc-tank1
+      NPC_TANK_MQTT_WIRE_MODE: direct_domain_json
+      NPC_TANK_DEVICE_MCP_URL: http://mock-npc-device-mcp:19003/mcp
+      NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: npc-tank-runtime:7005
+      RUNTIME_ENV: development
+    expose:
+      - "7013"
+    depends_on:
+      postgres-npc-adapter:
+        condition: service_healthy
+      mqtt-npc-test:
+        condition: service_healthy
+      mock-npc-device-mcp:
+        condition: service_healthy
+
+  npc-tank-runtime:
+    profiles: ["npc-tank-provider"]
+    build:
+      context: .
+      target: runtime
+    environment:
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      DATABASE_URL: postgresql://npc_runtime:npc_runtime@postgres-npc-runtime:5432/npc_runtime
+      ADAPTER_ENDPOINT: npc-tank-adapter:7013
+      ADAPTER_TLS_MODE: disabled
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: 7005
+      OTEL_ENABLED: "false"
+      PORT: 8080
+    ports:
+      - "19103:8080"
+    depends_on:
+      postgres-npc-runtime:
+        condition: service_healthy
+      npc-tank-adapter:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 45
+
+volumes:
+  runtime-postgres:
+  adapter-typescript-state:
+  ugv-runtime-postgres:
+  ugv-adapter-postgres:
+  npc-runtime-postgres:
+  npc-adapter-postgres:

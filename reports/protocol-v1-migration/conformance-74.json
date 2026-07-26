@@ -1,0 +1,991 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": "2026-07-28",
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+  "sourceCommit": "26897cc322f356487da89113451bd16b520b9288",
+  "command": "node node_modules/vitest/vitest.mjs run tests/protocol-conformance tests/integration/task-lifecycle-postgres.test.ts --reporter=json",
+  "testTargets": [
+    "tests/protocol-conformance",
+    "tests/integration/task-lifecycle-postgres.test.ts"
+  ],
+  "summary": { "total": 74, "passed": 74, "failed": 0 },
+  "results": [
+    {
+      "caseId": "C-001",
+      "title": "embodied.move exact discovery",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools.test.ts",
+          "title": "frozen tools/list C-001 discovers embodied.move exactly and publishes taskBehavior without legacy fields",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-002",
+      "title": "tool name containing dot",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools.test.ts",
+          "title": "frozen tools/list C-002 preserves an exact valid Tool name",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-003",
+      "title": "tool name containing slash",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools.test.ts",
+          "title": "frozen tools/list C-003 preserves an exact valid Tool name",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-004",
+      "title": "server discover fixed supportedVersions",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/discovery.test.ts",
+          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and mandatory notifications",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-005",
+      "title": "server discover tasks and notification capabilities",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/discovery.test.ts",
+          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and mandatory notifications",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-006",
+      "title": "source commit or schema hash mismatch rejected",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/baseline.test.ts",
+          "title": "frozen protocol baseline C-006 rejects drift from the pinned MCP source commit, blob and SHA-256",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-007",
+      "title": "request missing protocolVersion",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-007 rejects a request missing io.modelcontextprotocol/protocolVersion",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-008",
+      "title": "request missing clientCapabilities",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-008 rejects a request missing io.modelcontextprotocol/clientCapabilities",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-009",
+      "title": "SDAR request missing clientInfo",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-009 C-066 rejects a request missing io.modelcontextprotocol/clientInfo",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-010",
+      "title": "client omits tasks extension",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-010 C-011 requires the Tasks Extension for relevant requests",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-011",
+      "title": "task_required without tasks extension",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-010 C-011 requires the Tasks Extension for relevant requests",
+          "status": "passed"
+        },
+        {
+          "file": "tests/protocol-conformance/tools-call.test.ts",
+          "title": "frozen tools/call C-011 rejects task-producing tools before execution when Tasks capability is absent",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-012",
+      "title": "server returns synchronous result",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools-call.test.ts",
+          "title": "frozen tools/call C-012 returns a synchronous complete CallToolResult",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-013",
+      "title": "server returns flat CreateTaskResult",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision",
+          "status": "passed"
+        },
+        {
+          "file": "tests/protocol-conformance/tools-call.test.ts",
+          "title": "frozen tools/call C-013 returns the engine's flat CreateTaskResult with parsed timing",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-014",
+      "title": "created task immediately queryable",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools-call.test.ts",
+          "title": "frozen tools/call C-014 makes a newly created Task immediately queryable",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-015",
+      "title": "legacy nested task rejected",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-015 rejects a legacy nested Task result",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-016",
+      "title": "tasks/get working",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-017",
+      "title": "tasks/get input_required",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-017 maps input_required with open MRTR requests by stable request key",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-018",
+      "title": "partial tasks/update",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/mrtr.test.ts",
+          "title": "frozen MRTR inputResponses C-018 accepts a partial tasks/update with exact keyed elicitation responses",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-019",
+      "title": "unknown input key ignored",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-019 ignores an unknown frozen input response key",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-020",
+      "title": "answered input key repeated",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-020 accepts an identical repeat of an answered frozen input key",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-021",
+      "title": "input key reuse detected",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-021 detects and ignores reuse of an answered frozen input key",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-022",
+      "title": "cancel acknowledgement",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/task-acks.test.ts",
+          "title": "frozen Task acknowledgements C-022 returns empty complete acknowledgements for update and cooperative cancel",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-023",
+      "title": "working after cancel",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-023 C-024 C-025 keeps cancel Ack-only and preserves cancelled/completed outcomes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-024",
+      "title": "cancelled after cancel",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-023 C-024 C-025 keeps cancel Ack-only and preserves cancelled/completed outcomes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-025",
+      "title": "completed after cancel",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-023 C-024 C-025 keeps cancel Ack-only and preserves cancelled/completed outcomes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-026",
+      "title": "ttlMs null",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-026 uses null TTL when the handle has no expiry",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-027",
+      "title": "TTL extension updates wire value",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-028",
+      "title": "dynamic pollIntervalMs",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-028 projects a dynamic pollIntervalMs",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-029",
+      "title": "completed with isError false",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision",
+          "status": "passed"
+        },
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-029 preserves completed isError=false",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-030",
+      "title": "completed with isError true",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-030 preserves completed isError=true",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-031",
+      "title": "failed with JSON-RPC error",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-031 projects failed as a JSON-RPC Error",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-032",
+      "title": "evidence hard gate passes",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-032 accepts a valid structured-content Evidence hard gate",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-033",
+      "title": "evidence missing",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-033 rejects a missing required Evidence item",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-034",
+      "title": "evidence pointer missing",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-034 rejects an Evidence pointer absent from structuredContent",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-035",
+      "title": "URI evidence missing SHA",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-035 permits URI Evidence without SHA when it is not a hard gate",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-036",
+      "title": "tasks/observations namespace collision",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools.test.ts",
+          "title": "frozen tools/list C-036 C-037 reserves tasks/observations and detects legacy experimental methods",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-037",
+      "title": "PMS detects legacy tasks",
+      "status": "passed",
+      "components": ["runtime", "pms"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/tools.test.ts",
+          "title": "frozen tools/list C-036 C-037 reserves tasks/observations and detects legacy experimental methods",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-038",
+      "title": "task queryable after Runtime restart",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-038 C-039 publishes before returning and remains queryable across Runtime/SDAR restart",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-039",
+      "title": "SDAR resumes query after restart",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/integration/task-lifecycle-postgres.test.ts",
+          "title": "durable task lifecycle C-038 C-039 publishes before returning and remains queryable across Runtime/SDAR restart",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-040",
+      "title": "sync and async evidence shapes equal",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/evidence.test.ts",
+          "title": "frozen type-only Evidence C-040 gives synchronous and asynchronous completion the same Evidence shape",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-041",
+      "title": "HTTP missing MCP-Protocol-Version",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/headers.test.ts",
+          "title": "frozen Streamable HTTP routing headers C-041 C-042 C-043 rejects missing routing headers",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-042",
+      "title": "HTTP missing Mcp-Method",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/headers.test.ts",
+          "title": "frozen Streamable HTTP routing headers C-041 C-042 C-043 rejects missing routing headers",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-043",
+      "title": "applicable request missing Mcp-Name",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/headers.test.ts",
+          "title": "frozen Streamable HTTP routing headers C-041 C-042 C-043 rejects missing routing headers",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-044",
+      "title": "header and body mismatch",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/headers.test.ts",
+          "title": "frozen Streamable HTTP routing headers C-044 maps a Header and Body identity mismatch to -32001 and HTTP 400",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-045",
+      "title": "subscriptions/listen establishes SSE",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-046",
+      "title": "task subscription missing capability",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/task-acks.test.ts",
+          "title": "frozen Task acknowledgements C-046 requires the Tasks capability",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-047",
+      "title": "subscription acknowledgement is first",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-048",
+      "title": "ack includes only authorized accepted task IDs",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-049",
+      "title": "subscription messages contain subscriptionId",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-050",
+      "title": "current DetailedTask sent after ack",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-051",
+      "title": "input_required notification has full input requests",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-051 C-052 C-053 preserves complete input, result, Evidence and error snapshots",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-052",
+      "title": "completed notification has result and evidence",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-051 C-052 C-053 preserves complete input, result, Evidence and error snapshots",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-053",
+      "title": "failed notification has JSON-RPC error",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-051 C-052 C-053 preserves complete input, result, Evidence and error snapshots",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-054",
+      "title": "duplicate notification idempotent",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-054 de-duplicates an identical notification revision",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-055",
+      "title": "runtime revision does not regress",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-055 lets two Runtime replicas observe the same committed revision without regression",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-056",
+      "title": "no non-terminal notification after terminal",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-056 closes instead of emitting a non-terminal state after a terminal state",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-057",
+      "title": "HTTP SSE close releases subscription",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-057 releases polling immediately after the HTTP response closes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-058",
+      "title": "STDIO cancelled notification stops subscription",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-058 stops a STDIO subscription when notifications/cancelled names its request ID",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-059",
+      "title": "reconnect fills gap with tasks/get",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-059 C-065 reconnects from authoritative tasks/get state without a replay assumption",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-060",
+      "title": "slow consumer closes without blocking task",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-060 waits for drain instead of treating backpressure as disconnect",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-061",
+      "title": "task stream excludes progress notifications",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-061 C-062 emits only the frozen Task notification methods",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-062",
+      "title": "task stream excludes message notifications",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-061 C-062 emits only the frozen Task notification methods",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-063",
+      "title": "concurrent subscriptions route by request ID",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-063 routes concurrent subscriptions by their independent request IDs",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-064",
+      "title": "unknown or unauthorized tasks not disclosed",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-045 C-047 C-048 C-049 C-050 C-064 establishes an authorized stream with Ack first",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-065",
+      "title": "notification equals tasks/get at same revision",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/notifications.test.ts",
+          "title": "frozen Task notification SSE C-059 C-065 reconnects from authoritative tasks/get state without a replay assumption",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-066",
+      "title": "missing clientInfo returns Invalid Params",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/request-meta.test.ts",
+          "title": "frozen request meta C-009 C-066 rejects a request missing io.modelcontextprotocol/clientInfo",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-067",
+      "title": "CallToolResult missing resultType rejected",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-067 rejects a CallToolResult without resultType",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-068",
+      "title": "task_required synchronous success rejected",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-068 rejects synchronous success for task_required",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-069",
+      "title": "task_required admission_rejected allowed",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-069 allows synchronous admission_rejected for task_required",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-070",
+      "title": "runtime revision consistent across create get notification",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/detailed-task.test.ts",
+          "title": "frozen DetailedTask projection C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-071",
+      "title": "Provider evidence requirementId rejected",
+      "status": "passed",
+      "components": ["runtime", "pms"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-071 rejects Provider Evidence containing requirementId",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-072",
+      "title": "SDAR binds requirement locally by evidenceType",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-072 binds a local Skill requirement by evidenceType",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-073",
+      "title": "restricted availability requires valid hint",
+      "status": "passed",
+      "components": ["runtime"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/availability.test.ts",
+          "title": "frozen Availability envelope C-073 rejects restricted Availability without a valid time hint",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "caseId": "C-074",
+      "title": "URI hard-gate evidence requires valid SHA-256",
+      "status": "passed",
+      "components": ["runtime", "adapter-typescript", "adapter-python"],
+      "evidence": [
+        {
+          "file": "tests/protocol-conformance/consumer-validation.test.ts",
+          "title": "frozen result and Evidence consumer validation C-074 rejects missing SHA-256 only when URI Evidence is a hard gate",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

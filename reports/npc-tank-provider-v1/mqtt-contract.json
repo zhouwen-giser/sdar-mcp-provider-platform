@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "status": "MOCK_CONTRACT_PASS_REAL_INTERFACE_BLOCKED",
+  "wireModes": ["auto", "ros_message_json", "direct_domain_json"],
+  "exactTopicCount": 12,
+  "topics": [
+    "/npc_tank1/gnss",
+    "/npc_tank1/imu",
+    "/npc_tank1/speed",
+    "/npc_tank1/status",
+    "/npc_tank1/system_state",
+    "/npc_tank1/component_status",
+    "/npc_tank1/battery_range_km",
+    "/npc_tank1/mission_state",
+    "/npc_tank1/nav_state",
+    "/npc_tank1/detected_objects",
+    "/npc_tank1/target_detected",
+    "/npc_tank1/target/gnss"
+  ],
+  "wildcardsAllowed": false,
+  "ugvTopicsAllowed": false,
+  "authority": {
+    "terminal": ["mission_state", "status.chassis_task", "status.eo_task", "status.weapon_task"],
+    "nonTerminal": ["system_state.run_state", "system_state.mode"],
+    "conflictReasonCode": "NPC_TASK_STATE_CONFLICT"
+  },
+  "guards": [
+    "payload_bytes",
+    "json_depth",
+    "json_nodes",
+    "string_bytes",
+    "npc_identity",
+    "dedupe",
+    "older_observation"
+  ],
+  "realInterface": {
+    "status": "BLOCKED",
+    "reasonCode": "NPC_MQTT_UNAVAILABLE"
+  }
+}

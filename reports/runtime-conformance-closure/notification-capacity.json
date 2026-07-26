@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-07-22T02:38:00+08:00",
+  "defaults": {
+    "pollIntervalMs": 500,
+    "maxSubscriptions": 256,
+    "maxSubscriptionsPerAuthorization": 32,
+    "maxTaskBindings": 4096,
+    "maxQueueMessagesPerStream": 64,
+    "maxQueueBytesPerStream": 1048576,
+    "batchSize": 256
+  },
+  "verified": {
+    "globalSubscriptionLimit": true,
+    "authorizationSubscriptionLimit": true,
+    "globalTaskBindingLimit": true,
+    "independentBoundedQueues": true,
+    "nodeBackpressureWaitsForDrain": true,
+    "queueOverflowClosesOnlySlowStream": true,
+    "singleRuntimePollLoop": true,
+    "lowCardinalityMetrics": true
+  },
+  "testFiles": 4,
+  "tests": 16,
+  "status": "passed"
+}

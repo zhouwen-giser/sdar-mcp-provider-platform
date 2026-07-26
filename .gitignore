@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.env
+*.log
+*.tsbuildinfo
+.runtime-data/
+reports/runtime-v1/generated/
+examples/mock-adapter-python/.venv/
+examples/mock-adapter-python/__pycache__/
+examples/mock-adapter-python/**/__pycache__/
+examples/mock-adapter-python/generated/*_pb2*.py
+generated-python/

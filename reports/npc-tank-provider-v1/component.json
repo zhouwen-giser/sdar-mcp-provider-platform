@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "claim": "NPC Tank Provider Component Complete against supplied protocol and Mock Level 1 contract",
+  "operations": 9,
+  "tracks": ["chassis", "eo", "weapon"],
+  "semantics": {
+    "deviceAckIsTerminal": false,
+    "minusOneIsSuccess": false,
+    "runStateOrModeIsTerminalAuthority": false,
+    "stateConflictFailsClosed": true,
+    "commandAcksPersisted": true,
+    "stableExternalExecutionIds": true,
+    "independentNpcLedger": true
+  },
+  "tests": {
+    "unit": 11,
+    "contract": 5,
+    "integration": 7,
+    "security": 4,
+    "e2e": 1,
+    "total": 28
+  }
+}

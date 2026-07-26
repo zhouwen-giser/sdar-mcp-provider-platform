@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "circularScanSupported": true,
+  "requiredTools": ["npc_tank_eo_scan_start", "npc_tank_eo_scan_stop", "npc_tank_eo_set_angle"]
+}

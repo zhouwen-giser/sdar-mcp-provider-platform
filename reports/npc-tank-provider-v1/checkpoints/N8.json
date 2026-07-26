@@ -1,0 +1,11 @@
+{
+  "phase": "N8",
+  "name": "Compose / E2E / UGV Regression",
+  "status": "PASS",
+  "completedAt": "2026-07-23T06:06:13.712Z",
+  "evidence": [
+    "reports/npc-tank-provider-v1/compose-e2e.json",
+    "reports/npc-tank-provider-v1/ugv-regression.json"
+  ],
+  "gitOperationsPerformed": false
+}
