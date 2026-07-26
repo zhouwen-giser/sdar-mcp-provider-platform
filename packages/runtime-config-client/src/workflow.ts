@@ -23,7 +23,7 @@ export type RuntimeConfigSyncResult =
     };
 
 export interface RuntimeConfigWorkflowOptions {
-  readonly reconnectDelay?: (attempt: number) => Promise<void>;
+  readonly reconnectDelay?: (attempt: number, signal: AbortSignal) => Promise<void>;
 }
 
 export class RuntimeConfigApplyHandlerRegistry {
@@ -42,7 +42,7 @@ export class RuntimeConfigApplyHandlerRegistry {
 }
 
 export class RuntimeConfigWorkflow {
-  readonly #reconnectDelay: (attempt: number) => Promise<void>;
+  readonly #reconnectDelay: (attempt: number, signal: AbortSignal) => Promise<void>;
 
   constructor(
     private readonly target: RuntimeConfigTarget,
@@ -54,12 +54,7 @@ export class RuntimeConfigWorkflow {
     private readonly watch?: RuntimeConfigWatchPort,
     options: RuntimeConfigWorkflowOptions = {},
   ) {
-    this.#reconnectDelay =
-      options.reconnectDelay ??
-      ((attempt) =>
-        new Promise((resolve) => {
-          setTimeout(resolve, Math.min(500 * 2 ** Math.min(attempt - 1, 6), 30_000));
-        }));
+    this.#reconnectDelay = options.reconnectDelay ?? defaultReconnectDelay;
   }
 
   async syncOnce(): Promise<RuntimeConfigSyncResult> {
@@ -145,7 +140,7 @@ export class RuntimeConfigWorkflow {
       }
       if (isAborted(signal)) return;
       reconnectAttempt += 1;
-      await this.#reconnectDelay(reconnectAttempt);
+      await this.#reconnectDelay(reconnectAttempt, signal);
     }
   }
 
@@ -157,4 +152,18 @@ export class RuntimeConfigWorkflow {
 
 function isAborted(signal: AbortSignal): boolean {
   return signal.aborted;
+}
+
+function defaultReconnectDelay(attempt: number, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(finish, Math.min(500 * 2 ** Math.min(attempt - 1, 6), 30_000));
+    const abort = () => finish();
+    signal.addEventListener("abort", abort, { once: true });
+    function finish(): void {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", abort);
+      resolve();
+    }
+  });
 }

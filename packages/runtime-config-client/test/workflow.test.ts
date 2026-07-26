@@ -208,7 +208,7 @@ describe("RuntimeConfigWorkflow", () => {
     await workflow.run(controller.signal);
 
     expect(watchConnections).toBe(2);
-    expect(reconnectDelay).toHaveBeenCalledWith(1);
+    expect(reconnectDelay).toHaveBeenCalledWith(1, expect.any(AbortSignal));
     expect(latestCalls).toBe(2);
   });
 

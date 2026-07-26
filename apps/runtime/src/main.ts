@@ -1,8 +1,14 @@
 import { loadRuntimeConfig } from "./config.js";
 import { createRuntime } from "./runtime.js";
+import { loadRuntimeConfigClientBootstrap, RuntimeConfigIntegration } from "./runtime-config.js";
 
 const config = loadRuntimeConfig();
 const runtime = createRuntime(config);
+const runtimeConfigBootstrap = loadRuntimeConfigClientBootstrap(config);
+const runtimeConfig =
+  runtimeConfigBootstrap === null
+    ? null
+    : new RuntimeConfigIntegration(runtimeConfigBootstrap, runtime, runtime.app.log);
 
 async function initializeWithRetry(attempts = 20): Promise<void> {
   let lastError: unknown;
@@ -21,6 +27,7 @@ async function initializeWithRetry(attempts = 20): Promise<void> {
 
 async function shutdown(signal: string): Promise<void> {
   runtime.app.log.info({ signal }, "runtime shutting down");
+  await runtimeConfig?.stop();
   await runtime.app.close();
 }
 
@@ -29,9 +36,11 @@ process.once("SIGTERM", () => void shutdown("SIGTERM"));
 
 try {
   await initializeWithRetry();
+  runtimeConfig?.start();
   await runtime.app.listen({ host: config.HOST, port: config.PORT });
 } catch (error) {
   runtime.app.log.fatal({ err: error }, "runtime failed to start");
+  await runtimeConfig?.stop();
   await runtime.app.close();
   process.exitCode = 1;
 }

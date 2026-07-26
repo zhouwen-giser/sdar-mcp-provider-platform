@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T13:38:16.427296+00:00",
+  "updatedAt": "2026-07-26T13:54:23.057587+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -436,14 +436,16 @@
       "reason": null
     },
     "G1-P6-B03": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T13:38:52.784015+00:00",
+      "completedAt": "2026-07-26T13:54:23.057472+00:00",
+      "evidence": [
+        "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-config-e2e: PASS 1 file/8 tests; pnpm exec vitest run tests/runtime-config-e2e: semantic-equivalent test:runtime-config-e2e PASS 1 file/3 tests; pnpm test:unit: PASS 30 files/123 tests; optional PMS bootstrap leaves default Runtime startup/network behavior unchanged; complete bootstrap requires URL, token *_FILE, cache, deployment and instance identity; production PMS URL requires HTTPS and forbids URL credentials; Fetch Latest/Watch/Ack uses bounded responses, SSE hint-only parsing, Ack timeout and token file authorization; OTEL_ENABLED handler swaps/shuts down exporter through narrow Runtime control while health and Task dependencies remain unchanged; applied Ack covered for enable and disable; Watch re-pulls authoritative Latest; AbortSignal cancels Watch/reconnect backoff for graceful shutdown; runtime-config-client regression PASS 14/14; lint, typecheck, build, prettier scope, frozen lockfile and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P6-B04": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
