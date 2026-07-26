@@ -208,3 +208,10 @@ add a focused Fake JavaScript-API contract test so the mandatory filtered comman
 namespace denial, idempotency, Fork Mode, error mapping, and disconnect cleanup. The adapter takes
 an injected callback-compatible PM2 API rather than adding a shell command or an unneeded external
 dependency in this task. These minimal out-of-range files do not claim real PM2 certification.
+
+## 2026-07-26 — G2-P3-B04 release resolver export and filesystem contract
+
+The release implementation is correctly contained in `src/releases/**`; add only its package-root
+export and a focused temporary-filesystem test outside the allowlist so the mandatory filtered
+command proves traversal, symlink escape, unknown version, file mode, and fixed-entry behavior.
+The test creates no executable command surface and does not execute the resolved Runtime entry.

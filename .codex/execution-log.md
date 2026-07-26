@@ -295,3 +295,7 @@
 - 2026-07-26T16:37:07.020543+00:00 START G2-P3-B03
 
 - 2026-07-26T16:41:46.015337+00:00 PASS G2-P3-B03 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (2 files/11 tests, Fake PM2 component contract); tsc --noEmit; eslint targeted; git diff --check']
+
+- 2026-07-26T16:42:28.169190+00:00 START G2-P3-B04
+
+- 2026-07-26T16:45:31.057914+00:00 PASS G2-P3-B04 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (3 files/19 tests); tsc --noEmit; eslint targeted; temporary-filesystem release containment/mode contract']
