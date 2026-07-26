@@ -83,3 +83,7 @@
 - 2026-07-26T10:17:00.881267+00:00 START G1-P2-B07
 
 - 2026-07-26T10:22:41.357979+00:00 PASS G1-P2-B07 evidence=['pnpm test:provider-packages: PASS before and after build, 2 files/13 tests plus JSON self-check status PASS for 3 packages; pnpm build: PASS; CLI validates 3 entries, config sources, UGV/NPC migration sets (1 file each), Climate null migration, and 11 evidence refs; invalid JSON/schema/duplicate/symlink/mock fixtures fail in suite; missing workspace emits WORKSPACE_ROOT_UNAVAILABLE JSON and exit 1; prettier, eslint, typecheck, git diff --check PASS; .codex/reports/phase-P2.md']
+
+- 2026-07-26T10:23:04.028819+00:00 START G1-P3-B01
+
+- 2026-07-26T10:28:21.385067+00:00 PASS G1-P3-B01 evidence=['python3 .codex/task-package/scripts/verify_config_inventory.py: PASS, 226 items; independent TypeScript AST key-set audit: expected=226 actual=226 unique=226 (runtime 98, UGV 50, NPC 52, Climate 26); source line/default/required/validator audit: PASS 226/226; 22 Secret-bearing fields identified; 3 connection-string defaults redacted in evidence and SHA-256 matched to source; bootstrap/runtime/provider/collector groups explicit, collector=0; unknown apply modes conservatively restart_required pending review; prettier and git diff --check PASS']
