@@ -35,3 +35,7 @@
 - 2026-07-26T09:31:23.226287+00:00 START G1-P1-B03
 
 - 2026-07-26T09:32:17.606880+00:00 PASS G1-P1-B03 evidence=['verify_migration_source_map.py (26 valid); provider split isolation/hash validation; Runtime=24 UGV=1 NPC=1 root=0; git diff HEAD --summary (2 x 100% rename); prettier check; git diff --check']
+
+- 2026-07-26T09:33:22.621810+00:00 START G1-P1-B04
+
+- 2026-07-26T09:43:27.455127+00:00 PASS G1-P1-B04 evidence=['packages/database-migration-runner; pnpm --filter @sdar/database-migration-runner test (9/9 PASS); pnpm typecheck PASS; eslint PASS; prettier check PASS; git diff --check']

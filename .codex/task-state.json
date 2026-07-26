@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:32:17.606971+00:00",
+  "updatedAt": "2026-07-26T09:43:27.455196+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -85,21 +85,23 @@
       "reason": null
     },
     "G1-P1-B04": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:33:22.621738+00:00",
+      "completedAt": "2026-07-26T09:43:27.455048+00:00",
+      "evidence": [
+        "packages/database-migration-runner; pnpm --filter @sdar/database-migration-runner test (9/9 PASS); pnpm typecheck PASS; eslint PASS; prettier check PASS; git diff --check"
+      ],
+      "reason": null
+    },
+    "G1-P1-B05": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P1-B05": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P1-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

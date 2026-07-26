@@ -153,6 +153,8 @@ importers:
 
   packages/conformance-testkit: {}
 
+  packages/database-migration-runner: {}
+
   packages/domain: {}
 
   packages/mcp-protocol: {}
