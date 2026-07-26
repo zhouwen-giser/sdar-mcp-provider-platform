@@ -123,3 +123,7 @@
 - 2026-07-26T11:11:13.423407+00:00 START G1-P3-B10
 
 - 2026-07-26T11:14:03.944864+00:00 PASS G1-P3-B10 evidence=['pnpm test:config-compat (8 compatibility tests + 36 shared-contract/provider config tests); every inventory default compared, legacy secret defaults SHA-256 compared; pnpm config:schema:check (OK); pnpm build; pnpm typecheck; pnpm lint; git diff --check; .codex/reports/phase-P3.md']
+
+- 2026-07-26T11:15:29.309847+00:00 START G1-P4-B01
+
+- 2026-07-26T11:23:59.504045+00:00 PASS G1-P4-B01 evidence=['pnpm --filter @sdar/pms-domain test: PASS 1 file/9 tests; pnpm typecheck: PASS; eslint packages/pms-domain: PASS; prettier --check packages/pms-domain: PASS; full build: PASS; infra dependency scan: clean; git diff --check: PASS; branded IDs/status, vendor-managed hosting default, Provider-Resource N:N and invalid lifecycle transitions covered']

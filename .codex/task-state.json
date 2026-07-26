@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T11:14:03.944917+00:00",
+  "updatedAt": "2026-07-26T11:23:59.504117+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -283,21 +283,23 @@
       "reason": null
     },
     "G1-P4-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-26T11:15:29.309786+00:00",
+      "completedAt": "2026-07-26T11:23:59.503981+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/pms-domain test: PASS 1 file/9 tests; pnpm typecheck: PASS; eslint packages/pms-domain: PASS; prettier --check packages/pms-domain: PASS; full build: PASS; infra dependency scan: clean; git diff --check: PASS; branded IDs/status, vendor-managed hosting default, Provider-Resource N:N and invalid lifecycle transitions covered"
+      ],
+      "reason": null
+    },
+    "G1-P4-B02": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G1-P4-B02": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G1-P4-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

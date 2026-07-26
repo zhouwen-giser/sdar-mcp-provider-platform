@@ -165,6 +165,8 @@ importers:
 
   packages/persistence-postgres: {}
 
+  packages/pms-domain: {}
+
   packages/provider-adapter-kit: {}
 
   packages/provider-package-registry: {}

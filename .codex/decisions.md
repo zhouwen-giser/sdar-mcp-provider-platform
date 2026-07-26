@@ -13,3 +13,10 @@ The mandatory `pnpm test:config-compat` command does not exist. Add one root scr
 new `tests/config-compat/**` matrix and then the existing shared-contract package suite. This is the
 minimum out-of-range wiring needed to cover all four configuration classes and all Provider config
 tests without adding an empty or always-successful command.
+
+## 2026-07-26 — G1-P4-B01 empty workspace lock importer
+
+Adding `packages/pms-domain` makes pnpm treat the lockfile as stale unless the new dependency-free
+workspace has an empty importer. Add only `packages/pms-domain: {}` to `pnpm-lock.yaml`. This
+minimal out-of-range lock metadata prevents mandatory filtered tests from invoking dependency
+resolution; it adds no package or infrastructure dependency.
