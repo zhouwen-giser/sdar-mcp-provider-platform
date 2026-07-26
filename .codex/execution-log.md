@@ -71,3 +71,7 @@
 - 2026-07-26T10:10:24.517185+00:00 START G1-P2-B04
 
 - 2026-07-26T10:11:16.886553+00:00 PASS G1-P2-B04 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/home-assistant-climate/provider-package.json; entry, resource example, and 3 evidence refs resolve: PASS; hostingModes=[vendor_managed], configSchemaId=provider.climate, migrationSet=null, componentStatus=passed, realResourceStatus=pending mapped from realResourceQualified=false; registry tests PASS 5/5; prettier and git diff --check PASS']
+
+- 2026-07-26T10:12:06.928739+00:00 START G1-P2-B05
+
+- 2026-07-26T10:14:21.041841+00:00 PASS G1-P2-B05 evidence=['pnpm --filter @sdar/provider-package-registry test: PASS 2 files/11 tests; pnpm typecheck: PASS; eslint and prettier: PASS; controlled provider-packages root loads 3 built-ins in stable order; list/get/listByProviderType/validate APIs covered; duplicate ID+version, ambiguous unversioned get, invalid JSON/schema, and symlink entries/descriptors rejected; git diff --check PASS']

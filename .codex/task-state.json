@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:11:16.886603+00:00",
+  "updatedAt": "2026-07-26T10:14:21.041893+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -166,14 +166,16 @@
       "reason": null
     },
     "G1-P2-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:12:06.928613+00:00",
+      "completedAt": "2026-07-26T10:14:21.041773+00:00",
+      "evidence": [
+        "pnpm --filter @sdar/provider-package-registry test: PASS 2 files/11 tests; pnpm typecheck: PASS; eslint and prettier: PASS; controlled provider-packages root loads 3 built-ins in stable order; list/get/listByProviderType/validate APIs covered; duplicate ID+version, ambiguous unversioned get, invalid JSON/schema, and symlink entries/descriptors rejected; git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P2-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

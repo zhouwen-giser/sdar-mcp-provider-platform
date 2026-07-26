@@ -10,3 +10,10 @@ export {
   type ProviderPackage,
   type RealResourceQualificationStatus,
 } from "./model.js";
+export {
+  ProviderPackageRegistry,
+  ProviderPackageRegistryError,
+  loadProviderPackageRegistry,
+  validateProviderPackage,
+  type ProviderPackageRegistryErrorCode,
+} from "./registry.js";
