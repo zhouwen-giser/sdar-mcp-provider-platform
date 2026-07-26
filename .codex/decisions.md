@@ -215,3 +215,10 @@ The release implementation is correctly contained in `src/releases/**`; add only
 export and a focused temporary-filesystem test outside the allowlist so the mandatory filtered
 command proves traversal, symlink escape, unknown version, file mode, and fixed-entry behavior.
 The test creates no executable command surface and does not execute the resolved Runtime entry.
+
+## 2026-07-26 — G2-P3-B07 Health Probe export and HTTP contract
+
+The card correctly limits implementation to `src/health/**`; add only its package-root export and
+focused injected-fetch test outside the allowlist so the mandatory package gate exercises fixed
+loopback endpoints, timeout, schema validation, and dependency classification. The tests perform
+no external network call and do not claim real Runtime or PM2 qualification.
