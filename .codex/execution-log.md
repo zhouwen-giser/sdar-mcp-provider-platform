@@ -67,3 +67,7 @@
 - 2026-07-26T10:09:09.054006+00:00 START G1-P2-B03
 
 - 2026-07-26T10:10:07.970279+00:00 PASS G1-P2-B03 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/npc-tank/provider-package.json; entry, 5 evidence refs, and migrations/providers/npc-tank/025_npc_tank_provider.sql resolve: PASS; configSchemaId=provider.npcTank, migrationSet=provider:npc-tank, componentStatus=passed against Mock Level 1, realResourceStatus=pending; registry tests PASS 5/5; prettier and git diff --check PASS']
+
+- 2026-07-26T10:10:24.517185+00:00 START G1-P2-B04
+
+- 2026-07-26T10:11:16.886553+00:00 PASS G1-P2-B04 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/home-assistant-climate/provider-package.json; entry, resource example, and 3 evidence refs resolve: PASS; hostingModes=[vendor_managed], configSchemaId=provider.climate, migrationSet=null, componentStatus=passed, realResourceStatus=pending mapped from realResourceQualified=false; registry tests PASS 5/5; prettier and git diff --check PASS']

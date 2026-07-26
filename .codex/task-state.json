@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T10:10:07.970337+00:00",
+  "updatedAt": "2026-07-26T10:11:16.886603+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -157,14 +157,16 @@
       "reason": null
     },
     "G1-P2-B04": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T10:10:24.517127+00:00",
+      "completedAt": "2026-07-26T10:11:16.886493+00:00",
+      "evidence": [
+        "semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/home-assistant-climate/provider-package.json; entry, resource example, and 3 evidence refs resolve: PASS; hostingModes=[vendor_managed], configSchemaId=provider.climate, migrationSet=null, componentStatus=passed, realResourceStatus=pending mapped from realResourceQualified=false; registry tests PASS 5/5; prettier and git diff --check PASS"
+      ],
       "reason": null
     },
     "G1-P2-B05": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
