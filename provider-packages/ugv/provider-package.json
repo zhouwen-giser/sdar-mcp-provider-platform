@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "packageId": "builtin.isr.vehicle.ugv",
+  "packageVersion": "1.0.0",
+  "providerType": "isr.vehicle.ugv",
+  "hostingModes": ["vendor_managed", "platform_managed"],
+  "adapter": {
+    "entry": "apps/ugv-provider-adapter/src/main.ts",
+    "configSchemaId": "provider.ugv",
+    "migrationSet": "provider:ugv"
+  },
+  "runtime": {
+    "compatibleRuntimeVersion": "2.0.0-rc.1",
+    "protocolMode": "frozen_v1"
+  },
+  "qualification": {
+    "componentStatus": "passed",
+    "realResourceStatus": "pending",
+    "evidenceRefs": [
+      "docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json",
+      "reports/ugv-provider-v1/component.json",
+      "reports/ugv-provider-v1/external-interface-blocker.json"
+    ]
+  }
+}

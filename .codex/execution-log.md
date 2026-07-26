@@ -59,3 +59,7 @@
 - 2026-07-26T10:02:53.436209+00:00 START G1-P2-B01
 
 - 2026-07-26T10:06:03.195943+00:00 PASS G1-P2-B01 evidence=['pnpm --filter @sdar/provider-package-registry test: PASS 1 file/5 tests; pnpm typecheck: PASS; Ajv Draft 2020-12 and strict Zod validators both accept valid package and reject missing required fields, unknown/duplicate hosting modes, and additional properties; normalized JSON diff against task-package ProviderPackage.schema.json: exact semantic match; eslint, prettier, git diff --check: PASS']
+
+- 2026-07-26T10:06:31.954969+00:00 START G1-P2-B02
+
+- 2026-07-26T10:08:45.933319+00:00 PASS G1-P2-B02 evidence=['semantic equivalent for not-yet-defined B07 pnpm test:provider-packages: Ajv2020 validates provider-packages/ugv/provider-package.json against schemas/provider-package-v1.json; entry, 3 evidence refs, and migrations/providers/ugv/024_ugv_provider.sql resolve: PASS; configSchemaId=provider.ugv, migrationSet=provider:ugv, realResourceStatus=pending; pnpm --filter @sdar/provider-package-registry test: PASS 5/5; prettier and git diff --check: PASS']
