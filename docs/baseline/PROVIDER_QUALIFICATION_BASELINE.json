@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-26T09:22:41Z",
+  "taskId": "G1-P0-B05",
+  "testRun": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "aggregate": [
+      {
+        "command": "pnpm test:unit",
+        "status": "pass",
+        "testFiles": {
+          "passed": 29,
+          "total": 29
+        },
+        "tests": {
+          "passed": 121,
+          "total": 121
+        }
+      },
+      {
+        "command": "pnpm test:contract",
+        "status": "pass",
+        "testFiles": {
+          "passed": 4,
+          "total": 4
+        },
+        "tests": {
+          "passed": 18,
+          "total": 18
+        },
+        "attempts": [
+          {
+            "environment": "filesystem/network sandbox",
+            "status": "environment_restricted",
+            "detail": "Two Python syntax assertions could not spawn python3 (EPERM); 16 of 18 assertions passed."
+          },
+          {
+            "environment": "local process execution allowed",
+            "status": "pass",
+            "detail": "All 18 assertions passed, including both Python syntax checks."
+          }
+        ]
+      }
+    ]
+  },
+  "qualificationPolicy": {
+    "mockAssets": "test_fixture_only",
+    "componentEvidence": "May support only the explicit component claim recorded for that Provider.",
+    "realResourceEvidence": "Required separately; mock, fake, unit, contract, and component results never imply production or real-resource qualification.",
+    "interopCertification": "not_claimed"
+  },
+  "providers": [
+    {
+      "providerType": "ugv",
+      "application": "apps/ugv-provider-adapter",
+      "mockAssets": ["apps/mock-ugv-device-mcp", "apps/mock-ugv-mqtt-publisher"],
+      "currentRegression": [
+        {
+          "command": "pnpm test:ugv-provider:unit",
+          "status": "pass",
+          "testFiles": 1,
+          "tests": 9
+        },
+        {
+          "command": "pnpm test:ugv-provider:contract",
+          "status": "pass",
+          "testFiles": 1,
+          "tests": 4
+        }
+      ],
+      "component": {
+        "status": "pass",
+        "claim": "UGV Provider Component Complete against the supplied protocol and mock Level 1 contract",
+        "historicalEvidence": "reports/ugv-provider-v1/component.json",
+        "historicalTestCount": 23
+      },
+      "realResource": {
+        "status": "not_claimed",
+        "missingEvidence": [
+          "real UGV Device MCP contract conformance",
+          "real ISR MQTT schema conformance",
+          "real interface smoke"
+        ],
+        "evidence": "reports/ugv-provider-v1/external-interface-blocker.json"
+      }
+    },
+    {
+      "providerType": "npc-tank",
+      "application": "apps/npc-tank-provider-adapter",
+      "mockAssets": ["apps/mock-npc-tank-device-mcp", "apps/mock-npc-tank-mqtt-publisher"],
+      "currentRegression": [
+        {
+          "command": "pnpm test:npc-tank-provider:unit",
+          "status": "pass",
+          "testFiles": 1,
+          "tests": 11
+        },
+        {
+          "command": "pnpm test:npc-tank-provider:contract",
+          "status": "pass",
+          "testFiles": 1,
+          "tests": 5
+        }
+      ],
+      "component": {
+        "status": "pass",
+        "claim": "NPC Tank Provider Component Complete against supplied protocol and Mock Level 1 contract",
+        "historicalEvidence": "reports/npc-tank-provider-v1/component.json",
+        "historicalTestCount": 28
+      },
+      "realResource": {
+        "status": "not_claimed",
+        "missingEvidence": [
+          "real NPC Tank Device MCP contract conformance",
+          "real ISR NPC MQTT schema conformance",
+          "real interface smoke"
+        ],
+        "evidence": "reports/npc-tank-provider-v1/external-interface-blocker.json"
+      }
+    },
+    {
+      "providerType": "home-assistant-climate",
+      "application": "apps/home-assistant-climate-provider",
+      "mockAssets": ["tests/fixtures/fake-home-assistant-climate.ts"],
+      "currentRegression": [
+        {
+          "command": "pnpm test:ha-climate",
+          "status": "pass",
+          "testFiles": 4,
+          "tests": 7,
+          "attempts": [
+            {
+              "environment": "network sandbox",
+              "status": "environment_restricted",
+              "detail": "Fake Home Assistant fixtures could not listen on 127.0.0.1 (EPERM)."
+            },
+            {
+              "environment": "local loopback listen allowed",
+              "status": "pass",
+              "detail": "All unit, integration, recovery, and security cases passed."
+            }
+          ]
+        }
+      ],
+      "component": {
+        "status": "pass",
+        "claim": "Home Assistant Climate Provider Component Conformant",
+        "historicalEvidence": "reports/home-assistant-climate/provider-conformance.json",
+        "historicalConformanceCases": {
+          "passed": 8,
+          "total": 8
+        }
+      },
+      "realResource": {
+        "status": "not_claimed",
+        "missingEvidence": [
+          "physical climate device qualification",
+          "independently managed Home Assistant deployment verification"
+        ],
+        "evidence": "reports/home-assistant-climate/final-delivery-report.md"
+      }
+    }
+  ]
+}

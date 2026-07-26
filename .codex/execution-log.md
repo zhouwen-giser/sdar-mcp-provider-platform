@@ -15,3 +15,7 @@
 - 2026-07-26T09:15:52.412615+00:00 START G1-P0-B04
 
 - 2026-07-26T09:19:48.787102+00:00 PASS G1-P0-B04 evidence=['docs/baseline/FROZEN_PROTOCOL_GATE.md; pnpm protocol:check (11 schemas, 74 catalog cases, 38 lock files); TEST_DATABASE_URL=<local> pnpm test:frozen-74 (74/74 PASS); tracked report summary validation; git diff --check']
+
+- 2026-07-26T09:20:13.175814+00:00 START G1-P0-B05
+
+- 2026-07-26T09:23:49.758454+00:00 PASS G1-P0-B05 evidence=['docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json; pnpm test:unit (29 files/121 tests PASS); pnpm test:contract (4 files/18 tests PASS); UGV 9 unit + 4 contract PASS; NPC 11 unit + 5 contract PASS; HA 4 files/7 tests PASS; prettier check; git diff --check']

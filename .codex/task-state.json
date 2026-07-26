@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-01",
-  "updatedAt": "2026-07-26T09:19:48.787155+00:00",
+  "updatedAt": "2026-07-26T09:23:49.758506+00:00",
   "tasks": {
     "G1-P0-B01": {
       "status": "PASSED",
@@ -40,14 +40,16 @@
       "reason": null
     },
     "G1-P0-B05": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-26T09:20:13.175724+00:00",
+      "completedAt": "2026-07-26T09:23:49.758390+00:00",
+      "evidence": [
+        "docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json; pnpm test:unit (29 files/121 tests PASS); pnpm test:contract (4 files/18 tests PASS); UGV 9 unit + 4 contract PASS; NPC 11 unit + 5 contract PASS; HA 4 files/7 tests PASS; prettier check; git diff --check"
+      ],
       "reason": null
     },
     "G1-P0-B06": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
