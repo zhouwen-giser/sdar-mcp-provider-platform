@@ -1,0 +1,37 @@
+{
+  "$id": "https://schemas.sdar.dev/config/runtime.bootstrap/v1",
+  "additionalProperties": false,
+  "properties": {
+    "ADAPTER_ENDPOINT": { "type": "string" },
+    "ADAPTER_RPC_TIMEOUT_MS": { "maximum": 60000, "minimum": 1, "type": "integer" },
+    "ADAPTER_TLS_CA_PATH": { "minLength": 1, "type": "string" },
+    "ADAPTER_TLS_CERT_PATH": { "minLength": 1, "type": "string" },
+    "ADAPTER_TLS_KEY_PATH": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "ADAPTER_TLS_MODE": { "enum": ["disabled", "required"] },
+    "DATABASE_POOL_MAX": { "maximum": 100, "minimum": 1, "type": "integer" },
+    "DATABASE_URL": {
+      "format": "uri",
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "DATABASE_URL_FILE": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "HOST": { "type": "string" },
+    "PORT": { "maximum": 65535, "minimum": 1, "type": "integer" },
+    "PROVIDER_ID": { "maxLength": 128, "minLength": 1, "type": "string" },
+    "RUNTIME_ENV": { "enum": ["development", "test", "production"] }
+  },
+  "title": "runtime.bootstrap",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}

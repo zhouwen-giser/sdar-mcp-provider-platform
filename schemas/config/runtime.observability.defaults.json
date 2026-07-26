@@ -1,0 +1,12 @@
+{
+  "definitionId": "runtime.observability",
+  "definitionVersion": 1,
+  "schemaVersion": "1.0",
+  "values": {
+    "LOG_LEVEL": "info",
+    "OTEL_ENABLED": false,
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://127.0.0.1:4318",
+    "OTEL_EXPORTER_OTLP_TIMEOUT_MS": 10000,
+    "OTEL_EXPORTER_OTLP_TLS_MODE": "disabled"
+  }
+}

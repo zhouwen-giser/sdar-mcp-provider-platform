@@ -1,0 +1,192 @@
+{
+  "configGroup": "runtime.bootstrap",
+  "definitionId": "runtime.bootstrap",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime safety profile.",
+      "displayName": "Runtime environment",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RUNTIME_ENV",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime HTTP listen host.",
+      "displayName": "Listen host",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/HOST",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime HTTP listen port.",
+      "displayName": "Listen port",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "Immutable logical Provider identity.",
+      "displayName": "Provider ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_ID",
+      "required": true,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Legacy direct database connection secret.",
+      "displayName": "Legacy database URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/DATABASE_URL",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Path to the injected database connection secret.",
+      "displayName": "Database URL file",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/DATABASE_URL_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Maximum Runtime database pool size.",
+      "displayName": "Database pool maximum",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/DATABASE_POOL_MAX",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Provider Adapter network endpoint.",
+      "displayName": "Adapter endpoint",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_ENDPOINT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Provider Adapter transport security mode.",
+      "displayName": "Adapter TLS mode",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Path to the Adapter trust anchor.",
+      "displayName": "Adapter CA path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Path to the Runtime Adapter client certificate.",
+      "displayName": "Adapter certificate path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "SecretRef path to the Runtime Adapter client key.",
+      "displayName": "Adapter key path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Provider Adapter RPC timeout in milliseconds.",
+      "displayName": "Adapter RPC timeout",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_RPC_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": {
+    "enabled": true,
+    "order": ["runtime_instance", "runtime_deployment", "system_default"]
+  },
+  "schemaVersion": "1.0",
+  "targetTypes": ["runtime_deployment", "runtime_instance"]
+}

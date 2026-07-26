@@ -1,0 +1,1077 @@
+{
+  "configGroup": "runtime.workerEvents",
+  "definitionId": "runtime.workerEvents",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_ingress_enabled setting.",
+      "displayName": "Provider Telemetry Ingress Enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_INGRESS_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_host setting.",
+      "displayName": "Provider Telemetry Host",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_HOST",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_port setting.",
+      "displayName": "Provider Telemetry Port",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_PORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_tls_mode setting.",
+      "displayName": "Provider Telemetry Tls Mode",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_tls_ca_path setting.",
+      "displayName": "Provider Telemetry Tls Ca Path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_tls_cert_path setting.",
+      "displayName": "Provider Telemetry Tls Cert Path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_tls_key_path setting.",
+      "displayName": "Provider Telemetry Tls Key Path",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_max_batch setting.",
+      "displayName": "Provider Telemetry Max Batch",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_MAX_BATCH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_max_event_bytes setting.",
+      "displayName": "Provider Telemetry Max Event Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_MAX_EVENT_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_max_depth setting.",
+      "displayName": "Provider Telemetry Max Depth",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_MAX_DEPTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_max_nodes setting.",
+      "displayName": "Provider Telemetry Max Nodes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_MAX_NODES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime provider_telemetry_rate_limit setting.",
+      "displayName": "Provider Telemetry Rate Limit",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_RATE_LIMIT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime auth_mode setting.",
+      "displayName": "Auth Mode",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/AUTH_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime mcp_legacy_endpoint_enabled setting.",
+      "displayName": "Mcp Legacy Endpoint Enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/MCP_LEGACY_ENDPOINT_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_enabled setting.",
+      "displayName": "Business Events Enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_required_for_runtime_ready setting.",
+      "displayName": "Business Events Required For Runtime Ready",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_retention_ms setting.",
+      "displayName": "Business Events Retention Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_RETENTION_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_poll_interval_ms setting.",
+      "displayName": "Business Events Poll Interval Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_POLL_INTERVAL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_subscriptions setting.",
+      "displayName": "Business Events Max Subscriptions",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_SUBSCRIPTIONS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_subscriptions_per_auth setting.",
+      "displayName": "Business Events Max Subscriptions Per Auth",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_SUBSCRIPTIONS_PER_AUTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_queue_messages setting.",
+      "displayName": "Business Events Max Queue Messages",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_QUEUE_MESSAGES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_queue_bytes setting.",
+      "displayName": "Business Events Max Queue Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_QUEUE_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_replay_batch_size setting.",
+      "displayName": "Business Events Replay Batch Size",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_REPLAY_BATCH_SIZE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_stream_duration_ms setting.",
+      "displayName": "Business Events Max Stream Duration Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_STREAM_DURATION_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_event_bytes setting.",
+      "displayName": "Business Events Max Event Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_EVENT_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_payload_depth setting.",
+      "displayName": "Business Events Max Payload Depth",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_PAYLOAD_DEPTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_payload_nodes setting.",
+      "displayName": "Business Events Max Payload Nodes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_PAYLOAD_NODES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_events_max_payload_string_bytes setting.",
+      "displayName": "Business Events Max Payload String Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENTS_MAX_PAYLOAD_STRING_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_event_mapping_deadline_ms setting.",
+      "displayName": "Business Event Mapping Deadline Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENT_MAPPING_DEADLINE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_event_max_future_skew_ms setting.",
+      "displayName": "Business Event Max Future Skew Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENT_MAX_FUTURE_SKEW_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime business_event_clock_skew_safety_ms setting.",
+      "displayName": "Business Event Clock Skew Safety Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/BUSINESS_EVENT_CLOCK_SKEW_SAFETY_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_poll_interval_ms setting.",
+      "displayName": "Task Notification Poll Interval Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_POLL_INTERVAL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_max_subscriptions setting.",
+      "displayName": "Task Notification Max Subscriptions",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_MAX_SUBSCRIPTIONS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_max_subscriptions_per_auth setting.",
+      "displayName": "Task Notification Max Subscriptions Per Auth",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_MAX_SUBSCRIPTIONS_PER_AUTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_max_task_bindings setting.",
+      "displayName": "Task Notification Max Task Bindings",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_MAX_TASK_BINDINGS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_max_queue_messages setting.",
+      "displayName": "Task Notification Max Queue Messages",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_MAX_QUEUE_MESSAGES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_max_queue_bytes setting.",
+      "displayName": "Task Notification Max Queue Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_MAX_QUEUE_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime task_notification_batch_size setting.",
+      "displayName": "Task Notification Batch Size",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TASK_NOTIFICATION_BATCH_SIZE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime jwt_hs256_secret setting.",
+      "displayName": "Jwt Hs256 Secret",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/JWT_HS256_SECRET",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime jwt_issuer setting.",
+      "displayName": "Jwt Issuer",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/JWT_ISSUER",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime jwt_audience setting.",
+      "displayName": "Jwt Audience",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/JWT_AUDIENCE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime http_body_limit_bytes setting.",
+      "displayName": "Http Body Limit Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/HTTP_BODY_LIMIT_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime argument_max_bytes setting.",
+      "displayName": "Argument Max Bytes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ARGUMENT_MAX_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime argument_max_depth setting.",
+      "displayName": "Argument Max Depth",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ARGUMENT_MAX_DEPTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime argument_max_nodes setting.",
+      "displayName": "Argument Max Nodes",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ARGUMENT_MAX_NODES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime rate_limit_max setting.",
+      "displayName": "Rate Limit Max",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RATE_LIMIT_MAX",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime rate_limit_window_ms setting.",
+      "displayName": "Rate Limit Window Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RATE_LIMIT_WINDOW_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime rate_limit_max_keys setting.",
+      "displayName": "Rate Limit Max Keys",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RATE_LIMIT_MAX_KEYS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime idempotency_lease_ms setting.",
+      "displayName": "Idempotency Lease Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/IDEMPOTENCY_LEASE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime idempotency_wait_timeout_ms setting.",
+      "displayName": "Idempotency Wait Timeout Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/IDEMPOTENCY_WAIT_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime idempotency_poll_ms setting.",
+      "displayName": "Idempotency Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/IDEMPOTENCY_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime command_claim_lease_ms setting.",
+      "displayName": "Command Claim Lease Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/COMMAND_CLAIM_LEASE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime schedule_claim_lease_ms setting.",
+      "displayName": "Schedule Claim Lease Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SCHEDULE_CLAIM_LEASE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime recovery_lease_ms setting.",
+      "displayName": "Recovery Lease Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RECOVERY_LEASE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime lease_safety_margin_ms setting.",
+      "displayName": "Lease Safety Margin Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/LEASE_SAFETY_MARGIN_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime db_publication_budget_ms setting.",
+      "displayName": "Db Publication Budget Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/DB_PUBLICATION_BUDGET_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime allow_weak_lease_configuration setting.",
+      "displayName": "Allow Weak Lease Configuration",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ALLOW_WEAK_LEASE_CONFIGURATION",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime internal_endpoints_enabled setting.",
+      "displayName": "Internal Endpoints Enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/INTERNAL_ENDPOINTS_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime internal_admin_token setting.",
+      "displayName": "Internal Admin Token",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/INTERNAL_ADMIN_TOKEN",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime adapter_health_poll_ms setting.",
+      "displayName": "Adapter Health Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_HEALTH_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime adapter_health_failure_threshold setting.",
+      "displayName": "Adapter Health Failure Threshold",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_HEALTH_FAILURE_THRESHOLD",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime adapter_manifest_poll_ms setting.",
+      "displayName": "Adapter Manifest Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_MANIFEST_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime scheduler_poll_ms setting.",
+      "displayName": "Scheduler Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SCHEDULER_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime command_dispatch_concurrency setting.",
+      "displayName": "Command Dispatch Concurrency",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/COMMAND_DISPATCH_CONCURRENCY",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime scheduler_concurrency setting.",
+      "displayName": "Scheduler Concurrency",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SCHEDULER_CONCURRENCY",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_cleaner_poll_ms setting.",
+      "displayName": "Outbox Cleaner Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_CLEANER_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime recovery_poll_ms setting.",
+      "displayName": "Recovery Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/RECOVERY_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime ttl_cleaner_poll_ms setting.",
+      "displayName": "Ttl Cleaner Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TTL_CLEANER_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime ttl_purge_grace_ms setting.",
+      "displayName": "Ttl Purge Grace Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TTL_PURGE_GRACE_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_published_retention_ms setting.",
+      "displayName": "Outbox Published Retention Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_PUBLISHED_RETENTION_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime ttl_cleaner_batch_size setting.",
+      "displayName": "Ttl Cleaner Batch Size",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/TTL_CLEANER_BATCH_SIZE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_sink setting.",
+      "displayName": "Outbox Sink",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_SINK",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_webhook_url setting.",
+      "displayName": "Outbox Webhook Url",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_WEBHOOK_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_poll_ms setting.",
+      "displayName": "Outbox Poll Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_POLL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_batch_size setting.",
+      "displayName": "Outbox Batch Size",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_BATCH_SIZE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime outbox_webhook_timeout_ms setting.",
+      "displayName": "Outbox Webhook Timeout Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OUTBOX_WEBHOOK_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": {
+    "enabled": true,
+    "order": ["runtime_instance", "runtime_deployment", "system_default"]
+  },
+  "schemaVersion": "1.0",
+  "targetTypes": ["runtime_deployment", "runtime_instance"]
+}

@@ -1,0 +1,732 @@
+{
+  "configGroup": "provider.npcTank",
+  "definitionId": "provider.npcTank",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "immutable",
+      "description": "NPC Tank Provider provider_id setting.",
+      "displayName": "PROVIDER_ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "NPC Tank Provider provider_version setting.",
+      "displayName": "PROVIDER_VERSION",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_VERSION",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_host setting.",
+      "displayName": "ADAPTER_HOST",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_HOST",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_port setting.",
+      "displayName": "ADAPTER_PORT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_PORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_tls_mode setting.",
+      "displayName": "ADAPTER_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_tls_ca_path setting.",
+      "displayName": "ADAPTER_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_tls_cert_path setting.",
+      "displayName": "ADAPTER_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider adapter_tls_key_path setting.",
+      "displayName": "ADAPTER_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_adapter_store_mode setting.",
+      "displayName": "NPC_TANK_ADAPTER_STORE_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_ADAPTER_STORE_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_adapter_database_url setting.",
+      "displayName": "NPC_TANK_ADAPTER_DATABASE_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_ADAPTER_DATABASE_URL",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_adapter_database_pool_max setting.",
+      "displayName": "NPC_TANK_ADAPTER_DATABASE_POOL_MAX",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_ADAPTER_DATABASE_POOL_MAX",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_url setting.",
+      "displayName": "NPC_TANK_MQTT_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_client_id setting.",
+      "displayName": "NPC_TANK_MQTT_CLIENT_ID",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_CLIENT_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_username setting.",
+      "displayName": "NPC_TANK_MQTT_USERNAME",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_USERNAME",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_password_file setting.",
+      "displayName": "NPC_TANK_MQTT_PASSWORD_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_PASSWORD_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_tls_mode setting.",
+      "displayName": "NPC_TANK_MQTT_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_tls_ca_path setting.",
+      "displayName": "NPC_TANK_MQTT_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_tls_cert_path setting.",
+      "displayName": "NPC_TANK_MQTT_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_tls_key_path setting.",
+      "displayName": "NPC_TANK_MQTT_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_session_mode setting.",
+      "displayName": "NPC_TANK_MQTT_SESSION_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_SESSION_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_reconnect_min_ms setting.",
+      "displayName": "NPC_TANK_MQTT_RECONNECT_MIN_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_RECONNECT_MIN_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_reconnect_max_ms setting.",
+      "displayName": "NPC_TANK_MQTT_RECONNECT_MAX_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_RECONNECT_MAX_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_max_payload_bytes setting.",
+      "displayName": "NPC_TANK_MQTT_MAX_PAYLOAD_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_MAX_PAYLOAD_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_max_json_depth setting.",
+      "displayName": "NPC_TANK_MQTT_MAX_JSON_DEPTH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_MAX_JSON_DEPTH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_max_json_nodes setting.",
+      "displayName": "NPC_TANK_MQTT_MAX_JSON_NODES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_MAX_JSON_NODES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_max_string_bytes setting.",
+      "displayName": "NPC_TANK_MQTT_MAX_STRING_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_MAX_STRING_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mqtt_wire_mode setting.",
+      "displayName": "NPC_TANK_MQTT_WIRE_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MQTT_WIRE_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_chassis_freshness_ms setting.",
+      "displayName": "NPC_TANK_CHASSIS_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_CHASSIS_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_mission_freshness_ms setting.",
+      "displayName": "NPC_TANK_MISSION_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_MISSION_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_health_freshness_ms setting.",
+      "displayName": "NPC_TANK_HEALTH_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_HEALTH_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_target_freshness_ms setting.",
+      "displayName": "NPC_TANK_TARGET_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_TARGET_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_payload_freshness_ms setting.",
+      "displayName": "NPC_TANK_PAYLOAD_FRESHNESS_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_PAYLOAD_FRESHNESS_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_url setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_timeout_ms setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_TIMEOUT_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_tls_mode setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_headers_file setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_HEADERS_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_HEADERS_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_max_response_bytes setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_MAX_RESPONSE_BYTES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_MAX_RESPONSE_BYTES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_allow_mock_contract setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_device_mcp_contract_report_path setting.",
+      "displayName": "NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_navigation_selection_report_path setting.",
+      "displayName": "NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_eo_scan_capability_report_path setting.",
+      "displayName": "NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_allow_navigation_with_recon setting.",
+      "displayName": "NPC_TANK_ALLOW_NAVIGATION_WITH_RECON",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_ALLOW_NAVIGATION_WITH_RECON",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_fire_requires_chassis_stopped setting.",
+      "displayName": "NPC_TANK_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider npc_tank_execution_poll_interval_ms setting.",
+      "displayName": "NPC_TANK_EXECUTION_POLL_INTERVAL_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/NPC_TANK_EXECUTION_POLL_INTERVAL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_enabled setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_endpoint setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENDPOINT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENDPOINT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_tls_mode setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_tls_ca_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_tls_cert_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider provider_telemetry_tls_key_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider runtime_env setting.",
+      "displayName": "RUNTIME_ENV",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/RUNTIME_ENV",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "NPC Tank Provider log_level setting.",
+      "displayName": "LOG_LEVEL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/LOG_LEVEL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": { "enabled": true, "order": ["provider", "provider_type", "system_default"] },
+  "schemaVersion": "1.0",
+  "targetTypes": ["provider_type", "provider"]
+}

@@ -1,0 +1,260 @@
+{
+  "$id": "https://schemas.sdar.dev/config/provider.npcTank/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ADAPTER_HOST": { "default": "0.0.0.0", "minLength": 1, "type": "string" },
+    "ADAPTER_PORT": { "default": 7013, "maximum": 65535, "minimum": 1, "type": "integer" },
+    "ADAPTER_TLS_CA_PATH": { "type": "string" },
+    "ADAPTER_TLS_CERT_PATH": { "type": "string" },
+    "ADAPTER_TLS_KEY_PATH": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "ADAPTER_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "LOG_LEVEL": {
+      "default": "info",
+      "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
+      "type": "string"
+    },
+    "NPC_TANK_ADAPTER_DATABASE_POOL_MAX": {
+      "default": 8,
+      "maximum": 32,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "NPC_TANK_ADAPTER_DATABASE_URL": {
+      "format": "uri",
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "NPC_TANK_ADAPTER_STORE_MODE": {
+      "default": "postgres",
+      "enum": ["postgres", "memory"],
+      "type": "string"
+    },
+    "NPC_TANK_ALLOW_NAVIGATION_WITH_RECON": { "type": "boolean" },
+    "NPC_TANK_CHASSIS_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT": { "type": "boolean" },
+    "NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH": {
+      "default": "reports/npc-tank-provider-v1/external-contract/npc-tank-device-mcp-tools.json",
+      "minLength": 1,
+      "type": "string"
+    },
+    "NPC_TANK_DEVICE_MCP_HEADERS_FILE": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "NPC_TANK_DEVICE_MCP_MAX_RESPONSE_BYTES": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 1024,
+      "type": "integer"
+    },
+    "NPC_TANK_DEVICE_MCP_TIMEOUT_MS": {
+      "default": 5000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "NPC_TANK_DEVICE_MCP_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "NPC_TANK_DEVICE_MCP_URL": {
+      "default": "http://127.0.0.1:19003/mcp",
+      "format": "uri",
+      "type": "string"
+    },
+    "NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH": {
+      "default": "reports/npc-tank-provider-v1/eo-scan-capability.json",
+      "minLength": 1,
+      "type": "string"
+    },
+    "NPC_TANK_EXECUTION_POLL_INTERVAL_MS": {
+      "default": 250,
+      "maximum": 9007199254740991,
+      "minimum": 50,
+      "type": "integer"
+    },
+    "NPC_TANK_FIRE_REQUIRES_CHASSIS_STOPPED": { "type": "boolean" },
+    "NPC_TANK_HEALTH_FRESHNESS_MS": {
+      "default": 5000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "NPC_TANK_MISSION_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_CLIENT_ID": {
+      "default": "sdar-npc-tank-adapter-npc-tank1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "NPC_TANK_MQTT_MAX_JSON_DEPTH": {
+      "default": 16,
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_MAX_JSON_NODES": {
+      "default": 4096,
+      "maximum": 100000,
+      "minimum": 16,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_MAX_PAYLOAD_BYTES": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 128,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_MAX_STRING_BYTES": {
+      "default": 16384,
+      "maximum": 1048576,
+      "minimum": 64,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_PASSWORD_FILE": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "NPC_TANK_MQTT_RECONNECT_MAX_MS": {
+      "default": 30000,
+      "maximum": 9007199254740991,
+      "minimum": 500,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_RECONNECT_MIN_MS": {
+      "default": 500,
+      "maximum": 9007199254740991,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "NPC_TANK_MQTT_SESSION_MODE": {
+      "default": "persistent",
+      "enum": ["clean", "persistent"],
+      "type": "string"
+    },
+    "NPC_TANK_MQTT_TLS_CA_PATH": { "type": "string" },
+    "NPC_TANK_MQTT_TLS_CERT_PATH": { "type": "string" },
+    "NPC_TANK_MQTT_TLS_KEY_PATH": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "NPC_TANK_MQTT_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "NPC_TANK_MQTT_URL": { "default": "mqtt://127.0.0.1:1886", "minLength": 1, "type": "string" },
+    "NPC_TANK_MQTT_USERNAME": { "type": "string" },
+    "NPC_TANK_MQTT_WIRE_MODE": {
+      "default": "auto",
+      "enum": ["auto", "ros_message_json", "direct_domain_json"],
+      "type": "string"
+    },
+    "NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH": {
+      "default": "reports/npc-tank-provider-v1/navigation-tool-selection.json",
+      "minLength": 1,
+      "type": "string"
+    },
+    "NPC_TANK_PAYLOAD_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "NPC_TANK_TARGET_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "PROVIDER_ID": {
+      "default": "isr.vehicle.npc-tank.npc-tank1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "PROVIDER_TELEMETRY_ENABLED": { "type": "boolean" },
+    "PROVIDER_TELEMETRY_ENDPOINT": {
+      "default": "127.0.0.1:7005",
+      "minLength": 1,
+      "type": "string"
+    },
+    "PROVIDER_TELEMETRY_TLS_CA_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_CERT_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_KEY_PATH": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "PROVIDER_VERSION": { "default": "0.1.0", "minLength": 1, "type": "string" },
+    "RUNTIME_ENV": {
+      "default": "development",
+      "enum": ["development", "test", "production"],
+      "type": "string"
+    }
+  },
+  "required": [
+    "PROVIDER_ID",
+    "PROVIDER_VERSION",
+    "ADAPTER_HOST",
+    "ADAPTER_PORT",
+    "ADAPTER_TLS_MODE",
+    "NPC_TANK_ADAPTER_STORE_MODE",
+    "NPC_TANK_ADAPTER_DATABASE_URL",
+    "NPC_TANK_ADAPTER_DATABASE_POOL_MAX",
+    "NPC_TANK_MQTT_URL",
+    "NPC_TANK_MQTT_CLIENT_ID",
+    "NPC_TANK_MQTT_TLS_MODE",
+    "NPC_TANK_MQTT_SESSION_MODE",
+    "NPC_TANK_MQTT_RECONNECT_MIN_MS",
+    "NPC_TANK_MQTT_RECONNECT_MAX_MS",
+    "NPC_TANK_MQTT_MAX_PAYLOAD_BYTES",
+    "NPC_TANK_MQTT_MAX_JSON_DEPTH",
+    "NPC_TANK_MQTT_MAX_JSON_NODES",
+    "NPC_TANK_MQTT_MAX_STRING_BYTES",
+    "NPC_TANK_MQTT_WIRE_MODE",
+    "NPC_TANK_CHASSIS_FRESHNESS_MS",
+    "NPC_TANK_MISSION_FRESHNESS_MS",
+    "NPC_TANK_HEALTH_FRESHNESS_MS",
+    "NPC_TANK_TARGET_FRESHNESS_MS",
+    "NPC_TANK_PAYLOAD_FRESHNESS_MS",
+    "NPC_TANK_DEVICE_MCP_URL",
+    "NPC_TANK_DEVICE_MCP_TIMEOUT_MS",
+    "NPC_TANK_DEVICE_MCP_TLS_MODE",
+    "NPC_TANK_DEVICE_MCP_MAX_RESPONSE_BYTES",
+    "NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+    "NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH",
+    "NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH",
+    "NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH",
+    "NPC_TANK_ALLOW_NAVIGATION_WITH_RECON",
+    "NPC_TANK_FIRE_REQUIRES_CHASSIS_STOPPED",
+    "NPC_TANK_EXECUTION_POLL_INTERVAL_MS",
+    "PROVIDER_TELEMETRY_ENABLED",
+    "PROVIDER_TELEMETRY_ENDPOINT",
+    "PROVIDER_TELEMETRY_TLS_MODE",
+    "RUNTIME_ENV",
+    "LOG_LEVEL"
+  ],
+  "title": "provider.npcTank",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}

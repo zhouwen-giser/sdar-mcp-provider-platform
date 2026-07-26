@@ -128,7 +128,9 @@
     "dev:mock-npc-tank-mqtt-publisher": "tsx apps/mock-npc-tank-mqtt-publisher/src/main.ts",
     "dev:adapter:ts": "tsx examples/mock-adapter-typescript/src/main.ts",
     "dev:ha-climate": "tsx apps/home-assistant-climate-provider/src/main.ts",
-    "business-events:rotate": "pnpm build && node dist/apps/runtime/src/business-events/rotate.js"
+    "business-events:rotate": "pnpm build && node dist/apps/runtime/src/business-events/rotate.js",
+    "config:schema:generate": "node --import tsx scripts/generate-config-schemas.mjs",
+    "config:schema:check": "node --import tsx scripts/generate-config-schemas.mjs --check"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.4",

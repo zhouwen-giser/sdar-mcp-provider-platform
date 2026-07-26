@@ -1,0 +1,153 @@
+{
+  "configGroup": "runtime.observability",
+  "definitionId": "runtime.observability",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "hot_reload",
+      "description": "Runtime structured log verbosity.",
+      "displayName": "Log level",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/LOG_LEVEL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "hot_reload",
+      "description": "Enables Runtime metrics, traces, and logs export.",
+      "displayName": "OpenTelemetry enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "OpenTelemetry collector endpoint.",
+      "displayName": "OTLP endpoint",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_ENDPOINT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "OpenTelemetry collector transport security mode.",
+      "displayName": "OTLP TLS mode",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "File reference for the OTLP trust anchor.",
+      "displayName": "OTLP CA SecretRef",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_CA_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "File reference for the OTLP client certificate.",
+      "displayName": "OTLP certificate SecretRef",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_CERT_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "File reference for the OTLP client private key.",
+      "displayName": "OTLP key SecretRef",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "File reference for secret OTLP request headers.",
+      "displayName": "OTLP headers SecretRef",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_HEADERS_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "reconnect_required",
+      "description": "OpenTelemetry export timeout in milliseconds.",
+      "displayName": "OTLP timeout",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_EXPORTER_OTLP_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Stable Runtime telemetry resource instance identity.",
+      "displayName": "Telemetry instance ID",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/OTEL_SERVICE_INSTANCE_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": {
+    "enabled": true,
+    "order": ["runtime_instance", "runtime_deployment", "system_default"]
+  },
+  "schemaVersion": "1.0",
+  "targetTypes": ["runtime_deployment", "runtime_instance"]
+}

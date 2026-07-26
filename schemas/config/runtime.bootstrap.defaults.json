@@ -1,0 +1,15 @@
+{
+  "definitionId": "runtime.bootstrap",
+  "definitionVersion": 1,
+  "schemaVersion": "1.0",
+  "values": {
+    "ADAPTER_ENDPOINT": "127.0.0.1:7001",
+    "ADAPTER_RPC_TIMEOUT_MS": 5000,
+    "ADAPTER_TLS_MODE": "disabled",
+    "DATABASE_POOL_MAX": 10,
+    "HOST": "0.0.0.0",
+    "PORT": 8080,
+    "PROVIDER_ID": "mock-provider",
+    "RUNTIME_ENV": "development"
+  }
+}

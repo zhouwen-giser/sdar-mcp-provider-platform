@@ -1,0 +1,231 @@
+{
+  "$id": "https://schemas.sdar.dev/config/provider.ugv/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ADAPTER_HOST": { "default": "0.0.0.0", "minLength": 1, "type": "string" },
+    "ADAPTER_PORT": { "default": 7010, "maximum": 65535, "minimum": 1, "type": "integer" },
+    "ADAPTER_TLS_CA_PATH": { "type": "string" },
+    "ADAPTER_TLS_CERT_PATH": { "type": "string" },
+    "ADAPTER_TLS_KEY_PATH": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "ADAPTER_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "LOG_LEVEL": {
+      "default": "info",
+      "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
+      "type": "string"
+    },
+    "PROVIDER_ID": { "default": "isr.vehicle.ugv.ugv1", "minLength": 1, "type": "string" },
+    "PROVIDER_TELEMETRY_ENABLED": { "type": "boolean" },
+    "PROVIDER_TELEMETRY_ENDPOINT": {
+      "default": "127.0.0.1:7002",
+      "minLength": 1,
+      "type": "string"
+    },
+    "PROVIDER_TELEMETRY_TLS_CA_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_CERT_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_KEY_PATH": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "PROVIDER_VERSION": { "default": "1.0.0", "minLength": 1, "type": "string" },
+    "RUNTIME_ENV": {
+      "default": "development",
+      "enum": ["development", "test", "production"],
+      "type": "string"
+    },
+    "UGV_ADAPTER_DATABASE_POOL_MAX": {
+      "default": 8,
+      "maximum": 32,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "UGV_ADAPTER_DATABASE_URL": {
+      "format": "uri",
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "UGV_ADAPTER_STORE_MODE": {
+      "default": "postgres",
+      "enum": ["postgres", "memory"],
+      "type": "string"
+    },
+    "UGV_ALLOW_NAVIGATION_WITH_RECON": { "type": "boolean" },
+    "UGV_CHASSIS_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT": { "type": "boolean" },
+    "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH": {
+      "default": "reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json",
+      "minLength": 1,
+      "type": "string"
+    },
+    "UGV_DEVICE_MCP_HEADERS_FILE": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "UGV_DEVICE_MCP_MAX_RESPONSE_BYTES": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 1024,
+      "type": "integer"
+    },
+    "UGV_DEVICE_MCP_TIMEOUT_MS": {
+      "default": 5000,
+      "maximum": 60000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "UGV_DEVICE_MCP_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "UGV_DEVICE_MCP_URL": {
+      "default": "http://127.0.0.1:19000/mcp",
+      "format": "uri",
+      "type": "string"
+    },
+    "UGV_EXECUTION_POLL_INTERVAL_MS": {
+      "default": 250,
+      "maximum": 9007199254740991,
+      "minimum": 50,
+      "type": "integer"
+    },
+    "UGV_FIRE_REQUIRES_CHASSIS_STOPPED": { "type": "boolean" },
+    "UGV_HEALTH_FRESHNESS_MS": {
+      "default": 5000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "UGV_MISSION_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "UGV_MQTT_CLIENT_ID": { "default": "sdar-ugv-adapter-ugv1", "minLength": 1, "type": "string" },
+    "UGV_MQTT_MAX_JSON_DEPTH": { "default": 16, "maximum": 64, "minimum": 1, "type": "integer" },
+    "UGV_MQTT_MAX_JSON_NODES": {
+      "default": 4096,
+      "maximum": 100000,
+      "minimum": 16,
+      "type": "integer"
+    },
+    "UGV_MQTT_MAX_PAYLOAD_BYTES": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 128,
+      "type": "integer"
+    },
+    "UGV_MQTT_MAX_STRING_BYTES": {
+      "default": 16384,
+      "maximum": 1048576,
+      "minimum": 64,
+      "type": "integer"
+    },
+    "UGV_MQTT_PASSWORD_FILE": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "UGV_MQTT_RECONNECT_MAX_MS": {
+      "default": 30000,
+      "maximum": 9007199254740991,
+      "minimum": 500,
+      "type": "integer"
+    },
+    "UGV_MQTT_RECONNECT_MIN_MS": {
+      "default": 500,
+      "maximum": 9007199254740991,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "UGV_MQTT_SESSION_MODE": {
+      "default": "persistent",
+      "enum": ["clean", "persistent"],
+      "type": "string"
+    },
+    "UGV_MQTT_TLS_CA_PATH": { "type": "string" },
+    "UGV_MQTT_TLS_CERT_PATH": { "type": "string" },
+    "UGV_MQTT_TLS_KEY_PATH": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "UGV_MQTT_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "UGV_MQTT_URL": { "default": "mqtt://127.0.0.1:1883", "minLength": 1, "type": "string" },
+    "UGV_MQTT_USERNAME": { "type": "string" },
+    "UGV_MQTT_WIRE_MODE": {
+      "default": "auto",
+      "enum": ["auto", "ros_message_json", "direct_domain_json"],
+      "type": "string"
+    },
+    "UGV_PAYLOAD_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "UGV_TARGET_FRESHNESS_MS": {
+      "default": 3000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "PROVIDER_ID",
+    "PROVIDER_VERSION",
+    "ADAPTER_HOST",
+    "ADAPTER_PORT",
+    "ADAPTER_TLS_MODE",
+    "UGV_ADAPTER_STORE_MODE",
+    "UGV_ADAPTER_DATABASE_URL",
+    "UGV_ADAPTER_DATABASE_POOL_MAX",
+    "UGV_MQTT_URL",
+    "UGV_MQTT_CLIENT_ID",
+    "UGV_MQTT_TLS_MODE",
+    "UGV_MQTT_SESSION_MODE",
+    "UGV_MQTT_RECONNECT_MIN_MS",
+    "UGV_MQTT_RECONNECT_MAX_MS",
+    "UGV_MQTT_MAX_PAYLOAD_BYTES",
+    "UGV_MQTT_MAX_JSON_DEPTH",
+    "UGV_MQTT_MAX_JSON_NODES",
+    "UGV_MQTT_MAX_STRING_BYTES",
+    "UGV_MQTT_WIRE_MODE",
+    "UGV_CHASSIS_FRESHNESS_MS",
+    "UGV_MISSION_FRESHNESS_MS",
+    "UGV_HEALTH_FRESHNESS_MS",
+    "UGV_TARGET_FRESHNESS_MS",
+    "UGV_PAYLOAD_FRESHNESS_MS",
+    "UGV_DEVICE_MCP_URL",
+    "UGV_DEVICE_MCP_TIMEOUT_MS",
+    "UGV_DEVICE_MCP_TLS_MODE",
+    "UGV_DEVICE_MCP_MAX_RESPONSE_BYTES",
+    "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+    "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
+    "UGV_ALLOW_NAVIGATION_WITH_RECON",
+    "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+    "UGV_EXECUTION_POLL_INTERVAL_MS",
+    "PROVIDER_TELEMETRY_ENABLED",
+    "PROVIDER_TELEMETRY_ENDPOINT",
+    "PROVIDER_TELEMETRY_TLS_MODE",
+    "RUNTIME_ENV",
+    "LOG_LEVEL"
+  ],
+  "title": "provider.ugv",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}

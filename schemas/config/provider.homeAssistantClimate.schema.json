@@ -1,0 +1,112 @@
+{
+  "$id": "https://schemas.sdar.dev/config/provider.homeAssistantClimate/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ADAPTER_HOST": { "default": "0.0.0.0", "minLength": 1, "type": "string" },
+    "ADAPTER_PORT": { "default": 7020, "maximum": 65535, "minimum": 1, "type": "integer" },
+    "ADAPTER_TLS_CA_PATH": { "type": "string" },
+    "ADAPTER_TLS_CERT_PATH": { "type": "string" },
+    "ADAPTER_TLS_KEY_PATH": { "type": "string", "writeOnly": true, "x-sdar-secretRef": true },
+    "ADAPTER_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "CLIMATE_RESOURCES_FILE": { "minLength": 1, "type": "string" },
+    "HOME_ASSISTANT_ALLOW_INSECURE_HTTP": { "type": "boolean" },
+    "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS": {
+      "default": 15000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "HOME_ASSISTANT_POLL_INTERVAL_MS": {
+      "default": 500,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "HOME_ASSISTANT_REQUEST_TIMEOUT_MS": {
+      "default": 5000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "HOME_ASSISTANT_TOKEN_FILE": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "HOME_ASSISTANT_URL": { "format": "uri", "type": "string" },
+    "HOME_ASSISTANT_WS_RECONNECT_MAX_MS": {
+      "default": 30000,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "HOME_ASSISTANT_WS_RECONNECT_MIN_MS": {
+      "default": 500,
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "LOG_LEVEL": {
+      "default": "info",
+      "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
+      "type": "string"
+    },
+    "PROVIDER_ID": { "default": "home-assistant-climate", "minLength": 1, "type": "string" },
+    "PROVIDER_STATE_PATH": { "minLength": 1, "type": "string" },
+    "PROVIDER_TELEMETRY_ENABLED": { "type": "boolean" },
+    "PROVIDER_TELEMETRY_ENDPOINT": {
+      "default": "127.0.0.1:7002",
+      "minLength": 1,
+      "type": "string"
+    },
+    "PROVIDER_TELEMETRY_TLS_CA_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_CERT_PATH": { "type": "string" },
+    "PROVIDER_TELEMETRY_TLS_KEY_PATH": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "PROVIDER_TELEMETRY_TLS_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "required"],
+      "type": "string"
+    },
+    "PROVIDER_VERSION": { "default": "0.1.0", "minLength": 1, "type": "string" },
+    "RUNTIME_ENV": {
+      "default": "development",
+      "enum": ["development", "test", "production"],
+      "type": "string"
+    }
+  },
+  "required": [
+    "PROVIDER_ID",
+    "PROVIDER_VERSION",
+    "ADAPTER_HOST",
+    "ADAPTER_PORT",
+    "ADAPTER_TLS_MODE",
+    "HOME_ASSISTANT_URL",
+    "HOME_ASSISTANT_TOKEN_FILE",
+    "HOME_ASSISTANT_ALLOW_INSECURE_HTTP",
+    "HOME_ASSISTANT_REQUEST_TIMEOUT_MS",
+    "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS",
+    "HOME_ASSISTANT_POLL_INTERVAL_MS",
+    "HOME_ASSISTANT_WS_RECONNECT_MIN_MS",
+    "HOME_ASSISTANT_WS_RECONNECT_MAX_MS",
+    "CLIMATE_RESOURCES_FILE",
+    "PROVIDER_STATE_PATH",
+    "PROVIDER_TELEMETRY_ENABLED",
+    "PROVIDER_TELEMETRY_ENDPOINT",
+    "PROVIDER_TELEMETRY_TLS_MODE",
+    "LOG_LEVEL",
+    "RUNTIME_ENV"
+  ],
+  "title": "provider.homeAssistantClimate",
+  "type": "object",
+  "x-sdar-definition-version": 1
+}
