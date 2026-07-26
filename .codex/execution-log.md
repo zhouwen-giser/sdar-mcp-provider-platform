@@ -279,3 +279,7 @@
 - 2026-07-26T16:18:57.290837+00:00 START G2-P2-B08
 
 - 2026-07-26T16:23:03.559047+00:00 PASS G2-P2-B08 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); reports/evidence/G2-P2-B08-database-isolation.json; pnpm test:db-provisioner (3 files/21 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T16:23:32.363103+00:00 START G2-P2-B09
+
+- 2026-07-26T16:26:15.655764+00:00 PASS G2-P2-B09 evidence=['.codex/reports/goal2-P2.md; docs/operations/DATABASE_PROVISIONING_RUNBOOK.md; TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); pnpm build; database preparation unit/worker tests (2 files/5 tests)']
