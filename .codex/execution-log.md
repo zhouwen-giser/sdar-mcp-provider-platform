@@ -99,3 +99,7 @@
 - 2026-07-26T10:44:42.030871+00:00 START G1-P3-B04
 
 - 2026-07-26T10:47:31.508571+00:00 PASS G1-P3-B04 evidence=['pnpm --filter @sdar/runtime-configuration-contract test (3 files, 18 tests); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/production-config.test.ts (15 tests); pnpm typecheck; pnpm lint; pnpm build; git diff --check']
+
+- 2026-07-26T10:49:20.813227+00:00 START G1-P3-B05
+
+- 2026-07-26T10:53:40.741644+00:00 PASS G1-P3-B05 evidence=['pnpm --filter @sdar/runtime-configuration-contract test (4 files, 22 tests; exact 98 inventory fields plus DATABASE_URL_FILE covered once); pnpm test:unit (30 files, 123 tests); pnpm exec vitest run tests/security/production-config.test.ts tests/runtime-conformance-followup/notification-config-bounds.test.ts (22 tests); pnpm lint; pnpm typecheck; pnpm build; git diff --check']
