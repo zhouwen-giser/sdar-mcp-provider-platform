@@ -55,7 +55,12 @@ export async function authorizeManagementRequest(
 
 function isProtectedManagementPath(url: string): boolean {
   const path = url.split("?", 1)[0] ?? "";
-  if (!path.startsWith("/api/v1/") || path.startsWith("/api/v1/runtime-config/")) return false;
+  if (
+    !path.startsWith("/api/v1/") ||
+    path.startsWith("/api/v1/runtime-config/") ||
+    path.startsWith("/api/v1/runtime-registration/")
+  )
+    return false;
   return [
     "/api/v1/provider-packages",
     "/api/v1/provider-types",
