@@ -42,12 +42,8 @@ All checks are platform aware; Unix-only permission checks are skipped when runn
 ```json
 {
   "management": {
-    "reader": [
-      { "subjectId": "reader-1", "tokenFile": "/abs/path/to/reader.token" }
-    ],
-    "administrator": [
-      { "subjectId": "admin-1", "tokenFile": "/abs/path/to/admin.token" }
-    ]
+    "reader": [{ "subjectId": "reader-1", "tokenFile": "/abs/path/to/reader.token" }],
+    "administrator": [{ "subjectId": "admin-1", "tokenFile": "/abs/path/to/admin.token" }]
   }
 }
 ```
@@ -92,4 +88,4 @@ All checks are platform aware; Unix-only permission checks are skipped when runn
 - Management routes under:
   - `/api/v1/runtime-config/*`
   - `/api/v1/runtime-registration/*`
-  are excluded from management-authorizer protection and are protected by runtime-specific authorizers.
+    are excluded from management-authorizer protection and are protected by runtime-specific authorizers.
