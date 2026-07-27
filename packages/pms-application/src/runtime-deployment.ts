@@ -17,6 +17,7 @@ import {
   type RuntimeDeploymentSnapshot,
 } from "../../runtime-deployment/src/index.js";
 import { requireAuditContext, type AuditContext } from "./audit-service.js";
+import { parseRuntimeConfigProfileLocator } from "./runtime-config-profile-locator.js";
 
 export type RuntimeDeploymentApplicationErrorCode =
   | "RUNTIME_DEPLOYMENT_NOT_FOUND"
@@ -204,6 +205,21 @@ export class RuntimeDeploymentApplicationService {
       unavailable(
         "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
         "Provider is unavailable for RuntimeDeployment",
+      );
+    }
+    let locator: ReturnType<typeof parseRuntimeConfigProfileLocator>;
+    try {
+      locator = parseRuntimeConfigProfileLocator(input.configProfileId);
+    } catch {
+      unavailable(
+        "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+        "Config profile is unavailable for RuntimeDeployment",
+      );
+    }
+    if (locator.environment !== input.environment) {
+      unavailable(
+        "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+        "Config profile is unavailable for RuntimeDeployment",
       );
     }
     if (!(await this.prerequisites.configProfileAvailable(input.configProfileId))) {

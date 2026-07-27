@@ -1,5 +1,7 @@
 import type { Pool, PoolClient, QueryResultRow } from "pg";
-import { PmsRepositoryError } from "../../pms-domain/src/index.js";
+import {
+  PmsRepositoryError,
+} from "../../pms-domain/src/index.js";
 import {
   databaseProfileId,
   rehydrateRuntimeDeployment,
@@ -11,6 +13,7 @@ import {
   runtimeProviderId,
   type RuntimeDeployment,
   type RuntimeDeploymentSnapshot,
+  type RuntimeDeploymentStatus,
   type RuntimeProcessProjection,
 } from "../../runtime-deployment/src/index.js";
 import {
@@ -64,6 +67,44 @@ export class PostgresRuntimeDeploymentRepository {
       [providerId, environment ?? null],
     );
     return result.rows.map(deploymentFromRow);
+  }
+
+  async listByProviderPaged(options: {
+    readonly providerId: string;
+    readonly environment?: string;
+    readonly status?: RuntimeDeploymentStatus;
+    readonly limit: number;
+    readonly cursor?: string;
+  }): Promise<{
+    readonly items: readonly RuntimeDeployment[];
+    readonly nextCursor?: string;
+  }> {
+    if (!Number.isSafeInteger(options.limit) || options.limit < 1 || options.limit > 500) {
+      throw new RangeError("PMS_PAGE_LIMIT_INVALID");
+    }
+    const offset = parseListCursor(options.cursor);
+    const result = await this.db.query<RuntimeDeploymentRow>(
+      `${runtimeDeploymentSelect()}
+        WHERE provider_id=$1
+          AND ($2::text IS NULL OR environment=$2)
+          AND ($3::text IS NULL OR status=$3)
+        ORDER BY deployment_id
+        LIMIT $4 OFFSET $5`,
+      [
+        options.providerId,
+        options.environment ?? null,
+        options.status ?? null,
+        options.limit + 1,
+        offset,
+      ],
+    );
+    const rows = result.rows.map(deploymentFromRow);
+    const hasMore = rows.length > options.limit;
+    const items = rows.slice(0, options.limit);
+    return Object.freeze({
+      items: Object.freeze(items),
+      ...(hasMore ? { nextCursor: String(offset + options.limit) } : {}),
+    });
   }
 
   async insert(value: RuntimeDeploymentSnapshot): Promise<void> {
@@ -533,6 +574,15 @@ function deploymentsEqual(
   right: RuntimeDeploymentSnapshot,
 ): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function parseListCursor(cursor: string | undefined): number {
+  if (cursor === undefined) return 0;
+  const value = Number(cursor);
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new RangeError("PMS_PAGE_CURSOR_INVALID");
+  }
+  return value;
 }
 
 function processIdentityEqual(

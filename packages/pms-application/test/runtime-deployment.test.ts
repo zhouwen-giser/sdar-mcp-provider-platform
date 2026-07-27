@@ -5,6 +5,8 @@ import {
 } from "@sdar/runtime-deployment";
 import {
   RuntimeDeploymentApplicationService,
+  formatRuntimeConfigProfileLocator,
+  runtimeDeploymentProfileLocator,
   type RuntimeDeploymentApplicationRepositories,
   type RuntimeDeploymentPrerequisitePort,
 } from "../src/index.js";
@@ -206,7 +208,14 @@ function createInput(deploymentId: string) {
     environment: "production",
     runtimeVersion: "2.0.0-rc.1",
     databaseProfileId: "database-profile-1",
-    configProfileId: "config-profile-1",
+    configProfileId: formatRuntimeConfigProfileLocator(
+      runtimeDeploymentProfileLocator({
+        environment: "production",
+        targetId: deploymentId,
+        configGroup: "runtime",
+        dataId: "process",
+      }),
+    ),
     adapterEndpoint: "127.0.0.1:50051",
   };
 }
