@@ -23,6 +23,7 @@ const EXPECTED_TABLES = [
   "resource",
   "runtime_deployment",
   "runtime_deployment_action",
+  "runtime_registration",
   "runtime_process",
 ] as const;
 
@@ -67,6 +68,7 @@ describe("PMS control-plane migration set", () => {
       "006_database_profile.sql",
       "007_catalog_snapshot.sql",
       "008_registry_snapshot.sql",
+      "009_runtime_registration.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,
