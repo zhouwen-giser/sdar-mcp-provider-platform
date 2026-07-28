@@ -63,14 +63,14 @@ describe("PMS API production composition", () => {
         url: runtimeConfigUrl("latest"),
         headers: { authorization: "Bearer config-watch" },
       }),
-    ).resolves.toMatchObject({ statusCode: 401 });
+    ).resolves.toMatchObject({ statusCode: 403 });
     await expect(
       composition.app.inject({
         method: "GET",
         url: runtimeConfigUrl("watch"),
         headers: { authorization: "Bearer config-read" },
       }),
-    ).resolves.toMatchObject({ statusCode: 401 });
+    ).resolves.toMatchObject({ statusCode: 403 });
     await expect(
       composition.app.inject({
         method: "POST",
@@ -78,7 +78,7 @@ describe("PMS API production composition", () => {
         headers: { authorization: "Bearer config-read" },
         payload: { status: "applied" },
       }),
-    ).resolves.toMatchObject({ statusCode: 401 });
+    ).resolves.toMatchObject({ statusCode: 403 });
 
     await expect(
       composition.app.inject({

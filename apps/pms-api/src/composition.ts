@@ -1,4 +1,6 @@
 import type { FastifyInstance } from "fastify";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { Pool } from "pg";
 import {
   ProviderManagementService,
@@ -67,10 +69,11 @@ export async function createPmsApiComposition(
   let app: FastifyInstance | undefined;
 
   try {
-    await (dependencies.runMigrations ?? runPmsMigrations)(pool);
+    const workspaceRoot = pmsWorkspaceRoot();
+    await (dependencies.runMigrations ?? runPmsMigrations)(pool, workspaceRoot);
     const providerPackages = await (
       dependencies.loadProviderPackages ?? loadProviderPackageQueryService
-    )();
+    )(workspaceRoot);
     const unitOfWork = new PostgresPmsUnitOfWork(pool);
     const audit = new PostgresAuditRepository(pool);
     const configurationCenter = createDefaultConfigurationCenter();
@@ -120,6 +123,16 @@ export async function createPmsApiComposition(
     await pool.end().catch(() => undefined);
     throw error;
   }
+}
+
+function pmsWorkspaceRoot(): string {
+  let candidate = process.cwd();
+  while (candidate !== dirname(candidate)) {
+    if (existsSync(resolve(candidate, "migrations/pms"))) return candidate;
+    candidate = dirname(candidate);
+  }
+  if (existsSync(resolve(candidate, "migrations/pms"))) return candidate;
+  throw new Error("PMS_MIGRATION_WORKSPACE_ROOT_UNAVAILABLE");
 }
 
 function composition(

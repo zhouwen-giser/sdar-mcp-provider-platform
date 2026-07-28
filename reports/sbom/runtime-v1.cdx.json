@@ -12,7 +12,7 @@
     "properties": [
       {
         "name": "sdar:pnpm-lock-sha256",
-        "value": "e09f38b73b823cd5f5a9c92661bc4785055e024366798b2fee710c69d15b6de0"
+        "value": "a97062a292d5b99d4290aded88d4ac771d61bf96453bb7595a4d48e489f22fe9"
       }
     ]
   },
@@ -391,6 +391,12 @@
     },
     {
       "type": "library",
+      "name": "@sdar/registry-snapshot",
+      "version": "link:../../packages/registry-snapshot",
+      "purl": "pkg:npm/%40sdar/registry-snapshot@link%3A..%2F..%2Fpackages%2Fregistry-snapshot"
+    },
+    {
+      "type": "library",
       "name": "@sdar/runtime-configuration-contract",
       "version": "link:../../packages/runtime-configuration-contract",
       "purl": "pkg:npm/%40sdar/runtime-configuration-contract@link%3A..%2F..%2Fpackages%2Fruntime-configuration-contract"
@@ -412,6 +418,12 @@
       "name": "@sdar/runtime-deployment",
       "version": "link:../runtime-deployment",
       "purl": "pkg:npm/%40sdar/runtime-deployment@link%3A..%2Fruntime-deployment"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/runtime-registration",
+      "version": "link:../../packages/runtime-registration",
+      "purl": "pkg:npm/%40sdar/runtime-registration@link%3A..%2F..%2Fpackages%2Fruntime-registration"
     },
     {
       "type": "library",

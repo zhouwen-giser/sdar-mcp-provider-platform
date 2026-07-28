@@ -89,3 +89,16 @@ All checks are platform aware; Unix-only permission checks are skipped when runn
   - `/api/v1/runtime-config/*`
   - `/api/v1/runtime-registration/*`
     are excluded from management-authorizer protection and are protected by runtime-specific authorizers.
+
+## Production composition
+
+`apps/pms-api/src/main.ts` loads this bootstrap configuration and delegates all
+production assembly to `createPmsApiComposition`. The composition owns the
+PostgreSQL Pool, applies the PMS migration set, and wires the Provider,
+Configuration, RuntimeDeployment, RuntimeProcess, RuntimeRegistration,
+Registry, Audit, readiness, and file-backed authorization services.
+
+On `SIGINT` or `SIGTERM`, the API stops accepting HTTP connections, closes
+Runtime Config watch subscriptions, closes Fastify, then closes the PostgreSQL
+Pool. Do not construct repositories or substitute deny authorizers in the
+production entry point.

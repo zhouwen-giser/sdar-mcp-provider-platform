@@ -83,7 +83,7 @@ function classifyError(error: FastifyError): PublicError {
   if (error instanceof RuntimeProcessQueryError) return runtimeProcessQueryError(error.code);
   if (error instanceof RuntimeDeploymentError) return runtimeDeploymentError(error.code);
   if (error instanceof PmsRepositoryError) return repositoryError(error.code);
-  if (error instanceof ConfigurationCenterError) return configurationError(error.code);
+  if (error instanceof ConfigurationCenterError) return configurationError(error);
   if (error instanceof PmsApiAuthorizationError) return authorizationError(error.code);
   if (error instanceof RuntimeRegistrationAuthorizationError) {
     return runtimeRegistrationAuthorizationError(error.code);
@@ -170,10 +170,11 @@ function authorizationError(code: PmsApiAuthorizationErrorCode): PublicError {
   };
 }
 
-function configurationError(code: ConfigurationCenterErrorCode): PublicError {
+function configurationError(error: ConfigurationCenterError): PublicError {
+  const { code } = error;
   const statusCode =
     code === "RUNTIME_CONFIG_UNAUTHORIZED"
-      ? 401
+      ? runtimeConfigAuthorizationStatus(error)
       : code === "RUNTIME_CONFIG_PROJECTION_INVALID"
         ? 500
         : code === "RUNTIME_CONFIG_IDENTITY_MISMATCH"
@@ -192,6 +193,17 @@ function configurationError(code: ConfigurationCenterErrorCode): PublicError {
               ? 409
               : 400;
   return { statusCode, code, message: CONFIGURATION_MESSAGES[code] };
+}
+
+function runtimeConfigAuthorizationStatus(error: ConfigurationCenterError): 401 | 403 {
+  if (error.code !== "RUNTIME_CONFIG_UNAUTHORIZED") return 401;
+  /**
+   * The configuration-center contract intentionally shares this code for
+   * opaque-token failures and missing scopes. File-backed production
+   * credentials keep the scope diagnostic stable, so the HTTP boundary can
+   * preserve the distinction without exposing credentials.
+   */
+  return error.message.includes("does not include required scope") ? 403 : 401;
 }
 
 function domainError(code: PmsDomainErrorCode): PublicError {
