@@ -1,12 +1,13 @@
 import type { Pool, PoolClient } from "pg";
-import type { RuntimeDeploymentApplicationRepositories, RuntimeDeploymentApplicationUnitOfWork } from "../../pms-application/src/index.js";
+import type {
+  RuntimeDeploymentApplicationRepositories,
+  RuntimeDeploymentApplicationUnitOfWork,
+} from "../../pms-application/src/index.js";
 import { PostgresAuditRepository, PostgresJobLeaseRepository } from "./audit-job-repositories.js";
 import { PostgresRuntimeDeploymentRepository } from "./runtime-deployment-repositories.js";
 import type { PmsSqlClient } from "./shared.js";
 
-export class PostgresRuntimeDeploymentApplicationUnitOfWork
-  implements RuntimeDeploymentApplicationUnitOfWork
-{
+export class PostgresRuntimeDeploymentApplicationUnitOfWork implements RuntimeDeploymentApplicationUnitOfWork {
   constructor(private readonly pool: Pool) {}
 
   async transaction<T>(

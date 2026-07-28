@@ -28,17 +28,15 @@ export function parseRuntimeConfigProfileLocator(value: string): RuntimeConfigPr
     throw new TypeError("Runtime config profile identifier must be a string");
   }
   const parts = value.split(".");
-  if (
-    parts.length !== 7 ||
-    parts[0] !== PROFILE_PREFIX ||
-    parts[1] !== PROFILE_VERSION
-  ) {
+  if (parts.length !== 7 || parts[0] !== PROFILE_PREFIX || parts[1] !== PROFILE_VERSION) {
     throw new TypeError("Invalid runtime config profile identifier format");
   }
   const environment = decodePart(parts[2] ?? "", "environment");
   const targetType = decodePart(parts[3] ?? "", "targetType") as ConfigurationTargetType;
   if (!RUNTIME_PROFILE_TYPES.includes(targetType)) {
-    throw new TypeError("Runtime config profile target type must be runtime_deployment or runtime_instance");
+    throw new TypeError(
+      "Runtime config profile target type must be runtime_deployment or runtime_instance",
+    );
   }
   const targetId = decodePart(parts[4] ?? "", "targetId");
   const configGroup = decodePart(parts[5] ?? "", "configGroup");
@@ -53,14 +51,9 @@ export function parseRuntimeConfigProfileLocator(value: string): RuntimeConfigPr
   });
 }
 
-export function formatRuntimeConfigProfileLocator(
-  locator: RuntimeConfigProfileLocator,
-): string {
+export function formatRuntimeConfigProfileLocator(locator: RuntimeConfigProfileLocator): string {
   const targetType = validateTargetType(locator.targetType);
-  const environment = String(locator.environment);
-  const targetId = String(locator.targetId);
-  const configGroup = String(locator.configGroup);
-  const dataId = String(locator.dataId);
+  const { environment, targetId, configGroup, dataId } = locator;
   if (
     environment.trim().length === 0 ||
     targetId.trim().length === 0 ||
@@ -89,9 +82,7 @@ export function runtimeDeploymentProfileLocator(
   });
 }
 
-export function toConfigurationTarget(
-  locator: RuntimeConfigProfileLocator,
-): ConfigurationTarget {
+export function toConfigurationTarget(locator: RuntimeConfigProfileLocator): ConfigurationTarget {
   return Object.freeze({
     environment: environmentId(locator.environment),
     targetType: validateTargetType(locator.targetType),
@@ -122,5 +113,5 @@ function validateTargetType(value: string): ConfigurationTargetType {
   if (value !== "runtime_deployment" && value !== "runtime_instance") {
     throw new TypeError("Unsupported runtime config target type");
   }
-  return value as ConfigurationTargetType;
+  return value;
 }

@@ -21,6 +21,8 @@ const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const providerA = runtimeProviderId("provider:facade-a");
 const providerB = runtimeProviderId("provider:facade-b");
 const environment = environmentId("production");
+const providerADatabaseProfileId = "db-facade-a";
+const providerBDatabaseProfileId = "db-facade-b";
 const now = new Date("2026-07-28T00:00:00.000Z");
 
 describe("RuntimeDeploymentManagementFacade", () => {
@@ -88,7 +90,7 @@ describe("RuntimeDeploymentManagementFacade", () => {
 
   it("rejects create when database profile does not exist", async () => {
     const target = makeConfigTarget("facade-no-db");
-    await seedPublishedConfig(pool, target, "v1");
+    await seedPublishedConfig(pool, target);
     await expect(
       facade.create(
         {
@@ -106,8 +108,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
 
   it("rejects create when database profile secret ref is invalid (not ready)", async () => {
     const target = makeConfigTarget("facade-db-not-ready");
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = "db-facade-not-ready";
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "pending");
     await expect(
       facade.create(
@@ -125,7 +127,7 @@ describe("RuntimeDeploymentManagementFacade", () => {
   });
 
   it("rejects create when config profile does not exist", async () => {
-    const profileId = "db-facade-no-cfg";
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
     await expect(
       facade.create(
@@ -144,8 +146,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
 
   it("rejects create when config profile has no published revision", async () => {
     const target = makeConfigTarget("facade-no-pub");
-    await seedDraftConfig(pool, target, "v1");
-    const profileId = "db-facade-no-pub";
+    await seedDraftConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
     await expect(
       facade.create(
@@ -164,8 +166,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
 
   it("rejects create when config profile targets a different environment", async () => {
     const prodTarget = makeConfigTarget("facade-env-x");
-    await seedPublishedConfig(pool, prodTarget, "v1");
-    const profileId = "db-facade-env";
+    await seedPublishedConfig(pool, prodTarget);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
     const stagingTarget = runtimeDeploymentProfileLocator({
       environment: environmentId("staging"),
@@ -190,8 +192,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
 
   it("rejects create when config profile targets a different configGroup/dataId", async () => {
     const target = makeConfigTarget("facade-group-x");
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = "db-facade-group";
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
     const wrongGroup = runtimeDeploymentProfileLocator({
       environment,
@@ -217,8 +219,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("creates a runtime deployment successfully and enqueues reconcile + audit", async () => {
     const deploymentId = "facade-create-ok";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
 
     const view = await facade.create(
@@ -244,20 +246,30 @@ describe("RuntimeDeploymentManagementFacade", () => {
       observedRevision: 0,
     });
 
-    const jobRow = await pool.query("SELECT job_type FROM job_lease WHERE payload->>'deploymentId'=$1", [deploymentId]);
+    const jobRow = await pool.query<{ job_type: string }>(
+      "SELECT job_type FROM job_lease WHERE payload->>'deploymentId'=$1",
+      [deploymentId],
+    );
     expect(jobRow.rows).toHaveLength(1);
-    expect(jobRow.rows[0].job_type).toBe("runtime_deployment.reconcile");
+    const job = jobRow.rows[0];
+    if (job === undefined) throw new Error("RUNTIME_DEPLOYMENT_JOB_NOT_PERSISTED");
+    expect(job.job_type).toBe("runtime_deployment.reconcile");
 
-    const auditRow = await pool.query("SELECT action FROM audit WHERE subject_id=$1", [deploymentId]);
+    const auditRow = await pool.query<{ action: string }>(
+      "SELECT action FROM audit WHERE subject_id=$1",
+      [deploymentId],
+    );
     expect(auditRow.rows).toHaveLength(1);
-    expect(auditRow.rows[0].action).toBe("runtime_deployment.created");
+    const audit = auditRow.rows[0];
+    if (audit === undefined) throw new Error("RUNTIME_DEPLOYMENT_AUDIT_NOT_PERSISTED");
+    expect(audit.action).toBe("runtime_deployment.created");
   });
 
   it("rejects duplicate deployment creation", async () => {
     const deploymentId = "facade-duplicate";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
 
     await facade.create(
@@ -290,8 +302,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("get returns the deployment within the same provider scope", async () => {
     const deploymentId = "facade-get";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
     await facade.create(
       {
@@ -325,7 +337,11 @@ describe("RuntimeDeploymentManagementFacade", () => {
   });
 
   it("list supports environment filter", async () => {
-    const result = await facade.list({ providerId: providerA, environment: "production", limit: 100 });
+    const result = await facade.list({
+      providerId: providerA,
+      environment: "production",
+      limit: 100,
+    });
     for (const item of result.items) {
       expect(item.environment).toBe("production");
     }
@@ -334,7 +350,11 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("list supports cursor pagination", async () => {
     const first = await facade.list({ providerId: providerA, limit: 2 });
     if (first.nextCursor !== undefined) {
-      const second = await facade.list({ providerId: providerA, limit: 2, cursor: first.nextCursor });
+      const second = await facade.list({
+        providerId: providerA,
+        limit: 2,
+        cursor: first.nextCursor,
+      });
       expect(second.items.length).toBeGreaterThan(0);
       const firstIds = new Set(first.items.map((i) => i.deploymentId));
       for (const item of second.items) {
@@ -346,8 +366,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("list supports status filter", async () => {
     const deploymentId = "facade-list-status";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
 
     await facade.create(
@@ -382,8 +402,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("list filters by provider scope", async () => {
     const deploymentId = "facade-list-provider-b";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerBDatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerB, "ready");
 
     await facade.create(
@@ -406,16 +426,18 @@ describe("RuntimeDeploymentManagementFacade", () => {
   });
 
   it("rejects invalid cursor", async () => {
-    await expect(
-      facade.list({ providerId: providerA, limit: 10, cursor: "not-a-number" }),
-    ).rejects.toMatchObject({ name: "RangeError" });
+    for (const cursor of ["not-a-number", "1.5", "1e2", "-1", "01"]) {
+      await expect(facade.list({ providerId: providerA, limit: 10, cursor })).rejects.toMatchObject(
+        { name: "RangeError" },
+      );
+    }
   });
 
   it("command start/stop/restart/scale/reconcile preserves existing semantics", async () => {
     const deploymentId = "facade-commands";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
 
     await facade.create(
@@ -455,7 +477,13 @@ describe("RuntimeDeploymentManagementFacade", () => {
     );
 
     const scaled = await facade.command(
-      { providerId: providerA, deploymentId, command: "scale", expectedDesiredRevision: 2, desiredReplicas: 0 },
+      {
+        providerId: providerA,
+        deploymentId,
+        command: "scale",
+        expectedDesiredRevision: 2,
+        desiredReplicas: 0,
+      },
       { actorId: "admin-1", correlationId: "corr-scale" },
     );
     expect(scaled.desiredState).toBe("draining");
@@ -466,8 +494,8 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("command rejects stale optimistic revision", async () => {
     const deploymentId = "facade-rev-conflict";
     const target = makeConfigTarget(deploymentId);
-    await seedPublishedConfig(pool, target, "v1");
-    const profileId = `db-${deploymentId}`;
+    await seedPublishedConfig(pool, target);
+    const profileId = providerADatabaseProfileId;
     await seedDatabaseProfile(pool, profileId, providerA, "ready");
 
     await facade.create(
@@ -493,7 +521,12 @@ describe("RuntimeDeploymentManagementFacade", () => {
   it("command returns not found for cross-provider access", async () => {
     await expect(
       facade.command(
-        { providerId: providerB, deploymentId: "facade-create-ok", command: "reconcile", expectedDesiredRevision: 0 },
+        {
+          providerId: providerB,
+          deploymentId: "facade-create-ok",
+          command: "reconcile",
+          expectedDesiredRevision: 0,
+        },
         { actorId: "admin-1", correlationId: "corr-cross" },
       ),
     ).rejects.toMatchObject({ code: "RUNTIME_DEPLOYMENT_NOT_FOUND" });
@@ -535,7 +568,10 @@ async function seedDatabaseProfile(
      VALUES ($1,'database_profile.created','admin-1','seed','database_profile',$2,$3,'{}')`,
     [auditId, profileId, now],
   );
-  const slug = profileId.replace(/[^a-z0-9]/gi, "_").toLowerCase().slice(0, 20);
+  const slug = profileId
+    .replace(/[^a-z0-9]/gi, "_")
+    .toLowerCase()
+    .slice(0, 20);
   await pool.query(
     `INSERT INTO database_profile(
        profile_id,provider_id,environment,cluster_ref,host,port,database_mode,
@@ -544,16 +580,26 @@ async function seedDatabaseProfile(
        created_audit_event_id,last_audit_event_id
      ) VALUES ($1,$2,'production','cluster-1','localhost',5432,'preexisting',
        'sdar_rt_${slug}','sdar_rt_${slug}_app','disable','secret:admin-${slug}','secret:runtime-${slug}',
-       $3,CASE WHEN $3='failed' THEN 'ERR' ELSE NULL END,CASE WHEN $3='ready' THEN $4 ELSE NULL END,
-       $5,$5)`,
+       $3,CASE WHEN $3='failed' THEN 'ERR' ELSE NULL END,CASE WHEN $3='ready' THEN $4::timestamptz ELSE NULL END,
+       $5,$5)
+     ON CONFLICT (provider_id,environment) DO UPDATE
+       SET provision_status=EXCLUDED.provision_status,
+           last_error_code=EXCLUDED.last_error_code,
+           provisioned_at=EXCLUDED.provisioned_at,
+           last_audit_event_id=EXCLUDED.last_audit_event_id`,
     [profileId, providerId, provisionStatus, now, auditId],
   );
 }
 
 async function seedPublishedConfig(
   pool: Pool,
-  target: { environment: string; targetType: string; targetId: string; configGroup: string; dataId: string },
-  versionTag: string,
+  target: {
+    environment: string;
+    targetType: string;
+    targetId: string;
+    configGroup: string;
+    dataId: string;
+  },
 ): Promise<void> {
   const defId = randomUUID();
   await pool.query(
@@ -561,10 +607,17 @@ async function seedPublishedConfig(
        definition_id,environment,target_type,target_id,config_group,data_id,
        schema_document,default_content,secret_paths,field_metadata,status
      ) VALUES ($1,$2,$3,$4,$5,$6,'{}','{}','[]','{}','active')`,
-    [defId, target.environment, target.targetType, target.targetId, target.configGroup, target.dataId],
+    [
+      defId,
+      target.environment,
+      target.targetType,
+      target.targetId,
+      target.configGroup,
+      target.dataId,
+    ],
   );
   const revId = randomUUID();
-  const checksum = "a".repeat(64 - versionTag.length) + versionTag;
+  const checksum = "a".repeat(64);
   await pool.query(
     `INSERT INTO config_revision(
        revision_id,definition_id,revision,checksum,apply_mode,status,
@@ -576,8 +629,13 @@ async function seedPublishedConfig(
 
 async function seedDraftConfig(
   pool: Pool,
-  target: { environment: string; targetType: string; targetId: string; configGroup: string; dataId: string },
-  versionTag: string,
+  target: {
+    environment: string;
+    targetType: string;
+    targetId: string;
+    configGroup: string;
+    dataId: string;
+  },
 ): Promise<void> {
   const defId = randomUUID();
   await pool.query(
@@ -585,10 +643,17 @@ async function seedDraftConfig(
        definition_id,environment,target_type,target_id,config_group,data_id,
        schema_document,default_content,secret_paths,field_metadata,status
      ) VALUES ($1,$2,$3,$4,$5,$6,'{}','{}','[]','{}','active')`,
-    [defId, target.environment, target.targetType, target.targetId, target.configGroup, target.dataId],
+    [
+      defId,
+      target.environment,
+      target.targetType,
+      target.targetId,
+      target.configGroup,
+      target.dataId,
+    ],
   );
   const revId = randomUUID();
-  const checksum = "b".repeat(64 - versionTag.length) + versionTag;
+  const checksum = "b".repeat(64);
   await pool.query(
     `INSERT INTO config_revision(
        revision_id,definition_id,revision,checksum,apply_mode,status,

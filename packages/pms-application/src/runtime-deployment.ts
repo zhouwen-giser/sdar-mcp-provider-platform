@@ -40,7 +40,13 @@ export class RuntimeDeploymentApplicationError extends Error {
 export interface RuntimeDeploymentPrerequisitePort {
   providerAvailable(providerId: string): Promise<boolean>;
   configProfileAvailable(configProfileId: string): Promise<boolean>;
-  databaseProfileAvailable(databaseProfileId: string): Promise<boolean>;
+  databaseProfileAvailable(input: RuntimeDeploymentDatabaseProfilePrerequisite): Promise<boolean>;
+}
+
+export interface RuntimeDeploymentDatabaseProfilePrerequisite {
+  readonly databaseProfileId: string;
+  readonly providerId: string;
+  readonly environment: string;
 }
 
 export interface RuntimeDeploymentRepositoryPort {
@@ -228,7 +234,13 @@ export class RuntimeDeploymentApplicationService {
         "Config profile is unavailable for RuntimeDeployment",
       );
     }
-    if (!(await this.prerequisites.databaseProfileAvailable(input.databaseProfileId))) {
+    if (
+      !(await this.prerequisites.databaseProfileAvailable({
+        databaseProfileId: input.databaseProfileId,
+        providerId: input.providerId,
+        environment: input.environment,
+      }))
+    ) {
       unavailable(
         "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
         "Database profile is unavailable for RuntimeDeployment",

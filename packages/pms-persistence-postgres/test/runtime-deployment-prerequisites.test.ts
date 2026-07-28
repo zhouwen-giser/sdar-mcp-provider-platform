@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   formatRuntimeConfigProfileLocator,
   runtimeDeploymentProfileLocator,
-} from "@sdar/pms-application";
+} from "../../pms-application/src/index.js";
 import { environmentId } from "@sdar/pms-domain";
 import { runtimeProviderId } from "@sdar/runtime-deployment";
 import { PostgresRuntimeDeploymentPrerequisites, runPmsMigrations } from "../src/index.js";
@@ -67,30 +67,112 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
   describe("databaseProfileAvailable", () => {
     it("returns true for a ready database profile with valid secret refs", async () => {
       const profileId = "db-ready-1";
-      await seedDatabaseProfile(pool, profileId, providerA, "ready", "secret:admin-1", "secret:runtime-1");
-      await expect(prerequisites.databaseProfileAvailable(profileId)).resolves.toBe(true);
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "ready",
+        "secret:admin-1",
+        "secret:runtime-1",
+      );
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope(profileId)),
+      ).resolves.toBe(true);
     });
 
     it("returns false for a non-existent database profile", async () => {
-      await expect(prerequisites.databaseProfileAvailable("db-nonexistent")).resolves.toBe(false);
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope("db-nonexistent")),
+      ).resolves.toBe(false);
+    });
+
+    it("returns false for a profile outside its Provider or Environment scope", async () => {
+      const profileId = "db-scope-1";
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "ready",
+        "secret:admin-scope",
+        "secret:runtime-scope",
+      );
+
+      await expect(
+        prerequisites.databaseProfileAvailable({
+          ...databaseProfileScope(profileId),
+          providerId: "provider:other",
+        }),
+      ).resolves.toBe(false);
+      await expect(
+        prerequisites.databaseProfileAvailable({
+          ...databaseProfileScope(profileId),
+          environment: "staging",
+        }),
+      ).resolves.toBe(false);
+    });
+
+    it("returns false for an invalid SecretRef persisted by a legacy database", async () => {
+      await pool.query(
+        "ALTER TABLE database_profile DROP CONSTRAINT IF EXISTS database_profile_admin_secret_ref_check",
+      );
+      const profileId = "db-invalid-secret-1";
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "ready",
+        "invalid secret ref",
+        "secret:runtime-invalid",
+      );
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope(profileId)),
+      ).resolves.toBe(false);
     });
 
     it("returns false for a pending database profile", async () => {
       const profileId = "db-pending-1";
-      await seedDatabaseProfile(pool, profileId, providerA, "pending", "secret:admin-2", "secret:runtime-2");
-      await expect(prerequisites.databaseProfileAvailable(profileId)).resolves.toBe(false);
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "pending",
+        "secret:admin-2",
+        "secret:runtime-2",
+      );
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope(profileId)),
+      ).resolves.toBe(false);
     });
 
     it("returns false for a failed database profile", async () => {
       const profileId = "db-failed-1";
-      await seedDatabaseProfile(pool, profileId, providerA, "failed", "secret:admin-3", "secret:runtime-3", "PROVISION_ERROR");
-      await expect(prerequisites.databaseProfileAvailable(profileId)).resolves.toBe(false);
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "failed",
+        "secret:admin-3",
+        "secret:runtime-3",
+        "PROVISION_ERROR",
+      );
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope(profileId)),
+      ).resolves.toBe(false);
     });
 
     it("returns false for a provisioning database profile", async () => {
       const profileId = "db-provisioning-1";
-      await seedDatabaseProfile(pool, profileId, providerA, "provisioning", "secret:admin-4", "secret:runtime-4");
-      await expect(prerequisites.databaseProfileAvailable(profileId)).resolves.toBe(false);
+      await seedDatabaseProfile(
+        pool,
+        profileId,
+        providerA,
+        "provisioning",
+        "secret:admin-4",
+        "secret:runtime-4",
+      );
+      await expect(
+        prerequisites.databaseProfileAvailable(databaseProfileScope(profileId)),
+      ).resolves.toBe(false);
     });
   });
 
@@ -103,7 +185,7 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
         dataId: "process",
       });
       const configProfileId = formatRuntimeConfigProfileLocator(target);
-      await seedPublishedConfig(pool, target, "1.0.0");
+      await seedPublishedConfig(pool, target);
       await expect(prerequisites.configProfileAvailable(configProfileId)).resolves.toBe(true);
     });
 
@@ -131,7 +213,7 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
         dataId: "process",
       });
       const configProfileId = formatRuntimeConfigProfileLocator(target);
-      await seedDraftConfig(pool, target, "1.0.0");
+      await seedDraftConfig(pool, target);
       await expect(prerequisites.configProfileAvailable(configProfileId)).resolves.toBe(false);
     });
 
@@ -149,7 +231,7 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
         configGroup: "runtime",
         dataId: "process",
       });
-      await seedPublishedConfig(pool, targetProduction, "1.0.0");
+      await seedPublishedConfig(pool, targetProduction);
       const stagingId = formatRuntimeConfigProfileLocator(targetStaging);
       await expect(prerequisites.configProfileAvailable(stagingId)).resolves.toBe(false);
       const productionId = formatRuntimeConfigProfileLocator(targetProduction);
@@ -169,7 +251,7 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
         configGroup: "network",
         dataId: "process",
       });
-      await seedPublishedConfig(pool, target, "1.0.0");
+      await seedPublishedConfig(pool, target);
       const wrongId = formatRuntimeConfigProfileLocator(differentGroup);
       await expect(prerequisites.configProfileAvailable(wrongId)).resolves.toBe(false);
     });
@@ -187,7 +269,7 @@ describe("PostgresRuntimeDeploymentPrerequisites", () => {
         configGroup: "runtime",
         dataId: "secrets",
       });
-      await seedPublishedConfig(pool, target, "1.0.0");
+      await seedPublishedConfig(pool, target);
       const wrongId = formatRuntimeConfigProfileLocator(differentData);
       await expect(prerequisites.configProfileAvailable(wrongId)).resolves.toBe(false);
     });
@@ -218,6 +300,11 @@ async function seedDatabaseProfile(
   lastErrorCode?: string,
 ): Promise<void> {
   const auditId = randomUUID();
+  const slug = profileId
+    .replace(/[^a-z0-9]/gi, "_")
+    .toLowerCase()
+    .slice(0, 48);
+  const profileEnvironment = databaseProfileScope(profileId).environment;
   await pool.query(
     `INSERT INTO audit(audit_event_id,action,actor_id,correlation_id,subject_type,subject_id,occurred_at,metadata)
      VALUES ($1,'database_profile.created','admin-1','seed','database_profile',$2,$3,'{}')`,
@@ -229,8 +316,8 @@ async function seedDatabaseProfile(
        database_name,runtime_role_name,ssl_mode,admin_secret_ref,runtime_secret_ref,
        provision_status,last_error_code,provisioned_at,
        created_audit_event_id,last_audit_event_id
-     ) VALUES ($1,$2,'production','cluster-1','localhost',5432,'preexisting',
-       'sdar_rt_test_01','sdar_rt_test_01_app','disable',$3,$4,
+     ) VALUES ($1,$2,$11,'cluster-1','localhost',5432,'preexisting',
+       $9,$10,'disable',$3,$4,
        $5,$6,$7,$8,$8)`,
     [
       profileId,
@@ -241,14 +328,34 @@ async function seedDatabaseProfile(
       lastErrorCode ?? null,
       provisionStatus === "ready" ? now : null,
       auditId,
+      `sdar_rt_${slug}`,
+      `sdar_rt_${slug}_app`,
+      profileEnvironment,
     ],
   );
 }
 
+function databaseProfileScope(profileId: string) {
+  const suffix = profileId
+    .replace(/[^a-z0-9]/gi, "-")
+    .toLowerCase()
+    .slice(0, 58);
+  return {
+    databaseProfileId: profileId,
+    providerId: providerA,
+    environment: environmentId(`db-${suffix}`),
+  };
+}
+
 async function seedPublishedConfig(
   pool: Pool,
-  target: { environment: string; targetType: string; targetId: string; configGroup: string; dataId: string },
-  checksumVersion: string,
+  target: {
+    environment: string;
+    targetType: string;
+    targetId: string;
+    configGroup: string;
+    dataId: string;
+  },
 ): Promise<void> {
   const defId = randomUUID();
   await pool.query(
@@ -256,10 +363,17 @@ async function seedPublishedConfig(
        definition_id,environment,target_type,target_id,config_group,data_id,
        schema_document,default_content,secret_paths,field_metadata,status
      ) VALUES ($1,$2,$3,$4,$5,$6,'{}','{}','[]','{}','active')`,
-    [defId, target.environment, target.targetType, target.targetId, target.configGroup, target.dataId],
+    [
+      defId,
+      target.environment,
+      target.targetType,
+      target.targetId,
+      target.configGroup,
+      target.dataId,
+    ],
   );
   const revId = randomUUID();
-  const checksum = "0".repeat(64 - checksumVersion.length) + checksumVersion;
+  const checksum = "0".repeat(64);
   await pool.query(
     `INSERT INTO config_revision(
        revision_id,definition_id,revision,checksum,apply_mode,status,
@@ -271,8 +385,13 @@ async function seedPublishedConfig(
 
 async function seedDraftConfig(
   pool: Pool,
-  target: { environment: string; targetType: string; targetId: string; configGroup: string; dataId: string },
-  checksumVersion: string,
+  target: {
+    environment: string;
+    targetType: string;
+    targetId: string;
+    configGroup: string;
+    dataId: string;
+  },
 ): Promise<void> {
   const defId = randomUUID();
   await pool.query(
@@ -280,10 +399,17 @@ async function seedDraftConfig(
        definition_id,environment,target_type,target_id,config_group,data_id,
        schema_document,default_content,secret_paths,field_metadata,status
      ) VALUES ($1,$2,$3,$4,$5,$6,'{}','{}','[]','{}','active')`,
-    [defId, target.environment, target.targetType, target.targetId, target.configGroup, target.dataId],
+    [
+      defId,
+      target.environment,
+      target.targetType,
+      target.targetId,
+      target.configGroup,
+      target.dataId,
+    ],
   );
   const revId = randomUUID();
-  const checksum = "0".repeat(64 - checksumVersion.length) + checksumVersion;
+  const checksum = "0".repeat(64);
   await pool.query(
     `INSERT INTO config_revision(
        revision_id,definition_id,revision,checksum,apply_mode,status,

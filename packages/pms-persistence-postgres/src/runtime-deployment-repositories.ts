@@ -1,7 +1,5 @@
 import type { Pool, PoolClient, QueryResultRow } from "pg";
-import {
-  PmsRepositoryError,
-} from "../../pms-domain/src/index.js";
+import { PmsRepositoryError } from "../../pms-domain/src/index.js";
 import {
   databaseProfileId,
   rehydrateRuntimeDeployment,
@@ -578,8 +576,11 @@ function deploymentsEqual(
 
 function parseListCursor(cursor: string | undefined): number {
   if (cursor === undefined) return 0;
+  if (!/^(?:0|[1-9][0-9]*)$/.test(cursor)) {
+    throw new RangeError("PMS_PAGE_CURSOR_INVALID");
+  }
   const value = Number(cursor);
-  if (!Number.isSafeInteger(value) || value < 0) {
+  if (!Number.isSafeInteger(value)) {
     throw new RangeError("PMS_PAGE_CURSOR_INVALID");
   }
   return value;

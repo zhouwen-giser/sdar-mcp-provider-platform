@@ -10,10 +10,7 @@ import {
   runtimeEnvironmentId,
   runtimeProviderId,
 } from "@sdar/runtime-deployment";
-import {
-  PostgresRuntimeDeploymentApplicationUnitOfWork,
-  runPmsMigrations,
-} from "../src/index.js";
+import { PostgresRuntimeDeploymentApplicationUnitOfWork, runPmsMigrations } from "../src/index.js";
 
 const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const providerA = runtimeProviderId("provider:uow-a");
@@ -67,14 +64,29 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
     expect(result).toBe("ok");
     const checkPool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     try {
-      const dep = await checkPool.query("SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1", [deploymentId]);
+      const dep = await checkPool.query(
+        "SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1",
+        [deploymentId],
+      );
       expect(dep.rows).toHaveLength(1);
-      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [`job-${deploymentId}`]);
+      const job = await checkPool.query<{ job_type: string }>(
+        "SELECT job_type FROM job_lease WHERE job_id=$1",
+        [`job-${deploymentId}`],
+      );
       expect(job.rows).toHaveLength(1);
-      expect(job.rows[0].job_type).toBe("runtime_deployment.reconcile");
-      const audit = await checkPool.query("SELECT action FROM audit WHERE subject_id=$1", [deploymentId]);
+      const persistedJob = job.rows[0];
+      if (persistedJob === undefined) throw new Error("RUNTIME_DEPLOYMENT_JOB_NOT_PERSISTED");
+      expect(persistedJob.job_type).toBe("runtime_deployment.reconcile");
+      const audit = await checkPool.query<{ action: string }>(
+        "SELECT action FROM audit WHERE subject_id=$1",
+        [deploymentId],
+      );
       expect(audit.rows).toHaveLength(1);
-      expect(audit.rows[0].action).toBe("runtime_deployment.created");
+      const persistedAudit = audit.rows[0];
+      if (persistedAudit === undefined) {
+        throw new Error("RUNTIME_DEPLOYMENT_AUDIT_NOT_PERSISTED");
+      }
+      expect(persistedAudit.action).toBe("runtime_deployment.created");
     } finally {
       await checkPool.end();
     }
@@ -109,11 +121,18 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
 
     const checkPool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     try {
-      const dep = await checkPool.query("SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1", [deploymentId]);
+      const dep = await checkPool.query(
+        "SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1",
+        [deploymentId],
+      );
       expect(dep.rows).toHaveLength(0);
-      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [`job-${deploymentId}`]);
+      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [
+        `job-${deploymentId}`,
+      ]);
       expect(job.rows).toHaveLength(0);
-      const audit = await checkPool.query("SELECT action FROM audit WHERE subject_id=$1", [deploymentId]);
+      const audit = await checkPool.query("SELECT action FROM audit WHERE subject_id=$1", [
+        deploymentId,
+      ]);
       expect(audit.rows).toHaveLength(0);
     } finally {
       await checkPool.end();
@@ -152,9 +171,13 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
 
     const checkPool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     try {
-      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [`job-dup-${deploymentId}`]);
+      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [
+        `job-dup-${deploymentId}`,
+      ]);
       expect(job.rows).toHaveLength(0);
-      const audit = await checkPool.query("SELECT action FROM audit WHERE correlation_id=$1", ["corr-dup"]);
+      const audit = await checkPool.query("SELECT action FROM audit WHERE correlation_id=$1", [
+        "corr-dup",
+      ]);
       expect(audit.rows).toHaveLength(0);
     } finally {
       await checkPool.end();
@@ -178,7 +201,10 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
 
     const checkPool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     try {
-      const dep = await checkPool.query("SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1", [deploymentId]);
+      const dep = await checkPool.query(
+        "SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1",
+        [deploymentId],
+      );
       expect(dep.rows).toHaveLength(0);
     } finally {
       await checkPool.end();
@@ -212,9 +238,14 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
 
     const checkPool = new Pool({ connectionString, options: `-c search_path=${schema}` });
     try {
-      const dep = await checkPool.query("SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1", [deploymentId]);
+      const dep = await checkPool.query(
+        "SELECT deployment_id FROM runtime_deployment WHERE deployment_id=$1",
+        [deploymentId],
+      );
       expect(dep.rows).toHaveLength(0);
-      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [`job-${deploymentId}`]);
+      const job = await checkPool.query("SELECT job_type FROM job_lease WHERE job_id=$1", [
+        `job-${deploymentId}`,
+      ]);
       expect(job.rows).toHaveLength(0);
     } finally {
       await checkPool.end();

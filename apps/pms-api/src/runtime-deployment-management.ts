@@ -15,9 +15,7 @@ import type {
   RuntimeDeploymentView,
 } from "./runtime-deployment-routes.js";
 
-export class RuntimeDeploymentManagementFacade
-  implements RuntimeDeploymentManagementPort
-{
+export class RuntimeDeploymentManagementFacade implements RuntimeDeploymentManagementPort {
   constructor(
     private readonly pool: Pool,
     private readonly applicationService: RuntimeDeploymentApplicationService,
@@ -39,10 +37,7 @@ export class RuntimeDeploymentManagementFacade
     return toView(snapshot);
   }
 
-  async get(
-    providerId: string,
-    deploymentId: string,
-  ): Promise<RuntimeDeploymentView | null> {
+  async get(providerId: string, deploymentId: string): Promise<RuntimeDeploymentView | null> {
     const repo = new Repo(this.pool);
     const deployment = await repo.get(providerId, deploymentId);
     return deployment === null ? null : toView(deployment.snapshot);
@@ -87,7 +82,9 @@ function toView(snapshot: {
     runtimeVersion: snapshot.runtimeVersion,
     databaseProfileId: snapshot.databaseProfileId,
     configProfileId: snapshot.configProfileId,
-    ...(snapshot.adapterEndpoint === undefined ? {} : { adapterEndpoint: snapshot.adapterEndpoint }),
+    ...(snapshot.adapterEndpoint === undefined
+      ? {}
+      : { adapterEndpoint: snapshot.adapterEndpoint }),
     status: snapshot.status,
     desiredRevision: snapshot.desiredRevision,
     observedRevision: snapshot.observedRevision,
@@ -95,4 +92,9 @@ function toView(snapshot: {
 }
 
 export type { PostgresRuntimeDeploymentRepository };
-export type { RuntimeDeploymentManagementPort, RuntimeDeploymentView, RuntimeDeploymentListQuery, RuntimeDeploymentListResult };
+export type {
+  RuntimeDeploymentManagementPort,
+  RuntimeDeploymentView,
+  RuntimeDeploymentListQuery,
+  RuntimeDeploymentListResult,
+};
