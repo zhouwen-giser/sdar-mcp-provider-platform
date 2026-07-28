@@ -1,13 +1,18 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
   assertRuntimeRegistrationPrincipal,
   parseRuntimeHeartbeatRequest,
   parseRuntimeRegistrationRequest,
   type RuntimeRegistrationAuthorizer,
+  type RuntimeRegistrationRequest,
   type RuntimeRegistrationScope,
   type RuntimeRegistrationService,
 } from "../../../packages/runtime-registration/src/index.js";
 import { requestContext } from "./context.js";
+import {
+  auditAuthenticationRejection,
+  type AuthenticationRejectionAuditPort,
+} from "./authorization.js";
 
 interface RuntimeRegistrationParameters {
   readonly deploymentId: string;
@@ -31,6 +36,7 @@ export function registerRuntimeRegistrationRoutes(
   app: FastifyInstance,
   service: RuntimeRegistrationService,
   authorizer: RuntimeRegistrationAuthorizer,
+  authenticationAudit?: AuthenticationRejectionAuditPort,
 ): void {
   app.post<{ Params: RuntimeRegistrationParameters; Body: RuntimeRegistrationBody }>(
     "/api/v1/runtime-registration/deployments/:deploymentId/instances/:instanceId/register",
@@ -43,11 +49,11 @@ export function registerRuntimeRegistrationRoutes(
       });
       const principal = await authorize(
         authorizer,
-        request.headers.authorization,
-        request.params,
+        request,
+        runtime,
         "runtime:register",
+        authenticationAudit,
       );
-      assertRuntimeRegistrationPrincipal(principal, runtime, "runtime:register");
       const result = await service.register(runtime, {
         subjectId: principal.subjectId,
         ...requestContext(request),
@@ -67,11 +73,11 @@ export function registerRuntimeRegistrationRoutes(
       });
       const principal = await authorize(
         authorizer,
-        request.headers.authorization,
-        request.params,
+        request,
+        heartbeat,
         "runtime:heartbeat",
+        authenticationAudit,
       );
-      assertRuntimeRegistrationPrincipal(principal, heartbeat, "runtime:heartbeat");
       const result = await service.heartbeat(heartbeat, {
         subjectId: principal.subjectId,
         ...requestContext(request),
@@ -83,15 +89,29 @@ export function registerRuntimeRegistrationRoutes(
 
 function authorize(
   authorizer: RuntimeRegistrationAuthorizer,
-  authorization: string | readonly string[] | undefined,
-  target: RuntimeRegistrationParameters,
+  request: FastifyRequest,
+  target: RuntimeRegistrationRequest,
   scope: RuntimeRegistrationScope,
-) {
-  return authorizer.authorize(
-    typeof authorization === "string" ? { authorization } : {},
-    target,
-    scope,
-  );
+  authenticationAudit: AuthenticationRejectionAuditPort | undefined,
+): ReturnType<RuntimeRegistrationAuthorizer["authorize"]> {
+  return authorizeRegistration();
+
+  async function authorizeRegistration() {
+    try {
+      const principal = await authorizer.authorize(
+        typeof request.headers.authorization === "string"
+          ? { authorization: request.headers.authorization }
+          : {},
+        target,
+        scope,
+      );
+      assertRuntimeRegistrationPrincipal(principal, target, scope);
+      return principal;
+    } catch (error) {
+      await auditAuthenticationRejection(authenticationAudit, request, error, target);
+      throw error;
+    }
+  }
 }
 
 function response(result: Awaited<ReturnType<RuntimeRegistrationService["register"]>>) {

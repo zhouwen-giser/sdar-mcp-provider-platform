@@ -61,9 +61,9 @@ export class FilePmsApiRoleAuthorizer implements FilePmsApiRoleAuthorizerContrac
 }
 
 export interface RuntimeConfigRequestWithProfile extends RuntimeConfigClientRequest {
-  readonly providerId: string;
-  readonly runtimeVersion: string;
-  readonly protocolVersion: string;
+  readonly providerId?: string;
+  readonly runtimeVersion?: string;
+  readonly protocolVersion?: string;
 }
 
 export interface FileRuntimeConfigClientAuthorizerContract extends RuntimeConfigClientAuthorizer {
@@ -275,12 +275,12 @@ function assertRuntimeConfigIdentity(
   target: RuntimeConfigRequestWithProfile,
 ): void {
   if (
-    principal.providerId !== target.providerId ||
+    (target.providerId !== undefined && principal.providerId !== target.providerId) ||
     principal.environment !== target.environment ||
     principal.deploymentId !== target.deploymentId ||
     principal.instanceId !== target.instanceId ||
-    principal.runtimeVersion !== target.runtimeVersion ||
-    principal.protocolVersion !== target.protocolVersion
+    (target.runtimeVersion !== undefined && principal.runtimeVersion !== target.runtimeVersion) ||
+    (target.protocolVersion !== undefined && principal.protocolVersion !== target.protocolVersion)
   ) {
     throw new ConfigurationCenterError(
       "RUNTIME_CONFIG_IDENTITY_MISMATCH",

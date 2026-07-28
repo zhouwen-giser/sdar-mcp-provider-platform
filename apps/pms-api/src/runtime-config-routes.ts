@@ -1,11 +1,30 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import type {
   RuntimeConfigAcknowledgementService,
   RuntimeConfigClientAuthorizer,
   RuntimeConfigQueryService,
-  RuntimeConfigWatchHub,
+  RuntimeConfigClientIdentity,
+  RuntimeConfigClientRequest,
+  RuntimeConfigWatchSubscription,
 } from "../../../packages/configuration-center/src/index.js";
 import type { JsonObject } from "../../../packages/pms-domain/src/index.js";
+import {
+  auditAuthenticationRejection,
+  type AuthenticationRejectionAuditPort,
+} from "./authorization.js";
+import type { RuntimeConfigScope } from "./config.js";
+
+export interface RuntimeConfigWatchPort {
+  subscribe(request: RuntimeConfigClientRequest): RuntimeConfigWatchSubscription;
+}
+
+interface ScopedRuntimeConfigClientAuthorizer extends RuntimeConfigClientAuthorizer {
+  authorizeForScope(
+    credentials: { readonly authorization?: string },
+    target: RuntimeConfigClientRequest,
+    requiredScope: RuntimeConfigScope,
+  ): Promise<RuntimeConfigClientIdentity>;
+}
 
 interface RuntimeConfigParameters {
   readonly deploymentId: string;
@@ -33,8 +52,9 @@ export function registerRuntimeConfigRoutes(
   app: FastifyInstance,
   query: RuntimeConfigQueryService,
   authorizer: RuntimeConfigClientAuthorizer,
-  watch?: RuntimeConfigWatchHub,
+  watch?: RuntimeConfigWatchPort,
   acknowledgements?: RuntimeConfigAcknowledgementService,
+  authenticationAudit?: AuthenticationRejectionAuditPort,
 ): void {
   app.get<{ Params: RuntimeConfigParameters; Querystring: RuntimeConfigQuery }>(
     "/api/v1/runtime-config/deployments/:deploymentId/instances/:instanceId/latest",
@@ -75,13 +95,12 @@ export function registerRuntimeConfigRoutes(
         configGroup: request.query.configGroup,
         dataId: request.query.dataId,
       };
-      const identity = await authorizer.authorize(
-        {
-          ...(typeof request.headers.authorization === "string"
-            ? { authorization: request.headers.authorization }
-            : {}),
-        },
+      const identity = await authorizeRuntimeConfig(
+        authorizer,
+        request,
         target,
+        "runtime:config:read",
+        authenticationAudit,
       );
       const latest = await query.latest(target, identity);
       const etag = `"${latest.checksum}"`;
@@ -92,9 +111,11 @@ export function registerRuntimeConfigRoutes(
       return reply.send(latest);
     },
   );
-  if (watch !== undefined) registerWatchRoute(app, query, authorizer, watch);
+  if (watch !== undefined) {
+    registerWatchRoute(app, query, authorizer, watch, authenticationAudit);
+  }
   if (acknowledgements !== undefined) {
-    registerAcknowledgementRoute(app, authorizer, acknowledgements);
+    registerAcknowledgementRoute(app, authorizer, acknowledgements, authenticationAudit);
   }
 }
 
@@ -102,16 +123,20 @@ function registerWatchRoute(
   app: FastifyInstance,
   query: RuntimeConfigQueryService,
   authorizer: RuntimeConfigClientAuthorizer,
-  watch: RuntimeConfigWatchHub,
+  watch: RuntimeConfigWatchPort,
+  authenticationAudit?: AuthenticationRejectionAuditPort,
 ): void {
   app.get<{ Params: RuntimeConfigParameters; Querystring: RuntimeConfigQuery }>(
     "/api/v1/runtime-config/deployments/:deploymentId/instances/:instanceId/watch",
     { schema: runtimeTargetSchema() },
     async (request, reply) => {
       const target = targetFromRequest(request.params, request.query);
-      const identity = await authorizer.authorize(
-        credentials(request.headers.authorization),
+      const identity = await authorizeRuntimeConfig(
+        authorizer,
+        request,
         target,
+        "runtime:config:watch",
+        authenticationAudit,
       );
       const subscription = watch.subscribe(target);
       let latest;
@@ -150,6 +175,7 @@ function registerAcknowledgementRoute(
   app: FastifyInstance,
   authorizer: RuntimeConfigClientAuthorizer,
   acknowledgements: RuntimeConfigAcknowledgementService,
+  authenticationAudit?: AuthenticationRejectionAuditPort,
 ): void {
   app.post<{
     Params: RuntimeConfigAckParameters;
@@ -189,9 +215,12 @@ function registerAcknowledgementRoute(
     },
     async (request) => {
       const target = targetFromRequest(request.params, request.query);
-      const identity = await authorizer.authorize(
-        credentials(request.headers.authorization),
+      const identity = await authorizeRuntimeConfig(
+        authorizer,
+        request,
         target,
+        "runtime:config:ack",
+        authenticationAudit,
       );
       return acknowledgements.acknowledge(target, identity, {
         revisionId: request.params.revisionId,
@@ -204,6 +233,32 @@ function registerAcknowledgementRoute(
       });
     },
   );
+}
+
+async function authorizeRuntimeConfig(
+  authorizer: RuntimeConfigClientAuthorizer,
+  request: FastifyRequest,
+  target: RuntimeConfigClientRequest,
+  scope: RuntimeConfigScope,
+  authenticationAudit: AuthenticationRejectionAuditPort | undefined,
+): Promise<RuntimeConfigClientIdentity> {
+  try {
+    const scoped = scopedAuthorizer(authorizer);
+    return scoped === undefined
+      ? await authorizer.authorize(credentials(request.headers.authorization), target)
+      : await scoped.authorizeForScope(credentials(request.headers.authorization), target, scope);
+  } catch (error) {
+    await auditAuthenticationRejection(authenticationAudit, request, error, target);
+    throw error;
+  }
+}
+
+function scopedAuthorizer(
+  authorizer: RuntimeConfigClientAuthorizer,
+): ScopedRuntimeConfigClientAuthorizer | undefined {
+  return "authorizeForScope" in authorizer && typeof authorizer.authorizeForScope === "function"
+    ? (authorizer as ScopedRuntimeConfigClientAuthorizer)
+    : undefined;
 }
 
 function identifier() {

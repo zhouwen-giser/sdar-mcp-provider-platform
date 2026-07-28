@@ -280,6 +280,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         get: {
           operationId: "getLatestRuntimeConfiguration",
           security: [{ runtimeConfigToken: [] }],
+          "x-sdar-required-scope": "runtime:config:read",
           parameters: [
             { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
             { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
@@ -300,6 +301,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         get: {
           operationId: "watchRuntimeConfiguration",
           security: [{ runtimeConfigToken: [] }],
+          "x-sdar-required-scope": "runtime:config:watch",
           responses: {
             "200": { description: "SSE stream containing revision/checksum hints only" },
             "401": { description: "Runtime Config client authentication failed" },
@@ -311,6 +313,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           post: {
             operationId: "acknowledgeRuntimeConfiguration",
             security: [{ runtimeConfigToken: [] }],
+            "x-sdar-required-scope": "runtime:config:ack",
             responses: {
               "200": { description: "Idempotent structured Runtime acknowledgement" },
               "400": { description: "Invalid acknowledgement status or checksum" },
@@ -433,6 +436,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           type: "http",
           scheme: "bearer",
           bearerFormat: "opaque-runtime-config-token",
+          "x-sdar-scopes": ["runtime:config:read", "runtime:config:watch", "runtime:config:ack"],
         },
         runtimeRegistrationToken: {
           type: "http",

@@ -4,6 +4,7 @@ export * from "./file-authorizers.js";
 export * from "./audit-routes.js";
 export * from "./authorization.js";
 export * from "./configuration-routes.js";
+export * from "./composition.js";
 export * from "./context.js";
 export * from "./errors.js";
 export * from "./management-routes.js";

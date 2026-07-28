@@ -155,6 +155,15 @@ importers:
       '@sdar/pms-persistence-postgres':
         specifier: workspace:*
         version: link:../../packages/pms-persistence-postgres
+      '@sdar/registry-snapshot':
+        specifier: workspace:*
+        version: link:../../packages/registry-snapshot
+      '@sdar/runtime-deployment':
+        specifier: workspace:*
+        version: link:../../packages/runtime-deployment
+      '@sdar/runtime-registration':
+        specifier: workspace:*
+        version: link:../../packages/runtime-registration
       fastify:
         specifier: 5.10.0
         version: 5.10.0
