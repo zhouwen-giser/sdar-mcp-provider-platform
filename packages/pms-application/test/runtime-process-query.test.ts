@@ -72,6 +72,55 @@ describe("RuntimeProcess query service", () => {
       code: "RUNTIME_PROCESS_NOT_FOUND",
     });
   });
+
+  it("derives registration freshness from the durable expiry at query time", async () => {
+    const process = projection({ registrationState: "registered" });
+    const calls: string[] = [];
+    const service = new RuntimeProcessQueryService(repository([process]), {
+      now: () => now,
+      registrations: {
+        get(providerId, deploymentId, instanceId) {
+          calls.push(`${providerId}/${deploymentId}/${instanceId}`);
+          return Promise.resolve({ expiresAt: new Date("2026-07-26T00:01:01.000Z") });
+        },
+      },
+    });
+
+    await expect(service.get("provider-1", "instance-1")).resolves.toMatchObject({
+      registrationFreshness: "registered",
+    });
+    expect(calls).toEqual(["provider-1/deployment-1/instance-1"]);
+
+    const rebuilt = new RuntimeProcessQueryService(repository([process]), {
+      now: () => now,
+      registrations: { get: () => Promise.resolve({ expiresAt: now }) },
+    });
+    await expect(rebuilt.get("provider-1", "instance-1")).resolves.toMatchObject({
+      registrationFreshness: "stale",
+    });
+  });
+
+  it("keeps unregistered and identity-mismatch freshness independent of expiry lookup", async () => {
+    const unregistered = projection({
+      instanceId: "instance-unregistered",
+      registrationState: "unregistered",
+    });
+    const mismatch = projection({
+      instanceId: "instance-mismatch",
+      registrationState: "identity_mismatch",
+    });
+    const service = new RuntimeProcessQueryService(repository([unregistered, mismatch]), {
+      now: () => now,
+      registrations: { get: () => Promise.reject(new Error("must not query")) },
+    });
+
+    await expect(service.get("provider-1", "instance-unregistered")).resolves.toMatchObject({
+      registrationFreshness: "unregistered",
+    });
+    await expect(service.get("provider-1", "instance-mismatch")).resolves.toMatchObject({
+      registrationFreshness: "identity_mismatch",
+    });
+  });
 });
 
 function projection(

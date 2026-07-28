@@ -47,12 +47,44 @@ export interface RuntimeRegistrationProjectionPatch {
   readonly observedRevision: number;
 }
 
+export interface RuntimeRegistrationExpectedInstance {
+  readonly providerId: string;
+  readonly deploymentId: string;
+  readonly instanceId: string;
+  readonly runtimeVersion: string;
+  readonly protocolVersion: string;
+}
+
+/** The only process value needed by the registration transaction. */
+export interface RuntimeRegistrationProcessState {
+  readonly providerId: string;
+  readonly deploymentId: string;
+  readonly instanceId: string;
+  readonly observedRevision: number;
+}
+
 export interface RuntimeRegistrationRepository {
   get(
     providerId: string,
     deploymentId: string,
     instanceId: string,
   ): Promise<RuntimeRegistrationSnapshot | null>;
+  getForUpdate(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+  ): Promise<RuntimeRegistrationSnapshot | null>;
+  getExpectedRuntimeInstance(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+    protocolVersion: string,
+  ): Promise<RuntimeRegistrationExpectedInstance | null>;
+  getProcessForRegistration(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+  ): Promise<RuntimeRegistrationProcessState | null>;
   insert(
     providerId: string,
     deploymentId: string,
@@ -90,6 +122,20 @@ interface RuntimeRegistrationRow extends QueryResultRow {
   readiness_state: ReadyState;
 }
 
+interface RuntimeRegistrationExpectedRow extends QueryResultRow {
+  provider_id: string;
+  deployment_id: string;
+  runtime_instance_id: string;
+  runtime_version: string;
+}
+
+interface RuntimeRegistrationProcessRow extends QueryResultRow {
+  provider_id: string;
+  deployment_id: string;
+  runtime_instance_id: string;
+  observed_revision: string;
+}
+
 export class PostgresRuntimeRegistrationRepository implements RuntimeRegistrationRepository {
   constructor(private readonly db: PmsSqlClient) {}
 
@@ -97,6 +143,78 @@ export class PostgresRuntimeRegistrationRepository implements RuntimeRegistratio
     providerId: string,
     deploymentId: string,
     instanceId: string,
+  ): Promise<RuntimeRegistrationSnapshot | null> {
+    return this.#get(providerId, deploymentId, instanceId);
+  }
+
+  async getForUpdate(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+  ): Promise<RuntimeRegistrationSnapshot | null> {
+    return this.#get(providerId, deploymentId, instanceId, " FOR UPDATE OF reg");
+  }
+
+  async getExpectedRuntimeInstance(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+    protocolVersion: string,
+  ): Promise<RuntimeRegistrationExpectedInstance | null> {
+    const result = await this.db.query<RuntimeRegistrationExpectedRow>(
+      `SELECT deployment.provider_id,process.deployment_id,process.runtime_instance_id,
+              deployment.runtime_version
+         FROM runtime_process process
+         JOIN runtime_deployment deployment
+           ON deployment.deployment_id=process.deployment_id
+        WHERE deployment.provider_id=$1
+          AND process.deployment_id=$2
+          AND process.runtime_instance_id=$3`,
+      [providerId, deploymentId, instanceId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return Object.freeze({
+      providerId: row.provider_id,
+      deploymentId: row.deployment_id,
+      instanceId: row.runtime_instance_id,
+      runtimeVersion: row.runtime_version,
+      protocolVersion,
+    });
+  }
+
+  async getProcessForRegistration(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+  ): Promise<RuntimeRegistrationProcessState | null> {
+    const result = await this.db.query<RuntimeRegistrationProcessRow>(
+      `SELECT deployment.provider_id,process.deployment_id,process.runtime_instance_id,
+              process.observed_revision
+         FROM runtime_process process
+         JOIN runtime_deployment deployment
+           ON deployment.deployment_id=process.deployment_id
+        WHERE deployment.provider_id=$1
+          AND process.deployment_id=$2
+          AND process.runtime_instance_id=$3
+        FOR UPDATE OF process`,
+      [providerId, deploymentId, instanceId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return Object.freeze({
+      providerId: row.provider_id,
+      deploymentId: row.deployment_id,
+      instanceId: row.runtime_instance_id,
+      observedRevision: toNonNegativeInteger(row.observed_revision),
+    });
+  }
+
+  async #get(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+    lock = "",
   ): Promise<RuntimeRegistrationSnapshot | null> {
     const result = await this.db.query<RuntimeRegistrationRow>(
       `SELECT deployment.provider_id AS provider_id,
@@ -120,7 +238,7 @@ export class PostgresRuntimeRegistrationRepository implements RuntimeRegistratio
           AND process.deployment_id = reg.deployment_id
         WHERE deployment.provider_id = $1
           AND reg.deployment_id = $2
-          AND reg.runtime_instance_id = $3`,
+          AND reg.runtime_instance_id = $3${lock}`,
       [providerId, deploymentId, instanceId],
     );
     return result.rows[0] === undefined ? null : runtimeRegistrationFromRow(result.rows[0]);

@@ -26,6 +26,21 @@ export interface RuntimeProcessQueryRepository {
   ): Promise<readonly RuntimeProcessProjection[]>;
 }
 
+export type RuntimeRegistrationFreshness =
+  "unregistered" | "registered" | "stale" | "identity_mismatch";
+
+/**
+ * Registration expiry is durable state owned by runtime_registration. Keeping it
+ * separate from RuntimeProcess avoids a background state mutation just for stale.
+ */
+export interface RuntimeRegistrationFreshnessRepository {
+  get(
+    providerId: string,
+    deploymentId: string,
+    instanceId: string,
+  ): Promise<{ readonly expiresAt: Date } | null>;
+}
+
 export interface RuntimeProcessListFilter {
   readonly providerId: string;
   readonly deploymentId: string;
@@ -47,6 +62,7 @@ export interface RuntimeProcessView extends Omit<RuntimeProcessProjection, "last
   readonly readyForActive: boolean;
   readonly healthReasonCode: RuntimeObservedHealthEvaluation["reasonCode"];
   readonly stale: boolean;
+  readonly registrationFreshness: RuntimeRegistrationFreshness;
   readonly logReference: RuntimeProcessLogReference;
 }
 
@@ -58,11 +74,13 @@ export interface RuntimeProcessListResult {
 export interface RuntimeProcessQueryOptions {
   readonly now?: () => Date;
   readonly heartbeatStaleAfterMs?: number;
+  readonly registrations?: RuntimeRegistrationFreshnessRepository;
 }
 
 export class RuntimeProcessQueryService {
   readonly #now: () => Date;
   readonly #heartbeatStaleAfterMs: number;
+  readonly #registrations: RuntimeRegistrationFreshnessRepository | undefined;
 
   constructor(
     private readonly repository: RuntimeProcessQueryRepository,
@@ -70,6 +88,7 @@ export class RuntimeProcessQueryService {
   ) {
     this.#now = options.now ?? (() => new Date());
     this.#heartbeatStaleAfterMs = options.heartbeatStaleAfterMs ?? 30_000;
+    this.#registrations = options.registrations;
     if (!Number.isSafeInteger(this.#heartbeatStaleAfterMs) || this.#heartbeatStaleAfterMs < 1) {
       throw new TypeError("heartbeatStaleAfterMs must be a positive integer");
     }
@@ -83,20 +102,24 @@ export class RuntimeProcessQueryService {
         "RuntimeProcess does not exist in Provider scope",
       );
     }
-    return this.#view(projection, this.#now());
+    return this.#view(projection, this.#now(), providerId);
   }
 
   async list(filter: RuntimeProcessListFilter): Promise<RuntimeProcessListResult> {
     assertPage(filter.limit, filter.cursor);
     const now = this.#now();
     const offset = filter.cursor === undefined ? 0 : Number(filter.cursor);
-    const views = (await this.repository.listByDeployment(filter.providerId, filter.deploymentId))
-      .map((process) => this.#view(process, now))
-      .filter(
-        (process) =>
-          (filter.processState === undefined || process.processState === filter.processState) &&
-          (filter.observedHealth === undefined || process.observedHealth === filter.observedHealth),
-      );
+    const views = (
+      await Promise.all(
+        (await this.repository.listByDeployment(filter.providerId, filter.deploymentId)).map(
+          (process) => this.#view(process, now, filter.providerId),
+        ),
+      )
+    ).filter(
+      (process) =>
+        (filter.processState === undefined || process.processState === filter.processState) &&
+        (filter.observedHealth === undefined || process.observedHealth === filter.observedHealth),
+    );
     const items = views.slice(offset, offset + filter.limit);
     const nextOffset = offset + items.length;
     return Object.freeze({
@@ -105,7 +128,11 @@ export class RuntimeProcessQueryService {
     });
   }
 
-  #view(projection: RuntimeProcessProjection, now: Date): RuntimeProcessView {
+  async #view(
+    projection: RuntimeProcessProjection,
+    now: Date,
+    providerId: string,
+  ): Promise<RuntimeProcessView> {
     const evaluation = evaluateRuntimeObservedHealth(projection, {
       now,
       heartbeatStaleAfterMs: this.#heartbeatStaleAfterMs,
@@ -118,12 +145,30 @@ export class RuntimeProcessQueryService {
       readyForActive: evaluation.readyForActive,
       healthReasonCode: evaluation.reasonCode,
       stale: evaluation.health === "STALE",
+      registrationFreshness: await this.#registrationFreshness(projection, now, providerId),
       logReference: Object.freeze({
         referenceId: `runtime-process:${instanceId}`,
         tailEndpoint: `/api/v1/runtime-processes/${encodeURIComponent(instanceId)}/logs/tail`,
         contentIncluded: false,
       }),
     });
+  }
+
+  async #registrationFreshness(
+    projection: RuntimeProcessProjection,
+    now: Date,
+    providerId: string,
+  ): Promise<RuntimeRegistrationFreshness> {
+    if (projection.registrationState === "unregistered") return "unregistered";
+    if (projection.registrationState === "identity_mismatch") return "identity_mismatch";
+    if (this.#registrations === undefined) return "registered";
+    const registration = await this.#registrations.get(
+      providerId,
+      String(projection.deploymentId),
+      String(projection.instanceId),
+    );
+    if (registration === null) return "unregistered";
+    return now.getTime() >= registration.expiresAt.getTime() ? "stale" : "registered";
   }
 }
 
