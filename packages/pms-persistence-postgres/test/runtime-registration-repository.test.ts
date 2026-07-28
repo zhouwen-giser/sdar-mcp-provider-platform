@@ -206,6 +206,25 @@ describe("PostgreSQL RuntimeRegistration persistence", () => {
     expect(
       await repository.get(providerB, deploymentA.snapshot.deploymentId, processA.instanceId),
     ).toBeNull();
+
+    await expect(
+      repository.updateRegistrationProjection(
+        providerB,
+        deploymentA.snapshot.deploymentId,
+        processA.instanceId,
+        processA.observedRevision,
+        {
+          registrationState: "registered",
+          readinessState: "ready",
+          lastHeartbeatAt: new Date(now.getTime() + 1_000),
+          runtimeVersion: "2.0.0-rc.1",
+          configRevision: 1,
+          observedRevision: processA.observedRevision + 1,
+        },
+      ),
+    ).rejects.toMatchObject({ code: "OPTIMISTIC_CONCURRENCY_CONFLICT" });
+
+    expect((await loadProcess(pool, processA.instanceId)).observed_revision).toBe("0");
   });
 
   it("updates only registration-related process projection fields and uses observed revision CAS", async () => {
@@ -266,7 +285,9 @@ describe("PostgreSQL RuntimeRegistration persistence", () => {
       pm2_name: before.pm2_name,
       port: before.port,
       process_state: before.process_state,
+      liveness_state: before.liveness_state,
       catalog_state: before.catalog_state,
+      config_state: before.config_state,
       restart_count: before.restart_count,
     });
 
@@ -400,11 +421,14 @@ async function loadProcess(pool: Pool, instanceId: string) {
     pm2_name: string;
     port: number;
     process_state: string;
+    liveness_state: string;
     catalog_state: string;
+    config_state: string;
     restart_count: number;
   }>(
     `SELECT registration_state,readiness_state,runtime_version,config_revision,observed_revision,
-            last_heartbeat_at,pid,pm2_name,port,process_state,catalog_state,restart_count
+            last_heartbeat_at,pid,pm2_name,port,process_state,liveness_state,catalog_state,
+            config_state,restart_count
        FROM runtime_process
       WHERE runtime_instance_id=$1`,
     [instanceId],

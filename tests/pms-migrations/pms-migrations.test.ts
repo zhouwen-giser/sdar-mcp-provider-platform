@@ -23,8 +23,8 @@ const EXPECTED_TABLES = [
   "resource",
   "runtime_deployment",
   "runtime_deployment_action",
-  "runtime_registration",
   "runtime_process",
+  "runtime_registration",
 ] as const;
 
 const RUNTIME_TABLES = [

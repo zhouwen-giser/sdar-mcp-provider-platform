@@ -258,7 +258,8 @@ export class PostgresRuntimeRegistrationRepository implements RuntimeRegistratio
               config_revision=$9,
               observed_revision=$10,
               updated_at=GREATEST(
-                clock_timestamp(), date_trunc('milliseconds', updated_at) + interval '1 millisecond'
+                clock_timestamp(),
+                date_trunc('milliseconds', process.updated_at) + interval '1 millisecond'
               )
          FROM runtime_deployment deployment
         WHERE process.runtime_instance_id = $1
