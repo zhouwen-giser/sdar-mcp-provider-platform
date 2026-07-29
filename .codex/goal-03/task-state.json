@@ -1,24 +1,26 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-03-merge-readiness-foundation",
-  "updatedAt": null,
+  "updatedAt": "2026-07-29T01:18:36.490978+00:00",
   "tasks": {
     "G3-P0-B01": {
+      "status": "PASSED",
+      "startedAt": "2026-07-29T01:12:58.536436+00:00",
+      "completedAt": "2026-07-29T01:18:36.490911+00:00",
+      "evidence": [
+        "PR #2 run 30413182605 inspected; jobs runtime-compose=90453790964 runtime-ci=90453790990; docker compose build --no-cache runtime adapter-typescript reproduced missing packages/provider-telemetry/package.json (exit 1); CI log showed pnpm audit high advisories find-my-way<=9.6.0 and brace-expansion<=5.0.7 (exit 1); mandatory node/pnpm/docker/compose versions and Goal2 state hash verification passed"
+      ],
+      "reason": null
+    },
+    "G3-P1-B01": {
       "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
       "reason": null
     },
-    "G3-P1-B01": {
-      "status": "PLANNED",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
-      "reason": null
-    },
     "G3-P1-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
@@ -32,7 +34,7 @@
       "reason": null
     },
     "G3-P2-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
