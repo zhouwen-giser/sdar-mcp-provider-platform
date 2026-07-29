@@ -53,6 +53,10 @@ import type { PmsWorkerConfig } from "./config.js";
 import { requirePmsWorkerRuntimeConfig } from "./config.js";
 import { PeriodicReconcileScheduler } from "./reconcile-scheduler.js";
 import { createRuntimeDatabasePreparation } from "./runtime-database-preparation-job.js";
+import {
+  RuntimeControlPlaneCredentialResolver,
+  type RuntimeControlPlaneCredentialResolverContract,
+} from "./runtime-control-plane-credentials.js";
 
 const RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
 
@@ -64,6 +68,7 @@ export interface ProductionRuntimeComposition {
     databasePreparation: object;
     provisioner: object;
     provisioningCredentialResolver: object;
+    runtimeControlPlaneCredentialResolver: RuntimeControlPlaneCredentialResolverContract;
     runtimeMigrationRunner: object;
     secretStore: FileSecretStore;
     repositories: Readonly<{
@@ -105,12 +110,14 @@ export async function createProductionRuntimeComposition(
       migrationTimeoutMs: runtime.runtimeReconcileTimeoutMs,
       supportedRuntimeVersions: [CURRENT_RUNTIME_VERSION],
     });
+    const runtimeControlPlaneCredentialResolver =
+      await RuntimeControlPlaneCredentialResolver.create(runtime.runtimeControlPlaneCredentialRoot);
     const store = new PostgresRuntimeReconcileStore(
       pool,
       runtime.runtimeSecretRoot,
       runtime.runtimeConfigCacheRoot,
       runtime.runtimeControlPlaneUrl,
-      runtime.runtimeControlPlaneTokenFile,
+      runtimeControlPlaneCredentialResolver,
     );
     const repositories = Object.freeze({
       runtimeDeployments: new PostgresRuntimeDeploymentRepository(pool),
@@ -200,6 +207,7 @@ export async function createProductionRuntimeComposition(
         databasePreparation: databaseResources.job,
         provisioner: databaseResources.provisioner,
         provisioningCredentialResolver: databaseResources.credentialResolver,
+        runtimeControlPlaneCredentialResolver,
         runtimeMigrationRunner: databaseResources.migrationRunner,
         secretStore: databaseResources.secretStore,
         repositories,
@@ -246,7 +254,7 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
     private readonly secretRoot: string,
     private readonly configCacheRoot: string,
     private readonly runtimeControlPlaneUrl: string,
-    private readonly runtimeControlPlaneTokenFile: string,
+    private readonly runtimeControlPlaneCredentialResolver: RuntimeControlPlaneCredentialResolverContract,
   ) {
     this.#deployments = new PostgresRuntimeDeploymentRepository(pool);
     this.#processes = new PostgresRuntimeProcessRepository(pool);
@@ -368,7 +376,11 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
       }),
       pms: Object.freeze({
         baseUrl: this.runtimeControlPlaneUrl,
-        tokenFile: this.runtimeControlPlaneTokenFile,
+        tokenFile: await this.runtimeControlPlaneCredentialResolver.resolve({
+          providerId: String(deployment.providerId),
+          deploymentId: String(deployment.deploymentId),
+          instanceId: String(process.instanceId),
+        }),
         cachePath: resolve(
           this.configCacheRoot,
           `${String(deployment.deploymentId)}-${String(process.instanceId)}.json`,

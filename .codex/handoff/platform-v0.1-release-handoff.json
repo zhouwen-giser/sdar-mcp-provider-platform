@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "3.0",
+  "platformVersion": "0.1.0",
+  "runtimeVersion": "2.0.0-rc.1",
+  "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "releaseManifest": "reports/platform-v0.1/RELEASE_MANIFEST.json",
+  "qualification": {
+    "status": "qualified",
+    "pendingFreeze": false,
+    "candidateWorkflow": {
+      "workflow": ".github/workflows/release-candidate.yml",
+      "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+      "headSha": "33e43afbfc841a8c48f4e469c30943d02b8963e0",
+      "runId": 30456436614,
+      "runUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614"
+    },
+    "requiredJobs": [
+      {
+        "name": "static",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086189"
+      },
+      {
+        "name": "runtime-ci",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086172"
+      },
+      {
+        "name": "pms-api-production",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086221"
+      },
+      {
+        "name": "worker-pm2-production",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086364"
+      },
+      {
+        "name": "runtime-credential-isolation",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591491204"
+      },
+      {
+        "name": "worker-lease-safety",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086191"
+      },
+      {
+        "name": "provider-regression",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086285"
+      },
+      {
+        "name": "platform-e2e",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086331"
+      },
+      {
+        "name": "runtime-compose",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086220"
+      },
+      {
+        "name": "release-artifacts",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90591086421"
+      },
+      {
+        "name": "release-metadata",
+        "status": "success",
+        "jobUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/job/90593227286"
+      }
+    ]
+  },
+  "pullRequest": {
+    "number": 6,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/6",
+    "baseBranch": "main",
+    "headAtHandoffPreparation": "33e43afbfc841a8c48f4e469c30943d02b8963e0",
+    "requiredApprovalCount": 1,
+    "independentApprovals": [],
+    "status": "awaiting-independent-review"
+  },
+  "repositoryPolicy": {
+    "branch": "main",
+    "strictRequiredChecks": true,
+    "requiredChecks": [
+      "static",
+      "runtime-ci",
+      "pms-api-production",
+      "worker-pm2-production",
+      "runtime-credential-isolation",
+      "worker-lease-safety",
+      "provider-regression",
+      "platform-e2e",
+      "runtime-compose",
+      "release-artifacts",
+      "release-metadata"
+    ],
+    "requiredApprovals": 1,
+    "requireLastPushApproval": true,
+    "requireConversationResolution": true,
+    "enforceAdmins": true,
+    "allowForcePushes": false,
+    "allowDeletions": false
+  },
+  "artifacts": {
+    "candidateSummary": {
+      "id": 8725965106,
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614/artifacts/8725965106",
+      "digest": "sha256:0265b72dd6f1bc2a9853573d14042fc1d518fa022212dd213011cb8938e6d3e4",
+      "sizeBytes": 3043908
+    },
+    "sourceArchive": {
+      "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+      "digest": "sha256:4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5"
+    },
+    "sbom": {
+      "path": "reports/sbom/runtime-v1.cdx.json",
+      "digest": "sha256:333ac90a46397740c2425e8cabe913fb7240029f4d0f77764a6882f1731f6034"
+    }
+  },
+  "releaseApproval": {
+    "requiredValue": "platform-v0.1.0",
+    "approvedBy": null,
+    "approvedAt": null,
+    "status": "pending-explicit-approval"
+  },
+  "releaseCommandPreview": [
+    "test \"$SDAR_RELEASE_APPROVED\" = \"platform-v0.1.0\"",
+    "node scripts/release/verify-repository-policy.mjs --branch main --pr 6",
+    "node scripts/release/verify-release-metadata.mjs",
+    "node scripts/release/publish-release.mjs --tag platform-v0.1.0",
+    "node scripts/release/verify-published-release.mjs --tag platform-v0.1.0"
+  ],
+  "releaseMetadata": {
+    "tag": "platform-v0.1.0",
+    "commit": null,
+    "status": "pending-external-publication",
+    "recordingLocation": "GitHub Release and protected tag"
+  },
+  "ociArtifacts": [
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/runtime",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-api",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-worker",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-web",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    }
+  ],
+  "qualificationBoundary": {
+    "controlledSdarInterop": "qualified",
+    "externalSdarInterop": "not-qualified",
+    "realUgv": "not-qualified",
+    "realNpcTank": "not-qualified",
+    "realHomeAssistant": "not-qualified",
+    "certificationClaim": "none"
+  },
+  "secretsRedacted": true
+}

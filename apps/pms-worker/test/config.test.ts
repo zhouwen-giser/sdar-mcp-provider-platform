@@ -35,7 +35,7 @@ describe("PMS Worker production Runtime configuration", () => {
       runtimeSecretRoot: fixture.secretRoot,
       runtimeConfigCacheRoot: fixture.cacheRoot,
       runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
-      runtimeControlPlaneTokenFile: fixture.controlPlaneToken,
+      runtimeControlPlaneCredentialRoot: fixture.controlPlaneCredentialRoot,
       pm2Home: fixture.pm2Home,
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,
@@ -124,6 +124,13 @@ describe("PMS Worker production Runtime configuration", () => {
       }),
     ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
 
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: fixture.secretRoot,
+      }),
+    ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
+
     const nested = join(fixture.releaseRoot, "nested");
     await mkdir(nested, { mode: 0o700 });
     await expect(
@@ -166,6 +173,16 @@ describe("PMS Worker production Runtime configuration", () => {
       }),
     ).rejects.toThrow("PMS_WORKER_RUNTIME_TIMEOUT_ORDER_INVALID");
   });
+
+  it("rejects the legacy global Runtime token file without fallback", async () => {
+    const fixture = await secureFixture();
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE: fixture.databaseUrl,
+      }),
+    ).rejects.toThrow("PMS_WORKER_LEGACY_RUNTIME_TOKEN_FILE_REJECTED");
+  });
 });
 
 async function secureFixture() {
@@ -173,7 +190,7 @@ async function secureFixture() {
   temporaryDirectories.push(directory);
   const databaseUrl = join(directory, "database-url");
   const provisioningCredential = join(directory, "provisioning-credential");
-  const controlPlaneToken = join(directory, "control-plane-token");
+  const controlPlaneCredentialRoot = join(directory, "control-plane-credentials");
   const releaseRoot = join(directory, "releases");
   const secretRoot = join(directory, "secrets");
   const cacheRoot = join(directory, "runtime-config-cache");
@@ -181,10 +198,10 @@ async function secureFixture() {
   await Promise.all([
     writeFile(databaseUrl, "postgresql://local-only\n", { mode: 0o600 }),
     writeFile(provisioningCredential, '{"secretRef":"local-only"}\n', { mode: 0o600 }),
-    writeFile(controlPlaneToken, "local-control-plane-token\n", { mode: 0o600 }),
     mkdir(releaseRoot, { mode: 0o755 }),
     mkdir(secretRoot, { mode: 0o700 }),
     mkdir(cacheRoot, { mode: 0o700 }),
+    mkdir(controlPlaneCredentialRoot, { mode: 0o700 }),
     mkdir(pm2Home, { mode: 0o700 }),
   ]);
   const environment = {
@@ -194,7 +211,7 @@ async function secureFixture() {
     PMS_RUNTIME_SECRET_ROOT: secretRoot,
     PMS_RUNTIME_CONFIG_CACHE_ROOT: cacheRoot,
     PMS_RUNTIME_CONTROL_PLANE_URL: "http://127.0.0.1:8090",
-    PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE: controlPlaneToken,
+    PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: controlPlaneCredentialRoot,
     PMS_PM2_HOME: pm2Home,
     PMS_RUNTIME_RECONCILE_INTERVAL_MS: "15000",
     PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "120000",
@@ -204,7 +221,7 @@ async function secureFixture() {
     directory,
     databaseUrl,
     provisioningCredential,
-    controlPlaneToken,
+    controlPlaneCredentialRoot,
     releaseRoot,
     secretRoot,
     cacheRoot,

@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: sdar
+      POSTGRES_PASSWORD: release-ci-only
+      POSTGRES_DB: sdar
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdar -d sdar"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  pms-api:
+    image: sdar/pms-api:0.1.0-rc
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=0700,uid=1000,gid=1000
+    environment:
+      PMS_API_HOST: 0.0.0.0
+      PMS_API_PORT: "8090"
+      PMS_DATABASE_URL_FILE: /run/release/api/database-url
+      PMS_MANAGEMENT_CREDENTIAL_FILE: /run/release/api/management.json
+      PMS_RUNTIME_CREDENTIAL_FILE: /run/release/api/runtime.json
+    volumes:
+      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/api:/run/release/api:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  pms-worker:
+    image: sdar/pms-worker:0.1.0-rc
+    network_mode: service:pms-api
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=0700,uid=1000,gid=1000
+    environment:
+      PMS_DATABASE_URL_FILE: /run/release/worker/database-url
+      PMS_WORKER_ID: release-artifact-worker
+      PMS_WORKER_POLL_INTERVAL_MS: "100"
+      PMS_WORKER_LEASE_DURATION_MS: "1000"
+      PMS_WORKER_CLAIM_LIMIT: "3"
+      PMS_WORKER_RETRY_DELAY_MS: "100"
+      PMS_WORKSPACE_ROOT: /app
+      PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE: /run/release/worker/provisioning.json
+      PMS_RUNTIME_RELEASE_ROOT: /opt/sdar/runtime-releases
+      PMS_RUNTIME_SECRET_ROOT: /var/lib/sdar/secrets
+      PMS_RUNTIME_CONFIG_CACHE_ROOT: /var/lib/sdar/cache
+      PMS_RUNTIME_CONTROL_PLANE_URL: http://127.0.0.1:8090
+      PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: /run/release/worker/credentials
+      PMS_PM2_HOME: /var/lib/sdar/pm2
+      PMS_RUNTIME_RECONCILE_INTERVAL_MS: "1000"
+      PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "5000"
+      PMS_RUNTIME_HEALTH_TIMEOUT_MS: "1000"
+    volumes:
+      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/worker:/run/release/worker:ro
+      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/runtime-releases:/opt/sdar/runtime-releases:ro
+      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/worker-state:/var/lib/sdar
+    depends_on:
+      pms-api:
+        condition: service_healthy
+
+  pms-web:
+    image: sdar/pms-web:0.1.0-rc
+    read_only: true
+    environment:
+      PMS_WEB_API_BASE: http://pms-api:8090
+    depends_on:
+      pms-api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "Promise.all(['http://127.0.0.1:8080/health/ready','http://pms-api:8090/health/ready'].map(u=>fetch(u).then(r=>{if(!r.ok)throw Error(u)}))).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30

@@ -33,7 +33,7 @@ The production bootstrap also requires this group; omission fails closed with
 | `PMS_RUNTIME_SECRET_ROOT`                   | required    | Private Runtime secret-file root             |
 | `PMS_RUNTIME_CONFIG_CACHE_ROOT`             | required    | Private per-Runtime configuration cache root |
 | `PMS_RUNTIME_CONTROL_PLANE_URL`             | required    | HTTPS, or loopback HTTP, PMS Runtime API URL |
-| `PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE`      | required    | Runtime config/registration scoped token     |
+| `PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT` | required    | Private per-instance credential tree         |
 | `PMS_PM2_HOME`                              | required    | Private isolated PM2 state directory         |
 | `PMS_RUNTIME_RECONCILE_INTERVAL_MS`         | required    | Bounded periodic reconcile interval          |
 | `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
@@ -61,6 +61,26 @@ readable but not group/world writable. Secret, cache, and PM2 roots must be exis
 directories with permissions no broader than `0700`. Release, secret, cache, and PM2 roots must be
 pairwise distinct and cannot contain one another.
 
+The Worker resolves each Runtime control-plane token from
+`PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT/providers/<providerId>/deployments/<deploymentId>/instances/<instanceId>/control-plane.token`.
+The credential root must be canonical, existing, non-symlink and no broader than `0700`; token files
+must be canonical, regular, non-symlink, non-empty, singly linked and no broader than `0600`.
+Identity traversal, unsafe parents, missing files and reused hard links fail closed. The legacy
+`PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE` variable is rejected and has no production fallback.
+
+PMS API credential descriptors remain explicit per principal. Adding or rotating a V0.1 Runtime
+credential requires an atomic credential-tree and API-descriptor update followed by a PMS API
+restart. See [ADR 0012](../adr/0012-instance-scoped-runtime-control-plane-credentials.md).
+
+The production qualification gate exercises two independent Provider/Deployment/Instance
+identities. It first proves that a missing instance token fails before PM2 start, then converges
+both deployments through configuration pull/watch/acknowledgement, registration/heartbeat,
+Catalog/Registry publication, and `ACTIVE`. Each token is tested against all five endpoints of the
+other identity and must receive `403`. API and Worker restarts must preserve the mapping, while a
+single Runtime crash or token rotation must leave its peer process unchanged. The generated
+`reports/evidence/G5-P1-B02-runtime-credential-isolation.json` contains outcomes and versions only;
+it never contains token values or reversible token material.
+
 Inline database URLs, provisioning credentials, Runtime secrets/config tokens, and PM2 secrets are
 rejected. File contents are consumed only by their owning adapters and are never included in health
 state, errors, Audit, or evidence.
@@ -76,6 +96,10 @@ and leaves no scheduler running.
 - Claim uses database time, `FOR UPDATE SKIP LOCKED`, a lease token, and a monotonically increasing
   fencing token.
 - External work runs after the claim transaction has completed.
+- Every job in a claimed batch begins independent execution immediately and renews at no more than
+  one third of the configured lease duration.
+- Successful renewals update the execution's authoritative expiry. Renewal loss aborts the handler
+  and suppresses both `complete` and `fail`, leaving higher-fence takeover authoritative.
 - Successful handlers complete the lease only when job ID, owner, token, and fence still match.
 - Failed handlers release the claim into a delayed failed state.
 - An expired lease can be recovered by another worker with a higher fence; stale workers cannot
@@ -101,9 +125,11 @@ for the current handler up to the lease-duration shutdown bound. The Worker then
 JavaScript API and provisioning connection before closing the PMS Pool. Repeated stop requests are
 safe. A shutdown timeout is reported as `PMS_WORKER_SHUTDOWN_TIMEOUT`.
 
-Choose `PMS_WORKER_CLAIM_LIMIT` together with the lease duration and worst-case handler time. A
-Worker drains its already-claimed batch serially during shutdown; oversized batches can exhaust the
-lease-duration shutdown bound.
+Choose `PMS_WORKER_CLAIM_LIMIT` together with host capacity, the lease duration, and worst-case
+handler shutdown latency. The value is the bounded local concurrency for each claim cycle. During
+shutdown the Worker aborts every active handler and waits for them within the lease-duration outer
+bound; handlers that wrap non-interruptible calls must check their Signal immediately after return
+and before a later state write.
 
 Worker authority is limited to desired/observed Runtime infrastructure and its control-plane
 projections. Runtime Task data belongs to the Runtime database and is never read or mutated by the

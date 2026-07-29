@@ -1,8 +1,16 @@
-import type { JobLease } from "../../../packages/pms-domain/src/index.js";
+import type { JobLease, LeaseIdentity } from "../../../packages/pms-domain/src/index.js";
+
+export interface PmsJobExecutionContext {
+  readonly signal: AbortSignal;
+  readonly leaseIdentity: LeaseIdentity;
+  readonly operationId: string;
+  readonly idempotencyKey: string;
+  readonly leaseExpiresAt: () => Date;
+}
 
 export interface PmsJobHandler {
   readonly jobType: string;
-  execute(lease: JobLease): Promise<void>;
+  execute(lease: JobLease, context: PmsJobExecutionContext): Promise<void>;
 }
 
 export class PmsJobRegistry {

@@ -46,12 +46,15 @@ COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/pa
 COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
 COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
 COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+RUN pnpm install --frozen-lockfile
 COPY Dockerfile Dockerfile
 COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
 RUN node scripts/verify-docker-workspace-manifests.mjs
-RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm build
+RUN pnpm build \
+    && pnpm --filter @sdar/pms-web build \
+    && cp -R dist/packages release-packages \
+    && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'
 
 FROM build AS production-dependencies
 RUN CI=true pnpm prune --prod \
@@ -69,6 +72,69 @@ COPY --from=build /workspace/migrations /app/migrations
 RUN mkdir -p /var/lib/sdar && chown node:node /var/lib/sdar
 USER node
 CMD ["node", "dist/apps/runtime/src/main.js"]
+
+FROM node:22-bookworm-slim AS pms-base
+ARG VCS_REF=unknown
+ENV NODE_ENV=production
+WORKDIR /app
+LABEL org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.source="https://github.com/zhouwen-giser/sdar-mcp-provider-platform" \
+      org.opencontainers.image.licenses="Apache-2.0"
+COPY --from=production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+COPY --from=build --chown=root:root /workspace/dist /app/dist
+COPY --from=build --chown=root:root /workspace/release-packages /app/packages
+COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+RUN mkdir -p /var/lib/sdar /app/node_modules/@sdar \
+    && for package in /app/packages/*; do \
+      test -f "$package/package.json" || continue; \
+      ln -s "$package" "/app/node_modules/@sdar/$(basename "$package")"; \
+    done \
+    && chown node:node /var/lib/sdar
+USER node
+
+FROM pms-base AS pms-api
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR Provider Management API" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/provider-packages /app/provider-packages
+RUN test -f /app/provider-packages/ugv/provider-package.json
+EXPOSE 8090
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+CMD ["node", "dist/apps/pms-api/src/main.js"]
+
+FROM pms-base AS pms-worker
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR Provider Management Worker" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/provider-packages /app/provider-packages
+COPY --from=build --chown=root:root /workspace/proto /app/proto
+RUN test -f /app/migrations/migration-source-map.json \
+    && test -d /app/migrations/pms \
+    && test -d /app/migrations/runtime \
+    && test -f /app/provider-packages/ugv/provider-package.json
+CMD ["node", "dist/apps/pms-worker/src/main.js"]
+
+FROM node:22-bookworm-slim AS pms-web
+ARG VCS_REF=unknown
+ENV NODE_ENV=production
+WORKDIR /app
+LABEL org.opencontainers.image.title="SDAR Provider Management Web" \
+      org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.source="https://github.com/zhouwen-giser/sdar-mcp-provider-platform" \
+      org.opencontainers.image.licenses="Apache-2.0"
+COPY --from=build --chown=root:root /workspace/apps/pms-web/dist /app/web
+RUN test -f /app/web/index.html \
+    && test -f /app/web/styles.css \
+    && test -f /app/web/assets/main.js \
+    && test -f /app/web/assets/server.js
+USER node
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+CMD ["node", "web/assets/server.js"]
 
 FROM runtime AS adapter-ts
 CMD ["node", "dist/examples/mock-adapter-typescript/src/main.js"]

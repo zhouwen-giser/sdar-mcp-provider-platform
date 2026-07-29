@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P2-B01",
+  "commitSha": "b6c57718fcc7e520d8017e6c088805f681ee029b",
+  "commands": [
+    {
+      "command": "pnpm exec vitest run apps/pms-worker/test/worker.test.ts apps/pms-worker/test/job-execution.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts packages/pms-application/test/runtime-reconcile.test.ts",
+      "exitCode": 0,
+      "result": "4 files, 25 tests passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_worker_lease_contract.py .",
+      "exitCode": 0,
+      "result": "WORKER_LEASE_CONTRACT_OK"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P2-B01.json",
+    "apps/pms-worker/src/index.ts",
+    "apps/pms-worker/src/job-execution.ts",
+    "apps/pms-worker/src/job-registry.ts",
+    "apps/pms-worker/src/package-sync-job.ts",
+    "apps/pms-worker/src/runtime-reconcile-job.ts",
+    "apps/pms-worker/src/worker.ts",
+    "apps/pms-worker/test/job-execution.test.ts",
+    "apps/pms-worker/test/runtime-reconcile-job.test.ts",
+    "apps/pms-worker/test/worker.test.ts",
+    "docs/adr/0013-worker-lease-renewal-and-cancellation.md",
+    "docs/operations/PMS_WORKER.md",
+    "packages/pms-application/src/runtime-reconcile.ts",
+    "packages/pms-application/test/runtime-reconcile.test.ts"
+  ],
+  "assertions": {
+    "claimBatchExecutesConcurrently": true,
+    "eachActiveJobRenewsIndependently": true,
+    "renewalIntervalAtMostLeaseThird": true,
+    "renewalLowerBoundTested": true,
+    "authoritativeExpiryUpdated": true,
+    "longHandlerRetainedLeaseBeyondTwoPeriods": true,
+    "renewalLossAbortedSignal": true,
+    "renewalLossCompleted": false,
+    "renewalLossFailed": false,
+    "staleCompletePropagated": true,
+    "staleFailPropagated": true,
+    "workerStopAbortedAndDrained": true,
+    "runtimeProcessesStoppedByWorkerStop": false,
+    "reconcilerDatabaseCheckpointed": true,
+    "reconcilerPm2Checkpointed": true,
+    "reconcilerHealthCheckpointed": true,
+    "reconcilerIdentityCheckpointed": true,
+    "leaseTokenLogged": false,
+    "migrationsChanged": false,
+    "priorGoalStatesChanged": false
+  ],
+  "secretsRedacted": true
+}

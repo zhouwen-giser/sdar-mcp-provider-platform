@@ -13,7 +13,9 @@ describe("RuntimeDeployment reconcile worker handler", () => {
     });
     const handler = createRuntimeDeploymentReconcileJobHandler({ reconcile }, 12_000);
 
-    await handler.execute(lease());
+    const job = lease();
+    const execution = executionContext(job);
+    await handler.execute(job, execution);
 
     expect(handler.jobType).toBe(RUNTIME_DEPLOYMENT_RECONCILE_JOB);
     expect(reconcile).toHaveBeenCalledOnce();
@@ -25,6 +27,7 @@ describe("RuntimeDeployment reconcile worker handler", () => {
         correlationId: "request-1",
         idempotencyKey: "job-1:9",
         timeoutMs: 12_000,
+        signal: execution.signal,
       },
     });
   });
@@ -41,7 +44,7 @@ describe("RuntimeDeployment reconcile worker handler", () => {
       job: { ...valid.job, payload: { providerId: "provider-a" } },
     };
 
-    await expect(handler.execute(invalid)).rejects.toThrow(
+    await expect(handler.execute(invalid, executionContext(invalid))).rejects.toThrow(
       "RUNTIME_DEPLOYMENT_RECONCILE_PAYLOAD_INVALID",
     );
     expect(reconcile).not.toHaveBeenCalled();
@@ -69,5 +72,20 @@ function lease(): JobLease {
     token: "11111111-1111-4111-8111-111111111111",
     fencingToken: 9n,
     expiresAt: new Date("2026-07-26T00:01:00.000Z"),
+  };
+}
+
+function executionContext(job: JobLease) {
+  return {
+    signal: new AbortController().signal,
+    leaseIdentity: {
+      jobId: job.job.jobId,
+      owner: job.owner,
+      token: job.token,
+      fencingToken: job.fencingToken,
+    },
+    operationId: `job:${job.job.jobId}:fence:${String(job.fencingToken)}`,
+    idempotencyKey: `${job.job.jobId}:${String(job.fencingToken)}`,
+    leaseExpiresAt: () => new Date(job.expiresAt),
   };
 }

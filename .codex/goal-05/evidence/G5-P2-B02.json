@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P2-B02",
+  "commitSha": "0d7f264b4aab8a71a7362b6c702a7a366875e78a",
+  "commands": [
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:worker-lease-safety",
+      "exitCode": 0,
+      "result": "WORKER_LEASE_SAFETY_GATE_OK on two consecutive clean runs"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed after formatting generated evidence"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_worker_lease_contract.py .",
+      "exitCode": 0,
+      "result": "WORKER_LEASE_CONTRACT_OK"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P2-B02.json",
+    ".github/workflows/ci.yml",
+    "docs/review/GOAL05_LEASE_SAFETY_MATRIX.md",
+    "package.json",
+    "reports/evidence/G5-P2-B02-worker-lease-safety.json",
+    "scripts/run-worker-lease-safety-gate.mjs",
+    "tests/worker-lease-safety/run-worker-lease-safety.mjs"
+  ],
+  "assertions": {
+    "twoRealWorkers": true,
+    "realPostgresLeaseRepository": true,
+    "longHandlerRenewedBeyondThreePeriods": true,
+    "secondWorkerCouldNotClaimRenewedLease": true,
+    "renewFailureAbortedWorkerA": true,
+    "workerANoCompleteOrFailAfterLeaseLoss": true,
+    "workerBTookOverAtHigherFence": true,
+    "fencingTokenMonotonic": true,
+    "singleSucceededResult": true,
+    "uninterruptibleSqlReturnedBeforeAbortCheckpoint": true,
+    "noWorkerAWriteAfterSqlReturn": true,
+    "noDoubleActiveSideEffect": true,
+    "claimLimitAtLeastThree": true,
+    "eachBatchJobRenewedIndependently": true,
+    "noHangingLease": true,
+    "noPm2Process": true,
+    "noTemporaryDatabase": true,
+    "noTokenFile": true,
+    "ciJobRepeatable": true,
+    "migrationsChanged": false,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}

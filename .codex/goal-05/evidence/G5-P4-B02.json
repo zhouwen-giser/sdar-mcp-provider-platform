@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P4-B02",
+  "commitShaAtEvidenceCreation": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "candidateCommitAuthority": "exact GitHub workflow head recorded by release-candidate-summary artifact",
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspace projects already up to date"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> SDAR_REUSE_EXISTING_INFRA=true pnpm verify:v2",
+      "exitCode": 0,
+      "result": "frozen protocol 74/74; runtime closure/followup; Business Events 9/9; repository verify and RC2 regressions passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> SDAR_REUSE_EXISTING_INFRA=true pnpm verify:platform",
+      "exitCode": 0,
+      "result": "Platform static, migration, configuration, PM2, security, fault and E2E gates passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:pms-api-production",
+      "exitCode": 0,
+      "result": "1 file, 3 tests passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-pm2-production",
+      "exitCode": 0,
+      "result": "WORKER_PM2_PRODUCTION_GATE_OK; exact production path and bounded cleanup completed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-lease-safety",
+      "exitCode": 0,
+      "result": "WORKER_LEASE_SAFETY_GATE_OK"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs",
+      "exitCode": 0,
+      "result": "four local images built; non-root, health, size and secret checks passed"
+    },
+    {
+      "command": "node scripts/release/build-source-archive.mjs (twice) && node scripts/release/verify-source-archive.mjs",
+      "exitCode": 0,
+      "result": "966 files; two identical builds; deterministic sha256:4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5"
+    },
+    {
+      "command": "node scripts/release/verify-release-metadata.mjs && pnpm release:candidate:check",
+      "exitCode": 0,
+      "result": "metadata and workflow graph passed; 14 positive/negative assertions passed"
+    },
+    {
+      "command": "pnpm typecheck && pnpm lint && pnpm format:check && git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "diagnostics": [
+    {
+      "command": "TEST_DATABASE_URL=<stopped-local-postgres-54329> pnpm verify:v2",
+      "exitCode": 1,
+      "result": "environment-only ECONNREFUSED; rerun against discovered running test PostgreSQL at 5432 passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-pm2-production",
+      "exitCode": 1,
+      "result": "qualification exposed unbounded best-effort cleanup and nondeterministic post-restart convergence; the gate harness now bounds cleanup, explicitly waits for ACTIVE, emits stages and passed from a clean PM2 run"
+    },
+    {
+      "command": "GitHub Actions release-candidate run 30450727239 @ c98be12a59920764afd9da69ef2f457691277808",
+      "exitCode": 1,
+      "result": "release-artifacts failed with PMS_API_CREDENTIAL_READ_ERROR because runner-owned 0600 fixtures were unreadable by the image node UID; all nine independently completed peer jobs passed"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs after fixture ownership fix",
+      "exitCode": 0,
+      "result": "fixtures remain 0600 and are temporarily owned by the image node UID; ownership is restored to the host before cleanup; four-image smoke passed"
+    },
+    {
+      "command": "GitHub Actions release-candidate run 30451707090 @ 0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+      "exitCode": 1,
+      "result": "nine peer jobs passed; release-artifacts exposed BuildKit provenance-only size inflation and worker-pm2-production exposed a shared PM2 observer/client race; release-metadata correctly remained skipped"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs with --provenance=false",
+      "exitCode": 0,
+      "result": "all four clean local images passed existing size thresholds without changing policy; PMS Web measured 79,926,535 bytes"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-pm2-production after independent observer fix",
+      "exitCode": 0,
+      "result": "WORKER_PM2_PRODUCTION_GATE_OK; PM2 crash auto-recovery, adapter degradation/recovery, control-plane interruption, config restart, credential isolation and stale-fence assertions passed"
+    },
+    {
+      "command": "node scripts/release/verify-runtime-credential-evidence.mjs",
+      "exitCode": 0,
+      "result": "9 required exact-head credential isolation assertions passed and secret patterns were absent"
+    },
+    {
+      "command": "GitHub Actions release-candidate run 30454664075 @ fa3ad2c648b8d831db89125669861a828c9924ef",
+      "exitCode": 1,
+      "result": "worker PM2 and runtime credential isolation passed; worker-lease-safety exposed a redundant >=9 renewal-count timing assertion; release-artifacts confirmed Docker inspect Size is backend-dependent; regular CI independently exposed historical Registry checksum reactivation as REGISTRY_COMMIT_FAILED"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm exec vitest run packages/registry-snapshot/test/persistence.test.ts",
+      "exitCode": 0,
+      "result": "1 file, 5 tests passed; historical immutable checksum was atomically reactivated without duplicate insertion and emitted an audit event"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-lease-safety (10 consecutive pre-fix reproductions plus post-fix run)",
+      "exitCode": 0,
+      "result": "all runs passed; safety assertion now requires renewal across three lease periods while retaining the authoritative no-takeover and higher-fence checks"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs with portable size metric",
+      "exitCode": 0,
+      "result": "unchanged limits passed using gzip-compressed docker save bytes at qualified source 7579c26a96544f19bbf39da679419e85b52ee054: api 101599202, worker 101603798, web 79500517"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P4-B02.json",
+    ".codex/handoff/platform-v0.1-release-handoff.json",
+    ".github/workflows/release-candidate.yml",
+    "docs/review/GOAL05_CI_MATRIX.md",
+    "package.json",
+    "packages/pms-persistence-postgres/src/registry-snapshot-repository.ts",
+    "packages/registry-snapshot/test/persistence.test.ts",
+    "reports/ci/release-artifacts.json",
+    "reports/evidence/G5-P1-B02-runtime-credential-isolation.json",
+    "reports/platform-v0.1/CHECKSUMS.sha256",
+    "reports/platform-v0.1/RELEASE_MANIFEST.json",
+    "reports/platform-v0.1/TEST_EVIDENCE.json",
+    "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+    "scripts/release/generate-candidate-summary.mjs",
+    "scripts/release/generate-release-metadata.mjs",
+    "scripts/release/release-metadata-lib.mjs",
+    "scripts/release/verify-release-candidate-workflow.mjs",
+    "scripts/release/verify-release-candidate-workflow.test.mjs",
+    "scripts/release/verify-release-metadata.test.mjs",
+    "scripts/release/verify-runtime-credential-evidence.mjs",
+    "scripts/cleanup-release-artifact-ci.mjs",
+    "scripts/run-release-artifact-smoke.mjs",
+    "scripts/run-worker-pm2-production-gate.mjs",
+    "scripts/verify-release-images.mjs",
+    "tests/worker-lease-safety/run-worker-lease-safety.mjs",
+    "tests/worker-pm2-production/run-production-lifecycle.mjs"
+  ],
+  "assertions": {
+    "allJobsCheckoutExactCandidate": true,
+    "releaseMetadataNeedsAllOtherJobs": true,
+    "candidateSummaryBindsWorkflowHead": true,
+    "missingJobRejected": true,
+    "failedJobRejected": true,
+    "shaMismatchRejected": true,
+    "missingArtifactDigestRejected": true,
+    "qualificationPublishesImages": false,
+    "qualificationCreatesTag": false,
+    "secretsIncluded": false,
+    "externalCertificationClaimed": false
+  },
+  "githubActions": {
+    "statusAtCommit": "pending",
+    "authority": "release-candidate-summary artifact from exact workflow-head run"
+  },
+  "secretsRedacted": true
+}

@@ -19,21 +19,25 @@ snapshots; neither is allowed to invent operations.
 
 ## Deployment order
 
-1. Back up the PMS database and each affected Provider Runtime database using
+1. Build or pull the immutable `sdar/pms-api:0.1.0-rc`,
+   `sdar/pms-worker:0.1.0-rc`, and `sdar/pms-web:0.1.0-rc` images. Verify their
+   OCI revision label matches the qualified commit; never deploy a `latest` tag.
+2. Back up the PMS database and each affected Provider Runtime database using
    the database platform's supported controls.
-2. Deploy the PMS API and Worker with `PMS_DATABASE_URL_FILE`. Apply only the
+3. Deploy the PMS API and Worker with `PMS_DATABASE_URL_FILE`. Apply only the
    PMS migration set.
-3. Register Provider Packages and Providers, create separated DatabaseProfile
+4. Register Provider Packages and Providers, create separated DatabaseProfile
    SecretRefs, and publish a valid configuration revision.
-4. Reconcile RuntimeDeployment. The worker provisions or verifies the
+5. Reconcile RuntimeDeployment. The worker provisions or verifies the
    Provider-scoped database and role, runs the fixed Runtime migration set once
    under its lock, prepares secret files, and then invokes the PM2 adapter.
-5. Verify PM2 reports the allowlisted process online, then independently verify
+6. Verify PM2 reports the allowlisted process online, then independently verify
    `/health/live` and `/health/ready`. Only both health checks and a matching
    observed revision permit `ACTIVE`.
-6. Verify Runtime registration identity and synchronize Catalog and Registry.
+7. Verify Runtime registration identity and synchronize Catalog and Registry.
    A content-identical snapshot must remain a no-op revision.
-7. Inspect the PMS Web Runtime, Catalog, Registry, and Audit views. Audit output
+8. Deploy PMS Web with `PMS_WEB_API_BASE`, then inspect its Runtime, Catalog,
+   Registry, and Audit views. Audit output
    is metadata-free and must contain no connection strings or secret values.
 
 PM2 accepts only the platform Runtime entrypoint, controlled working directory,
@@ -73,8 +77,10 @@ not `ACTIVE` until live and ready checks recover.
   do not patch Catalog rows to manufacture agreement.
 
 Use `docs/operations/DATABASE_PROVISIONING_RUNBOOK.md`,
-`docs/operations/PMS_WORKER.md`, and `docs/operations/configuration.md` for
-component detail.
+`docs/operations/PMS_WORKER.md`, `docs/operations/PMS_WEB.md`, and
+`docs/operations/configuration.md` for component detail. A single-host example
+is provided at `deploy/pms/compose.yaml`; its secret and Runtime release bind
+mounts must be provisioned before startup.
 
 ## Verification
 
@@ -85,6 +91,9 @@ environment:
 TEST_DATABASE_URL=<local-postgres> pnpm verify:platform
 TEST_DATABASE_URL=<local-postgres> pnpm test:pms-api-production
 TEST_DATABASE_URL=<local-postgres> pnpm test:worker-pm2-production
+pnpm --filter @sdar/pms-web test
+pnpm --filter @sdar/pms-web build
+node scripts/verify-release-images.mjs
 ```
 
 The gate starts controlled local processes and a real isolated PM2 daemon. It
