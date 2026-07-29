@@ -11,5 +11,6 @@ export * from "./runtime-deployment-repositories.js";
 export * from "./runtime-registration-repository.js";
 export * from "./runtime-registration-audit.js";
 export * from "./runtime-registration-unit-of-work.js";
+export * from "./runtime-reconcile-scheduler-repository.js";
 export * from "./runtime-instance-allocator.js";
 export * from "./unit-of-work.js";
