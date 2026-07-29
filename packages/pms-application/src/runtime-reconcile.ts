@@ -142,7 +142,7 @@ export class RuntimeDeploymentReconciler {
     private readonly lifecycle: RuntimeReconcileLifecyclePort,
     private readonly health: RuntimeReconcileHealthPort,
     private readonly inventory: RuntimeReconcileProcessInventoryPort,
-    private readonly providerIdentity?: RuntimeReconcileProviderIdentityPort,
+    private readonly providerIdentity: RuntimeReconcileProviderIdentityPort,
   ) {}
 
   async reconcile(
@@ -199,28 +199,13 @@ export class RuntimeDeploymentReconciler {
           }
           case "HEALTH_CHECKING": {
             const instance = await this.store.ensureInstance(deployment.snapshot, 0);
-            if (this.providerIdentity !== undefined) {
-              const verification = await this.providerIdentity.verify({
-                expectedProviderId: input.providerId,
-                target: instance.target,
-                timeoutMs: input.context.timeoutMs,
-                signal: input.context.signal,
-              });
-              if (!verification.valid) {
-                await this.store.fail(
-                  input.providerId,
-                  input.deploymentId,
-                  deployment.snapshot.status,
-                  deployment.snapshot.observedRevision,
-                  verification.reasonCode,
-                );
-                deployment = await this.requireDeployment(input);
-                return {
-                  deployment: deployment.snapshot,
-                  progressed: true,
-                  orphanProcessNames: orphans,
-                };
-              }
+            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
+            if (identityFailure !== null) {
+              return {
+                deployment: identityFailure.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
             }
             const result = await this.health.probe({
               target: instance.target,
@@ -231,9 +216,7 @@ export class RuntimeDeploymentReconciler {
             await this.store.recordHealth(instance.target, result);
             deployment = await this.transition(
               deployment,
-              result.processState === "online" && result.live && result.ready
-                ? "DISCOVERING"
-                : "DEGRADED",
+              isHealthy(result) ? "DISCOVERING" : "DEGRADED",
               input,
             );
             return {
@@ -244,6 +227,7 @@ export class RuntimeDeploymentReconciler {
           }
           case "ACTIVE":
           case "DEGRADED": {
+            const before = deployment.snapshot.status;
             const instance = await this.store.ensureInstance(deployment.snapshot, 0);
             const result = await this.health.probe({
               target: instance.target,
@@ -252,6 +236,37 @@ export class RuntimeDeploymentReconciler {
               signal: input.context.signal,
             });
             await this.store.recordHealth(instance.target, result);
+            if (!isHealthy(result)) {
+              if (before === "ACTIVE") {
+                deployment = await this.transition(deployment, "DEGRADED", input);
+                return {
+                  deployment: deployment.snapshot,
+                  progressed: true,
+                  orphanProcessNames: orphans,
+                };
+              }
+              return {
+                deployment: deployment.snapshot,
+                progressed,
+                orphanProcessNames: orphans,
+              };
+            }
+            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
+            if (identityFailure !== null) {
+              return {
+                deployment: identityFailure.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
+            if (before === "DEGRADED") {
+              deployment = await this.transition(deployment, "DISCOVERING", input);
+              return {
+                deployment: deployment.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
             return {
               deployment: deployment.snapshot,
               progressed,
@@ -259,31 +274,11 @@ export class RuntimeDeploymentReconciler {
             };
           }
           case "DISCOVERING": {
-            if (this.providerIdentity === undefined) {
-              return {
-                deployment: deployment.snapshot,
-                progressed,
-                orphanProcessNames: orphans,
-              };
-            }
             const instance = await this.store.ensureInstance(deployment.snapshot, 0);
-            const verification = await this.providerIdentity.verify({
-              expectedProviderId: input.providerId,
-              target: instance.target,
-              timeoutMs: input.context.timeoutMs,
-              signal: input.context.signal,
-            });
-            if (!verification.valid) {
-              await this.store.fail(
-                input.providerId,
-                input.deploymentId,
-                deployment.snapshot.status,
-                deployment.snapshot.observedRevision,
-                verification.reasonCode,
-              );
-              deployment = await this.requireDeployment(input);
+            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
+            if (identityFailure !== null) {
               return {
-                deployment: deployment.snapshot,
+                deployment: identityFailure.snapshot,
                 progressed: true,
                 orphanProcessNames: orphans,
               };
@@ -365,6 +360,28 @@ export class RuntimeDeploymentReconciler {
     );
   }
 
+  private async failOnIdentityMismatch(
+    deployment: RuntimeDeployment,
+    instance: RuntimeReconcileInstance,
+    input: RuntimeDeploymentReconcileInput,
+  ): Promise<RuntimeDeployment | null> {
+    const verification = await this.providerIdentity.verify({
+      expectedProviderId: input.providerId,
+      target: instance.target,
+      timeoutMs: input.context.timeoutMs,
+      signal: input.context.signal,
+    });
+    if (verification.valid) return null;
+    await this.store.fail(
+      input.providerId,
+      input.deploymentId,
+      deployment.snapshot.status,
+      deployment.snapshot.observedRevision,
+      verification.reasonCode,
+    );
+    return this.requireDeployment(input);
+  }
+
   private async requireDeployment(
     input: RuntimeDeploymentReconcileInput,
   ): Promise<RuntimeDeployment> {
@@ -409,6 +426,10 @@ function stepContext(
     ...context,
     idempotencyKey: `${context.idempotencyKey}:${step}:${String(revision)}`,
   });
+}
+
+function isHealthy(result: RuntimeReconcileHealthResult): boolean {
+  return result.processState === "online" && result.live && result.ready;
 }
 
 function canFail(status: RuntimeDeploymentStatus): boolean {

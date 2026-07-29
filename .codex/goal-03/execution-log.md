@@ -36,3 +36,18 @@
 - Worker tests passed: 4 files / 12 tests; focused tests: 2 files / 5 tests
 - Typecheck, lint, static forbidden-symbol search, diff check, and Goal 2 state
   verification passed
+
+## G3-P2-B02
+
+- Started: 2026-07-29T09:38:15+08:00
+- Required Provider identity verification on the main Reconciler constructor
+- Added ACTIVE health degradation and identity-valid idempotence
+- Added DEGRADED unhealthy idempotence and healthy recovery through DISCOVERING
+- Replaced the domain's direct `DEGRADED -> ACTIVE` shortcut with
+  `DEGRADED -> DISCOVERING`
+- Added deterministic same-transition retry and divergent stale-revision tests
+- Focused tests passed: 3 files / 14 tests
+- RuntimeDeployment gate passed: 8 files / 55 tests
+- Catalog/Registry publication tests passed: 1 file / 4 tests
+- Typecheck, lint, diff check, Docker cleanup, and Goal 2 state verification
+  passed

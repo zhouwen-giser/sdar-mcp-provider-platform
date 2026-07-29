@@ -21,7 +21,7 @@ const ALLOWED: Readonly<Record<RuntimeDeploymentStatus, readonly RuntimeDeployme
   ACTIVE: ["DEGRADED", "DRAINING", "FAILED"],
   STOPPED: ["CONFIG_PREPARING", "REQUESTED"],
   DRAINING: ["STOPPED", "FAILED"],
-  DEGRADED: ["ACTIVE", "DRAINING", "FAILED"],
+  DEGRADED: ["DISCOVERING", "DRAINING", "FAILED"],
   FAILED: ["REQUESTED", "STOPPED"],
 };
 
@@ -77,6 +77,46 @@ describe("RuntimeDeployment state-machine properties", () => {
         new Date(),
       ),
     ).toThrow(expect.objectContaining({ code: "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" }));
+  });
+
+  it("makes concurrent recovery deterministic without permitting a direct ACTIVE shortcut", () => {
+    const recovered = atStatus("DEGRADED");
+    expect(
+      recovered.transition(
+        "DISCOVERING",
+        { expectedStatus: "DEGRADED", expectedRevision: 7 },
+        new Date(),
+      ),
+    ).toBe(true);
+    expect(
+      recovered.transition(
+        "DISCOVERING",
+        { expectedStatus: "DEGRADED", expectedRevision: 7 },
+        new Date(),
+      ),
+    ).toBe(false);
+
+    expect(() =>
+      atStatus("DEGRADED").transition(
+        "ACTIVE",
+        { expectedStatus: "DEGRADED", expectedRevision: 7 },
+        new Date(),
+      ),
+    ).toThrow(expect.objectContaining({ code: "INVALID_RUNTIME_DEPLOYMENT_TRANSITION" }));
+
+    const diverged = atStatus("DEGRADED");
+    diverged.transition(
+      "DRAINING",
+      { expectedStatus: "DEGRADED", expectedRevision: 7 },
+      new Date(),
+    );
+    expect(() =>
+      diverged.transition(
+        "DISCOVERING",
+        { expectedStatus: "DEGRADED", expectedRevision: 7 },
+        new Date(),
+      ),
+    ).toThrow(expect.objectContaining({ code: "RUNTIME_DEPLOYMENT_STATE_CONFLICT" }));
   });
 });
 

@@ -169,6 +169,7 @@ describe("RuntimeDeployment aggregate", () => {
     const deployment = createDeployment();
     activate(deployment);
     transition(deployment, "DEGRADED");
+    transition(deployment, "DISCOVERING");
     transition(deployment, "ACTIVE");
     deployment.changeDesiredState("stopped", 0, deployment.snapshot.desiredRevision, occurredAt);
     transition(deployment, "DRAINING");
