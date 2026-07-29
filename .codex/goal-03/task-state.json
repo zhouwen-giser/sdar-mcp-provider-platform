@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-03-merge-readiness-foundation",
-  "updatedAt": "2026-07-29T01:18:36.490978+00:00",
+  "updatedAt": "2026-07-29T01:26:15.975976+00:00",
   "tasks": {
     "G3-P0-B01": {
       "status": "PASSED",
@@ -13,10 +13,12 @@
       "reason": null
     },
     "G3-P1-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-29T01:19:05.993582+00:00",
+      "completedAt": "2026-07-29T01:26:15.975909+00:00",
+      "evidence": [
+        "manifest verifier 41 required/41 staged; 2 focused tests passed; docker compose config exit 0; no-cache runtime+adapter-typescript build exit 0; compose up --wait exit 0; /health/ready status=ready; compose down --volumes exit 0; pnpm typecheck/lint and git diff --check passed; Goal2 state unchanged"
+      ],
       "reason": null
     },
     "G3-P1-B02": {
