@@ -96,6 +96,9 @@ export interface WorkerJobSummary {
   readonly status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
   readonly attempts: number;
   readonly updatedAt: string;
+  readonly leaseOwner: string;
+  readonly fenceToken: string;
+  readonly timeline: readonly string[];
 }
 
 export interface RuntimeDeploymentDraft {
@@ -146,7 +149,42 @@ export interface IncidentSummary {
   readonly severity: "SEV-1" | "SEV-2" | "SEV-3";
   readonly status: "OPEN" | "MITIGATING" | "CLOSED";
   readonly deploymentId: string;
+  readonly jobId: string;
+  readonly owner: string;
   readonly updatedAt: string;
+  readonly timeline: readonly string[];
+}
+
+export interface CatalogOperationSummary {
+  readonly providerId: string;
+  readonly operationName: string;
+  readonly method: "tool" | "resource";
+  readonly revision: number;
+  readonly compatibility: "COMPATIBLE" | "BREAKING" | "REVIEW";
+  readonly registryStatus: "PUBLISHED" | "BLOCKED" | "DRAFT";
+  readonly schema: Readonly<Record<string, unknown>>;
+  readonly previousSchema: Readonly<Record<string, unknown>>;
+  readonly profile: string;
+  readonly evidence: readonly string[];
+}
+
+export interface RegistryRevision {
+  readonly revision: number;
+  readonly status: "PUBLISHED" | "BLOCKED" | "DRAFT";
+  readonly checksum: string;
+  readonly operationCount: number;
+  readonly createdAt: string;
+}
+
+export interface AuditEvent {
+  readonly auditId: string;
+  readonly action: string;
+  readonly aggregateId: string;
+  readonly reason: string;
+  readonly correlationId: string;
+  readonly before: Readonly<Record<string, unknown>>;
+  readonly after: Readonly<Record<string, unknown>>;
+  readonly occurredAt: string;
 }
 
 export interface DashboardSnapshot {
@@ -201,6 +239,7 @@ export interface PmsWebDataSource {
   deployment(deploymentId: string): Promise<RuntimeDeploymentSummary | undefined>;
   runtimeProcesses(): Promise<readonly RuntimeProcessSummary[]>;
   jobs(): Promise<readonly WorkerJobSummary[]>;
+  requeueJob(jobId: string): PrototypeOperation;
   configurationProfiles(): Promise<readonly ConfigurationProfile[]>;
   runtimeConfigurationAcks(profileId: string): Promise<readonly RuntimeConfigurationAck[]>;
   publishConfiguration(profileId: string): PrototypeOperation;
@@ -213,6 +252,12 @@ export interface PmsWebDataSource {
     readonly operation: PrototypeOperation;
   };
   incidents(): Promise<readonly IncidentSummary[]>;
+  closeIncident(incidentId: string): PrototypeOperation;
+  catalogOperations(): Promise<readonly CatalogOperationSummary[]>;
+  registryRevisions(): Promise<readonly RegistryRevision[]>;
+  rediscoverCatalog(providerId: string): PrototypeOperation;
+  publishCatalog(providerId: string): PrototypeOperation;
+  auditEvents(): Promise<readonly AuditEvent[]>;
   checkAdapter(draft: ProviderOnboardingDraft): Promise<MockCheckResult>;
   preflightProvider(draft: ProviderOnboardingDraft): Promise<MockCheckResult>;
   onboardProvider(draft: ProviderOnboardingDraft): {

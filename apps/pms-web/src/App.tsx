@@ -26,6 +26,13 @@ import {
   RuntimeJobsPage,
 } from "./features/operations/RuntimeRecoveryPage.js";
 import { ConfigurationPage } from "./features/configuration/ConfigurationPage.js";
+import { CatalogOperationPage, CatalogPage } from "./features/catalog/CatalogPages.js";
+import { RegistryPage } from "./features/registry/RegistryPage.js";
+import { AuditPage } from "./features/audit/AuditPage.js";
+import { ConformancePage } from "./features/conformance/ConformancePage.js";
+import { McpExplorerPage } from "./features/mcp-explorer/McpExplorerPage.js";
+import { ChangeRequestsPage } from "./features/changes/ChangeRequestsPage.js";
+import { SystemSettingsPage } from "./features/system/SystemSettingsPage.js";
 import "./styles.css";
 
 export function App() {
@@ -88,6 +95,25 @@ export function App() {
         <ConfigurationPage />
       ) : route.path === "/configuration/:profileId" ? (
         <ConfigurationPage profileId={segments[1] ?? ""} />
+      ) : route.path === "/catalog" ? (
+        <CatalogPage />
+      ) : route.path === "/catalog/:providerId/:operationName" ? (
+        <CatalogOperationPage
+          providerId={segments[1] ?? ""}
+          operationName={segments[2] ?? ""}
+        />
+      ) : route.path === "/registry" ? (
+        <RegistryPage />
+      ) : route.path === "/audit" ? (
+        <AuditPage />
+      ) : route.path === "/conformance" ? (
+        <ConformancePage />
+      ) : route.path === "/mcp-explorer" ? (
+        <McpExplorerPage />
+      ) : route.path === "/changes" ? (
+        <ChangeRequestsPage />
+      ) : route.path === "/system/settings" ? (
+        <SystemSettingsPage />
       ) : (
         <StructuredPlaceholder route={route} />
       )}

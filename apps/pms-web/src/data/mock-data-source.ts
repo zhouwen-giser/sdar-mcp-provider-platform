@@ -7,6 +7,8 @@ import {
 import { buildScenario } from "./scenarios.js";
 import type {
   DashboardSnapshot,
+  AuditEvent,
+  CatalogOperationSummary,
   ConfigurationProfile,
   IncidentSummary,
   MockCheckResult,
@@ -20,10 +22,16 @@ import type {
   RuntimeDeploymentSummary,
   RuntimeConfigurationAck,
   RuntimeProcessSummary,
+  RegistryRevision,
   SimulatedOperationInput,
   WorkerJobSummary,
 } from "./types.js";
-import { CONFIGURATION_PROFILES } from "./fixtures.js";
+import {
+  AUDIT_EVENTS,
+  CATALOG_OPERATIONS,
+  CONFIGURATION_PROFILES,
+  REGISTRY_REVISIONS,
+} from "./fixtures.js";
 
 export class MockPmsWebDataSource implements PmsWebDataSource {
   readonly #listeners = new Set<() => void>();
@@ -37,6 +45,8 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
   readonly #processOverrides = new Map<string, RuntimeProcessSummary>();
   readonly #createdJobs = new Map<string, WorkerJobSummary>();
   readonly #configurationAcks = new Map<string, readonly RuntimeConfigurationAck[]>();
+  readonly #incidentOverrides = new Map<string, IncidentSummary>();
+  readonly #catalogOverrides = new Map<string, CatalogOperationSummary>();
   #revision = 0;
 
   constructor(
@@ -101,7 +111,32 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
 
   async jobs(): Promise<readonly WorkerJobSummary[]> {
     const jobs = await this.#read((dataset) => dataset.jobs);
-    return [...jobs, ...this.#createdJobs.values()];
+    const baseIds = new Set(jobs.map((job) => job.jobId));
+    return [
+      ...jobs.map((job) => this.#createdJobs.get(job.jobId) ?? job),
+      ...[...this.#createdJobs.values()].filter((job) => !baseIds.has(job.jobId)),
+    ];
+  }
+
+  requeueJob(jobId: string): PrototypeOperation {
+    const existing = [
+      ...buildScenario(this.currentScenario).jobs,
+      ...this.#createdJobs.values(),
+    ].find((job) => job.jobId === jobId);
+    if (existing === undefined) throw new Error("PROTOTYPE_JOB_NOT_FOUND");
+    const operation = this.startOperation({
+      label: `模拟重新入队 ${jobId}`,
+      steps: ["Validate Fence", "Create Attempt", "Enqueue"],
+    });
+    this.#createdJobs.set(jobId, {
+      ...existing,
+      status: "PENDING",
+      attempts: existing.attempts + 1,
+      fenceToken: `${existing.fenceToken}-retry`,
+      timeline: [...existing.timeline, "SIMULATED_REENQUEUE"],
+    });
+    this.#emit();
+    return operation;
   }
 
   async configurationProfiles(): Promise<readonly ConfigurationProfile[]> {
@@ -251,6 +286,9 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
       status: "PENDING",
       attempts: 1,
       updatedAt: "Prototype clock",
+      leaseOwner: "worker-mock-reconcile",
+      fenceToken: `fence-${deploymentId}`,
+      timeline: ["ENQUEUED"],
     };
     this.#createdJobs.set(job.jobId, job);
     const operation = this.startOperation({
@@ -292,7 +330,101 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
   }
 
   async incidents(): Promise<readonly IncidentSummary[]> {
-    return this.#read((dataset) => dataset.incidents);
+    const incidents = await this.#read((dataset) => dataset.incidents);
+    return incidents.map(
+      (incident) => this.#incidentOverrides.get(incident.incidentId) ?? incident,
+    );
+  }
+
+  closeIncident(incidentId: string): PrototypeOperation {
+    const incident = buildScenario(this.currentScenario).incidents.find(
+      (item) => item.incidentId === incidentId,
+    );
+    if (incident === undefined) throw new Error("PROTOTYPE_INCIDENT_NOT_FOUND");
+    const operation = this.startOperation({
+      label: `模拟关闭 Incident ${incidentId}`,
+      steps: ["Verify Recovery", "Record Resolution", "Close Incident"],
+    });
+    this.#operationEffects.set(operation.operationId, (current) => {
+      if (current.status !== "COMPLETED") return;
+      this.#incidentOverrides.set(incidentId, {
+        ...incident,
+        status: "CLOSED",
+        timeline: [...incident.timeline, "SIMULATED_CLOSED"],
+      });
+    });
+    return operation;
+  }
+
+  async catalogOperations(): Promise<readonly CatalogOperationSummary[]> {
+    if (this.currentScenario === "network-error") throw new Error("MOCK_DATA_UNAVAILABLE");
+    const operations = structuredClone(CATALOG_OPERATIONS) as unknown as CatalogOperationSummary[];
+    const withScenario = operations.map((operation, index) =>
+      this.currentScenario === "catalog-breaking" && index === 0
+        ? {
+            ...operation,
+            revision: 43,
+            compatibility: "BREAKING" as const,
+            registryStatus: "BLOCKED" as const,
+            schema: {
+              ...operation.schema,
+              required: ["resourceId", "temperature", "safetyApproval"],
+            },
+          }
+        : operation,
+    );
+    return withScenario.map(
+      (operation) =>
+        this.#catalogOverrides.get(`${operation.providerId}/${operation.operationName}`) ??
+        operation,
+    );
+  }
+
+  async registryRevisions(): Promise<readonly RegistryRevision[]> {
+    const revisions = structuredClone(REGISTRY_REVISIONS) as unknown as RegistryRevision[];
+    if (this.currentScenario !== "catalog-breaking") return revisions;
+    return [
+      {
+        revision: 43,
+        status: "BLOCKED",
+        checksum: "sha256:catalog-mock-43-breaking",
+        operationCount: 8,
+        createdAt: "Prototype clock",
+      },
+      ...revisions,
+    ];
+  }
+
+  rediscoverCatalog(providerId: string): PrototypeOperation {
+    return this.startOperation({
+      label: `模拟重新发现 ${providerId}`,
+      steps: ["Enqueue Discovery", "Read Mock Schema", "Classify Compatibility"],
+    });
+  }
+
+  publishCatalog(providerId: string): PrototypeOperation {
+    const operation = this.startOperation({
+      label: `模拟发布 Catalog ${providerId}`,
+      steps: ["Verify Review", "Create Registry Revision", "Publish Mock Projection"],
+    });
+    this.#operationEffects.set(operation.operationId, (current) => {
+      if (current.status !== "COMPLETED") return;
+      for (const item of CATALOG_OPERATIONS.filter(
+        (candidate) => candidate.providerId === providerId,
+      )) {
+        this.#catalogOverrides.set(`${item.providerId}/${item.operationName}`, {
+          ...(structuredClone(item) as unknown as CatalogOperationSummary),
+          revision: item.revision + 1,
+          compatibility: "COMPATIBLE",
+          registryStatus: "PUBLISHED",
+        });
+      }
+    });
+    return operation;
+  }
+
+  async auditEvents(): Promise<readonly AuditEvent[]> {
+    return structuredClone(AUDIT_EVENTS) as unknown as AuditEvent[];
   }
 
   async checkAdapter(draft: ProviderOnboardingDraft): Promise<MockCheckResult> {

@@ -7,3 +7,5 @@
   recovery feature modules. No Runtime, Worker, PM2 or backend package is touched.
 - G5-P1-B04: `apps/pms-web/src/App.tsx` receives only Configuration route wiring; the complete
   editor and publishing interaction remains inside the task-scoped frontend feature.
+- G5-P1-B05: `apps/pms-web/src/App.tsx` receives only governance/operations route wiring. The
+  task remains a browser-only projection with no authentication, transport or backend changes.

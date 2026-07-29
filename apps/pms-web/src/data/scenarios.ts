@@ -88,6 +88,9 @@ export function buildScenario(scenario: PrototypeScenario): PrototypeDataset {
         status: "PENDING",
         attempts: 3,
         updatedAt: "2026-07-29T06:02:00.000Z",
+        leaseOwner: "worker-mock-backlog",
+        fenceToken: "fence-backlog-3",
+        timeline: ["ENQUEUED", "LEASE_EXPIRED", "REENQUEUED"],
       },
     ];
   }
@@ -99,7 +102,10 @@ export function buildScenario(scenario: PrototypeScenario): PrototypeDataset {
         severity: "SEV-2",
         status: "MITIGATING",
         deploymentId: "deploy-ha-primary",
+        jobId: "job-reconcile-backlog",
+        owner: "runtime-oncall-mock",
         updatedAt: "2026-07-29T06:02:00.000Z",
+        timeline: ["DETECTED", "TRIAGED", "RECONCILE_REQUESTED"],
       },
     ];
     dashboard = { ...dashboard, openIncidentCount: 1, stale: true };

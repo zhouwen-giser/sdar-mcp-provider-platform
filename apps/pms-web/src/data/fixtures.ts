@@ -182,7 +182,93 @@ export const HEALTHY_DATASET: PrototypeDataset = {
       status: "COMPLETED",
       attempts: 1,
       updatedAt: "2026-07-29T05:55:00.000Z",
+      leaseOwner: "worker-mock-01",
+      fenceToken: "fence-188",
+      timeline: ["ENQUEUED", "LEASED", "DISCOVERED", "COMPLETED"],
     },
   ],
   incidents: [],
 };
+
+export const CATALOG_OPERATIONS = [
+  {
+    providerId: "provider-ha-east",
+    operationName: "set_temperature",
+    method: "tool",
+    revision: 42,
+    compatibility: "COMPATIBLE",
+    registryStatus: "PUBLISHED",
+    schema: {
+      type: "object",
+      required: ["resourceId", "temperature"],
+      properties: { resourceId: { type: "string" }, temperature: { type: "number" } },
+    },
+    previousSchema: {
+      type: "object",
+      required: ["resourceId"],
+      properties: { resourceId: { type: "string" }, temperature: { type: "number" } },
+    },
+    profile: "climate-control / safe-write",
+    evidence: ["mock adapter handshake", "schema checksum verified", "sample invocation omitted"],
+  },
+  {
+    providerId: "provider-ugv-fleet",
+    operationName: "navigate",
+    method: "tool",
+    revision: 28,
+    compatibility: "COMPATIBLE",
+    registryStatus: "PUBLISHED",
+    schema: {
+      type: "object",
+      required: ["resourceId", "waypoint"],
+      properties: { resourceId: { type: "string" }, waypoint: { type: "string" } },
+    },
+    previousSchema: {
+      type: "object",
+      required: ["resourceId", "waypoint"],
+      properties: { resourceId: { type: "string" }, waypoint: { type: "string" } },
+    },
+    profile: "fleet-navigation / supervised",
+    evidence: ["mock discovery job", "conformance placeholder"],
+  },
+] as const;
+
+export const REGISTRY_REVISIONS = [
+  {
+    revision: 42,
+    status: "PUBLISHED",
+    checksum: "sha256:catalog-mock-42",
+    operationCount: 8,
+    createdAt: "2026-07-29T05:55:00.000Z",
+  },
+  {
+    revision: 41,
+    status: "PUBLISHED",
+    checksum: "sha256:catalog-mock-41",
+    operationCount: 7,
+    createdAt: "2026-07-28T10:00:00.000Z",
+  },
+] as const;
+
+export const AUDIT_EVENTS = [
+  {
+    auditId: "audit-config-043",
+    action: "CONFIGURATION_REVISION_DRAFTED",
+    aggregateId: "provider-runtime",
+    reason: "提高模拟连接池容量",
+    correlationId: "corr-prototype-config-043",
+    before: { poolSize: 8, credential: "REDACTED" },
+    after: { poolSize: 12, credential: "REDACTED" },
+    occurredAt: "2026-07-29T05:45:00.000Z",
+  },
+  {
+    auditId: "audit-catalog-042",
+    action: "CATALOG_REVISION_PUBLISHED",
+    aggregateId: "provider-ha-east",
+    reason: "Mock discovery completed",
+    correlationId: "corr-prototype-catalog-042",
+    before: { revision: 41 },
+    after: { revision: 42 },
+    occurredAt: "2026-07-29T05:55:00.000Z",
+  },
+] as const;
