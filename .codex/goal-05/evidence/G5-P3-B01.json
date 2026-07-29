@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P3-B01",
+  "commitSha": "e796eeb9e48618a6d2ae346d457d4abc578875c5",
+  "commands": [
+    {
+      "command": "pnpm --filter @sdar/pms-web test",
+      "exitCode": 0,
+      "result": "3 files and 17 tests passed"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web build",
+      "exitCode": 0,
+      "result": "compiled server and browser JavaScript plus HTML and CSS"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "docker build --target pms-api --build-arg VCS_REF=e796eeb9e48618a6d2ae346d457d4abc578875c5 -t sdar/pms-api:0.1.0-rc .",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "docker build --target pms-worker --build-arg VCS_REF=e796eeb9e48618a6d2ae346d457d4abc578875c5 -t sdar/pms-worker:0.1.0-rc .",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "docker build --target pms-web --build-arg VCS_REF=e796eeb9e48618a6d2ae346d457d4abc578875c5 -t sdar/pms-web:0.1.0-rc .",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "node scripts/verify-release-images.mjs",
+      "exitCode": 0,
+      "result": "API 102084031 bytes; Worker 102087728 bytes; Web 79927393 bytes; all lifecycle and security assertions passed"
+    },
+    {
+      "command": "docker compose -f deploy/pms/compose.yaml config -q",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/decisions.md",
+    ".codex/goal-05/evidence/G5-P3-B01.json",
+    "Dockerfile",
+    "apps/pms-web/build-static.mjs",
+    "apps/pms-web/src/server.ts",
+    "apps/pms-web/test/server.test.ts",
+    "apps/pms-web/tsconfig.json",
+    "deploy/pms/compose.yaml",
+    "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
+    "docs/operations/PMS_WEB.md",
+    "scripts/verify-release-images.mjs"
+  ],
+  "assertions": {
+    "explicitPmsTargets": true,
+    "existingRuntimeAndAdapterTargetsPreserved": true,
+    "builtEntrypoints": true,
+    "compiledWorkspacePackagesResolvable": true,
+    "nonRootFinalContainers": true,
+    "productionDependenciesOnly": true,
+    "readOnlyApplicationFiles": true,
+    "immutableVersionedComposeImages": true,
+    "ociLabelsMatchVersionAndCommit": true,
+    "apiHealthAndReadiness": true,
+    "workerCompositionStartAndSafeStop": true,
+    "workerPackageSyncSourcePresent": true,
+    "pmsAndRuntimeMigrationSourcesPresent": true,
+    "runtimeReleaseRootMountedReadOnly": true,
+    "webAssetsAndSpaFallback": true,
+    "webHealthEndpoints": true,
+    "webSecurityHeaders": true,
+    "webApiBaseConfigurable": true,
+    "imageSizeLimitsPassed": true,
+    "testSecretsAbsentFromHistoryAndFilesystem": true
+    ,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}
