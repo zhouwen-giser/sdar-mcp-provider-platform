@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P0-B01",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "baseSha": "039843ffc3d9e57017d6015261899927d074168a",
+  "activationCommit": "f2b17b5",
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "postgresql": "17.10",
+    "docker": "29.6.1",
+    "dockerCompose": "5.3.1",
+    "git": "2.34.1",
+    "os": "Linux 6.8.0-124-generic x86_64",
+    "pm2Availability": "not globally installed and not pinned in the workspace"
+  },
+  "commands": [
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspaces, lockfile current"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm verify:v2",
+      "exitCode": 0,
+      "result": "frozen 74/74; unit 123; contract 18; integration 212; recovery 9; security 42; E2E 8; RC regression 6; 275 production SBOM components; reproducible Runtime image 99659358/350000000 bytes"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:pms-api-production",
+      "exitCode": 0,
+      "result": "1 file, 3 tests"
+    },
+    {
+      "command": "node scripts/verify-docker-workspace-manifests.mjs",
+      "exitCode": 0,
+      "result": "41 required, 41 staged"
+    },
+    {
+      "command": "docker compose config -q && docker compose build runtime adapter-typescript",
+      "exitCode": 0,
+      "result": "both images built"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-worker test",
+      "exitCode": 0,
+      "result": "4 files, 12 tests"
+    },
+    {
+      "command": "pnpm --filter @sdar/pm2-runtime-adapter test",
+      "exitCode": 0,
+      "result": "6 files, 37 tests"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "priorStateHashes": {
+    ".codex/task-state.json": "5ffce4a73146dd9c8a7d7ffd299fb9298d2c461355946120019a36d6ce4378be",
+    ".codex/handoff/goal2-handoff.json": "c93f9fc6da11e8e359d77db45329a763468990607b0d2a578f8e71549319c6a2",
+    ".codex/goal-03/task-state.json": "97655383f319a93b51071872b0dfa39c8612b5fda6b2dad661d12c7f1853afcf",
+    ".codex/goal-03/handoff.json": "10179891284cf6695739bce4622dcdae18cc10e280126f7a88d4c6e624bb632d",
+    ".codex/goal-03/test-evidence.json": "1dfc5023fbabd45e3826ddc654b8e17c5ebf8e002c02f328b564a4f073bdeff0"
+  },
+  "deferredExternalQualification": [
+    "real external SDAR",
+    "real UGV",
+    "real NPC Tank",
+    "real Home Assistant"
+  ],
+  "claimBoundary": "Baseline only; no production code changed and no external resource certification is claimed."
+}
