@@ -2,8 +2,9 @@
 
 ## Authority
 
-Product source and CI inputs are frozen at `945df66df2f2a21d7a2c59e732535fe78d02744f`. Metadata commits
-may change only the release allowlist verified by
+Product source is frozen at `945df66df2f2a21d7a2c59e732535fe78d02744f`. The exact workflow-head commit may
+change only release metadata, workflow, and explicitly allowlisted gate-harness
+files verified by
 `scripts/release/verify-release-metadata.mjs`. The protected tag and metadata
 commit are recorded externally at publication, avoiding self-reference.
 

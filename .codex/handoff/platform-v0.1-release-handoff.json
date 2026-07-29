@@ -9,7 +9,8 @@
     "pendingFreeze": true,
     "candidateWorkflow": {
       "workflow": ".github/workflows/release-candidate.yml",
-      "headSha": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "headSha": null,
       "runId": null,
       "runUrl": null
     },
@@ -35,6 +36,11 @@
         "jobUrl": null
       },
       {
+        "name": "runtime-credential-isolation",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
         "name": "worker-lease-safety",
         "status": "pending",
         "jobUrl": null
@@ -51,11 +57,6 @@
       },
       {
         "name": "runtime-compose",
-        "status": "pending",
-        "jobUrl": null
-      },
-      {
-        "name": "runtime-credential-isolation",
         "status": "pending",
         "jobUrl": null
       },

@@ -12,11 +12,11 @@ export const REQUIRED_JOBS = Object.freeze([
   "runtime-ci",
   "pms-api-production",
   "worker-pm2-production",
+  "runtime-credential-isolation",
   "worker-lease-safety",
   "provider-regression",
   "platform-e2e",
   "runtime-compose",
-  "runtime-credential-isolation",
   "release-artifacts",
   "release-metadata",
 ]);
@@ -32,6 +32,8 @@ const RELEASE_PATHS = [
   /^\.github\/workflows\/(?:ci|release-candidate|release)\.yml$/,
   /^scripts\/release\//,
   /^scripts\/generate-sbom\.mjs$/,
+  /^scripts\/run-worker-pm2-production-gate\.mjs$/,
+  /^tests\/worker-pm2-production\/run-production-lifecycle\.mjs$/,
   /^package\.json$/,
   /^reports\/platform-v0\.1\//,
   /^reports\/sbom\/runtime-v1\.cdx\.json$/,
@@ -86,8 +88,8 @@ export function changedPaths(root, candidate) {
 }
 
 export function assertQualification(qualification, candidate) {
-  if (qualification?.candidateWorkflow?.headSha !== candidate) {
-    throw new Error("RELEASE_CANDIDATE_WORKFLOW_SHA_MISMATCH");
+  if (qualification?.candidateWorkflow?.qualifiedSourceCommit !== candidate) {
+    throw new Error("RELEASE_QUALIFIED_SOURCE_SHA_MISMATCH");
   }
   const jobs = qualification.requiredJobs;
   if (
@@ -99,6 +101,9 @@ export function assertQualification(qualification, candidate) {
   if (qualification.status === "pending_actions_freeze") {
     if (
       qualification.pendingFreeze !== true ||
+      qualification.candidateWorkflow.headSha !== null ||
+      qualification.candidateWorkflow.runId !== null ||
+      qualification.candidateWorkflow.runUrl !== null ||
       jobs.some(({ status, jobUrl }) => status !== "pending" || jobUrl !== null)
     ) {
       throw new Error("RELEASE_PENDING_QUALIFICATION_INVALID");
@@ -109,6 +114,7 @@ export function assertQualification(qualification, candidate) {
     throw new Error("RELEASE_QUALIFICATION_STATUS_INVALID");
   }
   if (
+    !/^[0-9a-f]{40}$/.test(qualification.candidateWorkflow.headSha) ||
     typeof qualification.candidateWorkflow.runUrl !== "string" ||
     !qualification.candidateWorkflow.runUrl.startsWith("https://github.com/") ||
     jobs.some(
@@ -119,6 +125,39 @@ export function assertQualification(qualification, candidate) {
     )
   ) {
     throw new Error("RELEASE_ACTIONS_QUALIFICATION_INCOMPLETE");
+  }
+}
+
+export function assertCandidateJobResults(results) {
+  if (
+    results === null ||
+    typeof results !== "object" ||
+    Array.isArray(results) ||
+    Object.keys(results).sort().join("\n") !==
+      REQUIRED_JOBS.filter((name) => name !== "release-metadata")
+        .sort()
+        .join("\n")
+  ) {
+    throw new Error("RELEASE_CANDIDATE_JOBS_MISSING");
+  }
+  if (Object.values(results).some((result) => result !== "success")) {
+    throw new Error("RELEASE_CANDIDATE_JOB_FAILED");
+  }
+}
+
+export function assertCandidateArtifactReport(report, workflowHeadCommit) {
+  if (report?.revision !== workflowHeadCommit) {
+    throw new Error("RELEASE_CANDIDATE_ARTIFACT_SHA_MISMATCH");
+  }
+  const artifacts = report.artifacts;
+  if (
+    artifacts === null ||
+    typeof artifacts !== "object" ||
+    !["runtime", "api", "worker", "web"].every((name) =>
+      /^sha256:[0-9a-f]{64}$/.test(artifacts[name]?.imageId),
+    )
+  ) {
+    throw new Error("RELEASE_CANDIDATE_ARTIFACT_DIGEST_MISSING");
   }
 }
 

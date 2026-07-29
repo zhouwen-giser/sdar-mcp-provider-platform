@@ -24,7 +24,8 @@
     "pendingFreeze": true,
     "candidateWorkflow": {
       "workflow": ".github/workflows/release-candidate.yml",
-      "headSha": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "headSha": null,
       "runId": null,
       "runUrl": null
     },
@@ -50,6 +51,11 @@
         "jobUrl": null
       },
       {
+        "name": "runtime-credential-isolation",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
         "name": "worker-lease-safety",
         "status": "pending",
         "jobUrl": null
@@ -70,11 +76,6 @@
         "jobUrl": null
       },
       {
-        "name": "runtime-credential-isolation",
-        "status": "pending",
-        "jobUrl": null
-      },
-      {
         "name": "release-artifacts",
         "status": "pending",
         "jobUrl": null
@@ -90,7 +91,7 @@
     "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
     "digest": {
       "algorithm": "sha256",
-      "value": "3858d750e4474f28e067344241af676f9ee2c22c45f1f7cf56d16ea5a75c8ef4",
+      "value": "b49014cb8b1cd29b83945c07499800d1bda22e6655daa3b51c3903e8af141dd2",
       "status": "generated"
     }
   },

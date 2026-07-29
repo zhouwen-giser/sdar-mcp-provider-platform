@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P4-B02",
+  "commitShaAtEvidenceCreation": "88590eb896fedf5c41db6d043aad44de795d8595",
+  "candidateCommitAuthority": "exact GitHub workflow head recorded by release-candidate-summary artifact",
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspace projects already up to date"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> SDAR_REUSE_EXISTING_INFRA=true pnpm verify:v2",
+      "exitCode": 0,
+      "result": "frozen protocol 74/74; runtime closure/followup; Business Events 9/9; repository verify and RC2 regressions passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> SDAR_REUSE_EXISTING_INFRA=true pnpm verify:platform",
+      "exitCode": 0,
+      "result": "Platform static, migration, configuration, PM2, security, fault and E2E gates passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:pms-api-production",
+      "exitCode": 0,
+      "result": "1 file, 3 tests passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-pm2-production",
+      "exitCode": 0,
+      "result": "WORKER_PM2_PRODUCTION_GATE_OK; exact production path and bounded cleanup completed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-lease-safety",
+      "exitCode": 0,
+      "result": "WORKER_LEASE_SAFETY_GATE_OK"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs",
+      "exitCode": 0,
+      "result": "four local images built; non-root, health, size and secret checks passed"
+    },
+    {
+      "command": "node scripts/release/build-source-archive.mjs (twice) && node scripts/release/verify-source-archive.mjs",
+      "exitCode": 0,
+      "result": "965 files; deterministic sha256:b49014cb8b1cd29b83945c07499800d1bda22e6655daa3b51c3903e8af141dd2"
+    },
+    {
+      "command": "node scripts/release/verify-release-metadata.mjs && pnpm release:candidate:check",
+      "exitCode": 0,
+      "result": "metadata and workflow graph passed; 14 positive/negative assertions passed"
+    },
+    {
+      "command": "pnpm typecheck && pnpm lint && pnpm format:check && git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "diagnostics": [
+    {
+      "command": "TEST_DATABASE_URL=<stopped-local-postgres-54329> pnpm verify:v2",
+      "exitCode": 1,
+      "result": "environment-only ECONNREFUSED; rerun against discovered running test PostgreSQL at 5432 passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-pm2-production",
+      "exitCode": 1,
+      "result": "qualification exposed unbounded best-effort cleanup and nondeterministic post-restart convergence; the gate harness now bounds cleanup, explicitly waits for ACTIVE, emits stages and passed from a clean PM2 run"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P4-B02.json",
+    ".codex/handoff/platform-v0.1-release-handoff.json",
+    ".github/workflows/release-candidate.yml",
+    "docs/review/GOAL05_CI_MATRIX.md",
+    "package.json",
+    "reports/ci/release-artifacts.json",
+    "reports/platform-v0.1/CHECKSUMS.sha256",
+    "reports/platform-v0.1/RELEASE_MANIFEST.json",
+    "reports/platform-v0.1/TEST_EVIDENCE.json",
+    "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+    "scripts/release/generate-candidate-summary.mjs",
+    "scripts/release/generate-release-metadata.mjs",
+    "scripts/release/release-metadata-lib.mjs",
+    "scripts/release/verify-release-candidate-workflow.mjs",
+    "scripts/release/verify-release-candidate-workflow.test.mjs",
+    "scripts/release/verify-release-metadata.test.mjs",
+    "scripts/run-worker-pm2-production-gate.mjs",
+    "tests/worker-pm2-production/run-production-lifecycle.mjs"
+  ],
+  "assertions": {
+    "allJobsCheckoutExactCandidate": true,
+    "releaseMetadataNeedsAllOtherJobs": true,
+    "candidateSummaryBindsWorkflowHead": true,
+    "missingJobRejected": true,
+    "failedJobRejected": true,
+    "shaMismatchRejected": true,
+    "missingArtifactDigestRejected": true,
+    "qualificationPublishesImages": false,
+    "qualificationCreatesTag": false,
+    "secretsIncluded": false,
+    "externalCertificationClaimed": false
+  },
+  "githubActions": {
+    "statusAtCommit": "pending",
+    "authority": "release-candidate-summary artifact from exact workflow-head run"
+  },
+  "secretsRedacted": true
+}

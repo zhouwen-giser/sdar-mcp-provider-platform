@@ -3,6 +3,8 @@ import test from "node:test";
 import {
   FAILED_CANDIDATE,
   REQUIRED_JOBS,
+  assertCandidateArtifactReport,
+  assertCandidateJobResults,
   assertCandidateRelationship,
   assertQualification,
   assertReleaseOnlyPaths,
@@ -31,6 +33,7 @@ test("rejects a failed CI conclusion presented as qualification", () => {
         {
           status: "qualified",
           candidateWorkflow: {
+            qualifiedSourceCommit: validSha,
             headSha: validSha,
             runUrl: "https://github.com/example/repository/actions/runs/1",
           },
@@ -46,19 +49,42 @@ test("rejects a failed CI conclusion presented as qualification", () => {
   );
 });
 
-test("rejects a missing or mismatched candidate workflow SHA", () => {
+test("rejects a missing or mismatched qualified source SHA", () => {
   assert.throws(
     () =>
       assertQualification(
         {
           status: "pending_actions_freeze",
           pendingFreeze: true,
-          candidateWorkflow: { headSha: FAILED_CANDIDATE },
+          candidateWorkflow: { qualifiedSourceCommit: FAILED_CANDIDATE, headSha: null },
           requiredJobs: REQUIRED_JOBS.map((name) => ({ name, status: "pending", jobUrl: null })),
         },
         validSha,
       ),
-    /RELEASE_CANDIDATE_WORKFLOW_SHA_MISMATCH/,
+    /RELEASE_QUALIFIED_SOURCE_SHA_MISMATCH/,
+  );
+});
+
+test("rejects missing Candidate jobs", () => {
+  assert.throws(() => assertCandidateJobResults({ static: "success" }), /JOBS_MISSING/);
+});
+
+test("rejects a failed Candidate job", () => {
+  const results = Object.fromEntries(
+    REQUIRED_JOBS.filter((name) => name !== "release-metadata").map((name) => [name, "success"]),
+  );
+  results.static = "failure";
+  assert.throws(() => assertCandidateJobResults(results), /JOB_FAILED/);
+});
+
+test("rejects an artifact report from a different SHA or without digests", () => {
+  assert.throws(
+    () => assertCandidateArtifactReport({ revision: FAILED_CANDIDATE, artifacts: {} }, validSha),
+    /ARTIFACT_SHA_MISMATCH/,
+  );
+  assert.throws(
+    () => assertCandidateArtifactReport({ revision: validSha, artifacts: {} }, validSha),
+    /ARTIFACT_DIGEST_MISSING/,
   );
 });
 

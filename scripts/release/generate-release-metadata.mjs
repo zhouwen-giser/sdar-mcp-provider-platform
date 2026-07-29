@@ -23,7 +23,8 @@ const qualification = {
   pendingFreeze: true,
   candidateWorkflow: {
     workflow: ".github/workflows/release-candidate.yml",
-    headSha: candidate,
+    qualifiedSourceCommit: candidate,
+    headSha: null,
     runId: null,
     runUrl: null,
   },
@@ -199,8 +200,9 @@ function delivery(candidate) {
 
 ## Authority
 
-Product source and CI inputs are frozen at \`${candidate}\`. Metadata commits
-may change only the release allowlist verified by
+Product source is frozen at \`${candidate}\`. The exact workflow-head commit may
+change only release metadata, workflow, and explicitly allowlisted gate-harness
+files verified by
 \`scripts/release/verify-release-metadata.mjs\`. The protected tag and metadata
 commit are recorded externally at publication, avoiding self-reference.
 
@@ -220,9 +222,10 @@ resources are unqualified. No external certification is claimed.
 function authority(candidate) {
   return `# Goal 05 Release Authority
 
-The immutable product/CI input is \`${candidate}\`. It must be an ancestor of
-every metadata commit, and every intervening path must match the verifier's
-release-only allowlist.
+The immutable product source is \`${candidate}\`. It must be an ancestor of
+every workflow-head commit, and every intervening path must match the verifier's
+release-only allowlist. The exact workflow head separately binds CI definitions
+and the narrowly scoped gate harness used to qualify that product source.
 
 The tag \`${RELEASE_TAG}\`, its main-branch commit, GitHub Actions run and OCI
 digests are external publication facts. They remain null/pending in repository

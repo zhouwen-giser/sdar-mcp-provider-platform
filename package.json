@@ -128,6 +128,7 @@
     "verify:ugv-npc-provider": "pnpm verify:ugv-provider && pnpm verify:npc-tank-provider",
     "protocol:ha-climate:check": "node scripts/provider-conformance-report.mjs --provider home-assistant-climate --check",
     "audit:dependencies": "pnpm audit --audit-level high",
+    "release:candidate:check": "node scripts/release/verify-release-candidate-workflow.mjs && node --test scripts/release/verify-release-candidate-workflow.test.mjs scripts/release/verify-release-metadata.test.mjs",
     "sbom:generate": "node scripts/generate-sbom.mjs",
     "sbom:check": "node scripts/generate-sbom.mjs --check",
     "deployment:check": "node scripts/check-kubernetes.mjs",

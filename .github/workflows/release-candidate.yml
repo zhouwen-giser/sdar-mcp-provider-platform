@@ -1,0 +1,391 @@
+name: release-candidate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: Exact branch commit to qualify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ inputs.candidate || github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+env:
+  CANDIDATE_SHA: ${{ inputs.candidate || github.event.pull_request.head.sha }}
+
+jobs:
+  static:
+    name: static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm protocol:check
+      - run: pnpm sbom:check
+
+  runtime-ci:
+    name: runtime-ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_runtime_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_runtime_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          version: 1.57.2
+          github_token: ${{ github.token }}
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:v2
+
+  pms-api-production:
+    name: pms-api-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_pms_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_pms_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_pms_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:pms-api-production
+      - run: pnpm test:pms
+      - run: pnpm test:pms-config-e2e
+      - run: pnpm test:pms-migrations
+
+  worker-pm2-production:
+    name: worker-pm2-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_worker_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_worker_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_worker_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:worker-pm2-production
+      - if: always()
+        run: node --import tsx scripts/cleanup-worker-pm2-ci.mjs
+
+  runtime-credential-isolation:
+    name: runtime-credential-isolation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_credential_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_credential_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_credential_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:worker-pm2-production
+      - run: test -f reports/evidence/G5-P1-B02-runtime-credential-isolation.json
+      - if: always()
+        run: node --import tsx scripts/cleanup-worker-pm2-ci.mjs
+
+  worker-lease-safety:
+    name: worker-lease-safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_lease_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_lease_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_lease_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:worker-lease-safety
+
+  provider-regression:
+    name: provider-regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_provider_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_provider_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_provider_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:provider-platform-ugv
+      - run: pnpm test:provider-platform-npc
+      - run: pnpm test:provider-platform-ha
+
+  platform-e2e:
+    name: platform-e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_platform_candidate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_platform_candidate"
+          --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_platform_candidate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:platform-security
+      - run: pnpm test:fault-injection
+      - run: pnpm test:catalog-registry-e2e
+      - run: pnpm test:sdar-interop
+      - run: pnpm test:platform-e2e
+
+  runtime-compose:
+    name: runtime-compose
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: docker compose config -q
+      - run: docker compose build runtime adapter-typescript
+      - run: docker compose up --detach --wait --wait-timeout 120
+      - run: curl --fail --silent --show-error http://127.0.0.1:8080/health/ready
+      - if: always()
+        run: docker compose down --volumes
+
+  release-artifacts:
+    name: release-artifacts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sdar/pms-web test
+      - run: pnpm --filter @sdar/pms-web build
+      - run: node scripts/run-release-artifact-smoke.mjs
+      - run: node scripts/verify-release-images.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-summary
+          path: reports/ci/release-artifacts.json
+          if-no-files-found: error
+      - if: always()
+        run: node scripts/cleanup-release-artifact-ci.mjs
+
+  release-metadata:
+    name: release-metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs:
+      - static
+      - runtime-ci
+      - pms-api-production
+      - worker-pm2-production
+      - runtime-credential-isolation
+      - worker-lease-safety
+      - provider-regression
+      - platform-e2e
+      - runtime-compose
+      - release-artifacts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts-summary
+          path: reports/ci
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: node scripts/release/verify-release-metadata.mjs
+      - run: node scripts/release/verify-source-archive.mjs
+      - name: Generate exact-head Candidate Summary
+        env:
+          RELEASE_CANDIDATE_SHA: ${{ env.CANDIDATE_SHA }}
+          RELEASE_RUN_ID: ${{ github.run_id }}
+          RELEASE_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RELEASE_JOB_RESULTS: >-
+            {"static":"${{ needs.static.result }}","runtime-ci":"${{ needs.runtime-ci.result }}","pms-api-production":"${{ needs.pms-api-production.result }}","worker-pm2-production":"${{ needs.worker-pm2-production.result }}","runtime-credential-isolation":"${{ needs.runtime-credential-isolation.result }}","worker-lease-safety":"${{ needs.worker-lease-safety.result }}","provider-regression":"${{ needs.provider-regression.result }}","platform-e2e":"${{ needs.platform-e2e.result }}","runtime-compose":"${{ needs.runtime-compose.result }}","release-artifacts":"${{ needs.release-artifacts.result }}"}
+        run: node scripts/release/generate-candidate-summary.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate-summary
+          path: |
+            reports/platform-v0.1/CANDIDATE_SUMMARY.json
+            reports/platform-v0.1/RELEASE_MANIFEST.json
+            reports/platform-v0.1/TEST_EVIDENCE.json
+            reports/platform-v0.1/CHECKSUMS.sha256
+            reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz
+            reports/sbom/runtime-v1.cdx.json
+          if-no-files-found: error

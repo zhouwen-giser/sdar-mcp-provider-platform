@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
-import { setTimeout } from "node:timers";
+import { clearTimeout, setTimeout } from "node:timers";
 import { URL } from "node:url";
 import { Pool } from "pg";
 import {
@@ -178,6 +178,7 @@ try {
   const beforeConfig = await onlineProcess();
   await publishConfig("config-drift", "debug", 1);
   worker = await startWorker();
+  await waitForStatus("ACTIVE", 60_000);
   const drifted = await waitForProcess(
     (value) =>
       value.state === "online" &&
@@ -288,6 +289,7 @@ try {
 } finally {
   await cleanup();
 }
+process.exit(process.exitCode ?? 0);
 
 async function prepareFilesystem() {
   await Promise.all(
@@ -405,6 +407,7 @@ async function stopApi() {
 }
 
 async function startWorker() {
+  process.stdout.write("WORKER_PM2_STAGE worker_bootstrap starting\n");
   const running = await bootstrapPmsWorker({
     loadConfig: () =>
       Promise.resolve({
@@ -430,12 +433,16 @@ async function startWorker() {
       }),
     readDatabaseUrl: () => Promise.resolve(pmsDatabaseUrl),
     createComposition: async (pool, config) => {
+      process.stdout.write("WORKER_PM2_STAGE worker_composition creating\n");
       workerComposition = await createPmsWorkerProductionComposition(pool, config);
+      process.stdout.write("WORKER_PM2_STAGE worker_composition created\n");
       return workerComposition;
     },
   });
+  process.stdout.write("WORKER_PM2_STAGE worker_bootstrap started\n");
   await delay(1_100);
   await workerComposition.runtime.scheduler.tick();
+  process.stdout.write("WORKER_PM2_STAGE worker_scheduler ticked\n");
   pm2Api = workerComposition.runtime.components.pm2Api;
   processes = workerComposition.runtime.components.processManager;
   return running;
@@ -915,54 +922,75 @@ async function apiRequest(path, options = {}) {
 }
 
 async function cleanup() {
-  await worker?.stop().catch(() => undefined);
-  await stopAdapter().catch(() => undefined);
-  await stopChild(isolatedAdapter).catch(() => undefined);
-  await stopApi().catch(() => undefined);
+  await bestEffortCleanup(() => worker?.stop());
+  await bestEffortCleanup(() => stopAdapter());
+  await bestEffortCleanup(() => stopChild(isolatedAdapter));
+  await bestEffortCleanup(() => stopApi());
   if (runtimeProcessObserved && processes !== undefined) {
-    await processes.delete(identity.pm2Name).catch(() => undefined);
-    await processes.delete(isolatedIdentity.pm2Name).catch(() => undefined);
+    await bestEffortCleanup(() => processes.delete(identity.pm2Name));
+    await bestEffortCleanup(() => processes.delete(isolatedIdentity.pm2Name));
   }
   try {
     pm2Api?.disconnect();
   } catch {
     // Best-effort cleanup after the product gate has already established its result.
   }
-  await pmsPool.end().catch(() => undefined);
-  await admin
-    .query(
+  await bestEffortCleanup(() => pmsPool.end());
+  await bestEffortCleanup(() =>
+    admin.query(
       "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()",
       [databaseNames.databaseName],
-    )
-    .catch(() => undefined);
-  await admin
-    .query(`DROP DATABASE IF EXISTS ${quoteIdentifier(databaseNames.databaseName)} WITH (FORCE)`)
-    .catch(() => undefined);
-  await admin
-    .query(`DROP ROLE IF EXISTS ${quoteIdentifier(databaseNames.runtimeRoleName)}`)
-    .catch(() => undefined);
-  await admin
-    .query(
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
+      `DROP DATABASE IF EXISTS ${quoteIdentifier(databaseNames.databaseName)} WITH (FORCE)`,
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP ROLE IF EXISTS ${quoteIdentifier(databaseNames.runtimeRoleName)}`),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
       "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()",
       [isolatedDatabaseNames.databaseName],
-    )
-    .catch(() => undefined);
-  await admin
-    .query(
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
       `DROP DATABASE IF EXISTS ${quoteIdentifier(isolatedDatabaseNames.databaseName)} WITH (FORCE)`,
-    )
-    .catch(() => undefined);
-  await admin
-    .query(`DROP ROLE IF EXISTS ${quoteIdentifier(isolatedDatabaseNames.runtimeRoleName)}`)
-    .catch(() => undefined);
-  await admin
-    .query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(schema)} CASCADE`)
-    .catch(() => undefined);
-  await admin.end().catch(() => undefined);
-  await Promise.all([
-    rm(temporaryRoot, { recursive: true, force: true }),
-    rm(pm2Home, { recursive: true, force: true }),
-  ]);
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP ROLE IF EXISTS ${quoteIdentifier(isolatedDatabaseNames.runtimeRoleName)}`),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(schema)} CASCADE`),
+  );
+  await bestEffortCleanup(() => admin.end());
+  await bestEffortCleanup(() =>
+    Promise.all([
+      rm(temporaryRoot, { recursive: true, force: true }),
+      rm(pm2Home, { recursive: true, force: true }),
+    ]),
+  );
+}
+
+async function bestEffortCleanup(operation, timeoutMs = 10_000) {
+  let timer;
+  try {
+    await Promise.race([
+      Promise.resolve().then(operation),
+      new Promise((resolveTimeout) => {
+        timer = setTimeout(resolveTimeout, timeoutMs);
+        timer.unref();
+      }),
+    ]);
+  } catch {
+    // Cleanup cannot replace the already established production-gate result.
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 async function collectPm2Diagnostics() {
@@ -1018,6 +1046,7 @@ function requiredPid(observation) {
 }
 
 function event(action, outcome) {
+  process.stdout.write(`WORKER_PM2_STAGE ${action} ${outcome}\n`);
   return { action, outcome, at: new Date().toISOString() };
 }
 
