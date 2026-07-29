@@ -55,7 +55,9 @@ RUN pnpm build
 
 FROM build AS production-dependencies
 RUN CI=true pnpm prune --prod \
-    && find node_modules -type f -name '*.map' -delete
+    && find node_modules -type f -name '*.map' -delete \
+    && find node_modules -type f -iname '*.md' \
+      ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete
 
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
