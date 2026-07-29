@@ -9,4 +9,5 @@ export * from "./reconcile-scheduler.js";
 export * from "./runtime-reconcile-job.js";
 export * from "./runtime-composition.js";
 export * from "./runtime-composition-contract.js";
+export * from "./runtime-control-plane-credentials.js";
 export * from "./worker.js";

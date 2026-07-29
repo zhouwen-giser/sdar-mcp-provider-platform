@@ -90,14 +90,14 @@ async function productionConfig(databaseUrl: string): Promise<{
   const releaseRoot = join(root, "releases");
   const secretRoot = join(root, "secrets");
   const cacheRoot = join(root, "cache");
+  const controlPlaneCredentialRoot = join(root, "control-plane-credentials");
   const pm2Home = join(root, "pm2");
   await Promise.all(
-    [releaseRoot, secretRoot, cacheRoot, pm2Home].map((directory) =>
+    [releaseRoot, secretRoot, cacheRoot, controlPlaneCredentialRoot, pm2Home].map((directory) =>
       mkdir(directory, { mode: 0o700 }),
     ),
   );
   const credentialFile = join(root, "provisioning.json");
-  const controlPlaneTokenFile = join(root, "control-plane-token");
   await writeFile(
     credentialFile,
     JSON.stringify({
@@ -109,7 +109,6 @@ async function productionConfig(databaseUrl: string): Promise<{
     { mode: 0o600 },
   );
   await chmod(credentialFile, 0o600);
-  await writeFile(controlPlaneTokenFile, "production-composition-token", { mode: 0o600 });
   await writeFile(
     join(releaseRoot, "runtime-releases.json"),
     JSON.stringify(CURRENT_RUNTIME_RELEASE_MANIFEST),
@@ -130,7 +129,7 @@ async function productionConfig(databaseUrl: string): Promise<{
         runtimeSecretRoot: secretRoot,
         runtimeConfigCacheRoot: cacheRoot,
         runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
-        runtimeControlPlaneTokenFile: controlPlaneTokenFile,
+        runtimeControlPlaneCredentialRoot: controlPlaneCredentialRoot,
         pm2Home,
         runtimeReconcileIntervalMs: 1_000,
         runtimeReconcileTimeoutMs: 5_000,

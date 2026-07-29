@@ -8,15 +8,15 @@ to one exact candidate. Runtime remains `2.0.0-rc.1`.
 
 ## Locked findings
 
-| Priority | Finding | Required closure |
-| --- | --- | --- |
-| P0 | Release authority points at a failed/intermediate commit | Rebind all metadata after exact-commit qualification |
-| P0 | Runtime control-plane credential is global | Resolve and authorize one credential per Provider/Deployment/Instance |
-| P0 | Claimed Worker jobs are not renewed | Renew independently, cancel on lease loss, fence all later effects |
-| P1 | PMS API, Worker and Web lack deployable targets | Add non-root, labeled OCI targets and qualification |
-| P1 | PMS Web lacks dedicated Test/Build/Serve CI | Add gates without removing the seven existing jobs |
-| P1 | Independent review and required-check proof are absent | Produce a PR handoff and wait for external approval |
-| P2 | Source archives include non-product workspace files | Apply explicit `export-ignore` and verify the archive |
+| Priority | Finding                                                  | Required closure                                                      |
+| -------- | -------------------------------------------------------- | --------------------------------------------------------------------- |
+| P0       | Release authority points at a failed/intermediate commit | Rebind all metadata after exact-commit qualification                  |
+| P0       | Runtime control-plane credential is global               | Resolve and authorize one credential per Provider/Deployment/Instance |
+| P0       | Claimed Worker jobs are not renewed                      | Renew independently, cancel on lease loss, fence all later effects    |
+| P1       | PMS API, Worker and Web lack deployable targets          | Add non-root, labeled OCI targets and qualification                   |
+| P1       | PMS Web lacks dedicated Test/Build/Serve CI              | Add gates without removing the seven existing jobs                    |
+| P1       | Independent review and required-check proof are absent   | Produce a PR handoff and wait for external approval                   |
+| P2       | Source archives include non-product workspace files      | Apply explicit `export-ignore` and verify the archive                 |
 
 ## Qualification boundary
 

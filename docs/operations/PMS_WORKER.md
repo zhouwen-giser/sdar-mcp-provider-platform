@@ -33,7 +33,7 @@ The production bootstrap also requires this group; omission fails closed with
 | `PMS_RUNTIME_SECRET_ROOT`                   | required    | Private Runtime secret-file root             |
 | `PMS_RUNTIME_CONFIG_CACHE_ROOT`             | required    | Private per-Runtime configuration cache root |
 | `PMS_RUNTIME_CONTROL_PLANE_URL`             | required    | HTTPS, or loopback HTTP, PMS Runtime API URL |
-| `PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE`      | required    | Runtime config/registration scoped token     |
+| `PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT` | required    | Private per-instance credential tree         |
 | `PMS_PM2_HOME`                              | required    | Private isolated PM2 state directory         |
 | `PMS_RUNTIME_RECONCILE_INTERVAL_MS`         | required    | Bounded periodic reconcile interval          |
 | `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
@@ -60,6 +60,17 @@ Database and provisioning files must be absolute, regular, non-symlink, non-empt
 readable but not group/world writable. Secret, cache, and PM2 roots must be existing canonical
 directories with permissions no broader than `0700`. Release, secret, cache, and PM2 roots must be
 pairwise distinct and cannot contain one another.
+
+The Worker resolves each Runtime control-plane token from
+`PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT/providers/<providerId>/deployments/<deploymentId>/instances/<instanceId>/control-plane.token`.
+The credential root must be canonical, existing, non-symlink and no broader than `0700`; token files
+must be canonical, regular, non-symlink, non-empty, singly linked and no broader than `0600`.
+Identity traversal, unsafe parents, missing files and reused hard links fail closed. The legacy
+`PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE` variable is rejected and has no production fallback.
+
+PMS API credential descriptors remain explicit per principal. Adding or rotating a V0.1 Runtime
+credential requires an atomic credential-tree and API-descriptor update followed by a PMS API
+restart. See [ADR 0012](../adr/0012-instance-scoped-runtime-control-plane-credentials.md).
 
 Inline database URLs, provisioning credentials, Runtime secrets/config tokens, and PM2 secrets are
 rejected. File contents are consumed only by their owning adapters and are never included in health
