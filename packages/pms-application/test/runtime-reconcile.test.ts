@@ -164,11 +164,12 @@ describe("RuntimeDeploymentReconciler", () => {
     const store = new MemoryReconcileStore(deployment("ACTIVE"));
     const health = readyHealth();
     const identity = validIdentity();
+    const lifecycle = lifecyclePort();
     const beforeRevision = store.current.snapshot.observedRevision;
     const reconciler = new RuntimeDeploymentReconciler(
       store,
       databasePort(store),
-      lifecyclePort(),
+      lifecycle,
       health,
       inventory([]),
       identity,
@@ -181,6 +182,7 @@ describe("RuntimeDeploymentReconciler", () => {
       observedRevision: beforeRevision,
     });
     expect(result.progressed).toBe(false);
+    expect(lifecycle.start).toHaveBeenCalledOnce();
     expect(store.transitions).toEqual([]);
     expect(identity.verify).toHaveBeenCalledOnce();
   });

@@ -6,6 +6,10 @@ V0.1 upgrades the accepted Goal 1 platform foundation while preserving the
 frozen Runtime protocol, existing Runtime migrations, workspace identities, and
 Runtime entrypoints. Node.js 22 and pnpm 11 are the verified toolchain.
 
+Platform rollout artifacts identify the private monorepo as
+`sdar-mcp-provider-platform@0.1.0`. Do not use that version as the Runtime
+artifact version: the delivered Runtime remains `@sdar/runtime@2.0.0-rc.1`.
+
 Before rollout, validate the Goal 1 handoff and ensure the production default
 Provider Adapter mode is `vendor_managed`.
 

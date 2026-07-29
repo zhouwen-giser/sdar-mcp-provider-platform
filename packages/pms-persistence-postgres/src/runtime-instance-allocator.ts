@@ -9,7 +9,7 @@ import {
   type RuntimePortRange,
   type RuntimePortReleasePolicy,
   type RuntimeProcessProjection,
-} from "@sdar/runtime-deployment";
+} from "../../runtime-deployment/src/index.js";
 import { PostgresRuntimeProcessRepository } from "./runtime-deployment-repositories.js";
 import type { PmsSqlClient } from "./shared.js";
 

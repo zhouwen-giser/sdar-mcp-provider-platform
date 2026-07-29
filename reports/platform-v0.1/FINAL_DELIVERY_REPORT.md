@@ -1,70 +1,42 @@
-# SDAR MCP Provider Platform V0.1 final delivery
+# SDAR MCP Provider Platform 0.1.0 final delivery
 
 ## Outcome
 
-Goal 2 delivers Runtime governance and the V0.1 control-plane-to-provider
-workflow. The terminal `pnpm verify:platform` gate passed on Node.js 22.23.1,
-pnpm 11.13.1, local PostgreSQL, and real isolated PM2 7.0.3.
+Platform 0.1.0 closes the production lifecycle from PMS API intent through the
+single fenced Worker reconcile job, Provider-scoped PostgreSQL preparation,
+Runtime migrations and secure bootstrap, the pinned PM2 7.0.3 JavaScript API,
+Runtime health/registration, Catalog discovery, Registry publication, and
+`ACTIVE`.
 
-The delivery includes revision-safe RuntimeDeployment, Provider-scoped database
-and role preparation, locked Runtime migration orchestration, governed PM2
-lifecycle, live/ready reconciliation, Runtime identity registration,
-Runtime-authoritative Operation Catalog, Registry snapshots, UGV/NPC
-Tank/Home Assistant integrations, PMS Web, security/fault tests, and controlled
-SDAR interoperability.
+The private monorepo identity is `sdar-mcp-provider-platform@0.1.0`.
+The independently versioned Runtime component remains
+`@sdar/runtime@2.0.0-rc.1`.
 
-## Reproducible gate
+## Candidate authority
 
-```bash
-TEST_DATABASE_URL=<local-postgres> pnpm verify:platform
-python3 .codex/task-package/scripts/taskctl.py status
-git status --short
-```
+The fully tested code candidate is
+`349fb8339ead8760f158ac8b05ad8d01e4825199`. Release files use this
+non-circular `candidateSourceCommit`; an eventual tag or merge commit belongs
+to GitHub Release metadata and is not self-referenced here.
 
-The first command passed formatting, lint, typecheck, build, frozen protocol,
-SBOM, migration isolation, configuration compatibility, PMS, Runtime
-governance, real PM2, security, fault injection, and five system E2E files with
-11 tests. Database credentials are redacted from this report.
+Original Goal 2 completed 50/50 tasks, the PMS API Fix completed 6/6, Goal 03
+completed 7/7, and Goal 04 completed 9/9. Goal 2 and Goal 03 handoffs remain
+historical records but are no longer release authority.
 
-## Core evidence
+## Qualification
 
-| Gate                 | Result                                                                     |
-| -------------------- | -------------------------------------------------------------------------- |
-| Frozen protocol      | PASS; exact profile, 11 schemas, 74 cases, 38 locked files                 |
-| SBOM                 | PASS; CycloneDX with 273 production components                             |
-| RuntimeDeployment    | PASS; 8 files, 54 tests                                                    |
-| Database provisioner | PASS; 3 files, 21 tests                                                    |
-| PM2 adapter          | PASS; 6 files, 37 tests                                                    |
-| PMS API              | PASS; 10 files, 53 tests                                                   |
-| PMS Web              | PASS; 2 files, 16 tests plus production build                              |
-| Real PM2             | PASS; fork mode, restart recovery, live/ready, unrelated process isolation |
-| Security/fault       | PASS; 4 plus 4 tests                                                       |
-| Platform E2E         | PASS; 5 files, 11 tests                                                    |
+`verify:v2`, `verify:platform`, PMS API production, Worker/PM2 production,
+controlled UGV/NPC Tank/Home Assistant regression, Docker composition,
+release-metadata verification, typecheck, lint, and formatting passed locally.
+Distinct GitHub Actions jobs enforce each qualification area.
 
-## Invariants retained
+The Worker production gate proves identity mismatch and adapter outage never
+produce `ACTIVE`, Runtime crash recovery, Worker/PMS outage independence,
+one controlled config restart, Registry-authoritative consumer resolution, stale
+fence rejection, and complete process/database/secret cleanup.
 
-- PMS owns control-plane data and cannot access Runtime Task Authority tables.
-- Runtime does not depend on the PMS database and keeps a no-PMS cold-start
-  path.
-- Existing Runtime migrations remain unchanged and are selected through the
-  established migration-set mapping.
-- PM2 only receives the allowlisted Runtime entrypoint, cwd, environment, and
-  stable platform process names.
-- Secrets cross boundaries only as SecretRef or `*_FILE`.
-- PM2 `online` is not Runtime `ACTIVE`; live and ready must also pass.
-- Catalog authority is Runtime `server/discover` plus `tools/list`.
-- Provider Adapter production mode defaults to `vendor_managed`.
+## Boundary
 
-## Qualification boundary
-
-Controlled local SDAR interoperability passed. External SDAR infrastructure,
-real UGV/NPC devices, ISR MQTT feeds, independent Home Assistant, and physical
-climate resources were unavailable. Those qualifications remain pending; this
-delivery does not claim external Interop Certified or real-resource
-certification.
-
-## Release artifacts
-
-See `RELEASE_MANIFEST.json`, `TEST_EVIDENCE.json`, `COMPATIBILITY_MATRIX.md`,
-`KNOWN_LIMITATIONS.md`, the operations/upgrade guides, and
-`reports/sbom/runtime-v1.cdx.json`.
+External SDAR infrastructure and real UGV, NPC Tank, ISR MQTT, Home Assistant,
+and physical climate resources were unavailable. This candidate makes no
+external Interop Certified or real-resource qualification claim.

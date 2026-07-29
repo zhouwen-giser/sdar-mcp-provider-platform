@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-04-production-lifecycle-closure",
+  "status": "IN_PROGRESS",
+  "baseBranch": "codex/goal-03-merge-readiness-foundation",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "candidateSourceCommit": null,
+  "taskSummary": {"total": 9, "passed": 0},
+  "externalQualification": {
+    "externalSdar": "BLOCKED_EXTERNAL",
+    "realResources": "UNQUALIFIED"
+  },
+  "secretsRedacted": true
+}

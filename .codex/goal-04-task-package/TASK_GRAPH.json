@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-04-production-lifecycle-closure",
+  "tasks": [
+    {
+      "id": "G4-P0-B01",
+      "title": "Lock Goal 04 baseline and validate Goal 03 handoff",
+      "phase": "P0",
+      "dependencies": []
+    },
+    {
+      "id": "G4-P1-B01",
+      "title": "Pin PM2 and implement production JavaScript API bridge",
+      "phase": "P1",
+      "dependencies": [
+        "G4-P0-B01"
+      ]
+    },
+    {
+      "id": "G4-P1-B02",
+      "title": "Enforce PM2 configuration drift and product-path real E2E",
+      "phase": "P1",
+      "dependencies": [
+        "G4-P1-B01"
+      ]
+    },
+    {
+      "id": "G4-P2-B01",
+      "title": "Harden PMS Worker runtime configuration and composition contracts",
+      "phase": "P2",
+      "dependencies": [
+        "G4-P0-B01"
+      ]
+    },
+    {
+      "id": "G4-P2-B02",
+      "title": "Add periodic reconcile scheduler with database-backed deduplication",
+      "phase": "P2",
+      "dependencies": [
+        "G4-P2-B01"
+      ]
+    },
+    {
+      "id": "G4-P2-B03",
+      "title": "Assemble PMS Worker production runtime lifecycle",
+      "phase": "P2",
+      "dependencies": [
+        "G4-P1-B02",
+        "G4-P2-B02"
+      ]
+    },
+    {
+      "id": "G4-P3-B01",
+      "title": "Prove Worker-to-Runtime production lifecycle end to end",
+      "phase": "P3",
+      "dependencies": [
+        "G4-P2-B03"
+      ]
+    },
+    {
+      "id": "G4-P3-B02",
+      "title": "Add final platform CI qualification jobs",
+      "phase": "P3",
+      "dependencies": [
+        "G4-P3-B01"
+      ]
+    },
+    {
+      "id": "G4-P4-B01",
+      "title": "Finalize version, release evidence and review-ready handoff",
+      "phase": "P4",
+      "dependencies": [
+        "G4-P3-B02"
+      ]
+    }
+  ]
+}

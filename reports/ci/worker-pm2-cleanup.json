@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-29T05:47:31.727Z",
+  "deletedProcesses": 0,
+  "deletedPm2Homes": 0,
+  "deletedReleaseFixtures": 0,
+  "droppedSchemas": 0,
+  "droppedDatabases": 0,
+  "droppedRoles": 0,
+  "secretsIncluded": false
+}

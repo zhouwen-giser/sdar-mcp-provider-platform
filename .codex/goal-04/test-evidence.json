@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-04-production-lifecycle-closure",
+  "candidateSourceCommit": "349fb8339ead8760f158ac8b05ad8d01e4825199",
+  "generatedAt": "2026-07-29T05:52:00Z",
+  "taskSummary": { "total": 9, "passed": 9 },
+  "commands": [
+    { "command": "pnpm install --frozen-lockfile", "status": "PASSED" },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm verify:v2",
+      "status": "PASSED"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm verify:platform",
+      "status": "PASSED"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:pms-api-production",
+      "status": "PASSED",
+      "result": "1 file, 3 tests"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:worker-pm2-production",
+      "status": "PASSED",
+      "result": "complete Worker/PM2 production lifecycle and cleanup"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-local-postgres> pnpm test:provider-platform-{ugv,npc,ha}",
+      "status": "PASSED_CONTROLLED",
+      "result": "2 tests per Provider"
+    },
+    {
+      "command": "pnpm typecheck && pnpm lint && pnpm format:check",
+      "status": "PASSED"
+    }
+  ],
+  "qualificationLimits": [
+    "External SDAR was unavailable; no external certification claim is made.",
+    "Real UGV, NPC Tank, ISR MQTT, Home Assistant and physical resources remain unqualified."
+  ],
+  "secretsRedacted": true
+}

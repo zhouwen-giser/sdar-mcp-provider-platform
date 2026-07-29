@@ -13,6 +13,27 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  static:
+    name: static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm protocol:check
+      - run: pnpm sbom:check
+
   runtime-ci:
     name: runtime-ci
     runs-on: ubuntu-24.04
@@ -51,8 +72,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify:v2
       - run: buf lint proto
-      - name: Check Protobuf compatibility against rc.1
-        run: buf breaking proto --against '.git#tag=v1.0.0-rc.1,subdir=proto'
+      - name: Check Protobuf compatibility against imported rc.1 baseline
+        run: |
+          baseline_dir="${RUNNER_TEMP}/runtime-rc1-proto"
+          mkdir -p "${baseline_dir}"
+          git archive ad199f508cf67dbe77491cf90569daf5da8197bb proto | tar -x -C "${baseline_dir}"
+          buf breaking proto --against "${baseline_dir}/proto"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -106,6 +131,121 @@ jobs:
       - run: pnpm test:pms
       - run: pnpm test:pms-config-e2e
       - run: pnpm test:pms-migrations
+
+  worker-pm2-production:
+    name: worker-pm2-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_worker_pm2_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_worker_pm2_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_worker_pm2_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:worker-pm2-production
+      - name: Cleanup Worker/PM2 qualification resources
+        if: always()
+        run: node --import tsx scripts/cleanup-worker-pm2-ci.mjs
+      - name: Upload redacted Worker/PM2 summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-pm2-production-summaries
+          path: |
+            reports/evidence/G4-P3-B01-worker-pm2-production.json
+            reports/ci/worker-pm2-cleanup.json
+          if-no-files-found: warn
+
+  provider-regression:
+    name: provider-regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_provider_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_provider_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_provider_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:provider-platform-ugv
+      - run: pnpm test:provider-platform-npc
+      - run: pnpm test:provider-platform-ha
+
+  platform-e2e:
+    name: platform-e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_platform_e2e_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_platform_e2e_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_platform_e2e_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:platform-security
+      - run: pnpm test:fault-injection
+      - run: pnpm test:catalog-registry-e2e
+      - run: pnpm test:sdar-interop
+      - run: pnpm test:platform-e2e
 
   runtime-compose:
     name: runtime-compose

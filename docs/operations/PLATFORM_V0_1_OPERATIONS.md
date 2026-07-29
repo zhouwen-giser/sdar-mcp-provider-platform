@@ -1,5 +1,9 @@
 # SDAR MCP Provider Platform V0.1 operations
 
+The private platform release identity is `sdar-mcp-provider-platform@0.1.0`.
+The managed Runtime component has its own lifecycle and remains
+`@sdar/runtime@2.0.0-rc.1`.
+
 ## Authority boundaries
 
 PMS is the control plane for Provider, configuration, deployment, Catalog,
@@ -79,6 +83,8 @@ environment:
 
 ```bash
 TEST_DATABASE_URL=<local-postgres> pnpm verify:platform
+TEST_DATABASE_URL=<local-postgres> pnpm test:pms-api-production
+TEST_DATABASE_URL=<local-postgres> pnpm test:worker-pm2-production
 ```
 
 The gate starts controlled local processes and a real isolated PM2 daemon. It

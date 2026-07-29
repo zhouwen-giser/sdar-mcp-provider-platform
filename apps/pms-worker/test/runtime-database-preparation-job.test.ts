@@ -13,4 +13,13 @@ describe("Runtime database preparation boundary", () => {
     expect(workerIndex).not.toContain("runtime-database-preparation-job");
     expect(workerIndex).toContain('export * from "./runtime-reconcile-job.js"');
   });
+
+  it("types PostgreSQL credential-rotation parameters for the real server", () => {
+    const implementation = readFileSync(
+      new URL("../src/runtime-database-preparation-job.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(implementation).toContain("format('ALTER ROLE %I PASSWORD %L',$1::text,$2::text)");
+  });
 });

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P1-B01",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "startingCommit": "4302ab8",
+  "dependency": {
+    "package": "pm2",
+    "version": "7.0.3",
+    "scope": "@sdar/pm2-runtime-adapter",
+    "exact": true
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspaces; lockfile current"
+    },
+    {
+      "command": "pnpm --filter @sdar/pm2-runtime-adapter test",
+      "exitCode": 0,
+      "result": "7 files, 42 tests"
+    },
+    {
+      "command": "pnpm exec vitest run packages/pm2-runtime-adapter/test/pm2-javascript-api.test.ts packages/pm2-runtime-adapter/test/process-manager.test.ts",
+      "exitCode": 0,
+      "result": "2 files, 12 tests"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_pm2_product_path.py . --bridge-only",
+      "exitCode": 0,
+      "result": "PM2_BRIDGE_OK"
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "securityAssertions": [
+    "bridge exposes only connect, disconnect, start, stop, restart, delete, describe and list",
+    "custom PM2 client receives an explicit absolute pm2_home without mutating PM2_HOME",
+    "callback and synchronous failures are mapped to stable redacted codes",
+    "failed connections clean up and repeated disconnect is safe",
+    "namespace, release root, fixed Runtime entry, fork mode and environment restrictions remain in Pm2ProcessManager",
+    "no shell, exec, command string, remote command or arbitrary cwd API was added"
+  ]
+}

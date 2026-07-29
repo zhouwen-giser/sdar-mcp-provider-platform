@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-29T00:00:00+09:00",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "observedGoal2Branch": "codex/goal-02-runtime-governance",
+  "observedGoal2Head": "49d68cb51b4e2562e32ff4772bff850a1bd3896c",
+  "observedPullRequest": 2,
+  "goal04Base": "origin/codex/goal-03-merge-readiness-foundation",
+  "goal04WorkBranch": "codex/goal-04-production-lifecycle-closure",
+  "preconditions": [
+    "Goal 03 branch exists remotely",
+    "Goal 03 task-state contains only PASSED tasks",
+    "Goal 03 handoff and final report exist",
+    "Goal 03 clean CI/Docker/PMS API gates passed"
+  ],
+  "knownRemainingBlockers": [
+    "pm2 package is not pinned in @sdar/pm2-runtime-adapter",
+    "real PM2 E2E uses pnpm dlx pm2 and bypasses production classes",
+    "Pm2ProcessManager online path does not detect configuration drift",
+    "PMS Worker bootstrap registers only provider_package.sync",
+    "Worker lacks secure runtime lifecycle configuration",
+    "No periodic reconcile scheduler closes lost or completed jobs",
+    "No full Worker-to-Runtime production lifecycle E2E",
+    "Platform final CI and release metadata are incomplete"
+  ]
+}
