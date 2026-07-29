@@ -46,3 +46,12 @@
 - The fixture uses `claimLimit: 1`: claims, leases, retries and fences remain production-backed,
   while explicit Worker shutdown can drain its claimed batch inside the configured lease-duration
   bound.
+
+## G4-P3-B02 — Derived SBOM freshness correction
+
+- The required `verify:v2` and new `static` CI job both fail closed on `pnpm sbom:check`.
+- The lockfile changed in G4-P1-B02 when the repository-pinned PM2 runtime dependency became
+  available to the built product path, but the derived CycloneDX report was not regenerated.
+- `reports/sbom/runtime-v1.cdx.json` is therefore included as the minimum out-of-path derived
+  correction. It records the current lockfile digest and PM2 dependency closure; no dependency,
+  vulnerability threshold, or product behavior changes in this task.

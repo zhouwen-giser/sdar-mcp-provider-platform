@@ -12,7 +12,7 @@
     "properties": [
       {
         "name": "sdar:pnpm-lock-sha256",
-        "value": "884deaa5849011efe383e3db742fb0ee39f38d94141228a0c3ff70a4c0b39b1b"
+        "value": "b26f1cdfcfd258dea4d44ef1c1574f9fd635d72a091f631e597288a49db9cae6"
       }
     ]
   },
@@ -277,6 +277,24 @@
     },
     {
       "type": "library",
+      "name": "@pm2/blessed",
+      "version": "0.1.81",
+      "purl": "pkg:npm/%40pm2/blessed@0.1.81"
+    },
+    {
+      "type": "library",
+      "name": "@pm2/js-api",
+      "version": "0.8.1",
+      "purl": "pkg:npm/%40pm2/js-api@0.8.1"
+    },
+    {
+      "type": "library",
+      "name": "@pm2/pm2-version-check",
+      "version": "1.0.4",
+      "purl": "pkg:npm/%40pm2/pm2-version-check@1.0.4"
+    },
+    {
+      "type": "library",
       "name": "@protobufjs/aspromise",
       "version": "1.1.2",
       "purl": "pkg:npm/%40protobufjs/aspromise@1.1.2"
@@ -331,6 +349,18 @@
     },
     {
       "type": "library",
+      "name": "@sdar/catalog-manager",
+      "version": "link:../../packages/catalog-manager",
+      "purl": "pkg:npm/%40sdar/catalog-manager@link%3A..%2F..%2Fpackages%2Fcatalog-manager"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/catalog-manager",
+      "version": "link:../catalog-manager",
+      "purl": "pkg:npm/%40sdar/catalog-manager@link%3A..%2Fcatalog-manager"
+    },
+    {
+      "type": "library",
       "name": "@sdar/configuration-center",
       "version": "link:../../packages/configuration-center",
       "purl": "pkg:npm/%40sdar/configuration-center@link%3A..%2F..%2Fpackages%2Fconfiguration-center"
@@ -350,8 +380,20 @@
     {
       "type": "library",
       "name": "@sdar/persistence-postgres",
+      "version": "link:../../packages/persistence-postgres",
+      "purl": "pkg:npm/%40sdar/persistence-postgres@link%3A..%2F..%2Fpackages%2Fpersistence-postgres"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/persistence-postgres",
       "version": "link:../persistence-postgres",
       "purl": "pkg:npm/%40sdar/persistence-postgres@link%3A..%2Fpersistence-postgres"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/pm2-runtime-adapter",
+      "version": "link:../../packages/pm2-runtime-adapter",
+      "purl": "pkg:npm/%40sdar/pm2-runtime-adapter@link%3A..%2F..%2Fpackages%2Fpm2-runtime-adapter"
     },
     {
       "type": "library",
@@ -379,6 +421,12 @@
     },
     {
       "type": "library",
+      "name": "@sdar/postgres-provisioner",
+      "version": "link:../../packages/postgres-provisioner",
+      "purl": "pkg:npm/%40sdar/postgres-provisioner@link%3A..%2F..%2Fpackages%2Fpostgres-provisioner"
+    },
+    {
+      "type": "library",
       "name": "@sdar/provider-package-registry",
       "version": "link:../../packages/provider-package-registry",
       "purl": "pkg:npm/%40sdar/provider-package-registry@link%3A..%2F..%2Fpackages%2Fprovider-package-registry"
@@ -394,6 +442,12 @@
       "name": "@sdar/registry-snapshot",
       "version": "link:../../packages/registry-snapshot",
       "purl": "pkg:npm/%40sdar/registry-snapshot@link%3A..%2F..%2Fpackages%2Fregistry-snapshot"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/registry-snapshot",
+      "version": "link:../registry-snapshot",
+      "purl": "pkg:npm/%40sdar/registry-snapshot@link%3A..%2Fregistry-snapshot"
     },
     {
       "type": "library",
@@ -421,6 +475,12 @@
     },
     {
       "type": "library",
+      "name": "@sdar/runtime-migration-runner",
+      "version": "link:../../packages/runtime-migration-runner",
+      "purl": "pkg:npm/%40sdar/runtime-migration-runner@link%3A..%2F..%2Fpackages%2Fruntime-migration-runner"
+    },
+    {
+      "type": "library",
       "name": "@sdar/runtime-registration",
       "version": "link:../../packages/runtime-registration",
       "purl": "pkg:npm/%40sdar/runtime-registration@link%3A..%2F..%2Fpackages%2Fruntime-registration"
@@ -428,8 +488,20 @@
     {
       "type": "library",
       "name": "@sdar/secret-store",
+      "version": "link:../../packages/secret-store",
+      "purl": "pkg:npm/%40sdar/secret-store@link%3A..%2F..%2Fpackages%2Fsecret-store"
+    },
+    {
+      "type": "library",
+      "name": "@sdar/secret-store",
       "version": "link:../secret-store",
       "purl": "pkg:npm/%40sdar/secret-store@link%3A..%2Fsecret-store"
+    },
+    {
+      "type": "library",
+      "name": "@tootallnate/quickjs-emscripten",
+      "version": "0.23.0",
+      "purl": "pkg:npm/%40tootallnate/quickjs-emscripten@0.23.0"
     },
     {
       "type": "library",
@@ -469,6 +541,12 @@
     },
     {
       "type": "library",
+      "name": "agent-base",
+      "version": "7.1.4",
+      "purl": "pkg:npm/agent-base@7.1.4"
+    },
+    {
+      "type": "library",
       "name": "ajv-formats",
       "version": "3.0.1",
       "purl": "pkg:npm/ajv-formats@3.0.1"
@@ -487,6 +565,18 @@
     },
     {
       "type": "library",
+      "name": "amp-message",
+      "version": "0.1.2",
+      "purl": "pkg:npm/amp-message@0.1.2"
+    },
+    {
+      "type": "library",
+      "name": "amp",
+      "version": "0.3.1",
+      "purl": "pkg:npm/amp@0.3.1"
+    },
+    {
+      "type": "library",
       "name": "ansi-regex",
       "version": "5.0.1",
       "purl": "pkg:npm/ansi-regex@5.0.1"
@@ -496,6 +586,42 @@
       "name": "ansi-styles",
       "version": "4.3.0",
       "purl": "pkg:npm/ansi-styles@4.3.0"
+    },
+    {
+      "type": "library",
+      "name": "ansis",
+      "version": "4.0.0-node10",
+      "purl": "pkg:npm/ansis@4.0.0-node10"
+    },
+    {
+      "type": "library",
+      "name": "anymatch",
+      "version": "3.1.3",
+      "purl": "pkg:npm/anymatch@3.1.3"
+    },
+    {
+      "type": "library",
+      "name": "argparse",
+      "version": "2.0.1",
+      "purl": "pkg:npm/argparse@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "ast-types",
+      "version": "0.13.4",
+      "purl": "pkg:npm/ast-types@0.13.4"
+    },
+    {
+      "type": "library",
+      "name": "async",
+      "version": "2.6.4",
+      "purl": "pkg:npm/async@2.6.4"
+    },
+    {
+      "type": "library",
+      "name": "async",
+      "version": "3.2.6",
+      "purl": "pkg:npm/async@3.2.6"
     },
     {
       "type": "library",
@@ -517,6 +643,18 @@
     },
     {
       "type": "library",
+      "name": "basic-ftp",
+      "version": "5.3.1",
+      "purl": "pkg:npm/basic-ftp@5.3.1"
+    },
+    {
+      "type": "library",
+      "name": "binary-extensions",
+      "version": "2.3.0",
+      "purl": "pkg:npm/binary-extensions@2.3.0"
+    },
+    {
+      "type": "library",
       "name": "bl",
       "version": "6.1.6",
       "purl": "pkg:npm/bl@6.1.6"
@@ -526,6 +664,12 @@
       "name": "body-parser",
       "version": "2.3.0",
       "purl": "pkg:npm/body-parser@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "braces",
+      "version": "3.0.3",
+      "purl": "pkg:npm/braces@3.0.3"
     },
     {
       "type": "library",
@@ -565,9 +709,27 @@
     },
     {
       "type": "library",
+      "name": "chalk",
+      "version": "3.0.0",
+      "purl": "pkg:npm/chalk@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "chokidar",
+      "version": "3.6.0",
+      "purl": "pkg:npm/chokidar@3.6.0"
+    },
+    {
+      "type": "library",
       "name": "cjs-module-lexer",
       "version": "2.2.0",
       "purl": "pkg:npm/cjs-module-lexer@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "cli-tableau",
+      "version": "2.0.1",
+      "purl": "pkg:npm/cli-tableau@2.0.1"
     },
     {
       "type": "library",
@@ -586,6 +748,12 @@
       "name": "color-name",
       "version": "1.1.4",
       "purl": "pkg:npm/color-name@1.1.4"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "2.15.1",
+      "purl": "pkg:npm/commander@2.15.1"
     },
     {
       "type": "library",
@@ -643,15 +811,45 @@
     },
     {
       "type": "library",
+      "name": "croner",
+      "version": "4.1.97",
+      "purl": "pkg:npm/croner@4.1.97"
+    },
+    {
+      "type": "library",
       "name": "cross-spawn",
       "version": "7.0.6",
       "purl": "pkg:npm/cross-spawn@7.0.6"
     },
     {
       "type": "library",
+      "name": "data-uri-to-buffer",
+      "version": "6.0.2",
+      "purl": "pkg:npm/data-uri-to-buffer@6.0.2"
+    },
+    {
+      "type": "library",
+      "name": "dayjs",
+      "version": "1.11.15",
+      "purl": "pkg:npm/dayjs@1.11.15"
+    },
+    {
+      "type": "library",
+      "name": "debug",
+      "version": "4.3.7",
+      "purl": "pkg:npm/debug@4.3.7"
+    },
+    {
+      "type": "library",
       "name": "debug",
       "version": "4.4.3",
       "purl": "pkg:npm/debug@4.4.3"
+    },
+    {
+      "type": "library",
+      "name": "degenerator",
+      "version": "5.0.1",
+      "purl": "pkg:npm/degenerator@5.0.1"
     },
     {
       "type": "library",
@@ -727,6 +925,30 @@
     },
     {
       "type": "library",
+      "name": "escodegen",
+      "version": "2.1.0",
+      "purl": "pkg:npm/escodegen@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "esprima",
+      "version": "4.0.1",
+      "purl": "pkg:npm/esprima@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "estraverse",
+      "version": "5.3.0",
+      "purl": "pkg:npm/estraverse@5.3.0"
+    },
+    {
+      "type": "library",
+      "name": "esutils",
+      "version": "2.0.3",
+      "purl": "pkg:npm/esutils@2.0.3"
+    },
+    {
+      "type": "library",
       "name": "etag",
       "version": "1.8.1",
       "purl": "pkg:npm/etag@1.8.1"
@@ -736,6 +958,12 @@
       "name": "event-target-shim",
       "version": "5.0.1",
       "purl": "pkg:npm/event-target-shim@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "eventemitter2",
+      "version": "6.4.9",
+      "purl": "pkg:npm/eventemitter2@6.4.9"
     },
     {
       "type": "library",
@@ -769,6 +997,12 @@
     },
     {
       "type": "library",
+      "name": "extrareqp2",
+      "version": "1.0.0",
+      "purl": "pkg:npm/extrareqp2@1.0.0"
+    },
+    {
+      "type": "library",
       "name": "fast-decode-uri-component",
       "version": "1.0.1",
       "purl": "pkg:npm/fast-decode-uri-component@1.0.1"
@@ -778,6 +1012,12 @@
       "name": "fast-deep-equal",
       "version": "3.1.3",
       "purl": "pkg:npm/fast-deep-equal@3.1.3"
+    },
+    {
+      "type": "library",
+      "name": "fast-json-patch",
+      "version": "3.1.1",
+      "purl": "pkg:npm/fast-json-patch@3.1.1"
     },
     {
       "type": "library",
@@ -823,6 +1063,12 @@
     },
     {
       "type": "library",
+      "name": "fill-range",
+      "version": "7.1.1",
+      "purl": "pkg:npm/fill-range@7.1.1"
+    },
+    {
+      "type": "library",
       "name": "finalhandler",
       "version": "2.1.1",
       "purl": "pkg:npm/finalhandler@2.1.1"
@@ -835,6 +1081,12 @@
     },
     {
       "type": "library",
+      "name": "follow-redirects",
+      "version": "1.16.0",
+      "purl": "pkg:npm/follow-redirects@1.16.0"
+    },
+    {
+      "type": "library",
       "name": "forwarded",
       "version": "0.2.0",
       "purl": "pkg:npm/forwarded@0.2.0"
@@ -844,6 +1096,12 @@
       "name": "fresh",
       "version": "2.0.0",
       "purl": "pkg:npm/fresh@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "fsevents",
+      "version": "2.3.3",
+      "purl": "pkg:npm/fsevents@2.3.3"
     },
     {
       "type": "library",
@@ -871,6 +1129,18 @@
     },
     {
       "type": "library",
+      "name": "get-uri",
+      "version": "6.0.5",
+      "purl": "pkg:npm/get-uri@6.0.5"
+    },
+    {
+      "type": "library",
+      "name": "glob-parent",
+      "version": "5.1.2",
+      "purl": "pkg:npm/glob-parent@5.1.2"
+    },
+    {
+      "type": "library",
       "name": "google-proto-files",
       "version": "5.0.2",
       "purl": "pkg:npm/google-proto-files@5.0.2"
@@ -880,6 +1150,12 @@
       "name": "gopd",
       "version": "1.2.0",
       "purl": "pkg:npm/gopd@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "has-flag",
+      "version": "4.0.0",
+      "purl": "pkg:npm/has-flag@4.0.0"
     },
     {
       "type": "library",
@@ -910,6 +1186,18 @@
       "name": "http-errors",
       "version": "2.0.1",
       "purl": "pkg:npm/http-errors@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "http-proxy-agent",
+      "version": "7.0.2",
+      "purl": "pkg:npm/http-proxy-agent@7.0.2"
+    },
+    {
+      "type": "library",
+      "name": "https-proxy-agent",
+      "version": "7.0.6",
+      "purl": "pkg:npm/https-proxy-agent@7.0.6"
     },
     {
       "type": "library",
@@ -955,9 +1243,33 @@
     },
     {
       "type": "library",
+      "name": "is-binary-path",
+      "version": "2.1.0",
+      "purl": "pkg:npm/is-binary-path@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "is-extglob",
+      "version": "2.1.1",
+      "purl": "pkg:npm/is-extglob@2.1.1"
+    },
+    {
+      "type": "library",
       "name": "is-fullwidth-code-point",
       "version": "3.0.0",
       "purl": "pkg:npm/is-fullwidth-code-point@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-glob",
+      "version": "4.0.3",
+      "purl": "pkg:npm/is-glob@4.0.3"
+    },
+    {
+      "type": "library",
+      "name": "is-number",
+      "version": "7.0.0",
+      "purl": "pkg:npm/is-number@7.0.0"
     },
     {
       "type": "library",
@@ -985,6 +1297,12 @@
     },
     {
       "type": "library",
+      "name": "js-yaml",
+      "version": "4.3.0",
+      "purl": "pkg:npm/js-yaml@4.3.0"
+    },
+    {
+      "type": "library",
       "name": "json-schema-ref-resolver",
       "version": "3.0.0",
       "purl": "pkg:npm/json-schema-ref-resolver@3.0.0"
@@ -1003,6 +1321,12 @@
     },
     {
       "type": "library",
+      "name": "json-stringify-safe",
+      "version": "5.0.1",
+      "purl": "pkg:npm/json-stringify-safe@5.0.1"
+    },
+    {
+      "type": "library",
       "name": "light-my-request",
       "version": "6.6.0",
       "purl": "pkg:npm/light-my-request@6.6.0"
@@ -1015,6 +1339,12 @@
     },
     {
       "type": "library",
+      "name": "lodash",
+      "version": "4.18.1",
+      "purl": "pkg:npm/lodash@4.18.1"
+    },
+    {
+      "type": "library",
       "name": "long",
       "version": "5.3.2",
       "purl": "pkg:npm/long@5.3.2"
@@ -1024,6 +1354,12 @@
       "name": "lru-cache",
       "version": "10.4.3",
       "purl": "pkg:npm/lru-cache@10.4.3"
+    },
+    {
+      "type": "library",
+      "name": "lru-cache",
+      "version": "7.18.3",
+      "purl": "pkg:npm/lru-cache@7.18.3"
     },
     {
       "type": "library",
@@ -1093,6 +1429,18 @@
     },
     {
       "type": "library",
+      "name": "netmask",
+      "version": "2.1.1",
+      "purl": "pkg:npm/netmask@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "normalize-path",
+      "version": "3.0.0",
+      "purl": "pkg:npm/normalize-path@3.0.0"
+    },
+    {
+      "type": "library",
       "name": "number-allocator",
       "version": "1.0.14",
       "purl": "pkg:npm/number-allocator@1.0.14"
@@ -1126,6 +1474,18 @@
       "name": "once",
       "version": "1.4.0",
       "purl": "pkg:npm/once@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "pac-proxy-agent",
+      "version": "7.2.0",
+      "purl": "pkg:npm/pac-proxy-agent@7.2.0"
+    },
+    {
+      "type": "library",
+      "name": "pac-resolver",
+      "version": "7.0.1",
+      "purl": "pkg:npm/pac-resolver@7.0.1"
     },
     {
       "type": "library",
@@ -1195,6 +1555,18 @@
     },
     {
       "type": "library",
+      "name": "picomatch",
+      "version": "2.3.2",
+      "purl": "pkg:npm/picomatch@2.3.2"
+    },
+    {
+      "type": "library",
+      "name": "pidusage",
+      "version": "4.0.1",
+      "purl": "pkg:npm/pidusage@4.0.1"
+    },
+    {
+      "type": "library",
       "name": "pino-abstract-transport",
       "version": "3.0.0",
       "purl": "pkg:npm/pino-abstract-transport@3.0.0"
@@ -1216,6 +1588,18 @@
       "name": "pkce-challenge",
       "version": "5.0.1",
       "purl": "pkg:npm/pkce-challenge@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "pm2-deploy",
+      "version": "1.0.2",
+      "purl": "pkg:npm/pm2-deploy@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "pm2",
+      "version": "7.0.3",
+      "purl": "pkg:npm/pm2@7.0.3"
     },
     {
       "type": "library",
@@ -1279,6 +1663,18 @@
     },
     {
       "type": "library",
+      "name": "proxy-agent",
+      "version": "6.5.0",
+      "purl": "pkg:npm/proxy-agent@6.5.0"
+    },
+    {
+      "type": "library",
+      "name": "proxy-from-env",
+      "version": "1.1.0",
+      "purl": "pkg:npm/proxy-from-env@1.1.0"
+    },
+    {
+      "type": "library",
       "name": "qs",
       "version": "6.15.3",
       "purl": "pkg:npm/qs@6.15.3"
@@ -1312,6 +1708,12 @@
       "name": "readable-stream",
       "version": "4.7.0",
       "purl": "pkg:npm/readable-stream@4.7.0"
+    },
+    {
+      "type": "library",
+      "name": "readdirp",
+      "version": "3.6.0",
+      "purl": "pkg:npm/readdirp@3.6.0"
     },
     {
       "type": "library",
@@ -1369,6 +1771,12 @@
     },
     {
       "type": "library",
+      "name": "run-series",
+      "version": "1.1.9",
+      "purl": "pkg:npm/run-series@1.1.9"
+    },
+    {
+      "type": "library",
       "name": "safe-buffer",
       "version": "5.2.1",
       "purl": "pkg:npm/safe-buffer@5.2.1"
@@ -1396,6 +1804,12 @@
       "name": "secure-json-parse",
       "version": "4.1.0",
       "purl": "pkg:npm/secure-json-parse@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "semver",
+      "version": "7.7.2",
+      "purl": "pkg:npm/semver@7.7.2"
     },
     {
       "type": "library",
@@ -1471,6 +1885,12 @@
     },
     {
       "type": "library",
+      "name": "socks-proxy-agent",
+      "version": "8.0.5",
+      "purl": "pkg:npm/socks-proxy-agent@8.0.5"
+    },
+    {
+      "type": "library",
       "name": "socks",
       "version": "2.8.9",
       "purl": "pkg:npm/socks@2.8.9"
@@ -1480,6 +1900,12 @@
       "name": "sonic-boom",
       "version": "4.2.1",
       "purl": "pkg:npm/sonic-boom@4.2.1"
+    },
+    {
+      "type": "library",
+      "name": "source-map",
+      "version": "0.6.1",
+      "purl": "pkg:npm/source-map@0.6.1"
     },
     {
       "type": "library",
@@ -1513,9 +1939,21 @@
     },
     {
       "type": "library",
+      "name": "supports-color",
+      "version": "7.2.0",
+      "purl": "pkg:npm/supports-color@7.2.0"
+    },
+    {
+      "type": "library",
       "name": "thread-stream",
       "version": "4.2.0",
       "purl": "pkg:npm/thread-stream@4.2.0"
+    },
+    {
+      "type": "library",
+      "name": "to-regex-range",
+      "version": "5.0.1",
+      "purl": "pkg:npm/to-regex-range@5.0.1"
     },
     {
       "type": "library",
@@ -1534,6 +1972,18 @@
       "name": "tslib",
       "version": "2.8.1",
       "purl": "pkg:npm/tslib@2.8.1"
+    },
+    {
+      "type": "library",
+      "name": "tv4",
+      "version": "1.3.0",
+      "purl": "pkg:npm/tv4@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "tx2",
+      "version": "1.0.5",
+      "purl": "pkg:npm/tx2@1.0.5"
     },
     {
       "type": "library",

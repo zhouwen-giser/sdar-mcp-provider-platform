@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-04-production-lifecycle-closure",
-  "updatedAt": "2026-07-29T05:24:17.692734+00:00",
+  "updatedAt": "2026-07-29T05:47:54.874073+00:00",
   "tasks": {
     "G4-P0-B01": {
       "status": "PASSED",
@@ -67,14 +67,16 @@
       "reason": null
     },
     "G4-P3-B02": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-29T05:25:17.659883+00:00",
+      "completedAt": "2026-07-29T05:47:54.874007+00:00",
+      "evidence": [
+        "pnpm install --frozen-lockfile PASS; TEST_DATABASE_URL=<redacted> pnpm verify:v2 PASS after derived SBOM refresh; TEST_DATABASE_URL=<redacted> pnpm verify:platform PASS; worker-pm2-production PASS; pms-api-production 3 passed; provider UGV/NPC/HA 2 passed each; pnpm typecheck/lint/format:check PASS; CI YAML parsed with 7 exact jobs and no weak shims; always-run cleanup PASS with zero residual resources; prior goal states unchanged; git diff --check PASS"
+      ],
       "reason": null
     },
     "G4-P4-B01": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
