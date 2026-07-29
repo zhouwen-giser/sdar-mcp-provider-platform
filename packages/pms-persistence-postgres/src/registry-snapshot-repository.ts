@@ -45,6 +45,17 @@ export class PostgresRegistrySnapshotRepository implements RegistrySnapshotRepos
         await client.query("COMMIT");
         return { created: false, snapshot: latest };
       }
+      const existing = await this.#byChecksum(
+        client,
+        input.candidate.document.environment,
+        input.candidate.checksum,
+      );
+      if (existing !== null) {
+        await activateSnapshot(client, existing);
+        await appendAudit(client, input, existing.revision, "registry.snapshot.reactivated");
+        await client.query("COMMIT");
+        return { created: false, snapshot: existing };
+      }
       const revisionResult = await client.query<{ revision: string }>(
         `SELECT COALESCE(MAX(revision),0)+1 AS revision
            FROM registry_snapshot
@@ -68,18 +79,11 @@ export class PostgresRegistrySnapshotRepository implements RegistrySnapshotRepos
           input.publishedAt,
         ],
       );
-      await client.query(
-        `INSERT INTO active_registry_snapshot(environment,revision,checksum)
-         VALUES ($1,$2,$3)
-         ON CONFLICT (environment) DO UPDATE
-           SET revision=EXCLUDED.revision,checksum=EXCLUDED.checksum,
-               updated_at=clock_timestamp()`,
-        [input.candidate.document.environment, revision, input.candidate.checksum],
-      );
-      await appendAudit(client, input, revision);
-      await client.query("COMMIT");
       const row = inserted.rows[0];
       if (row === undefined) throw new Error("REGISTRY_SNAPSHOT_INSERT_FAILED");
+      await activateSnapshot(client, snapshotFromRow(row));
+      await appendAudit(client, input, revision, "registry.snapshot.published");
+      await client.query("COMMIT");
       return { created: true, snapshot: snapshotFromRow(row) };
     } catch (error) {
       await client.query("ROLLBACK");
@@ -145,25 +149,52 @@ export class PostgresRegistrySnapshotRepository implements RegistrySnapshotRepos
     );
     return result.rows[0] === undefined ? null : snapshotFromRow(result.rows[0]);
   }
+
+  async #byChecksum(
+    db: Pool | PoolClient,
+    environment: string,
+    checksum: string,
+  ): Promise<RegistrySnapshot | null> {
+    const result = await db.query<RegistrySnapshotRow>(
+      `SELECT environment,revision,checksum,registry_document,published_at,created_at
+         FROM registry_snapshot
+        WHERE environment=$1 AND checksum=$2`,
+      [environment, checksum],
+    );
+    return result.rows[0] === undefined ? null : snapshotFromRow(result.rows[0]);
+  }
 }
 
 async function appendAudit(
   client: PoolClient,
   input: PublishRegistrySnapshot,
   revision: number,
+  action: "registry.snapshot.published" | "registry.snapshot.reactivated",
 ): Promise<void> {
   const environment = input.candidate.document.environment;
   await client.query(
     `INSERT INTO audit(
        audit_event_id,action,actor_id,correlation_id,subject_type,subject_id,metadata
-     ) VALUES ($1,'registry.snapshot.published',$2,$3,'registry_snapshot',$4,$5::jsonb)`,
+     ) VALUES ($1,$2,$3,$4,'registry_snapshot',$5,$6::jsonb)`,
     [
       randomUUID(),
+      action,
       input.actorId,
       input.correlationId,
       `${environment}:${String(revision)}`,
       json({ environment, revision, checksum: input.candidate.checksum }),
     ],
+  );
+}
+
+async function activateSnapshot(client: PoolClient, snapshot: RegistrySnapshot): Promise<void> {
+  await client.query(
+    `INSERT INTO active_registry_snapshot(environment,revision,checksum)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (environment) DO UPDATE
+       SET revision=EXCLUDED.revision,checksum=EXCLUDED.checksum,
+           updated_at=clock_timestamp()`,
+    [snapshot.environment, snapshot.revision, snapshot.checksum],
   );
 }
 
