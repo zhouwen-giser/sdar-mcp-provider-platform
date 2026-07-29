@@ -13,6 +13,7 @@ import {
   PmsJobRegistry,
   PmsWorker,
   PROVIDER_PACKAGE_SYNC_JOB,
+  type PmsJobHandler,
 } from "../src/index.js";
 
 const temporaryDirectories: string[] = [];
@@ -61,7 +62,7 @@ describe("PMS Worker foundation", () => {
 
   it("claims a registered job, executes it, and acknowledges completion", async () => {
     const lease = jobLease("provider_package.sync");
-    const execute = vi.fn(() => Promise.resolve());
+    const execute = vi.fn<PmsJobHandler["execute"]>(() => Promise.resolve());
     const { repository, complete, fail } = fakeJobs([lease]);
     const worker = new PmsWorker(
       workerConfig(),
@@ -70,7 +71,12 @@ describe("PMS Worker foundation", () => {
     );
 
     expect(await worker.runOnce()).toBe(1);
-    expect(execute).toHaveBeenCalledWith(lease);
+    expect(execute.mock.calls[0]?.[0]).toBe(lease);
+    expect(execute.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+    expect(execute.mock.calls[0]?.[1]).toMatchObject({
+      operationId: "job:job-1:fence:1",
+      idempotencyKey: "job-1:1",
+    });
     expect(complete).toHaveBeenCalledOnce();
     expect(fail).not.toHaveBeenCalled();
     expect(worker.health.snapshot().lastSuccessfulLoopAt).toBeInstanceOf(Date);
@@ -90,6 +96,59 @@ describe("PMS Worker foundation", () => {
     expect(worker.health.snapshot()).toMatchObject({ state: "stopped", ready: false });
   });
 
+  it("starts every claimed job without serial batch delay", async () => {
+    const leases = [jobLease("test.concurrent", "job-a"), jobLease("test.concurrent", "job-b")];
+    const started: string[] = [];
+    let release: (() => void) | undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const execute = vi.fn(async (lease: JobLease) => {
+      started.push(lease.job.jobId);
+      await gate;
+    });
+    const { repository } = fakeJobs(leases);
+    const worker = new PmsWorker(
+      workerConfig({ claimLimit: 2 }),
+      repository,
+      new PmsJobRegistry([{ jobType: "test.concurrent", execute }]),
+    );
+
+    const running = worker.runOnce();
+    await vi.waitFor(() => expect(started).toEqual(["job-a", "job-b"]));
+    release?.();
+    await running;
+  });
+
+  it("aborts active work and drains it during stop without terminal stale writes", async () => {
+    const lease = jobLease("test.abort");
+    let started: (() => void) | undefined;
+    const didStart = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const execute = vi.fn(
+      (_lease: JobLease, context: { readonly signal: AbortSignal }) =>
+        new Promise<void>((resolve) => {
+          started?.();
+          context.signal.addEventListener("abort", () => resolve(), { once: true });
+        }),
+    );
+    const { repository, complete, fail } = fakeJobs([lease]);
+    const worker = new PmsWorker(
+      workerConfig({ pollIntervalMs: 60_000 }),
+      repository,
+      new PmsJobRegistry([{ jobType: "test.abort", execute }]),
+    );
+
+    worker.start();
+    await didStart;
+    await worker.stop();
+
+    expect(complete).not.toHaveBeenCalled();
+    expect(fail).not.toHaveBeenCalled();
+    expect(worker.health.snapshot()).toMatchObject({ state: "stopped", ready: false });
+  });
+
   it("runs the controlled Provider Package sync handler with job audit identity", async () => {
     const synchronize = vi.fn(() => Promise.resolve({ inserted: 3, updated: 0, unchanged: 0 }));
     const unitOfWork = { transaction: vi.fn() } as unknown as PmsUnitOfWork;
@@ -100,7 +159,7 @@ describe("PMS Worker foundation", () => {
     });
     const lease = jobLease(PROVIDER_PACKAGE_SYNC_JOB);
 
-    await handler.execute(lease);
+    await handler.execute(lease, executionContext(lease));
 
     expect(synchronize).toHaveBeenCalledWith(
       unitOfWork,
@@ -128,11 +187,11 @@ function fakeJobs(leases: readonly JobLease[]) {
   return { repository, complete, fail };
 }
 
-function jobLease(jobType: string): JobLease {
+function jobLease(jobType: string, jobId = "job-1"): JobLease {
   const time = new Date("2026-07-26T00:00:00.000Z");
   return {
     job: {
-      jobId: "job-1",
+      jobId,
       jobType,
       payload: {},
       status: "leased",
@@ -145,6 +204,21 @@ function jobLease(jobType: string): JobLease {
     token: "11111111-1111-4111-8111-111111111111",
     fencingToken: 1n,
     expiresAt: new Date("2026-07-26T00:01:00.000Z"),
+  };
+}
+
+function executionContext(lease: JobLease) {
+  return {
+    signal: new AbortController().signal,
+    leaseIdentity: {
+      jobId: lease.job.jobId,
+      owner: lease.owner,
+      token: lease.token,
+      fencingToken: lease.fencingToken,
+    },
+    operationId: `job:${lease.job.jobId}:fence:${String(lease.fencingToken)}`,
+    idempotencyKey: `${lease.job.jobId}:${String(lease.fencingToken)}`,
+    leaseExpiresAt: () => new Date(lease.expiresAt),
   };
 }
 

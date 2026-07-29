@@ -96,6 +96,10 @@ and leaves no scheduler running.
 - Claim uses database time, `FOR UPDATE SKIP LOCKED`, a lease token, and a monotonically increasing
   fencing token.
 - External work runs after the claim transaction has completed.
+- Every job in a claimed batch begins independent execution immediately and renews at no more than
+  one third of the configured lease duration.
+- Successful renewals update the execution's authoritative expiry. Renewal loss aborts the handler
+  and suppresses both `complete` and `fail`, leaving higher-fence takeover authoritative.
 - Successful handlers complete the lease only when job ID, owner, token, and fence still match.
 - Failed handlers release the claim into a delayed failed state.
 - An expired lease can be recovered by another worker with a higher fence; stale workers cannot
@@ -121,9 +125,11 @@ for the current handler up to the lease-duration shutdown bound. The Worker then
 JavaScript API and provisioning connection before closing the PMS Pool. Repeated stop requests are
 safe. A shutdown timeout is reported as `PMS_WORKER_SHUTDOWN_TIMEOUT`.
 
-Choose `PMS_WORKER_CLAIM_LIMIT` together with the lease duration and worst-case handler time. A
-Worker drains its already-claimed batch serially during shutdown; oversized batches can exhaust the
-lease-duration shutdown bound.
+Choose `PMS_WORKER_CLAIM_LIMIT` together with host capacity, the lease duration, and worst-case
+handler shutdown latency. The value is the bounded local concurrency for each claim cycle. During
+shutdown the Worker aborts every active handler and waits for them within the lease-duration outer
+bound; handlers that wrap non-interruptible calls must check their Signal immediately after return
+and before a later state write.
 
 Worker authority is limited to desired/observed Runtime infrastructure and its control-plane
 projections. Runtime Task data belongs to the Runtime database and is never read or mutated by the

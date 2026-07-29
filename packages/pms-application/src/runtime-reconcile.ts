@@ -148,6 +148,7 @@ export class RuntimeDeploymentReconciler {
   async reconcile(
     input: RuntimeDeploymentReconcileInput,
   ): Promise<RuntimeDeploymentReconcileResult> {
+    checkpoint(input);
     let deployment = await this.requireDeployment(input);
     let orphans: readonly string[];
     try {
@@ -160,6 +161,7 @@ export class RuntimeDeploymentReconciler {
     let progressed = false;
     try {
       for (let step = 0; step < 12; step += 1) {
+        checkpoint(input);
         if (deployment.snapshot.desiredState !== "running") {
           const before = deployment.snapshot.status;
           const result = await this.reconcileStopped(deployment, input);
@@ -174,31 +176,39 @@ export class RuntimeDeploymentReconciler {
           case "DATABASE_PROVISIONING":
           case "MIGRATING":
           case "FAILED":
-            await this.database.execute({
-              providerId: input.providerId,
-              deploymentId: input.deploymentId,
-              operationId: input.context.operationId,
-            });
+            await cancellable(input, () =>
+              this.database.execute({
+                providerId: input.providerId,
+                deploymentId: input.deploymentId,
+                operationId: input.context.operationId,
+              }),
+            );
             deployment = await this.requireDeployment(input);
             progressed = true;
             continue;
           case "CONFIG_PREPARING":
-            await this.store.ensureInstance(deployment.snapshot, 0);
+            await cancellable(input, () => this.store.ensureInstance(deployment.snapshot, 0));
             deployment = await this.transition(deployment, "STARTING", input);
             progressed = true;
             continue;
           case "STARTING": {
-            const instance = await this.store.ensureInstance(deployment.snapshot, 0);
-            await this.lifecycle.start(
-              instance,
-              stepContext(input.context, "start", deployment.snapshot.observedRevision),
+            const instance = await cancellable(input, () =>
+              this.store.ensureInstance(deployment.snapshot, 0),
+            );
+            await cancellable(input, () =>
+              this.lifecycle.start(
+                instance,
+                stepContext(input.context, "start", deployment.snapshot.observedRevision),
+              ),
             );
             deployment = await this.transition(deployment, "HEALTH_CHECKING", input);
             progressed = true;
             continue;
           }
           case "HEALTH_CHECKING": {
-            const instance = await this.store.ensureInstance(deployment.snapshot, 0);
+            const instance = await cancellable(input, () =>
+              this.store.ensureInstance(deployment.snapshot, 0),
+            );
             const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
             if (identityFailure !== null) {
               return {
@@ -207,13 +217,15 @@ export class RuntimeDeploymentReconciler {
                 orphanProcessNames: orphans,
               };
             }
-            const result = await this.health.probe({
-              target: instance.target,
-              httpPort: instance.httpPort,
-              timeoutMs: input.context.timeoutMs,
-              signal: input.context.signal,
-            });
-            await this.store.recordHealth(instance.target, result);
+            const result = await cancellable(input, () =>
+              this.health.probe({
+                target: instance.target,
+                httpPort: instance.httpPort,
+                timeoutMs: input.context.timeoutMs,
+                signal: input.context.signal,
+              }),
+            );
+            await cancellable(input, () => this.store.recordHealth(instance.target, result));
             deployment = await this.transition(
               deployment,
               isHealthy(result) ? "DISCOVERING" : "DEGRADED",
@@ -228,18 +240,24 @@ export class RuntimeDeploymentReconciler {
           case "ACTIVE":
           case "DEGRADED": {
             const before = deployment.snapshot.status;
-            const instance = await this.store.ensureInstance(deployment.snapshot, 0);
-            await this.lifecycle.start(
-              instance,
-              stepContext(input.context, "start", deployment.snapshot.observedRevision),
+            const instance = await cancellable(input, () =>
+              this.store.ensureInstance(deployment.snapshot, 0),
             );
-            const result = await this.health.probe({
-              target: instance.target,
-              httpPort: instance.httpPort,
-              timeoutMs: input.context.timeoutMs,
-              signal: input.context.signal,
-            });
-            await this.store.recordHealth(instance.target, result);
+            await cancellable(input, () =>
+              this.lifecycle.start(
+                instance,
+                stepContext(input.context, "start", deployment.snapshot.observedRevision),
+              ),
+            );
+            const result = await cancellable(input, () =>
+              this.health.probe({
+                target: instance.target,
+                httpPort: instance.httpPort,
+                timeoutMs: input.context.timeoutMs,
+                signal: input.context.signal,
+              }),
+            );
+            await cancellable(input, () => this.store.recordHealth(instance.target, result));
             if (!isHealthy(result)) {
               if (before === "ACTIVE") {
                 deployment = await this.transition(deployment, "DEGRADED", input);
@@ -278,7 +296,9 @@ export class RuntimeDeploymentReconciler {
             };
           }
           case "DISCOVERING": {
-            const instance = await this.store.ensureInstance(deployment.snapshot, 0);
+            const instance = await cancellable(input, () =>
+              this.store.ensureInstance(deployment.snapshot, 0),
+            );
             const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
             if (identityFailure !== null) {
               return {
@@ -310,19 +330,29 @@ export class RuntimeDeploymentReconciler {
           : new RuntimeDeploymentReconcileError("RUNTIME_RECONCILE_OPERATION_FAILED", true, {
               cause: error,
             });
-      const current = await this.store
-        .getDeployment(input.providerId, input.deploymentId)
-        .catch(() => null);
+      if (input.context.signal.aborted) throw mapped;
+      let current: RuntimeDeployment | null = null;
+      try {
+        current = await cancellable(input, () =>
+          this.store.getDeployment(input.providerId, input.deploymentId),
+        );
+      } catch {
+        checkpoint(input);
+      }
       if (current !== null && canFail(current.snapshot.status)) {
-        await this.store
-          .fail(
-            input.providerId,
-            input.deploymentId,
-            current.snapshot.status,
-            current.snapshot.observedRevision,
-            mapped.code,
-          )
-          .catch(() => undefined);
+        try {
+          await cancellable(input, () =>
+            this.store.fail(
+              input.providerId,
+              input.deploymentId,
+              current.snapshot.status,
+              current.snapshot.observedRevision,
+              mapped.code,
+            ),
+          );
+        } catch {
+          checkpoint(input);
+        }
       }
       throw mapped;
     }
@@ -339,28 +369,34 @@ export class RuntimeDeploymentReconciler {
     if (deployment.snapshot.status !== "DRAINING") {
       deployment = await this.transition(deployment, "DRAINING", input);
     }
-    const instances = await this.store.listInstances(input.providerId, input.deploymentId);
+    const instances = await cancellable(input, () =>
+      this.store.listInstances(input.providerId, input.deploymentId),
+    );
     for (const instance of instances) {
-      await this.lifecycle.stop(
-        { target: instance.target },
-        stepContext(input.context, "stop", deployment.snapshot.observedRevision),
+      await cancellable(input, () =>
+        this.lifecycle.stop(
+          { target: instance.target },
+          stepContext(input.context, "stop", deployment.snapshot.observedRevision),
+        ),
       );
     }
     return this.transition(deployment, "STOPPED", input);
   }
 
-  private transition(
+  private async transition(
     deployment: RuntimeDeployment,
     target: RuntimeDeploymentStatus,
     input: RuntimeDeploymentReconcileInput,
   ): Promise<RuntimeDeployment> {
     const snapshot = deployment.snapshot;
-    return this.store.transition(
-      input.providerId,
-      input.deploymentId,
-      target,
-      snapshot.status,
-      snapshot.observedRevision,
+    return cancellable(input, () =>
+      this.store.transition(
+        input.providerId,
+        input.deploymentId,
+        target,
+        snapshot.status,
+        snapshot.observedRevision,
+      ),
     );
   }
 
@@ -369,19 +405,23 @@ export class RuntimeDeploymentReconciler {
     instance: RuntimeReconcileInstance,
     input: RuntimeDeploymentReconcileInput,
   ): Promise<RuntimeDeployment | null> {
-    const verification = await this.providerIdentity.verify({
-      expectedProviderId: input.providerId,
-      target: instance.target,
-      timeoutMs: input.context.timeoutMs,
-      signal: input.context.signal,
-    });
+    const verification = await cancellable(input, () =>
+      this.providerIdentity.verify({
+        expectedProviderId: input.providerId,
+        target: instance.target,
+        timeoutMs: input.context.timeoutMs,
+        signal: input.context.signal,
+      }),
+    );
     if (verification.valid) return null;
-    await this.store.fail(
-      input.providerId,
-      input.deploymentId,
-      deployment.snapshot.status,
-      deployment.snapshot.observedRevision,
-      verification.reasonCode,
+    await cancellable(input, () =>
+      this.store.fail(
+        input.providerId,
+        input.deploymentId,
+        deployment.snapshot.status,
+        deployment.snapshot.observedRevision,
+        verification.reasonCode,
+      ),
     );
     return this.requireDeployment(input);
   }
@@ -389,7 +429,9 @@ export class RuntimeDeploymentReconciler {
   private async requireDeployment(
     input: RuntimeDeploymentReconcileInput,
   ): Promise<RuntimeDeployment> {
-    const deployment = await this.store.getDeployment(input.providerId, input.deploymentId);
+    const deployment = await cancellable(input, () =>
+      this.store.getDeployment(input.providerId, input.deploymentId),
+    );
     if (deployment === null) {
       throw new RuntimeDeploymentReconcileError("RUNTIME_RECONCILE_DEPLOYMENT_NOT_FOUND", false);
     }
@@ -397,10 +439,12 @@ export class RuntimeDeploymentReconciler {
   }
 
   private async detectOrphans(input: RuntimeDeploymentReconcileInput): Promise<readonly string[]> {
-    const [known, observed] = await Promise.all([
-      this.store.listInstances(input.providerId, input.deploymentId),
-      this.inventory.list(),
-    ]);
+    const [known, observed] = await cancellable(input, () =>
+      Promise.all([
+        this.store.listInstances(input.providerId, input.deploymentId),
+        this.inventory.list(),
+      ]),
+    );
     const knownNames = new Set(known.map(({ target }) => target.processName));
     const orphans = observed
       .filter(
@@ -410,11 +454,13 @@ export class RuntimeDeploymentReconciler {
       .map(({ target }) => target.processName)
       .sort();
     if (orphans.length > 0) {
-      await this.store.recordOrphans(
-        input.providerId,
-        input.deploymentId,
-        orphans,
-        input.context.correlationId,
+      await cancellable(input, () =>
+        this.store.recordOrphans(
+          input.providerId,
+          input.deploymentId,
+          orphans,
+          input.context.correlationId,
+        ),
       );
     }
     return Object.freeze(orphans);
@@ -438,4 +484,18 @@ function isHealthy(result: RuntimeReconcileHealthResult): boolean {
 
 function canFail(status: RuntimeDeploymentStatus): boolean {
   return !["FAILED", "STOPPED"].includes(status);
+}
+
+async function cancellable<T>(
+  input: RuntimeDeploymentReconcileInput,
+  operation: () => Promise<T>,
+): Promise<T> {
+  checkpoint(input);
+  const result = await operation();
+  checkpoint(input);
+  return result;
+}
+
+function checkpoint(input: RuntimeDeploymentReconcileInput): void {
+  input.context.signal.throwIfAborted();
 }
