@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-05-pms-web-interaction-prototype",
+  "status": "READY_FOR_REVIEW",
+  "baseBranch": "main",
+  "branch": "codex/goal-05-pms-web-interaction-prototype",
+  "baselineCommit": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "taskSummary": {
+    "total": 7,
+    "passed": 7
+  },
+  "scope": {
+    "authentication": "NOT_IMPLEMENTED_BY_DESIGN",
+    "backendIntegration": "NOT_IMPLEMENTED_BY_DESIGN",
+    "dataMode": "MOCK_ONLY"
+  },
+  "verification": {
+    "unitTests": "9 files / 24 tests passed",
+    "browserTests": "7 passed",
+    "routes": 29,
+    "scenarios": 14,
+    "screenshots": 15,
+    "realDataTransportRequests": 0,
+    "consoleErrors": 0
+  },
+  "handoff": "docs/design/pms-web/PROTOTYPE_HANDOFF.md"
+}

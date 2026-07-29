@@ -1,96 +1,79 @@
-export type PmsWebRoute =
-  | { readonly page: "providers" }
-  | { readonly page: "provider"; readonly providerId: string }
-  | { readonly page: "packages" }
-  | { readonly page: "resources"; readonly environment: string }
-  | { readonly page: "configuration"; readonly draftId?: string }
-  | {
-      readonly page: "runtime";
-      readonly providerId?: string;
-      readonly deploymentId?: string;
-    }
-  | { readonly page: "catalog"; readonly environment: string; readonly providerId?: string }
-  | {
-      readonly page: "registry";
-      readonly environment: string;
-      readonly fromRevision?: number;
-      readonly toRevision?: number;
-    }
-  | {
-      readonly page: "audit";
-      readonly subjectType?: string;
-      readonly subjectId?: string;
-      readonly correlationId?: string;
-    };
+import { useEffect, useState } from "react";
 
-export function matchRoute(pathname: string, search = ""): PmsWebRoute {
-  const provider = /^\/providers\/([^/]+)$/.exec(pathname);
-  if (provider?.[1] !== undefined) {
-    return { page: "provider", providerId: decodeURIComponent(provider[1]) };
-  }
-  if (pathname === "/packages") return { page: "packages" };
-  if (pathname === "/resources") {
-    return {
-      page: "resources",
-      environment: new URLSearchParams(search).get("environment") ?? "production",
-    };
-  }
-  if (pathname === "/configuration") {
-    const draftId = new URLSearchParams(search).get("draftId");
-    return { page: "configuration", ...(draftId === null ? {} : { draftId }) };
-  }
-  if (pathname === "/runtime") {
-    const query = new URLSearchParams(search);
-    const providerId = query.get("providerId");
-    const deploymentId = query.get("deploymentId");
-    return {
-      page: "runtime",
-      ...(providerId === null ? {} : { providerId }),
-      ...(deploymentId === null ? {} : { deploymentId }),
-    };
-  }
-  if (pathname === "/catalog") {
-    const query = new URLSearchParams(search);
-    const providerId = query.get("providerId");
-    return {
-      page: "catalog",
-      environment: query.get("environment") ?? "production",
-      ...(providerId === null ? {} : { providerId }),
-    };
-  }
-  if (pathname === "/registry") {
-    const query = new URLSearchParams(search);
-    const fromRevision = positiveInteger(query.get("fromRevision"));
-    const toRevision = positiveInteger(query.get("toRevision"));
-    return {
-      page: "registry",
-      environment: query.get("environment") ?? "production",
-      ...(fromRevision === undefined ? {} : { fromRevision }),
-      ...(toRevision === undefined ? {} : { toRevision }),
-    };
-  }
-  if (pathname === "/audit") {
-    const query = new URLSearchParams(search);
-    return {
-      page: "audit",
-      ...optionalQuery(query, "subjectType"),
-      ...optionalQuery(query, "subjectId"),
-      ...optionalQuery(query, "correlationId"),
-    };
-  }
-  return { page: "providers" };
+export interface AppRoute {
+  readonly path: string;
+  readonly title: string;
+  readonly group: string;
+  readonly level: "P0" | "P1" | "internal";
 }
 
-function positiveInteger(value: string | null): number | undefined {
-  if (value === null || !/^[1-9][0-9]*$/.test(value)) return undefined;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) ? parsed : undefined;
+export const APP_ROUTES: readonly AppRoute[] = [
+  route("/dashboard", "工作台", "概览"),
+  route("/providers", "Providers", "Providers"),
+  route("/providers/new", "接入 Provider", "Providers"),
+  route("/providers/:providerId", "Provider 详情", "Providers"),
+  route("/provider-packages", "Provider Packages", "Providers", "P1"),
+  route("/resources", "Resources", "Providers"),
+  route("/resources/:resourceId", "Resource 详情", "Providers"),
+  route("/runtime/deployments", "Runtime Deployments", "Runtime"),
+  route("/runtime/deployments/new", "创建 RuntimeDeployment", "Runtime"),
+  route("/runtime/deployments/:deploymentId", "RuntimeDeployment 详情", "Runtime"),
+  route("/runtime/processes", "Runtime Processes", "Runtime"),
+  route("/runtime/releases", "Runtime Releases", "Runtime", "P1"),
+  route("/databases", "Database Profiles", "Runtime", "P1"),
+  route("/configuration", "配置中心", "Configuration"),
+  route("/configuration/:profileId", "配置详情", "Configuration"),
+  route("/catalog", "Catalog", "Discovery"),
+  route("/catalog/:providerId/:operationName", "Catalog Operation", "Discovery"),
+  route("/registry", "Registry", "Discovery"),
+  route("/conformance", "Conformance", "Discovery", "P1"),
+  route("/mcp-explorer", "MCP Explorer", "Discovery", "P1"),
+  route("/operations/health", "系统健康", "Operations"),
+  route("/operations/jobs", "Worker Jobs", "Operations"),
+  route("/operations/incidents", "Incidents", "Operations"),
+  route("/operations/incidents/:incidentId", "Incident 详情", "Operations"),
+  route("/changes", "Change Requests", "Governance", "P1"),
+  route("/audit", "Audit", "Governance"),
+  route("/system/settings", "System Settings", "Governance", "P1"),
+  route("/_prototype/components", "组件展示", "Prototype", "internal"),
+  route("/_prototype/scenarios", "场景展示", "Prototype", "internal"),
+];
+
+export function matchRoute(pathname: string): AppRoute | undefined {
+  return APP_ROUTES.find((candidate) => {
+    const expected = candidate.path.split("/").filter(Boolean);
+    const actual = pathname.split("/").filter(Boolean);
+    return (
+      expected.length === actual.length &&
+      expected.every((segment, index) => segment.startsWith(":") || segment === actual[index])
+    );
+  });
 }
 
-function optionalQuery(
-  query: URLSearchParams,
-  name: "subjectType" | "subjectId" | "correlationId",
-): Partial<Record<typeof name, string>> {
-  const value = query.get(name);
-  return value === null || value.length === 0 ? {} : { [name]: value };
+export function navigate(path: string): void {
+  const scenario = new URLSearchParams(window.location.search).get("scenario");
+  const url = new URL(path, window.location.origin);
+  if (scenario !== null && !url.searchParams.has("scenario"))
+    url.searchParams.set("scenario", scenario);
+  window.history.pushState({}, "", `${url.pathname}${url.search}`);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
+export function useRoute(): AppRoute | undefined {
+  const [route, setRoute] = useState(() => matchRoute(window.location.pathname));
+  useEffect(() => {
+    const listener = () => setRoute(matchRoute(window.location.pathname));
+    window.addEventListener("popstate", listener);
+    return () => window.removeEventListener("popstate", listener);
+  }, []);
+  return route;
+}
+
+function route(
+  path: string,
+  title: string,
+  group: string,
+  level: AppRoute["level"] = "P0",
+): AppRoute {
+  return { path, title, group, level };
 }

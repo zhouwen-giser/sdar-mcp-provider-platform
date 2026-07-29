@@ -1,0 +1,53 @@
+.blocking-callout,
+.permission-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--danger);
+  border-radius: 0.55rem;
+  background: var(--danger-soft);
+}
+
+.permission-banner {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.audit-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.job-state-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.job-state-grid section {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 800px) {
+  .blocking-callout,
+  .permission-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .audit-comparison,
+  .job-state-grid {
+    grid-template-columns: 1fr;
+  }
+}

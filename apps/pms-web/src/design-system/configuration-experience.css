@@ -1,0 +1,112 @@
+.configuration-workbench {
+  display: grid;
+  grid-template-columns: 13rem 12rem minmax(0, 1fr);
+  min-height: 36rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.configuration-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+}
+
+.configuration-column button {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.configuration-column button[aria-current="page"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.configuration-column small,
+.configuration-field small {
+  color: var(--text-muted);
+}
+
+.configuration-editor {
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.configuration-form {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.configuration-field {
+  display: grid;
+  grid-template-columns: minmax(13rem, 1fr) minmax(12rem, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.configuration-field > span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.configuration-field code {
+  overflow-wrap: anywhere;
+}
+
+.validation-panel,
+.ack-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.validation-panel small,
+.validation-link {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.validation-link {
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  text-align: left;
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.impact-grid section {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 1000px) {
+  .configuration-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .configuration-column {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
