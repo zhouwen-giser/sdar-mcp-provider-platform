@@ -28,6 +28,35 @@ export interface ProviderSummary {
   readonly observedAt: string;
 }
 
+export interface ResourceSummary {
+  readonly resourceId: string;
+  readonly providerId: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly environment: string;
+  readonly status: EntityStatus;
+  readonly capabilities: readonly string[];
+  readonly observedAt: string;
+}
+
+export interface ProviderOnboardingDraft {
+  readonly name: string;
+  readonly providerId: string;
+  readonly packageId: string;
+  readonly hostingMode: "platform-managed" | "vendor-managed";
+  readonly adapterEndpoint: string;
+  readonly databaseProfileId: string;
+  readonly runtimeRelease: string;
+  readonly environment: string;
+}
+
+export interface MockCheckResult {
+  readonly passed: boolean;
+  readonly code: string;
+  readonly summary: string;
+  readonly blockers: readonly string[];
+}
+
 export interface RuntimeDeploymentSummary {
   readonly deploymentId: string;
   readonly providerId: string;
@@ -60,6 +89,7 @@ export interface DashboardSnapshot {
 export interface PrototypeDataset {
   readonly dashboard: DashboardSnapshot;
   readonly providers: readonly ProviderSummary[];
+  readonly resources: readonly ResourceSummary[];
   readonly deployments: readonly RuntimeDeploymentSummary[];
   readonly incidents: readonly IncidentSummary[];
 }
@@ -90,8 +120,16 @@ export interface PmsWebDataSource {
   setScenario(scenario: PrototypeScenario): void;
   dashboard(): Promise<DashboardSnapshot>;
   providers(): Promise<readonly ProviderSummary[]>;
+  provider(providerId: string): Promise<ProviderSummary | undefined>;
+  resources(): Promise<readonly ResourceSummary[]>;
   deployments(): Promise<readonly RuntimeDeploymentSummary[]>;
   incidents(): Promise<readonly IncidentSummary[]>;
+  checkAdapter(draft: ProviderOnboardingDraft): Promise<MockCheckResult>;
+  preflightProvider(draft: ProviderOnboardingDraft): Promise<MockCheckResult>;
+  onboardProvider(draft: ProviderOnboardingDraft): {
+    readonly provider: ProviderSummary;
+    readonly operation: PrototypeOperation;
+  };
   startOperation(input: SimulatedOperationInput): PrototypeOperation;
   advanceOperation(operationId: string): PrototypeOperation;
   operations(): readonly PrototypeOperation[];

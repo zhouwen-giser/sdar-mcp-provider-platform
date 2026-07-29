@@ -34,12 +34,14 @@ export function buildScenario(scenario: PrototypeScenario): PrototypeDataset {
         stale: false,
       },
       providers: [],
+      resources: [],
       deployments: [],
       incidents: [],
     };
   }
   let dashboard = structuredClone(HEALTHY_DATASET.dashboard);
   let providers = [...structuredClone(HEALTHY_DATASET.providers)];
+  let resources = [...structuredClone(HEALTHY_DATASET.resources)];
   let deployments = [...structuredClone(HEALTHY_DATASET.deployments)];
   let incidents = [...structuredClone(HEALTHY_DATASET.incidents)];
   if (scenario === "degraded" || scenario === "partial-data") {
@@ -47,6 +49,9 @@ export function buildScenario(scenario: PrototypeScenario): PrototypeDataset {
       index === 1 ? { ...provider, status: "DEGRADED" } : provider,
     );
     dashboard = { ...dashboard, healthyProviderCount: 2 };
+    resources = resources.map((resource, index) =>
+      index === 1 ? { ...resource, status: "DEGRADED" } : resource,
+    );
   }
   if (scenario === "runtime-stale" || scenario === "config-drift") {
     deployments = deployments.map((deployment, index) =>
@@ -75,5 +80,5 @@ export function buildScenario(scenario: PrototypeScenario): PrototypeDataset {
       index === 2 ? { ...provider, status: "BLOCKED" } : provider,
     );
   }
-  return { dashboard, providers, deployments, incidents };
+  return { dashboard, providers, resources, deployments, incidents };
 }

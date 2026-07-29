@@ -41,6 +41,38 @@ export const HEALTHY_DATASET: PrototypeDataset = {
       observedAt: "2026-07-29T05:58:10.000Z",
     },
   ],
+  resources: [
+    {
+      resourceId: "climate-east-7f",
+      providerId: "provider-ha-east",
+      name: "7F 东区空调",
+      kind: "climate-zone",
+      environment: "production-mock",
+      status: "ACTIVE",
+      capabilities: ["read_temperature", "set_temperature"],
+      observedAt: "2026-07-29T06:00:00.000Z",
+    },
+    {
+      resourceId: "ugv-patrol-07",
+      providerId: "provider-ugv-fleet",
+      name: "巡检车 07",
+      kind: "ugv",
+      environment: "production-mock",
+      status: "ACTIVE",
+      capabilities: ["navigate", "stop", "inspect"],
+      observedAt: "2026-07-29T05:59:42.000Z",
+    },
+    {
+      resourceId: "npc-tank-alpha",
+      providerId: "provider-npc-range",
+      name: "NPC Tank Alpha",
+      kind: "npc-tank",
+      environment: "staging-mock",
+      status: "ACTIVE",
+      capabilities: ["move", "aim", "fire_simulation"],
+      observedAt: "2026-07-29T05:58:10.000Z",
+    },
+  ],
   deployments: [
     {
       deploymentId: "deploy-ha-primary",

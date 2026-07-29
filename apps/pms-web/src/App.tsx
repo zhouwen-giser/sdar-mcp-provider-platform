@@ -7,6 +7,11 @@ import {
   StructuredPlaceholder,
 } from "./pages/foundation.js";
 import { navigate, useRoute } from "./router.js";
+import { DashboardPage } from "./features/dashboard/DashboardPage.js";
+import { ProviderPackagesPage } from "./features/provider-packages/ProviderPackagesPage.js";
+import { ProviderDetailPage, ProvidersPage } from "./features/providers/ProviderPages.js";
+import { ProviderOnboardingPage } from "./features/providers/ProviderOnboardingPage.js";
+import { ResourceDetailPage, ResourcesPage } from "./features/resources/ResourcePages.js";
 import "./styles.css";
 
 export function App() {
@@ -15,6 +20,7 @@ export function App() {
     if (window.location.pathname === "/") navigate("/dashboard");
   }, []);
   if (window.location.pathname === "/") return null;
+  const segments = window.location.pathname.split("/").filter(Boolean);
   return (
     <AppShell route={route} operationPanel={<OperationPanel />}>
       {route === undefined ? (
@@ -30,6 +36,20 @@ export function App() {
         <ComponentCatalogue />
       ) : route.path === "/_prototype/scenarios" ? (
         <ScenarioCatalogue />
+      ) : route.path === "/dashboard" ? (
+        <DashboardPage />
+      ) : route.path === "/providers" ? (
+        <ProvidersPage />
+      ) : route.path === "/providers/new" ? (
+        <ProviderOnboardingPage />
+      ) : route.path === "/providers/:providerId" ? (
+        <ProviderDetailPage providerId={segments[1] ?? ""} />
+      ) : route.path === "/provider-packages" ? (
+        <ProviderPackagesPage />
+      ) : route.path === "/resources" ? (
+        <ResourcesPage />
+      ) : route.path === "/resources/:resourceId" ? (
+        <ResourceDetailPage resourceId={segments[1] ?? ""} />
       ) : (
         <StructuredPlaceholder route={route} />
       )}
