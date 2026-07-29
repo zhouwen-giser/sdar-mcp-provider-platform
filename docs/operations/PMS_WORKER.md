@@ -32,6 +32,8 @@ The production bootstrap also requires this group; omission fails closed with
 | `PMS_RUNTIME_RELEASE_ROOT`                  | required    | Versioned, read-only Runtime release root    |
 | `PMS_RUNTIME_SECRET_ROOT`                   | required    | Private Runtime secret-file root             |
 | `PMS_RUNTIME_CONFIG_CACHE_ROOT`             | required    | Private per-Runtime configuration cache root |
+| `PMS_RUNTIME_CONTROL_PLANE_URL`             | required    | HTTPS, or loopback HTTP, PMS Runtime API URL |
+| `PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE`      | required    | Runtime config/registration scoped token     |
 | `PMS_PM2_HOME`                              | required    | Private isolated PM2 state directory         |
 | `PMS_RUNTIME_RECONCILE_INTERVAL_MS`         | required    | Bounded periodic reconcile interval          |
 | `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
@@ -50,7 +52,8 @@ file under `PMS_RUNTIME_SECRET_ROOT`.
 versions are eligible, and every start resolves the fixed built entry
 `dist/apps/runtime/src/main.js` under its version directory. The PM2 adapter uses the repository
 dependency pinned to `7.0.3` and the JavaScript API with the isolated `PMS_PM2_HOME`; no PM2 CLI is
-invoked.
+invoked. Keep `PMS_PM2_HOME` short enough for the host's Unix-domain socket path limit; a deeply
+nested path can prevent the PM2 bus from starting even when the directory itself is valid.
 
 Database and provisioning files must be absolute, regular, non-symlink, non-empty, no broader than
 `0600`, and located under a non-group-writable/non-world-writable parent. Release roots may be
@@ -97,6 +100,10 @@ It contains only readiness, the last successful loop timestamp, and a stable fai
 for the current handler up to the lease-duration shutdown bound. The Worker then disconnects its PM2
 JavaScript API and provisioning connection before closing the PMS Pool. Repeated stop requests are
 safe. A shutdown timeout is reported as `PMS_WORKER_SHUTDOWN_TIMEOUT`.
+
+Choose `PMS_WORKER_CLAIM_LIMIT` together with the lease duration and worst-case handler time. A
+Worker drains its already-claimed batch serially during shutdown; oversized batches can exhaust the
+lease-duration shutdown bound.
 
 Worker authority is limited to desired/observed Runtime infrastructure and its control-plane
 projections. Runtime Task data belongs to the Runtime database and is never read or mutated by the

@@ -58,6 +58,8 @@ function contractFixture(
       runtimeReleaseRoot: "/opt/sdar/runtime-releases",
       runtimeSecretRoot: "/run/sdar/runtime-secrets",
       runtimeConfigCacheRoot: "/var/lib/sdar/runtime-config",
+      runtimeControlPlaneUrl: "https://pms.internal/",
+      runtimeControlPlaneTokenFile: "/run/sdar/pms-token",
       pm2Home: "/var/lib/sdar/pm2",
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,

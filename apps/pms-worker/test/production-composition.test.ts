@@ -97,6 +97,7 @@ async function productionConfig(databaseUrl: string): Promise<{
     ),
   );
   const credentialFile = join(root, "provisioning.json");
+  const controlPlaneTokenFile = join(root, "control-plane-token");
   await writeFile(
     credentialFile,
     JSON.stringify({
@@ -108,6 +109,7 @@ async function productionConfig(databaseUrl: string): Promise<{
     { mode: 0o600 },
   );
   await chmod(credentialFile, 0o600);
+  await writeFile(controlPlaneTokenFile, "production-composition-token", { mode: 0o600 });
   await writeFile(
     join(releaseRoot, "runtime-releases.json"),
     JSON.stringify(CURRENT_RUNTIME_RELEASE_MANIFEST),
@@ -127,6 +129,8 @@ async function productionConfig(databaseUrl: string): Promise<{
         runtimeReleaseRoot: releaseRoot,
         runtimeSecretRoot: secretRoot,
         runtimeConfigCacheRoot: cacheRoot,
+        runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
+        runtimeControlPlaneTokenFile: controlPlaneTokenFile,
         pm2Home,
         runtimeReconcileIntervalMs: 1_000,
         runtimeReconcileTimeoutMs: 5_000,

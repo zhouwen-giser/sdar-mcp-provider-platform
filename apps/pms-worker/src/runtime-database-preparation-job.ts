@@ -7,24 +7,24 @@ import {
   type RuntimeDatabasePreparationCheckpoint,
   type RuntimeDatabasePreparationStore,
   type RuntimeDatabaseSecretPort,
-} from "@sdar/pms-application";
+} from "../../../packages/pms-application/src/index.js";
 import {
   PostgresDatabaseProfileRepository,
   PostgresRuntimeDeploymentRepository,
-} from "@sdar/pms-persistence-postgres";
+} from "../../../packages/pms-persistence-postgres/src/index.js";
 import {
   PostgresProvisioner,
   type ProvisioningSqlClient,
   type RuntimeDatabaseConnectionFactory,
   type RuntimeCredentialRotationHook,
-} from "@sdar/postgres-provisioner";
-import { RuntimeMigrationRunner } from "@sdar/runtime-migration-runner";
-import { FileSecretStore } from "@sdar/secret-store";
+} from "../../../packages/postgres-provisioner/src/index.js";
+import { RuntimeMigrationRunner } from "../../../packages/runtime-migration-runner/src/index.js";
+import { FileSecretStore } from "../../../packages/secret-store/src/index.js";
 import type {
   PostgresProvisionContext,
   PostgresProvisioningSpec,
   RuntimeDeploymentSnapshot,
-} from "@sdar/runtime-deployment";
+} from "../../../packages/runtime-deployment/src/index.js";
 
 interface ProvisioningCredentials {
   readonly clusterRef: string;
@@ -271,7 +271,7 @@ class RuntimeCredentialRotation implements RuntimeCredentialRotationHook {
   ): Promise<{ readonly changed: boolean }> {
     assertCredentialAuthority(spec, this.credentials);
     const command = await admin.query<{ statement: string }>(
-      "SELECT format('ALTER ROLE %I PASSWORD %L',$1,$2) AS statement",
+      "SELECT format('ALTER ROLE %I PASSWORD %L',$1::text,$2::text) AS statement",
       [spec.runtimeRoleName, this.credentials.runtimePassword],
     );
     const statement = command.rows[0]?.statement;

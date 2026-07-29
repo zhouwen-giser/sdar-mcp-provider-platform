@@ -1,5 +1,8 @@
 import type { Pool } from "pg";
-import { PostgresPmsUnitOfWork, postgresRepositories } from "@sdar/pms-persistence-postgres";
+import {
+  PostgresPmsUnitOfWork,
+  postgresRepositories,
+} from "../../../packages/pms-persistence-postgres/src/index.js";
 import type { PmsWorkerConfig } from "./config.js";
 import { PmsJobRegistry } from "./job-registry.js";
 import { createPackageSyncJobHandler } from "./package-sync-job.js";

@@ -229,6 +229,10 @@ export class RuntimeDeploymentReconciler {
           case "DEGRADED": {
             const before = deployment.snapshot.status;
             const instance = await this.store.ensureInstance(deployment.snapshot, 0);
+            await this.lifecycle.start(
+              instance,
+              stepContext(input.context, "start", deployment.snapshot.observedRevision),
+            );
             const result = await this.health.probe({
               target: instance.target,
               httpPort: instance.httpPort,

@@ -34,6 +34,8 @@ describe("PMS Worker production Runtime configuration", () => {
       runtimeReleaseRoot: fixture.releaseRoot,
       runtimeSecretRoot: fixture.secretRoot,
       runtimeConfigCacheRoot: fixture.cacheRoot,
+      runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
+      runtimeControlPlaneTokenFile: fixture.controlPlaneToken,
       pm2Home: fixture.pm2Home,
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,
@@ -171,6 +173,7 @@ async function secureFixture() {
   temporaryDirectories.push(directory);
   const databaseUrl = join(directory, "database-url");
   const provisioningCredential = join(directory, "provisioning-credential");
+  const controlPlaneToken = join(directory, "control-plane-token");
   const releaseRoot = join(directory, "releases");
   const secretRoot = join(directory, "secrets");
   const cacheRoot = join(directory, "runtime-config-cache");
@@ -178,6 +181,7 @@ async function secureFixture() {
   await Promise.all([
     writeFile(databaseUrl, "postgresql://local-only\n", { mode: 0o600 }),
     writeFile(provisioningCredential, '{"secretRef":"local-only"}\n', { mode: 0o600 }),
+    writeFile(controlPlaneToken, "local-control-plane-token\n", { mode: 0o600 }),
     mkdir(releaseRoot, { mode: 0o755 }),
     mkdir(secretRoot, { mode: 0o700 }),
     mkdir(cacheRoot, { mode: 0o700 }),
@@ -189,6 +193,8 @@ async function secureFixture() {
     PMS_RUNTIME_RELEASE_ROOT: releaseRoot,
     PMS_RUNTIME_SECRET_ROOT: secretRoot,
     PMS_RUNTIME_CONFIG_CACHE_ROOT: cacheRoot,
+    PMS_RUNTIME_CONTROL_PLANE_URL: "http://127.0.0.1:8090",
+    PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE: controlPlaneToken,
     PMS_PM2_HOME: pm2Home,
     PMS_RUNTIME_RECONCILE_INTERVAL_MS: "15000",
     PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "120000",
@@ -198,6 +204,7 @@ async function secureFixture() {
     directory,
     databaseUrl,
     provisioningCredential,
+    controlPlaneToken,
     releaseRoot,
     secretRoot,
     cacheRoot,

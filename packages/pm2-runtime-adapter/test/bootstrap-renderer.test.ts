@@ -29,6 +29,7 @@ describe("BootstrapConfigRenderer", () => {
       PORT: "18080",
       DATABASE_URL_FILE: "/run/sdar/database-url",
       PMS_RUNTIME_CONFIG_TOKEN_FILE: "/run/sdar/pms-token",
+      PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "/run/sdar/pms-token",
       PMS_BOOTSTRAP_CHECKSUM: "a".repeat(64),
       PMS_CONFIG_REVISION: "7",
       PMS_RUNTIME_VERSION: "2.0.0-rc.1",
@@ -36,6 +37,7 @@ describe("BootstrapConfigRenderer", () => {
     expect(left.redactedPreview).toMatchObject({
       DATABASE_URL_FILE: "<secret-file>",
       PMS_RUNTIME_CONFIG_TOKEN_FILE: "<secret-file>",
+      PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "<secret-file>",
     });
     expect(JSON.stringify(left.redactedPreview)).not.toContain("/run/sdar/database-url");
   });

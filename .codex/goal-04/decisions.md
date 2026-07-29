@@ -24,3 +24,25 @@
   `packages/pms-persistence-postgres/test/runtime-reconcile-scheduler-repository.test.ts`.
 - No production behavior, Job Type, migration, or assertion strength changed. Regression evidence:
   Worker tests, Scheduler PostgreSQL integration, typecheck, and full-repository lint.
+
+## G4-P3-B01 — Production lifecycle E2E fixes and packaging boundary
+
+- The E2E exposed PostgreSQL `42P18` in the production Runtime credential rotation query because
+  parameters passed to `format()` had no inferable type. The minimal production fix casts both
+  parameters to `text`; the generated `ALTER ROLE` statement and password remain server-quoted.
+- Built Worker modules reached unresolved workspace aliases when executed from `dist`. The small
+  value-import corrections in `apps/pms-worker/**` and
+  `packages/pms-persistence-postgres/src/runtime-instance-allocator.ts` use repository-relative
+  module paths, matching other executable product paths without broad Worker composition or
+  packaging work.
+- The controlled gate instantiates PMS API and Worker through their production composition
+  factories from source under `tsx`, while the Runtime and Mock Provider Adapter use built output.
+  This isolates Goal 04 lifecycle authority from pre-existing monorepo-wide dist alias packaging
+  outside the task scope.
+- The fixed Runtime release directory remains under the repository test boundary so Node resolves
+  the frozen installed dependencies normally. Its isolated `PM2_HOME` uses a separate short
+  temporary path because PM2's Unix-domain socket path is more restrictive than filesystem path
+  validation.
+- The fixture uses `claimLimit: 1`: claims, leases, retries and fences remain production-backed,
+  while explicit Worker shutdown can drain its claimed batch inside the configured lease-duration
+  bound.

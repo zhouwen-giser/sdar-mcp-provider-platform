@@ -37,6 +37,8 @@ const RESERVED_KEYS = new Set([
   "PMS_RUNTIME_CONFIG_URL",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
   "PMS_RUNTIME_CONFIG_CACHE_PATH",
+  "PMS_RUNTIME_REGISTRATION_URL",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
   "PMS_BOOTSTRAP_CHECKSUM",
   "PMS_CONFIG_REVISION",
   "PMS_RUNTIME_VERSION",
@@ -45,6 +47,7 @@ const RESERVED_KEYS = new Set([
 const SECRET_FILE_KEYS = new Set([
   "DATABASE_URL_FILE",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
   "ADAPTER_TLS_CA_PATH",
   "ADAPTER_TLS_CERT_PATH",
   "ADAPTER_TLS_KEY_PATH",
@@ -112,6 +115,8 @@ export class BootstrapConfigRenderer {
       environment.PMS_RUNTIME_CONFIG_URL = new URL(input.pms.baseUrl).toString();
       environment.PMS_RUNTIME_CONFIG_TOKEN_FILE = input.pms.tokenFile;
       environment.PMS_RUNTIME_CONFIG_CACHE_PATH = input.pms.cachePath;
+      environment.PMS_RUNTIME_REGISTRATION_URL = new URL(input.pms.baseUrl).toString();
+      environment.PMS_RUNTIME_REGISTRATION_TOKEN_FILE = input.pms.tokenFile;
     }
     const sortedEnvironment = sortRecord(environment);
     const preview = Object.fromEntries(

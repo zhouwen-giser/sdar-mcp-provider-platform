@@ -6,6 +6,8 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_RELEASE_ROOT",
   "PMS_RUNTIME_SECRET_ROOT",
   "PMS_RUNTIME_CONFIG_CACHE_ROOT",
+  "PMS_RUNTIME_CONTROL_PLANE_URL",
+  "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE",
   "PMS_PM2_HOME",
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
   "PMS_RUNTIME_RECONCILE_TIMEOUT_MS",
@@ -17,6 +19,8 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeReleaseRoot: string;
   readonly runtimeSecretRoot: string;
   readonly runtimeConfigCacheRoot: string;
+  readonly runtimeControlPlaneUrl: string;
+  readonly runtimeControlPlaneTokenFile: string;
   readonly pm2Home: string;
   readonly runtimeReconcileIntervalMs: number;
   readonly runtimeReconcileTimeoutMs: number;
@@ -84,6 +88,14 @@ async function loadRuntimeConfig(
     postgresProvisioningCredentialFile,
     "PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE",
   );
+  const runtimeControlPlaneTokenFile = required(
+    environment,
+    "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE",
+  );
+  await validateSecretFile(runtimeControlPlaneTokenFile, "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE");
+  const runtimeControlPlaneUrl = validateControlPlaneUrl(
+    required(environment, "PMS_RUNTIME_CONTROL_PLANE_URL"),
+  );
   const roots = {
     runtimeReleaseRoot: required(environment, "PMS_RUNTIME_RELEASE_ROOT"),
     runtimeSecretRoot: required(environment, "PMS_RUNTIME_SECRET_ROOT"),
@@ -120,6 +132,8 @@ async function loadRuntimeConfig(
   }
   return Object.freeze({
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
+    runtimeControlPlaneUrl,
+    runtimeControlPlaneTokenFile: resolve(runtimeControlPlaneTokenFile),
     runtimeReleaseRoot: resolve(roots.runtimeReleaseRoot),
     runtimeSecretRoot: resolve(roots.runtimeSecretRoot),
     runtimeConfigCacheRoot: resolve(roots.runtimeConfigCacheRoot),
@@ -128,6 +142,26 @@ async function loadRuntimeConfig(
     runtimeReconcileTimeoutMs,
     runtimeHealthTimeoutMs,
   });
+}
+
+function validateControlPlaneUrl(source: string): string {
+  let url: URL;
+  try {
+    url = new URL(source);
+  } catch {
+    throw new Error("PMS_WORKER_CONTROL_PLANE_URL_INVALID");
+  }
+  const loopback = ["127.0.0.1", "::1", "localhost"].includes(url.hostname);
+  if (
+    (url.protocol !== "https:" && !(url.protocol === "http:" && loopback)) ||
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.search.length > 0 ||
+    url.hash.length > 0
+  ) {
+    throw new Error("PMS_WORKER_CONTROL_PLANE_URL_INVALID");
+  }
+  return url.toString();
 }
 
 function rejectInlineSecrets(environment: Readonly<Record<string, string | undefined>>): void {

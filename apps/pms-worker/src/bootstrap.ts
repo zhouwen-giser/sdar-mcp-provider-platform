@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { runPmsMigrations } from "@sdar/pms-persistence-postgres";
+import { runPmsMigrations } from "../../../packages/pms-persistence-postgres/src/index.js";
 import {
   createPmsWorkerProductionComposition,
   type PmsWorkerProductionComposition,

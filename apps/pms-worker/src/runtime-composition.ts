@@ -9,7 +9,7 @@ import {
   type RuntimeReconcileHealthResult,
   type RuntimeReconcileInstance,
   type RuntimeReconcileStore,
-} from "@sdar/pms-application";
+} from "../../../packages/pms-application/src/index.js";
 import {
   PostgresCatalogSnapshotRepository,
   PostgresConfigurationRepository,
@@ -19,7 +19,7 @@ import {
   PostgresRuntimeInstanceAllocator,
   PostgresRuntimeProcessRepository,
   PostgresRuntimeReconcileSchedulerRepository,
-} from "@sdar/pms-persistence-postgres";
+} from "../../../packages/pms-persistence-postgres/src/index.js";
 import {
   BootstrapConfigRenderer,
   CURRENT_RUNTIME_VERSION,
@@ -34,8 +34,8 @@ import {
   type RuntimeLifecycleEvent,
   type RuntimeLifecycleResult,
   type RuntimeLifecycleStore,
-} from "@sdar/pm2-runtime-adapter";
-import type { FileSecretStore } from "@sdar/secret-store";
+} from "../../../packages/pm2-runtime-adapter/src/index.js";
+import type { FileSecretStore } from "../../../packages/secret-store/src/index.js";
 import {
   runtimePortRange,
   updateRuntimeProcessObservation,
@@ -43,7 +43,7 @@ import {
   type RuntimeDeploymentSnapshot,
   type RuntimeDeploymentStatus,
   type RuntimeInfrastructureInstanceTarget,
-} from "@sdar/runtime-deployment";
+} from "../../../packages/runtime-deployment/src/index.js";
 import {
   CatalogRegistryPublicationPhase,
   CatalogRegistryReconcileDecorator,
@@ -105,7 +105,13 @@ export async function createProductionRuntimeComposition(
       migrationTimeoutMs: runtime.runtimeReconcileTimeoutMs,
       supportedRuntimeVersions: [CURRENT_RUNTIME_VERSION],
     });
-    const store = new PostgresRuntimeReconcileStore(pool, runtime.runtimeSecretRoot);
+    const store = new PostgresRuntimeReconcileStore(
+      pool,
+      runtime.runtimeSecretRoot,
+      runtime.runtimeConfigCacheRoot,
+      runtime.runtimeControlPlaneUrl,
+      runtime.runtimeControlPlaneTokenFile,
+    );
     const repositories = Object.freeze({
       runtimeDeployments: new PostgresRuntimeDeploymentRepository(pool),
       runtimeProcesses: new PostgresRuntimeProcessRepository(pool),
@@ -238,6 +244,9 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
   constructor(
     private readonly pool: Pool,
     private readonly secretRoot: string,
+    private readonly configCacheRoot: string,
+    private readonly runtimeControlPlaneUrl: string,
+    private readonly runtimeControlPlaneTokenFile: string,
   ) {
     this.#deployments = new PostgresRuntimeDeploymentRepository(pool);
     this.#processes = new PostgresRuntimeProcessRepository(pool);
@@ -356,6 +365,14 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
         ...(deployment.adapterEndpoint === undefined
           ? {}
           : { ADAPTER_ENDPOINT: deployment.adapterEndpoint }),
+      }),
+      pms: Object.freeze({
+        baseUrl: this.runtimeControlPlaneUrl,
+        tokenFile: this.runtimeControlPlaneTokenFile,
+        cachePath: resolve(
+          this.configCacheRoot,
+          `${String(deployment.deploymentId)}-${String(process.instanceId)}.json`,
+        ),
       }),
     });
   }
