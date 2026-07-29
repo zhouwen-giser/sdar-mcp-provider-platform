@@ -67,3 +67,18 @@
   conformance cases, container reproducibility, full tests, and capacity checks
 - Independent typecheck, lint, gate-weakening verification, diff check, and
   frozen protocol/migration comparison passed
+
+## G3-P1-B03
+
+- Preserved `runtime-ci` and `runtime-compose`
+- Added independent `pms-api-production` with Node 22, pnpm 11.13.1, and
+  PostgreSQL 17
+- Added PR-only concurrency cancellation for superseded commits
+- Frozen install and workflow YAML/structure validation passed
+- PMS API production passed: 1 file / 3 tests
+- PMS domain and persistence passed: 5 files / 23 tests
+- PMS configuration E2E passed: 1 file / 8 tests
+- PMS migrations passed: 2 files / 9 tests
+- Documented the three-job matrix and explicit Worker/PM2/release deferrals
+- GitHub run URL and ID will be appended when G3-P3-B01 creates or updates the
+  sole Goal 03 to Goal 2 pull request
