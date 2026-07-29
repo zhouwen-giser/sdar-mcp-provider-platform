@@ -12,7 +12,7 @@
     "properties": [
       {
         "name": "sdar:pnpm-lock-sha256",
-        "value": "a97062a292d5b99d4290aded88d4ac771d61bf96453bb7595a4d48e489f22fe9"
+        "value": "884deaa5849011efe383e3db742fb0ee39f38d94141228a0c3ff70a4c0b39b1b"
       }
     ]
   },
@@ -830,8 +830,8 @@
     {
       "type": "library",
       "name": "find-my-way",
-      "version": "9.6.0",
-      "purl": "pkg:npm/find-my-way@9.6.0"
+      "version": "9.7.0",
+      "purl": "pkg:npm/find-my-way@9.7.0"
     },
     {
       "type": "library",

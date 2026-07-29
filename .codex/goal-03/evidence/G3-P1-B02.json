@@ -1,0 +1,44 @@
+{
+  "taskId": "G3-P1-B02",
+  "commitSha": "1604ad8219860e790056f903680ef2d9d5c98410",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "commands": [
+    "pnpm install --frozen-lockfile",
+    "pnpm exec vitest run tests/tooling/audit-resolutions.test.mjs",
+    "pnpm audit --audit-level high",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime pnpm verify:v2",
+    "pnpm typecheck",
+    "pnpm lint",
+    "python3 .codex/goal-03-task-package/scripts/verify_no_gate_weakening.py package.json",
+    "git diff --check",
+    "git diff --exit-code HEAD -- proto migrations package.json .github/workflows/ci.yml"
+  ],
+  "exitCodes": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "testCounts": {
+    "focusedFiles": 1,
+    "focusedTests": 2,
+    "frozenConformanceCases": 74,
+    "productionSbomComponents": 275,
+    "remainingHighOrCriticalVulnerabilities": 0,
+    "remainingModerateVulnerabilities": 2
+  },
+  "changedFiles": [
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml",
+    "tests/tooling/audit-resolutions.test.mjs",
+    "reports/sbom/runtime-v1.cdx.json",
+    "docs/review/GOAL03_BASELINE.md",
+    ".codex/goal-03/decisions.md",
+    ".codex/goal-03/evidence/G3-P1-B02.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "notes": [
+    "The B01 failure reproduced at the strict pnpm audit --audit-level high subcommand: find-my-way 9.6.0 and brace-expansion 5.0.7 had high-severity advisories.",
+    "Workspace overrides now resolve find-my-way 9.7.0 and brace-expansion 5.0.8; the focused regression rejects the vulnerable ranges.",
+    "The complete verify:v2 chain passed on a clean task-owned PostgreSQL volume without removing, bypassing, or making any subcommand optional.",
+    "The first complete rerun found a pre-existing Prettier mismatch in the B01 baseline table; only mechanical table alignment changed.",
+    "The second complete rerun correctly found the SBOM stale; regeneration changed only the lock digest and find-my-way production component version.",
+    "Frozen protocol files, migrations, package.json, and .github/workflows/ci.yml are unchanged."
+  ]
+}

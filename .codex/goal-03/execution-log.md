@@ -51,3 +51,19 @@
 - Catalog/Registry publication tests passed: 1 file / 4 tests
 - Typecheck, lint, diff check, Docker cleanup, and Goal 2 state verification
   passed
+
+## G3-P1-B02
+
+- Resumed after explicit authorization for pnpm registry metadata and patched
+  dependency downloads
+- Reproduced the strict high-severity audit failure from B01
+- Pinned `find-my-way` to `9.7.0` and `brace-expansion` to `5.0.8`
+- Focused audit-resolution regression passed: 1 file / 2 tests
+- `pnpm audit --audit-level high` passed with only 2 moderate findings
+- Synchronized the 275-component production SBOM with the patched lockfile
+- Mechanically formatted the B01 baseline table discovered by the first full
+  gate rerun
+- Full `verify:v2` passed on a clean PostgreSQL volume, including 74/74 frozen
+  conformance cases, container reproducibility, full tests, and capacity checks
+- Independent typecheck, lint, gate-weakening verification, diff check, and
+  frozen protocol/migration comparison passed

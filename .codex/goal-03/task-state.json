@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-03-merge-readiness-foundation",
-  "updatedAt": "2026-07-29T01:48:54.278739+00:00",
+  "updatedAt": "2026-07-29T02:17:35.748199+00:00",
   "tasks": {
     "G3-P0-B01": {
       "status": "PASSED",
@@ -22,14 +22,16 @@
       "reason": null
     },
     "G3-P1-B02": {
-      "status": "BLOCKED",
+      "status": "PASSED",
       "startedAt": "2026-07-29T01:26:45.196847+00:00",
-      "completedAt": null,
-      "evidence": [],
-      "reason": "Reproduction: pnpm install --offline --frozen-lockfile exits ERR_PNPM_NO_OFFLINE_TARBALL for https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.8.tgz after an offline lockfile update resolved brace-expansion 5.0.8 and find-my-way 9.7.0; focused regression passes 2/2. Missing condition: permission to contact registry.npmjs.org and disclose this repository's dependency metadata so pnpm can download the patched tarballs and run pnpm audit/verify:v2. Unlock action: user explicitly authorizes that registry disclosure and network dependency download; then rerun pnpm install --frozen-lockfile, audit, full verify:v2, and remaining tasks."
+      "completedAt": "2026-07-29T02:17:35.748133+00:00",
+      "evidence": [
+        "frozen install passed; focused audit resolution 1 file/2 tests passed; pnpm audit high passed with 2 moderate only; clean-PostgreSQL verify:v2 passed end-to-end including frozen 74/74, 275-component SBOM, container reproducibility and capacity; pnpm typecheck/lint, no-gate-weakening, git diff check, frozen protocol/migration comparison passed"
+      ],
+      "reason": null
     },
     "G3-P1-B03": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],

@@ -27,10 +27,10 @@ gh run view 30413182605 --job 90453790990 --log
 The current failed workflow is `runtime-ci`, run `30413182605`, for head
 `ed5f01b7a7eac2ef9c982bfbc5132311bdb30cad`.
 
-| Job | Job ID | Failed step |
-| --- | --- | --- |
+| Job               | Job ID        | Failed step                                       |
+| ----------------- | ------------- | ------------------------------------------------- |
 | `runtime-compose` | `90453790964` | `docker compose build runtime adapter-typescript` |
-| `runtime-ci` | `90453790990` | `pnpm verify:v2` |
+| `runtime-ci`      | `90453790990` | `pnpm verify:v2`                                  |
 
 ## Toolchain baseline
 
