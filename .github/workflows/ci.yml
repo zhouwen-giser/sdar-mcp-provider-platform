@@ -177,6 +177,45 @@ jobs:
             reports/ci/worker-pm2-cleanup.json
           if-no-files-found: warn
 
+  worker-lease-safety:
+    name: worker-lease-safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sdar
+          POSTGRES_PASSWORD: sdar
+          POSTGRES_DB: sdar_worker_lease_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sdar -d sdar_worker_lease_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_worker_lease_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:worker-lease-safety
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-lease-safety-summary
+          path: reports/evidence/G5-P2-B02-worker-lease-safety.json
+          if-no-files-found: error
+
   provider-regression:
     name: provider-regression
     runs-on: ubuntu-24.04
