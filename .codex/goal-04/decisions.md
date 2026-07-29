@@ -55,3 +55,11 @@
 - `reports/sbom/runtime-v1.cdx.json` is therefore included as the minimum out-of-path derived
   correction. It records the current lockfile digest and PM2 dependency closure; no dependency,
   vulnerability threshold, or product behavior changes in this task.
+
+## G4-P4-B01 — SBOM root identity derivation
+
+- The final required root rename exposed that `scripts/generate-sbom.mjs` hard-coded the retired
+  Runtime-era root name while already deriving the version from `package.json`.
+- The minimum out-of-path release-tool correction derives the SBOM application name from the same
+  private root manifest. Component collection, lock digest, schema and freshness behavior are
+  unchanged.

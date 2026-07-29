@@ -1,8 +1,8 @@
 {
-  "name": "sdar-mcp-tasks-provider-runtime",
+  "name": "sdar-mcp-provider-platform",
   "displayName": "SDAR MCP Provider Platform",
   "description": "Provider-side control plane and standard MCP Tasks Runtime platform",
-  "version": "2.0.0-rc.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.13.1",
