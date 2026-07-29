@@ -12,6 +12,19 @@ import { ProviderPackagesPage } from "./features/provider-packages/ProviderPacka
 import { ProviderDetailPage, ProvidersPage } from "./features/providers/ProviderPages.js";
 import { ProviderOnboardingPage } from "./features/providers/ProviderOnboardingPage.js";
 import { ResourceDetailPage, ResourcesPage } from "./features/resources/ResourcePages.js";
+import {
+  RuntimeDeploymentDetailPage,
+  RuntimeDeploymentsPage,
+} from "./features/runtime-deployments/RuntimeDeploymentPages.js";
+import { RuntimeDeploymentWizard } from "./features/runtime-deployments/RuntimeDeploymentWizard.js";
+import { RuntimeProcessesPage } from "./features/runtime-processes/RuntimeProcessesPage.js";
+import { RuntimeReleasesPage } from "./features/runtime-releases/RuntimeReleasesPage.js";
+import { DatabaseProfilesPage } from "./features/database-profiles/DatabaseProfilesPage.js";
+import {
+  RuntimeHealthPage,
+  RuntimeIncidentsPage,
+  RuntimeJobsPage,
+} from "./features/operations/RuntimeRecoveryPage.js";
 import "./styles.css";
 
 export function App() {
@@ -50,6 +63,26 @@ export function App() {
         <ResourcesPage />
       ) : route.path === "/resources/:resourceId" ? (
         <ResourceDetailPage resourceId={segments[1] ?? ""} />
+      ) : route.path === "/runtime/deployments" ? (
+        <RuntimeDeploymentsPage />
+      ) : route.path === "/runtime/deployments/new" ? (
+        <RuntimeDeploymentWizard />
+      ) : route.path === "/runtime/deployments/:deploymentId" ? (
+        <RuntimeDeploymentDetailPage deploymentId={segments[2] ?? ""} />
+      ) : route.path === "/runtime/processes" ? (
+        <RuntimeProcessesPage />
+      ) : route.path === "/runtime/releases" ? (
+        <RuntimeReleasesPage />
+      ) : route.path === "/databases" ? (
+        <DatabaseProfilesPage />
+      ) : route.path === "/operations/health" ? (
+        <RuntimeHealthPage />
+      ) : route.path === "/operations/jobs" ? (
+        <RuntimeJobsPage />
+      ) : route.path === "/operations/incidents" ? (
+        <RuntimeIncidentsPage />
+      ) : route.path === "/operations/incidents/:incidentId" ? (
+        <RuntimeIncidentsPage incidentId={segments[2] ?? ""} />
       ) : (
         <StructuredPlaceholder route={route} />
       )}

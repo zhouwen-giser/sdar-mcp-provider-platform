@@ -95,5 +95,37 @@ export const HEALTHY_DATASET: PrototypeDataset = {
       configRevision: 28,
     },
   ],
+  processes: [
+    {
+      processId: "process-ha-01",
+      deploymentId: "deploy-ha-primary",
+      providerId: "provider-ha-east",
+      pm2Status: "online",
+      healthStatus: "ACTIVE",
+      registrationStatus: "REGISTERED",
+      observedRevision: 17,
+      heartbeatAt: "2026-07-29T06:00:02.000Z",
+    },
+    {
+      processId: "process-ugv-01",
+      deploymentId: "deploy-ugv-primary",
+      providerId: "provider-ugv-fleet",
+      pm2Status: "online",
+      healthStatus: "ACTIVE",
+      registrationStatus: "REGISTERED",
+      observedRevision: 9,
+      heartbeatAt: "2026-07-29T05:59:48.000Z",
+    },
+  ],
+  jobs: [
+    {
+      jobId: "job-discovery-188",
+      kind: "DISCOVER_CATALOG",
+      aggregateId: "provider-ha-east",
+      status: "COMPLETED",
+      attempts: 1,
+      updatedAt: "2026-07-29T05:55:00.000Z",
+    },
+  ],
   incidents: [],
 };

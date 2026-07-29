@@ -48,10 +48,10 @@ export function useScenario(): [PrototypeScenario, (scenario: PrototypeScenario)
 
 export function useDataQuery<T>(query: (source: PmsWebDataSource) => Promise<T>) {
   const source = usePmsWebDataSource();
-  const scenario = useSyncExternalStore(
+  const revision = useSyncExternalStore(
     (listener) => source.subscribe(listener),
-    () => source.scenario(),
-    () => source.scenario(),
+    () => source.revision(),
+    () => source.revision(),
   );
   const [state, setState] = useState<
     | { readonly status: "loading" }
@@ -73,7 +73,7 @@ export function useDataQuery<T>(query: (source: PmsWebDataSource) => Promise<T>)
     return () => {
       active = false;
     };
-  }, [query, scenario, source]);
+  }, [query, revision, source]);
   return state;
 }
 

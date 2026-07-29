@@ -1,0 +1,91 @@
+.status-stack,
+.process-state-groups,
+.key-value-list,
+.recovery-path {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.status-stack small,
+.runtime-detail-grid span,
+.process-state-groups p {
+  color: var(--text-muted);
+}
+
+.lifecycle-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.lifecycle-strip span {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.lifecycle-strip span[data-current="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.runtime-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.runtime-detail-grid > div {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+
+.process-state-groups section {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+
+.process-state-groups section > * {
+  display: block;
+  margin: 0.25rem 0;
+}
+
+.impact-box {
+  padding: 1rem;
+  border: 1px solid var(--warning);
+  border-radius: 0.55rem;
+  background: var(--warning-soft);
+}
+
+.key-value-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.recovery-path {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.recovery-path span {
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+
+@media (max-width: 900px) {
+  .lifecycle-strip,
+  .runtime-detail-grid,
+  .recovery-path {
+    grid-template-columns: 1fr;
+  }
+}
