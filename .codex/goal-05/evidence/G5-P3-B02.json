@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P3-B02",
+  "commitSha": "a990ad1ca0802e0584aa8975221ea88a60c8b049",
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspace projects already up to date"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web test",
+      "exitCode": 0,
+      "result": "3 files and 17 tests passed"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web build",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs",
+      "exitCode": 0,
+      "result": "RELEASE_ARTIFACT_SMOKE_OK"
+    },
+    {
+      "command": "RELEASE_ARTIFACT_INJECT_FAILURE=after-compose node scripts/run-release-artifact-smoke.mjs",
+      "exitCode": 1,
+      "result": "expected injected failure; finally cleanup completed"
+    },
+    {
+      "command": "assert no release-artifact Compose containers, networks, volumes, or temporary directory after injected failure",
+      "exitCode": 0,
+      "result": "RELEASE_ARTIFACT_FAILURE_CLEANUP_OK"
+    },
+    {
+      "command": "node scripts/cleanup-release-artifact-ci.mjs",
+      "exitCode": 0,
+      "result": "idempotent cleanup passed"
+    },
+    {
+      "command": "node scripts/verify-release-images.mjs",
+      "exitCode": 0,
+      "result": "API, Worker, and Web independent lifecycle and security assertions passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P3-B02.json",
+    ".github/workflows/ci.yml",
+    "deploy/release-compose.yml",
+    "docs/review/GOAL05_RELEASE_ARTIFACT_MATRIX.md",
+    "reports/ci/release-artifacts.json",
+    "scripts/cleanup-release-artifact-ci.mjs",
+    "scripts/run-release-artifact-smoke.mjs"
+  ],
+  "assertions": {
+    "existingRequiredJobsPreserved": true,
+    "releaseArtifactsJobAdded": true,
+    "runtimeImageBuilt": true,
+    "pmsApiImageBuilt": true,
+    "pmsWorkerImageBuilt": true,
+    "pmsWebImageBuilt": true,
+    "noRegistryPush": true,
+    "controlledComposeStarted": true,
+    "apiReady": true,
+    "workerRunning": true,
+    "webHtmlJsCssHealthApiBaseAndSpaVerified": true,
+    "webCanReachApiHealth": true,
+    "imageIdentityDigestSizeUidAndLabelsRecorded": true,
+    "dependencySourceMapPolicyPassed": true,
+    "licensePolicyPassed": true,
+    "filesystemWhitelistPassed": true,
+    "testSecretsAbsentFromImages": true,
+    "artifactJsonRedacted": true,
+    "successCleanupPassed": true,
+    "failureCleanupPassed": true,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}

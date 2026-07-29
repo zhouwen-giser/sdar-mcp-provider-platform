@@ -216,6 +216,35 @@ jobs:
           path: reports/evidence/G5-P2-B02-worker-lease-safety.json
           if-no-files-found: error
 
+  release-artifacts:
+    name: release-artifacts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sdar/pms-web test
+      - run: pnpm --filter @sdar/pms-web build
+      - run: node scripts/run-release-artifact-smoke.mjs
+      - run: node scripts/verify-release-images.mjs
+      - name: Upload redacted Release Artifact summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-summary
+          path: reports/ci/release-artifacts.json
+          if-no-files-found: error
+      - name: Cleanup Release Artifact qualification resources
+        if: always()
+        run: node scripts/cleanup-release-artifact-ci.mjs
+
   provider-regression:
     name: provider-regression
     runs-on: ubuntu-24.04

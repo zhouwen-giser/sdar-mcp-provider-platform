@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "revision": "a990ad1ca0802e0584aa8975221ea88a60c8b049",
+  "artifacts": {
+    "runtime": {
+      "image": "sdar/runtime:0.1.0-rc",
+      "imageId": "sha256:3415229cd6237b4504ef58cccc799395fc83ef3ef5dbb81eefc0cd0cd64f0ade",
+      "digest": "sdar/runtime@sha256:3415229cd6237b4504ef58cccc799395fc83ef3ef5dbb81eefc0cd0cd64f0ade",
+      "sizeBytes": 101357818,
+      "uid": "node",
+      "labels": {}
+    },
+    "api": {
+      "image": "sdar/pms-api:0.1.0-rc",
+      "imageId": "sha256:cd3d25a1aef81a174e819749a1f2a18972fb9e021a53cfcbbe89b25ac622ccb6",
+      "digest": "sdar/pms-api@sha256:cd3d25a1aef81a174e819749a1f2a18972fb9e021a53cfcbbe89b25ac622ccb6",
+      "sizeBytes": 102084010,
+      "uid": "node",
+      "labels": {
+        "org.opencontainers.image.licenses": "Apache-2.0",
+        "org.opencontainers.image.revision": "a990ad1ca0802e0584aa8975221ea88a60c8b049",
+        "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+        "org.opencontainers.image.title": "SDAR Provider Management API",
+        "org.opencontainers.image.version": "0.1.0"
+      }
+    },
+    "worker": {
+      "image": "sdar/pms-worker:0.1.0-rc",
+      "imageId": "sha256:cbdf1583eb92fa5abec93d5bb33fd2612718ad20130f1b0f44aecbe0e593ed75",
+      "digest": "sdar/pms-worker@sha256:cbdf1583eb92fa5abec93d5bb33fd2612718ad20130f1b0f44aecbe0e593ed75",
+      "sizeBytes": 102087700,
+      "uid": "node",
+      "labels": {
+        "org.opencontainers.image.licenses": "Apache-2.0",
+        "org.opencontainers.image.revision": "a990ad1ca0802e0584aa8975221ea88a60c8b049",
+        "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+        "org.opencontainers.image.title": "SDAR Provider Management Worker",
+        "org.opencontainers.image.version": "0.1.0"
+      }
+    },
+    "web": {
+      "image": "sdar/pms-web:0.1.0-rc",
+      "imageId": "sha256:5e418782b91f4713d373fd6921f0992c7460d694f648a86ff739b912ab1dc81f",
+      "digest": "sdar/pms-web@sha256:5e418782b91f4713d373fd6921f0992c7460d694f648a86ff739b912ab1dc81f",
+      "sizeBytes": 79927387,
+      "uid": "node",
+      "labels": {
+        "org.opencontainers.image.licenses": "Apache-2.0",
+        "org.opencontainers.image.revision": "a990ad1ca0802e0584aa8975221ea88a60c8b049",
+        "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+        "org.opencontainers.image.title": "SDAR Provider Management Web",
+        "org.opencontainers.image.version": "0.1.0"
+      }
+    }
+  },
+  "compose": {
+    "apiReady": true,
+    "workerRunning": true,
+    "webReadyAndApiReachable": true
+  },
+  "policy": {
+    "dependencySourceMapsAbsent": true,
+    "licensePolicyPassed": true,
+    "filesystemWhitelistPassed": true,
+    "testSecretsAbsent": true
+  },
+  "secretsIncluded": false
+}
