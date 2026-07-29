@@ -17,3 +17,20 @@
   Compose images built
 - Locked the bounded PM2, Worker, scheduler, lifecycle E2E, CI, and release
   scope without modifying production code
+
+## G4-P1-B01
+
+- Pinned `pm2@7.0.3` exactly in `@sdar/pm2-runtime-adapter`
+- Added a production JavaScript API factory backed by a custom client with an
+  explicit absolute `pm2_home`
+- Adapted only connect, disconnect, start, stop, restart, delete, describe, and
+  list callbacks
+- Normalized connection and operation failures to stable redacted codes
+- Added failed-connect cleanup and idempotent repeated disconnect behavior
+- Preserved `Pm2ProcessManager` ownership of the Runtime namespace, release
+  root, fixed entry, fork-mode, restart policy, and environment restrictions
+- Added ADR 0009 rejecting CLI and `pnpm dlx` as production authorities
+- PM2 adapter tests passed 7 files / 42 tests; focused Bridge and Manager tests
+  passed 2 / 12
+- Frozen install, typecheck, lint, `PM2_BRIDGE_OK`, prior-state verification,
+  and diff checks passed

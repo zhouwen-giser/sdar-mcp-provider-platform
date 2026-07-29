@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "activeGoal": "goal-04-production-lifecycle-closure",
-  "updatedAt": "2026-07-29T03:21:21.398437+00:00",
+  "updatedAt": "2026-07-29T03:28:09.119090+00:00",
   "tasks": {
     "G4-P0-B01": {
       "status": "PASSED",
@@ -13,14 +13,16 @@
       "reason": null
     },
     "G4-P1-B01": {
-      "status": "READY",
-      "startedAt": null,
-      "completedAt": null,
-      "evidence": [],
+      "status": "PASSED",
+      "startedAt": "2026-07-29T03:21:52.576164+00:00",
+      "completedAt": "2026-07-29T03:28:09.119018+00:00",
+      "evidence": [
+        "Pinned pm2@7.0.3 exactly; frozen install passed; production createPm2JavascriptApi uses isolated absolute pm2_home and only 8 allowed operations; stable redacted connection/operation errors; failed-connect cleanup and idempotent disconnect tested; adapter 7 files/42 tests, focused bridge+manager 2/12; typecheck, lint, PM2_BRIDGE_OK, prior goal hashes and diff check passed"
+      ],
       "reason": null
     },
     "G4-P1-B02": {
-      "status": "PLANNED",
+      "status": "READY",
       "startedAt": null,
       "completedAt": null,
       "evidence": [],
