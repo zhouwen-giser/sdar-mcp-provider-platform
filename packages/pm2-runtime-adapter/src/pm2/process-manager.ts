@@ -40,6 +40,9 @@ export interface Pm2ProcessDescription {
     readonly pm_uptime?: number;
     readonly restart_time?: number;
     readonly exec_mode?: string;
+    readonly PMS_BOOTSTRAP_CHECKSUM?: unknown;
+    readonly PMS_CONFIG_REVISION?: unknown;
+    readonly PMS_RUNTIME_VERSION?: unknown;
   };
 }
 
@@ -138,7 +141,7 @@ export class Pm2ProcessManager {
     const options = this.startOptions(request);
     return this.withConnection(async () => {
       const existing = await this.describeConnected(request.processName);
-      if (existing?.state === "online") {
+      if (existing?.state === "online" && fingerprintsMatch(existing, options.env)) {
         return Object.freeze({ outcome: "unchanged" as const, process: existing });
       }
       if (existing !== null) {
@@ -381,7 +384,57 @@ function mapDescription(
       : { startedAt: new Date(description.pm2_env.pm_uptime).toISOString() }),
     restartCount: safeCount(description.pm2_env?.restart_time),
     opaqueLogRef: `runtime-process:${processName}`,
+    ...mappedFingerprints(description.pm2_env),
   });
+}
+
+interface Pm2RuntimeFingerprints {
+  readonly bootstrapChecksum: string;
+  readonly configRevision: string;
+  readonly runtimeVersion: string;
+}
+
+type Pm2RuntimeProcessObservation = RuntimeInfrastructureProcessObservation & {
+  readonly fingerprints?: Pm2RuntimeFingerprints;
+};
+
+function mappedFingerprints(
+  environment: Pm2ProcessDescription["pm2_env"],
+): { readonly fingerprints: Pm2RuntimeFingerprints } | Record<string, never> {
+  const bootstrapChecksum = environment?.PMS_BOOTSTRAP_CHECKSUM;
+  const configRevision = environment?.PMS_CONFIG_REVISION;
+  const runtimeVersion = environment?.PMS_RUNTIME_VERSION;
+  if (
+    typeof bootstrapChecksum !== "string" ||
+    !/^[0-9a-f]{64}$/.test(bootstrapChecksum) ||
+    typeof configRevision !== "string" ||
+    !/^(0|[1-9][0-9]*)$/.test(configRevision) ||
+    !Number.isSafeInteger(Number(configRevision)) ||
+    typeof runtimeVersion !== "string" ||
+    !RUNTIME_VERSION.test(runtimeVersion)
+  ) {
+    return {};
+  }
+  return {
+    fingerprints: Object.freeze({
+      bootstrapChecksum,
+      configRevision,
+      runtimeVersion,
+    }),
+  };
+}
+
+function fingerprintsMatch(
+  observation: RuntimeInfrastructureProcessObservation,
+  expected: Readonly<Record<string, string>>,
+): boolean {
+  const fingerprints = (observation as Pm2RuntimeProcessObservation).fingerprints;
+  return (
+    fingerprints !== undefined &&
+    fingerprints.bootstrapChecksum === expected.PMS_BOOTSTRAP_CHECKSUM &&
+    fingerprints.configRevision === expected.PMS_CONFIG_REVISION &&
+    fingerprints.runtimeVersion === expected.PMS_RUNTIME_VERSION
+  );
 }
 
 function starting(

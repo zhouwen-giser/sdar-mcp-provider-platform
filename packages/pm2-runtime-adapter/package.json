@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@sdar/runtime-deployment": "workspace:*",
-    "@sdar/secret-store": "workspace:*"
+    "@sdar/secret-store": "workspace:*",
+    "pm2": "7.0.3"
   }
 }

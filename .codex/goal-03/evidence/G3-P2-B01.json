@@ -1,0 +1,41 @@
+{
+  "taskId": "G3-P2-B01",
+  "commitSha": "c95f47de5dd05e96f2ba3c76eac1d9886552d13f",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "commands": [
+    "pnpm --filter @sdar/pms-worker test",
+    "pnpm exec vitest run apps/pms-worker/test/runtime-reconcile-job.test.ts apps/pms-worker/test/job-registry.test.ts",
+    "pnpm typecheck",
+    "pnpm lint",
+    "! rg 'RUNTIME_DATABASE_PREPARATION_JOB|createRuntimeDatabasePreparationJobHandler' apps/pms-worker/src",
+    "git diff --check",
+    "python3 .codex/goal-03-task-package/scripts/verify_goal2_state_unchanged.py ."
+  ],
+  "exitCodes": [0, 0, 0, 0, 0, 0, 0],
+  "testCounts": {
+    "pmsWorkerFiles": 4,
+    "pmsWorkerTests": 12,
+    "focusedFiles": 2,
+    "focusedTests": 5,
+    "duplicateRegistrationTests": 2,
+    "databaseBoundaryTestsPreserved": 2
+  },
+  "changedFiles": [
+    "apps/pms-worker/src/index.ts",
+    "apps/pms-worker/src/runtime-database-preparation-job.ts",
+    "apps/pms-worker/test/runtime-database-preparation-job.test.ts",
+    "apps/pms-worker/test/job-registry.test.ts",
+    "docs/adr/0007-single-runtime-reconcile-job.md",
+    "docs/operations/PMS_WORKER.md",
+    ".codex/goal-03/evidence/G3-P2-B01.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "notes": [
+    "Before: runtime-database-preparation-job.ts and runtime-reconcile-job.ts both exported handlers with runtime_deployment.reconcile.",
+    "After: only RUNTIME_DEPLOYMENT_RECONCILE_JOB and createRuntimeDeploymentReconcileJobHandler remain in Worker source.",
+    "RuntimeDatabasePreparationJob remains available from pms-application and is consumed through RuntimeReconcileDatabasePort.",
+    "Constructor and incremental duplicate registration both fail deterministically with PMS_JOB_HANDLER_DUPLICATE.",
+    "No Worker production composition, PM2 adapter, database provisioner, migration, PMS API, or Runtime protocol code changed."
+  ]
+}

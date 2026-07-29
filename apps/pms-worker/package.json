@@ -10,9 +10,16 @@
     "test": "vitest run test"
   },
   "dependencies": {
+    "@sdar/catalog-manager": "workspace:*",
+    "@sdar/pm2-runtime-adapter": "workspace:*",
     "@sdar/pms-application": "workspace:*",
     "@sdar/pms-domain": "workspace:*",
     "@sdar/pms-persistence-postgres": "workspace:*",
+    "@sdar/postgres-provisioner": "workspace:*",
+    "@sdar/registry-snapshot": "workspace:*",
+    "@sdar/runtime-deployment": "workspace:*",
+    "@sdar/runtime-migration-runner": "workspace:*",
+    "@sdar/secret-store": "workspace:*",
     "pg": "8.22.0"
   }
 }

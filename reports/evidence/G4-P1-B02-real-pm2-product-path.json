@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P1-B02",
+  "generatedAt": "2026-07-29T03:55:20.203Z",
+  "resourceClassification": {
+    "pm2": "real pinned JavaScript API",
+    "runtime": "built SDAR Runtime",
+    "adapter": "built mock Adapter",
+    "database": "real local PostgreSQL",
+    "certificationClaim": "product-path component E2E; not provider Interop Certified"
+  },
+  "productPath": [
+    "createPm2JavascriptApi",
+    "Pm2ProcessManager",
+    "RuntimeLifecycleManager",
+    "built Runtime"
+  ],
+  "pm2": {
+    "version": "7.0.3",
+    "isolatedHome": true,
+    "processName": "sdar-runtime-e2e-product-0",
+    "initialStatus": "online",
+    "initialPid": 227248,
+    "initialOutcome": "changed",
+    "noOpOutcome": "unchanged",
+    "driftOutcome": "changed",
+    "driftedPid": 227311,
+    "driftRestartCount": 1,
+    "crashRecoveryStatus": "online",
+    "recoveredPid": 227335,
+    "recoveredRestartCount": 2,
+    "stopOutcome": "changed",
+    "stoppedStatus": "stopped",
+    "deleteOutcome": "changed",
+    "deleted": true,
+    "nonPlatformSentinel": {
+      "name": "unrelated-e2e-sentinel",
+      "excludedFromProductList": true,
+      "rejectedByProductManager": true,
+      "statusAfterPlatformDelete": "online"
+    }
+  },
+  "driftPolicy": {
+    "allowlistedPm2EnvironmentKeys": [
+      "PMS_BOOTSTRAP_CHECKSUM",
+      "PMS_CONFIG_REVISION",
+      "PMS_RUNTIME_VERSION"
+    ],
+    "noOpFingerprintMatch": true,
+    "configRevisionChangedFrom": 1,
+    "configRevisionChangedTo": 2,
+    "bootstrapChecksumChanged": true,
+    "runtimeVersionUnitCoverage": true
+  },
+  "health": {
+    "initial": {
+      "live": true,
+      "ready": true
+    },
+    "afterCrashRecovery": {
+      "live": true,
+      "ready": true
+    }
+  },
+  "lifecycle": {
+    "stateEvents": [
+      {
+        "action": "start",
+        "state": "starting"
+      },
+      {
+        "action": "start",
+        "state": "online"
+      },
+      {
+        "action": "start",
+        "state": "starting"
+      },
+      {
+        "action": "start",
+        "state": "online"
+      },
+      {
+        "action": "start",
+        "state": "starting"
+      },
+      {
+        "action": "start",
+        "state": "online"
+      },
+      {
+        "action": "stop",
+        "state": "stopping"
+      },
+      {
+        "action": "stop",
+        "state": "stopped"
+      },
+      {
+        "action": "delete",
+        "state": "deleting"
+      },
+      {
+        "action": "delete",
+        "state": "deleted"
+      }
+    ],
+    "auditEvents": [
+      "runtime_process.start_started",
+      "runtime_process.start_succeeded",
+      "runtime_process.start_started",
+      "runtime_process.start_succeeded",
+      "runtime_process.start_started",
+      "runtime_process.start_succeeded",
+      "runtime_process.stop_started",
+      "runtime_process.stop_succeeded",
+      "runtime_process.delete_started",
+      "runtime_process.delete_succeeded"
+    ],
+    "secretCleanup": true
+  },
+  "security": {
+    "databaseCredentialTransport": "DATABASE_URL_FILE",
+    "plaintextDatabaseUrlInEvidence": false,
+    "pm2HomeIsolated": true,
+    "directPm2CliUsed": false,
+    "configurationFileBypassUsed": false
+  }
+}

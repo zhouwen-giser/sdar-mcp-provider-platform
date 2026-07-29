@@ -6,8 +6,9 @@
   Runtime delivery to the SDAR MCP Provider Platform monorepo.
 - Established the platform presentation name and documented its control-plane,
   Runtime Task Authority, and Provider Adapter responsibility boundaries.
-- Retained the root package name, workspace package identities, Runtime entry
-  points, Node.js/pnpm constraints, and existing scripts for compatibility.
+- Set the private root monorepo identity to `sdar-mcp-provider-platform@0.1.0`
+  while retaining workspace package identities, Runtime entry points,
+  Node.js/pnpm constraints, and `@sdar/runtime@2.0.0-rc.1`.
 - Added revision-safe RuntimeDeployment orchestration, isolated Runtime database
   preparation and migration, governed PM2 lifecycle, live/ready reconciliation,
   Runtime registration, authoritative Catalog discovery, Registry snapshots,
@@ -15,6 +16,10 @@
 - Added one reproducible `verify:platform` gate spanning frozen protocol,
   migrations, configuration compatibility, real local PostgreSQL, real PM2,
   security, fault injection, and controlled system interoperability.
+- Closed the production PMS Worker lifecycle with the pinned PM2 JavaScript API,
+  periodic fenced reconciliation, real database preparation and migrations,
+  Runtime registration, Catalog/Registry publication, failure recovery, and
+  independent required CI qualification jobs.
 - Real UGV, NPC Tank, and Home Assistant resources remain unqualified; V0.1
   makes no external-resource or Interop Certified claim.
 

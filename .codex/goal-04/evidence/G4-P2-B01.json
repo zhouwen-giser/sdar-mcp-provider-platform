@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P2-B01",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "startingCommit": "e6daf2e",
+  "commands": [
+    {
+      "command": "pnpm --filter @sdar/pms-worker test",
+      "exitCode": 0,
+      "result": "6 files, 24 tests"
+    },
+    {
+      "command": "pnpm exec vitest run apps/pms-worker/test/config.test.ts apps/pms-worker/test/runtime-composition-contract.test.ts",
+      "exitCode": 0,
+      "result": "2 files, 12 tests"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "all matched files use Prettier code style"
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "configurationAssertions": [
+    "partial production Runtime configuration is rejected while the existing foundation-only mode remains unchanged",
+    "database and provisioning credentials require canonical non-symlink regular files with 0600-or-narrower permissions and safe parents",
+    "release, secret, cache and PM2 roots require canonical existing directories with controlled permissions",
+    "all four Runtime roots are distinct and non-overlapping",
+    "reconcile, lifecycle and health timings are explicit and bounded without changing Worker lease defaults"
+  ],
+  "authorityAssertions": [
+    "composition contracts name repositories, database preparation, lifecycle, health, identity, Catalog/Registry, scheduler and cleanup",
+    "contracts construct or start no infrastructure",
+    "Worker authority excludes Runtime Task data",
+    "Worker shutdown must not stop or delete running Runtime processes"
+  ]
+}

@@ -1,38 +1,60 @@
 import { Pool } from "pg";
+import { runPmsMigrations } from "../../../packages/pms-persistence-postgres/src/index.js";
 import {
-  PostgresPmsUnitOfWork,
-  postgresRepositories,
-  runPmsMigrations,
-} from "../../../packages/pms-persistence-postgres/src/index.js";
+  createPmsWorkerProductionComposition,
+  type PmsWorkerProductionComposition,
+} from "./composition.js";
 import { loadPmsWorkerConfig, readDatabaseUrlFile } from "./config.js";
-import { PmsJobRegistry } from "./job-registry.js";
-import { createPackageSyncJobHandler } from "./package-sync-job.js";
-import { PmsWorker } from "./worker.js";
+import type { PmsWorkerConfig } from "./config.js";
+import type { PmsWorker } from "./worker.js";
 
 export interface RunningPmsWorker {
   readonly worker: PmsWorker;
   stop(): Promise<void>;
 }
 
-export async function bootstrapPmsWorker(): Promise<RunningPmsWorker> {
-  const config = await loadPmsWorkerConfig();
-  const pool = new Pool({ connectionString: await readDatabaseUrlFile(config.databaseUrlFile) });
+export interface PmsWorkerBootstrapDependencies {
+  readonly loadConfig?: () => Promise<PmsWorkerConfig>;
+  readonly readDatabaseUrl?: (path: string) => Promise<string>;
+  readonly createPool?: (connectionString: string) => Pool;
+  readonly runMigrations?: (pool: Pool, workspaceRoot: string) => Promise<unknown>;
+  readonly createComposition?: (
+    pool: Pool,
+    config: PmsWorkerConfig,
+  ) => Promise<PmsWorkerProductionComposition>;
+}
+
+export async function bootstrapPmsWorker(
+  dependencies: PmsWorkerBootstrapDependencies = {},
+): Promise<RunningPmsWorker> {
+  const config = await (dependencies.loadConfig ?? loadPmsWorkerConfig)();
+  const connectionString = await (dependencies.readDatabaseUrl ?? readDatabaseUrlFile)(
+    config.databaseUrlFile,
+  );
+  const pool = dependencies.createPool?.(connectionString) ?? new Pool({ connectionString });
+  let composition: PmsWorkerProductionComposition | undefined;
   try {
-    await runPmsMigrations(pool, config.workspaceRoot);
-    const unitOfWork = new PostgresPmsUnitOfWork(pool);
-    const registry = new PmsJobRegistry([
-      createPackageSyncJobHandler({ unitOfWork, workspaceRoot: config.workspaceRoot }),
-    ]);
-    const worker = new PmsWorker(config, postgresRepositories(pool).jobs, registry);
-    worker.start();
+    await (dependencies.runMigrations ?? runPmsMigrations)(pool, config.workspaceRoot);
+    composition = await (dependencies.createComposition ?? createPmsWorkerProductionComposition)(
+      pool,
+      config,
+    );
+    composition.start();
+    let stopped = false;
     return {
-      worker,
+      worker: composition.worker,
       async stop(): Promise<void> {
-        await worker.stop();
-        await pool.end();
+        if (stopped) return;
+        stopped = true;
+        try {
+          await composition?.close();
+        } finally {
+          await pool.end();
+        }
       },
     };
   } catch (error) {
+    await composition?.close().catch(() => undefined);
     await pool.end();
     throw error;
   }

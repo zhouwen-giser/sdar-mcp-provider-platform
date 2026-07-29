@@ -1,0 +1,89 @@
+{
+  "taskId": "G3-P2-B02",
+  "commitSha": "57910a0104e72464cf70a403cc3ea9a2b8ae5d50",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "commands": [
+    "pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts tests/runtime-deployment/state-machine.property.test.ts",
+    "pnpm test:runtime-deployment",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime vitest run tests/catalog-registry-e2e/publication-phase.test.ts",
+    "pnpm typecheck",
+    "pnpm lint",
+    "git diff --check",
+    "python3 .codex/goal-03-task-package/scripts/verify_goal2_state_unchanged.py ."
+  ],
+  "exitCodes": [0, 0, 0, 0, 0, 0, 0],
+  "testCounts": {
+    "focusedFiles": 3,
+    "focusedTests": 14,
+    "runtimeDeploymentGateFiles": 8,
+    "runtimeDeploymentGateTests": 55,
+    "catalogRegistryFiles": 1,
+    "catalogRegistryTests": 4,
+    "totalObservedPassingTests": 73
+  },
+  "transitionMatrix": [
+    {
+      "from": "HEALTH_CHECKING",
+      "condition": "healthy and identity valid",
+      "to": "DISCOVERING"
+    },
+    {
+      "from": "HEALTH_CHECKING",
+      "condition": "identity mismatch",
+      "to": "FAILED"
+    },
+    {
+      "from": "ACTIVE",
+      "condition": "not online/live/ready",
+      "to": "DEGRADED"
+    },
+    {
+      "from": "ACTIVE",
+      "condition": "healthy and identity valid",
+      "to": "ACTIVE (idempotent)"
+    },
+    {
+      "from": "DEGRADED",
+      "condition": "still unhealthy",
+      "to": "DEGRADED (idempotent)"
+    },
+    {
+      "from": "DEGRADED",
+      "condition": "healthy and identity valid",
+      "to": "DISCOVERING"
+    },
+    {
+      "from": "DISCOVERING",
+      "condition": "catalog and registry commits both succeed",
+      "to": "ACTIVE"
+    },
+    {
+      "from": "DISCOVERING",
+      "condition": "identity or publication failure",
+      "to": "FAILED"
+    }
+  ],
+  "revisionConflictResults": {
+    "sameRecoveryRetry": "DEGRADED -> DISCOVERING retry at prior revision is idempotent",
+    "directActiveShortcut": "DEGRADED -> ACTIVE is INVALID_RUNTIME_DEPLOYMENT_TRANSITION",
+    "divergentStaleRecovery": "DEGRADED -> DRAINING followed by stale DISCOVERING is RUNTIME_DEPLOYMENT_STATE_CONFLICT"
+  },
+  "changedFiles": [
+    "packages/pms-application/src/runtime-reconcile.ts",
+    "packages/pms-application/test/runtime-reconcile.test.ts",
+    "packages/runtime-deployment/src/model.ts",
+    "packages/runtime-deployment/test/deployment.test.ts",
+    "tests/runtime-deployment/state-machine.property.test.ts",
+    "docs/adr/0008-runtime-reconcile-convergence.md",
+    ".codex/goal-03/decisions.md",
+    ".codex/goal-03/evidence/G3-P2-B02.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "notes": [
+    "The main RuntimeDeploymentReconciler constructor now requires Provider identity verification.",
+    "CatalogRegistryReconcileDecorator remains the sole DISCOVERING closer and activates only after both publication commits.",
+    "Registry commit failure and incomplete discovery tests prove publication failures never yield ACTIVE.",
+    "No scheduler, PM2 implementation, production Worker composition, migration, Runtime API, or PMS API code changed."
+  ]
+}

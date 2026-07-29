@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "product": "SDAR MCP Provider Platform",
+  "platformPackage": "sdar-mcp-provider-platform",
+  "platformVersion": "0.1.0",
+  "runtimePackage": "@sdar/runtime",
+  "runtimeVersion": "2.0.0-rc.1",
+  "candidateSourceCommit": "349fb8339ead8760f158ac8b05ad8d01e4825199",
+  "releaseManifest": "reports/platform-v0.1/RELEASE_MANIFEST.json",
+  "checksums": "reports/platform-v0.1/CHECKSUMS.sha256",
+  "sbom": "reports/sbom/runtime-v1.cdx.json",
+  "pullRequest": {
+    "number": 4,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/4",
+    "base": "codex/goal-03-merge-readiness-foundation",
+    "head": "codex/goal-04-production-lifecycle-closure"
+  },
+  "taskSummaries": {
+    "originalGoal2": "50/50",
+    "pmsApiFix": "6/6",
+    "goal03": "7/7",
+    "goal04": "9/9"
+  },
+  "historicalHandoffs": {
+    ".codex/handoff/goal2-handoff.json": "retained unchanged; historical only",
+    ".codex/goal-03/handoff.json": "retained unchanged; historical only"
+  },
+  "externalReleaseMetadata": {
+    "tag": "not-created",
+    "mergeCommit": "not-created",
+    "recordIn": "eventual GitHub Release"
+  },
+  "qualificationBoundary": {
+    "externalSdar": "BLOCKED_EXTERNAL",
+    "realResources": "UNQUALIFIED",
+    "certificationClaim": "none"
+  },
+  "secretsRedacted": true
+}

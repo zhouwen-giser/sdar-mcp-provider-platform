@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "activeGoal", "tasks"],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "activeGoal": {"const": "goal-04-production-lifecycle-closure"},
+    "tasks": {
+      "type": "object",
+      "minProperties": 9,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status", "evidence"],
+        "properties": {
+          "status": {"enum": ["PLANNED", "READY", "IN_PROGRESS", "PASSED", "BLOCKED"]},
+          "evidence": {"type": "array"}
+        }
+      }
+    }
+  }
+}

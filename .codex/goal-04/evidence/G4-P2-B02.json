@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P2-B02",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "startingCommit": "bc58a2a",
+  "commands": [
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run apps/pms-worker/test/reconcile-scheduler.test.ts packages/pms-persistence-postgres/test/runtime-reconcile-scheduler-repository.test.ts",
+      "exitCode": 0,
+      "result": "2 files, 9 tests"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-worker test",
+      "exitCode": 0,
+      "result": "7 files, 29 tests"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms",
+      "exitCode": 0,
+      "result": "5 files, 23 tests"
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_worker_reconcile_contract.py . --scheduler-only",
+      "exitCode": 0,
+      "result": "WORKER_SCHEDULER_CONTRACT_OK"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "schedulerAssertions": [
+    "only runtime_deployment.reconcile is enqueued",
+    "PostgreSQL clock_timestamp controls candidate age and job availability",
+    "transaction-scoped advisory locking serializes ticks across Worker processes",
+    "pending and leased work is excluded before the bounded batch limit",
+    "succeeded and failed history does not block later periodic work",
+    "insert failure rolls back without partial jobs and releases the advisory lock",
+    "in-process overlapping ticks are coalesced and stop waits for the active tick",
+    "scheduler never calls PM2, Runtime or lifecycle services directly"
+  ]
+}

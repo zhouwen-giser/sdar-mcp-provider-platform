@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "activeGoal": "goal-04-production-lifecycle-closure",
+  "updatedAt": null,
+  "tasks": {
+    "G4-P0-B01": {
+      "status": "READY",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P1-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P1-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P2-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P2-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P2-B03": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P3-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P3-B02": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    },
+    "G4-P4-B01": {
+      "status": "PLANNED",
+      "startedAt": null,
+      "completedAt": null,
+      "evidence": [],
+      "reason": null
+    }
+  }
+}

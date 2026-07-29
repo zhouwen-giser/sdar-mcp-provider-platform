@@ -1,44 +1,65 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "product": "SDAR MCP Provider Platform",
-  "version": "0.1.0",
-  "goalId": "goal-02",
-  "branch": "codex/goal-02-runtime-governance",
-  "sourceCommit": "1a710c38ba2ae3c549fac165c4ee9cc8d9d79fc7",
-  "releaseCommit": "commit-containing-this-manifest",
-  "generatedAt": "2026-07-26T19:42:18Z",
+  "package": "sdar-mcp-provider-platform",
+  "platformVersion": "0.1.0",
+  "runtimeComponent": {
+    "package": "@sdar/runtime",
+    "version": "2.0.0-rc.1"
+  },
+  "goalId": "goal-04-production-lifecycle-closure",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "integrationTarget": "codex/goal-03-merge-readiness-foundation",
+  "candidateSourceCommit": "349fb8339ead8760f158ac8b05ad8d01e4825199",
+  "generatedAt": "2026-07-29T05:52:00Z",
+  "releaseAuthority": true,
+  "externalReleaseMetadata": {
+    "tag": "not-created",
+    "mergeCommit": "not-created",
+    "recordingLocation": "eventual GitHub Release"
+  },
   "toolchain": {
     "node": "v22.23.1",
     "pnpm": "11.13.1",
+    "postgresql": "17",
     "pm2": "7.0.3"
   },
   "taskSummary": {
-    "total": 50,
-    "passed": 50,
-    "terminalTask": "G2-P5-B09",
-    "terminalTaskStatus": "PASSED"
+    "originalGoal2": { "passed": 50, "total": 50 },
+    "pmsApiFix": { "passed": 6, "total": 6 },
+    "goal03": { "passed": 7, "total": 7 },
+    "goal04": { "passed": 9, "total": 9 }
   },
   "gates": {
+    "verifyV2": "PASSED",
     "verifyPlatform": "PASSED",
-    "frozenProtocol": "PASSED",
-    "migrationIsolation": "PASSED",
-    "realPm2": "PASSED",
-    "security": "PASSED",
-    "faultInjection": "PASSED",
-    "controlledSdarInterop": "PASSED",
-    "externalInterop": "BLOCKED_EXTERNAL"
+    "pmsApiProduction": "PASSED",
+    "workerPm2Production": "PASSED",
+    "providerRegression": "PASSED_CONTROLLED",
+    "static": "PASSED_LOCAL",
+    "dockerCompose": "PASSED_LOCAL",
+    "externalSdar": "BLOCKED_EXTERNAL",
+    "realResources": "UNQUALIFIED"
   },
   "artifacts": [
     "CHANGELOG.md",
     "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
     "docs/operations/PLATFORM_V0_1_UPGRADE.md",
+    "docs/review/GOAL04_FINAL_REPORT.md",
+    "docs/review/GOAL04_RELEASE_HANDOFF.md",
     "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
     "reports/platform-v0.1/TEST_EVIDENCE.json",
     "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
     "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
     "reports/platform-v0.1/CHECKSUMS.sha256",
     "reports/sbom/runtime-v1.cdx.json",
-    ".codex/handoff/goal2-handoff.json"
+    ".codex/handoff/platform-v0.1-final-handoff.json",
+    ".codex/goal-04/handoff.json",
+    ".codex/goal-04/test-evidence.json"
   ],
+  "historicalArtifacts": {
+    "goal2Handoff": "retained unchanged; not release authority",
+    "goal03Handoff": "retained unchanged; not release authority"
+  },
   "secretsRedacted": true
 }

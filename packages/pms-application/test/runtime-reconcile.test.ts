@@ -32,6 +32,7 @@ describe("RuntimeDeploymentReconciler", () => {
       lifecycle,
       health,
       inventory([instance("sdar-runtime-orphan")]),
+      validIdentity(),
     );
 
     const result = await reconciler.reconcile(input());
@@ -69,6 +70,7 @@ describe("RuntimeDeploymentReconciler", () => {
       lifecycle,
       readyHealth(),
       inventory([]),
+      validIdentity(),
     );
 
     const result = await reconciler.reconcile(input());
@@ -92,6 +94,7 @@ describe("RuntimeDeploymentReconciler", () => {
       lifecycle,
       readyHealth(),
       inventory([]),
+      validIdentity(),
     );
 
     await expect(reconciler.reconcile(input())).rejects.toMatchObject({
@@ -133,6 +136,120 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(store.transitions).not.toContain("ACTIVE");
     expect(verify.mock.calls[0]?.[0].expectedProviderId).toBe("provider-a");
     expect(verify.mock.calls[0]?.[0].target.providerId).toBe("provider-a");
+  });
+
+  it("moves unhealthy ACTIVE deployments to DEGRADED", async () => {
+    const store = new MemoryReconcileStore(deployment("ACTIVE"));
+    const health = unhealthyHealth();
+    const identity = validIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      health,
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("active-unhealthy"));
+
+    expect(result.deployment.status).toBe("DEGRADED");
+    expect(result.progressed).toBe(true);
+    expect(store.transitions).toEqual(["DEGRADED"]);
+    expect(health.probe).toHaveBeenCalledOnce();
+    expect(identity.verify).not.toHaveBeenCalled();
+  });
+
+  it("keeps healthy identity-valid ACTIVE deployments idempotently ACTIVE", async () => {
+    const store = new MemoryReconcileStore(deployment("ACTIVE"));
+    const health = readyHealth();
+    const identity = validIdentity();
+    const lifecycle = lifecyclePort();
+    const beforeRevision = store.current.snapshot.observedRevision;
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecycle,
+      health,
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("active-healthy"));
+
+    expect(result.deployment).toMatchObject({
+      status: "ACTIVE",
+      observedRevision: beforeRevision,
+    });
+    expect(result.progressed).toBe(false);
+    expect(lifecycle.start).toHaveBeenCalledOnce();
+    expect(store.transitions).toEqual([]);
+    expect(identity.verify).toHaveBeenCalledOnce();
+  });
+
+  it("keeps an unhealthy DEGRADED deployment idempotently DEGRADED", async () => {
+    const store = new MemoryReconcileStore(deployment("DEGRADED"));
+    const health = unhealthyHealth();
+    const identity = validIdentity();
+    const beforeRevision = store.current.snapshot.observedRevision;
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      health,
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("degraded-unhealthy"));
+
+    expect(result.deployment).toMatchObject({
+      status: "DEGRADED",
+      observedRevision: beforeRevision,
+    });
+    expect(result.progressed).toBe(false);
+    expect(store.transitions).toEqual([]);
+    expect(identity.verify).not.toHaveBeenCalled();
+  });
+
+  it("moves a healthy identity-valid DEGRADED deployment back to DISCOVERING", async () => {
+    const store = new MemoryReconcileStore(deployment("DEGRADED"));
+    const identity = validIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      readyHealth(),
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("degraded-recovered"));
+
+    expect(result.deployment.status).toBe("DISCOVERING");
+    expect(result.progressed).toBe(true);
+    expect(store.transitions).toEqual(["DISCOVERING"]);
+    expect(identity.verify).toHaveBeenCalledOnce();
+  });
+
+  it("fails a healthy ACTIVE deployment when Provider identity no longer matches", async () => {
+    const store = new MemoryReconcileStore(deployment("ACTIVE"));
+    const identity = mismatchedIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      readyHealth(),
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("active-identity-mismatch"));
+
+    expect(result.deployment.status).toBe("FAILED");
+    expect(result.deployment.status).not.toBe("ACTIVE");
+    expect(store.failureCodes).toEqual(["PROVIDER_ID_MISMATCH"]);
+    expect(store.transitions).toEqual(["FAILED"]);
   });
 });
 
@@ -257,6 +374,44 @@ function readyHealth() {
   };
 }
 
+function unhealthyHealth() {
+  return {
+    probe: vi.fn(() =>
+      Promise.resolve({
+        processState: "stopped" as const,
+        live: false,
+        ready: false,
+        reasonCode: "PROCESS_OFFLINE",
+        checkedAt: "2026-07-26T00:00:00.000Z",
+      }),
+    ),
+  };
+}
+
+function validIdentity() {
+  const verify = vi.fn<RuntimeReconcileProviderIdentityPort["verify"]>(() =>
+    Promise.resolve({
+      valid: true as const,
+      reasonCode: "PROVIDER_ID_VERIFIED" as const,
+      mismatchRelations: [],
+      retryable: false as const,
+    }),
+  );
+  return { verify } satisfies RuntimeReconcileProviderIdentityPort;
+}
+
+function mismatchedIdentity() {
+  const verify = vi.fn<RuntimeReconcileProviderIdentityPort["verify"]>(() =>
+    Promise.resolve({
+      valid: false as const,
+      reasonCode: "PROVIDER_ID_MISMATCH" as const,
+      mismatchRelations: ["pms_adapter_manifest" as const],
+      retryable: true as const,
+    }),
+  );
+  return { verify } satisfies RuntimeReconcileProviderIdentityPort;
+}
+
 function inventory(values: readonly RuntimeReconcileInstance[]) {
   return {
     list: () =>
@@ -341,5 +496,6 @@ function observedRevision(status: RuntimeDeploymentStatus): number {
     "HEALTH_CHECKING",
     "DISCOVERING",
     "ACTIVE",
+    "DEGRADED",
   ].indexOf(status);
 }

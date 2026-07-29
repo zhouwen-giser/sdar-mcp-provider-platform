@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-03-merge-readiness-foundation",
+  "status": "PENDING",
+  "sourceBranch": "codex/goal-03-merge-readiness-foundation",
+  "targetBranch": "codex/goal-02-runtime-governance",
+  "tasks": {
+    "total": 7,
+    "passed": 0
+  },
+  "deferred": []
+}

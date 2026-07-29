@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G4-P1-B02",
+  "branch": "codex/goal-04-production-lifecycle-closure",
+  "startingCommit": "b4d055e",
+  "dependency": {
+    "package": "pm2",
+    "version": "7.0.3",
+    "rootRuntimeResolution": true,
+    "exact": true
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "42 workspaces; lockfile current"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm --filter @sdar/pm2-runtime-adapter test",
+      "exitCode": 0,
+      "result": "7 files, 49 tests"
+    },
+    {
+      "command": "node tests/pm2-adapter-e2e/run-real-pm2-e2e.mjs",
+      "exitCode": 0,
+      "result": "real PM2 7.0.3 product path; built Runtime live/ready; no-op unchanged; drift restart count 1; crash recovery count 2; stop/delete/cleanup and sentinel isolation passed"
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_pm2_product_path.py .",
+      "exitCode": 0,
+      "result": "PM2_PRODUCT_PATH_OK"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "python3 .codex/goal-04-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "securityAssertions": [
+    "only PMS_BOOTSTRAP_CHECKSUM, PMS_CONFIG_REVISION and PMS_RUNTIME_VERSION are read from pm2_env",
+    "database credentials remain in DATABASE_URL_FILE and are absent from evidence",
+    "no PM2 CLI, pnpm dlx or configuration-file control bypass is used",
+    "non-sdar sentinel is filtered and rejected by Pm2ProcessManager",
+    "isolated PM2 daemon and temporary release resources are cleaned"
+  ],
+  "evidenceFile": "reports/evidence/G4-P1-B02-real-pm2-product-path.json"
+}

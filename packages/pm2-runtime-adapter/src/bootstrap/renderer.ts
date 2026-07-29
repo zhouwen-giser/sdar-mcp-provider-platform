@@ -37,11 +37,17 @@ const RESERVED_KEYS = new Set([
   "PMS_RUNTIME_CONFIG_URL",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
   "PMS_RUNTIME_CONFIG_CACHE_PATH",
+  "PMS_RUNTIME_REGISTRATION_URL",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
+  "PMS_BOOTSTRAP_CHECKSUM",
+  "PMS_CONFIG_REVISION",
+  "PMS_RUNTIME_VERSION",
 ]);
 
 const SECRET_FILE_KEYS = new Set([
   "DATABASE_URL_FILE",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
   "ADAPTER_TLS_CA_PATH",
   "ADAPTER_TLS_CERT_PATH",
   "ADAPTER_TLS_KEY_PATH",
@@ -100,12 +106,17 @@ export class BootstrapConfigRenderer {
       RUNTIME_DEPLOYMENT_ID: input.target.deploymentId,
       RUNTIME_INSTANCE_ID: input.target.instanceId,
       OTEL_SERVICE_INSTANCE_ID: input.target.instanceId,
+      PMS_BOOTSTRAP_CHECKSUM: input.configChecksum,
+      PMS_CONFIG_REVISION: String(input.configRevision),
+      PMS_RUNTIME_VERSION: input.target.runtimeVersion,
     };
     if (input.pms !== undefined) {
       validatePms(input.pms, environment.RUNTIME_ENV);
       environment.PMS_RUNTIME_CONFIG_URL = new URL(input.pms.baseUrl).toString();
       environment.PMS_RUNTIME_CONFIG_TOKEN_FILE = input.pms.tokenFile;
       environment.PMS_RUNTIME_CONFIG_CACHE_PATH = input.pms.cachePath;
+      environment.PMS_RUNTIME_REGISTRATION_URL = new URL(input.pms.baseUrl).toString();
+      environment.PMS_RUNTIME_REGISTRATION_TOKEN_FILE = input.pms.tokenFile;
     }
     const sortedEnvironment = sortRecord(environment);
     const preview = Object.fromEntries(

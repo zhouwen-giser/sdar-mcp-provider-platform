@@ -1,0 +1,57 @@
+{
+  "taskId": "G3-P0-B01",
+  "commitSha": "f56813d2f52e35ac04fb0c3cdb11c8fb0a0bd051",
+  "refs": {
+    "branch": "codex/goal-03-merge-readiness-foundation",
+    "integrationBranch": "origin/codex/goal-02-runtime-governance",
+    "integrationSha": "ed5f01b7a7eac2ef9c982bfbc5132311bdb30cad",
+    "mainSha": "6bbd54fe3eec0514157cf05fe28690f09c15bcff",
+    "pullRequest": 2,
+    "workflowRunId": 30413182605,
+    "runtimeComposeJobId": 90453790964,
+    "runtimeCiJobId": 90453790990
+  },
+  "commands": [
+    "git fetch origin",
+    "gh pr checks 2 --json name,state,bucket,link,startedAt,completedAt,workflow",
+    "gh run view 30413182605 --job 90453790964 --log",
+    "gh run view 30413182605 --job 90453790990 --log",
+    "node --version",
+    "pnpm --version",
+    "docker --version",
+    "docker compose version",
+    "docker compose build --no-cache runtime adapter-typescript",
+    "python3 .codex/goal-03-task-package/scripts/verify_goal2_state_unchanged.py .",
+    "python3 .codex/goal-03-task-package/scripts/taskctl.py status"
+  ],
+  "exitCodes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "testCounts": {
+    "goalGraphTasks": 7,
+    "failedWorkflowJobsInspected": 2,
+    "dockerFailuresReproduced": 1
+  },
+  "changedFiles": [
+    "docs/review/GOAL03_BASELINE.md",
+    ".codex/goal-03/evidence/G3-P0-B01.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "notes": [
+    "runtime-compose first cause: Dockerfile copies missing packages/provider-telemetry/package.json.",
+    "runtime-ci first cause: strict pnpm audit rejects find-my-way@9.6.0 and brace-expansion@5.0.7 high-severity advisories.",
+    "Online local pnpm audit replay was denied because it would disclose dependency metadata to an external registry; authenticated CI logs and lockfile versions provide exact evidence.",
+    "Original Goal 2 task-state SHA-256 remains 5ffce4a73146dd9c8a7d7ffd299fb9298d2c461355946120019a36d6ce4378be."
+  ]
+}
