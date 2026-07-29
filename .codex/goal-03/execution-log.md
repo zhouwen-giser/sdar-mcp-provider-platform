@@ -80,5 +80,27 @@
 - PMS configuration E2E passed: 1 file / 8 tests
 - PMS migrations passed: 2 files / 9 tests
 - Documented the three-job matrix and explicit Worker/PM2/release deferrals
-- GitHub run URL and ID will be appended when G3-P3-B01 creates or updates the
-  sole Goal 03 to Goal 2 pull request
+- Initial PR run `30417122900` passed `runtime-compose` and
+  `pms-api-production`; `runtime-ci` exposed a Docker-backend image-size
+  regression for final-task follow-up
+
+## G3-P3-B01
+
+- Started: 2026-07-29T10:04:17+08:00
+- Fetched and compared the integration target; Goal 2 remained at
+  `ed5f01b7a7eac2ef9c982bfbc5132311bdb30cad`, so integration sync was a no-op
+- Verified the Goal 2 task-state SHA remained
+  `5ffce4a73146dd9c8a7d7ffd299fb9298d2c461355946120019a36d6ce4378be`
+- Full `verify:v2` passed on a clean PostgreSQL volume, along with the Docker
+  manifest verifier, Compose build/readiness, PMS API production, PMS
+  migrations, PMS Worker, focused Reconciler, typecheck, lint, formatting, and
+  diff checks
+- Created draft PR #3 with base `codex/goal-02-runtime-governance`
+- Initial PR run `30417122900` passed `runtime-compose` and
+  `pms-api-production`; `runtime-ci` reported image size `353156425` against
+  the unchanged `350000000` ceiling on the GitHub Docker backend
+- Removed only source maps from pruned third-party production dependencies and
+  added a fail-closed absence assertion; no ceiling or other image gate changed
+- Post-fix `pnpm container:check`, Compose readiness, and a second complete
+  clean-volume `verify:v2` passed; the final handoff commit triggers the
+  superseding three-job PR run

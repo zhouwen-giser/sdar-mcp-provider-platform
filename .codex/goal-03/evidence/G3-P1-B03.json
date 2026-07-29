@@ -32,8 +32,17 @@
     ".codex/goal-03/task-state.json"
   ],
   "githubRun": {
-    "status": "pending",
-    "reason": "The branch workflow is pull-request triggered; G3-P3-B01 creates or updates the sole Goal 03 to Goal 2 PR and records its run URL and ID."
+    "status": "completed",
+    "conclusion": "failure",
+    "id": 30417122900,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30417122900",
+    "headSha": "9b967e5160b1686093063adcfdc8b95bb92d5797",
+    "jobs": {
+      "runtime-ci": "failure: backend-reported runtime image size 353156425 exceeded unchanged 350000000 ceiling",
+      "runtime-compose": "success",
+      "pms-api-production": "success"
+    },
+    "followup": "G3-P3-B01 removed production dependency source maps without changing the 350 MB ceiling; local container:check and complete verify:v2 passed. The final handoff commit triggers a superseding PR run."
   },
   "notes": [
     "The workflow retains runtime-ci and runtime-compose and adds the independent pms-api-production job.",

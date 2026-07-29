@@ -58,3 +58,24 @@ regenerated from the patched lockfile. Its reviewed diff is limited to the
 lockfile digest and `find-my-way` changing from `9.6.0` to `9.7.0`;
 `brace-expansion` is not part of the production component set. No manual SBOM
 content, gate, runtime, protocol, or migration change is included.
+
+## G3-P3-B01 CI image-size regression exception
+
+Recorded after inspecting PR #3 Actions run `30417122900` on 2026-07-29.
+
+The `runtime-compose` and `pms-api-production` jobs passed. `runtime-ci`
+reached the unchanged 350 MB container ceiling but failed because the GitHub
+Linux Docker backend reported `353156425` bytes while the local containerd
+backend reported about 102 MB for the same runtime content. The production
+dependency tree contains about 16 MB of package source-map files that are not
+needed to execute the compiled Runtime.
+
+The minimum fix is limited to `Dockerfile` and
+`scripts/check-runtime-image.mjs`: delete only `*.map` files from the pruned
+production dependency layer and assert their absence in the existing
+fail-closed image inspection. The 350 MB limit, non-root user check,
+reproducibility comparison, required Runtime files, and exclusions for tests,
+docs, TypeScript, and Vitest remain unchanged. Runtime-owned compiled output
+and its source maps are not deleted. No application behavior, protocol,
+migration, Worker/PM2 composition, scheduler, release, or rollout change is
+included.
