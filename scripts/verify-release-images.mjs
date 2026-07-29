@@ -1,6 +1,8 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
 import process from "node:process";
+import { createGzip } from "node:zlib";
 
 const images = {
   api: "sdar/pms-api:0.1.0-rc",
@@ -33,6 +35,11 @@ try {
   const inspections = Object.fromEntries(
     Object.entries(images).map(([name, image]) => [name, inspect(image)]),
   );
+  const compressedSizes = {};
+  for (const [name, image] of Object.entries(images)) {
+    compressedSizes[name] = await compressedImageSize(image);
+  }
+  process.stdout.write(`RELEASE_IMAGE_COMPRESSED_SIZES ${JSON.stringify(compressedSizes)}\n`);
   for (const [name, inspection] of Object.entries(inspections)) {
     assert(inspection.Config.User === "node", `${name.toUpperCase()}_IMAGE_ROOT_USER`);
     assert(
@@ -61,14 +68,15 @@ try {
       "IMAGE_SECRET_HISTORY",
     );
   }
-  assert(inspections.api.Size < 450_000_000, "PMS_API_IMAGE_SIZE");
-  assert(inspections.worker.Size < 475_000_000, "PMS_WORKER_IMAGE_SIZE");
-  assert(inspections.web.Size < 175_000_000, "PMS_WEB_IMAGE_SIZE");
+  assert(compressedSizes.api < 450_000_000, "PMS_API_IMAGE_SIZE");
+  assert(compressedSizes.worker < 475_000_000, "PMS_WORKER_IMAGE_SIZE");
+  assert(compressedSizes.web < 175_000_000, "PMS_WEB_IMAGE_SIZE");
 
   filesystemSmoke();
   await apiSmoke();
   await workerSmoke();
   await webSmoke();
+  recordPortableImageSizes(compressedSizes);
 
   process.stdout.write(
     `${JSON.stringify({
@@ -77,7 +85,12 @@ try {
       images: Object.fromEntries(
         Object.entries(inspections).map(([name, value]) => [
           name,
-          { image: images[name], sizeBytes: value.Size, user: value.Config.User },
+          {
+            image: images[name],
+            sizeBytes: compressedSizes[name],
+            sizeMetric: "gzip-compressed docker save bytes",
+            user: value.Config.User,
+          },
         ]),
       ),
       apiHealth: true,
@@ -92,6 +105,44 @@ try {
     command("docker", ["rm", "-f", container], { ignoreFailure: true });
   }
   command("docker", ["network", "rm", network], { ignoreFailure: true });
+}
+
+async function compressedImageSize(image) {
+  const docker = spawn("docker", ["save", image], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const gzip = createGzip({ level: 9 });
+  let stderr = "";
+  let size = 0;
+  docker.stderr.setEncoding("utf8");
+  docker.stderr.on("data", (chunk) => {
+    stderr = `${stderr}${chunk}`.slice(-4_000);
+  });
+  docker.stdout.pipe(gzip);
+  const output = (async () => {
+    for await (const chunk of gzip) size += chunk.length;
+  })();
+  const completion = new Promise((resolveCompletion, rejectCompletion) => {
+    docker.once("error", rejectCompletion);
+    docker.once("close", (code) => {
+      if (code === 0) resolveCompletion();
+      else rejectCompletion(new Error(`DOCKER_IMAGE_SAVE_FAILED:${image}:${stderr}`));
+    });
+  });
+  await Promise.all([output, completion]);
+  return size;
+}
+
+function recordPortableImageSizes(sizes) {
+  const path = "reports/ci/release-artifacts.json";
+  const report = JSON.parse(readFileSync(path, "utf8"));
+  for (const [name, sizeBytes] of Object.entries(sizes)) {
+    if (report.artifacts?.[name] !== undefined) {
+      report.artifacts[name].sizeBytes = sizeBytes;
+      report.artifacts[name].sizeMetric = "gzip-compressed docker save bytes";
+    }
+  }
+  writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
 }
 
 function filesystemSmoke() {

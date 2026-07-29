@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "taskId": "G5-P4-B02",
-  "commitShaAtEvidenceCreation": "0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+  "commitShaAtEvidenceCreation": "7579c26a96544f19bbf39da679419e85b52ee054",
   "candidateCommitAuthority": "exact GitHub workflow head recorded by release-candidate-summary artifact",
   "commands": [
     {
@@ -42,7 +42,7 @@
     {
       "command": "node scripts/release/build-source-archive.mjs (twice) && node scripts/release/verify-source-archive.mjs",
       "exitCode": 0,
-      "result": "966 files; two identical builds; deterministic sha256:0f1241a8860762fa58510fec27012ce999ece3f53100d049f9bff0eaf63ff204"
+      "result": "966 files; two identical builds; deterministic sha256:4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5"
     },
     {
       "command": "node scripts/release/verify-release-metadata.mjs && pnpm release:candidate:check",
@@ -95,6 +95,26 @@
       "command": "node scripts/release/verify-runtime-credential-evidence.mjs",
       "exitCode": 0,
       "result": "9 required exact-head credential isolation assertions passed and secret patterns were absent"
+    },
+    {
+      "command": "GitHub Actions release-candidate run 30454664075 @ fa3ad2c648b8d831db89125669861a828c9924ef",
+      "exitCode": 1,
+      "result": "worker PM2 and runtime credential isolation passed; worker-lease-safety exposed a redundant >=9 renewal-count timing assertion; release-artifacts confirmed Docker inspect Size is backend-dependent; regular CI independently exposed historical Registry checksum reactivation as REGISTRY_COMMIT_FAILED"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm exec vitest run packages/registry-snapshot/test/persistence.test.ts",
+      "exitCode": 0,
+      "result": "1 file, 5 tests passed; historical immutable checksum was atomically reactivated without duplicate insertion and emitted an audit event"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres-5432> pnpm test:worker-lease-safety (10 consecutive pre-fix reproductions plus post-fix run)",
+      "exitCode": 0,
+      "result": "all runs passed; safety assertion now requires renewal across three lease periods while retaining the authoritative no-takeover and higher-fence checks"
+    },
+    {
+      "command": "node scripts/run-release-artifact-smoke.mjs && node scripts/verify-release-images.mjs with portable size metric",
+      "exitCode": 0,
+      "result": "unchanged limits passed using gzip-compressed docker save bytes at qualified source 7579c26a96544f19bbf39da679419e85b52ee054: api 101599202, worker 101603798, web 79500517"
     }
   ],
   "changedFiles": [
@@ -103,6 +123,8 @@
     ".github/workflows/release-candidate.yml",
     "docs/review/GOAL05_CI_MATRIX.md",
     "package.json",
+    "packages/pms-persistence-postgres/src/registry-snapshot-repository.ts",
+    "packages/registry-snapshot/test/persistence.test.ts",
     "reports/ci/release-artifacts.json",
     "reports/evidence/G5-P1-B02-runtime-credential-isolation.json",
     "reports/platform-v0.1/CHECKSUMS.sha256",
@@ -119,6 +141,8 @@
     "scripts/cleanup-release-artifact-ci.mjs",
     "scripts/run-release-artifact-smoke.mjs",
     "scripts/run-worker-pm2-production-gate.mjs",
+    "scripts/verify-release-images.mjs",
+    "tests/worker-lease-safety/run-worker-lease-safety.mjs",
     "tests/worker-pm2-production/run-production-lifecycle.mjs"
   ],
   "assertions": {

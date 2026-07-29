@@ -7,8 +7,8 @@
     "package": "@sdar/runtime",
     "version": "2.0.0-rc.1"
   },
-  "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
-  "generatedAt": "2026-07-29T18:49:38+08:00",
+  "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "generatedAt": "2026-07-29T21:25:15+08:00",
   "releaseAuthority": {
     "model": "two-layer",
     "qualifiedSource": "qualifiedSourceCommit",
@@ -24,7 +24,7 @@
     "pendingFreeze": true,
     "candidateWorkflow": {
       "workflow": ".github/workflows/release-candidate.yml",
-      "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
       "headSha": null,
       "runId": null,
       "runUrl": null
@@ -91,7 +91,7 @@
     "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
     "digest": {
       "algorithm": "sha256",
-      "value": "0f1241a8860762fa58510fec27012ce999ece3f53100d049f9bff0eaf63ff204",
+      "value": "4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5",
       "status": "generated"
     }
   },

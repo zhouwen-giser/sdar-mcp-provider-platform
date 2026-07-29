@@ -1,57 +1,60 @@
 {
   "schemaVersion": "1.0",
   "status": "pass",
-  "revision": "0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+  "revision": "7579c26a96544f19bbf39da679419e85b52ee054",
   "artifacts": {
     "runtime": {
       "image": "sdar/runtime:0.1.0-rc",
-      "imageId": "sha256:d8db7bcecdd718ba7eeae4b86fb253cd645be2d29136ebbb20882ebd2be82d8a",
-      "digest": "sdar/runtime@sha256:d8db7bcecdd718ba7eeae4b86fb253cd645be2d29136ebbb20882ebd2be82d8a",
-      "sizeBytes": 101356522,
+      "imageId": "sha256:4a1a8895e03a556a475ecd4c5b99d86bfcbb0b3598ecac21d5b0c04ce8221097",
+      "digest": "sdar/runtime@sha256:4a1a8895e03a556a475ecd4c5b99d86bfcbb0b3598ecac21d5b0c04ce8221097",
+      "sizeBytes": 101357338,
       "uid": "node",
       "labels": {}
     },
     "api": {
       "image": "sdar/pms-api:0.1.0-rc",
-      "imageId": "sha256:b2f678802fb48872a15ed3b4e8a017de0142a0de1c2e7c13f5f73522f4310cc2",
-      "digest": "sdar/pms-api@sha256:b2f678802fb48872a15ed3b4e8a017de0142a0de1c2e7c13f5f73522f4310cc2",
-      "sizeBytes": 102082727,
+      "imageId": "sha256:029331fa3d950e524df27eccaa09c40a22e95ed1292abb29f73869f85171e887",
+      "digest": "sdar/pms-api@sha256:029331fa3d950e524df27eccaa09c40a22e95ed1292abb29f73869f85171e887",
+      "sizeBytes": 101599202,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management API",
         "org.opencontainers.image.version": "0.1.0"
-      }
+      },
+      "sizeMetric": "gzip-compressed docker save bytes"
     },
     "worker": {
       "image": "sdar/pms-worker:0.1.0-rc",
-      "imageId": "sha256:5a51cb366a3895a4ee9bcd71fd0f15657e3dcaf8cb6ae6c98a823706822621ea",
-      "digest": "sdar/pms-worker@sha256:5a51cb366a3895a4ee9bcd71fd0f15657e3dcaf8cb6ae6c98a823706822621ea",
-      "sizeBytes": 102086419,
+      "imageId": "sha256:69edff34d1e7e22dab6fffd4c995bc55ec17f6bcb200ede9873b77d62c8737f9",
+      "digest": "sdar/pms-worker@sha256:69edff34d1e7e22dab6fffd4c995bc55ec17f6bcb200ede9873b77d62c8737f9",
+      "sizeBytes": 101603798,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Worker",
         "org.opencontainers.image.version": "0.1.0"
-      }
+      },
+      "sizeMetric": "gzip-compressed docker save bytes"
     },
     "web": {
       "image": "sdar/pms-web:0.1.0-rc",
-      "imageId": "sha256:85e6bf7d1d43b8130bdcc60c63b37ad042f4dcb563ef9369c810c42ec61bd021",
-      "digest": "sdar/pms-web@sha256:85e6bf7d1d43b8130bdcc60c63b37ad042f4dcb563ef9369c810c42ec61bd021",
-      "sizeBytes": 79926535,
+      "imageId": "sha256:44e849627b5530a7c2f480531758ea313df615dd9a582e79e46e009bf272c697",
+      "digest": "sdar/pms-web@sha256:44e849627b5530a7c2f480531758ea313df615dd9a582e79e46e009bf272c697",
+      "sizeBytes": 79500517,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "0d71483e0e33a6654c9658d4ea15bbdf4f09c53b",
+        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Web",
         "org.opencontainers.image.version": "0.1.0"
-      }
+      },
+      "sizeMetric": "gzip-compressed docker save bytes"
     }
   },
   "compose": {

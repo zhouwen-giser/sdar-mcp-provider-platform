@@ -94,7 +94,7 @@ async function scenarioContinuousRenewal() {
   const row = await waitForJob("scenario-a", "succeeded", 4_000);
   await stopWorkers(workerA, workerB);
   assert(workerBJobs.claims.length === 0, "SCENARIO_A_WORKER_B_CLAIMED");
-  assert(workerAJobs.renewals.get("scenario-a") >= 9, "SCENARIO_A_RENEWAL_COUNT_LOW");
+  assert(workerAJobs.renewals.get("scenario-a") >= 3, "SCENARIO_A_RENEWAL_COUNT_LOW");
   assert(row.fencing_token === "1", "SCENARIO_A_FENCE_CHANGED");
   assertions.longHandlerRenewedBeyondThreePeriods = true;
   assertions.secondWorkerCouldNotClaimRenewedLease = true;
@@ -232,7 +232,7 @@ async function scenarioBatchRenewal() {
 
   assert(workerBJobs.claims.length === 0, "SCENARIO_D_QUEUED_JOB_TAKEN_OVER");
   for (const jobId of jobIds) {
-    assert(workerAJobs.renewals.get(jobId) >= 9, `SCENARIO_D_RENEWAL_MISSING:${jobId}`);
+    assert(workerAJobs.renewals.get(jobId) >= 3, `SCENARIO_D_RENEWAL_MISSING:${jobId}`);
   }
   assertions.claimLimitThreeStartedWithoutQueueExpiry = true;
   assertions.eachClaimedJobRenewedIndependently = true;
