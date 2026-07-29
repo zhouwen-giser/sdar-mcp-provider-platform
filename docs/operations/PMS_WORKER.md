@@ -2,7 +2,8 @@
 
 The PMS Worker is a control-plane background process. Its current production bootstrap runs one
 allowlisted job, `provider_package.sync`, which projects the repository-controlled Provider Package
-registry into the PMS database. Full RuntimeDeployment production composition remains deferred.
+registry into the PMS database. The secure Runtime composition input contract is available, while
+construction and handler registration remain deferred to the scoped production-composition task.
 
 The external RuntimeDeployment lifecycle model reserves exactly one Job Type:
 `runtime_deployment.reconcile`. Its handler invokes the complete application reconciler under one
@@ -21,8 +22,29 @@ second external job. See [ADR 0007](../adr/0007-single-runtime-reconcile-job.md)
 | `PMS_WORKER_RETRY_DELAY_MS`    |                    `5000` | Delay before a failed job becomes available             |
 | `PMS_WORKSPACE_ROOT`           | process working directory | Controlled package and migration root                   |
 
-Inline `PMS_DATABASE_URL` and `DATABASE_URL` are rejected. The database URL file is read for Pool
-construction and is never included in health state, errors, or logs.
+The following Runtime lifecycle inputs are an atomic group. Supplying any one requires all of them;
+omitting the group preserves the foundation-only Worker until production composition is installed.
+
+| Variable                                    | Requirement | Purpose                                      |
+| ------------------------------------------- | ----------- | -------------------------------------------- |
+| `PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE` | required    | File-only provisioning authority             |
+| `PMS_RUNTIME_RELEASE_ROOT`                  | required    | Versioned, read-only Runtime release root    |
+| `PMS_RUNTIME_SECRET_ROOT`                   | required    | Private Runtime secret-file root             |
+| `PMS_RUNTIME_CONFIG_CACHE_ROOT`             | required    | Private per-Runtime configuration cache root |
+| `PMS_PM2_HOME`                              | required    | Private isolated PM2 state directory         |
+| `PMS_RUNTIME_RECONCILE_INTERVAL_MS`         | required    | Bounded periodic reconcile interval          |
+| `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
+| `PMS_RUNTIME_HEALTH_TIMEOUT_MS`             | required    | Bounded health/identity probe timeout        |
+
+Database and provisioning files must be absolute, regular, non-symlink, non-empty, no broader than
+`0600`, and located under a non-group-writable/non-world-writable parent. Release roots may be
+readable but not group/world writable. Secret, cache, and PM2 roots must be existing canonical
+directories with permissions no broader than `0700`. Release, secret, cache, and PM2 roots must be
+pairwise distinct and cannot contain one another.
+
+Inline database URLs, provisioning credentials, Runtime secrets/config tokens, and PM2 secrets are
+rejected. File contents are consumed only by their owning adapters and are never included in health
+state, errors, Audit, or evidence.
 
 Bootstrap applies only the PMS migration set, builds the allowlisted job registry, and then marks the
 worker ready. The worker receives a Pool for the PMS control-plane database; it has no Runtime
@@ -42,11 +64,13 @@ database discovery or fallback.
 The package sync handler uses `worker:<workerId>` as the Audit actor and includes job ID and fencing
 token in the correlation ID.
 
-When RuntimeDeployment composition is supplied by a future scoped change, the reconcile handler
+When RuntimeDeployment composition is supplied by the scoped production-composition change, the reconcile handler
 derives its operation ID and idempotency key from the job ID and fencing token. The registry rejects
 any second handler for `runtime_deployment.reconcile` with `PMS_JOB_HANDLER_DUPLICATE`. This
 repository does not currently add that handler to `bootstrapPmsWorker`; doing so requires the
-deferred production lifecycle dependencies.
+deferred production lifecycle dependencies. The immutable composition contract reserves explicit
+slots for repositories, database preparation, lifecycle, health, identity, Catalog/Registry,
+scheduler, and cleanup without constructing any of them.
 
 ## Health and shutdown
 
@@ -55,3 +79,8 @@ It contains only readiness, the last successful loop timestamp, and a stable fai
 
 `SIGTERM` and `SIGINT` stop new polling, interrupt the poll delay, wait for the current handler to
 finish, and then close the PMS Pool. Repeated stop requests are safe.
+
+Worker authority is limited to desired/observed Runtime infrastructure and its control-plane
+projections. Runtime Task data belongs to the Runtime database and is never read or mutated by the
+Worker. Stopping or restarting the Worker must stop scheduling/claiming and close its own resources;
+it must not stop or delete already-running Runtime processes.
