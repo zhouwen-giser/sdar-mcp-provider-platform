@@ -6,3 +6,16 @@ protocol/protocol-baseline.json text eol=lf
 protocol/protocol-baseline.lock.json text eol=lf
 packages/adapter-protocol/generated/** text eol=lf
 reports/**/*.json text eol=lf
+
+/.codex/** export-ignore
+/.obsidian/** export-ignore
+/coverage/** export-ignore
+/dist/** export-ignore
+/reports/** export-ignore
+/reports/platform-v0.1/** -export-ignore
+/reports/sbom/runtime-v1.cdx.json -export-ignore
+/reports/ci/** export-ignore
+/reports/evidence/** export-ignore
+/.env* export-ignore
+/**/*.tmp export-ignore
+/**/*.log export-ignore

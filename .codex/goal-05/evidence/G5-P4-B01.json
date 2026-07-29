@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P4-B01",
+  "commitSha": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+  "commands": [
+    {
+      "command": "pnpm sbom:generate",
+      "exitCode": 0,
+      "result": "CycloneDX 1.6 SBOM generated with 350 production components"
+    },
+    {
+      "command": "pnpm sbom:check",
+      "exitCode": 0,
+      "result": "SBOM current with pnpm-lock SHA-256"
+    },
+    {
+      "command": "node scripts/release/generate-release-metadata.mjs --candidate 945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "exitCode": 0,
+      "result": "two-layer pending Actions authority generated"
+    },
+    {
+      "command": "node scripts/release/build-source-archive.mjs",
+      "exitCode": 0,
+      "result": "repeated builds produced stable SHA-256 3858d750e4474f28e067344241af676f9ee2c22c45f1f7cf56d16ea5a75c8ef4"
+    },
+    {
+      "command": "node scripts/release/verify-source-archive.mjs",
+      "exitCode": 0,
+      "result": "960 files passed content whitelist and secret scan"
+    },
+    {
+      "command": "node scripts/release/verify-release-metadata.mjs",
+      "exitCode": 0,
+      "result": "qualified ancestor, release-only diff, authority, pending CI, artifacts, checksums, archive, and SBOM passed"
+    },
+    {
+      "command": "node --test scripts/release/verify-release-metadata.test.mjs",
+      "exitCode": 0,
+      "result": "verifier unit suite passed missing commit, non-ancestor, failed CI, SHA mismatch, and product-diff rejection cases"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_release_metadata_contract.py .",
+      "exitCode": 0,
+      "result": "RELEASE_METADATA_CONTRACT_OK"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P4-B01.json",
+    ".codex/handoff/platform-v0.1-release-handoff.json",
+    ".gitattributes",
+    "CHANGELOG.md",
+    "docs/review/GOAL05_RELEASE_AUTHORITY.md",
+    "docs/review/GOAL05_RELEASE_NOTES.md",
+    "reports/platform-v0.1/CHECKSUMS.sha256",
+    "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
+    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
+    "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
+    "reports/platform-v0.1/RELEASE_MANIFEST.json",
+    "reports/platform-v0.1/TEST_EVIDENCE.json",
+    "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+    "scripts/release/build-source-archive.mjs",
+    "scripts/release/generate-release-metadata.mjs",
+    "scripts/release/release-metadata-lib.mjs",
+    "scripts/release/verify-release-metadata.mjs",
+    "scripts/release/verify-release-metadata.test.mjs",
+    "scripts/release/verify-source-archive.mjs"
+  ],
+  "assertions": {
+    "qualifiedSourceCommitIsExistingAncestor": true,
+    "failedCandidateRemovedFromCurrentAuthority": true,
+    "twoLayerAuthorityNonCircular": true,
+    "futureMergeCommitNotInvented": true,
+    "tagAndMetadataCommitExternallyRecorded": true,
+    "formalQualificationPendingActions": true,
+    "localResultsNotFormalAuthority": true,
+    "failedCiReferenceRejected": true,
+    "nonAncestorRejected": true,
+    "productDiffAfterQualificationRejected": true,
+    "fourOciDigestPlaceholdersSchemaValid": true,
+    "compatibilityMatrixRegenerated": true,
+    "knownLimitationsPreserved": true,
+    "testEvidenceRegenerated": true,
+    "checksumsFresh": true,
+    "sbomFresh": true,
+    "sourceArchiveReproducible": true,
+    "sourceArchiveTaskStateAbsent": true,
+    "sourceArchiveWorkspaceStateAbsent": true,
+    "sourceArchiveSecretScanPassed": true,
+    "formalReleaseReportsPreservedByExportRules": true,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}

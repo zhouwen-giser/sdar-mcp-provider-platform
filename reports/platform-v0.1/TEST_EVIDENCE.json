@@ -1,66 +1,89 @@
 {
-  "schemaVersion": "2.0",
-  "goalId": "goal-04-production-lifecycle-closure",
+  "schemaVersion": "3.0",
   "platformVersion": "0.1.0",
   "runtimeVersion": "2.0.0-rc.1",
-  "candidateSourceCommit": "349fb8339ead8760f158ac8b05ad8d01e4825199",
-  "generatedAt": "2026-07-29T05:52:00Z",
-  "environment": {
-    "node": "v22.23.1",
-    "pnpm": "11.13.1",
-    "postgresql": "17",
-    "pm2": "7.0.3",
-    "database": "<local-postgres>",
-    "secretsRedacted": true
+  "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+  "generatedAt": "2026-07-29T18:49:38+08:00",
+  "qualification": {
+    "status": "pending_actions_freeze",
+    "pendingFreeze": true,
+    "candidateWorkflow": {
+      "workflow": ".github/workflows/release-candidate.yml",
+      "headSha": "945df66df2f2a21d7a2c59e732535fe78d02744f",
+      "runId": null,
+      "runUrl": null
+    },
+    "requiredJobs": [
+      {
+        "name": "static",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-ci",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "pms-api-production",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "worker-pm2-production",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "worker-lease-safety",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "provider-regression",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "platform-e2e",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-compose",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-credential-isolation",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "release-artifacts",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "release-metadata",
+        "status": "pending",
+        "jobUrl": null
+      }
+    ]
   },
-  "taskSummaries": {
-    "originalGoal2": "50/50",
-    "pmsApiFix": "6/6",
-    "goal03": "7/7",
-    "goal04": "9/9"
+  "supportingLocalEvidence": {
+    "authority": "non-release-supporting-only",
+    "tasksPassedBeforeFreeze": 8,
+    "releaseArtifactReport": "reports/ci/release-artifacts.json",
+    "priorGoalStatesChanged": false
   },
-  "terminalGates": [
-    {
-      "command": "TEST_DATABASE_URL=<local-postgres> pnpm verify:v2",
-      "status": "PASSED",
-      "result": "frozen 74/74; unit 123; contract 18; integration 212; recovery 9; security 42; E2E 8; Runtime image reproducible"
-    },
-    {
-      "command": "TEST_DATABASE_URL=<local-postgres> pnpm verify:platform",
-      "status": "PASSED",
-      "result": "static, migrations, configuration, PMS, Worker, Web, PM2, Registry, security, fault and controlled platform E2E passed"
-    },
-    {
-      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-api-production",
-      "status": "PASSED",
-      "result": "1 file, 3 tests"
-    },
-    {
-      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:worker-pm2-production",
-      "status": "PASSED",
-      "result": "real PostgreSQL and PM2 production lifecycle, recovery, Registry consumer, fencing and cleanup passed"
-    },
-    {
-      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:provider-platform-{ugv,npc,ha}",
-      "status": "PASSED_CONTROLLED",
-      "result": "2 tests per controlled Provider regression"
-    }
-  ],
-  "ciQualificationJobs": [
-    "static",
-    "runtime-ci",
-    "pms-api-production",
-    "worker-pm2-production",
-    "provider-regression",
-    "platform-e2e",
-    "runtime-compose"
-  ],
   "qualificationBoundary": {
-    "controlledSdarInterop": "PASSED",
-    "externalSdarInterop": "BLOCKED_EXTERNAL",
-    "realUgv": "UNQUALIFIED",
-    "realNpcTank": "UNQUALIFIED",
-    "realHomeAssistant": "UNQUALIFIED",
+    "controlledSdarInterop": "qualified",
+    "externalSdarInterop": "not-qualified",
+    "realUgv": "not-qualified",
+    "realNpcTank": "not-qualified",
+    "realHomeAssistant": "not-qualified",
     "certificationClaim": "none"
-  }
+  },
+  "secretsRedacted": true
 }

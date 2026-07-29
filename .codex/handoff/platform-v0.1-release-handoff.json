@@ -1,24 +1,9 @@
 {
-  "schemaVersion": "3.0",
-  "product": "SDAR MCP Provider Platform",
-  "package": "sdar-mcp-provider-platform",
+  "schemaVersion": "2.0",
   "platformVersion": "0.1.0",
-  "runtimeComponent": {
-    "package": "@sdar/runtime",
-    "version": "2.0.0-rc.1"
-  },
+  "runtimeVersion": "2.0.0-rc.1",
   "qualifiedSourceCommit": "945df66df2f2a21d7a2c59e732535fe78d02744f",
-  "generatedAt": "2026-07-29T18:49:38+08:00",
-  "releaseAuthority": {
-    "model": "two-layer",
-    "qualifiedSource": "qualifiedSourceCommit",
-    "releaseMetadata": {
-      "tag": "platform-v0.1.0",
-      "commit": null,
-      "status": "pending-external-publication",
-      "recordingLocation": "GitHub Release and protected tag"
-    }
-  },
+  "releaseManifest": "reports/platform-v0.1/RELEASE_MANIFEST.json",
   "qualification": {
     "status": "pending_actions_freeze",
     "pendingFreeze": true,
@@ -86,13 +71,11 @@
       }
     ]
   },
-  "sourceArchive": {
-    "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
-    "digest": {
-      "algorithm": "sha256",
-      "value": "3858d750e4474f28e067344241af676f9ee2c22c45f1f7cf56d16ea5a75c8ef4",
-      "status": "generated"
-    }
+  "releaseMetadata": {
+    "tag": "platform-v0.1.0",
+    "commit": null,
+    "status": "pending-external-publication",
+    "recordingLocation": "GitHub Release and protected tag"
   },
   "ociArtifacts": [
     {
@@ -131,22 +114,6 @@
         "status": "pending-tag-workflow"
       }
     }
-  ],
-  "releaseFiles": [
-    "CHANGELOG.md",
-    "package.json",
-    "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
-    "docs/operations/PLATFORM_V0_1_UPGRADE.md",
-    "docs/operations/PMS_WEB.md",
-    "docs/review/GOAL05_RELEASE_AUTHORITY.md",
-    "docs/review/GOAL05_RELEASE_NOTES.md",
-    "reports/platform-v0.1/TEST_EVIDENCE.json",
-    "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
-    "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
-    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
-    "reports/platform-v0.1/CHECKSUMS.sha256",
-    "reports/sbom/runtime-v1.cdx.json",
-    ".codex/handoff/platform-v0.1-release-handoff.json"
   ],
   "qualificationBoundary": {
     "controlledSdarInterop": "qualified",

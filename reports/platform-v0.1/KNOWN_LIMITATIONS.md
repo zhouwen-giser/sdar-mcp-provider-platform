@@ -3,16 +3,12 @@
 - External SDAR infrastructure was unavailable. Controlled interoperability is
   not an external Interop Certified result.
 - Real UGV and NPC Tank devices and ISR MQTT feeds were unavailable.
-- An independently managed Home Assistant deployment and physical climate
-  resources were unavailable.
-- PM2 is a single-host Runtime process adapter. Platform 0.1.0 does not provide
-  Kubernetes Runtime orchestration, cross-host scheduling, a multi-replica
-  gateway, or arbitrary remote command execution.
-- The delivered production Worker uses one Runtime replica per deployment.
-- PostgreSQL backup, point-in-time recovery, managed-service qualification,
-  multi-region failover, and production capacity qualification remain operator
-  responsibilities.
-- Database rollback migrations are not supported. Recovery is forward-only with
-  application rollback only where schema compatibility permits.
-- Branch-protection Required Checks must be configured by a repository
-  administrator using the exact names in `docs/review/GOAL04_CI_MATRIX.md`.
+- Independently managed Home Assistant and physical climate resources were unavailable.
+- PM2 is single-host only. This release has no Kubernetes Runtime orchestration,
+  cross-host scheduling, multi-replica gateway, or arbitrary remote commands.
+- The production Worker runs one Runtime replica per deployment.
+- PostgreSQL backup, PITR, managed-service, multi-region, and production capacity
+  qualification remain operator responsibilities.
+- Database rollback migrations are unsupported; recovery is forward-only.
+- The release remains pending until one exact-SHA GitHub Actions run, required
+  repository protection, independent approval, and explicit Release Approval pass.
