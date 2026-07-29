@@ -130,13 +130,40 @@ export function RuntimeIncidentsPage({
     (source: ReturnType<typeof usePmsWebDataSource>) => source.incidents(),
     [],
   );
+  const queryDeployments = useCallback(
+    (dataSource: ReturnType<typeof usePmsWebDataSource>) => dataSource.deployments(),
+    [],
+  );
   const incidents = useDataQuery(query);
-  if (incidents.status === "loading") return <Skeleton lines={6} />;
+  const deployments = useDataQuery(queryDeployments);
+  if (incidents.status === "loading" || deployments.status === "loading")
+    return <Skeleton lines={6} />;
   if (incidents.status === "error")
-    return <ErrorState code={incidents.error.message} impact="Incident 投影不可用。" action="切换场景" />;
+    return (
+      <ErrorState
+        code={incidents.error.message}
+        impact="Incident 投影不可用。"
+        action="切换场景"
+      />
+    );
+  if (deployments.status === "error")
+    return (
+      <ErrorState
+        code={deployments.error.message}
+        impact="关联 RuntimeDeployment 投影不可用。"
+        action="切换场景"
+      />
+    );
   const incident = incidentId === undefined
     ? undefined
     : incidents.data.find((item) => item.incidentId === incidentId);
+  const affectedDeployment =
+    incident === undefined
+      ? undefined
+      : deployments.data.find((item) => item.deploymentId === incident.deploymentId);
+  const recovered =
+    affectedDeployment?.observedState === "ACTIVE" &&
+    affectedDeployment.observedRevision === affectedDeployment.desiredRevision;
   if (incidentId !== undefined && incident === undefined)
     return (
       <ErrorState
@@ -160,6 +187,7 @@ export function RuntimeIncidentsPage({
                 variant="primary"
                 disabled={
                   incident.status === "CLOSED" ||
+                  !recovered ||
                   scenario === "read-only" ||
                   scenario === "permission-denied"
                 }
@@ -188,11 +216,15 @@ export function RuntimeIncidentsPage({
           <>
             <div className="job-state-grid">
               <section><small>Severity</small><p>{incident.severity}</p></section>
+              <section><small>Status</small><p>{incident.status}</p></section>
               <section><small>Owner</small><p>{incident.owner}</p></section>
               <section><small>Deployment</small><button className="table-link" onClick={() => navigate(`/runtime/deployments/${incident.deploymentId}`)}>{incident.deploymentId}</button></section>
               <section><small>Related Job</small><button className="table-link" onClick={() => navigate("/operations/jobs")}>{incident.jobId}</button></section>
             </div>
             <Timeline items={incident.timeline.map((label) => ({ label, meta: "Incident timeline" }))} />
+            {!recovered && incident.status !== "CLOSED" ? (
+              <p className="prototype-note">Deployment 尚未恢复为 ACTIVE，关闭操作保持禁用。</p>
+            ) : null}
             <div className="recovery-path">
               <span>Incident {incident.incidentId}</span>
               <span>→ Deployment {incident.deploymentId}</span>

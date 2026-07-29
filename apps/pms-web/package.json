@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "test": "vitest run",
+    "test": "vitest run test",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "pnpm typecheck && vite build",
     "preview": "vite preview --host 127.0.0.1"
@@ -15,6 +16,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
