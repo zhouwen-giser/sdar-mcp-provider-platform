@@ -72,6 +72,15 @@ PMS API credential descriptors remain explicit per principal. Adding or rotating
 credential requires an atomic credential-tree and API-descriptor update followed by a PMS API
 restart. See [ADR 0012](../adr/0012-instance-scoped-runtime-control-plane-credentials.md).
 
+The production qualification gate exercises two independent Provider/Deployment/Instance
+identities. It first proves that a missing instance token fails before PM2 start, then converges
+both deployments through configuration pull/watch/acknowledgement, registration/heartbeat,
+Catalog/Registry publication, and `ACTIVE`. Each token is tested against all five endpoints of the
+other identity and must receive `403`. API and Worker restarts must preserve the mapping, while a
+single Runtime crash or token rotation must leave its peer process unchanged. The generated
+`reports/evidence/G5-P1-B02-runtime-credential-isolation.json` contains outcomes and versions only;
+it never contains token values or reversible token material.
+
 Inline database URLs, provisioning credentials, Runtime secrets/config tokens, and PM2 secrets are
 rejected. File contents are consumed only by their owning adapters and are never included in health
 state, errors, Audit, or evidence.

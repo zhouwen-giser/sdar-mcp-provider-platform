@@ -20,7 +20,7 @@ const result = spawnSync(process.execPath, ["--import", "tsx", testFile], {
   cwd: process.cwd(),
   env: process.env,
   stdio: "inherit",
-  timeout: 240_000,
+  timeout: 420_000,
 });
 
 if (result.error) {
