@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, resolve } from "node:path";
@@ -55,6 +56,26 @@ for (const volume of lines(
   command("docker", ["volume", "rm", "-f", volume], true);
 }
 command("docker", ["rm", "-f", `${project}-runtime-extract`], true);
+if (existsSync(fixtureRoot) && process.getuid !== undefined && process.getgid !== undefined) {
+  command(
+    "docker",
+    [
+      "run",
+      "--rm",
+      "--user",
+      "0:0",
+      "--volume",
+      `${fixtureRoot}:/fixtures`,
+      "--entrypoint",
+      "chown",
+      "sdar/runtime:0.1.0-rc",
+      "-R",
+      `${String(process.getuid())}:${String(process.getgid())}`,
+      "/fixtures",
+    ],
+    true,
+  );
+}
 await rm(fixtureRoot, { recursive: true, force: true });
 process.stdout.write("RELEASE_ARTIFACT_CI_CLEANUP_OK\n");
 

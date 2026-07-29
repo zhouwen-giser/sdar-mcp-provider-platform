@@ -32,6 +32,7 @@ const RELEASE_PATHS = [
   /^\.github\/workflows\/(?:ci|release-candidate|release)\.yml$/,
   /^scripts\/release\//,
   /^scripts\/generate-sbom\.mjs$/,
+  /^scripts\/(?:run-release-artifact-smoke|cleanup-release-artifact-ci)\.mjs$/,
   /^scripts\/run-worker-pm2-production-gate\.mjs$/,
   /^tests\/worker-pm2-production\/run-production-lifecycle\.mjs$/,
   /^package\.json$/,

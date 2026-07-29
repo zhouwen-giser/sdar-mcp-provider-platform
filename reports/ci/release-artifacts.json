@@ -1,25 +1,25 @@
 {
   "schemaVersion": "1.0",
   "status": "pass",
-  "revision": "88590eb896fedf5c41db6d043aad44de795d8595",
+  "revision": "c98be12a59920764afd9da69ef2f457691277808",
   "artifacts": {
     "runtime": {
       "image": "sdar/runtime:0.1.0-rc",
-      "imageId": "sha256:08d4204b4437109543ede0d819e926e49faedf980cfa001ee24478cfbaa27554",
-      "digest": "sdar/runtime@sha256:08d4204b4437109543ede0d819e926e49faedf980cfa001ee24478cfbaa27554",
-      "sizeBytes": 101358304,
+      "imageId": "sha256:6bc8949f87afef872f3f44a4f69f70826ca46ae5a202173aa8eca3d43f361ad3",
+      "digest": "sdar/runtime@sha256:6bc8949f87afef872f3f44a4f69f70826ca46ae5a202173aa8eca3d43f361ad3",
+      "sizeBytes": 101358707,
       "uid": "node",
       "labels": {}
     },
     "api": {
       "image": "sdar/pms-api:0.1.0-rc",
-      "imageId": "sha256:23058f6dfd84d7ece955c0dc46c5cf535468a5ed79464d430110794c364c4409",
-      "digest": "sdar/pms-api@sha256:23058f6dfd84d7ece955c0dc46c5cf535468a5ed79464d430110794c364c4409",
-      "sizeBytes": 102084471,
+      "imageId": "sha256:8009c0f8dcd3a6a53885f4692a91a4717e1e8464c800009386f10d05717322ca",
+      "digest": "sdar/pms-api@sha256:8009c0f8dcd3a6a53885f4692a91a4717e1e8464c800009386f10d05717322ca",
+      "sizeBytes": 102084904,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "88590eb896fedf5c41db6d043aad44de795d8595",
+        "org.opencontainers.image.revision": "c98be12a59920764afd9da69ef2f457691277808",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management API",
         "org.opencontainers.image.version": "0.1.0"
@@ -27,13 +27,13 @@
     },
     "worker": {
       "image": "sdar/pms-worker:0.1.0-rc",
-      "imageId": "sha256:eb6955201b04b62031535751e6cc2811d2576e4388de018fcfc0e9ed1748bbfb",
-      "digest": "sdar/pms-worker@sha256:eb6955201b04b62031535751e6cc2811d2576e4388de018fcfc0e9ed1748bbfb",
-      "sizeBytes": 102088164,
+      "imageId": "sha256:465696888a7b8b8ec0f9d994c7d00319c9b05b057c436691dabe0322c113769d",
+      "digest": "sdar/pms-worker@sha256:465696888a7b8b8ec0f9d994c7d00319c9b05b057c436691dabe0322c113769d",
+      "sizeBytes": 102088597,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "88590eb896fedf5c41db6d043aad44de795d8595",
+        "org.opencontainers.image.revision": "c98be12a59920764afd9da69ef2f457691277808",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Worker",
         "org.opencontainers.image.version": "0.1.0"
@@ -41,13 +41,13 @@
     },
     "web": {
       "image": "sdar/pms-web:0.1.0-rc",
-      "imageId": "sha256:082fc9d9463e5576933c0ec7e9d7f0e73b9fc60755392533426eed26bf696305",
-      "digest": "sdar/pms-web@sha256:082fc9d9463e5576933c0ec7e9d7f0e73b9fc60755392533426eed26bf696305",
-      "sizeBytes": 79927393,
+      "imageId": "sha256:063be04a6e60560395c08e958669939b680325c90a1ca8f04525554994250b74",
+      "digest": "sdar/pms-web@sha256:063be04a6e60560395c08e958669939b680325c90a1ca8f04525554994250b74",
+      "sizeBytes": 79927387,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "88590eb896fedf5c41db6d043aad44de795d8595",
+        "org.opencontainers.image.revision": "c98be12a59920764afd9da69ef2f457691277808",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Web",
         "org.opencontainers.image.version": "0.1.0"

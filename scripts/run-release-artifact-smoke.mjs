@@ -34,6 +34,7 @@ try {
     ]);
   }
   await createFixtures();
+  assignFixtureOwnershipToRuntimeUser();
   try {
     command(
       "docker",
@@ -259,6 +260,42 @@ function redact(value) {
 
 async function secret(path, value) {
   await writeFile(path, value, { mode: 0o600 });
+}
+
+function assignFixtureOwnershipToRuntimeUser() {
+  const uid = command("docker", [
+    "run",
+    "--rm",
+    "--entrypoint",
+    "id",
+    images.runtime,
+    "-u",
+    "node",
+  ]).trim();
+  const gid = command("docker", [
+    "run",
+    "--rm",
+    "--entrypoint",
+    "id",
+    images.runtime,
+    "-g",
+    "node",
+  ]).trim();
+  assert(/^[1-9][0-9]*$/.test(uid) && /^[1-9][0-9]*$/.test(gid), "RUNTIME_USER_INVALID");
+  command("docker", [
+    "run",
+    "--rm",
+    "--user",
+    "0:0",
+    "--volume",
+    `${fixtureRoot}:/fixtures`,
+    "--entrypoint",
+    "chown",
+    images.runtime,
+    "-R",
+    `${uid}:${gid}`,
+    "/fixtures",
+  ]);
 }
 
 function compose(...args) {
