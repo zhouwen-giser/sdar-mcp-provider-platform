@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "goalId": "goal-02",
+  "generatedAt": "2026-07-26T19:42:18Z",
+  "sourceCommit": "1a710c38ba2ae3c549fac165c4ee9cc8d9d79fc7",
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "pm2": "7.0.3",
+    "database": "<local-postgres>",
+    "secretsRedacted": true
+  },
+  "terminalGate": {
+    "command": "TEST_DATABASE_URL=<local-postgres> pnpm verify:platform",
+    "exitCode": 0,
+    "status": "PASSED",
+    "source": "reports/platform-v0.1/TEST_EVIDENCE.json"
+  },
+  "qualificationLimits": [
+    "External SDAR was unavailable; no external Interop Certified claim is made.",
+    "Provider system tests use controlled components; real-resource qualification remains pending."
+  ]
+}

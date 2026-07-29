@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "goalId": "goal-01",
+  "generatedAt": "2026-07-26T14:22:00Z",
+  "historicalGateStatus": "PASSED",
+  "goal2ReverificationStatus": "PASSED_WITH_RECORDED_ENVIRONMENT_GAP",
+  "sourceCommit": "01257ac846d541a4402548b1a82595bdb6d0b31a",
+  "handoffImplementationCommit": "459c3f9c881816066dfc887e50d7a309733887f2",
+  "terminalHandoffCommit": "604bd09",
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "databaseConnection": "<local-postgres>",
+    "secretsRedacted": true
+  },
+  "historicalEvidence": [
+    {
+      "gate": "migration-isolation",
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:migration-isolation",
+      "status": "PASSED",
+      "result": "1 file, 1 test",
+      "source": "reports/evidence/migration-isolation.json and .codex/execution-log.md"
+    },
+    {
+      "gate": "pms-migrations",
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations",
+      "status": "PASSED",
+      "result": "1 file, 4 tests",
+      "source": ".codex/handoff/goal1-delivery-report.md"
+    },
+    {
+      "gate": "pms-config-e2e",
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-config-e2e",
+      "status": "PASSED",
+      "result": "1 file, 8 tests",
+      "source": ".codex/handoff/goal1-delivery-report.md"
+    }
+  ],
+  "goal2Reverification": [
+    {
+      "command": "python3 .codex/task-package/scripts/verify_goal1_handoff.py --repo .",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "Goal 1 handoff valid",
+      "context": "clean Goal 1 worktree before Goal 2 activation"
+    },
+    {
+      "command": "pnpm protocol:check",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "11 schemas, 74 frozen conformance cases, 38 locked files"
+    },
+    {
+      "command": "pnpm test:provider-packages",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "2 files, 13 tests; three built-in packages self-checked"
+    },
+    {
+      "command": "pnpm test:config-compat",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "1 file, 8 tests; runtime configuration contract 8 files, 36 tests"
+    },
+    {
+      "command": "pnpm exec vitest run tests/runtime-config-e2e",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "1 file, 3 tests"
+    },
+    {
+      "command": "pnpm test:unit",
+      "exitCode": 0,
+      "status": "PASSED",
+      "result": "30 files, 123 tests"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:migration-isolation",
+      "exitCode": 1,
+      "status": "ENVIRONMENT_UNAVAILABLE",
+      "result": "ECONNREFUSED at the configured local PostgreSQL endpoint; no assertions ran"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations",
+      "exitCode": 1,
+      "status": "ENVIRONMENT_UNAVAILABLE",
+      "result": "ECONNREFUSED at the configured local PostgreSQL endpoint; suite setup did not run"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:pms-config-e2e",
+      "exitCode": 1,
+      "status": "ENVIRONMENT_UNAVAILABLE",
+      "result": "ECONNREFUSED at the configured local PostgreSQL endpoint; suite setup did not run"
+    }
+  ],
+  "qualificationLimits": [
+    "Current database-dependent smoke was not re-certified because the local PostgreSQL service was unavailable.",
+    "Real UGV, NPC Tank, and Home Assistant resources remain pending; component and mock evidence is not real-resource qualification."
+  ]
+}

@@ -106,3 +106,298 @@ Adding the new `packages/runtime-config-client` workspace requires pnpm to recor
 existing shared Runtime Configuration Contract. Update only the generated workspace importer in
 `pnpm-lock.yaml`. This minimal out-of-range metadata change is required for the mandatory filtered
 test and frozen installation; it introduces no external dependency or later P6 behavior.
+
+## 2026-07-26 — G2-P1-B01 RuntimeDeployment workspace lock importer
+
+Adding the dependency-free `packages/runtime-deployment` workspace makes pnpm's dependency-state
+check invoke installation unless the workspace has an importer in `pnpm-lock.yaml`. Add only the
+empty `packages/runtime-deployment: {}` importer. This minimal out-of-range lock metadata is needed
+for the card's mandatory filtered test and frozen installation; it adds no dependency or later
+Runtime process, persistence, PM2, or provisioning capability.
+
+## 2026-07-26 — G2-P1-B03 RuntimeDeployment migration constraint coverage
+
+The card permits the new PMS SQL and schema documentation, while its completion criteria require
+constraint coverage and the mandatory existing PMS migration suite hard-codes both the migration
+list and table boundary. Update only `tests/pms-migrations/pms-migrations.test.ts` outside the
+allowlist to recognize append-only migration `005`, the three new control-plane tables, and to
+exercise Provider FK, desired replica consistency, PM2-name uniqueness, stable instance linkage,
+action idempotency, and an upgrade from the exact migration-004 schema while preserving existing
+Provider rows. This does not weaken or skip any existing assertion.
+
+## 2026-07-26 — G2-P1-B04 RuntimeDeployment persistence workspace dependency
+
+The persistence adapter now maps the pure `@sdar/runtime-deployment` aggregate and process
+projection. Add that existing workspace package to
+`packages/pms-persistence-postgres/package.json` and only its generated workspace link to
+`pnpm-lock.yaml`. The package remains an infrastructure adapter depending inward on a pure domain
+package; no PM2 or PostgreSQL type enters the RuntimeDeployment domain.
+
+## 2026-07-26 — G2-P1-B05 application workspace and mandatory test wiring
+
+RuntimeDeployment application use cases depend on the existing pure domain workspace, so add its
+workspace link to `packages/pms-application` and the generated lock importer. The mandatory root
+`pnpm test:pms` command previously listed explicit files and would omit the new use-case suite;
+append that real suite to the command. These are minimal wiring changes, not PM2 integration or an
+empty success script.
+
+## 2026-07-26 — G2-P2-B02 DatabaseProfile environment scope and migration verification
+
+The B02 acceptance criterion requires DatabaseProfile persistence to be scoped by both Provider and
+Environment, while the B01 card listed Provider-specific naming but did not explicitly name an
+environment field. Add `environment` to the already delivered pure DatabaseProfile value and its
+focused test as the minimum dependency correction; do not introduce provisioning behavior there.
+
+The mandatory root `test:pms-migrations` suite also hard-codes the append-only migration list and
+control-plane table boundary outside this card's allowlist. Update only that existing test to
+recognize migration `006`, validate its Provider/Environment uniqueness, SecretRef-only columns,
+status/error constraints, and audit reference. These changes strengthen existing verification and
+do not relax or skip prior migration assertions.
+
+## 2026-07-26 — G2-P2-B03 provisioning Port export and executable contract
+
+The card limits production code to `packages/runtime-deployment/src/ports/**`, but the Port would
+not be consumable through the package root and the mandatory package command only discovers its
+existing `test/**` directory. Add one root index export and one focused Port contract test outside
+the allowlist. These are minimal public wiring and verification changes: they add no PostgreSQL
+driver, Secret resolver, network behavior, or Provisioner implementation.
+
+## 2026-07-26 — G2-P2-B04 Provisioner workspace lock importer
+
+The new `packages/postgres-provisioner` workspace consumes the existing pure Provisioner Port and
+the repository's existing `pg` version. Add only its generated workspace importer to
+`pnpm-lock.yaml`. This is required for filtered tests and frozen installation; it adds no new
+external package version or authority.
+
+## 2026-07-26 — G2-P2-B05 Secret Store workspace lock importer
+
+The dependency-free `packages/secret-store` workspace requires an empty importer in
+`pnpm-lock.yaml` for frozen workspace validation. Add only that generated importer; the adapter uses
+Node filesystem primitives and introduces no external dependency.
+
+## 2026-07-26 — G2-P2-B06 existing Runtime migration engine evidence and timeout
+
+The delivered Runtime engine owns advisory locking and checksum history, but returns no per-file
+result and waits indefinitely for the lock. The B06 card explicitly requires using that engine,
+complete version evidence, timeout evidence, and concurrent single execution. Extend
+`runMigrations` compatibly with an optional positive statement timeout and a returned immutable
+per-file `applied`/`already_applied` result; existing callers may continue ignoring the return.
+Update its focused unit test and add only the new workspace lock importer. Do not alter any
+Migration SQL, set mapping, version key, checksum rule, transaction boundary, or rollback behavior.
+
+## 2026-07-26 — G2-P3-B01 infrastructure Port package export
+
+The card limits implementation to `packages/runtime-deployment/src/ports/**`, but later composite
+adapters must consume the infrastructure-neutral Port through the workspace package contract. Add
+only the corresponding export line to `packages/runtime-deployment/src/index.ts`. This minimal
+out-of-range wiring exposes types and validation only; it adds no PM2 dependency, command surface,
+process implementation, network listener, or infrastructure authority.
+
+## 2026-07-26 — G2-P3-B02 PM2 adapter workspace bootstrap
+
+The card's source allowlist assumes `packages/pm2-runtime-adapter` exists, but the workspace has no
+such package and the mandatory filtered test cannot resolve it. Add only the minimal package
+manifest, root source export, focused Bootstrap renderer test, and generated lock importer outside
+`src/bootstrap/**`. The package consumes the existing infrastructure-neutral type contract and
+adds no PM2 library, process control, arbitrary environment, script, cwd, or command capability.
+
+## 2026-07-26 — G2-P3-B03 Process Manager export and Fake API contract
+
+The card restricts implementation to `src/pm2/**`; expose the manager through the package root and
+add a focused Fake JavaScript-API contract test so the mandatory filtered command exercises
+namespace denial, idempotency, Fork Mode, error mapping, and disconnect cleanup. The adapter takes
+an injected callback-compatible PM2 API rather than adding a shell command or an unneeded external
+dependency in this task. These minimal out-of-range files do not claim real PM2 certification.
+
+## 2026-07-26 — G2-P3-B04 release resolver export and filesystem contract
+
+The release implementation is correctly contained in `src/releases/**`; add only its package-root
+export and a focused temporary-filesystem test outside the allowlist so the mandatory filtered
+command proves traversal, symlink escape, unknown version, file mode, and fixed-entry behavior.
+The test creates no executable command surface and does not execute the resolved Runtime entry.
+
+## 2026-07-26 — G2-P3-B07 Health Probe export and HTTP contract
+
+The card correctly limits implementation to `src/health/**`; add only its package-root export and
+focused injected-fetch test outside the allowlist so the mandatory package gate exercises fixed
+loopback endpoints, timeout, schema validation, and dependency classification. The tests perform
+no external network call and do not claim real Runtime or PM2 qualification.
+
+## 2026-07-26 — G2-P3-B12 built Runtime workspace import resolution
+
+The real PM2 E2E starts the fixed production entry `dist/apps/runtime/src/main.js` and exposed that
+two compiled Runtime Config Client files retain a bare workspace import for
+`@sdar/runtime-configuration-contract`. The source workspace has a package-local pnpm link, but the
+compiled `dist/packages/runtime-config-client` tree does not, so Node fails before Runtime
+initialization. Change only those two imports to the equivalent repository-relative contract entry,
+which TypeScript preserves as a resolvable relative path in `dist`. This is the minimum out-of-range
+runtime dependency fix needed to execute the mandated built Runtime; it changes no configuration,
+hashing, authority, PM2, protocol, or secret behavior.
+
+## 2026-07-26 — G2-P4-B01 Runtime Registration workspace lock importer
+
+The new dependency-free `packages/runtime-registration` workspace requires an empty importer in
+`pnpm-lock.yaml` for the mandatory filtered test and frozen workspace validation. Add only that
+generated importer outside the card allowlist. It introduces no external dependency, persistence,
+API, Provider creation capability, heartbeat transport, or later Catalog/Registry behavior.
+
+## 2026-07-26 — G2-P4-B05 Catalog migration regression expectation
+
+The existing PMS migration suite freezes the exact append-only migration and resulting table lists
+and requires every migration to be safe when applied repeatedly. Append only
+`007_catalog_snapshot.sql`; update the suite's two expected lists as the minimum out-of-range test
+maintenance. Do not alter migrations `001` through `006`. The new migration uses idempotent DDL and
+an immutable-history trigger, while the active pointer remains the only mutable Catalog relation.
+
+## 2026-07-26 — G2-P4-B06 Registry migration regression expectation
+
+Registry persistence appends `008_registry_snapshot.sql` without modifying migrations `001` through
+`007`. Update only the existing PMS migration suite's exact file and table expectations as the
+minimum out-of-range maintenance needed to preserve the repeat-application and Runtime-table
+isolation gate.
+
+## 2026-07-26 — G2-P4-B07 Registry API E2E command wiring
+
+The mandatory `pnpm test:registry-e2e` command does not exist. Add one root script that requires the
+local PostgreSQL test URL and runs the explicit Registry API E2E suite. This minimum out-of-range
+verification wiring is not an empty success shim and does not add Registry behavior outside the
+card's PMS API implementation.
+
+## 2026-07-26 — G2-P4-B08 Catalog/Registry E2E command wiring
+
+The mandatory `pnpm test:catalog-registry-e2e` command does not exist. Add one root script that
+requires the local PostgreSQL test URL and runs only `tests/catalog-registry-e2e`. This is the
+minimum out-of-range command wiring needed to execute the task-owned integration suite; it is not
+an empty or mocked-success command.
+
+## 2026-07-26 — G2-P5-B01 UGV platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-ugv` command does not exist. Add one root script that
+requires the local PostgreSQL URL and runs only the task-owned UGV platform integration directory.
+The suite starts the real local UGV Adapter and Runtime but uses Mock device resources, so its
+evidence remains component/platform integration and does not claim real-resource certification.
+
+## 2026-07-27 — G2-P5-B02 NPC Tank platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-npc` command does not exist. Add one root script that
+requires local PostgreSQL and runs only the task-owned NPC Tank platform integration directory. The
+suite uses the real local NPC Tank Adapter and Runtime with a Mock device client; qualification
+therefore remains component passed and real-resource pending.
+
+## 2026-07-27 — G2-P5-B03 authoritative resource-binding projection
+
+The Climate Adapter manifest contains the required `ARGUMENT_REFERENCE` resource binding, but the
+existing Runtime Operation Registry omitted it from `tools/list`. Catalog discovery cannot infer
+this authoritative field from Provider Package data. Add only the corresponding
+`io.sdar/resourceBinding` Tool metadata projection in Operation Registry, preserving all frozen
+Task fields and behavior. The task-owned platform E2E proves the binding reaches Catalog and
+Registry.
+
+## 2026-07-27 — G2-P5-B03 Home Assistant platform E2E command wiring
+
+The mandatory `pnpm test:provider-platform-ha` command does not exist. Add one root script requiring
+local PostgreSQL and running only the task-owned Home Assistant platform integration directory.
+The suite uses a local Fake Home Assistant service, so component status may be proven while
+real-resource qualification remains pending.
+
+# Goal 2 — Runtime Governance and Delivery
+
+## G2-P5-B05 — Ignore nested application build output
+
+- **Decision:** ESLint ignores `**/dist/**`, not only the repository-root `dist/**`.
+- **Reason:** `@sdar/pms-web` produces its static deployment artifact under
+  `apps/pms-web/dist`. Linting generated JavaScript as source caused browser
+  globals to fail the repository Node-oriented lint rules after the required
+  build command.
+- **Scope:** Tooling only. Source lint coverage remains unchanged and generated
+  output is still verified by the PMS Web build command.
+
+## G2-P5-B07 — Expose mandatory platform test gates
+
+- **Decision:** Add the two task-mandated root scripts `test:platform-security`
+  and `test:fault-injection`, each running only its task-owned test directory.
+- **Reason:** No semantically equivalent existing script selected these new
+  platform suites. The scripts fail when tests fail and are not empty
+  placeholders.
+- **Scope:** Root command routing only; test implementation and evidence remain
+  in the task's allowed directories.
+
+## G2-P5-B08 — Controlled SDAR Interop gate
+
+- **Decision:** Add the task-mandated `test:sdar-interop` script and require an
+  explicit `TEST_DATABASE_URL`.
+- **Reason:** Controlled Interop starts a real local Runtime, imports a Registry
+  Snapshot, and exercises the frozen MCP Task/notification protocol against
+  PostgreSQL. It must never silently fall back to an in-memory success.
+- **Evidence boundary:** This proves a controlled SDAR-consumer contract only.
+  External SDAR access remains `BLOCKED_EXTERNAL` and is not certified.
+
+### ResourceBinding NONE normalization
+
+- **Observed contract difference:** gRPC decoding with defaults materializes
+  `resourceIdJsonPointer: ""` for `mode: "NONE"`, while the public Catalog
+  contract requires the pointer to be absent in NONE mode.
+- **Decision:** Normalize only the Runtime tool projection at the Operation
+  Registry boundary. `NONE` publishes `{ "mode": "NONE" }`; argument-reference
+  bindings retain their validated pointer.
+- **Why this cross-range fix is required:** Without normalization, authoritative
+  Runtime `tools/list` output is rejected by the existing Catalog importer, so
+  Registry-based SDAR Interop cannot proceed.
+
+## G2-P5-B09 — Close the PMS Web Audit integration contract
+
+- **Observed gap:** The delivered read-only Audit page called
+  `/api/v1/audit-events`, but PMS API had no matching route.
+- **Decision:** Add a reader-protected, filterable, paginated Audit query route
+  backed by the existing PMS `AuditRepository`. Its public projection omits
+  metadata entirely and exposes only trace identity and timestamp fields.
+- **Why this cross-range fix is required:** Shipping a UI that deterministically
+  returns 404 would fail the V0.1 system acceptance claim. No new database table
+  or write authority is introduced.
+
+### Final platform gate composition
+
+- **Decision:** Add the task-mandated `verify:platform` command and replace the
+  fail-closed `tests/platform-e2e` placeholder with the five delivered system
+  suites: UGV, NPC Tank, Home Assistant, Catalog/Registry, and controlled SDAR
+  Interop.
+- **Reason:** The terminal task requires one reproducible V0.1 gate. The command
+  preserves the existing focused gates and adds formatting, lint, typecheck,
+  build, frozen protocol, SBOM, migration/config compatibility, PMS components,
+  real PM2, security, fault injection, and system E2E checks. It performs no
+  empty or unconditional-success validation.
+
+### Terminal formatting repair
+
+- **Decision:** Apply Prettier-only changes to three previously delivered
+  Markdown files and the migration-isolation evidence JSON.
+- **Reason:** `verify:platform` correctly failed closed at `format:check`.
+  The changes alter neither architecture nor evidence values and are the
+  smallest repair needed to execute the remaining terminal gates.
+
+### Terminal lint repair
+
+- **Decision:** Correct strict-lint findings in previously delivered Goal 2
+  domain, persistence, RuntimeDeployment, and contract-test files.
+- **Reason:** These files passed their focused tests but failed the terminal
+  all-repository lint gate. Repairs are limited to type narrowing, tuple
+  indexing, equivalent Vitest matchers, and removal of a comparison made
+  impossible by a literal type; no runtime authority or protocol behavior is
+  changed.
+
+### V0.1 SBOM refresh
+
+- **Decision:** Regenerate `reports/sbom/runtime-v1.cdx.json` with the existing
+  repository generator.
+- **Reason:** The terminal SBOM check found the artifact stale after Goal 2
+  added production packages and applications. The refreshed CycloneDX document
+  contains 273 production components and passes `pnpm sbom:check`.
+
+### Terminal acceptance record
+
+- **Decision:** Mark the Goal 2 acceptance checklist complete only after the
+  full `pnpm verify:platform` command returned exit code 0, and include the
+  checklist in the terminal delivery commit.
+- **Reason:** The checklist is the Goal-level acceptance authority and must
+  reflect the verified terminal state even though it sits outside the task
+  card's ordinary artifact paths.

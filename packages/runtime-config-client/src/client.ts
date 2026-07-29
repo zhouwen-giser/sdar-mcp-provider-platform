@@ -1,4 +1,4 @@
-import { canonicalSha256 } from "@sdar/runtime-configuration-contract";
+import { canonicalSha256 } from "../../runtime-configuration-contract/src/index.js";
 import { RuntimeConfigClientError } from "./errors.js";
 import type {
   RuntimeConfigCacheArtifact,

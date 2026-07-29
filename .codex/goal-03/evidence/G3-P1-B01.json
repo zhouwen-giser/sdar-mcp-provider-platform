@@ -1,0 +1,43 @@
+{
+  "taskId": "G3-P1-B01",
+  "commitSha": "c51fd3dcaf58786a97273a272720608761ccebdc",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "commands": [
+    "node scripts/verify-docker-workspace-manifests.mjs",
+    "./node_modules/.bin/vitest run tests/tooling/docker-workspace-manifests.test.mjs",
+    "docker compose config -q",
+    "docker compose build --no-cache runtime adapter-typescript",
+    "docker compose up --detach --wait --wait-timeout 120",
+    "curl --fail --silent --show-error http://127.0.0.1:8080/health/ready",
+    "docker compose ps",
+    "docker compose down --volumes",
+    "pnpm typecheck",
+    "pnpm lint",
+    "git diff --check",
+    "python3 .codex/goal-03-task-package/scripts/verify_goal2_state_unchanged.py ."
+  ],
+  "exitCodes": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "testCounts": {
+    "dockerManifestVerifierTests": 2,
+    "workspaceManifestsRequired": 41,
+    "workspaceManifestsStaged": 41,
+    "imagesBuilt": 2,
+    "readyEndpointsChecked": 1
+  },
+  "changedFiles": [
+    "Dockerfile",
+    "scripts/verify-docker-workspace-manifests.mjs",
+    "tests/tooling/docker-workspace-manifests.test.mjs",
+    ".codex/goal-03/evidence/G3-P1-B01.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "notes": [
+    "Original error: Dockerfile attempted to copy missing packages/provider-telemetry/package.json.",
+    "The verifier found and Docker staged 41 real workspace manifests before pnpm install --frozen-lockfile.",
+    "Built image targets: sdar-mcp-provider-platform-runtime:latest and sdar-mcp-provider-platform-adapter-typescript:latest.",
+    "Readiness returned status=ready with database, adapter, adapterManifest, recovery, scheduler, dispatcher, cleaners, publisher, and providerTelemetryIngress ready.",
+    "docker compose down --volumes removed runtime, adapter, PostgreSQL, the default network, and task-owned volumes.",
+    "Runtime image retains USER node and the fixed runtime/adapter CMD boundaries."
+  ]
+}

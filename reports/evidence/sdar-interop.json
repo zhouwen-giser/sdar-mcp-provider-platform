@@ -1,0 +1,34 @@
+{
+  "taskId": "G2-P5-B08",
+  "status": "CONTROLLED_INTEROP_PASS",
+  "externalGate": {
+    "status": "BLOCKED_EXTERNAL",
+    "reason": "No external SDAR endpoint or credential reference is available in the task environment.",
+    "unblock": "Provide an approved SDAR endpoint and scoped credential reference, then rerun the same Registry import and frozen MCP flow against that target."
+  },
+  "controlledEvidence": {
+    "command": "TEST_DATABASE_URL=<redacted> pnpm test:sdar-interop",
+    "consumer": "independent controlled SDAR Registry consumer",
+    "registryImport": true,
+    "serverDiscover": true,
+    "toolsList": true,
+    "synchronousToolResult": true,
+    "toolsCallTask": true,
+    "taskCancelTerminal": true,
+    "taskGetTerminal": true,
+    "taskNotificationTerminal": true,
+    "providerAdapter": "local mock adapter"
+  },
+  "contractDifferences": [
+    {
+      "id": "resource-binding-none-default-pointer",
+      "status": "resolved",
+      "resolution": "Runtime Catalog projection removes the decoder-supplied empty resourceIdJsonPointer when mode is NONE."
+    }
+  ],
+  "certification": {
+    "systemInteropCertified": false,
+    "realResourceAuthenticated": false,
+    "claim": "Controlled component interoperability only; not an external SDAR certification."
+  }
+}

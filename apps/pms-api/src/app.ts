@@ -3,6 +3,7 @@ import type {
   ProviderManagementService,
   ProviderPackageListFilter,
   ProviderPackageQueryService,
+  RuntimeProcessQueryService,
 } from "../../../packages/pms-application/src/index.js";
 import type {
   ConfigurationCenter,
@@ -10,15 +11,36 @@ import type {
   RuntimeConfigAcknowledgementService,
   RuntimeConfigClientAuthorizer,
   RuntimeConfigQueryService,
-  RuntimeConfigWatchHub,
 } from "../../../packages/configuration-center/src/index.js";
 import { registerConfigurationRoutes } from "./configuration-routes.js";
 import { attachRequestContext, requestContext } from "./context.js";
 import { notFoundError, sendPmsError } from "./errors.js";
 import { pmsOpenApiDocument } from "./openapi.js";
 import { registerManagementRoutes } from "./management-routes.js";
-import { registerRuntimeConfigRoutes } from "./runtime-config-routes.js";
-import { authorizeManagementRequest, type PmsApiRoleAuthorizer } from "./authorization.js";
+import {
+  registerRuntimeConfigRoutes,
+  type RuntimeConfigWatchPort,
+} from "./runtime-config-routes.js";
+import {
+  registerRuntimeDeploymentRoutes,
+  type RuntimeDeploymentManagementPort,
+} from "./runtime-deployment-routes.js";
+import { registerRuntimeProcessRoutes } from "./runtime-process-routes.js";
+import { registerRuntimeRegistrationRoutes } from "./runtime-registration-routes.js";
+import {
+  auditAuthenticationRejection,
+  authorizeManagementRequest,
+  type AuthenticationRejectionAuditPort,
+  type PmsApiRoleAuthorizer,
+} from "./authorization.js";
+import type {
+  RuntimeRegistrationAuthorizer,
+  RuntimeRegistrationService,
+} from "../../../packages/runtime-registration/src/index.js";
+import type { AuditRepository } from "../../../packages/pms-domain/src/index.js";
+import type { RegistrySnapshotRepository } from "../../../packages/registry-snapshot/src/index.js";
+import { registerAuditRoutes } from "./audit-routes.js";
+import { registerRegistryRoutes } from "./registry-routes.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -29,13 +51,21 @@ export interface PmsApiOptions {
   readonly readiness?: () => Promise<PmsReadiness>;
   readonly providerPackages?: ProviderPackageQueryService;
   readonly management?: ProviderManagementService;
+  readonly runtimeDeployments?: RuntimeDeploymentManagementPort;
+  readonly runtimeProcesses?: RuntimeProcessQueryService;
+  readonly runtimeRegistration?: RuntimeRegistrationService;
+  readonly runtimeRegistrationAuthorizer?: RuntimeRegistrationAuthorizer;
   readonly configurationCenter?: ConfigurationCenter;
   readonly configurationPublication?: ConfigurationPublicationService;
   readonly runtimeConfigQuery?: RuntimeConfigQueryService;
   readonly runtimeConfigAuthorizer?: RuntimeConfigClientAuthorizer;
-  readonly runtimeConfigWatch?: RuntimeConfigWatchHub;
+  readonly runtimeConfigWatch?: RuntimeConfigWatchPort;
   readonly runtimeConfigAcknowledgements?: RuntimeConfigAcknowledgementService;
+  readonly registrySnapshots?: RegistrySnapshotRepository;
+  readonly audit?: Pick<AuditRepository, "list">;
+  readonly registryWatchPollIntervalMs?: number;
   readonly managementAuthorizer?: PmsApiRoleAuthorizer;
+  readonly authenticationRejectionAudit?: AuthenticationRejectionAuditPort;
 }
 
 export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
@@ -49,9 +79,14 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   });
   const managementAuthorizer = options.managementAuthorizer;
   if (managementAuthorizer !== undefined) {
-    app.addHook("preHandler", (request) =>
-      authorizeManagementRequest(request, managementAuthorizer),
-    );
+    app.addHook("preHandler", async (request) => {
+      try {
+        await authorizeManagementRequest(request, managementAuthorizer);
+      } catch (error) {
+        await auditAuthenticationRejection(options.authenticationRejectionAudit, request, error);
+        throw error;
+      }
+    });
   }
   app.setErrorHandler(sendPmsError);
   app.setNotFoundHandler(notFoundError);
@@ -74,6 +109,23 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   if (options.management !== undefined) {
     registerManagementRoutes(app, options.management);
   }
+  if (options.runtimeDeployments !== undefined) {
+    registerRuntimeDeploymentRoutes(app, options.runtimeDeployments);
+  }
+  if (options.runtimeProcesses !== undefined) {
+    registerRuntimeProcessRoutes(app, options.runtimeProcesses);
+  }
+  if (
+    options.runtimeRegistration !== undefined &&
+    options.runtimeRegistrationAuthorizer !== undefined
+  ) {
+    registerRuntimeRegistrationRoutes(
+      app,
+      options.runtimeRegistration,
+      options.runtimeRegistrationAuthorizer,
+      options.authenticationRejectionAudit,
+    );
+  }
   if (options.configurationCenter !== undefined) {
     registerConfigurationRoutes(app, options.configurationCenter, options.configurationPublication);
   }
@@ -84,8 +136,17 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
       options.runtimeConfigAuthorizer,
       options.runtimeConfigWatch,
       options.runtimeConfigAcknowledgements,
+      options.authenticationRejectionAudit,
     );
   }
+  if (options.registrySnapshots !== undefined) {
+    registerRegistryRoutes(app, options.registrySnapshots, {
+      ...(options.registryWatchPollIntervalMs === undefined
+        ? {}
+        : { pollIntervalMs: options.registryWatchPollIntervalMs }),
+    });
+  }
+  if (options.audit !== undefined) registerAuditRoutes(app, options.audit);
 
   return app;
 }

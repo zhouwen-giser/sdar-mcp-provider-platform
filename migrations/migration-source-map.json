@@ -27,7 +27,7 @@
     "pms": {
       "owner": "pms",
       "plannedDirectory": "migrations/pms",
-      "deliveredFiles": 0,
+      "deliveredFiles": 9,
       "namingRule": "NNN_lower_snake_case_description.sql",
       "versionScope": "Unique and append-only within the pms set, starting at 001."
     }
@@ -292,6 +292,16 @@
       "plannedPath": "migrations/providers/npc-tank/025_npc_tank_provider.sql",
       "pathState": "owner_directory",
       "sha256": "55cba8544325d1e07aa9660453d8763992698d23fb7d8327cbb11c02bdbbb58b"
+    },
+    {
+      "sequence": 27,
+      "legacyVersion": "009",
+      "owner": "pms",
+      "oldPath": "migrations/009_runtime_registration.sql",
+      "newPath": "migrations/pms/009_runtime_registration.sql",
+      "plannedPath": "migrations/pms/009_runtime_registration.sql",
+      "pathState": "owner_directory",
+      "sha256": "a3895103f125c79108b62bf035326597ab91bdfad2b0c953ac5c9ef9f909c355"
     }
   ]
 }

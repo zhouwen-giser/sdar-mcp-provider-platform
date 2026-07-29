@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "sha256": {
+    ".codex/task-state.json": "5ffce4a73146dd9c8a7d7ffd299fb9298d2c461355946120019a36d6ce4378be",
+    ".codex/handoff/goal2-handoff.json": "c93f9fc6da11e8e359d77db45329a763468990607b0d2a578f8e71549319c6a2",
+    ".codex/goal-03/task-state.json": "97655383f319a93b51071872b0dfa39c8612b5fda6b2dad661d12c7f1853afcf",
+    ".codex/goal-03/handoff.json": "10179891284cf6695739bce4622dcdae18cc10e280126f7a88d4c6e624bb632d",
+    ".codex/goal-03/test-evidence.json": "1dfc5023fbabd45e3826ddc654b8e17c5ebf8e002c02f328b564a4f073bdeff0"
+  }
+}

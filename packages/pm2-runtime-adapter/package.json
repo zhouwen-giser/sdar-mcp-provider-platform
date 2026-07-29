@@ -1,0 +1,17 @@
+{
+  "name": "@sdar/pm2-runtime-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run test"
+  },
+  "dependencies": {
+    "@sdar/runtime-deployment": "workspace:*",
+    "@sdar/secret-store": "workspace:*",
+    "pm2": "7.0.3"
+  }
+}

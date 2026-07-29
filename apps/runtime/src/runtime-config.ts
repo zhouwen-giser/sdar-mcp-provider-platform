@@ -14,6 +14,7 @@ import {
 } from "../../../packages/runtime-config-client/src/index.js";
 import { RuntimeObservabilityResolvedSchema } from "../../../packages/runtime-configuration-contract/src/runtime/observability.js";
 import type { RuntimeConfig } from "./config.js";
+import { resolveRuntimePlatformIdentity, type RuntimePlatformIdentity } from "./config.js";
 
 const IdentifierSchema = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/);
 const BootstrapSchema = z
@@ -21,6 +22,8 @@ const BootstrapSchema = z
     PMS_RUNTIME_CONFIG_URL: z.url().optional(),
     PMS_RUNTIME_CONFIG_TOKEN_FILE: z.string().min(1).optional(),
     PMS_RUNTIME_CONFIG_CACHE_PATH: z.string().min(1).optional(),
+    PMS_DEPLOYMENT_ID: IdentifierSchema.optional(),
+    PMS_INSTANCE_ID: IdentifierSchema.optional(),
     RUNTIME_DEPLOYMENT_ID: IdentifierSchema.optional(),
     RUNTIME_INSTANCE_ID: IdentifierSchema.optional(),
   })
@@ -29,8 +32,6 @@ const BootstrapSchema = z
     for (const field of [
       "PMS_RUNTIME_CONFIG_TOKEN_FILE",
       "PMS_RUNTIME_CONFIG_CACHE_PATH",
-      "RUNTIME_DEPLOYMENT_ID",
-      "RUNTIME_INSTANCE_ID",
     ] as const) {
       if (enabled && value[field] === undefined) {
         context.addIssue({
@@ -76,6 +77,11 @@ export function loadRuntimeConfigClientBootstrap(
 ): RuntimeConfigClientBootstrap | null {
   const input = BootstrapSchema.parse(environment);
   if (input.PMS_RUNTIME_CONFIG_URL === undefined) return null;
+  const identity = mergePlatformIdentity(
+    runtime.platformIdentity,
+    resolveRuntimePlatformIdentity(environment),
+  );
+  if (identity === null) throw new Error("RUNTIME_CONFIG_PLATFORM_IDENTITY_REQUIRED");
   const url = new URL(input.PMS_RUNTIME_CONFIG_URL);
   if (
     !["http:", "https:"].includes(url.protocol) ||
@@ -93,17 +99,33 @@ export function loadRuntimeConfigClientBootstrap(
     cachePath: required(input.PMS_RUNTIME_CONFIG_CACHE_PATH),
     target: {
       environment: runtime.RUNTIME_ENV,
-      deploymentId: required(input.RUNTIME_DEPLOYMENT_ID),
-      instanceId: required(input.RUNTIME_INSTANCE_ID),
+      deploymentId: identity.deploymentId,
+      instanceId: identity.instanceId,
       configGroup: "runtime.observability",
       dataId: "main",
     },
   };
 }
 
+function mergePlatformIdentity(
+  configured: RuntimePlatformIdentity | null,
+  bootstrap: RuntimePlatformIdentity | null,
+): RuntimePlatformIdentity | null {
+  if (configured === null) return bootstrap;
+  if (bootstrap === null) return configured;
+  if (
+    configured.deploymentId !== bootstrap.deploymentId ||
+    configured.instanceId !== bootstrap.instanceId
+  ) {
+    throw new Error("RUNTIME_PLATFORM_IDENTITY_CONFLICT");
+  }
+  return configured;
+}
+
 export class RuntimeConfigIntegration {
   readonly #controller = new AbortController();
   readonly #workflow: RuntimeConfigWorkflow;
+  #currentRevision = 0;
   #running: Promise<void> | undefined;
 
   constructor(
@@ -142,6 +164,7 @@ export class RuntimeConfigIntegration {
       apply: async (document) => {
         const content = RuntimeObservabilityResolvedSchema.parse(document.content);
         await control.applyOtelEnabled(content.OTEL_ENABLED);
+        this.#currentRevision = document.revision;
       },
     });
     this.#workflow = new RuntimeConfigWorkflow(
@@ -156,8 +179,16 @@ export class RuntimeConfigIntegration {
     );
   }
 
-  syncOnce(): Promise<RuntimeConfigSyncResult> {
-    return this.#workflow.syncOnce();
+  async syncOnce(): Promise<RuntimeConfigSyncResult> {
+    const result = await this.#workflow.syncOnce();
+    if (result.state === "applied" || result.state === "unchanged" || result.state === "lkg") {
+      this.#currentRevision = result.document.revision;
+    }
+    return result;
+  }
+
+  currentRevision(): number {
+    return this.#currentRevision;
   }
 
   start(): void {

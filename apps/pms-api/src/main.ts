@@ -1,55 +1,20 @@
-import { readFile } from "node:fs/promises";
-import { isAbsolute } from "node:path";
-import { Pool } from "pg";
-import {
-  loadProviderPackageQueryService,
-  ProviderManagementService,
-} from "../../../packages/pms-application/src/index.js";
-import {
-  PostgresPmsUnitOfWork,
-  runPmsMigrations,
-} from "../../../packages/pms-persistence-postgres/src/index.js";
-import {
-  ConfigurationPublicationService,
-  createDefaultConfigurationCenter,
-  DenyRuntimeConfigClientAuthorizer,
-  RuntimeConfigAcknowledgementService,
-  RuntimeConfigQueryService,
-  RuntimeConfigWatchHub,
-} from "../../../packages/configuration-center/src/index.js";
-import { createPmsApi } from "./app.js";
-import { DenyPmsApiRoleAuthorizer } from "./authorization.js";
+import { createPmsApiComposition } from "./composition.js";
+import { loadPmsApiBootstrapConfig } from "./config.js";
 
-const port = boundedPort(process.env.PMS_API_PORT);
-const host = process.env.PMS_API_HOST ?? "127.0.0.1";
-const pool = new Pool({ connectionString: await databaseUrl() });
-await runPmsMigrations(pool);
-const unitOfWork = new PostgresPmsUnitOfWork(pool);
-const configurationCenter = createDefaultConfigurationCenter();
-const runtimeConfigWatch = new RuntimeConfigWatchHub();
-const app = createPmsApi({
-  managementAuthorizer: new DenyPmsApiRoleAuthorizer(),
-  providerPackages: await loadProviderPackageQueryService(),
-  management: new ProviderManagementService(unitOfWork),
-  configurationCenter,
-  configurationPublication: new ConfigurationPublicationService(configurationCenter, unitOfWork, {
-    onPublished: (event) => runtimeConfigWatch.publish(event),
-  }),
-  runtimeConfigQuery: new RuntimeConfigQueryService(unitOfWork),
-  runtimeConfigAuthorizer: new DenyRuntimeConfigClientAuthorizer(),
-  runtimeConfigWatch,
-  runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(unitOfWork),
-  readiness: async () => {
-    await pool.query("SELECT 1");
-    return { ready: true, checks: { database: "ready" } };
-  },
-});
+const config = await loadPmsApiBootstrapConfig();
+const composition = await createPmsApiComposition(config);
 
-await app.listen({ host, port });
+try {
+  await composition.app.listen({ host: config.host, port: config.port });
+} catch (error) {
+  await composition.close();
+  throw error;
+}
 
-async function stop(): Promise<void> {
-  await app.close();
-  await pool.end();
+let stopping: Promise<void> | undefined;
+function stop(): Promise<void> {
+  stopping ??= composition.close();
+  return stopping;
 }
 
 function onSignal(): void {
@@ -60,24 +25,3 @@ function onSignal(): void {
 
 process.once("SIGTERM", onSignal);
 process.once("SIGINT", onSignal);
-
-function boundedPort(source: string | undefined): number {
-  const value = source === undefined ? 8090 : Number(source);
-  if (!Number.isSafeInteger(value) || value < 1 || value > 65_535) {
-    throw new Error("PMS_API_PORT_INVALID");
-  }
-  return value;
-}
-
-async function databaseUrl(): Promise<string> {
-  if (process.env.PMS_DATABASE_URL !== undefined || process.env.DATABASE_URL !== undefined) {
-    throw new Error("PMS_API_INLINE_DATABASE_SECRET_REJECTED");
-  }
-  const path = process.env.PMS_DATABASE_URL_FILE;
-  if (path === undefined || !isAbsolute(path)) {
-    throw new Error("PMS_DATABASE_URL_FILE_REQUIRED");
-  }
-  const value = (await readFile(path, "utf8")).trim();
-  if (value.length === 0) throw new Error("PMS_DATABASE_URL_FILE_EMPTY");
-  return value;
-}

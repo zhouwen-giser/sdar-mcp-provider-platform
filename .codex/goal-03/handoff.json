@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "fromGoal": "goal-03-merge-readiness-foundation",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "integrationTarget": "codex/goal-02-runtime-governance",
+  "pullRequest": 3,
+  "foundationDelivered": [
+    "Docker frozen installs stage and verify all 41 workspace manifests",
+    "verify:v2 retains its complete fail-closed chain and has no high or critical dependency findings",
+    "one Worker job owns Runtime deployment reconciliation",
+    "DEGRADED recovery returns through DISCOVERING before Catalog and Registry publication can reach ACTIVE",
+    "PMS API production composition has an independent CI job"
+  ],
+  "nextGoalScope": [
+    {
+      "name": "PM2 Production Bridge",
+      "requiredOutcome": "qualify real production PM2 lifecycle, identity, failure, and recovery behavior without replacing the existing application ports"
+    },
+    {
+      "name": "Worker Production Composition",
+      "requiredOutcome": "compose and qualify the complete Worker process around the single runtime_deployment.reconcile owner, including operational shutdown and failure handling"
+    },
+    {
+      "name": "Periodic Scheduler",
+      "requiredOutcome": "add bounded periodic triggering with single-owner or lease semantics, overlap prevention, observability, and deterministic tests"
+    }
+  ],
+  "guardrails": [
+    "Preserve Goal 2 task-state hash 5ffce4a73146dd9c8a7d7ffd299fb9298d2c461355946120019a36d6ce4378be",
+    "Do not reintroduce runtime_deployment.prepare_database as a second Worker job",
+    "Do not allow DEGRADED to recover directly to ACTIVE",
+    "Do not weaken verify:v2, audit, frozen protocol, migration, Docker, or PMS production CI gates",
+    "Keep release metadata, versioning, tags, rollout, and merging main out of scope unless a later Goal explicitly authorizes them"
+  ],
+  "startingEvidence": [
+    ".codex/goal-03/test-evidence.json",
+    "docs/review/GOAL03_FINAL_REPORT.md",
+    "docs/review/GOAL03_CI_MATRIX.md",
+    "docs/review/GOAL03_NEXT_GOAL_HANDOFF.md",
+    "docs/adr/0007-single-runtime-reconcile-job.md",
+    "docs/adr/0008-runtime-reconcile-state-convergence.md"
+  ]
+}

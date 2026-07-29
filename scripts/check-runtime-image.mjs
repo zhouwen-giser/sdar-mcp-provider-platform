@@ -41,6 +41,8 @@ execFileSync(
       "test ! -e /app/references",
       "test ! -d /app/node_modules/typescript",
       "test ! -d /app/node_modules/vitest",
+      "test -z \"$(find /app/node_modules -type f -name '*.map' -print -quit)\"",
+      "test -z \"$(find /app/node_modules -type f -iname '*.md' ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -print -quit)\"",
     ].join(" && "),
   ],
   { stdio: "inherit" },

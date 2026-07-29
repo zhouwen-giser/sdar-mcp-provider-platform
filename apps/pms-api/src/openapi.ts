@@ -114,6 +114,84 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           responses: { "200": { description: "Provider status updated" } },
         },
       },
+      "/api/v1/runtime-deployments": {
+        get: {
+          operationId: "listRuntimeDeployments",
+          parameters: [
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+            { name: "environment", in: "query", schema: { type: "string" } },
+            { name: "status", in: "query", schema: { type: "string" } },
+            { name: "limit", in: "query", schema: { type: "integer", default: 100 } },
+            { name: "cursor", in: "query", schema: { type: "string" } },
+          ],
+          responses: { "200": { description: "Provider-scoped RuntimeDeployments" } },
+        },
+        post: {
+          operationId: "createRuntimeDeployment",
+          responses: {
+            "202": {
+              description: "RuntimeDeployment desired state accepted with an operation ID",
+            },
+            "409": { description: "A prerequisite is unavailable or state conflicts" },
+          },
+        },
+      },
+      "/api/v1/runtime-deployments/{deploymentId}": {
+        get: {
+          operationId: "getRuntimeDeployment",
+          parameters: [
+            { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "RuntimeDeployment desired and observed state" },
+            "404": { description: "RuntimeDeployment not found in Provider scope" },
+          },
+        },
+      },
+      ...runtimeDeploymentActionPaths(),
+      "/api/v1/runtime-processes": {
+        get: {
+          operationId: "listRuntimeProcesses",
+          parameters: [
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+            { name: "deploymentId", in: "query", required: true, schema: { type: "string" } },
+            { name: "processState", in: "query", schema: { type: "string" } },
+            { name: "observedHealth", in: "query", schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Runtime process projections with evaluated stale state" },
+          },
+        },
+      },
+      "/api/v1/runtime-processes/{instanceId}": {
+        get: {
+          operationId: "getRuntimeProcess",
+          parameters: [
+            { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "Runtime process projection without environment or secrets" },
+            "404": { description: "Runtime process not found in Provider scope" },
+          },
+        },
+      },
+      "/api/v1/runtime-processes/{instanceId}/logs": {
+        get: {
+          operationId: "getRuntimeProcessLogReference",
+          parameters: [
+            { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
+            { name: "providerId", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": {
+              description: "Opaque controlled log reference; file content is never returned",
+            },
+            "404": { description: "Runtime process not found in Provider scope" },
+          },
+        },
+      },
       "/api/v1/resources": {
         get: {
           operationId: "listResources",
@@ -202,6 +280,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         get: {
           operationId: "getLatestRuntimeConfiguration",
           security: [{ runtimeConfigToken: [] }],
+          "x-sdar-required-scope": "runtime:config:read",
           parameters: [
             { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
             { name: "instanceId", in: "path", required: true, schema: { type: "string" } },
@@ -222,6 +301,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
         get: {
           operationId: "watchRuntimeConfiguration",
           security: [{ runtimeConfigToken: [] }],
+          "x-sdar-required-scope": "runtime:config:watch",
           responses: {
             "200": { description: "SSE stream containing revision/checksum hints only" },
             "401": { description: "Runtime Config client authentication failed" },
@@ -233,6 +313,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           post: {
             operationId: "acknowledgeRuntimeConfiguration",
             security: [{ runtimeConfigToken: [] }],
+            "x-sdar-required-scope": "runtime:config:ack",
             responses: {
               "200": { description: "Idempotent structured Runtime acknowledgement" },
               "400": { description: "Invalid acknowledgement status or checksum" },
@@ -242,6 +323,86 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
             },
           },
         },
+      "/api/v1/runtime-registration/deployments/{deploymentId}/instances/{instanceId}/register": {
+        post: {
+          operationId: "registerRuntimeInstance",
+          security: [{ runtimeRegistrationToken: [] }],
+          "x-sdar-required-scope": "runtime:register",
+          responses: {
+            "200": { description: "Idempotent expected-instance registration" },
+            "401": { description: "Runtime registration authentication failed" },
+            "403": { description: "Token target or scope mismatch" },
+            "404": { description: "Expected Runtime instance does not exist" },
+            "409": { description: "Registration identity or replay conflict" },
+          },
+        },
+      },
+      "/api/v1/runtime-registration/deployments/{deploymentId}/instances/{instanceId}/heartbeat": {
+        post: {
+          operationId: "heartbeatRuntimeInstance",
+          security: [{ runtimeRegistrationToken: [] }],
+          "x-sdar-required-scope": "runtime:heartbeat",
+          responses: {
+            "200": { description: "Ordered idempotent Runtime heartbeat" },
+            "401": { description: "Runtime heartbeat authentication failed" },
+            "403": { description: "Token target or scope mismatch" },
+            "404": { description: "Expected Runtime instance does not exist" },
+            "409": { description: "Heartbeat session or sequence conflict" },
+          },
+        },
+      },
+      "/api/v1/registry/{environment}/latest": {
+        get: {
+          operationId: "getLatestRegistrySnapshot",
+          responses: {
+            "200": { description: "Latest immutable SDAR Registry Snapshot" },
+            "304": { description: "The consumer already has this checksum" },
+            "404": { description: "No Registry Snapshot has been published" },
+          },
+        },
+      },
+      "/api/v1/registry/{environment}/history": {
+        get: {
+          operationId: "getRegistrySnapshotHistory",
+          responses: { "200": { description: "Immutable Registry Snapshot history" } },
+        },
+      },
+      "/api/v1/registry/{environment}/diff": {
+        get: {
+          operationId: "diffRegistrySnapshots",
+          responses: { "200": { description: "Provider projection changes between revisions" } },
+        },
+      },
+      "/api/v1/registry/{environment}/watch": {
+        get: {
+          operationId: "watchRegistrySnapshots",
+          responses: { "200": { description: "SSE revision and checksum hints only" } },
+        },
+      },
+      "/api/v1/registry/{environment}/bootstrap": {
+        get: {
+          operationId: "bootstrapRegistrySnapshot",
+          responses: {
+            "200": { description: "Latest LKG or explicit empty safe bootstrap projection" },
+          },
+        },
+      },
+      "/api/v1/audit-events": {
+        get: {
+          operationId: "listAuditEvents",
+          parameters: [
+            { name: "subjectType", in: "query", schema: { type: "string" } },
+            { name: "subjectId", in: "query", schema: { type: "string" } },
+            { name: "correlationId", in: "query", schema: { type: "string" } },
+            {
+              name: "occurredBefore",
+              in: "query",
+              schema: { type: "string", format: "date-time" },
+            },
+          ],
+          responses: { "200": { description: "Redacted traceable Audit event projections" } },
+        },
+      },
     },
     components: {
       schemas: {
@@ -275,6 +436,13 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           type: "http",
           scheme: "bearer",
           bearerFormat: "opaque-runtime-config-token",
+          "x-sdar-scopes": ["runtime:config:read", "runtime:config:watch", "runtime:config:ack"],
+        },
+        runtimeRegistrationToken: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "opaque-file-backed-runtime-token",
+          "x-sdar-scopes": ["runtime:register", "runtime:heartbeat"],
         },
       },
     },
@@ -292,6 +460,10 @@ function applyManagementSecurity(
     "/api/v1/providers",
     "/api/v1/resources",
     "/api/v1/config-drafts",
+    "/api/v1/runtime-deployments",
+    "/api/v1/runtime-processes",
+    "/api/v1/registry",
+    "/api/v1/audit-events",
   ];
   for (const [path, operations] of Object.entries(paths)) {
     if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;
@@ -301,4 +473,26 @@ function applyManagementSecurity(
         method === "get" ? "reader_or_administrator" : "administrator";
     }
   }
+}
+
+function runtimeDeploymentActionPaths(): Record<string, Record<string, Record<string, unknown>>> {
+  return Object.fromEntries(
+    ["start", "stop", "restart", "scale", "reconcile"].map((action) => [
+      `/api/v1/runtime-deployments/{deploymentId}/${action}`,
+      {
+        post: {
+          operationId: `${action}RuntimeDeployment`,
+          parameters: [
+            { name: "deploymentId", in: "path", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "202": {
+              description: "RuntimeDeployment desired-state operation accepted",
+            },
+            "409": { description: "Desired revision conflict" },
+          },
+        },
+      },
+    ]),
+  );
 }

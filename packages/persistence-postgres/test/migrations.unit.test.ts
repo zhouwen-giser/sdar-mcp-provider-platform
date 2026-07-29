@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
-import { listRuntimeMigrations } from "../src/migrations.js";
+import { describe, expect, it, vi } from "vitest";
+import { listRuntimeMigrations, runMigrations } from "../src/migrations.js";
 
 const workspaceRoot = fileURLToPath(new URL("../../..", import.meta.url));
 
@@ -22,5 +22,19 @@ describe("Runtime Migration source", () => {
     expect(
       migrations.every(({ relativePath }) => relativePath.startsWith("migrations/runtime/")),
     ).toBe(true);
+  });
+
+  it("rejects invalid timeout configuration before lock acquisition", async () => {
+    const connect = {
+      query: vi.fn(() => Promise.resolve({ rows: [], rowCount: 0 })),
+      release: vi.fn(),
+    };
+    await expect(
+      runMigrations({ connect: () => Promise.resolve(connect) } as never, undefined, {
+        timeoutMs: 0,
+      }),
+    ).rejects.toThrow("timeoutMs must be a positive integer");
+    expect(connect.query).not.toHaveBeenCalledWith(expect.stringContaining("pg_advisory_lock"));
+    expect(connect.release).toHaveBeenCalledOnce();
   });
 });

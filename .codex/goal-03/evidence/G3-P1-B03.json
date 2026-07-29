@@ -1,0 +1,54 @@
+{
+  "taskId": "G3-P1-B03",
+  "commitSha": "b35ddb7e2f9be66313b8b8cf52c311cf0615ddbf",
+  "branch": "codex/goal-03-merge-readiness-foundation",
+  "commands": [
+    "pnpm install --frozen-lockfile",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime pnpm test:pms-api-production",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime pnpm test:pms",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime pnpm test:pms-config-e2e",
+    "TEST_DATABASE_URL=postgresql://sdar:***@127.0.0.1:5432/sdar_runtime pnpm test:pms-migrations",
+    "python3 yaml.safe_load(.github/workflows/ci.yml)",
+    "python3 CI matrix structural validation",
+    "pnpm exec prettier --check .github/workflows/ci.yml docs/review/GOAL03_CI_MATRIX.md",
+    "git diff --check"
+  ],
+  "exitCodes": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "testCounts": {
+    "pmsApiProductionFiles": 1,
+    "pmsApiProductionTests": 3,
+    "pmsFiles": 5,
+    "pmsTests": 23,
+    "pmsConfigE2eFiles": 1,
+    "pmsConfigE2eTests": 8,
+    "pmsMigrationFiles": 2,
+    "pmsMigrationTests": 9
+  },
+  "changedFiles": [
+    ".github/workflows/ci.yml",
+    "docs/review/GOAL03_CI_MATRIX.md",
+    ".codex/goal-03/evidence/G3-P1-B03.json",
+    ".codex/goal-03/execution-log.md",
+    ".codex/goal-03/task-state.json"
+  ],
+  "githubRun": {
+    "status": "completed",
+    "conclusion": "failure",
+    "id": 30417122900,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30417122900",
+    "headSha": "9b967e5160b1686093063adcfdc8b95bb92d5797",
+    "jobs": {
+      "runtime-ci": "failure: backend-reported runtime image size 353156425 exceeded unchanged 350000000 ceiling",
+      "runtime-compose": "success",
+      "pms-api-production": "success"
+    },
+    "followup": "G3-P3-B01 removed production dependency source maps without changing the 350 MB ceiling; local container:check and complete verify:v2 passed. The final handoff commit triggers a superseding PR run."
+  },
+  "notes": [
+    "The workflow retains runtime-ci and runtime-compose and adds the independent pms-api-production job.",
+    "The new job pins Node 22, pnpm 11.13.1, and PostgreSQL 17, and runs five non-empty commands including the frozen install.",
+    "The PMS job uploads no artifacts and defines no custom log step for its ephemeral database URL.",
+    "Workflow concurrency cancels only superseded pull-request commits; push runs are retained.",
+    "Worker production composition, PM2 Production Bridge, release readiness, and rollout remain explicitly deferred."
+  ]
+}

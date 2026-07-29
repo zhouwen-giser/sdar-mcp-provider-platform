@@ -62,3 +62,16 @@ export interface JobLeaseRepository {
   fail(lease: LeaseIdentity, availableAt: Date): Promise<void>;
   list(query: JobQuery): Promise<Page<PmsJob>>;
 }
+
+export interface ScheduleRuntimeReconcileJobs {
+  readonly limit: number;
+  readonly minimumAgeMs: number;
+}
+
+export interface RuntimeReconcileSchedulerRepository {
+  /**
+   * Uses database time and transaction-scoped advisory exclusion to enqueue due reconcile work.
+   * Pending or leased work for the same Provider/Deployment remains authoritative.
+   */
+  enqueueDue(input: ScheduleRuntimeReconcileJobs): Promise<number>;
+}

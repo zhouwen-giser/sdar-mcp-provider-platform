@@ -199,3 +199,203 @@
 - 2026-07-26T13:54:53.050573+00:00 START G1-P6-B04
 
 - 2026-07-26T14:00:15.971051+00:00 PASS G1-P6-B04 evidence=['Acceptance matrix PASS: source baseline exact SHA; pnpm build PASS; protocol:check PASS 11 schemas/74 cases/38 locked files; TEST_DATABASE_URL=<local-postgres> pnpm test:migration-isolation PASS 1/1; pnpm test:provider-packages PASS 13/13 plus 3-package self-check; pnpm test:config-compat PASS 8/8 plus contract 36/36; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations PASS 4/4; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-config-e2e PASS 8/8; pnpm exec vitest run tests/runtime-config-e2e PASS 3/3; pnpm test:unit PASS 30 files/123 tests; pnpm test:frozen-74 PASS; terminal verify_goal1_handoff.py is intentionally sequenced after 50/50 state, handoff commit, and clean-worktree precondition']
+
+- 2026-07-26T14:19:42.021272+00:00 START G2-P0-B01
+
+- 2026-07-26T14:23:43.074380+00:00 PASS G2-P0-B01 evidence=['python3 .codex/task-package/scripts/verify_goal1_handoff.py --repo .: PASS on clean Goal 1 baseline; .codex/reports/goal-02-baseline.md; .codex/handoff/goal1-test-evidence.json; Goal1Handoff schema PASS; migration source map 26 files PASS; protocol 74 frozen cases PASS; provider packages 13/13 PASS; config compatibility 8/8 + 36/36 PASS; runtime config E2E 3/3 PASS; unit 123/123 PASS; local PostgreSQL rerun unavailable with ECONNREFUSED and not claimed as fresh PASS']
+
+- 2026-07-26T14:24:11.519524+00:00 START G2-P0-B02
+
+- 2026-07-26T14:26:54.958382+00:00 PASS G2-P0-B02 evidence=['docs/baseline/GOAL2_ENVIRONMENT.json; node v22.23.1 PASS; pnpm 11.13.1 PASS; pm2 CLI and JS API unavailable; Docker 29.6.1/Compose v5.3.1 daemon available; PostgreSQL 17.10 Compose service healthy on 5432; redacted test role can CREATEDB/CREATEROLE but is test-only superuser; FakePm2/FakeProvisioner strategy and real E2E unlock actions recorded; JSON/prettier/secret scan/git diff check PASS']
+
+- 2026-07-26T14:27:22.903377+00:00 START G2-P0-B03
+
+- 2026-07-26T14:28:47.442856+00:00 PASS G2-P0-B03 evidence=['docs/adr/0001 through 0005: Accepted; process authority, PM2 single-node Fork Mode, per-logical-Provider Runtime DB, Collector-only ClickHouse path, vendor_managed and single-replica defaults frozen; task-package design/guardrail alignment review PASS; prettier and git diff --check PASS']
+
+- 2026-07-26T14:30:11.790507+00:00 START G2-P0-B04
+
+- 2026-07-26T14:31:50.325869+00:00 PASS G2-P0-B04 evidence=['package.json five Goal 2 gate commands; scripts/run-goal2-test-gate.mjs; all empty gates fail closed with exit 1 and stable NOT_IMPLEMENTED message; unknown gate rejected exit 2; Vitest entry exists; .codex/reports/goal2-P0.md and goal2-phase-template.md; Node v22.23.1/pnpm 11.13.1; syntax/prettier/git diff check PASS']
+
+- 2026-07-26T14:33:34.073662+00:00 START G2-P1-B01
+
+- 2026-07-26T14:40:32.085757+00:00 PASS G2-P1-B01 evidence=['@sdar/runtime-deployment aggregate/IDs/spec/status/CAS/domain events; mandatory filtered test PASS 1 file/10 tests; root test:runtime-deployment PASS 1/10; illegal jumps/state+revision conflicts/repeated transition+desired command idempotency/drain-stop-degrade-fail-retry covered; full typecheck, package ESLint/Prettier, offline frozen lock, git diff check PASS; package dependency and source scan confirms no pm2/pg/Fastify dependencies']
+
+- 2026-07-26T14:41:16.646060+00:00 START G2-P1-B02
+
+- 2026-07-26T14:43:28.892078+00:00 PASS G2-P1-B02 evidence=['RuntimeProcess stable identity and observation projection; PM2/PID/port/heartbeat/version/config/registration/catalog fields; observed health matrix and stale heartbeat boundary; PM2 online-only NOT_READY; PID changes preserve instanceId; identical observation idempotent and changed stale revision rejected; mandatory filtered and root runtime-deployment gates PASS 2 files/34 tests; typecheck/ESLint/Prettier/git diff check/dependency scan PASS']
+
+- 2026-07-26T14:44:24.351660+00:00 START G2-P1-B03
+
+- 2026-07-26T14:48:08.747631+00:00 PASS G2-P1-B03 evidence=['append-only migrations/pms/005_runtime_deployment.sql; migration-004 existing PMS schema upgrade preserves Provider row and creates deployment/process/action tables; mandatory PostgreSQL pms-migrations PASS 1 file/6 tests including repeated apply, provider FK, revision/replica checks, stable instance/PM2/port constraints and action idempotency; PMS regression PASS 4 files/16 tests; migration resolver PASS 1/9; old migrations 001-004 git diff clean; typecheck/prettier/git diff/secret scan PASS']
+
+- 2026-07-26T14:49:45.245499+00:00 START G2-P1-B04
+
+- 2026-07-26T14:54:55.872806+00:00 PASS G2-P1-B04 evidence=['PostgresRuntimeDeployment/RuntimeProcess/Action repositories plus transactional UoW; mandatory @sdar/pms-persistence-postgres PostgreSQL suite PASS 4 files/20 tests; conflicting deployment CAS one winner/stable conflict; identical save and heartbeat retries no-op; changed stale heartbeat conflict; all reads Provider-scoped; action append idempotency and divergent reuse rejection; commit/rollback across deployment/process/action; typecheck/ESLint/Prettier/offline frozen lock/git diff/authority+secret scan PASS']
+
+- 2026-07-26T14:55:45.874390+00:00 START G2-P1-B05
+
+- 2026-07-26T14:59:55.969649+00:00 PASS G2-P1-B05 evidence=['RuntimeDeployment create/start/stop/restart/scale/reconcile desired-intent use cases; Provider/config/database prerequisites; stop sets draining; replicas>1 rejected without gateway; jobs and Audit appended through application UoW; no PM2/process-manager calls or secret payloads; mandatory pnpm test:pms PASS 5 files/22 tests including new 6/6; typecheck/ESLint/Prettier/offline frozen lock/git diff scans PASS']
+
+- 2026-07-26T15:01:25.850114+00:00 START G2-P1-B06
+
+- 2026-07-26T15:06:36.961775+00:00 PASS G2-P1-B06 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-api test (6 files, 40 tests passed); pnpm typecheck; git diff --check']
+
+- 2026-07-26T15:07:08.827525+00:00 START G2-P1-B07
+
+- 2026-07-26T15:12:05.843795+00:00 PASS G2-P1-B07 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/pms-api test (7 files, 44 tests passed); pnpm exec vitest run packages/pms-application/test/runtime-process-query.test.ts apps/pms-api/test/runtime-process.test.ts (7 tests passed); pnpm typecheck; git diff --check']
+
+- 2026-07-26T15:12:27.209730+00:00 START G2-P1-B08
+
+- 2026-07-26T15:16:27.296603+00:00 PASS G2-P1-B08 evidence=['schemas/runtime-deployment-v1.json; tests/runtime-deployment/; .codex/reports/goal2-P1.md; pnpm test:runtime-deployment (5 files, 42 tests passed); pnpm build; Prettier check; git diff --check']
+
+- 2026-07-26T15:16:59.255714+00:00 START G2-P2-B01
+
+- 2026-07-26T15:20:20.467960+00:00 PASS G2-P2-B01 evidence=['@sdar/pms-domain DatabaseProfile/SecretRef/name-policy tests PASS 3 files/24 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms PASS 5 files/22 tests; pnpm typecheck; pnpm test:runtime-deployment PASS 5 files/42 tests; production model scan has no password/connectionString/databaseUrl fields; git diff --check']
+
+- 2026-07-26T15:20:49.094648+00:00 START G2-P2-B02
+
+- 2026-07-26T15:32:48.926976+00:00 PASS G2-P2-B02 evidence=['migrations/pms/006_database_profile.sql; PostgresDatabaseProfileRepository; TEST_DATABASE_URL=<local-postgres> pnpm test:pms-migrations PASS 1 file/7 tests; TEST_DATABASE_URL=<local-postgres> pnpm test:pms PASS 5 files/23 tests; @sdar/pms-domain PASS 3 files/24 tests; pnpm typecheck; old migrations 001-005 unchanged; plaintext column scan and git diff check PASS']
+
+- 2026-07-26T15:33:15.995895+00:00 START G2-P2-B03
+
+- 2026-07-26T15:35:21.536574+00:00 PASS G2-P2-B03 evidence=['@sdar/runtime-deployment mandatory test PASS 3 files/37 tests; FakeProvisioner deterministic replay/dry-run/inspect contract; explicit deletion policy target binding; retryable error classification; no admin URL/connection string/secret value fields; pnpm typecheck; git diff --check']
+
+- 2026-07-26T15:35:45.627586+00:00 START G2-P2-B04
+
+- 2026-07-26T15:51:22.670267+00:00 PASS G2-P2-B04 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/postgres-provisioner test PASS 1 file/8 tests; controlled PostgreSQL 17 integration with temporary NOSUPERUSER CREATEDB/CREATEROLE provisioner and restricted Runtime role; idempotent role/database/grant; Runtime SELECT+DDL verify; SQL injection rejected before query; credential rotation hook; explicit guarded delete; cleanup audit 0 temporary roles/0 databases; frozen offline install, typecheck, ESLint, Prettier, secret-output scan, git diff check PASS']
+
+- 2026-07-26T15:52:29.978992+00:00 START G2-P2-B05
+
+- 2026-07-26T16:00:21.454596+00:00 PASS G2-P2-B05 evidence=['pnpm --filter @sdar/secret-store test PASS 1 file/9 tests; atomic wx+fsync+rename and no staging residue; file 0600/directories 0700; deployment+instance containment; forged ref/traversal/target+parent symlink/relaxed permission rejection; exact explicit cleanup policy and idempotent missing outcome; redacted inspect no path/content/length and no logging; frozen offline install, typecheck, ESLint, Prettier, git diff check PASS']
+
+- 2026-07-26T16:01:01.994090+00:00 START G2-P2-B06
+
+- 2026-07-26T16:11:33.273948+00:00 PASS G2-P2-B06 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm --filter @sdar/runtime-migration-runner test PASS 1 file/4 tests; real PostgreSQL concurrent full runtime set: 24 applied vs 24 already_applied under advisory lock; 64-hex checksum/version evidence and no Provider 024/025; 100ms lock timeout stable/retryable evidence; injected failure preserves sentinel table and history with no cleanup/rollback SQL; persistence engine unit PASS 1 file/2 tests; 0 temporary migration databases; migrations unchanged; frozen offline install, typecheck, ESLint, Prettier, git diff check PASS']
+
+- 2026-07-26T16:12:41.934012+00:00 START G2-P2-B07
+
+- 2026-07-26T16:18:17.366088+00:00 PASS G2-P2-B07 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run packages/pms-application/test/runtime-database-preparation.test.ts apps/pms-worker/test/runtime-database-preparation-job.test.ts (2 files/5 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T16:18:57.290837+00:00 START G2-P2-B08
+
+- 2026-07-26T16:23:03.559047+00:00 PASS G2-P2-B08 evidence=['TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); reports/evidence/G2-P2-B08-database-isolation.json; pnpm test:db-provisioner (3 files/21 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T16:23:32.363103+00:00 START G2-P2-B09
+
+- 2026-07-26T16:26:15.655764+00:00 PASS G2-P2-B09 evidence=['.codex/reports/goal2-P2.md; docs/operations/DATABASE_PROVISIONING_RUNBOOK.md; TEST_DATABASE_URL=<local-postgres> pnpm test:db-provisioner (3 files/21 tests); pnpm exec vitest run tests/database-provisioning-e2e (1 file/1 E2E); pnpm build; database preparation unit/worker tests (2 files/5 tests)']
+
+- 2026-07-26T16:26:41.687661+00:00 START G2-P3-B01
+
+- 2026-07-26T16:29:33.081493+00:00 PASS G2-P3-B01 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime-deployment test (3 files/37 tests); tsc --noEmit; eslint targeted; PM2/script/cwd/command surface scan clean']
+
+- 2026-07-26T16:30:01.986114+00:00 START G2-P3-B02
+
+- 2026-07-26T16:36:32.447944+00:00 PASS G2-P3-B02 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (1 file/7 tests); tsc --noEmit; eslint targeted; deterministic/redaction/unknown-env/secret-file tests']
+
+- 2026-07-26T16:37:07.020543+00:00 START G2-P3-B03
+
+- 2026-07-26T16:41:46.015337+00:00 PASS G2-P3-B03 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (2 files/11 tests, Fake PM2 component contract); tsc --noEmit; eslint targeted; git diff --check']
+
+- 2026-07-26T16:42:28.169190+00:00 START G2-P3-B04
+
+- 2026-07-26T16:45:31.057914+00:00 PASS G2-P3-B04 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pm2-runtime-adapter test (3 files/19 tests); tsc --noEmit; eslint targeted; temporary-filesystem release containment/mode contract']
+
+- 2026-07-26T16:47:37.088134+00:00 START G2-P3-B05
+
+- 2026-07-26T16:51:55.830243+00:00 PASS G2-P3-B05 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:runtime-deployment (7 files/49 tests); TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run packages/pms-persistence-postgres/test/runtime-instance-allocator.test.ts (1 file/1 concurrency integration); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T16:52:34.270881+00:00 START G2-P3-B06
+
+- 2026-07-26T17:01:06.949572+00:00 PASS G2-P3-B06 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:pm2-adapter (4 files/23 tests, Fake PM2 component contract); tsc --noEmit; eslint targeted; lifecycle timeout/idempotency/state/audit/controlled-updateEnv/secret-cleanup tests']
+
+- 2026-07-26T17:02:06.218406+00:00 START G2-P3-B07
+
+- 2026-07-26T17:07:27.854741+00:00 PASS G2-P3-B07 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm test:pm2-adapter (5 files/30 tests, injected-fetch/Fake PM2 component contract); tsc --noEmit; eslint targeted; fixed-loopback SSRF/timeout/schema/dependency-classification tests']
+
+- 2026-07-26T17:09:05.926008+00:00 START G2-P3-B08
+
+- 2026-07-26T17:11:02.490910+00:00 PASS G2-P3-B08 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/runtime test (1 file/5 tests); pnpm test:config-compat (1 file/8 tests + runtime configuration contract 8 files/36 tests); pnpm exec vitest run tests/runtime-config-e2e/runtime-config.e2e.test.ts (1 file/3 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T17:11:59.620289+00:00 START G2-P3-B09
+
+- 2026-07-26T17:19:02.609862+00:00 PASS G2-P3-B09 evidence=['semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm --filter @sdar/pms-worker test (3 files/9 tests); pnpm test:runtime-deployment (7 files/49 tests); tsc --noEmit; eslint targeted']
+
+- 2026-07-26T17:19:59.378719+00:00 START G2-P3-B10
+
+- 2026-07-26T17:27:05.277640+00:00 PASS G2-P3-B10 evidence=['pnpm test:pm2-adapter (6 files/36 tests); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm exec vitest run tests/recovery/runtime-recovery-postgres.test.ts (1 file/9 tests, real PostgreSQL Runtime persistence recovery; not real PM2 certification); tsc --noEmit; eslint targeted; git diff --check']
+
+- 2026-07-26T17:27:33.891181+00:00 START G2-P3-B11
+
+- 2026-07-26T17:32:24.823370+00:00 PASS G2-P3-B11 evidence=['pnpm --filter @sdar/runtime test (2 files/8 tests: drain admission, idempotent SIGTERM cleanup order, active tasks persist for same-authority recovery); semantic equivalent of absent pnpm test:runtime-reconcile: pnpm exec vitest run packages/pms-application/test/runtime-reconcile.test.ts apps/pms-worker/test/runtime-reconcile-job.test.ts (2 files/5 tests); pnpm test:runtime-deployment (8 files/54 tests: all-stop DB switch guard); pnpm test:pm2-adapter (6 files/37 tests: bounded kill_timeout); tsc --noEmit; eslint changed files; git diff --check']
+
+- 2026-07-26T17:32:46.153677+00:00 START G2-P3-B12
+
+- 2026-07-26T17:45:56.594284+00:00 PASS G2-P3-B12 evidence=['semantic equivalent of absent pnpm test:pm2-adapter-e2e: TEST_DATABASE_URL=<redacted-local-postgres> node tests/pm2-adapter-e2e/run-real-pm2-e2e.mjs (real isolated PM2 7.0.3 + built Runtime + mock Adapter + real local PostgreSQL; start/inspect/SIGKILL restart/live+ready/stop/delete/sentinel isolation PASS; reports/evidence/G2-P3-B12-real-pm2-e2e.json); pnpm build PASS; pnpm test:pm2-adapter (6 files/37 tests); pnpm --filter @sdar/runtime-config-client test (2 files/14 tests); tsc --noEmit; eslint targeted; secret scan clean; .codex/reports/goal2-P3.md']
+
+- 2026-07-26T17:46:22.895229+00:00 START G2-P4-B01
+
+- 2026-07-26T17:50:58.391999+00:00 PASS G2-P4-B01 evidence=['pnpm --filter @sdar/runtime-registration test (1 file/5 tests: expected-instance-only registration, identity/version/protocol mismatch, duplicate idempotency, ordered heartbeat, TTL stale detection, exact DTO validation); tsc --noEmit; eslint package; git diff --check']
+
+- 2026-07-26T17:51:20.925398+00:00 START G2-P4-B02
+
+- 2026-07-26T18:03:54.779611+00:00 PASS G2-P4-B02 evidence=['semantic equivalent of absent pnpm test:runtime-registration: pnpm --filter @sdar/runtime-registration test (3 files/10 tests) + pnpm exec vitest run apps/pms-api/test/runtime-registration.test.ts (1 file/3 tests) + pnpm --filter @sdar/runtime test (3 files/12 tests); TEST_DATABASE_URL=<redacted-local-postgres> pnpm --filter @sdar/pms-api test (8 files/47 tests); dedicated runtime:register/runtime:heartbeat bearer scopes; token file read; audit correlation; bounded retry and PMS outage tolerance; tsc --noEmit; eslint targeted; git diff --check']
+
+- 2026-07-26T18:04:22.810636+00:00 START G2-P4-B03
+
+- 2026-07-26T18:12:07.028578+00:00 PASS G2-P4-B03 evidence=['pnpm exec vitest run packages/pms-application/test/provider-identity.test.ts packages/pms-application/test/runtime-reconcile.test.ts (2 files/9 tests); pnpm --filter @sdar/runtime test (4 files/16 tests); pnpm --filter @sdar/runtime-registration test (3 files/10 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:12:34.225939+00:00 START G2-P4-B04
+
+- 2026-07-26T18:17:35.041161+00:00 PASS G2-P4-B04 evidence=['pnpm --filter @sdar/catalog-manager test (1 file/10 tests); tsc --noEmit; eslint packages/catalog-manager; git diff --check']
+
+- 2026-07-26T18:17:50.613187+00:00 START G2-P4-B05
+
+- 2026-07-26T18:22:45.968565+00:00 PASS G2-P4-B05 evidence=['pnpm --filter @sdar/catalog-manager test (1 file/10 tests); TEST_DATABASE_URL=<local> pnpm exec vitest run packages/pms-persistence-postgres/test/catalog-snapshot.test.ts tests/pms-migrations/pms-migrations.test.ts (2 files/11 tests); TEST_DATABASE_URL=<local> pnpm --filter @sdar/pms-persistence-postgres test (6 files/26 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:23:03.330627+00:00 START G2-P4-B06
+
+- 2026-07-26T18:28:27.385430+00:00 PASS G2-P4-B06 evidence=['TEST_DATABASE_URL=<local> pnpm test:registry (2 files/12 tests); TEST_DATABASE_URL=<local> pnpm exec vitest run tests/pms-migrations/pms-migrations.test.ts packages/pms-persistence-postgres/test/catalog-snapshot.test.ts (2 files/11 tests); TEST_DATABASE_URL=<local> pnpm --filter @sdar/pms-persistence-postgres test (6 files/26 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:28:46.981690+00:00 START G2-P4-B07
+
+- 2026-07-26T18:34:02.586988+00:00 PASS G2-P4-B07 evidence=['TEST_DATABASE_URL=<local> pnpm test:registry-e2e (1 file/4 tests); TEST_DATABASE_URL=<local> pnpm --filter @sdar/pms-api test (9 files/51 tests); tsc --noEmit; eslint changed Registry API files; git diff --check; docs/integration/SDAR_REGISTRY_IMPORT.md']
+
+- 2026-07-26T18:34:22.236755+00:00 START G2-P4-B08
+
+- 2026-07-26T18:40:20.763450+00:00 PASS G2-P4-B08 evidence=['TEST_DATABASE_URL=<local> pnpm test:catalog-registry-e2e (1 file/4 tests); pnpm build; pnpm --filter @sdar/pms-worker test (3 files/9 tests); tsc --noEmit; eslint; git diff --check; .codex/reports/goal2-P4.md']
+
+- 2026-07-26T18:40:58.693297+00:00 START G2-P5-B01
+
+- 2026-07-26T18:46:29.900714+00:00 PASS G2-P5-B01 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ugv (1 file/2 tests; real local UGV Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, Catalog/Registry; Provider DB provision calls=0); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:46:48.934261+00:00 START G2-P5-B02
+
+- 2026-07-26T18:49:22.562239+00:00 PASS G2-P5-B02 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-npc (1 file/2 tests; real local NPC Tank Adapter + Runtime + PostgreSQL, Mock device resources, 9 Operations, conditional circular EO capability, Catalog/Registry); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:49:41.157589+00:00 START G2-P5-B03
+
+- 2026-07-26T18:52:57.609806+00:00 PASS G2-P5-B03 evidence=['TEST_DATABASE_URL=<local> pnpm test:provider-platform-ha (1 file/2 tests; Fake HA + real local Climate Adapter + Runtime + PostgreSQL, 4 Operations, resource binding, Catalog/Registry); pnpm test:protocol:frozen (14 files/71 tests); pnpm --filter @sdar/catalog-manager test (1 file/10 tests); tsc --noEmit; eslint; git diff --check']
+
+- 2026-07-26T18:53:19.046049+00:00 START G2-P5-B04
+
+- 2026-07-26T19:00:09.462253+00:00 PASS G2-P5-B04 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (7 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:00:26.450091+00:00 START G2-P5-B05
+
+- 2026-07-26T19:08:25.704650+00:00 PASS G2-P5-B05 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (12 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:08:40.039943+00:00 START G2-P5-B06
+
+- 2026-07-26T19:13:16.976740+00:00 PASS G2-P5-B06 evidence=['PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web test (16 passed); PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm --filter @sdar/pms-web build; root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:13:33.513922+00:00 START G2-P5-B07
+
+- 2026-07-26T19:17:10.358374+00:00 PASS G2-P5-B07 evidence=['reports/evidence/G2-P5-B07-platform-security.json; pnpm test:platform-security (4 passed); pnpm test:fault-injection (4 passed); root tsc/eslint/git diff --check passed']
+
+- 2026-07-26T19:17:24.165032+00:00 START G2-P5-B08
+
+- 2026-07-26T19:27:26.612202+00:00 PASS G2-P5-B08 evidence=['reports/evidence/sdar-interop.json; TEST_DATABASE_URL=<redacted> pnpm test:sdar-interop (1 controlled E2E passed); @sdar/catalog-manager 10 passed; frozen protocol 71 passed; external SDAR gate BLOCKED_EXTERNAL']
+
+- 2026-07-26T19:27:43.535405+00:00 START G2-P5-B09
+
+- 2026-07-26T19:45:49.385863+00:00 PASS G2-P5-B09 evidence=['reports/platform-v0.1/FINAL_DELIVERY_REPORT.md; TEST_DATABASE_URL=<local-postgres> pnpm verify:platform (exit 0); reports/platform-v0.1/TEST_EVIDENCE.json']
