@@ -1,52 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
-import type { JobLease } from "../../../packages/pms-domain/src/index.js";
-import {
-  createRuntimeDatabasePreparationJobHandler,
-  RUNTIME_DATABASE_PREPARATION_JOB,
-} from "../src/index.js";
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { RuntimeDatabasePreparationJob } from "../../../packages/pms-application/src/index.js";
 
-describe("Runtime database preparation worker handler", () => {
-  it("uses the lease fencing token as the recoverable operation identity", async () => {
-    const execute = vi.fn(() => Promise.resolve({}));
-    const handler = createRuntimeDatabasePreparationJobHandler({ execute });
-
-    await handler.execute(lease({ providerId: "provider-a", deploymentId: "deployment-1" }));
-
-    expect(handler.jobType).toBe(RUNTIME_DATABASE_PREPARATION_JOB);
-    expect(execute).toHaveBeenCalledWith({
-      providerId: "provider-a",
-      deploymentId: "deployment-1",
-      operationId: "job:job-1:fence:7",
-    });
+describe("Runtime database preparation boundary", () => {
+  it("keeps database preparation available as an internal application service", () => {
+    expect(RuntimeDatabasePreparationJob).toBeTypeOf("function");
   });
 
-  it("rejects malformed job payloads before calling the application job", async () => {
-    const execute = vi.fn(() => Promise.resolve({}));
-    const handler = createRuntimeDatabasePreparationJobHandler({ execute });
+  it("does not export a second external worker handler", () => {
+    const workerIndex = readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
 
-    await expect(handler.execute(lease({ providerId: "provider-a" }))).rejects.toThrow(
-      "RUNTIME_DATABASE_PREPARATION_PAYLOAD_INVALID",
-    );
-    expect(execute).not.toHaveBeenCalled();
+    expect(workerIndex).not.toContain("runtime-database-preparation-job");
+    expect(workerIndex).toContain('export * from "./runtime-reconcile-job.js"');
   });
 });
-
-function lease(payload: Readonly<Record<string, string>>): JobLease {
-  const now = new Date("2026-07-26T00:00:00.000Z");
-  return {
-    job: {
-      jobId: "job-1",
-      jobType: RUNTIME_DATABASE_PREPARATION_JOB,
-      payload,
-      status: "leased",
-      attempt: 1,
-      availableAt: now,
-      createdAt: now,
-      updatedAt: now,
-    },
-    owner: "worker-1",
-    token: "11111111-1111-4111-8111-111111111111",
-    fencingToken: 7n,
-    expiresAt: new Date("2026-07-26T00:01:00.000Z"),
-  };
-}

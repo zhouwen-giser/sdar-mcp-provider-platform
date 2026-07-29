@@ -24,3 +24,15 @@
 - Base Compose reached healthy; `/health/ready` returned `status=ready`
 - Compose containers, network, and volumes were cleaned up
 - Typecheck, lint, formatting, diff check, and Goal 2 state verification passed
+
+## G3-P2-B01
+
+- Started: 2026-07-29T09:31:56+08:00
+- Removed the second external database-preparation Worker handler and export
+- Preserved database preparation as the Reconciler's internal application port
+- Added ADR 0007 and updated Worker operations documentation
+- Added deterministic duplicate registration coverage for constructor and
+  incremental registration
+- Worker tests passed: 4 files / 12 tests; focused tests: 2 files / 5 tests
+- Typecheck, lint, static forbidden-symbol search, diff check, and Goal 2 state
+  verification passed

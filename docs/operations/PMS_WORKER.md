@@ -1,8 +1,13 @@
 # PMS Worker operations
 
-The PMS Worker is a control-plane background process. In Phase P4 it runs one allowlisted job,
-`provider_package.sync`, which projects the repository-controlled Provider Package registry into the
-PMS database. It does not manage Runtime processes or deployments.
+The PMS Worker is a control-plane background process. Its current production bootstrap runs one
+allowlisted job, `provider_package.sync`, which projects the repository-controlled Provider Package
+registry into the PMS database. Full RuntimeDeployment production composition remains deferred.
+
+The external RuntimeDeployment lifecycle model reserves exactly one Job Type:
+`runtime_deployment.reconcile`. Its handler invokes the complete application reconciler under one
+lease and fencing context. Database preparation is an internal reconciler port/service, not a
+second external job. See [ADR 0007](../adr/0007-single-runtime-reconcile-job.md).
 
 ## Bootstrap configuration
 
@@ -36,6 +41,12 @@ database discovery or fallback.
 
 The package sync handler uses `worker:<workerId>` as the Audit actor and includes job ID and fencing
 token in the correlation ID.
+
+When RuntimeDeployment composition is supplied by a future scoped change, the reconcile handler
+derives its operation ID and idempotency key from the job ID and fencing token. The registry rejects
+any second handler for `runtime_deployment.reconcile` with `PMS_JOB_HANDLER_DUPLICATE`. This
+repository does not currently add that handler to `bootstrapPmsWorker`; doing so requires the
+deferred production lifecycle dependencies.
 
 ## Health and shutdown
 
