@@ -1,13 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
-    "types": [],
-    "rootDir": "src",
-    "outDir": "dist/assets",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
     "declaration": false,
-    "sourceMap": true,
-    "noEmit": false
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx", "vite.config.ts"]
 }

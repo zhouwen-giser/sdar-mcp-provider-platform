@@ -1,0 +1,67 @@
+import type { PrototypeDataset } from "./types.js";
+
+export const HEALTHY_DATASET: PrototypeDataset = {
+  dashboard: {
+    providerCount: 3,
+    healthyProviderCount: 3,
+    activeDeploymentCount: 4,
+    openIncidentCount: 0,
+    workerBacklog: 2,
+    stale: false,
+  },
+  providers: [
+    {
+      providerId: "provider-ha-east",
+      name: "华东楼宇气候",
+      type: "home-assistant-climate",
+      environment: "production-mock",
+      status: "ACTIVE",
+      resourceCount: 24,
+      deploymentCount: 1,
+      observedAt: "2026-07-29T06:00:00.000Z",
+    },
+    {
+      providerId: "provider-ugv-fleet",
+      name: "园区 UGV 车队",
+      type: "ugv",
+      environment: "production-mock",
+      status: "ACTIVE",
+      resourceCount: 12,
+      deploymentCount: 2,
+      observedAt: "2026-07-29T05:59:42.000Z",
+    },
+    {
+      providerId: "provider-npc-range",
+      name: "靶场 NPC Tank",
+      type: "npc-tank",
+      environment: "staging-mock",
+      status: "ACTIVE",
+      resourceCount: 8,
+      deploymentCount: 1,
+      observedAt: "2026-07-29T05:58:10.000Z",
+    },
+  ],
+  deployments: [
+    {
+      deploymentId: "deploy-ha-primary",
+      providerId: "provider-ha-east",
+      release: "@sdar/runtime@2.0.0-rc.1",
+      desiredState: "ACTIVE",
+      observedState: "ACTIVE",
+      desiredRevision: 17,
+      observedRevision: 17,
+      configRevision: 42,
+    },
+    {
+      deploymentId: "deploy-ugv-primary",
+      providerId: "provider-ugv-fleet",
+      release: "@sdar/runtime@2.0.0-rc.1",
+      desiredState: "ACTIVE",
+      observedState: "ACTIVE",
+      desiredRevision: 9,
+      observedRevision: 9,
+      configRevision: 28,
+    },
+  ],
+  incidents: [],
+};
