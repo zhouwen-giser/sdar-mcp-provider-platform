@@ -72,8 +72,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify:v2
       - run: buf lint proto
-      - name: Check Protobuf compatibility against rc.1
-        run: buf breaking proto --against '.git#tag=v1.0.0-rc.1,subdir=proto'
+      - name: Check Protobuf compatibility against imported rc.1 baseline
+        run: |
+          baseline_dir="${RUNNER_TEMP}/runtime-rc1-proto"
+          mkdir -p "${baseline_dir}"
+          git archive ad199f508cf67dbe77491cf90569daf5da8197bb proto | tar -x -C "${baseline_dir}"
+          buf breaking proto --against "${baseline_dir}/proto"
       - if: always()
         uses: actions/upload-artifact@v4
         with:

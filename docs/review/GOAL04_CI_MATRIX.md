@@ -13,6 +13,10 @@ containers and database names. Required jobs do not use `continue-on-error` or w
 | Platform security, recovery, Catalog/Registry and SDAR | `platform-e2e`          | `test:platform-security`, `test:fault-injection`, `test:catalog-registry-e2e`, `test:sdar-interop`, `test:platform-e2e` |
 | Runtime and adapter container assembly                 | `runtime-compose`       | Compose config/build/start/readiness for TypeScript, Python and business-events profiles                                |
 
+The Runtime compatibility check pins the imported offline rc.1 baseline commit
+`ad199f508cf67dbe77491cf90569daf5da8197bb`. The historical tag is not present in this repository,
+and Goal 04 does not create or rewrite tags.
+
 The `worker-pm2-production` artifact contains only the redacted lifecycle evidence and cleanup
 resource counts. It never uploads credential files, database URLs, PM2 dumps, logs, or temporary
 directories.
