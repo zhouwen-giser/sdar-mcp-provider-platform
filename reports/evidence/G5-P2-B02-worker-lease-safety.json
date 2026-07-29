@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "taskId": "G5-P2-B02",
-  "generatedAt": "2026-07-29T13:20:55.667Z",
+  "generatedAt": "2026-07-29T09:51:14.618Z",
   "resourceClassification": {
     "postgres": "real local PostgreSQL",
     "workers": "two real PmsWorker instances using PostgresJobLeaseRepository",
@@ -10,12 +10,12 @@
   },
   "leaseDurationMs": 300,
   "metrics": {
-    "scenarioARenewals": 10,
+    "scenarioARenewals": 9,
     "scenarioBFences": ["1", "2"],
     "scenarioDRenewals": {
-      "scenario-d-1": 10,
-      "scenario-d-2": 10,
-      "scenario-d-3": 10
+      "scenario-d-1": 9,
+      "scenario-d-2": 9,
+      "scenario-d-3": 9
     }
   },
   "assertions": {
