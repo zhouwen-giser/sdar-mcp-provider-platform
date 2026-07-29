@@ -11,8 +11,8 @@ before running a gate.
 | `static`                       | Formatting, lint, types, build, protocol reports and SBOM       |
 | `runtime-ci`                   | Frozen protocol, runtime closure and repository verification    |
 | `pms-api-production`           | PMS API production, configuration and migration gates           |
-| `worker-pm2-production`        | Real PM2 worker lifecycle                                       |
-| `runtime-credential-isolation` | Two-deployment credential isolation evidence                    |
+| `worker-pm2-production`        | Real PM2 lifecycle and exact-head credential evidence producer  |
+| `runtime-credential-isolation` | Independent validation of exact-head credential evidence        |
 | `worker-lease-safety`          | Competing-worker lease ownership and expiry                     |
 | `provider-regression`          | UGV, NPC and HA provider suites                                 |
 | `platform-e2e`                 | Security, failure injection, registry, interop and platform E2E |

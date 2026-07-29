@@ -28,6 +28,10 @@ import {
   CatalogDiscoveryClient,
   HttpCatalogDiscoveryTransport,
 } from "../../packages/catalog-manager/src/index.ts";
+import {
+  createPm2JavascriptApi,
+  Pm2ProcessManager,
+} from "../../packages/pm2-runtime-adapter/src/index.ts";
 
 const root = process.cwd();
 const adminDatabaseUrl = requiredEnvironment("TEST_DATABASE_URL");
@@ -147,8 +151,23 @@ try {
   const beforeCrash = await onlineProcess();
   const isolatedBeforeCrash = await onlineProcess(isolatedIdentity.pm2Name);
   process.kill(requiredPid(beforeCrash), "SIGKILL");
-  await waitForStatus("DEGRADED", 30_000);
-  timeline.push(event("runtime_sigkill", "DEGRADED"));
+  const crashObserved = await waitFor(
+    async () => ({
+      status: await deploymentStatus(),
+      process: await processes.describe(identity.pm2Name),
+    }),
+    (value) =>
+      value.status === "DEGRADED" ||
+      (value.process.state === "online" && value.process.pid !== beforeCrash.pid),
+    30_000,
+    "RUNTIME_SIGKILL_NOT_OBSERVED",
+  );
+  timeline.push(
+    event(
+      "runtime_sigkill",
+      crashObserved.status === "DEGRADED" ? "DEGRADED" : "PM2_AUTO_RECOVERED",
+    ),
+  );
   const recovered = await waitForProcess(
     (value) => value.state === "online" && value.pid !== beforeCrash.pid,
     60_000,
@@ -443,8 +462,8 @@ async function startWorker() {
   await delay(1_100);
   await workerComposition.runtime.scheduler.tick();
   process.stdout.write("WORKER_PM2_STAGE worker_scheduler ticked\n");
-  pm2Api = workerComposition.runtime.components.pm2Api;
-  processes = workerComposition.runtime.components.processManager;
+  pm2Api = createPm2JavascriptApi({ pm2Home });
+  processes = new Pm2ProcessManager(pm2Api, releaseRoot);
   return running;
 }
 

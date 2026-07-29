@@ -24,6 +24,7 @@ try {
   for (const [target, image] of Object.entries(images)) {
     command("docker", [
       "build",
+      "--provenance=false",
       "--target",
       target === "runtime" ? "runtime" : `pms-${target}`,
       "--build-arg",
