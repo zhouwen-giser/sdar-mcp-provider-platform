@@ -25,6 +25,7 @@ import {
   RuntimeIncidentsPage,
   RuntimeJobsPage,
 } from "./features/operations/RuntimeRecoveryPage.js";
+import { ConfigurationPage } from "./features/configuration/ConfigurationPage.js";
 import "./styles.css";
 
 export function App() {
@@ -83,6 +84,10 @@ export function App() {
         <RuntimeIncidentsPage />
       ) : route.path === "/operations/incidents/:incidentId" ? (
         <RuntimeIncidentsPage incidentId={segments[2] ?? ""} />
+      ) : route.path === "/configuration" ? (
+        <ConfigurationPage />
+      ) : route.path === "/configuration/:profileId" ? (
+        <ConfigurationPage profileId={segments[1] ?? ""} />
       ) : (
         <StructuredPlaceholder route={route} />
       )}

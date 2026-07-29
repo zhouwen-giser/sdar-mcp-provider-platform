@@ -7,6 +7,7 @@ import {
 import { buildScenario } from "./scenarios.js";
 import type {
   DashboardSnapshot,
+  ConfigurationProfile,
   IncidentSummary,
   MockCheckResult,
   PmsWebDataSource,
@@ -17,10 +18,12 @@ import type {
   ResourceSummary,
   RuntimeDeploymentDraft,
   RuntimeDeploymentSummary,
+  RuntimeConfigurationAck,
   RuntimeProcessSummary,
   SimulatedOperationInput,
   WorkerJobSummary,
 } from "./types.js";
+import { CONFIGURATION_PROFILES } from "./fixtures.js";
 
 export class MockPmsWebDataSource implements PmsWebDataSource {
   readonly #listeners = new Set<() => void>();
@@ -33,6 +36,7 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
   readonly #deploymentOverrides = new Map<string, RuntimeDeploymentSummary>();
   readonly #processOverrides = new Map<string, RuntimeProcessSummary>();
   readonly #createdJobs = new Map<string, WorkerJobSummary>();
+  readonly #configurationAcks = new Map<string, readonly RuntimeConfigurationAck[]>();
   #revision = 0;
 
   constructor(
@@ -98,6 +102,100 @@ export class MockPmsWebDataSource implements PmsWebDataSource {
   async jobs(): Promise<readonly WorkerJobSummary[]> {
     const jobs = await this.#read((dataset) => dataset.jobs);
     return [...jobs, ...this.#createdJobs.values()];
+  }
+
+  async configurationProfiles(): Promise<readonly ConfigurationProfile[]> {
+    if (this.currentScenario === "network-error") throw new Error("MOCK_DATA_UNAVAILABLE");
+    const profiles = structuredClone(CONFIGURATION_PROFILES) as unknown as ConfigurationProfile[];
+    if (this.currentScenario === "pending-approval") {
+      return profiles.map((profile, index) =>
+        index === 0 ? { ...profile, status: "PENDING_APPROVAL" } : profile,
+      );
+    }
+    if (this.currentScenario === "partial-data") return profiles.slice(0, 1);
+    return profiles;
+  }
+
+  async runtimeConfigurationAcks(
+    profileId: string,
+  ): Promise<readonly RuntimeConfigurationAck[]> {
+    const override = this.#configurationAcks.get(profileId);
+    if (override !== undefined) return override;
+    const revision = profileId === "provider-runtime" ? 43 : 18;
+    const base: RuntimeConfigurationAck[] = [
+      {
+        runtimeId: "deploy-ha-primary",
+        profileId,
+        revision: revision - 1,
+        status: this.currentScenario === "config-drift" ? "OFFLINE" : "APPLIED",
+        detail:
+          this.currentScenario === "config-drift"
+            ? "最后心跳早于当前 revision"
+            : "模拟 ACK 已确认",
+      },
+      {
+        runtimeId: "deploy-ugv-primary",
+        profileId,
+        revision: revision - 1,
+        status: "RESTART_REQUIRED",
+        detail: "database.poolSize 需要重启",
+      },
+      {
+        runtimeId: "deploy-npc-primary",
+        profileId,
+        revision: revision - 1,
+        status: this.currentScenario === "partial-data" ? "PENDING" : "REJECTED",
+        detail: "模拟 schema version 不兼容",
+      },
+    ];
+    return base;
+  }
+
+  publishConfiguration(profileId: string): PrototypeOperation {
+    const operation = this.startOperation({
+      label: `模拟发布配置 ${profileId}`,
+      steps: ["Publish Revision", "Runtime Pull", "Validate / Apply", "Collect ACK"],
+    });
+    this.#configurationAcks.set(
+      profileId,
+      [
+        {
+          runtimeId: "deploy-ha-primary",
+          profileId,
+          revision: 43,
+          status: "PENDING",
+          detail: "等待模拟 Pull",
+        },
+        {
+          runtimeId: "deploy-ugv-primary",
+          profileId,
+          revision: 43,
+          status: "PENDING",
+          detail: "等待模拟 Pull",
+        },
+      ],
+    );
+    this.#operationEffects.set(operation.operationId, (current) => {
+      const complete = current.status === "COMPLETED";
+      this.#configurationAcks.set(profileId, [
+        {
+          runtimeId: "deploy-ha-primary",
+          profileId,
+          revision: 43,
+          status: complete ? "APPLIED" : "PENDING",
+          detail: complete ? "Hot Reload 模拟 ACK" : "等待模拟 Apply",
+        },
+        {
+          runtimeId: "deploy-ugv-primary",
+          profileId,
+          revision: 43,
+          status: complete ? "RESTART_REQUIRED" : "PENDING",
+          detail: complete ? "配置已拉取，需模拟重启" : "等待模拟 Apply",
+        },
+      ]);
+    });
+    this.#emit();
+    return operation;
   }
 
   createRuntimeDeployment(draft: RuntimeDeploymentDraft): {

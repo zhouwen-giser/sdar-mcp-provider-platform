@@ -107,6 +107,39 @@ export interface RuntimeDeploymentDraft {
   readonly replicas: number;
 }
 
+export type ConfigurationApplyMode = "HOT_RELOAD" | "RECONNECT" | "RESTART" | "IMMUTABLE";
+
+export interface ConfigurationField {
+  readonly key: string;
+  readonly value: string | number | boolean;
+  readonly defaultValue: string | number | boolean;
+  readonly source: "platform-default" | "provider-profile" | "environment-override";
+  readonly applyMode: ConfigurationApplyMode;
+  readonly secretRef?: string;
+}
+
+export interface ConfigurationProfile {
+  readonly profileId: string;
+  readonly name: string;
+  readonly status: "DRAFT" | "PUBLISHED" | "PENDING_APPROVAL";
+  readonly currentRevision: number;
+  readonly publishedRevision: number;
+  readonly fields: readonly ConfigurationField[];
+}
+
+export interface RuntimeConfigurationAck {
+  readonly runtimeId: string;
+  readonly profileId: string;
+  readonly revision: number;
+  readonly status:
+    | "APPLIED"
+    | "RESTART_REQUIRED"
+    | "OFFLINE"
+    | "REJECTED"
+    | "PENDING";
+  readonly detail: string;
+}
+
 export interface IncidentSummary {
   readonly incidentId: string;
   readonly title: string;
@@ -168,6 +201,9 @@ export interface PmsWebDataSource {
   deployment(deploymentId: string): Promise<RuntimeDeploymentSummary | undefined>;
   runtimeProcesses(): Promise<readonly RuntimeProcessSummary[]>;
   jobs(): Promise<readonly WorkerJobSummary[]>;
+  configurationProfiles(): Promise<readonly ConfigurationProfile[]>;
+  runtimeConfigurationAcks(profileId: string): Promise<readonly RuntimeConfigurationAck[]>;
+  publishConfiguration(profileId: string): PrototypeOperation;
   createRuntimeDeployment(draft: RuntimeDeploymentDraft): {
     readonly deployment: RuntimeDeploymentSummary;
     readonly operation: PrototypeOperation;

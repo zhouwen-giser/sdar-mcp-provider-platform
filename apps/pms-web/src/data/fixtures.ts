@@ -1,5 +1,62 @@
 import type { PrototypeDataset } from "./types.js";
 
+export const CONFIGURATION_PROFILES = [
+  {
+    profileId: "provider-runtime",
+    name: "Provider Runtime",
+    status: "DRAFT",
+    currentRevision: 43,
+    publishedRevision: 42,
+    fields: [
+      {
+        key: "runtime.logLevel",
+        value: "info",
+        defaultValue: "warn",
+        source: "provider-profile",
+        applyMode: "HOT_RELOAD",
+      },
+      {
+        key: "adapter.endpoint",
+        value: "mock://provider-ha-east",
+        defaultValue: "mock://unconfigured",
+        source: "environment-override",
+        applyMode: "RECONNECT",
+      },
+      {
+        key: "database.poolSize",
+        value: 12,
+        defaultValue: 8,
+        source: "provider-profile",
+        applyMode: "RESTART",
+      },
+      {
+        key: "database.credentials",
+        value: "secretref://pms/provider-ha-east/database",
+        defaultValue: "secretref://required",
+        source: "environment-override",
+        applyMode: "IMMUTABLE",
+        secretRef: "secretref://pms/provider-ha-east/database",
+      },
+    ],
+  },
+  {
+    profileId: "discovery-policy",
+    name: "Discovery Policy",
+    status: "PUBLISHED",
+    currentRevision: 18,
+    publishedRevision: 18,
+    fields: [
+      {
+        key: "discovery.intervalSeconds",
+        value: 60,
+        defaultValue: 300,
+        source: "provider-profile",
+        applyMode: "HOT_RELOAD",
+      },
+    ],
+  },
+] as const;
+
 export const HEALTHY_DATASET: PrototypeDataset = {
   dashboard: {
     providerCount: 3,
