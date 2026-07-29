@@ -180,6 +180,12 @@ importers:
 
   apps/pms-worker:
     dependencies:
+      '@sdar/catalog-manager':
+        specifier: workspace:*
+        version: link:../../packages/catalog-manager
+      '@sdar/pm2-runtime-adapter':
+        specifier: workspace:*
+        version: link:../../packages/pm2-runtime-adapter
       '@sdar/pms-application':
         specifier: workspace:*
         version: link:../../packages/pms-application
@@ -189,6 +195,21 @@ importers:
       '@sdar/pms-persistence-postgres':
         specifier: workspace:*
         version: link:../../packages/pms-persistence-postgres
+      '@sdar/postgres-provisioner':
+        specifier: workspace:*
+        version: link:../../packages/postgres-provisioner
+      '@sdar/registry-snapshot':
+        specifier: workspace:*
+        version: link:../../packages/registry-snapshot
+      '@sdar/runtime-deployment':
+        specifier: workspace:*
+        version: link:../../packages/runtime-deployment
+      '@sdar/runtime-migration-runner':
+        specifier: workspace:*
+        version: link:../../packages/runtime-migration-runner
+      '@sdar/secret-store':
+        specifier: workspace:*
+        version: link:../../packages/secret-store
       pg:
         specifier: 8.22.0
         version: 8.22.0
@@ -262,12 +283,18 @@ importers:
 
   packages/pms-persistence-postgres:
     dependencies:
+      '@sdar/catalog-manager':
+        specifier: workspace:*
+        version: link:../catalog-manager
       '@sdar/database-migration-runner':
         specifier: workspace:*
         version: link:../database-migration-runner
       '@sdar/pms-domain':
         specifier: workspace:*
         version: link:../pms-domain
+      '@sdar/registry-snapshot':
+        specifier: workspace:*
+        version: link:../registry-snapshot
       '@sdar/runtime-deployment':
         specifier: workspace:*
         version: link:../runtime-deployment
@@ -288,7 +315,11 @@ importers:
 
   packages/provider-package-registry: {}
 
-  packages/registry-snapshot: {}
+  packages/registry-snapshot:
+    dependencies:
+      '@sdar/catalog-manager':
+        specifier: workspace:*
+        version: link:../catalog-manager
 
   packages/runtime-config-client:
     dependencies:

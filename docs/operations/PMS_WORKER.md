@@ -1,9 +1,9 @@
 # PMS Worker operations
 
-The PMS Worker is a control-plane background process. Its current production bootstrap runs one
-allowlisted job, `provider_package.sync`, which projects the repository-controlled Provider Package
-registry into the PMS database. The secure Runtime composition input contract is available, while
-construction and handler registration remain deferred to the scoped production-composition task.
+The PMS Worker is a control-plane background process. Its production bootstrap runs exactly two
+allowlisted jobs: `provider_package.sync`, which projects the repository-controlled Provider Package
+registry, and `runtime_deployment.reconcile`, which owns the complete desired/observed Runtime
+lifecycle.
 
 The external RuntimeDeployment lifecycle model reserves exactly one Job Type:
 `runtime_deployment.reconcile`. Its handler invokes the complete application reconciler under one
@@ -22,8 +22,9 @@ second external job. See [ADR 0007](../adr/0007-single-runtime-reconcile-job.md)
 | `PMS_WORKER_RETRY_DELAY_MS`    |                    `5000` | Delay before a failed job becomes available             |
 | `PMS_WORKSPACE_ROOT`           | process working directory | Controlled package and migration root                   |
 
-The following Runtime lifecycle inputs are an atomic group. Supplying any one requires all of them;
-omitting the group preserves the foundation-only Worker until production composition is installed.
+The following Runtime lifecycle inputs are an atomic group. Supplying any one requires all of them.
+The production bootstrap also requires this group; omission fails closed with
+`PMS_WORKER_RUNTIME_CONFIG_REQUIRED`.
 
 | Variable                                    | Requirement | Purpose                                      |
 | ------------------------------------------- | ----------- | -------------------------------------------- |
@@ -36,6 +37,21 @@ omitting the group preserves the foundation-only Worker until production composi
 | `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
 | `PMS_RUNTIME_HEALTH_TIMEOUT_MS`             | required    | Bounded health/identity probe timeout        |
 
+`PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE` contains one JSON object with exactly `clusterRef`,
+`adminSecretRef`, `adminDatabaseUrl`, and `runtimePassword`. The cluster and secret references bind
+the file authority to one Database Profile, while the URL identifies its restricted PostgreSQL
+provisioning principal; the profile host and port must also match that URL. `runtimePassword` must
+contain at least 16 characters. The Worker never accepts any of these values inline. Database
+profiles must use the deployment-scoped Runtime secret reference
+`file/v1/<deploymentId>/database/runtime`; the Worker materializes its connection URL as a `0600`
+file under `PMS_RUNTIME_SECRET_ROOT`.
+
+`PMS_RUNTIME_RELEASE_ROOT/runtime-releases.json` is the Runtime release authority. Only listed
+versions are eligible, and every start resolves the fixed built entry
+`dist/apps/runtime/src/main.js` under its version directory. The PM2 adapter uses the repository
+dependency pinned to `7.0.3` and the JavaScript API with the isolated `PMS_PM2_HOME`; no PM2 CLI is
+invoked.
+
 Database and provisioning files must be absolute, regular, non-symlink, non-empty, no broader than
 `0600`, and located under a non-group-writable/non-world-writable parent. Release roots may be
 readable but not group/world writable. Secret, cache, and PM2 roots must be existing canonical
@@ -46,9 +62,11 @@ Inline database URLs, provisioning credentials, Runtime secrets/config tokens, a
 rejected. File contents are consumed only by their owning adapters and are never included in health
 state, errors, Audit, or evidence.
 
-Bootstrap applies only the PMS migration set, builds the allowlisted job registry, and then marks the
-worker ready. The worker receives a Pool for the PMS control-plane database; it has no Runtime
-database discovery or fallback.
+Bootstrap applies only the PMS migration set, validates the full Runtime configuration, constructs
+database preparation, migration, secret, release, PM2, health, identity, Catalog/Registry and
+reconcile components, starts the periodic scheduler, and finally starts the worker claim loop. A
+construction or startup failure disconnects PM2, closes the provisioning connection and PMS Pool,
+and leaves no scheduler running.
 
 ## Job and lease behavior
 
@@ -64,21 +82,21 @@ database discovery or fallback.
 The package sync handler uses `worker:<workerId>` as the Audit actor and includes job ID and fencing
 token in the correlation ID.
 
-When RuntimeDeployment composition is supplied by the scoped production-composition change, the reconcile handler
-derives its operation ID and idempotency key from the job ID and fencing token. The registry rejects
-any second handler for `runtime_deployment.reconcile` with `PMS_JOB_HANDLER_DUPLICATE`. This
-repository does not currently add that handler to `bootstrapPmsWorker`; doing so requires the
-deferred production lifecycle dependencies. The immutable composition contract reserves explicit
-slots for repositories, database preparation, lifecycle, health, identity, Catalog/Registry,
-scheduler, and cleanup without constructing any of them.
+The reconcile handler derives its operation ID and idempotency key from the job ID and fencing
+token. Database preparation remains an internal reconciler service and is never registered as an
+external job. A healthy Runtime reaches `ACTIVE` only after provider identity verification and
+successful Catalog plus Registry publication. Provisioning, migration, health, identity, discovery,
+or publication failures are fail-closed and are retried through the fenced reconcile job.
 
 ## Health and shutdown
 
 The in-process health indicator exposes `starting`, `ready`, `failed`, `stopping`, and `stopped`.
 It contains only readiness, the last successful loop timestamp, and a stable failure code.
 
-`SIGTERM` and `SIGINT` stop new polling, interrupt the poll delay, wait for the current handler to
-finish, and then close the PMS Pool. Repeated stop requests are safe.
+`SIGTERM` and `SIGINT` stop the scheduler first, stop new claims, interrupt the poll delay, and wait
+for the current handler up to the lease-duration shutdown bound. The Worker then disconnects its PM2
+JavaScript API and provisioning connection before closing the PMS Pool. Repeated stop requests are
+safe. A shutdown timeout is reported as `PMS_WORKER_SHUTDOWN_TIMEOUT`.
 
 Worker authority is limited to desired/observed Runtime infrastructure and its control-plane
 projections. Runtime Task data belongs to the Runtime database and is never read or mutated by the

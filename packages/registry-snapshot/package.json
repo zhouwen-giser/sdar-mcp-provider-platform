@@ -8,5 +8,8 @@
   },
   "scripts": {
     "test": "vitest run test"
+  },
+  "dependencies": {
+    "@sdar/catalog-manager": "workspace:*"
   }
 }

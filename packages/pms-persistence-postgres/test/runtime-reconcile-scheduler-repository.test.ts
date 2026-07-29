@@ -57,7 +57,11 @@ describe("PostgresRuntimeReconcileSchedulerRepository", () => {
     const repository = new PostgresRuntimeReconcileSchedulerRepository(pool);
 
     await expect(repository.enqueueDue({ limit: 20, minimumAgeMs: 1_000 })).resolves.toBe(4);
-    const jobs = await pool.query(
+    const jobs = await pool.query<{
+      payload: { deploymentId: string };
+      status: string;
+      available: boolean;
+    }>(
       `SELECT payload,status,available_at<=clock_timestamp() AS available
          FROM job_lease
         ORDER BY payload->>'deploymentId'`,

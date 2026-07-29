@@ -23,9 +23,8 @@ describe("PeriodicReconcileScheduler", () => {
 
   it("makes stop idempotent and waits for the active database tick", async () => {
     const pending = deferred<number>();
-    const repository: RuntimeReconcileSchedulerRepository = {
-      enqueueDue: vi.fn(() => pending.promise),
-    };
+    const enqueueDue = vi.fn(() => pending.promise);
+    const repository: RuntimeReconcileSchedulerRepository = { enqueueDue };
     const scheduler = new PeriodicReconcileScheduler(repository, {
       intervalMs: 1_000,
       batchSize: 10,
@@ -43,7 +42,7 @@ describe("PeriodicReconcileScheduler", () => {
     pending.resolve(1);
     await stopping;
     await scheduler.stop();
-    expect(repository.enqueueDue).toHaveBeenCalledOnce();
+    expect(enqueueDue).toHaveBeenCalledOnce();
   });
 
   it("releases overlap state after failure so a later tick can recover", async () => {

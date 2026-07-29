@@ -6,7 +6,9 @@ import {
 
 describe("PMS Worker Runtime composition contract", () => {
   it("defines immutable authority slots without constructing infrastructure", () => {
-    const input = contractFixture();
+    const schedulerStart = vi.fn();
+    const databasePreparationExecute = vi.fn(() => Promise.resolve());
+    const input = contractFixture({ schedulerStart, databasePreparationExecute });
 
     const contract = definePmsWorkerRuntimeCompositionContract(input);
 
@@ -28,8 +30,8 @@ describe("PMS Worker Runtime composition contract", () => {
     expect(Object.isFrozen(contract)).toBe(true);
     expect(Object.isFrozen(contract.config)).toBe(true);
     expect(Object.isFrozen(contract.repositories)).toBe(true);
-    expect(input.scheduler.start).not.toHaveBeenCalled();
-    expect(input.databasePreparation.execute).not.toHaveBeenCalled();
+    expect(schedulerStart).not.toHaveBeenCalled();
+    expect(databasePreparationExecute).not.toHaveBeenCalled();
   });
 
   it("fails closed when a required authority method is absent", () => {
@@ -44,7 +46,12 @@ describe("PMS Worker Runtime composition contract", () => {
   });
 });
 
-function contractFixture(): PmsWorkerRuntimeCompositionContract {
+function contractFixture(
+  overrides: {
+    readonly schedulerStart?: () => void;
+    readonly databasePreparationExecute?: () => Promise<unknown>;
+  } = {},
+): PmsWorkerRuntimeCompositionContract {
   return {
     config: {
       postgresProvisioningCredentialFile: "/run/sdar/provisioning-credential",
@@ -64,7 +71,9 @@ function contractFixture(): PmsWorkerRuntimeCompositionContract {
       catalogSnapshots: {},
       registrySnapshots: {},
     },
-    databasePreparation: { execute: vi.fn(() => Promise.resolve()) },
+    databasePreparation: {
+      execute: overrides.databasePreparationExecute ?? vi.fn(() => Promise.resolve()),
+    },
     lifecycle: {
       start: vi.fn(() => Promise.resolve()),
       stop: vi.fn(() => Promise.resolve()),
@@ -73,7 +82,7 @@ function contractFixture(): PmsWorkerRuntimeCompositionContract {
     identity: { verify: vi.fn(() => Promise.resolve()) },
     catalogRegistry: { close: vi.fn(() => Promise.resolve()) },
     scheduler: {
-      start: vi.fn(),
+      start: overrides.schedulerStart ?? vi.fn(),
       tick: vi.fn(() => Promise.resolve(0)),
       stop: vi.fn(() => Promise.resolve()),
     },
