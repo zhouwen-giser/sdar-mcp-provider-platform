@@ -37,6 +37,9 @@ const RESERVED_KEYS = new Set([
   "PMS_RUNTIME_CONFIG_URL",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
   "PMS_RUNTIME_CONFIG_CACHE_PATH",
+  "PMS_BOOTSTRAP_CHECKSUM",
+  "PMS_CONFIG_REVISION",
+  "PMS_RUNTIME_VERSION",
 ]);
 
 const SECRET_FILE_KEYS = new Set([
@@ -100,6 +103,9 @@ export class BootstrapConfigRenderer {
       RUNTIME_DEPLOYMENT_ID: input.target.deploymentId,
       RUNTIME_INSTANCE_ID: input.target.instanceId,
       OTEL_SERVICE_INSTANCE_ID: input.target.instanceId,
+      PMS_BOOTSTRAP_CHECKSUM: input.configChecksum,
+      PMS_CONFIG_REVISION: String(input.configRevision),
+      PMS_RUNTIME_VERSION: input.target.runtimeVersion,
     };
     if (input.pms !== undefined) {
       validatePms(input.pms, environment.RUNTIME_ENV);

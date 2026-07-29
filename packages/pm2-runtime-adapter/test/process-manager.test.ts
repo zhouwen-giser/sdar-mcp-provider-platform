@@ -99,6 +99,41 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
     expect(fake.restartOptions?.env).not.toHaveProperty("NODE_OPTIONS");
   });
 
+  it("keeps an online process unchanged only when all bootstrap fingerprints match", async () => {
+    const fake = new FakePm2Api();
+    fake.processes.set(
+      "sdar-runtime-provider-a-0",
+      description("online", request().bootstrap.environment),
+    );
+    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+
+    const result = await manager.start(request());
+
+    expect(result.outcome).toBe("unchanged");
+    expect(fake.restartOptions).toBeUndefined();
+  });
+
+  it.each([
+    ["runtime version", "PMS_RUNTIME_VERSION", "2.0.0-rc.0"],
+    ["config revision", "PMS_CONFIG_REVISION", "0"],
+    ["bootstrap checksum", "PMS_BOOTSTRAP_CHECKSUM", "b".repeat(64)],
+  ] as const)("restarts an online process with %s drift", async (_label, key, value) => {
+    const fake = new FakePm2Api();
+    fake.processes.set(
+      "sdar-runtime-provider-a-0",
+      description("online", { ...request().bootstrap.environment, [key]: value }),
+    );
+    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+
+    const result = await manager.start(request());
+
+    expect(result.outcome).toBe("changed");
+    expect(fake.restartOptions).toEqual({
+      updateEnv: true,
+      env: request().bootstrap.environment,
+    });
+  });
+
   it("makes repeated stop and delete idempotent", async () => {
     const fake = new FakePm2Api();
     fake.processes.set("sdar-runtime-provider-a-0", description("online"));
@@ -167,7 +202,7 @@ class FakePm2Api implements Pm2JavascriptApi {
 
   restart(name: string, options: Pm2RestartOptions, callback: (error?: Error) => void): void {
     this.restartOptions = options;
-    this.processes.set(name, description("online"));
+    this.processes.set(name, description("online", options.env));
     callback();
   }
 
@@ -216,6 +251,9 @@ function request() {
         PORT: "18080",
         PROVIDER_ID: "provider-a",
         DATABASE_URL_FILE: "/run/sdar/database-url",
+        PMS_BOOTSTRAP_CHECKSUM: "a".repeat(64),
+        PMS_CONFIG_REVISION: "1",
+        PMS_RUNTIME_VERSION: target.runtimeVersion,
       },
       redactedPreview: { DATABASE_URL_FILE: "<secret-file>" },
     },
@@ -228,7 +266,10 @@ function request() {
   };
 }
 
-function description(status: string): Pm2ProcessDescription {
+function description(
+  status: string,
+  environment: Readonly<Record<string, string>> = {},
+): Pm2ProcessDescription {
   return {
     name: "sdar-runtime-provider-a-0",
     pid: 12_345,
@@ -237,6 +278,7 @@ function description(status: string): Pm2ProcessDescription {
       pm_uptime: Date.parse("2026-07-26T00:00:00.000Z"),
       restart_time: 0,
       exec_mode: "fork_mode",
+      ...environment,
     },
   };
 }

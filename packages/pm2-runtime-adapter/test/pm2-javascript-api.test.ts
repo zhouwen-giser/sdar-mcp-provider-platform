@@ -45,6 +45,16 @@ describe("createPm2JavascriptApi", () => {
       "delete",
       "disconnect",
     ]);
+    expect(fixture.restartArguments).toEqual([
+      { name: options.name, env: options.env },
+      { updateEnv: true },
+    ]);
+    expect(
+      (fixture.restartArguments[0] as { readonly env: Readonly<Record<string, string>> }).env,
+    ).not.toBe(options.env);
+    expect(fixture.startArgument).toEqual(options);
+    expect(fixture.startArgument).not.toBe(options);
+    expect(fixture.startArgument?.env).not.toBe(options.env);
   });
 
   it("redacts connection failures and disconnects the failed client", async () => {
@@ -112,9 +122,13 @@ function moduleFixture(options: FixtureOptions = {}): {
   readonly module: InstalledPm2Module;
   readonly calls: string[];
   readonly constructedWith: { readonly pm2_home: string }[];
+  readonly restartArguments: unknown[];
+  readonly startArgument: Pm2StartOptions | undefined;
 } {
   const calls: string[] = [];
   const constructedWith: { readonly pm2_home: string }[] = [];
+  const restartArguments: unknown[] = [];
+  let startArgument: Pm2StartOptions | undefined;
   const process = processDescription();
   class CustomApi implements InstalledPm2JavascriptApi {
     constructor(configuration: { readonly pm2_home: string }) {
@@ -131,10 +145,11 @@ function moduleFixture(options: FixtureOptions = {}): {
     }
 
     start(
-      _startOptions: Pm2StartOptions,
+      startOptions: Pm2StartOptions,
       callback: (error: unknown, descriptions?: unknown) => void,
     ): void {
       calls.push("start");
+      startArgument = startOptions;
       callback(null, [process]);
     }
 
@@ -145,11 +160,13 @@ function moduleFixture(options: FixtureOptions = {}): {
     }
 
     restart(
-      _name: string,
-      _restartOptions: Pm2RestartOptions,
+      application:
+        string | { readonly name: string; readonly env: Readonly<Record<string, string>> },
+      restartOptions: Pick<Pm2RestartOptions, "updateEnv">,
       callback: (error?: unknown) => void,
     ): void {
       calls.push("restart");
+      restartArguments.push(application, restartOptions);
       callback();
     }
 
@@ -168,7 +185,15 @@ function moduleFixture(options: FixtureOptions = {}): {
       callback(options.listError ?? null, [process]);
     }
   }
-  return { module: { custom: CustomApi }, calls, constructedWith };
+  return {
+    module: { custom: CustomApi },
+    calls,
+    constructedWith,
+    restartArguments,
+    get startArgument() {
+      return startArgument;
+    },
+  };
 }
 
 function connect(api: ReturnType<typeof createPm2JavascriptApi>): Promise<void> {

@@ -29,6 +29,9 @@ describe("BootstrapConfigRenderer", () => {
       PORT: "18080",
       DATABASE_URL_FILE: "/run/sdar/database-url",
       PMS_RUNTIME_CONFIG_TOKEN_FILE: "/run/sdar/pms-token",
+      PMS_BOOTSTRAP_CHECKSUM: "a".repeat(64),
+      PMS_CONFIG_REVISION: "7",
+      PMS_RUNTIME_VERSION: "2.0.0-rc.1",
     });
     expect(left.redactedPreview).toMatchObject({
       DATABASE_URL_FILE: "<secret-file>",
@@ -37,22 +40,27 @@ describe("BootstrapConfigRenderer", () => {
     expect(JSON.stringify(left.redactedPreview)).not.toContain("/run/sdar/database-url");
   });
 
-  it.each(["PORT", "PROVIDER_ID", "DATABASE_URL", "RUNTIME_INSTANCE_ID"])(
-    "rejects reserved effective config key %s",
-    (key) => {
-      expect(() =>
-        renderer.render({
-          ...input(),
-          effectiveConfig: { ...input().effectiveConfig, [key]: "x" },
-        }),
-      ).toThrow(
-        expect.objectContaining({
-          code: "BOOTSTRAP_CONFIG_IMMUTABLE_OVERRIDE",
-          field: key,
-        }),
-      );
-    },
-  );
+  it.each([
+    "PORT",
+    "PROVIDER_ID",
+    "DATABASE_URL",
+    "RUNTIME_INSTANCE_ID",
+    "PMS_BOOTSTRAP_CHECKSUM",
+    "PMS_CONFIG_REVISION",
+    "PMS_RUNTIME_VERSION",
+  ])("rejects reserved effective config key %s", (key) => {
+    expect(() =>
+      renderer.render({
+        ...input(),
+        effectiveConfig: { ...input().effectiveConfig, [key]: "x" },
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "BOOTSTRAP_CONFIG_IMMUTABLE_OVERRIDE",
+        field: key,
+      }),
+    );
+  });
 
   it("rejects unknown environment keys and plaintext secret-shaped values", () => {
     expect(() =>

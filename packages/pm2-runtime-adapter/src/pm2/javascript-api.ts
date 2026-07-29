@@ -1,5 +1,5 @@
 import { isAbsolute, resolve } from "node:path";
-import pm2 from "pm2";
+import { createRequire } from "node:module";
 import type {
   Pm2JavascriptApi,
   Pm2ProcessDescription,
@@ -42,7 +42,11 @@ export interface InstalledPm2JavascriptApi {
   disconnect(): void;
   start(options: Pm2StartOptions, callback: (error: unknown, descriptions?: unknown) => void): void;
   stop(name: string, callback: (error?: unknown) => void): void;
-  restart(name: string, options: Pm2RestartOptions, callback: (error?: unknown) => void): void;
+  restart(
+    application: string | { readonly name: string; readonly env: Readonly<Record<string, string>> },
+    options: Pick<Pm2RestartOptions, "updateEnv">,
+    callback: (error?: unknown) => void,
+  ): void;
   delete(name: string, callback: (error?: unknown) => void): void;
   describe(name: string, callback: (error: unknown, descriptions?: unknown) => void): void;
   list(callback: (error: unknown, descriptions?: unknown) => void): void;
@@ -52,9 +56,16 @@ export interface InstalledPm2Module {
   readonly custom: new (options: { readonly pm2_home: string }) => InstalledPm2JavascriptApi;
 }
 
+// Match the official `pm2` programmatic entry point without constructing its global client.
+process.env.PM2_PROGRAMMATIC = "true";
+const installedPm2Api = createRequire(import.meta.url)(
+  "pm2/lib/API.js",
+) as InstalledPm2Module["custom"];
+const defaultInstalledModule: InstalledPm2Module = { custom: installedPm2Api };
+
 export function createPm2JavascriptApi(
   options: Pm2JavascriptApiOptions,
-  installedModule: InstalledPm2Module = pm2 as unknown as InstalledPm2Module,
+  installedModule: InstalledPm2Module = defaultInstalledModule,
 ): Pm2JavascriptApi {
   const pm2Home = validatePm2Home(options.pm2Home);
   let installed: InstalledPm2JavascriptApi;
@@ -106,7 +117,9 @@ class Pm2JavascriptApiBridge implements Pm2JavascriptApi {
     options: Pm2StartOptions,
     callback: (error: Error | null, descriptions?: readonly Pm2ProcessDescription[]) => void,
   ): void {
-    this.invokeList("start", callback, (done) => this.installed.start(options, done));
+    this.invokeList("start", callback, (done) =>
+      this.installed.start({ ...options, env: { ...options.env } }, done),
+    );
   }
 
   stop(name: string, callback: (error?: Error) => void): void {
@@ -114,7 +127,9 @@ class Pm2JavascriptApiBridge implements Pm2JavascriptApi {
   }
 
   restart(name: string, options: Pm2RestartOptions, callback: (error?: Error) => void): void {
-    this.invokeVoid("restart", callback, (done) => this.installed.restart(name, options, done));
+    this.invokeVoid("restart", callback, (done) =>
+      this.installed.restart({ name, env: { ...options.env } }, { updateEnv: true }, done),
+    );
   }
 
   delete(name: string, callback: (error?: Error) => void): void {
