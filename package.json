@@ -141,6 +141,8 @@
     "verify:v2": "pnpm verify:frozen-protocol && pnpm test:frozen-74 && pnpm test:runtime:closure && pnpm test:runtime:followup && pnpm test:interop:pr16 && pnpm verify:business-events && pnpm verify && pnpm protocol:reports:check && pnpm protocol:business-events:reports:check && pnpm test:rc2:red",
     "verify:business-events": "pnpm protocol:business-events:check && pnpm test:business-events:contract && pnpm test:business-events:adapter-contract && pnpm test:business-events:migration && pnpm test:business-events:persistence && pnpm test:business-events:retention && pnpm test:business-events:source && pnpm test:business-events:fencing && pnpm test:business-events:poison && pnpm test:business-events:finalizer && pnpm test:business-events:rotation && pnpm test:business-events:concurrency && pnpm test:business-events:stream && pnpm test:business-events:replay && pnpm test:business-events:continuity && pnpm test:business-events:relation && pnpm test:business-events:security && pnpm test:business-events:capacity && pnpm test:business-events:conformance && pnpm test:business-events:interop && pnpm verify:business-events:telemetry && pnpm protocol:business-events:reports:check",
     "dev:runtime": "tsx apps/runtime/src/main.ts",
+    "dev:pms-api": "tsx apps/pms-api/src/main.ts",
+    "dev:pms-web": "pnpm --filter @sdar/pms-web build && node scripts/serve-pms-web.mjs",
     "dev:ugv-adapter": "tsx apps/ugv-provider-adapter/src/main.ts",
     "dev:npc-tank-adapter": "tsx apps/npc-tank-provider-adapter/src/main.ts",
     "dev:mock-ugv-device-mcp": "tsx apps/mock-ugv-device-mcp/src/main.ts",
