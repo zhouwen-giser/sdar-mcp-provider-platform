@@ -15,3 +15,4 @@ export * from "./runtime-deployment-management.js";
 export * from "./runtime-deployment-routes.js";
 export * from "./runtime-process-routes.js";
 export * from "./runtime-registration-routes.js";
+export * from "./console/index.js";

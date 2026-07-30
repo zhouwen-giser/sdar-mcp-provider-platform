@@ -1,0 +1,51 @@
+{
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "validationStartHead": "b598474d5ab41d72962198612c853a945fa16100",
+  "remoteBranchHeadAtStart": "b598474d5ab41d72962198612c853a945fa16100",
+  "contractVersion": "1.0.0",
+  "contractStatus": "frozen",
+  "contractSha256": "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042",
+  "operationCount": 36,
+  "implementedOperationCount": 36,
+  "testedOperationCount": 0,
+  "testSourceCoveredOperationCount": 36,
+  "blockedOperationCount": 0,
+  "implementationStatus": "complete",
+  "validationStatus": "local_validation_required",
+  "dependencyInstallationAttempted": false,
+  "dependenciesAvailable": false,
+  "requestConformance": "not_executed_dependencies_unavailable",
+  "responseConformance": "not_executed_dependencies_unavailable",
+  "errorConformance": "not_executed_dependencies_unavailable",
+  "legacyRegression": "not_executed_dependencies_unavailable",
+  "typecheck": "not_executed_dependencies_unavailable",
+  "lint": "not_executed_dependencies_unavailable",
+  "test": "not_executed_dependencies_unavailable",
+  "build": "not_executed_dependencies_unavailable",
+  "businessSourceUnchanged": true,
+  "migrationsUnchanged": true,
+  "protocolUnchanged": true,
+  "pmsWebUnchanged": true,
+  "remotePushPerformed": false,
+  "productionCompositionTestSource": "apps/pms-api/test/production-composition.test.ts",
+  "commands": [
+    {
+      "command": "node scripts/pms-console-conformance/validate-all.mjs",
+      "result": "passed"
+    },
+    {
+      "command": "node --check <new TypeScript and MJS files>",
+      "result": "passed"
+    },
+    {
+      "command": "JSON parse checks",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "capturedAt": "2026-07-30T10:44:36.286Z"
+}
+

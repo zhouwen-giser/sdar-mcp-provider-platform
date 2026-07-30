@@ -160,12 +160,15 @@
     "pms-console-contract:lint": "node scripts/pms-console-contract/lint.mjs",
     "pms-console-contract:bundle": "node scripts/pms-console-contract/bundle.mjs",
     "pms-console-contract:test": "node scripts/pms-console-contract/validate-all.mjs --freeze",
+    "pms-console-contract:check": "node scripts/pms-console-contract/validate-all.mjs --freeze",
     "pms-console-contract:check-sources": "node scripts/pms-console-contract/check-sources.mjs --require-local",
     "pms-console-contract:check-errors": "node scripts/pms-console-contract/check-errors.mjs --require-local",
     "pms-console-contract:check-business-impact": "node scripts/pms-console-contract/check-business-impact.mjs --require-complete",
     "pms-console-contract:check-breaking": "node scripts/pms-console-contract/check-breaking.mjs",
     "pms-console-contract:freeze": "node scripts/pms-console-contract/generate-lock.mjs",
-    "pms-console-contract:deliver-frozen": "node scripts/pms-console-contract/create-frozen-delivery.mjs"
+    "pms-console-contract:deliver-frozen": "node scripts/pms-console-contract/create-frozen-delivery.mjs",
+    "pms-console-conformance:check": "node scripts/pms-console-conformance/validate-all.mjs",
+    "pms-console-conformance:deliver": "node scripts/pms-console-conformance/create-delivery.mjs"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.4",

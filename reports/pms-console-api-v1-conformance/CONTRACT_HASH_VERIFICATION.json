@@ -1,0 +1,50 @@
+{
+  "contract": "pms-console-api",
+  "version": "1.0.0",
+  "status": "frozen",
+  "operationCount": 36,
+  "mandatoryChecks": [
+    {
+      "field": "openApiSha256",
+      "relativePath": "openapi.yaml",
+      "expected": "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042",
+      "actual": "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042",
+      "passed": true
+    },
+    {
+      "field": "schemaBundleSha256",
+      "relativePath": "dist/openapi.bundle.json",
+      "expected": "a0982fd32dd5647831b528571fbee3972eac29ee0e8f7295b960e0507bf4ab1a",
+      "actual": "a0982fd32dd5647831b528571fbee3972eac29ee0e8f7295b960e0507bf4ab1a",
+      "passed": true
+    },
+    {
+      "field": "endpointSourceMapSha256",
+      "relativePath": "ENDPOINT_SOURCE_MAP.json",
+      "expected": "1ebf9c52c29044a0c14d19d73841a1822559a1d1ddef72f4abe399569ff1a396",
+      "actual": "1ebf9c52c29044a0c14d19d73841a1822559a1d1ddef72f4abe399569ff1a396",
+      "passed": true
+    },
+    {
+      "field": "errorSourceMapSha256",
+      "relativePath": "ERROR_SOURCE_MAP.json",
+      "expected": "3b72501425815462f7bbc11e5b080dc3baab3677bcea82d5701840d755ca2b6b",
+      "actual": "3b72501425815462f7bbc11e5b080dc3baab3677bcea82d5701840d755ca2b6b",
+      "passed": true
+    }
+  ],
+  "mandatoryChecksPassed": true,
+  "runtimePackageSchemaSemanticallyEqual": true,
+  "auxiliaryWarnings": [
+    {
+      "field": "contractManifestSha256",
+      "expected": "1b47a1fcaf45be7af9902204922ce4fe40095b2bfdb878f3e34b35a5b300164f",
+      "actual": "d8002e1f21f19ee7e6ef299e8a17ab6e80e3a418dd6203654b108c28050d163c",
+      "gating": false,
+      "reason": "Not one of the five implementation-start gates enumerated by the Goal 07 task"
+    }
+  ],
+  "contractModifiedByGoal07": false,
+  "capturedAt": "2026-07-30T10:44:36.286Z"
+}
+

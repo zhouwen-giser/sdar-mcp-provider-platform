@@ -1,0 +1,26 @@
+{
+  "implementation": "complete",
+  "operationSourceCoverage": 36,
+  "mutatingActorHeaderCoverage": "all_mutating_operations",
+  "negativeTracingHeaderCoverage": "all_36_operations",
+  "constraintsCoveredBySource": [
+    "path",
+    "query",
+    "header",
+    "requestBody",
+    "required",
+    "enum",
+    "format",
+    "pattern",
+    "minimum",
+    "maximum",
+    "additionalProperties",
+    "contentType"
+  ],
+  "executionStatus": "not_executed_dependencies_unavailable",
+  "testSources": [
+    "apps/pms-api/test/console/all-operations.test.ts",
+    "apps/pms-api/test/console/request-conformance.test.ts"
+  ]
+}
+

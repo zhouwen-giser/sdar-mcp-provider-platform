@@ -16,6 +16,7 @@ describe("PMS API production composition", () => {
     expect(routes).toContain("processes (GET, HEAD)");
     expect(routes).toContain("registration/deployments/");
     expect(routes).toContain("config/deployments/");
+    expect(routes).toContain("console/v1");
 
     await expect(
       composition.app.inject({ method: "GET", url: "/health/live" }),
@@ -27,6 +28,12 @@ describe("PMS API production composition", () => {
         method: "GET",
         url: "/api/v1/provider-packages",
         headers: { authorization: "Bearer management-reader" },
+      }),
+    ).resolves.toMatchObject({ statusCode: 200 });
+    await expect(
+      composition.app.inject({
+        method: "GET",
+        url: "/api/console/v1/provider-packages",
       }),
     ).resolves.toMatchObject({ statusCode: 200 });
     await expect(
