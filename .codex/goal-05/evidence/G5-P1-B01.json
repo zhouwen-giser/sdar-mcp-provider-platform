@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P1-B01",
+  "commitSha": "3a73b21df9a8c809e1fc349f6015e3eaa295a3ed",
+  "commands": [
+    {
+      "command": "pnpm exec vitest run apps/pms-worker/test/runtime-control-plane-credentials.test.ts apps/pms-worker/test/config.test.ts",
+      "exitCode": 0,
+      "result": "2 files, 23 tests passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_runtime_credential_contract.py .",
+      "exitCode": 0,
+      "result": "RUNTIME_CREDENTIAL_CONTRACT_OK"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/decisions.md",
+    ".codex/goal-05/evidence/G5-P1-B01.json",
+    "apps/pms-worker/src/config.ts",
+    "apps/pms-worker/src/index.ts",
+    "apps/pms-worker/src/runtime-composition-contract.ts",
+    "apps/pms-worker/src/runtime-composition.ts",
+    "apps/pms-worker/src/runtime-control-plane-credentials.ts",
+    "apps/pms-worker/test/config.test.ts",
+    "apps/pms-worker/test/production-composition.test.ts",
+    "apps/pms-worker/test/runtime-composition-contract.test.ts",
+    "apps/pms-worker/test/runtime-control-plane-credentials.test.ts",
+    "docs/adr/0012-instance-scoped-runtime-control-plane-credentials.md",
+    "docs/operations/PMS_WORKER.md",
+    "docs/review/GOAL05_BASELINE.md",
+    "docs/review/GOAL05_SCOPE_LOCK.md"
+  ],
+  "assertions": {
+    "legacyGlobalTokenFallback": false,
+    "distinctInstancePathsTested": true,
+    "identityVariationFailsClosed": true,
+    "traversalRejected": true,
+    "symlinkRejected": true,
+    "broadPermissionsRejected": true,
+    "emptyTokenRejected": true,
+    "unsafeParentRejected": true,
+    "rootOverlapRejected": true,
+    "duplicateHardLinkRejected": true,
+    "tokenContentReturnedOrLogged": false,
+    "apiAuthorizationSemanticsChanged": false,
+    "migrationsChanged": false,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}

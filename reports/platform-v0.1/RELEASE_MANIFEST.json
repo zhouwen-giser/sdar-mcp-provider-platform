@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.0",
+  "schemaVersion": "3.0",
   "product": "SDAR MCP Provider Platform",
   "package": "sdar-mcp-provider-platform",
   "platformVersion": "0.1.0",
@@ -7,59 +7,155 @@
     "package": "@sdar/runtime",
     "version": "2.0.0-rc.1"
   },
-  "goalId": "goal-04-production-lifecycle-closure",
-  "branch": "codex/goal-04-production-lifecycle-closure",
-  "integrationTarget": "codex/goal-03-merge-readiness-foundation",
-  "candidateSourceCommit": "349fb8339ead8760f158ac8b05ad8d01e4825199",
-  "generatedAt": "2026-07-29T05:52:00Z",
-  "releaseAuthority": true,
-  "externalReleaseMetadata": {
-    "tag": "not-created",
-    "mergeCommit": "not-created",
-    "recordingLocation": "eventual GitHub Release"
+  "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "generatedAt": "2026-07-29T21:25:15+08:00",
+  "releaseAuthority": {
+    "model": "two-layer",
+    "qualifiedSource": "qualifiedSourceCommit",
+    "releaseMetadata": {
+      "tag": "platform-v0.1.0",
+      "commit": null,
+      "status": "pending-external-publication",
+      "recordingLocation": "GitHub Release and protected tag"
+    }
   },
-  "toolchain": {
-    "node": "v22.23.1",
-    "pnpm": "11.13.1",
-    "postgresql": "17",
-    "pm2": "7.0.3"
+  "qualification": {
+    "status": "pending_actions_freeze",
+    "pendingFreeze": true,
+    "candidateWorkflow": {
+      "workflow": ".github/workflows/release-candidate.yml",
+      "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+      "headSha": null,
+      "runId": null,
+      "runUrl": null
+    },
+    "requiredJobs": [
+      {
+        "name": "static",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-ci",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "pms-api-production",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "worker-pm2-production",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-credential-isolation",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "worker-lease-safety",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "provider-regression",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "platform-e2e",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "runtime-compose",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "release-artifacts",
+        "status": "pending",
+        "jobUrl": null
+      },
+      {
+        "name": "release-metadata",
+        "status": "pending",
+        "jobUrl": null
+      }
+    ]
   },
-  "taskSummary": {
-    "originalGoal2": { "passed": 50, "total": 50 },
-    "pmsApiFix": { "passed": 6, "total": 6 },
-    "goal03": { "passed": 7, "total": 7 },
-    "goal04": { "passed": 9, "total": 9 }
+  "sourceArchive": {
+    "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5",
+      "status": "generated"
+    }
   },
-  "gates": {
-    "verifyV2": "PASSED",
-    "verifyPlatform": "PASSED",
-    "pmsApiProduction": "PASSED",
-    "workerPm2Production": "PASSED",
-    "providerRegression": "PASSED_CONTROLLED",
-    "static": "PASSED_LOCAL",
-    "dockerCompose": "PASSED_LOCAL",
-    "externalSdar": "BLOCKED_EXTERNAL",
-    "realResources": "UNQUALIFIED"
-  },
-  "artifacts": [
+  "ociArtifacts": [
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/runtime",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-api",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-worker",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    },
+    {
+      "name": "ghcr.io/zhouwen-giser/sdar-mcp-provider-platform/pms-web",
+      "tag": "0.1.0",
+      "digest": {
+        "algorithm": "sha256",
+        "value": null,
+        "status": "pending-tag-workflow"
+      }
+    }
+  ],
+  "releaseFiles": [
     "CHANGELOG.md",
+    "package.json",
     "docs/operations/PLATFORM_V0_1_OPERATIONS.md",
     "docs/operations/PLATFORM_V0_1_UPGRADE.md",
-    "docs/review/GOAL04_FINAL_REPORT.md",
-    "docs/review/GOAL04_RELEASE_HANDOFF.md",
-    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
+    "docs/operations/PMS_WEB.md",
+    "docs/review/GOAL05_RELEASE_AUTHORITY.md",
+    "docs/review/GOAL05_RELEASE_NOTES.md",
     "reports/platform-v0.1/TEST_EVIDENCE.json",
     "reports/platform-v0.1/COMPATIBILITY_MATRIX.md",
     "reports/platform-v0.1/KNOWN_LIMITATIONS.md",
+    "reports/platform-v0.1/FINAL_DELIVERY_REPORT.md",
     "reports/platform-v0.1/CHECKSUMS.sha256",
     "reports/sbom/runtime-v1.cdx.json",
-    ".codex/handoff/platform-v0.1-final-handoff.json",
-    ".codex/goal-04/handoff.json",
-    ".codex/goal-04/test-evidence.json"
+    ".codex/handoff/platform-v0.1-release-handoff.json"
   ],
-  "historicalArtifacts": {
-    "goal2Handoff": "retained unchanged; not release authority",
-    "goal03Handoff": "retained unchanged; not release authority"
+  "qualificationBoundary": {
+    "controlledSdarInterop": "qualified",
+    "externalSdarInterop": "not-qualified",
+    "realUgv": "not-qualified",
+    "realNpcTank": "not-qualified",
+    "realHomeAssistant": "not-qualified",
+    "certificationClaim": "none"
   },
   "secretsRedacted": true
 }

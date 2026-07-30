@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P1-B02",
+  "commitSha": "939fcfc642164a7c522e8869794a53b2d30e2841",
+  "commands": [
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm test:worker-pm2-production",
+      "exitCode": 0,
+      "result": "WORKER_PM2_PRODUCTION_GATE_OK; two real deployments and ten bidirectional cross-token requests passed"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<local-postgres> pnpm exec vitest run apps/pms-worker/test/production-composition.test.ts",
+      "exitCode": 0,
+      "result": "1 file, 2 tests passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_runtime_credential_contract.py .",
+      "exitCode": 0,
+      "result": "RUNTIME_CREDENTIAL_CONTRACT_OK"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff secret-pattern scan",
+      "exitCode": 0,
+      "result": "SECRET_SCAN_OK"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "passed"
+    }
+  ],
+  "changedFiles": [
+    ".codex/goal-05/evidence/G5-P1-B02.json",
+    "docs/operations/PMS_WORKER.md",
+    "docs/review/GOAL05_RUNTIME_CREDENTIAL_MATRIX.md",
+    "reports/evidence/G5-P1-B02-runtime-credential-isolation.json",
+    "scripts/run-worker-pm2-production-gate.mjs",
+    "tests/worker-pm2-production/run-production-lifecycle.mjs"
+  ],
+  "assertions": {
+    "twoDeploymentsActive": true,
+    "independentDatabases": true,
+    "independentPm2Processes": true,
+    "missingCredentialDidNotStartPm2": true,
+    "missingCredentialNeverActive": true,
+    "configPullCrossTokenRejectedBothDirections": true,
+    "configWatchCrossTokenRejectedBothDirections": true,
+    "configAckCrossTokenRejectedBothDirections": true,
+    "registrationCrossTokenRejectedBothDirections": true,
+    "heartbeatCrossTokenRejectedBothDirections": true,
+    "apiWorkerRestartPreservedIdentityMapping": true,
+    "peerCrashDidNotAffectIsolatedRuntime": true,
+    "peerTokenRotationDidNotAffectIsolatedRuntime": true,
+    "tokenInRuntimeEnvironment": false,
+    "tokenOrReversibleDigestInEvidence": false,
+    "apiAuthorizationSemanticsRelaxed": false,
+    "migrationsChanged": false,
+    "priorGoalStatesChanged": false
+  },
+  "secretsRedacted": true
+}

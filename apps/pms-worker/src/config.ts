@@ -7,7 +7,7 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_SECRET_ROOT",
   "PMS_RUNTIME_CONFIG_CACHE_ROOT",
   "PMS_RUNTIME_CONTROL_PLANE_URL",
-  "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE",
+  "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
   "PMS_PM2_HOME",
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
   "PMS_RUNTIME_RECONCILE_TIMEOUT_MS",
@@ -20,7 +20,7 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeSecretRoot: string;
   readonly runtimeConfigCacheRoot: string;
   readonly runtimeControlPlaneUrl: string;
-  readonly runtimeControlPlaneTokenFile: string;
+  readonly runtimeControlPlaneCredentialRoot: string;
   readonly pm2Home: string;
   readonly runtimeReconcileIntervalMs: number;
   readonly runtimeReconcileTimeoutMs: number;
@@ -42,6 +42,7 @@ export async function loadPmsWorkerConfig(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): Promise<PmsWorkerConfig> {
   rejectInlineSecrets(environment);
+  rejectLegacyRuntimeTokenFile(environment);
   const databaseUrlFile = required(environment, "PMS_DATABASE_URL_FILE");
   await validateSecretFile(databaseUrlFile, "PMS_DATABASE_URL_FILE");
   const base = {
@@ -88,11 +89,10 @@ async function loadRuntimeConfig(
     postgresProvisioningCredentialFile,
     "PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE",
   );
-  const runtimeControlPlaneTokenFile = required(
+  const runtimeControlPlaneCredentialRoot = required(
     environment,
-    "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE",
+    "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
   );
-  await validateSecretFile(runtimeControlPlaneTokenFile, "PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE");
   const runtimeControlPlaneUrl = validateControlPlaneUrl(
     required(environment, "PMS_RUNTIME_CONTROL_PLANE_URL"),
   );
@@ -100,12 +100,18 @@ async function loadRuntimeConfig(
     runtimeReleaseRoot: required(environment, "PMS_RUNTIME_RELEASE_ROOT"),
     runtimeSecretRoot: required(environment, "PMS_RUNTIME_SECRET_ROOT"),
     runtimeConfigCacheRoot: required(environment, "PMS_RUNTIME_CONFIG_CACHE_ROOT"),
+    runtimeControlPlaneCredentialRoot,
     pm2Home: required(environment, "PMS_PM2_HOME"),
   };
   await Promise.all([
     validateRoot(roots.runtimeReleaseRoot, "PMS_RUNTIME_RELEASE_ROOT", false),
     validateRoot(roots.runtimeSecretRoot, "PMS_RUNTIME_SECRET_ROOT", true),
     validateRoot(roots.runtimeConfigCacheRoot, "PMS_RUNTIME_CONFIG_CACHE_ROOT", true),
+    validateRoot(
+      roots.runtimeControlPlaneCredentialRoot,
+      "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
+      true,
+    ),
     validateRoot(roots.pm2Home, "PMS_PM2_HOME", true),
   ]);
   assertDistinctRoots(Object.values(roots));
@@ -133,7 +139,7 @@ async function loadRuntimeConfig(
   return Object.freeze({
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
     runtimeControlPlaneUrl,
-    runtimeControlPlaneTokenFile: resolve(runtimeControlPlaneTokenFile),
+    runtimeControlPlaneCredentialRoot: resolve(roots.runtimeControlPlaneCredentialRoot),
     runtimeReleaseRoot: resolve(roots.runtimeReleaseRoot),
     runtimeSecretRoot: resolve(roots.runtimeSecretRoot),
     runtimeConfigCacheRoot: resolve(roots.runtimeConfigCacheRoot),
@@ -142,6 +148,15 @@ async function loadRuntimeConfig(
     runtimeReconcileTimeoutMs,
     runtimeHealthTimeoutMs,
   });
+}
+
+function rejectLegacyRuntimeTokenFile(
+  environment: Readonly<Record<string, string | undefined>>,
+): void {
+  const legacyKey = ["PMS", "RUNTIME", "CONTROL", "PLANE", "TOKEN", "FILE"].join("_");
+  if (environment[legacyKey] !== undefined) {
+    throw new Error("PMS_WORKER_LEGACY_RUNTIME_TOKEN_FILE_REJECTED");
+  }
 }
 
 function validateControlPlaneUrl(source: string): string {

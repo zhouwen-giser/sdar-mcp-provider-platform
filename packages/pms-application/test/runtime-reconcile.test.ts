@@ -251,6 +251,114 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(store.failureCodes).toEqual(["PROVIDER_ID_MISMATCH"]);
     expect(store.transitions).toEqual(["FAILED"]);
   });
+
+  it("checks cancellation after an uninterruptible database call before later state writes", async () => {
+    const store = new MemoryReconcileStore(deployment("REQUESTED"));
+    const controller = new AbortController();
+    const database = {
+      execute: vi.fn(() => {
+        controller.abort(new Error("LEASE_LOST"));
+        return Promise.resolve(store.current.snapshot);
+      }),
+    };
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      database,
+      lifecyclePort(),
+      readyHealth(),
+      inventory([]),
+      validIdentity(),
+    );
+
+    await expect(
+      reconciler.reconcile(input("database-abort", controller.signal)),
+    ).rejects.toThrow();
+    expect(database.execute).toHaveBeenCalledOnce();
+    expect(store.transitions).toEqual([]);
+    expect(store.failureCodes).toEqual([]);
+  });
+
+  it("checks cancellation after PM2 and health calls before recording observations", async () => {
+    const lifecycleStore = new MemoryReconcileStore(deployment("STARTING"));
+    const lifecycleController = new AbortController();
+    const lifecycle = lifecyclePort();
+    lifecycle.start.mockImplementationOnce(() => {
+      lifecycleController.abort(new Error("LEASE_LOST"));
+      return Promise.resolve({});
+    });
+    const lifecycleReconciler = new RuntimeDeploymentReconciler(
+      lifecycleStore,
+      databasePort(lifecycleStore),
+      lifecycle,
+      readyHealth(),
+      inventory([]),
+      validIdentity(),
+    );
+    await expect(
+      lifecycleReconciler.reconcile(input("lifecycle-abort", lifecycleController.signal)),
+    ).rejects.toThrow();
+    expect(lifecycleStore.transitions).toEqual([]);
+    expect(lifecycleStore.failureCodes).toEqual([]);
+
+    const healthStore = new MemoryReconcileStore(deployment("HEALTH_CHECKING"));
+    const healthController = new AbortController();
+    const health = readyHealth();
+    health.probe.mockImplementationOnce(() => {
+      healthController.abort(new Error("LEASE_LOST"));
+      return Promise.resolve({
+        processState: "online",
+        live: true,
+        ready: true,
+        reasonCode: "HEALTHY",
+        checkedAt: "2026-07-26T00:00:00.000Z",
+      });
+    });
+    const healthReconciler = new RuntimeDeploymentReconciler(
+      healthStore,
+      databasePort(healthStore),
+      lifecyclePort(),
+      health,
+      inventory([]),
+      validIdentity(),
+    );
+    await expect(
+      healthReconciler.reconcile(input("health-abort", healthController.signal)),
+    ).rejects.toThrow();
+    expect(healthStore.health).toEqual([]);
+    expect(healthStore.transitions).toEqual([]);
+    expect(healthStore.failureCodes).toEqual([]);
+  });
+
+  it("checks cancellation after Provider identity verification before health or failure writes", async () => {
+    const store = new MemoryReconcileStore(deployment("HEALTH_CHECKING"));
+    const controller = new AbortController();
+    const identity = validIdentity();
+    identity.verify.mockImplementationOnce(() => {
+      controller.abort(new Error("LEASE_LOST"));
+      return Promise.resolve({
+        valid: true,
+        reasonCode: "PROVIDER_ID_VERIFIED",
+        mismatchRelations: [],
+        retryable: false,
+      });
+    });
+    const health = readyHealth();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      health,
+      inventory([]),
+      identity,
+    );
+
+    await expect(
+      reconciler.reconcile(input("identity-abort", controller.signal)),
+    ).rejects.toThrow();
+    expect(health.probe).not.toHaveBeenCalled();
+    expect(store.transitions).toEqual([]);
+    expect(store.failureCodes).toEqual([]);
+  });
 });
 
 class MemoryReconcileStore implements RuntimeReconcileStore {
@@ -447,7 +555,7 @@ function instance(processName: string): RuntimeReconcileInstance {
   };
 }
 
-function input(suffix = "1") {
+function input(suffix = "1", signal?: AbortSignal) {
   return {
     providerId: "provider-a",
     deploymentId: "deployment-1",
@@ -456,6 +564,7 @@ function input(suffix = "1") {
       correlationId: `correlation-${suffix}`,
       idempotencyKey: `idempotency-${suffix}`,
       timeoutMs: 1_000,
+      ...(signal === undefined ? {} : { signal }),
     }),
   };
 }

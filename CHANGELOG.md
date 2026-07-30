@@ -20,6 +20,11 @@
   periodic fenced reconciliation, real database preparation and migrations,
   Runtime registration, Catalog/Registry publication, failure recovery, and
   independent required CI qualification jobs.
+- Added separately deployable non-root Runtime, PMS API, PMS Worker, and PMS Web
+  release artifacts plus controlled image and source-distribution qualification.
+- Bound release authority to one immutable qualified source commit while
+  recording the metadata commit, protected tag, Actions run, and OCI digests as
+  external publication facts, avoiding self-referential release metadata.
 - Real UGV, NPC Tank, and Home Assistant resources remain unqualified; V0.1
   makes no external-resource or Interop Certified claim.
 

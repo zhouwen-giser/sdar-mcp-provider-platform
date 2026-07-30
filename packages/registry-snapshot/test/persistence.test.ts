@@ -82,7 +82,30 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
     ).rejects.toMatchObject({ code: "55000" });
   });
 
+  it("reactivates an immutable historical checksum without inserting a duplicate", async () => {
+    const reactivated = await repository.publish(publicationInput(["provider-a"]));
+
+    expect(reactivated).toMatchObject({ created: false, snapshot: { revision: 1 } });
+    expect(await repository.latest("production")).toMatchObject({
+      revision: 1,
+      document: { providers: [{ providerId: "provider-a" }] },
+    });
+    expect(await repository.history("production")).toHaveLength(2);
+    const audit = await pool.query<{ action: string; subject_id: string }>(
+      `SELECT action,subject_id
+         FROM audit
+        WHERE subject_type='registry_snapshot'
+        ORDER BY occurred_at DESC
+        LIMIT 1`,
+    );
+    expect(audit.rows[0]).toEqual({
+      action: "registry.snapshot.reactivated",
+      subject_id: "production:1",
+    });
+  });
+
   it("keeps the LKG when a candidate fails integrity validation", async () => {
+    const before = await repository.latest("production");
     const candidate = buildRegistrySnapshot("production", [provider("provider-c")]);
     await expect(
       repository.publish({
@@ -91,10 +114,7 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
       }),
     ).rejects.toThrow("REGISTRY_CANDIDATE_INTEGRITY_INVALID");
 
-    expect(await repository.latest("production")).toMatchObject({
-      revision: 2,
-      document: { providers: [{ providerId: "provider-b" }] },
-    });
+    expect(await repository.latest("production")).toEqual(before);
     expect(await repository.history("production")).toHaveLength(2);
   });
 });

@@ -1,0 +1,92 @@
+{
+  "taskId": "G5-P5-B01",
+  "status": "awaiting-external-independent-review",
+  "recordedAt": "2026-07-29T13:57:57Z",
+  "commitShaAtEvidenceCreation": "33e43afbfc841a8c48f4e469c30943d02b8963e0",
+  "qualifiedSourceCommit": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "changedFiles": [
+    ".codex/handoff/platform-v0.1-release-handoff.json",
+    "docs/review/GOAL05_RELEASE_HANDOFF.md",
+    "reports/platform-v0.1/CHECKSUMS.sha256",
+    "scripts/release/verify-repository-policy.mjs",
+    ".codex/goal-05/evidence/G5-P5-B01.json"
+  ],
+  "pullRequest": {
+    "number": 6,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/6",
+    "base": "main",
+    "candidateRun": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/30456436614",
+    "candidateHead": "33e43afbfc841a8c48f4e469c30943d02b8963e0",
+    "candidateConclusion": "success",
+    "reviewThreadsAtAudit": 0,
+    "independentApprovalsAtAudit": 0
+  },
+  "repositoryPolicy": {
+    "branch": "main",
+    "configuredVia": "PUT /repos/zhouwen-giser/sdar-mcp-provider-platform/branches/main/protection",
+    "strictChecks": true,
+    "requiredChecks": [
+      "static",
+      "runtime-ci",
+      "pms-api-production",
+      "worker-pm2-production",
+      "runtime-credential-isolation",
+      "worker-lease-safety",
+      "provider-regression",
+      "platform-e2e",
+      "runtime-compose",
+      "release-artifacts",
+      "release-metadata"
+    ],
+    "requiredApprovals": 1,
+    "requireLastPushApproval": true,
+    "requireConversationResolution": true,
+    "enforceAdmins": true,
+    "allowForcePushes": false,
+    "allowDeletions": false
+  },
+  "validation": [
+    {
+      "command": "node scripts/release/verify-repository-policy.mjs --self-test",
+      "exitCode": 0,
+      "result": "REPOSITORY_POLICY_SELF_TEST_OK 4 cases; missing check, missing independent approval, and weakened force-push protection fail closed"
+    },
+    {
+      "command": "node scripts/release/verify-repository-policy.mjs --branch main --pr 6",
+      "exitCode": 1,
+      "result": "Expected pre-handoff external conditions only: POLICY_PR_MUST_BE_READY,POLICY_INDEPENDENT_APPROVAL_MISSING"
+    },
+    {
+      "command": "node scripts/release/verify-release-metadata.mjs",
+      "exitCode": 0,
+      "result": "RELEASE_METADATA_OK 7579c26a96544f19bbf39da679419e85b52ee054"
+    },
+    {
+      "command": "python3 .codex/goal-05-task-package/scripts/verify_prior_goal_states_unchanged.py .",
+      "exitCode": 0,
+      "result": "PRIOR_GOAL_STATES_UNCHANGED"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "clean"
+    }
+  ],
+  "securityAssertions": {
+    "codexSelfApproval": false,
+    "requiredChecksBypassed": false,
+    "mainMerged": false,
+    "tagOrReleaseCreated": false,
+    "forcePushEnabled": false,
+    "branchDeletionEnabled": false,
+    "secretsIncluded": false
+  },
+  "externalUnlock": {
+    "condition": "A GitHub user other than zhouwen-giser must be granted repository read access, requested as reviewer on PR #6, and submit APPROVED after the final push with all threads resolved.",
+    "administratorCommands": [
+      "gh api --method PUT repos/zhouwen-giser/sdar-mcp-provider-platform/collaborators/<REVIEWER> -f permission=pull",
+      "gh pr edit 6 --add-reviewer <REVIEWER>",
+      "gh pr review 6 --approve"
+    ]
+  }
+}

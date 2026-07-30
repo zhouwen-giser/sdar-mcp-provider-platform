@@ -1,4 +1,5 @@
 import type { PmsWorkerRuntimeConfig } from "./config.js";
+import type { RuntimeControlPlaneCredentialResolverContract } from "./runtime-control-plane-credentials.js";
 
 export interface RuntimeCompositionRepositoryContracts {
   readonly jobs: object;
@@ -69,6 +70,7 @@ export interface PmsWorkerRuntimeCompositionContract {
   readonly catalogRegistry: RuntimeCompositionCatalogRegistryPort;
   readonly scheduler: RuntimeCompositionSchedulerPort;
   readonly cleanup: RuntimeCompositionCleanupPort;
+  readonly runtimeControlPlaneCredentialResolver: RuntimeControlPlaneCredentialResolverContract;
 }
 
 export function definePmsWorkerRuntimeCompositionContract(
@@ -81,6 +83,11 @@ export function definePmsWorkerRuntimeCompositionContract(
   requireMethods(input.catalogRegistry, ["close"], "catalogRegistry");
   requireMethods(input.scheduler, ["start", "tick", "stop"], "scheduler");
   requireMethods(input.cleanup, ["cleanup", "close"], "cleanup");
+  requireMethods(
+    input.runtimeControlPlaneCredentialResolver,
+    ["resolve"],
+    "runtimeControlPlaneCredentialResolver",
+  );
   for (const [name, repository] of Object.entries(input.repositories)) {
     if (typeof repository !== "object" || repository === null) {
       throw new Error(`PMS_WORKER_RUNTIME_COMPOSITION_INVALID:repositories.${name}`);

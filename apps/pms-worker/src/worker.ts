@@ -1,6 +1,7 @@
-import type { JobLease, JobLeaseRepository } from "../../../packages/pms-domain/src/index.js";
+import type { JobLeaseRepository } from "../../../packages/pms-domain/src/index.js";
 import type { PmsWorkerConfig } from "./config.js";
 import { WorkerHealth } from "./health.js";
+import { executePmsJob } from "./job-execution.js";
 import type { PmsJobRegistry } from "./job-registry.js";
 
 export class PmsWorker {
@@ -28,7 +29,18 @@ export class PmsWorker {
       limit: this.config.claimLimit,
       leaseDurationMs: this.config.leaseDurationMs,
     });
-    for (const lease of leases) await this.execute(lease);
+    await Promise.all(
+      leases.map((lease) =>
+        executePmsJob({
+          lease,
+          handler: this.registry.get(lease.job.jobType),
+          jobs: this.jobs,
+          leaseDurationMs: this.config.leaseDurationMs,
+          retryDelayMs: this.config.retryDelayMs,
+          workerSignal: this.#abort.signal,
+        }),
+      ),
+    );
     this.health.loopSucceeded();
     return leases.length;
   }
@@ -54,33 +66,6 @@ export class PmsWorker {
       await abortableDelay(this.config.pollIntervalMs, this.#abort.signal);
     }
   }
-
-  private async execute(lease: JobLease): Promise<void> {
-    const handler = this.registry.get(lease.job.jobType);
-    if (handler === undefined) {
-      await this.jobs.fail(identity(lease), retryAt(this.config.retryDelayMs));
-      return;
-    }
-    try {
-      await handler.execute(lease);
-      await this.jobs.complete(identity(lease));
-    } catch {
-      await this.jobs.fail(identity(lease), retryAt(this.config.retryDelayMs));
-    }
-  }
-}
-
-function identity(lease: JobLease) {
-  return {
-    jobId: lease.job.jobId,
-    owner: lease.owner,
-    token: lease.token,
-    fencingToken: lease.fencingToken,
-  };
-}
-
-function retryAt(delayMs: number): Date {
-  return new Date(Date.now() + delayMs);
 }
 
 async function abortableDelay(milliseconds: number, signal: AbortSignal): Promise<void> {

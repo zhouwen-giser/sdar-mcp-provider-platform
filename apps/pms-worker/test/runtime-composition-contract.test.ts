@@ -59,7 +59,7 @@ function contractFixture(
       runtimeSecretRoot: "/run/sdar/runtime-secrets",
       runtimeConfigCacheRoot: "/var/lib/sdar/runtime-config",
       runtimeControlPlaneUrl: "https://pms.internal/",
-      runtimeControlPlaneTokenFile: "/run/sdar/pms-token",
+      runtimeControlPlaneCredentialRoot: "/run/sdar/runtime-control-plane-credentials",
       pm2Home: "/var/lib/sdar/pm2",
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,
@@ -91,6 +91,9 @@ function contractFixture(
     cleanup: {
       cleanup: vi.fn(() => Promise.resolve()),
       close: vi.fn(() => Promise.resolve()),
+    },
+    runtimeControlPlaneCredentialResolver: {
+      resolve: vi.fn(() => Promise.resolve("/run/sdar/instance-control-plane-token")),
     },
   };
 }

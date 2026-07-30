@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "G5-P2-B02",
+  "generatedAt": "2026-07-29T09:51:14.618Z",
+  "resourceClassification": {
+    "postgres": "real local PostgreSQL",
+    "workers": "two real PmsWorker instances using PostgresJobLeaseRepository",
+    "faultInjection": "renew call failure only; authoritative lease row remains real PostgreSQL",
+    "pm2": "not required by focused SQL checkpoint scenario; no PM2 process created"
+  },
+  "leaseDurationMs": 300,
+  "metrics": {
+    "scenarioARenewals": 9,
+    "scenarioBFences": ["1", "2"],
+    "scenarioDRenewals": {
+      "scenario-d-1": 9,
+      "scenario-d-2": 9,
+      "scenario-d-3": 9
+    }
+  },
+  "assertions": {
+    "longHandlerRenewedBeyondThreePeriods": true,
+    "secondWorkerCouldNotClaimRenewedLease": true,
+    "renewFailureAbortedWorkerA": true,
+    "workerANoCompleteOrFailAfterLeaseLoss": true,
+    "workerBTookOverWithHigherFence": true,
+    "singleSucceededResultAfterTakeover": true,
+    "uninterruptibleSqlCheckedSignalAfterReturn": true,
+    "noWorkerAStateWriteAfterLeaseLoss": true,
+    "noDoubleActiveSideEffect": true,
+    "claimLimitThreeStartedWithoutQueueExpiry": true,
+    "eachClaimedJobRenewedIndependently": true,
+    "noHangingLeases": true,
+    "noPm2ProcessesCreated": true,
+    "noTemporaryDatabasesCreated": true,
+    "noTokenFilesCreated": true
+  },
+  "secretsIncluded": false
+}

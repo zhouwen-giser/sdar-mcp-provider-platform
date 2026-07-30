@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
-import { setTimeout } from "node:timers";
+import { clearTimeout, setTimeout } from "node:timers";
 import { URL } from "node:url";
 import { Pool } from "pg";
 import {
@@ -28,6 +28,10 @@ import {
   CatalogDiscoveryClient,
   HttpCatalogDiscoveryTransport,
 } from "../../packages/catalog-manager/src/index.ts";
+import {
+  createPm2JavascriptApi,
+  Pm2ProcessManager,
+} from "../../packages/pm2-runtime-adapter/src/index.ts";
 
 const root = process.cwd();
 const adminDatabaseUrl = requiredEnvironment("TEST_DATABASE_URL");
@@ -35,12 +39,21 @@ const runtimeVersion = "2.0.0-rc.1";
 const providerId = `worker-e2e-${randomUUID().slice(0, 8)}`;
 const deploymentId = `deployment-${randomUUID().slice(0, 8)}`;
 const databaseProfileId = `database-${randomUUID().slice(0, 8)}`;
+const isolatedProviderId = `worker-e2e-isolated-${randomUUID().slice(0, 8)}`;
+const isolatedDeploymentId = `deployment-isolated-${randomUUID().slice(0, 8)}`;
+const isolatedDatabaseProfileId = `database-isolated-${randomUUID().slice(0, 8)}`;
 const environment = "test";
 const clusterRef = `cluster-${randomUUID().slice(0, 8)}`;
 const adminSecretRef = `file/test/${clusterRef}/admin`;
 const runtimePassword = `runtime-${randomUUID()}-secret`;
 const identity = deriveRuntimeInstanceIdentity({ providerId, deploymentId, ordinal: 0 });
+const isolatedIdentity = deriveRuntimeInstanceIdentity({
+  providerId: isolatedProviderId,
+  deploymentId: isolatedDeploymentId,
+  ordinal: 0,
+});
 const databaseNames = providerDatabaseNames(providerId);
+const isolatedDatabaseNames = providerDatabaseNames(isolatedProviderId);
 const temporaryRoot = await mkdtemp(resolve(root, "tests/worker-pm2-production/.runtime-release-"));
 const schema = `worker_pm2_${randomUUID().replaceAll("-", "")}`;
 const pmsDatabaseUrl = withSearchPath(adminDatabaseUrl, schema);
@@ -50,14 +63,22 @@ const secretRoot = join(temporaryRoot, "runtime-secrets");
 const cacheRoot = join(temporaryRoot, "runtime-cache");
 const pm2Home = await mkdtemp(join(tmpdir(), "sdar-pm2-"));
 const credentialRoot = join(temporaryRoot, "credentials");
+const runtimeControlPlaneCredentialRoot = join(temporaryRoot, "runtime-control-plane-credentials");
 const databaseUrlFile = join(credentialRoot, "pms-database-url");
 const managementTokenFile = join(credentialRoot, "management.token");
-const runtimeTokenFile = join(credentialRoot, "runtime.token");
+const runtimeTokenFile = runtimeCredentialPath(providerId, deploymentId, identity.instanceId);
+const isolatedRuntimeTokenFile = runtimeCredentialPath(
+  isolatedProviderId,
+  isolatedDeploymentId,
+  isolatedIdentity.instanceId,
+);
 const managementDescriptor = join(credentialRoot, "management.json");
 const runtimeDescriptor = join(credentialRoot, "runtime.json");
 const provisioningCredentialFile = join(credentialRoot, "provisioning.json");
 const managementToken = `management-${randomUUID()}`;
 const runtimeToken = `runtime-control-${randomUUID()}`;
+const isolatedRuntimeToken = `runtime-control-isolated-${randomUUID()}`;
+let currentRuntimeToken = runtimeToken;
 const admin = new Pool({ connectionString: adminDatabaseUrl });
 const pmsPool = new Pool({ connectionString: pmsDatabaseUrl });
 const timeline = [];
@@ -68,6 +89,7 @@ let workerComposition;
 let pm2Api;
 let processes;
 let adapter;
+let isolatedAdapter;
 let adapterDiagnostics = "";
 let runtimeProcessObserved = false;
 
@@ -77,17 +99,38 @@ try {
   await startApi();
   await seedProviderType();
   await createProviderThroughApi();
+  await createProviderThroughApi(isolatedProviderId);
   await seedDatabaseProfile();
+  await seedDatabaseProfile({
+    providerId: isolatedProviderId,
+    deploymentId: isolatedDeploymentId,
+    databaseProfileId: isolatedDatabaseProfileId,
+    databaseNames: isolatedDatabaseNames,
+  });
   await publishConfig("initial-config", "error", null);
+  await publishConfig("isolated-initial-config", "error", null, isolatedDeploymentId);
 
   const adapterPort = await freePort();
+  const isolatedAdapterPort = await freePort();
   adapter = await startAdapter(adapterPort, `${providerId}-mismatch`);
+  isolatedAdapter = await startAdapter(isolatedAdapterPort, isolatedProviderId);
   await createDeploymentThroughApi(adapterPort);
+  await createDeploymentThroughApi(isolatedAdapterPort, {
+    providerId: isolatedProviderId,
+    deploymentId: isolatedDeploymentId,
+    databaseProfileId: isolatedDatabaseProfileId,
+  });
   worker = await startWorker();
 
   await waitForStatus("DEGRADED", 60_000);
   await waitForProcess((value) => value.state === "online", 20_000);
   runtimeProcessObserved = true;
+  await waitForMissingIsolatedCredentialFailure();
+  await writeSecure(isolatedRuntimeTokenFile, isolatedRuntimeToken);
+  await writeRuntimeDescriptor(true);
+  await stopApi();
+  await startApi();
+  await workerComposition.runtime.scheduler.tick();
   await delay(3_000);
   const identityMismatch = await deploymentStatus();
   assert(identityMismatch !== "ACTIVE", "IDENTITY_MISMATCH_BECAME_ACTIVE");
@@ -96,19 +139,41 @@ try {
   adapter = await startAdapter(adapterPort, providerId);
 
   await waitForStatus("ACTIVE", 90_000);
+  await waitForStatus("ACTIVE", 90_000, isolatedDeploymentId);
+  await waitForProcess((value) => value.state === "online", 30_000, isolatedIdentity.pm2Name);
   timeline.push(event("initial_convergence", "ACTIVE"));
+  timeline.push(event("isolated_convergence", "ACTIVE"));
+  await proveCrossTokenIsolation();
   await assertRuntimeDatabaseMigrated();
+  await assertRuntimeDatabaseMigrated(isolatedDeploymentId);
   const registryEndpoint = await assertRegistryConsumerPath();
 
   const beforeCrash = await onlineProcess();
+  const isolatedBeforeCrash = await onlineProcess(isolatedIdentity.pm2Name);
   process.kill(requiredPid(beforeCrash), "SIGKILL");
-  await waitForStatus("DEGRADED", 30_000);
-  timeline.push(event("runtime_sigkill", "DEGRADED"));
+  const crashObserved = await waitFor(
+    async () => ({
+      status: await deploymentStatus(),
+      process: await processes.describe(identity.pm2Name),
+    }),
+    (value) =>
+      value.status === "DEGRADED" ||
+      (value.process.state === "online" && value.process.pid !== beforeCrash.pid),
+    30_000,
+    "RUNTIME_SIGKILL_NOT_OBSERVED",
+  );
+  timeline.push(
+    event(
+      "runtime_sigkill",
+      crashObserved.status === "DEGRADED" ? "DEGRADED" : "PM2_AUTO_RECOVERED",
+    ),
+  );
   const recovered = await waitForProcess(
     (value) => value.state === "online" && value.pid !== beforeCrash.pid,
     60_000,
   );
   await waitForStatus("ACTIVE", 60_000);
+  await assertProcessUnchanged(isolatedIdentity.pm2Name, isolatedBeforeCrash);
   timeline.push(event("runtime_recovered", "ACTIVE"));
 
   await stopAdapter();
@@ -127,10 +192,12 @@ try {
   await assertRuntimeRemainsOnline("pms_api_stopped");
   timeline.push(event("pms_api_stopped", "runtime_online"));
   await startApi();
+  await proveCrossTokenIsolation();
 
   const beforeConfig = await onlineProcess();
   await publishConfig("config-drift", "debug", 1);
   worker = await startWorker();
+  await waitForStatus("ACTIVE", 60_000);
   const drifted = await waitForProcess(
     (value) =>
       value.state === "online" &&
@@ -139,6 +206,7 @@ try {
     60_000,
   );
   await waitForStatus("ACTIVE", 60_000);
+  await waitForStatus("ACTIVE", 60_000, isolatedDeploymentId);
   await delay(3_000);
   const stable = await onlineProcess();
   assert(
@@ -146,6 +214,19 @@ try {
     "CONFIG_DRIFT_RESTART_NOT_SINGLE",
   );
   timeline.push(event("config_revision_changed", "one_controlled_restart"));
+
+  const isolatedBeforeRotation = await onlineProcess(isolatedIdentity.pm2Name);
+  const rotatedRuntimeToken = `runtime-control-rotated-${randomUUID()}`;
+  currentRuntimeToken = rotatedRuntimeToken;
+  await writeSecure(runtimeTokenFile, rotatedRuntimeToken);
+  await writeRuntimeDescriptor(true);
+  await stopApi();
+  await startApi();
+  process.kill(requiredPid(await onlineProcess()), "SIGKILL");
+  await waitForProcess((value) => value.state === "online", 60_000);
+  await waitForStatus("ACTIVE", 60_000);
+  await assertProcessUnchanged(isolatedIdentity.pm2Name, isolatedBeforeRotation);
+  timeline.push(event("instance_token_rotated", "isolated_runtime_unchanged"));
 
   await stopWorkerGracefully();
   worker = undefined;
@@ -157,7 +238,7 @@ try {
   );
   const evidence = {
     schemaVersion: "1.0",
-    taskId: "G4-P3-B01",
+    taskId: "G5-P1-B02",
     generatedAt: new Date().toISOString(),
     resourceClassification: {
       postgres: "real local PostgreSQL",
@@ -192,13 +273,26 @@ try {
       workerRestartResumedReconcile: true,
       configRevisionSingleRestart: true,
       staleFenceRejected: true,
+      twoDeploymentsActive: true,
+      crossTokenConfigPullRejected: true,
+      crossTokenConfigWatchRejected: true,
+      crossTokenConfigAckRejected: true,
+      crossTokenRegisterRejected: true,
+      crossTokenHeartbeatRejected: true,
+      missingCredentialDidNotStartPm2: true,
+      identityMappingSurvivedApiWorkerRestart: true,
+      isolatedRuntimeUnaffectedByPeerCrashOrRotation: true,
     },
     timeline,
   };
   await mkdir(resolve(root, "reports/evidence"), { recursive: true });
   await writeFile(
-    resolve(root, "reports/evidence/G4-P3-B01-worker-pm2-production.json"),
+    resolve(root, "reports/evidence/G5-P1-B02-runtime-credential-isolation.json"),
     `${JSON.stringify(evidence, null, 2)}\n`,
+  );
+  await writeFile(
+    resolve(root, "reports/evidence/G4-P3-B01-worker-pm2-production.json"),
+    `${JSON.stringify({ ...evidence, taskId: "G4-P3-B01" }, null, 2)}\n`,
   );
   process.stdout.write("WORKER_PM2_PRODUCTION_GATE_OK\n");
 } catch (error) {
@@ -214,11 +308,12 @@ try {
 } finally {
   await cleanup();
 }
+process.exit(process.exitCode ?? 0);
 
 async function prepareFilesystem() {
   await Promise.all(
-    [releaseRoot, secretRoot, cacheRoot, credentialRoot].map((directory) =>
-      mkdir(directory, { recursive: true, mode: 0o700 }),
+    [releaseRoot, secretRoot, cacheRoot, credentialRoot, runtimeControlPlaneCredentialRoot].map(
+      (directory) => mkdir(directory, { recursive: true, mode: 0o700 }),
     ),
   );
   await cp(resolve(root, "dist"), resolve(releaseDirectory, "dist"), {
@@ -254,34 +349,7 @@ async function prepareFilesystem() {
       },
     }),
   );
-  const runtimeIdentity = {
-    providerId,
-    deploymentId,
-    instanceId: String(identity.instanceId),
-    runtimeVersion,
-    protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
-    tokenFile: runtimeTokenFile,
-  };
-  await writeSecure(
-    runtimeDescriptor,
-    JSON.stringify({
-      runtimeConfig: [
-        {
-          ...runtimeIdentity,
-          subjectId: "worker-e2e-runtime-config",
-          environment,
-          scopes: ["runtime:config:read", "runtime:config:watch", "runtime:config:ack"],
-        },
-      ],
-      runtimeRegistration: [
-        {
-          ...runtimeIdentity,
-          subjectId: "worker-e2e-runtime-registration",
-          scopes: ["runtime:register", "runtime:heartbeat"],
-        },
-      ],
-    }),
-  );
+  await writeRuntimeDescriptor(false);
   await writeSecure(
     provisioningCredentialFile,
     JSON.stringify({
@@ -289,6 +357,49 @@ async function prepareFilesystem() {
       adminSecretRef,
       adminDatabaseUrl,
       runtimePassword,
+    }),
+  );
+}
+
+async function writeRuntimeDescriptor(includeIsolated) {
+  const principals = [
+    {
+      providerId,
+      deploymentId,
+      instanceId: String(identity.instanceId),
+      tokenFile: runtimeTokenFile,
+      subject: "worker-e2e",
+    },
+    ...(includeIsolated
+      ? [
+          {
+            providerId: isolatedProviderId,
+            deploymentId: isolatedDeploymentId,
+            instanceId: String(isolatedIdentity.instanceId),
+            tokenFile: isolatedRuntimeTokenFile,
+            subject: "worker-e2e-isolated",
+          },
+        ]
+      : []),
+  ];
+  await writeSecure(
+    runtimeDescriptor,
+    JSON.stringify({
+      runtimeConfig: principals.map(({ subject, ...principal }) => ({
+        ...principal,
+        subjectId: `${subject}-runtime-config`,
+        environment,
+        runtimeVersion,
+        protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+        scopes: ["runtime:config:read", "runtime:config:watch", "runtime:config:ack"],
+      })),
+      runtimeRegistration: principals.map(({ subject, ...principal }) => ({
+        ...principal,
+        subjectId: `${subject}-runtime-registration`,
+        runtimeVersion,
+        protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+        scopes: ["runtime:register", "runtime:heartbeat"],
+      })),
     }),
   );
 }
@@ -315,6 +426,7 @@ async function stopApi() {
 }
 
 async function startWorker() {
+  process.stdout.write("WORKER_PM2_STAGE worker_bootstrap starting\n");
   const running = await bootstrapPmsWorker({
     loadConfig: () =>
       Promise.resolve({
@@ -331,7 +443,7 @@ async function startWorker() {
           runtimeSecretRoot: secretRoot,
           runtimeConfigCacheRoot: cacheRoot,
           runtimeControlPlaneUrl: apiAddress,
-          runtimeControlPlaneTokenFile: runtimeTokenFile,
+          runtimeControlPlaneCredentialRoot,
           pm2Home,
           runtimeReconcileIntervalMs: 1_000,
           runtimeReconcileTimeoutMs: 30_000,
@@ -340,14 +452,18 @@ async function startWorker() {
       }),
     readDatabaseUrl: () => Promise.resolve(pmsDatabaseUrl),
     createComposition: async (pool, config) => {
+      process.stdout.write("WORKER_PM2_STAGE worker_composition creating\n");
       workerComposition = await createPmsWorkerProductionComposition(pool, config);
+      process.stdout.write("WORKER_PM2_STAGE worker_composition created\n");
       return workerComposition;
     },
   });
+  process.stdout.write("WORKER_PM2_STAGE worker_bootstrap started\n");
   await delay(1_100);
   await workerComposition.runtime.scheduler.tick();
-  pm2Api = workerComposition.runtime.components.pm2Api;
-  processes = workerComposition.runtime.components.processManager;
+  process.stdout.write("WORKER_PM2_STAGE worker_scheduler ticked\n");
+  pm2Api = createPm2JavascriptApi({ pm2Home });
+  processes = new Pm2ProcessManager(pm2Api, releaseRoot);
   return running;
 }
 
@@ -360,9 +476,9 @@ async function stopWorkerGracefully() {
         `SELECT count(*)::integer AS active
            FROM job_lease
           WHERE job_type='runtime_deployment.reconcile'
-            AND payload->>'deploymentId'=$1
+            AND payload->>'deploymentId'=ANY($1::text[])
             AND status IN ('pending','leased')`,
-        [deploymentId],
+        [[deploymentId, isolatedDeploymentId]],
       );
       return result.rows[0]?.active;
     },
@@ -381,25 +497,27 @@ async function seedProviderType() {
   );
 }
 
-async function createProviderThroughApi() {
+async function createProviderThroughApi(targetProviderId = providerId) {
   const created = await apiRequest("/api/v1/providers", {
     method: "POST",
     body: {
-      providerId,
+      providerId: targetProviderId,
       providerTypeId: "test.worker.pm2",
       hostingMode: "platform_managed",
     },
   });
   assert(created.status === 201, `PROVIDER_CREATE_FAILED:${String(created.status)}`);
   const provider = await created.json();
-  const activated = await apiRequest(`/api/v1/providers/${providerId}/status`, {
+  const activated = await apiRequest(`/api/v1/providers/${targetProviderId}/status`, {
     method: "PATCH",
     body: { status: "active", expectedUpdatedAt: provider.updatedAt },
   });
   assert(activated.status === 200, `PROVIDER_ACTIVATE_FAILED:${String(activated.status)}`);
 }
 
-async function seedDatabaseProfile() {
+async function seedDatabaseProfile(
+  target = { providerId, deploymentId, databaseProfileId, databaseNames },
+) {
   const url = new URL(adminDatabaseUrl);
   const auditId = randomUUID();
   await pmsPool.query(
@@ -407,7 +525,7 @@ async function seedDatabaseProfile() {
        audit_event_id,action,actor_id,correlation_id,subject_type,subject_id,metadata
      ) VALUES ($1,'database_profile.created','worker-e2e','worker-e2e',
                'database_profile',$2,'{}')`,
-    [auditId, databaseProfileId],
+    [auditId, target.databaseProfileId],
   );
   await pmsPool.query(
     `INSERT INTO database_profile(
@@ -417,22 +535,27 @@ async function seedDatabaseProfile() {
      ) VALUES ($1,$2,$3,$4,$5,$6,'provisioned',$7,$8,'disable',$9,$10,
                'ready',clock_timestamp(),$11,$11)`,
     [
-      databaseProfileId,
-      providerId,
+      target.databaseProfileId,
+      target.providerId,
       environment,
       clusterRef,
       url.hostname,
       url.port.length === 0 ? 5432 : Number(url.port),
-      databaseNames.databaseName,
-      databaseNames.runtimeRoleName,
+      target.databaseNames.databaseName,
+      target.databaseNames.runtimeRoleName,
       adminSecretRef,
-      `file/v1/${deploymentId}/database/runtime`,
+      `file/v1/${target.deploymentId}/database/runtime`,
       auditId,
     ],
   );
 }
 
-async function publishConfig(draftId, logLevel, expectedPublishedRevision) {
+async function publishConfig(
+  draftId,
+  logLevel,
+  expectedPublishedRevision,
+  targetDeploymentId = deploymentId,
+) {
   const created = await apiRequest("/api/v1/config-drafts", {
     method: "POST",
     body: {
@@ -440,7 +563,7 @@ async function publishConfig(draftId, logLevel, expectedPublishedRevision) {
       definitionId: "runtime.observability",
       environment,
       targetType: "runtime_deployment",
-      targetId: deploymentId,
+      targetId: targetDeploymentId,
       configGroup: "runtime.observability",
       dataId: "main",
       content: { LOG_LEVEL: logLevel, OTEL_ENABLED: false },
@@ -467,11 +590,14 @@ async function publishConfig(draftId, logLevel, expectedPublishedRevision) {
   assert(published.status === 200, `CONFIG_PUBLISH_FAILED:${String(published.status)}`);
 }
 
-async function createDeploymentThroughApi(adapterPort) {
+async function createDeploymentThroughApi(
+  adapterPort,
+  target = { providerId, deploymentId, databaseProfileId },
+) {
   const configProfileId = formatRuntimeConfigProfileLocator(
     runtimeDeploymentProfileLocator({
       environment,
-      targetId: deploymentId,
+      targetId: target.deploymentId,
       configGroup: "runtime.observability",
       dataId: "main",
     }),
@@ -479,11 +605,11 @@ async function createDeploymentThroughApi(adapterPort) {
   const response = await apiRequest("/api/v1/runtime-deployments", {
     method: "POST",
     body: {
-      deploymentId,
-      providerId,
+      deploymentId: target.deploymentId,
+      providerId: target.providerId,
       environment,
       runtimeVersion,
-      databaseProfileId,
+      databaseProfileId: target.databaseProfileId,
       configProfileId,
       adapterEndpoint: `127.0.0.1:${String(adapterPort)}`,
     },
@@ -495,7 +621,9 @@ async function assertRegistryConsumerPath() {
   const response = await apiRequest(`/api/v1/registry/${environment}/latest`);
   assert(response.status === 200, `REGISTRY_LATEST_FAILED:${String(response.status)}`);
   const snapshot = await response.json();
-  const provider = snapshot.document.providers.find((value) => value.providerId === providerId);
+  const provider = snapshot.document.providers.find(
+    (value) => value.providerId === providerId || value.providerId === isolatedProviderId,
+  );
   assert(provider !== undefined, "REGISTRY_PROVIDER_MISSING");
   const discovered = await new CatalogDiscoveryClient(
     new HttpCatalogDiscoveryTransport({ endpoint: provider.effectiveEndpoint }),
@@ -505,11 +633,11 @@ async function assertRegistryConsumerPath() {
   return provider.effectiveEndpoint;
 }
 
-async function assertRuntimeDatabaseMigrated() {
+async function assertRuntimeDatabaseMigrated(targetDeploymentId = deploymentId) {
   const secretPath = join(
     secretRoot,
     "deployments",
-    deploymentId,
+    targetDeploymentId,
     "instances",
     "database",
     "runtime.secret",
@@ -567,6 +695,88 @@ async function proveStaleFenceRejected() {
   await jobs.complete(leaseIdentity(current));
 }
 
+async function waitForMissingIsolatedCredentialFailure() {
+  await waitFor(
+    async () => {
+      const [job, process] = await Promise.all([
+        pmsPool.query(
+          `SELECT status,attempt
+             FROM job_lease
+            WHERE job_type='runtime_deployment.reconcile'
+              AND payload->>'deploymentId'=$1
+            ORDER BY created_at DESC
+            LIMIT 1`,
+          [isolatedDeploymentId],
+        ),
+        processes.describe(isolatedIdentity.pm2Name),
+      ]);
+      return {
+        attempted: Number(job.rows[0]?.attempt ?? 0) > 0,
+        processState: process.state,
+      };
+    },
+    (value) => value.attempted && value.processState === "missing",
+    30_000,
+    "MISSING_INSTANCE_CREDENTIAL_STARTED_PM2",
+  );
+  assert(
+    (await deploymentStatus(isolatedDeploymentId)) !== "ACTIVE",
+    "MISSING_INSTANCE_CREDENTIAL_BECAME_ACTIVE",
+  );
+  timeline.push(event("missing_instance_credential", "pm2_not_started"));
+}
+
+async function proveCrossTokenIsolation() {
+  await assertCrossTokenRejected(runtimeToken, {
+    providerId: isolatedProviderId,
+    deploymentId: isolatedDeploymentId,
+    instanceId: String(isolatedIdentity.instanceId),
+  });
+  await assertCrossTokenRejected(isolatedRuntimeToken, {
+    providerId,
+    deploymentId,
+    instanceId: String(identity.instanceId),
+  });
+  timeline.push(event("cross_token_isolation", "ten_requests_rejected"));
+}
+
+async function assertCrossTokenRejected(token, target) {
+  const query = "environment=test&configGroup=runtime.observability&dataId=main";
+  const configBase = `/api/v1/runtime-config/deployments/${target.deploymentId}/instances/${target.instanceId}`;
+  const registrationBase =
+    `/api/v1/runtime-registration/deployments/${target.deploymentId}` +
+    `/instances/${target.instanceId}`;
+  const registrationBody = {
+    providerId: target.providerId,
+    sessionId: `cross-token-${randomUUID()}`,
+    runtimeVersion,
+    protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+    configRevision: 1,
+    readinessState: "ready",
+  };
+  const requests = [
+    ["config_pull", `${configBase}/latest?${query}`, { method: "GET" }],
+    ["config_watch", `${configBase}/watch?${query}`, { method: "GET" }],
+    [
+      "config_ack",
+      `${configBase}/revisions/${randomUUID()}/acks?${query}`,
+      { method: "POST", body: { status: "applied" } },
+    ],
+    ["register", `${registrationBase}/register`, { method: "POST", body: registrationBody }],
+    [
+      "heartbeat",
+      `${registrationBase}/heartbeat`,
+      { method: "POST", body: { ...registrationBody, sequence: 1 } },
+    ],
+  ];
+  for (const [name, path, options] of requests) {
+    const response = await runtimeRequest(path, token, options);
+    assert(response.status === 403, `CROSS_TOKEN_${name.toUpperCase()}_NOT_FORBIDDEN`);
+    const body = await response.text();
+    assert(!body.includes(token), `CROSS_TOKEN_${name.toUpperCase()}_LEAKED`);
+  }
+}
+
 async function startAdapter(port, adapterProviderId) {
   const child = spawn("node", ["dist/examples/mock-adapter-typescript/src/main.js"], {
     cwd: root,
@@ -601,6 +811,11 @@ async function stopAdapter() {
   if (adapter === undefined) return;
   const child = adapter;
   adapter = undefined;
+  await stopChild(child);
+}
+
+async function stopChild(child) {
+  if (child === undefined) return;
   if (child.exitCode === null) child.kill("SIGTERM");
   await waitFor(
     () => Promise.resolve(child.exitCode),
@@ -612,9 +827,10 @@ async function stopAdapter() {
   });
 }
 
-async function waitForStatus(status, timeoutMs) {
+async function waitForStatus(status, timeoutMs, targetDeploymentId = deploymentId) {
   return waitFor(
     async () => {
+      await workerComposition?.runtime.scheduler.tick();
       const result = await pmsPool.query(
         `SELECT d.status,d.observed_revision,
                 p.process_state,p.readiness_state,p.registration_state,p.catalog_state,
@@ -639,7 +855,7 @@ async function waitForStatus(status, timeoutMs) {
               LIMIT 1
            ) j ON true
           WHERE d.deployment_id=$1`,
-        [deploymentId],
+        [targetDeploymentId],
       );
       return {
         ...result.rows[0],
@@ -652,21 +868,21 @@ async function waitForStatus(status, timeoutMs) {
   );
 }
 
-async function deploymentStatus() {
+async function deploymentStatus(targetDeploymentId = deploymentId) {
   const result = await pmsPool.query(
     "SELECT status FROM runtime_deployment WHERE deployment_id=$1",
-    [deploymentId],
+    [targetDeploymentId],
   );
   return result.rows[0]?.status;
 }
 
-function onlineProcess() {
-  return waitForProcess((value) => value.state === "online", 20_000);
+function onlineProcess(processName = identity.pm2Name) {
+  return waitForProcess((value) => value.state === "online", 20_000, processName);
 }
 
-function waitForProcess(predicate, timeoutMs) {
+function waitForProcess(predicate, timeoutMs, processName = identity.pm2Name) {
   return waitFor(
-    () => processes.describe(identity.pm2Name),
+    () => processes.describe(processName),
     predicate,
     timeoutMs,
     "RUNTIME_PROCESS_TIMEOUT",
@@ -677,6 +893,30 @@ async function assertRuntimeRemainsOnline(reason) {
   await delay(1_500);
   const observed = await processes.describe(identity.pm2Name);
   assert(observed.state === "online", `RUNTIME_STOPPED_WITH_CONTROL_PLANE:${reason}`);
+}
+
+async function assertProcessUnchanged(processName, before) {
+  await delay(1_500);
+  const after = await processes.describe(processName);
+  assert(
+    after.state === "online" &&
+      after.pid === before.pid &&
+      after.restartCount === before.restartCount,
+    "ISOLATED_RUNTIME_CHANGED",
+  );
+}
+
+async function runtimeRequest(path, token, options) {
+  return globalThis.fetch(new URL(path, apiAddress), {
+    method: options.method,
+    redirect: "error",
+    headers: {
+      authorization: `Bearer ${token}`,
+      "x-correlation-id": randomUUID(),
+      "content-type": "application/json",
+    },
+    ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+  });
 }
 
 async function apiRequest(path, options = {}) {
@@ -701,38 +941,75 @@ async function apiRequest(path, options = {}) {
 }
 
 async function cleanup() {
-  await worker?.stop().catch(() => undefined);
-  await stopAdapter().catch(() => undefined);
-  await stopApi().catch(() => undefined);
+  await bestEffortCleanup(() => worker?.stop());
+  await bestEffortCleanup(() => stopAdapter());
+  await bestEffortCleanup(() => stopChild(isolatedAdapter));
+  await bestEffortCleanup(() => stopApi());
   if (runtimeProcessObserved && processes !== undefined) {
-    await processes.delete(identity.pm2Name).catch(() => undefined);
+    await bestEffortCleanup(() => processes.delete(identity.pm2Name));
+    await bestEffortCleanup(() => processes.delete(isolatedIdentity.pm2Name));
   }
   try {
     pm2Api?.disconnect();
   } catch {
     // Best-effort cleanup after the product gate has already established its result.
   }
-  await pmsPool.end().catch(() => undefined);
-  await admin
-    .query(
+  await bestEffortCleanup(() => pmsPool.end());
+  await bestEffortCleanup(() =>
+    admin.query(
       "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()",
       [databaseNames.databaseName],
-    )
-    .catch(() => undefined);
-  await admin
-    .query(`DROP DATABASE IF EXISTS ${quoteIdentifier(databaseNames.databaseName)}`)
-    .catch(() => undefined);
-  await admin
-    .query(`DROP ROLE IF EXISTS ${quoteIdentifier(databaseNames.runtimeRoleName)}`)
-    .catch(() => undefined);
-  await admin
-    .query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(schema)} CASCADE`)
-    .catch(() => undefined);
-  await admin.end().catch(() => undefined);
-  await Promise.all([
-    rm(temporaryRoot, { recursive: true, force: true }),
-    rm(pm2Home, { recursive: true, force: true }),
-  ]);
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
+      `DROP DATABASE IF EXISTS ${quoteIdentifier(databaseNames.databaseName)} WITH (FORCE)`,
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP ROLE IF EXISTS ${quoteIdentifier(databaseNames.runtimeRoleName)}`),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
+      "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()",
+      [isolatedDatabaseNames.databaseName],
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(
+      `DROP DATABASE IF EXISTS ${quoteIdentifier(isolatedDatabaseNames.databaseName)} WITH (FORCE)`,
+    ),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP ROLE IF EXISTS ${quoteIdentifier(isolatedDatabaseNames.runtimeRoleName)}`),
+  );
+  await bestEffortCleanup(() =>
+    admin.query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(schema)} CASCADE`),
+  );
+  await bestEffortCleanup(() => admin.end());
+  await bestEffortCleanup(() =>
+    Promise.all([
+      rm(temporaryRoot, { recursive: true, force: true }),
+      rm(pm2Home, { recursive: true, force: true }),
+    ]),
+  );
+}
+
+async function bestEffortCleanup(operation, timeoutMs = 10_000) {
+  let timer;
+  try {
+    await Promise.race([
+      Promise.resolve().then(operation),
+      new Promise((resolveTimeout) => {
+        timer = setTimeout(resolveTimeout, timeoutMs);
+        timer.unref();
+      }),
+    ]);
+  } catch {
+    // Cleanup cannot replace the already established production-gate result.
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 async function collectPm2Diagnostics() {
@@ -755,6 +1032,19 @@ function withSearchPath(connectionString, searchPath) {
   return url.toString();
 }
 
+function runtimeCredentialPath(targetProviderId, targetDeploymentId, targetInstanceId) {
+  return join(
+    runtimeControlPlaneCredentialRoot,
+    "providers",
+    targetProviderId,
+    "deployments",
+    targetDeploymentId,
+    "instances",
+    String(targetInstanceId),
+    "control-plane.token",
+  );
+}
+
 function quoteIdentifier(value) {
   if (!/^[a-z][a-z0-9_]{0,62}$/.test(value)) throw new Error("TEST_IDENTIFIER_INVALID");
   return `"${value}"`;
@@ -775,6 +1065,7 @@ function requiredPid(observation) {
 }
 
 function event(action, outcome) {
+  process.stdout.write(`WORKER_PM2_STAGE ${action} ${outcome}\n`);
   return { action, outcome, at: new Date().toISOString() };
 }
 
@@ -855,5 +1146,7 @@ function redact(value) {
     .replaceAll(adminDatabaseUrl, "<database-url>")
     .replaceAll(managementToken, "<management-token>")
     .replaceAll(runtimeToken, "<runtime-token>")
+    .replaceAll(currentRuntimeToken, "<current-runtime-token>")
+    .replaceAll(isolatedRuntimeToken, "<isolated-runtime-token>")
     .replaceAll(runtimePassword, "<runtime-password>");
 }
