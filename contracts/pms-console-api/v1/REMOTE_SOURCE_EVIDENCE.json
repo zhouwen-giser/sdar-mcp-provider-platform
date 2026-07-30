@@ -1,0 +1,75 @@
+{
+  "baselineCommit": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "reviewedAt": "2026-07-30T06:33:59.709005Z",
+  "sourceFiles": [
+    {
+      "path": "apps/pms-api/src/app.ts",
+      "blobSha": "080c6fc76fc9b519f46d41df1da54d1e14211fa6"
+    },
+    {
+      "path": "apps/pms-api/src/audit-routes.ts",
+      "blobSha": "a9897e4fdbc1a94ba93c7e990eb32e6702c075ba"
+    },
+    {
+      "path": "apps/pms-api/src/configuration-routes.ts",
+      "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+    },
+    {
+      "path": "apps/pms-api/src/errors.ts",
+      "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+    },
+    {
+      "path": "apps/pms-api/src/management-routes.ts",
+      "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+    },
+    {
+      "path": "apps/pms-api/src/registry-routes.ts",
+      "blobSha": "b93e36d8f09aefd9b211a72ad3d66008f714d6ce"
+    },
+    {
+      "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+      "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+    },
+    {
+      "path": "apps/pms-api/src/runtime-process-routes.ts",
+      "blobSha": "46b124cab8eb994290094ee059c7b68e5d6294d9"
+    },
+    {
+      "path": "packages/configuration-center/src/center.ts",
+      "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+    },
+    {
+      "path": "packages/configuration-center/src/model.ts",
+      "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+    },
+    {
+      "path": "packages/configuration-center/src/publication.ts",
+      "blobSha": "1747be528c80e99305c9b8009a68626b98f8c159"
+    },
+    {
+      "path": "packages/pms-application/src/provider-management.ts",
+      "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+    },
+    {
+      "path": "packages/pms-application/src/provider-package-query.ts",
+      "blobSha": "bb79918ddc62592e9d52e8fc3c99a959927913c3"
+    },
+    {
+      "path": "packages/pms-application/src/runtime-deployment.ts",
+      "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+    },
+    {
+      "path": "packages/pms-application/src/runtime-process-query.ts",
+      "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+    },
+    {
+      "path": "packages/pms-domain/src/entities.ts",
+      "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+    },
+    {
+      "path": "packages/registry-snapshot/src/model.ts",
+      "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+    }
+  ],
+  "note": "Source evidence was reviewed from GitHub main. Repository-local per-file business manifests remain mandatory before Contract Frozen."
+}

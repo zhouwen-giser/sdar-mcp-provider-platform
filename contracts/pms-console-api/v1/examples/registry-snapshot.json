@@ -1,0 +1,24 @@
+{
+  "environment": "production",
+  "revision": 4,
+  "checksum": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "document": {
+    "environment": "production",
+    "providers": [
+      {
+        "providerId": "ugv-prod-001",
+        "serverId": "ugv-server-001",
+        "protocolMode": "frozen_v1",
+        "effectiveEndpoint": "http://127.0.0.1:8201/mcp",
+        "catalogRevision": 2,
+        "tools": [
+          {
+            "name": "io.sdar/taskExecution/checkAvailability"
+          }
+        ]
+      }
+    ]
+  },
+  "publishedAt": "2026-07-30T05:15:00.000Z",
+  "createdAt": "2026-07-30T05:15:00.000Z"
+}

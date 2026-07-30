@@ -1,0 +1,1037 @@
+[
+  {
+    "operationId": "listProviderPackages",
+    "method": "GET",
+    "path": "/provider-packages",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ProviderPackage",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-package-query.ts",
+      "apps/pms-api/src/app.ts"
+    ],
+    "sourcePort": "ProviderPackageQueryService.list",
+    "currentRoute": "/api/v1/provider-packages",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-package-query.ts",
+        "blobSha": "bb79918ddc62592e9d52e8fc3c99a959927913c3"
+      },
+      {
+        "path": "apps/pms-api/src/app.ts",
+        "blobSha": "080c6fc76fc9b519f46d41df1da54d1e14211fa6"
+      }
+    ],
+    "sourceSymbols": ["ProviderPackageQueryService.list"]
+  },
+  {
+    "operationId": "getProviderPackage",
+    "method": "GET",
+    "path": "/provider-packages/{packageId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ProviderPackage",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-package-query.ts",
+      "apps/pms-api/src/app.ts"
+    ],
+    "sourcePort": "ProviderPackageQueryService.get",
+    "currentRoute": "/api/v1/provider-packages/:packageId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-package-query.ts",
+        "blobSha": "bb79918ddc62592e9d52e8fc3c99a959927913c3"
+      },
+      {
+        "path": "apps/pms-api/src/app.ts",
+        "blobSha": "080c6fc76fc9b519f46d41df1da54d1e14211fa6"
+      }
+    ],
+    "sourceSymbols": ["ProviderPackageQueryService.get"]
+  },
+  {
+    "operationId": "listProviderTypes",
+    "method": "GET",
+    "path": "/provider-types",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ProviderType",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.listProviderTypes",
+    "currentRoute": "/api/v1/provider-types",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.listProviderTypes"]
+  },
+  {
+    "operationId": "getProviderType",
+    "method": "GET",
+    "path": "/provider-types/{providerTypeId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ProviderType",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.getProviderType",
+    "currentRoute": "/api/v1/provider-types/:providerTypeId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.getProviderType"]
+  },
+  {
+    "operationId": "listProviders",
+    "method": "GET",
+    "path": "/providers",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "Provider",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.listProviders",
+    "currentRoute": "/api/v1/providers",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.listProviders"]
+  },
+  {
+    "operationId": "createProvider",
+    "method": "POST",
+    "path": "/providers",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "Provider",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.createProvider",
+    "currentRoute": "/api/v1/providers",
+    "businessSideEffects": ["provider insert", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.createProvider",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "provider.created",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.createProvider"]
+  },
+  {
+    "operationId": "getProvider",
+    "method": "GET",
+    "path": "/providers/{providerId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "Provider",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.getProvider",
+    "currentRoute": "/api/v1/providers/:providerId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.getProvider"]
+  },
+  {
+    "operationId": "updateProviderStatus",
+    "method": "PATCH",
+    "path": "/providers/{providerId}/status",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "Provider",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.updateProviderStatus",
+    "currentRoute": "/api/v1/providers/:providerId/status",
+    "businessSideEffects": ["provider optimistic update", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.updateProviderStatus",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "provider.status_updated",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.updateProviderStatus"]
+  },
+  {
+    "operationId": "listResources",
+    "method": "GET",
+    "path": "/resources",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "Resource",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.listResources",
+    "currentRoute": "/api/v1/resources",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.listResources"]
+  },
+  {
+    "operationId": "createResource",
+    "method": "POST",
+    "path": "/resources",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "Resource",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.createResource",
+    "currentRoute": "/api/v1/resources",
+    "businessSideEffects": ["resource insert", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.createResource",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "resource.created",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.createResource"]
+  },
+  {
+    "operationId": "getResource",
+    "method": "GET",
+    "path": "/resources/{environment}/{resourceId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "Resource",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.getResource",
+    "currentRoute": "/api/v1/resources/:environment/:resourceId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.getResource"]
+  },
+  {
+    "operationId": "updateResourceStatus",
+    "method": "PATCH",
+    "path": "/resources/{environment}/{resourceId}/status",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "Resource",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.updateResourceStatus",
+    "currentRoute": "/api/v1/resources/:environment/:resourceId/status",
+    "businessSideEffects": ["resource optimistic update", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.updateResourceStatus",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "resource.status_updated",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.updateResourceStatus"]
+  },
+  {
+    "operationId": "listProviderResourceBindings",
+    "method": "GET",
+    "path": "/providers/{providerId}/resource-bindings",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ProviderResourceBinding",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.listProviderResources",
+    "currentRoute": "/api/v1/providers/:providerId/resource-bindings",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.listProviderResources"]
+  },
+  {
+    "operationId": "bindProviderResource",
+    "method": "POST",
+    "path": "/providers/{providerId}/resource-bindings",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ProviderResourceBinding",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.bindResource",
+    "currentRoute": "/api/v1/providers/:providerId/resource-bindings",
+    "businessSideEffects": ["binding insert", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.bindResource",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "provider.resource_bound",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.bindResource"]
+  },
+  {
+    "operationId": "unbindProviderResource",
+    "method": "DELETE",
+    "path": "/providers/{providerId}/resource-bindings/{environment}/{resourceId}",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ProviderResourceBinding",
+    "sourceFiles": [
+      "packages/pms-application/src/provider-management.ts",
+      "apps/pms-api/src/management-routes.ts"
+    ],
+    "sourcePort": "ProviderManagementService.unbindResource",
+    "currentRoute": "/api/v1/providers/:providerId/resource-bindings/:environment/:resourceId",
+    "businessSideEffects": ["binding delete", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ProviderManagementService.unbindResource",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "provider.resource_unbound",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/provider-management.ts",
+        "blobSha": "1f234400ba75bb584a638b8d5cebb51469cab75b"
+      },
+      {
+        "path": "apps/pms-api/src/management-routes.ts",
+        "blobSha": "09059aa0551d5b3eb9c5ed296bd3cb9bb83811bd"
+      }
+    ],
+    "sourceSymbols": ["ProviderManagementService.unbindResource"]
+  },
+  {
+    "operationId": "createConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ConfigurationDraft",
+    "sourceFiles": [
+      "packages/configuration-center/src/center.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationCenter.createDraft",
+    "currentRoute": "/api/v1/config-drafts",
+    "businessSideEffects": ["configuration draft creation"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ConfigurationCenter.createDraft",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": null,
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/center.ts",
+        "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationCenter.createDraft"]
+  },
+  {
+    "operationId": "getConfigurationDraft",
+    "method": "GET",
+    "path": "/configuration-drafts/{draftId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "ConfigurationDraft",
+    "sourceFiles": [
+      "packages/configuration-center/src/center.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationCenter.getDraft",
+    "currentRoute": "/api/v1/config-drafts/:draftId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/center.ts",
+        "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationCenter.getDraft"]
+  },
+  {
+    "operationId": "updateConfigurationDraft",
+    "method": "PATCH",
+    "path": "/configuration-drafts/{draftId}",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ConfigurationDraft",
+    "sourceFiles": [
+      "packages/configuration-center/src/center.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationCenter.updateDraft",
+    "currentRoute": "/api/v1/config-drafts/:draftId",
+    "businessSideEffects": ["draft CAS update"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ConfigurationCenter.updateDraft",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": null,
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/center.ts",
+        "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationCenter.updateDraft"]
+  },
+  {
+    "operationId": "validateConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/validate",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ConfigurationDraft",
+    "sourceFiles": [
+      "packages/configuration-center/src/center.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationCenter.validateDraft",
+    "currentRoute": "/api/v1/config-drafts/:draftId/validate",
+    "businessSideEffects": ["draft validation state update"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ConfigurationCenter.validateDraft",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": null,
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/center.ts",
+        "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationCenter.validateDraft"]
+  },
+  {
+    "operationId": "previewEffectiveConfiguration",
+    "method": "GET",
+    "path": "/configuration-drafts/{draftId}/effective",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "EffectiveConfigurationPreview",
+    "sourceFiles": [
+      "packages/configuration-center/src/center.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationCenter.effectivePreview",
+    "currentRoute": "/api/v1/config-drafts/:draftId/effective",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/center.ts",
+        "blobSha": "282aac2b6f6355fe97d392c3bc5cd4574ef144d8"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationCenter.effectivePreview"]
+  },
+  {
+    "operationId": "publishConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/publish",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ConfigurationPublicationResult",
+    "sourceFiles": [
+      "packages/configuration-center/src/publication.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationPublicationService.publish",
+    "currentRoute": "/api/v1/config-drafts/:draftId/publish",
+    "businessSideEffects": ["published revision write", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ConfigurationPublicationService.publish",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "configuration.published",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/publication.ts",
+        "blobSha": "1747be528c80e99305c9b8009a68626b98f8c159"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationPublicationService.publish"]
+  },
+  {
+    "operationId": "rollbackConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/rollback",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "ConfigurationPublicationResult",
+    "sourceFiles": [
+      "packages/configuration-center/src/publication.ts",
+      "apps/pms-api/src/configuration-routes.ts"
+    ],
+    "sourcePort": "ConfigurationPublicationService.rollback",
+    "currentRoute": "/api/v1/config-drafts/:draftId/rollback",
+    "businessSideEffects": ["new published revision from existing revision", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "ConfigurationPublicationService.rollback",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "configuration.rolled_back",
+    "existingJobType": null,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/publication.ts",
+        "blobSha": "1747be528c80e99305c9b8009a68626b98f8c159"
+      },
+      {
+        "path": "apps/pms-api/src/configuration-routes.ts",
+        "blobSha": "0686f87db8749254ada2067df9b735ee65370181"
+      }
+    ],
+    "sourceSymbols": ["ConfigurationPublicationService.rollback"]
+  },
+  {
+    "operationId": "listRuntimeDeployments",
+    "method": "GET",
+    "path": "/runtime-deployments",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentManagementPort.list",
+    "currentRoute": "/api/v1/runtime-deployments",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentManagementPort.list"]
+  },
+  {
+    "operationId": "createRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.create",
+    "currentRoute": "/api/v1/runtime-deployments",
+    "businessSideEffects": ["deployment insert", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.create",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.created",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.create"]
+  },
+  {
+    "operationId": "getRuntimeDeployment",
+    "method": "GET",
+    "path": "/runtime-deployments/{deploymentId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentManagementPort.get",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentManagementPort.get"]
+  },
+  {
+    "operationId": "startRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/start",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.command",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId/start",
+    "businessSideEffects": ["possible desired-state CAS update", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.command(start)",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.start_requested",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.command(start)"]
+  },
+  {
+    "operationId": "stopRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/stop",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.command",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId/stop",
+    "businessSideEffects": ["possible desired-state CAS update", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.command(stop)",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.stop_requested",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.command(stop)"]
+  },
+  {
+    "operationId": "restartRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/restart",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.command",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId/restart",
+    "businessSideEffects": ["possible desired-state CAS update", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.command(restart)",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.restart_requested",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.command(restart)"]
+  },
+  {
+    "operationId": "scaleRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/scale",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.command",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId/scale",
+    "businessSideEffects": ["possible desired-state CAS update", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.command(scale)",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.scale_requested",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.command(scale)"]
+  },
+  {
+    "operationId": "reconcileRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/reconcile",
+    "classification": "EXISTING_COMMAND",
+    "domainObject": "RuntimeDeployment",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "apps/pms-api/src/runtime-deployment-routes.ts",
+      "apps/pms-api/src/runtime-deployment-management.ts"
+    ],
+    "sourcePort": "RuntimeDeploymentApplicationService.command",
+    "currentRoute": "/api/v1/runtime-deployments/:deploymentId/reconcile",
+    "businessSideEffects": ["possible desired-state CAS update", "job enqueue", "audit append"],
+    "newBusinessBehavior": false,
+    "existingCommand": "RuntimeDeploymentApplicationService.command(reconcile)",
+    "existingTransactionBoundary": "unchanged",
+    "existingAuditAction": "runtime_deployment.reconcile_requested",
+    "existingJobType": "runtime_deployment.reconcile",
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-routes.ts",
+        "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-deployment-management.ts"
+      }
+    ],
+    "sourceSymbols": ["RuntimeDeploymentApplicationService.command(reconcile)"]
+  },
+  {
+    "operationId": "listRuntimeProcesses",
+    "method": "GET",
+    "path": "/runtime-processes",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RuntimeProcess",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-process-query.ts",
+      "apps/pms-api/src/runtime-process-routes.ts"
+    ],
+    "sourcePort": "RuntimeProcessQueryService.list",
+    "currentRoute": "/api/v1/runtime-processes",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-process-query.ts",
+        "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-process-routes.ts",
+        "blobSha": "46b124cab8eb994290094ee059c7b68e5d6294d9"
+      }
+    ],
+    "sourceSymbols": ["RuntimeProcessQueryService.list"]
+  },
+  {
+    "operationId": "getRuntimeProcess",
+    "method": "GET",
+    "path": "/runtime-processes/{instanceId}",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RuntimeProcess",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-process-query.ts",
+      "apps/pms-api/src/runtime-process-routes.ts"
+    ],
+    "sourcePort": "RuntimeProcessQueryService.get",
+    "currentRoute": "/api/v1/runtime-processes/:instanceId",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-process-query.ts",
+        "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+      },
+      {
+        "path": "apps/pms-api/src/runtime-process-routes.ts",
+        "blobSha": "46b124cab8eb994290094ee059c7b68e5d6294d9"
+      }
+    ],
+    "sourceSymbols": ["RuntimeProcessQueryService.get"]
+  },
+  {
+    "operationId": "getLatestRegistrySnapshot",
+    "method": "GET",
+    "path": "/registry/{environment}/latest",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RegistrySnapshot",
+    "sourceFiles": [
+      "packages/registry-snapshot/src/model.ts",
+      "apps/pms-api/src/registry-routes.ts"
+    ],
+    "sourcePort": "RegistrySnapshotRepository.latest",
+    "currentRoute": "/api/v1/registry/:environment/latest",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/registry-snapshot/src/model.ts",
+        "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+      },
+      {
+        "path": "apps/pms-api/src/registry-routes.ts",
+        "blobSha": "b93e36d8f09aefd9b211a72ad3d66008f714d6ce"
+      }
+    ],
+    "sourceSymbols": ["RegistrySnapshotRepository.latest", "sendSnapshot", "etagMatches"]
+  },
+  {
+    "operationId": "listRegistryHistory",
+    "method": "GET",
+    "path": "/registry/{environment}/history",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RegistrySnapshot",
+    "sourceFiles": [
+      "packages/registry-snapshot/src/model.ts",
+      "apps/pms-api/src/registry-routes.ts"
+    ],
+    "sourcePort": "RegistrySnapshotRepository.history",
+    "currentRoute": "/api/v1/registry/:environment/history",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/registry-snapshot/src/model.ts",
+        "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+      },
+      {
+        "path": "apps/pms-api/src/registry-routes.ts",
+        "blobSha": "b93e36d8f09aefd9b211a72ad3d66008f714d6ce"
+      }
+    ],
+    "sourceSymbols": ["RegistrySnapshotRepository.history"]
+  },
+  {
+    "operationId": "diffRegistrySnapshots",
+    "method": "GET",
+    "path": "/registry/{environment}/diff",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "RegistrySnapshot",
+    "sourceFiles": [
+      "packages/registry-snapshot/src/model.ts",
+      "apps/pms-api/src/registry-routes.ts"
+    ],
+    "sourcePort": "RegistrySnapshotRepository.diff",
+    "currentRoute": "/api/v1/registry/:environment/diff",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/registry-snapshot/src/model.ts",
+        "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+      },
+      {
+        "path": "apps/pms-api/src/registry-routes.ts",
+        "blobSha": "b93e36d8f09aefd9b211a72ad3d66008f714d6ce"
+      }
+    ],
+    "sourceSymbols": ["RegistrySnapshotRepository.diff"]
+  },
+  {
+    "operationId": "listAuditEvents",
+    "method": "GET",
+    "path": "/audit-events",
+    "classification": "EXISTING_QUERY",
+    "domainObject": "AuditEvent",
+    "sourceFiles": [
+      "packages/pms-domain/src/ports/repositories.ts",
+      "apps/pms-api/src/audit-routes.ts"
+    ],
+    "sourcePort": "AuditRepository.list",
+    "currentRoute": "/api/v1/audit-events",
+    "businessSideEffects": [],
+    "newBusinessBehavior": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/ports/repositories.ts"
+      },
+      {
+        "path": "apps/pms-api/src/audit-routes.ts",
+        "blobSha": "a9897e4fdbc1a94ba93c7e990eb32e6702c075ba"
+      }
+    ],
+    "sourceSymbols": ["AuditRepository.list"]
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "resourceId": "ugv-01",
+  "resourceType": "ugv",
+  "metadata": {
+    "displayName": "UGV 01"
+  },
+  "status": "available",
+  "updatedAt": "2026-07-30T05:00:00.000Z"
+}

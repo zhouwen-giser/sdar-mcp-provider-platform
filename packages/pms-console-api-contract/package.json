@@ -1,0 +1,14 @@
+{
+  "name": "@sdar/pms-console-api-contract",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.js",
+    "./schema": "./schema/openapi.bundle.json"
+  },
+  "files": [
+    "src",
+    "schema"
+  ]
+}

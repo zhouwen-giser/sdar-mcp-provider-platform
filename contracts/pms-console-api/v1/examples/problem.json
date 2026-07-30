@@ -1,0 +1,9 @@
+{
+  "type": "urn:sdar:pms:problem:configuration-draft-version-conflict",
+  "title": "Configuration draft version conflict",
+  "status": 409,
+  "code": "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+  "detail": "The configuration draft changed; reload and retry.",
+  "requestId": "req-001",
+  "correlationId": "corr-001"
+}

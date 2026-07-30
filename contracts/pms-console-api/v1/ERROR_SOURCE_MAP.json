@@ -1,0 +1,548 @@
+[
+  {
+    "problemCode": "INVALID_REQUEST",
+    "sourceCode": "INVALID_REQUEST",
+    "sourceFiles": ["apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "INVALID_JSON",
+    "sourceCode": "INVALID_JSON",
+    "sourceFiles": ["apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "REQUEST_BODY_TOO_LARGE",
+    "sourceCode": "REQUEST_BODY_TOO_LARGE",
+    "sourceFiles": ["apps/pms-api/src/errors.ts"],
+    "httpStatus": 413,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "INTERNAL_ERROR",
+    "sourceCode": "INTERNAL_ERROR",
+    "sourceFiles": ["apps/pms-api/src/errors.ts"],
+    "httpStatus": 500,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "ROUTE_NOT_FOUND",
+    "sourceCode": "ROUTE_NOT_FOUND",
+    "sourceFiles": ["apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "INVALID_IDENTIFIER",
+    "sourceCode": "INVALID_IDENTIFIER",
+    "sourceFiles": ["packages/pms-domain/src/errors.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "INVALID_DOMAIN_VALUE",
+    "sourceCode": "INVALID_DOMAIN_VALUE",
+    "sourceFiles": ["packages/pms-domain/src/errors.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "INVALID_STATE_TRANSITION",
+    "sourceCode": "INVALID_STATE_TRANSITION",
+    "sourceFiles": ["packages/pms-domain/src/errors.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "DUPLICATE_RESOURCE_BINDING",
+    "sourceCode": "DUPLICATE_RESOURCE_BINDING",
+    "sourceFiles": ["packages/pms-domain/src/errors.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RESOURCE_BINDING_NOT_FOUND",
+    "sourceCode": "RESOURCE_BINDING_NOT_FOUND",
+    "sourceFiles": ["packages/pms-domain/src/errors.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "ENTITY_ALREADY_EXISTS",
+    "sourceCode": "ENTITY_ALREADY_EXISTS",
+    "sourceFiles": ["packages/pms-domain/src/ports/repositories.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/ports/repositories.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "ENTITY_NOT_FOUND",
+    "sourceCode": "ENTITY_NOT_FOUND",
+    "sourceFiles": ["packages/pms-domain/src/ports/repositories.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/ports/repositories.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "OPTIMISTIC_CONCURRENCY_CONFLICT",
+    "sourceCode": "OPTIMISTIC_CONCURRENCY_CONFLICT",
+    "sourceFiles": ["packages/pms-domain/src/ports/repositories.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/ports/repositories.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "LEASE_NOT_OWNED",
+    "sourceCode": "LEASE_NOT_OWNED",
+    "sourceFiles": ["packages/pms-domain/src/ports/repositories.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-domain/src/ports/repositories.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_NOT_FOUND",
+    "sourceCode": "RUNTIME_DEPLOYMENT_NOT_FOUND",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
+    "sourceCode": "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+    "sourceCode": "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
+    "sourceCode": "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED",
+    "sourceCode": "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_DEPLOYMENT_REVISION_CONFLICT",
+    "sourceCode": "RUNTIME_DEPLOYMENT_REVISION_CONFLICT",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-deployment.ts",
+      "packages/runtime-deployment/src/index.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-deployment.ts",
+        "blobSha": "bf0a873886cf3969c72664b6701779f88f67aa50"
+      },
+      {
+        "path": "packages/runtime-deployment/src/index.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "RUNTIME_PROCESS_NOT_FOUND",
+    "sourceCode": "RUNTIME_PROCESS_NOT_FOUND",
+    "sourceFiles": [
+      "packages/pms-application/src/runtime-process-query.ts",
+      "apps/pms-api/src/errors.ts"
+    ],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/pms-application/src/runtime-process-query.ts",
+        "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_DEFINITION_NOT_FOUND",
+    "sourceCode": "CONFIGURATION_DEFINITION_NOT_FOUND",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_TARGET_NOT_ALLOWED",
+    "sourceCode": "CONFIGURATION_TARGET_NOT_ALLOWED",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_BUSINESS_KEY_CONFLICT",
+    "sourceCode": "CONFIGURATION_BUSINESS_KEY_CONFLICT",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_DRAFT_NOT_FOUND",
+    "sourceCode": "CONFIGURATION_DRAFT_NOT_FOUND",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+    "sourceCode": "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_DRAFT_NOT_VALIDATED",
+    "sourceCode": "CONFIGURATION_DRAFT_NOT_VALIDATED",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_PUBLISH_CONFLICT",
+    "sourceCode": "CONFIGURATION_PUBLISH_CONFLICT",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 409,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_REVISION_NOT_FOUND",
+    "sourceCode": "CONFIGURATION_REVISION_NOT_FOUND",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_ROLLBACK_TARGET_MISMATCH",
+    "sourceCode": "CONFIGURATION_ROLLBACK_TARGET_MISMATCH",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "CONFIGURATION_INPUT_INVALID",
+    "sourceCode": "CONFIGURATION_INPUT_INVALID",
+    "sourceFiles": ["packages/configuration-center/src/index.ts", "apps/pms-api/src/errors.ts"],
+    "httpStatus": 400,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "packages/configuration-center/src/errors.ts"
+      },
+      {
+        "path": "apps/pms-api/src/errors.ts",
+        "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+      }
+    ]
+  },
+  {
+    "problemCode": "REGISTRY_SNAPSHOT_NOT_FOUND",
+    "sourceCode": "REGISTRY_SNAPSHOT_NOT_FOUND",
+    "sourceFiles": ["apps/pms-api/src/registry-routes.ts"],
+    "httpStatus": 404,
+    "semanticChange": false,
+    "sourceEvidence": [
+      {
+        "path": "apps/pms-api/src/registry-routes.ts",
+        "blobSha": "b93e36d8f09aefd9b211a72ad3d66008f714d6ce"
+      }
+    ]
+  }
+]

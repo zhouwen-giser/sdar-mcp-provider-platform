@@ -153,7 +153,17 @@
     "dev:ha-climate": "tsx apps/home-assistant-climate-provider/src/main.ts",
     "business-events:rotate": "pnpm build && node dist/apps/runtime/src/business-events/rotate.js",
     "config:schema:generate": "node --import tsx scripts/generate-config-schemas.mjs",
-    "config:schema:check": "node --import tsx scripts/generate-config-schemas.mjs --check"
+    "config:schema:check": "node --import tsx scripts/generate-config-schemas.mjs --check",
+    "pms-console-contract:generate": "node scripts/pms-console-contract/generate-artifacts.mjs",
+    "pms-console-contract:lint": "node scripts/pms-console-contract/lint.mjs",
+    "pms-console-contract:bundle": "node scripts/pms-console-contract/bundle.mjs",
+    "pms-console-contract:test": "node scripts/pms-console-contract/validate-all.mjs --freeze",
+    "pms-console-contract:check-sources": "node scripts/pms-console-contract/check-sources.mjs --require-local",
+    "pms-console-contract:check-errors": "node scripts/pms-console-contract/check-errors.mjs --require-local",
+    "pms-console-contract:check-business-impact": "node scripts/pms-console-contract/check-business-impact.mjs --require-complete",
+    "pms-console-contract:check-breaking": "node scripts/pms-console-contract/check-breaking.mjs",
+    "pms-console-contract:freeze": "node scripts/pms-console-contract/generate-lock.mjs",
+    "pms-console-contract:deliver-frozen": "node scripts/pms-console-contract/create-frozen-delivery.mjs"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.4",
@@ -184,6 +194,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@redocly/cli": "2.40.0",
     "@types/node": "22.20.1",
     "@types/pg": "8.20.0",
     "@types/ws": "8.18.1",
@@ -192,10 +203,14 @@
     "eslint": "10.0.1",
     "grpc-tools": "1.13.1",
     "grpc_tools_node_protoc_ts": "5.3.3",
+    "ajv-formats": "3.0.1",
+    "@pb33f/openapi-changes": "0.2.7",
+    "openapi-typescript": "7.13.0",
     "prettier": "3.9.5",
     "tsx": "4.23.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.64.0",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "yaml": "2.9.0"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "remoteBranchHeadAtStart": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteMainHeadAtStart": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "validationStartHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "businessMergeBase": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "capturedAt": "2026-07-30T08:33:19Z",
+  "platformVersion": "0.1.0",
+  "captureMethod": "local checkout plus dynamically fetched Git refs",
+  "publishedSourceArchive": {
+    "path": "reports/platform-v0.1/sdar-mcp-provider-platform-0.1.0-source.tar.gz",
+    "sha256": "4abab21e31ec9f9d4713cd13434163344057406b922000ac3aff3d9396ba80d5",
+    "purpose": "historical release evidence only; not business non-impact proof for this candidate"
+  }
+}

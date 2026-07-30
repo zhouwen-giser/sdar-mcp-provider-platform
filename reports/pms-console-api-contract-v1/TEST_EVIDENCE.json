@@ -1,0 +1,192 @@
+{
+  "contract": "pms-console-api",
+  "targetVersion": "1.0.0",
+  "candidateVersion": "3",
+  "status": "frozen",
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "remoteBranchHeadAtStart": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteBranchHeadAtEnd": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteMainHeadAtStart": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "businessMergeBase": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "validationStartHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "finalLocalHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "localRemoteRelationAtStart": "equal",
+  "localRemoteRelationAtEnd": "equal",
+  "remoteBranchIsAncestorAtStart": true,
+  "remoteBranchIsAncestorAtEnd": true,
+  "authenticationScope": "deferred",
+  "commands": [
+    {
+      "command": "git fetch --prune origin +refs/heads/codex/goal-06-pms-console-api-contract-v1:refs/remotes/origin/codex/goal-06-pms-console-api-contract-v1 +refs/heads/main:refs/remotes/origin/main",
+      "exitCode": 0
+    },
+    {
+      "command": "git merge-base --is-ancestor REMOTE_BRANCH_HEAD_AT_START VALIDATION_START_HEAD",
+      "exitCode": 0
+    },
+    {
+      "command": "sha256sum candidate2.zip and compare sidecar",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --name-only BUSINESS_MERGE_BASE VALIDATION_START_HEAD -- protected paths",
+      "exitCode": 0,
+      "output": []
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-semantics.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-enums.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-generated.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-schemas.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/validate-examples.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-scope.mjs",
+      "exitCode": 1
+    },
+    {
+      "command": "cmp contracts/pms-console-api/v1/business-baseline.sha256 contracts/pms-console-api/v1/business-final.sha256",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:generate",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:lint",
+      "exitCode": 0,
+      "details": "Redocly: 0 errors, 47 warnings"
+    },
+    {
+      "command": "pnpm pms-console-contract:bundle",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:test",
+      "exitCode": 1,
+      "details": "all contract checks pass until the required dynamic scope gate"
+    },
+    {
+      "command": "pnpm pms-console-contract:check-sources",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:check-errors",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:check-business-impact",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm pms-console-contract:check-breaking",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "details": "11 pre-existing no-undef errors in scripts/serve-pms-web.mjs"
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 1,
+      "details": "two pre-existing docs/api files fail Prettier"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --name-only VALIDATION_START_HEAD -- migrations",
+      "exitCode": 0,
+      "output": []
+    },
+    {
+      "command": "git diff --name-only VALIDATION_START_HEAD -- protocol",
+      "exitCode": 0,
+      "output": []
+    },
+    {
+      "command": "final git fetch of Goal 06 remote branch",
+      "exitCode": 0
+    },
+    {
+      "command": "git merge-base --is-ancestor REMOTE_BRANCH_HEAD_AT_END FINAL_LOCAL_HEAD",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-freeze-exceptions.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/pms-console-contract/check-scope.mjs --approved-non-contract-exceptions",
+      "exitCode": 0,
+      "details": "exact six-path pre-existing exception set accepted by repository owner"
+    },
+    {
+      "command": "pnpm pms-console-contract:freeze",
+      "exitCode": 0,
+      "details": "all protocol freeze prerequisites passed; contract-lock generated and verified"
+    },
+    {
+      "command": "node scripts/pms-console-contract/validate-all.mjs --freeze --approved-non-contract-exceptions",
+      "exitCode": 0,
+      "details": "final frozen-state validation passed"
+    }
+  ],
+  "operationCount": 36,
+  "schemaCount": 28,
+  "jsonSchemaFileCount": 29,
+  "exampleCount": 15,
+  "operationExampleMappingCount": 36,
+  "problemCodeCount": 32,
+  "localSourceConformant": true,
+  "generatedArtifactsFresh": true,
+  "breakingCheckPassed": true,
+  "businessSourceUnchanged": true,
+  "protectedFileCount": 262,
+  "protectedManifestSha256": "0d0de8dbbfc356e9198ca438687b066fc529cfcdf92b7407614a567c677d3ea3",
+  "migrationsUnchanged": true,
+  "protocolUnchanged": true,
+  "productionRoutesUnchanged": true,
+  "pmsWebGatewaysUnchanged": true,
+  "scopePassed": false,
+  "scopeAcceptedWithNonContractExceptions": true,
+  "repositoryGatesPassed": false,
+  "repositoryGatesAcceptedWithNonContractExceptions": true,
+  "protocolFreezeGatesPassed": true,
+  "contractLockGenerated": true,
+  "freezeReady": true,
+  "secretsIncluded": false,
+  "blockers": [],
+  "acceptedNonContractExceptions": [
+    "six pre-existing paths outside Scope Lock between BUSINESS_MERGE_BASE and VALIDATION_START_HEAD",
+    "root lint fails on pre-existing scripts/serve-pms-web.mjs",
+    "root format check fails on two pre-existing docs/api files"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "checkedAt": "2026-07-30T09:10:41Z",
+  "remoteBranchHeadAtStart": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteBranchHeadAtEnd": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "finalLocalHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "relationAtStart": "equal",
+  "relationAtEnd": "equal",
+  "remoteBranchIsAncestorAtStart": true,
+  "remoteBranchIsAncestorAtEnd": true,
+  "startAncestorExitCode": 0,
+  "endAncestorExitCode": 0,
+  "remoteAdvancedDuringValidation": false,
+  "status": "passed"
+}

@@ -1,0 +1,166 @@
+{
+  "reportSummary": {
+    "components": {
+      "totalChanges": 1,
+      "breakingChanges": 0
+    },
+    "info": {
+      "totalChanges": 2,
+      "breakingChanges": 0
+    },
+    "paths": {
+      "totalChanges": 4,
+      "breakingChanges": 0
+    }
+  },
+  "changes": [
+    {
+      "breaking": true,
+      "change": 4,
+      "changeHash": "JdfefP3RJ5GfD-HbWVr4_9msptAS78NNuOj1qT5z-dw=",
+      "changeText": "object_removed",
+      "context": {
+        "originalColumn": 24,
+        "originalLine": 3413
+      },
+      "original": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+      "path": "$",
+      "property": "x-baseline-commit",
+      "type": "extension"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "u3EZdqaT30Frobq5OM5Juo6Iq9x7utQ-7-ywpiK8dFI=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 28,
+        "newLine": 3798
+      },
+      "new": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+      "path": "$",
+      "property": "x-business-merge-base",
+      "type": "extension"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "phfh_NGlAkiegmFAXpWCABr9w73aX0ZIXQoM54maWYg=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 30,
+        "newLine": 3799
+      },
+      "new": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+      "path": "$",
+      "property": "x-validation-start-head",
+      "type": "extension"
+    },
+    {
+      "breaking": false,
+      "change": 2,
+      "changeHash": "1OlMjjQLKk_O9pvUgGPLDDOpxXdCVlIvBjjGHknxVVc=",
+      "changeText": "property_added",
+      "context": {
+        "newColumn": 15,
+        "newLine": 3091
+      },
+      "new": "stopped",
+      "path": "$.components.schemas['RuntimeDeployment'].properties['desiredState']",
+      "property": "enum",
+      "type": "schema"
+    },
+    {
+      "breaking": false,
+      "change": 1,
+      "changeHash": "uSpTGpvpczoRgliQBWyb9GsiAa3YWTmBx1KuF9lqI5M=",
+      "changeText": "modified",
+      "context": {
+        "newColumn": 20,
+        "newLine": 6,
+        "originalColumn": 20,
+        "originalLine": 1041
+      },
+      "new": "Contract Candidate 3 reconciled from Candidate 2 against the local SMPP checkout. Transport adapter contract only; no /api/console/v1 implementation is included. Authentication, authorization, RBAC, login and session management are explicitly deferred. X-Actor-ID is audit metadata rather than an authentication credential.",
+      "original": "Contract Candidate 2. Transport adapter contract only; no /api/console/v1 implementation is included. Authentication, authorization, RBAC, login and session management are explicitly deferred. X-Actor-ID is audit metadata rather than an authentication credential.",
+      "path": "$.info",
+      "property": "description",
+      "type": "info"
+    },
+    {
+      "breaking": false,
+      "change": 1,
+      "changeHash": "gc-WQRtrLPN1lTDTgAbipYajAW3BokqN8VzepDMxtGQ=",
+      "changeText": "modified",
+      "context": {
+        "newColumn": 16,
+        "newLine": 5,
+        "originalColumn": 16,
+        "originalLine": 1043
+      },
+      "new": "1.0.0-candidate.3",
+      "original": "1.0.0-candidate.2",
+      "path": "$.info",
+      "property": "version",
+      "type": "info"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "kb3trsVIOEsizc1K80BOTRdSF4hk2jFAgzFBPTvGT3Q=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 21,
+        "newLine": 2354
+      },
+      "new": "If-None-Match",
+      "path": "$.paths['/registry/{environment}/latest'].get",
+      "property": "parameters",
+      "type": "operation"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "YbRMvgTeIiFsZdt5J8KH17X5EdduvnRf1lOypJ_fFRE=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 18,
+        "newLine": 2318
+      },
+      "new": "304",
+      "path": "$.paths['/registry/{environment}/latest'].get.responses",
+      "property": "codes",
+      "type": "responses"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "lKrgGKGbATk3dc5eTIYCuzCcmLK-gZIlLSPDFh5-crI=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 32,
+        "newLine": 2303
+      },
+      "new": "Cache-Control",
+      "path": "$.paths['/registry/{environment}/latest'].get.responses['200']",
+      "property": "headers",
+      "type": "response"
+    },
+    {
+      "breaking": false,
+      "change": 3,
+      "changeHash": "w0bHC6O44tcThw46CZxpKww0kWiJzjSfUqf2E1vY10o=",
+      "changeText": "object_added",
+      "context": {
+        "newColumn": 23,
+        "newLine": 2297
+      },
+      "new": "ETag",
+      "path": "$.paths['/registry/{environment}/latest'].get.responses['200']",
+      "property": "headers",
+      "type": "response"
+    }
+  ],
+  "originalPath": "contracts/pms-console-api/v1/breaking-baseline/openapi.bundle.json",
+  "modifiedPath": "contracts/pms-console-api/v1/dist/openapi.bundle.json"
+}

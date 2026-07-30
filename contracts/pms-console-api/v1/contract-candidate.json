@@ -1,0 +1,30 @@
+{
+  "contract": "pms-console-api",
+  "targetVersion": "1.0.0",
+  "candidateVersion": "3",
+  "status": "frozen",
+  "remoteBranchHeadAtStart": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteMainHeadAtStart": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "validationStartHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "businessMergeBase": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "authenticationScope": "deferred",
+  "semanticRemediationComplete": true,
+  "localSourceVerified": true,
+  "repositoryBusinessHashVerified": true,
+  "repositoryGatesVerified": false,
+  "freezeReady": true,
+  "generatedAt": "2026-07-30T09:11:04.027Z",
+  "openApiSha256": "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042",
+  "schemaBundleSha256": "a0982fd32dd5647831b528571fbee3972eac29ee0e8f7295b960e0507bf4ab1a",
+  "endpointSourceMapSha256": "1ebf9c52c29044a0c14d19d73841a1822559a1d1ddef72f4abe399569ff1a396",
+  "errorSourceMapSha256": "3b72501425815462f7bbc11e5b080dc3baab3677bcea82d5701840d755ca2b6b",
+  "schemaSourceMapSha256": "9fe428e34f92854fea8d951105da7705870b6d6c94929daedd13902c628ee1c4",
+  "generatedTypesSha256": "4fde3a89da6dc9b3300f36f5f54f3ab1ea1d6f37d5647df9c93df5bb2326dc66",
+  "candidateGatesVerified": true,
+  "freezeBlockers": [],
+  "frozenFromCandidateVersion": "3",
+  "repositoryGatesAcceptedWithNonContractExceptions": true,
+  "freezeExceptions": [
+    "FREEZE_EXCEPTIONS.json"
+  ]
+}

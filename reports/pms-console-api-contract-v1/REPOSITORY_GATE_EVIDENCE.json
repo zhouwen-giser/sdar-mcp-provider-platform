@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-07-30T08:48:27.096Z",
+  "allPassed": false,
+  "finalAssessment": "protocol freeze passed; pre-existing non-protocol scope, lint and format findings accepted by repository owner",
+  "contractScopeLintPassed": true,
+  "contractScopeFormatPassed": true,
+  "protocolFreezePassed": true,
+  "nonContractExceptionsAccepted": true,
+  "exceptionEvidence": "contracts/pms-console-api/v1/FREEZE_EXCEPTIONS.json",
+  "results": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "startedAt": "2026-07-30T08:44:43.728Z",
+      "finishedAt": "2026-07-30T08:44:44.249Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:generate",
+      "startedAt": "2026-07-30T08:44:44.249Z",
+      "finishedAt": "2026-07-30T08:45:19.897Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:lint",
+      "startedAt": "2026-07-30T08:45:19.897Z",
+      "finishedAt": "2026-07-30T08:45:32.729Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:bundle",
+      "startedAt": "2026-07-30T08:45:32.729Z",
+      "finishedAt": "2026-07-30T08:46:01.968Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:test",
+      "startedAt": "2026-07-30T08:46:01.968Z",
+      "finishedAt": "2026-07-30T08:47:27.962Z",
+      "exitCode": 1,
+      "status": "failed"
+    },
+    {
+      "command": "pnpm pms-console-contract:check-sources",
+      "startedAt": "2026-07-30T08:47:27.962Z",
+      "finishedAt": "2026-07-30T08:47:28.883Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:check-errors",
+      "startedAt": "2026-07-30T08:47:28.883Z",
+      "finishedAt": "2026-07-30T08:47:29.639Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:check-business-impact",
+      "startedAt": "2026-07-30T08:47:29.639Z",
+      "finishedAt": "2026-07-30T08:47:30.171Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm pms-console-contract:check-breaking",
+      "startedAt": "2026-07-30T08:47:30.171Z",
+      "finishedAt": "2026-07-30T08:47:30.882Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-07-30T08:47:30.882Z",
+      "finishedAt": "2026-07-30T08:47:39.198Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-07-30T08:47:39.198Z",
+      "finishedAt": "2026-07-30T08:48:05.714Z",
+      "exitCode": 1,
+      "status": "failed"
+    },
+    {
+      "command": "pnpm format:check",
+      "startedAt": "2026-07-30T08:48:05.714Z",
+      "finishedAt": "2026-07-30T08:48:18.098Z",
+      "exitCode": 1,
+      "status": "failed"
+    },
+    {
+      "command": "pnpm build",
+      "startedAt": "2026-07-30T08:48:18.098Z",
+      "finishedAt": "2026-07-30T08:48:27.073Z",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "startedAt": "2026-07-30T08:48:27.074Z",
+      "finishedAt": "2026-07-30T08:48:27.096Z",
+      "exitCode": 0,
+      "status": "passed"
+    }
+  ],
+  "finalReruns": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "remainingErrors": 11,
+      "affectedPaths": ["scripts/serve-pms-web.mjs"],
+      "preExistingAtValidationStart": true
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 1,
+      "affectedPaths": [
+        "docs/api/PMS_Console_API_Contract_V1.0.md",
+        "docs/api/pms_contract_task.md"
+      ],
+      "preExistingAtValidationStart": true
+    }
+  ]
+}

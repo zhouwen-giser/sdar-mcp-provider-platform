@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-07-30T08:33:19Z",
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "remoteUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform.git",
+  "remoteBranchHeadAtStart": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "remoteMainHeadAtStart": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "validationStartHead": "ecf72ef734362f6bd4831d9480c13f5f73c4f268",
+  "businessMergeBase": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "localRemoteRelation": "equal",
+  "remoteBranchIsAncestorAtStart": true,
+  "remoteBranchAncestorCommandExitCode": 0,
+  "nodeVersion": "v22.23.1",
+  "pnpmVersion": "11.13.1",
+  "worktreeAtStart": "clean",
+  "protectedManifestAlgorithm": "sha256 over Git tracked and non-ignored untracked regular files, path-sorted",
+  "protectedFileCount": 262,
+  "protectedManifestSha256": "0d0de8dbbfc356e9198ca438687b066fc529cfcdf92b7407614a567c677d3ea3",
+  "protectedChangesFromBusinessMergeBaseToValidationStart": [],
+  "missingProtectedRoots": ["apps/pms-web/src/features", "apps/pms-web/src/gateways"],
+  "preExistingScopePathsFromBusinessMergeBaseToValidationStart": [
+    ".gitignore",
+    "README.md",
+    "docs/api/PMS_Console_API_Contract_V1.0.md",
+    "docs/api/pms_contract_task.md",
+    "docs/operations/pms-local-configuration-runbook.md",
+    "package.json",
+    "scripts/serve-pms-web.mjs"
+  ],
+  "preExistingOutOfScopeBlockers": [
+    ".gitignore",
+    "README.md",
+    "docs/api/PMS_Console_API_Contract_V1.0.md",
+    "docs/api/pms_contract_task.md",
+    "docs/operations/pms-local-configuration-runbook.md",
+    "scripts/serve-pms-web.mjs"
+  ]
+}
