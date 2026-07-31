@@ -1,0 +1,10 @@
+{
+  "providerId": "ugv-prod-001",
+  "providerTypeId": "ugv",
+  "packageId": "ugv-provider",
+  "packageVersion": "1.0.0",
+  "hostingMode": "platform_managed",
+  "adapterEndpoint": "127.0.0.1:8101",
+  "status": "active",
+  "updatedAt": "2026-07-30T05:00:00.000Z"
+}

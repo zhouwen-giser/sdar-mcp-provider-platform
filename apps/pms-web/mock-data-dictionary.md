@@ -1,0 +1,3 @@
+# Mock Data Dictionary
+
+核心实体：Provider、ProviderPackage、RuntimeDeployment、RuntimeInstance、RuntimeProcess、ConfigurationProfile、ConfigurationRevision、SecretReference、Resource、CatalogRevision、RegistryRevision、Operation、WorkerJob、Incident、ChangeRequest、AuditEvent。所有写操作只推进浏览器内 Operation。

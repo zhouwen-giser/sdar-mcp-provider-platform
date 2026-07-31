@@ -1,0 +1,13 @@
+{
+  "packageId": "ugv-provider",
+  "packageVersion": "1.0.0",
+  "providerType": "ugv",
+  "hostingModes": ["platform_managed"],
+  "configSchemaId": "ugv-config-v1",
+  "compatibleRuntimeVersion": "2.0.0-rc.1",
+  "protocolMode": "frozen_v1",
+  "qualification": {
+    "componentStatus": "passed",
+    "realResourceStatus": "pending"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "environment": "production",
+  "fromRevision": 3,
+  "toRevision": 4,
+  "added": [],
+  "removed": [],
+  "changed": [
+    {
+      "providerId": "ugv-prod-001",
+      "before": {
+        "providerId": "ugv-prod-001",
+        "serverId": "ugv-server-001",
+        "protocolMode": "frozen_v1",
+        "effectiveEndpoint": "http://127.0.0.1:8201/mcp",
+        "catalogRevision": 1,
+        "tools": []
+      },
+      "after": {
+        "providerId": "ugv-prod-001",
+        "serverId": "ugv-server-001",
+        "protocolMode": "frozen_v1",
+        "effectiveEndpoint": "http://127.0.0.1:8201/mcp",
+        "catalogRevision": 2,
+        "tools": [
+          {
+            "name": "io.sdar/taskExecution/checkAvailability"
+          }
+        ]
+      }
+    }
+  ]
+}

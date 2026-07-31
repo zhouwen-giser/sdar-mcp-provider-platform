@@ -1,0 +1,23 @@
+{
+  "outcome": "published",
+  "revision": {
+    "revisionId": "123e4567-e89b-42d3-a456-426614174000",
+    "target": {
+      "environment": "production",
+      "targetType": "runtime_deployment",
+      "targetId": "deploy-001",
+      "configGroup": "runtime",
+      "dataId": "runtime-main"
+    },
+    "revision": 3,
+    "checksum": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "applyMode": "restart_required",
+    "status": "published",
+    "content": {
+      "runtime": {
+        "port": 8201
+      }
+    },
+    "createdAt": "2026-07-30T05:12:00.000Z"
+  }
+}

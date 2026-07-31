@@ -1,96 +1,132 @@
-export type PmsWebRoute =
-  | { readonly page: "providers" }
-  | { readonly page: "provider"; readonly providerId: string }
-  | { readonly page: "packages" }
-  | { readonly page: "resources"; readonly environment: string }
-  | { readonly page: "configuration"; readonly draftId?: string }
-  | {
-      readonly page: "runtime";
-      readonly providerId?: string;
-      readonly deploymentId?: string;
-    }
-  | { readonly page: "catalog"; readonly environment: string; readonly providerId?: string }
-  | {
-      readonly page: "registry";
-      readonly environment: string;
-      readonly fromRevision?: number;
-      readonly toRevision?: number;
-    }
-  | {
-      readonly page: "audit";
-      readonly subjectType?: string;
-      readonly subjectId?: string;
-      readonly correlationId?: string;
-    };
+export interface AppRoute { readonly path:string; readonly title:string; readonly group:string; readonly level:"P0"|"P1"|"internal"; }
 
-export function matchRoute(pathname: string, search = ""): PmsWebRoute {
-  const provider = /^\/providers\/([^/]+)$/.exec(pathname);
-  if (provider?.[1] !== undefined) {
-    return { page: "provider", providerId: decodeURIComponent(provider[1]) };
-  }
-  if (pathname === "/packages") return { page: "packages" };
-  if (pathname === "/resources") {
-    return {
-      page: "resources",
-      environment: new URLSearchParams(search).get("environment") ?? "production",
-    };
-  }
-  if (pathname === "/configuration") {
-    const draftId = new URLSearchParams(search).get("draftId");
-    return { page: "configuration", ...(draftId === null ? {} : { draftId }) };
-  }
-  if (pathname === "/runtime") {
-    const query = new URLSearchParams(search);
-    const providerId = query.get("providerId");
-    const deploymentId = query.get("deploymentId");
-    return {
-      page: "runtime",
-      ...(providerId === null ? {} : { providerId }),
-      ...(deploymentId === null ? {} : { deploymentId }),
-    };
-  }
-  if (pathname === "/catalog") {
-    const query = new URLSearchParams(search);
-    const providerId = query.get("providerId");
-    return {
-      page: "catalog",
-      environment: query.get("environment") ?? "production",
-      ...(providerId === null ? {} : { providerId }),
-    };
-  }
-  if (pathname === "/registry") {
-    const query = new URLSearchParams(search);
-    const fromRevision = positiveInteger(query.get("fromRevision"));
-    const toRevision = positiveInteger(query.get("toRevision"));
-    return {
-      page: "registry",
-      environment: query.get("environment") ?? "production",
-      ...(fromRevision === undefined ? {} : { fromRevision }),
-      ...(toRevision === undefined ? {} : { toRevision }),
-    };
-  }
-  if (pathname === "/audit") {
-    const query = new URLSearchParams(search);
-    return {
-      page: "audit",
-      ...optionalQuery(query, "subjectType"),
-      ...optionalQuery(query, "subjectId"),
-      ...optionalQuery(query, "correlationId"),
-    };
-  }
-  return { page: "providers" };
-}
+function route(path:string,title:string,group:string,level:AppRoute["level"]):AppRoute{return{path,title,group,level}}
 
-function positiveInteger(value: string | null): number | undefined {
-  if (value === null || !/^[1-9][0-9]*$/.test(value)) return undefined;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) ? parsed : undefined;
-}
+export const APP_ROUTES: readonly AppRoute[] = [
+  route("/dashboard", "工作台", "概览", "P0"),
+  route("/attention", "待处理中心", "概览", "P0"),
+  route("/notifications", "通知中心", "概览", "P1"),
+  route("/search", "全局搜索", "概览", "P1"),
+  route("/providers", "Provider 列表", "Provider", "P0"),
+  route("/providers/new", "创建 Provider", "Provider", "P0"),
+  route("/providers/:providerId", "Provider 详情", "Provider", "P0"),
+  route("/providers/:providerId/overview", "Provider 概览", "Provider", "P0"),
+  route("/providers/:providerId/edit", "编辑 Provider", "Provider", "P0"),
+  route("/providers/:providerId/configuration", "Provider 配置", "Provider", "P0"),
+  route("/providers/:providerId/deployments", "Provider Deployments", "Provider", "P0"),
+  route("/providers/:providerId/resources", "Provider Resources", "Provider", "P0"),
+  route("/providers/:providerId/catalog", "Provider Catalog", "Provider", "P0"),
+  route("/providers/:providerId/activity", "Provider Activity", "Provider", "P0"),
+  route("/providers/:providerId/settings", "Provider Settings", "Provider", "P1"),
+  route("/providers/:providerId/decommission", "Provider 下线", "Provider", "P0"),
+  route("/provider-packages", "Provider Packages", "Provider", "P0"),
+  route("/provider-packages/new", "注册 Package", "Provider", "P1"),
+  route("/provider-packages/import", "导入 Package", "Provider", "P1"),
+  route("/provider-packages/:packageId", "Package 详情", "Provider", "P0"),
+  route("/provider-packages/:packageId/versions/:version", "Package Version", "Provider", "P0"),
+  route("/provider-packages/:packageId/versions/:version/qualification", "Package Qualification", "Provider", "P0"),
+  route("/provider-packages/:packageId/versions/:version/usage", "Package Usage", "Provider", "P1"),
+  route("/runtime/deployments", "Runtime Deployments", "运行管理", "P0"),
+  route("/runtime/deployments/new", "创建 Deployment", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId", "Deployment 详情", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/overview", "Deployment 概览", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/edit", "编辑 Deployment", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/reconciliation", "调和时间线", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/instances", "Deployment Instances", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/configuration", "Deployment Configuration", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/activity", "Deployment Activity", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/upgrade", "升级 Deployment", "运行管理", "P0"),
+  route("/runtime/deployments/:deploymentId/scale", "扩缩容", "运行管理", "P1"),
+  route("/runtime/instances", "Runtime Instances", "运行管理", "P0"),
+  route("/runtime/instances/:runtimeId", "Runtime Instance 详情", "运行管理", "P0"),
+  route("/runtime/instances/:runtimeId/registration", "Runtime Registration", "运行管理", "P0"),
+  route("/runtime/instances/:runtimeId/configuration", "Runtime Configuration", "运行管理", "P0"),
+  route("/runtime/instances/:runtimeId/activity", "Runtime Activity", "运行管理", "P0"),
+  route("/runtime/processes", "Runtime Processes", "运行管理", "P0"),
+  route("/runtime/processes/:processId", "Runtime Process 详情", "运行管理", "P0"),
+  route("/runtime/releases", "Runtime Releases", "运行管理", "P1"),
+  route("/runtime/releases/new", "注册 Runtime Release", "运行管理", "P1"),
+  route("/runtime/releases/:releaseId", "Runtime Release 详情", "运行管理", "P1"),
+  route("/runtime/releases/:releaseId/compatibility", "Release Compatibility", "运行管理", "P1"),
+  route("/runtime/releases/:releaseId/usage", "Release Usage", "运行管理", "P1"),
+  route("/databases", "Database Profiles", "运行管理", "P1"),
+  route("/databases/new", "创建 Database Profile", "运行管理", "P1"),
+  route("/databases/:profileId", "Database Profile 详情", "运行管理", "P1"),
+  route("/databases/:profileId/edit", "编辑 Database Profile", "运行管理", "P1"),
+  route("/databases/:profileId/usage", "Database Profile Usage", "运行管理", "P1"),
+  route("/configuration", "配置中心", "制品与配置", "P0"),
+  route("/configuration/new", "新建配置", "制品与配置", "P0"),
+  route("/configuration/:profileId", "配置详情", "制品与配置", "P0"),
+  route("/configuration/:profileId/edit", "编辑配置", "制品与配置", "P0"),
+  route("/configuration/:profileId/revisions", "配置 Revisions", "制品与配置", "P0"),
+  route("/configuration/:profileId/revisions/:revision", "Configuration Revision", "制品与配置", "P0"),
+  route("/configuration/:profileId/compare", "配置对比", "制品与配置", "P0"),
+  route("/configuration/:profileId/revisions/:revision/rollback", "配置回滚", "制品与配置", "P0"),
+  route("/secrets", "Secret References", "制品与配置", "P1"),
+  route("/secrets/:secretRef", "Secret Reference 详情", "制品与配置", "P1"),
+  route("/resources", "Resources", "发现与资源", "P0"),
+  route("/resources/:resourceId", "Resource 详情", "发现与资源", "P0"),
+  route("/resources/:resourceId/history", "Resource History", "发现与资源", "P1"),
+  route("/resources/:resourceId/activity", "Resource Activity", "发现与资源", "P1"),
+  route("/catalog", "Catalog", "发现与资源", "P0"),
+  route("/catalog/providers/:providerId", "Provider Catalog", "发现与资源", "P0"),
+  route("/catalog/providers/:providerId/:operationName", "Catalog Operation", "发现与资源", "P0"),
+  route("/catalog/providers/:providerId/revisions", "Catalog Revisions", "发现与资源", "P0"),
+  route("/catalog/providers/:providerId/revisions/:revision", "Catalog Revision", "发现与资源", "P0"),
+  route("/catalog/providers/:providerId/compare", "Catalog Compare", "发现与资源", "P0"),
+  route("/catalog/:providerId/:operationName", "Catalog Operation 兼容路由", "发现与资源", "P0"),
+  route("/registry", "Registry", "发现与资源", "P0"),
+  route("/registry/revisions/:revision", "Registry Revision", "发现与资源", "P0"),
+  route("/registry/compare", "Registry Compare", "发现与资源", "P0"),
+  route("/registry/publish", "Registry Publish", "发现与资源", "P0"),
+  route("/conformance", "Conformance", "发现与资源", "P1"),
+  route("/conformance/suites", "Conformance Suites", "发现与资源", "P1"),
+  route("/conformance/runs", "Conformance Runs", "发现与资源", "P1"),
+  route("/conformance/runs/:runId", "Conformance Run 详情", "发现与资源", "P1"),
+  route("/mcp-explorer", "MCP Explorer", "发现与资源", "P1"),
+  route("/mcp-explorer/history", "MCP Explorer History", "发现与资源", "P1"),
+  route("/operations", "Control Plane Operations", "运维", "P0"),
+  route("/operations/:operationId", "Operation 详情", "运维", "P0"),
+  route("/operations/health", "系统健康", "运维", "P0"),
+  route("/operations/jobs", "Worker Jobs", "运维", "P0"),
+  route("/operations/jobs/:jobId", "Worker Job 详情", "运维", "P0"),
+  route("/operations/queues", "Worker Queue", "运维", "P1"),
+  route("/operations/workers", "Workers", "运维", "P1"),
+  route("/operations/incidents", "Incidents", "运维", "P0"),
+  route("/operations/incidents/new", "创建 Incident", "运维", "P0"),
+  route("/operations/incidents/:incidentId", "Incident 详情", "运维", "P0"),
+  route("/operations/incident-rules", "Incident Rules", "运维", "P1"),
+  route("/changes", "Change Requests", "治理", "P0"),
+  route("/changes/new", "创建 Change Request", "治理", "P0"),
+  route("/changes/:changeId", "Change Request 详情", "治理", "P0"),
+  route("/changes/:changeId/review", "Change Review", "治理", "P0"),
+  route("/audit", "Audit", "治理", "P0"),
+  route("/audit/:auditId", "Audit 详情", "治理", "P0"),
+  route("/audit/export", "Audit Export", "治理", "P1"),
+  route("/environments", "Environments", "系统", "P1"),
+  route("/environments/:environmentId", "Environment 详情", "系统", "P1"),
+  route("/access/users", "用户管理", "系统", "P1"),
+  route("/access/roles", "角色管理", "系统", "P1"),
+  route("/access/roles/:roleId", "角色详情", "系统", "P1"),
+  route("/access/service-accounts", "Service Accounts", "系统", "P1"),
+  route("/system/general", "General Settings", "系统", "P1"),
+  route("/system/runtime-defaults", "Runtime Defaults", "系统", "P1"),
+  route("/system/registry", "Registry Settings", "系统", "P1"),
+  route("/system/retention", "Retention Settings", "系统", "P1"),
+  route("/system/security", "Security Settings", "系统", "P1"),
+  route("/system/settings", "System Settings 兼容路由", "系统", "P1"),
+  route("/profile", "用户资料", "系统", "P1"),
+  route("/profile/preferences", "用户偏好", "系统", "P1"),
+  route("/login", "登录", "通用", "P1"),
+  route("/session-expired", "会话过期", "通用", "P1"),
+  route("/access-denied", "访问拒绝", "通用", "P1"),
+  route("/403", "403", "通用", "P1"),
+  route("/404", "404", "通用", "P1"),
+  route("/500", "500", "通用", "P1"),
+  route("/maintenance", "维护模式", "通用", "P1"),
+  route("/_prototype/components", "组件展示", "Prototype", "internal"),
+  route("/_prototype/scenarios", "场景展示", "Prototype", "internal"),
+];
 
-function optionalQuery(
-  query: URLSearchParams,
-  name: "subjectType" | "subjectId" | "correlationId",
-): Partial<Record<typeof name, string>> {
-  const value = query.get(name);
-  return value === null || value.length === 0 ? {} : { [name]: value };
-}
+export function matchRoute(pathname:string):AppRoute|undefined { return APP_ROUTES.find(candidate=>{ const expected=candidate.path.split("/").filter(Boolean); const actual=pathname.split("/").filter(Boolean); return expected.length===actual.length&&expected.every((segment,index)=>segment.startsWith(":")||segment===actual[index]); }); }
+export { navigate } from "./app/navigation.js";
