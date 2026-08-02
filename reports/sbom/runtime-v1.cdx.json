@@ -12,7 +12,7 @@
     "properties": [
       {
         "name": "sdar:pnpm-lock-sha256",
-        "value": "b26f1cdfcfd258dea4d44ef1c1574f9fd635d72a091f631e597288a49db9cae6"
+        "value": "da705bf9c6d996abc2c5b24fff91a909c95c66c698076b9fd6cd2e5a135d8b11"
       }
     ]
   },
@@ -496,6 +496,18 @@
       "name": "@sdar/secret-store",
       "version": "link:../secret-store",
       "purl": "pkg:npm/%40sdar/secret-store@link%3A..%2Fsecret-store"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/query-core",
+      "version": "5.101.4",
+      "purl": "pkg:npm/%40tanstack/query-core@5.101.4"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/react-query",
+      "version": "5.101.4",
+      "purl": "pkg:npm/%40tanstack/react-query@5.101.4"
     },
     {
       "type": "library",
@@ -1699,6 +1711,30 @@
     },
     {
       "type": "library",
+      "name": "react-dom",
+      "version": "19.2.8",
+      "purl": "pkg:npm/react-dom@19.2.8"
+    },
+    {
+      "type": "library",
+      "name": "react-router-dom",
+      "version": "7.18.2",
+      "purl": "pkg:npm/react-router-dom@7.18.2"
+    },
+    {
+      "type": "library",
+      "name": "react-router",
+      "version": "7.18.2",
+      "purl": "pkg:npm/react-router@7.18.2"
+    },
+    {
+      "type": "library",
+      "name": "react",
+      "version": "19.2.8",
+      "purl": "pkg:npm/react@19.2.8"
+    },
+    {
+      "type": "library",
       "name": "readable-stream",
       "version": "3.6.2",
       "purl": "pkg:npm/readable-stream@3.6.2"
@@ -1798,6 +1834,12 @@
       "name": "safer-buffer",
       "version": "2.1.2",
       "purl": "pkg:npm/safer-buffer@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "scheduler",
+      "version": "0.27.0",
+      "purl": "pkg:npm/scheduler@0.27.0"
     },
     {
       "type": "library",
@@ -1936,6 +1978,12 @@
       "name": "strip-ansi",
       "version": "6.0.1",
       "purl": "pkg:npm/strip-ansi@6.0.1"
+    },
+    {
+      "type": "library",
+      "name": "supports-color",
+      "version": "10.2.2",
+      "purl": "pkg:npm/supports-color@10.2.2"
     },
     {
       "type": "library",
