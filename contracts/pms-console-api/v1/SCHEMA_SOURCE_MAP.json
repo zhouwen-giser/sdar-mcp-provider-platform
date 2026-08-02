@@ -1,0 +1,167 @@
+{
+  "ProblemDetails": {
+    "classification": "TRANSPORT_METADATA",
+    "sourceFile": null,
+    "sourceSymbol": "PmsErrorEnvelope projection"
+  },
+  "ProblemCode": {
+    "classification": "TRANSPORT_METADATA",
+    "sourceFile": "apps/pms-api/src/errors.ts",
+    "sourceSymbol": "classifyError/public codes",
+    "blobSha": "a74fab434f890e4f286e22b50ebe09c090cd6139"
+  },
+  "PageInfo": {
+    "classification": "TRANSPORT_METADATA",
+    "sourceFile": null,
+    "sourceSymbol": "Page projection"
+  },
+  "ProviderType": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/entities.ts",
+    "sourceSymbol": "ProviderType",
+    "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+  },
+  "ProviderPackage": {
+    "classification": "EXISTING_PROJECTION",
+    "sourceFile": "packages/pms-application/src/provider-package-query.ts",
+    "sourceSymbol": "PublicProviderPackage",
+    "blobSha": "bb79918ddc62592e9d52e8fc3c99a959927913c3"
+  },
+  "Provider": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/entities.ts",
+    "sourceSymbol": "Provider",
+    "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+  },
+  "Resource": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/entities.ts",
+    "sourceSymbol": "Resource",
+    "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+  },
+  "ProviderResourceBinding": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/bindings.ts",
+    "sourceSymbol": "ProviderResourceBinding"
+  },
+  "SecretRef": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "SecretRef",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigurationValue": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "ConfigurationValue",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigurationContent": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "ConfigurationContent",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigurationBusinessKey": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "ConfigurationBusinessKey",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigurationTarget": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/entities.ts",
+    "sourceSymbol": "ConfigurationTarget",
+    "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+  },
+  "ConfigurationValidationIssue": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "ConfigurationValidationIssue",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigurationDraft": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "ConfigurationDraft",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "EffectiveConfigurationPreview": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/model.ts",
+    "sourceSymbol": "EffectiveConfigurationPreview",
+    "blobSha": "c3536a76cf0bcda71faea6c380ea1b597d101596"
+  },
+  "ConfigRevision": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/pms-domain/src/entities.ts",
+    "sourceSymbol": "ConfigRevision",
+    "blobSha": "32e244bfb7f7fb2757857a18cca6dfcaf55df76a"
+  },
+  "ConfigurationPublicationResult": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/configuration-center/src/publication.ts",
+    "sourceSymbol": "ConfigurationPublicationResult",
+    "blobSha": "1747be528c80e99305c9b8009a68626b98f8c159"
+  },
+  "RuntimeDeployment": {
+    "classification": "EXISTING_PROJECTION",
+    "sourceFile": "apps/pms-api/src/runtime-deployment-routes.ts",
+    "sourceSymbol": "RuntimeDeploymentView",
+    "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+  },
+  "RuntimeDeploymentIntent": {
+    "classification": "EXISTING_PROJECTION",
+    "sourceFile": "apps/pms-api/src/runtime-deployment-routes.ts",
+    "sourceSymbol": "intentResponse",
+    "blobSha": "fe8f13d7ef5775df4f894e058bb46912ec4a6379"
+  },
+  "RuntimeProcess": {
+    "classification": "EXISTING_PROJECTION",
+    "sourceFile": "packages/pms-application/src/runtime-process-query.ts",
+    "sourceSymbol": "RuntimeProcessView",
+    "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+  },
+  "RuntimeProcessLogReference": {
+    "classification": "EXISTING_PROJECTION_OPAQUE",
+    "sourceFile": "packages/pms-application/src/runtime-process-query.ts",
+    "sourceSymbol": "RuntimeProcessLogReference",
+    "blobSha": "512b1940e691a72e1ec11301908de6429202ca35"
+  },
+  "RegistryProviderProjection": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/registry-snapshot/src/model.ts",
+    "sourceSymbol": "RegistryProviderProjection",
+    "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+  },
+  "RegistrySnapshotDocument": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/registry-snapshot/src/model.ts",
+    "sourceSymbol": "RegistrySnapshotDocument",
+    "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+  },
+  "RegistrySnapshot": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/registry-snapshot/src/model.ts",
+    "sourceSymbol": "RegistrySnapshot",
+    "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+  },
+  "RegistryProviderChange": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/registry-snapshot/src/model.ts",
+    "sourceSymbol": "RegistryProviderChange",
+    "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+  },
+  "RegistryDiff": {
+    "classification": "EXISTING_OBJECT",
+    "sourceFile": "packages/registry-snapshot/src/model.ts",
+    "sourceSymbol": "RegistrySnapshotDiff",
+    "blobSha": "4601a101a859c092c657910a0931ae5945c3e45a"
+  },
+  "AuditEvent": {
+    "classification": "EXISTING_PROJECTION",
+    "sourceFile": "apps/pms-api/src/audit-routes.ts",
+    "sourceSymbol": "audit list response projection",
+    "blobSha": "a9897e4fdbc1a94ba93c7e990eb32e6702c075ba"
+  }
+}

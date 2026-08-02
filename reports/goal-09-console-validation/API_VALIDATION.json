@@ -1,0 +1,31 @@
+{
+  "status": "BLOCKED",
+  "frozenOperationCount": 36,
+  "registeredOperationCount": 36,
+  "consoleInject": {
+    "testFilesPassed": 15,
+    "testsPassed": 24,
+    "allSuccessCases": 36,
+    "missingActorMutationCoverage": 21,
+    "invalidCorrelationCoverage": 36,
+    "unknownFieldRejection": "PASSED",
+    "problemDetails": "PASSED",
+    "status204NoBody": "PASSED",
+    "status304NoBodyAndCacheHeaders": "PASSED",
+    "intent202": "PASSED"
+  },
+  "commands": {
+    "pnpm --filter @sdar/pms-api test": "127 passed, 1 environment failure before assertion",
+    "pnpm typecheck": "PASSED",
+    "pnpm build": "PASSED with approved Docker access for pinned grpc-tools",
+    "node scripts/pms-console-conformance/validate-all.mjs": "PASSED, 36/36",
+    "pnpm lint": "PASSED with typed rules configured for TS and TSX",
+    "pnpm format:check": "PASSED; frozen and generated contracts excluded and hash-stable"
+  },
+  "blockingTest": {
+    "file": "apps/pms-api/test/config.test.ts",
+    "name": "rejects non-file and symlink token locations",
+    "failure": "EPERM while creating a Windows file symlink",
+    "implementationAssertionReached": false
+  }
+}

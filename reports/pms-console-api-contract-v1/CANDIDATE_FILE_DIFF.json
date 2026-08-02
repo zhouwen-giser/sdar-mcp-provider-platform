@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0",
+  "reference": ".codex/goal-06-contract-freeze-validation/payload/pms-console-api-contract-v1-candidate2.zip",
+  "referenceSha256": "49a08389ffe0d593b323fbf1574efc2884446312ca6019d67cd8ffedff27ec6b",
+  "referenceFileCount": 112,
+  "standaloneRootFilesNotCopied": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "APPLY_TO_REPOSITORY.md"
+  ],
+  "rootFilesMergedMinimally": ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"],
+  "semanticContractChanges": [
+    "contracts/pms-console-api/v1/openapi.yaml",
+    "contracts/pms-console-api/v1/ENDPOINT_SOURCE_MAP.json",
+    "contracts/pms-console-api/v1/OPERATION_EXAMPLE_MAP.json"
+  ],
+  "newToolingAndEvidence": [
+    "contracts/pms-console-api/v1/redocly.yaml",
+    "contracts/pms-console-api/v1/dist/openapi.resolved.yaml",
+    "contracts/pms-console-api/v1/schemas/components.schema.json",
+    "scripts/pms-console-contract/check-enums.mjs",
+    "scripts/pms-console-contract/check-generated.mjs",
+    "scripts/pms-console-contract/check-semantics.mjs",
+    "scripts/pms-console-contract/check-schemas.mjs",
+    "scripts/pms-console-contract/validate-examples.mjs",
+    "scripts/pms-console-contract/run-repository-gates.mjs"
+  ],
+  "removedCandidateOnlyChecks": [
+    "scripts/pms-console-contract/check-schemas.py",
+    "scripts/pms-console-contract/validate-examples.py"
+  ],
+  "generatedArtifactsRegenerated": true,
+  "authoritativeStatus": "frozen",
+  "freezeBlocked": true
+}

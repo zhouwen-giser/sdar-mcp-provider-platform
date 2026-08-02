@@ -5,6 +5,7 @@ coverage/
 *.log
 *.tsbuildinfo
 .runtime-data/
+.local/
 reports/runtime-v1/generated/
 examples/mock-adapter-python/.venv/
 examples/mock-adapter-python/__pycache__/

@@ -1,0 +1,24 @@
+{
+  "instanceId": "runtime-001",
+  "deploymentId": "deploy-001",
+  "processState": "online",
+  "livenessState": "healthy",
+  "readinessState": "ready",
+  "registrationState": "registered",
+  "catalogState": "published",
+  "runtimeVersion": "2.0.0-rc.1",
+  "configRevision": 3,
+  "observedRevision": 2,
+  "restartCount": 0,
+  "lastHeartbeatAt": "2026-07-30T05:13:00.000Z",
+  "observedHealth": "READY",
+  "readyForActive": true,
+  "healthReasonCode": "READY",
+  "stale": false,
+  "registrationFreshness": "registered",
+  "logReference": {
+    "referenceId": "runtime-process:runtime-001",
+    "tailEndpoint": "/api/v1/runtime-processes/runtime-001/logs/tail",
+    "contentIncluded": false
+  }
+}

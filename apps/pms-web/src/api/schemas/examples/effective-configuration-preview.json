@@ -1,0 +1,22 @@
+{
+  "draftId": "draft-001",
+  "definitionId": "runtime-config",
+  "definitionVersion": 1,
+  "content": {
+    "runtime": {
+      "port": 8201
+    },
+    "database": {
+      "credential": {
+        "secretRef": "secret://runtime/ugv-prod/db"
+      }
+    }
+  },
+  "sources": {
+    "runtime.port": "runtime_deployment",
+    "database.credential": "runtime_deployment"
+  },
+  "applyMode": "restart_required",
+  "valid": true,
+  "issues": []
+}

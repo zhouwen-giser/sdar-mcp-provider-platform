@@ -265,6 +265,64 @@ describe("PMS API production composition", () => {
     }
   });
 
+  it("routes Console creation through production Application, Job, Audit, and rollback", async () => {
+    const app = requiredComposition().app;
+    const consoleDeployment = "e2e-console-deployment";
+    await seedDeploymentPrerequisiteConfig(pool, consoleDeployment);
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/runtime-deployments",
+      headers: {
+        "x-actor-id": "prototype-user",
+        "x-correlation-id": "console-production-create",
+      },
+      payload: deploymentInput(consoleDeployment),
+    });
+    expect(created.statusCode).toBe(202);
+    expect(created.json()).toMatchObject({
+      operationId: "console-production-create",
+      deployment: { deploymentId: consoleDeployment },
+    });
+    const committed = await pool.query<{
+      deployments: string;
+      jobs: string;
+      audits: string;
+    }>(
+      `SELECT
+         (SELECT count(*) FROM runtime_deployment WHERE deployment_id=$1)::text AS deployments,
+         (SELECT count(*) FROM job_lease WHERE payload->>'deploymentId'=$1)::text AS jobs,
+         (SELECT count(*) FROM audit WHERE subject_id=$1 AND action='runtime_deployment.created')::text AS audits`,
+      [consoleDeployment],
+    );
+    expect(committed.rows[0]).toEqual({ deployments: "1", jobs: "1", audits: "1" });
+
+    const rollbackDeployment = "e2e-console-rollback";
+    await seedDeploymentPrerequisiteConfig(pool, rollbackDeployment);
+    await installFailureTrigger(
+      pool,
+      "job_lease",
+      "e2e_console_job_failure",
+      "RAISE EXCEPTION 'E2E_CONSOLE_JOB_FAILURE';",
+    );
+    try {
+      const failed = await app.inject({
+        method: "POST",
+        url: "/api/console/v1/runtime-deployments",
+        headers: {
+          "x-actor-id": "prototype-user",
+          "x-correlation-id": "console-production-rollback",
+        },
+        payload: deploymentInput(rollbackDeployment),
+      });
+      expect(failed.statusCode).toBe(500);
+      expect(failed.headers["content-type"]).toContain("application/problem+json");
+      expect(failed.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+      await expectDeploymentRollback(pool, rollbackDeployment);
+    } finally {
+      await removeFailureTrigger(pool, "job_lease", "e2e_console_job_failure");
+    }
+  });
+
   it("persists Registration across composition recreation, enforces CAS, and derives freshness", async () => {
     const app = requiredComposition().app;
     const registerBody = registrationBody("e2e-session", 7);

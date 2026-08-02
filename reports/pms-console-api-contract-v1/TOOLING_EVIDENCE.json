@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "tools": {
+    "redocly": "2.40.0",
+    "openapiTypescript": "7.13.0",
+    "openapiChanges": "0.2.7",
+    "ajv": "8.18.0",
+    "ajvFormats": "3.0.1",
+    "yaml": "2.9.0"
+  },
+  "standardsValidation": {
+    "command": "pnpm pms-console-contract:lint",
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 47,
+    "securityDefinedRule": "disabled only because all V1 authentication and security schemes are explicitly deferred",
+    "customSecurityAbsenceCheck": "passed"
+  },
+  "bundling": {
+    "command": "pnpm pms-console-contract:bundle",
+    "exitCode": 0,
+    "artifacts": [
+      "contracts/pms-console-api/v1/dist/openapi.bundle.json",
+      "contracts/pms-console-api/v1/dist/openapi.bundle.yaml",
+      "contracts/pms-console-api/v1/dist/openapi.resolved.yaml"
+    ],
+    "deterministicFreshness": true
+  },
+  "typescriptGeneration": {
+    "generator": "openapi-typescript",
+    "artifact": "packages/pms-console-api-contract/src/dto.d.ts",
+    "fresh": true
+  },
+  "jsonSchemaGeneration": {
+    "draft": "2020-12",
+    "schemaFileCount": 29,
+    "componentSchemaCount": 28,
+    "ajvCompilationPassed": true,
+    "exampleValidationCount": 15
+  },
+  "breakingDetection": {
+    "matureTool": "openapi-changes",
+    "matureToolBreakingCount": 0,
+    "rawReport": "reports/pms-console-api-contract-v1/OPENAPI_CHANGE_REPORT.json",
+    "customCoverage": [
+      "operations",
+      "operationIds",
+      "parameters",
+      "required request fields",
+      "required response fields",
+      "response statuses",
+      "response fields and media types",
+      "types",
+      "formats",
+      "enum narrowing",
+      "ProblemCode narrowing",
+      "security changes"
+    ],
+    "exitCode": 0
+  },
+  "generatedArtifactFreshness": {
+    "command": "node scripts/pms-console-contract/check-generated.mjs",
+    "exitCode": 0,
+    "checkedFileCount": 36
+  }
+}

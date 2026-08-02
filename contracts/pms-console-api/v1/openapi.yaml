@@ -1,0 +1,3800 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PMS Console API Contract",
+    "version": "1.0.0",
+    "description": "Contract Frozen from Candidate 3. Transport adapter contract only; authentication, authorization, RBAC, login and sessions remain deferred. X-Actor-ID remains audit context."
+  },
+  "servers": [
+    {
+      "url": "/api/console/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ProviderPackages"
+    },
+    {
+      "name": "ProviderTypes"
+    },
+    {
+      "name": "Providers"
+    },
+    {
+      "name": "Resources"
+    },
+    {
+      "name": "Configuration"
+    },
+    {
+      "name": "RuntimeDeployments"
+    },
+    {
+      "name": "RuntimeProcesses"
+    },
+    {
+      "name": "Registry"
+    },
+    {
+      "name": "Audit"
+    }
+  ],
+  "paths": {
+    "/provider-packages": {
+      "get": {
+        "operationId": "listProviderPackages",
+        "tags": [
+          "ProviderPackages"
+        ],
+        "summary": "listProviderPackages",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderPackage"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "hostingMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "vendor_managed",
+                "platform_managed"
+              ]
+            }
+          },
+          {
+            "name": "componentStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "partial",
+                "pending",
+                "failed"
+              ]
+            }
+          },
+          {
+            "name": "realResourceStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "qualified",
+                "pending",
+                "failed",
+                "not_applicable"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listProviderPackages`."
+      }
+    },
+    "/provider-packages/{packageId}": {
+      "get": {
+        "operationId": "getProviderPackage",
+        "tags": [
+          "ProviderPackages"
+        ],
+        "summary": "getProviderPackage",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderPackage"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getProviderPackage`."
+      }
+    },
+    "/provider-types": {
+      "get": {
+        "operationId": "listProviderTypes",
+        "tags": [
+          "ProviderTypes"
+        ],
+        "summary": "listProviderTypes",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderType"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "deprecated"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listProviderTypes`."
+      }
+    },
+    "/provider-types/{providerTypeId}": {
+      "get": {
+        "operationId": "getProviderType",
+        "tags": [
+          "ProviderTypes"
+        ],
+        "summary": "getProviderType",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderType"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerTypeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getProviderType`."
+      }
+    },
+    "/providers": {
+      "get": {
+        "operationId": "listProviders",
+        "tags": [
+          "Providers"
+        ],
+        "summary": "listProviders",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Provider"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "active",
+                "degraded",
+                "disabled",
+                "retired"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listProviders`."
+      },
+      "post": {
+        "operationId": "createProvider",
+        "tags": [
+          "Providers"
+        ],
+        "summary": "createProvider",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Provider"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "providerTypeId"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "providerTypeId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "packageId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "packageVersion": {
+                    "type": "string"
+                  },
+                  "hostingMode": {
+                    "type": "string",
+                    "enum": [
+                      "vendor_managed",
+                      "platform_managed"
+                    ]
+                  },
+                  "adapterEndpoint": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `createProvider`."
+      }
+    },
+    "/providers/{providerId}": {
+      "get": {
+        "operationId": "getProvider",
+        "tags": [
+          "Providers"
+        ],
+        "summary": "getProvider",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Provider"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getProvider`."
+      }
+    },
+    "/providers/{providerId}/status": {
+      "patch": {
+        "operationId": "updateProviderStatus",
+        "tags": [
+          "Providers"
+        ],
+        "summary": "updateProviderStatus",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Provider"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "expectedUpdatedAt"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "active",
+                      "degraded",
+                      "disabled",
+                      "retired"
+                    ]
+                  },
+                  "expectedUpdatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `updateProviderStatus`."
+      }
+    },
+    "/resources": {
+      "get": {
+        "operationId": "listResources",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "listResources",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Resource"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "available",
+                "unavailable",
+                "retired"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listResources`."
+      },
+      "post": {
+        "operationId": "createResource",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "createResource",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "environment",
+                  "resourceId",
+                  "resourceType"
+                ],
+                "properties": {
+                  "environment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "resourceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "resourceType": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `createResource`."
+      }
+    },
+    "/resources/{environment}/{resourceId}": {
+      "get": {
+        "operationId": "getResource",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "getResource",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getResource`."
+      }
+    },
+    "/resources/{environment}/{resourceId}/status": {
+      "patch": {
+        "operationId": "updateResourceStatus",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "updateResourceStatus",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "expectedUpdatedAt"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "retired"
+                    ]
+                  },
+                  "expectedUpdatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `updateResourceStatus`."
+      }
+    },
+    "/providers/{providerId}/resource-bindings": {
+      "get": {
+        "operationId": "listProviderResourceBindings",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "listProviderResourceBindings",
+        "responses": {
+          "200": {
+            "description": "Bindings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderResourceBinding"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listProviderResourceBindings`."
+      },
+      "post": {
+        "operationId": "bindProviderResource",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "bindProviderResource",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderResourceBinding"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "environment",
+                  "resourceId"
+                ],
+                "properties": {
+                  "environment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "resourceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `bindProviderResource`."
+      }
+    },
+    "/providers/{providerId}/resource-bindings/{environment}/{resourceId}": {
+      "delete": {
+        "operationId": "unbindProviderResource",
+        "tags": [
+          "Resources"
+        ],
+        "summary": "unbindProviderResource",
+        "responses": {
+          "204": {
+            "description": "Unbound"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `unbindProviderResource`."
+      }
+    },
+    "/configuration-drafts": {
+      "post": {
+        "operationId": "createConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "createConfigurationDraft",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDraft"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "draftId",
+                  "definitionId",
+                  "environment",
+                  "targetType",
+                  "targetId",
+                  "configGroup",
+                  "dataId",
+                  "content"
+                ],
+                "properties": {
+                  "draftId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "definitionId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "environment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "targetType": {
+                    "type": "string",
+                    "enum": [
+                      "environment",
+                      "provider_type",
+                      "provider",
+                      "runtime_deployment",
+                      "runtime_instance",
+                      "collector"
+                    ]
+                  },
+                  "targetId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "configGroup": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "dataId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "ancestorTargetIds": {
+                    "type": "object",
+                    "propertyNames": {
+                      "enum": [
+                        "environment",
+                        "provider_type",
+                        "provider",
+                        "runtime_deployment",
+                        "runtime_instance",
+                        "collector"
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  },
+                  "content": {
+                    "$ref": "#/components/schemas/ConfigurationContent"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `createConfigurationDraft`."
+      }
+    },
+    "/configuration-drafts/{draftId}": {
+      "get": {
+        "operationId": "getConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "getConfigurationDraft",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDraft"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getConfigurationDraft`."
+      },
+      "patch": {
+        "operationId": "updateConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "updateConfigurationDraft",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDraft"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "expectedVersion",
+                  "content"
+                ],
+                "properties": {
+                  "expectedVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "ancestorTargetIds": {
+                    "type": "object",
+                    "propertyNames": {
+                      "enum": [
+                        "environment",
+                        "provider_type",
+                        "provider",
+                        "runtime_deployment",
+                        "runtime_instance",
+                        "collector"
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  },
+                  "content": {
+                    "$ref": "#/components/schemas/ConfigurationContent"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `updateConfigurationDraft`."
+      }
+    },
+    "/configuration-drafts/{draftId}/validate": {
+      "post": {
+        "operationId": "validateConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "validateConfigurationDraft",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDraft"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `validateConfigurationDraft`."
+      }
+    },
+    "/configuration-drafts/{draftId}/effective": {
+      "get": {
+        "operationId": "previewEffectiveConfiguration",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "previewEffectiveConfiguration",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EffectiveConfigurationPreview"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `previewEffectiveConfiguration`."
+      }
+    },
+    "/configuration-drafts/{draftId}/publish": {
+      "post": {
+        "operationId": "publishConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "publishConfigurationDraft",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationPublicationResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "expectedDraftVersion",
+                  "expectedPublishedRevision"
+                ],
+                "properties": {
+                  "expectedDraftVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "expectedPublishedRevision": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `publishConfigurationDraft`."
+      }
+    },
+    "/configuration-drafts/{draftId}/rollback": {
+      "post": {
+        "operationId": "rollbackConfigurationDraft",
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "rollbackConfigurationDraft",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationPublicationResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "expectedDraftVersion",
+                  "expectedPublishedRevision",
+                  "sourceRevisionId"
+                ],
+                "properties": {
+                  "expectedDraftVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "expectedPublishedRevision": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "sourceRevisionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `rollbackConfigurationDraft`."
+      }
+    },
+    "/runtime-deployments": {
+      "get": {
+        "operationId": "listRuntimeDeployments",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "listRuntimeDeployments",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RuntimeDeployment"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REQUESTED",
+                "DATABASE_PROVISIONING",
+                "MIGRATING",
+                "CONFIG_PREPARING",
+                "STARTING",
+                "HEALTH_CHECKING",
+                "DISCOVERING",
+                "ACTIVE",
+                "STOPPED",
+                "DRAINING",
+                "DEGRADED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listRuntimeDeployments`."
+      },
+      "post": {
+        "operationId": "createRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "createRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "deploymentId",
+                  "providerId",
+                  "environment",
+                  "runtimeVersion",
+                  "databaseProfileId",
+                  "configProfileId"
+                ],
+                "properties": {
+                  "deploymentId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "environment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "runtimeVersion": {
+                    "type": "string"
+                  },
+                  "databaseProfileId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "configProfileId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "adapterEndpoint": {
+                    "type": "string"
+                  },
+                  "desiredReplicas": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `createRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}": {
+      "get": {
+        "operationId": "getRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "getRuntimeDeployment",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeployment"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}/start": {
+      "post": {
+        "operationId": "startRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "startRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "expectedDesiredRevision"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "expectedDesiredRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `startRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}/stop": {
+      "post": {
+        "operationId": "stopRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "stopRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "expectedDesiredRevision"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "expectedDesiredRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `stopRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}/restart": {
+      "post": {
+        "operationId": "restartRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "restartRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "expectedDesiredRevision"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "expectedDesiredRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `restartRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}/scale": {
+      "post": {
+        "operationId": "scaleRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "scaleRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "expectedDesiredRevision",
+                  "desiredReplicas"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "expectedDesiredRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "desiredReplicas": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `scaleRuntimeDeployment`."
+      }
+    },
+    "/runtime-deployments/{deploymentId}/reconcile": {
+      "post": {
+        "operationId": "reconcileRuntimeDeployment",
+        "tags": [
+          "RuntimeDeployments"
+        ],
+        "summary": "reconcileRuntimeDeployment",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDeploymentIntent"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "$ref": "#/components/parameters/ActorIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "providerId",
+                  "expectedDesiredRevision"
+                ],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "expectedDesiredRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "Console transport projection of existing SMPP capability `reconcileRuntimeDeployment`."
+      }
+    },
+    "/runtime-processes": {
+      "get": {
+        "operationId": "listRuntimeProcesses",
+        "tags": [
+          "RuntimeProcesses"
+        ],
+        "summary": "listRuntimeProcesses",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RuntimeProcess"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "deploymentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "processState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "missing",
+                "starting",
+                "online",
+                "stopping",
+                "stopped",
+                "errored"
+              ]
+            }
+          },
+          {
+            "name": "observedHealth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STOPPED",
+                "STARTING",
+                "NOT_READY",
+                "STALE",
+                "DEGRADED",
+                "FAILED",
+                "READY"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listRuntimeProcesses`."
+      }
+    },
+    "/runtime-processes/{instanceId}": {
+      "get": {
+        "operationId": "getRuntimeProcess",
+        "tags": [
+          "RuntimeProcesses"
+        ],
+        "summary": "getRuntimeProcess",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeProcess"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "instanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getRuntimeProcess`."
+      }
+    },
+    "/registry/{environment}/latest": {
+      "get": {
+        "operationId": "getLatestRegistrySnapshot",
+        "tags": [
+          "Registry"
+        ],
+        "summary": "getLatestRegistrySnapshot",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "ETag": {
+                "description": "Quoted snapshot checksum used by the existing Registry conditional-read behavior.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Existing Registry cache directive.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrySnapshot"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified",
+            "headers": {
+              "ETag": {
+                "description": "Quoted checksum matching If-None-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Existing Registry cache directive.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "description": "Existing Registry conditional-read validator; accepts a quoted checksum, weak validator or wildcard.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `getLatestRegistrySnapshot`."
+      }
+    },
+    "/registry/{environment}/history": {
+      "get": {
+        "operationId": "listRegistryHistory",
+        "tags": [
+          "Registry"
+        ],
+        "summary": "listRegistryHistory",
+        "responses": {
+          "200": {
+            "description": "History",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RegistrySnapshot"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listRegistryHistory`."
+      }
+    },
+    "/registry/{environment}/diff": {
+      "get": {
+        "operationId": "diffRegistrySnapshots",
+        "tags": [
+          "Registry"
+        ],
+        "summary": "diffRegistrySnapshots",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryDiff"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "fromRevision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "toRevision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `diffRegistrySnapshots`."
+      }
+    },
+    "/audit-events": {
+      "get": {
+        "operationId": "listAuditEvents",
+        "tags": [
+          "Audit"
+        ],
+        "summary": "listAuditEvents",
+        "responses": {
+          "200": {
+            "description": "Page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditEvent"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "subjectType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "correlationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "occurredBefore",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "description": "Console transport projection of existing SMPP capability `listAuditEvents`."
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProblemDetails": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Stable URN or URI identifying the problem category."
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "code": {
+            "$ref": "#/components/schemas/ProblemCode"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Transport projection of existing SMPP public errors. No retryability policy is frozen in V1."
+      },
+      "ProblemCode": {
+        "type": "string",
+        "enum": [
+          "INVALID_REQUEST",
+          "INVALID_JSON",
+          "REQUEST_BODY_TOO_LARGE",
+          "INTERNAL_ERROR",
+          "ROUTE_NOT_FOUND",
+          "INVALID_IDENTIFIER",
+          "INVALID_DOMAIN_VALUE",
+          "INVALID_STATE_TRANSITION",
+          "DUPLICATE_RESOURCE_BINDING",
+          "RESOURCE_BINDING_NOT_FOUND",
+          "ENTITY_ALREADY_EXISTS",
+          "ENTITY_NOT_FOUND",
+          "OPTIMISTIC_CONCURRENCY_CONFLICT",
+          "LEASE_NOT_OWNED",
+          "RUNTIME_DEPLOYMENT_NOT_FOUND",
+          "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
+          "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+          "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
+          "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED",
+          "RUNTIME_DEPLOYMENT_REVISION_CONFLICT",
+          "RUNTIME_PROCESS_NOT_FOUND",
+          "CONFIGURATION_DEFINITION_NOT_FOUND",
+          "CONFIGURATION_TARGET_NOT_ALLOWED",
+          "CONFIGURATION_BUSINESS_KEY_CONFLICT",
+          "CONFIGURATION_DRAFT_NOT_FOUND",
+          "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+          "CONFIGURATION_DRAFT_NOT_VALIDATED",
+          "CONFIGURATION_PUBLISH_CONFLICT",
+          "CONFIGURATION_REVISION_NOT_FOUND",
+          "CONFIGURATION_ROLLBACK_TARGET_MISMATCH",
+          "CONFIGURATION_INPUT_INVALID",
+          "REGISTRY_SNAPSHOT_NOT_FOUND"
+        ]
+      },
+      "PageInfo": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProviderType": {
+        "type": "object",
+        "required": [
+          "providerTypeId",
+          "displayName",
+          "status"
+        ],
+        "properties": {
+          "providerTypeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "deprecated"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProviderPackage": {
+        "type": "object",
+        "required": [
+          "packageId",
+          "packageVersion",
+          "providerType",
+          "hostingModes",
+          "configSchemaId",
+          "compatibleRuntimeVersion",
+          "protocolMode",
+          "qualification"
+        ],
+        "properties": {
+          "packageId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "packageVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "providerType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "hostingModes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "vendor_managed",
+                "platform_managed"
+              ]
+            }
+          },
+          "configSchemaId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "compatibleRuntimeVersion": {
+            "type": "string"
+          },
+          "protocolMode": {
+            "type": "string"
+          },
+          "qualification": {
+            "type": "object",
+            "required": [
+              "componentStatus",
+              "realResourceStatus"
+            ],
+            "properties": {
+              "componentStatus": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "partial",
+                  "pending",
+                  "failed"
+                ]
+              },
+              "realResourceStatus": {
+                "type": "string",
+                "enum": [
+                  "qualified",
+                  "pending",
+                  "failed",
+                  "not_applicable"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "Provider": {
+        "type": "object",
+        "required": [
+          "providerId",
+          "providerTypeId",
+          "hostingMode",
+          "status"
+        ],
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "providerTypeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "packageId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "packageVersion": {
+            "type": "string"
+          },
+          "hostingMode": {
+            "type": "string",
+            "enum": [
+              "vendor_managed",
+              "platform_managed"
+            ]
+          },
+          "adapterEndpoint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "degraded",
+              "disabled",
+              "retired"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Resource": {
+        "type": "object",
+        "required": [
+          "environment",
+          "resourceId",
+          "resourceType",
+          "metadata",
+          "status"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable",
+              "retired"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProviderResourceBinding": {
+        "type": "object",
+        "required": [
+          "providerId",
+          "environment",
+          "resourceId",
+          "boundAt"
+        ],
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "boundAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationBusinessKey": {
+        "type": "object",
+        "required": [
+          "environment",
+          "targetType",
+          "targetId",
+          "configGroup",
+          "dataId"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "environment",
+              "provider_type",
+              "provider",
+              "runtime_deployment",
+              "runtime_instance",
+              "collector"
+            ]
+          },
+          "targetId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "configGroup": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "dataId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationDraft": {
+        "type": "object",
+        "required": [
+          "draftId",
+          "definitionId",
+          "definitionVersion",
+          "key",
+          "ancestorTargetIds",
+          "content",
+          "version",
+          "status",
+          "validationIssues",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "definitionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "definitionVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "key": {
+            "$ref": "#/components/schemas/ConfigurationBusinessKey"
+          },
+          "ancestorTargetIds": {
+            "type": "object",
+            "propertyNames": {
+              "enum": [
+                "environment",
+                "provider_type",
+                "provider",
+                "runtime_deployment",
+                "runtime_instance",
+                "collector"
+              ]
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "content": {
+            "$ref": "#/components/schemas/ConfigurationContent"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "validated",
+              "invalid"
+            ]
+          },
+          "applyMode": {
+            "type": "string",
+            "enum": [
+              "hot_reload",
+              "reconnect_required",
+              "restart_required",
+              "immutable"
+            ]
+          },
+          "validationIssues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationValidationIssue"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RuntimeDeployment": {
+        "type": "object",
+        "required": [
+          "deploymentId",
+          "providerId",
+          "environment",
+          "desiredState",
+          "desiredReplicas",
+          "runtimeVersion",
+          "databaseProfileId",
+          "configProfileId",
+          "status",
+          "desiredRevision",
+          "observedRevision"
+        ],
+        "properties": {
+          "deploymentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "providerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "desiredState": {
+            "type": "string",
+            "enum": [
+              "running",
+              "stopped",
+              "draining"
+            ]
+          },
+          "desiredReplicas": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "runtimeVersion": {
+            "type": "string"
+          },
+          "databaseProfileId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "configProfileId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "adapterEndpoint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "DATABASE_PROVISIONING",
+              "MIGRATING",
+              "CONFIG_PREPARING",
+              "STARTING",
+              "HEALTH_CHECKING",
+              "DISCOVERING",
+              "ACTIVE",
+              "STOPPED",
+              "DRAINING",
+              "DEGRADED",
+              "FAILED"
+            ]
+          },
+          "desiredRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "observedRevision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "RuntimeDeploymentIntent": {
+        "type": "object",
+        "required": [
+          "operationId",
+          "deployment"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string"
+          },
+          "deployment": {
+            "$ref": "#/components/schemas/RuntimeDeployment"
+          }
+        },
+        "additionalProperties": false,
+        "description": "operationId is the existing correlation identifier returned by the current route; it is not a Generic Operation domain object."
+      },
+      "RuntimeProcess": {
+        "type": "object",
+        "required": [
+          "instanceId",
+          "deploymentId",
+          "processState",
+          "observedHealth",
+          "readyForActive",
+          "stale",
+          "registrationFreshness",
+          "logReference"
+        ],
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "deploymentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "processState": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "starting",
+              "online",
+              "stopping",
+              "stopped",
+              "errored"
+            ]
+          },
+          "livenessState": {
+            "type": "string"
+          },
+          "readinessState": {
+            "type": "string"
+          },
+          "registrationState": {
+            "type": "string"
+          },
+          "catalogState": {
+            "type": "string"
+          },
+          "runtimeVersion": {
+            "type": "string"
+          },
+          "configRevision": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "observedRevision": {
+            "type": "integer"
+          },
+          "restartCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lastHeartbeatAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "observedHealth": {
+            "type": "string",
+            "enum": [
+              "STOPPED",
+              "STARTING",
+              "NOT_READY",
+              "STALE",
+              "DEGRADED",
+              "FAILED",
+              "READY"
+            ]
+          },
+          "readyForActive": {
+            "type": "boolean"
+          },
+          "healthReasonCode": {
+            "type": "string"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "registrationFreshness": {
+            "type": "string",
+            "enum": [
+              "unregistered",
+              "registered",
+              "stale",
+              "identity_mismatch"
+            ]
+          },
+          "logReference": {
+            "$ref": "#/components/schemas/RuntimeProcessLogReference",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": true,
+        "description": "Read-only projection from RuntimeProcessQueryService. Direct process control is forbidden."
+      },
+      "RuntimeProcessLogReference": {
+        "type": "object",
+        "required": [
+          "referenceId",
+          "tailEndpoint",
+          "contentIncluded"
+        ],
+        "properties": {
+          "referenceId": {
+            "type": "string"
+          },
+          "tailEndpoint": {
+            "type": "string"
+          },
+          "contentIncluded": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "Opaque log locator emitted by the existing RuntimeProcess query. V1 does not guarantee that tailEndpoint is dereferenceable through the Console API."
+      },
+      "RegistrySnapshot": {
+        "type": "object",
+        "required": [
+          "environment",
+          "revision",
+          "checksum",
+          "document",
+          "publishedAt",
+          "createdAt"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "checksum": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RegistrySnapshotDocument"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegistryDiff": {
+        "type": "object",
+        "required": [
+          "environment",
+          "fromRevision",
+          "toRevision",
+          "added",
+          "removed",
+          "changed"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "fromRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "toRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "added": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistryProviderProjection"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistryProviderProjection"
+            }
+          },
+          "changed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistryProviderChange"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuditEvent": {
+        "type": "object",
+        "required": [
+          "auditEventId",
+          "action",
+          "actorId",
+          "correlationId",
+          "subjectType",
+          "subjectId",
+          "occurredAt"
+        ],
+        "properties": {
+          "auditEventId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Read-only projection returned by the current audit list route; metadata is intentionally not included."
+      },
+      "SecretRef": {
+        "type": "object",
+        "required": [
+          "secretRef"
+        ],
+        "properties": {
+          "secretRef": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationValue": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/schemas/SecretRef"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationValue"
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ConfigurationValue"
+            }
+          }
+        ]
+      },
+      "ConfigurationContent": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ConfigurationValue"
+        }
+      },
+      "ConfigurationTarget": {
+        "type": "object",
+        "required": [
+          "environment",
+          "targetType",
+          "targetId",
+          "configGroup",
+          "dataId"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "environment",
+              "provider_type",
+              "provider",
+              "runtime_deployment",
+              "runtime_instance",
+              "collector"
+            ]
+          },
+          "targetId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "configGroup": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "dataId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationValidationIssue": {
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "IMMUTABLE_OVERRIDE",
+              "OVERRIDE_NOT_ALLOWED",
+              "PLAINTEXT_SECRET_REJECTED",
+              "SCHEMA_VALIDATION_FAILED"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EffectiveConfigurationPreview": {
+        "type": "object",
+        "required": [
+          "draftId",
+          "definitionId",
+          "definitionVersion",
+          "content",
+          "sources",
+          "applyMode",
+          "valid",
+          "issues"
+        ],
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "definitionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "definitionVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "content": {
+            "$ref": "#/components/schemas/ConfigurationContent"
+          },
+          "sources": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "system_default",
+                "environment",
+                "provider_type",
+                "provider",
+                "runtime_deployment",
+                "runtime_instance",
+                "collector"
+              ]
+            }
+          },
+          "applyMode": {
+            "type": "string",
+            "enum": [
+              "hot_reload",
+              "reconnect_required",
+              "restart_required",
+              "immutable"
+            ]
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationValidationIssue"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigRevision": {
+        "type": "object",
+        "required": [
+          "revisionId",
+          "target",
+          "revision",
+          "checksum",
+          "applyMode",
+          "status",
+          "content",
+          "createdAt"
+        ],
+        "properties": {
+          "revisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target": {
+            "$ref": "#/components/schemas/ConfigurationTarget"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "checksum": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "applyMode": {
+            "type": "string",
+            "enum": [
+              "hot_reload",
+              "reconnect_required",
+              "restart_required",
+              "immutable"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "validated",
+              "published",
+              "superseded",
+              "rejected"
+            ]
+          },
+          "content": {
+            "$ref": "#/components/schemas/ConfigurationContent"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigurationPublicationResult": {
+        "type": "object",
+        "required": [
+          "outcome",
+          "revision"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "published",
+              "no_change"
+            ]
+          },
+          "revision": {
+            "$ref": "#/components/schemas/ConfigRevision"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegistryProviderProjection": {
+        "type": "object",
+        "required": [
+          "providerId",
+          "serverId",
+          "protocolMode",
+          "effectiveEndpoint",
+          "catalogRevision",
+          "tools"
+        ],
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "serverId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "protocolMode": {
+            "type": "string",
+            "const": "frozen_v1"
+          },
+          "effectiveEndpoint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "catalogRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegistrySnapshotDocument": {
+        "type": "object",
+        "required": [
+          "environment",
+          "providers"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistryProviderProjection"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegistryProviderChange": {
+        "type": "object",
+        "required": [
+          "providerId"
+        ],
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "before": {
+            "$ref": "#/components/schemas/RegistryProviderProjection"
+          },
+          "after": {
+            "$ref": "#/components/schemas/RegistryProviderProjection"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "Problem": {
+        "description": "Mapped existing SMPP error",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "CorrelationIdHeader": {
+        "name": "X-Correlation-ID",
+        "in": "header",
+        "required": false,
+        "description": "Optional trace correlation identifier. The server may generate one when absent.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        }
+      },
+      "ActorIdHeader": {
+        "name": "X-Actor-ID",
+        "in": "header",
+        "required": true,
+        "description": "Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  },
+  "x-contract-status": "frozen",
+  "x-authentication-scope": "deferred",
+  "x-business-merge-base": "8af9b76086eebc8b6e516cda4ca29068dc4d5ef7",
+  "x-validation-start-head": "ecf72ef734362f6bd4831d9480c13f5f73c4f268"
+}

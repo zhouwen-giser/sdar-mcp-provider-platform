@@ -1,0 +1,5 @@
+branch: codex/goal-06-pms-console-api-contract-v1
+VALIDATION_START_HEAD: ecf72ef734362f6bd4831d9480c13f5f73c4f268
+captured_at: 2026-07-30T08:33:19Z
+git status --short:
+(clean)

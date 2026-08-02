@@ -1,0 +1,31 @@
+{
+  "draftId": "draft-001",
+  "definitionId": "runtime-config",
+  "definitionVersion": 1,
+  "key": {
+    "environment": "production",
+    "targetType": "runtime_deployment",
+    "targetId": "deploy-001",
+    "configGroup": "runtime",
+    "dataId": "runtime-main"
+  },
+  "ancestorTargetIds": {
+    "provider": "ugv-prod-001"
+  },
+  "content": {
+    "runtime": {
+      "port": 8201
+    },
+    "database": {
+      "credential": {
+        "secretRef": "secret://runtime/ugv-prod/db"
+      }
+    }
+  },
+  "version": 2,
+  "status": "validated",
+  "applyMode": "restart_required",
+  "validationIssues": [],
+  "createdAt": "2026-07-30T05:00:00.000Z",
+  "updatedAt": "2026-07-30T05:10:00.000Z"
+}

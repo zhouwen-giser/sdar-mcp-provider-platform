@@ -1,0 +1,15 @@
+{
+  "nodeAvailable": true,
+  "nodeVersion": "v24.14.0",
+  "nodeVersionMatchesRepositoryEngine": false,
+  "pnpmAvailable": true,
+  "pnpmVersion": "11.7.0",
+  "pnpmVersionMatchesPackageManager": false,
+  "npmAvailable": true,
+  "npmVersion": "11.9.0",
+  "nodeModulesAvailable": false,
+  "fullValidationAvailable": false,
+  "dependencyInstallationAttempted": false,
+  "networkDependencyInstallationRequired": false,
+  "capturedAt": "2026-07-30T10:44:36.286Z"
+}

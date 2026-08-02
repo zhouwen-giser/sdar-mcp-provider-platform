@@ -41,6 +41,10 @@ import type { AuditRepository } from "../../../packages/pms-domain/src/index.js"
 import type { RegistrySnapshotRepository } from "../../../packages/registry-snapshot/src/index.js";
 import { registerAuditRoutes } from "./audit-routes.js";
 import { registerRegistryRoutes } from "./registry-routes.js";
+import {
+  consoleApiDependencies,
+  registerConsoleApiRoutes,
+} from "./console/register-console-routes.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -147,6 +151,10 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
     });
   }
   if (options.audit !== undefined) registerAuditRoutes(app, options.audit);
+  const consoleDependencies = consoleApiDependencies(options);
+  if (consoleDependencies !== undefined) {
+    registerConsoleApiRoutes(app, consoleDependencies);
+  }
 
   return app;
 }

@@ -1,0 +1,9 @@
+{
+  "implementation": "complete",
+  "mediaType": "application/problem+json",
+  "frozenProblemCodeCount": 32,
+  "legacyEnvelopeChanged": false,
+  "unexpectedErrorRedactionCovered": true,
+  "executionStatus": "not_executed_dependencies_unavailable",
+  "testSource": "apps/pms-api/test/console/problem-details.test.ts"
+}

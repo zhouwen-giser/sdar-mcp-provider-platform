@@ -1,0 +1,6 @@
+{
+  "legacyRoutesChanged": false,
+  "executableTestSource": "apps/pms-api/test/console/legacy-regression.test.ts",
+  "existingPmsApiSuiteRetained": true,
+  "executionStatus": "not_executed_dependencies_unavailable"
+}

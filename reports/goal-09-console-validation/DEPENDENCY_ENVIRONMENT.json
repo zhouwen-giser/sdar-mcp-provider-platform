@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-08-01T22:57:21.1606659Z",
+  "nodeVersion": "v22.14.0",
+  "nodeRequirement": ">=22 <23",
+  "pnpmVersion": "11.13.1",
+  "pnpmRequirement": ">=11 <12",
+  "frozenLockfileInstall": "PASSED",
+  "lockfileChanged": false,
+  "testDatabaseUrlPresent": false,
+  "isolatedTestDatabase": "postgresql://sdar@127.0.0.1:55490/sdar_goal09",
+  "isolatedTestDatabaseStatus": "AVAILABLE_AND_USED",
+  "psqlAvailable": false,
+  "dockerClientVersion": "29.6.1",
+  "dockerServerAvailableInSandbox": false,
+  "dockerServerAvailableWithApprovedEscalation": true,
+  "dockerServerVersion": "29.6.1",
+  "dockerLimitation": "docker_engine named pipe requires approved host access",
+  "browserCandidates": [
+    "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+  ],
+  "playwrightVersion": "1.62.0",
+  "notes": [
+    "Dependencies were restored only with pnpm install --frozen-lockfile.",
+    "No dependency or lockfile version was changed.",
+    "An isolated PostgreSQL 17.10 container was used for all database-backed Goal 09 gates.",
+    "System Chrome and Playwright 1.62.0 were used for real browser verification."
+  ]
+}

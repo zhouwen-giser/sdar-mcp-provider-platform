@@ -1,0 +1,7 @@
+extends:
+  - recommended
+
+rules:
+  # Authentication and all security schemes are explicitly deferred from V1.
+  # The custom semantic gate requires both root and operation security to be absent.
+  security-defined: off

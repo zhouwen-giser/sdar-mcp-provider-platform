@@ -1,0 +1,15 @@
+{
+  "implementation": "complete",
+  "operationSourceCoverage": 36,
+  "statusesCoveredBySource": [200, 201, 202, 204, 304, 400, 404, 409, 413, 500],
+  "runtimeSchemaRegistration": true,
+  "dateToRfc3339Mapper": true,
+  "optionalFieldOmission": true,
+  "secretRefOnly": true,
+  "executionStatus": "not_executed_dependencies_unavailable",
+  "testSources": [
+    "apps/pms-api/test/console/all-operations.test.ts",
+    "apps/pms-api/test/console/response-conformance.test.ts",
+    "apps/pms-api/test/production-composition.test.ts"
+  ]
+}

@@ -151,6 +151,7 @@ function filesystemSmoke() {
       "test -f /app/dist/apps/pms-api/src/main.js",
       "test -d /app/migrations/pms",
       "test -f /app/provider-packages/ugv/provider-package.json",
+      "test -f /app/packages/pms-console-api-contract/schema/openapi.bundle.json",
       "test ! -e /app/tests",
       'test "$(stat -c %u /app/dist)" = 0',
       'test "$(stat -c %u /app/provider-packages)" = 0',
@@ -168,9 +169,9 @@ function filesystemSmoke() {
     ],
     [images.web]: [
       "test -f /app/web/index.html",
-      "test -f /app/web/styles.css",
-      "test -f /app/web/assets/main.js",
-      "test -f /app/web/assets/server.js",
+      "test -f /app/server.mjs",
+      "find /app/web/assets -type f -name '*.css' -print -quit | grep -q .",
+      "find /app/web/assets -type f -name '*.js' -print -quit | grep -q .",
       "test ! -e /app/node_modules",
       'test "$(stat -c %u /app/web)" = 0',
       "! grep -R -a -E 'release-test-only|management-test-token|runtime-test-token' /app",
@@ -296,7 +297,7 @@ async function webSmoke() {
       name,
       "node",
       "-e",
-      String.raw`Promise.all(["/","/assets/main.js","/styles.css","/providers/one","/health/live","/health/ready"].map(async p=>{const r=await fetch("http://127.0.0.1:8080"+p);if(!r.ok)throw Error(p);if(p==="/"){const t=await r.text();if(!t.includes("https://pms.example.test/api")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web")}}))`,
+      String.raw`fetch("http://127.0.0.1:8080/").then(async r=>{const html=await r.text();if(!r.ok||!html.includes("https://pms.example.test/api")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web");const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(m=>m[1]);if(!assets.some(p=>p.endsWith(".js"))||!assets.some(p=>p.endsWith(".css")))throw Error("assets");await Promise.all([...assets,"/providers/one","/health/live","/health/ready"].map(async p=>{const a=await fetch("http://127.0.0.1:8080"+p);if(!a.ok)throw Error(p)}))})`,
     ]),
   );
   stopCleanly(name);

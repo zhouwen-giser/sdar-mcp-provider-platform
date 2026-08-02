@@ -1,0 +1,130 @@
+[
+  { "operationId": "listProviderPackages", "method": "GET", "path": "/provider-packages" },
+  {
+    "operationId": "getProviderPackage",
+    "method": "GET",
+    "path": "/provider-packages/{packageId}"
+  },
+  { "operationId": "listProviderTypes", "method": "GET", "path": "/provider-types" },
+  { "operationId": "getProviderType", "method": "GET", "path": "/provider-types/{providerTypeId}" },
+  { "operationId": "listProviders", "method": "GET", "path": "/providers" },
+  { "operationId": "createProvider", "method": "POST", "path": "/providers" },
+  { "operationId": "getProvider", "method": "GET", "path": "/providers/{providerId}" },
+  {
+    "operationId": "updateProviderStatus",
+    "method": "PATCH",
+    "path": "/providers/{providerId}/status"
+  },
+  { "operationId": "listResources", "method": "GET", "path": "/resources" },
+  { "operationId": "createResource", "method": "POST", "path": "/resources" },
+  {
+    "operationId": "getResource",
+    "method": "GET",
+    "path": "/resources/{environment}/{resourceId}"
+  },
+  {
+    "operationId": "updateResourceStatus",
+    "method": "PATCH",
+    "path": "/resources/{environment}/{resourceId}/status"
+  },
+  {
+    "operationId": "listProviderResourceBindings",
+    "method": "GET",
+    "path": "/providers/{providerId}/resource-bindings"
+  },
+  {
+    "operationId": "bindProviderResource",
+    "method": "POST",
+    "path": "/providers/{providerId}/resource-bindings"
+  },
+  {
+    "operationId": "unbindProviderResource",
+    "method": "DELETE",
+    "path": "/providers/{providerId}/resource-bindings/{environment}/{resourceId}"
+  },
+  { "operationId": "createConfigurationDraft", "method": "POST", "path": "/configuration-drafts" },
+  {
+    "operationId": "getConfigurationDraft",
+    "method": "GET",
+    "path": "/configuration-drafts/{draftId}"
+  },
+  {
+    "operationId": "updateConfigurationDraft",
+    "method": "PATCH",
+    "path": "/configuration-drafts/{draftId}"
+  },
+  {
+    "operationId": "validateConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/validate"
+  },
+  {
+    "operationId": "previewEffectiveConfiguration",
+    "method": "GET",
+    "path": "/configuration-drafts/{draftId}/effective"
+  },
+  {
+    "operationId": "publishConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/publish"
+  },
+  {
+    "operationId": "rollbackConfigurationDraft",
+    "method": "POST",
+    "path": "/configuration-drafts/{draftId}/rollback"
+  },
+  { "operationId": "listRuntimeDeployments", "method": "GET", "path": "/runtime-deployments" },
+  { "operationId": "createRuntimeDeployment", "method": "POST", "path": "/runtime-deployments" },
+  {
+    "operationId": "getRuntimeDeployment",
+    "method": "GET",
+    "path": "/runtime-deployments/{deploymentId}"
+  },
+  {
+    "operationId": "startRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/start"
+  },
+  {
+    "operationId": "stopRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/stop"
+  },
+  {
+    "operationId": "restartRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/restart"
+  },
+  {
+    "operationId": "scaleRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/scale"
+  },
+  {
+    "operationId": "reconcileRuntimeDeployment",
+    "method": "POST",
+    "path": "/runtime-deployments/{deploymentId}/reconcile"
+  },
+  { "operationId": "listRuntimeProcesses", "method": "GET", "path": "/runtime-processes" },
+  {
+    "operationId": "getRuntimeProcess",
+    "method": "GET",
+    "path": "/runtime-processes/{instanceId}"
+  },
+  {
+    "operationId": "getLatestRegistrySnapshot",
+    "method": "GET",
+    "path": "/registry/{environment}/latest"
+  },
+  {
+    "operationId": "listRegistryHistory",
+    "method": "GET",
+    "path": "/registry/{environment}/history"
+  },
+  {
+    "operationId": "diffRegistrySnapshots",
+    "method": "GET",
+    "path": "/registry/{environment}/diff"
+  },
+  { "operationId": "listAuditEvents", "method": "GET", "path": "/audit-events" }
+]

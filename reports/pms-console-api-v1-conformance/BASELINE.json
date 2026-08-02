@@ -1,0 +1,13 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "validationStartHead": "b598474d5ab41d72962198612c853a945fa16100",
+  "remoteBranchHeadAtStart": "b598474d5ab41d72962198612c853a945fa16100",
+  "remoteMainHeadAtStart": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "workingTreeCleanAtStart": true,
+  "preExistingChanges": [],
+  "fetchPerformed": false,
+  "fetchReason": "Resumed from the verified local clone; GitHub network is unavailable in Work mode",
+  "frozenInputZipSha256": "f33ad8842ac47b07893ba2b1b1124b0c4a0ca9fafab92911c02b12e8531430b9",
+  "capturedAt": "2026-07-30T10:44:36.286Z"
+}

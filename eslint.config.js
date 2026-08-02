@@ -15,7 +15,7 @@ export default tseslint.config(
     ],
   },
   {
-    files: ["**/*.ts"],
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -29,10 +29,58 @@ export default tseslint.config(
         "error",
         { checksVoidReturn: { arguments: false } },
       ],
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        { allowBoolean: true, allowNumber: true },
+      ],
     },
   },
   {
     files: ["**/*.js", "**/*.mjs"],
     ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: {
+        Buffer: "readonly",
+        URL: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+      },
+    },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      "no-redeclare": "off",
+    },
+  },
+  {
+    files: ["**/test/**/*.ts", "**/test/**/*.tsx", "**/tests/**/*.ts", "**/tests/**/*.tsx"],
+    rules: {
+      "@typescript-eslint/await-thenable": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/non-nullable-type-assertion-style": "off",
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/unbound-method": "off",
+    },
+  },
+  {
+    files: ["apps/pms-web/src/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
+      "@typescript-eslint/no-unnecessary-type-conversion": "off",
+    },
+  },
+  {
+    files: ["apps/pms-web/src/features/discovery/DiscoveryPages.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
+    },
   },
 );

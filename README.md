@@ -71,6 +71,18 @@ The default stack exposes Runtime HTTP on `:8080`, PostgreSQL on `:5432`, and an
 docker compose --profile python-adapter build adapter-python
 ```
 
+## PMS Web debug entry
+
+Build and serve the Provider Management Console locally with:
+
+```bash
+pnpm dev:pms-web
+```
+
+Open [http://127.0.0.1:5173/configuration](http://127.0.0.1:5173/configuration). The local web server proxies `/api/*` to PMS API at `http://127.0.0.1:8090`; override that target with `PMS_WEB_API_ORIGIN`, and use `PMS_WEB_HOST` or `PMS_WEB_PORT` to change its listener.
+
+For the complete local setup, credential, configuration publication, and troubleshooting workflow, see the [PMS local operations and configuration runbook](docs/operations/pms-local-configuration-runbook.md).
+
 Runtime startup applies migrations and runs durable scheduling/recovery before
 readiness. The reference Adapter state and PostgreSQL data use named volumes.
 For a release gate with PostgreSQL and Docker available, run:

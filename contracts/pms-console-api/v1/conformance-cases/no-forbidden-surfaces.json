@@ -1,0 +1,11 @@
+{
+  "case": "forbidden paths absent",
+  "forbiddenTerms": [
+    "/operations",
+    "/incidents",
+    "/changes",
+    "/environments",
+    "/registry/{environment}/publish"
+  ],
+  "expected": true
+}

@@ -352,9 +352,15 @@ jobs:
           name: release-artifacts-summary
           path: reports/ci
       - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-      - run: node scripts/release/verify-release-metadata.mjs
-      - run: node scripts/release/verify-source-archive.mjs
+      - name: Verify exact-head PR artifact metadata
+        if: github.event_name == 'pull_request'
+        run: node scripts/release/verify-candidate-artifact.mjs
+      - if: github.event_name == 'workflow_dispatch'
+        run: node scripts/release/verify-release-metadata.mjs
+      - if: github.event_name == 'workflow_dispatch'
+        run: node scripts/release/verify-source-archive.mjs
       - name: Generate exact-head Candidate Summary
+        if: github.event_name == 'workflow_dispatch'
         env:
           RELEASE_CANDIDATE_SHA: ${{ env.CANDIDATE_SHA }}
           RELEASE_RUN_ID: ${{ github.run_id }}
@@ -363,6 +369,7 @@ jobs:
             {"static":"${{ needs.static.result }}","runtime-ci":"${{ needs.runtime-ci.result }}","pms-api-production":"${{ needs.pms-api-production.result }}","worker-pm2-production":"${{ needs.worker-pm2-production.result }}","runtime-credential-isolation":"${{ needs.runtime-credential-isolation.result }}","worker-lease-safety":"${{ needs.worker-lease-safety.result }}","provider-regression":"${{ needs.provider-regression.result }}","platform-e2e":"${{ needs.platform-e2e.result }}","runtime-compose":"${{ needs.runtime-compose.result }}","release-artifacts":"${{ needs.release-artifacts.result }}"}
         run: node scripts/release/generate-candidate-summary.mjs
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: release-candidate-summary
           path: |
