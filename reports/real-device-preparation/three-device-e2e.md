@@ -9,8 +9,8 @@
 ## Device results
 
 - `ha-climate-lab` / `living-room-air-conditioner`: restoration=restored, tasks=3
-- `ha-light-lab` / `living-room-main-light`: restoration=restored, tasks=0
-- `ha-light-lab` / `living-room-aux-light`: restoration=restored, tasks=0
+- `ha-light-lab` / `living-room-main-light`: restoration=restored, tasks=2
+- `ha-light-lab` / `living-room-aux-light`: restoration=restored, tasks=2
 
 ## Blockers
 

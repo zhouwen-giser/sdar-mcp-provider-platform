@@ -114,9 +114,7 @@ function summarizeLights(value: JsonObject): JsonObject[] {
       originalState: resource.original ?? null,
       finalState: restoration?.currentAfterRestore ?? null,
       restorationStatus: restoration?.status ?? null,
-      tasks: scenarioSummaries(
-        scenarios.filter((item) => isObject(item) && item.resourceId === resourceId),
-      ),
+      tasks: scenarioSummaries(scenarios.filter((item) => scenarioResourceId(item) === resourceId)),
       taskResultStatus: isObject(value.taskResultCompatibility)
         ? value.taskResultCompatibility.status
         : null,
@@ -127,7 +125,7 @@ function summarizeLights(value: JsonObject): JsonObject[] {
 function scenarioSummaries(value: unknown): JsonObject[] {
   return (Array.isArray(value) ? value : []).filter(isObject).map((item) => ({
     operation: item.operation ?? null,
-    resourceId: item.resourceId ?? null,
+    resourceId: scenarioResourceId(item),
     status: item.status ?? null,
     runtimeTaskId: item.runtimeTaskId ?? null,
     adapterExternalExecutionId: item.adapterExternalExecutionId ?? null,
@@ -137,6 +135,16 @@ function scenarioSummaries(value: unknown): JsonObject[] {
     desired: item.desired ?? null,
     after: item.after ?? null,
   }));
+}
+
+function scenarioResourceId(value: unknown): string | null {
+  if (!isObject(value)) return null;
+  if (typeof value.resourceId === "string") return value.resourceId;
+  for (const candidate of [value.before, value.after]) {
+    if (isObject(candidate) && typeof candidate.resourceId === "string")
+      return candidate.resourceId;
+  }
+  return null;
 }
 
 function summarizePreflight(value: JsonObject): JsonObject {
