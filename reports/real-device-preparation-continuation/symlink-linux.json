@@ -1,0 +1,16 @@
+{
+  "evidenceClass": "contract",
+  "phase": "C2_CROSS_PLATFORM_GATES",
+  "environment": "linux-container",
+  "image": "node:22-bookworm",
+  "platform": "linux",
+  "executedAt": "2026-08-02T22:49:00Z",
+  "command": "node scripts/provider-package-linux-symlink-check.mjs",
+  "implementation": "dist/packages/provider-package-registry/src/index.js",
+  "symlinkSupported": true,
+  "expectedCode": "PACKAGE_ENTRY_SYMLINK_REJECTED",
+  "actualCode": "PACKAGE_ENTRY_SYMLINK_REJECTED",
+  "status": "passed",
+  "fullVitestNote": "The mounted Windows dependency tree lacks the Linux optional Rolldown binding; the dedicated gate exercises the compiled Provider Package Registry implementation directly.",
+  "noSecrets": true
+}
