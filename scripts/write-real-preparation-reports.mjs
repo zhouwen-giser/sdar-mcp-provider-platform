@@ -10,6 +10,7 @@ const climate = readJson("climate-real-qualification.json");
 const light = readJson("light-real-qualification.json");
 const blockers = [
   "FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.",
+  "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified.",
   "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.",
   "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.",
   "REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices.",
@@ -268,6 +269,15 @@ writeFileSync(
   protocolKnownLimitations.replace(
     "- No SDAR Agent Runtime was connected.",
     "- `protocol:check`, `verify:v2` and `verify:platform` stop at the protocol lock hash mismatch under `core.autocrlf=true`; the frozen contract, schemas and 74 conformance cases pass and the committed lock is unchanged.\n- No SDAR Agent Runtime was connected.",
+  ),
+  "utf8",
+);
+const climateKnownLimitations = readFileSync(knownLimitationsPath, "utf8");
+writeFileSync(
+  knownLimitationsPath,
+  climateKnownLimitations.replace(
+    "- No SDAR Agent Runtime was connected.",
+    "- `climate_set_power` was not separately written against the real air conditioner: its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified.\n- No SDAR Agent Runtime was connected.",
   ),
   "utf8",
 );

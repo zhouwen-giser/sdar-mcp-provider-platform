@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation final delivery
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate implementation SHA: `a62f7e05d6326ae950fc2979bc42ba57634576b2`
+- Candidate implementation SHA: `285672caf8e938a5a3833986ed62dc5f7ad1e1e9`
 - Environment: `home-lab`
 - Overall status: **BLOCKED**
 - Ready for SDAR integration: **NO**
@@ -22,6 +22,7 @@
 ## Hard blockers
 
 - FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.
+- CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified.
 - PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.
 - REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.
 - REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices.

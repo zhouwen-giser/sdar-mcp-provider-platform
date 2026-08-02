@@ -7,5 +7,6 @@
 - The two light runs used power control only. Brightness capability was observed in read-only preflight and the optional brightness operation is covered by fake/contract tests, but no brightness side effect was executed on the real lights.
 - The existing provider-package suite has one environment-only failure: its Windows symlink assertion receives EPERM; the standalone package self-check passes for all packages.
 - `protocol:check`, `verify:v2` and `verify:platform` stop at the protocol lock hash mismatch under `core.autocrlf=true`; the frozen contract, schemas and 74 conformance cases pass and the committed lock is unchanged.
+- `climate_set_power` was not separately written against the real air conditioner: its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified.
 - No SDAR Agent Runtime was connected.
 - No credentials, raw Authorization headers, or Home Assistant internal entity IDs are included in reports or handoff artifacts.

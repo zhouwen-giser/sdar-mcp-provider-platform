@@ -22,7 +22,7 @@
     }
   ],
   "blockers": [
-    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real."
+    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified."
   ],
   "noSecrets": true,
   "noEntityIds": true
