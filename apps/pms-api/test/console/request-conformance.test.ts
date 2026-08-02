@@ -64,4 +64,3 @@ describe("Console request conformance", () => {
     await app.close();
   });
 });
-

@@ -114,10 +114,7 @@ export function mapUpdateConfigurationDraft(body: unknown): UpdateConfigurationD
   };
 }
 
-export function mapPublishConfiguration(
-  draftId: string,
-  body: unknown,
-): PublishConfigurationDraft {
+export function mapPublishConfiguration(draftId: string, body: unknown): PublishConfigurationDraft {
   const value = record(body);
   return {
     draftId,
@@ -126,10 +123,7 @@ export function mapPublishConfiguration(
   };
 }
 
-export function mapRollbackConfiguration(
-  draftId: string,
-  body: unknown,
-): RollbackConfiguration {
+export function mapRollbackConfiguration(draftId: string, body: unknown): RollbackConfiguration {
   const value = record(body);
   return {
     ...mapPublishConfiguration(draftId, value),
@@ -174,17 +168,11 @@ export function requestRecord(value: unknown): Readonly<Record<string, unknown>>
   return record(value);
 }
 
-export function requestString(
-  value: Readonly<Record<string, unknown>>,
-  field: string,
-): string {
+export function requestString(value: Readonly<Record<string, unknown>>, field: string): string {
   return string(value, field);
 }
 
-export function requestInteger(
-  value: Readonly<Record<string, unknown>>,
-  field: string,
-): number {
+export function requestInteger(value: Readonly<Record<string, unknown>>, field: string): number {
   return integer(value, field);
 }
 

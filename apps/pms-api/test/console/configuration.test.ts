@@ -37,4 +37,3 @@ describe("Console Configuration operations", () => {
     await app.close();
   });
 });
-

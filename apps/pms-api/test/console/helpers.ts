@@ -10,9 +10,7 @@ import type {
   ConfigurationPublicationService,
 } from "../../../../packages/configuration-center/src/index.js";
 import type { AuditRepository } from "../../../../packages/pms-domain/src/index.js";
-import type {
-  RegistrySnapshotRepository,
-} from "../../../../packages/registry-snapshot/src/index.js";
+import type { RegistrySnapshotRepository } from "../../../../packages/registry-snapshot/src/index.js";
 import {
   createPmsApi,
   type PmsApiOptions,
@@ -156,9 +154,10 @@ export interface ConsoleSpies {
   readonly auditList: ReturnType<typeof vi.fn>;
 }
 
-export function createConsoleTestApp(
-  overrides: Partial<PmsApiOptions> = {},
-): { readonly app: FastifyInstance; readonly spies: ConsoleSpies } {
+export function createConsoleTestApp(overrides: Partial<PmsApiOptions> = {}): {
+  readonly app: FastifyInstance;
+  readonly spies: ConsoleSpies;
+} {
   const createProvider = vi.fn(async () => PROVIDER);
   const createResource = vi.fn(async () => RESOURCE);
   const commandDeployment = vi.fn(async (input: { readonly command: string }) => ({
@@ -433,12 +432,14 @@ export const SUCCESS_CASES: readonly ConsoleOperationCase[] = [
     url: "/api/console/v1/runtime-deployments/deployment-1?providerId=provider-1",
     status: 200,
   },
-  ...([
-    { operationId: "startRuntimeDeployment", command: "start" },
-    { operationId: "stopRuntimeDeployment", command: "stop" },
-    { operationId: "restartRuntimeDeployment", command: "restart" },
-    { operationId: "reconcileRuntimeDeployment", command: "reconcile" },
-  ] as const).map(({ operationId, command }) => ({
+  ...(
+    [
+      { operationId: "startRuntimeDeployment", command: "start" },
+      { operationId: "stopRuntimeDeployment", command: "stop" },
+      { operationId: "restartRuntimeDeployment", command: "restart" },
+      { operationId: "reconcileRuntimeDeployment", command: "reconcile" },
+    ] as const
+  ).map(({ operationId, command }) => ({
     operationId,
     method: "POST" as const,
     url: `/api/console/v1/runtime-deployments/deployment-1/${command}`,
@@ -489,4 +490,3 @@ export const SUCCESS_CASES: readonly ConsoleOperationCase[] = [
     status: 200,
   },
 ];
-

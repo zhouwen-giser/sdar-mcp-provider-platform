@@ -21,4 +21,3 @@ installation is prohibited. They are not reported as passed or failed.
 The five mandatory contract-lock gates passed. A non-gating auxiliary
 `contractManifestSha256` mismatch in the supplied frozen archive is recorded in
 `CONTRACT_HASH_VERIFICATION.json`; the contract was not edited or regenerated.
-

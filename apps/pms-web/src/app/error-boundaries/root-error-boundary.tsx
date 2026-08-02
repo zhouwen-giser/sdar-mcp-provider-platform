@@ -1,3 +1,25 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { toUiProblem } from "../../shared/errors/ui-problem.js";
-export class RootErrorBoundary extends Component<{children:ReactNode},{error?:unknown}>{state:{error?:unknown}={};static getDerivedStateFromError(error:unknown){return{error}}componentDidCatch(_e:unknown,_i:ErrorInfo){}render(){if(this.state.error){const p=toUiProblem(this.state.error);return <main className="fatal-error"><h1>{p.title}</h1><p>{p.detail}</p><code>{p.code}</code><button onClick={()=>location.reload()}>重新加载</button></main>}return this.props.children}}
+export class RootErrorBoundary extends Component<{ children: ReactNode }, { error?: unknown }> {
+  state: { error?: unknown } = {};
+  static getDerivedStateFromError(error: unknown) {
+    return { error };
+  }
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    console.error("PMS_WEB_RENDER_ERROR", error, info.componentStack);
+  }
+  render() {
+    if (this.state.error) {
+      const p = toUiProblem(this.state.error);
+      return (
+        <main className="fatal-error">
+          <h1>{p.title}</h1>
+          <p>{p.detail}</p>
+          <code>{p.code}</code>
+          <button onClick={() => location.reload()}>重新加载</button>
+        </main>
+      );
+    }
+    return this.props.children;
+  }
+}

@@ -80,8 +80,7 @@ writeJson("CONTRACT_HASH_VERIFICATION.json", {
   status: lock.status,
   operationCount: lock.operationCount,
   mandatoryChecks: hashChecks,
-  mandatoryChecksPassed:
-    lock.status === "frozen" && hashChecks.every(({ passed }) => passed),
+  mandatoryChecksPassed: lock.status === "frozen" && hashChecks.every(({ passed }) => passed),
   runtimePackageSchemaSemanticallyEqual,
   auxiliaryWarnings,
   contractModifiedByGoal07: false,
@@ -191,8 +190,8 @@ writeJson("LEGACY_ROUTE_REGRESSION.json", {
 const changedPaths = [
   ...new Set([
     ...gitLines(["diff", "--name-only", baseline, "--"]),
-    ...gitLines(["status", "--porcelain=v1", "--untracked-files=all"]).map(
-      (line) => (line.slice(3).split(" -> ").at(-1) ?? "").replace(/^"|"$/g, ""),
+    ...gitLines(["status", "--porcelain=v1", "--untracked-files=all"]).map((line) =>
+      (line.slice(3).split(" -> ").at(-1) ?? "").replace(/^"|"$/g, ""),
     ),
   ]),
 ].filter(Boolean);
@@ -355,8 +354,5 @@ function sha256(path) {
 }
 
 function gitLines(args) {
-  return execFileSync("git", args, { cwd: root, encoding: "utf8" })
-    .split(/\r?\n/u)
-    .filter(Boolean);
+  return execFileSync("git", args, { cwd: root, encoding: "utf8" }).split(/\r?\n/u).filter(Boolean);
 }
-

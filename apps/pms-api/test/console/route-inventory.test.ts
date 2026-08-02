@@ -1,10 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  CONSOLE_ROUTE_INVENTORY,
-  frozenConsoleOperations,
-} from "../../src/console/index.js";
+import { CONSOLE_ROUTE_INVENTORY, frozenConsoleOperations } from "../../src/console/index.js";
 
 describe("PMS Console API route inventory", () => {
   it("contains every frozen operation and no contract-external operation", () => {
@@ -22,4 +19,3 @@ describe("PMS Console API route inventory", () => {
     expect(JSON.parse(readFileSync(path, "utf8"))).toHaveLength(36);
   });
 });
-

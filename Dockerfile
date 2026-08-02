@@ -98,7 +98,9 @@ ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="SDAR Provider Management API" \
       org.opencontainers.image.revision="${VCS_REF}"
 COPY --from=build --chown=root:root /workspace/provider-packages /app/provider-packages
-RUN test -f /app/provider-packages/ugv/provider-package.json
+COPY --from=build --chown=root:root /workspace/packages/pms-console-api-contract/schema /app/packages/pms-console-api-contract/schema
+RUN test -f /app/provider-packages/ugv/provider-package.json \
+    && test -f /app/packages/pms-console-api-contract/schema/openapi.bundle.json
 EXPOSE 8090
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
@@ -118,7 +120,10 @@ CMD ["node", "dist/apps/pms-worker/src/main.js"]
 
 FROM node:22-bookworm-slim AS pms-web
 ARG VCS_REF=unknown
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    PMS_WEB_ROOT=/app/web \
+    PMS_WEB_HOST=0.0.0.0 \
+    PMS_WEB_PORT=8080
 WORKDIR /app
 LABEL org.opencontainers.image.title="SDAR Provider Management Web" \
       org.opencontainers.image.version="0.1.0" \
@@ -126,15 +131,16 @@ LABEL org.opencontainers.image.title="SDAR Provider Management Web" \
       org.opencontainers.image.source="https://github.com/zhouwen-giser/sdar-mcp-provider-platform" \
       org.opencontainers.image.licenses="Apache-2.0"
 COPY --from=build --chown=root:root /workspace/apps/pms-web/dist /app/web
+COPY --chown=root:root scripts/serve-pms-web.mjs /app/server.mjs
 RUN test -f /app/web/index.html \
-    && test -f /app/web/styles.css \
-    && test -f /app/web/assets/main.js \
-    && test -f /app/web/assets/server.js
+    && test -f /app/server.mjs \
+    && find /app/web/assets -type f -name '*.css' -print -quit | grep -q . \
+    && find /app/web/assets -type f -name '*.js' -print -quit | grep -q .
 USER node
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-CMD ["node", "web/assets/server.js"]
+CMD ["node", "server.mjs"]
 
 FROM runtime AS adapter-ts
 CMD ["node", "dist/examples/mock-adapter-typescript/src/main.js"]

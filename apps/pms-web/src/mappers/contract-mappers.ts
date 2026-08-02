@@ -23,7 +23,10 @@ export function mapProvider(source: ProviderDto): ProviderSummaryViewModel {
   return {
     providerId: source.providerId,
     providerTypeId: source.providerTypeId,
-    packageLabel: source.packageId === undefined ? "未绑定" : `${source.packageId}@${source.packageVersion ?? "latest"}`,
+    packageLabel:
+      source.packageId === undefined
+        ? "未绑定"
+        : `${source.packageId}@${source.packageVersion ?? "latest"}`,
     hostingMode: source.hostingMode,
     adapterEndpoint: source.adapterEndpoint ?? "未配置",
     status: source.status,
@@ -48,7 +51,10 @@ export function mapResource(source: ResourceDto): ResourceSummaryViewModel {
     environment: source.environment,
     resourceId: source.resourceId,
     resourceType: source.resourceType,
-    displayName: typeof source.metadata.displayName === "string" ? source.metadata.displayName : source.resourceId,
+    displayName:
+      typeof source.metadata.displayName === "string"
+        ? source.metadata.displayName
+        : source.resourceId,
     status: source.status,
     updatedAt: source.updatedAt ?? "未记录",
     metadata: source.metadata,
@@ -72,7 +78,10 @@ export function mapRuntimeDeployment(source: RuntimeDeploymentDto): RuntimeDeplo
   };
 }
 
-export function mapRuntimeProcess(source: RuntimeProcessDto, providerId: string): RuntimeProcessViewModel {
+export function mapRuntimeProcess(
+  source: RuntimeProcessDto,
+  providerId: string,
+): RuntimeProcessViewModel {
   return {
     providerId,
     instanceId: source.instanceId,
@@ -111,9 +120,15 @@ export function mapRegistrySnapshot(source: RegistrySnapshotDto): RegistrySnapsh
     revision: source.revision,
     checksum: source.checksum,
     providerCount: source.document.providers.length,
-    toolCount: source.document.providers.reduce((count, provider) => count + provider.tools.length, 0),
+    toolCount: source.document.providers.reduce(
+      (count, provider) => count + provider.tools.length,
+      0,
+    ),
     publishedAt: source.publishedAt,
-    providers: source.document.providers.map(provider => ({ ...provider, tools: provider.tools as readonly Readonly<Record<string, unknown>>[] })),
+    providers: source.document.providers.map((provider) => ({
+      ...provider,
+      tools: provider.tools as readonly Readonly<Record<string, unknown>>[],
+    })),
   };
 }
 

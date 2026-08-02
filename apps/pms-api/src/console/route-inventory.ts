@@ -35,4 +35,3 @@ export function assertCompleteHandlerInventory(handlerIds: readonly string[]): v
     );
   }
 }
-

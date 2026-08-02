@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createConsoleTestApp,
-  SUCCESS_CASES,
-  WRITE_HEADERS,
-} from "./helpers.js";
+import { createConsoleTestApp, SUCCESS_CASES, WRITE_HEADERS } from "./helpers.js";
 
 describe("all frozen Console operations", () => {
   it("has a successful Fastify inject case for all 36 operations", async () => {

@@ -1,23 +1,660 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, CodeOrJsonViewer, ConfirmDialog, DataTable, FormField, KeyValueList, MetricCard, QuerySurface, StatusBadge, Timeline, Toast } from "../../components/ui.js";
-import { useAuditEvents, useDeployment, useDeployments, useProcesses, useProviders, useRegistryLatest, useRuntimeCommand } from "../../queries/hooks.js";
+import {
+  Button,
+  ConfirmDialog,
+  DataTable,
+  FormField,
+  KeyValueList,
+  MetricCard,
+  QuerySurface,
+  StatusBadge,
+  Timeline,
+} from "../../components/ui.js";
+import {
+  useDeployment,
+  useDeployments,
+  useProcesses,
+  useProviders,
+  useRegistryLatest,
+  useRuntimeCommand,
+} from "../../queries/hooks.js";
 import { useClientWorkspace, useClientWorkspaceStore } from "../../client-workspace/context.js";
 import { navigate } from "../../app/navigation.js";
-import { LocalWorkspaceHeader, MutationFeedback, ProductPage } from "../shared/product-components.js";
+import {
+  LocalWorkspaceHeader,
+  MutationFeedback,
+  ProductPage,
+} from "../shared/product-components.js";
 
-export function OperationsPage({detail=false}:{readonly detail?:boolean}){const {operationId=""}=useParams();const snapshot=useClientWorkspace();if(detail){const item=snapshot.operations.find(value=>value.operationId===operationId);return item?<ProductPage title={item.operationId} description={`${item.kind} · ${item.subjectId}`} classification="WEB_COMPOSED"><div className="metrics-row"><MetricCard label="Status" value={<StatusBadge status={item.status}/>}/><MetricCard label="Progress" value={`${item.progress}%`}/><MetricCard label="Correlation" value={<code>{item.correlationId}</code>}/><MetricCard label="Job" value={item.jobId??"none"}/></div><div className="grid-two"><section className="panel"><h2>Operation Read Model</h2><KeyValueList entries={[["Kind",item.kind],["Subject",item.subjectId],["Status",item.status],["Correlation ID",<code>{item.correlationId}</code>],["Job",item.jobId??"not projected"]]}/></section><section className="panel"><h2>关联入口</h2><div className="quick-actions"><Button onClick={()=>navigate(`/runtime/deployments/ugv-prod-001/${item.subjectId}`)}>Deployment</Button>{item.jobId?<Button onClick={()=>navigate(`/operations/jobs/${item.jobId}`)}>Worker Job</Button>:null}<Button onClick={()=>navigate(`/audit?correlationId=${item.correlationId}`)}>Audit</Button></div></section></div><section className="panel"><h2>Timeline</h2><Timeline items={item.timeline.map((label,index)=>({label,meta:`step ${index+1}`,status:index===item.timeline.length-1?item.status:"SUCCEEDED"}))}/></section></ProductPage>:<ProductPage title="Operation not found" description={`${operationId} 不是当前前端 Read Model 中的 Operation。`} classification="WEB_COMPOSED"><section className="panel"><Button onClick={()=>navigate("/operations")}>返回 Operations</Button></section></ProductPage>}
- return <ProductPage title="Control Plane Operations" description="Generic Operation Domain 不存在；页面组合 Runtime Intent、Worker Job 与 Audit。" classification="WEB_COMPOSED"><div className="metrics-row"><MetricCard label="Operations" value={snapshot.operations.length}/><MetricCard label="Running" value={snapshot.operations.filter(x=>x.status==="RUNNING"||x.status==="ACCEPTED").length}/><MetricCard label="Succeeded" value={snapshot.operations.filter(x=>x.status==="SUCCEEDED").length}/><MetricCard label="Failed" value={snapshot.operations.filter(x=>x.status==="FAILED").length}/></div><section className="panel"><DataTable columns={["Operation","Kind","Subject","Status","Progress","Correlation","Job"]} rows={snapshot.operations.map(item=>[<button className="table-link" onClick={()=>navigate(`/operations/${item.operationId}`)}>{item.operationId}</button>,item.kind,item.subjectId,<StatusBadge status={item.status}/>,`${item.progress}%`,<code>{item.correlationId}</code>,item.jobId??"—"])}/></section></ProductPage>}
+export function OperationsPage({ detail = false }: { readonly detail?: boolean }) {
+  const { operationId = "" } = useParams();
+  const snapshot = useClientWorkspace();
+  if (detail) {
+    const item = snapshot.operations.find((value) => value.operationId === operationId);
+    return item ? (
+      <ProductPage
+        title={item.operationId}
+        description={`${item.kind} · ${item.subjectId}`}
+        classification="WEB_COMPOSED"
+      >
+        <div className="metrics-row">
+          <MetricCard label="Status" value={<StatusBadge status={item.status} />} />
+          <MetricCard label="Progress" value={`${item.progress}%`} />
+          <MetricCard label="Correlation" value={<code>{item.correlationId}</code>} />
+          <MetricCard label="Job" value={item.jobId ?? "none"} />
+        </div>
+        <div className="grid-two">
+          <section className="panel">
+            <h2>Operation Read Model</h2>
+            <KeyValueList
+              entries={[
+                ["Kind", item.kind],
+                ["Subject", item.subjectId],
+                ["Status", item.status],
+                ["Correlation ID", <code>{item.correlationId}</code>],
+                ["Job", item.jobId ?? "not projected"],
+              ]}
+            />
+          </section>
+          <section className="panel">
+            <h2>关联入口</h2>
+            <div className="quick-actions">
+              <Button
+                onClick={() => navigate(`/runtime/deployments/ugv-prod-001/${item.subjectId}`)}
+              >
+                Deployment
+              </Button>
+              {item.jobId ? (
+                <Button onClick={() => navigate(`/operations/jobs/${item.jobId}`)}>
+                  Worker Job
+                </Button>
+              ) : null}
+              <Button onClick={() => navigate(`/audit?correlationId=${item.correlationId}`)}>
+                Audit
+              </Button>
+            </div>
+          </section>
+        </div>
+        <section className="panel">
+          <h2>Timeline</h2>
+          <Timeline
+            items={item.timeline.map((label, index) => ({
+              label,
+              meta: `step ${index + 1}`,
+              status: index === item.timeline.length - 1 ? item.status : "SUCCEEDED",
+            }))}
+          />
+        </section>
+      </ProductPage>
+    ) : (
+      <ProductPage
+        title="Operation not found"
+        description={`${operationId} 不是当前前端 Read Model 中的 Operation。`}
+        classification="WEB_COMPOSED"
+      >
+        <section className="panel">
+          <Button onClick={() => navigate("/operations")}>返回 Operations</Button>
+        </section>
+      </ProductPage>
+    );
+  }
+  return (
+    <ProductPage
+      title="Control Plane Operations"
+      description="Generic Operation Domain 不存在；页面组合 Runtime Intent、Worker Job 与 Audit。"
+      classification="WEB_COMPOSED"
+    >
+      <div className="metrics-row">
+        <MetricCard label="Operations" value={snapshot.operations.length} />
+        <MetricCard
+          label="Running"
+          value={
+            snapshot.operations.filter((x) => x.status === "RUNNING" || x.status === "ACCEPTED")
+              .length
+          }
+        />
+        <MetricCard
+          label="Succeeded"
+          value={snapshot.operations.filter((x) => x.status === "SUCCEEDED").length}
+        />
+        <MetricCard
+          label="Failed"
+          value={snapshot.operations.filter((x) => x.status === "FAILED").length}
+        />
+      </div>
+      <section className="panel">
+        <DataTable
+          columns={["Operation", "Kind", "Subject", "Status", "Progress", "Correlation", "Job"]}
+          rows={snapshot.operations.map((item) => [
+            <button
+              className="table-link"
+              onClick={() => navigate(`/operations/${item.operationId}`)}
+            >
+              {item.operationId}
+            </button>,
+            item.kind,
+            item.subjectId,
+            <StatusBadge status={item.status} />,
+            `${item.progress}%`,
+            <code>{item.correlationId}</code>,
+            item.jobId ?? "—",
+          ])}
+        />
+      </section>
+    </ProductPage>
+  );
+}
 
-export function RuntimeHealthPage(){const providers=useProviders();const deployments=useDeployments();const processes=useProcesses();const registry=useRegistryLatest("production");const workspace=useClientWorkspace();return <ProductPage title="系统健康" description="从冻结查询和客户端运维工作区组合的健康视图；不是新的 Health Domain。" classification="WEB_COMPOSED"><div className="metrics-row"><MetricCard label="Provider healthy" value={`${providers.data?.filter(x=>x.status==="active").length??0}/${providers.data?.length??0}`}/><MetricCard label="Deployment converged" value={`${deployments.data?.filter(x=>x.converged).length??0}/${deployments.data?.length??0}`}/><MetricCard label="Runtime ready" value={`${processes.data?.filter(x=>x.readyForActive).length??0}/${processes.data?.length??0}`}/><MetricCard label="Registry revision" value={registry.data?.revision??"—"}/></div><div className="grid-two"><section className="panel"><h2>Runtime health</h2><QuerySurface query={processes}>{items=><DataTable columns={["Instance","Deployment","Process","Health","Registration","Heartbeat"]} rows={items.map(item=>[<button className="table-link" onClick={()=>navigate(`/runtime/processes/${item.providerId}/${item.instanceId}`)}>{item.instanceId}</button>,item.deploymentId,item.processState,<StatusBadge status={item.observedHealth}/>,item.registrationState,item.lastHeartbeatAt])}/>}</QuerySurface></section><section className="panel"><h2>Operational workspace</h2><DataTable columns={["Type","Object","Status"]} rows={[...workspace.jobs.filter(x=>x.status==="FAILED").map(x=>["Job",x.jobId,<StatusBadge status={x.status}/>]),...workspace.incidents.filter(x=>x.status!=="CLOSED").map(x=>["Incident",x.incidentId,<StatusBadge status={x.status}/>])]} /></section></div></ProductPage>}
+export function RuntimeHealthPage() {
+  const providers = useProviders();
+  const deployments = useDeployments();
+  const processes = useProcesses();
+  const registry = useRegistryLatest("production");
+  const workspace = useClientWorkspace();
+  return (
+    <ProductPage
+      title="系统健康"
+      description="从冻结查询和客户端运维工作区组合的健康视图；不是新的 Health Domain。"
+      classification="WEB_COMPOSED"
+    >
+      <div className="metrics-row">
+        <MetricCard
+          label="Provider healthy"
+          value={`${providers.data?.filter((x) => x.status === "active").length ?? 0}/${providers.data?.length ?? 0}`}
+        />
+        <MetricCard
+          label="Deployment converged"
+          value={`${deployments.data?.filter((x) => x.converged).length ?? 0}/${deployments.data?.length ?? 0}`}
+        />
+        <MetricCard
+          label="Runtime ready"
+          value={`${processes.data?.filter((x) => x.readyForActive).length ?? 0}/${processes.data?.length ?? 0}`}
+        />
+        <MetricCard label="Registry revision" value={registry.data?.revision ?? "—"} />
+      </div>
+      <div className="grid-two">
+        <section className="panel">
+          <h2>Runtime health</h2>
+          <QuerySurface query={processes}>
+            {(items) => (
+              <DataTable
+                columns={[
+                  "Instance",
+                  "Deployment",
+                  "Process",
+                  "Health",
+                  "Registration",
+                  "Heartbeat",
+                ]}
+                rows={items.map((item) => [
+                  <button
+                    className="table-link"
+                    onClick={() =>
+                      navigate(`/runtime/processes/${item.providerId}/${item.instanceId}`)
+                    }
+                  >
+                    {item.instanceId}
+                  </button>,
+                  item.deploymentId,
+                  item.processState,
+                  <StatusBadge status={item.observedHealth} />,
+                  item.registrationState,
+                  item.lastHeartbeatAt,
+                ])}
+              />
+            )}
+          </QuerySurface>
+        </section>
+        <section className="panel">
+          <h2>Operational workspace</h2>
+          <DataTable
+            columns={["Type", "Object", "Status"]}
+            rows={[
+              ...workspace.jobs
+                .filter((x) => x.status === "FAILED")
+                .map((x) => ["Job", x.jobId, <StatusBadge status={x.status} />]),
+              ...workspace.incidents
+                .filter((x) => x.status !== "CLOSED")
+                .map((x) => ["Incident", x.incidentId, <StatusBadge status={x.status} />]),
+            ]}
+          />
+        </section>
+      </div>
+    </ProductPage>
+  );
+}
 
-export function JobsPage({detail=false}:{readonly detail?:boolean}){const {jobId=""}=useParams();const snapshot=useClientWorkspace();if(detail){const job=snapshot.jobs.find(item=>item.jobId===jobId);return job?<ProductPage title={job.jobId} description={`${job.kind} · ${job.subjectId}`} classification="DEFERRED"><div className="grid-two"><section className="panel"><KeyValueList entries={[["Status",<StatusBadge status={job.status}/>],["Attempt",job.attempt],["Lease Owner",job.leaseOwner],["Fence Token",<code>{job.fenceToken}</code>],["Updated",job.updatedAt],["Error",job.error??"none"]]}/></section><section className="panel"><h2>Management boundary</h2><p>V1 冻结合同未包含 Worker Job 查询或 requeue/cancel 命令；当前数据来自本地确定性运维 Fixture。</p><Button disabled title="No requeue command in frozen contract">Requeue unavailable</Button><Button disabled title="No cancel command in frozen contract">Cancel unavailable</Button></section></div><Button onClick={()=>navigate(`/runtime/deployments/ugv-prod-001/${job.subjectId}`)}>打开关联 Deployment</Button></ProductPage>:<ProductPage title="Worker Job not found" description={jobId} classification="DEFERRED"><section className="panel"><Button onClick={()=>navigate("/operations/jobs")}>返回 Jobs</Button></section></ProductPage>}
- return <ProductPage title="Worker Jobs" description="完整 Job、Attempt、Lease、Fence 和错误摘要体验；冻结合同未开放 Job API。" classification="DEFERRED"><section className="panel"><DataTable columns={["Job","Kind","Subject","Status","Attempt","Lease Owner","Fence","Updated","Error"]} rows={snapshot.jobs.map(item=>[<button className="table-link" onClick={()=>navigate(`/operations/jobs/${item.jobId}`)}>{item.jobId}</button>,item.kind,item.subjectId,<StatusBadge status={item.status}/>,item.attempt,item.leaseOwner,<code>{item.fenceToken}</code>,item.updatedAt,item.error??"—"])}/></section></ProductPage>}
+export function JobsPage({ detail = false }: { readonly detail?: boolean }) {
+  const { jobId = "" } = useParams();
+  const snapshot = useClientWorkspace();
+  if (detail) {
+    const job = snapshot.jobs.find((item) => item.jobId === jobId);
+    return job ? (
+      <ProductPage
+        title={job.jobId}
+        description={`${job.kind} · ${job.subjectId}`}
+        classification="DEFERRED"
+      >
+        <div className="grid-two">
+          <section className="panel">
+            <KeyValueList
+              entries={[
+                ["Status", <StatusBadge status={job.status} />],
+                ["Attempt", job.attempt],
+                ["Lease Owner", job.leaseOwner],
+                ["Fence Token", <code>{job.fenceToken}</code>],
+                ["Updated", job.updatedAt],
+                ["Error", job.error ?? "none"],
+              ]}
+            />
+          </section>
+          <section className="panel">
+            <h2>Management boundary</h2>
+            <p>
+              V1 冻结合同未包含 Worker Job 查询或 requeue/cancel 命令；当前数据来自本地确定性运维
+              Fixture。
+            </p>
+            <Button disabled title="No requeue command in frozen contract">
+              Requeue unavailable
+            </Button>
+            <Button disabled title="No cancel command in frozen contract">
+              Cancel unavailable
+            </Button>
+          </section>
+        </div>
+        <Button onClick={() => navigate(`/runtime/deployments/ugv-prod-001/${job.subjectId}`)}>
+          打开关联 Deployment
+        </Button>
+      </ProductPage>
+    ) : (
+      <ProductPage title="Worker Job not found" description={jobId} classification="DEFERRED">
+        <section className="panel">
+          <Button onClick={() => navigate("/operations/jobs")}>返回 Jobs</Button>
+        </section>
+      </ProductPage>
+    );
+  }
+  return (
+    <ProductPage
+      title="Worker Jobs"
+      description="完整 Job、Attempt、Lease、Fence 和错误摘要体验；冻结合同未开放 Job API。"
+      classification="DEFERRED"
+    >
+      <section className="panel">
+        <DataTable
+          columns={[
+            "Job",
+            "Kind",
+            "Subject",
+            "Status",
+            "Attempt",
+            "Lease Owner",
+            "Fence",
+            "Updated",
+            "Error",
+          ]}
+          rows={snapshot.jobs.map((item) => [
+            <button
+              className="table-link"
+              onClick={() => navigate(`/operations/jobs/${item.jobId}`)}
+            >
+              {item.jobId}
+            </button>,
+            item.kind,
+            item.subjectId,
+            <StatusBadge status={item.status} />,
+            item.attempt,
+            item.leaseOwner,
+            <code>{item.fenceToken}</code>,
+            item.updatedAt,
+            item.error ?? "—",
+          ])}
+        />
+      </section>
+    </ProductPage>
+  );
+}
 
-export function QueuePage({workers=false}:{readonly workers?:boolean}){const snapshot=useClientWorkspace();if(workers)return <ProductPage title="Workers" description="只读本地 Worker 心跳和租约占用视图；不提供 Worker 管理命令。" classification="DEFERRED"><section className="panel"><DataTable columns={["Worker","Status","Leased Jobs","Last Heartbeat","Capacity"]} rows={[["worker-a",<StatusBadge status="HEALTHY"/>,snapshot.jobs.filter(x=>x.leaseOwner==="worker-a"&&x.status==="RUNNING").length,"8s ago","3/8"],["worker-b",<StatusBadge status="HEALTHY"/>,snapshot.jobs.filter(x=>x.leaseOwner==="worker-b"&&x.status==="RUNNING").length,"4s ago","2/8"]]}/></section></ProductPage>;const kinds=Array.from(new Set(snapshot.jobs.map(item=>item.kind)));return <ProductPage title="Worker Queue" description="根据本地 Job Fixture 聚合 backlog、running、failed 和 oldest age。" classification="DEFERRED"><section className="panel"><DataTable columns={["Job Type","Pending","Running","Succeeded","Failed","Oldest"]} rows={kinds.map(kind=>{const jobs=snapshot.jobs.filter(item=>item.kind===kind);return[kind,jobs.filter(x=>x.status==="PENDING").length,jobs.filter(x=>x.status==="RUNNING").length,jobs.filter(x=>x.status==="SUCCEEDED").length,jobs.filter(x=>x.status==="FAILED").length,jobs.at(-1)?.updatedAt??"—"]})}/></section></ProductPage>}
+export function QueuePage({ workers = false }: { readonly workers?: boolean }) {
+  const snapshot = useClientWorkspace();
+  if (workers)
+    return (
+      <ProductPage
+        title="Workers"
+        description="只读本地 Worker 心跳和租约占用视图；不提供 Worker 管理命令。"
+        classification="DEFERRED"
+      >
+        <section className="panel">
+          <DataTable
+            columns={["Worker", "Status", "Leased Jobs", "Last Heartbeat", "Capacity"]}
+            rows={[
+              [
+                "worker-a",
+                <StatusBadge status="HEALTHY" />,
+                snapshot.jobs.filter((x) => x.leaseOwner === "worker-a" && x.status === "RUNNING")
+                  .length,
+                "8s ago",
+                "3/8",
+              ],
+              [
+                "worker-b",
+                <StatusBadge status="HEALTHY" />,
+                snapshot.jobs.filter((x) => x.leaseOwner === "worker-b" && x.status === "RUNNING")
+                  .length,
+                "4s ago",
+                "2/8",
+              ],
+            ]}
+          />
+        </section>
+      </ProductPage>
+    );
+  const kinds = Array.from(new Set(snapshot.jobs.map((item) => item.kind)));
+  return (
+    <ProductPage
+      title="Worker Queue"
+      description="根据本地 Job Fixture 聚合 backlog、running、failed 和 oldest age。"
+      classification="DEFERRED"
+    >
+      <section className="panel">
+        <DataTable
+          columns={["Job Type", "Pending", "Running", "Succeeded", "Failed", "Oldest"]}
+          rows={kinds.map((kind) => {
+            const jobs = snapshot.jobs.filter((item) => item.kind === kind);
+            return [
+              kind,
+              jobs.filter((x) => x.status === "PENDING").length,
+              jobs.filter((x) => x.status === "RUNNING").length,
+              jobs.filter((x) => x.status === "SUCCEEDED").length,
+              jobs.filter((x) => x.status === "FAILED").length,
+              jobs.at(-1)?.updatedAt ?? "—",
+            ];
+          })}
+        />
+      </section>
+    </ProductPage>
+  );
+}
 
-export function IncidentsPage({mode="list"}:{readonly mode?:"list"|"new"|"detail"|"rules"}){const {incidentId=""}=useParams();const snapshot=useClientWorkspace();const store=useClientWorkspaceStore();const [title,setTitle]=useState("Runtime reconciliation failure");const [deploymentId,setDeploymentId]=useState("deploy-001");const [owner,setOwner]=useState("operator-a");const [note,setNote]=useState("");const [confirmClose,setConfirmClose]=useState(false);const deployment=useDeployment("ugv-prod-001",mode==="detail"?(snapshot.incidents.find(x=>x.incidentId===incidentId)?.deploymentId??""):"");const processes=useProcesses();const reconcile=useRuntimeCommand("reconcile");
- if(mode==="rules")return <><LocalWorkspaceHeader title="Incident Rules" description="本地告警规则工作区；不会创建平台规则对象。"/><section className="panel"><DataTable columns={["Rule","Condition","Severity","Enabled"]} rows={[["runtime-failed","Deployment status = FAILED for 3 checks","SEV-2",<StatusBadge status="LOCAL"/>],["registration-stale","Runtime heartbeat > 120s","SEV-3",<StatusBadge status="LOCAL"/>]]}/></section></>;
- if(mode==="new")return <><LocalWorkspaceHeader title="创建 Incident" description="只保存到 Client-side operational workspace。"/><section className="panel narrow-form"><FormField label="Title"><input value={title} onChange={e=>setTitle(e.target.value)}/></FormField><FormField label="Deployment"><input value={deploymentId} onChange={e=>setDeploymentId(e.target.value)}/></FormField><FormField label="Owner"><input value={owner} onChange={e=>setOwner(e.target.value)}/></FormField><FormField label="Severity"><select id="incident-severity"><option>SEV-2</option><option>SEV-1</option><option>SEV-3</option></select></FormField><Button variant="primary" onClick={()=>{const created=store.createIncident({title,severity:"SEV-2",deploymentId,owner});navigate(`/operations/incidents/${created.incidentId}`)}}>创建本地 Incident</Button></section></>;
- if(mode==="detail"){const incident=snapshot.incidents.find(item=>item.incidentId===incidentId);if(!incident)return <ProductPage title="Incident not found" description={incidentId} classification="CLIENT_ONLY"><section className="panel"><Button onClick={()=>navigate("/operations/incidents")}>返回 Incidents</Button></section></ProductPage>;const process=(processes.data??[]).find(item=>item.deploymentId===incident.deploymentId);return <><LocalWorkspaceHeader title={incident.incidentId} description={`${incident.severity} · ${incident.title}`} actions={<Button variant="danger" disabled={incident.status==="CLOSED"} onClick={()=>setConfirmClose(true)}>关闭 Incident</Button>}/><div className="metrics-row"><MetricCard label="Status" value={<StatusBadge status={incident.status}/>}/><MetricCard label="Deployment" value={incident.deploymentId}/><MetricCard label="Job" value={incident.jobId??"—"}/><MetricCard label="Owner" value={incident.owner}/></div><div className="grid-two"><section className="panel"><h2>Recovery path</h2><Timeline items={[{label:"Incident detected",status:incident.status},{label:"RuntimeDeployment",meta:deployment.data?.status??"loading"},{label:"RuntimeProcess",meta:process?.observedHealth??"missing"},{label:"Worker Job",meta:snapshot.jobs.find(x=>x.jobId===incident.jobId)?.status??"unknown"},{label:"Reconcile Intent",meta:"operator action"},{label:"Close incident",meta:"only after ACTIVE"}]}/><div className="quick-actions"><Button onClick={()=>navigate(`/runtime/deployments/${deployment.data?.providerId??"ugv-prod-001"}/${incident.deploymentId}`)}>Deployment</Button>{process?<Button onClick={()=>navigate(`/runtime/processes/${process.providerId}/${process.instanceId}`)}>RuntimeProcess</Button>:null}{incident.jobId?<Button onClick={()=>navigate(`/operations/jobs/${incident.jobId}`)}>Worker Job</Button>:null}<Button variant="primary" disabled={!deployment.data} busy={reconcile.isPending} onClick={()=>{const item=deployment.data;if(!item)return;reconcile.mutate({deploymentId:item.deploymentId,providerId:item.providerId,expectedDesiredRevision:item.desiredRevision},{onSuccess:intent=>store.recordIntent("runtime.reconcile",item.deploymentId,intent.operationId)})}}>重新对账</Button></div><MutationFeedback mutation={reconcile}/></section><section className="panel"><h2>Notes</h2><Timeline items={incident.notes.map(value=>({label:value,meta:"client-side note"}))}/><FormField label="Add note"><textarea value={note} onChange={e=>setNote(e.target.value)}/></FormField><Button onClick={()=>{if(note.trim()){store.addIncidentNote(incident.incidentId,note.trim());setNote("")}}}>添加备注</Button></section></div><ConfirmDialog open={confirmClose} title="关闭 Incident" impact={<ul><li>仅更新浏览器本地 Incident Store</li><li>Deployment 当前状态：{deployment.data?.status??"unknown"}</li><li>不会修改 SMPP 领域状态</li></ul>} requirePhrase={incident.incidentId} reasonRequired onCancel={()=>setConfirmClose(false)} onConfirm={()=>{store.closeIncident(incident.incidentId);setConfirmClose(false)}}/></>}
- return <><LocalWorkspaceHeader title="Incidents" description="Client-side operational workspace；API 模式下不声称持久化。" actions={<Button variant="primary" onClick={()=>navigate("/operations/incidents/new")}>创建 Incident</Button>}/><section className="panel"><DataTable columns={["Incident","Title","Severity","Status","Deployment","Job","Owner","Updated"]} rows={snapshot.incidents.map(item=>[<button className="table-link" onClick={()=>navigate(`/operations/incidents/${item.incidentId}`)}>{item.incidentId}</button>,item.title,<StatusBadge status={item.severity}/>,<StatusBadge status={item.status}/>,item.deploymentId,item.jobId??"—",item.owner,item.updatedAt])}/></section></>}
+export function IncidentsPage({
+  mode = "list",
+}: {
+  readonly mode?: "list" | "new" | "detail" | "rules";
+}) {
+  const { incidentId = "" } = useParams();
+  const snapshot = useClientWorkspace();
+  const store = useClientWorkspaceStore();
+  const [title, setTitle] = useState("Runtime reconciliation failure");
+  const [deploymentId, setDeploymentId] = useState("deploy-001");
+  const [owner, setOwner] = useState("operator-a");
+  const [note, setNote] = useState("");
+  const [confirmClose, setConfirmClose] = useState(false);
+  const deployment = useDeployment(
+    "ugv-prod-001",
+    mode === "detail"
+      ? (snapshot.incidents.find((x) => x.incidentId === incidentId)?.deploymentId ?? "")
+      : "",
+  );
+  const processes = useProcesses();
+  const reconcile = useRuntimeCommand("reconcile");
+  if (mode === "rules")
+    return (
+      <>
+        <LocalWorkspaceHeader
+          title="Incident Rules"
+          description="本地告警规则工作区；不会创建平台规则对象。"
+        />
+        <section className="panel">
+          <DataTable
+            columns={["Rule", "Condition", "Severity", "Enabled"]}
+            rows={[
+              [
+                "runtime-failed",
+                "Deployment status = FAILED for 3 checks",
+                "SEV-2",
+                <StatusBadge status="LOCAL" />,
+              ],
+              [
+                "registration-stale",
+                "Runtime heartbeat > 120s",
+                "SEV-3",
+                <StatusBadge status="LOCAL" />,
+              ],
+            ]}
+          />
+        </section>
+      </>
+    );
+  if (mode === "new")
+    return (
+      <>
+        <LocalWorkspaceHeader
+          title="创建 Incident"
+          description="只保存到 Client-side operational workspace。"
+        />
+        <section className="panel narrow-form">
+          <FormField label="Title">
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </FormField>
+          <FormField label="Deployment">
+            <input value={deploymentId} onChange={(e) => setDeploymentId(e.target.value)} />
+          </FormField>
+          <FormField label="Owner">
+            <input value={owner} onChange={(e) => setOwner(e.target.value)} />
+          </FormField>
+          <FormField label="Severity">
+            <select id="incident-severity">
+              <option>SEV-2</option>
+              <option>SEV-1</option>
+              <option>SEV-3</option>
+            </select>
+          </FormField>
+          <Button
+            variant="primary"
+            onClick={() => {
+              const created = store.createIncident({
+                title,
+                severity: "SEV-2",
+                deploymentId,
+                owner,
+              });
+              navigate(`/operations/incidents/${created.incidentId}`);
+            }}
+          >
+            创建本地 Incident
+          </Button>
+        </section>
+      </>
+    );
+  if (mode === "detail") {
+    const incident = snapshot.incidents.find((item) => item.incidentId === incidentId);
+    if (!incident)
+      return (
+        <ProductPage
+          title="Incident not found"
+          description={incidentId}
+          classification="CLIENT_ONLY"
+        >
+          <section className="panel">
+            <Button onClick={() => navigate("/operations/incidents")}>返回 Incidents</Button>
+          </section>
+        </ProductPage>
+      );
+    const process = (processes.data ?? []).find(
+      (item) => item.deploymentId === incident.deploymentId,
+    );
+    return (
+      <>
+        <LocalWorkspaceHeader
+          title={incident.incidentId}
+          description={`${incident.severity} · ${incident.title}`}
+          actions={
+            <Button
+              variant="danger"
+              disabled={incident.status === "CLOSED"}
+              onClick={() => setConfirmClose(true)}
+            >
+              关闭 Incident
+            </Button>
+          }
+        />
+        <div className="metrics-row">
+          <MetricCard label="Status" value={<StatusBadge status={incident.status} />} />
+          <MetricCard label="Deployment" value={incident.deploymentId} />
+          <MetricCard label="Job" value={incident.jobId ?? "—"} />
+          <MetricCard label="Owner" value={incident.owner} />
+        </div>
+        <div className="grid-two">
+          <section className="panel">
+            <h2>Recovery path</h2>
+            <Timeline
+              items={[
+                { label: "Incident detected", status: incident.status },
+                { label: "RuntimeDeployment", meta: deployment.data?.status ?? "loading" },
+                { label: "RuntimeProcess", meta: process?.observedHealth ?? "missing" },
+                {
+                  label: "Worker Job",
+                  meta: snapshot.jobs.find((x) => x.jobId === incident.jobId)?.status ?? "unknown",
+                },
+                { label: "Reconcile Intent", meta: "operator action" },
+                { label: "Close incident", meta: "only after ACTIVE" },
+              ]}
+            />
+            <div className="quick-actions">
+              <Button
+                onClick={() =>
+                  navigate(
+                    `/runtime/deployments/${deployment.data?.providerId ?? "ugv-prod-001"}/${incident.deploymentId}`,
+                  )
+                }
+              >
+                Deployment
+              </Button>
+              {process ? (
+                <Button
+                  onClick={() =>
+                    navigate(`/runtime/processes/${process.providerId}/${process.instanceId}`)
+                  }
+                >
+                  RuntimeProcess
+                </Button>
+              ) : null}
+              {incident.jobId ? (
+                <Button onClick={() => navigate(`/operations/jobs/${incident.jobId}`)}>
+                  Worker Job
+                </Button>
+              ) : null}
+              <Button
+                variant="primary"
+                disabled={!deployment.data}
+                busy={reconcile.isPending}
+                onClick={() => {
+                  const item = deployment.data;
+                  if (!item) return;
+                  reconcile.mutate(
+                    {
+                      deploymentId: item.deploymentId,
+                      providerId: item.providerId,
+                      expectedDesiredRevision: item.desiredRevision,
+                    },
+                    {
+                      onSuccess: (intent) =>
+                        store.recordIntent(
+                          "runtime.reconcile",
+                          item.deploymentId,
+                          intent.operationId,
+                        ),
+                    },
+                  );
+                }}
+              >
+                重新对账
+              </Button>
+            </div>
+            <MutationFeedback mutation={reconcile} />
+          </section>
+          <section className="panel">
+            <h2>Notes</h2>
+            <Timeline
+              items={incident.notes.map((value) => ({ label: value, meta: "client-side note" }))}
+            />
+            <FormField label="Add note">
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} />
+            </FormField>
+            <Button
+              onClick={() => {
+                if (note.trim()) {
+                  store.addIncidentNote(incident.incidentId, note.trim());
+                  setNote("");
+                }
+              }}
+            >
+              添加备注
+            </Button>
+          </section>
+        </div>
+        <ConfirmDialog
+          open={confirmClose}
+          title="关闭 Incident"
+          impact={
+            <ul>
+              <li>仅更新浏览器本地 Incident Store</li>
+              <li>Deployment 当前状态：{deployment.data?.status ?? "unknown"}</li>
+              <li>不会修改 SMPP 领域状态</li>
+            </ul>
+          }
+          requirePhrase={incident.incidentId}
+          reasonRequired
+          onCancel={() => setConfirmClose(false)}
+          onConfirm={() => {
+            store.closeIncident(incident.incidentId);
+            setConfirmClose(false);
+          }}
+        />
+      </>
+    );
+  }
+  return (
+    <>
+      <LocalWorkspaceHeader
+        title="Incidents"
+        description="Client-side operational workspace；API 模式下不声称持久化。"
+        actions={
+          <Button variant="primary" onClick={() => navigate("/operations/incidents/new")}>
+            创建 Incident
+          </Button>
+        }
+      />
+      <section className="panel">
+        <DataTable
+          columns={[
+            "Incident",
+            "Title",
+            "Severity",
+            "Status",
+            "Deployment",
+            "Job",
+            "Owner",
+            "Updated",
+          ]}
+          rows={snapshot.incidents.map((item) => [
+            <button
+              className="table-link"
+              onClick={() => navigate(`/operations/incidents/${item.incidentId}`)}
+            >
+              {item.incidentId}
+            </button>,
+            item.title,
+            <StatusBadge status={item.severity} />,
+            <StatusBadge status={item.status} />,
+            item.deploymentId,
+            item.jobId ?? "—",
+            item.owner,
+            item.updatedAt,
+          ])}
+        />
+      </section>
+    </>
+  );
+}

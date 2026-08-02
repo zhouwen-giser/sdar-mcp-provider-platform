@@ -1,4 +1,10 @@
-import { createContext, type PropsWithChildren, useContext, useMemo, useSyncExternalStore } from "react";
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "../query-client.js";
 import { createGateways } from "../../gateways/factory.js";
@@ -13,9 +19,18 @@ function scenarioFromUrl(): ProductScenario {
   return isProductScenario(value) ? value : "healthy";
 }
 
-export function AppProviders({ children, gateways }: PropsWithChildren<{ readonly gateways?: GatewayBundle }>) {
+export function AppProviders({
+  children,
+  gateways,
+}: PropsWithChildren<{ readonly gateways?: GatewayBundle }>) {
   const value = useMemo(() => gateways ?? createGateways(scenarioFromUrl()), [gateways]);
-  return <QueryClientProvider client={queryClient}><GatewayContext.Provider value={value}><ClientWorkspaceProvider>{children}</ClientWorkspaceProvider></GatewayContext.Provider></QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GatewayContext.Provider value={value}>
+        <ClientWorkspaceProvider>{children}</ClientWorkspaceProvider>
+      </GatewayContext.Provider>
+    </QueryClientProvider>
+  );
 }
 
 export function useGateways(): GatewayBundle {
@@ -28,15 +43,18 @@ export function useScenario(): readonly [ProductScenario, (next: ProductScenario
   const gateways = useGateways();
   const query = useQueryClient();
   const current = useSyncExternalStore(
-    listener => gateways.scenarios.subscribe(listener),
+    (listener) => gateways.scenarios.subscribe(listener),
     () => gateways.scenarios.current(),
     () => gateways.scenarios.current(),
   );
-  return [current, next => {
-    const url = new URL(globalThis.location.href);
-    url.searchParams.set("scenario", next);
-    globalThis.history.replaceState({}, "", `${url.pathname}${url.search}`);
-    gateways.scenarios.set(next);
-    void query.invalidateQueries();
-  }] as const;
+  return [
+    current,
+    (next) => {
+      const url = new URL(globalThis.location.href);
+      url.searchParams.set("scenario", next);
+      globalThis.history.replaceState({}, "", `${url.pathname}${url.search}`);
+      gateways.scenarios.set(next);
+      void query.invalidateQueries();
+    },
+  ] as const;
 }

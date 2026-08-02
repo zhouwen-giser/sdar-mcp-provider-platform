@@ -17,4 +17,3 @@ describe("Console Audit operations", () => {
     await app.close();
   });
 });
-

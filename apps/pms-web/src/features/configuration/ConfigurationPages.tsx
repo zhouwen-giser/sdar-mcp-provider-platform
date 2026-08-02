@@ -1,41 +1,635 @@
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Button, CodeOrJsonViewer, ConfirmDialog, DataTable, DiffViewer, FormField, KeyValueList, MetricCard, QuerySurface, StatusBadge, Tabs, Toast } from "../../components/ui.js";
-import { useConfigurationDraft, useConfigurationDrafts, useConfigurationPreview, useConfigurationRevisions, useCreateConfigurationDraft, usePublishConfigurationDraft, useRollbackConfigurationDraft, useUpdateConfigurationDraft, useValidateConfigurationDraft } from "../../queries/hooks.js";
+import {
+  Button,
+  CodeOrJsonViewer,
+  ConfirmDialog,
+  DataTable,
+  DiffViewer,
+  FormField,
+  KeyValueList,
+  MetricCard,
+  QuerySurface,
+  StatusBadge,
+  Tabs,
+  Toast,
+} from "../../components/ui.js";
+import {
+  useConfigurationDraft,
+  useConfigurationDrafts,
+  useConfigurationPreview,
+  useConfigurationRevisions,
+  useCreateConfigurationDraft,
+  usePublishConfigurationDraft,
+  useRollbackConfigurationDraft,
+  useUpdateConfigurationDraft,
+  useValidateConfigurationDraft,
+} from "../../queries/hooks.js";
 import { navigate } from "../../app/navigation.js";
-import { ContractBoundaryNote, MutationFeedback, ProductPage } from "../shared/product-components.js";
+import {
+  ContractBoundaryNote,
+  MutationFeedback,
+  ProductPage,
+} from "../shared/product-components.js";
 
 export function ConfigurationListPage() {
   const query = useConfigurationDrafts();
-  return <ProductPage title="配置中心" description="ConfigurationDraft 是正式对象；列表由本地已知 Draft ID 调用冻结 get 接口组合。" classification="WEB_COMPOSED" actions={<Button variant="primary" onClick={() => navigate("/configuration/new")}>创建 Draft</Button>}>
-    <div className="metrics-row"><MetricCard label="Drafts" value={query.data?.length ?? "—"} /><MetricCard label="Validated" value={query.data?.filter(item => item.status === "validated").length ?? "—"} /><MetricCard label="Invalid" value={query.data?.filter(item => item.status === "invalid").length ?? "—"} /><MetricCard label="Restart Required" value={query.data?.filter(item => item.applyMode === "restart_required").length ?? "—"} /></div>
-    <section className="panel"><QuerySurface query={query}>{items => <DataTable columns={["Draft","Definition","Target","Status","Version","Apply Mode","Updated"]} rows={items.map(item => [<button className="table-link" onClick={() => navigate(`/configuration/${item.draftId}`)}>{item.draftId}</button>,item.definitionId,item.targetLabel,<StatusBadge status={item.status}/>,item.version,item.applyMode ?? "未计算",item.updatedAt])} />}</QuerySurface></section>
-  </ProductPage>;
+  return (
+    <ProductPage
+      title="配置中心"
+      description="ConfigurationDraft 是正式对象；列表由本地已知 Draft ID 调用冻结 get 接口组合。"
+      classification="WEB_COMPOSED"
+      actions={
+        <Button variant="primary" onClick={() => navigate("/configuration/new")}>
+          创建 Draft
+        </Button>
+      }
+    >
+      <div className="metrics-row">
+        <MetricCard label="Drafts" value={query.data?.length ?? "—"} />
+        <MetricCard
+          label="Validated"
+          value={query.data?.filter((item) => item.status === "validated").length ?? "—"}
+        />
+        <MetricCard
+          label="Invalid"
+          value={query.data?.filter((item) => item.status === "invalid").length ?? "—"}
+        />
+        <MetricCard
+          label="Restart Required"
+          value={query.data?.filter((item) => item.applyMode === "restart_required").length ?? "—"}
+        />
+      </div>
+      <section className="panel">
+        <QuerySurface query={query}>
+          {(items) => (
+            <DataTable
+              columns={[
+                "Draft",
+                "Definition",
+                "Target",
+                "Status",
+                "Version",
+                "Apply Mode",
+                "Updated",
+              ]}
+              rows={items.map((item) => [
+                <button
+                  className="table-link"
+                  onClick={() => navigate(`/configuration/${item.draftId}`)}
+                >
+                  {item.draftId}
+                </button>,
+                item.definitionId,
+                item.targetLabel,
+                <StatusBadge status={item.status} />,
+                item.version,
+                item.applyMode ?? "未计算",
+                item.updatedAt,
+              ])}
+            />
+          )}
+        </QuerySurface>
+      </section>
+    </ProductPage>
+  );
 }
 
 export function ConfigurationCreatePage() {
-  const [params] = useSearchParams(); const mutation = useCreateConfigurationDraft();
-  const [draft, setDraft] = useState({ draftId: "draft-new-001", definitionId: "runtime-config", environment: "production", targetType: (params.get("targetType") ?? "runtime_deployment") as "environment"|"provider_type"|"provider"|"runtime_deployment"|"runtime_instance"|"collector", targetId: params.get("targetId") ?? "deploy-001", configGroup: "runtime", dataId: "runtime-main", contentText: JSON.stringify({ runtime: { port: 8201, logLevel: "info" }, database: { credential: { secretRef: "secret://runtime/example/db" } } }, null, 2) });
-  const [parseError,setParseError]=useState<string>();
-  const submit=()=>{try{const content=JSON.parse(draft.contentText) as Record<string,unknown>;setParseError(undefined);mutation.mutate({...draft,content},{onSuccess:result=>navigate(`/configuration/${result.draftId}/edit`)});}catch(error){setParseError(error instanceof Error?error.message:"Invalid JSON");}};
-  return <ProductPage title="创建 Configuration Draft" description="使用冻结 createConfigurationDraft；Secret 必须采用 { secretRef }，不接受明文凭据。" classification="FROZEN_API"><div className="grid-two"><section className="panel component-stack"><FormField label="Draft ID"><input value={draft.draftId} onChange={e=>setDraft(x=>({...x,draftId:e.target.value}))}/></FormField><FormField label="Definition ID"><input value={draft.definitionId} onChange={e=>setDraft(x=>({...x,definitionId:e.target.value}))}/></FormField><FormField label="Environment"><input value={draft.environment} onChange={e=>setDraft(x=>({...x,environment:e.target.value}))}/></FormField><FormField label="Target Type"><select value={draft.targetType} onChange={e=>setDraft(x=>({...x,targetType:e.target.value as typeof x.targetType}))}>{["environment","provider_type","provider","runtime_deployment","runtime_instance","collector"].map(v=><option key={v}>{v}</option>)}</select></FormField><FormField label="Target ID"><input value={draft.targetId} onChange={e=>setDraft(x=>({...x,targetId:e.target.value}))}/></FormField><FormField label="Config Group"><input value={draft.configGroup} onChange={e=>setDraft(x=>({...x,configGroup:e.target.value}))}/></FormField><FormField label="Data ID"><input value={draft.dataId} onChange={e=>setDraft(x=>({...x,dataId:e.target.value}))}/></FormField></section><section className="panel"><FormField label="Configuration Content"><textarea className="json-editor" value={draft.contentText} onChange={e=>setDraft(x=>({...x,contentText:e.target.value}))}/></FormField>{parseError?<Toast tone="error">JSON: {parseError}</Toast>:null}<ContractBoundaryNote>配置值可递归包含 primitive、array、object 和 SecretRef。页面不会把 password/token 字符串转换为 Secret。</ContractBoundaryNote></section></div><div className="page-actions"><Button onClick={()=>navigate("/configuration")}>取消</Button><Button variant="primary" busy={mutation.isPending} onClick={submit}>创建 Draft</Button></div><MutationFeedback mutation={mutation}/></ProductPage>;
+  const [params] = useSearchParams();
+  const mutation = useCreateConfigurationDraft();
+  const [draft, setDraft] = useState({
+    draftId: "draft-new-001",
+    definitionId: "runtime-config",
+    environment: "production",
+    targetType: (params.get("targetType") ?? "runtime_deployment") as
+      | "environment"
+      | "provider_type"
+      | "provider"
+      | "runtime_deployment"
+      | "runtime_instance"
+      | "collector",
+    targetId: params.get("targetId") ?? "deploy-001",
+    configGroup: "runtime",
+    dataId: "runtime-main",
+    contentText: JSON.stringify(
+      {
+        runtime: { port: 8201, logLevel: "info" },
+        database: { credential: { secretRef: "secret://runtime/example/db" } },
+      },
+      null,
+      2,
+    ),
+  });
+  const [parseError, setParseError] = useState<string>();
+  const submit = () => {
+    try {
+      const content = JSON.parse(draft.contentText) as Record<string, unknown>;
+      setParseError(undefined);
+      mutation.mutate(
+        { ...draft, content },
+        { onSuccess: (result) => navigate(`/configuration/${result.draftId}/edit`) },
+      );
+    } catch (error) {
+      setParseError(error instanceof Error ? error.message : "Invalid JSON");
+    }
+  };
+  return (
+    <ProductPage
+      title="创建 Configuration Draft"
+      description="使用冻结 createConfigurationDraft；Secret 必须采用 { secretRef }，不接受明文凭据。"
+      classification="FROZEN_API"
+    >
+      <div className="grid-two">
+        <section className="panel component-stack">
+          <FormField label="Draft ID">
+            <input
+              value={draft.draftId}
+              onChange={(e) => setDraft((x) => ({ ...x, draftId: e.target.value }))}
+            />
+          </FormField>
+          <FormField label="Definition ID">
+            <input
+              value={draft.definitionId}
+              onChange={(e) => setDraft((x) => ({ ...x, definitionId: e.target.value }))}
+            />
+          </FormField>
+          <FormField label="Environment">
+            <input
+              value={draft.environment}
+              onChange={(e) => setDraft((x) => ({ ...x, environment: e.target.value }))}
+            />
+          </FormField>
+          <FormField label="Target Type">
+            <select
+              value={draft.targetType}
+              onChange={(e) =>
+                setDraft((x) => ({ ...x, targetType: e.target.value as typeof x.targetType }))
+              }
+            >
+              {[
+                "environment",
+                "provider_type",
+                "provider",
+                "runtime_deployment",
+                "runtime_instance",
+                "collector",
+              ].map((v) => (
+                <option key={v}>{v}</option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="Target ID">
+            <input
+              value={draft.targetId}
+              onChange={(e) => setDraft((x) => ({ ...x, targetId: e.target.value }))}
+            />
+          </FormField>
+          <FormField label="Config Group">
+            <input
+              value={draft.configGroup}
+              onChange={(e) => setDraft((x) => ({ ...x, configGroup: e.target.value }))}
+            />
+          </FormField>
+          <FormField label="Data ID">
+            <input
+              value={draft.dataId}
+              onChange={(e) => setDraft((x) => ({ ...x, dataId: e.target.value }))}
+            />
+          </FormField>
+        </section>
+        <section className="panel">
+          <FormField label="Configuration Content">
+            <textarea
+              className="json-editor"
+              value={draft.contentText}
+              onChange={(e) => setDraft((x) => ({ ...x, contentText: e.target.value }))}
+            />
+          </FormField>
+          {parseError ? <Toast tone="error">JSON: {parseError}</Toast> : null}
+          <ContractBoundaryNote>
+            配置值可递归包含 primitive、array、object 和 SecretRef。页面不会把 password/token
+            字符串转换为 Secret。
+          </ContractBoundaryNote>
+        </section>
+      </div>
+      <div className="page-actions">
+        <Button onClick={() => navigate("/configuration")}>取消</Button>
+        <Button variant="primary" busy={mutation.isPending} onClick={submit}>
+          创建 Draft
+        </Button>
+      </div>
+      <MutationFeedback mutation={mutation} />
+    </ProductPage>
+  );
 }
 
-type ConfigurationSection="overview"|"edit"|"revisions"|"revision"|"compare"|"rollback";
-export function ConfigurationDetailPage({section="overview"}:{readonly section?:ConfigurationSection}){
- const {profileId="",revision=""}=useParams();const draft=useConfigurationDraft(profileId);const preview=useConfigurationPreview(profileId);const revisions=useConfigurationRevisions(profileId);const update=useUpdateConfigurationDraft();const validate=useValidateConfigurationDraft();const publish=usePublishConfigurationDraft();const rollback=useRollbackConfigurationDraft();const [content,setContent]=useState<string>();const [parseError,setParseError]=useState<string>();const [confirmPublish,setConfirmPublish]=useState(false);const [confirmRollback,setConfirmRollback]=useState(false);
- return <QuerySurface query={draft}>{item=>{const editor=content??JSON.stringify(item.content,null,2);const selectedRevision=(revisions.data??[]).find(r=>String(r.revision)===revision||r.revisionId===revision)??revisions.data?.[0];const previous=(revisions.data??[]).find(r=>r.revision===((selectedRevision?.revision??1)-1));const latestRevision=revisions.data?.[0]?.revision??null;const save=()=>{try{const parsed=JSON.parse(editor) as Record<string,unknown>;setParseError(undefined);update.mutate({draftId:item.draftId,expectedVersion:item.version,content:parsed});}catch(error){setParseError(error instanceof Error?error.message:"Invalid JSON");}};return <ProductPage title={section==="revision"&&selectedRevision?`Revision ${selectedRevision.revision}`:item.draftId} description={`${item.definitionId} · ${item.targetLabel} · version ${item.version}`} classification={section==="revisions"||section==="revision"||section==="compare"?"CLIENT_ONLY":"FROZEN_API"} actions={<><Button busy={validate.isPending} onClick={()=>validate.mutate(item.draftId)}>校验 Draft</Button><Button variant="primary" disabled={item.status!=="validated"} onClick={()=>setConfirmPublish(true)}>发布</Button></>}><Tabs current={section==="overview"?"overview":section} onChange={id=>navigate(`/configuration/${item.draftId}/${id==="overview"?"":id}`.replace(/\/$/,""))} items={[{id:"overview",label:"Overview"},{id:"edit",label:"Edit"},{id:"revisions",label:"Revisions"},{id:"compare",label:"Compare"}]}/>
- {section==="overview"?<><div className="metrics-row"><MetricCard label="Status" value={<StatusBadge status={item.status}/>}/><MetricCard label="Version" value={item.version}/><MetricCard label="Apply Mode" value={item.applyMode??"未计算"}/><MetricCard label="Issues" value={item.issues.length}/></div><div className="grid-two"><section className="panel"><h2>Draft Content</h2><CodeOrJsonViewer value={item.content}/></section><section className="panel"><h2>Effective Preview</h2><QuerySurface query={preview}>{value=><><KeyValueList entries={[["Valid",String(value.valid)],["Apply Mode",value.applyMode],["Definition Version",value.definitionVersion]]}/><CodeOrJsonViewer value={value.sources}/></>}</QuerySurface></section></div>{item.issues.length?<section className="panel state-error"><h2>Validation Issues</h2><DataTable columns={["Code","Path","Message"]} rows={item.issues.map(issue=>[issue.code,<code>{issue.path}</code>,issue.message])}/></section>:null}</>:null}
- {section==="edit"?<div className="grid-two"><section className="panel"><FormField label="JSON Content" hint={`expectedVersion = ${item.version}`}><textarea className="json-editor" value={editor} onChange={e=>setContent(e.target.value)}/></FormField>{parseError?<Toast tone="error">{parseError}</Toast>:null}<div className="page-actions"><Button onClick={()=>setContent(JSON.stringify(item.content,null,2))}>重置</Button><Button variant="primary" busy={update.isPending} onClick={save}>保存 Draft</Button></div><MutationFeedback mutation={update}/></section><section className="panel"><h2>SecretRef 检查</h2><p>任何 credential、password、token 字段必须表示为：</p><CodeOrJsonViewer value={{secretRef:"secret://namespace/name"}}/><p>明文 Secret 在 validation scenario 中返回 PLAINTEXT_SECRET_REJECTED。</p></section></div>:null}
- {section==="revisions"?<section className="panel"><p className="local-only-notice">Revision 列表来自本地缓存的 publish/rollback 成功响应；V1 未冻结 revision list 查询。</p><DataTable columns={["Revision","Revision ID","Status","Apply Mode","Checksum","Created"]} rows={(revisions.data??[]).map(value=>[<button className="table-link" onClick={()=>navigate(`/configuration/${item.draftId}/revisions/${value.revision}`)}>{value.revision}</button>,<code>{value.revisionId}</code>,<StatusBadge status={value.status}/>,value.applyMode,<code>{value.checksum.slice(0,12)}…</code>,value.createdAt])}/></section>:null}
- {section==="revision"&&selectedRevision?<div className="grid-two"><section className="panel"><KeyValueList entries={[["Revision",selectedRevision.revision],["Revision ID",selectedRevision.revisionId],["Status",<StatusBadge status={selectedRevision.status}/>],["Apply Mode",selectedRevision.applyMode],["Checksum",<code>{selectedRevision.checksum}</code>],["Created",selectedRevision.createdAt]]}/><Button variant="danger" onClick={()=>setConfirmRollback(true)}>回滚到此 Revision</Button></section><section className="panel"><CodeOrJsonViewer value={selectedRevision.content}/></section></div>:null}
- {section==="compare"?<section className="panel"><h2>Revision Compare</h2>{selectedRevision&&previous?<DiffViewer before={JSON.stringify(previous.content,null,2)} after={JSON.stringify(selectedRevision.content,null,2)}/>:<p>需要至少两个本地 Revision。</p>}</section>:null}
- {section==="rollback"?<section className="panel danger-zone"><h2>Rollback</h2><p>sourceRevisionId、expectedDraftVersion 和 expectedPublishedRevision 均为冻结请求字段。</p><KeyValueList entries={[["Draft",item.draftId],["Current Draft Version",item.version],["Current Published Revision",latestRevision??"none"],["Source Revision",selectedRevision?.revisionId??revision]]}/><Button variant="danger" onClick={()=>setConfirmRollback(true)}>执行 Rollback</Button></section>:null}
- <ConfirmDialog open={confirmPublish} title="发布 Configuration Draft" impact={<ul><li>expectedDraftVersion = {item.version}</li><li>expectedPublishedRevision = {latestRevision??"null"}</li><li>响应 outcome 为 published 或 no_change</li><li>Apply mode: {item.applyMode??"from preview"}</li></ul>} requirePhrase={item.draftId} reasonRequired busy={publish.isPending} onCancel={()=>setConfirmPublish(false)} onConfirm={()=>publish.mutate({draftId:item.draftId,expectedDraftVersion:item.version,expectedPublishedRevision:latestRevision},{onSuccess:()=>setConfirmPublish(false)})}/>
- <ConfirmDialog open={confirmRollback} title="回滚 Configuration" impact={<ul><li>sourceRevisionId = {selectedRevision?.revisionId??revision}</li><li>不会修改历史 Revision</li><li>会发布一个新的 Revision</li></ul>} requirePhrase={`ROLLBACK ${item.draftId}`} reasonRequired busy={rollback.isPending} onCancel={()=>setConfirmRollback(false)} onConfirm={()=>{const source=selectedRevision?.revisionId??revision;rollback.mutate({draftId:item.draftId,expectedDraftVersion:item.version,expectedPublishedRevision:latestRevision,sourceRevisionId:source},{onSuccess:()=>setConfirmRollback(false)});}}/>
- <MutationFeedback mutation={validate}/><MutationFeedback mutation={publish}/><MutationFeedback mutation={rollback}/>
- </ProductPage>}}</QuerySurface>;
+type ConfigurationSection = "overview" | "edit" | "revisions" | "revision" | "compare" | "rollback";
+export function ConfigurationDetailPage({
+  section = "overview",
+}: {
+  readonly section?: ConfigurationSection;
+}) {
+  const { profileId = "", revision = "" } = useParams();
+  const draft = useConfigurationDraft(profileId);
+  const preview = useConfigurationPreview(profileId);
+  const revisions = useConfigurationRevisions(profileId);
+  const update = useUpdateConfigurationDraft();
+  const validate = useValidateConfigurationDraft();
+  const publish = usePublishConfigurationDraft();
+  const rollback = useRollbackConfigurationDraft();
+  const [content, setContent] = useState<string>();
+  const [parseError, setParseError] = useState<string>();
+  const [confirmPublish, setConfirmPublish] = useState(false);
+  const [confirmRollback, setConfirmRollback] = useState(false);
+  return (
+    <QuerySurface query={draft}>
+      {(item) => {
+        const editor = content ?? JSON.stringify(item.content, null, 2);
+        const selectedRevision =
+          (revisions.data ?? []).find(
+            (r) => String(r.revision) === revision || r.revisionId === revision,
+          ) ?? revisions.data?.[0];
+        const previous = (revisions.data ?? []).find(
+          (r) => r.revision === (selectedRevision?.revision ?? 1) - 1,
+        );
+        const latestRevision = revisions.data?.[0]?.revision ?? null;
+        const save = () => {
+          try {
+            const parsed = JSON.parse(editor) as Record<string, unknown>;
+            setParseError(undefined);
+            update.mutate({
+              draftId: item.draftId,
+              expectedVersion: item.version,
+              content: parsed,
+            });
+          } catch (error) {
+            setParseError(error instanceof Error ? error.message : "Invalid JSON");
+          }
+        };
+        return (
+          <ProductPage
+            title={
+              section === "revision" && selectedRevision
+                ? `Revision ${selectedRevision.revision}`
+                : item.draftId
+            }
+            description={`${item.definitionId} · ${item.targetLabel} · version ${item.version}`}
+            classification={
+              section === "revisions" || section === "revision" || section === "compare"
+                ? "CLIENT_ONLY"
+                : "FROZEN_API"
+            }
+            actions={
+              <>
+                <Button busy={validate.isPending} onClick={() => validate.mutate(item.draftId)}>
+                  校验 Draft
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={item.status !== "validated"}
+                  onClick={() => setConfirmPublish(true)}
+                >
+                  发布
+                </Button>
+              </>
+            }
+          >
+            <Tabs
+              current={section === "overview" ? "overview" : section}
+              onChange={(id) =>
+                navigate(
+                  `/configuration/${item.draftId}/${id === "overview" ? "" : id}`.replace(
+                    /\/$/,
+                    "",
+                  ),
+                )
+              }
+              items={[
+                { id: "overview", label: "Overview" },
+                { id: "edit", label: "Edit" },
+                { id: "revisions", label: "Revisions" },
+                { id: "compare", label: "Compare" },
+              ]}
+            />
+            {section === "overview" ? (
+              <>
+                <div className="metrics-row">
+                  <MetricCard label="Status" value={<StatusBadge status={item.status} />} />
+                  <MetricCard label="Version" value={item.version} />
+                  <MetricCard label="Apply Mode" value={item.applyMode ?? "未计算"} />
+                  <MetricCard label="Issues" value={item.issues.length} />
+                </div>
+                <div className="grid-two">
+                  <section className="panel">
+                    <h2>Draft Content</h2>
+                    <CodeOrJsonViewer value={item.content} />
+                  </section>
+                  <section className="panel">
+                    <h2>Effective Preview</h2>
+                    <QuerySurface query={preview}>
+                      {(value) => (
+                        <>
+                          <KeyValueList
+                            entries={[
+                              ["Valid", String(value.valid)],
+                              ["Apply Mode", value.applyMode],
+                              ["Definition Version", value.definitionVersion],
+                            ]}
+                          />
+                          <CodeOrJsonViewer value={value.sources} />
+                        </>
+                      )}
+                    </QuerySurface>
+                  </section>
+                </div>
+                {item.issues.length ? (
+                  <section className="panel state-error">
+                    <h2>Validation Issues</h2>
+                    <DataTable
+                      columns={["Code", "Path", "Message"]}
+                      rows={item.issues.map((issue) => [
+                        issue.code,
+                        <code>{issue.path}</code>,
+                        issue.message,
+                      ])}
+                    />
+                  </section>
+                ) : null}
+              </>
+            ) : null}
+            {section === "edit" ? (
+              <div className="grid-two">
+                <section className="panel">
+                  <FormField label="JSON Content" hint={`expectedVersion = ${item.version}`}>
+                    <textarea
+                      className="json-editor"
+                      value={editor}
+                      onChange={(e) => setContent(e.target.value)}
+                    />
+                  </FormField>
+                  {parseError ? <Toast tone="error">{parseError}</Toast> : null}
+                  <div className="page-actions">
+                    <Button onClick={() => setContent(JSON.stringify(item.content, null, 2))}>
+                      重置
+                    </Button>
+                    <Button variant="primary" busy={update.isPending} onClick={save}>
+                      保存 Draft
+                    </Button>
+                  </div>
+                  <MutationFeedback mutation={update} />
+                </section>
+                <section className="panel">
+                  <h2>SecretRef 检查</h2>
+                  <p>任何 credential、password、token 字段必须表示为：</p>
+                  <CodeOrJsonViewer value={{ secretRef: "secret://namespace/name" }} />
+                  <p>明文 Secret 在 validation scenario 中返回 PLAINTEXT_SECRET_REJECTED。</p>
+                </section>
+              </div>
+            ) : null}
+            {section === "revisions" ? (
+              <section className="panel">
+                <p className="local-only-notice">
+                  Revision 列表来自本地缓存的 publish/rollback 成功响应；V1 未冻结 revision list
+                  查询。
+                </p>
+                <DataTable
+                  columns={[
+                    "Revision",
+                    "Revision ID",
+                    "Status",
+                    "Apply Mode",
+                    "Checksum",
+                    "Created",
+                  ]}
+                  rows={(revisions.data ?? []).map((value) => [
+                    <button
+                      className="table-link"
+                      onClick={() =>
+                        navigate(`/configuration/${item.draftId}/revisions/${value.revision}`)
+                      }
+                    >
+                      {value.revision}
+                    </button>,
+                    <code>{value.revisionId}</code>,
+                    <StatusBadge status={value.status} />,
+                    value.applyMode,
+                    <code>{value.checksum.slice(0, 12)}…</code>,
+                    value.createdAt,
+                  ])}
+                />
+              </section>
+            ) : null}
+            {section === "revision" && selectedRevision ? (
+              <div className="grid-two">
+                <section className="panel">
+                  <KeyValueList
+                    entries={[
+                      ["Revision", selectedRevision.revision],
+                      ["Revision ID", selectedRevision.revisionId],
+                      ["Status", <StatusBadge status={selectedRevision.status} />],
+                      ["Apply Mode", selectedRevision.applyMode],
+                      ["Checksum", <code>{selectedRevision.checksum}</code>],
+                      ["Created", selectedRevision.createdAt],
+                    ]}
+                  />
+                  <Button variant="danger" onClick={() => setConfirmRollback(true)}>
+                    回滚到此 Revision
+                  </Button>
+                </section>
+                <section className="panel">
+                  <CodeOrJsonViewer value={selectedRevision.content} />
+                </section>
+              </div>
+            ) : null}
+            {section === "compare" ? (
+              <section className="panel">
+                <h2>Revision Compare</h2>
+                {selectedRevision && previous ? (
+                  <DiffViewer
+                    before={JSON.stringify(previous.content, null, 2)}
+                    after={JSON.stringify(selectedRevision.content, null, 2)}
+                  />
+                ) : (
+                  <p>需要至少两个本地 Revision。</p>
+                )}
+              </section>
+            ) : null}
+            {section === "rollback" ? (
+              <section className="panel danger-zone">
+                <h2>Rollback</h2>
+                <p>
+                  sourceRevisionId、expectedDraftVersion 和 expectedPublishedRevision
+                  均为冻结请求字段。
+                </p>
+                <KeyValueList
+                  entries={[
+                    ["Draft", item.draftId],
+                    ["Current Draft Version", item.version],
+                    ["Current Published Revision", latestRevision ?? "none"],
+                    ["Source Revision", selectedRevision?.revisionId ?? revision],
+                  ]}
+                />
+                <Button variant="danger" onClick={() => setConfirmRollback(true)}>
+                  执行 Rollback
+                </Button>
+              </section>
+            ) : null}
+            <ConfirmDialog
+              open={confirmPublish}
+              title="发布 Configuration Draft"
+              impact={
+                <ul>
+                  <li>expectedDraftVersion = {item.version}</li>
+                  <li>expectedPublishedRevision = {latestRevision ?? "null"}</li>
+                  <li>响应 outcome 为 published 或 no_change</li>
+                  <li>Apply mode: {item.applyMode ?? "from preview"}</li>
+                </ul>
+              }
+              requirePhrase={item.draftId}
+              reasonRequired
+              busy={publish.isPending}
+              onCancel={() => setConfirmPublish(false)}
+              onConfirm={() =>
+                publish.mutate(
+                  {
+                    draftId: item.draftId,
+                    expectedDraftVersion: item.version,
+                    expectedPublishedRevision: latestRevision,
+                  },
+                  { onSuccess: () => setConfirmPublish(false) },
+                )
+              }
+            />
+            <ConfirmDialog
+              open={confirmRollback}
+              title="回滚 Configuration"
+              impact={
+                <ul>
+                  <li>sourceRevisionId = {selectedRevision?.revisionId ?? revision}</li>
+                  <li>不会修改历史 Revision</li>
+                  <li>会发布一个新的 Revision</li>
+                </ul>
+              }
+              requirePhrase={`ROLLBACK ${item.draftId}`}
+              reasonRequired
+              busy={rollback.isPending}
+              onCancel={() => setConfirmRollback(false)}
+              onConfirm={() => {
+                const source = selectedRevision?.revisionId ?? revision;
+                rollback.mutate(
+                  {
+                    draftId: item.draftId,
+                    expectedDraftVersion: item.version,
+                    expectedPublishedRevision: latestRevision,
+                    sourceRevisionId: source,
+                  },
+                  { onSuccess: () => setConfirmRollback(false) },
+                );
+              }}
+            />
+            <MutationFeedback mutation={validate} />
+            <MutationFeedback mutation={publish} />
+            <MutationFeedback mutation={rollback} />
+          </ProductPage>
+        );
+      }}
+    </QuerySurface>
+  );
 }
 
-function collectSecretRefs(value:unknown,path="$"):readonly {ref:string;path:string}[]{if(Array.isArray(value))return value.flatMap((item,index)=>collectSecretRefs(item,`${path}[${index}]`));if(typeof value==="object"&&value!==null){const object=value as Record<string,unknown>;if(typeof object.secretRef==="string")return[{ref:object.secretRef,path}];return Object.entries(object).flatMap(([key,item])=>collectSecretRefs(item,`${path}.${key}`));}return[];}
-export function SecretReferencesPage({detail=false}:{readonly detail?:boolean}){const {secretRef=""}=useParams();const drafts=useConfigurationDrafts();const refs=useMemo(()=>{const all=(drafts.data??[]).flatMap(draft=>collectSecretRefs(draft.content).map(item=>({...item,draftId:draft.draftId,target:draft.targetLabel})));return Array.from(new Map(all.map(item=>[item.ref,item])).values());},[drafts.data]);const decoded=decodeURIComponent(secretRef);if(!detail)return <ProductPage title="Secret References" description="只读扫描 Configuration Content 中的 SecretRef；不读取、复制、修改或删除 Secret 值。" classification="WEB_COMPOSED"><section className="panel"><DataTable columns={["SecretRef","Used by Draft","Target","JSON Path","Value Access"]} rows={refs.map(item=>[<button className="table-link" onClick={()=>navigate(`/secrets/${encodeURIComponent(item.ref)}`)}>{item.ref}</button>,item.draftId,item.target,<code>{item.path}</code>,<StatusBadge status="FORBIDDEN"/>])}/></section></ProductPage>;const usages=(drafts.data??[]).flatMap(draft=>collectSecretRefs(draft.content).filter(item=>item.ref===decoded).map(item=>({...item,draftId:draft.draftId,target:draft.targetLabel})));return <ProductPage title={decoded} description="SecretRef metadata and usage only." classification="FORBIDDEN"><div className="grid-two"><section className="panel"><KeyValueList entries={[["Reference",<code>{decoded}</code>],["Type","opaque SecretRef"],["Value","Never delivered to PMS Web"],["Copy value","Forbidden"],["Rotate","External secret backend"]]}/></section><section className="panel"><h2>Usage</h2><DataTable columns={["Draft","Target","Path"]} rows={usages.map(item=>[<button className="table-link" onClick={()=>navigate(`/configuration/${item.draftId}`)}>{item.draftId}</button>,item.target,<code>{item.path}</code>])}/></section></div></ProductPage>}
+function collectSecretRefs(value: unknown, path = "$"): readonly { ref: string; path: string }[] {
+  if (Array.isArray(value))
+    return value.flatMap((item, index) => collectSecretRefs(item, `${path}[${index}]`));
+  if (typeof value === "object" && value !== null) {
+    const object = value as Record<string, unknown>;
+    if (typeof object.secretRef === "string") return [{ ref: object.secretRef, path }];
+    return Object.entries(object).flatMap(([key, item]) =>
+      collectSecretRefs(item, `${path}.${key}`),
+    );
+  }
+  return [];
+}
+export function SecretReferencesPage({ detail = false }: { readonly detail?: boolean }) {
+  const { secretRef = "" } = useParams();
+  const drafts = useConfigurationDrafts();
+  const refs = useMemo(() => {
+    const all = (drafts.data ?? []).flatMap((draft) =>
+      collectSecretRefs(draft.content).map((item) => ({
+        ...item,
+        draftId: draft.draftId,
+        target: draft.targetLabel,
+      })),
+    );
+    return Array.from(new Map(all.map((item) => [item.ref, item])).values());
+  }, [drafts.data]);
+  const decoded = decodeURIComponent(secretRef);
+  if (!detail)
+    return (
+      <ProductPage
+        title="Secret References"
+        description="只读扫描 Configuration Content 中的 SecretRef；不读取、复制、修改或删除 Secret 值。"
+        classification="WEB_COMPOSED"
+      >
+        <section className="panel">
+          <DataTable
+            columns={["SecretRef", "Used by Draft", "Target", "JSON Path", "Value Access"]}
+            rows={refs.map((item) => [
+              <button
+                className="table-link"
+                onClick={() => navigate(`/secrets/${encodeURIComponent(item.ref)}`)}
+              >
+                {item.ref}
+              </button>,
+              item.draftId,
+              item.target,
+              <code>{item.path}</code>,
+              <StatusBadge status="FORBIDDEN" />,
+            ])}
+          />
+        </section>
+      </ProductPage>
+    );
+  const usages = (drafts.data ?? []).flatMap((draft) =>
+    collectSecretRefs(draft.content)
+      .filter((item) => item.ref === decoded)
+      .map((item) => ({ ...item, draftId: draft.draftId, target: draft.targetLabel })),
+  );
+  return (
+    <ProductPage
+      title={decoded}
+      description="SecretRef metadata and usage only."
+      classification="FORBIDDEN"
+    >
+      <div className="grid-two">
+        <section className="panel">
+          <KeyValueList
+            entries={[
+              ["Reference", <code>{decoded}</code>],
+              ["Type", "opaque SecretRef"],
+              ["Value", "Never delivered to PMS Web"],
+              ["Copy value", "Forbidden"],
+              ["Rotate", "External secret backend"],
+            ]}
+          />
+        </section>
+        <section className="panel">
+          <h2>Usage</h2>
+          <DataTable
+            columns={["Draft", "Target", "Path"]}
+            rows={usages.map((item) => [
+              <button
+                className="table-link"
+                onClick={() => navigate(`/configuration/${item.draftId}`)}
+              >
+                {item.draftId}
+              </button>,
+              item.target,
+              <code>{item.path}</code>,
+            ])}
+          />
+        </section>
+      </div>
+    </ProductPage>
+  );
+}

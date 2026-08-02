@@ -22,8 +22,11 @@ export type SecretRefDto = ContractSchemas["SecretRef"];
 export type OperationName = keyof operations;
 export type RequestBody<K extends OperationName> = operations[K] extends {
   requestBody: { content: { "application/json": infer T } };
-} ? T : never;
+}
+  ? T
+  : never;
 
 export const CONTRACT_VERSION = "1.0.0" as const;
 export const CONTRACT_STATUS = "frozen" as const;
-export const CONTRACT_OPENAPI_SHA256 = "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042" as const;
+export const CONTRACT_OPENAPI_SHA256 =
+  "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042" as const;

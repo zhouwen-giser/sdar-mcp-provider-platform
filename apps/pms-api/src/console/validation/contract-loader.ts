@@ -92,7 +92,8 @@ export function resolveResponse(response: OpenApiResponse): OpenApiResponse {
 
 export function rewriteSchemaReferences<T>(value: T): T {
   if (Array.isArray(value)) {
-    return value.map((item) => rewriteSchemaReferences(item)) as T;
+    const items: readonly unknown[] = value;
+    return items.map((item) => rewriteSchemaReferences(item)) as T;
   }
   if (value === null || typeof value !== "object") return value;
   const output: Record<string, unknown> = {};
@@ -121,7 +122,7 @@ function loadDocument(): OpenApiDocument {
 function resolveContractPath(): string {
   for (const start of [process.cwd(), dirname(fileURLToPath(import.meta.url))]) {
     let candidate = resolve(start);
-    while (true) {
+    for (;;) {
       const path = resolve(candidate, CONTRACT_RELATIVE_PATH);
       if (existsSync(path)) return path;
       const parent = dirname(candidate);
@@ -157,4 +158,3 @@ function localComponentName(reference: string, kind: string): string {
   }
   return reference.slice(prefix.length);
 }
-

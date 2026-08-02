@@ -1,9 +1,4 @@
-import type {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-  RouteHandlerMethod,
-} from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest, RouteHandlerMethod } from "fastify";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import type { AnySchema } from "ajv";
 import type {
@@ -21,18 +16,10 @@ import type {
   ProviderTypeStatus,
   ResourceStatus,
 } from "../../../../packages/pms-domain/src/index.js";
-import type {
-  RegistrySnapshotRepository,
-} from "../../../../packages/registry-snapshot/src/index.js";
+import type { RegistrySnapshotRepository } from "../../../../packages/registry-snapshot/src/index.js";
 import type { PmsApiOptions } from "../app.js";
-import {
-  type RuntimeDeploymentManagementPort,
-} from "../runtime-deployment-routes.js";
-import {
-  ConsoleApiProblem,
-  sendConsoleNotFound,
-  sendConsoleProblem,
-} from "./problem-details.js";
+import { type RuntimeDeploymentManagementPort } from "../runtime-deployment-routes.js";
+import { ConsoleApiProblem, sendConsoleNotFound, sendConsoleProblem } from "./problem-details.js";
 import {
   consoleAuditContext,
   mapCreateConfigurationDraft,
@@ -173,8 +160,7 @@ function installStrictConsoleValidator(app: FastifyInstance): void {
     });
     ajv.addFormat("uuid", {
       type: "string",
-      validate:
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu,
+      validate: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu,
     });
     for (const schema of Object.values(app.getSchemas())) ajv.addSchema(schema as AnySchema);
     return ajv;
@@ -211,7 +197,7 @@ function createConsoleHandlers(
           ...optionalString(query, "hostingMode"),
           ...optionalString(query, "componentStatus"),
           ...optionalString(query, "realResourceStatus"),
-        } as Parameters<ProviderPackageQueryService["list"]>[0]),
+        }),
         mapProviderPackage,
       );
     },
@@ -371,9 +357,7 @@ function createConsoleHandlers(
     validateConfigurationDraft: (request) => {
       consoleAuditContext(request);
       return mapConfigurationDraft(
-        configurationCenter.validateDraft(
-          requestString(requestRecord(request.params), "draftId"),
-        ),
+        configurationCenter.validateDraft(requestString(requestRecord(request.params), "draftId")),
       );
     },
     previewEffectiveConfiguration: (request) =>
@@ -410,7 +394,7 @@ function createConsoleHandlers(
         ...optionalString(query, "environment"),
         ...optionalString(query, "status"),
         ...optionalString(query, "cursor"),
-      } as Parameters<RuntimeDeploymentManagementPort["list"]>[0]);
+      });
       return mapArrayPage(result.items, mapRuntimeDeployment, result.nextCursor);
     },
     createRuntimeDeployment: async (request, reply) => {
@@ -446,7 +430,7 @@ function createConsoleHandlers(
         ...optionalString(query, "processState"),
         ...optionalString(query, "observedHealth"),
         ...optionalString(query, "cursor"),
-      } as Parameters<RuntimeProcessQueryService["list"]>[0]);
+      });
       return mapArrayPage(result.items, mapRuntimeProcess, result.nextCursor);
     },
     getRuntimeProcess: async (request) =>
@@ -572,10 +556,7 @@ function optionalInteger(
   return value[key] === undefined ? undefined : requestInteger(value, key);
 }
 
-function optionalValue(
-  value: Readonly<Record<string, unknown>>,
-  key: string,
-): unknown | undefined {
+function optionalValue(value: Readonly<Record<string, unknown>>, key: string): unknown {
   return value[key];
 }
 

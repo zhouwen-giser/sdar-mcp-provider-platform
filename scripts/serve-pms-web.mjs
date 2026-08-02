@@ -1,13 +1,18 @@
 import { createReadStream } from "node:fs";
-import { access, stat } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../apps/pms-web/dist");
+const root = resolve(
+  process.env.PMS_WEB_ROOT ??
+    resolve(dirname(fileURLToPath(import.meta.url)), "../apps/pms-web/dist"),
+);
 const host = process.env.PMS_WEB_HOST ?? "127.0.0.1";
 const port = parsePort(process.env.PMS_WEB_PORT ?? "5173");
-const apiOrigin = new URL(process.env.PMS_WEB_API_ORIGIN ?? "http://127.0.0.1:8090");
+const apiOrigin = new URL(
+  process.env.PMS_WEB_API_BASE ?? process.env.PMS_WEB_API_ORIGIN ?? "http://127.0.0.1:8090",
+);
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -20,6 +25,16 @@ const contentTypes = {
 const server = createServer(async (request, response) => {
   try {
     const requestUrl = new URL(request.url ?? "/", `http://${request.headers.host ?? host}`);
+    if (["/health/live", "/health/ready"].includes(requestUrl.pathname)) {
+      response.writeHead(200, {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff",
+      });
+      response.end('{"status":"ok"}\n');
+      return;
+    }
+
     if (requestUrl.pathname.startsWith("/api/")) {
       await proxyApi(request, response, requestUrl);
       return;
@@ -56,7 +71,16 @@ async function serveStatic(response, pathname) {
   response.writeHead(200, {
     "content-type": contentTypes[extname(target)] ?? "application/octet-stream",
     "cache-control": target === fallback ? "no-cache" : "no-cache",
+    "x-content-type-options": "nosniff",
   });
+  if (target === fallback) {
+    const html = await readFile(fallback, "utf8");
+    const runtimeConfig = `<meta name="pms-web-api-base" content="${escapeHtml(
+      apiOrigin.href.replace(/\/$/, ""),
+    )}">`;
+    response.end(html.replace("</head>", `  ${runtimeConfig}\n  </head>`));
+    return;
+  }
   createReadStream(target).pipe(response);
 }
 
@@ -103,4 +127,12 @@ async function exists(file) {
   } catch {
     return false;
   }
+}
+
+function escapeHtml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

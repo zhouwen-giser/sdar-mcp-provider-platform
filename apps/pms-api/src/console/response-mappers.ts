@@ -234,4 +234,3 @@ function optional(key: string, value: unknown): Readonly<Record<string, unknown>
 function optionalDate(key: string, value: Date | undefined): Readonly<Record<string, string>> {
   return value === undefined ? {} : { [key]: value.toISOString() };
 }
-

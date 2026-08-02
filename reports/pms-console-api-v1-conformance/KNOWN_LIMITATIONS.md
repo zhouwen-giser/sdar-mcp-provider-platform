@@ -9,4 +9,3 @@
    editing or refreezing the contract.
 5. The final candidate ZIP excludes every `dist` directory as required. Local validation must
    restore the supplied frozen Bundle before running the contract-lock test.
-

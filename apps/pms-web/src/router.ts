@@ -1,6 +1,13 @@
-export interface AppRoute { readonly path:string; readonly title:string; readonly group:string; readonly level:"P0"|"P1"|"internal"; }
+export interface AppRoute {
+  readonly path: string;
+  readonly title: string;
+  readonly group: string;
+  readonly level: "P0" | "P1" | "internal";
+}
 
-function route(path:string,title:string,group:string,level:AppRoute["level"]):AppRoute{return{path,title,group,level}}
+function route(path: string, title: string, group: string, level: AppRoute["level"]): AppRoute {
+  return { path, title, group, level };
+}
 
 export const APP_ROUTES: readonly AppRoute[] = [
   route("/dashboard", "工作台", "概览", "P0"),
@@ -24,23 +31,68 @@ export const APP_ROUTES: readonly AppRoute[] = [
   route("/provider-packages/import", "导入 Package", "Provider", "P1"),
   route("/provider-packages/:packageId", "Package 详情", "Provider", "P0"),
   route("/provider-packages/:packageId/versions/:version", "Package Version", "Provider", "P0"),
-  route("/provider-packages/:packageId/versions/:version/qualification", "Package Qualification", "Provider", "P0"),
+  route(
+    "/provider-packages/:packageId/versions/:version/qualification",
+    "Package Qualification",
+    "Provider",
+    "P0",
+  ),
   route("/provider-packages/:packageId/versions/:version/usage", "Package Usage", "Provider", "P1"),
   route("/runtime/deployments", "Runtime Deployments", "运行管理", "P0"),
   route("/runtime/deployments/new", "创建 Deployment", "运行管理", "P0"),
   route("/runtime/deployments/:providerId/:deploymentId", "Deployment 详情", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/overview", "Deployment 概览", "运行管理", "P0"),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/overview",
+    "Deployment 概览",
+    "运行管理",
+    "P0",
+  ),
   route("/runtime/deployments/:providerId/:deploymentId/edit", "编辑 Deployment", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/reconciliation", "调和时间线", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/instances", "Deployment Instances", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/configuration", "Deployment Configuration", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/activity", "Deployment Activity", "运行管理", "P0"),
-  route("/runtime/deployments/:providerId/:deploymentId/upgrade", "升级 Deployment", "运行管理", "P0"),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/reconciliation",
+    "调和时间线",
+    "运行管理",
+    "P0",
+  ),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/instances",
+    "Deployment Instances",
+    "运行管理",
+    "P0",
+  ),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/configuration",
+    "Deployment Configuration",
+    "运行管理",
+    "P0",
+  ),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/activity",
+    "Deployment Activity",
+    "运行管理",
+    "P0",
+  ),
+  route(
+    "/runtime/deployments/:providerId/:deploymentId/upgrade",
+    "升级 Deployment",
+    "运行管理",
+    "P0",
+  ),
   route("/runtime/deployments/:providerId/:deploymentId/scale", "扩缩容", "运行管理", "P1"),
   route("/runtime/instances", "Runtime Instances", "运行管理", "P0"),
   route("/runtime/instances/:providerId/:runtimeId", "Runtime Instance 详情", "运行管理", "P0"),
-  route("/runtime/instances/:providerId/:runtimeId/registration", "Runtime Registration", "运行管理", "P0"),
-  route("/runtime/instances/:providerId/:runtimeId/configuration", "Runtime Configuration", "运行管理", "P0"),
+  route(
+    "/runtime/instances/:providerId/:runtimeId/registration",
+    "Runtime Registration",
+    "运行管理",
+    "P0",
+  ),
+  route(
+    "/runtime/instances/:providerId/:runtimeId/configuration",
+    "Runtime Configuration",
+    "运行管理",
+    "P0",
+  ),
   route("/runtime/instances/:providerId/:runtimeId/activity", "Runtime Activity", "运行管理", "P0"),
   route("/runtime/processes", "Runtime Processes", "运行管理", "P0"),
   route("/runtime/processes/:providerId/:processId", "Runtime Process 详情", "运行管理", "P0"),
@@ -59,7 +111,12 @@ export const APP_ROUTES: readonly AppRoute[] = [
   route("/configuration/:profileId", "配置详情", "制品与配置", "P0"),
   route("/configuration/:profileId/edit", "编辑配置", "制品与配置", "P0"),
   route("/configuration/:profileId/revisions", "配置 Revisions", "制品与配置", "P0"),
-  route("/configuration/:profileId/revisions/:revision", "Configuration Revision", "制品与配置", "P0"),
+  route(
+    "/configuration/:profileId/revisions/:revision",
+    "Configuration Revision",
+    "制品与配置",
+    "P0",
+  ),
   route("/configuration/:profileId/compare", "配置对比", "制品与配置", "P0"),
   route("/configuration/:profileId/revisions/:revision/rollback", "配置回滚", "制品与配置", "P0"),
   route("/secrets", "Secret References", "制品与配置", "P1"),
@@ -72,7 +129,12 @@ export const APP_ROUTES: readonly AppRoute[] = [
   route("/catalog/providers/:providerId", "Provider Catalog", "发现与资源", "P0"),
   route("/catalog/providers/:providerId/:operationName", "Catalog Operation", "发现与资源", "P0"),
   route("/catalog/providers/:providerId/revisions", "Catalog Revisions", "发现与资源", "P0"),
-  route("/catalog/providers/:providerId/revisions/:revision", "Catalog Revision", "发现与资源", "P0"),
+  route(
+    "/catalog/providers/:providerId/revisions/:revision",
+    "Catalog Revision",
+    "发现与资源",
+    "P0",
+  ),
   route("/catalog/providers/:providerId/compare", "Catalog Compare", "发现与资源", "P0"),
   route("/catalog/:providerId/:operationName", "Catalog Operation 兼容路由", "发现与资源", "P0"),
   route("/registry", "Registry", "发现与资源", "P0"),
@@ -128,5 +190,14 @@ export const APP_ROUTES: readonly AppRoute[] = [
   route("/_prototype/scenarios", "场景展示", "Prototype", "internal"),
 ];
 
-export function matchRoute(pathname:string):AppRoute|undefined { return APP_ROUTES.find(candidate=>{ const expected=candidate.path.split("/").filter(Boolean); const actual=pathname.split("/").filter(Boolean); return expected.length===actual.length&&expected.every((segment,index)=>segment.startsWith(":")||segment===actual[index]); }); }
+export function matchRoute(pathname: string): AppRoute | undefined {
+  return APP_ROUTES.find((candidate) => {
+    const expected = candidate.path.split("/").filter(Boolean);
+    const actual = pathname.split("/").filter(Boolean);
+    return (
+      expected.length === actual.length &&
+      expected.every((segment, index) => segment.startsWith(":") || segment === actual[index])
+    );
+  });
+}
 export { navigate } from "./app/navigation.js";

@@ -7,4 +7,12 @@ import "./styles.css";
 
 const root = document.getElementById("app");
 if (root === null) throw new Error("PMS_WEB_ROOT_MISSING");
-createRoot(root).render(<StrictMode><RootErrorBoundary><AppProviders><App /></AppProviders></RootErrorBoundary></StrictMode>);
+createRoot(root).render(
+  <StrictMode>
+    <RootErrorBoundary>
+      <AppProviders>
+        <App />
+      </AppProviders>
+    </RootErrorBoundary>
+  </StrictMode>,
+);

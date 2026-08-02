@@ -83,4 +83,3 @@ describe("Console ProblemDetails", () => {
     await app.close();
   });
 });
-

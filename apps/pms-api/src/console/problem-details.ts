@@ -4,10 +4,7 @@ import {
   RuntimeDeploymentApplicationError,
   RuntimeProcessQueryError,
 } from "../../../../packages/pms-application/src/index.js";
-import {
-  PmsDomainError,
-  PmsRepositoryError,
-} from "../../../../packages/pms-domain/src/index.js";
+import { PmsDomainError, PmsRepositoryError } from "../../../../packages/pms-domain/src/index.js";
 import { RuntimeDeploymentError } from "../../../../packages/runtime-deployment/src/index.js";
 import { requestContext } from "../context.js";
 
@@ -146,11 +143,7 @@ function classifyConsoleError(error: FastifyError): {
     );
   }
   if (error instanceof PmsRepositoryError) {
-    return problem(
-      error.code === "ENTITY_NOT_FOUND" ? 404 : 409,
-      error.code,
-      error.message,
-    );
+    return problem(error.code === "ENTITY_NOT_FOUND" ? 404 : 409, error.code, error.message);
   }
   if (error instanceof RuntimeDeploymentApplicationError) {
     const status =
@@ -238,4 +231,3 @@ const CONFIGURATION_CONFLICT = new Set<ConsoleProblemCode>([
   "CONFIGURATION_DRAFT_NOT_VALIDATED",
   "CONFIGURATION_PUBLISH_CONFLICT",
 ]);
-

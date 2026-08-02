@@ -25,4 +25,3 @@ describe("Console Registry operations", () => {
     await app.close();
   });
 });
-

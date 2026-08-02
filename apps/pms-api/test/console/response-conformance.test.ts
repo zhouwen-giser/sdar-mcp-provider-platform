@@ -22,4 +22,3 @@ describe("Console response conformance", () => {
     await app.close();
   });
 });
-

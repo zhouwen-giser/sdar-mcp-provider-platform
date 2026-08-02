@@ -7,14 +7,28 @@ describe("client-only workspaces", () => {
     const listener = vi.fn();
     store.subscribe(listener);
     store.markAllNotifications();
-    const incident = store.createIncident({ title: "Local incident", severity: "SEV-3", deploymentId: "deploy-001", owner: "reviewer" });
+    const incident = store.createIncident({
+      title: "Local incident",
+      severity: "SEV-3",
+      deploymentId: "deploy-001",
+      owner: "reviewer",
+    });
     store.addIncidentNote(incident.incidentId, "Local note");
     store.closeIncident(incident.incidentId);
-    const change = store.createChange({ title: "Local review", kind: "runtime", subjectId: "deploy-001", impact: "No backend persistence" });
+    const change = store.createChange({
+      title: "Local review",
+      kind: "runtime",
+      subjectId: "deploy-001",
+      impact: "No backend persistence",
+    });
     store.reviewChange(change.changeId, true);
-    expect(store.snapshot().notifications.every(item => item.read)).toBe(true);
-    expect(store.snapshot().incidents.find(item => item.incidentId === incident.incidentId)?.status).toBe("CLOSED");
-    expect(store.snapshot().changes.find(item => item.changeId === change.changeId)?.status).toBe("APPROVED");
+    expect(store.snapshot().notifications.every((item) => item.read)).toBe(true);
+    expect(
+      store.snapshot().incidents.find((item) => item.incidentId === incident.incidentId)?.status,
+    ).toBe("CLOSED");
+    expect(store.snapshot().changes.find((item) => item.changeId === change.changeId)?.status).toBe(
+      "APPROVED",
+    );
     expect(listener).toHaveBeenCalled();
   });
 

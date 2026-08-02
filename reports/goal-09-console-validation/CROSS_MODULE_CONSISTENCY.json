@@ -12,7 +12,12 @@
     "runtimeProcessDetail": ["providerId", "processId"],
     "audit": ["subjectType", "subjectId", "correlationId", "occurredBefore", "cursor", "limit"]
   },
-  "responseModels": { "intent202": "AGREED", "noContent204": "AGREED", "notModified304": "AGREED", "pagination": "AGREED" },
+  "responseModels": {
+    "intent202": "AGREED",
+    "noContent204": "AGREED",
+    "notModified304": "AGREED",
+    "pagination": "AGREED"
+  },
   "authentication": "Deferred; X-Actor-ID remains audit context only",
   "statement": "Live browser-to-PMS API integration was not implemented or claimed in Goal 09."
 }

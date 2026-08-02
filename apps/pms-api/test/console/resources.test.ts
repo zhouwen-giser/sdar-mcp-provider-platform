@@ -33,4 +33,3 @@ describe("Console Resource operations", () => {
     await app.close();
   });
 });
-

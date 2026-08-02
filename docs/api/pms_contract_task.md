@@ -34,7 +34,7 @@ pms-web-productionization-foundation.zip
 
 该 ZIP 只用于分析 PMS Web 当前的：
 
-* Gateway；
+- Gateway；
   -ViewModel；
   -页面数据需求；
   -交互流程；
@@ -668,10 +668,7 @@ contracts/pms-console-api/v1/ENDPOINT_SOURCE_MAP.json
   "operationId": "listProviders",
   "classification": "EXISTING_QUERY",
   "domainObject": "Provider",
-  "sourceFiles": [
-    "packages/pms-application/src/...",
-    "apps/pms-api/src/..."
-  ],
+  "sourceFiles": ["packages/pms-application/src/...", "apps/pms-api/src/..."],
   "sourcePort": "ProviderManagementPort.list",
   "currentRoute": "/api/v1/providers",
   "businessSideEffects": [],
@@ -746,9 +743,7 @@ application/problem+json
 {
   "problemCode": "PROVIDER_NOT_FOUND",
   "sourceCode": "PROVIDER_NOT_FOUND",
-  "sourceFiles": [
-    "packages/pms-application/src/..."
-  ],
+  "sourceFiles": ["packages/pms-application/src/..."],
   "httpStatus": 404,
   "semanticChange": false
 }

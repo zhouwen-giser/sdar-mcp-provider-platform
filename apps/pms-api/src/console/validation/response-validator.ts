@@ -26,9 +26,8 @@ export function consoleResponseSchemas(operationId: string): Readonly<Record<str
       response[status] = { type: "null" };
     }
   }
-  if (response.default === undefined) {
+  if (!Object.hasOwn(response, "default")) {
     response.default = { $ref: schemaId("ProblemDetails") };
   }
   return response;
 }
-

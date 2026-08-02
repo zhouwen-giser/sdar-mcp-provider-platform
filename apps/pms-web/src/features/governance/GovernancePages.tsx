@@ -1,19 +1,334 @@
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Button, CodeOrJsonViewer, DataTable, FormField, KeyValueList, QuerySurface, StatusBadge, Timeline, Toast } from "../../components/ui.js";
+import {
+  Button,
+  CodeOrJsonViewer,
+  DataTable,
+  FormField,
+  KeyValueList,
+  QuerySurface,
+  StatusBadge,
+  Timeline,
+} from "../../components/ui.js";
 import { useAuditEvents } from "../../queries/hooks.js";
 import { useClientWorkspace, useClientWorkspaceStore } from "../../client-workspace/context.js";
 import { navigate } from "../../app/navigation.js";
-import { DetailNotAvailable, LocalWorkspaceHeader, ProductPage } from "../shared/product-components.js";
+import {
+  DetailNotAvailable,
+  LocalWorkspaceHeader,
+  ProductPage,
+} from "../shared/product-components.js";
 
-export function ChangesPage({mode="list"}:{readonly mode?:"list"|"new"|"detail"|"review"}){const {changeId=""}=useParams();const snapshot=useClientWorkspace();const store=useClientWorkspaceStore();const [title,setTitle]=useState("Review runtime configuration change");const [kind,setKind]=useState("configuration");const [subjectId,setSubjectId]=useState("draft-001");const [impact,setImpact]=useState("Requires restart; estimated interruption 30 seconds.");
- if(mode==="new")return <><LocalWorkspaceHeader title="创建 Change Request" description="本地治理工作区，不写入 Console API V1。"/><section className="panel narrow-form"><FormField label="Title"><input value={title} onChange={e=>setTitle(e.target.value)}/></FormField><FormField label="Kind"><select value={kind} onChange={e=>setKind(e.target.value)}><option>configuration</option><option>runtime</option><option>catalog</option><option>provider</option></select></FormField><FormField label="Subject ID"><input value={subjectId} onChange={e=>setSubjectId(e.target.value)}/></FormField><FormField label="Impact"><textarea value={impact} onChange={e=>setImpact(e.target.value)}/></FormField><Button variant="primary" onClick={()=>{const item=store.createChange({title,kind,subjectId,impact});navigate(`/changes/${item.changeId}`)}}>创建本地 Change</Button></section></>;
- if(mode==="detail"||mode==="review"){const item=snapshot.changes.find(x=>x.changeId===changeId);if(!item)return <DetailNotAvailable entity="Change Request" id={changeId}/>;return <><LocalWorkspaceHeader title={item.changeId} description={`${item.kind} · ${item.subjectId}`} actions={mode==="review"?<><Button variant="danger" onClick={()=>store.reviewChange(item.changeId,false)}>Reject locally</Button><Button variant="primary" onClick={()=>store.reviewChange(item.changeId,true)}>Approve locally</Button></>:<Button onClick={()=>navigate(`/changes/${item.changeId}/review`)}>Review</Button>}/><div className="grid-two"><section className="panel"><KeyValueList entries={[["Title",item.title],["Kind",item.kind],["Subject",item.subjectId],["Status",<StatusBadge status={item.status}/>],["Persistence","Browser Mock Scenario only"]]}/></section><section className="panel"><h2>Impact analysis</h2><p>{item.impact}</p><ul><li>Provider and Runtime links are navigation only</li><li>Approval does not authorize a backend command</li><li>Execution remains separate frozen mutations</li></ul></section></div><section className="panel"><h2>Timeline</h2><Timeline items={item.timeline.map(label=>({label,meta:"local governance event"}))}/></section></>}
- return <><LocalWorkspaceHeader title="Change Requests" description="Not persisted by Console API V1；用于产品评审和多步骤治理演示。" actions={<Button variant="primary" onClick={()=>navigate("/changes/new")}>创建 Change</Button>}/><section className="panel"><DataTable columns={["Change","Title","Kind","Subject","Status","Impact"]} rows={snapshot.changes.map(item=>[<button className="table-link" onClick={()=>navigate(`/changes/${item.changeId}`)}>{item.changeId}</button>,item.title,item.kind,item.subjectId,<StatusBadge status={item.status}/>,item.impact])}/></section></>}
+export function ChangesPage({
+  mode = "list",
+}: {
+  readonly mode?: "list" | "new" | "detail" | "review";
+}) {
+  const { changeId = "" } = useParams();
+  const snapshot = useClientWorkspace();
+  const store = useClientWorkspaceStore();
+  const [title, setTitle] = useState("Review runtime configuration change");
+  const [kind, setKind] = useState("configuration");
+  const [subjectId, setSubjectId] = useState("draft-001");
+  const [impact, setImpact] = useState("Requires restart; estimated interruption 30 seconds.");
+  if (mode === "new")
+    return (
+      <>
+        <LocalWorkspaceHeader
+          title="创建 Change Request"
+          description="本地治理工作区，不写入 Console API V1。"
+        />
+        <section className="panel narrow-form">
+          <FormField label="Title">
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </FormField>
+          <FormField label="Kind">
+            <select value={kind} onChange={(e) => setKind(e.target.value)}>
+              <option>configuration</option>
+              <option>runtime</option>
+              <option>catalog</option>
+              <option>provider</option>
+            </select>
+          </FormField>
+          <FormField label="Subject ID">
+            <input value={subjectId} onChange={(e) => setSubjectId(e.target.value)} />
+          </FormField>
+          <FormField label="Impact">
+            <textarea value={impact} onChange={(e) => setImpact(e.target.value)} />
+          </FormField>
+          <Button
+            variant="primary"
+            onClick={() => {
+              const item = store.createChange({ title, kind, subjectId, impact });
+              navigate(`/changes/${item.changeId}`);
+            }}
+          >
+            创建本地 Change
+          </Button>
+        </section>
+      </>
+    );
+  if (mode === "detail" || mode === "review") {
+    const item = snapshot.changes.find((x) => x.changeId === changeId);
+    if (!item) return <DetailNotAvailable entity="Change Request" id={changeId} />;
+    return (
+      <>
+        <LocalWorkspaceHeader
+          title={item.changeId}
+          description={`${item.kind} · ${item.subjectId}`}
+          actions={
+            mode === "review" ? (
+              <>
+                <Button variant="danger" onClick={() => store.reviewChange(item.changeId, false)}>
+                  Reject locally
+                </Button>
+                <Button variant="primary" onClick={() => store.reviewChange(item.changeId, true)}>
+                  Approve locally
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => navigate(`/changes/${item.changeId}/review`)}>Review</Button>
+            )
+          }
+        />
+        <div className="grid-two">
+          <section className="panel">
+            <KeyValueList
+              entries={[
+                ["Title", item.title],
+                ["Kind", item.kind],
+                ["Subject", item.subjectId],
+                ["Status", <StatusBadge status={item.status} />],
+                ["Persistence", "Browser Mock Scenario only"],
+              ]}
+            />
+          </section>
+          <section className="panel">
+            <h2>Impact analysis</h2>
+            <p>{item.impact}</p>
+            <ul>
+              <li>Provider and Runtime links are navigation only</li>
+              <li>Approval does not authorize a backend command</li>
+              <li>Execution remains separate frozen mutations</li>
+            </ul>
+          </section>
+        </div>
+        <section className="panel">
+          <h2>Timeline</h2>
+          <Timeline
+            items={item.timeline.map((label) => ({ label, meta: "local governance event" }))}
+          />
+        </section>
+      </>
+    );
+  }
+  return (
+    <>
+      <LocalWorkspaceHeader
+        title="Change Requests"
+        description="Not persisted by Console API V1；用于产品评审和多步骤治理演示。"
+        actions={
+          <Button variant="primary" onClick={() => navigate("/changes/new")}>
+            创建 Change
+          </Button>
+        }
+      />
+      <section className="panel">
+        <DataTable
+          columns={["Change", "Title", "Kind", "Subject", "Status", "Impact"]}
+          rows={snapshot.changes.map((item) => [
+            <button className="table-link" onClick={() => navigate(`/changes/${item.changeId}`)}>
+              {item.changeId}
+            </button>,
+            item.title,
+            item.kind,
+            item.subjectId,
+            <StatusBadge status={item.status} />,
+            item.impact,
+          ])}
+        />
+      </section>
+    </>
+  );
+}
 
-function download(name:string,content:string,type:string){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const anchor=document.createElement("a");anchor.href=url;anchor.download=name;anchor.click();URL.revokeObjectURL(url);}
-export function AuditPage({mode="list"}:{readonly mode?:"list"|"detail"|"export"}){const {auditId=""}=useParams();const [params,setParams]=useSearchParams();const query=useAuditEvents({...(params.get("subjectType")?{subjectType:params.get("subjectType")!}:{}),...(params.get("subjectId")?{subjectId:params.get("subjectId")!}:{}),...(params.get("correlationId")?{correlationId:params.get("correlationId")!}:{})});const [subjectType,setSubjectType]=useState(params.get("subjectType")??"");const [subjectId,setSubjectId]=useState(params.get("subjectId")??"");const [correlationId,setCorrelationId]=useState(params.get("correlationId")??"");
- const filtered=useMemo(()=> (query.data??[]).filter(item=>(!subjectType||item.subjectType.includes(subjectType))&&(!subjectId||item.subjectId.includes(subjectId))&&(!correlationId||item.correlationId.includes(correlationId))),[correlationId,query.data,subjectId,subjectType]);
- if(mode==="detail")return <QuerySurface query={query}>{items=>{const item=items.find(value=>value.auditEventId===auditId);return item?<ProductPage title={item.auditEventId} description={`${item.action} · ${item.subjectType}/${item.subjectId}`} classification="WEB_COMPOSED"><div className="grid-two"><section className="panel"><KeyValueList entries={[["Action",item.action],["Actor",item.actorId],["Correlation ID",<code>{item.correlationId}</code>],["Subject Type",item.subjectType],["Subject ID",item.subjectId],["Occurred At",item.occurredAt]]}/></section><section className="panel"><h2>Detail boundary</h2><p>冻结合同只有 listAuditEvents。此详情从列表 Cache 定位；刷新直达仍会先执行列表查询。</p><Button onClick={()=>navigate(`/search?q=${encodeURIComponent(item.subjectId)}`)}>搜索关联对象</Button></section></div></ProductPage>:<DetailNotAvailable entity="Audit Event" id={auditId}/>;}}</QuerySurface>;
- if(mode==="export")return <ProductPage title="Audit Export" description="导出当前冻结 list 查询结果；文件生成完全在浏览器中。" classification="CLIENT_ONLY"><section className="panel"><p>当前可导出 {filtered.length} 条记录。不会调用 Export API。</p><div className="quick-actions"><Button onClick={()=>download("pms-audit.json",JSON.stringify(filtered,null,2),"application/json")}>导出 JSON</Button><Button onClick={()=>download("pms-audit.csv",["auditEventId,action,actorId,correlationId,subjectType,subjectId,occurredAt",...filtered.map(item=>[item.auditEventId,item.action,item.actorId,item.correlationId,item.subjectType,item.subjectId,item.occurredAt].map(value=>`"${String(value).replaceAll('"','""')}"`).join(","))].join("\n"),"text/csv")}>导出 CSV</Button></div><CodeOrJsonViewer value={filtered.slice(0,3)}/></section></ProductPage>;
- return <ProductPage title="Audit" description="只读 list 查询；支持 Subject、Correlation ID 和时间语义的前端过滤。" classification="FROZEN_API" actions={<Button onClick={()=>navigate(`/audit/export?${params.toString()}`)}>导出当前结果</Button>}><section className="panel filter-grid"><FormField label="Subject Type"><input value={subjectType} onChange={e=>setSubjectType(e.target.value)}/></FormField><FormField label="Subject ID"><input value={subjectId} onChange={e=>setSubjectId(e.target.value)}/></FormField><FormField label="Correlation ID"><input value={correlationId} onChange={e=>setCorrelationId(e.target.value)}/></FormField><Button onClick={()=>setParams(Object.fromEntries(Object.entries({subjectType,subjectId,correlationId}).filter(([,value])=>value)))}>应用筛选</Button></section><section className="panel"><QuerySurface query={query}>{()=> <DataTable columns={["Event","Action","Actor","Correlation","Subject","Occurred"]} rows={filtered.map(item=>[<button className="table-link" onClick={()=>navigate(`/audit/${item.auditEventId}`)}>{item.auditEventId}</button>,item.action,item.actorId,<code>{item.correlationId}</code>,`${item.subjectType}/${item.subjectId}`,item.occurredAt])}/>}</QuerySurface></section></ProductPage>}
+function download(name: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = name;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+export function AuditPage({ mode = "list" }: { readonly mode?: "list" | "detail" | "export" }) {
+  const { auditId = "" } = useParams();
+  const [params, setParams] = useSearchParams();
+  const query = useAuditEvents({
+    ...(params.get("subjectType") ? { subjectType: params.get("subjectType")! } : {}),
+    ...(params.get("subjectId") ? { subjectId: params.get("subjectId")! } : {}),
+    ...(params.get("correlationId") ? { correlationId: params.get("correlationId")! } : {}),
+  });
+  const [subjectType, setSubjectType] = useState(params.get("subjectType") ?? "");
+  const [subjectId, setSubjectId] = useState(params.get("subjectId") ?? "");
+  const [correlationId, setCorrelationId] = useState(params.get("correlationId") ?? "");
+  const filtered = useMemo(
+    () =>
+      (query.data ?? []).filter(
+        (item) =>
+          (!subjectType || item.subjectType.includes(subjectType)) &&
+          (!subjectId || item.subjectId.includes(subjectId)) &&
+          (!correlationId || item.correlationId.includes(correlationId)),
+      ),
+    [correlationId, query.data, subjectId, subjectType],
+  );
+  if (mode === "detail")
+    return (
+      <QuerySurface query={query}>
+        {(items) => {
+          const item = items.find((value) => value.auditEventId === auditId);
+          return item ? (
+            <ProductPage
+              title={item.auditEventId}
+              description={`${item.action} · ${item.subjectType}/${item.subjectId}`}
+              classification="WEB_COMPOSED"
+            >
+              <div className="grid-two">
+                <section className="panel">
+                  <KeyValueList
+                    entries={[
+                      ["Action", item.action],
+                      ["Actor", item.actorId],
+                      ["Correlation ID", <code>{item.correlationId}</code>],
+                      ["Subject Type", item.subjectType],
+                      ["Subject ID", item.subjectId],
+                      ["Occurred At", item.occurredAt],
+                    ]}
+                  />
+                </section>
+                <section className="panel">
+                  <h2>Detail boundary</h2>
+                  <p>
+                    冻结合同只有 listAuditEvents。此详情从列表 Cache
+                    定位；刷新直达仍会先执行列表查询。
+                  </p>
+                  <Button
+                    onClick={() => navigate(`/search?q=${encodeURIComponent(item.subjectId)}`)}
+                  >
+                    搜索关联对象
+                  </Button>
+                </section>
+              </div>
+            </ProductPage>
+          ) : (
+            <DetailNotAvailable entity="Audit Event" id={auditId} />
+          );
+        }}
+      </QuerySurface>
+    );
+  if (mode === "export")
+    return (
+      <ProductPage
+        title="Audit Export"
+        description="导出当前冻结 list 查询结果；文件生成完全在浏览器中。"
+        classification="CLIENT_ONLY"
+      >
+        <section className="panel">
+          <p>当前可导出 {filtered.length} 条记录。不会调用 Export API。</p>
+          <div className="quick-actions">
+            <Button
+              onClick={() =>
+                download("pms-audit.json", JSON.stringify(filtered, null, 2), "application/json")
+              }
+            >
+              导出 JSON
+            </Button>
+            <Button
+              onClick={() =>
+                download(
+                  "pms-audit.csv",
+                  [
+                    "auditEventId,action,actorId,correlationId,subjectType,subjectId,occurredAt",
+                    ...filtered.map((item) =>
+                      [
+                        item.auditEventId,
+                        item.action,
+                        item.actorId,
+                        item.correlationId,
+                        item.subjectType,
+                        item.subjectId,
+                        item.occurredAt,
+                      ]
+                        .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+                        .join(","),
+                    ),
+                  ].join("\n"),
+                  "text/csv",
+                )
+              }
+            >
+              导出 CSV
+            </Button>
+          </div>
+          <CodeOrJsonViewer value={filtered.slice(0, 3)} />
+        </section>
+      </ProductPage>
+    );
+  return (
+    <ProductPage
+      title="Audit"
+      description="只读 list 查询；支持 Subject、Correlation ID 和时间语义的前端过滤。"
+      classification="FROZEN_API"
+      actions={
+        <Button onClick={() => navigate(`/audit/export?${params.toString()}`)}>导出当前结果</Button>
+      }
+    >
+      <section className="panel filter-grid">
+        <FormField label="Subject Type">
+          <input value={subjectType} onChange={(e) => setSubjectType(e.target.value)} />
+        </FormField>
+        <FormField label="Subject ID">
+          <input value={subjectId} onChange={(e) => setSubjectId(e.target.value)} />
+        </FormField>
+        <FormField label="Correlation ID">
+          <input value={correlationId} onChange={(e) => setCorrelationId(e.target.value)} />
+        </FormField>
+        <Button
+          onClick={() =>
+            setParams(
+              Object.fromEntries(
+                Object.entries({ subjectType, subjectId, correlationId }).filter(
+                  ([, value]) => value,
+                ),
+              ),
+            )
+          }
+        >
+          应用筛选
+        </Button>
+      </section>
+      <section className="panel">
+        <QuerySurface query={query}>
+          {() => (
+            <DataTable
+              columns={["Event", "Action", "Actor", "Correlation", "Subject", "Occurred"]}
+              rows={filtered.map((item) => [
+                <button
+                  className="table-link"
+                  onClick={() => navigate(`/audit/${item.auditEventId}`)}
+                >
+                  {item.auditEventId}
+                </button>,
+                item.action,
+                item.actorId,
+                <code>{item.correlationId}</code>,
+                `${item.subjectType}/${item.subjectId}`,
+                item.occurredAt,
+              ])}
+            />
+          )}
+        </QuerySurface>
+      </section>
+    </ProductPage>
+  );
+}

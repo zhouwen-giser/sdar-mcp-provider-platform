@@ -15,9 +15,7 @@ describe("PMS Console API frozen lock", () => {
     expect(lock.operationCount).toBe(36);
     expect(hash(resolve(contract, "openapi.yaml"))).toBe(lock.openApiSha256);
     expect(hash(resolve(contract, "dist/openapi.bundle.json"))).toBe(lock.schemaBundleSha256);
-    expect(hash(resolve(contract, "ENDPOINT_SOURCE_MAP.json"))).toBe(
-      lock.endpointSourceMapSha256,
-    );
+    expect(hash(resolve(contract, "ENDPOINT_SOURCE_MAP.json"))).toBe(lock.endpointSourceMapSha256);
     expect(hash(resolve(contract, "ERROR_SOURCE_MAP.json"))).toBe(lock.errorSourceMapSha256);
   });
 });

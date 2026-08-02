@@ -6,17 +6,12 @@ const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const contract = readJson(
   resolve(root, "packages/pms-console-api-contract/schema/openapi.bundle.json"),
 );
-const registered = readJson(
-  resolve(root, "apps/pms-api/src/console/route-inventory.json"),
-);
+const registered = readJson(resolve(root, "apps/pms-api/src/console/route-inventory.json"));
 const source = readFileSync(
   resolve(root, "apps/pms-api/src/console/register-console-routes.ts"),
   "utf8",
 );
-const testSource = readFileSync(
-  resolve(root, "apps/pms-api/test/console/helpers.ts"),
-  "utf8",
-);
+const testSource = readFileSync(resolve(root, "apps/pms-api/test/console/helpers.ts"), "utf8");
 const frozen = Object.entries(contract.paths).flatMap(([path, item]) =>
   Object.entries(item)
     .filter(([method]) => ["get", "post", "patch", "delete"].includes(method))
@@ -70,4 +65,3 @@ function duplicates(values) {
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
-

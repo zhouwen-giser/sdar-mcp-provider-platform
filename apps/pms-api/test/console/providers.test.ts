@@ -23,4 +23,3 @@ describe("Console Provider operations", () => {
     await app.close();
   });
 });
-

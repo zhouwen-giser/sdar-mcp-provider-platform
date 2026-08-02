@@ -12,7 +12,9 @@ describe("production infrastructure", () => {
   });
 
   it("maps gateway failures to stable UI problems", () => {
-    expect(toUiProblem(new Error("API_DATA_SOURCE_NOT_CONFIGURED")).code).toBe("PMS_API_NOT_CONFIGURED");
+    expect(toUiProblem(new Error("API_DATA_SOURCE_NOT_CONFIGURED")).code).toBe(
+      "PMS_API_NOT_CONFIGURED",
+    );
   });
 
   it("guards prototype routes and rejects generic public pages", () => {

@@ -23,4 +23,3 @@ for (const script of scripts) {
 }
 process.stdout.write(`PMS_CONSOLE_CONFORMANCE_STATIC=${passed ? "PASSED" : "FAILED"}\n`);
 if (!passed) process.exitCode = 1;
-

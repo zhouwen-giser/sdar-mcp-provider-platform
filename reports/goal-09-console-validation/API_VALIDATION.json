@@ -19,8 +19,8 @@
     "pnpm typecheck": "PASSED",
     "pnpm build": "PASSED with approved Docker access for pinned grpc-tools",
     "node scripts/pms-console-conformance/validate-all.mjs": "PASSED, 36/36",
-    "pnpm lint": "TSX typed-rule initialization PASSED; 278 existing rule violations remain",
-    "pnpm format:check": "BLOCKED by baseline formatting and frozen-file scope conflict"
+    "pnpm lint": "PASSED with typed rules configured for TS and TSX",
+    "pnpm format:check": "PASSED; frozen and generated contracts excluded and hash-stable"
   },
   "blockingTest": {
     "file": "apps/pms-api/test/config.test.ts",

@@ -14,4 +14,3 @@ describe("legacy route regression", () => {
     await app.close();
   });
 });
-

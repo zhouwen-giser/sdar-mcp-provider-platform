@@ -19,4 +19,3 @@ describe("Console Provider Package operations", () => {
     await app.close();
   });
 });
-

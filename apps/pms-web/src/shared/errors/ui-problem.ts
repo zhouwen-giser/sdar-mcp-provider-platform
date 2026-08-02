@@ -21,12 +21,13 @@ export function toUiProblem(error: unknown): UiProblem {
     };
   }
   const message = error instanceof Error ? error.message : "UNEXPECTED_ERROR";
-  if (message === "API_DATA_SOURCE_NOT_CONFIGURED") return {
-    code: "PMS_API_NOT_CONFIGURED",
-    title: "API data source is not configured",
-    detail: "Console API V1 adapter 尚未配置；生产模式不会回退到 Mock。",
-    retryable: false,
-  };
+  if (message === "API_DATA_SOURCE_NOT_CONFIGURED")
+    return {
+      code: "PMS_API_NOT_CONFIGURED",
+      title: "API data source is not configured",
+      detail: "Console API V1 adapter 尚未配置；生产模式不会回退到 Mock。",
+      retryable: false,
+    };
   return {
     code: "PMS_UI_UNEXPECTED",
     title: "页面处理失败",

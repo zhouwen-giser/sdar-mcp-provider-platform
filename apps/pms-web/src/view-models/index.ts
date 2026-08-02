@@ -63,10 +63,21 @@ export interface ConfigurationDraftViewModel {
   readonly version: number;
   readonly applyMode?: string;
   readonly content: Readonly<Record<string, unknown>>;
-  readonly issues: readonly { readonly code: string; readonly path: string; readonly message: string }[];
+  readonly issues: readonly {
+    readonly code: string;
+    readonly path: string;
+    readonly message: string;
+  }[];
   readonly updatedAt: string;
 }
-export interface RegistryProviderViewModel { readonly providerId: string; readonly serverId: string; readonly protocolMode: string; readonly effectiveEndpoint: string; readonly catalogRevision: number; readonly tools: readonly Readonly<Record<string, unknown>>[] }
+export interface RegistryProviderViewModel {
+  readonly providerId: string;
+  readonly serverId: string;
+  readonly protocolMode: string;
+  readonly effectiveEndpoint: string;
+  readonly catalogRevision: number;
+  readonly tools: readonly Readonly<Record<string, unknown>>[];
+}
 export interface RegistrySnapshotViewModel {
   readonly environment: string;
   readonly revision: number;

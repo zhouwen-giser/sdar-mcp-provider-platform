@@ -13,7 +13,7 @@ Status: Contract Frozen
 
 该合同只允许暴露 SMPP 当前 `main` 已经存在的：
 
-* 领域对象；
+- 领域对象；
   -应用服务；
   -查询能力；
   -命令能力；
@@ -23,7 +23,7 @@ Status: Contract Frozen
 
 合同不得：
 
-* 创造新的业务对象；
+- 创造新的业务对象；
   -创造新的状态机；
   -增加新的业务命令；
   -改变现有事务边界；
@@ -183,7 +183,7 @@ pnpm-lock.yaml
 
 `package.json` 和锁文件只允许增加：
 
-* OpenAPI 校验工具；
+- OpenAPI 校验工具；
   -Contract Package；
   -合同验证脚本；
   -合同测试命令。
@@ -853,10 +853,7 @@ contracts/pms-console-api/v1/ENDPOINT_SOURCE_MAP.json
   "operationId": "listProviders",
   "classification": "EXISTING_QUERY",
   "domainObject": "Provider",
-  "sourceFiles": [
-    "packages/...",
-    "apps/pms-api/..."
-  ],
+  "sourceFiles": ["packages/...", "apps/pms-api/..."],
   "sourcePort": "ProviderManagementPort.list",
   "currentRoute": "/api/v1/providers",
   "businessSideEffects": [],

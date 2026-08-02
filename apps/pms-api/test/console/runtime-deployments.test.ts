@@ -27,4 +27,3 @@ describe("Console RuntimeDeployment operations", () => {
     await app.close();
   });
 });
-
