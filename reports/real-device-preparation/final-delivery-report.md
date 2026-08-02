@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation final delivery
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate implementation SHA: `285672caf8e938a5a3833986ed62dc5f7ad1e1e9`
+- Candidate implementation SHA: `cd68a91d129ba50a240837c79526ebdfdfbfa05c`
 - Environment: `home-lab`
 - Overall status: **BLOCKED**
 - Ready for SDAR integration: **NO**
