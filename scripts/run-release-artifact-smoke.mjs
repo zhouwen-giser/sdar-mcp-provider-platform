@@ -209,7 +209,7 @@ function validateImage(name, image, inspection) {
     runtime: ["dist", "migrations", "node_modules", "proto"],
     api: ["dist", "migrations", "node_modules", "packages", "provider-packages"],
     worker: ["dist", "migrations", "node_modules", "packages", "proto", "provider-packages"],
-    web: ["web"],
+    web: ["server.mjs", "web"],
   }[name];
   const actual = lines(
     command("docker", [
