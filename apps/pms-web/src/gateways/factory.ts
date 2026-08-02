@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { createMockGateways } from "./mock/create-mock-gateways.js";
 import { createUnconfiguredOpenApiGateways } from "./openapi/unconfigured-gateways.js";
 import type { GatewayBundle } from "./contracts/index.js";

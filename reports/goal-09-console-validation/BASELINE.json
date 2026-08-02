@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-08-01T22:52:00.1590246Z",
+  "branch": "codex/goal-06-pms-console-api-contract-v1",
+  "startHead": "996ef7289fe90a9de6140121de77e93439f78d0d",
+  "reviewedRemoteHead": "996ef7289fe90a9de6140121de77e93439f78d0d",
+  "remoteTargetHead": "996ef7289fe90a9de6140121de77e93439f78d0d",
+  "remoteMainHead": "840111af99e65a37c1e4f8cfe84fd7c14f9b3e0c",
+  "worktreeAtStart": "clean",
+  "preExistingTrackedChanges": [],
+  "preExistingUntrackedFiles": [],
+  "taskPackageSha256": "021c01ebdd4237969f245ae4414194e73c9564daa0ca4381484cf2ef70e0fa71",
+  "taskPackageManifest": "verified",
+  "baselineDecision": "MATCHED"
+}

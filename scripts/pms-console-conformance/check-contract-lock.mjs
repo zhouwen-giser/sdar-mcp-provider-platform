@@ -37,10 +37,17 @@ process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 if (!result.passed) process.exitCode = 1;
 
 function sha256(path) {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  return createHash("sha256").update(canonicalContractBytes(path)).digest("hex");
+}
+
+function canonicalContractBytes(path) {
+  const bytes = readFileSync(path);
+  if (bytes.includes(13)) {
+    return Buffer.from(bytes.toString("utf8").replaceAll("\r\n", "\n"), "utf8");
+  }
+  return bytes;
 }
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
-

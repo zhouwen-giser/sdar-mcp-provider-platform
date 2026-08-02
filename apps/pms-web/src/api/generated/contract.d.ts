@@ -5,2240 +5,2113 @@
  */
 
 export interface paths {
-  readonly "/audit-events": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/provider-packages": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listProviderPackages
+         * @description Console transport projection of existing SMPP capability `listProviderPackages`.
+         */
+        readonly get: operations["listProviderPackages"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listAuditEvents
-     * @description Console transport projection of existing SMPP capability `listAuditEvents`.
-     */
-    readonly get: operations["listAuditEvents"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/provider-packages/{packageId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getProviderPackage
+         * @description Console transport projection of existing SMPP capability `getProviderPackage`.
+         */
+        readonly get: operations["getProviderPackage"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * createConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `createConfigurationDraft`.
-     */
-    readonly post: operations["createConfigurationDraft"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts/{draftId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/provider-types": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listProviderTypes
+         * @description Console transport projection of existing SMPP capability `listProviderTypes`.
+         */
+        readonly get: operations["listProviderTypes"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `getConfigurationDraft`.
-     */
-    readonly get: operations["getConfigurationDraft"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    /**
-     * updateConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `updateConfigurationDraft`.
-     */
-    readonly patch: operations["updateConfigurationDraft"];
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts/{draftId}/effective": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/provider-types/{providerTypeId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getProviderType
+         * @description Console transport projection of existing SMPP capability `getProviderType`.
+         */
+        readonly get: operations["getProviderType"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * previewEffectiveConfiguration
-     * @description Console transport projection of existing SMPP capability `previewEffectiveConfiguration`.
-     */
-    readonly get: operations["previewEffectiveConfiguration"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts/{draftId}/publish": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/providers": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listProviders
+         * @description Console transport projection of existing SMPP capability `listProviders`.
+         */
+        readonly get: operations["listProviders"];
+        readonly put?: never;
+        /**
+         * createProvider
+         * @description Console transport projection of existing SMPP capability `createProvider`.
+         */
+        readonly post: operations["createProvider"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * publishConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `publishConfigurationDraft`.
-     */
-    readonly post: operations["publishConfigurationDraft"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts/{draftId}/rollback": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/providers/{providerId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getProvider
+         * @description Console transport projection of existing SMPP capability `getProvider`.
+         */
+        readonly get: operations["getProvider"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * rollbackConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `rollbackConfigurationDraft`.
-     */
-    readonly post: operations["rollbackConfigurationDraft"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/configuration-drafts/{draftId}/validate": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/providers/{providerId}/status": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        /**
+         * updateProviderStatus
+         * @description Console transport projection of existing SMPP capability `updateProviderStatus`.
+         */
+        readonly patch: operations["updateProviderStatus"];
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * validateConfigurationDraft
-     * @description Console transport projection of existing SMPP capability `validateConfigurationDraft`.
-     */
-    readonly post: operations["validateConfigurationDraft"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/provider-packages": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/resources": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listResources
+         * @description Console transport projection of existing SMPP capability `listResources`.
+         */
+        readonly get: operations["listResources"];
+        readonly put?: never;
+        /**
+         * createResource
+         * @description Console transport projection of existing SMPP capability `createResource`.
+         */
+        readonly post: operations["createResource"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listProviderPackages
-     * @description Console transport projection of existing SMPP capability `listProviderPackages`.
-     */
-    readonly get: operations["listProviderPackages"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/provider-packages/{packageId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/resources/{environment}/{resourceId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getResource
+         * @description Console transport projection of existing SMPP capability `getResource`.
+         */
+        readonly get: operations["getResource"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getProviderPackage
-     * @description Console transport projection of existing SMPP capability `getProviderPackage`.
-     */
-    readonly get: operations["getProviderPackage"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/provider-types": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/resources/{environment}/{resourceId}/status": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        /**
+         * updateResourceStatus
+         * @description Console transport projection of existing SMPP capability `updateResourceStatus`.
+         */
+        readonly patch: operations["updateResourceStatus"];
+        readonly trace?: never;
     };
-    /**
-     * listProviderTypes
-     * @description Console transport projection of existing SMPP capability `listProviderTypes`.
-     */
-    readonly get: operations["listProviderTypes"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/provider-types/{providerTypeId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/providers/{providerId}/resource-bindings": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listProviderResourceBindings
+         * @description Console transport projection of existing SMPP capability `listProviderResourceBindings`.
+         */
+        readonly get: operations["listProviderResourceBindings"];
+        readonly put?: never;
+        /**
+         * bindProviderResource
+         * @description Console transport projection of existing SMPP capability `bindProviderResource`.
+         */
+        readonly post: operations["bindProviderResource"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getProviderType
-     * @description Console transport projection of existing SMPP capability `getProviderType`.
-     */
-    readonly get: operations["getProviderType"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/providers": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/providers/{providerId}/resource-bindings/{environment}/{resourceId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        /**
+         * unbindProviderResource
+         * @description Console transport projection of existing SMPP capability `unbindProviderResource`.
+         */
+        readonly delete: operations["unbindProviderResource"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listProviders
-     * @description Console transport projection of existing SMPP capability `listProviders`.
-     */
-    readonly get: operations["listProviders"];
-    readonly put?: never;
-    /**
-     * createProvider
-     * @description Console transport projection of existing SMPP capability `createProvider`.
-     */
-    readonly post: operations["createProvider"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/providers/{providerId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * createConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `createConfigurationDraft`.
+         */
+        readonly post: operations["createConfigurationDraft"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getProvider
-     * @description Console transport projection of existing SMPP capability `getProvider`.
-     */
-    readonly get: operations["getProvider"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/providers/{providerId}/resource-bindings": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts/{draftId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `getConfigurationDraft`.
+         */
+        readonly get: operations["getConfigurationDraft"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        /**
+         * updateConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `updateConfigurationDraft`.
+         */
+        readonly patch: operations["updateConfigurationDraft"];
+        readonly trace?: never;
     };
-    /**
-     * listProviderResourceBindings
-     * @description Console transport projection of existing SMPP capability `listProviderResourceBindings`.
-     */
-    readonly get: operations["listProviderResourceBindings"];
-    readonly put?: never;
-    /**
-     * bindProviderResource
-     * @description Console transport projection of existing SMPP capability `bindProviderResource`.
-     */
-    readonly post: operations["bindProviderResource"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/providers/{providerId}/resource-bindings/{environment}/{resourceId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts/{draftId}/validate": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * validateConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `validateConfigurationDraft`.
+         */
+        readonly post: operations["validateConfigurationDraft"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    readonly post?: never;
-    /**
-     * unbindProviderResource
-     * @description Console transport projection of existing SMPP capability `unbindProviderResource`.
-     */
-    readonly delete: operations["unbindProviderResource"];
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/providers/{providerId}/status": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts/{draftId}/effective": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * previewEffectiveConfiguration
+         * @description Console transport projection of existing SMPP capability `previewEffectiveConfiguration`.
+         */
+        readonly get: operations["previewEffectiveConfiguration"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    /**
-     * updateProviderStatus
-     * @description Console transport projection of existing SMPP capability `updateProviderStatus`.
-     */
-    readonly patch: operations["updateProviderStatus"];
-    readonly trace?: never;
-  };
-  readonly "/registry/{environment}/diff": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts/{draftId}/publish": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * publishConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `publishConfigurationDraft`.
+         */
+        readonly post: operations["publishConfigurationDraft"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * diffRegistrySnapshots
-     * @description Console transport projection of existing SMPP capability `diffRegistrySnapshots`.
-     */
-    readonly get: operations["diffRegistrySnapshots"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/registry/{environment}/history": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/configuration-drafts/{draftId}/rollback": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * rollbackConfigurationDraft
+         * @description Console transport projection of existing SMPP capability `rollbackConfigurationDraft`.
+         */
+        readonly post: operations["rollbackConfigurationDraft"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listRegistryHistory
-     * @description Console transport projection of existing SMPP capability `listRegistryHistory`.
-     */
-    readonly get: operations["listRegistryHistory"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/registry/{environment}/latest": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listRuntimeDeployments
+         * @description Console transport projection of existing SMPP capability `listRuntimeDeployments`.
+         */
+        readonly get: operations["listRuntimeDeployments"];
+        readonly put?: never;
+        /**
+         * createRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `createRuntimeDeployment`.
+         */
+        readonly post: operations["createRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getLatestRegistrySnapshot
-     * @description Console transport projection of existing SMPP capability `getLatestRegistrySnapshot`.
-     */
-    readonly get: operations["getLatestRegistrySnapshot"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/resources": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `getRuntimeDeployment`.
+         */
+        readonly get: operations["getRuntimeDeployment"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listResources
-     * @description Console transport projection of existing SMPP capability `listResources`.
-     */
-    readonly get: operations["listResources"];
-    readonly put?: never;
-    /**
-     * createResource
-     * @description Console transport projection of existing SMPP capability `createResource`.
-     */
-    readonly post: operations["createResource"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/resources/{environment}/{resourceId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}/start": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * startRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `startRuntimeDeployment`.
+         */
+        readonly post: operations["startRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getResource
-     * @description Console transport projection of existing SMPP capability `getResource`.
-     */
-    readonly get: operations["getResource"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/resources/{environment}/{resourceId}/status": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}/stop": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * stopRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `stopRuntimeDeployment`.
+         */
+        readonly post: operations["stopRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    /**
-     * updateResourceStatus
-     * @description Console transport projection of existing SMPP capability `updateResourceStatus`.
-     */
-    readonly patch: operations["updateResourceStatus"];
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}/restart": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * restartRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `restartRuntimeDeployment`.
+         */
+        readonly post: operations["restartRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listRuntimeDeployments
-     * @description Console transport projection of existing SMPP capability `listRuntimeDeployments`.
-     */
-    readonly get: operations["listRuntimeDeployments"];
-    readonly put?: never;
-    /**
-     * createRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `createRuntimeDeployment`.
-     */
-    readonly post: operations["createRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}/scale": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * scaleRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `scaleRuntimeDeployment`.
+         */
+        readonly post: operations["scaleRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `getRuntimeDeployment`.
-     */
-    readonly get: operations["getRuntimeDeployment"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}/reconcile": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-deployments/{deploymentId}/reconcile": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * reconcileRuntimeDeployment
+         * @description Console transport projection of existing SMPP capability `reconcileRuntimeDeployment`.
+         */
+        readonly post: operations["reconcileRuntimeDeployment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * reconcileRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `reconcileRuntimeDeployment`.
-     */
-    readonly post: operations["reconcileRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}/restart": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-processes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listRuntimeProcesses
+         * @description Console transport projection of existing SMPP capability `listRuntimeProcesses`.
+         */
+        readonly get: operations["listRuntimeProcesses"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * restartRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `restartRuntimeDeployment`.
-     */
-    readonly post: operations["restartRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}/scale": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/runtime-processes/{instanceId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getRuntimeProcess
+         * @description Console transport projection of existing SMPP capability `getRuntimeProcess`.
+         */
+        readonly get: operations["getRuntimeProcess"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * scaleRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `scaleRuntimeDeployment`.
-     */
-    readonly post: operations["scaleRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}/start": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/registry/{environment}/latest": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * getLatestRegistrySnapshot
+         * @description Console transport projection of existing SMPP capability `getLatestRegistrySnapshot`.
+         */
+        readonly get: operations["getLatestRegistrySnapshot"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * startRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `startRuntimeDeployment`.
-     */
-    readonly post: operations["startRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-deployments/{deploymentId}/stop": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/registry/{environment}/history": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listRegistryHistory
+         * @description Console transport projection of existing SMPP capability `listRegistryHistory`.
+         */
+        readonly get: operations["listRegistryHistory"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * stopRuntimeDeployment
-     * @description Console transport projection of existing SMPP capability `stopRuntimeDeployment`.
-     */
-    readonly post: operations["stopRuntimeDeployment"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-processes": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/registry/{environment}/diff": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * diffRegistrySnapshots
+         * @description Console transport projection of existing SMPP capability `diffRegistrySnapshots`.
+         */
+        readonly get: operations["diffRegistrySnapshots"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * listRuntimeProcesses
-     * @description Console transport projection of existing SMPP capability `listRuntimeProcesses`.
-     */
-    readonly get: operations["listRuntimeProcesses"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/runtime-processes/{instanceId}": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/audit-events": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /**
+         * listAuditEvents
+         * @description Console transport projection of existing SMPP capability `listAuditEvents`.
+         */
+        readonly get: operations["listAuditEvents"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /**
-     * getRuntimeProcess
-     * @description Console transport projection of existing SMPP capability `getRuntimeProcess`.
-     */
-    readonly get: operations["getRuntimeProcess"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** @description Read-only projection returned by the current audit list route; metadata is intentionally not included. */
-    readonly AuditEvent: {
-      readonly action: string;
-      readonly actorId: string;
-      readonly auditEventId: string;
-      readonly correlationId: string;
-      /** Format: date-time */
-      readonly occurredAt: string;
-      readonly subjectId: string;
-      readonly subjectType: string;
-    };
-    readonly ConfigRevision: {
-      /** @enum {string} */
-      readonly applyMode: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
-      readonly checksum: string;
-      readonly content: components["schemas"]["ConfigurationContent"];
-      /** Format: date-time */
-      readonly createdAt: string;
-      readonly revision: number;
-      /** Format: uuid */
-      readonly revisionId: string;
-      /** @enum {string} */
-      readonly status: "draft" | "validated" | "published" | "superseded" | "rejected";
-      readonly target: components["schemas"]["ConfigurationTarget"];
-    };
-    readonly ConfigurationBusinessKey: {
-      readonly configGroup: string;
-      readonly dataId: string;
-      readonly environment: string;
-      readonly targetId: string;
-      /** @enum {string} */
-      readonly targetType:
-        | "environment"
-        | "provider_type"
-        | "provider"
-        | "runtime_deployment"
-        | "runtime_instance"
-        | "collector";
-    };
-    readonly ConfigurationContent: {
-      readonly [key: string]: components["schemas"]["ConfigurationValue"];
-    };
-    readonly ConfigurationDraft: {
-      readonly ancestorTargetIds: {
-        readonly [key: string]: string;
-      };
-      /** @enum {string} */
-      readonly applyMode?: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
-      readonly content: components["schemas"]["ConfigurationContent"];
-      /** Format: date-time */
-      readonly createdAt: string;
-      readonly definitionId: string;
-      readonly definitionVersion: number;
-      readonly draftId: string;
-      readonly key: components["schemas"]["ConfigurationBusinessKey"];
-      /** @enum {string} */
-      readonly status: "draft" | "validated" | "invalid";
-      /** Format: date-time */
-      readonly updatedAt: string;
-      readonly validationIssues: readonly components["schemas"]["ConfigurationValidationIssue"][];
-      readonly version: number;
-    };
-    readonly ConfigurationPublicationResult: {
-      /** @enum {string} */
-      readonly outcome: "published" | "no_change";
-      readonly revision: components["schemas"]["ConfigRevision"];
-    };
-    readonly ConfigurationTarget: {
-      readonly configGroup: string;
-      readonly dataId: string;
-      readonly environment: string;
-      readonly targetId: string;
-      /** @enum {string} */
-      readonly targetType:
-        | "environment"
-        | "provider_type"
-        | "provider"
-        | "runtime_deployment"
-        | "runtime_instance"
-        | "collector";
-    };
-    readonly ConfigurationValidationIssue: {
-      /** @enum {string} */
-      readonly code:
-        | "IMMUTABLE_OVERRIDE"
-        | "OVERRIDE_NOT_ALLOWED"
-        | "PLAINTEXT_SECRET_REJECTED"
-        | "SCHEMA_VALIDATION_FAILED";
-      readonly message: string;
-      readonly path: string;
-    };
-    readonly ConfigurationValue:
-      | null
-      | boolean
-      | number
-      | string
-      | components["schemas"]["SecretRef"]
-      | readonly components["schemas"]["ConfigurationValue"][]
-      | {
-          readonly [key: string]: components["schemas"]["ConfigurationValue"];
+    schemas: {
+        /** @description Transport projection of existing SMPP public errors. No retryability policy is frozen in V1. */
+        readonly ProblemDetails: {
+            /** @description Stable URN or URI identifying the problem category. */
+            readonly type: string;
+            readonly title: string;
+            readonly status: number;
+            readonly code: components["schemas"]["ProblemCode"];
+            readonly detail?: string;
+            readonly requestId?: string;
+            readonly correlationId?: string;
         };
-    readonly EffectiveConfigurationPreview: {
-      /** @enum {string} */
-      readonly applyMode: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
-      readonly content: components["schemas"]["ConfigurationContent"];
-      readonly definitionId: string;
-      readonly definitionVersion: number;
-      readonly draftId: string;
-      readonly issues: readonly components["schemas"]["ConfigurationValidationIssue"][];
-      readonly sources: {
-        readonly [key: string]:
-          | "system_default"
-          | "environment"
-          | "provider_type"
-          | "provider"
-          | "runtime_deployment"
-          | "runtime_instance"
-          | "collector";
-      };
-      readonly valid: boolean;
-    };
-    readonly PageInfo: {
-      readonly nextCursor?: string;
-    };
-    /** @enum {string} */
-    readonly ProblemCode:
-      | "INVALID_REQUEST"
-      | "INVALID_JSON"
-      | "REQUEST_BODY_TOO_LARGE"
-      | "INTERNAL_ERROR"
-      | "ROUTE_NOT_FOUND"
-      | "INVALID_IDENTIFIER"
-      | "INVALID_DOMAIN_VALUE"
-      | "INVALID_STATE_TRANSITION"
-      | "DUPLICATE_RESOURCE_BINDING"
-      | "RESOURCE_BINDING_NOT_FOUND"
-      | "ENTITY_ALREADY_EXISTS"
-      | "ENTITY_NOT_FOUND"
-      | "OPTIMISTIC_CONCURRENCY_CONFLICT"
-      | "LEASE_NOT_OWNED"
-      | "RUNTIME_DEPLOYMENT_NOT_FOUND"
-      | "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE"
-      | "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE"
-      | "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE"
-      | "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED"
-      | "RUNTIME_DEPLOYMENT_REVISION_CONFLICT"
-      | "RUNTIME_PROCESS_NOT_FOUND"
-      | "CONFIGURATION_DEFINITION_NOT_FOUND"
-      | "CONFIGURATION_TARGET_NOT_ALLOWED"
-      | "CONFIGURATION_BUSINESS_KEY_CONFLICT"
-      | "CONFIGURATION_DRAFT_NOT_FOUND"
-      | "CONFIGURATION_DRAFT_VERSION_CONFLICT"
-      | "CONFIGURATION_DRAFT_NOT_VALIDATED"
-      | "CONFIGURATION_PUBLISH_CONFLICT"
-      | "CONFIGURATION_REVISION_NOT_FOUND"
-      | "CONFIGURATION_ROLLBACK_TARGET_MISMATCH"
-      | "CONFIGURATION_INPUT_INVALID"
-      | "REGISTRY_SNAPSHOT_NOT_FOUND";
-    /** @description Transport projection of existing SMPP public errors. No retryability policy is frozen in V1. */
-    readonly ProblemDetails: {
-      readonly code: components["schemas"]["ProblemCode"];
-      readonly correlationId?: string;
-      readonly detail?: string;
-      readonly requestId?: string;
-      readonly status: number;
-      readonly title: string;
-      /** @description Stable URN or URI identifying the problem category. */
-      readonly type: string;
-    };
-    readonly Provider: {
-      readonly adapterEndpoint?: string;
-      /** @enum {string} */
-      readonly hostingMode: "vendor_managed" | "platform_managed";
-      readonly packageId?: string;
-      readonly packageVersion?: string;
-      readonly providerId: string;
-      readonly providerTypeId: string;
-      /** @enum {string} */
-      readonly status: "draft" | "active" | "degraded" | "disabled" | "retired";
-      /** Format: date-time */
-      readonly updatedAt?: string;
-    };
-    readonly ProviderPackage: {
-      readonly compatibleRuntimeVersion: string;
-      readonly configSchemaId: string;
-      readonly hostingModes: readonly ("vendor_managed" | "platform_managed")[];
-      readonly packageId: string;
-      readonly packageVersion: string;
-      readonly protocolMode: string;
-      readonly providerType: string;
-      readonly qualification: {
         /** @enum {string} */
-        readonly componentStatus: "passed" | "partial" | "pending" | "failed";
-        /** @enum {string} */
-        readonly realResourceStatus: "qualified" | "pending" | "failed" | "not_applicable";
-      };
+        readonly ProblemCode: "INVALID_REQUEST" | "INVALID_JSON" | "REQUEST_BODY_TOO_LARGE" | "INTERNAL_ERROR" | "ROUTE_NOT_FOUND" | "INVALID_IDENTIFIER" | "INVALID_DOMAIN_VALUE" | "INVALID_STATE_TRANSITION" | "DUPLICATE_RESOURCE_BINDING" | "RESOURCE_BINDING_NOT_FOUND" | "ENTITY_ALREADY_EXISTS" | "ENTITY_NOT_FOUND" | "OPTIMISTIC_CONCURRENCY_CONFLICT" | "LEASE_NOT_OWNED" | "RUNTIME_DEPLOYMENT_NOT_FOUND" | "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE" | "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE" | "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE" | "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED" | "RUNTIME_DEPLOYMENT_REVISION_CONFLICT" | "RUNTIME_PROCESS_NOT_FOUND" | "CONFIGURATION_DEFINITION_NOT_FOUND" | "CONFIGURATION_TARGET_NOT_ALLOWED" | "CONFIGURATION_BUSINESS_KEY_CONFLICT" | "CONFIGURATION_DRAFT_NOT_FOUND" | "CONFIGURATION_DRAFT_VERSION_CONFLICT" | "CONFIGURATION_DRAFT_NOT_VALIDATED" | "CONFIGURATION_PUBLISH_CONFLICT" | "CONFIGURATION_REVISION_NOT_FOUND" | "CONFIGURATION_ROLLBACK_TARGET_MISMATCH" | "CONFIGURATION_INPUT_INVALID" | "REGISTRY_SNAPSHOT_NOT_FOUND";
+        readonly PageInfo: {
+            readonly nextCursor?: string;
+        };
+        readonly ProviderType: {
+            readonly providerTypeId: string;
+            readonly displayName: string;
+            /** @enum {string} */
+            readonly status: "active" | "deprecated";
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly ProviderPackage: {
+            readonly packageId: string;
+            readonly packageVersion: string;
+            readonly providerType: string;
+            readonly hostingModes: readonly ("vendor_managed" | "platform_managed")[];
+            readonly configSchemaId: string;
+            readonly compatibleRuntimeVersion: string;
+            readonly protocolMode: string;
+            readonly qualification: {
+                /** @enum {string} */
+                readonly componentStatus: "passed" | "partial" | "pending" | "failed";
+                /** @enum {string} */
+                readonly realResourceStatus: "qualified" | "pending" | "failed" | "not_applicable";
+            };
+        };
+        readonly Provider: {
+            readonly providerId: string;
+            readonly providerTypeId: string;
+            readonly packageId?: string;
+            readonly packageVersion?: string;
+            /** @enum {string} */
+            readonly hostingMode: "vendor_managed" | "platform_managed";
+            readonly adapterEndpoint?: string;
+            /** @enum {string} */
+            readonly status: "draft" | "active" | "degraded" | "disabled" | "retired";
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly Resource: {
+            readonly environment: string;
+            readonly resourceId: string;
+            readonly resourceType: string;
+            readonly metadata: {
+                readonly [key: string]: unknown;
+            };
+            /** @enum {string} */
+            readonly status: "available" | "unavailable" | "retired";
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly ProviderResourceBinding: {
+            readonly providerId: string;
+            readonly environment: string;
+            readonly resourceId: string;
+            /** Format: date-time */
+            readonly boundAt: string;
+        };
+        readonly ConfigurationBusinessKey: {
+            readonly environment: string;
+            /** @enum {string} */
+            readonly targetType: "environment" | "provider_type" | "provider" | "runtime_deployment" | "runtime_instance" | "collector";
+            readonly targetId: string;
+            readonly configGroup: string;
+            readonly dataId: string;
+        };
+        readonly ConfigurationDraft: {
+            readonly draftId: string;
+            readonly definitionId: string;
+            readonly definitionVersion: number;
+            readonly key: components["schemas"]["ConfigurationBusinessKey"];
+            readonly ancestorTargetIds: {
+                readonly [key: string]: string;
+            };
+            readonly content: components["schemas"]["ConfigurationContent"];
+            readonly version: number;
+            /** @enum {string} */
+            readonly status: "draft" | "validated" | "invalid";
+            /** @enum {string} */
+            readonly applyMode?: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
+            readonly validationIssues: readonly components["schemas"]["ConfigurationValidationIssue"][];
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        readonly RuntimeDeployment: {
+            readonly deploymentId: string;
+            readonly providerId: string;
+            readonly environment: string;
+            /** @enum {string} */
+            readonly desiredState: "running" | "stopped" | "draining";
+            readonly desiredReplicas: number;
+            readonly runtimeVersion: string;
+            readonly databaseProfileId: string;
+            readonly configProfileId: string;
+            readonly adapterEndpoint?: string;
+            /** @enum {string} */
+            readonly status: "REQUESTED" | "DATABASE_PROVISIONING" | "MIGRATING" | "CONFIG_PREPARING" | "STARTING" | "HEALTH_CHECKING" | "DISCOVERING" | "ACTIVE" | "STOPPED" | "DRAINING" | "DEGRADED" | "FAILED";
+            readonly desiredRevision: number;
+            readonly observedRevision: number;
+        };
+        /** @description operationId is the existing correlation identifier returned by the current route; it is not a Generic Operation domain object. */
+        readonly RuntimeDeploymentIntent: {
+            readonly operationId: string;
+            readonly deployment: components["schemas"]["RuntimeDeployment"];
+        };
+        /** @description Read-only projection from RuntimeProcessQueryService. Direct process control is forbidden. */
+        readonly RuntimeProcess: {
+            readonly instanceId: string;
+            readonly deploymentId: string;
+            /** @enum {string} */
+            readonly processState: "missing" | "starting" | "online" | "stopping" | "stopped" | "errored";
+            readonly livenessState?: string;
+            readonly readinessState?: string;
+            readonly registrationState?: string;
+            readonly catalogState?: string;
+            readonly runtimeVersion?: string;
+            readonly configRevision?: number | null;
+            readonly observedRevision?: number;
+            readonly restartCount?: number;
+            /** Format: date-time */
+            readonly lastHeartbeatAt?: string | null;
+            /** @enum {string} */
+            readonly observedHealth: "STOPPED" | "STARTING" | "NOT_READY" | "STALE" | "DEGRADED" | "FAILED" | "READY";
+            readonly readyForActive: boolean;
+            readonly healthReasonCode?: string;
+            readonly stale: boolean;
+            /** @enum {string} */
+            readonly registrationFreshness: "unregistered" | "registered" | "stale" | "identity_mismatch";
+            readonly logReference: components["schemas"]["RuntimeProcessLogReference"];
+        } & {
+            readonly [key: string]: unknown;
+        };
+        /** @description Opaque log locator emitted by the existing RuntimeProcess query. V1 does not guarantee that tailEndpoint is dereferenceable through the Console API. */
+        readonly RuntimeProcessLogReference: {
+            readonly referenceId: string;
+            readonly tailEndpoint: string;
+            /** @constant */
+            readonly contentIncluded: false;
+        };
+        readonly RegistrySnapshot: {
+            readonly environment: string;
+            readonly revision: number;
+            readonly checksum: string;
+            readonly document: components["schemas"]["RegistrySnapshotDocument"];
+            /** Format: date-time */
+            readonly publishedAt: string;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        readonly RegistryDiff: {
+            readonly environment: string;
+            readonly fromRevision: number;
+            readonly toRevision: number;
+            readonly added: readonly components["schemas"]["RegistryProviderProjection"][];
+            readonly removed: readonly components["schemas"]["RegistryProviderProjection"][];
+            readonly changed: readonly components["schemas"]["RegistryProviderChange"][];
+        };
+        /** @description Read-only projection returned by the current audit list route; metadata is intentionally not included. */
+        readonly AuditEvent: {
+            readonly auditEventId: string;
+            readonly action: string;
+            readonly actorId: string;
+            readonly correlationId: string;
+            readonly subjectType: string;
+            readonly subjectId: string;
+            /** Format: date-time */
+            readonly occurredAt: string;
+        };
+        readonly SecretRef: {
+            readonly secretRef: string;
+        };
+        readonly ConfigurationValue: null | boolean | number | string | components["schemas"]["SecretRef"] | readonly components["schemas"]["ConfigurationValue"][] | {
+            readonly [key: string]: components["schemas"]["ConfigurationValue"];
+        };
+        readonly ConfigurationContent: {
+            readonly [key: string]: components["schemas"]["ConfigurationValue"];
+        };
+        readonly ConfigurationTarget: {
+            readonly environment: string;
+            /** @enum {string} */
+            readonly targetType: "environment" | "provider_type" | "provider" | "runtime_deployment" | "runtime_instance" | "collector";
+            readonly targetId: string;
+            readonly configGroup: string;
+            readonly dataId: string;
+        };
+        readonly ConfigurationValidationIssue: {
+            /** @enum {string} */
+            readonly code: "IMMUTABLE_OVERRIDE" | "OVERRIDE_NOT_ALLOWED" | "PLAINTEXT_SECRET_REJECTED" | "SCHEMA_VALIDATION_FAILED";
+            readonly path: string;
+            readonly message: string;
+        };
+        readonly EffectiveConfigurationPreview: {
+            readonly draftId: string;
+            readonly definitionId: string;
+            readonly definitionVersion: number;
+            readonly content: components["schemas"]["ConfigurationContent"];
+            readonly sources: {
+                readonly [key: string]: "system_default" | "environment" | "provider_type" | "provider" | "runtime_deployment" | "runtime_instance" | "collector";
+            };
+            /** @enum {string} */
+            readonly applyMode: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
+            readonly valid: boolean;
+            readonly issues: readonly components["schemas"]["ConfigurationValidationIssue"][];
+        };
+        readonly ConfigRevision: {
+            /** Format: uuid */
+            readonly revisionId: string;
+            readonly target: components["schemas"]["ConfigurationTarget"];
+            readonly revision: number;
+            readonly checksum: string;
+            /** @enum {string} */
+            readonly applyMode: "hot_reload" | "reconnect_required" | "restart_required" | "immutable";
+            /** @enum {string} */
+            readonly status: "draft" | "validated" | "published" | "superseded" | "rejected";
+            readonly content: components["schemas"]["ConfigurationContent"];
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        readonly ConfigurationPublicationResult: {
+            /** @enum {string} */
+            readonly outcome: "published" | "no_change";
+            readonly revision: components["schemas"]["ConfigRevision"];
+        };
+        readonly RegistryProviderProjection: {
+            readonly providerId: string;
+            readonly serverId: string;
+            /** @constant */
+            readonly protocolMode: "frozen_v1";
+            readonly effectiveEndpoint: string;
+            readonly catalogRevision: number;
+            readonly tools: readonly {
+                readonly [key: string]: unknown;
+            }[];
+        };
+        readonly RegistrySnapshotDocument: {
+            readonly environment: string;
+            readonly providers: readonly components["schemas"]["RegistryProviderProjection"][];
+        };
+        readonly RegistryProviderChange: {
+            readonly providerId: string;
+            readonly before?: components["schemas"]["RegistryProviderProjection"];
+            readonly after?: components["schemas"]["RegistryProviderProjection"];
+        };
     };
-    readonly ProviderResourceBinding: {
-      /** Format: date-time */
-      readonly boundAt: string;
-      readonly environment: string;
-      readonly providerId: string;
-      readonly resourceId: string;
+    responses: {
+        /** @description Mapped existing SMPP error */
+        readonly Problem: {
+            headers: {
+                readonly [name: string]: unknown;
+            };
+            content: {
+                readonly "application/problem+json": components["schemas"]["ProblemDetails"];
+            };
+        };
     };
-    readonly ProviderType: {
-      readonly displayName: string;
-      readonly providerTypeId: string;
-      /** @enum {string} */
-      readonly status: "active" | "deprecated";
-      /** Format: date-time */
-      readonly updatedAt?: string;
+    parameters: {
+        /** @description Optional trace correlation identifier. The server may generate one when absent. */
+        readonly CorrelationIdHeader: string;
+        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+        readonly ActorIdHeader: string;
     };
-    readonly RegistryDiff: {
-      readonly added: readonly components["schemas"]["RegistryProviderProjection"][];
-      readonly changed: readonly components["schemas"]["RegistryProviderChange"][];
-      readonly environment: string;
-      readonly fromRevision: number;
-      readonly removed: readonly components["schemas"]["RegistryProviderProjection"][];
-      readonly toRevision: number;
-    };
-    readonly RegistryProviderChange: {
-      readonly after?: components["schemas"]["RegistryProviderProjection"];
-      readonly before?: components["schemas"]["RegistryProviderProjection"];
-      readonly providerId: string;
-    };
-    readonly RegistryProviderProjection: {
-      readonly catalogRevision: number;
-      readonly effectiveEndpoint: string;
-      /** @constant */
-      readonly protocolMode: "frozen_v1";
-      readonly providerId: string;
-      readonly serverId: string;
-      readonly tools: readonly {
-        readonly [key: string]: unknown;
-      }[];
-    };
-    readonly RegistrySnapshot: {
-      readonly checksum: string;
-      /** Format: date-time */
-      readonly createdAt: string;
-      readonly document: components["schemas"]["RegistrySnapshotDocument"];
-      readonly environment: string;
-      /** Format: date-time */
-      readonly publishedAt: string;
-      readonly revision: number;
-    };
-    readonly RegistrySnapshotDocument: {
-      readonly environment: string;
-      readonly providers: readonly components["schemas"]["RegistryProviderProjection"][];
-    };
-    readonly Resource: {
-      readonly environment: string;
-      readonly metadata: {
-        readonly [key: string]: unknown;
-      };
-      readonly resourceId: string;
-      readonly resourceType: string;
-      /** @enum {string} */
-      readonly status: "available" | "unavailable" | "retired";
-      /** Format: date-time */
-      readonly updatedAt?: string;
-    };
-    readonly RuntimeDeployment: {
-      readonly adapterEndpoint?: string;
-      readonly configProfileId: string;
-      readonly databaseProfileId: string;
-      readonly deploymentId: string;
-      readonly desiredReplicas: number;
-      readonly desiredRevision: number;
-      /** @enum {string} */
-      readonly desiredState: "running" | "stopped" | "draining";
-      readonly environment: string;
-      readonly observedRevision: number;
-      readonly providerId: string;
-      readonly runtimeVersion: string;
-      /** @enum {string} */
-      readonly status:
-        | "REQUESTED"
-        | "DATABASE_PROVISIONING"
-        | "MIGRATING"
-        | "CONFIG_PREPARING"
-        | "STARTING"
-        | "HEALTH_CHECKING"
-        | "DISCOVERING"
-        | "ACTIVE"
-        | "STOPPED"
-        | "DRAINING"
-        | "DEGRADED"
-        | "FAILED";
-    };
-    /** @description operationId is the existing correlation identifier returned by the current route; it is not a Generic Operation domain object. */
-    readonly RuntimeDeploymentIntent: {
-      readonly deployment: components["schemas"]["RuntimeDeployment"];
-      readonly operationId: string;
-    };
-    /** @description Read-only projection from RuntimeProcessQueryService. Direct process control is forbidden. */
-    readonly RuntimeProcess: {
-      readonly catalogState?: string;
-      readonly configRevision?: number | null;
-      readonly deploymentId: string;
-      readonly healthReasonCode?: string;
-      readonly instanceId: string;
-      /** Format: date-time */
-      readonly lastHeartbeatAt?: string | null;
-      readonly livenessState?: string;
-      readonly logReference: components["schemas"]["RuntimeProcessLogReference"];
-      /** @enum {string} */
-      readonly observedHealth:
-        "STOPPED" | "STARTING" | "NOT_READY" | "STALE" | "DEGRADED" | "FAILED" | "READY";
-      readonly observedRevision?: number;
-      /** @enum {string} */
-      readonly processState: "missing" | "starting" | "online" | "stopping" | "stopped" | "errored";
-      readonly readinessState?: string;
-      readonly readyForActive: boolean;
-      /** @enum {string} */
-      readonly registrationFreshness: "unregistered" | "registered" | "stale" | "identity_mismatch";
-      readonly registrationState?: string;
-      readonly restartCount?: number;
-      readonly runtimeVersion?: string;
-      readonly stale: boolean;
-    } & {
-      readonly [key: string]: unknown;
-    };
-    /** @description Opaque log locator emitted by the existing RuntimeProcess query. V1 does not guarantee that tailEndpoint is dereferenceable through the Console API. */
-    readonly RuntimeProcessLogReference: {
-      /** @constant */
-      readonly contentIncluded: false;
-      readonly referenceId: string;
-      readonly tailEndpoint: string;
-    };
-    readonly SecretRef: {
-      readonly secretRef: string;
-    };
-  };
-  responses: {
-    /** @description Mapped existing SMPP error */
-    readonly Problem: {
-      headers: {
-        readonly [name: string]: unknown;
-      };
-      content: {
-        readonly "application/problem+json": components["schemas"]["ProblemDetails"];
-      };
-    };
-  };
-  parameters: {
-    /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-    readonly ActorIdHeader: string;
-    /** @description Optional trace correlation identifier. The server may generate one when absent. */
-    readonly CorrelationIdHeader: string;
-  };
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-export type AuditEvent = components["schemas"]["AuditEvent"];
-export type ConfigRevision = components["schemas"]["ConfigRevision"];
-export type ConfigurationBusinessKey = components["schemas"]["ConfigurationBusinessKey"];
-export type ConfigurationContent = components["schemas"]["ConfigurationContent"];
-export type ConfigurationDraft = components["schemas"]["ConfigurationDraft"];
-export type ConfigurationPublicationResult =
-  components["schemas"]["ConfigurationPublicationResult"];
-export type ConfigurationTarget = components["schemas"]["ConfigurationTarget"];
-export type ConfigurationValidationIssue = components["schemas"]["ConfigurationValidationIssue"];
-export type ConfigurationValue = components["schemas"]["ConfigurationValue"];
-export type EffectiveConfigurationPreview = components["schemas"]["EffectiveConfigurationPreview"];
-export type PageInfo = components["schemas"]["PageInfo"];
-export type ProblemCode = components["schemas"]["ProblemCode"];
-export type ProblemDetails = components["schemas"]["ProblemDetails"];
-export type Provider = components["schemas"]["Provider"];
-export type ProviderPackage = components["schemas"]["ProviderPackage"];
-export type ProviderResourceBinding = components["schemas"]["ProviderResourceBinding"];
-export type ProviderType = components["schemas"]["ProviderType"];
-export type RegistryDiff = components["schemas"]["RegistryDiff"];
-export type RegistryProviderChange = components["schemas"]["RegistryProviderChange"];
-export type RegistryProviderProjection = components["schemas"]["RegistryProviderProjection"];
-export type RegistrySnapshot = components["schemas"]["RegistrySnapshot"];
-export type RegistrySnapshotDocument = components["schemas"]["RegistrySnapshotDocument"];
-export type Resource = components["schemas"]["Resource"];
-export type RuntimeDeployment = components["schemas"]["RuntimeDeployment"];
-export type RuntimeDeploymentIntent = components["schemas"]["RuntimeDeploymentIntent"];
-export type RuntimeProcess = components["schemas"]["RuntimeProcess"];
-export type RuntimeProcessLogReference = components["schemas"]["RuntimeProcessLogReference"];
-export type SecretRef = components["schemas"]["SecretRef"];
-export type ResponseProblem = components["responses"]["Problem"];
-export type ParameterActorIdHeader = components["parameters"]["ActorIdHeader"];
-export type ParameterCorrelationIdHeader = components["parameters"]["CorrelationIdHeader"];
 export type $defs = Record<string, never>;
 export interface operations {
-  readonly listAuditEvents: {
-    readonly parameters: {
-      readonly query?: {
-        readonly correlationId?: string;
-        readonly cursor?: string;
-        readonly limit?: number;
-        readonly occurredBefore?: string;
-        readonly subjectId?: string;
-        readonly subjectType?: string;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["AuditEvent"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly createConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly ancestorTargetIds?: {
-            readonly [key: string]: string;
-          };
-          readonly configGroup: string;
-          readonly content: components["schemas"]["ConfigurationContent"];
-          readonly dataId: string;
-          readonly definitionId: string;
-          readonly draftId: string;
-          readonly environment: string;
-          readonly targetId: string;
-          /** @enum {string} */
-          readonly targetType:
-            | "environment"
-            | "provider_type"
-            | "provider"
-            | "runtime_deployment"
-            | "runtime_instance"
-            | "collector";
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Created */
-      readonly 201: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationDraft"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationDraft"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly updateConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly ancestorTargetIds?: {
-            readonly [key: string]: string;
-          };
-          readonly content: components["schemas"]["ConfigurationContent"];
-          readonly expectedVersion: number;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationDraft"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly previewEffectiveConfiguration: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["EffectiveConfigurationPreview"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly publishConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDraftVersion: number;
-          readonly expectedPublishedRevision: number | null;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationPublicationResult"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly rollbackConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDraftVersion: number;
-          readonly expectedPublishedRevision: number | null;
-          /** Format: uuid */
-          readonly sourceRevisionId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationPublicationResult"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly validateConfigurationDraft: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly draftId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ConfigurationDraft"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listProviderPackages: {
-    readonly parameters: {
-      readonly query?: {
-        readonly componentStatus?: "passed" | "partial" | "pending" | "failed";
-        readonly hostingMode?: "vendor_managed" | "platform_managed";
-        readonly providerType?: string;
-        readonly realResourceStatus?: "qualified" | "pending" | "failed" | "not_applicable";
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["ProviderPackage"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getProviderPackage: {
-    readonly parameters: {
-      readonly query?: {
-        readonly version?: string;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly packageId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ProviderPackage"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listProviderTypes: {
-    readonly parameters: {
-      readonly query?: {
-        readonly cursor?: string;
-        readonly limit?: number;
-        readonly status?: "active" | "deprecated";
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["ProviderType"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getProviderType: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly providerTypeId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ProviderType"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listProviders: {
-    readonly parameters: {
-      readonly query?: {
-        readonly cursor?: string;
-        readonly limit?: number;
-        readonly status?: "draft" | "active" | "degraded" | "disabled" | "retired";
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["Provider"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly createProvider: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly adapterEndpoint?: string;
-          /** @enum {string} */
-          readonly hostingMode?: "vendor_managed" | "platform_managed";
-          readonly packageId?: string;
-          readonly packageVersion?: string;
-          readonly providerId: string;
-          readonly providerTypeId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Created */
-      readonly 201: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Provider"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getProvider: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly providerId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Provider"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listProviderResourceBindings: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly providerId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Bindings */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["ProviderResourceBinding"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly bindProviderResource: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly providerId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly environment: string;
-          readonly resourceId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Created */
-      readonly 201: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ProviderResourceBinding"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly unbindProviderResource: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-        readonly providerId: string;
-        readonly resourceId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Unbound */
-      readonly 204: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content?: never;
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly updateProviderStatus: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly providerId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          /** Format: date-time */
-          readonly expectedUpdatedAt: string;
-          /** @enum {string} */
-          readonly status: "draft" | "active" | "degraded" | "disabled" | "retired";
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Provider"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly diffRegistrySnapshots: {
-    readonly parameters: {
-      readonly query: {
-        readonly fromRevision: number;
-        readonly toRevision: number;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RegistryDiff"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listRegistryHistory: {
-    readonly parameters: {
-      readonly query?: {
-        readonly limit?: number;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description History */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["RegistrySnapshot"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getLatestRegistrySnapshot: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Existing Registry conditional-read validator; accepts a quoted checksum, weak validator or wildcard. */
-        readonly "If-None-Match"?: string;
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          /** @description Existing Registry cache directive. */
-          readonly "Cache-Control"?: string;
-          /** @description Quoted snapshot checksum used by the existing Registry conditional-read behavior. */
-          readonly ETag?: string;
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RegistrySnapshot"];
-        };
-      };
-      /** @description Not Modified */
-      readonly 304: {
-        headers: {
-          /** @description Existing Registry cache directive. */
-          readonly "Cache-Control"?: string;
-          /** @description Quoted checksum matching If-None-Match. */
-          readonly ETag?: string;
-          readonly [name: string]: unknown;
-        };
-        content?: never;
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listResources: {
-    readonly parameters: {
-      readonly query: {
-        readonly cursor?: string;
-        readonly environment: string;
-        readonly limit?: number;
-        readonly status?: "available" | "unavailable" | "retired";
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["Resource"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly createResource: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly environment: string;
-          readonly metadata?: {
-            readonly [key: string]: unknown;
-          };
-          readonly resourceId: string;
-          readonly resourceType: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Created */
-      readonly 201: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Resource"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getResource: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-        readonly resourceId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Resource"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly updateResourceStatus: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly environment: string;
-        readonly resourceId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          /** Format: date-time */
-          readonly expectedUpdatedAt: string;
-          /** @enum {string} */
-          readonly status: "available" | "unavailable" | "retired";
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["Resource"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listRuntimeDeployments: {
-    readonly parameters: {
-      readonly query: {
-        readonly cursor?: string;
-        readonly environment?: string;
-        readonly limit?: number;
-        readonly providerId: string;
-        readonly status?:
-          | "REQUESTED"
-          | "DATABASE_PROVISIONING"
-          | "MIGRATING"
-          | "CONFIG_PREPARING"
-          | "STARTING"
-          | "HEALTH_CHECKING"
-          | "DISCOVERING"
-          | "ACTIVE"
-          | "STOPPED"
-          | "DRAINING"
-          | "DEGRADED"
-          | "FAILED";
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["RuntimeDeployment"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly createRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly adapterEndpoint?: string;
-          readonly configProfileId: string;
-          readonly databaseProfileId: string;
-          readonly deploymentId: string;
-          readonly desiredReplicas?: number;
-          readonly environment: string;
-          readonly providerId: string;
-          readonly runtimeVersion: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getRuntimeDeployment: {
-    readonly parameters: {
-      readonly query: {
-        readonly providerId: string;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeployment"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly reconcileRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDesiredRevision: number;
-          readonly providerId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly restartRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDesiredRevision: number;
-          readonly providerId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly scaleRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly desiredReplicas: number;
-          readonly expectedDesiredRevision: number;
-          readonly providerId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly startRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDesiredRevision: number;
-          readonly providerId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly stopRuntimeDeployment: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header: {
-        /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
-        readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly deploymentId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": {
-          readonly expectedDesiredRevision: number;
-          readonly providerId: string;
-        };
-      };
-    };
-    readonly responses: {
-      /** @description Accepted */
-      readonly 202: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly listRuntimeProcesses: {
-    readonly parameters: {
-      readonly query: {
-        readonly cursor?: string;
-        readonly deploymentId: string;
-        readonly limit?: number;
-        readonly observedHealth?:
-          "STOPPED" | "STARTING" | "NOT_READY" | "STALE" | "DEGRADED" | "FAILED" | "READY";
-        readonly processState?:
-          "missing" | "starting" | "online" | "stopping" | "stopped" | "errored";
-        readonly providerId: string;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Page */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": {
-            readonly items: readonly components["schemas"]["RuntimeProcess"][];
-            readonly nextCursor?: string;
-          };
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
-  readonly getRuntimeProcess: {
-    readonly parameters: {
-      readonly query: {
-        readonly providerId: string;
-      };
-      readonly header?: {
-        /** @description Optional trace correlation identifier. The server may generate one when absent. */
-        readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
-      };
-      readonly path: {
-        readonly instanceId: string;
-      };
-      readonly cookie?: never;
-    };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Success */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["RuntimeProcess"];
-        };
-      };
-      readonly default: components["responses"]["Problem"];
-    };
-  };
+    readonly listProviderPackages: {
+        readonly parameters: {
+            readonly query?: {
+                readonly providerType?: string;
+                readonly hostingMode?: "vendor_managed" | "platform_managed";
+                readonly componentStatus?: "passed" | "partial" | "pending" | "failed";
+                readonly realResourceStatus?: "qualified" | "pending" | "failed" | "not_applicable";
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["ProviderPackage"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getProviderPackage: {
+        readonly parameters: {
+            readonly query?: {
+                readonly version?: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ProviderPackage"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listProviderTypes: {
+        readonly parameters: {
+            readonly query?: {
+                readonly limit?: number;
+                readonly cursor?: string;
+                readonly status?: "active" | "deprecated";
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["ProviderType"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getProviderType: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly providerTypeId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ProviderType"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listProviders: {
+        readonly parameters: {
+            readonly query?: {
+                readonly limit?: number;
+                readonly cursor?: string;
+                readonly status?: "draft" | "active" | "degraded" | "disabled" | "retired";
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["Provider"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly createProvider: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly providerTypeId: string;
+                    readonly packageId?: string;
+                    readonly packageVersion?: string;
+                    /** @enum {string} */
+                    readonly hostingMode?: "vendor_managed" | "platform_managed";
+                    readonly adapterEndpoint?: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Provider"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getProvider: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly providerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Provider"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly updateProviderStatus: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly providerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    /** @enum {string} */
+                    readonly status: "draft" | "active" | "degraded" | "disabled" | "retired";
+                    /** Format: date-time */
+                    readonly expectedUpdatedAt: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Provider"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listResources: {
+        readonly parameters: {
+            readonly query: {
+                readonly environment: string;
+                readonly limit?: number;
+                readonly cursor?: string;
+                readonly status?: "available" | "unavailable" | "retired";
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["Resource"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly createResource: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly environment: string;
+                    readonly resourceId: string;
+                    readonly resourceType: string;
+                    readonly metadata?: {
+                        readonly [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Resource"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getResource: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly environment: string;
+                readonly resourceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Resource"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly updateResourceStatus: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly environment: string;
+                readonly resourceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    /** @enum {string} */
+                    readonly status: "available" | "unavailable" | "retired";
+                    /** Format: date-time */
+                    readonly expectedUpdatedAt: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Resource"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listProviderResourceBindings: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly providerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Bindings */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["ProviderResourceBinding"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly bindProviderResource: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly providerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly environment: string;
+                    readonly resourceId: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ProviderResourceBinding"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly unbindProviderResource: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly providerId: string;
+                readonly environment: string;
+                readonly resourceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Unbound */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly createConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly draftId: string;
+                    readonly definitionId: string;
+                    readonly environment: string;
+                    /** @enum {string} */
+                    readonly targetType: "environment" | "provider_type" | "provider" | "runtime_deployment" | "runtime_instance" | "collector";
+                    readonly targetId: string;
+                    readonly configGroup: string;
+                    readonly dataId: string;
+                    readonly ancestorTargetIds?: {
+                        readonly [key: string]: string;
+                    };
+                    readonly content: components["schemas"]["ConfigurationContent"];
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationDraft"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationDraft"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly updateConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly expectedVersion: number;
+                    readonly ancestorTargetIds?: {
+                        readonly [key: string]: string;
+                    };
+                    readonly content: components["schemas"]["ConfigurationContent"];
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationDraft"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly validateConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationDraft"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly previewEffectiveConfiguration: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["EffectiveConfigurationPreview"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly publishConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly expectedDraftVersion: number;
+                    readonly expectedPublishedRevision: number | null;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationPublicationResult"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly rollbackConfigurationDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly draftId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly expectedDraftVersion: number;
+                    readonly expectedPublishedRevision: number | null;
+                    /** Format: uuid */
+                    readonly sourceRevisionId: string;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ConfigurationPublicationResult"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listRuntimeDeployments: {
+        readonly parameters: {
+            readonly query: {
+                readonly providerId: string;
+                readonly environment?: string;
+                readonly status?: "REQUESTED" | "DATABASE_PROVISIONING" | "MIGRATING" | "CONFIG_PREPARING" | "STARTING" | "HEALTH_CHECKING" | "DISCOVERING" | "ACTIVE" | "STOPPED" | "DRAINING" | "DEGRADED" | "FAILED";
+                readonly limit?: number;
+                readonly cursor?: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["RuntimeDeployment"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly createRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly deploymentId: string;
+                    readonly providerId: string;
+                    readonly environment: string;
+                    readonly runtimeVersion: string;
+                    readonly databaseProfileId: string;
+                    readonly configProfileId: string;
+                    readonly adapterEndpoint?: string;
+                    readonly desiredReplicas?: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getRuntimeDeployment: {
+        readonly parameters: {
+            readonly query: {
+                readonly providerId: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeployment"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly startRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly expectedDesiredRevision: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly stopRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly expectedDesiredRevision: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly restartRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly expectedDesiredRevision: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly scaleRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly expectedDesiredRevision: number;
+                    readonly desiredReplicas: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly reconcileRuntimeDeployment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Required audit actor identifier for mutating requests. It is not an authentication or authorization credential in V1. */
+                readonly "X-Actor-ID": components["parameters"]["ActorIdHeader"];
+            };
+            readonly path: {
+                readonly deploymentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": {
+                    readonly providerId: string;
+                    readonly expectedDesiredRevision: number;
+                };
+            };
+        };
+        readonly responses: {
+            /** @description Accepted */
+            readonly 202: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeDeploymentIntent"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listRuntimeProcesses: {
+        readonly parameters: {
+            readonly query: {
+                readonly providerId: string;
+                readonly deploymentId: string;
+                readonly processState?: "missing" | "starting" | "online" | "stopping" | "stopped" | "errored";
+                readonly observedHealth?: "STOPPED" | "STARTING" | "NOT_READY" | "STALE" | "DEGRADED" | "FAILED" | "READY";
+                readonly limit?: number;
+                readonly cursor?: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["RuntimeProcess"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getRuntimeProcess: {
+        readonly parameters: {
+            readonly query: {
+                readonly providerId: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly instanceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RuntimeProcess"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly getLatestRegistrySnapshot: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+                /** @description Existing Registry conditional-read validator; accepts a quoted checksum, weak validator or wildcard. */
+                readonly "If-None-Match"?: string;
+            };
+            readonly path: {
+                readonly environment: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    /** @description Quoted snapshot checksum used by the existing Registry conditional-read behavior. */
+                    readonly ETag?: string;
+                    /** @description Existing Registry cache directive. */
+                    readonly "Cache-Control"?: string;
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RegistrySnapshot"];
+                };
+            };
+            /** @description Not Modified */
+            readonly 304: {
+                headers: {
+                    /** @description Quoted checksum matching If-None-Match. */
+                    readonly ETag?: string;
+                    /** @description Existing Registry cache directive. */
+                    readonly "Cache-Control"?: string;
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listRegistryHistory: {
+        readonly parameters: {
+            readonly query?: {
+                readonly limit?: number;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly environment: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description History */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["RegistrySnapshot"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly diffRegistrySnapshots: {
+        readonly parameters: {
+            readonly query: {
+                readonly fromRevision: number;
+                readonly toRevision: number;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path: {
+                readonly environment: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Success */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RegistryDiff"];
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
+    readonly listAuditEvents: {
+        readonly parameters: {
+            readonly query?: {
+                readonly subjectType?: string;
+                readonly subjectId?: string;
+                readonly correlationId?: string;
+                readonly occurredBefore?: string;
+                readonly limit?: number;
+                readonly cursor?: string;
+            };
+            readonly header?: {
+                /** @description Optional trace correlation identifier. The server may generate one when absent. */
+                readonly "X-Correlation-ID"?: components["parameters"]["CorrelationIdHeader"];
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": {
+                        readonly items: readonly components["schemas"]["AuditEvent"][];
+                        readonly nextCursor?: string;
+                    };
+                };
+            };
+            readonly default: components["responses"]["Problem"];
+        };
+    };
 }

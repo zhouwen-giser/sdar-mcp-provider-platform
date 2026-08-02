@@ -37,7 +37,7 @@ if (/GenericRoute|feature-routes|StructuredPlaceholder|PlatformPage/.test(router
 if (existsSync(join(sourceRoot, "data"))) failures.push("src/data: legacy centralized data source directory remains");
 if (!existsSync(join(sourceRoot, "api/generated/contract.d.ts"))) failures.push("generated contract DTO missing");
 if (!existsSync(join(sourceRoot, "gateways/contracts/index.ts"))) failures.push("gateway contracts missing");
-if (!existsSync(join(sourceRoot, "queries/hooks.ts"))) failures.push("domain query hooks missing");
+if (!existsSync(join(sourceRoot, "queries/hooks.ts")) && !existsSync(join(sourceRoot, "queries/hooks.tsx"))) failures.push("domain query hooks missing");
 
 if (failures.length > 0) {
   console.error(failures.join("\n"));

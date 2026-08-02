@@ -12,9 +12,10 @@ describe("product state components", () => {
     const host=document.createElement("div");document.body.append(host);const confirm=vi.fn();
     await act(()=>{createRoot(host).render(<ConfirmDialog title="Stop runtime" impact="Scale to zero" open requirePhrase="deploy-001" reasonRequired onCancel={vi.fn()} onConfirm={confirm}/>)});
     const inputs=host.querySelectorAll("input,textarea");
-    await act(()=>{(inputs[0] as HTMLTextAreaElement).value="maintenance";(inputs[0] as HTMLTextAreaElement).dispatchEvent(new Event("input",{bubbles:true}));(inputs[1] as HTMLInputElement).value="deploy-001";(inputs[1] as HTMLInputElement).dispatchEvent(new Event("input",{bubbles:true}))});
-    const button=[...host.querySelectorAll("button")].find(item=>item.textContent?.includes("确认执行"));
-    await act(()=>button?.click());
+    await act(()=>{setNativeValue(inputs[0] as HTMLTextAreaElement,"maintenance");setNativeValue(inputs[1] as HTMLInputElement,"deploy-001")});
+    const button=host.querySelector("button.button-danger") as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    await act(()=>button.click());
     expect(confirm).toHaveBeenCalledWith("maintenance");
   });
 
@@ -26,3 +27,13 @@ describe("product state components", () => {
     expect(host.textContent).toContain("PMS_API_NOT_CONFIGURED");
   });
 });
+
+function setNativeValue(element: HTMLInputElement | HTMLTextAreaElement, value: string): void {
+  const prototype = element instanceof HTMLTextAreaElement
+    ? HTMLTextAreaElement.prototype
+    : HTMLInputElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+  if (setter === undefined) throw new Error("native value setter missing");
+  setter.call(element, value);
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+}

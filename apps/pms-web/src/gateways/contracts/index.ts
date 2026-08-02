@@ -35,7 +35,7 @@ export interface ProviderGateway {
   updateProviderStatus(providerId: string, input: RequestBody<"updateProviderStatus">, context?: GatewayContext): Promise<ProviderDto>;
 }
 export interface ResourceGateway {
-  listResources(context?: GatewayContext): Promise<Page<ResourceDto>>;
+  listResources(environment: string, context?: GatewayContext): Promise<Page<ResourceDto>>;
   getResource(environment: string, resourceId: string, context?: GatewayContext): Promise<ResourceDto>;
   createResource(input: RequestBody<"createResource">, context?: GatewayContext): Promise<ResourceDto>;
   updateResourceStatus(environment: string, resourceId: string, input: RequestBody<"updateResourceStatus">, context?: GatewayContext): Promise<ResourceDto>;
@@ -53,16 +53,16 @@ export interface ConfigurationGateway {
   rollbackDraft(draftId: string, input: RequestBody<"rollbackConfigurationDraft">, context?: GatewayContext): Promise<ConfigurationPublicationResultDto>;
 }
 export interface RuntimeGateway {
-  listDeployments(context?: GatewayContext): Promise<Page<RuntimeDeploymentDto>>;
-  getDeployment(deploymentId: string, context?: GatewayContext): Promise<RuntimeDeploymentDto>;
+  listDeployments(providerId: string, context?: GatewayContext): Promise<Page<RuntimeDeploymentDto>>;
+  getDeployment(providerId: string, deploymentId: string, context?: GatewayContext): Promise<RuntimeDeploymentDto>;
   createDeployment(input: RequestBody<"createRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
   startDeployment(deploymentId: string, input: RequestBody<"startRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
   stopDeployment(deploymentId: string, input: RequestBody<"stopRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
   restartDeployment(deploymentId: string, input: RequestBody<"restartRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
   scaleDeployment(deploymentId: string, input: RequestBody<"scaleRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
   reconcileDeployment(deploymentId: string, input: RequestBody<"reconcileRuntimeDeployment">, context?: GatewayContext): Promise<RuntimeDeploymentIntentDto>;
-  listProcesses(context?: GatewayContext): Promise<Page<RuntimeProcessDto>>;
-  getProcess(instanceId: string, context?: GatewayContext): Promise<RuntimeProcessDto>;
+  listProcesses(providerId: string, deploymentId: string, context?: GatewayContext): Promise<Page<RuntimeProcessDto>>;
+  getProcess(providerId: string, instanceId: string, context?: GatewayContext): Promise<RuntimeProcessDto>;
 }
 export interface RegistryGateway {
   latest(environment: string, context?: GatewayContext): Promise<RegistrySnapshotDto>;
@@ -70,7 +70,15 @@ export interface RegistryGateway {
   diff(environment: string, fromRevision: number, toRevision: number, context?: GatewayContext): Promise<RegistryDiffDto>;
 }
 export interface AuditGateway {
-  list(context?: GatewayContext): Promise<Page<AuditEventDto>>;
+  list(filters: AuditListFilters, context?: GatewayContext): Promise<Page<AuditEventDto>>;
+}
+export interface AuditListFilters {
+  readonly subjectType?: string;
+  readonly subjectId?: string;
+  readonly correlationId?: string;
+  readonly occurredBefore?: string;
+  readonly limit?: number;
+  readonly cursor?: string;
 }
 export interface ScenarioController {
   current(): ProductScenario;

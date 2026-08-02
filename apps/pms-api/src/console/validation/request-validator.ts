@@ -10,12 +10,16 @@ import {
 export function consoleRequestSchema(operationId: string): FastifySchema {
   const { operation } = frozenConsoleOperation(operationId);
   const path = parameterObject(operation.parameters, "path", false);
-  const querystring = parameterObject(operation.parameters, "query", false);
+  const querystring = parameterObject(operation.parameters, "query", false) ?? {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  };
   const headers = parameterObject(operation.parameters, "header", true);
   const body = requestBodySchema(operation.requestBody);
   return {
     ...(path === undefined ? {} : { params: path }),
-    ...(querystring === undefined ? {} : { querystring }),
+    querystring,
     ...(headers === undefined ? {} : { headers }),
     ...(body === undefined ? {} : { body }),
   };
@@ -56,4 +60,3 @@ function requestBodySchema(
   if (schema === undefined) throw new Error("PMS_CONSOLE_JSON_REQUEST_SCHEMA_MISSING");
   return rewriteSchemaReferences(schema);
 }
-

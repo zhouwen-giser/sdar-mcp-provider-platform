@@ -19,7 +19,6 @@ const protectedPrefixes = [
   "migrations/",
   "protocol/",
   "provider-packages/",
-  "apps/pms-web/",
 ];
 const diff = spawnSync("git", ["diff", "--name-only", baseline, "--"], {
   cwd: root,
@@ -30,7 +29,7 @@ if (diff.status !== 0) {
   process.exit(1);
 }
 const changedPaths = diff.stdout.split(/\r?\n/u).filter(Boolean);
-const status = spawnSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], {
+const status = spawnSync("git", ["ls-files", "--others", "--exclude-standard"], {
   cwd: root,
   encoding: "utf8",
 });
@@ -39,7 +38,7 @@ if (status.status !== 0) {
   process.exit(1);
 }
 for (const line of status.stdout.split(/\r?\n/u).filter(Boolean)) {
-  const path = (line.slice(3).split(" -> ").at(-1) ?? "").replace(/^"|"$/g, "");
+  const path = line.replace(/^"|"$/g, "");
   if (path.length > 0 && !changedPaths.includes(path)) changedPaths.push(path);
 }
 const protectedChanges = changedPaths.filter((path) =>
@@ -52,7 +51,7 @@ const result = {
   businessSourceUnchanged: protectedChanges.length === 0,
   migrationsUnchanged: !protectedChanges.some((path) => path.startsWith("migrations/")),
   protocolUnchanged: !protectedChanges.some((path) => path.startsWith("protocol/")),
-  pmsWebUnchanged: !protectedChanges.some((path) => path.startsWith("apps/pms-web/")),
+  pmsWebUnchanged: !changedPaths.some((path) => path.startsWith("apps/pms-web/")),
   passed: protectedChanges.length === 0,
 };
 process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

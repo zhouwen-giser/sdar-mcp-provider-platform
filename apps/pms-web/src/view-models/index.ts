@@ -40,6 +40,7 @@ export interface RuntimeDeploymentViewModel {
   readonly converged: boolean;
 }
 export interface RuntimeProcessViewModel {
+  readonly providerId: string;
   readonly instanceId: string;
   readonly deploymentId: string;
   readonly processState: string;

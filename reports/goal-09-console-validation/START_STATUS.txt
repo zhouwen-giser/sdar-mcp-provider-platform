@@ -1,0 +1,2 @@
+## codex/goal-06-pms-console-api-contract-v1...origin/codex/goal-06-pms-console-api-contract-v1
+WORKTREE=clean

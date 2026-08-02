@@ -91,8 +91,9 @@ export function mapCreateConfigurationDraft(body: unknown): CreateConfigurationD
     ...(value.ancestorTargetIds === undefined
       ? {}
       : {
-          ancestorTargetIds:
-            value.ancestorTargetIds as CreateConfigurationDraft["ancestorTargetIds"],
+          ancestorTargetIds: value.ancestorTargetIds as NonNullable<
+            CreateConfigurationDraft["ancestorTargetIds"]
+          >,
         }),
     content: record(value.content) as CreateConfigurationDraft["content"],
   };
@@ -105,8 +106,9 @@ export function mapUpdateConfigurationDraft(body: unknown): UpdateConfigurationD
     ...(value.ancestorTargetIds === undefined
       ? {}
       : {
-          ancestorTargetIds:
-            value.ancestorTargetIds as UpdateConfigurationDraft["ancestorTargetIds"],
+          ancestorTargetIds: value.ancestorTargetIds as NonNullable<
+            UpdateConfigurationDraft["ancestorTargetIds"]
+          >,
         }),
     content: record(value.content) as UpdateConfigurationDraft["content"],
   };
@@ -226,4 +228,3 @@ function record(value: unknown): Readonly<Record<string, unknown>> {
   }
   return value as Readonly<Record<string, unknown>>;
 }
-

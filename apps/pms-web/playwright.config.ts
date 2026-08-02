@@ -1,4 +1,15 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
+
+const configuredExecutable = process.env.PMS_WEB_CHROMIUM_EXECUTABLE;
+const knownExecutables = process.platform === "win32"
+  ? [
+      "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+      "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
+    ]
+  : ["/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome"];
+const executablePath = configuredExecutable ?? knownExecutables.find(candidate => existsSync(candidate));
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,7 +23,7 @@ export default defineConfig({
     browserName: "chromium",
     headless: true,
     launchOptions: {
-      executablePath: "/usr/bin/chromium",
+      ...(executablePath === undefined ? {} : { executablePath }),
       args: ["--no-sandbox", "--disable-dev-shm-usage"],
     },
     trace: "retain-on-failure",

@@ -10,7 +10,7 @@ describe("formal product route inventory", () => {
 
   it("matches deep parameterized routes", () => {
     expect(matchRoute("/providers/ugv-prod-001/deployments")?.path).toBe("/providers/:providerId/deployments");
-    expect(matchRoute("/runtime/deployments/deploy-001/reconciliation")?.path).toBe("/runtime/deployments/:deploymentId/reconciliation");
+    expect(matchRoute("/runtime/deployments/ugv-prod-001/deploy-001/reconciliation")?.path).toBe("/runtime/deployments/:providerId/:deploymentId/reconciliation");
     expect(matchRoute("/configuration/draft-001/revisions/3/rollback")?.path).toBe("/configuration/:profileId/revisions/:revision/rollback");
   });
 });

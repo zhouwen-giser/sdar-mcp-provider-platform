@@ -27,22 +27,22 @@
 | `/provider-packages/:packageId/versions/:version/usage` | Package Usage | Provider | P1 |
 | `/runtime/deployments` | Runtime Deployments | 运行管理 | P0 |
 | `/runtime/deployments/new` | 创建 Deployment | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId` | Deployment 详情 | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/overview` | Deployment 概览 | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/edit` | 编辑 Deployment | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/reconciliation` | 调和时间线 | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/instances` | Deployment Instances | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/configuration` | Deployment Configuration | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/activity` | Deployment Activity | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/upgrade` | 升级 Deployment | 运行管理 | P0 |
-| `/runtime/deployments/:deploymentId/scale` | 扩缩容 | 运行管理 | P1 |
+| `/runtime/deployments/:providerId/:deploymentId` | Deployment 详情 | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/overview` | Deployment 概览 | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/edit` | 编辑 Deployment | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/reconciliation` | 调和时间线 | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/instances` | Deployment Instances | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/configuration` | Deployment Configuration | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/activity` | Deployment Activity | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/upgrade` | 升级 Deployment | 运行管理 | P0 |
+| `/runtime/deployments/:providerId/:deploymentId/scale` | 扩缩容 | 运行管理 | P1 |
 | `/runtime/instances` | Runtime Instances | 运行管理 | P0 |
-| `/runtime/instances/:runtimeId` | Runtime Instance 详情 | 运行管理 | P0 |
-| `/runtime/instances/:runtimeId/registration` | Runtime Registration | 运行管理 | P0 |
-| `/runtime/instances/:runtimeId/configuration` | Runtime Configuration | 运行管理 | P0 |
-| `/runtime/instances/:runtimeId/activity` | Runtime Activity | 运行管理 | P0 |
+| `/runtime/instances/:providerId/:runtimeId` | Runtime Instance 详情 | 运行管理 | P0 |
+| `/runtime/instances/:providerId/:runtimeId/registration` | Runtime Registration | 运行管理 | P0 |
+| `/runtime/instances/:providerId/:runtimeId/configuration` | Runtime Configuration | 运行管理 | P0 |
+| `/runtime/instances/:providerId/:runtimeId/activity` | Runtime Activity | 运行管理 | P0 |
 | `/runtime/processes` | Runtime Processes | 运行管理 | P0 |
-| `/runtime/processes/:processId` | Runtime Process 详情 | 运行管理 | P0 |
+| `/runtime/processes/:providerId/:processId` | Runtime Process 详情 | 运行管理 | P0 |
 | `/runtime/releases` | Runtime Releases | 运行管理 | P1 |
 | `/runtime/releases/new` | 注册 Runtime Release | 运行管理 | P1 |
 | `/runtime/releases/:releaseId` | Runtime Release 详情 | 运行管理 | P1 |
@@ -64,9 +64,9 @@
 | `/secrets` | Secret References | 制品与配置 | P1 |
 | `/secrets/:secretRef` | Secret Reference 详情 | 制品与配置 | P1 |
 | `/resources` | Resources | 发现与资源 | P0 |
-| `/resources/:resourceId` | Resource 详情 | 发现与资源 | P0 |
-| `/resources/:resourceId/history` | Resource History | 发现与资源 | P1 |
-| `/resources/:resourceId/activity` | Resource Activity | 发现与资源 | P1 |
+| `/resources/:environment/:resourceId` | Resource 详情 | 发现与资源 | P0 |
+| `/resources/:environment/:resourceId/history` | Resource History | 发现与资源 | P1 |
+| `/resources/:environment/:resourceId/activity` | Resource Activity | 发现与资源 | P1 |
 | `/catalog` | Catalog | 发现与资源 | P0 |
 | `/catalog/providers/:providerId` | Provider Catalog | 发现与资源 | P0 |
 | `/catalog/providers/:providerId/:operationName` | Catalog Operation | 发现与资源 | P0 |

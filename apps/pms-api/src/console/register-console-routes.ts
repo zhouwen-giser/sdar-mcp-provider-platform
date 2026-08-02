@@ -4,6 +4,8 @@ import type {
   FastifyRequest,
   RouteHandlerMethod,
 } from "fastify";
+import { Ajv2020 } from "ajv/dist/2020.js";
+import type { AnySchema } from "ajv";
 import type {
   ProviderManagementService,
   ProviderPackageQueryService,
@@ -130,6 +132,7 @@ export function registerConsoleApiRoutes(
   app.register(
     (consoleApp, _options, done) => {
       registerFrozenConsoleSchemas(consoleApp);
+      installStrictConsoleValidator(consoleApp);
       consoleApp.setErrorHandler(sendConsoleProblem);
       consoleApp.setNotFoundHandler(sendConsoleNotFound);
       const handlers = createConsoleHandlers(dependencies);
@@ -151,6 +154,37 @@ export function registerConsoleApiRoutes(
       done();
     },
     { prefix: PMS_CONSOLE_API_BASE_PATH },
+  );
+}
+
+function installStrictConsoleValidator(app: FastifyInstance): void {
+  const createCompiler = (coerceTypes: boolean | "array") => {
+    const ajv = new Ajv2020({
+      coerceTypes,
+      useDefaults: coerceTypes === "array",
+      removeAdditional: false,
+      addUsedSchema: false,
+      allErrors: false,
+      strict: false,
+    });
+    ajv.addFormat("date-time", {
+      type: "string",
+      validate: (value: string) => value.includes("T") && !Number.isNaN(Date.parse(value)),
+    });
+    ajv.addFormat("uuid", {
+      type: "string",
+      validate:
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu,
+    });
+    for (const schema of Object.values(app.getSchemas())) ajv.addSchema(schema as AnySchema);
+    return ajv;
+  };
+  const parameterAjv = createCompiler("array");
+  const payloadAjv = createCompiler(false);
+  app.setValidatorCompiler(({ schema, httpPart }) =>
+    (httpPart === "querystring" || httpPart === "params" ? parameterAjv : payloadAjv).compile(
+      schema,
+    ),
   );
 }
 

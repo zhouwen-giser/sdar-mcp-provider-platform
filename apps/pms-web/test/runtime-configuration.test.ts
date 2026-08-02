@@ -22,7 +22,7 @@ describe("runtime deployment contract behavior", () => {
 
   it("accepts only the current desired revision", async () => {
     const gateways = createMockGateways("healthy");
-    const deployment = await gateways.runtime.getDeployment("deploy-001", context);
+    const deployment = await gateways.runtime.getDeployment("ugv-prod-001", "deploy-001", context);
     await expect(gateways.runtime.restartDeployment(deployment.deploymentId, { providerId: deployment.providerId, expectedDesiredRevision: deployment.desiredRevision - 1 }, context)).rejects.toMatchObject({ problem: { code: "RUNTIME_DEPLOYMENT_REVISION_CONFLICT", status: 409 } });
     const intent = await gateways.runtime.stopDeployment(deployment.deploymentId, { providerId: deployment.providerId, expectedDesiredRevision: deployment.desiredRevision }, context);
     expect(intent.deployment.desiredState).toBe("stopped");

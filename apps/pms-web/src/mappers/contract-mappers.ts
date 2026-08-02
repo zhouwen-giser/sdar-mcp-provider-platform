@@ -72,8 +72,9 @@ export function mapRuntimeDeployment(source: RuntimeDeploymentDto): RuntimeDeplo
   };
 }
 
-export function mapRuntimeProcess(source: RuntimeProcessDto): RuntimeProcessViewModel {
+export function mapRuntimeProcess(source: RuntimeProcessDto, providerId: string): RuntimeProcessViewModel {
   return {
+    providerId,
     instanceId: source.instanceId,
     deploymentId: source.deploymentId,
     processState: source.processState,
@@ -97,7 +98,7 @@ export function mapConfigurationDraft(source: ConfigurationDraftDto): Configurat
     targetLabel: `${source.key.environment}/${source.key.targetType}/${source.key.targetId}`,
     status: source.status,
     version: source.version,
-    applyMode: source.applyMode,
+    ...(source.applyMode === undefined ? {} : { applyMode: source.applyMode }),
     content: source.content,
     issues: source.validationIssues,
     updatedAt: source.updatedAt,

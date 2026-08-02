@@ -1,0 +1,25 @@
+{
+  "status": "PASSED",
+  "mode": "Mock product experience",
+  "liveApiGatewayImplemented": false,
+  "contractCheck": "PASSED",
+  "typecheck": "PASSED",
+  "supplementalLint": "PASSED",
+  "unitTests": { "files": 8, "tests": 23, "passed": 23 },
+  "productionBuild": "PASSED",
+  "architectureValidation": "PASSED",
+  "pageCompletionValidation": { "status": "PASSED", "routes": 123 },
+  "playwrightMock": { "passed": 12, "skippedApiMode": 1 },
+  "playwrightApiMode": { "passed": 1, "assertion": "fail-closed without Mock fallback" },
+  "screenshots": {
+    "count": 42,
+    "viewports": ["1440x900", "1280x720"],
+    "reviewedSamples": ["dashboard", "runtime-deployment-detail"]
+  },
+  "inAppBrowser": {
+    "dashboardLoaded": true,
+    "deploymentButtonCount": 1,
+    "resultUrl": "/runtime/deployments/ugv-prod-001/deploy-001",
+    "providerScopePreserved": true
+  }
+}

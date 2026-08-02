@@ -23,6 +23,9 @@ describe("PMS Console API frozen lock", () => {
 });
 
 function hash(path: string): string {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  const bytes = readFileSync(path);
+  const canonical = bytes.includes(13)
+    ? Buffer.from(bytes.toString("utf8").replaceAll("\r\n", "\n"), "utf8")
+    : bytes;
+  return createHash("sha256").update(canonical).digest("hex");
 }
-

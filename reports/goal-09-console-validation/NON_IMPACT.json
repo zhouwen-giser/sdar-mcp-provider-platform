@@ -1,0 +1,12 @@
+{
+  "status": "PASSED",
+  "businessPackagesChanged": false,
+  "migrationsChanged": false,
+  "protocolChanged": false,
+  "workerChanged": false,
+  "runtimeChanged": false,
+  "dependenciesChanged": false,
+  "lockfileChanged": false,
+  "frozenContractChanged": false,
+  "verification": "git diff --name-only from 996ef7289fe90a9de6140121de77e93439f78d0d plus protected-path validator"
+}

@@ -14,9 +14,9 @@ export function toUiProblem(error: unknown): UiProblem {
     return {
       code: source.code,
       title: source.title,
-      detail: source.detail,
+      ...(source.detail === undefined ? {} : { detail: source.detail }),
       retryable: source.status >= 500,
-      correlationId: source.correlationId,
+      ...(source.correlationId === undefined ? {} : { correlationId: source.correlationId }),
       status: source.status,
     };
   }

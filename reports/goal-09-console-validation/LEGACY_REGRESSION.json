@@ -1,0 +1,12 @@
+{
+  "status": "PASSED_WITH_ENVIRONMENT_LIMITATION",
+  "isolatedPostgresql": "PostgreSQL 17.10 on 127.0.0.1:55490",
+  "productionComposition": { "tests": 4, "passed": 4 },
+  "runtimeConfigE2e": { "tests": 8, "passed": 8 },
+  "registryE2e": { "tests": 4, "passed": 4 },
+  "pmsApiFullSuite": { "filesPassed": 31, "filesFailed": 1, "testsPassed": 127, "testsFailedBeforeAssertion": 1 },
+  "legacyRoutes": ["/api/v1/**", "runtime-config", "runtime-registration", "health"],
+  "legacyAuthenticationScopeUnchanged": true,
+  "consoleAuthenticationInvented": false,
+  "limitation": "Windows file-symlink creation returned EPERM before the sole failing security assertion ran."
+}

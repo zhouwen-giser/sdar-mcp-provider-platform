@@ -18,7 +18,7 @@ export function DashboardPage() {
       <MetricCard label="待处理" value={pending} hint="Client workspace + frozen queries" />
     </div>
     <div className="grid-two">
-      <section className="panel"><h2>运行态摘要</h2><QuerySurface query={deployments}>{items => <DataTable columns={["Deployment", "Provider", "Desired", "Status", "Revision"]} rows={items.slice(0,5).map(item => [<button className="table-link" onClick={() => navigate(`/runtime/deployments/${item.deploymentId}`)}>{item.deploymentId}</button>, item.providerId, `${item.desiredState}/${item.desiredReplicas}`, <StatusBadge status={item.status} />, `${item.observedRevision}/${item.desiredRevision}`])} />}</QuerySurface></section>
+      <section className="panel"><h2>运行态摘要</h2><QuerySurface query={deployments}>{items => <DataTable columns={["Deployment", "Provider", "Desired", "Status", "Revision"]} rows={items.slice(0,5).map(item => [<button className="table-link" onClick={() => navigate(`/runtime/deployments/${item.providerId}/${item.deploymentId}`)}>{item.deploymentId}</button>, item.providerId, `${item.desiredState}/${item.desiredReplicas}`, <StatusBadge status={item.status} />, `${item.observedRevision}/${item.desiredRevision}`])} />}</QuerySurface></section>
       <section className="panel"><h2>最近 Audit</h2><QuerySurface query={audit}>{items => <DataTable columns={["Action", "Subject", "Actor", "Time"]} rows={items.slice(0,5).map(item => [item.action, `${item.subjectType}/${item.subjectId}`, item.actorId, item.occurredAt])} />}</QuerySurface></section>
     </div>
     <section className="panel"><h2>快速入口</h2><div className="quick-actions"><Button onClick={() => navigate("/runtime/deployments/new")}>创建 Deployment</Button><Button onClick={() => navigate("/configuration/new")}>创建配置 Draft</Button><Button onClick={() => navigate("/registry/compare")}>Registry Diff</Button><Button onClick={() => navigate("/operations/health")}>系统健康</Button></div></section>
@@ -29,7 +29,7 @@ export function AttentionPage() {
   const providers = useProviders(); const deployments = useDeployments(); const drafts = useConfigurationDrafts(); const workspace = useClientWorkspace();
   const rows = [
     ...(providers.data ?? []).filter(item => item.status === "degraded" || item.status === "disabled").map(item => ["Provider", item.providerId, item.status, "检查 Adapter 与 Resource 绑定", `/providers/${item.providerId}`]),
-    ...(deployments.data ?? []).filter(item => !item.converged || ["FAILED","DEGRADED"].includes(item.status)).map(item => ["Runtime", item.deploymentId, item.status, "执行 reconcile 并检查 RuntimeProcess", `/runtime/deployments/${item.deploymentId}/reconciliation`]),
+    ...(deployments.data ?? []).filter(item => !item.converged || ["FAILED","DEGRADED"].includes(item.status)).map(item => ["Runtime", item.deploymentId, item.status, "执行 reconcile 并检查 RuntimeProcess", `/runtime/deployments/${item.providerId}/${item.deploymentId}/reconciliation`]),
     ...(drafts.data ?? []).filter(item => item.status === "invalid").map(item => ["Configuration", item.draftId, item.status, "修复 Validation Issues", `/configuration/${item.draftId}/edit`]),
     ...workspace.jobs.filter(item => item.status === "FAILED").map(item => ["Worker Job", item.jobId, item.status, item.error ?? "检查失败摘要", `/operations/jobs/${item.jobId}`]),
     ...workspace.incidents.filter(item => item.status !== "CLOSED").map(item => ["Incident", item.incidentId, item.severity, "进入本地运维工作区", `/operations/incidents/${item.incidentId}`]),
@@ -50,9 +50,9 @@ export function SearchPage() {
     const needle = q.toLowerCase().trim(); if (needle.length === 0) return [];
     return [
       ...(providers.data ?? []).map(item => ({ type: "Provider", id: item.providerId, summary: `${item.providerTypeId} ${item.status}`, path: `/providers/${item.providerId}` })),
-      ...(resources.data ?? []).map(item => ({ type: "Resource", id: item.resourceId, summary: `${item.resourceType} ${item.status}`, path: `/resources/${item.resourceId}` })),
-      ...(deployments.data ?? []).map(item => ({ type: "RuntimeDeployment", id: item.deploymentId, summary: `${item.providerId} ${item.status}`, path: `/runtime/deployments/${item.deploymentId}` })),
-      ...(processes.data ?? []).map(item => ({ type: "RuntimeProcess", id: item.instanceId, summary: `${item.deploymentId} ${item.observedHealth}`, path: `/runtime/processes/${item.instanceId}` })),
+      ...(resources.data ?? []).map(item => ({ type: "Resource", id: item.resourceId, summary: `${item.resourceType} ${item.status}`, path: `/resources/${item.environment}/${item.resourceId}` })),
+      ...(deployments.data ?? []).map(item => ({ type: "RuntimeDeployment", id: item.deploymentId, summary: `${item.providerId} ${item.status}`, path: `/runtime/deployments/${item.providerId}/${item.deploymentId}` })),
+      ...(processes.data ?? []).map(item => ({ type: "RuntimeProcess", id: item.instanceId, summary: `${item.deploymentId} ${item.observedHealth}`, path: `/runtime/processes/${item.providerId}/${item.instanceId}` })),
       ...(audit.data ?? []).map(item => ({ type: "Audit", id: item.auditEventId, summary: `${item.action} ${item.subjectId}`, path: `/audit/${item.auditEventId}` })),
     ].filter(item => `${item.type} ${item.id} ${item.summary}`.toLowerCase().includes(needle));
   }, [audit.data, deployments.data, processes.data, providers.data, q, resources.data]);

@@ -27,15 +27,13 @@ test("RuntimeDeployment creation returns an accepted intent", async ({ page }) =
   await page.getByLabel("Deployment ID").fill("deploy-product-e2e");
   await page.getByRole("button", { name: "提交创建 Intent" }).click();
   await expect(page.getByRole("heading", { name: "Intent accepted" })).toBeVisible();
-  await expect(page.getByText("ACCEPTED")).toBeVisible();
+  await expect(page.getByLabel("操作反馈面板").getByText("ACCEPTED").first()).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test("Runtime revision conflict is visible and recoverable", async ({ page }) => {
   const errors = watchRuntime(page);
-  await page.goto("/_prototype/scenarios");
-  await page.getByRole("button", { name: /runtime-revision-conflict/i }).click();
-  await page.goto("/runtime/deployments/deploy-001");
+  await page.goto("/runtime/deployments/ugv-prod-001/deploy-001?scenario=runtime-revision-conflict");
   await page.getByRole("button", { name: "Reconcile" }).click();
   await expect(page.getByText(/RUNTIME_DEPLOYMENT_REVISION_CONFLICT/)).toBeVisible();
   expect(errors).toEqual([]);
@@ -64,7 +62,7 @@ test("Resource binding and optimistic concurrency controls are exposed", async (
   const errors = watchRuntime(page);
   await page.goto("/resources?bindProvider=ugv-prod-001");
   await expect(page.getByRole("heading", { name: "Resources" })).toBeVisible();
-  await page.goto("/resources/ugv-01");
+  await page.goto("/resources/production/ugv-01");
   await expect(page.getByText(/expectedUpdatedAt/)).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -95,5 +93,15 @@ test("Deferred pages provide complete validation experience without fake success
   await page.getByRole("button", { name: "运行本地校验" }).click();
   await expect(page.getByText(/本地校验通过/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Not available in Console API V1" })).toBeDisabled();
+  expect(errors).toEqual([]);
+});
+
+test("API mode fails closed and never falls back to Mock", async ({ page }) => {
+  test.skip(process.env.VITE_PMS_DATA_MODE !== "api", "run with VITE_PMS_DATA_MODE=api");
+  const errors = watchRuntime(page);
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { name: "API data source is not configured" })).toBeVisible();
+  await expect(page.getByText("PMS_API_NOT_CONFIGURED")).toBeVisible();
+  await expect(page.getByText("ugv-prod-001")).toHaveCount(0);
   expect(errors).toEqual([]);
 });

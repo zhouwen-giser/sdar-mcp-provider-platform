@@ -1,26 +1,33 @@
-# PMS Console API Contract V1.0 Frozen Delivery
+# Goal 09 Delivery Report
 
-## Outcome
+## Result
 
-Final status is `FROZEN`. Candidate 3 is the authoritative PMS Console API Contract V1.0.
+`BLOCKED`
 
-Candidate 2 was reconciled against the local SMPP source. The frozen contract retains 36 operations, adds no unsupported surface, restores the existing Registry `If-None-Match`/`ETag`/`304` behavior, and copies `RuntimeDeploymentDesiredState` exactly by restoring `stopped`.
+The scoped implementation remediation is complete and its functional gates pass, but three mandatory repository gates cannot be declared complete: one Windows symlink security test cannot enter its assertion, root ESLint now initializes typed rules for TSX but reports 278 existing rule violations, and root Prettier requires changes to frozen/out-of-scope baseline files.
 
-Local source, semantic assertions, Redocly validation, deterministic bundling, generated TypeScript, generated JSON Schemas, example validation, breaking detection, typecheck, build, protected-business equality, remote currency and protocol/migration non-impact passed.
+## Delivered remediation
 
-The repository owner explicitly approved the six pre-existing scope findings and their associated root lint/format findings as non-protocol freeze exceptions. The exact, narrow approval is recorded in `contracts/pms-console-api/v1/FREEZE_EXCEPTIONS.json`; it does not waive any protocol, source, generated-artifact, business-impact or remote-currency gate.
+- PMS Console request validation now rejects unknown query/body fields without changing legacy Fastify behavior.
+- Console validation is scoped and all 36 frozen operations have success, actor and tracing coverage.
+- Contract hash checks are EOL-stable on Windows; all frozen hashes remain unchanged.
+- Web Gateway signatures, hooks and query keys carry Resource, Provider, Deployment and Audit scope.
+- Canonical Resource and Runtime deep links preserve their composite identities.
+- Page-completion validation now checks all 123 routes against evidence/classification rows.
+- Chromium discovery is portable; API mode remains fail-closed.
+- Root ESLint now supplies project-service type information to both TypeScript and TSX files.
+- Stale Console API, response envelope, Generic Operation and RBAC documentation was corrected.
+- 42 reviewed screenshots cover 21 core pages at 1440x900 and 1280x720.
 
-The authoritative lock is `contracts/pms-console-api/v1/contract-lock.json`. The Frozen ZIP and checksum are under `reports/pms-console-api-contract-v1/delivery/`.
+## Verified evidence
 
-## Goal 07 — PMS API Console V1 Conformance
+- Console: 15 files / 24 tests passed; 36/36 operation inventory and static conformance passed.
+- Database: production composition 4/4, runtime configuration 8/8, registry 4/4 on isolated PostgreSQL 17.10.
+- Web: 8 files / 23 tests, architecture, 123-route completion, typecheck and build passed.
+- Browser: Mock mode 12 passed (API-only case skipped); separate API mode fail-closed 1/1 passed; in-app deep-link interaction passed.
+- Root TypeScript and root build passed.
+- Business packages, migrations, protocol, worker, runtime, dependencies, lockfile and frozen contract are unchanged.
 
-The existing `pms-api` now registers all 36 frozen operations under `/api/console/v1` when the
-production dependency set is present. The implementation is a transport adapter over existing
-Application and Query services; it does not add domain objects, persistence behavior, migrations,
-worker jobs, authentication, or PMS Web changes.
+See `reports/goal-09-console-validation/KNOWN_LIMITATIONS.md` for the exact blockers and all JSON reports for machine-readable evidence.
 
-Implementation status is `complete`. Work validation status is `local_validation_required`
-because repository `node_modules` are unavailable and dependency installation is prohibited.
-Dependency-free lock, route-inventory, protected-path, JSON, syntax, Git whitespace, and delivery
-integrity checks are executable in this package. See `LOCAL_VALIDATION_REQUIRED.md` for the
-dependency-backed validation commands that remain to be run locally.
+Live browser-to-PMS API integration was not implemented or claimed in Goal 09.

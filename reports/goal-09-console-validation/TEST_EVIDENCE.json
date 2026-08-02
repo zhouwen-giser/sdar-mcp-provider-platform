@@ -1,0 +1,23 @@
+{
+  "finalStatus": "BLOCKED",
+  "executed": [
+    { "command": "pnpm install --frozen-lockfile", "result": "PASSED" },
+    { "command": "pnpm --filter @sdar/pms-api test", "result": "127 passed; 1 Windows symlink EPERM" },
+    { "command": "vitest run test/console (package cwd)", "result": "15 files, 24 tests passed" },
+    { "command": "pnpm test:pms-api-production", "result": "4 passed" },
+    { "command": "pnpm test:pms-config-e2e", "result": "8 passed" },
+    { "command": "pnpm test:registry-e2e", "result": "4 passed" },
+    { "command": "pnpm typecheck", "result": "PASSED" },
+    { "command": "pnpm build", "result": "PASSED" },
+    { "command": "node scripts/pms-console-conformance/validate-all.mjs", "result": "PASSED, 36/36" },
+    { "command": "pnpm --filter @sdar/pms-web test", "result": "8 files, 23 tests passed" },
+    { "command": "pnpm --filter @sdar/pms-web build", "result": "PASSED" },
+    { "command": "pnpm --filter @sdar/pms-web test:e2e", "result": "12 passed, 1 API-only skipped" },
+    { "command": "VITE_PMS_DATA_MODE=api playwright --grep API mode", "result": "1 passed" },
+    { "command": "pnpm lint", "result": "TSX typed-rule initialization PASSED; 278 existing rule violations reported" },
+    { "command": "pnpm format:check", "result": "BLOCKED by baseline/frozen formatting set" }
+  ],
+  "realEvidence": ["Fastify inject", "isolated PostgreSQL", "system Chrome Playwright", "in-app browser", "production build"],
+  "mockEvidence": ["PMS Web product data and interactions"],
+  "notClaimed": ["live browser-to-PMS API integration"]
+}

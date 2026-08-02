@@ -7,8 +7,8 @@ describe("contract-first mock gateways", () => {
   it("serves deterministic frozen DTO projections", async () => {
     const gateways = createMockGateways("healthy");
     const providers = await gateways.providers.listProviders(context);
-    const resources = await gateways.resources.listResources(context);
-    const deployments = await gateways.runtime.listDeployments(context);
+    const resources = await gateways.resources.listResources("production", context);
+    const deployments = await gateways.runtime.listDeployments("ugv-prod-001", context);
     expect(providers.items.map(item => item.providerId)).toEqual(["ugv-prod-001", "ha-east-001", "npc-training-001"]);
     expect(resources.items[0]?.environment).toBe("production");
     expect(deployments.items.every(item => item.desiredReplicas === 0 || item.desiredReplicas === 1)).toBe(true);

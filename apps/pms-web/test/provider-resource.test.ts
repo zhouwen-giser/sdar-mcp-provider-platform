@@ -15,7 +15,7 @@ describe("provider and resource contract behavior", () => {
       adapterEndpoint: "127.0.0.1:8999",
     }, context);
     expect(created.status).toBe("draft");
-    expect((await gateways.runtime.listDeployments(context)).items.some(item => item.providerId === created.providerId)).toBe(false);
+    expect((await gateways.runtime.listDeployments(created.providerId, context)).items.some(item => item.providerId === created.providerId)).toBe(false);
   });
 
   it("enforces expectedUpdatedAt for provider status", async () => {

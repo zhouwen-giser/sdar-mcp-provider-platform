@@ -15,7 +15,7 @@ describe("all frozen Console operations", () => {
         method: testCase.method,
         url: testCase.url,
         ...(testCase.method === "GET" ? {} : { headers: WRITE_HEADERS }),
-        ...(testCase.payload === undefined ? {} : { payload: testCase.payload }),
+        ...(testCase.payload == null ? {} : { payload: testCase.payload }),
       });
       expect(response.statusCode, testCase.operationId).toBe(testCase.status);
     }
@@ -28,7 +28,7 @@ describe("all frozen Console operations", () => {
       const response = await app.inject({
         method: testCase.method,
         url: testCase.url,
-        ...(testCase.payload === undefined ? {} : { payload: testCase.payload }),
+        ...(testCase.payload == null ? {} : { payload: testCase.payload }),
       });
       expect(response.statusCode, testCase.operationId).toBe(400);
       expect(response.json(), testCase.operationId).toMatchObject({ code: "INVALID_REQUEST" });
@@ -46,7 +46,7 @@ describe("all frozen Console operations", () => {
           "x-correlation-id": "invalid correlation",
           ...(testCase.method === "GET" ? {} : { "x-actor-id": "prototype-user" }),
         },
-        ...(testCase.payload === undefined ? {} : { payload: testCase.payload }),
+        ...(testCase.payload == null ? {} : { payload: testCase.payload }),
       });
       expect(response.statusCode, testCase.operationId).toBe(400);
       expect(response.json(), testCase.operationId).toMatchObject({ code: "INVALID_REQUEST" });
@@ -54,4 +54,3 @@ describe("all frozen Console operations", () => {
     await app.close();
   });
 });
-
