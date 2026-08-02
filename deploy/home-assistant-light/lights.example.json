@@ -1,0 +1,16 @@
+{
+  "resources": [
+    {
+      "resourceId": "example-main-light",
+      "entityId": "light.example_main_light",
+      "displayName": "Main light",
+      "enabled": true
+    },
+    {
+      "resourceId": "example-aux-light",
+      "entityId": "light.example_aux_light",
+      "displayName": "Auxiliary light",
+      "enabled": true
+    }
+  ]
+}

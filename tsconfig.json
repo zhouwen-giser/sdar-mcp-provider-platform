@@ -21,6 +21,7 @@
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
+    "scripts/**/*.ts",
     "examples/mock-adapter-typescript/**/*.ts",
     "tests/**/*.ts",
     "vitest.config.ts"

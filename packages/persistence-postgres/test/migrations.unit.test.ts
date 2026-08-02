@@ -9,7 +9,7 @@ describe("Runtime Migration source", () => {
     const migrations = await listRuntimeMigrations(workspaceRoot);
     const filenames = migrations.map(({ filename }) => filename);
 
-    expect(migrations).toHaveLength(24);
+    expect(migrations).toHaveLength(25);
     expect(filenames).toEqual([...filenames].sort());
     expect(filenames).toContain("001_operation_snapshot.sql");
     expect(filenames).toContain("023_business_events_profile_v1.sql");

@@ -1,0 +1,48 @@
+{
+  "source": "package.json at P0",
+  "available": {
+    "pnpm install --frozen-lockfile": true,
+    "pnpm format:check": true,
+    "pnpm lint": true,
+    "pnpm typecheck": true,
+    "pnpm build": true,
+    "pnpm protocol:check": true,
+    "pnpm test:unit": true,
+    "pnpm test:contract": true,
+    "pnpm test:integration": true,
+    "pnpm test:e2e": true,
+    "pnpm test:ha-climate": true,
+    "pnpm test:ha-climate:e2e": true,
+    "pnpm test:ha-climate:protocol-v1": true,
+    "pnpm test:provider-platform-ha": true,
+    "pnpm verify:v2": true,
+    "pnpm verify:platform": true,
+    "pnpm test:ha-light": false,
+    "pnpm test:ha-light:e2e": false,
+    "pnpm test:ha-light:protocol-v1": false,
+    "pnpm test:ha-real:preflight": false,
+    "pnpm test:ha-climate:real": false,
+    "pnpm test:ha-light:real": false,
+    "pnpm test:ha-real:e2e": false,
+    "pnpm verify:ha-real-preparation": false
+  },
+  "plannedAdditions": [
+    "pnpm ha:real:preflight",
+    "pnpm test:ha-light",
+    "pnpm test:ha-light:e2e",
+    "pnpm test:ha-light:protocol-v1",
+    "pnpm test:ha-real:preflight",
+    "pnpm test:ha-climate:real",
+    "pnpm test:ha-light:real",
+    "pnpm test:ha-real:e2e",
+    "pnpm verify:ha-real-preparation"
+  ],
+  "evidencePolicy": {
+    "defaultRealCommandsAreReadOnly": true,
+    "writeRequires": [
+      "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
+      "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
+    ],
+    "tokenTransport": "HOME_ASSISTANT_TOKEN_FILE only; HOME_ASSISTANT_TOKEN environment variable is forbidden"
+  }
+}

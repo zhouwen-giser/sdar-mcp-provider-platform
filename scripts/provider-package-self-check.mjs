@@ -13,10 +13,12 @@ const CURRENT_CONFIG_SOURCES = {
   "provider.ugv": "apps/ugv-provider-adapter/src/config.ts",
   "provider.npcTank": "apps/npc-tank-provider-adapter/src/config.ts",
   "provider.climate": "apps/home-assistant-climate-provider/src/config.ts",
+  "provider.homeAssistantLight": "apps/home-assistant-light-provider/src/config.ts",
 };
 
 const EXPECTED_BUILTIN_PACKAGE_IDS = [
   "builtin.home-assistant.climate",
+  "builtin.home-assistant.light",
   "builtin.isr.vehicle.npc-tank",
   "builtin.isr.vehicle.ugv",
 ];

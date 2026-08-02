@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
+  "protocolVersion": "2026-07-28",
+  "runtimeMergeCommit": "abd9db778848303d2966ac9b9e80f75207713109",
+  "component": "home-assistant-light-provider",
+  "claim": "Provider Component Conformant",
+  "realResourceQualified": false,
+  "cases": [
+    {
+      "caseId": "P-HAL-001",
+      "requirement": "Merged frozen Runtime main is an ancestor of the Provider branch.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "git merge-base --is-ancestor abd9db778848303d2966ac9b9e80f75207713109 HEAD",
+          "files": [
+            {
+              "path": "apps/home-assistant-light-provider/src/manifest.ts",
+              "sha256": "ba61de04feed92356005319170e28bde62674676fc416428e44c8d25b8f3e8cf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-002",
+      "requirement": "Operation names remain explicit and execution maps to frozen taskBehavior.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "Manifest plus tools/list taskBehavior assertions",
+          "files": [
+            {
+              "path": "apps/home-assistant-light-provider/src/manifest.ts",
+              "sha256": "ba61de04feed92356005319170e28bde62674676fc416428e44c8d25b8f3e8cf"
+            },
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-003",
+      "requirement": "All Runtime E2E calls use frozen request meta and routing headers.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "2026-07-28 meta and MCP routing header assertions",
+          "files": [
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-004",
+      "requirement": "Task admission returns a flat CreateTaskResult and preserves idempotency.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "Flat resultType task and duplicate taskId assertions",
+          "files": [
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-005",
+      "requirement": "Ack-first Task notifications converge with tasks/get at the same revision.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "Ack, working, completed, and normalized equality assertions",
+          "files": [
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-006",
+      "requirement": "Evidence is derived from persisted observed Home Assistant confirmation.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "confirmedState and structured-content Evidence assertions",
+          "files": [
+            {
+              "path": "apps/home-assistant-light-provider/src/execution/execution-engine.ts",
+              "sha256": "20009050595783f3f344459231f04a9db176e71c58ac9b7c738fa1b8fd21d608"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/execution/snapshots.ts",
+              "sha256": "6a1ea6e408e52f92611ea7b7a42ca1bbfe0c52302ae163d99fb1559f37d417af"
+            },
+            {
+              "path": "tests/integration/home-assistant-light-provider.test.ts",
+              "sha256": "ec00403cbcb09b2ab1f5b10bdee6fd652c55f616deac6d8710a21e8867e8fa9e"
+            },
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-007",
+      "requirement": "Provider Wire Evidence is type-only and never publishes requirementId.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "Recursive Provider source scan",
+          "files": [
+            {
+              "path": "apps/home-assistant-light-provider/package.json",
+              "sha256": "0db7e72615926dcf05dadcee61b10d8411294a7b379199496a1383178e1944a5"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/config.ts",
+              "sha256": "0d64d81a5d66e835769f4d883f4f245cdc0c33c87ec318e43ab88be135b90611"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/errors.ts",
+              "sha256": "d042ee733c74faa3ad4790fa521ded1237e78b0dd81b4b29c67a502123de39ca"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/execution/execution-engine.ts",
+              "sha256": "20009050595783f3f344459231f04a9db176e71c58ac9b7c738fa1b8fd21d608"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/execution/snapshots.ts",
+              "sha256": "6a1ea6e408e52f92611ea7b7a42ca1bbfe0c52302ae163d99fb1559f37d417af"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/home-assistant.ts",
+              "sha256": "450f61a5bc514296ce33e78839a17d539c52467b0882fea0189be3cf50566dbd"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/main.ts",
+              "sha256": "89afe42bf9ad66f8a1fa4566e7726030a9de0f5d9f0ec08ba80fec380c01f669"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/manifest.ts",
+              "sha256": "ba61de04feed92356005319170e28bde62674676fc416428e44c8d25b8f3e8cf"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/resources.ts",
+              "sha256": "58d912e7d929a030bcead3081be60b909d956b85fe45d978ede73e26dec55807"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/server.ts",
+              "sha256": "6a6023e9735c3195bd44afe03a887ff70128b638095b84c4c328e540405a9a3e"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/store.ts",
+              "sha256": "00338cf07dd73308ef6b77f5011629e6f91631b0b72fe47f655cfe0555a6b672"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/telemetry.ts",
+              "sha256": "d2efe463ffaa1caf81ebec100a010a8f81ff430dd51e8bc2d256aba65b48d537"
+            },
+            {
+              "path": "apps/home-assistant-light-provider/src/types.ts",
+              "sha256": "6e35ce19a68431d14511e807118b1946e1bf16b383f9500b7beceaf218682012"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "P-HAL-008",
+      "requirement": "Provider uses frozen Runtime over real HTTP/SSE and PostgreSQL in E2E.",
+      "status": "pass",
+      "evidence": [
+        {
+          "assertion": "Provider-specific Runtime/PostgreSQL E2E suite",
+          "files": [
+            {
+              "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
+              "sha256": "4ed9c6cab14a2f911422f3219cde42f014ad9eb4d8deabd4ad07493d215d190f"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0
+  }
+}

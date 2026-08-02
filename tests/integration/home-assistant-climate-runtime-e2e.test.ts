@@ -26,7 +26,7 @@ let pool: Pool;
 beforeAll(async () => {
   pool = new Pool({ connectionString: databaseUrl, max: 1 });
   await pool.query(
-    `DROP TABLE IF EXISTS provider_ops_delivery,runtime_lease,outbox_event,idempotency_record,task_command,task_input_request,task_observation,provider_task,admission_intent,operation_snapshot,runtime_schema_migration CASCADE`,
+    `DROP TABLE IF EXISTS task_input_response_inbox,provider_ops_delivery,runtime_lease,outbox_event,idempotency_record,task_command,task_input_request,task_observation,provider_task,admission_intent,operation_snapshot,runtime_schema_migration CASCADE`,
   );
   fake = new FakeHomeAssistantClimate();
   fake.setState("climate.e2e", "off", {

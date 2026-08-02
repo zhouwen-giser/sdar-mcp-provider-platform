@@ -7,6 +7,7 @@ WORKDIR /workspace
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
 COPY apps/runtime/package.json apps/runtime/package.json
 COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
 COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
 COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
 COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
@@ -148,6 +149,9 @@ CMD ["node", "dist/examples/mock-adapter-typescript/src/main.js"]
 
 FROM runtime AS home-assistant-climate-provider
 CMD ["node", "dist/apps/home-assistant-climate-provider/src/main.js"]
+
+FROM runtime AS home-assistant-light-provider
+CMD ["node", "dist/apps/home-assistant-light-provider/src/main.js"]
 
 FROM runtime AS ugv-provider-adapter
 CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]

@@ -1,0 +1,39 @@
+{
+  "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "smppCandidateSha": "PENDING_IMPLEMENTATION_COMMIT",
+  "environment": "home-lab",
+  "registryRevision": 0,
+  "registryChecksum": "",
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "",
+      "catalogRevision": 0
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "",
+      "catalogRevision": 0
+    }
+  ],
+  "realResourcesQualified": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "readyForSdarIntegration": false,
+  "blockers": [
+    "FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.",
+    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.",
+    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.",
+    "REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices.",
+    "WINDOWS_SYMLINK_SECURITY_TEST_UNVERIFIED: test:provider-packages passes 12/13 checks but its symlink assertion is blocked by Windows EPERM; the standalone provider-package self-check passes.",
+    "WINDOWS_PROTOCOL_LOCK_LINE_ENDING_UNVERIFIED: protocol:check, verify:v2 and verify:platform stop at the protocol lock hash mismatch under core.autocrlf=true; frozen contract, schemas and 74 conformance cases pass."
+  ]
+}

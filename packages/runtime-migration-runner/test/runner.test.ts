@@ -62,7 +62,7 @@ describe("RuntimeMigrationRunner controlled PostgreSQL integration", () => {
     const history = await pool.query<{ count: number }>(
       "SELECT count(*)::int AS count FROM runtime_schema_migration",
     );
-    expect(history.rows).toEqual([{ count: 24 }]);
+    expect(history.rows).toEqual([{ count: 25 }]);
   });
 
   it("times out advisory-lock waits with redacted failure evidence", async () => {

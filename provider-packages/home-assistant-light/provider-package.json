@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "packageId": "builtin.home-assistant.light",
+  "packageVersion": "0.1.0",
+  "providerType": "home_assistant.light",
+  "hostingModes": ["vendor_managed"],
+  "adapter": {
+    "entry": "apps/home-assistant-light-provider/src/main.ts",
+    "configSchemaId": "provider.homeAssistantLight",
+    "migrationSet": null
+  },
+  "runtime": {
+    "compatibleRuntimeVersion": "2.0.0-rc.1",
+    "protocolMode": "frozen_v1"
+  },
+  "qualification": {
+    "componentStatus": "pending",
+    "realResourceStatus": "pending",
+    "evidenceRefs": [
+      "docs/providers/home-assistant-light-provider.md",
+      "reports/home-assistant-light/provider-conformance.json",
+      "reports/real-device-preparation/light-real-qualification.md"
+    ]
+  }
+}

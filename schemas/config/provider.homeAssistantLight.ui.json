@@ -1,0 +1,368 @@
+{
+  "configGroup": "provider.homeAssistantLight",
+  "definitionId": "provider.homeAssistantLight",
+  "definitionVersion": 1,
+  "fields": [
+    {
+      "applyMode": "immutable",
+      "description": "Home Assistant Light Provider provider_id setting.",
+      "displayName": "PROVIDER_ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "Home Assistant Light Provider provider_version setting.",
+      "displayName": "PROVIDER_VERSION",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/PROVIDER_VERSION",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_host setting.",
+      "displayName": "ADAPTER_HOST",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_HOST",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_port setting.",
+      "displayName": "ADAPTER_PORT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_PORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_tls_mode setting.",
+      "displayName": "ADAPTER_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_tls_ca_path setting.",
+      "displayName": "ADAPTER_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_tls_cert_path setting.",
+      "displayName": "ADAPTER_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider adapter_tls_key_path setting.",
+      "displayName": "ADAPTER_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ADAPTER_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_url setting.",
+      "displayName": "HOME_ASSISTANT_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_URL",
+      "required": true,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_token_file setting.",
+      "displayName": "HOME_ASSISTANT_TOKEN_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_TOKEN_FILE",
+      "required": true,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_allow_insecure_http setting.",
+      "displayName": "HOME_ASSISTANT_ALLOW_INSECURE_HTTP",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_ALLOW_INSECURE_HTTP",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_request_timeout_ms setting.",
+      "displayName": "HOME_ASSISTANT_REQUEST_TIMEOUT_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_REQUEST_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_confirm_timeout_ms setting.",
+      "displayName": "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_CONFIRM_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_poll_interval_ms setting.",
+      "displayName": "HOME_ASSISTANT_POLL_INTERVAL_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_POLL_INTERVAL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_ws_reconnect_min_ms setting.",
+      "displayName": "HOME_ASSISTANT_WS_RECONNECT_MIN_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_WS_RECONNECT_MIN_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider home_assistant_ws_reconnect_max_ms setting.",
+      "displayName": "HOME_ASSISTANT_WS_RECONNECT_MAX_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_WS_RECONNECT_MAX_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider light_resources_file setting.",
+      "displayName": "LIGHT_RESOURCES_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/LIGHT_RESOURCES_FILE",
+      "required": true,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_state_path setting.",
+      "displayName": "PROVIDER_STATE_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_STATE_PATH",
+      "required": true,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_enabled setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_endpoint setting.",
+      "displayName": "PROVIDER_TELEMETRY_ENDPOINT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_ENDPOINT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_tls_mode setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_tls_ca_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CA_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_tls_cert_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_CERT_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider provider_telemetry_tls_key_path setting.",
+      "displayName": "PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/PROVIDER_TELEMETRY_TLS_KEY_PATH",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider log_level setting.",
+      "displayName": "LOG_LEVEL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/LOG_LEVEL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Light Provider runtime_env setting.",
+      "displayName": "RUNTIME_ENV",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/RUNTIME_ENV",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    }
+  ],
+  "inheritance": { "enabled": true, "order": ["provider", "provider_type", "system_default"] },
+  "schemaVersion": "1.0",
+  "targetTypes": ["provider_type", "provider"]
+}

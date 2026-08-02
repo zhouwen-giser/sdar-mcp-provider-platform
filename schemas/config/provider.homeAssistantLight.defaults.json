@@ -1,0 +1,23 @@
+{
+  "definitionId": "provider.homeAssistantLight",
+  "definitionVersion": 1,
+  "schemaVersion": "1.0",
+  "values": {
+    "ADAPTER_HOST": "0.0.0.0",
+    "ADAPTER_PORT": 7021,
+    "ADAPTER_TLS_MODE": "disabled",
+    "HOME_ASSISTANT_ALLOW_INSECURE_HTTP": false,
+    "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS": 15000,
+    "HOME_ASSISTANT_POLL_INTERVAL_MS": 500,
+    "HOME_ASSISTANT_REQUEST_TIMEOUT_MS": 5000,
+    "HOME_ASSISTANT_WS_RECONNECT_MAX_MS": 30000,
+    "HOME_ASSISTANT_WS_RECONNECT_MIN_MS": 500,
+    "LOG_LEVEL": "info",
+    "PROVIDER_ID": "home-assistant-light",
+    "PROVIDER_TELEMETRY_ENABLED": true,
+    "PROVIDER_TELEMETRY_ENDPOINT": "127.0.0.1:7003",
+    "PROVIDER_TELEMETRY_TLS_MODE": "disabled",
+    "PROVIDER_VERSION": "0.1.0",
+    "RUNTIME_ENV": "development"
+  }
+}

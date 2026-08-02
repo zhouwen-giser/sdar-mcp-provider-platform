@@ -1,0 +1,27 @@
+services:
+  home-assistant-light-provider:
+    build:
+      context: ../..
+      target: home-assistant-light-provider
+    environment:
+      PROVIDER_ID: home-assistant-light
+      ADAPTER_PORT: 7021
+      HOME_ASSISTANT_URL: ${HOME_ASSISTANT_URL}
+      HOME_ASSISTANT_TOKEN_FILE: /run/secrets/home-assistant-token
+      LIGHT_RESOURCES_FILE: /app/config/lights.json
+      PROVIDER_STATE_PATH: /var/lib/sdar/state.json
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: runtime:7002
+      RUNTIME_ENV: production
+    volumes:
+      - ./lights.json:/app/config/lights.json:ro
+      - light-provider-state:/var/lib/sdar
+    secrets:
+      - home-assistant-token
+
+volumes:
+  light-provider-state:
+
+secrets:
+  home-assistant-token:
+    file: ./home-assistant-token.txt

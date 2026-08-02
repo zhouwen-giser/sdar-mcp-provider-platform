@@ -1,0 +1,81 @@
+{
+  "evidenceClass": "unverified",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "blocked",
+  "environment": "home-lab",
+  "providerIds": ["ha-climate-lab", "ha-light-lab"],
+  "resourceIds": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
+  "steps": [
+    {
+      "step": "providerPackageSync",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "Provider package registry and self-check include both packages."
+    },
+    {
+      "step": "providerTypeCreateOrConfirm",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "Provider type persistence is covered by the platform E2E path."
+    },
+    {
+      "step": "providerCreate",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "Vendor-managed Provider creation is covered by platform tests."
+    },
+    {
+      "step": "resourceCreate",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "Resource persistence/binding is covered by platform tests; target lab entities were not sent to PMS."
+    },
+    {
+      "step": "bindingCreate",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "N:N binding behavior is covered by platform tests."
+    },
+    {
+      "step": "configDraft",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "note": "No live PMS API run in this environment."
+    },
+    {
+      "step": "configPublish",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "note": "No live PMS API run in this environment."
+    },
+    {
+      "step": "runtimeDeploymentCreate",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "note": "No live PMS deployment control plane in this environment."
+    },
+    {
+      "step": "runtimeStartAndReadiness",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "note": "The real qualification runners used isolated in-process Runtime instances, not PMS-managed deployments."
+    },
+    {
+      "step": "catalogDiscovery",
+      "evidenceClass": "contract",
+      "status": "covered",
+      "note": "Catalog discovery and resource-binding assertions pass in both Home Assistant platform E2Es."
+    },
+    {
+      "step": "registrySnapshotPublish",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "note": "No live PMS Registry publication was claimed."
+    }
+  ],
+  "blockers": [
+    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real."
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

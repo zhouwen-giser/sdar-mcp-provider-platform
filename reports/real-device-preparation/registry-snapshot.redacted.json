@@ -1,0 +1,33 @@
+{
+  "evidenceClass": "unverified",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "not_published",
+  "environment": "home-lab",
+  "revision": 0,
+  "checksum": null,
+  "etag": null,
+  "latest": "unverified",
+  "bootstrap": "unverified",
+  "watch": "unverified",
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": null,
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": null,
+      "catalogRevision": 0
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": null,
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": null,
+      "catalogRevision": 0
+    }
+  ],
+  "blockers": [
+    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real."
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

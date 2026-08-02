@@ -24,12 +24,14 @@ describe("ProviderPackage Registry", () => {
 
     expect(registry.list().map(({ packageId }) => packageId)).toEqual([
       "builtin.home-assistant.climate",
+      "builtin.home-assistant.light",
       "builtin.isr.vehicle.npc-tank",
       "builtin.isr.vehicle.ugv",
     ]);
     expect(registry.get("builtin.isr.vehicle.ugv", "1.0.0")?.providerType).toBe("isr.vehicle.ugv");
     expect(registry.get("missing")).toBeUndefined();
     expect(registry.listByProviderType("home_assistant.climate")).toHaveLength(1);
+    expect(registry.listByProviderType("home_assistant.light")).toHaveLength(1);
   });
 
   it("rejects duplicate packageId and packageVersion pairs", () => {
@@ -122,7 +124,7 @@ describe("ProviderPackage Registry", () => {
     const registry = await loadProviderPackageRegistry(workspaceRoot);
     const projections = registry.list().map(projectProviderQualification);
 
-    expect(projections).toHaveLength(3);
+    expect(projections).toHaveLength(4);
     expect(projections.every(({ realResourceStatus }) => realResourceStatus === "pending")).toBe(
       true,
     );

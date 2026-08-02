@@ -1,0 +1,46 @@
+{
+  "evidenceClass": "contract",
+  "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
+  "status": "blocked",
+  "checks": [
+    {
+      "scenario": "accepted substate migration and concurrent accepted admission",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "source": "tests/integration/runtime-accepted-substate.test.ts"
+    },
+    {
+      "scenario": "real climate Runtime/Adapter task recovery state",
+      "evidenceClass": "real",
+      "status": "passed",
+      "activeTasks": 0,
+      "uncertainTasks": 0
+    },
+    {
+      "scenario": "real light Runtime/Adapter task recovery state",
+      "evidenceClass": "real",
+      "status": "passed",
+      "activeTasks": 0,
+      "uncertainTasks": 0
+    },
+    {
+      "scenario": "Provider restart reconcile on real device",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Runtime restart with PostgreSQL recovery on real device",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "PMS outage/Registry latest recovery",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    }
+  ],
+  "blockers": [
+    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.",
+    "REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices."
+  ]
+}

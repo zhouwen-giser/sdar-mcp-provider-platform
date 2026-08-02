@@ -12,7 +12,7 @@
     "runtime": {
       "owner": "runtime",
       "plannedDirectory": "migrations/runtime",
-      "deliveredFiles": 24
+      "deliveredFiles": 25
     },
     "provider:ugv": {
       "owner": "provider:ugv",
@@ -276,6 +276,16 @@
     {
       "sequence": 25,
       "legacyVersion": "024",
+      "owner": "runtime",
+      "oldPath": "migrations/024_accepted_task_substate.sql",
+      "newPath": "migrations/runtime/024_accepted_task_substate.sql",
+      "plannedPath": "migrations/runtime/024_accepted_task_substate.sql",
+      "pathState": "owner_directory",
+      "sha256": "25a0432bd8cdd04cbe4a56762827fd219857c0ca24c260c7911857c75aa78287"
+    },
+    {
+      "sequence": 26,
+      "legacyVersion": "024",
       "owner": "provider:ugv",
       "oldPath": "migrations/024_ugv_provider.sql",
       "newPath": "migrations/providers/ugv/024_ugv_provider.sql",
@@ -284,7 +294,7 @@
       "sha256": "05d6e1ec15187fbc96d96db8a6ee3d8d7edc33ff1840c2dc91fd7f104be805a2"
     },
     {
-      "sequence": 26,
+      "sequence": 27,
       "legacyVersion": "025",
       "owner": "provider:npc-tank",
       "oldPath": "migrations/025_npc_tank_provider.sql",
@@ -294,7 +304,7 @@
       "sha256": "55cba8544325d1e07aa9660453d8763992698d23fb7d8327cbb11c02bdbbb58b"
     },
     {
-      "sequence": 27,
+      "sequence": 28,
       "legacyVersion": "009",
       "owner": "pms",
       "oldPath": "migrations/009_runtime_registration.sql",

@@ -1,0 +1,31 @@
+# SMPP Home Assistant real-device preparation final delivery
+
+- Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
+- Candidate implementation SHA: `PENDING_IMPLEMENTATION_COMMIT`
+- Environment: `home-lab`
+- Overall status: **BLOCKED**
+- Ready for SDAR integration: **NO**
+
+## Real evidence
+
+- Home Assistant read-only preflight passed for one configured climate and two configured lights.
+- Climate real Runtime -> Adapter gRPC -> Home Assistant qualification executed HVAC mode and temperature, confirmed actual state, tested idempotency, and restored the original state.
+- Light real Runtime -> Adapter gRPC -> Home Assistant qualification executed power control for both lights, confirmed actual state, tested idempotency, and restored both original states within the per-light two-write budget.
+- Final real reports show zero active and zero uncertain tasks.
+
+## Contract and static evidence
+
+- Home Assistant Light Provider implementation, package, config schema, deployment descriptor, unit/integration/runtime E2E, protocol conformance, and PMS platform E2E were added.
+- Climate and Light provider conformance reports each pass 8/8.
+- Platform E2Es cover vendor-managed package/type/provider/resource binding, Catalog discovery, and Registry snapshot behavior with fake devices.
+
+## Hard blockers
+
+- FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.
+- PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.
+- REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.
+- REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices.
+- WINDOWS_SYMLINK_SECURITY_TEST_UNVERIFIED: test:provider-packages passes 12/13 checks but its symlink assertion is blocked by Windows EPERM; the standalone provider-package self-check passes.
+- WINDOWS_PROTOCOL_LOCK_LINE_ENDING_UNVERIFIED: protocol:check, verify:v2 and verify:platform stop at the protocol lock hash mismatch under core.autocrlf=true; frozen contract, schemas and 74 conformance cases pass.
+
+The real resource qualification is deliberately scoped to the three configured lab resources. It does not change the Provider Package realResourceStatus field from pending, and it does not certify all Home Assistant entities. No merge, tag, release, public deployment, or SDAR Agent Runtime integration was performed.

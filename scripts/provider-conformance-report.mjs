@@ -6,7 +6,7 @@ import { join, relative } from "node:path";
 import process from "node:process";
 
 const frozenContractSha256 = "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845";
-const runtimeMergeCommit = "798656827ea747fb824df2975f8e66135e80fcc2";
+const runtimeMergeCommit = "abd9db778848303d2966ac9b9e80f75207713109";
 const provider = argument("--provider");
 const check = process.argv.includes("--check");
 const write = process.argv.includes("--write");

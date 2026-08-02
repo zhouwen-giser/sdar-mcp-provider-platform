@@ -60,7 +60,7 @@ describe("Migration set isolation", () => {
       const runtimeMigrationCount = await runtime.query<{ count: string }>(
         "SELECT count(*) FROM runtime_schema_migration",
       );
-      expect(runtimeMigrationCount.rows[0]?.count).toBe("24");
+      expect(runtimeMigrationCount.rows[0]?.count).toBe("25");
 
       await writeEvidence({
         runtime: runtimeTables,

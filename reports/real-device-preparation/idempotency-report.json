@@ -1,0 +1,67 @@
+{
+  "evidenceClass": "real",
+  "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
+  "status": "blocked",
+  "scenarios": [
+    {
+      "providerId": "ha-climate-lab",
+      "resourceId": null,
+      "operation": "climate_set_hvac_mode",
+      "evidenceClass": "real",
+      "status": "passed",
+      "sameArgumentsSameKey": true,
+      "sameKeyDifferentArgumentsRejected": true,
+      "runtimeTaskId": "4dbbe3c1-d095-4f6b-abf7-09cd9cdda017",
+      "adapterExternalExecutionId": "658d0cb9-8848-401d-a66d-70e763162329"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": null,
+      "operation": "light_set_power",
+      "evidenceClass": "real",
+      "status": "passed",
+      "sameArgumentsSameKey": true,
+      "sameKeyDifferentArgumentsRejected": true,
+      "runtimeTaskId": "d54a3c9f-64e3-4dda-b305-4a0363cb33a4",
+      "adapterExternalExecutionId": "b28e9121-79cc-46d6-9397-5103de826f6d"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": null,
+      "operation": "light_set_power",
+      "evidenceClass": "real",
+      "status": "passed",
+      "sameArgumentsSameKey": true,
+      "sameKeyDifferentArgumentsRejected": true,
+      "runtimeTaskId": "f11bb895-9f12-4ab4-9e46-4c867fbd4415",
+      "adapterExternalExecutionId": "b282e1ef-c702-4cf4-9172-162df57e809f"
+    },
+    {
+      "scenario": "client timeout then retry",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Runtime duplicate tools/call after accepted task",
+      "evidenceClass": "contract",
+      "status": "covered"
+    },
+    {
+      "scenario": "Adapter restart during task",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "corrupted Provider state file fails closed",
+      "evidenceClass": "contract",
+      "status": "covered by unit contract"
+    }
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "blockers": [
+    "FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.",
+    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.",
+    "REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices."
+  ]
+}

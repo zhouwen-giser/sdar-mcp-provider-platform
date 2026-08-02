@@ -1,0 +1,43 @@
+{
+  "evidenceClass": "contract",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "contract_verified_not_published",
+  "catalogs": [
+    {
+      "providerId": "ha-climate-lab",
+      "catalogRevision": null,
+      "runtimeToolsMatch": "contract",
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ],
+      "resourceBinding": {
+        "mode": "ARGUMENT_REFERENCE",
+        "resourceIdJsonPointer": "/resourceId"
+      }
+    },
+    {
+      "providerId": "ha-light-lab",
+      "catalogRevision": null,
+      "runtimeToolsMatch": "contract",
+      "tools": ["light_get_state", "light_set_brightness", "light_set_power"],
+      "resourceBinding": {
+        "mode": "ARGUMENT_REFERENCE",
+        "resourceIdJsonPointer": "/resourceId"
+      }
+    }
+  ],
+  "sourceEvidence": [
+    "reports/home-assistant-climate/provider-conformance.json",
+    "reports/home-assistant-light/provider-conformance.json",
+    "tests/provider-platform-e2e/home-assistant/vendor-managed.test.ts",
+    "tests/provider-platform-e2e/home-assistant/light-vendor-managed.test.ts"
+  ],
+  "blockers": [
+    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real."
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

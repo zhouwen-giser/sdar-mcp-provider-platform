@@ -45,6 +45,7 @@ export class Sep2663ProtocolHandler {
     readonly businessEventManager?: BusinessEventNotificationManager,
     readonly businessEventDiscovery?: Record<string, unknown>,
     readonly businessEventRelationManager?: BusinessEventRelationManager,
+    readonly onProtocolError?: (error: unknown, requestId: string | number | null) => void,
   ) {
     this.notificationStream =
       notificationStream ??
@@ -173,6 +174,7 @@ export class Sep2663ProtocolHandler {
       return { httpStatus: 200, body: { jsonrpc: "2.0", id: request.id, result } };
     } catch (error) {
       const mapped = mapFrozenError(error);
+      if (mapped.code === FrozenErrorCode.InternalError) this.onProtocolError?.(error, id);
       return { httpStatus: mapped.httpStatus, body: frozenErrorResponse(id, mapped) };
     }
   }
@@ -211,6 +213,8 @@ export class Sep2663ProtocolHandler {
         return;
       }
       const mapped = mapFrozenError(error);
+      if (mapped.code === FrozenErrorCode.InternalError)
+        this.onProtocolError?.(error, requestId(body));
       dispatched = {
         httpStatus: mapped.httpStatus,
         body: frozenErrorResponse(requestId(body), mapped),

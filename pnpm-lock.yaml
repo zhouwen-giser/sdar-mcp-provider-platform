@@ -152,6 +152,8 @@ importers:
 
   apps/home-assistant-climate-provider: {}
 
+  apps/home-assistant-light-provider: {}
+
   apps/mock-npc-tank-device-mcp: {}
 
   apps/mock-npc-tank-mqtt-publisher: {}

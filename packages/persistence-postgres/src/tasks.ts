@@ -591,6 +591,15 @@ export class TaskRepository {
       return task;
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
+      const databaseError = error as { code?: string; constraint?: string };
+      if (databaseError.code === "23505" && databaseError.constraint === "provider_task_pkey") {
+        // Admission recovery and the original caller can publish the same accepted
+        // Adapter snapshot concurrently. The Task ID is the authority for this
+        // race; return the committed row instead of converting convergence into a
+        // technical failure or allowing a second side effect.
+        const existing = await selectTaskById(client, input.taskId);
+        if (existing !== null) return existing;
+      }
       throw error;
     } finally {
       client.release();

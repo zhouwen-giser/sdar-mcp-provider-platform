@@ -227,6 +227,22 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     config.RATE_LIMIT_MAX_KEYS,
   );
 
+  async function waitForBackgroundWorkers(): Promise<void> {
+    while (
+      schedulerTicking ||
+      recoveryTicking ||
+      commandDispatcherTicking ||
+      ttlCleanerTicking ||
+      outboxCleanerTicking ||
+      adapterHealthTicking ||
+      adapterManifestTicking ||
+      outboxPublisherTicking ||
+      providerOpsPublisherTicking
+    ) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    }
+  }
+
   app.addHook("onRequest", async (request, reply) => {
     const path = request.url.split("?", 1)[0];
     if (path !== "/mcp" && !(config.MCP_LEGACY_ENDPOINT_ENABLED && path === "/mcp/legacy")) return;
@@ -430,6 +446,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         sourceId,
       });
     }
+    await waitForBackgroundWorkers();
     gateway.close();
     await providerTelemetryServer?.close();
     await telemetry?.shutdown();
@@ -683,6 +700,8 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         businessEventManager,
         businessEventDiscovery,
         businessEventRelationManager,
+        (error, requestId) =>
+          logger.error({ err: error, requestId }, "Frozen MCP technical request failure"),
       );
       mcpRouter = new ProtocolRouter(
         frozenHandler,

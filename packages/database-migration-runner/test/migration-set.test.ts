@@ -54,7 +54,7 @@ describe("MigrationSet resolver", () => {
       resolveMigrationSet(workspaceRoot, "provider:npc-tank"),
     ]);
 
-    expect(runtime).toHaveLength(24);
+    expect(runtime).toHaveLength(25);
     expect(runtime.map(({ filename }) => filename)).not.toContain("024_ugv_provider.sql");
     expect(runtime.map(({ filename }) => filename)).not.toContain("025_npc_tank_provider.sql");
     expect(ugv.map(({ filename }) => filename)).toEqual(["024_ugv_provider.sql"]);
