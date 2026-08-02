@@ -95,7 +95,7 @@ Real commands default to read-only. The two safety variables are required for an
 
 - Device: stop writes, preserve current HA state, record `MANUAL_RESTORE_REQUIRED` and let an operator restore after the climate safety interval.
 - Adapter: stop the process, preserve its durable state, restart with the same state path and run reconcile; never delete state to clear a task.
-- Runtime: restart against the same isolated PostgreSQL database and use `tasks/get`, `tasks/result` and reconciliation; do not create a new database to hide an uncertain task.
+- Runtime: restart against the same isolated PostgreSQL database and use authoritative `tasks/get`, Task notifications and reconciliation; do not create a new database to hide an uncertain task.
 - PMS: restore Registry from `latest`/`bootstrap` and reconcile deployment/config revisions; do not re-run a side effect because PMS was unavailable.
 - Code: use a narrow reproducer, evidence capture, regression test, minimal fix, narrow test, component test, then all previously passing real scenarios.
 

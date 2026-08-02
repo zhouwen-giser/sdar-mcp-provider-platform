@@ -82,7 +82,6 @@ x-sdar-admin-token: replace-with-secret-admin-token
 | `tools/list`                              | 列出由 Provider Manifest 生成的 Tool（工具）                |
 | `tools/call`                              | 调用一个 Tool；可能直接返回结果或创建 Task                  |
 | `tasks/get`                               | 获取 Task 当前快照和最多 100 条最新 Observation（观察记录） |
-| `tasks/result`                            | 获取终态 Task 结果                                          |
 | `tasks/cancel`                            | 持久化取消请求；确认接收不代表 Task 已终止                  |
 | `tasks/update`                            | 回答 Task Input Request（输入请求）并返回命令接收凭据       |
 | `tasks/observations`                      | 分页读取 Task Observation 历史                              |

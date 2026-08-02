@@ -5,7 +5,8 @@ The Streamable HTTP endpoint is `POST /mcp`. It uses the official TypeScript MCP
 The endpoint is explicitly stateless under SDK 1.29.0: every POST creates an independent Server
 and transport, no MCP session id or resumable event store is issued, and GET/DELETE session
 lifecycle plus Task status notifications are not advertised. Durable Task ids, PostgreSQL state
-and `tasks/get`/`tasks/result` polling provide continuity across requests and replicas.
+and authoritative `tasks/get` polling plus Task notifications provide continuity across requests
+and replicas. The frozen profile does not expose the legacy `tasks/result` method.
 
 At startup Runtime calls Adapter DescribeProvider, validates and hashes the Manifest, persists immutable operation snapshots, and builds one Tool per operation. Resource instances remain Tool arguments and never expand the catalog.
 

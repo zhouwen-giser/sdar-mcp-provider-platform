@@ -71,7 +71,8 @@ const report: JsonObject = {
   toolsList: null,
   resources: [],
   scenarios: [],
-  taskResultCompatibility: null,
+  terminalTaskProjection: null,
+  terminalTaskStatus: null,
   stateRestoration: null,
   errors: [],
 };
@@ -323,28 +324,16 @@ try {
   report.websocketObservations = observedEvents;
   const finalState = await readState(mcpUrl, climate.resourceId, integrationRunId, 13);
   report.finalState = redactClimateState(finalState.normalized);
-  const temperatureTaskId =
-    typeof temperatureScenario.runtimeTaskId === "string" ? temperatureScenario.runtimeTaskId : "";
-  report.taskResultCompatibility = await readOnlyCall(
-    mcpUrl,
-    "tasks/result",
-    { taskId: temperatureTaskId },
-    temperatureTaskId,
-    14,
-  );
+  report.terminalTaskProjection = temperatureScenario.finalTask;
+  report.terminalTaskStatus = temperatureScenario.status;
   report.activeTasks = await activeTaskCount(runtime.pool);
   report.uncertainTasks = 0;
-  const taskResultCompatibility = isObject(report.taskResultCompatibility)
-    ? report.taskResultCompatibility
-    : {};
   report.status =
     restore.status === "restored" &&
-    taskResultCompatibility.status === 200 &&
-    (!isObject(taskResultCompatibility.body) || taskResultCompatibility.body.error === undefined)
+    isObject(report.terminalTaskProjection) &&
+    report.terminalTaskStatus === "completed"
       ? "passed"
       : "blocked";
-  if (isObject(taskResultCompatibility.body) && taskResultCompatibility.body.error !== undefined)
-    (report.errors as unknown[]).push("FROZEN_MCP_TASKS_RESULT_UNSUPPORTED");
   writeRunState({
     integrationRunId,
     phase: report.status === "passed" ? "completed" : "manual_review",
@@ -440,16 +429,6 @@ function loadLocalConfiguration(): {
   };
 }
 
-async function readOnlyCall(
-  url: URL,
-  method: string,
-  params: JsonObject,
-  name: string | undefined,
-  id: number,
-): Promise<McpResponse> {
-  return request(url, method, params, name, id);
-}
-
 async function readState(
   url: URL,
   resourceId: string,
@@ -468,6 +447,16 @@ async function readState(
     throw coded("CLIMATE_STATE_READ_FAILED");
   const normalized = result.structuredContent;
   return { normalized: { ...normalized, observationId: observationId(normalized) }, response };
+}
+
+async function readOnlyCall(
+  url: URL,
+  method: string,
+  params: JsonObject,
+  name: string | undefined,
+  id: number,
+): Promise<McpResponse> {
+  return request(url, method, params, name, id);
 }
 
 async function runTask(

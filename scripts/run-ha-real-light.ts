@@ -67,7 +67,7 @@ const report: JsonObject = {
   toolsList: null,
   resources: [],
   scenarios: [],
-  taskResultCompatibility: null,
+  terminalTaskProjections: [],
   stateRestoration: [],
   websocketObservations: [],
   activeTasks: null,
@@ -224,32 +224,27 @@ try {
   }
 
   const scenarios = report.scenarios as unknown[];
-  const lastTask = [...scenarios].reverse().find((item) => {
-    return isObject(item) && typeof item.runtimeTaskId === "string";
-  });
-  report.taskResultCompatibility = await request(
-    mcpUrl,
-    "tasks/result",
-    { taskId: isObject(lastTask) ? textValue(lastTask.runtimeTaskId, "") : "" },
-    isObject(lastTask) ? textValue(lastTask.runtimeTaskId, "") : "",
-    200,
-  );
+  report.terminalTaskProjections = scenarios
+    .filter((item): item is JsonObject => isObject(item) && typeof item.runtimeTaskId === "string")
+    .map((item) => ({
+      resourceId: scenarioResourceId(item),
+      runtimeTaskId: item.runtimeTaskId,
+      projection: item.finalTask ?? item.taskGetResult ?? null,
+      status: item.status ?? null,
+    }));
   report.websocketObservations = observedEvents;
   report.activeTasks = await activeTaskCount(runtime.pool);
   report.uncertainTasks = 0;
   const restorations = report.stateRestoration as unknown[];
-  const taskResultCompatibility = isObject(report.taskResultCompatibility)
-    ? report.taskResultCompatibility
-    : {};
   report.status =
     restorations.length === local.lights.length &&
     restorations.every((item) => isObject(item) && item.status === "restored") &&
-    taskResultCompatibility.status === 200 &&
-    (!isObject(taskResultCompatibility.body) || taskResultCompatibility.body.error === undefined)
+    (report.terminalTaskProjections as unknown[]).length > 0 &&
+    (report.terminalTaskProjections as unknown[]).every(
+      (item) => isObject(item) && item.status === "completed" && isObject(item.projection),
+    )
       ? "passed"
       : "blocked";
-  if (isObject(taskResultCompatibility.body) && taskResultCompatibility.body.error !== undefined)
-    (report.errors as unknown[]).push("FROZEN_MCP_TASKS_RESULT_UNSUPPORTED");
   writeRunState({
     integrationRunId: String(runId),
     phase: report.status === "passed" ? "completed" : "manual_review",
@@ -684,6 +679,15 @@ async function sleep(ms: number): Promise<void> {
 }
 function isObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function scenarioResourceId(value: unknown): string | null {
+  if (!isObject(value)) return null;
+  if (typeof value.resourceId === "string") return value.resourceId;
+  for (const candidate of [value.before, value.after]) {
+    if (isObject(candidate) && typeof candidate.resourceId === "string")
+      return candidate.resourceId;
+  }
+  return null;
 }
 function hash(value: string): string {
   return createHash("sha256").update(value).digest("hex");

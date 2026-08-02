@@ -40,12 +40,6 @@ try {
   const climate = readJson(climatePath);
   const light = readJson(lightPath);
   const preflight = readJson(preflightPath);
-  const climateTaskResult = isObject(climate.taskResultCompatibility)
-    ? climate.taskResultCompatibility
-    : {};
-  const lightTaskResult = isObject(light.taskResultCompatibility)
-    ? light.taskResultCompatibility
-    : {};
   report.finalReadOnlyPreflight = summarizePreflight(preflight);
   report.devices = [summarizeClimate(climate), ...summarizeLights(light)];
   report.activeTasks = sumNumber(climate.activeTasks, light.activeTasks);
@@ -53,8 +47,7 @@ try {
   const blockers = report.blockers as unknown[];
   for (const item of [climate, light]) {
     if (item.status !== "passed") blockers.push(...stringArray(item.errors));
-    const taskResult = item === climate ? climateTaskResult : lightTaskResult;
-    if (taskResult.status !== 200) blockers.push("FROZEN_MCP_TASKS_RESULT_UNSUPPORTED");
+    if (!hasTerminalTaskEvidence(item)) blockers.push("TERMINAL_TASK_GET_EVIDENCE_MISSING");
   }
   if (report.activeTasks !== 0) blockers.push("ACTIVE_RUNTIME_TASKS_REMAIN");
   if (report.uncertainTasks !== 0) blockers.push("UNCERTAIN_RUNTIME_TASKS_REMAIN");
@@ -93,9 +86,7 @@ function summarizeClimate(value: JsonObject): JsonObject {
     finalState: value.finalState ?? null,
     restorationStatus: isObject(value.stateRestoration) ? value.stateRestoration.status : null,
     tasks: scenarioSummaries(value.scenarios),
-    taskResultStatus: isObject(value.taskResultCompatibility)
-      ? value.taskResultCompatibility.status
-      : null,
+    terminalTaskStatus: value.terminalTaskStatus ?? null,
   };
 }
 
@@ -115,11 +106,33 @@ function summarizeLights(value: JsonObject): JsonObject[] {
       finalState: restoration?.currentAfterRestore ?? null,
       restorationStatus: restoration?.status ?? null,
       tasks: scenarioSummaries(scenarios.filter((item) => scenarioResourceId(item) === resourceId)),
-      taskResultStatus: isObject(value.taskResultCompatibility)
-        ? value.taskResultCompatibility.status
-        : null,
+      terminalTaskStatus: terminalTaskStatus(value, resourceId),
     };
   });
+}
+
+function hasTerminalTaskEvidence(value: JsonObject): boolean {
+  if (value.providerId === "ha-climate-lab")
+    return value.terminalTaskStatus === "completed" && isObject(value.terminalTaskProjection);
+  const projections = Array.isArray(value.terminalTaskProjections)
+    ? value.terminalTaskProjections
+    : [];
+  return (
+    projections.length > 0 &&
+    projections.every(
+      (item) => isObject(item) && item.status === "completed" && isObject(item.projection),
+    )
+  );
+}
+
+function terminalTaskStatus(value: JsonObject, resourceId: string): unknown {
+  const projections = Array.isArray(value.terminalTaskProjections)
+    ? value.terminalTaskProjections
+    : [];
+  const match = projections.find(
+    (item): item is JsonObject => isObject(item) && item.resourceId === resourceId,
+  );
+  return match?.status ?? null;
 }
 
 function scenarioSummaries(value: unknown): JsonObject[] {
