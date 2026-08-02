@@ -57,7 +57,8 @@ RUN pnpm build \
     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'
 
 FROM build AS production-dependencies
-RUN CI=true pnpm prune --prod \
+RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules \
+    && CI=true pnpm install --prod --offline --frozen-lockfile --filter='!@sdar/pms-web' \
     && find node_modules -type f -name '*.map' -delete \
     && find node_modules -type f -iname '*.md' \
       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete

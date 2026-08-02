@@ -52,6 +52,17 @@ server.listen(port, host, () => {
   console.log(`PMS API proxy: ${apiOrigin.origin}`);
 });
 
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.once(signal, () => {
+    server.close((error) => {
+      if (error) {
+        console.error(error);
+        process.exitCode = 1;
+      }
+    });
+  });
+}
+
 function parsePort(value) {
   const port = Number.parseInt(value, 10);
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
