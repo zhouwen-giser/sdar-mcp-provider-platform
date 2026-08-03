@@ -211,7 +211,10 @@ finalReadiness.readyForSdarIntegration = Object.values(finalReadiness).every(Boo
 
 const blockers = [
   ...(registryEndpointE2e.status === "blocked_resource_unavailable"
-    ? ["HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT"]
+    ? [
+        "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
+        "HA_XIAOMI_MIOT_SESSION_UNAVAILABLE_AFTER_RESTART",
+      ]
     : []),
   ...(climate.status !== "passed" ? ["CLIMATE_POWER_CONTROL_SAFETY_DEFERRED"] : []),
   "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
