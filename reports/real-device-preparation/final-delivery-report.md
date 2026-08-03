@@ -9,7 +9,7 @@
 
 ## Real evidence
 
-- Home Assistant read-only preflight passed for the configured climate and two lights; reports are redacted.
+- The initial Home Assistant read-only preflight passed for the configured climate and two lights; reports are redacted. A later read-only recheck is recorded as unavailable below.
 - PMS API onboarding created/confirmed both Provider Packages, Provider Types, Providers, three Resources, bindings, published configuration, Runtime Deployments, Catalog revisions, and Registry revision 3.
 - Both PMS-managed Runtime Deployments reached `ACTIVE`/ready in the controlled local environment. The separately launched Worker did not complete its existing reconcile leases, so the Worker sub-gate remains unverified.
 - Registry-backed MCP reads returned all three resources. The Registry `latest` and `bootstrap` checksums and ETags matched; the redacted Registry contained neither secrets nor Home Assistant Entity ID keys.
