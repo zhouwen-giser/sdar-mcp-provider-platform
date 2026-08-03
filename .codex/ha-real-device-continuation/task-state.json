@@ -4,7 +4,7 @@
   "branch": "codex/ha-real-device-preparation",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
   "previousCandidateSha": "cd68a91d129ba50a240837c79526ebdfdfbfa05c",
-  "candidateHeadSha": "PENDING_FINAL_COMMIT_SHA",
+  "candidateHeadSha": "86f742e7f39c24809f031c475b0e42a4eba5c392",
   "updatedAt": "2026-08-03T10:10:00+08:00",
   "phaseStatus": {
     "C0_CANDIDATE_PROTECTION": "passed",
