@@ -3,9 +3,9 @@
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
   "previousCandidateSha": "cd68a91d129ba50a240837c79526ebdfdfbfa05c",
-  "finalCandidateSha": "b2590d73a8dbd5dea692a04c1c82ea0f3ad76c7c",
+  "finalCandidateSha": "575b252e4e98a0cd1163da5424ef0a04421213ec",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "b2590d73a8dbd5dea692a04c1c82ea0f3ad76c7c",
+  "smppCandidateSha": "575b252e4e98a0cd1163da5424ef0a04421213ec",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registry": {

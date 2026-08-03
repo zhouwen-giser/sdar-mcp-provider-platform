@@ -2,7 +2,7 @@
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
 - Previous candidate SHA: `cd68a91d129ba50a240837c79526ebdfdfbfa05c`
-- Final candidate SHA: `b2590d73a8dbd5dea692a04c1c82ea0f3ad76c7c`
+- Final candidate SHA: `575b252e4e98a0cd1163da5424ef0a04421213ec`
 - Branch: `codex/ha-real-device-preparation`
 - Overall readiness: **NO**
 
