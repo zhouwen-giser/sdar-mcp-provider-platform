@@ -1,0 +1,31 @@
+{
+  "evidenceClass": "real",
+  "phase": "C4_LIVE_PROVIDER_ONBOARDING",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T03:24:41Z",
+  "sourceReports": ["pms-live-bootstrap.json"],
+  "providerIds": ["ha-climate-lab", "ha-light-lab"],
+  "resourceIds": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
+  "formalApiSteps": {
+    "providerPackageSync": "passed",
+    "providerTypeCreateOrConfirm": "passed",
+    "providerCreateOrConfirm": "passed",
+    "resourceCreateOrConfirm": "passed",
+    "bindingCreateOrConfirm": "passed",
+    "configDraft": "passed",
+    "configPublish": "passed",
+    "runtimeDeploymentCreateOrConfirm": "passed",
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
+    "resourceIds": [
+      "living-room-air-conditioner",
+      "living-room-main-light",
+      "living-room-aux-light"
+    ],
+    "publishedConfigRevision": 1
+  },
+  "deploymentModel": "vendor_managed_adapter_plus_pms_managed_runtime",
+  "noSecrets": true,
+  "noEntityIds": true,
+  "blockers": []
+}

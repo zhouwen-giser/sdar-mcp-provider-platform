@@ -13,6 +13,7 @@
 - `VERIFY_V2_AGGREGATOR_UNVERIFIED`
 - `VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED`
 - `HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT`
+- `HA_XIAOMI_MIOT_SESSION_UNAVAILABLE_AFTER_RESTART`
 - `RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED`
 
 Each blocker must be independently reclassified with fresh evidence; a contract or fake test cannot close a real-device or live-PMS blocker.
@@ -25,6 +26,7 @@ Each blocker must be independently reclassified with fresh evidence; a contract 
 - `WINDOWS_NODE_MODULES_STATUS_EPERM` is an execution-environment limitation: pnpm's ordinary workspace status check attempted a node_modules recreation and failed, while the explicit offline frozen-lockfile rebuild passed.
 - `WINDOWS_PROVIDER_PACKAGE_FULL_SUITE_UNVERIFIED` remains open after an elevated symlink-test rerun reproduced EPERM; the dedicated Linux symlink gate is passed.
 - `HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT` is open after two consecutive read-only preflight runs found the auxiliary light unavailable; no further writes are authorized until P1 passes.
+- `HA_XIAOMI_MIOT_SESSION_UNAVAILABLE_AFTER_RESTART` is the current diagnostic cause: Home Assistant `xiaomi_home` logs repeated MIoT session disconnect/reconnect attempts. A targeted config-entry reload and one local Home Assistant restart did not make the auxiliary light available.
 - `FROZEN_MCP_INITIALIZE_EXPECTATION_UNSUPPORTED_BY_CURRENT_RUNTIME` is closed as a runner defect: the frozen live surface is now validated with `server/discover`, `tools/list`, and `tools/call`; `initialize` is recorded as not applicable rather than treated as a required method.
 
 ## Closed in C1

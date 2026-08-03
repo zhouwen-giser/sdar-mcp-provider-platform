@@ -1,6 +1,6 @@
 {
   "evidenceClass": "real",
-  "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
+  "phase": "C6_REGISTRY_ENDPOINT_REAL_E2E",
   "integrationRunId": "smpp-registry-e2e-5c2b9ab6-3420-40a5-8de3-89adfe52758c",
   "environment": "home-lab",
   "startedAt": "2026-08-03T04:36:00.309Z",
@@ -130,5 +130,9 @@
     "status": "passed",
     "requiredMethods": ["server/discover", "tools/list", "tools/call"],
     "initialize": "not_applicable_to_frozen_runtime_surface"
-  }
+  },
+  "sourceReport": "registry-backed-e2e.json",
+  "functionalGate": false,
+  "noSecrets": true,
+  "noEntityIds": true
 }

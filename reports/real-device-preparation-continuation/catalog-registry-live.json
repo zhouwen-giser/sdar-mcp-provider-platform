@@ -1,9 +1,9 @@
 {
   "evidenceClass": "real",
   "phase": "P5_LIVE_CATALOG_AND_REGISTRY",
-  "status": "passed_with_watch_unverified",
+  "status": "passed",
   "environment": "home-lab",
-  "observedAt": "2026-08-03T01:22:36Z",
+  "observedAt": "2026-08-03T04:39:29.829Z",
   "catalogs": [
     {
       "providerId": "ha-climate-lab",
@@ -40,7 +40,23 @@
     "providerIds": ["ha-climate-lab", "ha-light-lab"],
     "containsSecretKeys": false,
     "containsEntityIdKeys": false,
-    "watch": "unverified"
+    "history": {
+      "status": 200,
+      "monotonicRevisions": true,
+      "count": 3
+    },
+    "diff": {
+      "status": 200,
+      "fromRevision": 2,
+      "toRevision": 3
+    },
+    "ifNoneMatch": {
+      "status": 304
+    },
+    "watch": {
+      "status": 200,
+      "initialHintObserved": true
+    }
   },
   "runtimeEndpoints": [
     {

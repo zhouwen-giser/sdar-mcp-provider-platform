@@ -35,7 +35,31 @@
       "fault": "PMS API unavailable with Runtime active",
       "evidenceClass": "unverified",
       "status": "not_injected"
+    },
+    {
+      "fault": "PMS outage with Runtime LKG",
+      "evidenceClass": "controlledFaultInjection",
+      "status": "passed",
+      "source": "tests/fault-injection/platform-faults.test.ts"
+    },
+    {
+      "fault": "Runtime crash recovery backoff",
+      "evidenceClass": "controlledFaultInjection",
+      "status": "passed",
+      "source": "tests/fault-injection/platform-faults.test.ts"
+    },
+    {
+      "fault": "Migration database unavailable fails closed",
+      "evidenceClass": "controlledFaultInjection",
+      "status": "passed",
+      "source": "tests/fault-injection/platform-faults.test.ts"
     }
   ],
+  "controlledTestSummary": {
+    "source": "tests/fault-injection/platform-faults.test.ts",
+    "testsPassed": 4,
+    "testsFailed": 0,
+    "sensitiveErrorDetailsRedacted": true
+  },
   "safety": "No fault injection directly changed Home Assistant state; all real writes remained inside the existing explicit gate and bounded light run."
 }

@@ -1,0 +1,14 @@
+{
+  "evidenceClass": "real",
+  "phase": "C7_ADAPTER_RESTART_REAL",
+  "status": "passed_scoped_runtime_restart_required",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T01:22:36Z",
+  "providerId": "ha-light-lab",
+  "outageReadiness": "not_ready",
+  "adapterRecovery": "describe_provider_passed",
+  "automaticReconnectWithoutRuntimeRestart": "unverified",
+  "inFlightTaskRecovery": "unverified",
+  "sourceReport": "real-recovery.json",
+  "blockers": ["RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED"]
+}

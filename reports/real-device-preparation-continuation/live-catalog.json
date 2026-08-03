@@ -1,0 +1,41 @@
+{
+  "evidenceClass": "real",
+  "phase": "C5_LIVE_CATALOG_DISCOVERY",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T04:36:01.158Z",
+  "sourceReports": ["catalog-registry-live.json", "registry-backed-e2e.json"],
+  "catalogs": [
+    {
+      "providerId": "ha-climate-lab",
+      "catalogRevision": 1,
+      "checksum": "987c494684bffd15d024efe9512709c20258c8b3e2c751389643876473ec92b6",
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ],
+      "runtimeToolsListMatch": true,
+      "runtimeDiscovery": {
+        "status": 200,
+        "resultType": "complete",
+        "hasError": false
+      }
+    },
+    {
+      "providerId": "ha-light-lab",
+      "catalogRevision": 1,
+      "checksum": "4fea3c49bf3c4c0e9ec19d3ad19a4d73b9eae809033d1c13fd0fe2727cb769a3",
+      "tools": ["light_get_state", "light_set_power", "light_set_brightness"],
+      "runtimeToolsListMatch": true,
+      "runtimeDiscovery": {
+        "status": 200,
+        "resultType": "complete",
+        "hasError": false
+      }
+    }
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

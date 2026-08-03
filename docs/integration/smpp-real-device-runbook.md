@@ -10,4 +10,6 @@
 
 For the formal lab path, run the PMS onboarding and Registry-backed drivers only after both Runtime Deployments report `ACTIVE` and `/health/ready` is ready. The live continuation reports are under `reports/real-device-preparation-continuation/`; a direct application Reconcile result must not be relabelled as completed Worker job evidence.
 
+For a current live snapshot, run the Registry contract probe, the Registry-backed read E2E, and the continuation view generator in that order. The generator preserves `blocked`, `partial`, and `unverified` statuses; do not edit those statuses to obtain a readiness value. If Home Assistant reports any configured resource as `unavailable`, stop all device writes, diagnose the integration, and rerun the read-only preflight before resuming.
+
 The frozen Runtime profile exposes `server/discover`, `tools/list`, `tools/call`, `tasks/get`, notifications, and the frozen Task control methods. It does not expose the legacy `initialize` or `tasks/result` methods; reports must preserve that compatibility distinction.

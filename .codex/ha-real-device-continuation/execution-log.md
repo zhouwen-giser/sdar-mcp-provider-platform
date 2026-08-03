@@ -63,6 +63,17 @@
 - 2026-08-03 11:24 Asia/Shanghai: Registry-backed real MCP read E2E used the live `latest`/`bootstrap` Registry, verified checksum/ETag equality and both Provider records, then completed `server/discover`, `tools/list`, and `tools/call` state reads for all three configured resources. Protocol qualification passed; the run is `blocked_resource_unavailable` solely because the auxiliary light returned `reachable=false`/`unavailable`.
 - 2026-08-03 11:32 Asia/Shanghai: read-only HA WebSocket diagnostics found all three configured entities present in the entity registry, not disabled or hidden, and the `xiaomi_home` config entry loaded. The auxiliary light remains unavailable at HA state authority; no write was attempted.
 
+## Current HA availability diagnosis and Registry contract
+
+- 2026-08-03 12:29-12:35 Asia/Shanghai: HA error-log inspection found repeated `xiaomi_home` MIoT session disconnect/reconnect messages without an invalid-token indication. The config entry remained `loaded` and the entities remained enabled; the auxiliary light stayed `unavailable`.
+- A fixed Home Assistant `reload_config_entry` management call succeeded without invoking any device-domain service, but the auxiliary light remained unavailable. One controlled restart of the local `homeassistant` container also left the auxiliary light unavailable; climate and main light returned to their prior readable `off` states, and both SMPP Runtime readiness endpoints returned HTTP 200.
+- 2026-08-03 12:39 Asia/Shanghai: live Registry contract probe passed `latest`, `bootstrap`, monotonic `history`, `diff`, ETag/If-None-Match 304, initial `watch` event, checksum, provider count, and sensitive-field checks. The Registry-backed MCP read E2E remains blocked only by the current auxiliary-light resource state.
+
+## Controlled fault-injection tests
+
+- `tests/fault-injection/platform-faults.test.ts` passed 4/4: PMS LKG during outage, Adapter readiness separation, bounded Runtime crash recovery, and migration database failure closed with redacted evidence.
+- Home Assistant Provider security coverage passed for the selected climate/light files. These are controlled/contract evidence and do not close real in-flight restart or REST-200-without-state-change blockers.
+
 ## Final narrow verification
 
 - 2026-08-03 11:57 Asia/Shanghai: direct local binaries passed the changed-scope PM2 test (12/12), Prettier checks, ESLint, and TypeScript typecheck. The pnpm wrapper was not used for these results because its dependency-status phase reproduced the known Windows node_modules EPERM/no-TTY failure.

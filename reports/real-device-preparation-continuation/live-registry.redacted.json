@@ -1,0 +1,36 @@
+{
+  "evidenceClass": "real",
+  "phase": "C5_LIVE_REGISTRY_SNAPSHOT",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T04:39:29.829Z",
+  "revision": 3,
+  "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+  "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp",
+      "catalogRevision": 1,
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp",
+      "catalogRevision": 1,
+      "tools": ["light_get_state", "light_set_power", "light_set_brightness"]
+    }
+  ],
+  "sourceReports": ["catalog-registry-live.json", "live-registry-contract.json"],
+  "noSecrets": true,
+  "noEntityIds": true
+}

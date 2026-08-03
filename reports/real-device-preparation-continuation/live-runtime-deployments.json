@@ -1,0 +1,51 @@
+{
+  "evidenceClass": "real",
+  "phase": "C4_LIVE_RUNTIME_DEPLOYMENTS",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T04:36:01.158Z",
+  "sourceReports": ["pms-live-bootstrap.json", "registry-backed-e2e.json"],
+  "deployments": [
+    {
+      "providerId": "ha-climate-lab",
+      "deploymentId": "ha-climate-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 2,
+      "observedRevision": 22,
+      "runtimeReadiness": "ready",
+      "runtimeEndpoint": "http://127.0.0.1:18081/mcp"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "deploymentId": "ha-light-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 0,
+      "observedRevision": 40,
+      "runtimeReadiness": "ready",
+      "runtimeEndpoint": "http://127.0.0.1:18080/mcp"
+    }
+  ],
+  "readinessChecks": [
+    {
+      "providerId": "ha-climate-lab",
+      "endpoint": "http://127.0.0.1:18081/mcp",
+      "discoveryStatus": 200,
+      "toolsList": [
+        "climate_get_state",
+        "climate_set_power",
+        "climate_set_hvac_mode",
+        "climate_set_temperature"
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "endpoint": "http://127.0.0.1:18080/mcp",
+      "discoveryStatus": 200,
+      "toolsList": ["light_get_state", "light_set_power", "light_set_brightness"]
+    }
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

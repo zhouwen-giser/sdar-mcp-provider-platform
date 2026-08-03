@@ -2,7 +2,7 @@
   "evidenceClass": "unverified",
   "phase": "C10_FULL_REGRESSION",
   "status": "partial",
-  "observedAt": "2026-08-03T11:34:00+08:00",
+  "observedAt": "2026-08-03T12:44:15+08:00",
   "dependencyIntake": {
     "command": "CI=true pnpm install --offline --force --frozen-lockfile --ignore-scripts --node-linker=hoisted --config.confirmModulesPurge=false",
     "evidenceClass": "static",
@@ -27,6 +27,25 @@
       "evidenceClass": "real",
       "status": "blocked_resource_unavailable",
       "detail": "Registry, server/discover, tools/list, and tools/call passed for all three resources; only the current auxiliary-light reachable=false state blocked the real-resource gate."
+    },
+    {
+      "command": "scripts/probe-live-registry-contract.mjs",
+      "evidenceClass": "real",
+      "status": "passed",
+      "detail": "Live latest/bootstrap/history/diff/watch and ETag/If-None-Match contract checks passed without exposing secrets or Entity IDs."
+    },
+    {
+      "command": "tests/fault-injection/platform-faults.test.ts",
+      "evidenceClass": "controlledFaultInjection",
+      "status": "passed",
+      "tests": "4/4",
+      "detail": "PMS LKG, Adapter readiness, Runtime crash recovery, and migration failure-closed semantics passed."
+    },
+    {
+      "command": "Home Assistant Xiaomi config-entry reload plus local service restart",
+      "evidenceClass": "real",
+      "status": "partial",
+      "detail": "Climate and main light recovered to readable off states and both SMPP Runtime readiness endpoints returned 200; auxiliary light remained unavailable. No device service was called."
     },
     {
       "command": "prettier --check .",
@@ -121,6 +140,7 @@
   ],
   "blockers": [
     "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
+    "HA_XIAOMI_MIOT_SESSION_UNAVAILABLE_AFTER_RESTART",
     "FORMAT_CHECK_PRE_EXISTING_FILES",
     "WINDOWS_NODE_MODULES_STATUS_EPERM",
     "WINDOWS_PROVIDER_PACKAGE_SYMLINK_EPERM",

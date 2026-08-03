@@ -1,0 +1,39 @@
+{
+  "evidenceClass": "real",
+  "phase": "C5_LIVE_REGISTRY_CONTRACT",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T04:47:21.685Z",
+  "source": "live PMS Registry API",
+  "checks": {
+    "latest": true,
+    "bootstrap": true,
+    "history": true,
+    "historyMonotonic": true,
+    "diff": true,
+    "etag": true,
+    "ifNoneMatch": true,
+    "watch": true,
+    "checksum": true,
+    "providerCount": true,
+    "noSecretKeys": true,
+    "noEntityIdKeys": true
+  },
+  "registry": {
+    "revision": 3,
+    "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+    "bootstrapChecksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+    "historyCount": 3,
+    "historyRevisions": [3, 2, 1],
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
+    "latestStatus": 200,
+    "bootstrapStatus": 200,
+    "historyStatus": 200,
+    "diffStatus": 200,
+    "conditionalStatus": 304,
+    "watchStatus": 200,
+    "watchContentType": "text/event-stream; charset=utf-8"
+  },
+  "errors": []
+}

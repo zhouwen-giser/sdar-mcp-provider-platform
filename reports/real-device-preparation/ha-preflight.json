@@ -1,8 +1,8 @@
 {
   "evidenceClass": "real",
   "phase": "P1_HA_READ_ONLY_PREFLIGHT",
-  "startedAt": "2026-08-03T03:32:04.657Z",
-  "completedAt": "2026-08-03T03:32:05.246Z",
+  "startedAt": "2026-08-03T04:35:13.134Z",
+  "completedAt": "2026-08-03T04:35:13.755Z",
   "status": "failed",
   "readOnly": true,
   "sideEffectsAttempted": false,
@@ -43,8 +43,14 @@
       "displayName": "Living room air conditioner",
       "state": "off",
       "reachable": true,
-      "observedAt": "2026-08-03T00:36:56.219608+00:00",
-      "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
+      "observedAt": "2026-08-03T04:34:22.258701+00:00",
+      "supportedHvacModes": [
+        "heat",
+        "dry",
+        "cool",
+        "fan_only",
+        "off"
+      ],
       "minTemperature": 16,
       "maxTemperature": 31,
       "currentTemperature": null,
@@ -58,7 +64,7 @@
       "displayName": "餐厅灯",
       "state": "off",
       "reachable": true,
-      "observedAt": "2026-08-03T01:06:41.408308+00:00",
+      "observedAt": "2026-08-03T04:34:17.442515+00:00",
       "supportsBrightness": true,
       "brightnessPercent": null
     },
@@ -69,7 +75,7 @@
       "displayName": "客厅灯",
       "state": "unavailable",
       "reachable": false,
-      "observedAt": "2026-08-03T01:51:47.059061+00:00",
+      "observedAt": "2026-08-03T04:34:16.325781+00:00",
       "supportsBrightness": true,
       "brightnessPercent": null
     }
