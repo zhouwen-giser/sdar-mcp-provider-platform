@@ -45,6 +45,24 @@ describe("ConfigurationCenter", () => {
     expect(() => createDefaultConfigurationCenter()).not.toThrow();
   });
 
+  it("loads the Home Assistant Light Provider definition for PMS onboarding", () => {
+    const center = createDefaultConfigurationCenter();
+    expect(() =>
+      center.createDraft({
+        draftId: "ha-light-definition-check",
+        definitionId: "provider.homeAssistantLight",
+        key: {
+          environment: "home-lab",
+          targetType: "provider",
+          targetId: "ha-light-lab",
+          configGroup: "provider.homeAssistantLight",
+          dataId: "main",
+        },
+        content: {},
+      }),
+    ).not.toThrow();
+  });
+
   it("resolves the declared inheritance order and reports field sources", () => {
     const center = new ConfigurationCenter([definition]);
     center.createDraft(

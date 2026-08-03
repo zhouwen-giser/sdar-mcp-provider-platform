@@ -233,7 +233,10 @@ async function validateSecretFile(path: string, name: string): Promise<void> {
     throw new Error(`PMS_WORKER_SECRET_FILE_INVALID:${name}`);
   }
   const permissions = status.mode & 0o777;
-  if ((permissions & ~0o600) !== 0 || (permissions & 0o400) === 0) {
+  if (
+    process.platform !== "win32" &&
+    ((permissions & ~0o600) !== 0 || (permissions & 0o400) === 0)
+  ) {
     throw new Error(`PMS_WORKER_SECRET_FILE_PERMISSIONS:${name}`);
   }
   const parent = dirname(path);
@@ -246,7 +249,7 @@ async function validateSecretFile(path: string, name: string): Promise<void> {
   if (
     parentStatus.isSymbolicLink() ||
     !parentStatus.isDirectory() ||
-    (parentStatus.mode & 0o022) !== 0 ||
+    (process.platform !== "win32" && (parentStatus.mode & 0o022) !== 0) ||
     (await realpath(parent)) !== resolve(parent)
   ) {
     throw new Error(`PMS_WORKER_SECRET_PARENT_UNSAFE:${name}`);
@@ -269,7 +272,10 @@ async function validateRoot(path: string, name: string, privateRoot: boolean): P
     throw new Error(`PMS_WORKER_ROOT_INVALID:${name}`);
   }
   const permissions = status.mode & 0o777;
-  if ((permissions & 0o022) !== 0 || (privateRoot && (permissions & 0o077) !== 0)) {
+  if (
+    process.platform !== "win32" &&
+    ((permissions & 0o022) !== 0 || (privateRoot && (permissions & 0o077) !== 0))
+  ) {
     throw new Error(`PMS_WORKER_ROOT_PERMISSIONS:${name}`);
   }
 }

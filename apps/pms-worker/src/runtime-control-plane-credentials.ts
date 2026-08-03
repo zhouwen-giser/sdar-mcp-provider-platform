@@ -74,7 +74,9 @@ async function validateCredentialRoot(source: string): Promise<string> {
   if (status.isSymbolicLink() || !status.isDirectory() || canonical !== expected) {
     throw credentialError("ROOT_INVALID");
   }
-  if ((status.mode & 0o077) !== 0) throw credentialError("ROOT_PERMISSIONS");
+  if (process.platform !== "win32" && (status.mode & 0o077) !== 0) {
+    throw credentialError("ROOT_PERMISSIONS");
+  }
   return canonical;
 }
 
@@ -90,7 +92,7 @@ async function assertRootUnchanged(root: string): Promise<void> {
     status.isSymbolicLink() ||
     !status.isDirectory() ||
     canonical !== root ||
-    (status.mode & 0o077) !== 0
+    (process.platform !== "win32" && (status.mode & 0o077) !== 0)
   ) {
     throw credentialError("ROOT_INVALID");
   }
@@ -108,7 +110,7 @@ async function validateCredentialParent(path: string): Promise<void> {
     status.isSymbolicLink() ||
     !status.isDirectory() ||
     canonical !== path ||
-    (status.mode & 0o022) !== 0
+    (process.platform !== "win32" && (status.mode & 0o022) !== 0)
   ) {
     throw credentialError("PARENT_UNSAFE");
   }
@@ -127,7 +129,10 @@ async function validateCredentialFile(path: string): Promise<void> {
   }
   if (status.nlink !== 1) throw credentialError("TOKEN_DUPLICATE_MAPPING");
   const permissions = status.mode & 0o777;
-  if ((permissions & ~0o600) !== 0 || (permissions & 0o400) === 0) {
+  if (
+    process.platform !== "win32" &&
+    ((permissions & ~0o600) !== 0 || (permissions & 0o400) === 0)
+  ) {
     throw credentialError("TOKEN_PERMISSIONS");
   }
   if ((await readFile(path, "utf8")).trim().length === 0) {

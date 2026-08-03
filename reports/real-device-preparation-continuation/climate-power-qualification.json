@@ -1,0 +1,29 @@
+{
+  "evidenceClass": "real",
+  "phase": "P2_P6_CLIMATE_REAL_QUALIFICATION",
+  "status": "blocked_manual_safety",
+  "providerId": "ha-climate-lab",
+  "resourceId": "living-room-air-conditioner",
+  "currentRegistryPathState": {
+    "power": "off",
+    "hvacMode": "off",
+    "targetTemperature": 23,
+    "reachable": true
+  },
+  "climateSetPower": {
+    "status": "not_executed",
+    "reason": "The original power was off; changing HVAC mode may change power state, and an inverse power write within the five-minute protection window was not safe."
+  },
+  "climateSetHvacMode": {
+    "status": "not_executed_on_current_registry_path"
+  },
+  "climateSetTemperature": {
+    "status": "not_executed_on_current_registry_path"
+  },
+  "manualSafetyAction": "MANUAL_RESTORE_REQUIRED only if a future climate write changes power and immediate inverse restoration would violate the five-minute rule.",
+  "blockers": [
+    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED",
+    "CURRENT_PMS_REGISTRY_CLIMATE_WRITE_QUALIFICATION_UNVERIFIED"
+  ],
+  "note": "Historical real climate runner evidence remains in reports/real-device-preparation/climate-real-qualification.json, but it is not relabelled as current PMS Registry-backed completion."
+}

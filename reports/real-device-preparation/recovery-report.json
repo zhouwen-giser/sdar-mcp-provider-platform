@@ -1,7 +1,8 @@
 {
-  "evidenceClass": "contract",
+  "evidenceClass": "real",
   "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
-  "status": "blocked",
+  "status": "partial",
+  "continuationReport": "reports/real-device-preparation-continuation/real-recovery.json",
   "checks": [
     {
       "scenario": "accepted substate migration and concurrent accepted admission",
@@ -10,37 +11,36 @@
       "source": "tests/integration/runtime-accepted-substate.test.ts"
     },
     {
-      "scenario": "real climate Runtime/Adapter task recovery state",
+      "scenario": "real Light Adapter outage and readiness fail-closed",
+      "evidenceClass": "real",
+      "status": "passed"
+    },
+    {
+      "scenario": "real Light Adapter restart followed by exact Runtime restart",
       "evidenceClass": "real",
       "status": "passed",
       "activeTasks": 0,
-      "uncertainTasks": 0
+      "uncertainTasks": 0,
+      "sideEffectReplay": "none"
     },
     {
-      "scenario": "real light Runtime/Adapter task recovery state",
-      "evidenceClass": "real",
-      "status": "passed",
-      "activeTasks": 0,
-      "uncertainTasks": 0
-    },
-    {
-      "scenario": "Provider restart reconcile on real device",
+      "scenario": "Adapter restart during in-flight Task",
       "evidenceClass": "unverified",
       "status": "unverified"
     },
     {
-      "scenario": "Runtime restart with PostgreSQL recovery on real device",
+      "scenario": "Runtime restart during in-flight Task with PostgreSQL recovery",
       "evidenceClass": "unverified",
       "status": "unverified"
     },
     {
-      "scenario": "PMS outage/Registry latest recovery",
+      "scenario": "PMS outage and Registry latest recovery",
       "evidenceClass": "unverified",
       "status": "unverified"
     }
   ],
   "blockers": [
-    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.",
-    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs."
+    "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
+    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED"
   ]
 }

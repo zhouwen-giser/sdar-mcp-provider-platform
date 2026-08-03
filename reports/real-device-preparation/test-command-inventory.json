@@ -17,26 +17,17 @@
     "pnpm test:provider-platform-ha": true,
     "pnpm verify:v2": true,
     "pnpm verify:platform": true,
-    "pnpm test:ha-light": false,
-    "pnpm test:ha-light:e2e": false,
-    "pnpm test:ha-light:protocol-v1": false,
-    "pnpm test:ha-real:preflight": false,
-    "pnpm test:ha-climate:real": false,
-    "pnpm test:ha-light:real": false,
-    "pnpm test:ha-real:e2e": false,
-    "pnpm verify:ha-real-preparation": false
+    "pnpm test:ha-light": true,
+    "pnpm test:ha-light:e2e": true,
+    "pnpm test:ha-light:protocol-v1": true,
+    "pnpm ha:real:preflight": true,
+    "pnpm test:ha-real:preflight": true,
+    "pnpm test:ha-climate:real": true,
+    "pnpm test:ha-light:real": true,
+    "pnpm test:ha-real:e2e": true,
+    "pnpm verify:ha-real-preparation": true
   },
-  "plannedAdditions": [
-    "pnpm ha:real:preflight",
-    "pnpm test:ha-light",
-    "pnpm test:ha-light:e2e",
-    "pnpm test:ha-light:protocol-v1",
-    "pnpm test:ha-real:preflight",
-    "pnpm test:ha-climate:real",
-    "pnpm test:ha-light:real",
-    "pnpm test:ha-real:e2e",
-    "pnpm verify:ha-real-preparation"
-  ],
+  "plannedAdditions": [],
   "evidencePolicy": {
     "defaultRealCommandsAreReadOnly": true,
     "writeRequires": [

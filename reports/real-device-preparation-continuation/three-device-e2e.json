@@ -1,0 +1,819 @@
+{
+  "evidenceClass": "real",
+  "phase": "P6_MCP_REAL_DEVICE_E2E",
+  "integrationRunId": "smpp-three-device-20260803-0910",
+  "environment": "home-lab",
+  "startedAt": "2026-08-03T01:06:37.100Z",
+  "completedAt": "2026-08-03T01:06:57.125Z",
+  "status": "blocked_climate_safety",
+  "safetyGate": {
+    "allowRealDeviceSideEffects": true,
+    "runIdPresent": true,
+    "writeGateOpen": true,
+    "lightWriteBudgetPerResource": 2,
+    "climatePowerWriteBudget": {
+      "on": 1,
+      "off": 1
+    },
+    "writesUsed": {
+      "living-room-main-light": 2,
+      "living-room-aux-light": 2
+    }
+  },
+  "registry": {
+    "revision": 3,
+    "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
+    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+    "containsEntityIdKeys": false,
+    "containsSecretKeys": false
+  },
+  "initialStates": [
+    {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "targetTemperature": 23,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T00:36:56.219608+00:00",
+      "observationId": null
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": null,
+      "targetTemperature": null,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T01:06:24.716776+00:00",
+      "observationId": null
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "power": "on",
+      "reachable": true,
+      "hvacMode": null,
+      "targetTemperature": null,
+      "currentTemperature": null,
+      "brightnessPercent": 100,
+      "observedAt": "2026-08-03T01:06:26.314119+00:00",
+      "observationId": null
+    }
+  ],
+  "scenarios": [
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "operation": "light_set_power",
+      "before": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:06:24.716776+00:00",
+        "observationId": null
+      },
+      "desired": {
+        "power": "on"
+      },
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "0754c914-af8e-46cb-a840-b6c38663e077",
+      "correlationId": "smpp-three-device-20260803-0910:light:living-room-main-light",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-0754c914-af8e-46cb-a840-b6c38663e077-4",
+                  "observedAt": "2026-08-03T01:06:38.386905+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T01:06:38.386905+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-0754c914-af8e-46cb-a840-b6c38663e077-4"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "operation": "light_set_power.restore",
+      "before": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-main-light",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T01:06:38.386905+00:00",
+        "observationId": null
+      },
+      "desired": {
+        "power": "off"
+      },
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "9fe1dfd0-7260-4028-90bd-0586908b37bf",
+      "correlationId": "smpp-three-device-20260803-0910:light:living-room-main-light:restore",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-9fe1dfd0-7260-4028-90bd-0586908b37bf-4",
+                  "observedAt": "2026-08-03T01:06:41.408308+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T01:06:41.408308+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-9fe1dfd0-7260-4028-90bd-0586908b37bf-4"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "operation": "light_set_power",
+      "before": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T01:06:26.314119+00:00",
+        "observationId": null
+      },
+      "desired": {
+        "power": "off"
+      },
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "6df17dd4-a478-4b01-8260-0f54551a6e38",
+      "correlationId": "smpp-three-device-20260803-0910:light:living-room-aux-light",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-6df17dd4-a478-4b01-8260-0f54551a6e38-4",
+                  "observedAt": "2026-08-03T01:06:47.094546+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T01:06:47.094546+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-6df17dd4-a478-4b01-8260-0f54551a6e38-4"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "operation": "light_set_power.restore",
+      "before": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:06:47.094546+00:00",
+        "observationId": null
+      },
+      "desired": {
+        "power": "on"
+      },
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "e4847ce1-a4bc-4ece-901d-a6c099afbc37",
+      "correlationId": "smpp-three-device-20260803-0910:light:living-room-aux-light:restore",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-e4847ce1-a4bc-4ece-901d-a6c099afbc37-4",
+                  "observedAt": "2026-08-03T01:06:52.263509+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T01:06:52.263509+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-e4847ce1-a4bc-4ece-901d-a6c099afbc37-4"
+    }
+  ],
+  "finalStates": [
+    {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "targetTemperature": 23,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T00:36:56.219608+00:00",
+      "observationId": null
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": null,
+      "targetTemperature": null,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T01:06:41.408308+00:00",
+      "observationId": null
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "power": "on",
+      "reachable": true,
+      "hvacMode": null,
+      "targetTemperature": null,
+      "currentTemperature": null,
+      "brightnessPercent": 100,
+      "observedAt": "2026-08-03T01:06:52.263509+00:00",
+      "observationId": null
+    }
+  ],
+  "stateRestoration": [
+    {
+      "resourceId": "living-room-main-light",
+      "status": "restored",
+      "original": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:06:24.716776+00:00",
+        "observationId": null
+      },
+      "currentBeforeRestore": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-main-light",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T01:06:38.386905+00:00",
+        "observationId": null
+      },
+      "currentAfterRestore": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:06:41.408308+00:00",
+        "observationId": null
+      },
+      "writesUsed": 2,
+      "idempotency": {
+        "sameArgumentsSameTask": true,
+        "sameTaskId": "0754c914-af8e-46cb-a840-b6c38663e077",
+        "differentArgumentsRejected": true,
+        "duplicateHttpStatus": 200,
+        "conflictHttpStatus": 400
+      }
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "status": "restored",
+      "original": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T01:06:26.314119+00:00",
+        "observationId": null
+      },
+      "currentBeforeRestore": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:06:47.094546+00:00",
+        "observationId": null
+      },
+      "currentAfterRestore": {
+        "providerId": "ha-light-lab",
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T01:06:52.263509+00:00",
+        "observationId": null
+      },
+      "writesUsed": 2,
+      "idempotency": {
+        "sameArgumentsSameTask": true,
+        "sameTaskId": "6df17dd4-a478-4b01-8260-0f54551a6e38",
+        "differentArgumentsRejected": true,
+        "duplicateHttpStatus": 200,
+        "conflictHttpStatus": 400
+      }
+    }
+  ],
+  "climateSafety": {
+    "status": "MANUAL_SAFETY_BLOCK",
+    "original": {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "targetTemperature": 23,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T00:36:56.219608+00:00",
+      "observationId": null
+    },
+    "current": {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "targetTemperature": 23,
+      "currentTemperature": null,
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T00:36:56.219608+00:00",
+      "observationId": null
+    },
+    "reason": "Climate write skipped: changing HVAC mode may change power state and the inverse operation is protected by the five-minute safety interval."
+  },
+  "runtimeTaskCounts": {
+    "active": 0,
+    "uncertain": 0,
+    "runtimes": [
+      {
+        "providerId": "ha-climate-lab",
+        "active": 0,
+        "uncertain": 0
+      },
+      {
+        "providerId": "ha-light-lab",
+        "active": 0,
+        "uncertain": 0
+      }
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,41 @@
+{
+  "evidenceClass": "real",
+  "phase": "P7_CONTROLLED_FAULT_INJECTION",
+  "status": "partial",
+  "matrix": [
+    {
+      "fault": "Light Adapter unavailable",
+      "evidenceClass": "real",
+      "status": "observed",
+      "result": "Runtime live endpoint remained up but readiness became HTTP 503; no device write was attempted."
+    },
+    {
+      "fault": "Light Adapter returns after outage",
+      "evidenceClass": "real",
+      "status": "observed_after_runtime_restart",
+      "result": "Adapter describeProvider succeeded and exact Runtime restart returned readiness to ready."
+    },
+    {
+      "fault": "REST 200 without target state change",
+      "evidenceClass": "unverified",
+      "status": "not_injected"
+    },
+    {
+      "fault": "Home Assistant Entity unavailable",
+      "evidenceClass": "unverified",
+      "status": "not_injected"
+    },
+    {
+      "fault": "Provider state file corruption",
+      "evidenceClass": "contract",
+      "status": "covered_by_tests",
+      "source": "tests/security/home-assistant-light-security.test.ts"
+    },
+    {
+      "fault": "PMS API unavailable with Runtime active",
+      "evidenceClass": "unverified",
+      "status": "not_injected"
+    }
+  ],
+  "safety": "No fault injection directly changed Home Assistant state; all real writes remained inside the existing explicit gate and bounded light run."
+}

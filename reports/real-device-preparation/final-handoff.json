@@ -1,40 +1,64 @@
 {
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "cd68a91d129ba50a240837c79526ebdfdfbfa05c",
+  "smppCandidateSha": "PENDING_FINAL_COMMIT_SHA",
+  "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
-  "registryRevision": 0,
-  "registryChecksum": "",
+  "registryRevision": 3,
+  "registryChecksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+  "registryLatestBootstrapConsistent": true,
   "providers": [
     {
       "providerId": "ha-climate-lab",
-      "serverId": "",
+      "serverId": "runtime-3ffb9721d7ae-0",
       "protocolMode": "frozen_v1",
-      "effectiveEndpoint": "",
-      "catalogRevision": 0
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp",
+      "catalogRevision": 1,
+      "realReadStatus": "passed",
+      "realWriteStatus": "blocked_manual_safety"
     },
     {
       "providerId": "ha-light-lab",
-      "serverId": "",
+      "serverId": "runtime-8e6e163f0b32-0",
       "protocolMode": "frozen_v1",
-      "effectiveEndpoint": "",
-      "catalogRevision": 0
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp",
+      "catalogRevision": 1,
+      "realReadStatus": "passed",
+      "realWriteStatus": "passed_and_restored"
     }
   ],
-  "realResourcesQualified": [
+  "realResourcesRead": [
     "living-room-air-conditioner",
     "living-room-main-light",
     "living-room-aux-light"
   ],
+  "realResourcesQualified": ["living-room-main-light", "living-room-aux-light"],
+  "realResourcesBlocked": ["living-room-air-conditioner"],
   "activeTasks": 0,
   "uncertainTasks": 0,
+  "readiness": {
+    "readyForSdarFunctionalIntegration": false,
+    "readyForSdarResilienceIntegration": false,
+    "readyForSdarFullCapabilityIntegration": false,
+    "readyForSdarIntegration": false
+  },
   "readyForSdarIntegration": false,
+  "deviceState": "lights_restored_at_qualification_time_latest_aux_light_unavailable_climate_unchanged",
   "blockers": [
-    "FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.",
-    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified.",
-    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.",
-    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs.",
-    "REAL_FAULT_INJECTION_UNVERIFIED: HA unavailable, REST-200-without-state-change, and state-file-corruption scenarios were covered by contract/fake tests or not run against the real devices.",
-    "WINDOWS_SYMLINK_SECURITY_TEST_UNVERIFIED: test:provider-packages passes 12/13 checks but its symlink assertion is blocked by Windows EPERM; the standalone provider-package self-check passes.",
-    "WINDOWS_PROTOCOL_LOCK_LINE_ENDING_UNVERIFIED: protocol:check, verify:v2 and verify:platform stop at the protocol lock hash mismatch under core.autocrlf=true; frozen contract, schemas and 74 conformance cases pass."
-  ]
+    "CLIMATE_REAL_WRITE_QUALIFICATION_BLOCKED_MANUAL_SAFETY",
+    "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
+    "FROZEN_MCP_INITIALIZE_NOT_SUPPORTED_BY_CURRENT_RUNTIME",
+    "PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED",
+    "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
+    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED",
+    "WINDOWS_PROVIDER_PACKAGE_SYMLINK_EPERM",
+    "NPC_TANK_FIXED_TEMP_PATH_EPERM",
+    "FORMAT_CHECK_PRE_EXISTING_FILES",
+    "VERIFY_V2_AGGREGATOR_UNVERIFIED",
+    "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED"
+  ],
+  "secrets": "excluded",
+  "homeAssistantEntityIds": "excluded",
+  "sdarAgentRuntime": "not_connected"
 }

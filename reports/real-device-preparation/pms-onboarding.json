@@ -1,80 +1,41 @@
 {
-  "evidenceClass": "unverified",
+  "evidenceClass": "real",
   "phase": "P5_PMS_PLATFORM_ONBOARDING",
-  "status": "blocked",
+  "status": "partial",
+  "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
   "environment": "home-lab",
   "providerIds": ["ha-climate-lab", "ha-light-lab"],
   "resourceIds": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
   "steps": [
-    {
-      "step": "providerPackageSync",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "Provider package registry and self-check include both packages."
-    },
-    {
-      "step": "providerTypeCreateOrConfirm",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "Provider type persistence is covered by the platform E2E path."
-    },
-    {
-      "step": "providerCreate",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "Vendor-managed Provider creation is covered by platform tests."
-    },
-    {
-      "step": "resourceCreate",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "Resource persistence/binding is covered by platform tests; target lab entities were not sent to PMS."
-    },
-    {
-      "step": "bindingCreate",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "N:N binding behavior is covered by platform tests."
-    },
-    {
-      "step": "configDraft",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "note": "No live PMS API run in this environment."
-    },
+    { "step": "providerPackageSync", "evidenceClass": "real", "status": "passed" },
+    { "step": "providerTypeCreateOrConfirm", "evidenceClass": "real", "status": "passed" },
+    { "step": "providerCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "resourceCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "bindingCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "configDraft", "evidenceClass": "real", "status": "passed" },
     {
       "step": "configPublish",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "note": "No live PMS API run in this environment."
+      "evidenceClass": "real",
+      "status": "passed",
+      "publishedRevision": 1
     },
-    {
-      "step": "runtimeDeploymentCreate",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "note": "No live PMS deployment control plane in this environment."
-    },
+    { "step": "runtimeDeploymentCreate", "evidenceClass": "real", "status": "passed" },
     {
       "step": "runtimeStartAndReadiness",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "note": "The real qualification runners used isolated in-process Runtime instances, not PMS-managed deployments."
+      "evidenceClass": "real",
+      "status": "partial",
+      "statusDetail": "Both Deployments ACTIVE and ready; Worker job completion remains unverified."
     },
-    {
-      "step": "catalogDiscovery",
-      "evidenceClass": "contract",
-      "status": "covered",
-      "note": "Catalog discovery and resource-binding assertions pass in both Home Assistant platform E2Es."
-    },
+    { "step": "catalogDiscovery", "evidenceClass": "real", "status": "passed" },
     {
       "step": "registrySnapshotPublish",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "note": "No live PMS Registry publication was claimed."
+      "evidenceClass": "real",
+      "status": "passed",
+      "revision": 3
     }
   ],
   "blockers": [
-    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified."
+    "PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED: direct PMS application reconcile converged the deployments while the separately launched Worker retained three old reconcile leases."
   ],
   "noSecrets": true,
   "noEntityIds": true

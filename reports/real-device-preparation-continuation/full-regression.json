@@ -1,0 +1,120 @@
+{
+  "evidenceClass": "unverified",
+  "phase": "C10_FULL_REGRESSION",
+  "status": "partial",
+  "observedAt": "2026-08-03T10:05:00+08:00",
+  "dependencyIntake": {
+    "command": "CI=true pnpm install --offline --force --frozen-lockfile --ignore-scripts --node-linker=hoisted --config.confirmModulesPurge=false",
+    "evidenceClass": "static",
+    "status": "passed",
+    "detail": "Workspace dependency tree rebuilt from the frozen lockfile with pnpm 11.13.1. The ordinary pnpm status check also reproduced Windows EPERM while recreating node_modules."
+  },
+  "checks": [
+    {
+      "command": "node scripts/ha-real-preflight.mjs",
+      "evidenceClass": "real",
+      "status": "blocked",
+      "detail": "The latest read-only run passed URL, token, existence and domain checks but stopped on ENTITY_UNAVAILABLE for living-room-aux-light. No side effect was attempted."
+    },
+    {
+      "command": "prettier --check .",
+      "evidenceClass": "static",
+      "status": "blocked",
+      "detail": "Two pre-existing files remain unformatted: docs/protocol/mcp-runtime.md and reports/real-device-preparation/authority-map.md. All changed files were formatted."
+    },
+    { "command": "eslint .", "evidenceClass": "static", "status": "passed" },
+    { "command": "tsc --noEmit -p tsconfig.json", "evidenceClass": "static", "status": "passed" },
+    { "command": "tsc -p tsconfig.build.json", "evidenceClass": "static", "status": "passed" },
+    {
+      "command": "protocol:check",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "detail": "Frozen contract, pinned schema, 11 schemas/74 cases, and protocol lock 38/38 passed."
+    },
+    {
+      "command": "generated-self-check",
+      "evidenceClass": "static",
+      "status": "passed",
+      "detail": "9 generated files passed using the pinned Docker tool path."
+    },
+    {
+      "command": "vitest run tests/unit",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "tests": "127/127"
+    },
+    {
+      "command": "vitest run tests/contract",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "tests": "18/18"
+    },
+    {
+      "command": "vitest run tests/integration",
+      "evidenceClass": "contract",
+      "status": "partial",
+      "tests": "211 passed, 7 failed",
+      "detail": "The 7 failures are existing NPC Tank cases unable to write fixed D:/tmp/npc-tank-*.json because Windows returns EPERM."
+    },
+    {
+      "command": "vitest run tests/e2e",
+      "evidenceClass": "contract",
+      "status": "partial",
+      "tests": "7 passed, 1 failed",
+      "detail": "The single failure is the existing NPC Tank gRPC case writing fixed D:/tmp/npc-tank-grpc-navigation.json with Windows EPERM."
+    },
+    {
+      "command": "HA Climate and Light focused suites",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "tests": "12/12",
+      "detail": "Six provider unit/integration/security files passed; both Runtime E2E files passed 2/2."
+    },
+    {
+      "command": "provider-platform home-assistant suite",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "detail": "tests/provider-platform-e2e/home-assistant passed in the focused platform run."
+    },
+    {
+      "command": "vitest run tests/security",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "tests": "42/42"
+    },
+    {
+      "command": "vitest run tests/protocol-conformance",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "tests": "73/73"
+    },
+    {
+      "command": "packages/pm2-runtime-adapter/test/release-resolver.test.ts",
+      "evidenceClass": "contract",
+      "status": "blocked",
+      "detail": "7 passed, 1 skipped, 1 failed: Windows cannot create the test symlink and returns EPERM, including an elevated rerun."
+    },
+    {
+      "command": "pnpm verify:v2",
+      "evidenceClass": "unverified",
+      "status": "not_completed",
+      "detail": "The aggregate wrapper was not rerun after the dependency-status EPERM; its direct protocol, build, unit, contract, security, provider and focused E2E components are recorded above."
+    },
+    {
+      "command": "pnpm verify:platform",
+      "evidenceClass": "unverified",
+      "status": "not_completed",
+      "detail": "The aggregate wrapper was not rerun after the dependency-status EPERM; the relevant focused platform and build checks are recorded above."
+    }
+  ],
+  "blockers": [
+    "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
+    "FORMAT_CHECK_PRE_EXISTING_FILES",
+    "WINDOWS_NODE_MODULES_STATUS_EPERM",
+    "WINDOWS_PROVIDER_PACKAGE_SYMLINK_EPERM",
+    "NPC_TANK_FIXED_TEMP_PATH_EPERM",
+    "VERIFY_V2_AGGREGATOR_UNVERIFIED",
+    "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED"
+  ],
+  "scopeNote": "No frozen MCP semantic, Adapter Proto field, Task Authority, or real-device safety gate was weakened."
+}

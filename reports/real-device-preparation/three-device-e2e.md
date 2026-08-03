@@ -1,19 +1,11 @@
-# Three-device real MCP E2E
+# Three-device MCP E2E
 
 - Evidence class: `real`
-- Status: **BLOCKED**
-- Execution model: sequential calls to two isolated MCP Tasks Runtime instances
-- Active tasks: 0
-- Uncertain tasks: 0
+- Status: `blocked_climate_safety`
+- Registry-backed resources read: climate plus both configured lights
+- Light writes: both toggled, confirmed, idempotency-checked, and restored
+- Climate writes: not executed because the saved power was off and the five-minute safety rule blocked a safe inverse operation
+- Active/uncertain tasks: `0 / 0`
+- Device state: lights restored; climate unchanged
 
-## Device results
-
-- `ha-climate-lab` / `living-room-air-conditioner`: restoration=restored, tasks=3
-- `ha-light-lab` / `living-room-main-light`: restoration=restored, tasks=2
-- `ha-light-lab` / `living-room-aux-light`: restoration=restored, tasks=2
-
-## Blockers
-
-- `FROZEN_MCP_TASKS_RESULT_UNSUPPORTED`
-
-This aggregate report is derived from the two real Runtime/Adapter qualification reports and a final read-only Home Assistant preflight. It contains no credentials or Home Assistant entity identifiers.
+The detailed current evidence is in `reports/real-device-preparation-continuation/three-device-e2e.json`. No `initialize` or `tasks/result` claim is made because those methods are outside the repository's frozen Runtime surface. Entity identifiers and credentials are excluded.

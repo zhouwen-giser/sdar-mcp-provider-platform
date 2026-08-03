@@ -83,6 +83,35 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(database).not.toHaveProperty("delete");
   });
 
+  it("re-enters the startup state when a stopped deployment is started", async () => {
+    const store = new MemoryReconcileStore(deployment("STOPPED"));
+    const database = databasePort(store);
+    const lifecycle = lifecyclePort();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      database,
+      lifecycle,
+      readyHealth(),
+      inventory([]),
+      validIdentity(),
+    );
+
+    const result = await reconciler.reconcile(input("restart-after-stop"));
+
+    expect(result.deployment.status).toBe("DISCOVERING");
+    expect(store.transitions).toEqual([
+      "REQUESTED",
+      "DATABASE_PROVISIONING",
+      "MIGRATING",
+      "CONFIG_PREPARING",
+      "STARTING",
+      "HEALTH_CHECKING",
+      "DISCOVERING",
+    ]);
+    expect(lifecycle.start).toHaveBeenCalledOnce();
+    expect(database.execute).toHaveBeenCalledOnce();
+  });
+
   it("persists FAILED on lifecycle failure and leaves destructive cleanup out of scope", async () => {
     const store = new MemoryReconcileStore(deployment("STARTING"));
     const lifecycle = lifecyclePort();
@@ -596,15 +625,18 @@ function deployment(
 }
 
 function observedRevision(status: RuntimeDeploymentStatus): number {
-  return [
-    "REQUESTED",
-    "DATABASE_PROVISIONING",
-    "MIGRATING",
-    "CONFIG_PREPARING",
-    "STARTING",
-    "HEALTH_CHECKING",
-    "DISCOVERING",
-    "ACTIVE",
-    "DEGRADED",
-  ].indexOf(status);
+  return Math.max(
+    0,
+    [
+      "REQUESTED",
+      "DATABASE_PROVISIONING",
+      "MIGRATING",
+      "CONFIG_PREPARING",
+      "STARTING",
+      "HEALTH_CHECKING",
+      "DISCOVERING",
+      "ACTIVE",
+      "DEGRADED",
+    ].indexOf(status),
+  );
 }

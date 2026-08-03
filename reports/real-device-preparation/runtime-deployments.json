@@ -1,29 +1,32 @@
 {
-  "evidenceClass": "unverified",
+  "evidenceClass": "real",
   "phase": "P5_PMS_PLATFORM_ONBOARDING",
-  "status": "blocked",
-  "deploymentModel": "vendor_managed adapter plus PMS-managed Runtime when formally deployed",
+  "status": "partial",
+  "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
+  "deploymentModel": "vendor_managed adapter plus PMS-managed Runtime",
   "deployments": [
     {
+      "deploymentId": "ha-climate-deployment",
       "providerId": "ha-climate-lab",
       "hostingMode": "vendor_managed",
-      "adapterProcess": "contract-supported local controlled process",
-      "runtimeDeploymentStatus": "unverified",
-      "readiness": "unverified",
-      "effectiveEndpoint": null
+      "runtimeDeploymentStatus": "ACTIVE",
+      "readiness": "ready",
+      "desiredRevision": 2,
+      "observedRevision": 19,
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp"
     },
     {
+      "deploymentId": "ha-light-deployment",
       "providerId": "ha-light-lab",
       "hostingMode": "vendor_managed",
-      "adapterProcess": "contract-supported local controlled process",
-      "runtimeDeploymentStatus": "unverified",
-      "readiness": "unverified",
-      "effectiveEndpoint": null
+      "runtimeDeploymentStatus": "ACTIVE",
+      "readiness": "ready",
+      "desiredRevision": 0,
+      "observedRevision": 37,
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp"
     }
   ],
-  "blockers": [
-    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: climate_set_power was not separately written against the real air conditioner because its original power was off and the five-minute opposite-power protection did not permit an additional bounded power cycle; HVAC mode and temperature were qualified."
-  ],
+  "blockers": ["PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED"],
   "noSecrets": true,
   "noEntityIds": true
 }

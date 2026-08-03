@@ -122,7 +122,10 @@ export class RuntimeReleaseResolver {
     if ((entryStatus.mode & 0o444) === 0) {
       throw new RuntimeReleaseResolverError("RUNTIME_RELEASE_ENTRY_UNREADABLE", version);
     }
-    if ((entryStatus.mode & 0o111) === 0) {
+    // Windows launches the fixed JavaScript entry through Node and does not expose
+    // POSIX execute bits on NTFS. Linux and other POSIX hosts still require the
+    // executable bit as part of the release artifact gate.
+    if (process.platform !== "win32" && (entryStatus.mode & 0o111) === 0) {
       throw new RuntimeReleaseResolverError("RUNTIME_RELEASE_ENTRY_NOT_EXECUTABLE", version);
     }
     return Object.freeze({

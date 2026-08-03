@@ -1,0 +1,68 @@
+{
+  "evidenceClass": "real",
+  "phase": "P3_P5_LIVE_PMS_BOOTSTRAP_AND_ONBOARDING",
+  "status": "partial",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T01:22:36Z",
+  "pmsApi": {
+    "baseUrl": "http://127.0.0.1:8090",
+    "healthLive": 200,
+    "healthReady": 200
+  },
+  "formalApiSteps": {
+    "providerPackageSync": "passed",
+    "providerTypeCreateOrConfirm": "passed",
+    "providerCreateOrConfirm": "passed",
+    "resourceCreateOrConfirm": "passed",
+    "bindingCreateOrConfirm": "passed",
+    "configDraft": "passed",
+    "configPublish": "passed",
+    "runtimeDeploymentCreateOrConfirm": "passed",
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
+    "resourceIds": [
+      "living-room-air-conditioner",
+      "living-room-main-light",
+      "living-room-aux-light"
+    ],
+    "publishedConfigRevision": 1
+  },
+  "deploymentAuthority": {
+    "model": "vendor_managed_adapter_plus_pms_managed_runtime",
+    "climateDeployment": {
+      "deploymentId": "ha-climate-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 2,
+      "observedRevision": 19,
+      "runtimeReadiness": "ready"
+    },
+    "lightDeployment": {
+      "deploymentId": "ha-light-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 0,
+      "observedRevision": 37,
+      "runtimeReadiness": "ready"
+    }
+  },
+  "worker": {
+    "evidenceClass": "real",
+    "status": "blocked_on_reconcile_job_completion",
+    "claimedBy": "smpp-continuation-worker-final",
+    "leasedJobCountAtObservation": 3,
+    "jobCompletion": "unverified",
+    "note": "The worker renewed three existing runtime_deployment.reconcile leases without completing them. Deployment ACTIVE/readiness was obtained through the direct PMS application reconciler and is not relabelled as worker completion."
+  },
+  "noSecrets": true,
+  "noEntityIds": true,
+  "blockers": [
+    "PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED",
+    "WINDOWS_PM2_CONTROL_PLANE_RESTART_BEHAVIOR_UNSTABLE"
+  ],
+  "sources": [
+    "scripts/run-live-pms-onboarding.ts",
+    "scripts/run-live-pms-reconcile.ts",
+    "packages/pms-application/src/runtime-reconcile.ts",
+    "packages/pms-application/test/runtime-reconcile.test.ts"
+  ]
+}

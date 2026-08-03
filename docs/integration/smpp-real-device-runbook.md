@@ -8,4 +8,6 @@
 6. Observe `tasks/get` and Home Assistant state before classifying a Task as completed. HTTP 200 alone is not completion evidence.
 7. Stop on an uncertain or safety-blocked operation. Do not automatically retry a device write beyond the run budget.
 
+For the formal lab path, run the PMS onboarding and Registry-backed drivers only after both Runtime Deployments report `ACTIVE` and `/health/ready` is ready. The live continuation reports are under `reports/real-device-preparation-continuation/`; a direct application Reconcile result must not be relabelled as completed Worker job evidence.
+
 The frozen Runtime profile exposes `server/discover`, `tools/list`, `tools/call`, `tasks/get`, notifications, and the frozen Task control methods. It does not expose the legacy `initialize` or `tasks/result` methods; reports must preserve that compatibility distinction.

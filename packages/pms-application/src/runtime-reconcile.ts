@@ -314,6 +314,9 @@ export class RuntimeDeploymentReconciler {
             };
           }
           case "STOPPED":
+            deployment = await this.transition(deployment, "REQUESTED", input);
+            progressed = true;
+            continue;
           case "DRAINING":
             return {
               deployment: deployment.snapshot,

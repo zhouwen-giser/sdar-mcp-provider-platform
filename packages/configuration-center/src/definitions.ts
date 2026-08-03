@@ -1,5 +1,6 @@
 import type { ConfigurationDefinition } from "@sdar/runtime-configuration-contract";
 import { HomeAssistantClimateConfigurationDefinition } from "../../runtime-configuration-contract/src/providers/home-assistant.js";
+import { HomeAssistantLightConfigurationDefinition } from "../../runtime-configuration-contract/src/providers/home-assistant-light.js";
 import { NpcTankProviderConfigurationDefinition } from "../../runtime-configuration-contract/src/providers/npc-tank.js";
 import { UgvProviderConfigurationDefinition } from "../../runtime-configuration-contract/src/providers/ugv.js";
 import { RuntimeBootstrapConfigurationDefinition } from "../../runtime-configuration-contract/src/runtime/bootstrap.js";
@@ -14,6 +15,7 @@ const platformConfigurationDefinitions: readonly ConfigurationDefinition[] = [
   UgvProviderConfigurationDefinition,
   NpcTankProviderConfigurationDefinition,
   HomeAssistantClimateConfigurationDefinition,
+  HomeAssistantLightConfigurationDefinition,
 ];
 
 export function createDefaultConfigurationCenter(): ConfigurationCenter {

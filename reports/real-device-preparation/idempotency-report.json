@@ -1,40 +1,32 @@
 {
   "evidenceClass": "real",
   "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
-  "status": "blocked",
+  "status": "partial",
+  "continuationReport": "reports/real-device-preparation-continuation/three-device-e2e.json",
   "scenarios": [
     {
-      "providerId": "ha-climate-lab",
-      "resourceId": null,
-      "operation": "climate_set_hvac_mode",
-      "evidenceClass": "real",
-      "status": "passed",
-      "sameArgumentsSameKey": true,
-      "sameKeyDifferentArgumentsRejected": true,
-      "runtimeTaskId": "4dbbe3c1-d095-4f6b-abf7-09cd9cdda017",
-      "adapterExternalExecutionId": "658d0cb9-8848-401d-a66d-70e763162329"
-    },
-    {
       "providerId": "ha-light-lab",
-      "resourceId": null,
+      "resourceId": "living-room-main-light",
       "operation": "light_set_power",
       "evidenceClass": "real",
       "status": "passed",
-      "sameArgumentsSameKey": true,
-      "sameKeyDifferentArgumentsRejected": true,
-      "runtimeTaskId": "d54a3c9f-64e3-4dda-b305-4a0363cb33a4",
-      "adapterExternalExecutionId": "b28e9121-79cc-46d6-9397-5103de826f6d"
+      "sameArgumentsSameTask": true,
+      "sameTaskId": "0754c914-af8e-46cb-a840-b6c38663e077",
+      "differentArgumentsRejected": true,
+      "conflictHttpStatus": 400,
+      "homeAssistantObservationId": "home-assistant-light-0754c914-af8e-46cb-a840-b6c38663e077-4"
     },
     {
       "providerId": "ha-light-lab",
-      "resourceId": null,
+      "resourceId": "living-room-aux-light",
       "operation": "light_set_power",
       "evidenceClass": "real",
       "status": "passed",
-      "sameArgumentsSameKey": true,
-      "sameKeyDifferentArgumentsRejected": true,
-      "runtimeTaskId": "f11bb895-9f12-4ab4-9e46-4c867fbd4415",
-      "adapterExternalExecutionId": "b282e1ef-c702-4cf4-9172-162df57e809f"
+      "sameArgumentsSameTask": true,
+      "sameTaskId": "6df17dd4-a478-4b01-8260-0f54551a6e38",
+      "differentArgumentsRejected": true,
+      "conflictHttpStatus": 400,
+      "homeAssistantObservationId": "home-assistant-light-6df17dd4-a478-4b01-8260-0f54551a6e38-4"
     },
     {
       "scenario": "client timeout then retry",
@@ -42,26 +34,22 @@
       "status": "unverified"
     },
     {
-      "scenario": "Runtime duplicate tools/call after accepted task",
-      "evidenceClass": "contract",
-      "status": "covered"
+      "scenario": "Runtime duplicate tools/call after accepted Task",
+      "evidenceClass": "real",
+      "status": "passed"
     },
     {
-      "scenario": "Adapter restart during task",
+      "scenario": "Adapter restart during Task",
       "evidenceClass": "unverified",
       "status": "unverified"
     },
     {
       "scenario": "corrupted Provider state file fails closed",
       "evidenceClass": "contract",
-      "status": "covered by unit contract"
+      "status": "covered_by_tests"
     }
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "blockers": [
-    "FROZEN_MCP_TASKS_RESULT_UNSUPPORTED: the repository frozen MCP profile exposes tasks/get but not tasks/result; real runners therefore remain conservative BLOCKED.",
-    "PMS_LIVE_FORMAL_ONBOARDING_UNVERIFIED: no live PMS API/worker deployment was available in this run, so target Provider IDs, Resources, Deployments, Catalog publication, and Registry publication were not claimed as real.",
-    "REAL_ADAPTER_RESTART_RECOVERY_UNVERIFIED: real Provider process restart during an in-flight task was not induced after the successful bounded device runs."
-  ]
+  "blockers": ["FROZEN_MCP_TASKS_RESULT_UNSUPPORTED", "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED"]
 }

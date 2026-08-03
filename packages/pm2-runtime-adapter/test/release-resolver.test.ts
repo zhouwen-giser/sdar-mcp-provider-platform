@@ -66,20 +66,32 @@ describe("RuntimeReleaseResolver", () => {
     ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_PATH_ESCAPE" });
   });
 
-  it("rejects an entry that is not both readable and executable", async () => {
-    const root = await releaseRoot(0o400);
-    await expect(
-      new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
-        CURRENT_RUNTIME_VERSION,
-      ),
-    ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_NOT_EXECUTABLE" });
+  it.skipIf(process.platform === "win32")(
+    "rejects an entry that is not both readable and executable",
+    async () => {
+      const root = await releaseRoot(0o400);
+      await expect(
+        new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
+          CURRENT_RUNTIME_VERSION,
+        ),
+      ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_NOT_EXECUTABLE" });
 
-    const unreadableRoot = await releaseRoot(0o100);
-    await expect(
-      new RuntimeReleaseResolver(unreadableRoot, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
-        CURRENT_RUNTIME_VERSION,
-      ),
-    ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_UNREADABLE" });
+      const unreadableRoot = await releaseRoot(0o100);
+      await expect(
+        new RuntimeReleaseResolver(unreadableRoot, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
+          CURRENT_RUNTIME_VERSION,
+        ),
+      ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_UNREADABLE" });
+    },
+  );
+
+  it("accepts the fixed readable JavaScript entry on Windows", async () => {
+    const root = await releaseRoot(0o400);
+    const release = await new RuntimeReleaseResolver(
+      root,
+      CURRENT_RUNTIME_RELEASE_MANIFEST,
+    ).resolve(CURRENT_RUNTIME_VERSION);
+    expect(release.runtimeEntry).toBe(resolve(root, CURRENT_RUNTIME_VERSION, FIXED_RUNTIME_ENTRY));
   });
 
   it("loads only the fixed contained manifest file and rejects extra fields", async () => {

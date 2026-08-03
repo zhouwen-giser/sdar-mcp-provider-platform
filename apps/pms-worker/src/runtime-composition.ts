@@ -52,6 +52,7 @@ import {
 import type { PmsWorkerConfig } from "./config.js";
 import { requirePmsWorkerRuntimeConfig } from "./config.js";
 import { PeriodicReconcileScheduler } from "./reconcile-scheduler.js";
+import { buildRegistryProviderProjection } from "./registry-provider-projection.js";
 import { createRuntimeDatabasePreparation } from "./runtime-database-preparation-job.js";
 import {
   RuntimeControlPlaneCredentialResolver,
@@ -59,6 +60,23 @@ import {
 } from "./runtime-control-plane-credentials.js";
 
 const RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
+const RUNTIME_BOOTSTRAP_RESERVED_KEYS = new Set([
+  "PORT",
+  "PROVIDER_ID",
+  "DATABASE_URL",
+  "DATABASE_URL_FILE",
+  "RUNTIME_DEPLOYMENT_ID",
+  "RUNTIME_INSTANCE_ID",
+  "OTEL_SERVICE_INSTANCE_ID",
+  "PMS_RUNTIME_CONFIG_URL",
+  "PMS_RUNTIME_CONFIG_TOKEN_FILE",
+  "PMS_RUNTIME_CONFIG_CACHE_PATH",
+  "PMS_RUNTIME_REGISTRATION_URL",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
+  "PMS_BOOTSTRAP_CHECKSUM",
+  "PMS_CONFIG_REVISION",
+  "PMS_RUNTIME_VERSION",
+]);
 
 export interface ProductionRuntimeComposition {
   readonly reconciler: CatalogRegistryReconcileDecorator;
@@ -159,15 +177,19 @@ export async function createProductionRuntimeComposition(
       repositories.catalogSnapshots,
       {
         providers: async ({ deployment, endpoint, catalog }) =>
-          Object.freeze([
-            Object.freeze({
-              providerId: deployment.providerId,
-              serverId: (await store.ensureInstance(deployment, 0)).target.instanceId,
-              protocolMode: "frozen_v1" as const,
-              effectiveEndpoint: endpoint.replace(/\/mcp$/, ""),
-              catalog,
+          buildRegistryProviderProjection({
+            deployment,
+            endpoint,
+            catalog,
+            deployments: await repositories.runtimeDeployments.listByEnvironment(
+              String(deployment.environment),
+            ),
+            activeCatalog: (providerId) => repositories.catalogSnapshots.active(providerId),
+            ensureInstance: async (candidate) => ({
+              instanceId: (await store.ensureInstance(candidate, 0)).target.instanceId,
             }),
-          ]),
+            runtimeBaseUrl: (candidate) => store.runtimeBaseUrl(candidate),
+          }),
       },
       repositories.registrySnapshots,
       {
@@ -572,13 +594,15 @@ function targetFrom(
   });
 }
 
-function primitiveConfiguration(
+export function primitiveConfiguration(
   content: Readonly<Record<string, unknown>>,
 ): Readonly<Record<string, string | number | boolean>> {
   return Object.freeze(
     Object.fromEntries(
-      Object.entries(content).filter((entry): entry is [string, string | number | boolean] =>
-        ["string", "number", "boolean"].includes(typeof entry[1]),
+      Object.entries(content).filter(
+        (entry): entry is [string, string | number | boolean] =>
+          !RUNTIME_BOOTSTRAP_RESERVED_KEYS.has(entry[0]) &&
+          ["string", "number", "boolean"].includes(typeof entry[1]),
       ),
     ),
   );
