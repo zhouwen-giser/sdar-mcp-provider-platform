@@ -1,6 +1,6 @@
 {
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "86f742e7f39c24809f031c475b0e42a4eba5c392",
+  "smppCandidateSha": "5ad7144dd7ea6dcb15858dfb1cf2b6689d977774",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registryRevision": 3,
