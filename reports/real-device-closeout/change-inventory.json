@@ -1,7 +1,7 @@
 {
   "evidenceClass": "static",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "candidateSha": "fc45772d1bddeded92716efd79cd633e194f433c",
+  "candidateSha": "b94206af28ce936f90c5ed8d1eda66988f1a1c5f",
   "branch": "codex/ha-real-device-preparation",
   "changedFileCount": 201,
   "changedFiles": [
@@ -94,6 +94,8 @@
     "reports/real-device-preparation-continuation/catalog-registry-live.json",
     "reports/real-device-preparation-continuation/catalog-registry-live.md",
     "reports/real-device-preparation-continuation/climate-power-qualification.json",
+    "reports/real-device-preparation-continuation/climate-restore-recovery.json",
+    "reports/real-device-preparation-continuation/climate-restore-recovery.md",
     "reports/real-device-preparation-continuation/failure-semantics.md",
     "reports/real-device-preparation-continuation/fault-injection.json",
     "reports/real-device-preparation-continuation/final-delivery-report.md",
@@ -166,6 +168,7 @@
     "scripts/provider-conformance-report.mjs",
     "scripts/provider-package-linux-symlink-check.mjs",
     "scripts/provider-package-self-check.mjs",
+    "scripts/restore-live-smpp-climate.ts",
     "scripts/restore-live-smpp-lights.ts",
     "scripts/run-business-events-conformance.mjs",
     "scripts/run-business-events-interop.mjs",
@@ -177,6 +180,7 @@
     "scripts/run-live-smpp-registry-e2e.ts",
     "scripts/run-live-smpp-three-device-e2e.ts",
     "scripts/write-live-continuation-views.mjs",
+    "scripts/write-real-device-closeout.mjs",
     "scripts/write-real-preparation-reports.mjs",
     "tests/business-events/adapter-contract/adapter-source.test.ts",
     "tests/business-events/contract/business-events-contract.test.ts",
@@ -201,11 +205,7 @@
     "tests/security/home-assistant-climate-security.test.ts",
     "tests/unit/home-assistant-light-core.test.ts",
     "tests/unit/real-device-runner-protocol.test.ts",
-    "tsconfig.json",
-    "reports/real-device-preparation-continuation/climate-restore-recovery.json",
-    "reports/real-device-preparation-continuation/climate-restore-recovery.md",
-    "scripts/restore-live-smpp-climate.ts",
-    "scripts/write-real-device-closeout.mjs"
+    "tsconfig.json"
   ],
   "categories": {
     "climateSafetyGate": [
@@ -311,6 +311,8 @@
       "reports/real-device-preparation-continuation/catalog-registry-live.json",
       "reports/real-device-preparation-continuation/catalog-registry-live.md",
       "reports/real-device-preparation-continuation/climate-power-qualification.json",
+      "reports/real-device-preparation-continuation/climate-restore-recovery.json",
+      "reports/real-device-preparation-continuation/climate-restore-recovery.md",
       "reports/real-device-preparation-continuation/failure-semantics.md",
       "reports/real-device-preparation-continuation/fault-injection.json",
       "reports/real-device-preparation-continuation/final-delivery-report.md",
@@ -369,9 +371,7 @@
       "reports/real-device-preparation/three-device-e2e.json",
       "reports/real-device-preparation/three-device-e2e.md",
       "reports/runtime-conformance-followup/uuid-index-plan.json",
-      "reports/sbom/runtime-v1.cdx.json",
-      "reports/real-device-preparation-continuation/climate-restore-recovery.json",
-      "reports/real-device-preparation-continuation/climate-restore-recovery.md"
+      "reports/sbom/runtime-v1.cdx.json"
     ]
   },
   "forbiddenAutomaticActions": [

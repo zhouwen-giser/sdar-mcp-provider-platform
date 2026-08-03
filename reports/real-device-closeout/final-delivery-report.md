@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation closeout
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate SHA: `fc45772d1bddeded92716efd79cd633e194f433c`
+- Candidate SHA: `b94206af28ce936f90c5ed8d1eda66988f1a1c5f`
 - Branch: `codex/ha-real-device-preparation`
 - Environment: `home-lab`
 - Overall readiness: **NO**
