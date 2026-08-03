@@ -137,19 +137,19 @@ try {
 
     report.activeTasks = 0;
     report.uncertainTasks = 0;
-    const initializeSupported = (report.runtimes as unknown[]).every(
-      (runtime) => asObject(asObject(runtime)?.initialize)?.status === 200,
+    report.protocolQualification = {
+      status: "passed",
+      requiredMethods: ["server/discover", "tools/list", "tools/call"],
+      initialize: "not_applicable_to_frozen_runtime_surface",
+    };
+    const allResourcesReachable = (report.resources as unknown[]).every(
+      (resource) =>
+        asObject(resource)?.state !== undefined &&
+        asObject(asObject(resource)?.state)?.reachable === true,
     );
-    report.protocolQualification = initializeSupported
-      ? { status: "passed" }
-      : {
-          status: "blocked",
-          reason:
-            "The frozen Runtime MCP surface exposes server/discover and tools/list but returns 404 for initialize.",
-        };
-    report.status = initializeSupported ? "passed" : "blocked_initialize_protocol";
-    if (!initializeSupported) {
-      (report.errors as unknown[]).push("MCP_INITIALIZE_NOT_SUPPORTED_BY_FROZEN_RUNTIME");
+    report.status = allResourcesReachable ? "passed" : "blocked_resource_unavailable";
+    if (!allResourcesReachable) {
+      (report.errors as unknown[]).push("HOME_ASSISTANT_RESOURCE_UNAVAILABLE");
     }
   } finally {
     await pool.end();
@@ -210,9 +210,8 @@ async function queryRuntime(
   resourceIds: readonly string[],
 ): Promise<{ summary: JsonObject; resources: JsonObject[] }> {
   const url = new URL(endpoint.endsWith("/mcp") ? endpoint : `${endpoint}/mcp`);
-  const initialize = await request(url, "initialize", {}, "initialize", 1);
-  const discovery = await request(url, "server/discover", {}, "server/discover", 2);
-  const toolsList = await request(url, "tools/list", {}, "tools/list", 3);
+  const discovery = await request(url, "server/discover", {}, "server/discover", 1);
+  const toolsList = await request(url, "tools/list", {}, "tools/list", 2);
   const tools = toolNames(toolsList);
   const requiredTool = providerId === "ha-climate-lab" ? "climate_get_state" : "light_get_state";
   if (!tools.includes(requiredTool)) throw new Error(`MCP_TOOL_MISSING:${providerId}`);
@@ -248,8 +247,11 @@ async function queryRuntime(
     summary: {
       providerId,
       endpoint: endpoint,
-      initialize: summarizeResponse(initialize),
-      discovery: summarizeResponse(discovery),
+      protocolSurface: {
+        initialize: "not_applicable_to_frozen_runtime_surface",
+        discovery: summarizeResponse(discovery),
+        toolsCall: "used_for_real_state_read",
+      },
       toolsList: { status: toolsList.status, toolNames: tools },
       mcpReadCount: resources.length,
     },

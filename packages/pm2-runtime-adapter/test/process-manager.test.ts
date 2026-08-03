@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import type {
   Pm2JavascriptApi,
@@ -7,18 +8,22 @@ import type {
 } from "../src/index.js";
 import { Pm2ProcessManager, Pm2ProcessManagerError } from "../src/index.js";
 
+const RELEASE_ROOT = resolve("/opt/sdar/runtime-releases");
+const RELEASE_DIRECTORY = resolve(RELEASE_ROOT, "2.0.0-rc.1");
+const RUNTIME_ENTRY = resolve(RELEASE_DIRECTORY, "dist/apps/runtime/src/main.js");
+
 describe("Pm2ProcessManager Fake JavaScript API contract", () => {
   it("starts only a fixed fork-mode Runtime entry and disconnects", async () => {
     const fake = new FakePm2Api();
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     const result = await manager.start(request());
 
     expect(result).toMatchObject({ outcome: "changed", process: { state: "online" } });
     expect(fake.startOptions).toMatchObject({
       name: "sdar-runtime-provider-a-0",
-      script: "/opt/sdar/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js",
-      cwd: "/opt/sdar/runtime-releases/2.0.0-rc.1",
+      script: RUNTIME_ENTRY,
+      cwd: RELEASE_DIRECTORY,
       exec_mode: "fork",
       instances: 1,
       autorestart: true,
@@ -28,12 +33,13 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       min_uptime: 10_000,
       kill_timeout: 30_000,
     });
+    await manager.close();
     expect(fake.disconnect).toHaveBeenCalledOnce();
   });
 
   it("rejects non-platform process names before connecting", () => {
     const fake = new FakePm2Api();
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     expect(() => manager.stop("unrelated-process")).toThrow(
       expect.objectContaining({
@@ -48,7 +54,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
 
     expect(
       () =>
-        new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases", {
+        new Pm2ProcessManager(fake, RELEASE_ROOT, {
           restartDelayMs: 0,
           maxRestarts: 100,
           maxMemoryBytes: 32,
@@ -69,7 +75,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       () =>
         new Pm2ProcessManager(
           fake,
-          "/opt/sdar/runtime-releases",
+          RELEASE_ROOT,
           {
             restartDelayMs: 5_000,
             maxRestarts: 5,
@@ -88,7 +94,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
   it("restarts with only the rendered environment and explicit updateEnv", async () => {
     const fake = new FakePm2Api();
     fake.processes.set("sdar-runtime-provider-a-0", description("stopped"));
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     await manager.restart(request());
 
@@ -105,7 +111,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       "sdar-runtime-provider-a-0",
       description("online", request().bootstrap.environment),
     );
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     const result = await manager.start(request());
 
@@ -123,7 +129,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       "sdar-runtime-provider-a-0",
       description("online", { ...request().bootstrap.environment, [key]: value }),
     );
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     const result = await manager.start(request());
 
@@ -137,7 +143,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
   it("makes repeated stop and delete idempotent", async () => {
     const fake = new FakePm2Api();
     fake.processes.set("sdar-runtime-provider-a-0", description("online"));
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     expect(await manager.stop("sdar-runtime-provider-a-0")).toMatchObject({
       outcome: "changed",
@@ -161,7 +167,7 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
     const fake = new FakePm2Api();
     fake.processes.set("sdar-runtime-provider-a-0", description("online"));
     fake.processes.set("unrelated-process", { name: "unrelated-process" });
-    const manager = new Pm2ProcessManager(fake, "/opt/sdar/runtime-releases");
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
 
     expect(await manager.list()).toHaveLength(1);
     fake.listError = new Error("daemon socket /private/path failed");
@@ -173,57 +179,103 @@ describe("Pm2ProcessManager Fake JavaScript API contract", () => {
       retryable: true,
       message: "PM2_OPERATION_FAILED",
     });
-    expect(fake.disconnect).toHaveBeenCalledTimes(2);
+    await manager.close();
+    expect(fake.disconnect).toHaveBeenCalledOnce();
+  });
+
+  it("serializes concurrent operations on the shared PM2 connection", async () => {
+    const fake = new FakePm2Api();
+    fake.operationDelayMs = 5;
+    const manager = new Pm2ProcessManager(fake, RELEASE_ROOT);
+
+    await Promise.all([manager.start(request()), manager.start(requestFor("provider-b"))]);
+    await manager.close();
+
+    expect(fake.disconnectWhileOperationPending).toBe(false);
+    expect(fake.connect).toHaveBeenCalledOnce();
+    expect(fake.disconnect).toHaveBeenCalledOnce();
   });
 });
 
 class FakePm2Api implements Pm2JavascriptApi {
   readonly processes = new Map<string, Pm2ProcessDescription>();
   readonly connect = vi.fn((callback: (error?: Error) => void) => callback());
-  readonly disconnect = vi.fn();
+  readonly disconnect = vi.fn(() => {
+    if (this.pendingOperations > 0) this.disconnectWhileOperationPending = true;
+  });
   startOptions?: Pm2StartOptions;
   restartOptions?: Pm2RestartOptions;
   listError?: Error;
+  operationDelayMs = 0;
+  pendingOperations = 0;
+  disconnectWhileOperationPending = false;
 
   start(
     options: Pm2StartOptions,
     callback: (error: Error | null, descriptions?: readonly Pm2ProcessDescription[]) => void,
   ): void {
     this.startOptions = options;
-    const value = description("online");
-    this.processes.set(options.name, value);
-    callback(null, [value]);
+    this.defer(() => {
+      const value = description("online");
+      this.processes.set(options.name, value);
+      callback(null, [value]);
+    });
   }
 
   stop(name: string, callback: (error?: Error) => void): void {
-    this.processes.set(name, description("stopped"));
-    callback();
+    this.defer(() => {
+      this.processes.set(name, description("stopped"));
+      callback();
+    });
   }
 
   restart(name: string, options: Pm2RestartOptions, callback: (error?: Error) => void): void {
     this.restartOptions = options;
-    this.processes.set(name, description("online", options.env));
-    callback();
+    this.defer(() => {
+      this.processes.set(name, description("online", options.env));
+      callback();
+    });
   }
 
   delete(name: string, callback: (error?: Error) => void): void {
-    this.processes.delete(name);
-    callback();
+    this.defer(() => {
+      this.processes.delete(name);
+      callback();
+    });
   }
 
   describe(
     name: string,
     callback: (error: Error | null, descriptions?: readonly Pm2ProcessDescription[]) => void,
   ): void {
-    const value = this.processes.get(name);
-    callback(null, value === undefined ? [] : [value]);
+    this.defer(() => {
+      const value = this.processes.get(name);
+      callback(null, value === undefined ? [] : [value]);
+    });
   }
 
   list(
     callback: (error: Error | null, descriptions?: readonly Pm2ProcessDescription[]) => void,
   ): void {
-    if (this.listError !== undefined) callback(this.listError);
-    else callback(null, [...this.processes.values()]);
+    this.defer(() => {
+      if (this.listError !== undefined) callback(this.listError);
+      else callback(null, [...this.processes.values()]);
+    });
+  }
+
+  private defer(callback: () => void): void {
+    if (this.operationDelayMs === 0) {
+      callback();
+      return;
+    }
+    this.pendingOperations += 1;
+    setTimeout(() => {
+      try {
+        callback();
+      } finally {
+        this.pendingOperations -= 1;
+      }
+    }, this.operationDelayMs);
   }
 }
 
@@ -259,9 +311,23 @@ function request() {
     },
     release: {
       version: target.runtimeVersion,
-      releaseDirectory: "/opt/sdar/runtime-releases/2.0.0-rc.1",
-      runtimeEntry: "/opt/sdar/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js",
+      releaseDirectory: `${RELEASE_ROOT}/2.0.0-rc.1`,
+      runtimeEntry: `${RELEASE_ROOT}/2.0.0-rc.1/dist/apps/runtime/src/main.js`,
       manifestDigest: "b".repeat(64),
+    },
+  };
+}
+
+function requestFor(provider: string) {
+  const value = request();
+  const processName = `sdar-runtime-${provider}-0`;
+  return {
+    ...value,
+    processName,
+    bootstrap: {
+      ...value.bootstrap,
+      target: { ...value.bootstrap.target, providerId: provider, processName },
+      environment: { ...value.bootstrap.environment, PROVIDER_ID: provider },
     },
   };
 }

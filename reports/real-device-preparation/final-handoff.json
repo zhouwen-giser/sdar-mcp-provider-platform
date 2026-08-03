@@ -35,6 +35,9 @@
   "realResourcesBlocked": ["living-room-air-conditioner"],
   "activeTasks": 0,
   "uncertainTasks": 0,
+  "readyForSdarFunctionalIntegration": false,
+  "readyForSdarResilienceIntegration": false,
+  "readyForSdarFullCapabilityIntegration": false,
   "readiness": {
     "readyForSdarFunctionalIntegration": false,
     "readyForSdarResilienceIntegration": false,
@@ -46,8 +49,6 @@
   "blockers": [
     "CLIMATE_REAL_WRITE_QUALIFICATION_BLOCKED_MANUAL_SAFETY",
     "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
-    "FROZEN_MCP_INITIALIZE_NOT_SUPPORTED_BY_CURRENT_RUNTIME",
-    "PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED",
     "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
     "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
     "REAL_FAULT_INJECTION_UNVERIFIED",

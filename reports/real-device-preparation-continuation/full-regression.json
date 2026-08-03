@@ -2,7 +2,7 @@
   "evidenceClass": "unverified",
   "phase": "C10_FULL_REGRESSION",
   "status": "partial",
-  "observedAt": "2026-08-03T10:05:00+08:00",
+  "observedAt": "2026-08-03T11:34:00+08:00",
   "dependencyIntake": {
     "command": "CI=true pnpm install --offline --force --frozen-lockfile --ignore-scripts --node-linker=hoisted --config.confirmModulesPurge=false",
     "evidenceClass": "static",
@@ -15,6 +15,18 @@
       "evidenceClass": "real",
       "status": "blocked",
       "detail": "The latest read-only run passed URL, token, existence and domain checks but stopped on ENTITY_UNAVAILABLE for living-room-aux-light. No side effect was attempted."
+    },
+    {
+      "command": "formal PMS Worker runtime_deployment.reconcile",
+      "evidenceClass": "real",
+      "status": "passed",
+      "detail": "After the PM2 connection-lifecycle repair and a fresh local PM2 root, repeated reconcile jobs for both Providers completed; both Deployments were ACTIVE/ready."
+    },
+    {
+      "command": "scripts/run-live-smpp-registry-e2e.ts",
+      "evidenceClass": "real",
+      "status": "blocked_resource_unavailable",
+      "detail": "Registry, server/discover, tools/list, and tools/call passed for all three resources; only the current auxiliary-light reachable=false state blocked the real-resource gate."
     },
     {
       "command": "prettier --check .",
@@ -114,7 +126,8 @@
     "WINDOWS_PROVIDER_PACKAGE_SYMLINK_EPERM",
     "NPC_TANK_FIXED_TEMP_PATH_EPERM",
     "VERIFY_V2_AGGREGATOR_UNVERIFIED",
-    "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED"
+    "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED",
+    "RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED"
   ],
   "scopeNote": "No frozen MCP semantic, Adapter Proto field, Task Authority, or real-device safety gate was weakened."
 }

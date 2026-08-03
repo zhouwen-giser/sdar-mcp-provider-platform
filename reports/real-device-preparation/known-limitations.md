@@ -1,7 +1,7 @@
 # Known limitations
 
-- The repository's frozen MCP profile implements server/discover, tools/list, tools/call, tasks/get, tasks/update, tasks/cancel, and observations. It does not implement initialize or tasks/result; the real runners record the 404 and stay BLOCKED.
-- The live continuation performed formal PMS API onboarding, Config Publish, ACTIVE Runtime Deployment reconciliation, Catalog publication, and Registry revision 3 publication. The separately launched PMS Worker did not complete its three pre-existing reconcile leases, so Worker job completion remains unverified.
+- The repository's frozen MCP profile implements server/discover, tools/list, tools/call, tasks/get, tasks/update, tasks/cancel, and observations. It does not implement initialize or tasks/result; real runners treat initialize as not applicable and use terminal tasks/get where needed.
+- The live continuation performed formal PMS API onboarding, Config Publish, ACTIVE Runtime Deployment reconciliation, Catalog publication, and Registry revision 3 publication. After the PM2 connection-lifecycle repair, the formal PMS Worker completed repeated reconcile jobs for both Providers.
 - Real Adapter outage and recovery were observed; the Adapter came back but the existing Runtime required an exact restart before readiness recovered. Adapter/Runtime restart during an in-flight Task, HA outage injection, and corrupted real Provider state-file injection remain unverified.
 - Real qualification is limited to the three explicitly configured lab resources. It is not a production certification of all Home Assistant climate or light entities.
 - The two light runs used power control only. Brightness capability was observed in read-only preflight and the optional brightness operation is covered by fake/contract tests, but no brightness side effect was executed on the real lights.

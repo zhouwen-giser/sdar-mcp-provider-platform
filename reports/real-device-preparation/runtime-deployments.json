@@ -1,7 +1,7 @@
 {
   "evidenceClass": "real",
   "phase": "P5_PMS_PLATFORM_ONBOARDING",
-  "status": "partial",
+  "status": "passed",
   "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
   "deploymentModel": "vendor_managed adapter plus PMS-managed Runtime",
   "deployments": [
@@ -12,7 +12,7 @@
       "runtimeDeploymentStatus": "ACTIVE",
       "readiness": "ready",
       "desiredRevision": 2,
-      "observedRevision": 19,
+      "observedRevision": 22,
       "effectiveEndpoint": "http://127.0.0.1:18081/mcp"
     },
     {
@@ -22,11 +22,11 @@
       "runtimeDeploymentStatus": "ACTIVE",
       "readiness": "ready",
       "desiredRevision": 0,
-      "observedRevision": 37,
+      "observedRevision": 40,
       "effectiveEndpoint": "http://127.0.0.1:18080/mcp"
     }
   ],
-  "blockers": ["PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED"],
+  "blockers": [],
   "noSecrets": true,
   "noEntityIds": true
 }

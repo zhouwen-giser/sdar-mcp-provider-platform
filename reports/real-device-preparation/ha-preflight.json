@@ -1,8 +1,8 @@
 {
   "evidenceClass": "real",
   "phase": "P1_HA_READ_ONLY_PREFLIGHT",
-  "startedAt": "2026-08-03T02:15:16.898Z",
-  "completedAt": "2026-08-03T02:15:17.468Z",
+  "startedAt": "2026-08-03T03:32:04.657Z",
+  "completedAt": "2026-08-03T03:32:05.246Z",
   "status": "failed",
   "readOnly": true,
   "sideEffectsAttempted": false,
@@ -44,13 +44,7 @@
       "state": "off",
       "reachable": true,
       "observedAt": "2026-08-03T00:36:56.219608+00:00",
-      "supportedHvacModes": [
-        "heat",
-        "dry",
-        "cool",
-        "fan_only",
-        "off"
-      ],
+      "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
       "minTemperature": 16,
       "maxTemperature": 31,
       "currentTemperature": null,

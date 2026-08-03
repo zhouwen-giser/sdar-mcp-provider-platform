@@ -37,11 +37,11 @@
 - Formal PMS API onboarding confirmed both Provider Packages, Provider Types, Providers, three Resources, bindings, published configuration revision 1, and both Runtime Deployments.
 - Both live Deployments reached `ACTIVE` and both Runtime `/health/ready` endpoints returned ready after controlled local release asset preparation.
 - Catalog revision 1 for each Provider and Registry revision 3 were observed through the live PMS API. `latest` and `bootstrap` returned the same checksum and ETag; the redacted Registry contained no Secret or Entity ID keys.
-- The separately launched Worker claimed three existing reconcile jobs and renewed their leases without completion. Direct application reconcile evidence is kept separate and does not close the Worker gate.
+- Historical pre-repair evidence: the separately launched Worker claimed three existing reconcile jobs and renewed their leases without completion. The Worker gate was later closed by the fresh post-repair formal run recorded below.
 
 ## C6-C8 real Registry E2E and recovery
 
-- Registry-backed read-only MCP calls queried all three configured resources. The frozen Runtime returned 404 for `initialize`; this is recorded as `MCP_INITIALIZE_NOT_SUPPORTED_BY_FROZEN_RUNTIME`, not converted into a pass.
+- Historical pre-runner-correction evidence: the frozen Runtime returned 404 for `initialize`. The runner was later corrected to use the frozen `server/discover`, `tools/list`, and `tools/call` surface, with `initialize` recorded as not applicable.
 - Both lights completed bounded `light_set_power` toggles and restorations through the PMS Registry-backed Light Runtime. Same-argument duplicate Task IDs were reused and conflicting arguments returned HTTP 400. Final light states matched the saved originals; active and uncertain counts were zero.
 - Stopping the Light Adapter caused Runtime readiness 503 and gRPC connection failures. Restarting the Adapter alone did not recover the existing Runtime client; an exact Light Runtime restart restored readiness. In-flight restart recovery remains unverified.
 - Climate writes were stopped because the saved climate power was off and the five-minute inverse-power protection would make a safe restoration impossible. No climate side effect was attempted in this continuation.
@@ -55,3 +55,15 @@
 - Provider Package symlink security test remains blocked by Windows EPERM, including elevated rerun; the dedicated Linux symlink gate remains the valid OS-specific evidence.
 - `verify:v2` and `verify:platform` aggregate wrappers remain unverified; direct component gates are recorded in `reports/real-device-preparation-continuation/full-regression.json`.
 - A later read-only Home Assistant preflight was run twice and failed both times with `ENTITY_UNAVAILABLE` for the auxiliary light. No write was attempted after this state change; the current handoff therefore remains blocked.
+
+## C3/C6 continuation recheck
+
+- 2026-08-03 11:15-11:25 Asia/Shanghai: a fresh formal PMS Worker run initially reproduced the Windows PM2 client lifecycle failure. The minimum repair serializes `Pm2ProcessManager` operations, reuses one PM2 connection, and disconnects only from Runtime composition shutdown; focused PM2 tests passed 12/12, TypeScript/ESLint/Prettier passed, and two concurrent live PM2 `list` calls passed 2/2.
+- After moving the stale local PM2 control root to a recoverable ignored backup and starting a clean root, the formal Worker completed repeated `runtime_deployment.reconcile` jobs for both `ha-climate-lab` and `ha-light-lab`. Both Deployments were `ACTIVE`, ready, and listening on their Registry endpoints; latest observed revisions were 22 and 40. The current `pms-worker.err.log` has no entries newer than the earlier failed run.
+- 2026-08-03 11:24 Asia/Shanghai: Registry-backed real MCP read E2E used the live `latest`/`bootstrap` Registry, verified checksum/ETag equality and both Provider records, then completed `server/discover`, `tools/list`, and `tools/call` state reads for all three configured resources. Protocol qualification passed; the run is `blocked_resource_unavailable` solely because the auxiliary light returned `reachable=false`/`unavailable`.
+- 2026-08-03 11:32 Asia/Shanghai: read-only HA WebSocket diagnostics found all three configured entities present in the entity registry, not disabled or hidden, and the `xiaomi_home` config entry loaded. The auxiliary light remains unavailable at HA state authority; no write was attempted.
+
+## Final narrow verification
+
+- 2026-08-03 11:57 Asia/Shanghai: direct local binaries passed the changed-scope PM2 test (12/12), Prettier checks, ESLint, and TypeScript typecheck. The pnpm wrapper was not used for these results because its dependency-status phase reproduced the known Windows node_modules EPERM/no-TTY failure.
+- The report scan over all changed `.codex` and `reports` files found zero configured Home Assistant Entity ID occurrences, zero token occurrences, and zero Authorization Header occurrences.

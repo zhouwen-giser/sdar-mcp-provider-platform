@@ -11,8 +11,8 @@
 
 - The initial Home Assistant read-only preflight passed for the configured climate and two lights; reports are redacted. A later read-only recheck is recorded as unavailable below.
 - PMS API onboarding created/confirmed both Provider Packages, Provider Types, Providers, three Resources, bindings, published configuration, Runtime Deployments, Catalog revisions, and Registry revision 3.
-- Both PMS-managed Runtime Deployments reached `ACTIVE`/ready in the controlled local environment. The separately launched Worker did not complete its existing reconcile leases, so the Worker sub-gate remains unverified.
-- Registry-backed MCP reads returned all three resources. The Registry `latest` and `bootstrap` checksums and ETags matched; the redacted Registry contained neither secrets nor Home Assistant Entity ID keys.
+- Both PMS-managed Runtime Deployments reached `ACTIVE`/ready in the controlled local environment. After the PM2 connection-lifecycle repair, the formal Worker completed repeated reconcile jobs for both Providers; no active lease was present at the latest sample.
+- Registry-backed MCP reads returned all three resources. The Registry `latest` and `bootstrap` checksums and ETags matched; the redacted Registry contained neither secrets nor Home Assistant Entity ID keys. The frozen read protocol qualification passed with `server/discover`, `tools/list`, and `tools/call`; `initialize` is not part of the frozen surface.
 - Both real lights completed bounded power toggles, terminal `tasks/get` confirmation, same-argument idempotency reuse, conflicting-argument rejection, and restoration. Final active and uncertain task counts were zero.
 - A real Light Adapter outage was observed. Readiness failed closed, and exact Light Runtime restart restored readiness without replaying device side effects.
 - The real climate was read successfully. Climate writes were not attempted because the saved power was off and the five-minute inverse-power safety rule blocked a safe bounded restoration.
@@ -29,8 +29,6 @@
 
 - `CLIMATE_REAL_WRITE_QUALIFICATION_BLOCKED_MANUAL_SAFETY`: current PMS Registry-backed `climate_set_power`, `climate_set_hvac_mode`, and `climate_set_temperature` writes were not executed; no climate write pass is claimed.
 - `HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT`: the latest read-only preflight found the auxiliary light unavailable, so no further real-device writes are permitted until Home Assistant state is restored and P1 passes again.
-- `FROZEN_MCP_INITIALIZE_NOT_SUPPORTED_BY_CURRENT_RUNTIME`: the frozen Runtime returns 404 for `initialize`; this is recorded, not worked around by changing the frozen protocol.
-- `PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED`: direct PMS application reconciliation converged the local deployments, but the formal Worker lease completion was not observed.
 - `RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED` and `REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED`.
 - `REAL_FAULT_INJECTION_UNVERIFIED`: real HA unavailable, REST-200-without-state-change, Entity unavailable, state-file corruption, PMS outage, and in-flight restart scenarios remain unverified.
 - `RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED`: local release assets required controlled preparation before PMS Runtime startup; a clean packaged-release cold start is not claimed.

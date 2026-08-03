@@ -122,6 +122,8 @@ export class Pm2ProcessManager {
   readonly #releaseRoot: string;
   readonly #recoveryPolicy: RuntimeCrashRecoveryPolicy;
   readonly #shutdownPolicy: RuntimeShutdownPolicy;
+  #operationTail: Promise<void> = Promise.resolve();
+  #connectionReady: Promise<void> | undefined;
 
   constructor(
     private readonly api: Pm2JavascriptApi,
@@ -244,6 +246,13 @@ export class Pm2ProcessManager {
     });
   }
 
+  async close(): Promise<void> {
+    await this.#operationTail;
+    if (this.#connectionReady === undefined) return;
+    this.api.disconnect();
+    this.#connectionReady = undefined;
+  }
+
   private async describeConnected(
     processName: string,
   ): Promise<RuntimeInfrastructureProcessObservation | null> {
@@ -269,7 +278,10 @@ export class Pm2ProcessManager {
     const cwd = resolve(this.#releaseRoot, request.runtimeVersion);
     assertContained(this.#releaseRoot, cwd);
     const script = resolve(cwd, RUNTIME_ENTRY);
-    if (request.release.releaseDirectory !== cwd || request.release.runtimeEntry !== script) {
+    if (
+      resolve(request.release.releaseDirectory) !== cwd ||
+      resolve(request.release.runtimeEntry) !== script
+    ) {
       throw new Pm2ProcessManagerError("PM2_RUNTIME_RELEASE_INVALID", "start", false);
     }
     return Object.freeze({
@@ -289,7 +301,20 @@ export class Pm2ProcessManager {
   }
 
   private async withConnection<T>(operation: () => Promise<T>): Promise<T> {
-    await new Promise<void>((resolveConnect, rejectConnect) => {
+    const queued = this.#operationTail.then(async () => {
+      await this.ensureConnection();
+      return operation();
+    });
+    this.#operationTail = queued.then(
+      () => undefined,
+      () => undefined,
+    );
+    return queued;
+  }
+
+  private ensureConnection(): Promise<void> {
+    if (this.#connectionReady !== undefined) return this.#connectionReady;
+    const connecting = new Promise<void>((resolveConnect, rejectConnect) => {
       this.api.connect((error) => {
         if (error === undefined) resolveConnect();
         else
@@ -300,11 +325,11 @@ export class Pm2ProcessManager {
           );
       });
     });
-    try {
-      return await operation();
-    } finally {
-      this.api.disconnect();
-    }
+    this.#connectionReady = connecting.catch((error: unknown) => {
+      this.#connectionReady = undefined;
+      throw error;
+    });
+    return this.#connectionReady;
   }
 }
 

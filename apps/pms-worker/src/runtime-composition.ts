@@ -248,7 +248,7 @@ export async function createProductionRuntimeComposition(
         if (closed) return;
         closed = true;
         try {
-          api.disconnect();
+          await processManager.close();
         } finally {
           await databaseResources?.close();
         }

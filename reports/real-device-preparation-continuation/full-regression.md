@@ -3,6 +3,8 @@
 - Aggregate evidence class: `unverified`
 - Status: `partial`
 - Latest real read-only Home Assistant preflight is blocked by `ENTITY_UNAVAILABLE` for the auxiliary light; no write followed that observation.
+- The formal PMS Worker now completes repeated runtime reconcile jobs for both Providers after the PM2 connection-lifecycle repair; both Deployments remain `ACTIVE`/ready.
+- The Registry-backed real MCP read runner now qualifies the frozen surface with `server/discover`, `tools/list`, and `tools/call`; all three resources were queried, but the current auxiliary light remains unavailable.
 - Dependency intake: offline frozen-lockfile rebuild passed with pnpm `11.13.1`.
 - Lint, typecheck, build, frozen protocol checks, generated self-check, unit, contract, security, protocol-conformance, focused HA suites, and focused PMS Home Assistant platform tests passed.
 - `prettier --check .` is blocked only by two pre-existing files: `docs/protocol/mcp-runtime.md` and `reports/real-device-preparation/authority-map.md`.

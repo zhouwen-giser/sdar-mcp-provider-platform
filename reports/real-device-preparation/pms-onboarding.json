@@ -1,7 +1,7 @@
 {
   "evidenceClass": "real",
   "phase": "P5_PMS_PLATFORM_ONBOARDING",
-  "status": "partial",
+  "status": "passed",
   "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
   "environment": "home-lab",
   "providerIds": ["ha-climate-lab", "ha-light-lab"],
@@ -23,8 +23,8 @@
     {
       "step": "runtimeStartAndReadiness",
       "evidenceClass": "real",
-      "status": "partial",
-      "statusDetail": "Both Deployments ACTIVE and ready; Worker job completion remains unverified."
+      "status": "passed",
+      "statusDetail": "Both Deployments ACTIVE and ready; formal Worker reconcile jobs completed."
     },
     { "step": "catalogDiscovery", "evidenceClass": "real", "status": "passed" },
     {
@@ -34,9 +34,7 @@
       "revision": 3
     }
   ],
-  "blockers": [
-    "PMS_WORKER_RECONCILE_JOB_COMPLETION_UNVERIFIED: direct PMS application reconcile converged the deployments while the separately launched Worker retained three old reconcile leases."
-  ],
+  "blockers": [],
   "noSecrets": true,
   "noEntityIds": true
 }

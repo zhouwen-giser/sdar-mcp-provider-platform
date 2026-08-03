@@ -1,11 +1,11 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-286f7e17-c1b7-40b3-bfde-c92e697149a9",
+  "integrationRunId": "smpp-registry-e2e-d9f09121-d724-4997-9aaa-1d18714f3ab6",
   "environment": "home-lab",
-  "startedAt": "2026-08-03T01:22:53.426Z",
-  "completedAt": "2026-08-03T01:22:54.231Z",
-  "status": "blocked_initialize_protocol",
+  "startedAt": "2026-08-03T03:23:56.064Z",
+  "completedAt": "2026-08-03T03:23:57.086Z",
+  "status": "blocked_resource_unavailable",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
     "registry": {
@@ -28,15 +28,14 @@
     {
       "providerId": "ha-climate-lab",
       "endpoint": "http://127.0.0.1:18081/mcp",
-      "initialize": {
-        "status": 404,
-        "resultType": null,
-        "hasError": true
-      },
-      "discovery": {
-        "status": 200,
-        "resultType": "complete",
-        "hasError": false
+      "protocolSurface": {
+        "initialize": "not_applicable_to_frozen_runtime_surface",
+        "discovery": {
+          "status": 200,
+          "resultType": "complete",
+          "hasError": false
+        },
+        "toolsCall": "used_for_real_state_read"
       },
       "toolsList": {
         "status": 200,
@@ -52,15 +51,14 @@
     {
       "providerId": "ha-light-lab",
       "endpoint": "http://127.0.0.1:18080/mcp",
-      "initialize": {
-        "status": 404,
-        "resultType": null,
-        "hasError": true
-      },
-      "discovery": {
-        "status": 200,
-        "resultType": "complete",
-        "hasError": false
+      "protocolSurface": {
+        "initialize": "not_applicable_to_frozen_runtime_surface",
+        "discovery": {
+          "status": 200,
+          "resultType": "complete",
+          "hasError": false
+        },
+        "toolsCall": "used_for_real_state_read"
       },
       "toolsList": {
         "status": 200,
@@ -114,22 +112,23 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "on",
-        "reachable": true,
+        "power": "unavailable",
+        "reachable": false,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": 100,
-        "observedAt": "2026-08-03T01:06:52.263509+00:00"
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T01:51:47.059061+00:00"
       },
       "status": 200
     }
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "errors": ["MCP_INITIALIZE_NOT_SUPPORTED_BY_FROZEN_RUNTIME"],
+  "errors": ["HOME_ASSISTANT_RESOURCE_UNAVAILABLE"],
   "protocolQualification": {
-    "status": "blocked",
-    "reason": "The frozen Runtime MCP surface exposes server/discover and tools/list but returns 404 for initialize."
+    "status": "passed",
+    "requiredMethods": ["server/discover", "tools/list", "tools/call"],
+    "initialize": "not_applicable_to_frozen_runtime_surface"
   }
 }

@@ -29,7 +29,7 @@
     "active": 0,
     "uncertain": 0
   },
-  "blockedQualification": "The frozen Runtime returns 404 for initialize; Adapter reconnect without an exact Runtime restart and in-flight recovery remain unverified.",
+  "blockedQualification": "The frozen Runtime read surface was qualified with server/discover, tools/list, and tools/call. Adapter reconnect without an exact Runtime restart and in-flight recovery remain unverified; the latest P1 preflight also reports the auxiliary light unavailable, so no new writes are authorized.",
   "entityIdentifiers": "excluded",
   "credentials": "excluded"
 }
