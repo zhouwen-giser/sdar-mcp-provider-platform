@@ -2,7 +2,7 @@
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
 - Candidate branch: `codex/ha-real-device-preparation`
-- Candidate implementation SHA: `86f742e7f39c24809f031c475b0e42a4eba5c392`
+- Candidate implementation SHA: `16d5f3880187671b09c1b178533ed6ea18aa2b15`
 - Environment: `home-lab`
 - Overall status: **BLOCKED**
 - Ready for SDAR integration: **NO**
