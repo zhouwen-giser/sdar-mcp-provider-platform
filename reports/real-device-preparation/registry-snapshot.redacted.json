@@ -1,15 +1,13 @@
 {
   "evidenceClass": "real",
-  "phase": "P5_PMS_PLATFORM_ONBOARDING",
-  "status": "published",
-  "continuationReport": "reports/real-device-preparation-continuation/catalog-registry-live.json",
+  "status": "passed",
   "environment": "home-lab",
   "revision": 3,
   "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
   "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
   "latest": "passed",
   "bootstrap": "passed",
-  "watch": "unverified",
+  "watch": "passed",
   "providers": [
     {
       "providerId": "ha-climate-lab",
@@ -29,7 +27,6 @@
   "latestBootstrapSameChecksum": true,
   "containsSecretKeys": false,
   "containsEntityIdKeys": false,
-  "blockers": ["CLIMATE_POWER_CONTROL_SAFETY_DEFERRED"],
   "noSecrets": true,
   "noEntityIds": true
 }

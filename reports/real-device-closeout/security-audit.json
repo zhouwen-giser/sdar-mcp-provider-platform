@@ -1,0 +1,21 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "dependencyAudit": "not separately recorded",
+  "sensitiveReportScan": {
+    "filesScanned": 76,
+    "tokenMatchCount": 0,
+    "entityIdMatchCount": 0,
+    "authorizationHeaderCount": 0,
+    "tokenFileReadForScanOnly": true,
+    "entityIdsReadForScanOnly": true
+  },
+  "realWriteGate": {
+    "climate": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
+    "light": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
+    "invalidGateBehavior": "read-only; new real writes fail closed"
+  },
+  "noAuthorizationHeaderInReports": true,
+  "noTokenInReports": true,
+  "noEntityIdInReports": true
+}

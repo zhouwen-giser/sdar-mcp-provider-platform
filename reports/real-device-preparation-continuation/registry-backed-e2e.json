@@ -1,18 +1,21 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-5c2b9ab6-3420-40a5-8de3-89adfe52758c",
+  "integrationRunId": "smpp-registry-e2e-07b60144-94ee-4887-96df-e70c378ad4db",
   "environment": "home-lab",
-  "startedAt": "2026-08-03T04:36:00.309Z",
-  "completedAt": "2026-08-03T04:36:01.158Z",
-  "status": "blocked_resource_unavailable",
+  "startedAt": "2026-08-03T22:30:37.455Z",
+  "completedAt": "2026-08-03T22:30:38.327Z",
+  "status": "passed",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
     "registry": {
       "environment": "home-lab",
       "revision": 3,
       "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
-      "providerIds": ["ha-climate-lab", "ha-light-lab"],
+      "providerIds": [
+        "ha-climate-lab",
+        "ha-light-lab"
+      ],
       "providerCount": 2,
       "containsSecretKeys": false,
       "containsEntityIdKeys": false
@@ -62,7 +65,11 @@
       },
       "toolsList": {
         "status": 200,
-        "toolNames": ["light_get_state", "light_set_power", "light_set_brightness"]
+        "toolNames": [
+          "light_get_state",
+          "light_set_power",
+          "light_set_brightness"
+        ]
       },
       "mcpReadCount": 2
     }
@@ -82,7 +89,7 @@
         "targetTemperature": 23,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:22.258701+00:00"
+        "observedAt": "2026-08-03T19:44:29.157337+00:00"
       },
       "status": 200
     },
@@ -100,7 +107,7 @@
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:17.442515+00:00"
+        "observedAt": "2026-08-03T19:44:40.414404+00:00"
       },
       "status": 200
     },
@@ -112,23 +119,27 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "unavailable",
-        "reachable": false,
+        "power": "off",
+        "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:16.325781+00:00"
+        "observedAt": "2026-08-03T19:44:49.616898+00:00"
       },
       "status": 200
     }
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "errors": ["HOME_ASSISTANT_RESOURCE_UNAVAILABLE"],
+  "errors": [],
   "protocolQualification": {
     "status": "passed",
-    "requiredMethods": ["server/discover", "tools/list", "tools/call"],
+    "requiredMethods": [
+      "server/discover",
+      "tools/list",
+      "tools/call"
+    ],
     "initialize": "not_applicable_to_frozen_runtime_surface"
   }
 }

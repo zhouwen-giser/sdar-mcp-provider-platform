@@ -1,0 +1,104 @@
+{
+  "evidenceClass": "real",
+  "phase": "P6_CLIMATE_RESTORE_RECOVERY",
+  "integrationRunId": "smpp-live-climate-restore-20260804-0329",
+  "environment": "home-lab",
+  "startedAt": "2026-08-03T19:30:49.431Z",
+  "completedAt": "2026-08-03T19:30:52.067Z",
+  "status": "passed",
+  "safetyGate": {
+    "allowRealDeviceSideEffects": true,
+    "runIdPresent": true,
+    "writeBudget": {
+      "climatePowerOff": 1
+    },
+    "writesUsed": {
+      "climatePowerOff": 1
+    }
+  },
+  "sourceInitialState": {
+    "resourceId": "living-room-air-conditioner",
+    "power": "off",
+    "reachable": true,
+    "hvacMode": "off",
+    "targetTemperature": 23,
+    "currentTemperature": null,
+    "observedAt": "2026-08-03T19:12:33.121057+00:00",
+    "observationId": null
+  },
+  "currentBeforeRestore": {
+    "resourceId": "living-room-air-conditioner",
+    "power": "on",
+    "reachable": true,
+    "hvacMode": "cool",
+    "targetTemperature": 23,
+    "currentTemperature": null,
+    "observedAt": "2026-08-03T19:25:47.437224+00:00",
+    "observationId": null
+  },
+  "wait": {
+    "safetyIntervalMs": 300000,
+    "waitedMs": 0,
+    "reason": "opposite climate power operation"
+  },
+  "task": {
+    "status": "completed",
+    "runtimeTaskId": "3d54ca1b-5b6d-44eb-8293-860988fcead1",
+    "correlationId": "smpp-live-climate-restore-20260804-0329:restore-power-off",
+    "finalTask": {
+      "status": "completed",
+      "revision": null,
+      "reasonCode": null,
+      "result": {
+        "resultType": "complete",
+        "_meta": {
+          "io.sdar/evidence": {
+            "items": [
+              {
+                "producer": ["home-assistant"],
+                "evidenceId": "home-assistant-climate-3d54ca1b-5b6d-44eb-8293-860988fcead1-3",
+                "observedAt": "2026-08-03T19:30:50.792588+00:00",
+                "payloadRef": {
+                  "kind": "structured_content",
+                  "jsonPointer": "/power"
+                },
+                "subjectRef": "resource:living-room-air-conditioner",
+                "evidenceType": "climate.state.observation"
+              }
+            ],
+            "profileVersion": "1.0"
+          }
+        },
+        "content": [
+          {
+            "text": "Desired climate state confirmed.",
+            "type": "text"
+          }
+        ],
+        "isError": false,
+        "structuredContent": {
+          "power": "off",
+          "confirmed": true,
+          "observedAt": "2026-08-03T19:30:50.792588+00:00",
+          "resourceId": "living-room-air-conditioner"
+        }
+      },
+      "evidence": null
+    },
+    "adapterExternalExecutionId": null,
+    "homeAssistantObservationId": null
+  },
+  "finalState": {
+    "resourceId": "living-room-air-conditioner",
+    "power": "off",
+    "reachable": true,
+    "hvacMode": "off",
+    "targetTemperature": 23,
+    "currentTemperature": null,
+    "observedAt": "2026-08-03T19:30:50.792588+00:00",
+    "observationId": null
+  },
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "errors": []
+}

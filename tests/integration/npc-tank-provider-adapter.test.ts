@@ -18,6 +18,8 @@ import {
   type NpcTankSnapshot,
 } from "../../packages/vehicle-provider-core/src/index.js";
 import { NpcTankProviderRuntime } from "../../apps/npc-tank-provider-adapter/src/runtime.js";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 const active: NpcTankProviderRuntime[] = [];
@@ -295,8 +297,11 @@ function runtimeOptions() {
     allowNavigationWithRecon: true,
     fireRequiresChassisStopped: true,
     pollIntervalMs: 60_000,
-    navigationReportPath: "/tmp/npc-tank-test-navigation.json",
-    eoScanReportPath: "/tmp/npc-tank-test-eo.json",
+    navigationReportPath: resolve(
+      tmpdir(),
+      `sdar-npc-tank-${String(process.pid)}-test-navigation.json`,
+    ),
+    eoScanReportPath: resolve(tmpdir(), `sdar-npc-tank-${String(process.pid)}-test-eo.json`),
   };
 }
 function startInput(

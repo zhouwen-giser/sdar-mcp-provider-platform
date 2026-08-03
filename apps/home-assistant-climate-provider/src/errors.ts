@@ -12,6 +12,7 @@ export type ClimateReasonCode =
   | "HVAC_MODE_NOT_ALLOWED"
   | "HVAC_MODE_NOT_SUPPORTED"
   | "TEMPERATURE_OUT_OF_RANGE"
+  | "REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED"
   | "TASK_IDENTITY_CONFLICT";
 
 export class ClimateProviderError extends Error {

@@ -114,7 +114,7 @@ describe("PMS control-plane API foundation", () => {
 });
 
 describe("Provider Package query API", () => {
-  it("lists the three production packages in stable order with safe qualification", async () => {
+  it("lists the four production packages in stable order with safe qualification", async () => {
     const app = createPmsApi({
       providerPackages: await loadProviderPackageQueryService(workspaceRoot()),
     });
@@ -126,6 +126,7 @@ describe("Provider Package query API", () => {
     expect(response.statusCode).toBe(200);
     expect(body.items.map(({ packageId }) => packageId)).toEqual([
       "builtin.home-assistant.climate",
+      "builtin.home-assistant.light",
       "builtin.isr.vehicle.npc-tank",
       "builtin.isr.vehicle.ugv",
     ]);

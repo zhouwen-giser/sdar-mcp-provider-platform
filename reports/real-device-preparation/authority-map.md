@@ -1,12 +1,12 @@
 # SMPP Home Assistant authority map
 
-| Concern                                                                                   | Authoritative component       | Required evidence                                                                                                |
-| ----------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Provider identity, package, config, desired deployment and audit                          | PMS                           | PMS API/application records and redacted audit/deployment output                                                 |
+| Concern                                                                                   | Authoritative component       | Required evidence                                                                                              |
+| ----------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Provider identity, package, config, desired deployment and audit                          | PMS                           | PMS API/application records and redacted audit/deployment output                                               |
 | Task acceptance, task state, command sequencing, scheduler, recovery and `/mcp`           | MCP Tasks Runtime             | Runtime readiness, `tools/list`, `tools/call`, authoritative `tasks/get`, notification and PostgreSQL evidence |
-| Home Assistant connection, resource allowlist, actual service call and state confirmation | Provider Adapter              | Adapter manifest, gRPC trace, persisted execution, HA REST/WebSocket observations                                |
-| Actual `climate.*` and `light.*` state                                                    | Home Assistant                | HA REST state and `state_changed` observations for only the configured resources                                 |
-| Catalog and Registry publication                                                          | PMS Catalog/Registry services | Catalog checksum/revision and redacted Registry Snapshot; no secret or internal HA entity identifier             |
+| Home Assistant connection, resource allowlist, actual service call and state confirmation | Provider Adapter              | Adapter manifest, gRPC trace, persisted execution, HA REST/WebSocket observations                              |
+| Actual `climate.*` and `light.*` state                                                    | Home Assistant                | HA REST state and `state_changed` observations for only the configured resources                               |
+| Catalog and Registry publication                                                          | PMS Catalog/Registry services | Catalog checksum/revision and redacted Registry Snapshot; no secret or internal HA entity identifier           |
 
 ## Non-negotiable boundaries
 

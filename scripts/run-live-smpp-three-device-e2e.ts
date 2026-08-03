@@ -9,6 +9,7 @@ const API_BASE_URL = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const RUN_ID = process.env.REAL_DEVICE_TEST_RUN_ID?.trim() ?? "";
 const WRITE_GATE = process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" && RUN_ID.length > 0;
 const MANAGEMENT_TOKEN_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token");
+const LOCAL_RESOURCES_FILE = resolve(ROOT, ".local/ha-real-device/resources.local.json");
 const REPORT_DIRECTORY = resolve(ROOT, "reports/real-device-preparation-continuation");
 const REPORT_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.json");
 const MARKDOWN_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.md");
@@ -42,6 +43,12 @@ interface StateRecord {
   readonly observationId: unknown;
 }
 
+interface ClimateConfiguration {
+  readonly allowedHvacModes: readonly string[];
+  readonly minimumTemperature: number;
+  readonly maximumTemperature: number;
+}
+
 const integrationRunId = RUN_ID || `smpp-three-device-${randomUUID()}`;
 const report: JsonObject = {
   evidenceClass: "real",
@@ -56,7 +63,12 @@ const report: JsonObject = {
     runIdPresent: RUN_ID.length > 0,
     writeGateOpen: WRITE_GATE,
     lightWriteBudgetPerResource: 2,
-    climatePowerWriteBudget: { on: 1, off: 1 },
+    climateWriteBudget: {
+      climateHvacMode: 2,
+      climateTemperature: 2,
+      climatePowerOn: 1,
+      climatePowerOff: 1,
+    },
     writesUsed: {},
   },
   registry: null,
@@ -93,6 +105,7 @@ try {
 
   const climateEndpoint = endpointFor(providers, "ha-climate-lab");
   const lightEndpoint = endpointFor(providers, "ha-light-lab");
+  const climateConfiguration = await loadClimateConfiguration();
   const initial = [
     await readState(climateEndpoint, "ha-climate-lab", CLIMATE_RESOURCE, 10),
     ...(await Promise.all(
@@ -110,15 +123,17 @@ try {
 
   const climate = initial[0];
   if (climate === undefined) throw new Error("CLIMATE_INITIAL_STATE_MISSING");
-  report.climateSafety = {
-    status: climate.power === "off" ? "MANUAL_SAFETY_BLOCK" : "not_executed",
-    original: redactState(climate),
-    current: redactState(climate),
-    reason:
-      climate.power === "off"
-        ? "Climate write skipped: changing HVAC mode may change power state and the inverse operation is protected by the five-minute safety interval."
-        : "Climate write was not attempted by this light-focused controlled run.",
-  };
+  const climateQualification = await qualifyClimate(
+    climateEndpoint,
+    climate,
+    climateConfiguration,
+    `${integrationRunId}:climate`,
+    50,
+  );
+  report.climateSafety = climateQualification;
+  if (climateQualification.status !== "passed") {
+    throw new Error("CLIMATE_LIVE_QUALIFICATION_FAILED");
+  }
 
   const lightRestorations: JsonObject[] = [];
   for (const [index, resourceId] of LIGHT_RESOURCES.entries()) {
@@ -134,7 +149,7 @@ try {
       ),
     );
   }
-  report.stateRestoration = lightRestorations;
+  report.stateRestoration = [climateQualification.restoration, ...lightRestorations];
 
   const finalStates = [
     await readState(climateEndpoint, "ha-climate-lab", CLIMATE_RESOURCE, 300),
@@ -146,10 +161,12 @@ try {
   ];
   report.finalStates = finalStates.map(redactState);
   report.runtimeTaskCounts = await runtimeTaskCounts();
-  const lightsRestored = lightRestorations.every((item) => item.status === "restored");
+  const resourcesRestored = (report.stateRestoration as unknown[]).every(
+    (item) => isObject(item) && item.status === "restored",
+  );
   const noUncertain =
     report.runtimeTaskCounts !== null && (report.runtimeTaskCounts as JsonObject).uncertain === 0;
-  report.status = lightsRestored && noUncertain ? "blocked_climate_safety" : "blocked";
+  report.status = resourcesRestored && noUncertain ? "passed" : "blocked";
 } catch (error) {
   (report.errors as unknown[]).push(safeError(error));
   report.status = "blocked";
@@ -160,10 +177,8 @@ try {
   await writeFile(MARKDOWN_PATH, renderMarkdown(report), "utf8");
 }
 
-process.stdout.write(
-  `${report.status === "blocked_climate_safety" ? "BLOCKED_CLIMATE_SAFETY" : "BLOCKED"} Three-device MCP E2E\n`,
-);
-process.exitCode = 1;
+process.stdout.write(`${report.status === "passed" ? "PASS" : "BLOCKED"} Three-device MCP E2E\n`);
+process.exitCode = report.status === "passed" ? 0 : 1;
 
 async function readRegistry(token: string): Promise<{
   readonly body: JsonObject;
@@ -200,6 +215,360 @@ function endpointFor(providers: readonly RegistryProvider[], providerId: string)
     throw new Error(`RUNTIME_ENDPOINT_INVALID:${providerId}`);
   }
   return endpoint;
+}
+
+async function loadClimateConfiguration(): Promise<ClimateConfiguration> {
+  const value = JSON.parse(await readFile(LOCAL_RESOURCES_FILE, "utf8")) as JsonObject;
+  const climate = asObject(value.climate);
+  const range = asObject(climate?.temperatureRange);
+  const allowed = climate?.allowedHvacModes;
+  if (
+    !Array.isArray(allowed) ||
+    !allowed.every((mode): mode is string => typeof mode === "string") ||
+    typeof range?.minimum !== "number" ||
+    typeof range.maximum !== "number"
+  ) {
+    throw new Error("LOCAL_CLIMATE_CONFIGURATION_INVALID");
+  }
+  return {
+    allowedHvacModes: allowed,
+    minimumTemperature: range.minimum,
+    maximumTemperature: range.maximum,
+  };
+}
+
+async function qualifyClimate(
+  endpoint: string,
+  original: StateRecord,
+  configuration: ClimateConfiguration,
+  key: string,
+  requestId: number,
+): Promise<JsonObject> {
+  const restoration: JsonObject = {
+    providerId: "ha-climate-lab",
+    resourceId: CLIMATE_RESOURCE,
+    status: "manual_restore_required",
+    original: redactState(original),
+    currentBeforeRestore: null,
+    currentAfterRestore: null,
+    manualRestoreRequired: false,
+    writesUsed: {},
+    waits: [],
+    idempotency: null,
+  };
+  if (original.power !== "on" && original.power !== "off") {
+    restoration.reason = "CLIMATE_INITIAL_POWER_UNSAFE";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+  if (original.reachable !== true || typeof original.hvacMode !== "string") {
+    restoration.reason = "CLIMATE_INITIAL_STATE_UNSAFE";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+
+  const desiredMode = chooseClimateMode(configuration.allowedHvacModes, original.hvacMode);
+  const desiredTemperature = chooseClimateTemperature(
+    original.targetTemperature,
+    configuration.minimumTemperature,
+    configuration.maximumTemperature,
+  );
+  const beforeMode = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId);
+  const modeTask = await runTask(
+    endpoint,
+    "ha-climate-lab",
+    "climate_set_hvac_mode",
+    CLIMATE_RESOURCE,
+    { hvacMode: desiredMode },
+    `${key}:mode`,
+    requestId + 1,
+  );
+  (report.scenarios as unknown[]).push({
+    providerId: "ha-climate-lab",
+    resourceId: CLIMATE_RESOURCE,
+    operation: "climate_set_hvac_mode",
+    before: redactState(beforeMode),
+    desired: { hvacMode: desiredMode },
+    ...modeTask,
+  });
+  if (modeTask.status !== "completed") {
+    restoration.reason = "CLIMATE_MODE_CONFIRMATION_FAILED";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+  incrementClimateWrite("climateHvacMode", restoration);
+  const afterMode = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 2);
+  const modeScenario = lastScenario();
+  if (isObject(modeScenario)) modeScenario.after = redactState(afterMode);
+  if (afterMode.hvacMode !== desiredMode) {
+    restoration.reason = "CLIMATE_MODE_STATE_MISMATCH";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+
+  const duplicate = await callTool(
+    endpoint,
+    "ha-climate-lab",
+    "climate_set_hvac_mode",
+    CLIMATE_RESOURCE,
+    { hvacMode: desiredMode },
+    `${key}:mode`,
+    requestId + 3,
+  );
+  const duplicateResult = asObject(duplicate.body.result);
+  const conflictMode = chooseDifferentClimateMode(configuration.allowedHvacModes, desiredMode);
+  const conflict = await callTool(
+    endpoint,
+    "ha-climate-lab",
+    "climate_set_hvac_mode",
+    CLIMATE_RESOURCE,
+    { hvacMode: conflictMode },
+    `${key}:mode`,
+    requestId + 4,
+  );
+  if (isObject(modeScenario)) {
+    modeScenario.idempotency = {
+      sameArgumentsSameTask:
+        duplicateResult?.resultType === "task" && duplicateResult.taskId === modeTask.runtimeTaskId,
+      duplicateRuntimeTaskId: duplicateResult?.taskId ?? null,
+      sameKeyDifferentArgumentsRejected:
+        conflict.status >= 400 ||
+        conflict.body.error !== undefined ||
+        asObject(conflict.body.result)?.isError === true,
+      duplicateHttpStatus: duplicate.status,
+      conflictHttpStatus: conflict.status,
+    };
+  }
+
+  const beforeTemperature = await readState(
+    endpoint,
+    "ha-climate-lab",
+    CLIMATE_RESOURCE,
+    requestId + 5,
+  );
+  const temperatureTask = await runTask(
+    endpoint,
+    "ha-climate-lab",
+    "climate_set_temperature",
+    CLIMATE_RESOURCE,
+    { targetTemperature: desiredTemperature },
+    `${key}:temperature`,
+    requestId + 6,
+  );
+  (report.scenarios as unknown[]).push({
+    providerId: "ha-climate-lab",
+    resourceId: CLIMATE_RESOURCE,
+    operation: "climate_set_temperature",
+    before: redactState(beforeTemperature),
+    desired: { targetTemperature: desiredTemperature },
+    ...temperatureTask,
+  });
+  if (temperatureTask.status !== "completed") {
+    restoration.reason = "CLIMATE_TEMPERATURE_CONFIRMATION_FAILED";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+  incrementClimateWrite("climateTemperature", restoration);
+  const afterTemperature = await readState(
+    endpoint,
+    "ha-climate-lab",
+    CLIMATE_RESOURCE,
+    requestId + 7,
+  );
+  const temperatureScenario = lastScenario();
+  if (isObject(temperatureScenario)) temperatureScenario.after = redactState(afterTemperature);
+  if (afterTemperature.targetTemperature !== desiredTemperature) {
+    restoration.reason = "CLIMATE_TEMPERATURE_STATE_MISMATCH";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+
+  let current = afterTemperature;
+  if (
+    typeof original.targetTemperature === "number" &&
+    current.targetTemperature !== original.targetTemperature
+  ) {
+    const beforeRestoreTemperature = await readState(
+      endpoint,
+      "ha-climate-lab",
+      CLIMATE_RESOURCE,
+      requestId + 8,
+    );
+    const restoreTemperature = await runTask(
+      endpoint,
+      "ha-climate-lab",
+      "climate_set_temperature",
+      CLIMATE_RESOURCE,
+      { targetTemperature: original.targetTemperature },
+      `${key}:restore-temperature`,
+      requestId + 9,
+    );
+    (report.scenarios as unknown[]).push({
+      providerId: "ha-climate-lab",
+      resourceId: CLIMATE_RESOURCE,
+      operation: "climate_set_temperature.restore",
+      before: redactState(beforeRestoreTemperature),
+      desired: { targetTemperature: original.targetTemperature },
+      ...restoreTemperature,
+    });
+    if (restoreTemperature.status !== "completed") {
+      restoration.reason = "CLIMATE_TEMPERATURE_RESTORE_FAILED";
+      restoration.manualRestoreRequired = true;
+      return { status: "blocked", restoration };
+    }
+    incrementClimateWrite("climateTemperature", restoration);
+    current = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 10);
+  }
+
+  const modeRequiresRestore =
+    current.hvacMode !== original.hvacMode &&
+    !(original.power === "off" && original.hvacMode === "off");
+  if (modeRequiresRestore) {
+    const beforeRestoreMode = await readState(
+      endpoint,
+      "ha-climate-lab",
+      CLIMATE_RESOURCE,
+      requestId + 11,
+    );
+    const restoreMode = await runTask(
+      endpoint,
+      "ha-climate-lab",
+      "climate_set_hvac_mode",
+      CLIMATE_RESOURCE,
+      { hvacMode: original.hvacMode },
+      `${key}:restore-mode`,
+      requestId + 12,
+    );
+    (report.scenarios as unknown[]).push({
+      providerId: "ha-climate-lab",
+      resourceId: CLIMATE_RESOURCE,
+      operation: "climate_set_hvac_mode.restore",
+      before: redactState(beforeRestoreMode),
+      desired: { hvacMode: original.hvacMode },
+      ...restoreMode,
+    });
+    if (restoreMode.status !== "completed") {
+      restoration.reason = "CLIMATE_MODE_RESTORE_FAILED";
+      restoration.manualRestoreRequired = true;
+      return { status: "blocked", restoration };
+    }
+    incrementClimateWrite("climateHvacMode", restoration);
+    current = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 13);
+  }
+
+  restoration.currentBeforeRestore = redactState(current);
+  if (current.power !== original.power) {
+    if (original.power !== "off" || current.power !== "on") {
+      restoration.reason = "CLIMATE_POWER_STATE_MISMATCH";
+      restoration.manualRestoreRequired = true;
+      return { status: "blocked", restoration };
+    }
+    const waitMs = safetyWaitMs(current.observedAt);
+    if (waitMs > 0) {
+      (restoration.waits as unknown[]).push({
+        safetyIntervalMs: 300_000,
+        waitedMs: waitMs,
+        reason: "opposite climate power operation",
+      });
+      await delay(waitMs);
+    }
+    const beforeRestorePower = await readState(
+      endpoint,
+      "ha-climate-lab",
+      CLIMATE_RESOURCE,
+      requestId + 14,
+    );
+    if (beforeRestorePower.power === "on") {
+      const restorePower = await runTask(
+        endpoint,
+        "ha-climate-lab",
+        "climate_set_power",
+        CLIMATE_RESOURCE,
+        { power: "off" },
+        `${key}:restore-power-off`,
+        requestId + 15,
+      );
+      (report.scenarios as unknown[]).push({
+        providerId: "ha-climate-lab",
+        resourceId: CLIMATE_RESOURCE,
+        operation: "climate_set_power.restore",
+        before: redactState(beforeRestorePower),
+        desired: { power: "off" },
+        ...restorePower,
+      });
+      if (restorePower.status !== "completed") {
+        restoration.reason = "CLIMATE_POWER_RESTORE_FAILED";
+        restoration.manualRestoreRequired = true;
+        return { status: "blocked", restoration };
+      }
+      incrementClimateWrite("climatePowerOff", restoration);
+    }
+  }
+
+  const final = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 16);
+  restoration.currentAfterRestore = redactState(final);
+  const restored =
+    final.power === original.power &&
+    final.hvacMode === original.hvacMode &&
+    final.targetTemperature === original.targetTemperature;
+  restoration.status = restored ? "restored" : "manual_restore_required";
+  restoration.manualRestoreRequired = !restored;
+  if (!restored) restoration.reason = "CLIMATE_RESTORE_STATE_MISMATCH";
+  return { status: restored ? "passed" : "blocked", restoration };
+}
+
+function lastScenario(): JsonObject | undefined {
+  const scenarios = report.scenarios as unknown[];
+  const value = scenarios.at(-1);
+  return isObject(value) ? value : undefined;
+}
+
+function incrementClimateWrite(kind: string, restoration: JsonObject): void {
+  const gate = asObject(report.safetyGate);
+  const writes = gate?.writesUsed;
+  const budget = gate?.climateWriteBudget;
+  if (!isObject(writes) || !isObject(budget)) throw new Error("SAFETY_BUDGET_STATE_INVALID");
+  const used = typeof writes[kind] === "number" ? writes[kind] : 0;
+  const maximum = typeof budget[kind] === "number" ? budget[kind] : 0;
+  if (used >= maximum) throw new Error(`CLIMATE_WRITE_BUDGET_EXCEEDED:${kind}`);
+  writes[kind] = used + 1;
+  const restorationWrites = asObject(restoration.writesUsed);
+  if (restorationWrites === undefined) throw new Error("SAFETY_RESTORATION_STATE_INVALID");
+  restorationWrites[kind] =
+    (typeof restorationWrites[kind] === "number" ? restorationWrites[kind] : 0) + 1;
+}
+
+function chooseClimateMode(allowed: readonly string[], current: string): string {
+  const preferred = ["cool", "heat", "dry", "fan_only", "auto"];
+  const selected = preferred.find((mode) => allowed.includes(mode) && mode !== current);
+  if (selected === undefined) throw new Error("NO_SAFE_HVAC_MODE_CHANGE");
+  return selected;
+}
+
+function chooseDifferentClimateMode(allowed: readonly string[], current: string): string {
+  const selected = allowed.find((mode) => mode !== current && mode !== "off");
+  if (selected === undefined) throw new Error("NO_HVAC_CONFLICT_MODE");
+  return selected;
+}
+
+function chooseClimateTemperature(current: unknown, minimum: number, maximum: number): number {
+  const candidate =
+    typeof current === "number" && current + 1 <= maximum
+      ? current + 1
+      : typeof current === "number" && current - 1 >= minimum
+        ? current - 1
+        : minimum;
+  if (candidate < minimum || candidate > maximum || candidate === current) {
+    throw new Error("NO_SAFE_TEMPERATURE_CHANGE");
+  }
+  return candidate;
+}
+
+function safetyWaitMs(observedAt: unknown): number {
+  if (typeof observedAt !== "string") return 300_000;
+  const observed = Date.parse(observedAt);
+  if (!Number.isFinite(observed)) return 300_000;
+  return Math.max(0, 300_000 - (Date.now() - observed));
 }
 
 async function qualifyLight(

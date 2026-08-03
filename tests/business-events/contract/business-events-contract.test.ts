@@ -39,7 +39,7 @@ describe("Business Events Profile 1.0 contract catalog", () => {
     expect(entry.status).toBe("required");
     switch (entry.category) {
       case "requirements-lock":
-        expect(sha256(readFileSync(requirementsPath))).toBe(
+        expect(sha256Requirements(requirementsPath)).toBe(
           "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f",
         );
         break;
@@ -101,4 +101,8 @@ describe("Business Events Profile 1.0 contract catalog", () => {
 
 function sha256(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function sha256Requirements(path: string): string {
+  return sha256(Buffer.from(readFileSync(path, "utf8").replaceAll("\r\n", "\n"), "utf8"));
 }

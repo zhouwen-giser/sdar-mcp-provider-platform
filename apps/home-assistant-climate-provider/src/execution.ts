@@ -24,6 +24,7 @@ export class ClimateExecutionEngine {
     readonly rest: HomeAssistantClimateClient,
     readonly telemetry: ClimateTelemetry,
     readonly confirmMs: number,
+    readonly sideEffectsEnabled: boolean,
   ) {}
   async start(input: StartClimateInput): Promise<ClimateExecution> {
     const existing = this.store.get(input.taskId);
@@ -31,6 +32,8 @@ export class ClimateExecutionEngine {
       if (!same(existing, input)) throw new ClimateProviderError("TASK_IDENTITY_CONFLICT", false);
       return existing;
     }
+    if (!this.sideEffectsEnabled)
+      throw new ClimateProviderError("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED", false);
     const resource = this.registry.require(input.resourceId);
     const observed = normalizeClimateState(
       resource.resourceId,

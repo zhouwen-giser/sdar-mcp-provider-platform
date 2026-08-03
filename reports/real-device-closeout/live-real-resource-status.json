@@ -1,0 +1,74 @@
+{
+  "evidenceClass": "real",
+  "status": "passed",
+  "environment": "home-lab",
+  "preflight": {
+    "status": "passed",
+    "completedAt": "2026-08-03T22:30:29.387Z",
+    "resourceCount": 3,
+    "allReachable": true,
+    "websocketStateChangedSubscribed": false,
+    "restWebSocketConsistent": true
+  },
+  "registry": {
+    "status": "passed",
+    "revision": 3,
+    "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+    "providerCount": 2,
+    "latestBootstrapSameChecksum": true,
+    "historyMonotonic": true,
+    "noSecrets": true,
+    "noEntityIds": true
+  },
+  "threeDeviceRun": {
+    "status": "passed",
+    "integrationRunId": "smpp-live-three-device-closeout-20260804-0345",
+    "completedAt": "2026-08-03T19:44:55.189Z",
+    "resources": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
+    "allRestored": true,
+    "activeTasks": 0,
+    "uncertainTasks": 0,
+    "climateSafety": "passed",
+    "writesUsed": {
+      "climateHvacMode": 1,
+      "climateTemperature": 2,
+      "living-room-main-light": 2,
+      "living-room-aux-light": 2
+    }
+  },
+  "qualifiedOperations": {
+    "climate_get_state": "real_pass",
+    "climate_set_hvac_mode": "real_pass_time_scoped",
+    "climate_set_temperature": "real_pass_time_scoped",
+    "climate_set_power": "real_pass_off_restore_only",
+    "light_get_state": "real_pass_time_scoped",
+    "light_set_power": "real_pass_time_scoped",
+    "light_set_brightness": "unverified_optional"
+  },
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp",
+      "catalogRevision": 1,
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp",
+      "catalogRevision": 1,
+      "tools": ["light_get_state", "light_set_power", "light_set_brightness"]
+    }
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

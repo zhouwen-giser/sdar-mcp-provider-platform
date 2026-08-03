@@ -25,6 +25,10 @@ const rest = new HomeAssistantClimateClient({
   timeoutMs: config.HOME_ASSISTANT_REQUEST_TIMEOUT_MS,
 });
 const store = new JsonClimateStore(config.PROVIDER_STATE_PATH);
+const sideEffectsEnabled =
+  process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" &&
+  typeof process.env.REAL_DEVICE_TEST_RUN_ID === "string" &&
+  process.env.REAL_DEVICE_TEST_RUN_ID.trim().length > 0;
 const telemetry = new ProviderClimateTelemetry(
   {
     providerId: config.PROVIDER_ID,
@@ -50,6 +54,7 @@ const engine = new ClimateExecutionEngine(
   rest,
   telemetry,
   config.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS,
+  sideEffectsEnabled,
 );
 const websocket = new HomeAssistantClimateWebSocket({
   baseUrl: config.HOME_ASSISTANT_URL,

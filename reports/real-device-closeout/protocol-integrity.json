@@ -1,0 +1,10 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "frozenContract": "passed",
+  "pinnedSchema": "passed",
+  "frozenCases": "74/74",
+  "protocolLock": "38/38",
+  "adapterProtoChanged": false,
+  "tasksResultUsedByLiveRunner": false
+}

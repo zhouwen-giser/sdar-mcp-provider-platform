@@ -14,8 +14,9 @@ describe("Business Events migration 023", () => {
     const applied = await harness.pool.query<{ version: string }>(
       "SELECT version FROM runtime_schema_migration ORDER BY version",
     );
-    expect(applied.rows).toHaveLength(24);
-    expect(applied.rows.at(-1)?.version).toBe("023_business_events_profile_v1.sql");
+    expect(applied.rows).toHaveLength(25);
+    expect(applied.rows.at(-2)?.version).toBe("023_business_events_profile_v1.sql");
+    expect(applied.rows.at(-1)?.version).toBe("024_accepted_task_substate.sql");
     expect(
       readdirSync(resolve("migrations/runtime")).filter((name) => name.startsWith("023_")),
     ).toEqual(["023_business_events_profile_v1.sql"]);

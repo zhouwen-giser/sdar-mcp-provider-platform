@@ -1,11 +1,11 @@
 {
   "evidenceClass": "real",
   "phase": "C6_REGISTRY_ENDPOINT_REAL_E2E",
-  "integrationRunId": "smpp-registry-e2e-5c2b9ab6-3420-40a5-8de3-89adfe52758c",
+  "integrationRunId": "smpp-registry-e2e-6b93336e-2f11-4638-80f0-d8b75fb3c7a7",
   "environment": "home-lab",
-  "startedAt": "2026-08-03T04:36:00.309Z",
-  "completedAt": "2026-08-03T04:36:01.158Z",
-  "status": "blocked_resource_unavailable",
+  "startedAt": "2026-08-03T19:46:02.768Z",
+  "completedAt": "2026-08-03T19:46:03.555Z",
+  "status": "passed",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
     "registry": {
@@ -82,7 +82,7 @@
         "targetTemperature": 23,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:22.258701+00:00"
+        "observedAt": "2026-08-03T19:44:29.157337+00:00"
       },
       "status": 200
     },
@@ -100,7 +100,7 @@
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:17.442515+00:00"
+        "observedAt": "2026-08-03T19:44:40.414404+00:00"
       },
       "status": 200
     },
@@ -112,27 +112,27 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "unavailable",
-        "reachable": false,
+        "power": "off",
+        "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T04:34:16.325781+00:00"
+        "observedAt": "2026-08-03T19:44:49.616898+00:00"
       },
       "status": 200
     }
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "errors": ["HOME_ASSISTANT_RESOURCE_UNAVAILABLE"],
+  "errors": [],
   "protocolQualification": {
     "status": "passed",
     "requiredMethods": ["server/discover", "tools/list", "tools/call"],
     "initialize": "not_applicable_to_frozen_runtime_surface"
   },
   "sourceReport": "registry-backed-e2e.json",
-  "functionalGate": false,
+  "functionalGate": true,
   "noSecrets": true,
   "noEntityIds": true
 }

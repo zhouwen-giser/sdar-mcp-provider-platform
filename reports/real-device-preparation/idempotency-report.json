@@ -31,7 +31,8 @@
     {
       "scenario": "client timeout then retry",
       "evidenceClass": "unverified",
-      "status": "unverified"
+      "status": "unverified",
+      "reason": "Not induced against a real device after the bounded qualification run."
     },
     {
       "scenario": "Runtime duplicate tools/call after accepted Task",
@@ -41,7 +42,8 @@
     {
       "scenario": "Adapter restart during Task",
       "evidenceClass": "unverified",
-      "status": "unverified"
+      "status": "unverified",
+      "reason": "In-flight restart was not induced against a real device."
     },
     {
       "scenario": "corrupted Provider state file fails closed",
@@ -53,6 +55,7 @@
   "uncertainTasks": 0,
   "blockers": [
     "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
-    "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT"
+    "CLIENT_TIMEOUT_RETRY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED"
   ]
 }

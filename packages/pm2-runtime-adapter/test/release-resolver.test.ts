@@ -58,7 +58,7 @@ describe("RuntimeReleaseResolver", () => {
     await rm(resolve(root, CURRENT_RUNTIME_VERSION), { recursive: true });
     const outside = await mkdtemp(resolve(tmpdir(), "sdar-release-outside-"));
     temporaryRoots.push(outside);
-    await symlink(outside, resolve(root, CURRENT_RUNTIME_VERSION));
+    await createSecurityLink(outside, resolve(root, CURRENT_RUNTIME_VERSION));
     await expect(
       new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
         CURRENT_RUNTIME_VERSION,
@@ -119,5 +119,19 @@ describe("RuntimeReleaseResolver", () => {
     await writeFile(entry, "export {};\n", { mode });
     await chmod(entry, mode);
     return root;
+  }
+
+  async function createSecurityLink(target: string, link: string): Promise<void> {
+    try {
+      await symlink(target, link);
+    } catch (error) {
+      const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+      if (process.platform !== "win32" || !["EACCES", "EPERM", "EPROTO"].includes(code ?? "")) {
+        throw error;
+      }
+      const junctionTarget = await mkdtemp(resolve(tmpdir(), "sdar-release-junction-"));
+      temporaryRoots.push(junctionTarget);
+      await symlink(junctionTarget, link, "junction");
+    }
   }
 });

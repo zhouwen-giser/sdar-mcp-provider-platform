@@ -1,34 +1,28 @@
 {
   "evidenceClass": "real",
-  "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
   "status": "partial",
-  "environment": "home-lab",
-  "observedAt": "2026-08-03T01:22:36Z",
+  "observedAt": "2026-08-03T19:44:55.189Z",
   "checks": [
     {
       "scenario": "Light Adapter stopped after completed device tasks",
       "evidenceClass": "real",
       "status": "passed",
       "providerId": "ha-light-lab",
-      "runtimeReadinessDuringOutage": "not_ready",
-      "failureEvidence": "Runtime health logs recorded adapter gRPC ECONNREFUSED and readiness returned HTTP 503."
-    },
-    {
-      "scenario": "Light Adapter restart and Runtime recovery",
-      "evidenceClass": "real",
-      "status": "passed_after_runtime_restart",
-      "providerId": "ha-light-lab",
-      "adapterDescribeProvider": "passed",
-      "runtimeReadinessAfterExactRuntimeRestart": "ready",
-      "activeTasks": 0,
-      "uncertainTasks": 0,
+      "runtimeReadinessDuringOutage": "not_ready_or_connection_error_observed",
       "sideEffectReplay": "none"
     },
     {
-      "scenario": "Adapter reconnect without Runtime restart",
+      "scenario": "Idle Adapter restart and reconnect without Runtime restart",
       "evidenceClass": "real",
-      "status": "blocked",
-      "reason": "The existing Runtime gRPC gateway continued to report ECONNREFUSED after the Adapter was back; an exact Light Runtime restart was required."
+      "status": "passed",
+      "providerId": "ha-light-lab",
+      "adapterDescribeProvider": "passed",
+      "runtimeRestartPerformed": false,
+      "runtimeReadinessAfterAdapterRestart": "ready",
+      "postRestartReadTask": "passed",
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "sideEffectReplay": "none"
     },
     {
       "scenario": "Adapter restart during an in-flight real Task",
@@ -46,18 +40,19 @@
       "status": "unverified"
     },
     {
-      "scenario": "Home Assistant Xiaomi integration reload and local service restart",
+      "scenario": "Home Assistant Entity unavailable or REST 200 without target state",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "deviceWriteAttempted": false
+    },
+    {
+      "scenario": "Latest read-only Home Assistant preflight after live qualification",
       "evidenceClass": "real",
-      "status": "partial_auxiliary_still_unavailable",
-      "reloadConfigEntry": "succeeded",
-      "homeAssistantRestart": "completed",
-      "climateAndMainLightReadableAfterRestart": true,
-      "auxiliaryLightReachableAfterRestart": false,
+      "status": "passed",
+      "sourceReport": "../real-device-preparation/ha-preflight.json",
+      "allConfiguredResourcesReachable": true,
       "deviceWriteAttempted": false
     }
   ],
-  "blockers": [
-    "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
-    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED"
-  ]
+  "safety": "No unverified recovery scenario triggered a device write; the bounded live run restored all three configured resources and left zero active or uncertain tasks."
 }

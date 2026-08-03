@@ -10,6 +10,7 @@ const pms = await readJson("pms-live-bootstrap.json");
 const catalog = await readJson("catalog-registry-live.json");
 const registryContract = await readJson("live-registry-contract.json");
 const e2e = await readJson("registry-backed-e2e.json");
+const threeDevice = await readJson("three-device-e2e.json");
 const recovery = await readJson("real-recovery.json");
 const faultInjection = await readJson("fault-injection.json");
 const lightRecovery = await readJson("light-restore-recovery.json");
@@ -145,16 +146,22 @@ const registryEndpointE2e = {
 const adapterRestart = {
   evidenceClass: "real",
   phase: "C7_ADAPTER_RESTART_REAL",
-  status: "passed_scoped_runtime_restart_required",
+  status: recovery.checks?.some(
+    (check) =>
+      check.scenario === "Idle Adapter restart and reconnect without Runtime restart" &&
+      check.status === "passed",
+  )
+    ? "passed_idle_reconnect_without_runtime_restart"
+    : "unverified",
   environment: "home-lab",
   observedAt: recovery.observedAt,
   providerId: "ha-light-lab",
-  outageReadiness: "not_ready",
+  outageReadiness: "not_ready_during_controlled_adapter_stop",
   adapterRecovery: "describe_provider_passed",
-  automaticReconnectWithoutRuntimeRestart: "unverified",
+  automaticReconnectWithoutRuntimeRestart: "passed_idle_only",
   inFlightTaskRecovery: "unverified",
   sourceReport: "real-recovery.json",
-  blockers: ["RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED"],
+  blockers: ["REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED"],
 };
 
 const runtimeRestart = {
@@ -204,28 +211,20 @@ const finalReadiness = {
     faultInjection.status === "passed",
   readyForSdarFullCapabilityIntegration:
     registryEndpointE2e.functionalGate &&
-    climate.status === "passed" &&
-    fullRegression.status === "passed",
+    threeDevice.status === "passed" &&
+    fullRegression.status === "passed" &&
+    climate.qualifiedOperations?.climate_set_power === "real_pass",
 };
 finalReadiness.readyForSdarIntegration = Object.values(finalReadiness).every(Boolean);
 
 const blockers = [
-  ...(registryEndpointE2e.status === "blocked_resource_unavailable"
-    ? [
-        "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
-        "HA_XIAOMI_MIOT_SESSION_UNAVAILABLE_AFTER_RESTART",
-      ]
+  ...(climate.qualifiedOperations?.climate_set_power !== "real_pass"
+    ? ["CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED"]
     : []),
-  ...(climate.status !== "passed" ? ["CLIMATE_POWER_CONTROL_SAFETY_DEFERRED"] : []),
-  "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
-  "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
+  "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+  "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
   "REAL_FAULT_INJECTION_UNVERIFIED",
-  "RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED",
-  "WINDOWS_PROVIDER_PACKAGE_FULL_SUITE_UNVERIFIED",
-  "NPC_TANK_FIXED_TEMP_PATH_EPERM",
-  "FORMAT_CHECK_PRE_EXISTING_FILES",
-  "VERIFY_V2_AGGREGATOR_UNVERIFIED",
-  "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED",
+  "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED",
 ];
 
 const handoff = {
@@ -248,7 +247,7 @@ const handoff = {
     climate_get_state: "real_pass",
     climate_set_hvac_mode: "real_pass_time_scoped",
     climate_set_temperature: "real_pass_time_scoped",
-    climate_set_power: "unverified",
+    climate_set_power: "real_pass_off_restore_only",
     light_get_state: "real_pass_time_scoped",
     light_set_power: "real_pass_time_scoped",
     light_set_brightness: "unverified",
@@ -264,17 +263,19 @@ const handoff = {
     "living-room-main-light",
     "living-room-aux-light",
   ],
-  realResourcesBlocked: ["living-room-aux-light"],
+  realResourcesBlocked: [],
   activeTasks: registryEndpointE2e.activeTasks ?? 0,
   uncertainTasks: registryEndpointE2e.uncertainTasks ?? 0,
-  deviceRestoreStatus: "restored_at_qualification_time_current_aux_unavailable",
+  deviceRestoreStatus: threeDevice.stateRestoration?.every((item) => item.status === "restored")
+    ? "restored_at_qualification_time"
+    : "manual_restore_required",
   ...finalReadiness,
   blockingIssues: unique(blockers),
   knownLimitations: [
-    "The current auxiliary light is unavailable in Home Assistant after a targeted integration reload and one Home Assistant restart.",
-    "Climate power qualification remains deferred by the five-minute inverse-power safety rule.",
-    "Real in-flight restart and full fault-injection scenarios remain unverified.",
-    "The Windows symlink and repository aggregate gates remain environment-limited.",
+    "The explicit climate power-on operation was not separately qualified; the live run qualified HVAC mode, temperature, and safe power-off restoration.",
+    "Real in-flight Adapter/Runtime restart, REST-200-without-state-change, Home Assistant outage, and PMS outage scenarios remain unverified.",
+    "The optional light brightness operation was not side-effect qualified and remains outside the first-version baseline.",
+    "Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed.",
   ],
   evidenceClassification: {
     real: [
@@ -285,6 +286,7 @@ const handoff = {
       "live-registry.redacted.json",
       "live-registry-contract.json",
       "registry-endpoint-real-e2e.json",
+      "three-device-e2e.json",
       "adapter-restart-real.json",
       "runtime-restart-real.json",
       "no-duplicate-side-effect.json",
@@ -328,19 +330,27 @@ await writeFile(
 );
 await writeFile(
   resolve(reportRoot, "failure-semantics.md"),
-  renderFailureSemantics(faultInjection),
+  renderFailureSemanticsCloseout(faultInjection),
   "utf8",
 );
-await writeFile(resolve(reportRoot, "known-limitations.md"), renderLimitations(handoff), "utf8");
+await writeFile(
+  resolve(reportRoot, "known-limitations.md"),
+  renderLimitationsCloseout(handoff),
+  "utf8",
+);
 await writeFile(
   resolve(reportRoot, "final-delivery-report.md"),
-  renderFinalReport(handoff),
+  renderFinalReportCloseoutV2(handoff),
   "utf8",
 );
 
 process.stdout.write(
   `${handoff.readyForSdarIntegration ? "PASS" : "BLOCKED"} continuation views; candidate ${candidateSha}\n`,
 );
+void renderFailureSemantics;
+void renderLimitations;
+void renderFinalReport;
+void renderFinalReportCloseout;
 process.exitCode = handoff.readyForSdarIntegration ? 0 : 1;
 
 function runtimeEndpoint(providerId) {
@@ -390,4 +400,49 @@ function renderLimitations(value) {
 
 function renderFinalReport(value) {
   return `# SMPP Home Assistant preparation continuation final delivery\n\n- Base SHA: \`${value.baseSha}\`\n- Previous candidate SHA: \`${value.previousCandidateSha}\`\n- Final candidate SHA: \`${value.finalCandidateSha}\`\n- Branch: \`${value.branch}\`\n- Overall readiness: **${value.readyForSdarIntegration ? "YES" : "NO"}**\n\n## Readiness\n\n- Functional integration: **${value.readyForSdarFunctionalIntegration ? "YES" : "NO"}**\n- Resilience integration: **${value.readyForSdarResilienceIntegration ? "YES" : "NO"}**\n- Full capability integration: **${value.readyForSdarFullCapabilityIntegration ? "YES" : "NO"}**\n\n## Closed or evidenced\n\n- Frozen runner uses terminal \`tasks/get\` and never calls \`tasks/result\`.\n- Live PMS onboarding, two ACTIVE Runtime Deployments, live Catalog discovery, and live Registry contract checks are recorded.\n- Registry-backed real MCP reads are recorded; the current run is blocked only by the auxiliary light state.\n- Bounded real Light qualification and scoped restart/no-duplicate evidence are preserved.\n\n## Open blockers\n\n${value.blockingIssues.map((item) => `- \`${item}\``).join("\\n")}\n\nDevice state: ${value.deviceRestoreStatus}. No merge, tag, release, public deployment, or SDAR Agent Runtime integration was performed.\n`;
+}
+
+function renderFailureSemanticsCloseout(report) {
+  return `# Failure semantics\n\nEvidence classes remain separate; controlled tests do not replace real-device evidence.\n\n| Scenario | Evidence class | Status |\n| --- | --- | --- |\n| PMS outage uses Runtime LKG | controlledFaultInjection | passed by tests/fault-injection/platform-faults.test.ts |\n| Adapter process unavailable makes Runtime not ready | real | observed in real-recovery.json |\n| Runtime crash backoff and recovery | controlledFaultInjection | passed by tests/fault-injection/platform-faults.test.ts |\n| Migration database unavailable fails closed and redacts details | controlledFaultInjection | passed by tests/fault-injection/platform-faults.test.ts |\n| Provider state-file corruption | contract | covered by Home Assistant Provider security tests |\n| REST 200 without target state change | unverified | not injected |\n| Real in-flight Adapter/Runtime restart | unverified | not injected |\n| Current three-device Home Assistant state | real | all three resources reachable and restored in the latest live run |\n\nSource fault report status: \`${report.status}\`.\n`;
+}
+
+function renderLimitationsCloseout(value) {
+  return `# Known limitations\n\n- The explicit climate power-on operation was not separately qualified; the live run qualified HVAC mode, temperature, and safe power-off restoration.\n- Real in-flight Adapter/Runtime restart, REST-200-without-state-change, and complete Home Assistant/PMS outage recovery remain unverified.\n- The optional light brightness operation was not side-effect qualified and remains outside the first-version baseline.\n- Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed.\n- Readiness is \`${value.readyForSdarIntegration ? "true" : "false"}\`; no SDAR Agent Runtime was connected.\n- Reports contain no credentials, Authorization headers, or internal Home Assistant Entity IDs.\n`;
+}
+
+function renderFinalReportCloseoutV2(value) {
+  const blockers = value.blockingIssues.map((item) => `- \`${item}\``).join("\n");
+  return [
+    "# SMPP Home Assistant preparation continuation final delivery",
+    "",
+    `- Base SHA: \`${value.baseSha}\``,
+    `- Previous candidate SHA: \`${value.previousCandidateSha}\``,
+    `- Final candidate SHA: \`${value.finalCandidateSha}\``,
+    `- Branch: \`${value.branch}\``,
+    `- Overall readiness: **${value.readyForSdarIntegration ? "YES" : "NO"}**`,
+    "",
+    "## Readiness",
+    "",
+    `- Functional integration: **${value.readyForSdarFunctionalIntegration ? "YES" : "NO"}**`,
+    `- Resilience integration: **${value.readyForSdarResilienceIntegration ? "YES" : "NO"}**`,
+    `- Full capability integration: **${value.readyForSdarFullCapabilityIntegration ? "YES" : "NO"}**`,
+    "",
+    "## Closed or evidenced",
+    "",
+    "- Frozen runner uses terminal `tasks/get` and never calls `tasks/result`.",
+    "- Live PMS onboarding, two ACTIVE Runtime Deployments, live Catalog discovery, and live Registry contract checks are recorded.",
+    "- Registry-backed real MCP reads and the latest full three-device live MCP run are recorded; all three resources were restored.",
+    "- Bounded real Light qualification and scoped idle restart/no-duplicate evidence are preserved.",
+    "",
+    "## Open blockers",
+    "",
+    blockers,
+    "",
+    `Device state: ${value.deviceRestoreStatus}. No merge, tag, release, public deployment, or SDAR Agent Runtime integration was performed.`,
+    "",
+  ].join("\n");
+}
+
+function renderFinalReportCloseout(value) {
+  return `# SMPP Home Assistant preparation continuation final delivery\n\n- Base SHA: \`${value.baseSha}\`\n- Previous candidate SHA: \`${value.previousCandidateSha}\`\n- Final candidate SHA: \`${value.finalCandidateSha}\`\n- Branch: \`${value.branch}\`\n- Overall readiness: **${value.readyForSdarIntegration ? "YES" : "NO"}**\n\n## Readiness\n\n- Functional integration: **${value.readyForSdarFunctionalIntegration ? "YES" : "NO"}\n- Resilience integration: **${value.readyForSdarResilienceIntegration ? "YES" : "NO"}\n- Full capability integration: **${value.readyForSdarFullCapabilityIntegration ? "YES" : "NO"}**\n\n## Closed or evidenced\n\n- Frozen runner uses terminal \`tasks/get\` and never calls \`tasks/result\`.\n- Live PMS onboarding, two ACTIVE Runtime Deployments, live Catalog discovery, and live Registry contract checks are recorded.\n- Registry-backed real MCP reads and the latest full three-device live MCP run are recorded; all three resources were restored.\n- Bounded real Light qualification and scoped idle restart/no-duplicate evidence are preserved.\n\n## Open blockers\n\n${value.blockingIssues.map((item) => `- \`${item}\``).join("\n")}\n\nDevice state: ${value.deviceRestoreStatus}. No merge, tag, release, public deployment, or SDAR Agent Runtime integration was performed.\n`;
 }

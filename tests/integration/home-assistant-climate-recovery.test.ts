@@ -67,6 +67,7 @@ describe("Home Assistant climate recovery", () => {
         new HomeAssistantClimateClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
         new NoopClimateTelemetry(),
         2000,
+        true,
       );
       await engine.recover();
       expect(fake.serviceCalls).toHaveLength(1);

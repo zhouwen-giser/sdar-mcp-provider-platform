@@ -1,6 +1,6 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   JobLease,
@@ -42,7 +42,7 @@ describe("PMS Worker foundation", () => {
       databaseUrlFile: secretFile,
       workerId: "worker-1",
       pollIntervalMs: 25,
-      workspaceRoot: "/workspace",
+      workspaceRoot: resolve("/workspace"),
     });
     await expect(
       loadPmsWorkerConfig({

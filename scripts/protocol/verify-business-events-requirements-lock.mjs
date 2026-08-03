@@ -6,7 +6,8 @@ import process from "node:process";
 const filename = "SDAR_v1.2.2_Business_Events_Provider_Runtime_Requirements_V0.5.2.md";
 const expected = "a17ee1552bc5b516dabdcc24db2fe9fd2d3deaf74688eae51e2fdc0c6a24cc0f";
 const path = resolve("docs/requirements", filename);
-const actual = createHash("sha256").update(readFileSync(path)).digest("hex");
+const requirements = readFileSync(path, "utf8").replaceAll("\r\n", "\n");
+const actual = createHash("sha256").update(requirements, "utf8").digest("hex");
 if (actual !== expected) throw new Error(`BUSINESS_EVENTS_REQUIREMENTS_HASH_MISMATCH: ${actual}`);
 
 const lock = readFileSync(`${path}.sha256`, "utf8").trim();

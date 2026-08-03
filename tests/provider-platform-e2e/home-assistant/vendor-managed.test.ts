@@ -103,7 +103,7 @@ describe("vendor_managed Home Assistant Climate platform integration", () => {
       resources,
       store,
     );
-    const engine = new ClimateExecutionEngine(store, resources, rest, telemetry, 3_000);
+    const engine = new ClimateExecutionEngine(store, resources, rest, telemetry, 3_000, true);
     await engine.recover();
     provider = new ClimateProviderServer(
       {

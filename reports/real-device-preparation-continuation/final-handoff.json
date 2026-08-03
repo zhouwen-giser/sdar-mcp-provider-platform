@@ -3,9 +3,9 @@
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
   "previousCandidateSha": "cd68a91d129ba50a240837c79526ebdfdfbfa05c",
-  "finalCandidateSha": "575b252e4e98a0cd1163da5424ef0a04421213ec",
+  "finalCandidateSha": "fc45772d1bddeded92716efd79cd633e194f433c",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "575b252e4e98a0cd1163da5424ef0a04421213ec",
+  "smppCandidateSha": "fc45772d1bddeded92716efd79cd633e194f433c",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registry": {
@@ -40,13 +40,13 @@
     "climate_get_state": "real_pass",
     "climate_set_hvac_mode": "real_pass_time_scoped",
     "climate_set_temperature": "real_pass_time_scoped",
-    "climate_set_power": "unverified",
+    "climate_set_power": "real_pass_off_restore_only",
     "light_get_state": "real_pass_time_scoped",
     "light_set_power": "real_pass_time_scoped",
     "light_set_brightness": "unverified"
   },
   "recovery": {
-    "adapterRestart": "passed_scoped_runtime_restart_required",
+    "adapterRestart": "passed_idle_reconnect_without_runtime_restart",
     "runtimeRestart": "passed_scoped_no_inflight_task",
     "noDuplicateSideEffect": "passed_scoped_bounded_light_runs"
   },
@@ -60,32 +60,26 @@
     "living-room-main-light",
     "living-room-aux-light"
   ],
-  "realResourcesBlocked": ["living-room-aux-light"],
+  "realResourcesBlocked": [],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "deviceRestoreStatus": "restored_at_qualification_time_current_aux_unavailable",
-  "readyForSdarFunctionalIntegration": false,
+  "deviceRestoreStatus": "restored_at_qualification_time",
+  "readyForSdarFunctionalIntegration": true,
   "readyForSdarResilienceIntegration": false,
   "readyForSdarFullCapabilityIntegration": false,
   "readyForSdarIntegration": false,
   "blockingIssues": [
-    "HA_AUX_ENTITY_UNAVAILABLE_CURRENT_PREFLIGHT",
-    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED",
-    "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
-    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
     "REAL_FAULT_INJECTION_UNVERIFIED",
-    "RUNTIME_RELEASE_ASSET_PACKAGING_UNVERIFIED",
-    "WINDOWS_PROVIDER_PACKAGE_FULL_SUITE_UNVERIFIED",
-    "NPC_TANK_FIXED_TEMP_PATH_EPERM",
-    "FORMAT_CHECK_PRE_EXISTING_FILES",
-    "VERIFY_V2_AGGREGATOR_UNVERIFIED",
-    "VERIFY_PLATFORM_AGGREGATOR_UNVERIFIED"
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
   ],
   "knownLimitations": [
-    "The current auxiliary light is unavailable in Home Assistant after a targeted integration reload and one Home Assistant restart.",
-    "Climate power qualification remains deferred by the five-minute inverse-power safety rule.",
-    "Real in-flight restart and full fault-injection scenarios remain unverified.",
-    "The Windows symlink and repository aggregate gates remain environment-limited."
+    "The explicit climate power-on operation was not separately qualified; the live run qualified HVAC mode, temperature, and safe power-off restoration.",
+    "Real in-flight Adapter/Runtime restart, REST-200-without-state-change, Home Assistant outage, and PMS outage scenarios remain unverified.",
+    "The optional light brightness operation was not side-effect qualified and remains outside the first-version baseline.",
+    "Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed."
   ],
   "evidenceClassification": {
     "real": [
@@ -96,6 +90,7 @@
       "live-registry.redacted.json",
       "live-registry-contract.json",
       "registry-endpoint-real-e2e.json",
+      "three-device-e2e.json",
       "adapter-restart-real.json",
       "runtime-restart-real.json",
       "no-duplicate-side-effect.json"

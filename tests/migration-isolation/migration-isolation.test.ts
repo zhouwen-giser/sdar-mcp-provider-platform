@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
+import prettier from "prettier";
 import { describe, expect, it } from "vitest";
 import { runNpcTankProviderMigrations } from "../../apps/npc-tank-provider-adapter/src/migrate.js";
 import { runUgvProviderMigrations } from "../../apps/ugv-provider-adapter/src/migrate.js";
@@ -103,45 +104,41 @@ async function writeEvidence(tables: {
 }): Promise<void> {
   const evidencePath = resolve("reports/evidence/migration-isolation.json");
   await mkdir(resolve(evidencePath, ".."), { recursive: true });
+  const evidence = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    status: "PASS",
+    database: {
+      implementation: "PostgreSQL",
+      connection: "TEST_DATABASE_URL (credentials redacted)",
+      isolation: "three temporary schemas",
+    },
+    repeatedRunsPerSet: 2,
+    sets: {
+      runtime: {
+        migrationCount: 25,
+        representativePresent: ["provider_task", "runtime_schema_migration"],
+        representativeAbsent: ["ugv_execution", "npc_tank_execution"],
+        tableCount: tables.runtime.length,
+      },
+      "provider:ugv": {
+        representativePresent: ["ugv_execution"],
+        representativeAbsent: ["provider_task", "runtime_schema_migration", "npc_tank_execution"],
+        tableCount: tables.ugv.length,
+      },
+      "provider:npc-tank": {
+        representativePresent: ["npc_tank_execution"],
+        representativeAbsent: ["provider_task", "runtime_schema_migration", "ugv_execution"],
+        tableCount: tables.npcTank.length,
+      },
+    },
+  };
   await writeFile(
     evidencePath,
-    `${JSON.stringify(
-      {
-        schemaVersion: 1,
-        generatedAt: new Date().toISOString(),
-        status: "PASS",
-        database: {
-          implementation: "PostgreSQL",
-          connection: "TEST_DATABASE_URL (credentials redacted)",
-          isolation: "three temporary schemas",
-        },
-        repeatedRunsPerSet: 2,
-        sets: {
-          runtime: {
-            migrationCount: 24,
-            representativePresent: ["provider_task", "runtime_schema_migration"],
-            representativeAbsent: ["ugv_execution", "npc_tank_execution"],
-            tableCount: tables.runtime.length,
-          },
-          "provider:ugv": {
-            representativePresent: ["ugv_execution"],
-            representativeAbsent: [
-              "provider_task",
-              "runtime_schema_migration",
-              "npc_tank_execution",
-            ],
-            tableCount: tables.ugv.length,
-          },
-          "provider:npc-tank": {
-            representativePresent: ["npc_tank_execution"],
-            representativeAbsent: ["provider_task", "runtime_schema_migration", "ugv_execution"],
-            tableCount: tables.npcTank.length,
-          },
-        },
-      },
-      null,
-      2,
-    )}\n`,
+    await prettier.format(JSON.stringify(evidence), {
+      ...(await prettier.resolveConfig(evidencePath)),
+      filepath: evidencePath,
+    }),
     "utf8",
   );
 }

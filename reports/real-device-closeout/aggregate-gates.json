@@ -1,0 +1,17 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "commands": {
+    "verifyV2": "passed",
+    "verifyPlatform": "passed",
+    "formatCheck": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "protocolCheck": "passed"
+  },
+  "testSuites": {},
+  "knownEnvironmentDiagnostics": [
+    "Windows PM2 pidusage can emit WMI ManagementException diagnostics while readiness and task paths remain usable."
+  ]
+}

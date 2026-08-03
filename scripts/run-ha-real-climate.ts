@@ -120,7 +120,14 @@ try {
     resources,
     store,
   );
-  const engine = new ClimateExecutionEngine(store, resources, rest, telemetry, 20_000);
+  const engine = new ClimateExecutionEngine(
+    store,
+    resources,
+    rest,
+    telemetry,
+    20_000,
+    writesEnabled,
+  );
   websocket = new HomeAssistantClimateWebSocket({
     baseUrl: local.url,
     token: local.token,

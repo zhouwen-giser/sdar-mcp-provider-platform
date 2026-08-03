@@ -3,7 +3,7 @@
   "phase": "C7_RUNTIME_RESTART_REAL",
   "status": "passed_scoped_no_inflight_task",
   "environment": "home-lab",
-  "observedAt": "2026-08-03T01:22:36Z",
+  "observedAt": "2026-08-03T19:44:55.189Z",
   "providerId": "ha-light-lab",
   "exactRuntimeRestartReadiness": "ready",
   "postRestartActiveTasks": 0,

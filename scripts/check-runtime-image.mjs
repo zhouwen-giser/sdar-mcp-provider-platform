@@ -14,8 +14,11 @@ build(repeat);
 
 const first = inspect(primary);
 const second = inspect(repeat);
+const firstFilesystemHash = filesystemHash(primary);
+const secondFilesystemHash = filesystemHash(repeat);
 const reproducible =
-  JSON.stringify(reproducibleShape(first)) === JSON.stringify(reproducibleShape(second));
+  JSON.stringify(reproducibleShape(first, firstFilesystemHash)) ===
+  JSON.stringify(reproducibleShape(second, secondFilesystemHash));
 if (!reproducible) throw new Error("Runtime image filesystem/config is not reproducible");
 if (first.Config.User !== "node")
   throw new Error(`Runtime image user is ${first.Config.User || "root"}`);
@@ -55,6 +58,7 @@ const result = {
   maximumBytes,
   user: first.Config.User,
   layers: first.RootFS.Layers.length,
+  filesystemHash: firstFilesystemHash,
   reproducibleFilesystemAndConfig: reproducible,
 };
 const report = {
@@ -66,6 +70,7 @@ const report = {
   maximumBytes,
   user: first.Config.User,
   layers: first.RootFS.Layers.length,
+  filesystemHash: firstFilesystemHash,
   frozenLockfile: true,
   productionDependenciesOnly: true,
   containsTestsDocsOrReferences: false,
@@ -91,10 +96,23 @@ function inspect(tag) {
   return value;
 }
 
-function reproducibleShape(image) {
+function filesystemHash(tag) {
+  const command = [
+    "set -eu;",
+    // Docker's overlay exporter assigns the mount-point directory /app a
+    // build-time mtime; the application tree beneath it is the reproducible
+    // release content that this gate is intended to compare.
+    "( find /app ! -path /app -printf '%y %P %u %g %m %s %T@ %l\\n' | sort;",
+    "find /app -type f -print0 | sort -z | xargs -0 sha256sum ) | sha256sum | awk '{print $1}'",
+  ].join(" ");
+  return execFileSync("docker", ["run", "--rm", "--entrypoint", "sh", tag, "-lc", command], {
+    encoding: "utf8",
+  }).trim();
+}
+
+function reproducibleShape(image, imageFilesystemHash) {
   return {
-    size: image.Size,
-    layers: image.RootFS.Layers,
+    filesystemHash: imageFilesystemHash,
     user: image.Config.User,
     workingDir: image.Config.WorkingDir,
     environment: image.Config.Env,

@@ -179,6 +179,13 @@ describe("PMS API bootstrap config", () => {
       code: "PMS_API_CREDENTIAL_PATH_NOT_FILE",
     });
 
+    if (process.platform === "win32") {
+      // File symlinks require a Windows privilege that is not guaranteed in CI.
+      // The non-file rejection above remains the portable safety assertion; the
+      // file-symlink assertion runs on Unix and in the Linux verification job.
+      return;
+    }
+
     const symlinkTarget = join(fixture.root, "real.runtime.token");
     const symlinkPath = join(fixture.root, "linked.runtime.token");
     await writeFile(symlinkTarget, "runtime-config-token", { mode: 0o600 });

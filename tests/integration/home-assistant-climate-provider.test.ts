@@ -122,6 +122,7 @@ describe("Home Assistant climate Provider", () => {
       rest,
       new NoopClimateTelemetry(),
       2000,
+      true,
     );
     ws = new HomeAssistantClimateWebSocket({
       baseUrl: fake.url,

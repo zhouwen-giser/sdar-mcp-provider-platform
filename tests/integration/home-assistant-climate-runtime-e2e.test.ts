@@ -65,7 +65,7 @@ beforeAll(async () => {
     registry,
     store,
   );
-  const engine = new ClimateExecutionEngine(store, registry, rest, telemetry, 3000);
+  const engine = new ClimateExecutionEngine(store, registry, rest, telemetry, 3000, true);
   ws = new HomeAssistantClimateWebSocket({
     baseUrl: fake.url,
     token: fake.token,

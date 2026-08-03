@@ -55,14 +55,17 @@ COPY . .
 RUN pnpm build \
     && pnpm --filter @sdar/pms-web build \
     && cp -R dist/packages release-packages \
-    && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'
+    && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }' \
+    && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
 
 FROM build AS production-dependencies
 RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules \
     && CI=true pnpm install --prod --offline --frozen-lockfile --filter='!@sdar/pms-web' \
     && find node_modules -type f -name '*.map' -delete \
     && find node_modules -type f -iname '*.md' \
-      ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete
+      ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete \
+    && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json \
+    && find node_modules -exec touch -h -d '@0' {} +
 
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
@@ -71,7 +74,9 @@ COPY --from=production-dependencies /workspace/node_modules /app/node_modules
 COPY --from=build /workspace/dist /app/dist
 COPY --from=build /workspace/proto /app/proto
 COPY --from=build /workspace/migrations /app/migrations
-RUN mkdir -p /var/lib/sdar && chown node:node /var/lib/sdar
+RUN mkdir -p /var/lib/sdar \
+    && chown node:node /var/lib/sdar \
+    && touch -d '@0' /var/lib/sdar /app
 USER node
 CMD ["node", "dist/apps/runtime/src/main.js"]
 

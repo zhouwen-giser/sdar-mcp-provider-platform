@@ -1,0 +1,15 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "migrationDirectory": "migrations/runtime",
+  "migrationCount": 25,
+  "latestMigration": "024_accepted_task_substate.sql",
+  "expectedRuntimeMigrationCount": 25,
+  "isolationEvidence": {
+    "report": "reports/evidence/migration-isolation.json",
+    "status": "PASS",
+    "repeatedRunsPerSet": 2,
+    "runtimeTableCount": 24
+  },
+  "migrationHistoryConflict": "none observed in the isolated runtime migration check"
+}

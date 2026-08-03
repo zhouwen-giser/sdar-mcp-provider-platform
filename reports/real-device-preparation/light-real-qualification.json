@@ -1,35 +1,1142 @@
 {
   "evidenceClass": "real",
   "phase": "P4_LIGHT_REAL_QUALIFICATION",
-  "status": "partial",
-  "continuationReport": "reports/real-device-preparation-continuation/three-device-e2e.json",
+  "integrationRunId": "smpp-real-light-closeout-20260804-0216",
   "providerId": "ha-light-lab",
   "protocolMode": "frozen_v1",
+  "startedAt": "2026-08-03T19:13:11.708Z",
+  "completedAt": "2026-08-03T19:13:17.770Z",
+  "status": "passed",
+  "safetyGate": {
+    "allowRealDeviceSideEffects": true,
+    "runIdPresent": true,
+    "perResourceWriteBudget": 2,
+    "writesUsed": {
+      "living-room-main-light": 2,
+      "living-room-aux-light": 2
+    }
+  },
+  "endpoint": {
+    "runtimeMcp": "http://127.0.0.1:53617/mcp",
+    "adapterTransport": "gRPC",
+    "homeAssistant": "redacted-local-config"
+  },
+  "initialize": {
+    "status": 404,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32601,
+        "message": "Method not found"
+      }
+    }
+  },
+  "discovery": {
+    "status": 200,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "resultType": "complete",
+        "supportedVersions": ["2026-07-28"],
+        "capabilities": {
+          "tools": {},
+          "extensions": {
+            "io.modelcontextprotocol/tasks": {},
+            "io.sdar/taskExecution": {
+              "profileVersion": "1.0",
+              "taskNotifications": true
+            }
+          }
+        },
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "sdar-mcp-tasks-provider-runtime",
+            "version": "2.0.0-rc.1"
+          }
+        },
+        "instructions": "This server provides SDAR task-capable tools.",
+        "ttlMs": 3600000,
+        "cacheScope": "public"
+      }
+    }
+  },
+  "toolsList": {
+    "status": 200,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "tools": [
+          {
+            "name": "light_get_state",
+            "description": "Read normalized state for a configured Home Assistant light entity.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": ["resourceId"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "power": {
+                      "type": "string",
+                      "enum": ["on", "off", "unknown", "unavailable"]
+                    },
+                    "reachable": {
+                      "type": "boolean"
+                    },
+                    "brightnessPercent": {
+                      "type": ["number", "null"]
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "resourceId",
+                    "power",
+                    "reachable",
+                    "brightnessPercent",
+                    "observedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "synchronous_only",
+                "availability": "dynamic",
+                "supportsScheduling": false,
+                "supportsMaxElapsed": false,
+                "supportsObservations": false,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          },
+          {
+            "name": "light_set_power",
+            "description": "Set and confirm light power.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "power": {
+                  "type": "string",
+                  "enum": ["on", "off"]
+                }
+              },
+              "required": ["resourceId", "power"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "power": {
+                      "type": "string",
+                      "enum": ["on", "off"]
+                    },
+                    "confirmed": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["resourceId", "power", "confirmed", "observedAt"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "task_required",
+                "availability": "dynamic",
+                "supportsScheduling": true,
+                "supportsMaxElapsed": false,
+                "supportsObservations": true,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          },
+          {
+            "name": "light_set_brightness",
+            "description": "Set and confirm supported light brightness.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "brightnessPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "required": ["resourceId", "brightnessPercent"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "brightnessPercent": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "confirmed": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["resourceId", "brightnessPercent", "confirmed", "observedAt"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "task_required",
+                "availability": "dynamic",
+                "supportsScheduling": true,
+                "supportsMaxElapsed": false,
+                "supportsObservations": true,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
   "resources": [
     {
       "resourceId": "living-room-main-light",
-      "read": "passed",
-      "powerToggleAndRestore": "passed",
-      "sameArgumentsSameTask": true,
-      "differentArgumentsRejected": true,
-      "writesUsed": 2,
-      "finalState": "original"
+      "entityHash": "48d411259a1aaeffd9111bc10a9444ff2a092e79e51e1bd337a32e59c19d7928",
+      "original": {
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:09:39.776901+00:00",
+        "observationId": "b36ff0f49804d26adde9a997dc9a9d96c11a74d04ba589f5d9675f597256e1f6"
+      }
     },
     {
       "resourceId": "living-room-aux-light",
-      "read": "passed",
-      "powerToggleAndRestore": "passed",
-      "sameArgumentsSameTask": true,
-      "differentArgumentsRejected": true,
-      "writesUsed": 2,
-      "finalState": "original"
+      "entityHash": "2b3f49cc64f1b856d860173ae06e4a9cef8c4dca858043a3fc46f9eee42e6591",
+      "original": {
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:11:32.857128+00:00",
+        "observationId": "3d53b0b14d4f8710178a3f9cf4655ca68663ee8c270ee19837ccf16e3cc1d82b"
+      }
     }
   ],
-  "runtimeTaskCounts": {
-    "active": 0,
-    "uncertain": 0
-  },
-  "blockedQualification": "The frozen Runtime read surface was qualified with server/discover, tools/list, and tools/call. Adapter reconnect without an exact Runtime restart and in-flight recovery remain unverified; the latest P1 preflight also reports the auxiliary light unavailable, so no new writes are authorized.",
-  "entityIdentifiers": "excluded",
-  "credentials": "excluded"
+  "scenarios": [
+    {
+      "operation": "light_set_power",
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "ef41e7e4-adee-4c0c-81ba-3212471ceca3",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ef41e7e4-adee-4c0c-81ba-3212471ceca3-4",
+                  "observedAt": "2026-08-03T19:13:14.142853+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:14.142853+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-ef41e7e4-adee-4c0c-81ba-3212471ceca3-4",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ef41e7e4-adee-4c0c-81ba-3212471ceca3-4",
+                  "observedAt": "2026-08-03T19:13:14.142853+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:14.142853+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:09:39.776901+00:00",
+        "observationId": "b36ff0f49804d26adde9a997dc9a9d96c11a74d04ba589f5d9675f597256e1f6"
+      },
+      "desired": {
+        "power": "on"
+      },
+      "after": {
+        "resourceId": "living-room-main-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:14.142853+00:00",
+        "observationId": "397f078c5672926d4d9c1794b2e716a7423c5ef82fefa075ea931b4602834e31"
+      },
+      "idempotency": {
+        "sameArgumentsSameKey": true,
+        "duplicateRuntimeTaskId": "ef41e7e4-adee-4c0c-81ba-3212471ceca3",
+        "response": {
+          "status": 200,
+          "error": null,
+          "resultType": "task"
+        },
+        "sameKeyDifferentArgumentsRejected": true,
+        "conflictResponse": {
+          "status": 400,
+          "error": {
+            "code": -32602,
+            "message": "Invalid request parameters.",
+            "data": {
+              "reasonCode": "IDEMPOTENCY_KEY_CONFLICT"
+            }
+          },
+          "resultType": null
+        }
+      }
+    },
+    {
+      "operation": "light_set_power",
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "9eb85faa-8e84-4550-827c-29065df772aa",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-9eb85faa-8e84-4550-827c-29065df772aa-4",
+                  "observedAt": "2026-08-03T19:13:15.232500+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:15.232500+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-9eb85faa-8e84-4550-827c-29065df772aa-4",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-9eb85faa-8e84-4550-827c-29065df772aa-4",
+                  "observedAt": "2026-08-03T19:13:15.232500+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:15.232500+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-main-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:14.142853+00:00",
+        "observationId": "397f078c5672926d4d9c1794b2e716a7423c5ef82fefa075ea931b4602834e31"
+      },
+      "desired": {
+        "power": "off"
+      }
+    },
+    {
+      "operation": "light_set_power",
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "4fa30353-fbf6-4209-8c62-0326d3a32840",
+      "taskStatuses": [
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-4fa30353-fbf6-4209-8c62-0326d3a32840-4",
+                  "observedAt": "2026-08-03T19:13:16.235163+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.235163+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-4fa30353-fbf6-4209-8c62-0326d3a32840-4",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-4fa30353-fbf6-4209-8c62-0326d3a32840-4",
+                  "observedAt": "2026-08-03T19:13:16.235163+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.235163+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:11:32.857128+00:00",
+        "observationId": "3d53b0b14d4f8710178a3f9cf4655ca68663ee8c270ee19837ccf16e3cc1d82b"
+      },
+      "desired": {
+        "power": "on"
+      },
+      "after": {
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:16.235163+00:00",
+        "observationId": "9e42b795f0d01077b7abcdc25439db713a2756b032a3beb75303cb4b5ffc94d4"
+      },
+      "idempotency": {
+        "sameArgumentsSameKey": true,
+        "duplicateRuntimeTaskId": "4fa30353-fbf6-4209-8c62-0326d3a32840",
+        "response": {
+          "status": 200,
+          "error": null,
+          "resultType": "task"
+        },
+        "sameKeyDifferentArgumentsRejected": true,
+        "conflictResponse": {
+          "status": 400,
+          "error": {
+            "code": -32602,
+            "message": "Invalid request parameters.",
+            "data": {
+              "reasonCode": "IDEMPOTENCY_KEY_CONFLICT"
+            }
+          },
+          "resultType": null
+        }
+      }
+    },
+    {
+      "operation": "light_set_power",
+      "status": "completed",
+      "accepted": true,
+      "runtimeTaskId": "ce2a4f97-5fa0-4489-8e5b-c00a60ab222f",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ce2a4f97-5fa0-4489-8e5b-c00a60ab222f-4",
+                  "observedAt": "2026-08-03T19:13:16.954162+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.954162+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-light-ce2a4f97-5fa0-4489-8e5b-c00a60ab222f-4",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ce2a4f97-5fa0-4489-8e5b-c00a60ab222f-4",
+                  "observedAt": "2026-08-03T19:13:16.954162+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.954162+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:16.235163+00:00",
+        "observationId": "9e42b795f0d01077b7abcdc25439db713a2756b032a3beb75303cb4b5ffc94d4"
+      },
+      "desired": {
+        "power": "off"
+      }
+    }
+  ],
+  "terminalTaskProjections": [
+    {
+      "resourceId": "living-room-main-light",
+      "runtimeTaskId": "ef41e7e4-adee-4c0c-81ba-3212471ceca3",
+      "projection": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ef41e7e4-adee-4c0c-81ba-3212471ceca3-4",
+                  "observedAt": "2026-08-03T19:13:14.142853+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:14.142853+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "status": "completed"
+    },
+    {
+      "resourceId": "living-room-main-light",
+      "runtimeTaskId": "9eb85faa-8e84-4550-827c-29065df772aa",
+      "projection": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-9eb85faa-8e84-4550-827c-29065df772aa-4",
+                  "observedAt": "2026-08-03T19:13:15.232500+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-main-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:15.232500+00:00",
+            "resourceId": "living-room-main-light"
+          }
+        },
+        "evidence": null
+      },
+      "status": "completed"
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "runtimeTaskId": "4fa30353-fbf6-4209-8c62-0326d3a32840",
+      "projection": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-4fa30353-fbf6-4209-8c62-0326d3a32840-4",
+                  "observedAt": "2026-08-03T19:13:16.235163+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "on",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.235163+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "status": "completed"
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "runtimeTaskId": "ce2a4f97-5fa0-4489-8e5b-c00a60ab222f",
+      "projection": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-light-ce2a4f97-5fa0-4489-8e5b-c00a60ab222f-4",
+                  "observedAt": "2026-08-03T19:13:16.954162+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/power"
+                  },
+                  "subjectRef": "resource:living-room-aux-light",
+                  "evidenceType": "light.state.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired light state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "power": "off",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:13:16.954162+00:00",
+            "resourceId": "living-room-aux-light"
+          }
+        },
+        "evidence": null
+      },
+      "status": "completed"
+    }
+  ],
+  "stateRestoration": [
+    {
+      "resourceId": "living-room-main-light",
+      "status": "restored",
+      "original": {
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:09:39.776901+00:00",
+        "observationId": "b36ff0f49804d26adde9a997dc9a9d96c11a74d04ba589f5d9675f597256e1f6"
+      },
+      "currentBeforeRestore": {
+        "resourceId": "living-room-main-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:14.142853+00:00",
+        "observationId": "397f078c5672926d4d9c1794b2e716a7423c5ef82fefa075ea931b4602834e31"
+      },
+      "manualRestoreRequired": false,
+      "currentAfterRestore": {
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T19:13:15.232500+00:00",
+        "observationId": "578486be5c5896e18c4532602c058e76a46a0c14f482b00b2ef8ad621e9f57a7"
+      }
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "status": "restored",
+      "original": {
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T16:11:32.857128+00:00",
+        "observationId": "3d53b0b14d4f8710178a3f9cf4655ca68663ee8c270ee19837ccf16e3cc1d82b"
+      },
+      "currentBeforeRestore": {
+        "resourceId": "living-room-aux-light",
+        "power": "on",
+        "reachable": true,
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-03T19:13:16.235163+00:00",
+        "observationId": "9e42b795f0d01077b7abcdc25439db713a2756b032a3beb75303cb4b5ffc94d4"
+      },
+      "manualRestoreRequired": false,
+      "currentAfterRestore": {
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T19:13:16.954162+00:00",
+        "observationId": "47c5cb577142150da63b38e957ba016a5b83367658ec134e105224d9849ac1b0"
+      }
+    }
+  ],
+  "websocketObservations": [
+    {
+      "resourceId": "living-room-main-light",
+      "power": "on",
+      "brightnessPercent": 100,
+      "observedAt": "2026-08-03T19:13:14.142853+00:00",
+      "observationId": "397f078c5672926d4d9c1794b2e716a7423c5ef82fefa075ea931b4602834e31"
+    },
+    {
+      "resourceId": "living-room-main-light",
+      "power": "off",
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T19:13:15.232500+00:00",
+      "observationId": "578486be5c5896e18c4532602c058e76a46a0c14f482b00b2ef8ad621e9f57a7"
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "power": "on",
+      "brightnessPercent": 100,
+      "observedAt": "2026-08-03T19:13:16.235163+00:00",
+      "observationId": "9e42b795f0d01077b7abcdc25439db713a2756b032a3beb75303cb4b5ffc94d4"
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "power": "off",
+      "brightnessPercent": null,
+      "observedAt": "2026-08-03T19:13:16.954162+00:00",
+      "observationId": "47c5cb577142150da63b38e957ba016a5b83367658ec134e105224d9849ac1b0"
+    }
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "errors": []
 }

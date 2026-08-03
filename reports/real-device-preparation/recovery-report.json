@@ -24,6 +24,15 @@
       "sideEffectReplay": "none"
     },
     {
+      "scenario": "idle Adapter reconnect without Runtime restart",
+      "evidenceClass": "real",
+      "status": "passed",
+      "runtimeRestartPerformed": false,
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "sideEffectReplay": "none"
+    },
+    {
       "scenario": "Adapter restart during in-flight Task",
       "evidenceClass": "unverified",
       "status": "unverified"
@@ -40,8 +49,9 @@
     }
   ],
   "blockers": [
-    "RUNTIME_ADAPTER_RECONNECT_WITHOUT_RUNTIME_RESTART_UNVERIFIED",
-    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
-    "REAL_FAULT_INJECTION_UNVERIFIED"
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
   ]
 }

@@ -2,7 +2,7 @@
   "profileVersion": "1.0",
   "adapterLanguage": "typescript",
   "providerId": "conformance-typescript",
-  "generatedAt": "2026-07-22T08:17:15.415Z",
+  "generatedAt": "2026-08-03T21:27:38.282Z",
   "status": "passed",
   "scopes": {
     "runtimeProfile": {
@@ -26,12 +26,12 @@
         {
           "name": "P0 protocol/catalog and synchronous Tool",
           "status": "passed",
-          "durationMs": 184.2086710000001
+          "durationMs": 188.4441999999999
         },
         {
           "name": "P0 persisted task_required lifecycle and terminal read",
           "status": "passed",
-          "durationMs": 66.61744999999996
+          "durationMs": 105.72960000000012
         }
       ]
     },
@@ -42,7 +42,7 @@
         {
           "name": "P1 checkAvailability four states, risk and windows",
           "status": "passed",
-          "durationMs": 7.780759999999873
+          "durationMs": 13.645300000000134
         }
       ]
     },
@@ -53,12 +53,12 @@
         {
           "name": "P2 scheduled start is durable and never early",
           "status": "passed",
-          "durationMs": 76.31526700000018
+          "durationMs": 114.41859999999997
         },
         {
           "name": "P2 retryable start rejection has a bounded retry identity",
           "status": "passed",
-          "durationMs": 4.5516039999999975
+          "durationMs": 8.332899999999881
         }
       ]
     },
@@ -69,12 +69,12 @@
         {
           "name": "P3 restricted arbitration accepts or rejects without ambiguity",
           "status": "passed",
-          "durationMs": 17.761347999999998
+          "durationMs": 33.25579999999991
         },
         {
           "name": "P3 pause/resume acknowledgements preserve a working execution",
           "status": "passed",
-          "durationMs": 8.538580000000138
+          "durationMs": 39.42039999999997
         }
       ]
     },
@@ -85,67 +85,67 @@
         {
           "name": "P4 input_required and multi-round update",
           "status": "passed",
-          "durationMs": 260.44424700000013
+          "durationMs": 403.4002999999998
         },
         {
           "name": "P4 cancel Ack, safe stop proof and duplicate idempotency",
           "status": "passed",
-          "durationMs": 113.87780700000008
+          "durationMs": 190.51029999999992
         },
         {
           "name": "P4 invocation idempotency duplicate and conflict",
           "status": "passed",
-          "durationMs": 23.111162999999806
+          "durationMs": 43.65869999999995
         },
         {
           "name": "P4 frozen reservation reference is bound to Start identity",
           "status": "passed",
-          "durationMs": 4.674229000000196
+          "durationMs": 20.195200000000114
         },
         {
           "name": "P4 frozen MRTR request and keyed response",
           "status": "passed",
-          "durationMs": 115.33001600000011
+          "durationMs": 228.2470000000003
         },
         {
           "name": "P4 frozen type-only Evidence projection",
           "status": "passed",
-          "durationMs": 37.40734600000019
+          "durationMs": 82.23260000000028
         },
         {
           "name": "P4 response-loss Reconcile without duplicate identity",
           "status": "passed",
-          "durationMs": 24.757630999999947
+          "durationMs": 49.84490000000005
         },
         {
           "name": "P4 Adapter task/argument identity conflict",
           "status": "passed",
-          "durationMs": 4.190394999999853
+          "durationMs": 20.797099999999773
         },
         {
           "name": "P4 Adapter output mismatch becomes a failed Task",
           "status": "passed",
-          "durationMs": 35.847256000000016
+          "durationMs": 65.76290000000063
         },
         {
           "name": "P4 command sequence mismatch is observable",
           "status": "passed",
-          "durationMs": 3.709427000000005
+          "durationMs": 20.040799999999763
         },
         {
           "name": "P4 safe-stop permanent, retryable and transport rejection",
           "status": "passed",
-          "durationMs": 15.012050000000045
+          "durationMs": 122.41600000000017
         },
         {
           "name": "P4 Adapter process restart retains execution binding",
           "status": "passed",
-          "durationMs": 0.054946999999856416
+          "durationMs": 0.08400000000074215
         },
         {
           "name": "P4 terminal irreversibility and observation/outbox idempotency",
           "status": "passed",
-          "durationMs": 36.91089499999998
+          "durationMs": 82.7439000000004
         }
       ]
     }

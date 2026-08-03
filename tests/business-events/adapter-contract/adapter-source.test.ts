@@ -2,6 +2,7 @@ import * as grpc from "@grpc/grpc-js";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import process from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   businessEventId,
@@ -142,15 +143,15 @@ describe("Adapter Business Event source contract", () => {
     expect(canonicalSha256(storedVector.input)).toBe(storedVector.expectedHash);
 
     const python = execFileSync(
-      "python3",
+      process.platform === "win32" ? "python" : "python3",
       [
         "-c",
-        "import json,sys;sys.path.insert(0,'examples/mock-adapter-python');from business_events import event_id,canonical_sha256,normalize_rfc3339_nano;v=json.load(open('protocol/business-events-golden/event-id.json'));s=json.load(open('protocol/business-events-golden/source-canonical-hash.json'));print(event_id(v['providerId'],v['sourceId'],v['sourceStreamId'],v['sourceEventId']));print(canonical_sha256(s['input']));print(normalize_rfc3339_nano('2026-07-22T09:00:00+08:00'))",
+        "import json,sys;sys.path.insert(0,'examples/mock-adapter-python');from business_events import event_id,canonical_sha256,normalize_rfc3339_nano;v=json.load(open('protocol/business-events-golden/event-id.json',encoding='utf-8'));s=json.load(open('protocol/business-events-golden/source-canonical-hash.json',encoding='utf-8'));print(event_id(v['providerId'],v['sourceId'],v['sourceStreamId'],v['sourceEventId']));print(canonical_sha256(s['input']));print(normalize_rfc3339_nano('2026-07-22T09:00:00+08:00'))",
       ],
       { encoding: "utf8" },
     )
       .trim()
-      .split("\n");
+      .split(/\r?\n/);
     expect(python).toEqual([
       eventVector.expectedEventId,
       sourceVector.expectedHash,

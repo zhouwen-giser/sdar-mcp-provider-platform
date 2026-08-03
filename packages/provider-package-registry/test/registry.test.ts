@@ -76,7 +76,7 @@ describe("ProviderPackage Registry", () => {
     const entryRoot = await fixtureRoot();
     const outside = await mkdtemp(resolve(tmpdir(), "sdar-provider-package-outside-"));
     roots.push(outside);
-    await symlink(outside, resolve(entryRoot, "provider-packages/linked"));
+    await createSecurityLink(outside, resolve(entryRoot, "provider-packages/linked"), roots);
     await expect(loadProviderPackageRegistry(entryRoot)).rejects.toMatchObject({
       code: "PACKAGE_ENTRY_SYMLINK_REJECTED",
     });
@@ -85,9 +85,10 @@ describe("ProviderPackage Registry", () => {
     await mkdir(resolve(descriptorRoot, "provider-packages/linked"), { recursive: true });
     const descriptor = resolve(outside, "provider-package.json");
     await writeFile(descriptor, JSON.stringify(packageFixture()));
-    await symlink(
+    await createSecurityLink(
       descriptor,
       resolve(descriptorRoot, "provider-packages/linked/provider-package.json"),
+      roots,
     );
     await expect(loadProviderPackageRegistry(descriptorRoot)).rejects.toMatchObject({
       code: "PACKAGE_ENTRY_SYMLINK_REJECTED",
@@ -145,6 +146,24 @@ async function writeDescriptor(root: string, directory: string, source: string):
   const packageDirectory = resolve(root, "provider-packages", directory);
   await mkdir(packageDirectory, { recursive: true });
   await writeFile(resolve(packageDirectory, "provider-package.json"), source);
+}
+
+async function createSecurityLink(
+  target: string,
+  link: string,
+  cleanupRoots: string[],
+): Promise<void> {
+  try {
+    await symlink(target, link);
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+    if (process.platform !== "win32" || !["EACCES", "EPERM", "EPROTO"].includes(code ?? "")) {
+      throw error;
+    }
+    const junctionTarget = await mkdtemp(resolve(tmpdir(), "sdar-provider-package-junction-"));
+    cleanupRoots.push(junctionTarget);
+    await symlink(junctionTarget, link, "junction");
+  }
 }
 
 function packageFixture(): ProviderPackage {

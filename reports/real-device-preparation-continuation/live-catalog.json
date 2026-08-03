@@ -3,7 +3,7 @@
   "phase": "C5_LIVE_CATALOG_DISCOVERY",
   "status": "passed",
   "environment": "home-lab",
-  "observedAt": "2026-08-03T04:36:01.158Z",
+  "observedAt": "2026-08-03T19:46:03.555Z",
   "sourceReports": ["catalog-registry-live.json", "registry-backed-e2e.json"],
   "catalogs": [
     {

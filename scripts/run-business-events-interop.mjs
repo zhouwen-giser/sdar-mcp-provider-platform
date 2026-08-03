@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import process from "node:process";
 
-const directory = process.env.BUSINESS_EVENTS_REPORT_DIR ?? "reports/business-events-profile-v1";
+const directory =
+  process.env.BUSINESS_EVENTS_REPORT_DIR ??
+  (process.argv.includes("--verification")
+    ? resolve(tmpdir(), "sdar-business-events-profile-v1-verification")
+    : "reports/business-events-profile-v1");
 mkdirSync(directory, { recursive: true });
 const matrix = [
   "strict discovery",

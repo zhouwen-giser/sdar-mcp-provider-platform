@@ -28,6 +28,9 @@ PROVIDER_TELEMETRY_INGRESS_ENABLED=true
 
 Production plaintext HTTP is rejected unless `HOME_ASSISTANT_ALLOW_INSECURE_HTTP=true` is set.
 Adapter and Provider Telemetry support required mutual TLS using CA, certificate, and key paths.
+Real Home Assistant writes additionally require `ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES` and a
+non-empty `REAL_DEVICE_TEST_RUN_ID`; the Provider fails closed for new write Tasks when either
+gate is absent. Reads remain available without the gate.
 
 ## Operations
 

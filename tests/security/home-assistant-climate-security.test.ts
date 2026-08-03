@@ -41,6 +41,7 @@ describe("Home Assistant climate security", () => {
         rest,
         new NoopClimateTelemetry(),
         1000,
+        true,
       );
       await expect(
         engine.start({
@@ -57,6 +58,49 @@ describe("Home Assistant climate security", () => {
           },
         }),
       ).rejects.toMatchObject({ reasonCode: "RESOURCE_NOT_CONFIGURED" });
+      expect(fake.serviceCalls).toHaveLength(0);
+    } finally {
+      await fake.close();
+    }
+  });
+
+  it("fails closed for real writes when the side-effect gate is closed", async () => {
+    const fake = new FakeHomeAssistantClimate();
+    fake.setState("climate.allowed", "off", { hvac_modes: ["cool"], min_temp: 16, max_temp: 30 });
+    await fake.start();
+    try {
+      const engine = new ClimateExecutionEngine(
+        new MemoryClimateStore(),
+        new ClimateResourceRegistry([
+          {
+            resourceId: "allowed",
+            entityId: "climate.allowed",
+            displayName: "Allowed",
+            enabled: true,
+            temperatureRange: { minimum: 16, maximum: 30 },
+            allowedHvacModes: ["cool"],
+          },
+        ]),
+        new HomeAssistantClimateClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
+        new NoopClimateTelemetry(),
+        1000,
+        false,
+      );
+      await expect(
+        engine.start({
+          taskId: "gate-closed",
+          operationName: "climate_set_power",
+          resourceId: "allowed",
+          power: "on",
+          argumentHash: "f".repeat(64),
+          executionContext: {
+            authorizationContextHash: "auth",
+            executionMode: "LIVE",
+            simulationId: "",
+            correlationId: "c",
+          },
+        }),
+      ).rejects.toMatchObject({ reasonCode: "REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED" });
       expect(fake.serviceCalls).toHaveLength(0);
     } finally {
       await fake.close();
