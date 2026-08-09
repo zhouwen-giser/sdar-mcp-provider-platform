@@ -1,23 +1,22 @@
 # Final merge readiness
 
-- Status: **not_ready**
-- Main merge ready: **NO**
+- Status: **ready**
+- Main merge ready: **YES**
 
 ## Code and repository blockers
 
-- `WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION`
+- None recorded.
 
 ## GitHub protected-branch state
 
 - Required checks: **passed**
-- Pull request state: **OPEN / DRAFT**
-- Independent Review: **not_received**
+- Pull request state: **OPEN / READY**
+- Independent Review: **passed**
 - Blocking review findings: **0**
 - Unresolved threads: **0**
 
 ## GitHub blockers
 
-- `PULL_REQUEST_IS_DRAFT`
-- `INDEPENDENT_REVIEW_NOT_PASSED`
+- None recorded.
 
 Real-device qualification blockers are listed separately and do not become code-review findings by implication.

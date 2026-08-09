@@ -1,9 +1,12 @@
 {
   "evidenceClass": "mixed",
-  "status": "independent_review_pending_or_blocked",
+  "status": "passed_after_independent_review",
   "blockingMajorCount": 0,
-  "codeAndRepositoryFindings": [],
-  "repositoryGateBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
+  "codeAndRepositoryFindings": [
+    { "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT", "status": "resolved" },
+    { "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION", "status": "resolved" }
+  ],
+  "repositoryGateBlockers": [],
   "realQualificationFindings": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",

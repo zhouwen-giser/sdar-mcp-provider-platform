@@ -1,7 +1,7 @@
 {
   "evidenceClass": "static",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "candidateSha": "bfd45184e6229b55c42cf32320718c53a359ed5f",
+  "candidateSha": "e3da358b95782f3bec545b7044dc703c0c8f9b9c",
   "branch": "codex/ha-real-device-preparation",
   "changedFileCount": 231,
   "changedFiles": [
@@ -63,6 +63,7 @@
     "packages/catalog-manager/src/client.ts",
     "packages/catalog-manager/src/index.ts",
     "packages/catalog-manager/src/model.ts",
+    "packages/catalog-manager/src/public-data.ts",
     "packages/catalog-manager/test/client.test.ts",
     "packages/configuration-center/src/definitions.ts",
     "packages/configuration-center/test/center.test.ts",
@@ -187,6 +188,7 @@
     "scripts/provider-package-self-check.mjs",
     "scripts/real-device-closeout-lib.mjs",
     "scripts/real-device-closeout-lib.test.mjs",
+    "scripts/real-device-side-effect-budget.ts",
     "scripts/release/release-artifact-volume-layout.test.mjs",
     "scripts/release/verify-release-candidate-workflow.mjs",
     "scripts/release/verify-release-candidate-workflow.test.mjs",
@@ -228,14 +230,12 @@
     "tests/security/home-assistant-climate-security.test.ts",
     "tests/unit/home-assistant-light-core.test.ts",
     "tests/unit/live-runtime-task-state.test.ts",
+    "tests/unit/migration-source-map.test.ts",
     "tests/unit/real-device-runner-protocol.test.ts",
+    "tests/unit/real-device-side-effect-budget.test.ts",
     "tests/worker-lease-safety/run-worker-lease-safety.mjs",
     "tests/worker-pm2-production/run-production-lifecycle.mjs",
-    "tsconfig.json",
-    "packages/catalog-manager/src/public-data.ts",
-    "scripts/real-device-side-effect-budget.ts",
-    "tests/unit/migration-source-map.test.ts",
-    "tests/unit/real-device-side-effect-budget.test.ts"
+    "tsconfig.json"
   ],
   "categories": {
     "climateSafetyGate": [
@@ -330,11 +330,11 @@
       "tests/security/home-assistant-climate-security.test.ts",
       "tests/unit/home-assistant-light-core.test.ts",
       "tests/unit/live-runtime-task-state.test.ts",
-      "tests/unit/real-device-runner-protocol.test.ts",
-      "tests/worker-lease-safety/run-worker-lease-safety.mjs",
-      "tests/worker-pm2-production/run-production-lifecycle.mjs",
       "tests/unit/migration-source-map.test.ts",
-      "tests/unit/real-device-side-effect-budget.test.ts"
+      "tests/unit/real-device-runner-protocol.test.ts",
+      "tests/unit/real-device-side-effect-budget.test.ts",
+      "tests/worker-lease-safety/run-worker-lease-safety.mjs",
+      "tests/worker-pm2-production/run-production-lifecycle.mjs"
     ],
     "reports": [
       "reports/capacity/capacity-v2.json",

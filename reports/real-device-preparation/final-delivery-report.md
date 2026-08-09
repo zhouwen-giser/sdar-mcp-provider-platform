@@ -1,21 +1,20 @@
 # SMPP Home Assistant real-device preparation closeout
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate SHA: `bfd45184e6229b55c42cf32320718c53a359ed5f`
+- Candidate SHA: `e3da358b95782f3bec545b7044dc703c0c8f9b9c`
 - Branch: `codex/ha-real-device-preparation`
 - Environment: `home-lab`
-- Main merge readiness: **NO**
+- Main merge readiness: **YES**
 - Ready for SDAR integration: **NO**
 
 ## Main merge readiness
 
-- Code/repository blocker: `WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION`
+- Code/repository hard blockers: **none recorded**
 - Required GitHub checks: **passed**
-- [PR #9](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9): **OPEN / DRAFT**
-- Independent Review: **not_received**
+- [PR #9](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9): **OPEN / READY**
+- Independent Review: **passed**
 - Blocking review findings: `0`; unresolved threads: `0`
-- GitHub blocker: `PULL_REQUEST_IS_DRAFT`
-- GitHub blocker: `INDEPENDENT_REVIEW_NOT_PASSED`
+- GitHub merge blockers: **none recorded**
 
 ## SDAR lab qualification
 

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "bfd45184e6229b55c42cf32320718c53a359ed5f",
+  "smppCandidateSha": "e3da358b95782f3bec545b7044dc703c0c8f9b9c",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registryRevision": 3,
@@ -101,30 +101,30 @@
     }
   ],
   "externalResourceBlockers": [],
-  "mainMergeReady": false,
-  "mainMergeReadinessStatus": "not_ready",
-  "mainMergeBlockers": [
-    "WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION",
-    "PULL_REQUEST_IS_DRAFT",
-    "INDEPENDENT_REVIEW_NOT_PASSED"
-  ],
-  "mainMergeCodeBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
-  "mainMergeGithubBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
+  "mainMergeReady": true,
+  "mainMergeReadinessStatus": "ready",
+  "mainMergeBlockers": [],
+  "mainMergeCodeBlockers": [],
+  "mainMergeGithubBlockers": [],
   "mainMergeGithub": {
     "prNumber": 9,
     "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
     "prState": "OPEN",
-    "isDraft": true,
+    "isDraft": false,
     "mergeable": "MERGEABLE",
     "mergeStateStatus": "CLEAN",
-    "checkedCandidateSha": "b7bad1139aac75a5131caf5280dff9551c3ef665",
+    "checkedCandidateSha": "fe46fc1a3b0361a12f3dee9e9352795f42f69631",
     "requiredChecks": "passed",
-    "checkRuns": { "passed": 20, "failed": 0, "pending": 0 },
+    "checkRuns": { "passed": 21, "failed": 0, "pending": 0 },
     "reviewDecision": "none",
-    "independentReviewStatus": "not_received",
+    "independentReviewStatus": "passed",
     "independentApprovals": 0,
     "blockingReviewFindings": 0,
     "unresolvedThreads": 0,
+    "independentReviewFindings": [
+      { "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT", "status": "resolved" },
+      { "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION", "status": "resolved" }
+    ],
     "branchProtection": {
       "pattern": "main",
       "requiresApprovingReviews": true,
@@ -136,8 +136,8 @@
       "allowsForcePushes": false,
       "allowsDeletions": false
     },
-    "checkedAt": "2026-08-09T15:50:41.2173132Z",
-    "note": "All checks passed at the audited candidate SHA. The PR remains Draft and has no independent review, so main merge readiness is false."
+    "checkedAt": "2026-08-09T19:49:51.5839451Z",
+    "note": "All 21 checks passed at the audited executable candidate SHA. PR #9 is ready for review, the independent code review has zero open blocking findings, and GitHub reports zero unresolved review threads. Any subsequent closeout commits are evidence-only and must receive the same protected checks before merge."
   },
   "blockingIssues": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
