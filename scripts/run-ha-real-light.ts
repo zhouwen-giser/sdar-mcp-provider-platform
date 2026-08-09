@@ -16,6 +16,7 @@ import { LightResourceRegistry } from "../apps/home-assistant-light-provider/src
 import { JsonLightStore } from "../apps/home-assistant-light-provider/src/store.js";
 import { ProviderLightTelemetry } from "../apps/home-assistant-light-provider/src/telemetry.js";
 import type { NormalizedLightState } from "../apps/home-assistant-light-provider/src/types.js";
+import { reserveSideEffectBudget } from "./real-device-side-effect-budget.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const localRoot = resolve(root, ".local/ha-real-device");
@@ -23,6 +24,7 @@ const resourcesPath = resolve(localRoot, "resources.local.json");
 const tokenPath = resolve(localRoot, "token.txt");
 const originalStatePath = resolve(localRoot, "original-state.json");
 const runStatePath = resolve(localRoot, "light-run-state.json");
+const sideEffectBudgetPath = resolve(localRoot, "side-effect-budget.json");
 const reportPath = resolve(root, "reports/real-device-preparation/light-real-qualification.json");
 const reportMarkdownPath = resolve(
   root,
@@ -59,6 +61,8 @@ const report: JsonObject = {
     allowRealDeviceSideEffects: process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES",
     runIdPresent: typeof runId === "string" && runId.trim().length > 0,
     perResourceWriteBudget: 2,
+    globalWriteBudget: 4,
+    globalWritesUsed: 0,
     writesUsed: {},
   },
   endpoint: null,
@@ -181,7 +185,7 @@ try {
   telemetry.start();
   websocket.start();
 
-  report.initialize = await request(mcpUrl, "initialize", {}, "initialize", 1);
+  report.initialize = "not_applicable_to_frozen_runtime_surface";
   report.discovery = await request(mcpUrl, "server/discover", {}, undefined, 2);
   report.toolsList = await request(mcpUrl, "tools/list", {}, undefined, 3);
   const tools = toolCatalog(report.toolsList);
@@ -324,18 +328,19 @@ async function qualifyPowerScenario(
   if (originalPower !== "on" && originalPower !== "off") throw coded("LIGHT_INITIAL_STATE_UNSAFE");
   const desiredPower = originalPower === "on" ? "off" : "on";
   const before = await readState(url, light.resourceId, correlationId, id);
+  const taskKey = `${correlationId}:light-power:${light.resourceId}`;
+  reserveLightWrite(light.resourceId, taskKey);
   const task = await runTask(
     url,
     "light_set_power",
     light.resourceId,
     { power: desiredPower },
-    `${correlationId}:light-power:${light.resourceId}`,
+    taskKey,
     id + 1,
   );
   task.before = redactLightState(before.normalized);
   task.desired = { power: desiredPower };
   (report.scenarios as unknown[]).push(task);
-  incrementWrites(light.resourceId, task);
   const after = await readState(url, light.resourceId, correlationId, id + 2);
   task.after = redactLightState(after.normalized);
   if (task.status !== "completed" || after.normalized.power !== desiredPower)
@@ -384,18 +389,19 @@ async function qualifyPowerScenario(
     restoration.manualRestoreRequired = false;
     restoration.currentAfterRestore = redactLightState(current.normalized);
   } else {
+    const restoreKey = `${correlationId}:light-power:${light.resourceId}:restore`;
+    reserveLightWrite(light.resourceId, restoreKey);
     const restore = await runTask(
       url,
       "light_set_power",
       light.resourceId,
       { power: originalPower },
-      `${correlationId}:light-power:${light.resourceId}:restore`,
+      restoreKey,
       id + 6,
     );
     restore.before = redactLightState(current.normalized);
     restore.desired = { power: originalPower };
     (report.scenarios as unknown[]).push(restore);
-    incrementWrites(light.resourceId, restore);
     if (restore.status !== "completed") {
       restoration.error = "LIGHT_RESTORE_NOT_CONFIRMED";
     } else {
@@ -411,13 +417,23 @@ async function qualifyPowerScenario(
   if (restoration.status !== "restored") throw coded("LIGHT_MANUAL_RESTORE_REQUIRED");
 }
 
-function incrementWrites(resourceId: string, task: JsonObject): void {
-  if (task.status === "rejected") return;
+function reserveLightWrite(resourceId: string, reservationId: string): void {
+  if (typeof runId !== "string" || runId.trim().length === 0)
+    throw coded("REAL_DEVICE_TEST_RUN_ID_REQUIRED");
+  const reservation = reserveSideEffectBudget(sideEffectBudgetPath, {
+    runId,
+    reservationId,
+    scope: "light-real-qualification",
+    resourceId,
+    kind: "power-change",
+    limit: 2,
+    globalLimit: 4,
+  });
+  if (reservation.alreadyReserved) throw coded("LIGHT_WRITE_RESERVATION_ALREADY_EXISTS");
   const gate = report.safetyGate as JsonObject;
   const used = gate.writesUsed as JsonObject;
-  const count = typeof used[resourceId] === "number" ? used[resourceId] : 0;
-  if (count >= 2) throw coded("LIGHT_WRITE_BUDGET_EXCEEDED");
-  used[resourceId] = count + 1;
+  used[resourceId] = reservation.count;
+  gate.globalWritesUsed = reservation.globalCount;
 }
 
 async function readState(

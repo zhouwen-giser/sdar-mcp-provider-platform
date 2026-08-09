@@ -5,11 +5,15 @@ import process from "node:process";
 import { REQUIRED_JOBS } from "./release-metadata-lib.mjs";
 
 const WORKFLOW_PATH = ".github/workflows/release-candidate.yml";
+const SUPPLEMENTAL_JOBS = Object.freeze(["provider-packages-windows"]);
 
 export function assertReleaseCandidateWorkflow(source) {
   const normalizedSource = source.replace(/\r\n?/g, "\n");
   const jobs = extractJobBlocks(normalizedSource);
-  if (Object.keys(jobs).join("\n") !== REQUIRED_JOBS.join("\n")) {
+  const expectedJobs = REQUIRED_JOBS.flatMap((name) =>
+    name === "provider-regression" ? [...SUPPLEMENTAL_JOBS, name] : [name],
+  );
+  if (Object.keys(jobs).join("\n") !== expectedJobs.join("\n")) {
     throw new Error("RELEASE_WORKFLOW_JOBS_INVALID");
   }
   if (
@@ -22,13 +26,19 @@ export function assertReleaseCandidateWorkflow(source) {
     throw new Error("RELEASE_WORKFLOW_CANDIDATE_TRIGGER_INVALID");
   }
   for (const [name, block] of Object.entries(jobs)) {
+    const exactCandidateCheck =
+      block.includes('test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"') ||
+      block.includes("if ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { exit 1 }");
     if (
       !block.includes("uses: actions/checkout@v4") ||
       !block.includes("ref: ${{ env.CANDIDATE_SHA }}") ||
-      !block.includes('test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"')
+      !exactCandidateCheck
     ) {
       throw new Error(`RELEASE_WORKFLOW_EXACT_CHECKOUT_MISSING:${name}`);
     }
+  }
+  if (!jobs["provider-regression"].includes("needs: provider-packages-windows")) {
+    throw new Error("RELEASE_WORKFLOW_WINDOWS_PROVIDER_GATE_MISSING");
   }
   const metadata = jobs["release-metadata"];
   const needs = extractNeeds(metadata);

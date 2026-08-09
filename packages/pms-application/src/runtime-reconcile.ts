@@ -98,14 +98,40 @@ export interface RuntimeReconcileProcessInventoryPort {
   list(): Promise<readonly RuntimeInfrastructureProcessObservation[]>;
 }
 
+export type RuntimeReconcileProviderIdentityVerification =
+  | ProviderIdentityVerification
+  | {
+      readonly valid: false;
+      readonly reasonCode: "PROVIDER_IDENTITY_UNAVAILABLE";
+      readonly mismatchRelations: readonly never[];
+      readonly retryable: true;
+    };
+
+export type RuntimeReconcileAdapterTlsConfiguration =
+  | { readonly mode: "disabled" }
+  | {
+      readonly mode: "required";
+      readonly caPath: string;
+      readonly certPath: string;
+      readonly keyPath: string;
+    };
+
 export interface RuntimeReconcileProviderIdentityPort {
   verify(input: {
     readonly expectedProviderId: string;
     readonly target: RuntimeInfrastructureInstanceTarget;
+    readonly bootstrapProviderId: string;
+    readonly adapterEndpoint: string;
+    readonly adapterTls: RuntimeReconcileAdapterTlsConfiguration;
     readonly timeoutMs: number;
     readonly signal: AbortSignal;
-  }): Promise<ProviderIdentityVerification>;
+  }): Promise<RuntimeReconcileProviderIdentityVerification>;
 }
+
+type RuntimeReconcileProviderIdentityOutcome =
+  | { readonly state: "verified" }
+  | { readonly state: "unavailable" }
+  | { readonly state: "mismatch"; readonly deployment: RuntimeDeployment };
 
 export interface RuntimeDeploymentReconcileInput {
   readonly providerId: string;
@@ -195,6 +221,21 @@ export class RuntimeDeploymentReconciler {
             const instance = await cancellable(input, () =>
               this.store.ensureInstance(deployment.snapshot, 0),
             );
+            const identity = await this.reconcileProviderIdentity(deployment, instance, input);
+            if (identity.state === "mismatch") {
+              return {
+                deployment: identity.deployment.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
+            if (identity.state === "unavailable") {
+              return {
+                deployment: deployment.snapshot,
+                progressed,
+                orphanProcessNames: orphans,
+              };
+            }
             await cancellable(input, () =>
               this.lifecycle.start(
                 instance,
@@ -209,10 +250,18 @@ export class RuntimeDeploymentReconciler {
             const instance = await cancellable(input, () =>
               this.store.ensureInstance(deployment.snapshot, 0),
             );
-            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
-            if (identityFailure !== null) {
+            const identity = await this.reconcileProviderIdentity(deployment, instance, input);
+            if (identity.state === "mismatch") {
               return {
-                deployment: identityFailure.snapshot,
+                deployment: identity.deployment.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
+            if (identity.state === "unavailable") {
+              deployment = await this.transition(deployment, "DEGRADED", input);
+              return {
+                deployment: deployment.snapshot,
                 progressed: true,
                 orphanProcessNames: orphans,
               };
@@ -273,11 +322,26 @@ export class RuntimeDeploymentReconciler {
                 orphanProcessNames: orphans,
               };
             }
-            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
-            if (identityFailure !== null) {
+            const identity = await this.reconcileProviderIdentity(deployment, instance, input);
+            if (identity.state === "mismatch") {
               return {
-                deployment: identityFailure.snapshot,
+                deployment: identity.deployment.snapshot,
                 progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
+            if (identity.state === "unavailable") {
+              if (before === "ACTIVE") {
+                deployment = await this.transition(deployment, "DEGRADED", input);
+                return {
+                  deployment: deployment.snapshot,
+                  progressed: true,
+                  orphanProcessNames: orphans,
+                };
+              }
+              return {
+                deployment: deployment.snapshot,
+                progressed,
                 orphanProcessNames: orphans,
               };
             }
@@ -299,10 +363,18 @@ export class RuntimeDeploymentReconciler {
             const instance = await cancellable(input, () =>
               this.store.ensureInstance(deployment.snapshot, 0),
             );
-            const identityFailure = await this.failOnIdentityMismatch(deployment, instance, input);
-            if (identityFailure !== null) {
+            const identity = await this.reconcileProviderIdentity(deployment, instance, input);
+            if (identity.state === "mismatch") {
               return {
-                deployment: identityFailure.snapshot,
+                deployment: identity.deployment.snapshot,
+                progressed: true,
+                orphanProcessNames: orphans,
+              };
+            }
+            if (identity.state === "unavailable") {
+              deployment = await this.transition(deployment, "DEGRADED", input);
+              return {
+                deployment: deployment.snapshot,
                 progressed: true,
                 orphanProcessNames: orphans,
               };
@@ -403,20 +475,26 @@ export class RuntimeDeploymentReconciler {
     );
   }
 
-  private async failOnIdentityMismatch(
+  private async reconcileProviderIdentity(
     deployment: RuntimeDeployment,
     instance: RuntimeReconcileInstance,
     input: RuntimeDeploymentReconcileInput,
-  ): Promise<RuntimeDeployment | null> {
+  ): Promise<RuntimeReconcileProviderIdentityOutcome> {
     const verification = await cancellable(input, () =>
       this.providerIdentity.verify({
         expectedProviderId: input.providerId,
         target: instance.target,
+        bootstrapProviderId: instance.target.providerId,
+        adapterEndpoint: requireAdapterEndpoint(instance.effectiveConfig),
+        adapterTls: requireAdapterTlsConfiguration(instance.effectiveConfig),
         timeoutMs: input.context.timeoutMs,
         signal: input.context.signal,
       }),
     );
-    if (verification.valid) return null;
+    if (verification.valid) return { state: "verified" };
+    if (verification.reasonCode === "PROVIDER_IDENTITY_UNAVAILABLE") {
+      return { state: "unavailable" };
+    }
     await cancellable(input, () =>
       this.store.fail(
         input.providerId,
@@ -426,7 +504,7 @@ export class RuntimeDeploymentReconciler {
         verification.reasonCode,
       ),
     );
-    return this.requireDeployment(input);
+    return { state: "mismatch", deployment: await this.requireDeployment(input) };
   }
 
   private async requireDeployment(
@@ -468,6 +546,37 @@ export class RuntimeDeploymentReconciler {
     }
     return Object.freeze(orphans);
   }
+}
+
+function requireAdapterEndpoint(
+  effectiveConfig: Readonly<Record<string, string | number | boolean>>,
+): string {
+  const endpoint = effectiveConfig.ADAPTER_ENDPOINT;
+  if (typeof endpoint !== "string" || endpoint.length === 0)
+    throw new Error("RUNTIME_ADAPTER_ENDPOINT_MISSING");
+  return endpoint;
+}
+
+function requireAdapterTlsConfiguration(
+  effectiveConfig: Readonly<Record<string, string | number | boolean>>,
+): RuntimeReconcileAdapterTlsConfiguration {
+  const mode = effectiveConfig.ADAPTER_TLS_MODE ?? "disabled";
+  if (mode === "disabled") return { mode };
+  const caPath = effectiveConfig.ADAPTER_TLS_CA_PATH;
+  const certPath = effectiveConfig.ADAPTER_TLS_CERT_PATH;
+  const keyPath = effectiveConfig.ADAPTER_TLS_KEY_PATH;
+  if (
+    mode !== "required" ||
+    typeof caPath !== "string" ||
+    caPath.length === 0 ||
+    typeof certPath !== "string" ||
+    certPath.length === 0 ||
+    typeof keyPath !== "string" ||
+    keyPath.length === 0
+  ) {
+    throw new Error("RUNTIME_ADAPTER_MTLS_CONFIGURATION_INVALID");
+  }
+  return { mode, caPath, certPath, keyPath };
 }
 
 function stepContext(

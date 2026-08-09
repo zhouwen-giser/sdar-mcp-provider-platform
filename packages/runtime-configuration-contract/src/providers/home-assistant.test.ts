@@ -72,5 +72,14 @@ describe("Home Assistant Climate configuration contract", () => {
         ADAPTER_TLS_MODE: "required",
       }),
     ).toThrow("ADAPTER_MTLS_FILES_REQUIRED");
+    for (const unsafeUrl of [
+      "http://user:secret@127.0.0.1:8123",
+      "http://127.0.0.1:8123?token=secret",
+      "http://127.0.0.1:8123#secret",
+    ]) {
+      expect(() =>
+        loadHomeAssistantClimateConfiguration({ ...base, HOME_ASSISTANT_URL: unsafeUrl }),
+      ).toThrow("HOME_ASSISTANT_URL_SENSITIVE_COMPONENT_FORBIDDEN");
+    }
   });
 });

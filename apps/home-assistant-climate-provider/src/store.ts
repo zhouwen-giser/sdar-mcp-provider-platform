@@ -13,6 +13,11 @@ export interface StateDocument {
   executions: Record<string, ClimateExecution>;
   pendingTelemetryEvents: QueuedEvent[];
   nextTelemetrySequence: number;
+  climatePowerGuard?: {
+    power: "on" | "off";
+    attemptedAt: string;
+    taskId: string;
+  };
 }
 export interface ClimateStore {
   get(id: string): ClimateExecution | undefined;
@@ -87,17 +92,82 @@ export class MemoryClimateStore implements ClimateStore {
   }
 }
 function valid(v: unknown): v is StateDocument {
+  if (
+    !record(v) ||
+    !(
+      "version" in v &&
+      v.version === 1 &&
+      "executions" in v &&
+      record(v.executions) &&
+      "pendingTelemetryEvents" in v &&
+      Array.isArray(v.pendingTelemetryEvents) &&
+      "nextTelemetrySequence" in v &&
+      typeof v.nextTelemetrySequence === "number"
+    )
+  )
+    return false;
+  if (!Object.values(v.executions).every(validExecution)) return false;
+  const guard = v.climatePowerGuard;
   return (
-    typeof v === "object" &&
-    v !== null &&
-    "version" in v &&
-    v.version === 1 &&
-    "executions" in v &&
-    typeof v.executions === "object" &&
-    v.executions !== null &&
-    "pendingTelemetryEvents" in v &&
-    Array.isArray(v.pendingTelemetryEvents) &&
-    "nextTelemetrySequence" in v &&
-    typeof v.nextTelemetrySequence === "number"
+    guard === undefined ||
+    (record(guard) &&
+      (guard.power === "on" || guard.power === "off") &&
+      typeof guard.attemptedAt === "string" &&
+      Number.isFinite(Date.parse(guard.attemptedAt)) &&
+      typeof guard.taskId === "string" &&
+      guard.taskId.length > 0)
   );
+}
+
+function validExecution(value: unknown): value is ClimateExecution {
+  if (!record(value) || !record(value.executionContext) || !record(value.desiredState))
+    return false;
+  const desired = value.desiredState;
+  const desiredValid =
+    (desired.type === "power" && (desired.power === "on" || desired.power === "off")) ||
+    (desired.type === "hvac_mode" && typeof desired.hvacMode === "string") ||
+    (desired.type === "temperature" &&
+      typeof desired.temperature === "number" &&
+      Number.isFinite(desired.temperature));
+  const operationMatchesDesired =
+    (value.operationName === "climate_set_power" && desired.type === "power") ||
+    (value.operationName === "climate_set_hvac_mode" && desired.type === "hvac_mode") ||
+    (value.operationName === "climate_set_temperature" && desired.type === "temperature");
+  const dispatchState = value.dispatchState;
+  return (
+    typeof value.taskId === "string" &&
+    value.taskId.length > 0 &&
+    typeof value.externalExecutionId === "string" &&
+    (value.operationName === "climate_set_power" ||
+      value.operationName === "climate_set_hvac_mode" ||
+      value.operationName === "climate_set_temperature") &&
+    typeof value.resourceId === "string" &&
+    /^climate\.[a-z0-9_]+$/.test(String(value.entityId)) &&
+    typeof value.argumentHash === "string" &&
+    typeof value.executionContext.authorizationContextHash === "string" &&
+    typeof value.executionContext.executionMode === "string" &&
+    typeof value.executionContext.simulationId === "string" &&
+    typeof value.executionContext.correlationId === "string" &&
+    desiredValid &&
+    operationMatchesDesired &&
+    (value.state === "PENDING_SIDE_EFFECT" ||
+      value.state === "CONFIRMING" ||
+      value.state === "SUCCEEDED" ||
+      value.state === "TECHNICAL_FAILED") &&
+    typeof value.sideEffectDispatched === "boolean" &&
+    (dispatchState === undefined ||
+      dispatchState === "NOT_STARTED" ||
+      dispatchState === "INTENT_PERSISTED" ||
+      dispatchState === "CALL_RETURNED") &&
+    Number.isInteger(value.revision) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    typeof value.confirmationDeadlineAt === "string" &&
+    record(value.lastSnapshot) &&
+    record(value.commandAcks)
+  );
+}
+
+function record(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

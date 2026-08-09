@@ -15,6 +15,7 @@ import { ClimateResourceRegistry } from "../apps/home-assistant-climate-provider
 import { ClimateProviderServer } from "../apps/home-assistant-climate-provider/src/server.js";
 import { JsonClimateStore } from "../apps/home-assistant-climate-provider/src/store.js";
 import { ProviderClimateTelemetry } from "../apps/home-assistant-climate-provider/src/telemetry.js";
+import { reserveSideEffectBudget } from "./real-device-side-effect-budget.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const localRoot = resolve(root, ".local/ha-real-device");
@@ -22,6 +23,7 @@ const resourcesPath = resolve(localRoot, "resources.local.json");
 const tokenPath = resolve(localRoot, "token.txt");
 const originalStatePath = resolve(localRoot, "original-state.json");
 const runStatePath = resolve(localRoot, "run-state.json");
+const sideEffectBudgetPath = resolve(localRoot, "side-effect-budget.json");
 const reportPath = resolve(root, "reports/real-device-preparation/climate-real-qualification.json");
 const reportMarkdownPath = resolve(
   root,
@@ -66,6 +68,8 @@ const report: JsonObject = {
       climateHvacMode: 2,
       climateTemperature: 2,
     },
+    globalWriteBudget: 6,
+    globalWritesUsed: 0,
     writesUsed: {
       climatePowerOn: 0,
       climatePowerOff: 0,
@@ -142,6 +146,7 @@ try {
     telemetry,
     20_000,
     writesEnabled,
+    { powerSideEffectsEnabled: writesEnabled && climatePowerTestGateOpen },
   );
   websocket = new HomeAssistantClimateWebSocket({
     baseUrl: local.url,
@@ -212,7 +217,7 @@ try {
   telemetry.start();
   websocket.start();
 
-  report.initialize = await readOnlyCall(mcpUrl, "initialize", {}, "initialize", 1);
+  report.initialize = "not_applicable_to_frozen_runtime_surface";
   report.discovery = await readOnlyCall(mcpUrl, "server/discover", {}, undefined, 2);
   report.toolsList = await readOnlyCall(mcpUrl, "tools/list", {}, undefined, 3);
   const toolNames = (
@@ -255,12 +260,18 @@ try {
     climate.temperatureRange.maximum,
   );
   const modePreState = await readState(mcpUrl, climate.resourceId, integrationRunId, 5);
+  const modeKey = `${integrationRunId}:climate-mode`;
+  if (modePreState.normalized.power === "off" && !climatePowerTestGateOpen)
+    throw coded("CLIMATE_POWER_TEST_GATE_CLOSED");
+  reserveClimateWrite(climate.resourceId, "climateHvacMode", modeKey);
+  if (modePreState.normalized.power === "off")
+    reserveClimateWrite(climate.resourceId, "climatePowerOn", `${modeKey}:implicit-power-on`);
   const modeScenario = await runTask(
     mcpUrl,
     "climate_set_hvac_mode",
     climate.resourceId,
     { hvacMode: desiredMode },
-    `${integrationRunId}:climate-mode`,
+    modeKey,
     6,
   );
   modeScenario.before = redactClimateState(modePreState.normalized);
@@ -269,22 +280,12 @@ try {
   if (modeScenario.status !== "completed") throw coded("CLIMATE_MODE_NOT_CONFIRMED");
   const afterMode = await readState(mcpUrl, climate.resourceId, integrationRunId, 7);
   modeScenario.after = redactClimateState(afterMode.normalized);
-  (report.safetyGate as JsonObject).writesUsed = {
-    ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
-    climateHvacMode: 1,
-  };
-  if (original.normalized.power === "off" && afterMode.normalized.power === "on") {
-    (report.safetyGate as JsonObject).writesUsed = {
-      ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
-      climatePowerOn: 1,
-    };
-  }
 
   const duplicate = await callTool(
     mcpUrl,
     "climate_set_hvac_mode",
     { resourceId: climate.resourceId, hvacMode: desiredMode },
-    `${integrationRunId}:climate-mode`,
+    modeKey,
     8,
   );
   const duplicateResult = isObject(duplicate.body.result) ? duplicate.body.result : {};
@@ -305,7 +306,7 @@ try {
           ? chooseDifferentMode(climate.allowedHvacModes, desiredMode)
           : original.normalized.hvacMode,
     },
-    `${integrationRunId}:climate-mode`,
+    modeKey,
     9,
   );
   const conflictResult = isObject(conflict.body.result) ? conflict.body.result : {};
@@ -319,12 +320,14 @@ try {
   };
 
   const temperaturePreState = await readState(mcpUrl, climate.resourceId, integrationRunId, 10);
+  const temperatureKey = `${integrationRunId}:climate-temperature`;
+  reserveClimateWrite(climate.resourceId, "climateTemperature", temperatureKey);
   const temperatureScenario = await runTask(
     mcpUrl,
     "climate_set_temperature",
     climate.resourceId,
     { targetTemperature: desiredTemperature },
-    `${integrationRunId}:climate-temperature`,
+    temperatureKey,
     11,
   );
   temperatureScenario.before = redactClimateState(temperaturePreState.normalized);
@@ -342,12 +345,14 @@ try {
       const powerPreState = await readState(mcpUrl, climate.resourceId, integrationRunId, 13);
       let powerScenario: JsonObject;
       try {
+        const powerKey = `${integrationRunId}:climate-power-on`;
+        reserveClimateWrite(climate.resourceId, "climatePowerOn", powerKey);
         powerScenario = await runTask(
           mcpUrl,
           "climate_set_power",
           climate.resourceId,
           { power: "on" },
-          `${integrationRunId}:climate-power-on`,
+          powerKey,
           14,
         );
       } catch (error) {
@@ -367,10 +372,6 @@ try {
       stateBeforeRestore = afterPower.normalized;
       if (powerScenario.status === "completed" && afterPower.normalized.power === "on") {
         powerQualificationStatus = "real_pass";
-        (report.safetyGate as JsonObject).writesUsed = {
-          ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
-          climatePowerOn: 1,
-        };
       } else {
         powerQualificationStatus = "blocked";
       }
@@ -687,12 +688,14 @@ async function restoreClimate(
     Math.abs(original.targetTemperature - current.targetTemperature) > 0.1
   ) {
     const pre = await readState(url, climate.resourceId, correlationId, 15);
+    const restoreTemperatureKey = `${correlationId}:restore-temperature`;
+    reserveClimateWrite(climate.resourceId, "climateTemperature", restoreTemperatureKey);
     const task = await runTask(
       url,
       "climate_set_temperature",
       climate.resourceId,
       { targetTemperature: original.targetTemperature },
-      `${correlationId}:restore-temperature`,
+      restoreTemperatureKey,
       16,
     );
     task.before = redactClimateState(pre.normalized);
@@ -703,14 +706,51 @@ async function restoreClimate(
       restoration.manualRestoreRequired = true;
       return restoration;
     }
-    (report.safetyGate as JsonObject).writesUsed = {
-      ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
-      climateTemperature: 2,
-    };
     current = (await readState(url, climate.resourceId, correlationId, 17)).normalized;
   }
+  if (
+    original.power === "on" &&
+    typeof original.hvacMode === "string" &&
+    original.hvacMode !== "off" &&
+    current.hvacMode !== original.hvacMode
+  ) {
+    const pre = await readState(url, climate.resourceId, correlationId, 18);
+    if (pre.normalized.power === "off" && !climatePowerTestGateOpen) {
+      restoration.status = "manual_restore_required";
+      restoration.manualRestoreRequired = true;
+      restoration.reason = "CLIMATE_POWER_TEST_GATE_CLOSED";
+      restoration.currentAfterRestore = redactClimateState(pre.normalized);
+      return restoration;
+    }
+    const restoreModeKey = `${correlationId}:restore-mode`;
+    reserveClimateWrite(climate.resourceId, "climateHvacMode", restoreModeKey);
+    if (pre.normalized.power === "off")
+      reserveClimateWrite(
+        climate.resourceId,
+        "climatePowerOn",
+        `${restoreModeKey}:implicit-power-on`,
+      );
+    const task = await runTask(
+      url,
+      "climate_set_hvac_mode",
+      climate.resourceId,
+      { hvacMode: original.hvacMode },
+      restoreModeKey,
+      19,
+    );
+    task.before = redactClimateState(pre.normalized);
+    task.desired = { hvacMode: original.hvacMode };
+    (report.scenarios as unknown[]).push(task);
+    if (task.status !== "completed") {
+      restoration.status = "manual_restore_required";
+      restoration.manualRestoreRequired = true;
+      restoration.reason = "CLIMATE_MODE_RESTORE_FAILED";
+      return restoration;
+    }
+    current = (await readState(url, climate.resourceId, correlationId, 20)).normalized;
+  }
   if (original.power === "off" && current.power === "on") {
-    let observedBeforeSafetyWait = await readState(url, climate.resourceId, correlationId, 18);
+    let observedBeforeSafetyWait = await readState(url, climate.resourceId, correlationId, 21);
     for (
       let attempt = 0;
       attempt < 10 && observedBeforeSafetyWait.normalized.power === "on";
@@ -721,7 +761,7 @@ async function restoreClimate(
         url,
         climate.resourceId,
         correlationId,
-        19 + attempt,
+        22 + attempt,
       );
     }
     current = observedBeforeSafetyWait.normalized;
@@ -755,7 +795,7 @@ async function restoreClimate(
       restoration.currentAfterRestore = redactClimateState(current);
       return restoration;
     }
-    const pre = await readState(url, climate.resourceId, correlationId, 30);
+    const pre = await readState(url, climate.resourceId, correlationId, 40);
     if (pre.normalized.power !== "on") {
       if (pre.normalized.power === original.power) {
         restoration.status = "restored";
@@ -766,13 +806,15 @@ async function restoreClimate(
       }
       return restoration;
     }
+    const restorePowerKey = `${correlationId}:restore-power-off`;
+    reserveClimateWrite(climate.resourceId, "climatePowerOff", restorePowerKey);
     const task = await runTask(
       url,
       "climate_set_power",
       climate.resourceId,
       { power: "off" },
-      `${correlationId}:restore-power-off`,
-      31,
+      restorePowerKey,
+      41,
     );
     task.before = redactClimateState(pre.normalized);
     task.desired = { power: "off" };
@@ -782,13 +824,9 @@ async function restoreClimate(
       restoration.manualRestoreRequired = true;
       return restoration;
     }
-    (report.safetyGate as JsonObject).writesUsed = {
-      ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
-      climatePowerOff: 1,
-    };
     restoration.status = "restored";
     restoration.currentAfterRestore = redactClimateState(
-      (await readState(url, climate.resourceId, correlationId, 32)).normalized,
+      (await readState(url, climate.resourceId, correlationId, 42)).normalized,
     );
   }
   if (restoration.status === "not_required") restoration.status = "restored";
@@ -802,6 +840,31 @@ function chooseMode(allowed: string[], supported: string[], current: unknown): s
   );
   if (selected === undefined) throw coded("NO_SAFE_HVAC_MODE_CHANGE");
   return selected;
+}
+function reserveClimateWrite(resourceId: string, kind: string, reservationId: string): void {
+  if (typeof runId !== "string" || runId.trim().length === 0)
+    throw coded("REAL_DEVICE_TEST_RUN_ID_REQUIRED");
+  const limits: Record<string, number> = {
+    climatePowerOn: 1,
+    climatePowerOff: 1,
+    climateHvacMode: 2,
+    climateTemperature: 2,
+  };
+  const limit = limits[kind];
+  if (limit === undefined) throw coded("CLIMATE_WRITE_BUDGET_KIND_INVALID");
+  const reservation = reserveSideEffectBudget(sideEffectBudgetPath, {
+    runId,
+    reservationId,
+    scope: "climate-real-qualification",
+    resourceId,
+    kind,
+    limit,
+    globalLimit: 6,
+  });
+  if (reservation.alreadyReserved) throw coded("CLIMATE_WRITE_RESERVATION_ALREADY_EXISTS");
+  const gate = report.safetyGate as JsonObject;
+  gate.writesUsed = { ...(gate.writesUsed as JsonObject), [kind]: reservation.count };
+  gate.globalWritesUsed = reservation.globalCount;
 }
 function chooseDifferentMode(allowed: string[], current: string): string {
   return allowed.find((mode) => mode !== current) ?? current;

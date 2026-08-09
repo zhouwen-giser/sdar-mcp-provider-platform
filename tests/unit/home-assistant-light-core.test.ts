@@ -25,6 +25,15 @@ describe("Home Assistant light core", () => {
     expect(() => loadLightConfig({ ...base, RUNTIME_ENV: "production" })).toThrow(
       "HOME_ASSISTANT_INSECURE_HTTP_FORBIDDEN",
     );
+    for (const unsafeUrl of [
+      "http://user:secret@127.0.0.1:8123",
+      "http://127.0.0.1:8123?token=secret",
+      "http://127.0.0.1:8123#secret",
+    ]) {
+      expect(() => loadLightConfig({ ...base, HOME_ASSISTANT_URL: unsafeUrl })).toThrow(
+        "HOME_ASSISTANT_URL_SENSITIVE_COMPONENT_FORBIDDEN",
+      );
+    }
   });
 
   it("keeps light entity identifiers allowlisted and maps unsupported brightness to null", () => {
@@ -62,6 +71,15 @@ describe("Home Assistant light core", () => {
         last_updated: "2026-07-18T00:00:00Z",
       }),
     ).toMatchObject({ brightnessPercent: 50, supportsBrightness: true });
+    expect(
+      normalizeLightState("main", {
+        entity_id: "light.main",
+        state: "off",
+        attributes: { supported_color_modes: ["brightness"] },
+        last_changed: "2026-07-18T00:00:00Z",
+        last_updated: "2026-07-18T00:00:00Z",
+      }),
+    ).toMatchObject({ brightnessPercent: null, supportsBrightness: true });
     expect(
       normalizeLightState("main", {
         entity_id: "light.main",

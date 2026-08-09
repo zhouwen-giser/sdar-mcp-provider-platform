@@ -6,7 +6,9 @@ const ROOT = resolve(process.cwd());
 const ENVIRONMENT = "home-lab";
 const API_BASE_URL = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const RUN_ID = process.env.REAL_DEVICE_TEST_RUN_ID?.trim() ?? "";
-const WRITE_GATE = process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" && RUN_ID.length > 0;
+const GENERAL_WRITE_GATE =
+  process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" && RUN_ID.length > 0;
+const CLIMATE_POWER_TEST_GATE = process.env.ALLOW_CLIMATE_POWER_TEST === "YES";
 const SOURCE_REPORT = resolve(
   ROOT,
   "reports/real-device-preparation-continuation/three-device-e2e.json",
@@ -35,6 +37,8 @@ const report: JsonObject = {
   safetyGate: {
     allowRealDeviceSideEffects: process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES",
     runIdPresent: RUN_ID.length > 0,
+    climatePowerTestGateOpen: CLIMATE_POWER_TEST_GATE,
+    writeGateOpen: GENERAL_WRITE_GATE && CLIMATE_POWER_TEST_GATE,
     writeBudget: { climatePowerOff: 1 },
     writesUsed: { climatePowerOff: 0 },
   },
@@ -43,13 +47,15 @@ const report: JsonObject = {
   wait: null,
   task: null,
   finalState: null,
+  deviceRestoreStatus: "unverified",
+  manualRestoreRequired: false,
   activeTasks: null,
   uncertainTasks: null,
+  runtimeTaskCountSource: "not_queried",
   errors: [],
 };
 
 try {
-  if (!WRITE_GATE) throw new Error("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED");
   const source = JSON.parse(await readFile(SOURCE_REPORT, "utf8")) as JsonObject;
   const initialStates = Array.isArray(source.initialStates) ? source.initialStates : [];
   const original = initialStates.find(
@@ -70,16 +76,21 @@ try {
   report.currentBeforeRestore = redactState(current);
 
   if (current.power !== original.power) {
+    report.deviceRestoreStatus = "manual_restore_required";
+    report.manualRestoreRequired = true;
     if (original.power !== "off" || current.power !== "on") {
       throw new Error("CLIMATE_RESTORE_POWER_STATE_UNSAFE");
     }
+    if (!GENERAL_WRITE_GATE) throw new Error("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED");
+    if (!CLIMATE_POWER_TEST_GATE) throw new Error("CLIMATE_POWER_TEST_GATE_CLOSED");
     const waitMs = safetyWaitMs(current.observedAt);
     report.wait = {
       safetyIntervalMs: 300_000,
-      waitedMs: waitMs,
+      remainingMs: waitMs,
+      waitedMs: 0,
       reason: "opposite climate power operation",
     };
-    if (waitMs > 0) await delay(waitMs);
+    if (waitMs > 0) throw new Error("CLIMATE_OPPOSITE_POWER_INTERVAL_ACTIVE");
     current = await readState(climateEndpoint, CLIMATE_RESOURCE, 11);
     if (current.power === "on") {
       const task = await runPowerOff(climateEndpoint, `${integrationRunId}:restore-power-off`, 20);
@@ -93,8 +104,6 @@ try {
 
   const final = await readState(climateEndpoint, CLIMATE_RESOURCE, 30);
   report.finalState = redactState(final);
-  report.activeTasks = 0;
-  report.uncertainTasks = 0;
   report.status =
     final.power === original.power &&
     final.hvacMode === original.hvacMode &&
@@ -102,8 +111,24 @@ try {
       ? "passed"
       : "blocked";
   if (report.status !== "passed") throw new Error("CLIMATE_RESTORE_STATE_MISMATCH");
+  report.deviceRestoreStatus = "restored";
+  report.manualRestoreRequired = false;
 } catch (error) {
-  (report.errors as unknown[]).push(safeError(error));
+  const code = safeError(error);
+  (report.errors as unknown[]).push(code);
+  if (
+    [
+      "REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED",
+      "CLIMATE_POWER_TEST_GATE_CLOSED",
+      "CLIMATE_OPPOSITE_POWER_INTERVAL_ACTIVE",
+      "CLIMATE_RESTORE_POWER_STATE_UNSAFE",
+      "CLIMATE_POWER_RESTORE_CONFIRMATION_FAILED",
+      "CLIMATE_RESTORE_STATE_MISMATCH",
+    ].includes(code)
+  ) {
+    report.deviceRestoreStatus = "manual_restore_required";
+    report.manualRestoreRequired = true;
+  }
 } finally {
   report.completedAt = new Date().toISOString();
   await mkdir(REPORT_DIRECTORY, { recursive: true });
@@ -308,8 +333,12 @@ function renderMarkdown(value: JsonObject): string {
     `- Evidence class: \`${String(value.evidenceClass)}\``,
     `- Status: \`${String(value.status)}\``,
     `- Integration run: \`${String(value.integrationRunId)}\``,
+    `- Device restore: \`${String(value.deviceRestoreStatus)}\``,
+    `- Source state: \`${JSON.stringify(value.sourceInitialState ?? null)}\``,
+    `- Current before restore: \`${JSON.stringify(value.currentBeforeRestore ?? null)}\``,
     `- Wait: \`${JSON.stringify(value.wait ?? null)}\``,
     `- Final state: \`${JSON.stringify(value.finalState ?? null)}\``,
+    `- Runtime task counts: \`not_queried\``,
     "",
     "Only the safety-gated `climate_set_power(off)` restore path is permitted by this recovery driver; no other device operation is attempted.",
     "",

@@ -1,11 +1,15 @@
 {
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
+  "inventory": {
+    "mappedProvenanceEntries": 28,
+    "ownerDirectoryFiles": 36
+  },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
     "newPath": "Current hash-verifiable path; replaced with plannedPath by the physical split task.",
     "plannedPath": "Owner-specific authoritative path after the physical split.",
-    "sequence": "Unique deterministic order across all 26 delivered files.",
+    "sequence": "Unique deterministic append-only order across mapped provenance entries; owner-directory inventory can include migrations outside the original offline mapping set.",
     "legacyVersion": "Original numeric filename prefix; not unique because the delivery contains two independent 014 files."
   },
   "migrationSets": {
@@ -276,16 +280,6 @@
     {
       "sequence": 25,
       "legacyVersion": "024",
-      "owner": "runtime",
-      "oldPath": "migrations/024_accepted_task_substate.sql",
-      "newPath": "migrations/runtime/024_accepted_task_substate.sql",
-      "plannedPath": "migrations/runtime/024_accepted_task_substate.sql",
-      "pathState": "owner_directory",
-      "sha256": "25a0432bd8cdd04cbe4a56762827fd219857c0ca24c260c7911857c75aa78287"
-    },
-    {
-      "sequence": 26,
-      "legacyVersion": "024",
       "owner": "provider:ugv",
       "oldPath": "migrations/024_ugv_provider.sql",
       "newPath": "migrations/providers/ugv/024_ugv_provider.sql",
@@ -294,7 +288,7 @@
       "sha256": "05d6e1ec15187fbc96d96db8a6ee3d8d7edc33ff1840c2dc91fd7f104be805a2"
     },
     {
-      "sequence": 27,
+      "sequence": 26,
       "legacyVersion": "025",
       "owner": "provider:npc-tank",
       "oldPath": "migrations/025_npc_tank_provider.sql",
@@ -304,7 +298,7 @@
       "sha256": "55cba8544325d1e07aa9660453d8763992698d23fb7d8327cbb11c02bdbbb58b"
     },
     {
-      "sequence": 28,
+      "sequence": 27,
       "legacyVersion": "009",
       "owner": "pms",
       "oldPath": "migrations/009_runtime_registration.sql",
@@ -312,6 +306,16 @@
       "plannedPath": "migrations/pms/009_runtime_registration.sql",
       "pathState": "owner_directory",
       "sha256": "a3895103f125c79108b62bf035326597ab91bdfad2b0c953ac5c9ef9f909c355"
+    },
+    {
+      "sequence": 28,
+      "legacyVersion": "024",
+      "owner": "runtime",
+      "oldPath": "migrations/024_accepted_task_substate.sql",
+      "newPath": "migrations/runtime/024_accepted_task_substate.sql",
+      "plannedPath": "migrations/runtime/024_accepted_task_substate.sql",
+      "pathState": "owner_directory",
+      "sha256": "25a0432bd8cdd04cbe4a56762827fd219857c0ca24c260c7911857c75aa78287"
     }
   ]
 }

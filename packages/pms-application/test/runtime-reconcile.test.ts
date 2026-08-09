@@ -136,6 +136,49 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(database).not.toHaveProperty("delete");
   });
 
+  it("fails closed on Provider identity mismatch before starting the Runtime", async () => {
+    const store = new MemoryReconcileStore(deployment("STARTING"));
+    const lifecycle = lifecyclePort();
+    const health = readyHealth();
+    const identity = mismatchedIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecycle,
+      health,
+      inventory([]),
+      identity,
+    );
+
+    const result = await reconciler.reconcile(input("pre-start-identity-mismatch"));
+
+    expect(result.deployment.status).toBe("FAILED");
+    expect(store.failureCodes).toEqual(["PROVIDER_ID_MISMATCH"]);
+    expect(lifecycle.start).not.toHaveBeenCalled();
+    expect(health.probe).not.toHaveBeenCalled();
+    expect(identity.verify).toHaveBeenCalledOnce();
+  });
+
+  it("waits in STARTING without launching the Runtime when identity evidence is unavailable", async () => {
+    const store = new MemoryReconcileStore(deployment("STARTING"));
+    const lifecycle = lifecyclePort();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecycle,
+      readyHealth(),
+      inventory([]),
+      unavailableIdentity(),
+    );
+
+    const result = await reconciler.reconcile(input("pre-start-identity-unavailable"));
+
+    expect(result.deployment.status).toBe("STARTING");
+    expect(result.progressed).toBe(false);
+    expect(lifecycle.start).not.toHaveBeenCalled();
+    expect(store.failureCodes).toEqual([]);
+  });
+
   it("blocks health/ACTIVE progression on structured Provider identity mismatch", async () => {
     const store = new MemoryReconcileStore(deployment("HEALTH_CHECKING"));
     const health = readyHealth();
@@ -187,6 +230,25 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(store.transitions).toEqual(["DEGRADED"]);
     expect(health.probe).toHaveBeenCalledOnce();
     expect(identity.verify).not.toHaveBeenCalled();
+  });
+
+  it("moves ACTIVE to DEGRADED when Adapter identity evidence becomes unavailable", async () => {
+    const store = new MemoryReconcileStore(deployment("ACTIVE"));
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      readyHealth(),
+      inventory([]),
+      unavailableIdentity(),
+    );
+
+    const result = await reconciler.reconcile(input("active-identity-unavailable"));
+
+    expect(result.deployment.status).toBe("DEGRADED");
+    expect(result.progressed).toBe(true);
+    expect(store.failureCodes).toEqual([]);
+    expect(store.transitions).toEqual(["DEGRADED"]);
   });
 
   it("keeps healthy identity-valid ACTIVE deployments idempotently ACTIVE", async () => {
@@ -549,6 +611,18 @@ function mismatchedIdentity() {
   return { verify } satisfies RuntimeReconcileProviderIdentityPort;
 }
 
+function unavailableIdentity() {
+  const verify = vi.fn<RuntimeReconcileProviderIdentityPort["verify"]>(() =>
+    Promise.resolve({
+      valid: false as const,
+      reasonCode: "PROVIDER_IDENTITY_UNAVAILABLE" as const,
+      mismatchRelations: [],
+      retryable: true as const,
+    }),
+  );
+  return { verify } satisfies RuntimeReconcileProviderIdentityPort;
+}
+
 function inventory(values: readonly RuntimeReconcileInstance[]) {
   return {
     list: () =>
@@ -580,6 +654,10 @@ function instance(processName: string): RuntimeReconcileInstance {
     effectiveConfig: {
       RUNTIME_ENV: "production",
       ADAPTER_TLS_MODE: "required",
+      ADAPTER_TLS_CA_PATH: "/run/secrets/adapter-ca",
+      ADAPTER_TLS_CERT_PATH: "/run/secrets/adapter-cert",
+      ADAPTER_TLS_KEY_PATH: "/run/secrets/adapter-key",
+      ADAPTER_ENDPOINT: "127.0.0.1:17021",
     },
   };
 }

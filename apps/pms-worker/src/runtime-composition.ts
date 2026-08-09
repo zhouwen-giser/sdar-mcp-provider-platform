@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import * as grpc from "@grpc/grpc-js";
 import type { Pool } from "pg";
+import { GrpcAdapterGateway } from "../../../packages/adapter-protocol/src/index.js";
 import {
   RuntimeDeploymentReconciler,
   parseRuntimeConfigProfileLocator,
   toConfigurationTarget,
   verifyProviderIdentity,
+  type RuntimeReconcileAdapterTlsConfiguration,
+  type RuntimeReconcileProviderIdentityVerification,
   type RuntimeReconcileHealthResult,
   type RuntimeReconcileInstance,
   type RuntimeReconcileStore,
@@ -478,21 +483,75 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
   }
 }
 
-class RuntimeProviderIdentityVerifier {
-  verify(input: {
+interface ProviderManifestGateway {
+  describeProvider(): Promise<{ readonly providerId: string }>;
+  close(): void;
+}
+
+export class RuntimeProviderIdentityVerifier {
+  constructor(
+    private readonly gateway: (input: {
+      readonly endpoint: string;
+      readonly providerId: string;
+      readonly timeoutMs: number;
+      readonly credentials: grpc.ChannelCredentials;
+    }) => ProviderManifestGateway = (input) => new GrpcAdapterGateway(input),
+    private readonly credentials: (
+      input: RuntimeReconcileAdapterTlsConfiguration,
+    ) => grpc.ChannelCredentials = adapterIdentityCredentials,
+  ) {}
+
+  async verify(input: {
     readonly expectedProviderId: string;
     readonly target: RuntimeInfrastructureInstanceTarget;
-  }) {
-    // Runtime readiness is fail-closed until DescribeProvider has been observed. This verifies
-    // the independent PMS/bootstrap relation; the health probe supplies the adapter relation.
-    return Promise.resolve(
-      verifyProviderIdentity(input.expectedProviderId, {
-        bootstrapProviderId: input.target.providerId,
-        adapterManifestProviderId: input.target.providerId,
+    readonly bootstrapProviderId: string;
+    readonly adapterEndpoint: string;
+    readonly adapterTls: RuntimeReconcileAdapterTlsConfiguration;
+    readonly timeoutMs: number;
+    readonly signal: AbortSignal;
+  }): Promise<RuntimeReconcileProviderIdentityVerification> {
+    assertProviderIdentitySignal(input.signal);
+    const gateway = this.gateway({
+      endpoint: input.adapterEndpoint,
+      providerId: input.expectedProviderId,
+      timeoutMs: input.timeoutMs,
+      credentials: this.credentials(input.adapterTls),
+    });
+    try {
+      const manifest = await gateway.describeProvider();
+      assertProviderIdentitySignal(input.signal);
+      return verifyProviderIdentity(input.expectedProviderId, {
+        bootstrapProviderId: input.bootstrapProviderId,
+        adapterManifestProviderId: manifest.providerId,
         describeProviderObserved: true,
-      }),
-    );
+      });
+    } catch {
+      assertProviderIdentitySignal(input.signal);
+      return Object.freeze({
+        valid: false,
+        reasonCode: "PROVIDER_IDENTITY_UNAVAILABLE",
+        mismatchRelations: Object.freeze([]),
+        retryable: true,
+      });
+    } finally {
+      gateway.close();
+    }
   }
+}
+
+function adapterIdentityCredentials(
+  input: RuntimeReconcileAdapterTlsConfiguration,
+): grpc.ChannelCredentials {
+  if (input.mode === "disabled") return grpc.credentials.createInsecure();
+  return grpc.credentials.createSsl(
+    readFileSync(input.caPath),
+    readFileSync(input.keyPath),
+    readFileSync(input.certPath),
+  );
+}
+
+function assertProviderIdentitySignal(signal: AbortSignal): void {
+  if (signal.aborted) throw new Error("RUNTIME_PROVIDER_IDENTITY_ABORTED");
 }
 
 class PostgresRuntimeLifecycleStore implements RuntimeLifecycleStore {

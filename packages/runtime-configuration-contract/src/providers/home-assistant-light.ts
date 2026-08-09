@@ -74,6 +74,8 @@ export function loadHomeAssistantLightConfiguration(
   }
   if (!new Set(["http:", "https:"]).has(url.protocol))
     throw new Error("HOME_ASSISTANT_URL_PROTOCOL_INVALID");
+  if (url.username || url.password || url.search || url.hash)
+    throw new Error("HOME_ASSISTANT_URL_SENSITIVE_COMPONENT_FORBIDDEN");
   validateTls(
     value.ADAPTER_TLS_MODE,
     value.ADAPTER_TLS_CA_PATH,

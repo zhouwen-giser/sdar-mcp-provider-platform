@@ -75,6 +75,7 @@ export type CatalogDiscoveryErrorCode =
   | "CATALOG_INCOMPLETE_TOOLS_LIST"
   | "CATALOG_INVALID_TOOL"
   | "CATALOG_INVALID_SCHEMA"
+  | "CATALOG_SENSITIVE_DATA"
   | "CATALOG_DUPLICATE_TOOL";
 
 export class CatalogDiscoveryError extends Error {

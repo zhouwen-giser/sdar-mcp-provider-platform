@@ -90,17 +90,70 @@ export class MemoryLightStore implements LightStore {
   }
 }
 function valid(value: unknown): value is StateDocument {
+  if (
+    !record(value) ||
+    !(
+      "version" in value &&
+      value.version === 1 &&
+      "executions" in value &&
+      record(value.executions) &&
+      "pendingTelemetryEvents" in value &&
+      Array.isArray(value.pendingTelemetryEvents) &&
+      "nextTelemetrySequence" in value &&
+      typeof value.nextTelemetrySequence === "number"
+    )
+  )
+    return false;
+  return Object.values(value.executions).every(validExecution);
+}
+
+function validExecution(value: unknown): value is LightExecution {
+  if (!record(value) || !record(value.executionContext) || !record(value.desiredState))
+    return false;
+  const desired = value.desiredState;
+  const desiredValid =
+    (desired.type === "power" && (desired.power === "on" || desired.power === "off")) ||
+    (desired.type === "brightness" &&
+      typeof desired.brightnessPercent === "number" &&
+      Number.isFinite(desired.brightnessPercent) &&
+      desired.brightnessPercent >= 0 &&
+      desired.brightnessPercent <= 100);
+  const operationMatchesDesired =
+    (value.operationName === "light_set_power" && desired.type === "power") ||
+    (value.operationName === "light_set_brightness" && desired.type === "brightness");
+  const dispatchState = value.dispatchState;
   return (
-    typeof value === "object" &&
-    value !== null &&
-    "version" in value &&
-    value.version === 1 &&
-    "executions" in value &&
-    typeof value.executions === "object" &&
-    value.executions !== null &&
-    "pendingTelemetryEvents" in value &&
-    Array.isArray(value.pendingTelemetryEvents) &&
-    "nextTelemetrySequence" in value &&
-    typeof value.nextTelemetrySequence === "number"
+    typeof value.taskId === "string" &&
+    value.taskId.length > 0 &&
+    typeof value.externalExecutionId === "string" &&
+    (value.operationName === "light_set_power" || value.operationName === "light_set_brightness") &&
+    typeof value.resourceId === "string" &&
+    /^light\.[a-z0-9_]+$/.test(String(value.entityId)) &&
+    typeof value.argumentHash === "string" &&
+    typeof value.executionContext.authorizationContextHash === "string" &&
+    typeof value.executionContext.executionMode === "string" &&
+    typeof value.executionContext.simulationId === "string" &&
+    typeof value.executionContext.correlationId === "string" &&
+    desiredValid &&
+    operationMatchesDesired &&
+    (value.state === "PENDING_SIDE_EFFECT" ||
+      value.state === "CONFIRMING" ||
+      value.state === "SUCCEEDED" ||
+      value.state === "TECHNICAL_FAILED") &&
+    typeof value.sideEffectDispatched === "boolean" &&
+    (dispatchState === undefined ||
+      dispatchState === "NOT_STARTED" ||
+      dispatchState === "INTENT_PERSISTED" ||
+      dispatchState === "CALL_RETURNED") &&
+    Number.isInteger(value.revision) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    typeof value.confirmationDeadlineAt === "string" &&
+    record(value.lastSnapshot) &&
+    record(value.commandAcks)
   );
+}
+
+function record(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

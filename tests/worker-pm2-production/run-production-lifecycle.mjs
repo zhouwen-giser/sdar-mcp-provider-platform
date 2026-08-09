@@ -122,10 +122,11 @@ try {
     databaseProfileId: isolatedDatabaseProfileId,
   });
   worker = await startWorker();
-
-  await waitForStatus("DEGRADED", 60_000);
-  await waitForProcess((value) => value.state === "online", 20_000);
+  // Reconciliation may already have created either PM2 process before a fail-closed
+  // bootstrap or Provider-identity check. Always clean both names on every exit.
   runtimeProcessObserved = true;
+
+  await waitForStatus("FAILED", 60_000);
   await waitForMissingIsolatedCredentialFailure();
   await writeSecure(isolatedRuntimeTokenFile, isolatedRuntimeToken);
   await writeRuntimeDescriptor(true);
@@ -138,6 +139,7 @@ try {
   timeline.push(event("identity_mismatch", identityMismatch));
   await stopAdapter();
   adapter = await startAdapter(adapterPort, providerId);
+  await reconcileDeploymentThroughApi();
 
   await waitForStatus("ACTIVE", 90_000);
   await waitForStatus("ACTIVE", 90_000, isolatedDeploymentId);
@@ -617,6 +619,25 @@ async function createDeploymentThroughApi(
     },
   });
   assert(response.status === 202, `DEPLOYMENT_CREATE_FAILED:${String(response.status)}`);
+}
+
+async function reconcileDeploymentThroughApi(target = { providerId, deploymentId }) {
+  const current = await apiRequest(
+    `/api/v1/runtime-deployments/${target.deploymentId}?providerId=${target.providerId}`,
+  );
+  assert(current.status === 200, `DEPLOYMENT_GET_FAILED:${String(current.status)}`);
+  const deployment = await current.json();
+  const response = await apiRequest(
+    `/api/v1/runtime-deployments/${target.deploymentId}/reconcile`,
+    {
+      method: "POST",
+      body: {
+        providerId: target.providerId,
+        expectedDesiredRevision: deployment.desiredRevision,
+      },
+    },
+  );
+  assert(response.status === 202, `DEPLOYMENT_RECONCILE_FAILED:${String(response.status)}`);
 }
 
 async function assertRegistryConsumerPath() {

@@ -38,6 +38,14 @@ test("rejects an incomplete metadata dependency graph", () => {
   assert.throws(() => assertReleaseCandidateWorkflow(changed), /RELEASE_WORKFLOW_NEEDS_INVALID/);
 });
 
+test("requires Linux provider regression to depend on the exact-candidate Windows gate", () => {
+  const changed = source.replace("    needs: provider-packages-windows\n", "");
+  assert.throws(
+    () => assertReleaseCandidateWorkflow(changed),
+    /RELEASE_WORKFLOW_WINDOWS_PROVIDER_GATE_MISSING/,
+  );
+});
+
 test("rejects publication from qualification", () => {
   const changed = `${source}\n# docker push ghcr.io/example/image\n`;
   assert.throws(

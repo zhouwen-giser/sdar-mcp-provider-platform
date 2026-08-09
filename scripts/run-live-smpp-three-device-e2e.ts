@@ -3,18 +3,21 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
 import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
+import { reserveSideEffectBudget } from "./real-device-side-effect-budget.js";
 
 const ROOT = resolve(process.cwd());
 const ENVIRONMENT = "home-lab";
 const API_BASE_URL = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const RUN_ID = process.env.REAL_DEVICE_TEST_RUN_ID?.trim() ?? "";
 const WRITE_GATE = process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" && RUN_ID.length > 0;
+const CLIMATE_POWER_TEST_GATE = process.env.ALLOW_CLIMATE_POWER_TEST === "YES";
 const MANAGEMENT_TOKEN_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token");
 const LOCAL_RESOURCES_FILE = resolve(ROOT, ".local/ha-real-device/resources.local.json");
 const REPORT_DIRECTORY = resolve(ROOT, "reports/real-device-preparation-continuation");
 const REPORT_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.json");
 const MARKDOWN_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.md");
 const STATE_PATH = resolve(ROOT, ".local/pms-continuation/three-device-run-state.json");
+const SIDE_EFFECT_BUDGET_PATH = resolve(ROOT, ".local/ha-real-device/side-effect-budget.json");
 
 const CLIMATE_RESOURCE = "living-room-air-conditioner";
 const LIGHT_RESOURCES = ["living-room-main-light", "living-room-aux-light"] as const;
@@ -63,7 +66,10 @@ const report: JsonObject = {
     allowRealDeviceSideEffects: process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES",
     runIdPresent: RUN_ID.length > 0,
     writeGateOpen: WRITE_GATE,
+    climatePowerTestGateOpen: CLIMATE_POWER_TEST_GATE,
     lightWriteBudgetPerResource: 2,
+    globalWriteBudget: 10,
+    globalWritesUsed: 0,
     climateWriteBudget: {
       climateHvacMode: 2,
       climateTemperature: 2,
@@ -275,13 +281,22 @@ async function qualifyClimate(
     configuration.maximumTemperature,
   );
   const beforeMode = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId);
+  const modeKey = `${key}:mode`;
+  if (beforeMode.power === "off" && !CLIMATE_POWER_TEST_GATE) {
+    restoration.reason = "CLIMATE_POWER_TEST_GATE_CLOSED";
+    restoration.manualRestoreRequired = true;
+    return { status: "blocked", restoration };
+  }
+  reserveClimateWrite("climateHvacMode", modeKey, restoration);
+  if (beforeMode.power === "off")
+    reserveClimateWrite("climatePowerOn", `${modeKey}:implicit-power-on`, restoration);
   const modeTask = await runTask(
     endpoint,
     "ha-climate-lab",
     "climate_set_hvac_mode",
     CLIMATE_RESOURCE,
     { hvacMode: desiredMode },
-    `${key}:mode`,
+    modeKey,
     requestId + 1,
   );
   (report.scenarios as unknown[]).push({
@@ -297,7 +312,6 @@ async function qualifyClimate(
     restoration.manualRestoreRequired = true;
     return { status: "blocked", restoration };
   }
-  incrementClimateWrite("climateHvacMode", restoration);
   const afterMode = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 2);
   const modeScenario = lastScenario();
   if (isObject(modeScenario)) modeScenario.after = redactState(afterMode);
@@ -313,7 +327,7 @@ async function qualifyClimate(
     "climate_set_hvac_mode",
     CLIMATE_RESOURCE,
     { hvacMode: desiredMode },
-    `${key}:mode`,
+    modeKey,
     requestId + 3,
   );
   const duplicateResult = asObject(duplicate.body.result);
@@ -324,7 +338,7 @@ async function qualifyClimate(
     "climate_set_hvac_mode",
     CLIMATE_RESOURCE,
     { hvacMode: conflictMode },
-    `${key}:mode`,
+    modeKey,
     requestId + 4,
   );
   if (isObject(modeScenario)) {
@@ -347,13 +361,15 @@ async function qualifyClimate(
     CLIMATE_RESOURCE,
     requestId + 5,
   );
+  const temperatureKey = `${key}:temperature`;
+  reserveClimateWrite("climateTemperature", temperatureKey, restoration);
   const temperatureTask = await runTask(
     endpoint,
     "ha-climate-lab",
     "climate_set_temperature",
     CLIMATE_RESOURCE,
     { targetTemperature: desiredTemperature },
-    `${key}:temperature`,
+    temperatureKey,
     requestId + 6,
   );
   (report.scenarios as unknown[]).push({
@@ -369,7 +385,6 @@ async function qualifyClimate(
     restoration.manualRestoreRequired = true;
     return { status: "blocked", restoration };
   }
-  incrementClimateWrite("climateTemperature", restoration);
   const afterTemperature = await readState(
     endpoint,
     "ha-climate-lab",
@@ -395,13 +410,15 @@ async function qualifyClimate(
       CLIMATE_RESOURCE,
       requestId + 8,
     );
+    const restoreTemperatureKey = `${key}:restore-temperature`;
+    reserveClimateWrite("climateTemperature", restoreTemperatureKey, restoration);
     const restoreTemperature = await runTask(
       endpoint,
       "ha-climate-lab",
       "climate_set_temperature",
       CLIMATE_RESOURCE,
       { targetTemperature: original.targetTemperature },
-      `${key}:restore-temperature`,
+      restoreTemperatureKey,
       requestId + 9,
     );
     (report.scenarios as unknown[]).push({
@@ -417,7 +434,6 @@ async function qualifyClimate(
       restoration.manualRestoreRequired = true;
       return { status: "blocked", restoration };
     }
-    incrementClimateWrite("climateTemperature", restoration);
     current = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 10);
   }
 
@@ -431,13 +447,15 @@ async function qualifyClimate(
       CLIMATE_RESOURCE,
       requestId + 11,
     );
+    const restoreModeKey = `${key}:restore-mode`;
+    reserveClimateWrite("climateHvacMode", restoreModeKey, restoration);
     const restoreMode = await runTask(
       endpoint,
       "ha-climate-lab",
       "climate_set_hvac_mode",
       CLIMATE_RESOURCE,
       { hvacMode: original.hvacMode },
-      `${key}:restore-mode`,
+      restoreModeKey,
       requestId + 12,
     );
     (report.scenarios as unknown[]).push({
@@ -453,7 +471,6 @@ async function qualifyClimate(
       restoration.manualRestoreRequired = true;
       return { status: "blocked", restoration };
     }
-    incrementClimateWrite("climateHvacMode", restoration);
     current = await readState(endpoint, "ha-climate-lab", CLIMATE_RESOURCE, requestId + 13);
   }
 
@@ -464,14 +481,24 @@ async function qualifyClimate(
       restoration.manualRestoreRequired = true;
       return { status: "blocked", restoration };
     }
+    if (!CLIMATE_POWER_TEST_GATE) {
+      restoration.reason = "CLIMATE_POWER_TEST_GATE_CLOSED";
+      restoration.status = "manual_restore_required";
+      restoration.manualRestoreRequired = true;
+      return { status: "blocked", restoration };
+    }
     const waitMs = safetyWaitMs(current.observedAt);
     if (waitMs > 0) {
       (restoration.waits as unknown[]).push({
         safetyIntervalMs: 300_000,
-        waitedMs: waitMs,
+        remainingMs: waitMs,
+        waitedMs: 0,
         reason: "opposite climate power operation",
       });
-      await delay(waitMs);
+      restoration.reason = "CLIMATE_OPPOSITE_POWER_INTERVAL_ACTIVE";
+      restoration.status = "manual_restore_required";
+      restoration.manualRestoreRequired = true;
+      return { status: "blocked", restoration };
     }
     const beforeRestorePower = await readState(
       endpoint,
@@ -480,13 +507,15 @@ async function qualifyClimate(
       requestId + 14,
     );
     if (beforeRestorePower.power === "on") {
+      const restorePowerKey = `${key}:restore-power-off`;
+      reserveClimateWrite("climatePowerOff", restorePowerKey, restoration);
       const restorePower = await runTask(
         endpoint,
         "ha-climate-lab",
         "climate_set_power",
         CLIMATE_RESOURCE,
         { power: "off" },
-        `${key}:restore-power-off`,
+        restorePowerKey,
         requestId + 15,
       );
       (report.scenarios as unknown[]).push({
@@ -502,7 +531,6 @@ async function qualifyClimate(
         restoration.manualRestoreRequired = true;
         return { status: "blocked", restoration };
       }
-      incrementClimateWrite("climatePowerOff", restoration);
     }
   }
 
@@ -524,19 +552,29 @@ function lastScenario(): JsonObject | undefined {
   return isObject(value) ? value : undefined;
 }
 
-function incrementClimateWrite(kind: string, restoration: JsonObject): void {
+function reserveClimateWrite(kind: string, reservationId: string, restoration: JsonObject): void {
   const gate = asObject(report.safetyGate);
   const writes = gate?.writesUsed;
   const budget = gate?.climateWriteBudget;
-  if (!isObject(writes) || !isObject(budget)) throw new Error("SAFETY_BUDGET_STATE_INVALID");
-  const used = typeof writes[kind] === "number" ? writes[kind] : 0;
+  if (gate === undefined || !isObject(writes) || !isObject(budget))
+    throw new Error("SAFETY_BUDGET_STATE_INVALID");
   const maximum = typeof budget[kind] === "number" ? budget[kind] : 0;
-  if (used >= maximum) throw new Error(`CLIMATE_WRITE_BUDGET_EXCEEDED:${kind}`);
-  writes[kind] = used + 1;
+  const reservation = reserveSideEffectBudget(SIDE_EFFECT_BUDGET_PATH, {
+    runId: integrationRunId,
+    reservationId,
+    scope: "three-device-e2e",
+    resourceId: CLIMATE_RESOURCE,
+    kind,
+    limit: maximum,
+    globalLimit: 10,
+  });
+  if (reservation.alreadyReserved)
+    throw new Error(`CLIMATE_WRITE_RESERVATION_ALREADY_EXISTS:${kind}`);
+  writes[kind] = reservation.count;
+  gate.globalWritesUsed = reservation.globalCount;
   const restorationWrites = asObject(restoration.writesUsed);
   if (restorationWrites === undefined) throw new Error("SAFETY_RESTORATION_STATE_INVALID");
-  restorationWrites[kind] =
-    (typeof restorationWrites[kind] === "number" ? restorationWrites[kind] : 0) + 1;
+  restorationWrites[kind] = reservation.count;
 }
 
 function chooseClimateMode(allowed: readonly string[], current: string): string {
@@ -594,6 +632,7 @@ async function qualifyLight(
   }
   const desiredPower = original.power === "on" ? "off" : "on";
   const before = await readState(endpoint, "ha-light-lab", resourceId, requestId);
+  reserveLightWrite(resourceId, key, restoration);
   const task = await runTask(
     endpoint,
     "ha-light-lab",
@@ -615,7 +654,6 @@ async function qualifyLight(
     restoration.reason = "LIGHT_POWER_CONFIRMATION_FAILED";
     return restoration;
   }
-  incrementLightWrite(resourceId, restoration);
   const after = await readState(endpoint, "ha-light-lab", resourceId, requestId + 2);
   restoration.currentBeforeRestore = redactState(after);
   if (after.power !== desiredPower) {
@@ -662,18 +700,15 @@ async function qualifyLight(
     restoration.currentAfterRestore = redactState(current);
     return restoration;
   }
-  const writesUsed = typeof restoration.writesUsed === "number" ? restoration.writesUsed : 0;
-  if (writesUsed >= 2) {
-    restoration.reason = "LIGHT_WRITE_BUDGET_EXCEEDED";
-    return restoration;
-  }
+  const restoreKey = `${key}:restore`;
+  reserveLightWrite(resourceId, restoreKey, restoration);
   const restore = await runTask(
     endpoint,
     "ha-light-lab",
     "light_set_power",
     resourceId,
     { power: original.power },
-    `${key}:restore`,
+    restoreKey,
     requestId + 6,
   );
   (report.scenarios as unknown[]).push({
@@ -688,7 +723,6 @@ async function qualifyLight(
     restoration.reason = "LIGHT_RESTORE_CONFIRMATION_FAILED";
     return restoration;
   }
-  incrementLightWrite(resourceId, restoration);
   const final = await readState(endpoint, "ha-light-lab", resourceId, requestId + 7);
   restoration.currentAfterRestore = redactState(final);
   restoration.status = final.power === original.power ? "restored" : "manual_restore_required";
@@ -841,15 +875,29 @@ async function request(
   return { status: response.status, body };
 }
 
-function incrementLightWrite(resourceId: string, restoration: JsonObject): void {
+function reserveLightWrite(
+  resourceId: string,
+  reservationId: string,
+  restoration: JsonObject,
+): void {
   const writes = asObject(report.safetyGate)?.writesUsed;
   if (!isObject(writes)) throw new Error("SAFETY_BUDGET_STATE_INVALID");
-  const writeValue = writes[resourceId];
-  const used = typeof writeValue === "number" ? writeValue : 0;
-  if (used >= 2) throw new Error(`LIGHT_WRITE_BUDGET_EXCEEDED:${resourceId}`);
-  writes[resourceId] = used + 1;
-  const previousWrites = typeof restoration.writesUsed === "number" ? restoration.writesUsed : 0;
-  restoration.writesUsed = previousWrites + 1;
+  const reservation = reserveSideEffectBudget(SIDE_EFFECT_BUDGET_PATH, {
+    runId: integrationRunId,
+    reservationId,
+    scope: "three-device-e2e",
+    resourceId,
+    kind: "lightPowerChange",
+    limit: 2,
+    globalLimit: 10,
+  });
+  if (reservation.alreadyReserved)
+    throw new Error(`LIGHT_WRITE_RESERVATION_ALREADY_EXISTS:${resourceId}`);
+  writes[resourceId] = reservation.count;
+  const gate = asObject(report.safetyGate);
+  if (gate === undefined) throw new Error("SAFETY_BUDGET_STATE_INVALID");
+  gate.globalWritesUsed = reservation.globalCount;
+  restoration.writesUsed = reservation.count;
 }
 
 async function runtimeTaskCounts(): Promise<JsonObject> {

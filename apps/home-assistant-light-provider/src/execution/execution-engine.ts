@@ -18,7 +18,18 @@ export interface StartLightInput {
   executionContext: ExecutionContextRecord;
 }
 
+export interface LightExecutionEngineOptions {
+  now?: () => number;
+  hooks?: {
+    afterDispatchIntentPersisted?: (execution: LightExecution) => void | Promise<void>;
+    afterHomeAssistantCall?: (execution: LightExecution) => void | Promise<void>;
+  };
+}
+
 export class LightExecutionEngine {
+  readonly #taskLocks = new Map<string, Promise<void>>();
+  readonly #now: () => number;
+
   constructor(
     readonly store: LightStore,
     readonly registry: LightResourceRegistry,
@@ -26,14 +37,23 @@ export class LightExecutionEngine {
     readonly telemetry: LightTelemetry,
     readonly confirmMs: number,
     readonly sideEffectsEnabled = true,
-  ) {}
+    readonly options: LightExecutionEngineOptions = {},
+  ) {
+    this.#now = options.now ?? Date.now;
+  }
 
   async start(input: StartLightInput): Promise<LightExecution> {
+    return this.#withTaskLock(input.taskId, () => this.#start(input));
+  }
+
+  async #start(input: StartLightInput): Promise<LightExecution> {
     const existing = this.store.get(input.taskId);
     if (existing !== undefined) {
       if (!same(existing, input)) throw new LightProviderError("TASK_IDENTITY_CONFLICT", false);
       return existing;
     }
+    if (input.executionContext.executionMode !== "LIVE")
+      throw new LightProviderError("EXECUTION_MODE_NOT_LIVE", false);
     if (!this.sideEffectsEnabled)
       throw new LightProviderError("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED", false);
     const resource = this.registry.require(input.resourceId);
@@ -53,7 +73,7 @@ export class LightExecutionEngine {
         throw new LightProviderError("BRIGHTNESS_OUT_OF_RANGE", false);
       desired = { type: "brightness", brightnessPercent: brightness };
     }
-    const now = new Date();
+    const now = new Date(this.#now());
     const execution: LightExecution = {
       taskId: input.taskId,
       externalExecutionId: randomUUID(),
@@ -65,6 +85,7 @@ export class LightExecutionEngine {
       desiredState: desired,
       state: "PENDING_SIDE_EFFECT",
       sideEffectDispatched: false,
+      dispatchState: "NOT_STARTED",
       revision: 1,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
@@ -80,21 +101,53 @@ export class LightExecutionEngine {
 
   async recover(): Promise<void> {
     for (const execution of this.store.list()) {
-      if (execution.state === "PENDING_SIDE_EFFECT" && execution.sideEffectDispatched) {
-        const confirming = advance(execution, "CONFIRMING");
-        this.store.set(confirming);
+      if (execution.state === "SUCCEEDED" || execution.state === "TECHNICAL_FAILED") continue;
+      if (!this.#resourceStillAllowlisted(execution)) {
+        await this.#fail(execution, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
+        continue;
+      }
+      if (execution.executionContext.executionMode !== "LIVE") {
+        await this.#fail(execution, "EXECUTION_MODE_NOT_LIVE", false);
+        continue;
+      }
+      if (execution.state === "CONFIRMING") {
         await this.poll(execution.taskId);
-      } else if (execution.state === "PENDING_SIDE_EFFECT") await this.#dispatch(execution);
-      else if (execution.state === "CONFIRMING") await this.poll(execution.taskId);
+        continue;
+      }
+      if (execution.dispatchState === undefined) {
+        if (!execution.sideEffectDispatched) {
+          await this.#fail(execution, "SIDE_EFFECT_STATE_UNCERTAIN", false);
+          continue;
+        }
+        await this.#resumeConfirmation(execution);
+        continue;
+      }
+      if (
+        execution.dispatchState === "INTENT_PERSISTED" ||
+        execution.dispatchState === "CALL_RETURNED"
+      ) {
+        await this.#resumeConfirmation(execution);
+        continue;
+      }
+      if (!this.sideEffectsEnabled) {
+        await this.#fail(execution, "REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED", false);
+        continue;
+      }
+      await this.#dispatch(execution);
     }
   }
 
   async poll(taskId: string): Promise<void> {
     const execution = this.store.get(taskId);
     if (execution?.state !== "CONFIRMING") return;
+    const resource = this.#activeResource(execution);
+    if (resource === undefined) {
+      await this.#fail(execution, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
+      return;
+    }
     try {
       await this.observe(
-        normalizeLightState(execution.resourceId, await this.rest.getState(execution.entityId)),
+        normalizeLightState(execution.resourceId, await this.rest.getState(resource.entityId)),
       );
     } catch {
       // REST polling is a confirmation fallback; the persisted deadline remains authoritative.
@@ -102,19 +155,20 @@ export class LightExecutionEngine {
     const current = this.store.get(taskId);
     if (
       current?.state === "CONFIRMING" &&
-      Date.now() >= Date.parse(current.confirmationDeadlineAt)
+      this.#now() >= Date.parse(current.confirmationDeadlineAt)
     ) {
-      const failed = advance(current, "TECHNICAL_FAILED");
-      this.store.set(failed);
-      await this.telemetry.progress(failed);
+      await this.#fail(current, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
     }
   }
 
   async observe(state: NormalizedLightState): Promise<void> {
     await this.telemetry.observed(state);
     for (const execution of this.store.list()) {
+      const resource = this.#activeResource(execution);
       if (
+        resource !== undefined &&
         execution.resourceId === state.resourceId &&
+        execution.entityId === resource.entityId &&
         execution.state === "CONFIRMING" &&
         confirmed(execution, state)
       ) {
@@ -126,46 +180,139 @@ export class LightExecutionEngine {
   }
 
   async #dispatch(execution: LightExecution): Promise<void> {
-    if (execution.sideEffectDispatched) return;
+    if (execution.dispatchState !== "NOT_STARTED" || execution.sideEffectDispatched) return;
+    if (execution.executionContext.executionMode !== "LIVE")
+      throw new LightProviderError("EXECUTION_MODE_NOT_LIVE", false);
     if (!this.sideEffectsEnabled)
       throw new LightProviderError("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED", false);
-    const marked = advance({ ...execution, sideEffectDispatched: true }, "PENDING_SIDE_EFFECT");
+    const resource = this.#activeResource(execution);
+    if (resource === undefined)
+      throw new LightProviderError("RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
+    const observed = normalizeLightState(
+      resource.resourceId,
+      await this.rest.getState(resource.entityId),
+    );
+    if (!observed.reachable) throw new LightProviderError("RESOURCE_UNAVAILABLE", true);
+    if (execution.desiredState.type === "brightness" && !observed.supportsBrightness)
+      throw new LightProviderError("BRIGHTNESS_NOT_SUPPORTED", false);
+    if (confirmed(execution, observed)) {
+      const done = advance({ ...execution, confirmedState: observed }, "SUCCEEDED", this.#now());
+      this.store.set(done);
+      await this.telemetry.progress(done);
+      return;
+    }
+    const marked = advance(
+      { ...execution, sideEffectDispatched: true, dispatchState: "INTENT_PERSISTED" },
+      "PENDING_SIDE_EFFECT",
+      this.#now(),
+    );
     this.store.set(marked);
-    if (execution.desiredState.type === "power") {
+    await this.options.hooks?.afterDispatchIntentPersisted?.(marked);
+    if (marked.desiredState.type === "power") {
       try {
-        if (execution.desiredState.power === "on") await this.rest.turnOn(execution.entityId);
-        else await this.rest.turnOff(execution.entityId);
-      } catch (error) {
-        const confirming = advance(marked, "CONFIRMING");
+        if (marked.desiredState.power === "on") await this.rest.turnOn(resource.entityId);
+        else await this.rest.turnOff(resource.entityId);
+      } catch {
+        const confirming = advance(marked, "CONFIRMING", this.#now());
         this.store.set(confirming);
         await this.telemetry.progress(confirming);
-        throw error;
+        return;
       }
     } else
       try {
-        await this.rest.setBrightness(execution.entityId, execution.desiredState.brightnessPercent);
-      } catch (error) {
-        const confirming = advance(marked, "CONFIRMING");
+        await this.rest.setBrightness(resource.entityId, marked.desiredState.brightnessPercent);
+      } catch {
+        const confirming = advance(marked, "CONFIRMING", this.#now());
         this.store.set(confirming);
         await this.telemetry.progress(confirming);
-        throw error;
+        return;
       }
-    const confirming = advance(marked, "CONFIRMING");
+    await this.options.hooks?.afterHomeAssistantCall?.(marked);
+    const confirming = advance(
+      { ...marked, dispatchState: "CALL_RETURNED" },
+      "CONFIRMING",
+      this.#now(),
+    );
     this.store.set(confirming);
     await this.telemetry.progress(confirming);
   }
+
+  async #resumeConfirmation(execution: LightExecution): Promise<void> {
+    const confirming =
+      execution.state === "CONFIRMING" ? execution : advance(execution, "CONFIRMING", this.#now());
+    if (confirming !== execution) {
+      this.store.set(confirming);
+      await this.telemetry.progress(confirming);
+    }
+    await this.poll(execution.taskId);
+  }
+
+  async #fail(execution: LightExecution, reasonCode: string, retryable: boolean): Promise<void> {
+    const current = this.store.get(execution.taskId) ?? execution;
+    if (current.state === "SUCCEEDED" || current.state === "TECHNICAL_FAILED") return;
+    const failed = failedExecution(current, reasonCode, retryable, this.#now());
+    this.store.set(failed);
+    await this.telemetry.progress(failed);
+  }
+
+  #activeResource(execution: LightExecution) {
+    try {
+      const resource = this.registry.require(execution.resourceId);
+      return resource.entityId === execution.entityId ? resource : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  #resourceStillAllowlisted(execution: LightExecution): boolean {
+    return this.#activeResource(execution) !== undefined;
+  }
+
+  async #withTaskLock<T>(taskId: string, action: () => Promise<T>): Promise<T> {
+    const previous = this.#taskLocks.get(taskId) ?? Promise.resolve();
+    let release = (): void => undefined;
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const queued = previous.then(() => current);
+    this.#taskLocks.set(taskId, queued);
+    await previous;
+    try {
+      return await action();
+    } finally {
+      release();
+      if (this.#taskLocks.get(taskId) === queued) this.#taskLocks.delete(taskId);
+    }
+  }
 }
 
-function advance(execution: LightExecution, state: LightExecution["state"]): LightExecution {
+function advance(
+  execution: LightExecution,
+  state: LightExecution["state"],
+  now = Date.now(),
+): LightExecution {
   if (execution.state === "SUCCEEDED" || execution.state === "TECHNICAL_FAILED") return execution;
   const next = {
     ...execution,
     state,
     revision: execution.revision + 1,
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(now).toISOString(),
   };
   next.lastSnapshot = snapshot(next);
   return next;
+}
+
+function failedExecution(
+  execution: LightExecution,
+  reasonCode: string,
+  retryable: boolean,
+  now: number,
+): LightExecution {
+  return advance(
+    { ...execution, failureReasonCode: reasonCode, failureRetryable: retryable },
+    "TECHNICAL_FAILED",
+    now,
+  );
 }
 function confirmed(execution: LightExecution, state: NormalizedLightState): boolean {
   if (execution.desiredState.type === "power") return state.power === execution.desiredState.power;

@@ -96,8 +96,18 @@ export function normalizeLightState(
           : "unknown";
   const reachable = power === "on" || power === "off";
   const rawBrightness = state.attributes.brightness;
-  const supportsBrightness = typeof rawBrightness === "number" && Number.isFinite(rawBrightness);
-  const brightnessPercent = supportsBrightness ? Math.round((rawBrightness / 255) * 100) : null;
+  const brightnessReported = typeof rawBrightness === "number" && Number.isFinite(rawBrightness);
+  const colorModes = Array.isArray(state.attributes.supported_color_modes)
+    ? state.attributes.supported_color_modes.filter(
+        (value): value is string => typeof value === "string",
+      )
+    : [];
+  const supportsBrightness =
+    brightnessReported ||
+    colorModes.some((mode) =>
+      new Set(["brightness", "color_temp", "hs", "xy", "rgb", "rgbw", "rgbww"]).has(mode),
+    );
+  const brightnessPercent = brightnessReported ? Math.round((rawBrightness / 255) * 100) : null;
   return {
     resourceId,
     power,

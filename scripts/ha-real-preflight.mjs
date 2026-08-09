@@ -171,6 +171,8 @@ function loadConfiguration(resourcesPath, tokenPath) {
     throw coded("RESOURCES_FILE_INVALID");
   const url = new URL(value.homeAssistantUrl);
   if (!new Set(["http:", "https:"]).has(url.protocol)) throw coded("HOME_ASSISTANT_URL_INVALID");
+  if (url.username || url.password || url.search || url.hash)
+    throw coded("HOME_ASSISTANT_URL_SENSITIVE_COMPONENT_FORBIDDEN");
   const resources = [
     parseResource(value.climate, "climate"),
     ...value.lights.map((item) => parseResource(item, "light")),

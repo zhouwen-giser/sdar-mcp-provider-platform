@@ -3,5 +3,6 @@ node_modules
 dist
 coverage
 .runtime-data
+.local
 reports/runtime-v1/generated
 examples/mock-adapter-python/.venv

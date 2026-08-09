@@ -29,6 +29,8 @@ const sideEffectsEnabled =
   process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" &&
   typeof process.env.REAL_DEVICE_TEST_RUN_ID === "string" &&
   process.env.REAL_DEVICE_TEST_RUN_ID.trim().length > 0;
+const climatePowerSideEffectsEnabled =
+  sideEffectsEnabled && process.env.ALLOW_CLIMATE_POWER_TEST === "YES";
 const telemetry = new ProviderClimateTelemetry(
   {
     providerId: config.PROVIDER_ID,
@@ -55,6 +57,7 @@ const engine = new ClimateExecutionEngine(
   telemetry,
   config.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS,
   sideEffectsEnabled,
+  { powerSideEffectsEnabled: climatePowerSideEffectsEnabled },
 );
 const websocket = new HomeAssistantClimateWebSocket({
   baseUrl: config.HOME_ASSISTANT_URL,

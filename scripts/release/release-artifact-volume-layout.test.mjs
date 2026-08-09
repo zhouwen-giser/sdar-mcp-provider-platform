@@ -21,3 +21,13 @@ test("release smoke copies fixtures into managed volumes with restrictive modes"
   assert.match(smoke, /chmod 0700/);
   assert.match(smoke, /chmod 0600/);
 });
+
+test("release smoke materializes dependencies and starts the exact extracted runtime through PM2", () => {
+  assert.match(smoke, /\["dist", "proto", "migrations", "node_modules"\]/);
+  assert.match(smoke, /verifyExtractedRuntimeWithPm2\(\)/);
+  assert.match(
+    smoke,
+    /\/opt\/sdar\/runtime-releases\/2\.0\.0-rc\.1\/dist\/apps\/runtime\/src\/main\.js/,
+  );
+  assert.match(smoke, /EXTRACTED_RUNTIME_PM2_READINESS_FAILED/);
+});

@@ -30,7 +30,9 @@ Production plaintext HTTP is rejected unless `HOME_ASSISTANT_ALLOW_INSECURE_HTTP
 Adapter and Provider Telemetry support required mutual TLS using CA, certificate, and key paths.
 Real Home Assistant writes additionally require `ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES` and a
 non-empty `REAL_DEVICE_TEST_RUN_ID`; the Provider fails closed for new write Tasks when either
-gate is absent. Reads remain available without the gate.
+gate is absent. Reads remain available without the gate. Qualification and recovery drivers that
+can change climate power—including `climate_set_power` and `climate_set_hvac_mode` from off—additionally require `ALLOW_CLIMATE_POWER_TEST=YES` and stop for manual
+restoration instead of waiting through an active five-minute opposite-power interval.
 
 ## Operations
 

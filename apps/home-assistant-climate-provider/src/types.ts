@@ -53,6 +53,13 @@ export interface ClimateExecution {
     | { type: "temperature"; temperature: number };
   state: "PENDING_SIDE_EFFECT" | "CONFIRMING" | "SUCCEEDED" | "TECHNICAL_FAILED";
   sideEffectDispatched: boolean;
+  /**
+   * Durable dispatch protocol. Older state files do not contain this field and
+   * are therefore reconciled conservatively during recovery.
+   */
+  dispatchState?: "NOT_STARTED" | "INTENT_PERSISTED" | "CALL_RETURNED";
+  failureReasonCode?: string;
+  failureRetryable?: boolean;
   revision: number;
   createdAt: string;
   updatedAt: string;

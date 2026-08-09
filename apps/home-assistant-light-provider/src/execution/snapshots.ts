@@ -20,7 +20,7 @@ export function snapshot(x: LightExecution): Record<string, unknown> {
       x.state === "SUCCEEDED"
         ? "HOME_ASSISTANT_STATE_CONFIRMED"
         : x.state === "TECHNICAL_FAILED"
-          ? "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT"
+          ? (x.failureReasonCode ?? "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT")
           : x.state === "CONFIRMING"
             ? "HOME_ASSISTANT_CONFIRMING"
             : "EXECUTION_PERSISTED",
@@ -28,12 +28,12 @@ export function snapshot(x: LightExecution): Record<string, unknown> {
       x.state === "SUCCEEDED"
         ? "Desired light state confirmed."
         : x.state === "TECHNICAL_FAILED"
-          ? "Light state confirmation timed out."
+          ? (x.failureReasonCode ?? "Light state confirmation failed.")
           : "Waiting for observed Home Assistant light state.",
     ...(completedResult === undefined
       ? {}
       : { result: jsonToProtoStruct(completedResult), evidence: [completionEvidence(x)] }),
-    retryable: x.state === "TECHNICAL_FAILED",
+    retryable: x.state === "TECHNICAL_FAILED" ? (x.failureRetryable ?? false) : false,
     observedAt: timestamp(x.updatedAt),
   };
 }

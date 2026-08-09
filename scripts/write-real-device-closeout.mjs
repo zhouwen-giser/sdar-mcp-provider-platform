@@ -93,6 +93,15 @@ const functionalPass =
   currentRuntimeTaskCounts.active === 0 &&
   currentRuntimeTaskCounts.uncertain === 0;
 const climatePowerOnQualified = climatePower.qualifiedOperations?.climate_set_power === "real_pass";
+const boundedIdempotencyScenarios = collectBoundedIdempotencyScenarios(climate, lights);
+const boundedIdempotencyPassed =
+  boundedIdempotencyScenarios.length === 3 &&
+  new Set(boundedIdempotencyScenarios.map((scenario) => scenario.resourceId)).size === 3 &&
+  boundedIdempotencyScenarios.every(
+    (scenario) =>
+      scenario.sameArgumentsSameTask === true &&
+      scenario.sameTaskDifferentArgumentsRejected === true,
+  );
 const realInFlightRecoveryQualified = false;
 const realFaultsQualified = false;
 const pmsOutageQualified = false;
@@ -297,7 +306,8 @@ const securityAudit = {
     verificationCommands.dependencyAudit?.currentOnlineRefresh ?? "not_requested",
   sensitiveReportScan: sensitiveScan,
   realWriteGate: {
-    climate: "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
+    climate:
+      "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID; climate_set_power additionally requires ALLOW_CLIMATE_POWER_TEST=YES",
     light: "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
     invalidGateBehavior: "read-only; new real writes fail closed",
   },
@@ -510,7 +520,7 @@ const liveRealResourceStatus = {
     writesUsed: threeDevice.safetyGate?.writesUsed ?? {},
   },
   qualifiedOperations: {
-    climate_get_state: "real_pass",
+    climate_get_state: "real_pass_time_scoped",
     climate_set_hvac_mode: "real_pass_time_scoped",
     climate_set_temperature: "real_pass_time_scoped",
     climate_set_power: "real_pass_off_restore_only",
@@ -540,7 +550,8 @@ const adapterRecovery = {
     )
     .map((check) => check.scenario),
   inFlightScenario: "unverified",
-  noAutomaticReplayAfterRestart: noDuplicate.status === "passed",
+  completedTaskReplayNotObserved: noDuplicate.status === "passed_scoped_bounded_light_runs",
+  inFlightNoReplay: "unverified",
   sourceReport: "reports/real-device-preparation-continuation/real-recovery.json",
 };
 const runtimeRecovery = {
@@ -582,10 +593,16 @@ const faultQualification = {
   forbiddenConversion: "controlled fault results are not real-device qualification",
 };
 const noDuplicateQualification = {
-  evidenceClass: noDuplicate.evidenceClass ?? "real",
-  status: noDuplicate.status,
-  sourceReport: "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
-  scenarios: noDuplicate.scenarios ?? noDuplicate.checks ?? [],
+  evidenceClass: "real",
+  status: boundedIdempotencyPassed ? "passed_scoped_bounded_real_tasks" : "partial",
+  sourceReports: [
+    "reports/real-device-preparation/climate-real-qualification.json",
+    "reports/real-device-preparation/light-real-qualification.json",
+    "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
+  ],
+  scenarios: boundedIdempotencyScenarios,
+  scope: "same idempotency key retry and conflicting-argument rejection on three executed Tasks",
+  inFlightCrashReplay: "unverified_real_device",
   activeTasks: currentRuntimeTaskCounts.active,
   uncertainTasks: currentRuntimeTaskCounts.uncertain,
   runtimeTaskCountSource: currentRuntimeTaskCounts.source,
@@ -614,10 +631,18 @@ const finalQualification = {
   blockers,
 };
 const operationQualifications = {
-  climate_get_state: climatePower.qualifiedOperations?.climate_get_state ?? "unverified",
-  climate_set_hvac_mode: climatePower.qualifiedOperations?.climate_set_hvac_mode ?? "unverified",
+  climate_get_state:
+    climatePower.qualifiedOperations?.climate_get_state === "real_pass"
+      ? "real_pass_time_scoped"
+      : "unverified",
+  climate_set_hvac_mode:
+    climatePower.qualifiedOperations?.climate_set_hvac_mode === "real_pass"
+      ? "real_pass_time_scoped"
+      : "unverified",
   climate_set_temperature:
-    climatePower.qualifiedOperations?.climate_set_temperature ?? "unverified",
+    climatePower.qualifiedOperations?.climate_set_temperature === "real_pass"
+      ? "real_pass_time_scoped"
+      : "unverified",
   climate_set_power: climatePower.qualifiedOperations?.climate_set_power ?? "unverified",
   light_get_state: lights.status === "passed" ? "real_pass_time_scoped" : "unverified",
   light_set_power: lights.status === "passed" ? "real_pass_time_scoped" : "unverified",
@@ -717,13 +742,15 @@ await writeJson(resolve(closeoutRoot, "final-merge-readiness.json"), mainMergeRe
 await writeJson(resolve(closeoutRoot, "review-findings.json"), {
   evidenceClass: "mixed",
   status:
-    mainMergeReadiness.codeAndRepositoryBlockers.length === 0
-      ? "no_code_findings"
-      : "open_code_findings",
-  blockingMajorCount: mainMergeReadiness.codeAndRepositoryBlockers.length,
-  codeAndRepositoryFindings: mainMergeReadiness.codeAndRepositoryBlockers,
+    verification.github?.independentReviewStatus === "passed" &&
+    verification.github?.blockingReviewFindings === 0
+      ? "passed_after_independent_review"
+      : "independent_review_pending_or_blocked",
+  blockingMajorCount: verification.github?.blockingReviewFindings ?? null,
+  codeAndRepositoryFindings: verification.github?.independentReviewFindings ?? [],
+  repositoryGateBlockers: mainMergeReadiness.codeAndRepositoryBlockers,
   realQualificationFindings: blockers,
-  note: "Real-device qualification gaps are kept separate from candidate code review findings.",
+  note: "Independent-review findings, repository gates, and real-device qualification gaps are reported separately; an empty self-review list is not treated as independent approval.",
 });
 await writeJson(resolve(closeoutRoot, "sdar-integration-allowlist.json"), sdarIntegrationAllowlist);
 await writeJson(resolve(closeoutRoot, "post-merge-validation.json"), {
@@ -785,11 +812,11 @@ await writeMarkdown(
   renderThreeDeviceSummary(threeDevice, finalHandoff),
 );
 await writeJson(resolve(sourceRoot, "idempotency-report.json"), {
-  evidenceClass: noDuplicate.evidenceClass ?? "real",
+  evidenceClass: "real",
   phase: "P7_IDEMPOTENCY_AND_RECOVERY",
-  status: noDuplicate.status,
-  continuationReport: "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
-  scenarios: noDuplicate.scenarios ?? noDuplicate.checks ?? [],
+  status: boundedIdempotencyPassed ? "passed_scoped_bounded_real_tasks" : "partial",
+  sourceReports: noDuplicateQualification.sourceReports,
+  scenarios: boundedIdempotencyScenarios,
   activeTasks: currentRuntimeTaskCounts.active,
   uncertainTasks: currentRuntimeTaskCounts.uncertain,
   runtimeTaskCountSource: currentRuntimeTaskCounts.source,
@@ -848,6 +875,36 @@ function statusOf(value) {
   if (typeof value === "string") return value;
   if (value && typeof value.status === "string") return value.status;
   return "unverified";
+}
+
+function collectBoundedIdempotencyScenarios(climateReport, lightReport) {
+  const collect = (providerId, sourceReport, report) =>
+    (report.scenarios ?? [])
+      .filter((scenario) => scenario?.idempotency && scenario?.status === "completed")
+      .map((scenario) => ({
+        providerId,
+        resourceId: scenario.before?.resourceId ?? scenario.after?.resourceId ?? null,
+        operation: scenario.operation ?? null,
+        runtimeTaskId: scenario.runtimeTaskId ?? null,
+        sameArgumentsSameTask:
+          scenario.idempotency.sameArgumentsSameKey === true ||
+          scenario.idempotency.sameArgumentsSameTask === true,
+        sameTaskDifferentArgumentsRejected:
+          scenario.idempotency.sameKeyDifferentArgumentsRejected === true,
+        sourceReport,
+      }));
+  return [
+    ...collect(
+      "ha-climate-lab",
+      "reports/real-device-preparation/climate-real-qualification.json",
+      climateReport,
+    ),
+    ...collect(
+      "ha-light-lab",
+      "reports/real-device-preparation/light-real-qualification.json",
+      lightReport,
+    ),
+  ];
 }
 
 function git(args) {

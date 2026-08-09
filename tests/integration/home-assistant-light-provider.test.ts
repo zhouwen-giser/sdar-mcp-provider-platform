@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   GrpcAdapterGateway,
@@ -11,8 +14,12 @@ import {
 } from "../../apps/home-assistant-light-provider/src/home-assistant.js";
 import { LightResourceRegistry } from "../../apps/home-assistant-light-provider/src/resources.js";
 import { LightProviderServer } from "../../apps/home-assistant-light-provider/src/server.js";
-import { MemoryLightStore } from "../../apps/home-assistant-light-provider/src/store.js";
+import {
+  JsonLightStore,
+  MemoryLightStore,
+} from "../../apps/home-assistant-light-provider/src/store.js";
 import { NoopLightTelemetry } from "../../apps/home-assistant-light-provider/src/telemetry.js";
+import type { LightExecution } from "../../apps/home-assistant-light-provider/src/types.js";
 import { FakeHomeAssistantLight } from "../fixtures/fake-home-assistant-light.js";
 
 const resource = {
@@ -135,6 +142,186 @@ describe("Home Assistant light Provider", () => {
     expect(fake.serviceCalls.length).toBe(callsBeforeRecovery);
     expect(store.get("restart-task")?.state).toBe("SUCCEEDED");
   });
+
+  it("fails closed without replay when a process stops after persisting dispatch intent", async () => {
+    const store = new MemoryLightStore();
+    const registry = new LightResourceRegistry([resource]);
+    const client = new HomeAssistantLightClient({
+      baseUrl: fake.url,
+      token: fake.token,
+      timeoutMs: 1000,
+    });
+    const startedAt = Date.parse("2026-08-10T00:00:00.000Z");
+    const crashing = new LightExecutionEngine(
+      store,
+      registry,
+      client,
+      new NoopLightTelemetry(),
+      1000,
+      true,
+      {
+        now: () => startedAt,
+        hooks: {
+          afterDispatchIntentPersisted: () => {
+            throw new Error("SIMULATED_PROCESS_CRASH");
+          },
+        },
+      },
+    );
+    await expect(
+      crashing.start({
+        taskId: "pre-call-crash",
+        operationName: "light_set_power",
+        resourceId: resource.resourceId,
+        power: "on",
+        argumentHash: "f".repeat(64),
+        executionContext: liveLightContext(),
+      }),
+    ).rejects.toThrow("SIMULATED_PROCESS_CRASH");
+    expect(fake.serviceCalls).toHaveLength(0);
+    expect(store.get("pre-call-crash")?.dispatchState).toBe("INTENT_PERSISTED");
+
+    const recovered = new LightExecutionEngine(
+      store,
+      registry,
+      client,
+      new NoopLightTelemetry(),
+      1000,
+      true,
+      { now: () => startedAt + 2000 },
+    );
+    await recovered.recover();
+    expect(fake.serviceCalls).toHaveLength(0);
+    expect(store.get("pre-call-crash")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      failureReasonCode: "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT",
+    });
+  });
+
+  it("rejects non-live writes and serializes concurrent duplicate admission", async () => {
+    const store = new MemoryLightStore();
+    const engine = new LightExecutionEngine(
+      store,
+      new LightResourceRegistry([resource]),
+      new HomeAssistantLightClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
+      new NoopLightTelemetry(),
+      1000,
+      true,
+    );
+    await expect(
+      engine.start({
+        taskId: "simulation",
+        operationName: "light_set_power",
+        resourceId: resource.resourceId,
+        power: "on",
+        argumentHash: "1".repeat(64),
+        executionContext: { ...liveLightContext(), executionMode: "SIMULATION" },
+      }),
+    ).rejects.toMatchObject({ reasonCode: "EXECUTION_MODE_NOT_LIVE" });
+    expect(fake.serviceCalls).toHaveLength(0);
+
+    fake.suppressChanges = true;
+    const input = {
+      taskId: "concurrent-light",
+      operationName: "light_set_power" as const,
+      resourceId: resource.resourceId,
+      power: "on" as const,
+      argumentHash: "2".repeat(64),
+      executionContext: liveLightContext(),
+    };
+    await Promise.all([engine.start(input), engine.start(input)]);
+    expect(fake.serviceCalls).toHaveLength(1);
+  });
+
+  it("fails recovery when a public resource is remapped to another entity", async () => {
+    fake.setState("light.remapped", "off", { supported_color_modes: ["brightness"] });
+    const store = new MemoryLightStore();
+    const client = new HomeAssistantLightClient({
+      baseUrl: fake.url,
+      token: fake.token,
+      timeoutMs: 1000,
+    });
+    const crashing = new LightExecutionEngine(
+      store,
+      new LightResourceRegistry([resource]),
+      client,
+      new NoopLightTelemetry(),
+      1000,
+      true,
+      {
+        hooks: {
+          afterDispatchIntentPersisted: () => {
+            throw new Error("SIMULATED_PROCESS_CRASH");
+          },
+        },
+      },
+    );
+    await expect(
+      crashing.start({
+        taskId: "remapped-light",
+        operationName: "light_set_power",
+        resourceId: resource.resourceId,
+        power: "on",
+        argumentHash: "3".repeat(64),
+        executionContext: liveLightContext(),
+      }),
+    ).rejects.toThrow("SIMULATED_PROCESS_CRASH");
+
+    const recovered = new LightExecutionEngine(
+      store,
+      new LightResourceRegistry([{ ...resource, entityId: "light.remapped" }]),
+      client,
+      new NoopLightTelemetry(),
+      1000,
+      true,
+    );
+    await recovered.recover();
+    expect(fake.serviceCalls).toHaveLength(0);
+    expect(store.get("remapped-light")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      failureReasonCode: "RECOVERY_RESOURCE_NOT_ALLOWLISTED",
+    });
+  });
+
+  it("rejects mismatched operations and out-of-range brightness in durable state", () => {
+    const now = new Date().toISOString();
+    const base: LightExecution = {
+      taskId: "corrupt-light",
+      externalExecutionId: "external",
+      operationName: "light_set_brightness",
+      resourceId: resource.resourceId,
+      entityId: resource.entityId,
+      argumentHash: "f".repeat(64),
+      executionContext: liveLightContext(),
+      desiredState: { type: "brightness", brightnessPercent: 50 },
+      state: "PENDING_SIDE_EFFECT",
+      sideEffectDispatched: false,
+      dispatchState: "NOT_STARTED",
+      revision: 1,
+      createdAt: now,
+      updatedAt: now,
+      confirmationDeadlineAt: now,
+      lastSnapshot: {},
+      commandAcks: {},
+    };
+    const corruptions: LightExecution[] = [
+      { ...base, operationName: "light_set_power" },
+      { ...base, desiredState: { type: "brightness", brightnessPercent: 101 } },
+    ];
+    for (const execution of corruptions) {
+      const path = join(mkdtempSync(join(tmpdir(), "light-corrupt-")), "state.json");
+      writeFileSync(
+        path,
+        JSON.stringify({
+          version: 1,
+          executions: { corrupt: execution },
+          pendingTelemetryEvents: [],
+          nextTelemetrySequence: 1,
+        }),
+      );
+      expect(() => new JsonLightStore(path)).toThrow("INVALID_PROVIDER_STATE_FILE");
+    }
+  });
 });
 
 async function setup(): Promise<{ store: MemoryLightStore; engine: LightExecutionEngine }> {
@@ -192,4 +379,13 @@ async function wait(predicate: () => boolean | Promise<boolean>, timeout = 3000)
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
   throw new Error("WAIT_TIMEOUT");
+}
+
+function liveLightContext(): LightExecution["executionContext"] {
+  return {
+    authorizationContextHash: "auth",
+    executionMode: "LIVE",
+    simulationId: "",
+    correlationId: "c",
+  };
 }
