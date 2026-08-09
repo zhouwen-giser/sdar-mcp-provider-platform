@@ -4,10 +4,10 @@
   "environment": "home-lab",
   "preflight": {
     "status": "passed",
-    "completedAt": "2026-08-03T22:30:29.387Z",
+    "completedAt": "2026-08-09T14:45:18.423Z",
     "resourceCount": 3,
     "allReachable": true,
-    "websocketStateChangedSubscribed": false,
+    "websocketStateChangedSubscribed": true,
     "restWebSocketConsistent": true
   },
   "registry": {
@@ -27,8 +27,11 @@
     "completedAt": "2026-08-03T19:44:55.189Z",
     "resources": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
     "allRestored": true,
+    "currentPreflightPass": true,
+    "currentDeviceStateRestored": true,
     "activeTasks": 0,
     "uncertainTasks": 0,
+    "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
     "climateSafety": "passed",
     "writesUsed": {
       "climateHvacMode": 1,

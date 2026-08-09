@@ -1,18 +1,14 @@
 {
   "evidenceClass": "real",
   "phase": "P1_HA_READ_ONLY_PREFLIGHT",
-  "startedAt": "2026-08-03T22:30:28.496Z",
-  "completedAt": "2026-08-03T22:30:29.387Z",
+  "startedAt": "2026-08-09T14:45:17.536Z",
+  "completedAt": "2026-08-09T14:45:18.423Z",
   "status": "passed",
   "readOnly": true,
   "sideEffectsAttempted": false,
   "environment": "home-lab",
   "homeAssistantUrl": "http://localhost:8123",
-  "token": {
-    "source": "file",
-    "path": "<redacted>",
-    "present": true
-  },
+  "token": { "source": "file", "path": "<redacted>", "present": true },
   "checks": [
     {
       "name": "home_assistant_url_reachable",
@@ -71,20 +67,14 @@
       "entityHash": "76109bf457a6cdb862e448b84c3ea87c37f9c8cdba92a52b8ef7b3a47a3333f8",
       "domain": "climate",
       "displayName": "Living room air conditioner",
-      "state": "off",
+      "state": "cool",
       "reachable": true,
-      "observedAt": "2026-08-03T19:44:29.157337+00:00",
-      "supportedHvacModes": [
-        "heat",
-        "dry",
-        "cool",
-        "fan_only",
-        "off"
-      ],
+      "observedAt": "2026-08-09T13:57:50.382352+00:00",
+      "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
       "minTemperature": 16,
       "maxTemperature": 31,
       "currentTemperature": null,
-      "targetTemperature": 23,
+      "targetTemperature": 16,
       "temperatureUnit": null
     },
     {
@@ -92,22 +82,22 @@
       "entityHash": "48d411259a1aaeffd9111bc10a9444ff2a092e79e51e1bd337a32e59c19d7928",
       "domain": "light",
       "displayName": "餐厅灯",
-      "state": "off",
+      "state": "on",
       "reachable": true,
-      "observedAt": "2026-08-03T19:44:40.414404+00:00",
+      "observedAt": "2026-08-09T11:28:33.453479+00:00",
       "supportsBrightness": true,
-      "brightnessPercent": null
+      "brightnessPercent": 100
     },
     {
       "resourceId": "living-room-aux-light",
       "entityHash": "2b3f49cc64f1b856d860173ae06e4a9cef8c4dca858043a3fc46f9eee42e6591",
       "domain": "light",
       "displayName": "客厅灯",
-      "state": "off",
+      "state": "on",
       "reachable": true,
-      "observedAt": "2026-08-03T19:44:49.616898+00:00",
+      "observedAt": "2026-08-09T11:28:33.782813+00:00",
       "supportsBrightness": true,
-      "brightnessPercent": null
+      "brightnessPercent": 100
     }
   ],
   "error": null,

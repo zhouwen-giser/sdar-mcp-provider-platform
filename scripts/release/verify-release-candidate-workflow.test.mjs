@@ -3,10 +3,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { assertReleaseCandidateWorkflow } from "./verify-release-candidate-workflow.mjs";
 
-const source = readFileSync(".github/workflows/release-candidate.yml", "utf8");
+const rawSource = readFileSync(".github/workflows/release-candidate.yml", "utf8");
+const source = rawSource.replace(/\r\n?/g, "\n");
 
 test("accepts the exact release candidate workflow", () => {
   assert.doesNotThrow(() => assertReleaseCandidateWorkflow(source));
+});
+
+test("accepts a CRLF workflow without changing its semantics", () => {
+  assert.doesNotThrow(() => assertReleaseCandidateWorkflow(rawSource));
 });
 
 test("rejects a missing required job", () => {

@@ -1,0 +1,10 @@
+{
+  "evidenceClass": "real",
+  "status": "passed_scoped_bounded_light_runs",
+  "sourceReport": "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
+  "scenarios": [],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "stateRestored": true
+}

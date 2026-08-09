@@ -49,7 +49,7 @@ describe("vendor_managed Home Assistant Light platform integration", () => {
     expect(providerPackage.providerType).toBe("home_assistant.light");
     expect(providerPackage.hostingModes).toEqual(["vendor_managed"]);
     expect(providerPackage.qualification).toMatchObject({
-      componentStatus: "pending",
+      componentStatus: "passed",
       realResourceStatus: "pending",
     });
 

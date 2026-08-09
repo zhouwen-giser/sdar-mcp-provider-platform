@@ -7,14 +7,17 @@ import { REQUIRED_JOBS } from "./release-metadata-lib.mjs";
 const WORKFLOW_PATH = ".github/workflows/release-candidate.yml";
 
 export function assertReleaseCandidateWorkflow(source) {
-  const jobs = extractJobBlocks(source);
+  const normalizedSource = source.replace(/\r\n?/g, "\n");
+  const jobs = extractJobBlocks(normalizedSource);
   if (Object.keys(jobs).join("\n") !== REQUIRED_JOBS.join("\n")) {
     throw new Error("RELEASE_WORKFLOW_JOBS_INVALID");
   }
   if (
-    !source.includes("pull_request:\n    branches: [main]") ||
-    !source.includes("workflow_dispatch:") ||
-    !source.includes("CANDIDATE_SHA: ${{ inputs.candidate || github.event.pull_request.head.sha }}")
+    !normalizedSource.includes("pull_request:\n    branches: [main]") ||
+    !normalizedSource.includes("workflow_dispatch:") ||
+    !normalizedSource.includes(
+      "CANDIDATE_SHA: ${{ inputs.candidate || github.event.pull_request.head.sha }}",
+    )
   ) {
     throw new Error("RELEASE_WORKFLOW_CANDIDATE_TRIGGER_INVALID");
   }
@@ -40,8 +43,8 @@ export function assertReleaseCandidateWorkflow(source) {
     throw new Error("RELEASE_WORKFLOW_SUMMARY_MISSING");
   }
   if (
-    /docker\s+(?:image\s+)?push\b/.test(source) ||
-    /\bghcr\.io\/.*(?:push|login-action)/.test(source)
+    /docker\s+(?:image\s+)?push\b/.test(normalizedSource) ||
+    /\bghcr\.io\/.*(?:push|login-action)/.test(normalizedSource)
   ) {
     throw new Error("RELEASE_WORKFLOW_PUBLICATION_FORBIDDEN");
   }

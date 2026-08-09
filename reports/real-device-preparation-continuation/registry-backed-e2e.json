@@ -1,10 +1,10 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-07b60144-94ee-4887-96df-e70c378ad4db",
+  "integrationRunId": "smpp-registry-e2e-4249fae3-e111-432c-84ba-4969264968c8",
   "environment": "home-lab",
-  "startedAt": "2026-08-03T22:30:37.455Z",
-  "completedAt": "2026-08-03T22:30:38.327Z",
+  "startedAt": "2026-08-09T14:46:30.262Z",
+  "completedAt": "2026-08-09T14:46:32.164Z",
   "status": "passed",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
@@ -12,10 +12,7 @@
       "environment": "home-lab",
       "revision": 3,
       "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
-      "providerIds": [
-        "ha-climate-lab",
-        "ha-light-lab"
-      ],
+      "providerIds": ["ha-climate-lab", "ha-light-lab"],
       "providerCount": 2,
       "containsSecretKeys": false,
       "containsEntityIdKeys": false
@@ -33,11 +30,7 @@
       "endpoint": "http://127.0.0.1:18081/mcp",
       "protocolSurface": {
         "initialize": "not_applicable_to_frozen_runtime_surface",
-        "discovery": {
-          "status": 200,
-          "resultType": "complete",
-          "hasError": false
-        },
+        "discovery": { "status": 200, "resultType": "complete", "hasError": false },
         "toolsCall": "used_for_real_state_read"
       },
       "toolsList": {
@@ -56,20 +49,12 @@
       "endpoint": "http://127.0.0.1:18080/mcp",
       "protocolSurface": {
         "initialize": "not_applicable_to_frozen_runtime_surface",
-        "discovery": {
-          "status": 200,
-          "resultType": "complete",
-          "hasError": false
-        },
+        "discovery": { "status": 200, "resultType": "complete", "hasError": false },
         "toolsCall": "used_for_real_state_read"
       },
       "toolsList": {
         "status": 200,
-        "toolNames": [
-          "light_get_state",
-          "light_set_power",
-          "light_set_brightness"
-        ]
+        "toolNames": ["light_get_state", "light_set_power", "light_set_brightness"]
       },
       "mcpReadCount": 2
     }
@@ -83,13 +68,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-air-conditioner",
-        "power": "off",
+        "power": "on",
         "reachable": true,
-        "hvacMode": "off",
-        "targetTemperature": 23,
+        "hvacMode": "cool",
+        "targetTemperature": 16,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-03T19:44:29.157337+00:00"
+        "observedAt": "2026-08-09T13:57:50.382352+00:00"
       },
       "status": 200
     },
@@ -101,13 +86,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-main-light",
-        "power": "off",
+        "power": "on",
         "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": null,
-        "observedAt": "2026-08-03T19:44:40.414404+00:00"
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-09T11:28:33.453479+00:00"
       },
       "status": 200
     },
@@ -119,27 +104,31 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "off",
+        "power": "on",
         "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": null,
-        "observedAt": "2026-08-03T19:44:49.616898+00:00"
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-09T11:28:33.782813+00:00"
       },
       "status": 200
     }
   ],
+  "runtimeTaskCounts": {
+    "active": 0,
+    "uncertain": 0,
+    "runtimes": [
+      { "providerId": "ha-climate-lab", "active": 0, "uncertain": 0 },
+      { "providerId": "ha-light-lab", "active": 0, "uncertain": 0 }
+    ]
+  },
   "activeTasks": 0,
   "uncertainTasks": 0,
   "errors": [],
   "protocolQualification": {
     "status": "passed",
-    "requiredMethods": [
-      "server/discover",
-      "tools/list",
-      "tools/call"
-    ],
+    "requiredMethods": ["server/discover", "tools/list", "tools/call"],
     "initialize": "not_applicable_to_frozen_runtime_surface"
   }
 }

@@ -14,7 +14,7 @@
     "protocolMode": "frozen_v1"
   },
   "qualification": {
-    "componentStatus": "pending",
+    "componentStatus": "passed",
     "realResourceStatus": "pending",
     "evidenceRefs": [
       "docs/providers/home-assistant-light-provider.md",

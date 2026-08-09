@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
+import { format, resolveConfig } from "prettier";
+import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
 
 const ROOT = resolve(process.cwd());
 const ENVIRONMENT = "home-lab";
@@ -11,10 +13,15 @@ const MANAGEMENT_TOKEN_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms
 const REPORT_DIRECTORY = resolve(ROOT, "reports/real-device-preparation-continuation");
 const REPORT_PATH = resolve(REPORT_DIRECTORY, "registry-backed-e2e.json");
 const MARKDOWN_PATH = resolve(REPORT_DIRECTORY, "registry-backed-e2e.md");
+const prettierConfig = (await resolveConfig(resolve(ROOT, "package.json"))) ?? {};
 
 const expectedResources = Object.freeze({
   "ha-climate-lab": ["living-room-air-conditioner"],
   "ha-light-lab": ["living-room-main-light", "living-room-aux-light"],
+});
+const expectedDeployments = Object.freeze({
+  "ha-climate-lab": "ha-climate-deployment",
+  "ha-light-lab": "ha-light-deployment",
 });
 
 type JsonObject = Record<string, unknown>;
@@ -41,6 +48,7 @@ const report: JsonObject = {
   },
   runtimes: [],
   resources: [],
+  runtimeTaskCounts: null,
   activeTasks: null,
   uncertainTasks: null,
   errors: [],
@@ -107,6 +115,7 @@ try {
     );
     if (rows.rows.length !== 2) throw new Error("RUNTIME_DEPLOYMENT_COUNT_INVALID");
 
+    const runtimeTaskCounts: JsonObject[] = [];
     for (const row of rows.rows) {
       const provider = providers.find((candidate) => candidate.providerId === row.provider_id);
       if (!isObject(provider)) throw new Error(`REGISTRY_PROVIDER_MISSING:${row.provider_id}`);
@@ -119,6 +128,12 @@ try {
       }
       if (!(row.provider_id in expectedResources)) {
         throw new Error(`UNEXPECTED_PROVIDER:${row.provider_id}`);
+      }
+      if (
+        row.deployment_id !==
+        expectedDeployments[row.provider_id as keyof typeof expectedDeployments]
+      ) {
+        throw new Error(`RUNTIME_DEPLOYMENT_ID_MISMATCH:${row.provider_id}`);
       }
       const expected = expectedResources[row.provider_id as keyof typeof expectedResources];
       if (
@@ -133,10 +148,19 @@ try {
       const runtime = await queryRuntime(row.provider_id, endpoint, expected);
       (report.runtimes as unknown[]).push(runtime.summary);
       (report.resources as unknown[]).push(...runtime.resources);
+      runtimeTaskCounts.push(await readRuntimeTaskCounts(row.provider_id, row.deployment_id));
     }
 
-    report.activeTasks = 0;
-    report.uncertainTasks = 0;
+    report.activeTasks = runtimeTaskCounts.reduce((sum, item) => sum + Number(item.active ?? 0), 0);
+    report.uncertainTasks = runtimeTaskCounts.reduce(
+      (sum, item) => sum + Number(item.uncertain ?? 0),
+      0,
+    );
+    report.runtimeTaskCounts = {
+      active: report.activeTasks,
+      uncertain: report.uncertainTasks,
+      runtimes: runtimeTaskCounts,
+    };
     report.protocolQualification = {
       status: "passed",
       requiredMethods: ["server/discover", "tools/list", "tools/call"],
@@ -160,8 +184,16 @@ try {
 } finally {
   report.completedAt = new Date().toISOString();
   await mkdir(REPORT_DIRECTORY, { recursive: true });
-  await writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  await writeFile(MARKDOWN_PATH, renderMarkdown(report), "utf8");
+  await writeFile(
+    REPORT_PATH,
+    await format(JSON.stringify(report), { ...prettierConfig, parser: "json" }),
+    "utf8",
+  );
+  await writeFile(
+    MARKDOWN_PATH,
+    await format(renderMarkdown(report), { ...prettierConfig, parser: "markdown" }),
+    "utf8",
+  );
 }
 
 process.stdout.write(
@@ -202,6 +234,44 @@ async function checkBootstrap(expectedChecksum: unknown): Promise<JsonObject> {
     sameChecksum: snapshot?.checksum === expectedChecksum,
     etag: response.headers.get("etag"),
   };
+}
+
+async function readRuntimeTaskCounts(
+  providerId: string,
+  deploymentId: string,
+): Promise<JsonObject> {
+  const credentialPath = resolve(
+    ROOT,
+    `.local/pms-continuation/roots/runtime-secrets/deployments/${deploymentId}/instances/database/runtime.secret`,
+  );
+  const connectionString = (await readFile(credentialPath, "utf8")).trim();
+  const pool = new Pool({ connectionString, max: 1 });
+  try {
+    const result = await pool.query<{ internal_state: string; count: string }>(
+      "SELECT internal_state, count(*)::text AS count FROM provider_task GROUP BY internal_state",
+    );
+    const admission = await readUnsettledAdmissionCounts(pool);
+    return { providerId, ...summarizeRuntimeTaskStates(result.rows, admission) };
+  } finally {
+    await pool.end();
+  }
+}
+
+async function readUnsettledAdmissionCounts(
+  pool: Pool,
+): Promise<{ active: string; uncertain: string }> {
+  const result = await pool.query<{ active: string; uncertain: string }>(
+    `SELECT
+       count(*) FILTER (
+         WHERE intent.state IN ('PENDING','ACCEPTED','UNCERTAIN')
+           AND NOT EXISTS (SELECT 1 FROM provider_task task WHERE task.task_id=intent.task_id)
+       )::text AS active,
+       count(*) FILTER (WHERE intent.state='UNCERTAIN')::text AS uncertain
+     FROM admission_intent intent`,
+  );
+  const counts = result.rows[0];
+  if (counts === undefined) throw new Error("RUNTIME_ADMISSION_TASK_COUNTS_MISSING");
+  return counts;
 }
 
 async function queryRuntime(

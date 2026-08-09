@@ -117,4 +117,75 @@ describe("Runtime accepted Task substate", () => {
     );
     expect(count.rows[0]?.count).toBe("1");
   });
+
+  it("fails closed when concurrent accepted publications reuse a Task ID with different arguments", async () => {
+    const snapshotId = randomUUID();
+    const taskId = randomUUID();
+    await pool.query(
+      `INSERT INTO operation_snapshot
+         (snapshot_id,provider_id,provider_version,operation_name,manifest_hash,definition)
+       VALUES ($1,'accepted-conflict-provider','1.0.0','accepted_task',repeat('2',64),'{}'::jsonb)`,
+      [snapshotId],
+    );
+    const timing: TaskExecutionTiming = {
+      start: { mode: "immediate", startToleranceMs: 0 },
+      maxElapsedMs: null,
+    };
+    const transition: SnapshotTransition = {
+      internalState: "QUEUED",
+      mcpStatus: "working",
+      substate: "accepted",
+      statusMessage: "accepted",
+      result: null,
+      error: null,
+      terminal: false,
+      observationType: "task.accepted",
+    };
+    const baseInput = {
+      taskId,
+      providerId: "accepted-conflict-provider",
+      operationName: "accepted_task",
+      operationSnapshotId: snapshotId,
+      authorization: {
+        hash: "3".repeat(64),
+        executionMode: "simulation" as const,
+        simulationId: "sim-conflict",
+        correlationId: "accepted-conflict",
+      },
+      arguments: { power: "on" },
+      argumentHash: "4".repeat(64),
+      externalExecutionId: "accepted-conflict-execution",
+      transition,
+      adapterRevision: 1,
+      adapterResponse: { result: "accepted" },
+      acceptedAt: new Date(),
+      notBefore: new Date(),
+      latestStartAt: new Date(Date.now() + 60_000),
+      deadlineAt: null,
+      ttlMs: 60_000,
+      timing,
+      reservationRef: null,
+    };
+    const repository = new TaskRepository(pool);
+    const outcomes = await Promise.allSettled([
+      repository.publishAccepted(baseInput),
+      repository.publishAccepted({
+        ...baseInput,
+        arguments: { power: "off" },
+        argumentHash: "5".repeat(64),
+      }),
+    ]);
+
+    expect(outcomes.filter((outcome) => outcome.status === "fulfilled")).toHaveLength(1);
+    const rejected = outcomes.find((outcome) => outcome.status === "rejected");
+    expect(rejected?.status).toBe("rejected");
+    if (rejected?.status !== "rejected")
+      throw new Error("EXPECTED_CONCURRENT_PUBLICATION_REJECTION");
+    const rejectionReason: unknown = rejected.reason;
+    expect(rejectionReason).toBeInstanceOf(Error);
+    expect((rejectionReason as Error).message).toBe("TASK_ACCEPTED_IDENTITY_CONFLICT");
+    const persisted = await repository.getById(taskId);
+    expect(persisted).not.toBeNull();
+    expect(["4".repeat(64), "5".repeat(64)]).toContain(persisted?.argumentHash);
+  });
 });

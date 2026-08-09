@@ -43,6 +43,7 @@ import {
   type RuntimeDeploymentSnapshot,
   type RuntimeDeploymentStatus,
   type RuntimeInfrastructureInstanceTarget,
+  type RuntimePortRange,
 } from "../../../packages/runtime-deployment/src/index.js";
 import {
   CatalogRegistryPublicationPhase,
@@ -59,7 +60,7 @@ import {
   type RuntimeControlPlaneCredentialResolverContract,
 } from "./runtime-control-plane-credentials.js";
 
-const RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
+const DEFAULT_RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
 const RUNTIME_BOOTSTRAP_RESERVED_KEYS = new Set([
   "PORT",
   "PROVIDER_ID",
@@ -115,6 +116,10 @@ export async function createProductionRuntimeComposition(
   config: PmsWorkerConfig,
 ): Promise<ProductionRuntimeComposition> {
   const runtime = requirePmsWorkerRuntimeConfig(config);
+  const portRange =
+    runtime.runtimePortRange === undefined
+      ? DEFAULT_RUNTIME_PORT_RANGE
+      : runtimePortRange(runtime.runtimePortRange.start, runtime.runtimePortRange.end);
   const manifest = await loadRuntimeReleaseManifest(runtime.runtimeReleaseRoot);
   const releaseResolver = new RuntimeReleaseResolver(runtime.runtimeReleaseRoot, manifest);
   const api = createPm2JavascriptApi({ pm2Home: runtime.pm2Home });
@@ -136,6 +141,7 @@ export async function createProductionRuntimeComposition(
       runtime.runtimeConfigCacheRoot,
       runtime.runtimeControlPlaneUrl,
       runtimeControlPlaneCredentialResolver,
+      portRange,
     );
     const repositories = Object.freeze({
       runtimeDeployments: new PostgresRuntimeDeploymentRepository(pool),
@@ -270,6 +276,7 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
   readonly #processes: PostgresRuntimeProcessRepository;
   readonly #allocator: PostgresRuntimeInstanceAllocator;
   readonly #configuration: PostgresConfigurationRepository;
+  readonly #portRange: RuntimePortRange;
 
   constructor(
     private readonly pool: Pool,
@@ -277,11 +284,13 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
     private readonly configCacheRoot: string,
     private readonly runtimeControlPlaneUrl: string,
     private readonly runtimeControlPlaneCredentialResolver: RuntimeControlPlaneCredentialResolverContract,
+    portRange: RuntimePortRange,
   ) {
     this.#deployments = new PostgresRuntimeDeploymentRepository(pool);
     this.#processes = new PostgresRuntimeProcessRepository(pool);
     this.#allocator = new PostgresRuntimeInstanceAllocator(pool);
     this.#configuration = new PostgresConfigurationRepository(pool);
+    this.#portRange = portRange;
   }
 
   getDeployment(providerId: string, deploymentId: string) {
@@ -367,7 +376,7 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
       providerId: String(deployment.providerId),
       deploymentId: String(deployment.deploymentId),
       ordinal,
-      portRange: RUNTIME_PORT_RANGE,
+      portRange: this.#portRange,
     });
     const locator = parseRuntimeConfigProfileLocator(String(deployment.configProfileId));
     const revision = await this.#configuration.getPublishedRevision(toConfigurationTarget(locator));

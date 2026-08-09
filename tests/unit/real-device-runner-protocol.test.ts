@@ -25,4 +25,11 @@ describe("real-device runner frozen MCP profile", () => {
     expect(apiReference).not.toMatch(/\|\s*`tasks\/result`\s*\|/);
     expect(runtimeBoundary).toContain("does not expose the legacy `tasks/result` method");
   });
+
+  it("stops automatic climate writes when an opposite power restore is inside five minutes", () => {
+    const source = readFileSync(resolve(root, "scripts/run-ha-real-climate.ts"), "utf8");
+    expect(source).toContain('restoration.reason = "CLIMATE_OPPOSITE_POWER_INTERVAL_ACTIVE"');
+    expect(source).toContain('restoration.status = "manual_restore_required"');
+    expect(source).not.toContain("await sleep(remaining)");
+  });
 });

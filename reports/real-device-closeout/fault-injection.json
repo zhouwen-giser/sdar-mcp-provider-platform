@@ -1,0 +1,15 @@
+{
+  "evidenceClass": "mixed",
+  "status": "unverified",
+  "real": {
+    "status": "unverified",
+    "sourceReport": "reports/real-device-preparation-continuation/fault-injection.json"
+  },
+  "controlled": {
+    "status": "partial",
+    "testsPassed": 4,
+    "testsFailed": 0,
+    "evidenceClass": "controlledFaultInjection"
+  },
+  "forbiddenConversion": "controlled fault results are not real-device qualification"
+}

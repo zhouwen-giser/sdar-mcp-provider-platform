@@ -1,0 +1,26 @@
+{
+  "evidenceClass": "mixed",
+  "status": "not_ready",
+  "mainMergeReady": false,
+  "codeAndRepositoryBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
+  "github": {
+    "requiredChecks": "not_checked_before_pr",
+    "blockingReviewFindings": null,
+    "unresolvedThreads": null
+  },
+  "externalQualificationBlockers": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ],
+  "automaticActionsNotTaken": [
+    "merge",
+    "tag",
+    "release",
+    "public deployment",
+    "force push",
+    "branch deletion"
+  ]
+}

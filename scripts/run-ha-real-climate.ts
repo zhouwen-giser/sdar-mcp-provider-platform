@@ -27,12 +27,18 @@ const reportMarkdownPath = resolve(
   root,
   "reports/real-device-preparation/climate-real-qualification.md",
 );
+const climatePowerQualificationReportPath = resolve(
+  root,
+  "reports/real-device-preparation-continuation/climate-power-qualification.json",
+);
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const runId = process.env.REAL_DEVICE_TEST_RUN_ID;
 const writesEnabled =
   process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" &&
   typeof runId === "string" &&
   runId.trim().length > 0;
+const powerOnQualificationRequested = process.env.REAL_CLIMATE_POWER_ON_QUALIFICATION === "YES";
+const climatePowerTestGateOpen = process.env.ALLOW_CLIMATE_POWER_TEST === "YES";
 
 type JsonObject = Record<string, unknown>;
 interface McpResponse {
@@ -52,6 +58,8 @@ const report: JsonObject = {
   safetyGate: {
     allowRealDeviceSideEffects: process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES",
     runIdPresent: typeof runId === "string" && runId.trim().length > 0,
+    powerOnQualificationRequested,
+    climatePowerTestGateOpen,
     writeBudget: {
       climatePowerOn: 1,
       climatePowerOff: 1,
@@ -75,7 +83,14 @@ const report: JsonObject = {
   terminalTaskStatus: null,
   stateRestoration: null,
   errors: [],
+  qualifiedOperations: {
+    climate_get_state: "unverified",
+    climate_set_hvac_mode: "unverified",
+    climate_set_temperature: "unverified",
+    climate_set_power: "unverified",
+  },
 };
+let powerQualificationStatus = powerOnQualificationRequested ? "not_started" : "not_requested";
 
 let runtime: ReturnType<typeof createRuntime> | undefined;
 let provider: ClimateProviderServer | undefined;
@@ -319,11 +334,54 @@ try {
   const afterTemperature = await readState(mcpUrl, climate.resourceId, integrationRunId, 12);
   temperatureScenario.after = redactClimateState(afterTemperature.normalized);
 
+  let stateBeforeRestore = afterTemperature.normalized;
+  if (powerOnQualificationRequested) {
+    if (original.normalized.power !== "off") {
+      powerQualificationStatus = "not_applicable_initial_power_on";
+    } else {
+      const powerPreState = await readState(mcpUrl, climate.resourceId, integrationRunId, 13);
+      let powerScenario: JsonObject;
+      try {
+        powerScenario = await runTask(
+          mcpUrl,
+          "climate_set_power",
+          climate.resourceId,
+          { power: "on" },
+          `${integrationRunId}:climate-power-on`,
+          14,
+        );
+      } catch (error) {
+        report.errors = [...(report.errors as unknown[]), safeCode(error)];
+        powerScenario = {
+          operation: "climate_set_power",
+          status: "blocked",
+          runtimeTaskId: null,
+          error: safeCode(error),
+        };
+      }
+      powerScenario.before = redactClimateState(powerPreState.normalized);
+      powerScenario.desired = { power: "on" };
+      reportScenarios().push(powerScenario);
+      const afterPower = await readState(mcpUrl, climate.resourceId, integrationRunId, 15);
+      powerScenario.after = redactClimateState(afterPower.normalized);
+      stateBeforeRestore = afterPower.normalized;
+      if (powerScenario.status === "completed" && afterPower.normalized.power === "on") {
+        powerQualificationStatus = "real_pass";
+        (report.safetyGate as JsonObject).writesUsed = {
+          ...((report.safetyGate as JsonObject).writesUsed as JsonObject),
+          climatePowerOn: 1,
+        };
+      } else {
+        powerQualificationStatus = "blocked";
+      }
+    }
+  }
+
   const restore = await restoreClimate(
     mcpUrl,
     climate,
     original.normalized,
-    afterTemperature.normalized,
+    stateBeforeRestore,
     integrationRunId,
     observedEvents,
   );
@@ -333,12 +391,27 @@ try {
   report.finalState = redactClimateState(finalState.normalized);
   report.terminalTaskProjection = temperatureScenario.finalTask;
   report.terminalTaskStatus = temperatureScenario.status;
+  const powerOperationQualification =
+    powerQualificationStatus === "real_pass" && restore.status === "restored"
+      ? "real_pass"
+      : powerQualificationStatus === "real_pass"
+        ? "real_pass_manual_restore_required"
+        : powerOnQualificationRequested
+          ? powerQualificationStatus
+          : "real_pass_off_restore_only";
+  report.qualifiedOperations = {
+    climate_get_state: "real_pass",
+    climate_set_hvac_mode: "real_pass",
+    climate_set_temperature: "real_pass",
+    climate_set_power: powerOperationQualification,
+  };
   report.activeTasks = await activeTaskCount(runtime.pool);
   report.uncertainTasks = 0;
   report.status =
     restore.status === "restored" &&
     isObject(report.terminalTaskProjection) &&
-    report.terminalTaskStatus === "completed"
+    report.terminalTaskStatus === "completed" &&
+    (!powerOnQualificationRequested || powerOperationQualification === "real_pass")
       ? "passed"
       : "blocked";
   writeRunState({
@@ -354,6 +427,34 @@ try {
   report.completedAt = new Date().toISOString();
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   writeFileSync(reportMarkdownPath, markdown(report), "utf8");
+  writeFileSync(
+    climatePowerQualificationReportPath,
+    `${JSON.stringify(
+      {
+        evidenceClass: "real",
+        phase: "P2_CLIMATE_POWER_QUALIFICATION",
+        integrationRunId: report.integrationRunId,
+        status:
+          powerOnQualificationRequested &&
+          (report.qualifiedOperations as JsonObject).climate_set_power === "real_pass"
+            ? "passed"
+            : powerOnQualificationRequested
+              ? "blocked"
+              : "partial",
+        qualifiedOperations: report.qualifiedOperations,
+        powerOnQualificationRequested,
+        climatePowerTestGateOpen,
+        sourceReport: "reports/real-device-preparation/climate-real-qualification.json",
+        safety: {
+          fiveMinuteOppositePowerIntervalPreserved: true,
+          automaticContinuationAfterUncertain: false,
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
   websocket?.stop();
   telemetry?.stop();
   await runtime?.app.close().catch(() => undefined);
@@ -371,6 +472,8 @@ process.exitCode = report.status === "passed" ? 0 : 1;
 
 function assertSafetyPrerequisites(): void {
   if (!writesEnabled) throw coded("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED");
+  if (powerOnQualificationRequested && !climatePowerTestGateOpen)
+    throw coded("CLIMATE_POWER_TEST_GATE_CLOSED");
 }
 
 function loadLocalConfiguration(): {
@@ -641,11 +744,16 @@ async function restoreClimate(
       restoration.waits = [
         {
           safetyIntervalMs: 300_000,
-          waitedMs: remaining,
+          waitedMs: 0,
+          remainingMs: remaining,
           reason: "opposite climate power operation",
         },
       ];
-      await sleep(remaining);
+      restoration.status = "manual_restore_required";
+      restoration.manualRestoreRequired = true;
+      restoration.reason = "CLIMATE_OPPOSITE_POWER_INTERVAL_ACTIVE";
+      restoration.currentAfterRestore = redactClimateState(current);
+      return restoration;
     }
     const pre = await readState(url, climate.resourceId, correlationId, 30);
     if (pre.normalized.power !== "on") {

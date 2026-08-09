@@ -1,61 +1,16 @@
 {
   "evidenceClass": "real",
   "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
-  "status": "partial",
-  "continuationReport": "reports/real-device-preparation-continuation/three-device-e2e.json",
-  "scenarios": [
-    {
-      "providerId": "ha-light-lab",
-      "resourceId": "living-room-main-light",
-      "operation": "light_set_power",
-      "evidenceClass": "real",
-      "status": "passed",
-      "sameArgumentsSameTask": true,
-      "sameTaskId": "0754c914-af8e-46cb-a840-b6c38663e077",
-      "differentArgumentsRejected": true,
-      "conflictHttpStatus": 400,
-      "homeAssistantObservationId": "home-assistant-light-0754c914-af8e-46cb-a840-b6c38663e077-4"
-    },
-    {
-      "providerId": "ha-light-lab",
-      "resourceId": "living-room-aux-light",
-      "operation": "light_set_power",
-      "evidenceClass": "real",
-      "status": "passed",
-      "sameArgumentsSameTask": true,
-      "sameTaskId": "6df17dd4-a478-4b01-8260-0f54551a6e38",
-      "differentArgumentsRejected": true,
-      "conflictHttpStatus": 400,
-      "homeAssistantObservationId": "home-assistant-light-6df17dd4-a478-4b01-8260-0f54551a6e38-4"
-    },
-    {
-      "scenario": "client timeout then retry",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "reason": "Not induced against a real device after the bounded qualification run."
-    },
-    {
-      "scenario": "Runtime duplicate tools/call after accepted Task",
-      "evidenceClass": "real",
-      "status": "passed"
-    },
-    {
-      "scenario": "Adapter restart during Task",
-      "evidenceClass": "unverified",
-      "status": "unverified",
-      "reason": "In-flight restart was not induced against a real device."
-    },
-    {
-      "scenario": "corrupted Provider state file fails closed",
-      "evidenceClass": "contract",
-      "status": "covered_by_tests"
-    }
-  ],
+  "status": "passed_scoped_bounded_light_runs",
+  "continuationReport": "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
+  "scenarios": [],
   "activeTasks": 0,
   "uncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "deviceState": "restored",
   "blockers": [
-    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
     "CLIENT_TIMEOUT_RETRY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
     "REAL_FAULT_INJECTION_UNVERIFIED"
   ]
 }

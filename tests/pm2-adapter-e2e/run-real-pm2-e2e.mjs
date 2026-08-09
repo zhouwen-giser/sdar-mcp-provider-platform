@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { connect, createServer } from "node:net";
 import {
@@ -17,12 +18,15 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import process from "node:process";
 import { clearTimeout, setTimeout } from "node:timers";
+import { URL } from "node:url";
+import { Pool } from "pg";
 import {
   BootstrapConfigRenderer,
   createPm2JavascriptApi,
   Pm2ProcessManager,
   RuntimeLifecycleManager,
 } from "../../dist/packages/pm2-runtime-adapter/src/index.js";
+import { runMigrations } from "../../dist/packages/persistence-postgres/src/index.js";
 
 class MemoryLifecycleStore {
   completed = new Map();
@@ -51,6 +55,9 @@ const databaseUrl = process.env.TEST_DATABASE_URL;
 if (databaseUrl === undefined || databaseUrl.length === 0) {
   throw new Error("TEST_DATABASE_URL is required for real PM2 E2E");
 }
+const databaseSchema = `pm2_product_${randomUUID().replaceAll("-", "")}`;
+const runtimeDatabaseUrl = withSearchPath(databaseUrl, databaseSchema);
+const databaseAdmin = new Pool({ connectionString: databaseUrl });
 
 const runtimeVersion = "2.0.0-rc.1";
 const processName = "sdar-runtime-e2e-product-0";
@@ -125,6 +132,7 @@ const startRequest = (configRevision, configChecksum) => ({
 let adapter;
 let adapterDiagnostics = "";
 let pm2Connected = false;
+let migrationCount;
 
 try {
   await mkdir(releaseDirectory, { recursive: true });
@@ -142,7 +150,17 @@ try {
     resolve(root, "node_modules"),
     resolve(releaseDirectory, "node_modules"),
   );
-  await writeFile(secretFile, `${databaseUrl}\n`, { mode: 0o600 });
+  await databaseAdmin.query(`CREATE SCHEMA ${quoteIdentifier(databaseSchema)}`);
+  const migrationPool = new Pool({ connectionString: runtimeDatabaseUrl });
+  try {
+    const result = await runMigrations(migrationPool, undefined, {
+      workspaceRoot: releaseDirectory,
+    });
+    migrationCount = result.migrations.length;
+  } finally {
+    await migrationPool.end();
+  }
+  await writeFile(secretFile, `${runtimeDatabaseUrl}\n`, { mode: 0o600 });
   await chmod(secretFile, 0o600);
 
   adapter = spawn("node", ["dist/examples/mock-adapter-typescript/src/main.js"], {
@@ -335,6 +353,10 @@ try {
       directPm2CliUsed: false,
       configurationFileBypassUsed: false,
     },
+    databaseIsolation: {
+      isolatedSchema: true,
+      releaseArtifactMigrationsApplied: migrationCount,
+    },
   };
   const evidenceDirectory = resolve(root, "reports/evidence");
   await mkdir(evidenceDirectory, { recursive: true });
@@ -381,6 +403,10 @@ try {
   } else {
     process.stderr.write(`PM2_E2E_TEMP_RETAINED:${temporaryRoot}\n`);
   }
+  await databaseAdmin
+    .query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(databaseSchema)} CASCADE`)
+    .catch(() => undefined);
+  await databaseAdmin.end().catch(() => undefined);
 }
 process.exit(0);
 
@@ -577,6 +603,17 @@ function sanitizeDiagnostics(value, secret) {
     .replaceAll(secret, "<redacted-database-url>")
     .replace(/postgres(?:ql)?:\/\/[^\s"'\\]+/gi, "<redacted-database-url>")
     .slice(0, 32_000);
+}
+
+function withSearchPath(connectionString, searchPath) {
+  const url = new URL(connectionString);
+  url.searchParams.set("options", `-c search_path=${searchPath}`);
+  return url.toString();
+}
+
+function quoteIdentifier(value) {
+  if (!/^[a-z][a-z0-9_]{0,62}$/.test(value)) throw new Error("TEST_IDENTIFIER_INVALID");
+  return `"${value}"`;
 }
 
 function freePort() {

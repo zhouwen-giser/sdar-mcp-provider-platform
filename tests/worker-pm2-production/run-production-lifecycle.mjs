@@ -28,6 +28,7 @@ import {
   CatalogDiscoveryClient,
   HttpCatalogDiscoveryTransport,
 } from "../../packages/catalog-manager/src/index.ts";
+import { GrpcAdapterGateway } from "../../packages/adapter-protocol/src/index.ts";
 import {
   createPm2JavascriptApi,
   Pm2ProcessManager,
@@ -448,6 +449,7 @@ async function startWorker() {
           runtimeReconcileIntervalMs: 1_000,
           runtimeReconcileTimeoutMs: 30_000,
           runtimeHealthTimeoutMs: 2_000,
+          runtimePortRange: { start: 19_080, end: 19_179 },
         },
       }),
     readDatabaseUrl: () => Promise.resolve(pmsDatabaseUrl),
@@ -778,6 +780,12 @@ async function assertCrossTokenRejected(token, target) {
 }
 
 async function startAdapter(port, adapterProviderId) {
+  await waitFor(
+    () => tcpAvailable(port),
+    (occupied) => occupied === false,
+    5_000,
+    "MOCK_ADAPTER_PORT_NOT_RELEASED",
+  );
   const child = spawn("node", ["dist/examples/mock-adapter-typescript/src/main.js"], {
     cwd: root,
     env: {
@@ -798,9 +806,21 @@ async function startAdapter(port, adapterProviderId) {
   await waitFor(
     async () => {
       if (child.exitCode !== null) throw new Error("MOCK_ADAPTER_EXITED");
-      return tcpAvailable(port);
+      if (!(await tcpAvailable(port))) return null;
+      const gateway = new GrpcAdapterGateway({
+        endpoint: `127.0.0.1:${String(port)}`,
+        providerId: adapterProviderId,
+        timeoutMs: 1_000,
+      });
+      try {
+        return await gateway.describeProvider();
+      } catch {
+        return null;
+      } finally {
+        gateway.close();
+      }
     },
-    (ready) => ready,
+    (manifest) => manifest?.providerId === adapterProviderId,
     15_000,
     "MOCK_ADAPTER_START_TIMEOUT",
   );

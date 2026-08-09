@@ -16,8 +16,13 @@ const images = Object.freeze({
 const environment = {
   ...process.env,
   RELEASE_ARTIFACT_PROJECT: project,
-  RELEASE_ARTIFACT_FIXTURE_ROOT: fixtureRoot,
 };
+const composeVolumes = Object.freeze({
+  "release-api": `${project}_release-api`,
+  "release-worker": `${project}_release-worker`,
+  "release-runtime-releases": `${project}_release-runtime-releases`,
+  "release-worker-state": `${project}_release-worker-state`,
+});
 
 cleanup();
 try {
@@ -35,7 +40,7 @@ try {
     ]);
   }
   await createFixtures();
-  assignFixtureOwnershipToRuntimeUser();
+  prepareComposeVolumes();
   try {
     command(
       "docker",
@@ -263,7 +268,7 @@ async function secret(path, value) {
   await writeFile(path, value, { mode: 0o600 });
 }
 
-function assignFixtureOwnershipToRuntimeUser() {
+function prepareComposeVolumes() {
   const uid = command("docker", [
     "run",
     "--rm",
@@ -283,20 +288,40 @@ function assignFixtureOwnershipToRuntimeUser() {
     "node",
   ]).trim();
   assert(/^[1-9][0-9]*$/.test(uid) && /^[1-9][0-9]*$/.test(gid), "RUNTIME_USER_INVALID");
-  command("docker", [
-    "run",
-    "--rm",
-    "--user",
-    "0:0",
-    "--volume",
-    `${fixtureRoot}:/fixtures`,
-    "--entrypoint",
-    "chown",
-    images.runtime,
-    "-R",
-    `${uid}:${gid}`,
-    "/fixtures",
-  ]);
+  const sources = Object.freeze({
+    "release-api": "api",
+    "release-worker": "worker",
+    "release-runtime-releases": "runtime-releases",
+    "release-worker-state": "worker-state",
+  });
+  for (const [composeName, source] of Object.entries(sources)) {
+    const volume = composeVolumes[composeName];
+    command("docker", [
+      "volume",
+      "create",
+      "--label",
+      `com.docker.compose.project=${project}`,
+      "--label",
+      `com.docker.compose.volume=${composeName}`,
+      volume,
+    ]);
+    command("docker", [
+      "run",
+      "--rm",
+      "--user",
+      "0:0",
+      "--volume",
+      `${resolve(fixtureRoot, source)}:/source:ro`,
+      "--volume",
+      `${volume}:/target`,
+      "--entrypoint",
+      "sh",
+      images.runtime,
+      "-eu",
+      "-c",
+      `cp -a /source/. /target/ && chown -R ${uid}:${gid} /target && find /target -type d -exec chmod 0700 {} + && find /target -type f -exec chmod 0600 {} +`,
+    ]);
+  }
 }
 
 function compose(...args) {

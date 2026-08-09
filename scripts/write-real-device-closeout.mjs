@@ -2,12 +2,20 @@ import { execFileSync } from "node:child_process";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { format, resolveConfig } from "prettier";
+import {
+  buildSdarIntegrationAllowlist,
+  describeCurrentPreflight,
+  hasStateChangedSubscription,
+  renderFaultMatrix,
+  resolveCurrentRuntimeTaskCounts,
+} from "./real-device-closeout-lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = resolve(root, "reports/real-device-preparation");
 const continuationRoot = resolve(root, "reports/real-device-preparation-continuation");
 const closeoutRoot = resolve(root, "reports/real-device-closeout");
-const codexRoot = resolve(root, ".codex/ha-real-device-closeout");
+const prettierConfig = (await resolveConfig(resolve(root, "package.json"))) ?? {};
 
 const baseline = await readJson(resolve(sourceRoot, "baseline.json"));
 const preflight = await readJson(resolve(sourceRoot, "ha-preflight.json"));
@@ -22,6 +30,13 @@ const threeDevice = await readJson(resolve(continuationRoot, "three-device-e2e.j
 const recovery = await readJson(resolve(continuationRoot, "real-recovery.json"));
 const faultInjection = await readJson(resolve(continuationRoot, "fault-injection.json"));
 const climatePower = await readJson(resolve(continuationRoot, "climate-power-qualification.json"));
+const noDuplicate = await readJson(resolve(continuationRoot, "no-duplicate-side-effect.json"));
+const protocolLockCrossPlatform = await readJson(
+  resolve(continuationRoot, "protocol-lock-cross-platform.json"),
+);
+const protocolLockDiff = await readJson(resolve(continuationRoot, "protocol-lock-diff.json"));
+const linuxSymlink = await readJsonIfPresent(resolve(continuationRoot, "symlink-linux.json"));
+const runtimeImage = await readJsonIfPresent(resolve(root, "reports/image/runtime-v2.json"));
 const migrationEvidence = await readJson(
   resolve(root, "reports/evidence/migration-isolation.json"),
 );
@@ -52,11 +67,20 @@ const resourceIds = [
   "living-room-main-light",
   "living-room-aux-light",
 ];
+const resourceBindings = [
+  { providerId: "ha-climate-lab", resourceId: "living-room-air-conditioner" },
+  { providerId: "ha-light-lab", resourceId: "living-room-main-light" },
+  { providerId: "ha-light-lab", resourceId: "living-room-aux-light" },
+];
 const allThreeRestored =
   (threeDevice.stateRestoration ?? []).length === 3 &&
   threeDevice.stateRestoration.every((item) => item.status === "restored");
+const currentRuntimeTaskCounts = resolveCurrentRuntimeTaskCounts(registryE2e, threeDevice);
+const preflightWebSocket = preflight.websocket ?? preflight.ws ?? {};
+const currentPreflightPass = preflight.status === "passed";
+const currentDeviceStateRestored = currentPreflightPass && allThreeRestored;
 const functionalPass =
-  preflight.status === "passed" &&
+  currentPreflightPass &&
   climate.status === "passed" &&
   lights.status === "passed" &&
   pms.status === "passed" &&
@@ -65,8 +89,8 @@ const functionalPass =
   registryE2e.status === "passed" &&
   threeDevice.status === "passed" &&
   allThreeRestored &&
-  (threeDevice.runtimeTaskCounts?.active ?? 1) === 0 &&
-  (threeDevice.runtimeTaskCounts?.uncertain ?? 1) === 0;
+  currentRuntimeTaskCounts.active === 0 &&
+  currentRuntimeTaskCounts.uncertain === 0;
 const climatePowerOnQualified = climatePower.qualifiedOperations?.climate_set_power === "real_pass";
 const realInFlightRecoveryQualified = false;
 const realFaultsQualified = false;
@@ -74,6 +98,9 @@ const pmsOutageQualified = false;
 const resiliencePass = realInFlightRecoveryQualified && realFaultsQualified && pmsOutageQualified;
 const fullCapabilityPass = functionalPass && climatePowerOnQualified && resiliencePass;
 const blockers = unique([
+  ...(currentPreflightPass
+    ? []
+    : ["HA_PREFLIGHT_NOT_CURRENTLY_PASSED", "MANUAL_RESTORE_REQUIRED_CURRENT_DEVICE_STATE"]),
   ...(climatePowerOnQualified ? [] : ["CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED"]),
   ...(realInFlightRecoveryQualified
     ? []
@@ -86,6 +113,38 @@ const blockers = unique([
 ]);
 
 const verificationCommands = verification.commands ?? {};
+const requiredRepositoryCommandNames = [
+  "installFrozen",
+  "formatCheck",
+  "lint",
+  "typecheck",
+  "build",
+  "protocolCheck",
+  "testUnit",
+  "testContract",
+  "testIntegration",
+  "testE2e",
+  "migrationIsolation",
+  "haClimate",
+  "haLight",
+  "providerPlatformHa",
+  "providerPackages",
+  "security",
+  "sbom",
+  "container",
+  "verifyV2",
+  "verifyPlatform",
+  "releaseCandidateCheck",
+  "pmsApiProduction",
+  "workerPm2Production",
+  "linuxSymlink",
+];
+const repositoryCommandStatuses = Object.fromEntries(
+  requiredRepositoryCommandNames.map((name) => [name, statusOf(verificationCommands[name])]),
+);
+const repositoryGatesPassed = requiredRepositoryCommandNames.every(
+  (name) => repositoryCommandStatuses[name] === "passed",
+);
 const aggregateStatus = {
   verifyV2: statusOf(verificationCommands.verifyV2),
   verifyPlatform: statusOf(verificationCommands.verifyPlatform),
@@ -94,6 +153,15 @@ const aggregateStatus = {
   typecheck: statusOf(verificationCommands.typecheck),
   build: statusOf(verificationCommands.build),
   protocolCheck: statusOf(verificationCommands.protocolCheck),
+  releaseCandidateCheck: statusOf(verificationCommands.releaseCandidateCheck),
+  providerPackages: statusOf(verificationCommands.providerPackages),
+  security: statusOf(verificationCommands.security),
+  sbom: statusOf(verificationCommands.sbom),
+  container: statusOf(verificationCommands.container),
+  migrationIsolation: statusOf(verificationCommands.migrationIsolation),
+  pmsApiProduction: statusOf(verificationCommands.pmsApiProduction),
+  workerPm2Production: statusOf(verificationCommands.workerPm2Production),
+  linuxSymlink: statusOf(verificationCommands.linuxSymlink),
 };
 const sensitiveScan = await scanReports();
 const forbiddenProtocolChanges = changedFiles.filter((file) =>
@@ -222,7 +290,10 @@ const protocolIntegrity = {
 const securityAudit = {
   evidenceClass: statusOf(verificationCommands.security) === "passed" ? "contract" : "unverified",
   status: statusOf(verificationCommands.security),
-  dependencyAudit: verification.dependencyAudit ?? "not separately recorded",
+  dependencyAudit:
+    verificationCommands.dependencyAudit?.summary ?? "not separately recorded for this candidate",
+  dependencyAuditRefresh:
+    verificationCommands.dependencyAudit?.currentOnlineRefresh ?? "not_requested",
   sensitiveReportScan: sensitiveScan,
   realWriteGate: {
     climate: "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
@@ -263,6 +334,123 @@ const aggregateGates = {
     "Windows PM2 pidusage can emit WMI ManagementException diagnostics while readiness and task paths remain usable.",
   ],
 };
+const releasePackaging = {
+  evidenceClass:
+    statusOf(verificationCommands.container) === "passed" &&
+    statusOf(verificationCommands.releaseCandidateCheck) === "passed" &&
+    runtimeImage?.reproducibleFilesystemAndConfig === true
+      ? "static"
+      : "unverified",
+  status:
+    statusOf(verificationCommands.container) === "passed" &&
+    statusOf(verificationCommands.releaseCandidateCheck) === "passed" &&
+    runtimeImage?.reproducibleFilesystemAndConfig === true
+      ? "passed"
+      : "blocked",
+  releaseCandidateWorkflow: statusOf(verificationCommands.releaseCandidateCheck),
+  runtimeImage: runtimeImage
+    ? {
+        image: runtimeImage.image,
+        base: runtimeImage.base,
+        sizeBytes: runtimeImage.sizeBytes,
+        maximumBytes: runtimeImage.maximumBytes,
+        filesystemHash: runtimeImage.filesystemHash,
+        frozenLockfile: runtimeImage.frozenLockfile,
+        productionDependenciesOnly: runtimeImage.productionDependenciesOnly,
+        containsTestsDocsOrReferences: runtimeImage.containsTestsDocsOrReferences,
+        reproducibleFilesystemAndConfig: runtimeImage.reproducibleFilesystemAndConfig,
+      }
+    : null,
+  noPublicPublication: true,
+};
+const crossPlatformGates = {
+  evidenceClass:
+    protocolLockCrossPlatform.windows?.status === "passed" &&
+    protocolLockCrossPlatform.linux?.status === "passed" &&
+    (linuxSymlink?.status ?? "unverified") === "passed" &&
+    protocolLockDiff.summary?.contentDrift === 0
+      ? "mixed"
+      : "unverified",
+  status:
+    protocolLockCrossPlatform.windows?.status === "passed" &&
+    protocolLockCrossPlatform.linux?.status === "passed" &&
+    (linuxSymlink?.status ?? "unverified") === "passed" &&
+    protocolLockDiff.summary?.contentDrift === 0
+      ? "passed"
+      : "partial",
+  protocolLock: {
+    windows: protocolLockCrossPlatform.windows?.status ?? "unverified",
+    linux: protocolLockCrossPlatform.linux?.status ?? "unverified",
+    contentDrift: protocolLockDiff.summary?.contentDrift ?? null,
+    lineEndingDrift: protocolLockDiff.summary?.lineEndingDrift ?? null,
+  },
+  providerPackageLinuxSymlink: linuxSymlink
+    ? {
+        status: linuxSymlink.status,
+        expectedCode: linuxSymlink.expectedCode,
+        actualCode: linuxSymlink.actualCode,
+      }
+    : { status: "unverified" },
+};
+const repositoryGates = {
+  evidenceClass: repositoryGatesPassed ? "mixed" : "unverified",
+  status: repositoryGatesPassed ? "passed" : "blocked",
+  requiredCommandStatuses: repositoryCommandStatuses,
+  historicalOrEnvironmentNotes: [
+    "A command is counted only when its current recorded status is exactly passed.",
+    "A timeout or missing TEST_DATABASE_URL is not converted into a pass.",
+  ],
+};
+const mergeCodeBlockers = unique([
+  ...(worktreeClean ? [] : ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"]),
+  ...(architectureReview.status === "passed" ? [] : ["ARCHITECTURE_BOUNDARY_REVIEW_FAILED"]),
+  ...(migrationAudit.status === "passed" ? [] : ["MIGRATION_AUDIT_FAILED"]),
+  ...(protocolIntegrity.status === "passed" ? [] : ["FROZEN_PROTOCOL_GATE_FAILED"]),
+  ...(securityAudit.status === "passed" ? [] : ["SECURITY_GATE_FAILED"]),
+  ...(providerPackageGate.status === "passed" ? [] : ["PROVIDER_PACKAGE_GATE_FAILED"]),
+  ...(repositoryGates.status === "passed" ? [] : ["REPOSITORY_GATES_NOT_CURRENTLY_PASSED"]),
+  ...(releasePackaging.status === "passed"
+    ? []
+    : ["RUNTIME_RELEASE_PACKAGING_NOT_CURRENTLY_PASSED"]),
+  ...(crossPlatformGates.status === "passed" ? [] : ["CROSS_PLATFORM_GATE_FAILED"]),
+  ...(sensitiveScan.tokenMatchCount === 0 ? [] : ["SECRET_FOUND_IN_REPORT_SCAN"]),
+  ...(sensitiveScan.entityIdMatchCount === 0 ? [] : ["ENTITY_ID_FOUND_IN_REPORT_SCAN"]),
+  ...(sensitiveScan.authorizationHeaderCount === 0
+    ? []
+    : ["AUTHORIZATION_HEADER_FOUND_IN_REPORT_SCAN"]),
+  ...(currentRuntimeTaskCounts.active === 0 ? [] : ["ACTIVE_RUNTIME_TASKS_REMAIN"]),
+  ...(currentRuntimeTaskCounts.uncertain === 0 ? [] : ["UNCERTAIN_RUNTIME_TASKS_REMAIN"]),
+]);
+const mainMergeReadiness = {
+  evidenceClass: "mixed",
+  status:
+    mergeCodeBlockers.length === 0 &&
+    verification.github?.requiredChecks === "passed" &&
+    verification.github?.blockingReviewFindings === 0
+      ? "ready"
+      : "not_ready",
+  mainMergeReady:
+    mergeCodeBlockers.length === 0 &&
+    verification.github?.requiredChecks === "passed" &&
+    verification.github?.blockingReviewFindings === 0,
+  codeAndRepositoryBlockers: mergeCodeBlockers,
+  github: verification.github ?? {
+    requiredChecks: "not_verified",
+    blockingReviewFindings: null,
+    unresolvedThreads: null,
+    checkedAt: null,
+    note: "A PR and its protected-branch checks had not been verified when this report was generated.",
+  },
+  externalQualificationBlockers: blockers,
+  automaticActionsNotTaken: [
+    "merge",
+    "tag",
+    "release",
+    "public deployment",
+    "force push",
+    "branch deletion",
+  ],
+};
 const recoveryFaultEvidence = {
   evidenceClass: "mixed",
   status: resiliencePass ? "passed" : "partial",
@@ -299,8 +487,8 @@ const liveRealResourceStatus = {
     completedAt: preflight.completedAt,
     resourceCount: preflight.resources?.length ?? 0,
     allReachable: (preflight.resources ?? []).every((resource) => resource.reachable === true),
-    websocketStateChangedSubscribed: preflight.ws?.subscribedEventType === "state_changed",
-    restWebSocketConsistent: (preflight.ws?.initialStateComparisons ?? []).every(
+    websocketStateChangedSubscribed: hasStateChangedSubscription(preflight),
+    restWebSocketConsistent: (preflightWebSocket.initialStateComparisons ?? []).every(
       (item) => item.consistent === true,
     ),
   },
@@ -321,8 +509,11 @@ const liveRealResourceStatus = {
     completedAt: threeDevice.completedAt,
     resources: resourceIds,
     allRestored: allThreeRestored,
-    activeTasks: threeDevice.runtimeTaskCounts?.active ?? null,
-    uncertainTasks: threeDevice.runtimeTaskCounts?.uncertain ?? null,
+    currentPreflightPass,
+    currentDeviceStateRestored,
+    activeTasks: currentRuntimeTaskCounts.active,
+    uncertainTasks: currentRuntimeTaskCounts.uncertain,
+    runtimeTaskCountSource: currentRuntimeTaskCounts.source,
     climateSafety: threeDevice.climateSafety?.status ?? null,
     writesUsed: threeDevice.safetyGate?.writesUsed ?? {},
   },
@@ -339,6 +530,118 @@ const liveRealResourceStatus = {
   noSecrets: true,
   noEntityIds: true,
 };
+const adapterRecovery = {
+  evidenceClass: "mixed",
+  status: recovery.checks?.some(
+    (check) =>
+      check.scenario === "Adapter restart during an in-flight real Task" &&
+      check.status === "passed",
+  )
+    ? "passed"
+    : "unverified",
+  completedRealScenarios: (recovery.checks ?? [])
+    .filter(
+      (check) =>
+        check.evidenceClass === "real" &&
+        typeof check.status === "string" &&
+        check.status === "passed",
+    )
+    .map((check) => check.scenario),
+  inFlightScenario: "unverified",
+  noAutomaticReplayAfterRestart: noDuplicate.status === "passed",
+  sourceReport: "reports/real-device-preparation-continuation/real-recovery.json",
+};
+const runtimeRecovery = {
+  evidenceClass: "mixed",
+  status: recovery.checks?.some(
+    (check) =>
+      check.scenario === "Runtime restart during an in-flight real Task" &&
+      check.status === "passed",
+  )
+    ? "passed"
+    : "unverified",
+  completedRealScenarios: (recovery.checks ?? [])
+    .filter(
+      (check) =>
+        check.evidenceClass === "real" &&
+        check.runtimeRestartPerformed === true &&
+        check.status === "passed",
+    )
+    .map((check) => check.scenario),
+  inFlightScenario: "unverified",
+  postRestartActiveTasks: currentRuntimeTaskCounts.active,
+  postRestartUncertainTasks: currentRuntimeTaskCounts.uncertain,
+  runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  sourceReport: "reports/real-device-preparation-continuation/real-recovery.json",
+};
+const faultQualification = {
+  evidenceClass: "mixed",
+  status: realFaultsQualified ? "passed" : "unverified",
+  real: {
+    status: "unverified",
+    sourceReport: "reports/real-device-preparation-continuation/fault-injection.json",
+  },
+  controlled: {
+    status: faultInjection.status,
+    testsPassed: faultInjection.controlledTestSummary?.testsPassed ?? 0,
+    testsFailed: faultInjection.controlledTestSummary?.testsFailed ?? 0,
+    evidenceClass: "controlledFaultInjection",
+  },
+  forbiddenConversion: "controlled fault results are not real-device qualification",
+};
+const noDuplicateQualification = {
+  evidenceClass: noDuplicate.evidenceClass ?? "real",
+  status: noDuplicate.status,
+  sourceReport: "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
+  scenarios: noDuplicate.scenarios ?? noDuplicate.checks ?? [],
+  activeTasks: currentRuntimeTaskCounts.active,
+  uncertainTasks: currentRuntimeTaskCounts.uncertain,
+  runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  stateRestored: allThreeRestored,
+};
+const finalQualification = {
+  evidenceClass: "mixed",
+  status: fullCapabilityPass ? "passed" : "blocked",
+  functional: {
+    status: functionalPass ? "passed" : "blocked",
+    resources: functionalPass ? resourceIds : [],
+    deviceState: currentDeviceStateRestored ? "restored" : "manual_restore_required",
+    activeTasks: currentRuntimeTaskCounts.active,
+    uncertainTasks: currentRuntimeTaskCounts.uncertain,
+    runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  },
+  resilience: {
+    status: resiliencePass ? "passed" : "blocked",
+    adapterInFlight: adapterRecovery.status,
+    runtimeInFlight: runtimeRecovery.status,
+    realFaultInjection: faultQualification.real.status,
+    pmsOutageTaskAuthority: pmsOutageQualified ? "passed" : "unverified",
+  },
+  fullCapability: fullCapabilityPass ? "passed" : "blocked",
+  climatePowerOn: climatePowerOnQualified ? "passed" : "unverified",
+  blockers,
+};
+const operationQualifications = {
+  climate_get_state: climatePower.qualifiedOperations?.climate_get_state ?? "unverified",
+  climate_set_hvac_mode: climatePower.qualifiedOperations?.climate_set_hvac_mode ?? "unverified",
+  climate_set_temperature:
+    climatePower.qualifiedOperations?.climate_set_temperature ?? "unverified",
+  climate_set_power: climatePower.qualifiedOperations?.climate_set_power ?? "unverified",
+  light_get_state: lights.status === "passed" ? "real_pass_time_scoped" : "unverified",
+  light_set_power: lights.status === "passed" ? "real_pass_time_scoped" : "unverified",
+  light_set_brightness: "unverified_optional",
+};
+const sdarIntegrationAllowlist = buildSdarIntegrationAllowlist({
+  environment: "home-lab",
+  providerEndpoints,
+  resourceBindings,
+  preflightResources: preflight.resources,
+  operationQualifications,
+  functionalPass,
+  resiliencePass,
+  fullCapabilityPass,
+  blockers,
+});
 const finalHandoff = {
   schemaVersion: "1.0",
   repository: "zhouwen-giser/sdar-mcp-provider-platform",
@@ -351,31 +654,50 @@ const finalHandoff = {
   registryEtag: registry.etag ?? "",
   providers: providerEndpoints,
   realResourcesQualified: functionalPass ? resourceIds : [],
+  historicallyQualifiedResources:
+    threeDevice.status === "passed" && allThreeRestored ? resourceIds : [],
   realResourcesRead: resourceIds,
-  activeTasks: threeDevice.runtimeTaskCounts?.active ?? 0,
-  uncertainTasks: threeDevice.runtimeTaskCounts?.uncertain ?? 0,
-  deviceState: allThreeRestored ? "restored" : "manual_restore_required",
+  activeTasks: currentRuntimeTaskCounts.active,
+  uncertainTasks: currentRuntimeTaskCounts.uncertain,
+  runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  deviceState: currentDeviceStateRestored ? "restored" : "manual_restore_required",
   readyForSdarFunctionalIntegration: functionalPass,
   readyForSdarResilienceIntegration: resiliencePass,
   readyForSdarFullCapabilityIntegration: fullCapabilityPass,
   readyForSdarIntegration: functionalPass && resiliencePass && fullCapabilityPass,
+  allowedProviders: sdarIntegrationAllowlist.allowedProviders,
+  allowedResources: sdarIntegrationAllowlist.allowedResources,
+  allowedOperations: sdarIntegrationAllowlist.allowedOperations,
+  forbiddenOrUnverifiedResources: sdarIntegrationAllowlist.forbiddenOrUnverifiedResources,
+  forbiddenOrUnverifiedOperations: sdarIntegrationAllowlist.forbiddenOrUnverifiedOperations,
+  externalResourceBlockers: sdarIntegrationAllowlist.externalResourceBlockers,
+  mainMergeReady: mainMergeReadiness.mainMergeReady,
+  mainMergeReadinessStatus: mainMergeReadiness.status,
+  mainMergeBlockers: mainMergeReadiness.codeAndRepositoryBlockers,
   blockingIssues: blockers,
   noSecrets: true,
   noEntityIds: true,
   sdarAgentRuntime: "not_connected",
 };
 const knownLimitations = [
+  describeCurrentPreflight(preflight),
   "The explicit climate power-on operation was not separately qualified; HVAC mode, target temperature, and safe power-off restoration were qualified.",
   "Real in-flight Adapter/Runtime restart recovery and real PMS/HA outage recovery remain unverified.",
   "REST 200 without observed target state was not injected against a real device.",
   "Optional light brightness was read and capability-checked but not side-effect qualified.",
   "Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed.",
+  "The Worker PM2 gate initially reproduced three identical Mock Adapter connection-refused attempts; a bounded startup-race fix was then verified with the full production-path gate.",
+  "The first current verify:v2 attempt failed before container work because sandboxed Docker access was denied; the exact command subsequently passed with authorized Docker access.",
+  ...(verification.github?.requiredChecks === "passed"
+    ? []
+    : [
+        "Protected-branch GitHub checks and review state are not yet fully passed; main merge readiness remains independent and false until they are.",
+      ]),
   "No SDAR Agent Runtime was connected, and no public deployment, merge, tag, or release was performed.",
 ];
 const finalReport = renderFinalReport(finalHandoff, verification, aggregateGates);
 
 await mkdir(closeoutRoot, { recursive: true });
-await mkdir(codexRoot, { recursive: true });
 await writeJson(resolve(closeoutRoot, "baseline.json"), baselineCloseout);
 await writeJson(resolve(closeoutRoot, "change-inventory.json"), changeInventory);
 await writeJson(resolve(closeoutRoot, "architecture-boundary-review.json"), architectureReview);
@@ -384,22 +706,115 @@ await writeJson(resolve(closeoutRoot, "protocol-integrity.json"), protocolIntegr
 await writeJson(resolve(closeoutRoot, "security-audit.json"), securityAudit);
 await writeJson(resolve(closeoutRoot, "provider-package-gate.json"), providerPackageGate);
 await writeJson(resolve(closeoutRoot, "aggregate-gates.json"), aggregateGates);
+await writeJson(resolve(closeoutRoot, "repository-gates.json"), repositoryGates);
+await writeJson(resolve(closeoutRoot, "cross-platform-gates.json"), crossPlatformGates);
+await writeJson(resolve(closeoutRoot, "release-packaging.json"), releasePackaging);
+await writeJson(resolve(closeoutRoot, "adapter-recovery.json"), adapterRecovery);
+await writeJson(resolve(closeoutRoot, "runtime-recovery.json"), runtimeRecovery);
+await writeJson(resolve(closeoutRoot, "fault-injection.json"), faultQualification);
+await writeJson(resolve(closeoutRoot, "no-duplicate-side-effect.json"), noDuplicateQualification);
+await writeJson(resolve(closeoutRoot, "final-qualification.json"), finalQualification);
+await writeJson(resolve(closeoutRoot, "final-merge-readiness.json"), mainMergeReadiness);
+await writeJson(resolve(closeoutRoot, "review-findings.json"), {
+  evidenceClass: "mixed",
+  status:
+    mainMergeReadiness.codeAndRepositoryBlockers.length === 0
+      ? "no_code_findings"
+      : "open_code_findings",
+  blockingMajorCount: mainMergeReadiness.codeAndRepositoryBlockers.length,
+  codeAndRepositoryFindings: mainMergeReadiness.codeAndRepositoryBlockers,
+  realQualificationFindings: blockers,
+  note: "Real-device qualification gaps are kept separate from candidate code review findings.",
+});
+await writeJson(resolve(closeoutRoot, "sdar-integration-allowlist.json"), sdarIntegrationAllowlist);
+await writeJson(resolve(closeoutRoot, "post-merge-validation.json"), {
+  evidenceClass: "unverified",
+  status: "not_run",
+  reason: "Post-merge validation is executed only after a protected main merge.",
+  requiredChecks: [
+    "origin/main equals merged candidate",
+    "working tree clean",
+    "frozen protocol check",
+    "migration isolation",
+    "provider package gate",
+    "read-only Registry and MCP discovery",
+  ],
+});
 await writeJson(resolve(closeoutRoot, "recovery-fault-evidence.json"), recoveryFaultEvidence);
 await writeJson(resolve(closeoutRoot, "live-real-resource-status.json"), liveRealResourceStatus);
 await writeJson(resolve(closeoutRoot, "final-handoff.json"), finalHandoff);
-await writeFile(
+await writeMarkdown(
   resolve(closeoutRoot, "known-limitations.md"),
   renderLimitations(knownLimitations, finalHandoff),
-  "utf8",
 );
-await writeFile(resolve(closeoutRoot, "final-delivery-report.md"), finalReport, "utf8");
+await writeMarkdown(resolve(closeoutRoot, "final-delivery-report.md"), finalReport);
+await writeMarkdown(
+  resolve(closeoutRoot, "architecture-review.md"),
+  renderArchitectureReview(architectureReview),
+);
+await writeMarkdown(
+  resolve(closeoutRoot, "security-review.md"),
+  renderSecurityReview(securityAudit),
+);
+await writeMarkdown(
+  resolve(closeoutRoot, "migration-review.md"),
+  renderMigrationReview(migrationAudit),
+);
+await writeMarkdown(
+  resolve(closeoutRoot, "final-qualification.md"),
+  renderFinalQualification(finalQualification),
+);
+await writeMarkdown(
+  resolve(closeoutRoot, "final-merge-readiness.md"),
+  renderMergeReadiness(mainMergeReadiness),
+);
 
 await writeJson(resolve(sourceRoot, "final-handoff.json"), finalHandoff);
-await writeFile(resolve(sourceRoot, "final-delivery-report.md"), finalReport, "utf8");
-await writeFile(
+await writeMarkdown(resolve(sourceRoot, "final-delivery-report.md"), finalReport);
+await writeMarkdown(
   resolve(sourceRoot, "known-limitations.md"),
   renderLimitations(knownLimitations, finalHandoff),
-  "utf8",
+);
+await writeJson(resolve(sourceRoot, "three-device-e2e.json"), {
+  ...threeDevice,
+  sourceReport: "reports/real-device-preparation-continuation/three-device-e2e.json",
+  entityIdentifiers: "excluded",
+  credentials: "excluded",
+});
+await writeMarkdown(
+  resolve(sourceRoot, "three-device-e2e.md"),
+  renderThreeDeviceSummary(threeDevice, finalHandoff),
+);
+await writeJson(resolve(sourceRoot, "idempotency-report.json"), {
+  evidenceClass: noDuplicate.evidenceClass ?? "real",
+  phase: "P7_IDEMPOTENCY_AND_RECOVERY",
+  status: noDuplicate.status,
+  continuationReport: "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
+  scenarios: noDuplicate.scenarios ?? noDuplicate.checks ?? [],
+  activeTasks: currentRuntimeTaskCounts.active,
+  uncertainTasks: currentRuntimeTaskCounts.uncertain,
+  runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  deviceState: currentDeviceStateRestored ? "restored" : "manual_restore_required",
+  blockers: [
+    "CLIENT_TIMEOUT_RETRY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+  ],
+});
+await writeJson(resolve(sourceRoot, "recovery-report.json"), {
+  evidenceClass: "mixed",
+  phase: "P7_IDEMPOTENCY_AND_RECOVERY",
+  status: recovery.status,
+  continuationReport: "reports/real-device-preparation-continuation/real-recovery.json",
+  checks: recovery.checks ?? [],
+  activeTasks: currentRuntimeTaskCounts.active,
+  uncertainTasks: currentRuntimeTaskCounts.uncertain,
+  runtimeTaskCountSource: currentRuntimeTaskCounts.source,
+  blockers,
+});
+await writeMarkdown(
+  resolve(sourceRoot, "fault-matrix.md"),
+  renderFaultMatrix(finalQualification, preflight.status),
 );
 await writeJson(resolve(sourceRoot, "registry-snapshot.redacted.json"), {
   evidenceClass: "real",
@@ -423,51 +838,6 @@ await writeJson(resolve(sourceRoot, "registry-snapshot.redacted.json"), {
   containsEntityIdKeys: false,
   noSecrets: true,
   noEntityIds: true,
-});
-
-await writeJson(resolve(codexRoot, "task-state.json"), {
-  schemaVersion: "1.0",
-  phase: "P9_FINAL_QUALIFICATION",
-  status: finalHandoff.readyForSdarIntegration ? "completed" : "blocked_by_explicit_hard_gates",
-  baseSha,
-  candidateSha,
-  branch,
-  worktreeClean,
-  functional: functionalPass ? "passed" : "blocked",
-  resilience: resiliencePass ? "passed" : "blocked",
-  fullCapability: fullCapabilityPass ? "passed" : "blocked",
-  readyForSdarIntegration: finalHandoff.readyForSdarIntegration,
-  blockers,
-  nextAction:
-    "Complete the explicitly listed real in-flight/outage qualification gates before SDAR integration.",
-});
-await writeFile(
-  resolve(codexRoot, "execution-log.md"),
-  `# SMPP Home Assistant closeout execution log\n\n- Base SHA: \`${baseSha}\`\n- Candidate SHA at report generation: \`${candidateSha}\`\n- Branch: \`${branch}\`\n- Functional live qualification: **${functionalPass ? "passed" : "blocked"}**\n- Resilience qualification: **${resiliencePass ? "passed" : "blocked"}**\n- Full capability qualification: **${fullCapabilityPass ? "passed" : "blocked"}**\n- Device state: **${finalHandoff.deviceState}**\n- Active tasks: \`${finalHandoff.activeTasks}\`; uncertain tasks: \`${finalHandoff.uncertainTasks}\`\n- All reports are redacted; entity IDs are represented only by local preflight hashes.\n`,
-  "utf8",
-);
-await writeFile(
-  resolve(codexRoot, "decisions.md"),
-  `# Decisions\n\n- Keep the PMS, Runtime, Provider Adapter, and Home Assistant authority boundaries unchanged.\n- Keep the frozen MCP Tasks and Adapter Protocol contracts unchanged.\n- Treat the three configured resources as an environment-scoped qualification, not a blanket Home Assistant provider certification.\n- Keep \`readyForSdarIntegration\` false until the real in-flight and outage recovery gates are executed and evidenced.\n- Do not convert controlled fault tests into real-device evidence.\n`,
-  "utf8",
-);
-await writeFile(
-  resolve(codexRoot, "blockers.md"),
-  `# Blockers\n\n${blockers.map((item) => `- \`${item}\``).join("\n")}\n`,
-  "utf8",
-);
-await writeJson(resolve(codexRoot, "review-findings.json"), {
-  evidenceClass: "static",
-  status:
-    blockers.length === 0 && architectureReview.status === "passed" ? "passed" : "open_findings",
-  findings: blockers.map((blocker) => ({
-    severity: "P1",
-    blocker,
-    disposition: "must be completed before readyForSdarIntegration=true",
-  })),
-  architectureReviewStatus: architectureReview.status,
-  protocolIntegrityStatus: protocolIntegrity.status,
-  securityAuditStatus: securityAudit.status,
 });
 
 process.stdout.write(
@@ -499,7 +869,15 @@ async function readJsonIfPresent(file) {
 }
 
 async function writeJson(file, value) {
-  await writeFile(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await writeFile(
+    file,
+    await format(JSON.stringify(value), { ...prettierConfig, parser: "json" }),
+    "utf8",
+  );
+}
+
+async function writeMarkdown(file, value) {
+  await writeFile(file, await format(value, { ...prettierConfig, parser: "markdown" }), "utf8");
 }
 
 async function scanReports() {
@@ -572,29 +950,147 @@ function renderFinalReport(handoff, verificationRun, aggregate) {
     `- Candidate SHA: \`${handoff.smppCandidateSha}\``,
     `- Branch: \`${handoff.branch}\``,
     `- Environment: \`${handoff.environment}\``,
-    `- Overall readiness: **${handoff.readyForSdarIntegration ? "YES" : "NO"}**`,
+    `- Main merge readiness: **${handoff.mainMergeReady ? "YES" : "NO"}**`,
+    `- Ready for SDAR integration: **${handoff.readyForSdarIntegration ? "YES" : "NO"}**`,
     "",
-    "## Qualification",
+    "## Main merge readiness",
+    "",
+    ...(handoff.mainMergeBlockers.length === 0
+      ? ["- Code/repository hard blockers: **none recorded**"]
+      : handoff.mainMergeBlockers.map((item) => `- Code/repository blocker: \`${item}\``)),
+    "- Protected-branch GitHub checks/review state must be verified separately before merge.",
+    "",
+    "## SDAR lab qualification",
     "",
     `- Functional three-device MCP path: **${handoff.readyForSdarFunctionalIntegration ? "PASS" : "BLOCKED"}**`,
     `- Resilience qualification: **${handoff.readyForSdarResilienceIntegration ? "PASS" : "BLOCKED"}**`,
     `- Full capability qualification: **${handoff.readyForSdarFullCapabilityIntegration ? "PASS" : "BLOCKED"}**`,
     `- Device state: **${handoff.deviceState}**`,
     `- Active tasks: \`${handoff.activeTasks}\`; uncertain tasks: \`${handoff.uncertainTasks}\``,
-    "",
-    "## Evidence",
-    "",
-    "- Home Assistant read-only preflight passed for the three configured resources, including REST/WebSocket consistency.",
-    "- PMS onboarding, two ACTIVE Runtime Deployments, Catalog discovery, and Registry snapshot checks passed.",
-    "- Registry-backed MCP reads and the latest three-device write/confirm/restore run passed.",
-    "- Climate power-on remains intentionally unqualified; safe power-off restoration is separately evidenced.",
+    "- The qualification scope is exactly one configured climate resource and two configured light resources; it is not a blanket Home Assistant certification.",
+    "- Climate HVAC mode, target temperature, safe power-off restoration, light power control, observation confirmation, and bounded idempotency passed for the executed lab run.",
+    "- Explicit climate power-on and real in-flight/outage fault recovery remain unverified.",
     `- Aggregate repository evidence status: **${aggregate.status}**; recorded command run status: **${verificationRun.status}**.`,
     "",
-    "## Open blockers",
+    "## Open SDAR blockers",
     "",
     ...handoff.blockingIssues.map((item) => `- \`${item}\``),
     "",
     "No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, or force push was performed.",
+    "",
+  ].join("\n");
+}
+
+function renderArchitectureReview(review) {
+  return [
+    "# Architecture boundary review",
+    "",
+    `- Status: **${review.status}**`,
+    "",
+    "| Authority | Responsibility |",
+    "| --- | --- |",
+    `| PMS | ${review.authorityBoundaries.pms} |`,
+    `| MCP Tasks Runtime | ${review.authorityBoundaries.runtime} |`,
+    `| Provider Adapter | ${review.authorityBoundaries.providerAdapter} |`,
+    `| Home Assistant | ${review.authorityBoundaries.homeAssistant} |`,
+    "",
+    `- Frozen protocol changes: **${review.forbiddenProtocolChanges.length === 0 ? "none" : review.forbiddenProtocolChanges.join(", ")}**`,
+    `- Runtime/PMS Home Assistant imports: **${review.runtimeHomeAssistantImports.length === 0 ? "none" : review.runtimeHomeAssistantImports.join(", ")}**`,
+    `- Direct PMS Home Assistant calls: **${review.directPmsHomeAssistantCall ? "found" : "none"}**`,
+    `- Direct Runtime Home Assistant calls: **${review.directRuntimeHomeAssistantCall ? "found" : "none"}**`,
+    `- Runtime Task Authority preserved: **${review.taskAuthority}**`,
+    "",
+  ].join("\n");
+}
+
+function renderSecurityReview(review) {
+  return [
+    "# Security review",
+    "",
+    `- Status: **${review.status}**`,
+    `- Token matches in scanned reports: \`${review.sensitiveReportScan.tokenMatchCount}\``,
+    `- Entity ID matches in scanned reports: \`${review.sensitiveReportScan.entityIdMatchCount}\``,
+    `- Authorization headers in scanned reports: \`${review.sensitiveReportScan.authorizationHeaderCount}\``,
+    `- Real write gate: **${review.realWriteGate.invalidGateBehavior}**`,
+    `- Dependency audit: ${review.dependencyAudit}`,
+    `- Dependency audit refresh: ${review.dependencyAuditRefresh}`,
+    "",
+    "The local token and entity identifiers are not copied into committed evidence; the preflight keeps only resource IDs and hashes.",
+    "",
+  ].join("\n");
+}
+
+function renderMigrationReview(review) {
+  return [
+    "# Migration review",
+    "",
+    `- Status: **${review.status}**`,
+    `- Migration directory: \`${review.migrationDirectory}\``,
+    `- Migration count: \`${review.migrationCount}\``,
+    `- Latest migration: \`${review.latestMigration ?? "none"}\``,
+    `- Isolated repeated-run evidence: **${review.isolationEvidence.status}**`,
+    `- History conflict: **${review.migrationHistoryConflict}**`,
+    "",
+  ].join("\n");
+}
+
+function renderFinalQualification(qualification) {
+  return [
+    "# Final qualification",
+    "",
+    `- Overall: **${qualification.status}**`,
+    `- Functional: **${qualification.functional.status}**`,
+    `- Resilience: **${qualification.resilience.status}**`,
+    `- Full capability: **${qualification.fullCapability}**`,
+    `- Climate power-on: **${qualification.climatePowerOn}**`,
+    `- Device state: **${qualification.functional.deviceState}**`,
+    `- Active tasks: \`${qualification.functional.activeTasks}\``,
+    `- Uncertain tasks: \`${qualification.functional.uncertainTasks}\``,
+    "",
+    "## Qualification blockers",
+    "",
+    ...qualification.blockers.map((item) => `- \`${item}\``),
+    "",
+  ].join("\n");
+}
+
+function renderMergeReadiness(readiness) {
+  return [
+    "# Final merge readiness",
+    "",
+    `- Status: **${readiness.status}**`,
+    `- Main merge ready: **${readiness.mainMergeReady ? "YES" : "NO"}**`,
+    "",
+    "## Code and repository blockers",
+    "",
+    ...(readiness.codeAndRepositoryBlockers.length === 0
+      ? ["- None recorded."]
+      : readiness.codeAndRepositoryBlockers.map((item) => `- \`${item}\``)),
+    "",
+    "## GitHub protected-branch state",
+    "",
+    `- Required checks: **${readiness.github.requiredChecks}**`,
+    `- Blocking review findings: **${readiness.github.blockingReviewFindings ?? "not verified"}**`,
+    `- Unresolved threads: **${readiness.github.unresolvedThreads ?? "not verified"}**`,
+    "",
+    "Real-device qualification blockers are listed separately and do not become code-review findings by implication.",
+    "",
+  ].join("\n");
+}
+
+function renderThreeDeviceSummary(run, handoff) {
+  return [
+    "# Three-device MCP E2E",
+    "",
+    `- Evidence class: **${run.evidenceClass ?? "real"}**`,
+    `- Status: **${run.status}**`,
+    `- Integration run: \`${run.integrationRunId ?? "redacted"}\``,
+    `- Resources: \`${(run.stateRestoration ?? []).length}\``,
+    `- Restored: **${handoff.deviceState === "restored" ? "yes" : "no"}**`,
+    `- Active tasks: \`${handoff.activeTasks ?? "unverified"}\``,
+    `- Uncertain tasks: \`${handoff.uncertainTasks ?? "unverified"}\``,
+    "",
+    "The run used the Registry-backed Runtime MCP surfaces and recorded observed-state confirmation before completion. Entity identifiers and credentials are excluded.",
     "",
   ].join("\n");
 }

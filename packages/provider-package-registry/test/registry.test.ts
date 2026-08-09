@@ -129,6 +129,10 @@ describe("ProviderPackage Registry", () => {
     expect(projections.every(({ realResourceStatus }) => realResourceStatus === "pending")).toBe(
       true,
     );
+    expect(
+      projections.find(({ packageId }) => packageId === "builtin.home-assistant.light")
+        ?.componentStatus,
+    ).toBe("passed");
     expect(projections.every(({ evidenceRefs }) => evidenceRefs.length > 0)).toBe(true);
     expect(JSON.stringify(projections).toLowerCase()).not.toContain("certified");
     expect(JSON.stringify(projections)).not.toContain("systemStatus");

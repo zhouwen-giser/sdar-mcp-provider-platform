@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "b94206af28ce936f90c5ed8d1eda66988f1a1c5f",
+  "smppCandidateSha": "8b786151e9a1a11c4ddabe24d878bbf98a12a552",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registryRevision": 3,
@@ -36,6 +36,11 @@
     "living-room-main-light",
     "living-room-aux-light"
   ],
+  "historicallyQualifiedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
   "realResourcesRead": [
     "living-room-air-conditioner",
     "living-room-main-light",
@@ -43,11 +48,62 @@
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
   "deviceState": "restored",
   "readyForSdarFunctionalIntegration": true,
   "readyForSdarResilienceIntegration": false,
   "readyForSdarFullCapabilityIntegration": false,
   "readyForSdarIntegration": false,
+  "allowedProviders": ["ha-climate-lab", "ha-light-lab"],
+  "allowedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "allowedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_get_state",
+      "qualification": "real_pass"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_hvac_mode",
+      "qualification": "real_pass"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_temperature",
+      "qualification": "real_pass"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_power",
+      "qualification": "real_pass_time_scoped"
+    }
+  ],
+  "forbiddenOrUnverifiedResources": [],
+  "forbiddenOrUnverifiedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_power",
+      "reason": "real_pass_off_restore_only"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_brightness",
+      "reason": "unverified_optional"
+    }
+  ],
+  "externalResourceBlockers": [],
+  "mainMergeReady": false,
+  "mainMergeReadinessStatus": "not_ready",
+  "mainMergeBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
   "blockingIssues": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",

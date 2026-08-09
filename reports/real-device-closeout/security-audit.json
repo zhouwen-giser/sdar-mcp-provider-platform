@@ -1,9 +1,10 @@
 {
   "evidenceClass": "contract",
   "status": "passed",
-  "dependencyAudit": "not separately recorded",
+  "dependencyAudit": "The current lockfile was audited after the dependency overrides: 0 high or critical, 6 moderate, and 1 low advisory.",
+  "dependencyAuditRefresh": "blocked_by_approval_policy_to_avoid_external_dependency_inventory_disclosure",
   "sensitiveReportScan": {
-    "filesScanned": 76,
+    "filesScanned": 93,
     "tokenMatchCount": 0,
     "entityIdMatchCount": 0,
     "authorizationHeaderCount": 0,

@@ -8,7 +8,16 @@
     "lint": "passed",
     "typecheck": "passed",
     "build": "passed",
-    "protocolCheck": "passed"
+    "protocolCheck": "passed",
+    "releaseCandidateCheck": "passed",
+    "providerPackages": "passed",
+    "security": "passed",
+    "sbom": "passed",
+    "container": "passed",
+    "migrationIsolation": "passed",
+    "pmsApiProduction": "passed",
+    "workerPm2Production": "passed",
+    "linuxSymlink": "passed"
   },
   "testSuites": {},
   "knownEnvironmentDiagnostics": [

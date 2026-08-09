@@ -25,6 +25,11 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeReconcileIntervalMs: number;
   readonly runtimeReconcileTimeoutMs: number;
   readonly runtimeHealthTimeoutMs: number;
+  /** Optional isolated allocation range for local/controlled compositions. */
+  readonly runtimePortRange?: {
+    readonly start: number;
+    readonly end: number;
+  };
 }
 
 export interface PmsWorkerConfig {

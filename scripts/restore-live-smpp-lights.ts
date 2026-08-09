@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
+import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
 
 const ROOT = resolve(process.cwd());
 const API = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
@@ -306,17 +307,29 @@ async function taskCounts(): Promise<JsonObject> {
     const rows = await pool.query<{ internal_state: string; count: string }>(
       "SELECT internal_state, count(*)::text AS count FROM provider_task GROUP BY internal_state",
     );
-    return {
-      active: rows.rows
-        .filter((row) => !row.internal_state.startsWith("TERMINAL_"))
-        .reduce((sum, row) => sum + Number(row.count), 0),
-      uncertain: rows.rows
-        .filter((row) => row.internal_state.toUpperCase().includes("UNCERTAIN"))
-        .reduce((sum, row) => sum + Number(row.count), 0),
-    };
+    const admission = await readUnsettledAdmissionCounts(pool);
+    const counts = summarizeRuntimeTaskStates(rows.rows, admission);
+    return { active: counts.active, uncertain: counts.uncertain };
   } finally {
     await pool.end();
   }
+}
+
+async function readUnsettledAdmissionCounts(
+  pool: Pool,
+): Promise<{ active: string; uncertain: string }> {
+  const result = await pool.query<{ active: string; uncertain: string }>(
+    `SELECT
+       count(*) FILTER (
+         WHERE intent.state IN ('PENDING','ACCEPTED','UNCERTAIN')
+           AND NOT EXISTS (SELECT 1 FROM provider_task task WHERE task.task_id=intent.task_id)
+       )::text AS active,
+       count(*) FILTER (WHERE intent.state='UNCERTAIN')::text AS uncertain
+     FROM admission_intent intent`,
+  );
+  const counts = result.rows[0];
+  if (counts === undefined) throw new Error("RUNTIME_ADMISSION_TASK_COUNTS_MISSING");
+  return counts;
 }
 
 function redactState(value: JsonObject): JsonObject {

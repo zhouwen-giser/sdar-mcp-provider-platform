@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
+import { format, resolveConfig } from "prettier";
 import WebSocket from "ws";
 
 const workspace = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -11,6 +12,7 @@ const defaultTokenPath = resolve(workspace, ".local/ha-real-device/token.txt");
 const reportJsonPath = resolve(workspace, "reports/real-device-preparation/ha-preflight.json");
 const reportMarkdownPath = resolve(workspace, "reports/real-device-preparation/ha-preflight.md");
 const timeoutMs = 8_000;
+const prettierConfig = (await resolveConfig(resolve(workspace, "package.json"))) ?? {};
 
 const main = async () => {
   const resourcesPath =
@@ -135,8 +137,16 @@ const main = async () => {
       report.token.present = false;
   }
   report.completedAt = new Date().toISOString();
-  writeFileSync(reportJsonPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  writeFileSync(reportMarkdownPath, markdown(report), "utf8");
+  writeFileSync(
+    reportJsonPath,
+    await format(JSON.stringify(report), { ...prettierConfig, parser: "json" }),
+    "utf8",
+  );
+  writeFileSync(
+    reportMarkdownPath,
+    await format(markdown(report), { ...prettierConfig, parser: "markdown" }),
+    "utf8",
+  );
   process.stdout.write(
     `${report.status === "passed" ? "PASS" : "FAIL"} Home Assistant read-only preflight\n`,
   );

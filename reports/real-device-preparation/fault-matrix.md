@@ -1,17 +1,15 @@
 # SMPP real-device fault matrix
 
-| Fault area                   | Scenario                                                     | Evidence            | Status                          | Notes                                                                                     |
-| ---------------------------- | ------------------------------------------------------------ | ------------------- | ------------------------------- | ----------------------------------------------------------------------------------------- |
-| HOME_ASSISTANT_CONFIGURATION | URL, token, domains, state and WebSocket preflight           | real                | passed                          | Three configured resources reachable; report is redacted.                                 |
-| CLIMATE_PROVIDER             | HVAC mode and target temperature through Runtime and Adapter | real                | passed for executed lab climate | Original state restored; explicit power-on remains separately unqualified.                |
-| LIGHT_PROVIDER               | Power control for both configured lights                     | real                | passed for executed lab lights  | Each light changed and restored within 2-write budget.                                    |
-| MCP_TASKS_RUNTIME            | Duplicate Task ID and argument conflict                      | real/contract       | passed                          | Same key converged; different arguments returned InvalidParams/IDEMPOTENCY_KEY_CONFLICT.  |
-| MCP_TASKS_RUNTIME            | Runtime restart during real task                             | unverified          | unverified                      | In-flight restart was not induced after bounded real-device runs.                         |
-| ADAPTER_PROTOCOL             | Adapter gRPC manifest/resource/task path                     | contract/real       | passed for executed paths       | Protocol conformance reports 8/8; real runs used gRPC.                                    |
-| PMS_CONFIGURATION            | Formal live package/provider/resource/config flow            | real                | passed                          | Two providers, three resources, deployments, Catalog and Registry were exercised.         |
-| CATALOG                      | Tool list and Resource Binding                               | contract            | passed                          | Both Home Assistant platform E2Es pass.                                                   |
-| REGISTRY                     | Latest/bootstrap/watch and checksum/ETag                     | real                | passed                          | Live Registry snapshot and endpoint contract checks passed without secrets or Entity IDs. |
-| HOME_ASSISTANT_CAPABILITY    | unavailable, REST 200 without state change                   | contract/unverified | unverified for real devices     | Fake/contract coverage exists; no artificial real fault injected.                         |
-| MANUAL_SAFETY_BLOCK          | AC opposite power interval                                   | real                | passed                          | No opposite AC power write was forced; HA returned to original state.                     |
+| Area                      | Evidence      | Status                                               |
+| ------------------------- | ------------- | ---------------------------------------------------- |
+| Home Assistant preflight  | real          | passed for three configured resources                |
+| Climate Provider          | real          | passed for executed mode/temperature/power-off scope |
+| Light Provider            | real          | passed for both configured lights                    |
+| Runtime idempotency       | real/contract | passed for bounded duplicate and conflict scenarios  |
+| Adapter in-flight restart | mixed         | unverified                                           |
+| Runtime in-flight restart | mixed         | unverified                                           |
+| Real fault injection      | mixed         | unverified                                           |
+| PMS outage Task Authority | unverified    | unverified                                           |
+| Manual AC safety interval | real          | preserved; no unsafe inverse operation forced        |
 
-The matrix deliberately separates executed real evidence from contract and unverified evidence.
+Controlled fault-injection results remain classified as controlled evidence and are not promoted to real-device qualification.

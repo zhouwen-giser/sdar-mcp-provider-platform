@@ -23,7 +23,7 @@ services:
       PMS_MANAGEMENT_CREDENTIAL_FILE: /run/release/api/management.json
       PMS_RUNTIME_CREDENTIAL_FILE: /run/release/api/runtime.json
     volumes:
-      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/api:/run/release/api:ro
+      - release-api:/run/release/api:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,9 +64,9 @@ services:
       PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "5000"
       PMS_RUNTIME_HEALTH_TIMEOUT_MS: "1000"
     volumes:
-      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/worker:/run/release/worker:ro
-      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/runtime-releases:/opt/sdar/runtime-releases:ro
-      - ${RELEASE_ARTIFACT_FIXTURE_ROOT:?}/worker-state:/var/lib/sdar
+      - release-worker:/run/release/worker:ro
+      - release-runtime-releases:/opt/sdar/runtime-releases:ro
+      - release-worker-state:/var/lib/sdar
     depends_on:
       pms-api:
         condition: service_healthy
@@ -90,3 +90,9 @@ services:
       interval: 2s
       timeout: 2s
       retries: 30
+
+volumes:
+  release-api:
+  release-worker:
+  release-runtime-releases:
+  release-worker-state:

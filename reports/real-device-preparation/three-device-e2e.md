@@ -1,11 +1,11 @@
 # Three-device MCP E2E
 
-- Evidence class: `real`
-- Status: `blocked_climate_safety`
-- Registry-backed resources read: climate plus both configured lights
-- Light writes: both toggled, confirmed, idempotency-checked, and restored
-- Climate writes: not executed because the saved power was off and the five-minute safety rule blocked a safe inverse operation
-- Active/uncertain tasks: `0 / 0`
-- Device state: lights restored; climate unchanged
+- Evidence class: **real**
+- Status: **passed**
+- Integration run: `smpp-live-three-device-closeout-20260804-0345`
+- Resources: `3`
+- Restored: **yes**
+- Active tasks: `0`
+- Uncertain tasks: `0`
 
-The detailed current evidence is in `reports/real-device-preparation-continuation/three-device-e2e.json`. No `initialize` or `tasks/result` claim is made because those methods are outside the repository's frozen Runtime surface. Entity identifiers and credentials are excluded.
+The run used the Registry-backed Runtime MCP surfaces and recorded observed-state confirmation before completion. Entity identifiers and credentials are excluded.

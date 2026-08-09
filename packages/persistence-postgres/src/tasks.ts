@@ -598,7 +598,10 @@ export class TaskRepository {
         // race; return the committed row instead of converting convergence into a
         // technical failure or allowing a second side effect.
         const existing = await selectTaskById(client, input.taskId);
-        if (existing !== null) return existing;
+        if (existing !== null) {
+          assertAcceptedPublicationIdentity(existing, input);
+          return existing;
+        }
       }
       throw error;
     } finally {
@@ -3793,6 +3796,21 @@ export class TaskRepository {
     } finally {
       client.release();
     }
+  }
+}
+
+function assertAcceptedPublicationIdentity(existing: TaskRecord, input: PublishTaskInput): void {
+  if (
+    existing.providerId !== input.providerId ||
+    existing.operationName !== input.operationName ||
+    existing.operationSnapshotId !== input.operationSnapshotId ||
+    existing.authorizationContextHash !== input.authorization.hash ||
+    existing.executionMode !== input.authorization.executionMode ||
+    existing.simulationId !== input.authorization.simulationId ||
+    existing.argumentHash !== input.argumentHash ||
+    existing.externalExecutionId !== input.externalExecutionId
+  ) {
+    throw new Error("TASK_ACCEPTED_IDENTITY_CONFLICT");
   }
 }
 
