@@ -1,0 +1,109 @@
+{
+  "evidenceClass": "static",
+  "phase": "C1_PROTOCOL_RUNNER_CORRECTION",
+  "checkedAt": "2026-08-03T06:34:00+08:00",
+  "frozenProfile": {
+    "supportedTerminalRead": "tasks/get",
+    "terminalNotifications": true,
+    "removedLegacyMethod": "tasks/result",
+    "frozenSourceModified": false
+  },
+  "requiredMethod": "tasks/result",
+  "currentRunnerRule": "Real runners must use terminal tasks/get snapshots and notifications; the removed legacy method is never called.",
+  "occurrences": [
+    {
+      "path": "scripts/run-ha-real-climate.ts",
+      "category": "live-runner",
+      "before": "called removed method",
+      "after": "closed; terminal tasks/get projection is authoritative",
+      "status": "passed"
+    },
+    {
+      "path": "scripts/run-ha-real-light.ts",
+      "category": "live-runner",
+      "before": "called removed method",
+      "after": "closed; terminal tasks/get projections are authoritative",
+      "status": "passed"
+    },
+    {
+      "path": "scripts/run-ha-real-e2e.ts",
+      "category": "live-runner-aggregator",
+      "before": "required removed-method compatibility response",
+      "after": "closed; validates terminal tasks/get evidence from component reports",
+      "status": "passed"
+    },
+    {
+      "path": "docs/protocol/api-reference.md",
+      "category": "current-documentation",
+      "before": "listed removed method as current API",
+      "after": "closed; current table has one tasks/get entry",
+      "status": "passed"
+    },
+    {
+      "path": "docs/protocol/mcp-runtime.md",
+      "category": "current-documentation",
+      "before": "described polling with removed method",
+      "after": "closed; describes tasks/get and explicitly labels removed method legacy",
+      "status": "passed"
+    },
+    {
+      "path": "execplans/EP-SMPP-HA-REAL-DEVICE-PREPARATION.md",
+      "category": "execution-documentation",
+      "before": "listed removed method in recovery",
+      "after": "closed; uses tasks/get and notifications",
+      "status": "passed"
+    },
+    {
+      "path": "reports/real-device-preparation/authority-map.md",
+      "category": "evidence-documentation",
+      "before": "listed removed method as Runtime evidence",
+      "after": "closed; uses authoritative tasks/get",
+      "status": "passed"
+    },
+    {
+      "path": "docs/integration/smpp-real-device-runbook.md",
+      "category": "compatibility-documentation",
+      "before": "none",
+      "after": "retained explanatory legacy-method distinction",
+      "status": "intentional"
+    },
+    {
+      "path": "tests/protocol-conformance/tools.test.ts",
+      "category": "frozen-negative-conformance",
+      "before": "forbidden method list",
+      "after": "unchanged; negative conformance protection",
+      "status": "intentional"
+    },
+    {
+      "path": "protocol/frozen/SDAR_MCP_Tasks_Unified_Protocol_Profile_V1.0.md",
+      "category": "frozen-source",
+      "before": "frozen byte content",
+      "after": "unchanged; lock and frozen contract are protected",
+      "status": "intentional"
+    },
+    {
+      "path": "docs/requirements/SDAR_UGV_Provider_Interface_Protocol_Profile_V1.0.md",
+      "category": "legacy-requirements",
+      "before": "legacy profile reference",
+      "after": "unchanged; outside the frozen SMPP Runtime profile",
+      "status": "intentional"
+    },
+    {
+      "path": "reports/real-device-preparation/**",
+      "category": "historical-evidence",
+      "before": "prior run recorded the mismatch as a blocker",
+      "after": "preserved as historical evidence; continuation reports supersede readiness interpretation",
+      "status": "intentional"
+    }
+  ],
+  "regressionTest": {
+    "path": "tests/unit/real-device-runner-protocol.test.ts",
+    "status": "passed",
+    "tests": 2,
+    "assertions": [
+      "live runners contain tasks/get and do not contain the removed method",
+      "aggregate runner consumes terminal task projections and current documentation does not list the removed method as an API row"
+    ]
+  },
+  "result": "REAL_RUNNER_EXPECTS_REMOVED_TASKS_RESULT=CLOSED"
+}

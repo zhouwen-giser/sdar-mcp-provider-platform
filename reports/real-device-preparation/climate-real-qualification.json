@@ -1,0 +1,944 @@
+{
+  "evidenceClass": "real",
+  "phase": "P2_CLIMATE_REAL_QUALIFICATION",
+  "integrationRunId": "smpp-real-climate-closeout-20260804-0215",
+  "providerId": "ha-climate-lab",
+  "protocolMode": "frozen_v1",
+  "startedAt": "2026-08-03T19:12:22.936Z",
+  "completedAt": "2026-08-03T19:12:30.962Z",
+  "status": "passed",
+  "safetyGate": {
+    "allowRealDeviceSideEffects": true,
+    "runIdPresent": true,
+    "writeBudget": {
+      "climatePowerOn": 1,
+      "climatePowerOff": 1,
+      "climateHvacMode": 2,
+      "climateTemperature": 2
+    },
+    "writesUsed": {
+      "climatePowerOn": 1,
+      "climatePowerOff": 0,
+      "climateHvacMode": 1,
+      "climateTemperature": 2
+    }
+  },
+  "endpoint": {
+    "runtimeMcp": "http://127.0.0.1:55914/mcp",
+    "adapterTransport": "gRPC",
+    "homeAssistant": "redacted-local-config"
+  },
+  "initialize": {
+    "status": 404,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32601,
+        "message": "Method not found"
+      }
+    }
+  },
+  "discovery": {
+    "status": 200,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "resultType": "complete",
+        "supportedVersions": ["2026-07-28"],
+        "capabilities": {
+          "tools": {},
+          "extensions": {
+            "io.modelcontextprotocol/tasks": {},
+            "io.sdar/taskExecution": {
+              "profileVersion": "1.0",
+              "taskNotifications": true
+            }
+          }
+        },
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "sdar-mcp-tasks-provider-runtime",
+            "version": "2.0.0-rc.1"
+          }
+        },
+        "instructions": "This server provides SDAR task-capable tools.",
+        "ttlMs": 3600000,
+        "cacheScope": "public"
+      }
+    }
+  },
+  "toolsList": {
+    "status": 200,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "tools": [
+          {
+            "name": "climate_get_state",
+            "description": "Read normalized state for a configured Home Assistant climate entity.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": ["resourceId"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "power": {
+                      "type": "string",
+                      "enum": ["on", "off", "unknown", "unavailable"]
+                    },
+                    "reachable": {
+                      "type": "boolean"
+                    },
+                    "hvacMode": {
+                      "type": ["string", "null"]
+                    },
+                    "currentTemperature": {
+                      "type": ["number", "null"]
+                    },
+                    "targetTemperature": {
+                      "type": ["number", "null"]
+                    },
+                    "temperatureUnit": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "resourceId",
+                    "power",
+                    "reachable",
+                    "hvacMode",
+                    "currentTemperature",
+                    "targetTemperature",
+                    "temperatureUnit",
+                    "observedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "synchronous_only",
+                "availability": "dynamic",
+                "supportsScheduling": false,
+                "supportsMaxElapsed": false,
+                "supportsObservations": false,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          },
+          {
+            "name": "climate_set_power",
+            "description": "Set and confirm climate power.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "power": {
+                  "type": "string",
+                  "enum": ["on", "off"]
+                }
+              },
+              "required": ["resourceId", "power"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "power": {
+                      "type": "string",
+                      "enum": ["on", "off"]
+                    },
+                    "confirmed": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["resourceId", "power", "confirmed", "observedAt"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "task_required",
+                "availability": "dynamic",
+                "supportsScheduling": true,
+                "supportsMaxElapsed": false,
+                "supportsObservations": true,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          },
+          {
+            "name": "climate_set_hvac_mode",
+            "description": "Set and confirm an allowed HVAC mode.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "hvacMode": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              },
+              "required": ["resourceId", "hvacMode"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "hvacMode": {
+                      "type": "string"
+                    },
+                    "confirmed": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["resourceId", "hvacMode", "confirmed", "observedAt"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "task_required",
+                "availability": "dynamic",
+                "supportsScheduling": true,
+                "supportsMaxElapsed": false,
+                "supportsObservations": true,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          },
+          {
+            "name": "climate_set_temperature",
+            "description": "Set and confirm target temperature.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "targetTemperature": {
+                  "type": "number",
+                  "minimum": -50,
+                  "maximum": 100
+                }
+              },
+              "required": ["resourceId", "targetTemperature"],
+              "additionalProperties": false
+            },
+            "outputSchema": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "targetTemperature": {
+                      "type": "number"
+                    },
+                    "confirmed": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "observedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["resourceId", "targetTemperature", "confirmed", "observedAt"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasonCode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "_meta": {
+              "io.sdar/taskExecution": {
+                "profileVersion": "1.0",
+                "taskBehavior": "task_required",
+                "availability": "dynamic",
+                "supportsScheduling": true,
+                "supportsMaxElapsed": false,
+                "supportsObservations": true,
+                "supportsInputRequired": false,
+                "idempotency": "server_managed"
+              },
+              "io.sdar/resourceBinding": {
+                "mode": "ARGUMENT_REFERENCE",
+                "resourceIdJsonPointer": "/resourceId"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "resources": [
+    {
+      "resourceId": "living-room-air-conditioner",
+      "entityHash": "76109bf457a6cdb862e448b84c3ea87c37f9c8cdba92a52b8ef7b3a47a3333f8",
+      "original": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": "off",
+        "currentTemperature": null,
+        "targetTemperature": 23,
+        "observedAt": "2026-08-03T16:40:52.277934+00:00",
+        "observationId": "ea07c4efd79413dfd6161e84d57255129dcd755a2b096f5ad67b703b383e16c1"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "operation": "climate_set_hvac_mode",
+      "status": "completed",
+      "runtimeTaskId": "5a0d4806-92e9-4c70-a84a-c6d61644a00e",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-5a0d4806-92e9-4c70-a84a-c6d61644a00e-3",
+                  "observedAt": "2026-08-03T19:12:25.999422+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/hvacMode"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.hvac_mode.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "hvacMode": "cool",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:25.999422+00:00",
+            "resourceId": "living-room-air-conditioner"
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-climate-5a0d4806-92e9-4c70-a84a-c6d61644a00e-3",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-5a0d4806-92e9-4c70-a84a-c6d61644a00e-3",
+                  "observedAt": "2026-08-03T19:12:25.999422+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/hvacMode"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.hvac_mode.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "hvacMode": "cool",
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:25.999422+00:00",
+            "resourceId": "living-room-air-conditioner"
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": "off",
+        "currentTemperature": null,
+        "targetTemperature": 23,
+        "observedAt": "2026-08-03T16:40:52.277934+00:00",
+        "observationId": "ea07c4efd79413dfd6161e84d57255129dcd755a2b096f5ad67b703b383e16c1"
+      },
+      "desired": {
+        "hvacMode": "cool"
+      },
+      "after": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": "cool",
+        "currentTemperature": null,
+        "targetTemperature": 23,
+        "observedAt": "2026-08-03T19:12:25.999422+00:00",
+        "observationId": "ca0c9b1b71883cea2264ca6fcfa79f79cfeb4b9f65db18842bff3355a3563e5f"
+      },
+      "idempotency": {
+        "sameArgumentsSameKey": true,
+        "duplicateRuntimeTaskId": "5a0d4806-92e9-4c70-a84a-c6d61644a00e",
+        "response": {
+          "status": 200,
+          "error": null,
+          "resultType": "task"
+        },
+        "sameKeyDifferentArgumentsRejected": true,
+        "conflictResponse": {
+          "status": 400,
+          "error": {
+            "code": -32602,
+            "message": "Invalid request parameters.",
+            "data": {
+              "reasonCode": "IDEMPOTENCY_KEY_CONFLICT"
+            }
+          },
+          "resultType": null
+        }
+      }
+    },
+    {
+      "operation": "climate_set_temperature",
+      "status": "completed",
+      "runtimeTaskId": "fa911d70-137b-4e1e-bde6-9c0b932581e6",
+      "taskStatuses": [
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-fa911d70-137b-4e1e-bde6-9c0b932581e6-3",
+                  "observedAt": "2026-08-03T19:12:27.187232+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/targetTemperature"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.target_temperature.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:27.187232+00:00",
+            "resourceId": "living-room-air-conditioner",
+            "targetTemperature": 24
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-climate-fa911d70-137b-4e1e-bde6-9c0b932581e6-3",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-fa911d70-137b-4e1e-bde6-9c0b932581e6-3",
+                  "observedAt": "2026-08-03T19:12:27.187232+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/targetTemperature"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.target_temperature.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:27.187232+00:00",
+            "resourceId": "living-room-air-conditioner",
+            "targetTemperature": 24
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": "cool",
+        "currentTemperature": null,
+        "targetTemperature": 23,
+        "observedAt": "2026-08-03T19:12:25.999422+00:00",
+        "observationId": "ca0c9b1b71883cea2264ca6fcfa79f79cfeb4b9f65db18842bff3355a3563e5f"
+      },
+      "desired": {
+        "targetTemperature": 24
+      },
+      "after": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": "cool",
+        "currentTemperature": null,
+        "targetTemperature": 24,
+        "observedAt": "2026-08-03T19:12:27.187232+00:00",
+        "observationId": "d77d6b7e9f0c39db9046c2d323012a534397fdfecc249cf444b4b1d0a47455df"
+      }
+    },
+    {
+      "operation": "climate_set_temperature",
+      "status": "completed",
+      "runtimeTaskId": "cce0de4d-ff58-4323-9225-5f1de1a33b0e",
+      "taskStatuses": [
+        {
+          "status": "working",
+          "revision": null,
+          "reasonCode": null
+        },
+        {
+          "status": "completed",
+          "revision": null,
+          "reasonCode": null
+        }
+      ],
+      "finalTask": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-cce0de4d-ff58-4323-9225-5f1de1a33b0e-3",
+                  "observedAt": "2026-08-03T19:12:28.050621+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/targetTemperature"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.target_temperature.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:28.050621+00:00",
+            "resourceId": "living-room-air-conditioner",
+            "targetTemperature": 23
+          }
+        },
+        "evidence": null
+      },
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": "home-assistant-climate-cce0de4d-ff58-4323-9225-5f1de1a33b0e-3",
+      "taskGetResult": {
+        "status": "completed",
+        "revision": null,
+        "reasonCode": null,
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": ["home-assistant"],
+                  "evidenceId": "home-assistant-climate-cce0de4d-ff58-4323-9225-5f1de1a33b0e-3",
+                  "observedAt": "2026-08-03T19:12:28.050621+00:00",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": "/targetTemperature"
+                  },
+                  "subjectRef": "resource:living-room-air-conditioner",
+                  "evidenceType": "climate.target_temperature.observation"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "Desired climate state confirmed.",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "confirmed": true,
+            "observedAt": "2026-08-03T19:12:28.050621+00:00",
+            "resourceId": "living-room-air-conditioner",
+            "targetTemperature": 23
+          }
+        },
+        "evidence": null
+      },
+      "before": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "on",
+        "reachable": true,
+        "hvacMode": "cool",
+        "currentTemperature": null,
+        "targetTemperature": 24,
+        "observedAt": "2026-08-03T19:12:27.187232+00:00",
+        "observationId": "d77d6b7e9f0c39db9046c2d323012a534397fdfecc249cf444b4b1d0a47455df"
+      },
+      "desired": {
+        "targetTemperature": 23
+      }
+    }
+  ],
+  "terminalTaskProjection": {
+    "status": "completed",
+    "revision": null,
+    "reasonCode": null,
+    "result": {
+      "resultType": "complete",
+      "_meta": {
+        "io.sdar/evidence": {
+          "items": [
+            {
+              "producer": ["home-assistant"],
+              "evidenceId": "home-assistant-climate-fa911d70-137b-4e1e-bde6-9c0b932581e6-3",
+              "observedAt": "2026-08-03T19:12:27.187232+00:00",
+              "payloadRef": {
+                "kind": "structured_content",
+                "jsonPointer": "/targetTemperature"
+              },
+              "subjectRef": "resource:living-room-air-conditioner",
+              "evidenceType": "climate.target_temperature.observation"
+            }
+          ],
+          "profileVersion": "1.0"
+        }
+      },
+      "content": [
+        {
+          "text": "Desired climate state confirmed.",
+          "type": "text"
+        }
+      ],
+      "isError": false,
+      "structuredContent": {
+        "confirmed": true,
+        "observedAt": "2026-08-03T19:12:27.187232+00:00",
+        "resourceId": "living-room-air-conditioner",
+        "targetTemperature": 24
+      }
+    },
+    "evidence": null
+  },
+  "terminalTaskStatus": "completed",
+  "stateRestoration": {
+    "status": "restored",
+    "original": {
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "currentTemperature": null,
+      "targetTemperature": 23,
+      "observedAt": "2026-08-03T16:40:52.277934+00:00",
+      "observationId": "ea07c4efd79413dfd6161e84d57255129dcd755a2b096f5ad67b703b383e16c1"
+    },
+    "currentBeforeRestore": {
+      "resourceId": "living-room-air-conditioner",
+      "power": "on",
+      "reachable": true,
+      "hvacMode": "cool",
+      "currentTemperature": null,
+      "targetTemperature": 24,
+      "observedAt": "2026-08-03T19:12:27.187232+00:00",
+      "observationId": "d77d6b7e9f0c39db9046c2d323012a534397fdfecc249cf444b4b1d0a47455df"
+    },
+    "manualRestoreRequired": false,
+    "waits": [],
+    "currentAfterRestore": {
+      "resourceId": "living-room-air-conditioner",
+      "power": "off",
+      "reachable": true,
+      "hvacMode": "off",
+      "currentTemperature": null,
+      "targetTemperature": 23,
+      "observedAt": "2026-08-03T19:12:29.884771+00:00",
+      "observationId": "5cde9803bc936fabc66f5d3db219dbfa5a8b4449a1570a280a262bb28a027975"
+    }
+  },
+  "errors": [],
+  "websocketObservations": [
+    {
+      "observedAt": "2026-08-03T19:12:25.999422+00:00",
+      "state": "on",
+      "hvacMode": "cool",
+      "observationId": "ca0c9b1b71883cea2264ca6fcfa79f79cfeb4b9f65db18842bff3355a3563e5f"
+    },
+    {
+      "observedAt": "2026-08-03T19:12:27.187232+00:00",
+      "state": "on",
+      "hvacMode": "cool",
+      "observationId": "d77d6b7e9f0c39db9046c2d323012a534397fdfecc249cf444b4b1d0a47455df"
+    },
+    {
+      "observedAt": "2026-08-03T19:12:28.050621+00:00",
+      "state": "on",
+      "hvacMode": "cool",
+      "observationId": "a9487b61c36799f5ebcf8cf239319ddda6c67dd715843d92b8136d0cc14a3190"
+    },
+    {
+      "observedAt": "2026-08-03T19:12:29.884771+00:00",
+      "state": "off",
+      "hvacMode": "off",
+      "observationId": "5cde9803bc936fabc66f5d3db219dbfa5a8b4449a1570a280a262bb28a027975"
+    }
+  ],
+  "finalState": {
+    "resourceId": "living-room-air-conditioner",
+    "power": "off",
+    "reachable": true,
+    "hvacMode": "off",
+    "currentTemperature": null,
+    "targetTemperature": 23,
+    "observedAt": "2026-08-03T19:12:29.884771+00:00",
+    "observationId": "5cde9803bc936fabc66f5d3db219dbfa5a8b4449a1570a280a262bb28a027975"
+  },
+  "activeTasks": 0,
+  "uncertainTasks": 0
+}

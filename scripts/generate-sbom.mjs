@@ -15,6 +15,7 @@ if (!pnpmEntry) {
 const listed = JSON.parse(
   execFileSync(process.execPath, [pnpmEntry, "list", "--prod", "--json", "--depth", "Infinity"], {
     encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
   }),
 );
 const components = new Map();

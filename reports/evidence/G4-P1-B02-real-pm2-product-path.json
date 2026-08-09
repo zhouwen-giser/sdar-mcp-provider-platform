@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "taskId": "G4-P1-B02",
-  "generatedAt": "2026-07-29T03:55:20.203Z",
+  "generatedAt": "2026-08-09T14:36:50.927Z",
   "resourceClassification": {
     "pm2": "real pinned JavaScript API",
     "runtime": "built SDAR Runtime",
@@ -20,14 +20,14 @@
     "isolatedHome": true,
     "processName": "sdar-runtime-e2e-product-0",
     "initialStatus": "online",
-    "initialPid": 227248,
+    "initialPid": 10744,
     "initialOutcome": "changed",
     "noOpOutcome": "unchanged",
     "driftOutcome": "changed",
-    "driftedPid": 227311,
+    "driftedPid": 28344,
     "driftRestartCount": 1,
     "crashRecoveryStatus": "online",
-    "recoveredPid": 227335,
+    "recoveredPid": 31640,
     "recoveredRestartCount": 2,
     "stopOutcome": "changed",
     "stoppedStatus": "stopped",
@@ -125,5 +125,9 @@
     "pm2HomeIsolated": true,
     "directPm2CliUsed": false,
     "configurationFileBypassUsed": false
+  },
+  "databaseIsolation": {
+    "isolatedSchema": true,
+    "releaseArtifactMigrationsApplied": 25
   }
 }

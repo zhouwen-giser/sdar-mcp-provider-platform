@@ -116,7 +116,7 @@ export class FileSecretStore implements SecretStorePort {
     const target = this.#target(scope.deploymentId, scope.instanceId, scope.name);
     const status = await this.#safeFileStatus(target);
     if (status === null) throw new SecretStoreError("SECRET_STORE_NOT_FOUND");
-    if ((status.mode & 0o077) !== 0) {
+    if (process.platform !== "win32" && (status.mode & 0o077) !== 0) {
       throw new SecretStoreError("SECRET_STORE_INVALID_PERMISSIONS");
     }
     try {
@@ -136,7 +136,7 @@ export class FileSecretStore implements SecretStorePort {
     const scope = parseRef(ref);
     const target = this.#target(scope.deploymentId, scope.instanceId, scope.name);
     const status = await this.#safeFileStatus(target);
-    if (status !== null && (status.mode & 0o077) !== 0) {
+    if (status !== null && process.platform !== "win32" && (status.mode & 0o077) !== 0) {
       throw new SecretStoreError("SECRET_STORE_INVALID_PERMISSIONS");
     }
     return Object.freeze({

@@ -1,0 +1,124 @@
+{
+  "evidenceClass": "real",
+  "phase": "P1_HA_READ_ONLY_PREFLIGHT",
+  "startedAt": "2026-08-09T16:17:00.319Z",
+  "completedAt": "2026-08-09T16:17:01.262Z",
+  "status": "passed",
+  "readOnly": true,
+  "sideEffectsAttempted": false,
+  "environment": "home-lab",
+  "homeAssistantUrl": "http://localhost:8123",
+  "token": { "source": "file", "path": "<redacted>", "present": true },
+  "checks": [
+    {
+      "name": "home_assistant_url_reachable",
+      "status": "passed",
+      "detail": "GET /api/ returned HTTP 2xx."
+    },
+    {
+      "name": "token_valid",
+      "status": "passed",
+      "detail": "Home Assistant accepted the file token."
+    },
+    {
+      "name": "configured_entities_exist",
+      "status": "passed",
+      "detail": "All configured resources returned a state."
+    },
+    {
+      "name": "entity_domains_match",
+      "status": "passed",
+      "detail": "Configured resource domains match climate/light."
+    },
+    {
+      "name": "entities_reachable",
+      "status": "passed",
+      "detail": "No configured entity is unknown or unavailable."
+    },
+    {
+      "name": "climate_capabilities",
+      "status": "passed",
+      "detail": "A configured HVAC mode and Home Assistant temperature limits are readable."
+    },
+    {
+      "name": "light_brightness_capabilities",
+      "status": "passed",
+      "detail": "Brightness capability was inspected for both configured lights; unsupported values remain null."
+    },
+    {
+      "name": "websocket_connected",
+      "status": "passed",
+      "detail": "Home Assistant WebSocket authenticated."
+    },
+    {
+      "name": "websocket_state_changed_subscription",
+      "status": "passed",
+      "detail": "state_changed subscription acknowledged."
+    },
+    {
+      "name": "rest_websocket_initial_state_consistent",
+      "status": "passed",
+      "detail": "Configured resource state snapshots matched REST reads."
+    }
+  ],
+  "resources": [
+    {
+      "resourceId": "living-room-air-conditioner",
+      "entityHash": "76109bf457a6cdb862e448b84c3ea87c37f9c8cdba92a52b8ef7b3a47a3333f8",
+      "domain": "climate",
+      "displayName": "Living room air conditioner",
+      "state": "off",
+      "reachable": true,
+      "observedAt": "2026-08-09T15:01:58.722278+00:00",
+      "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
+      "minTemperature": 16,
+      "maxTemperature": 31,
+      "currentTemperature": null,
+      "targetTemperature": 16,
+      "temperatureUnit": null
+    },
+    {
+      "resourceId": "living-room-main-light",
+      "entityHash": "48d411259a1aaeffd9111bc10a9444ff2a092e79e51e1bd337a32e59c19d7928",
+      "domain": "light",
+      "displayName": "餐厅灯",
+      "state": "on",
+      "reachable": true,
+      "observedAt": "2026-08-09T16:14:11.583771+00:00",
+      "supportsBrightness": true,
+      "brightnessPercent": 100
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "entityHash": "2b3f49cc64f1b856d860173ae06e4a9cef8c4dca858043a3fc46f9eee42e6591",
+      "domain": "light",
+      "displayName": "客厅灯",
+      "state": "off",
+      "reachable": true,
+      "observedAt": "2026-08-09T16:14:05.349370+00:00",
+      "supportsBrightness": true,
+      "brightnessPercent": null
+    }
+  ],
+  "error": null,
+  "websocket": {
+    "initialStateComparisons": [
+      {
+        "resourceId": "living-room-air-conditioner",
+        "entityHash": "76109bf457a6cdb862e448b84c3ea87c37f9c8cdba92a52b8ef7b3a47a3333f8",
+        "consistent": true
+      },
+      {
+        "resourceId": "living-room-main-light",
+        "entityHash": "48d411259a1aaeffd9111bc10a9444ff2a092e79e51e1bd337a32e59c19d7928",
+        "consistent": true
+      },
+      {
+        "resourceId": "living-room-aux-light",
+        "entityHash": "2b3f49cc64f1b856d860173ae06e4a9cef8c4dca858043a3fc46f9eee42e6591",
+        "consistent": true
+      }
+    ],
+    "subscribedEventType": "state_changed"
+  }
+}

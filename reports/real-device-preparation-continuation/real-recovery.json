@@ -1,0 +1,58 @@
+{
+  "evidenceClass": "real",
+  "status": "partial",
+  "observedAt": "2026-08-03T19:44:55.189Z",
+  "checks": [
+    {
+      "scenario": "Light Adapter stopped after completed device tasks",
+      "evidenceClass": "real",
+      "status": "passed",
+      "providerId": "ha-light-lab",
+      "runtimeReadinessDuringOutage": "not_ready_or_connection_error_observed",
+      "sideEffectReplay": "none"
+    },
+    {
+      "scenario": "Idle Adapter restart and reconnect without Runtime restart",
+      "evidenceClass": "real",
+      "status": "passed",
+      "providerId": "ha-light-lab",
+      "adapterDescribeProvider": "passed",
+      "runtimeRestartPerformed": false,
+      "runtimeReadinessAfterAdapterRestart": "ready",
+      "postRestartReadTask": "passed",
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "sideEffectReplay": "none"
+    },
+    {
+      "scenario": "Adapter restart during an in-flight real Task",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Runtime restart during an in-flight real Task",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "PMS outage while Runtime Task Authority remains live",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Home Assistant Entity unavailable or REST 200 without target state",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "deviceWriteAttempted": false
+    },
+    {
+      "scenario": "Latest read-only Home Assistant preflight after live qualification",
+      "evidenceClass": "real",
+      "status": "passed",
+      "sourceReport": "../real-device-preparation/ha-preflight.json",
+      "allConfiguredResourcesReachable": true,
+      "deviceWriteAttempted": false
+    }
+  ],
+  "safety": "No unverified recovery scenario triggered a device write; the bounded live run restored all three configured resources and left zero active or uncertain tasks."
+}

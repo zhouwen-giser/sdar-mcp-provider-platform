@@ -108,7 +108,7 @@ describe("pre-012 database forward upgrade", () => {
     const current = await upgradePool.query<{ count: string }>(
       "SELECT count(*) FROM runtime_schema_migration",
     );
-    expect(current.rows[0]?.count).toBe("24");
+    expect(current.rows[0]?.count).toBe("25");
     const providerTables = await upgradePool.query<{ table_name: string }>(
       `SELECT table_name FROM information_schema.tables
        WHERE table_schema=$1

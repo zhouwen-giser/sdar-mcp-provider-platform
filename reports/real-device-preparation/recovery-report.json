@@ -1,0 +1,68 @@
+{
+  "evidenceClass": "mixed",
+  "phase": "P7_IDEMPOTENCY_AND_RECOVERY",
+  "status": "partial",
+  "continuationReport": "reports/real-device-preparation-continuation/real-recovery.json",
+  "checks": [
+    {
+      "scenario": "Light Adapter stopped after completed device tasks",
+      "evidenceClass": "real",
+      "status": "passed",
+      "providerId": "ha-light-lab",
+      "runtimeReadinessDuringOutage": "not_ready_or_connection_error_observed",
+      "sideEffectReplay": "none"
+    },
+    {
+      "scenario": "Idle Adapter restart and reconnect without Runtime restart",
+      "evidenceClass": "real",
+      "status": "passed",
+      "providerId": "ha-light-lab",
+      "adapterDescribeProvider": "passed",
+      "runtimeRestartPerformed": false,
+      "runtimeReadinessAfterAdapterRestart": "ready",
+      "postRestartReadTask": "passed",
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "sideEffectReplay": "none"
+    },
+    {
+      "scenario": "Adapter restart during an in-flight real Task",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Runtime restart during an in-flight real Task",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "PMS outage while Runtime Task Authority remains live",
+      "evidenceClass": "unverified",
+      "status": "unverified"
+    },
+    {
+      "scenario": "Home Assistant Entity unavailable or REST 200 without target state",
+      "evidenceClass": "unverified",
+      "status": "unverified",
+      "deviceWriteAttempted": false
+    },
+    {
+      "scenario": "Latest read-only Home Assistant preflight after live qualification",
+      "evidenceClass": "real",
+      "status": "passed",
+      "sourceReport": "../real-device-preparation/ha-preflight.json",
+      "allConfiguredResourcesReachable": true,
+      "deviceWriteAttempted": false
+    }
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "blockers": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ]
+}

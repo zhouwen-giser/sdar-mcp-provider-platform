@@ -1,0 +1,10 @@
+{
+  "evidenceClass": "mixed",
+  "status": "unverified",
+  "completedRealScenarios": [],
+  "inFlightScenario": "unverified",
+  "postRestartActiveTasks": 0,
+  "postRestartUncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "sourceReport": "reports/real-device-preparation-continuation/real-recovery.json"
+}

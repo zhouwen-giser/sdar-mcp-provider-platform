@@ -1,17 +1,32 @@
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { connect, createServer } from "node:net";
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  chmod,
+  copyFile,
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import process from "node:process";
 import { clearTimeout, setTimeout } from "node:timers";
+import { URL } from "node:url";
+import { Pool } from "pg";
 import {
   BootstrapConfigRenderer,
   createPm2JavascriptApi,
   Pm2ProcessManager,
   RuntimeLifecycleManager,
 } from "../../dist/packages/pm2-runtime-adapter/src/index.js";
+import { runMigrations } from "../../dist/packages/persistence-postgres/src/index.js";
 
 class MemoryLifecycleStore {
   completed = new Map();
@@ -40,6 +55,9 @@ const databaseUrl = process.env.TEST_DATABASE_URL;
 if (databaseUrl === undefined || databaseUrl.length === 0) {
   throw new Error("TEST_DATABASE_URL is required for real PM2 E2E");
 }
+const databaseSchema = `pm2_product_${randomUUID().replaceAll("-", "")}`;
+const runtimeDatabaseUrl = withSearchPath(databaseUrl, databaseSchema);
+const databaseAdmin = new Pool({ connectionString: databaseUrl });
 
 const runtimeVersion = "2.0.0-rc.1";
 const processName = "sdar-runtime-e2e-product-0";
@@ -52,7 +70,9 @@ const runtimeEntry = resolve(releaseDirectory, "dist/apps/runtime/src/main.js");
 const secretFile = resolve(temporaryRoot, "runtime-database-url");
 const runtimePort = await freePort();
 const adapterPort = await freePort();
-const api = createPm2JavascriptApi({ pm2Home });
+const isolatedPm2Module = createIsolatedPm2Module(temporaryRoot);
+const api = createPm2JavascriptApi({ pm2Home }, isolatedPm2Module);
+const retainPm2Connection = process.platform === "win32";
 const processes = new Pm2ProcessManager(api, releaseRoot, {
   restartDelayMs: 1_000,
   maxRestarts: 3,
@@ -112,14 +132,35 @@ const startRequest = (configRevision, configChecksum) => ({
 let adapter;
 let adapterDiagnostics = "";
 let pm2Connected = false;
+let migrationCount;
 
 try {
-  await mkdir(dirname(runtimeEntry), { recursive: true });
+  await mkdir(releaseDirectory, { recursive: true });
   await mkdir(pm2Home, { recursive: true });
-  await symlink(resolve(root, "dist/apps/runtime/src/main.js"), runtimeEntry);
-  await symlink(resolve(root, "proto"), resolve(releaseDirectory, "proto"), "dir");
-  await symlink(resolve(root, "migrations"), resolve(releaseDirectory, "migrations"), "dir");
-  await writeFile(secretFile, `${databaseUrl}\n`, { mode: 0o600 });
+  // Materialize the built release so PM2 launches an actual file rather than a
+  // Windows junction. The installed dependency tree is mounted at the release
+  // root because pnpm's workspace links are not release artifacts.
+  await cp(resolve(root, "dist"), resolve(releaseDirectory, "dist"), { recursive: true });
+  await cp(resolve(root, "proto"), resolve(releaseDirectory, "proto"), { recursive: true });
+  await cp(resolve(root, "migrations"), resolve(releaseDirectory, "migrations"), {
+    recursive: true,
+  });
+  await copyFile(resolve(root, "package.json"), resolve(releaseDirectory, "package.json"));
+  await createDirectoryLink(
+    resolve(root, "node_modules"),
+    resolve(releaseDirectory, "node_modules"),
+  );
+  await databaseAdmin.query(`CREATE SCHEMA ${quoteIdentifier(databaseSchema)}`);
+  const migrationPool = new Pool({ connectionString: runtimeDatabaseUrl });
+  try {
+    const result = await runMigrations(migrationPool, undefined, {
+      workspaceRoot: releaseDirectory,
+    });
+    migrationCount = result.migrations.length;
+  } finally {
+    await migrationPool.end();
+  }
+  await writeFile(secretFile, `${runtimeDatabaseUrl}\n`, { mode: 0o600 });
   await chmod(secretFile, 0o600);
 
   adapter = spawn("node", ["dist/examples/mock-adapter-typescript/src/main.js"], {
@@ -144,8 +185,10 @@ try {
   await connectApi(api);
   pm2Connected = true;
   await startApi(api, sentinelOptions());
-  api.disconnect();
-  pm2Connected = false;
+  if (!retainPm2Connection) {
+    api.disconnect();
+    pm2Connected = false;
+  }
 
   const initialResult = await lifecycle.start(
     startRequest(1, "a".repeat(64)),
@@ -223,12 +266,16 @@ try {
   );
   const deleted = await processes.describe(processName);
 
-  await connectApi(api);
-  pm2Connected = true;
+  if (!retainPm2Connection) {
+    await connectApi(api);
+    pm2Connected = true;
+  }
   const sentinelAfter = requiredDescription(await describeApi(api, sentinelName), sentinelName);
   await deleteApi(api, sentinelName);
-  api.disconnect();
-  pm2Connected = false;
+  if (!retainPm2Connection) {
+    api.disconnect();
+    pm2Connected = false;
+  }
   if (sentinelAfter.pm2_env?.status !== "online") {
     throw new Error("NON_PLATFORM_SENTINEL_WAS_NOT_PRESERVED");
   }
@@ -306,6 +353,10 @@ try {
       directPm2CliUsed: false,
       configurationFileBypassUsed: false,
     },
+    databaseIsolation: {
+      isolatedSchema: true,
+      releaseArtifactMigrationsApplied: migrationCount,
+    },
   };
   const evidenceDirectory = resolve(root, "reports/evidence");
   await mkdir(evidenceDirectory, { recursive: true });
@@ -315,12 +366,18 @@ try {
   );
   process.stdout.write(`${JSON.stringify(evidence, null, 2)}\n`);
 } catch (error) {
+  await processes.delete(processName).catch(() => undefined);
+  const processObservation = await processes.describe(processName).catch((observationError) => ({
+    state: "diagnostic-error",
+    error: observationError instanceof Error ? observationError.message : "DESCRIBE_FAILED",
+  }));
   const daemonDiagnostics = await readFile(resolve(pm2Home, "pm2.log"), "utf8").catch(() => "");
   const runtimeDiagnostics = await readPm2ApplicationLogs(pm2Home, processName);
   process.stderr.write(
     `${sanitizeDiagnostics(
       JSON.stringify({
         error: error instanceof Error ? error.message : "PM2_PRODUCT_E2E_FAILED",
+        processObservation,
         adapter: adapterDiagnostics,
         daemon: daemonDiagnostics.slice(-8_000),
         runtime: runtimeDiagnostics,
@@ -337,12 +394,19 @@ try {
       // The primary test result remains authoritative.
     }
   }
-  await cleanupIsolatedDaemon(pm2Home).catch(() => undefined);
   if (adapter !== undefined) {
     adapter.kill("SIGTERM");
     await waitForExit(adapter, 5_000).catch(() => adapter.kill("SIGKILL"));
   }
-  await rm(temporaryRoot, { recursive: true, force: true });
+  if (process.env.KEEP_PM2_E2E_TEMP !== "YES") {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  } else {
+    process.stderr.write(`PM2_E2E_TEMP_RETAINED:${temporaryRoot}\n`);
+  }
+  await databaseAdmin
+    .query(`DROP SCHEMA IF EXISTS ${quoteIdentifier(databaseSchema)} CASCADE`)
+    .catch(() => undefined);
+  await databaseAdmin.end().catch(() => undefined);
 }
 process.exit(0);
 
@@ -401,31 +465,29 @@ function deleteApi(value, name) {
   });
 }
 
-async function cleanupIsolatedDaemon(home) {
-  const pid = Number.parseInt(await readFile(resolve(home, "pm2.pid"), "utf8"), 10);
+function createIsolatedPm2Module(home) {
   const require = createRequire(import.meta.url);
   const Pm2Api = require("pm2/lib/API.js");
-  const cleanup = new Pm2Api({ pm2_home: home });
-  try {
-    await boundedCleanup(
-      new Promise((resolveConnect, rejectConnect) => {
-        cleanup.connect((error) => (error == null ? resolveConnect() : rejectConnect(error)));
-      }),
-    );
-    await boundedCleanup(
-      new Promise((resolveKill, rejectKill) => {
-        cleanup.killDaemon((error) => (error == null ? resolveKill() : rejectKill(error)));
-      }),
-    );
-  } finally {
-    cleanup.disconnect();
-    if (Number.isSafeInteger(pid) && pid > 0 && processIsAlive(pid)) {
-      process.kill(pid, "SIGTERM");
-      await waitFor(() => (processIsAlive(pid) ? null : true), 5_000, "PM2_CLEANUP_TIMEOUT").catch(
-        () => process.kill(pid, "SIGKILL"),
-      );
-    }
-  }
+  if (process.platform !== "win32") return { custom: Pm2Api };
+
+  // PM2 currently hard-codes Windows RPC/PUB pipes, so pm2_home alone can
+  // attach to an unrelated daemon. Use unique pipes and an in-process daemon
+  // for this isolated product-path fixture.
+  const identity = home.slice(-32).replace(/[^A-Za-z0-9_-]/g, "-");
+  const pipePrefix = `${String.fromCharCode(92, 92, 46, 92, 112, 105, 112, 101, 92)}sdar-pm2-${identity}`;
+  return {
+    custom: class IsolatedWindowsPm2Api extends Pm2Api {
+      constructor(options) {
+        super({ ...options, daemon_mode: false });
+        const rpc = `${pipePrefix}-rpc`;
+        const pub = `${pipePrefix}-pub`;
+        this._conf.DAEMON_RPC_PORT = rpc;
+        this._conf.DAEMON_PUB_PORT = pub;
+        this.Client.rpc_socket_file = rpc;
+        this.Client.pub_socket_file = pub;
+      }
+    },
+  };
 }
 
 async function readPm2ApplicationLogs(home, name) {
@@ -437,31 +499,6 @@ async function readPm2ApplicationLogs(home, name) {
       .map((value) => readFile(resolve(logDirectory, value), "utf8").catch(() => "")),
   );
   return values.join("\n").slice(-8_000);
-}
-
-function boundedCleanup(operation) {
-  return new Promise((resolveCleanup, rejectCleanup) => {
-    const timeout = setTimeout(() => rejectCleanup(new Error("PM2_CLEANUP_TIMEOUT")), 5_000);
-    operation.then(
-      (value) => {
-        clearTimeout(timeout);
-        resolveCleanup(value);
-      },
-      (error) => {
-        clearTimeout(timeout);
-        rejectCleanup(error);
-      },
-    );
-  });
-}
-
-function processIsAlive(pid) {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function waitForProcess(observe, predicate, code) {
@@ -534,6 +571,18 @@ function requiredEnvironment(name) {
   return value;
 }
 
+async function createDirectoryLink(target, link) {
+  try {
+    await symlink(target, link, "dir");
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+    if (process.platform !== "win32" || !["EACCES", "EPERM", "EPROTO"].includes(code ?? "")) {
+      throw error;
+    }
+    await symlink(target, link, "junction");
+  }
+}
+
 function requiredDescription(values, name) {
   const value = values.find((candidate) => candidate.name === name);
   if (value === undefined) throw new Error(`PM2_PROCESS_MISSING:${name}`);
@@ -554,6 +603,17 @@ function sanitizeDiagnostics(value, secret) {
     .replaceAll(secret, "<redacted-database-url>")
     .replace(/postgres(?:ql)?:\/\/[^\s"'\\]+/gi, "<redacted-database-url>")
     .slice(0, 32_000);
+}
+
+function withSearchPath(connectionString, searchPath) {
+  const url = new URL(connectionString);
+  url.searchParams.set("options", `-c search_path=${searchPath}`);
+  return url.toString();
+}
+
+function quoteIdentifier(value) {
+  if (!/^[a-z][a-z0-9_]{0,62}$/.test(value)) throw new Error("TEST_IDENTIFIER_INVALID");
+  return `"${value}"`;
 }
 
 function freePort() {

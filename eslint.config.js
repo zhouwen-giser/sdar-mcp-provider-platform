@@ -41,10 +41,13 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         Buffer: "readonly",
+        AbortController: "readonly",
         URL: "readonly",
         console: "readonly",
         fetch: "readonly",
+        clearTimeout: "readonly",
         process: "readonly",
+        setTimeout: "readonly",
       },
     },
     rules: {

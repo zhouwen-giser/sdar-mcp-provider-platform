@@ -210,10 +210,36 @@ jobs:
       - run: pnpm build
       - run: pnpm test:worker-lease-safety
 
+  provider-packages-windows:
+    name: provider-packages-windows
+    runs-on: windows-2025
+    timeout-minutes: 20
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: core.longpaths
+      GIT_CONFIG_VALUE_0: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: if ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { exit 1 }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:provider-packages
+      - run: pnpm test:ha-climate
+      - run: pnpm test:ha-light
+
   provider-regression:
     name: provider-regression
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
+    needs: provider-packages-windows
     services:
       postgres:
         image: postgres:17-alpine
@@ -241,6 +267,10 @@ jobs:
           cache: pnpm
       - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
       - run: pnpm install --frozen-lockfile
+      - run: pnpm test:provider-packages
+      - run: pnpm test:provider-packages:linux-symlink
+      - run: pnpm test:ha-climate
+      - run: pnpm test:ha-light
       - run: pnpm test:provider-platform-ugv
       - run: pnpm test:provider-platform-npc
       - run: pnpm test:provider-platform-ha

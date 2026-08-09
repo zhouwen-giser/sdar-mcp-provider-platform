@@ -1,72 +1,73 @@
 {
   "schemaVersion": "1.0",
   "status": "pass",
-  "revision": "7579c26a96544f19bbf39da679419e85b52ee054",
+  "revision": "bfd45184e6229b55c42cf32320718c53a359ed5f",
   "artifacts": {
     "runtime": {
       "image": "sdar/runtime:0.1.0-rc",
-      "imageId": "sha256:4a1a8895e03a556a475ecd4c5b99d86bfcbb0b3598ecac21d5b0c04ce8221097",
-      "digest": "sdar/runtime@sha256:4a1a8895e03a556a475ecd4c5b99d86bfcbb0b3598ecac21d5b0c04ce8221097",
-      "sizeBytes": 101357338,
+      "imageId": "sha256:b697e9c166c9344c3fdc2a23a7dba8b52fe362f5435082de9ff9561e9a1a51fc",
+      "digest": "sdar/runtime@sha256:b697e9c166c9344c3fdc2a23a7dba8b52fe362f5435082de9ff9561e9a1a51fc",
+      "sizeBytes": 101488862,
       "uid": "node",
       "labels": {}
     },
     "api": {
       "image": "sdar/pms-api:0.1.0-rc",
-      "imageId": "sha256:029331fa3d950e524df27eccaa09c40a22e95ed1292abb29f73869f85171e887",
-      "digest": "sdar/pms-api@sha256:029331fa3d950e524df27eccaa09c40a22e95ed1292abb29f73869f85171e887",
-      "sizeBytes": 101599202,
+      "imageId": "sha256:43124f86e18b1e7c17ac3f074fa6137604434aac9abf97d8a22460ff2be23003",
+      "digest": "sdar/pms-api@sha256:43124f86e18b1e7c17ac3f074fa6137604434aac9abf97d8a22460ff2be23003",
+      "sizeBytes": 102233432,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
+        "org.opencontainers.image.revision": "bfd45184e6229b55c42cf32320718c53a359ed5f",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management API",
         "org.opencontainers.image.version": "0.1.0"
-      },
-      "sizeMetric": "gzip-compressed docker save bytes"
+      }
     },
     "worker": {
       "image": "sdar/pms-worker:0.1.0-rc",
-      "imageId": "sha256:69edff34d1e7e22dab6fffd4c995bc55ec17f6bcb200ede9873b77d62c8737f9",
-      "digest": "sdar/pms-worker@sha256:69edff34d1e7e22dab6fffd4c995bc55ec17f6bcb200ede9873b77d62c8737f9",
-      "sizeBytes": 101603798,
+      "imageId": "sha256:b5e50252de1559cf74db7c0b86d284a2d30f00d5d09f01253d642f31458cc43b",
+      "digest": "sdar/pms-worker@sha256:b5e50252de1559cf74db7c0b86d284a2d30f00d5d09f01253d642f31458cc43b",
+      "sizeBytes": 102228903,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
+        "org.opencontainers.image.revision": "bfd45184e6229b55c42cf32320718c53a359ed5f",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Worker",
         "org.opencontainers.image.version": "0.1.0"
-      },
-      "sizeMetric": "gzip-compressed docker save bytes"
+      }
     },
     "web": {
       "image": "sdar/pms-web:0.1.0-rc",
-      "imageId": "sha256:44e849627b5530a7c2f480531758ea313df615dd9a582e79e46e009bf272c697",
-      "digest": "sdar/pms-web@sha256:44e849627b5530a7c2f480531758ea313df615dd9a582e79e46e009bf272c697",
-      "sizeBytes": 79500517,
+      "imageId": "sha256:269a9169f52d4d4654191ec29ec843fecc61e8f87e66ef38a73baf827f3d1a60",
+      "digest": "sdar/pms-web@sha256:269a9169f52d4d4654191ec29ec843fecc61e8f87e66ef38a73baf827f3d1a60",
+      "sizeBytes": 80473217,
       "uid": "node",
       "labels": {
         "org.opencontainers.image.licenses": "Apache-2.0",
-        "org.opencontainers.image.revision": "7579c26a96544f19bbf39da679419e85b52ee054",
+        "org.opencontainers.image.revision": "bfd45184e6229b55c42cf32320718c53a359ed5f",
         "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
         "org.opencontainers.image.title": "SDAR Provider Management Web",
         "org.opencontainers.image.version": "0.1.0"
-      },
-      "sizeMetric": "gzip-compressed docker save bytes"
+      }
     }
   },
   "compose": {
     "apiReady": true,
     "workerRunning": true,
-    "webReadyAndApiReachable": true
+    "webReadyAndApiReachable": true,
+    "extractedRuntimePm2Ready": true,
+    "extractedRuntimeEntry": "/opt/sdar/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js",
+    "extractedRuntimeCwd": "/opt/sdar/runtime-releases/2.0.0-rc.1"
   },
   "policy": {
     "dependencySourceMapsAbsent": true,
     "licensePolicyPassed": true,
     "filesystemWhitelistPassed": true,
-    "testSecretsAbsent": true
+    "testSecretsAbsent": true,
+    "runtimeReleaseBundleSelfContained": true
   },
   "secretsIncluded": false
 }

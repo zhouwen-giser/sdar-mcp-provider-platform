@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "1.0",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "smppCandidateSha": "e3da358b95782f3bec545b7044dc703c0c8f9b9c",
+  "branch": "codex/ha-real-device-preparation",
+  "environment": "home-lab",
+  "registryRevision": 3,
+  "registryChecksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+  "registryEtag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp",
+      "catalogRevision": 1,
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp",
+      "catalogRevision": 1,
+      "tools": ["light_get_state", "light_set_power", "light_set_brightness"]
+    }
+  ],
+  "realResourcesQualified": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "historicallyQualifiedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "realResourcesRead": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "deviceState": "restored",
+  "readyForSdarFunctionalIntegration": true,
+  "readyForSdarResilienceIntegration": false,
+  "readyForSdarFullCapabilityIntegration": false,
+  "readyForSdarIntegration": false,
+  "allowedProviders": ["ha-climate-lab", "ha-light-lab"],
+  "allowedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "allowedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_hvac_mode",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_temperature",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_power",
+      "qualification": "real_pass_time_scoped"
+    }
+  ],
+  "forbiddenOrUnverifiedResources": [],
+  "forbiddenOrUnverifiedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_power",
+      "reason": "real_pass_off_restore_only"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_brightness",
+      "reason": "unverified_optional"
+    }
+  ],
+  "externalResourceBlockers": [],
+  "mainMergeReady": true,
+  "mainMergeReadinessStatus": "ready",
+  "mainMergeBlockers": [],
+  "mainMergeCodeBlockers": [],
+  "mainMergeGithubBlockers": [],
+  "mainMergeGithub": {
+    "prNumber": 9,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
+    "prState": "OPEN",
+    "isDraft": false,
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "CLEAN",
+    "checkedCandidateSha": "fe46fc1a3b0361a12f3dee9e9352795f42f69631",
+    "requiredChecks": "passed",
+    "checkRuns": { "passed": 21, "failed": 0, "pending": 0 },
+    "reviewDecision": "none",
+    "independentReviewStatus": "passed",
+    "independentApprovals": 0,
+    "blockingReviewFindings": 0,
+    "unresolvedThreads": 0,
+    "independentReviewFindings": [
+      { "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT", "status": "resolved" },
+      { "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION", "status": "resolved" }
+    ],
+    "branchProtection": {
+      "pattern": "main",
+      "requiresApprovingReviews": true,
+      "requiredApprovingReviewCount": 0,
+      "requiresStatusChecks": true,
+      "requiresConversationResolution": true,
+      "requiresStrictStatusChecks": true,
+      "isAdminEnforced": true,
+      "allowsForcePushes": false,
+      "allowsDeletions": false
+    },
+    "checkedAt": "2026-08-09T19:49:51.5839451Z",
+    "note": "All 21 checks passed at the audited executable candidate SHA. PR #9 is ready for review, the independent code review has zero open blocking findings, and GitHub reports zero unresolved review threads. Any subsequent closeout commits are evidence-only and must receive the same protected checks before merge."
+  },
+  "blockingIssues": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ],
+  "noSecrets": true,
+  "noEntityIds": true,
+  "sdarAgentRuntime": "not_connected"
+}

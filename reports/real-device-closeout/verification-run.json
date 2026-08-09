@@ -1,0 +1,278 @@
+{
+  "evidenceClass": "mixed",
+  "status": "passed_code_and_repository_gates",
+  "generatedAt": "2026-08-09T19:49:51.5839451Z",
+  "commands": {
+    "installFrozen": {
+      "command": "pnpm install --frozen-lockfile",
+      "status": "passed",
+      "evidenceClass": "static"
+    },
+    "formatCheck": {
+      "command": "pnpm format:check",
+      "status": "passed",
+      "evidenceClass": "static"
+    },
+    "lint": {
+      "command": "pnpm lint",
+      "status": "passed",
+      "evidenceClass": "static"
+    },
+    "typecheck": {
+      "command": "pnpm typecheck",
+      "status": "passed",
+      "evidenceClass": "static"
+    },
+    "build": {
+      "command": "pnpm build",
+      "status": "passed",
+      "evidenceClass": "static"
+    },
+    "protocolCheck": {
+      "command": "pnpm protocol:check",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "frozenCases": "74/74",
+      "protocolLock": "38/38",
+      "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845"
+    },
+    "testUnit": {
+      "command": "pnpm test:unit",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "132/132"
+    },
+    "testContract": {
+      "command": "pnpm test:contract",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "18/18"
+    },
+    "testIntegration": {
+      "command": "pnpm test:integration",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "219/219"
+    },
+    "testE2e": {
+      "command": "pnpm test:e2e",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "8/8"
+    },
+    "migrationIsolation": {
+      "command": "pnpm test:migration-isolation",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "1/1",
+      "migrationCount": 25
+    },
+    "haClimate": {
+      "command": "pnpm test:ha-climate && pnpm test:ha-climate:e2e && pnpm test:ha-climate:protocol-v1",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "protocolCases": "8/8"
+    },
+    "haLight": {
+      "command": "pnpm test:ha-light && pnpm test:ha-light:e2e && pnpm test:ha-light:protocol-v1",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "protocolCases": "8/8"
+    },
+    "providerPlatformHa": {
+      "command": "pnpm test:provider-platform-ha",
+      "status": "passed",
+      "evidenceClass": "contract"
+    },
+    "providerPackages": {
+      "command": "pnpm test:provider-packages",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "packages": "13/13"
+    },
+    "security": {
+      "command": "pnpm test:security and platform security portions of aggregate gates",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "43/43"
+    },
+    "dependencyAudit": {
+      "command": "pnpm audit --audit-level high",
+      "status": "passed",
+      "evidenceClass": "static",
+      "summary": "The current lockfile was audited after the dependency overrides: 0 high or critical, 6 moderate, and 1 low advisory.",
+      "currentOnlineRefresh": "blocked_by_approval_policy_to_avoid_external_dependency_inventory_disclosure",
+      "lockfileChangedAfterSuccessfulAudit": false
+    },
+    "sbom": {
+      "command": "pnpm sbom:generate && pnpm sbom:check",
+      "status": "passed",
+      "evidenceClass": "static",
+      "productionComponents": 358
+    },
+    "container": {
+      "command": "pnpm container:check",
+      "status": "passed",
+      "evidenceClass": "static",
+      "image": "sdar-runtime:v2-audit-primary",
+      "sizeBytes": 101472946,
+      "filesystemHash": "6fc98ef3c6eaa0fbb890acb89a1581d7d248c3802b74fc0e9f2f08e65251a929",
+      "reproducibleFilesystemAndConfig": true
+    },
+    "verifyV2": {
+      "command": "pnpm verify:v2",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "durationSeconds": 942.8,
+      "sandboxedAttempt": "failed_before_container_work_because_Docker_named_pipe_access_was_denied",
+      "authorizedDockerRerun": "passed"
+    },
+    "verifyPlatform": {
+      "command": "pnpm verify:platform",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "durationSeconds": 373.8
+    },
+    "haPreflight": {
+      "command": "pnpm test:ha-real:preflight",
+      "status": "passed",
+      "evidenceClass": "real",
+      "readOnly": true,
+      "sideEffectsAttempted": false,
+      "resources": 3,
+      "webSocketStateChangedSubscribed": true,
+      "restWebSocketInitialStateConsistent": true
+    },
+    "realClimate": {
+      "command": "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES REAL_DEVICE_TEST_RUN_ID=<redacted-run-id> pnpm test:ha-climate:real",
+      "status": "passed",
+      "evidenceClass": "real",
+      "historicalTimeScoped": true
+    },
+    "realLight": {
+      "command": "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES REAL_DEVICE_TEST_RUN_ID=<redacted-run-id> pnpm test:ha-light:real",
+      "status": "passed",
+      "evidenceClass": "real",
+      "historicalTimeScoped": true
+    },
+    "registryBackedRealE2e": {
+      "command": "node --import tsx scripts/run-live-smpp-registry-e2e.ts",
+      "status": "passed",
+      "evidenceClass": "real",
+      "readOnly": true,
+      "resources": 3,
+      "activeTasks": 0,
+      "uncertainTasks": 0
+    },
+    "threeDeviceRealE2e": {
+      "command": "node --import tsx scripts/run-live-smpp-three-device-e2e.ts",
+      "status": "passed",
+      "evidenceClass": "real",
+      "historicalTimeScoped": true,
+      "resources": 3,
+      "restored": true,
+      "activeTasks": 0,
+      "uncertainTasks": 0
+    },
+    "controlledFaultInjection": {
+      "command": "pnpm test:fault-injection",
+      "status": "passed",
+      "evidenceClass": "controlledFaultInjection",
+      "tests": "4/4",
+      "realFaultInjection": "not claimed"
+    },
+    "releaseCandidateCheck": {
+      "command": "pnpm release:candidate:check",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "checks": "17/17",
+      "crossPlatformLineEndings": "accepted"
+    },
+    "pmsApiProduction": {
+      "command": "pnpm test:pms-api-production",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "tests": "4/4",
+      "database": "isolated local PostgreSQL"
+    },
+    "workerPm2Production": {
+      "command": "pnpm test:worker-pm2-production",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "database": "isolated local PostgreSQL",
+      "startupRaceRegression": "passed",
+      "recoveryAndIsolation": "passed"
+    },
+    "linuxSymlink": {
+      "command": "pnpm test:provider-packages:linux-symlink",
+      "status": "passed",
+      "evidenceClass": "contract",
+      "image": "sdar-runtime:v2-audit-primary",
+      "expectedCode": "PACKAGE_ENTRY_SYMLINK_REJECTED"
+    }
+  },
+  "finalRechecks": {
+    "formatCheck": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed_with_local_docker",
+    "protocolCheck": "passed",
+    "frozenConformance": "74/74 passed",
+    "verifyV2WithIsolatedDatabaseAndDocker": "passed",
+    "verifyPlatformWithIsolatedDatabaseAndDocker": "passed",
+    "finalHaPreflight": "passed_read_only",
+    "finalRegistryContract": "passed",
+    "finalRegistryReadOnlyE2e": "passed_with_current_runtime_task_counts",
+    "currentRuntimeActiveTasks": 0,
+    "currentRuntimeUncertainTasks": 0,
+    "adapterWriteGateAfterRealQualification": "closed",
+    "trackedSensitiveValueScan": "passed_0_exact_matches",
+    "onlineDependencyAuditRefresh": "blocked_by_approval_policy",
+    "mergeReadinessRegression": "8/8 passed",
+    "githubChecksAtCandidateSha": "21/21 passed"
+  },
+  "github": {
+    "prNumber": 9,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
+    "prState": "OPEN",
+    "isDraft": false,
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "CLEAN",
+    "checkedCandidateSha": "fe46fc1a3b0361a12f3dee9e9352795f42f69631",
+    "requiredChecks": "passed",
+    "checkRuns": {
+      "passed": 21,
+      "failed": 0,
+      "pending": 0
+    },
+    "reviewDecision": "none",
+    "independentReviewStatus": "passed",
+    "independentApprovals": 0,
+    "blockingReviewFindings": 0,
+    "unresolvedThreads": 0,
+    "independentReviewFindings": [
+      {
+        "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT",
+        "status": "resolved"
+      },
+      {
+        "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION",
+        "status": "resolved"
+      }
+    ],
+    "branchProtection": {
+      "pattern": "main",
+      "requiresApprovingReviews": true,
+      "requiredApprovingReviewCount": 0,
+      "requiresStatusChecks": true,
+      "requiresConversationResolution": true,
+      "requiresStrictStatusChecks": true,
+      "isAdminEnforced": true,
+      "allowsForcePushes": false,
+      "allowsDeletions": false
+    },
+    "checkedAt": "2026-08-09T19:49:51.5839451Z",
+    "note": "All 21 checks passed at the audited executable candidate SHA. PR #9 is ready for review, the independent code review has zero open blocking findings, and GitHub reports zero unresolved review threads. Any subsequent closeout commits are evidence-only and must receive the same protected checks before merge."
+  },
+  "hardGateConclusion": "Code and repository gates passed. Functional real-device scope passed. Overall readyForSdarIntegration remains false because real in-flight resilience, real fault injection, PMS-outage Task Authority, and explicit climate power-on qualification are incomplete."
+}

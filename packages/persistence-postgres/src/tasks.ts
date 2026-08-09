@@ -591,6 +591,18 @@ export class TaskRepository {
       return task;
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
+      const databaseError = error as { code?: string; constraint?: string };
+      if (databaseError.code === "23505" && databaseError.constraint === "provider_task_pkey") {
+        // Admission recovery and the original caller can publish the same accepted
+        // Adapter snapshot concurrently. The Task ID is the authority for this
+        // race; return the committed row instead of converting convergence into a
+        // technical failure or allowing a second side effect.
+        const existing = await selectTaskById(client, input.taskId);
+        if (existing !== null) {
+          assertAcceptedPublicationIdentity(existing, input);
+          return existing;
+        }
+      }
       throw error;
     } finally {
       client.release();
@@ -3784,6 +3796,21 @@ export class TaskRepository {
     } finally {
       client.release();
     }
+  }
+}
+
+function assertAcceptedPublicationIdentity(existing: TaskRecord, input: PublishTaskInput): void {
+  if (
+    existing.providerId !== input.providerId ||
+    existing.operationName !== input.operationName ||
+    existing.operationSnapshotId !== input.operationSnapshotId ||
+    existing.authorizationContextHash !== input.authorization.hash ||
+    existing.executionMode !== input.authorization.executionMode ||
+    existing.simulationId !== input.authorization.simulationId ||
+    existing.argumentHash !== input.argumentHash ||
+    existing.externalExecutionId !== input.externalExecutionId
+  ) {
+    throw new Error("TASK_ACCEPTED_IDENTITY_CONFLICT");
   }
 }
 

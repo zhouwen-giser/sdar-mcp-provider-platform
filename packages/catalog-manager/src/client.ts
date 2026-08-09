@@ -1,5 +1,6 @@
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { canonicalize } from "./canonical.js";
+import { assertCatalogPublicData } from "./public-data.js";
 import {
   CatalogDiscoveryError,
   FROZEN_PROTOCOL_VERSION,
@@ -55,6 +56,11 @@ export class CatalogDiscoveryClient {
     const discovery = validateDiscovery(rpcResult(discoveryResponse, "server/discover"));
     const tools = this.#validateTools(rpcResult(toolsResponse, "tools/list"));
     const snapshot = { discovery, tools };
+    try {
+      assertCatalogPublicData(snapshot);
+    } catch (error) {
+      throw new CatalogDiscoveryError("CATALOG_SENSITIVE_DATA", false, { cause: error });
+    }
     return { ...snapshot, canonicalJson: canonicalize(snapshot) };
   }
 
@@ -171,9 +177,11 @@ function rpcResult(response: unknown, method: CatalogDiscoveryRequest["method"])
 function validateDiscovery(value: unknown): RuntimeDiscovery {
   const discovery = record(value, "CATALOG_INVALID_DISCOVERY");
   const capabilities = record(discovery.capabilities, "CATALOG_INVALID_DISCOVERY");
+  record(capabilities.tools, "CATALOG_INVALID_DISCOVERY");
   const extensions = record(capabilities.extensions, "CATALOG_INVALID_DISCOVERY");
   const taskExtension = extensions["io.modelcontextprotocol/tasks"];
   const taskProfile = record(extensions["io.sdar/taskExecution"], "CATALOG_INVALID_DISCOVERY");
+  const businessEvents = extensions["io.sdar/businessEvents"];
   const metadata = record(discovery._meta, "CATALOG_INVALID_DISCOVERY");
   const serverInfo = record(
     metadata["io.modelcontextprotocol/serverInfo"],
@@ -186,9 +194,7 @@ function validateDiscovery(value: unknown): RuntimeDiscovery {
       (version): version is string => typeof version === "string",
     ) ||
     !discovery.supportedVersions.includes(FROZEN_PROTOCOL_VERSION) ||
-    typeof taskExtension !== "object" ||
-    taskExtension === null ||
-    Array.isArray(taskExtension) ||
+    !isRecord(taskExtension) ||
     taskProfile.profileVersion !== "1.0" ||
     taskProfile.taskNotifications !== true ||
     typeof serverInfo.name !== "string" ||
@@ -201,12 +207,28 @@ function validateDiscovery(value: unknown): RuntimeDiscovery {
   return {
     resultType: "complete",
     supportedVersions: [...discovery.supportedVersions],
-    capabilities,
+    capabilities: {
+      tools: {},
+      extensions: {
+        "io.modelcontextprotocol/tasks": {},
+        "io.sdar/taskExecution": {
+          profileVersion: "1.0",
+          taskNotifications: true,
+        },
+        ...(businessEvents === undefined
+          ? {}
+          : { "io.sdar/businessEvents": record(businessEvents, "CATALOG_INVALID_DISCOVERY") }),
+      },
+    },
     serverInfo: { name: serverInfo.name, version: serverInfo.version },
     ...(typeof discovery.instructions === "string" ? { instructions: discovery.instructions } : {}),
     ...(typeof discovery.ttlMs === "number" ? { ttlMs: discovery.ttlMs } : {}),
     ...(typeof discovery.cacheScope === "string" ? { cacheScope: discovery.cacheScope } : {}),
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function validateTaskExecution(value: unknown): TaskExecutionProfile {

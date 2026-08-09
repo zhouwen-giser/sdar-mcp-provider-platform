@@ -1,0 +1,13 @@
+{
+  "evidenceClass": "unverified",
+  "status": "not_run",
+  "reason": "Post-merge validation is executed only after a protected main merge.",
+  "requiredChecks": [
+    "origin/main equals merged candidate",
+    "working tree clean",
+    "frozen protocol check",
+    "migration isolation",
+    "provider package gate",
+    "read-only Registry and MCP discovery"
+  ]
+}

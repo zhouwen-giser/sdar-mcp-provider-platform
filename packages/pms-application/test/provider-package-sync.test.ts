@@ -31,17 +31,17 @@ describe("Provider Package PMS projection", () => {
     await admin.end();
   });
 
-  it("imports all three controlled packages atomically", async () => {
+  it("imports all four controlled packages atomically", async () => {
     const result = await synchronizeWorkspaceProviderPackages(
       unitOfWork,
       { actorId: "system:package-sync", correlationId: "sync-1" },
       workspaceRoot,
     );
 
-    expect(result).toEqual({ inserted: 3, updated: 0, unchanged: 0 });
-    expect(await count("provider_package")).toBe(3);
-    expect(await count("provider_type")).toBe(3);
-    expect(await count("audit")).toBe(3);
+    expect(result).toEqual({ inserted: 4, updated: 0, unchanged: 0 });
+    expect(await count("provider_package")).toBe(4);
+    expect(await count("provider_type")).toBe(4);
+    expect(await count("audit")).toBe(4);
   });
 
   it("does not create revision or audit noise when every checksum matches", async () => {
@@ -51,8 +51,8 @@ describe("Provider Package PMS projection", () => {
       workspaceRoot,
     );
 
-    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 3 });
-    expect(await count("audit")).toBe(3);
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 4 });
+    expect(await count("audit")).toBe(4);
   });
 
   it("restores database drift from the file projection, never the reverse", async () => {
@@ -72,12 +72,12 @@ describe("Provider Package PMS projection", () => {
         WHERE package_id='builtin.isr.vehicle.ugv' AND package_version='1.0.0'`,
     );
 
-    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 2 });
+    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 3 });
     expect(stored.rows[0]?.source_document).toMatchObject({
       packageId: "builtin.isr.vehicle.ugv",
       adapter: { entry: "apps/ugv-provider-adapter/src/main.ts" },
     });
-    expect(await count("audit")).toBe(4);
+    expect(await count("audit")).toBe(5);
   });
 
   it("rejects a damaged descriptor before opening a write transaction", async () => {
@@ -94,8 +94,8 @@ describe("Provider Package PMS projection", () => {
         correlationId: "sync-invalid",
       }),
     ).rejects.toBeDefined();
-    expect(await count("provider_package")).toBe(3);
-    expect(await count("audit")).toBe(4);
+    expect(await count("provider_package")).toBe(4);
+    expect(await count("audit")).toBe(5);
   });
 
   async function count(table: "audit" | "provider_package" | "provider_type"): Promise<number> {

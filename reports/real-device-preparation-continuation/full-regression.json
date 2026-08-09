@@ -1,0 +1,59 @@
+{
+  "evidenceClass": "mixed",
+  "phase": "P8_FULL_REGRESSION",
+  "status": "passed_code_and_functional",
+  "observedAt": "2026-08-04T05:38:26+08:00",
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "evidenceClass": "static",
+      "status": "passed"
+    },
+    {
+      "command": "pnpm verify:v2",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "detail": "Frozen protocol, business events, repository verification, image reproducibility, capacity, and report checks passed."
+    },
+    {
+      "command": "pnpm verify:platform",
+      "evidenceClass": "contract",
+      "status": "passed",
+      "detail": "PMS API/Worker/Web, migrations, PM2, registry, security, fault injection, and platform E2E passed."
+    },
+    {
+      "command": "node scripts/ha-real-preflight.mjs",
+      "evidenceClass": "real",
+      "status": "passed",
+      "detail": "All three configured resources were reachable and REST/WebSocket initial states were consistent."
+    },
+    {
+      "command": "Registry-backed live MCP E2E",
+      "evidenceClass": "real",
+      "status": "passed",
+      "detail": "PMS Registry, two Runtime endpoints, tools/list, and real resource reads passed with zero active or uncertain tasks."
+    },
+    {
+      "command": "Three-device live MCP E2E",
+      "evidenceClass": "real",
+      "status": "passed",
+      "detail": "Climate HVAC mode/temperature and both lights were controlled, confirmed by observed state, and restored."
+    },
+    {
+      "command": "Real in-flight and outage recovery matrix",
+      "evidenceClass": "unverified",
+      "status": "not_completed",
+      "detail": "The closeout deliberately does not convert controlled fault tests into real-device qualification."
+    }
+  ],
+  "blockers": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ],
+  "deviceState": "restored",
+  "activeTasks": 0,
+  "uncertainTasks": 0
+}

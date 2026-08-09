@@ -42,6 +42,13 @@ export async function executePmsJob(input: ExecutePmsJobInput): Promise<void> {
     await input.handler.execute(input.lease, context);
   } catch (error) {
     handlerFailure = error;
+    console.error(
+      JSON.stringify({
+        event: "pms_job_failed",
+        jobType: input.lease.job.jobType,
+        errorCode: failureCode(error),
+      }),
+    );
   } finally {
     renewal.abort();
     await renewalLoop;
@@ -70,6 +77,13 @@ export async function executePmsJob(input: ExecutePmsJobInput): Promise<void> {
       }
     }
   }
+}
+
+function failureCode(error: unknown): string {
+  if (typeof error !== "object" || error === null) return "UNKNOWN";
+  if ("code" in error && typeof error.code === "string") return error.code;
+  if (error instanceof Error && error.name.length > 0) return error.name;
+  return "UNKNOWN";
 }
 
 export function renewalInterval(leaseDurationMs: number): number {

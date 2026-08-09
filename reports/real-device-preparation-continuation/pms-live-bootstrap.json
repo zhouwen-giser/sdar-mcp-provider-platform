@@ -1,0 +1,67 @@
+{
+  "evidenceClass": "real",
+  "phase": "P3_P5_LIVE_PMS_BOOTSTRAP_AND_ONBOARDING",
+  "status": "passed",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T03:24:41Z",
+  "pmsApi": {
+    "baseUrl": "http://127.0.0.1:8090",
+    "healthLive": 200,
+    "healthReady": 200
+  },
+  "formalApiSteps": {
+    "providerPackageSync": "passed",
+    "providerTypeCreateOrConfirm": "passed",
+    "providerCreateOrConfirm": "passed",
+    "resourceCreateOrConfirm": "passed",
+    "bindingCreateOrConfirm": "passed",
+    "configDraft": "passed",
+    "configPublish": "passed",
+    "runtimeDeploymentCreateOrConfirm": "passed",
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
+    "resourceIds": [
+      "living-room-air-conditioner",
+      "living-room-main-light",
+      "living-room-aux-light"
+    ],
+    "publishedConfigRevision": 1
+  },
+  "deploymentAuthority": {
+    "model": "vendor_managed_adapter_plus_pms_managed_runtime",
+    "climateDeployment": {
+      "deploymentId": "ha-climate-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 2,
+      "observedRevision": 22,
+      "runtimeReadiness": "ready"
+    },
+    "lightDeployment": {
+      "deploymentId": "ha-light-deployment",
+      "status": "ACTIVE",
+      "desiredState": "running",
+      "desiredRevision": 0,
+      "observedRevision": 40,
+      "runtimeReadiness": "ready"
+    }
+  },
+  "worker": {
+    "evidenceClass": "real",
+    "status": "passed",
+    "claimedBy": "smpp-continuation-worker",
+    "leasedJobCountAtObservation": 0,
+    "jobCompletion": "passed",
+    "note": "After the PM2 connection-lifecycle fix and a fresh local PM2 control root, the formal Worker completed repeated runtime_deployment.reconcile jobs for both Providers. The latest sampled jobs were succeeded or pending, with no active lease; both Deployments remained ACTIVE and ready."
+  },
+  "noSecrets": true,
+  "noEntityIds": true,
+  "blockers": [],
+  "sources": [
+    "scripts/run-live-pms-onboarding.ts",
+    "scripts/run-live-pms-reconcile.ts",
+    "packages/pms-application/src/runtime-reconcile.ts",
+    "packages/pms-application/test/runtime-reconcile.test.ts",
+    "packages/pm2-runtime-adapter/src/pm2/process-manager.ts",
+    "packages/pm2-runtime-adapter/test/process-manager.test.ts"
+  ]
+}

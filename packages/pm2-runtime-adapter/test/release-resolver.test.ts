@@ -58,7 +58,7 @@ describe("RuntimeReleaseResolver", () => {
     await rm(resolve(root, CURRENT_RUNTIME_VERSION), { recursive: true });
     const outside = await mkdtemp(resolve(tmpdir(), "sdar-release-outside-"));
     temporaryRoots.push(outside);
-    await symlink(outside, resolve(root, CURRENT_RUNTIME_VERSION));
+    await createSecurityLink(outside, resolve(root, CURRENT_RUNTIME_VERSION));
     await expect(
       new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
         CURRENT_RUNTIME_VERSION,
@@ -66,20 +66,32 @@ describe("RuntimeReleaseResolver", () => {
     ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_PATH_ESCAPE" });
   });
 
-  it("rejects an entry that is not both readable and executable", async () => {
-    const root = await releaseRoot(0o400);
-    await expect(
-      new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
-        CURRENT_RUNTIME_VERSION,
-      ),
-    ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_NOT_EXECUTABLE" });
+  it.skipIf(process.platform === "win32")(
+    "rejects an entry that is not both readable and executable",
+    async () => {
+      const root = await releaseRoot(0o400);
+      await expect(
+        new RuntimeReleaseResolver(root, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
+          CURRENT_RUNTIME_VERSION,
+        ),
+      ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_NOT_EXECUTABLE" });
 
-    const unreadableRoot = await releaseRoot(0o100);
-    await expect(
-      new RuntimeReleaseResolver(unreadableRoot, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
-        CURRENT_RUNTIME_VERSION,
-      ),
-    ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_UNREADABLE" });
+      const unreadableRoot = await releaseRoot(0o100);
+      await expect(
+        new RuntimeReleaseResolver(unreadableRoot, CURRENT_RUNTIME_RELEASE_MANIFEST).resolve(
+          CURRENT_RUNTIME_VERSION,
+        ),
+      ).rejects.toMatchObject({ code: "RUNTIME_RELEASE_ENTRY_UNREADABLE" });
+    },
+  );
+
+  it("accepts the fixed readable JavaScript entry on Windows", async () => {
+    const root = await releaseRoot(0o400);
+    const release = await new RuntimeReleaseResolver(
+      root,
+      CURRENT_RUNTIME_RELEASE_MANIFEST,
+    ).resolve(CURRENT_RUNTIME_VERSION);
+    expect(release.runtimeEntry).toBe(resolve(root, CURRENT_RUNTIME_VERSION, FIXED_RUNTIME_ENTRY));
   });
 
   it("loads only the fixed contained manifest file and rejects extra fields", async () => {
@@ -107,5 +119,19 @@ describe("RuntimeReleaseResolver", () => {
     await writeFile(entry, "export {};\n", { mode });
     await chmod(entry, mode);
     return root;
+  }
+
+  async function createSecurityLink(target: string, link: string): Promise<void> {
+    try {
+      await symlink(target, link);
+    } catch (error) {
+      const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+      if (process.platform !== "win32" || !["EACCES", "EPERM", "EPROTO"].includes(code ?? "")) {
+        throw error;
+      }
+      const junctionTarget = await mkdtemp(resolve(tmpdir(), "sdar-release-junction-"));
+      temporaryRoots.push(junctionTarget);
+      await symlink(junctionTarget, link, "junction");
+    }
   }
 });

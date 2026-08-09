@@ -217,7 +217,7 @@ describe("T-047 rc.1 full-state database forward migration", () => {
     expect(
       (await pool.query<{ count: string }>("SELECT count(*) FROM runtime_schema_migration")).rows[0]
         ?.count,
-    ).toBe("24");
+    ).toBe("25");
     expect(
       await pool.query(
         `SELECT 1 FROM provider_task WHERE task_id=$1

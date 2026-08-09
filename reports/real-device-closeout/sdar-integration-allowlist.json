@@ -1,0 +1,130 @@
+{
+  "evidenceClass": "mixed",
+  "environment": "home-lab",
+  "status": "functional_only",
+  "activationAllowed": false,
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp",
+      "catalogRevision": 1,
+      "allowedResources": ["living-room-air-conditioner"],
+      "forbiddenResources": [],
+      "allowedOperations": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_temperature"
+      ],
+      "forbiddenOperations": [
+        { "operation": "climate_set_power", "reason": "real_pass_off_restore_only" }
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "protocolMode": "frozen_v1",
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp",
+      "catalogRevision": 1,
+      "allowedResources": ["living-room-main-light", "living-room-aux-light"],
+      "forbiddenResources": [],
+      "allowedOperations": ["light_get_state", "light_set_power"],
+      "forbiddenOperations": [
+        { "operation": "light_set_brightness", "reason": "unverified_optional" }
+      ]
+    }
+  ],
+  "allowedProviders": ["ha-climate-lab", "ha-light-lab"],
+  "allowedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "allowedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_hvac_mode",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_temperature",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_power",
+      "qualification": "real_pass_time_scoped"
+    }
+  ],
+  "forbiddenOrUnverifiedResources": [],
+  "forbiddenOrUnverifiedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_power",
+      "reason": "real_pass_off_restore_only"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_brightness",
+      "reason": "unverified_optional"
+    }
+  ],
+  "candidateFunctionalScope": {
+    "resources": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
+    "operations": [
+      {
+        "providerId": "ha-climate-lab",
+        "operation": "climate_get_state",
+        "qualification": "real_pass_time_scoped"
+      },
+      {
+        "providerId": "ha-climate-lab",
+        "operation": "climate_set_hvac_mode",
+        "qualification": "real_pass_time_scoped"
+      },
+      {
+        "providerId": "ha-climate-lab",
+        "operation": "climate_set_temperature",
+        "qualification": "real_pass_time_scoped"
+      },
+      {
+        "providerId": "ha-light-lab",
+        "operation": "light_get_state",
+        "qualification": "real_pass_time_scoped"
+      },
+      {
+        "providerId": "ha-light-lab",
+        "operation": "light_set_power",
+        "qualification": "real_pass_time_scoped"
+      }
+    ]
+  },
+  "readiness": {
+    "functional": true,
+    "resilience": false,
+    "fullCapability": false,
+    "readyForSdarIntegration": false
+  },
+  "externalResourceBlockers": [],
+  "blockers": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

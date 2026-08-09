@@ -1,0 +1,32 @@
+{
+  "evidenceClass": "real",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "published_and_runtime_tool_match",
+  "continuationReport": "reports/real-device-preparation-continuation/catalog-registry-live.json",
+  "catalogs": [
+    {
+      "providerId": "ha-climate-lab",
+      "catalogRevision": 1,
+      "runtimeToolsMatch": "real",
+      "tools": [
+        "climate_get_state",
+        "climate_set_hvac_mode",
+        "climate_set_power",
+        "climate_set_temperature"
+      ],
+      "resourceBinding": { "mode": "ARGUMENT_REFERENCE", "resourceIdJsonPointer": "/resourceId" }
+    },
+    {
+      "providerId": "ha-light-lab",
+      "catalogRevision": 1,
+      "runtimeToolsMatch": "real",
+      "tools": ["light_get_state", "light_set_power", "light_set_brightness"],
+      "resourceBinding": { "mode": "ARGUMENT_REFERENCE", "resourceIdJsonPointer": "/resourceId" }
+    }
+  ],
+  "blockers": [
+    "CLIMATE_POWER_CONTROL_SAFETY_DEFERRED: current PMS Registry-backed climate writes were stopped by the five-minute safety gate."
+  ],
+  "noSecrets": true,
+  "noEntityIds": true
+}

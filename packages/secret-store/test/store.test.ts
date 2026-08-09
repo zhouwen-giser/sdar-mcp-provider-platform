@@ -30,11 +30,13 @@ describe("FileSecretStore", () => {
       "instance-1",
       "DATABASE_URL.secret",
     );
-    expect((await lstat(target)).mode & 0o777).toBe(0o600);
-    expect(
-      (await lstat(join(root, "deployments", "deployment-1", "instances", "instance-1"))).mode &
-        0o777,
-    ).toBe(0o700);
+    if (process.platform !== "win32") {
+      expect((await lstat(target)).mode & 0o777).toBe(0o600);
+      expect(
+        (await lstat(join(root, "deployments", "deployment-1", "instances", "instance-1"))).mode &
+          0o777,
+      ).toBe(0o700);
+    }
     expect(await readFile(target, "utf8")).toBe("rotated-secret");
     expect(Buffer.from(await store.read(ref)).toString("utf8")).toBe("rotated-secret");
     expect(
@@ -95,16 +97,18 @@ describe("FileSecretStore", () => {
       "DATABASE_URL.secret",
     );
     await rm(target);
-    await symlink("/etc/passwd", target);
+    await createSecurityLink("/etc/passwd", target);
     await expect(store.read(ref)).rejects.toMatchObject({
       code: "SECRET_STORE_SYMLINK_REJECTED",
     });
     await rm(target);
     await store.write(input("secret"));
-    await chmod(target, 0o644);
-    await expect(store.read(ref)).rejects.toMatchObject({
-      code: "SECRET_STORE_INVALID_PERMISSIONS",
-    });
+    if (process.platform !== "win32") {
+      await chmod(target, 0o644);
+      await expect(store.read(ref)).rejects.toMatchObject({
+        code: "SECRET_STORE_INVALID_PERMISSIONS",
+      });
+    }
   });
 
   it("requires an exact explicit cleanup policy and is idempotent after deletion", async () => {
@@ -135,7 +139,7 @@ describe("FileSecretStore", () => {
     const root = await temporaryRoot();
     const outside = await temporaryRoot();
     await mkdir(join(root, "deployments"), { mode: 0o700 });
-    await symlink(outside, join(root, "deployments", "deployment-1"));
+    await createSecurityLink(outside, join(root, "deployments", "deployment-1"));
     const store = new FileSecretStore(root);
 
     await expect(store.write(input("secret"))).rejects.toMatchObject({
@@ -169,5 +173,19 @@ async function pathExists(path: string): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function createSecurityLink(target: string, link: string): Promise<void> {
+  try {
+    await symlink(target, link);
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+    if (process.platform !== "win32" || !["EACCES", "EPERM", "EPROTO"].includes(code ?? "")) {
+      throw error;
+    }
+    const junctionTarget = await mkdtemp(join(tmpdir(), "sdar-secret-store-junction-"));
+    directories.push(junctionTarget);
+    await symlink(junctionTarget, link, "junction");
   }
 }

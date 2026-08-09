@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "frozenContractSha256": "d33623f33ea2dfbb0ad56868d9911af6c7b37b354a0b17a76798646bded9a845",
   "protocolVersion": "2026-07-28",
-  "runtimeMergeCommit": "798656827ea747fb824df2975f8e66135e80fcc2",
+  "runtimeMergeCommit": "abd9db778848303d2966ac9b9e80f75207713109",
   "component": "home-assistant-climate-provider",
   "claim": "Provider Component Conformant",
   "realResourceQualified": false,
@@ -13,11 +13,11 @@
       "status": "pass",
       "evidence": [
         {
-          "assertion": "git merge-base --is-ancestor 798656827ea747fb824df2975f8e66135e80fcc2 HEAD",
+          "assertion": "git merge-base --is-ancestor abd9db778848303d2966ac9b9e80f75207713109 HEAD",
           "files": [
             {
               "path": "apps/home-assistant-climate-provider/src/manifest.ts",
-              "sha256": "1657a8332c8cec694ff69451fadbd70c856504d39babf3bbc526c4d5ef9e086c"
+              "sha256": "0eec8e6b0f511bb5d9842128b873d71a534189f8a63e5f1bd53bbe04b9769f3d"
             }
           ]
         }
@@ -33,11 +33,11 @@
           "files": [
             {
               "path": "apps/home-assistant-climate-provider/src/manifest.ts",
-              "sha256": "1657a8332c8cec694ff69451fadbd70c856504d39babf3bbc526c4d5ef9e086c"
+              "sha256": "0eec8e6b0f511bb5d9842128b873d71a534189f8a63e5f1bd53bbe04b9769f3d"
             },
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }
@@ -53,7 +53,7 @@
           "files": [
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }
@@ -69,7 +69,7 @@
           "files": [
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }
@@ -85,7 +85,7 @@
           "files": [
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }
@@ -101,19 +101,19 @@
           "files": [
             {
               "path": "apps/home-assistant-climate-provider/src/execution.ts",
-              "sha256": "3a5eef59ad1e84c06a05ab1f84d33f68816c73b8c5a75ca200b79ebddeb1fc8d"
+              "sha256": "ed92bdf4f86020c0e2e79a536666bd0b478f4fee0348a72ab35fb0a2b2038037"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/execution.ts",
-              "sha256": "3a5eef59ad1e84c06a05ab1f84d33f68816c73b8c5a75ca200b79ebddeb1fc8d"
+              "sha256": "ed92bdf4f86020c0e2e79a536666bd0b478f4fee0348a72ab35fb0a2b2038037"
             },
             {
               "path": "tests/integration/home-assistant-climate-provider.test.ts",
-              "sha256": "024647bee2e1efcfa3fcf25786bcb67185c6562e6df685d04841c512b5852525"
+              "sha256": "5ff8d38ed19769d456243dc14558a058d24a03aa0734ea9a689bb898ec947cf3"
             },
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }
@@ -129,55 +129,55 @@
           "files": [
             {
               "path": "apps/home-assistant-climate-provider/config/climates.example.json",
-              "sha256": "f1ae1c5354d68d4e124277f0fee2a704f81d8ddb92e29cd05198025ad6f70b30"
+              "sha256": "9ee1e87774ce1947e87326a066c5c7306c93c5d8d365321c997a53a042676352"
             },
             {
               "path": "apps/home-assistant-climate-provider/package.json",
-              "sha256": "918c6771ef5b07dfeebab19e6195337278cfd1b224113a8d4c46bb1d1be1eef5"
+              "sha256": "4df5b625b89716f3a33dd6fc506e0bc0a17cd04f277a35a6fc2811f0db91da86"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/config.ts",
-              "sha256": "064fb2e7af1c6f3155ceee383ee0ef6330a2b98ec7b41953816509cedcead28f"
+              "sha256": "cf33e9e38c311abdb760014882b1ae1e359dc969a302fdfeb1834cf67f478901"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/errors.ts",
-              "sha256": "53222fe5e16cfbabd093d4ecedb6f4cfc3667ebf6898fc6e4d3ccd213807cca9"
+              "sha256": "8317837683de1010588d586729c08be53edc4bc374b6b489c221ffb4f5d4ed9b"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/execution.ts",
-              "sha256": "3a5eef59ad1e84c06a05ab1f84d33f68816c73b8c5a75ca200b79ebddeb1fc8d"
+              "sha256": "ed92bdf4f86020c0e2e79a536666bd0b478f4fee0348a72ab35fb0a2b2038037"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/home-assistant.ts",
-              "sha256": "502d516e1da7d7c0f85e5a274edc1bb8e1640418bde638e32bc0cff22dab54ca"
+              "sha256": "f971212fd78d4c3a0b9aafda0d3f299f08aafdba8e63eada49626e018a297a49"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/main.ts",
-              "sha256": "ed9e98679fa73eb00fdc44d6168d8c4b1612efa1e3c3168caca2573233c83e13"
+              "sha256": "634c51cfab20d6beafc046b6fbfef137afa7544bd67e98bfe564eae20f7b1530"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/manifest.ts",
-              "sha256": "1657a8332c8cec694ff69451fadbd70c856504d39babf3bbc526c4d5ef9e086c"
+              "sha256": "0eec8e6b0f511bb5d9842128b873d71a534189f8a63e5f1bd53bbe04b9769f3d"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/resources.ts",
-              "sha256": "5d7f4e64cb7042215f87a55acc55c4aeb60e99b71bdd69bc6769daa94be6465a"
+              "sha256": "92c3ecf531254324965007fa6f582017f5f1f44294c5beb5d85e528dfc9af24e"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/server.ts",
-              "sha256": "7b7eb3d2c6ad53bc4c6b6ff34319d5bbf37c94446748f28808261b97f1b96aa2"
+              "sha256": "b0d242e37f744c52100933c5e7880c731e194018120dc8d164e3ec5b4e73772b"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/store.ts",
-              "sha256": "b9b445c7148fb592adcd25ded7e798a0333abe42b1d885fe258902550467f5c0"
+              "sha256": "193d328c3d10134c3d326408e876e4499669f4d30ff716d5735c38900ac54da2"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/telemetry.ts",
-              "sha256": "7cb3bdd508bf32c26d316ae9eaad43d8dfb27876627aeb7cdc10886dfd8819c9"
+              "sha256": "4d00d67b9b32b9d35affeceda6ae04827e415ea8220d9bcf2a983366a9545174"
             },
             {
               "path": "apps/home-assistant-climate-provider/src/types.ts",
-              "sha256": "4d1b9f188eb4352db22f49fd22b3397fdac9d33549f66637e40a9f6751bf68ec"
+              "sha256": "ef1242a760fce4db6bc5c18f925f0dba78e0577349a3ca314d58b893d7f9354f"
             }
           ]
         }
@@ -193,7 +193,7 @@
           "files": [
             {
               "path": "tests/integration/home-assistant-climate-runtime-e2e.test.ts",
-              "sha256": "195492d4d2059905dec3802c89a97b3b5857afdb8c1abc6c856e76d2186b9aac"
+              "sha256": "1408777e342f204f9f13fe9deff5f51caa7827ccf0388ce6eae0421a52390ad4"
             }
           ]
         }

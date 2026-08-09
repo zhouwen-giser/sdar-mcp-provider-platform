@@ -1,0 +1,32 @@
+{
+  "evidenceClass": "real",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "passed",
+  "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
+  "deploymentModel": "vendor_managed adapter plus PMS-managed Runtime",
+  "deployments": [
+    {
+      "deploymentId": "ha-climate-deployment",
+      "providerId": "ha-climate-lab",
+      "hostingMode": "vendor_managed",
+      "runtimeDeploymentStatus": "ACTIVE",
+      "readiness": "ready",
+      "desiredRevision": 2,
+      "observedRevision": 22,
+      "effectiveEndpoint": "http://127.0.0.1:18081/mcp"
+    },
+    {
+      "deploymentId": "ha-light-deployment",
+      "providerId": "ha-light-lab",
+      "hostingMode": "vendor_managed",
+      "runtimeDeploymentStatus": "ACTIVE",
+      "readiness": "ready",
+      "desiredRevision": 0,
+      "observedRevision": 40,
+      "effectiveEndpoint": "http://127.0.0.1:18080/mcp"
+    }
+  ],
+  "blockers": [],
+  "noSecrets": true,
+  "noEntityIds": true
+}

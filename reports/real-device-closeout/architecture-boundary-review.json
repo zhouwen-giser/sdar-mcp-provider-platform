@@ -1,0 +1,17 @@
+{
+  "evidenceClass": "static",
+  "status": "passed",
+  "authorityBoundaries": {
+    "pms": "provider/config/deployment/catalog/registry/audit/desired state",
+    "runtime": "Task/Command/Scheduler/Recovery/Notification/MCP data plane",
+    "providerAdapter": "Home Assistant connection/resource facts/side effects/safety",
+    "homeAssistant": "actual climate/light state"
+  },
+  "forbiddenProtocolChanges": [],
+  "runtimeHomeAssistantImports": [],
+  "taskAuthority": "Runtime remains the Task Authority; no tasks/result call was introduced.",
+  "directPmsHomeAssistantCall": false,
+  "directRuntimeHomeAssistantCall": false,
+  "providerAdapterPmsOrRuntimeTaskTableMutation": false,
+  "note": "The source review is scoped to the candidate diff and the live evidence paths; no frozen MCP Tasks or Adapter Proto fields were changed."
+}

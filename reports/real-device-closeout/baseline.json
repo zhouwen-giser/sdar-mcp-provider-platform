@@ -1,0 +1,27 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "branch": "codex/ha-real-device-preparation",
+  "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "startedAt": "2026-08-02T14:03:00.2483723Z",
+  "originMainSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "nodeVersion": "v22.14.0",
+  "pnpmVersion": "11.13.1",
+  "dockerVersion": "Docker version 29.6.1, build 8900f1d",
+  "worktreeClean": true,
+  "baselineCommands": [
+    "git fetch origin",
+    "git checkout main",
+    "git pull --ff-only origin main",
+    "git status --short",
+    "git rev-parse HEAD",
+    "git log -1 --format=fuller"
+  ],
+  "notes": [
+    "git fetch and checkout required elevated filesystem permission for .git metadata; both completed successfully",
+    "Docker CLI reported an unreadable user config warning; Docker version itself was available"
+  ],
+  "evidenceClass": "static",
+  "candidateSha": "e3da358b95782f3bec545b7044dc703c0c8f9b9c",
+  "capturedAt": "2026-08-09T19:52:36.332Z",
+  "statusLines": []
+}

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { format } from "prettier";
 import type { ConfigurationDefinition } from "../model.js";
 import { HomeAssistantClimateConfigurationDefinition } from "../providers/home-assistant.js";
+import { HomeAssistantLightConfigurationDefinition } from "../providers/home-assistant-light.js";
 import { NpcTankProviderConfigurationDefinition } from "../providers/npc-tank.js";
 import { UgvProviderConfigurationDefinition } from "../providers/ugv.js";
 import { RuntimeBootstrapConfigurationDefinition } from "../runtime/bootstrap.js";
@@ -16,6 +17,7 @@ export const PLATFORM_CONFIGURATION_DEFINITIONS: readonly ConfigurationDefinitio
   UgvProviderConfigurationDefinition,
   NpcTankProviderConfigurationDefinition,
   HomeAssistantClimateConfigurationDefinition,
+  HomeAssistantLightConfigurationDefinition,
 ].sort((left, right) => left.definitionId.localeCompare(right.definitionId));
 
 export type ConfigurationArtifactKind = "schema" | "defaults" | "ui";

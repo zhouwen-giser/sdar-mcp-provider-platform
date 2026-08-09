@@ -1,0 +1,40 @@
+{
+  "evidenceClass": "real",
+  "phase": "P5_PMS_PLATFORM_ONBOARDING",
+  "status": "passed",
+  "continuationReport": "reports/real-device-preparation-continuation/pms-live-bootstrap.json",
+  "environment": "home-lab",
+  "providerIds": ["ha-climate-lab", "ha-light-lab"],
+  "resourceIds": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
+  "steps": [
+    { "step": "providerPackageSync", "evidenceClass": "real", "status": "passed" },
+    { "step": "providerTypeCreateOrConfirm", "evidenceClass": "real", "status": "passed" },
+    { "step": "providerCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "resourceCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "bindingCreate", "evidenceClass": "real", "status": "passed" },
+    { "step": "configDraft", "evidenceClass": "real", "status": "passed" },
+    {
+      "step": "configPublish",
+      "evidenceClass": "real",
+      "status": "passed",
+      "publishedRevision": 1
+    },
+    { "step": "runtimeDeploymentCreate", "evidenceClass": "real", "status": "passed" },
+    {
+      "step": "runtimeStartAndReadiness",
+      "evidenceClass": "real",
+      "status": "passed",
+      "statusDetail": "Both Deployments ACTIVE and ready; formal Worker reconcile jobs completed."
+    },
+    { "step": "catalogDiscovery", "evidenceClass": "real", "status": "passed" },
+    {
+      "step": "registrySnapshotPublish",
+      "evidenceClass": "real",
+      "status": "passed",
+      "revision": 3
+    }
+  ],
+  "blockers": [],
+  "noSecrets": true,
+  "noEntityIds": true
+}

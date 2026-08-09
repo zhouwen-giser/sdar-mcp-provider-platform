@@ -56,12 +56,28 @@ export interface InstalledPm2Module {
   readonly custom: new (options: { readonly pm2_home: string }) => InstalledPm2JavascriptApi;
 }
 
+interface Pm2InternalApi extends InstalledPm2JavascriptApi {
+  readonly _conf: {
+    DAEMON_RPC_PORT?: string;
+    DAEMON_PUB_PORT?: string;
+  };
+  readonly Client: {
+    rpc_socket_file?: string;
+    pub_socket_file?: string;
+  };
+}
+
+type Pm2ApiConstructor = new (options: {
+  readonly pm2_home: string;
+  readonly daemon_mode?: boolean;
+}) => Pm2InternalApi;
+
 // Match the official `pm2` programmatic entry point without constructing its global client.
 process.env.PM2_PROGRAMMATIC = "true";
-const installedPm2Api = createRequire(import.meta.url)(
-  "pm2/lib/API.js",
-) as InstalledPm2Module["custom"];
-const defaultInstalledModule: InstalledPm2Module = { custom: installedPm2Api };
+const installedPm2Api = createRequire(import.meta.url)("pm2/lib/API.js") as Pm2ApiConstructor;
+const defaultInstalledModule: InstalledPm2Module = {
+  custom: createPlatformPm2Constructor(installedPm2Api),
+};
 
 export function createPm2JavascriptApi(
   options: Pm2JavascriptApiOptions,
@@ -197,6 +213,27 @@ function validatePm2Home(value: string): string {
     throw new Pm2JavascriptApiBridgeError("PM2_JAVASCRIPT_API_CONFIG_INVALID", "create");
   }
   return resolve(value);
+}
+
+function createPlatformPm2Constructor(
+  constructor: Pm2ApiConstructor,
+): InstalledPm2Module["custom"] {
+  if (process.platform !== "win32") return constructor;
+
+  return class WindowsIsolatedPm2Api extends constructor {
+    constructor(options: { readonly pm2_home: string }) {
+      super({ ...options, daemon_mode: false });
+      const identity = resolve(options.pm2_home)
+        .slice(-32)
+        .replace(/[^A-Za-z0-9_-]/g, "-");
+      const rpc = `\\\\.\\pipe\\sdar-pm2-${identity}-rpc`;
+      const pub = `\\\\.\\pipe\\sdar-pm2-${identity}-pub`;
+      this._conf.DAEMON_RPC_PORT = rpc;
+      this._conf.DAEMON_PUB_PORT = pub;
+      this.Client.rpc_socket_file = rpc;
+      this.Client.pub_socket_file = pub;
+    }
+  };
 }
 
 function operationError(

@@ -1,0 +1,35 @@
+{
+  "evidenceClass": "real",
+  "phase": "P2_CLIMATE_POWER_QUALIFICATION",
+  "status": "partial",
+  "qualifiedOperations": {
+    "climate_get_state": "real_pass",
+    "climate_set_hvac_mode": "real_pass",
+    "climate_set_temperature": "real_pass",
+    "climate_set_power": "real_pass_off_restore_only"
+  },
+  "checks": [
+    {
+      "operation": "climate_set_hvac_mode",
+      "status": "real_pass",
+      "detail": "The latest Registry-backed live three-device run changed the climate HVAC mode and confirmed the Home Assistant observed state before restoring it."
+    },
+    {
+      "operation": "climate_set_temperature",
+      "status": "real_pass",
+      "detail": "The latest Registry-backed live three-device run changed the target temperature, confirmed the observed state, and restored the original target."
+    },
+    {
+      "operation": "climate_set_power",
+      "status": "real_pass_off_restore_only",
+      "detail": "A separately recorded safety-gated recovery run confirmed power-off after the protected inverse-power interval. An independent power-on qualification was not performed."
+    }
+  ],
+  "blockers": ["CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED"],
+  "sourceReports": [
+    "../real-device-preparation/climate-real-qualification.json",
+    "three-device-e2e.json",
+    "climate-restore-recovery.json"
+  ],
+  "safety": "No write was repeated to qualify the unverified power-on direction; the five-minute inverse-power protection was preserved."
+}

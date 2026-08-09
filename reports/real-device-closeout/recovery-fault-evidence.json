@@ -1,0 +1,60 @@
+{
+  "evidenceClass": "mixed",
+  "status": "partial",
+  "realRecovery": {
+    "status": "partial",
+    "checks": [
+      {
+        "scenario": "Light Adapter stopped after completed device tasks",
+        "evidenceClass": "real",
+        "status": "passed",
+        "sideEffectReplay": "none"
+      },
+      {
+        "scenario": "Idle Adapter restart and reconnect without Runtime restart",
+        "evidenceClass": "real",
+        "status": "passed",
+        "runtimeRestartPerformed": false,
+        "sideEffectReplay": "none"
+      },
+      {
+        "scenario": "Adapter restart during an in-flight real Task",
+        "evidenceClass": "unverified",
+        "status": "unverified"
+      },
+      {
+        "scenario": "Runtime restart during an in-flight real Task",
+        "evidenceClass": "unverified",
+        "status": "unverified"
+      },
+      {
+        "scenario": "PMS outage while Runtime Task Authority remains live",
+        "evidenceClass": "unverified",
+        "status": "unverified"
+      },
+      {
+        "scenario": "Home Assistant Entity unavailable or REST 200 without target state",
+        "evidenceClass": "unverified",
+        "status": "unverified"
+      },
+      {
+        "scenario": "Latest read-only Home Assistant preflight after live qualification",
+        "evidenceClass": "real",
+        "status": "passed"
+      }
+    ]
+  },
+  "controlledFaultInjection": {
+    "status": "partial",
+    "report": "reports/real-device-preparation-continuation/fault-injection.json",
+    "controlledTestsPassed": 4,
+    "controlledTestsFailed": 0
+  },
+  "hardGaps": [
+    "real in-flight Adapter restart recovery",
+    "real in-flight Runtime restart recovery",
+    "real PMS outage while Runtime Task Authority remains live",
+    "real REST 200 without observed target state"
+  ],
+  "noAutomaticRetryAfterUncertain": true
+}

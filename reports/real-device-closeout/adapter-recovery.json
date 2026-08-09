@@ -1,0 +1,13 @@
+{
+  "evidenceClass": "mixed",
+  "status": "unverified",
+  "completedRealScenarios": [
+    "Light Adapter stopped after completed device tasks",
+    "Idle Adapter restart and reconnect without Runtime restart",
+    "Latest read-only Home Assistant preflight after live qualification"
+  ],
+  "inFlightScenario": "unverified",
+  "completedTaskReplayNotObserved": true,
+  "inFlightNoReplay": "unverified",
+  "sourceReport": "reports/real-device-preparation-continuation/real-recovery.json"
+}

@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   createPm2JavascriptApi,
@@ -9,20 +11,22 @@ import {
   type Pm2StartOptions,
 } from "../src/index.js";
 
+const testPm2Home = resolve(tmpdir(), "sdar-pm2-test");
+
 describe("createPm2JavascriptApi", () => {
   it("creates an isolated custom PM2 client without mutating PM2_HOME", () => {
     const original = process.env.PM2_HOME;
     const fixture = moduleFixture();
 
-    createPm2JavascriptApi({ pm2Home: "/run/sdar/pm2" }, fixture.module);
+    createPm2JavascriptApi({ pm2Home: testPm2Home }, fixture.module);
 
-    expect(fixture.constructedWith).toEqual([{ pm2_home: "/run/sdar/pm2" }]);
+    expect(fixture.constructedWith).toEqual([{ pm2_home: testPm2Home }]);
     expect(process.env.PM2_HOME).toBe(original);
   });
 
   it("adapts only the required callbacks and makes repeated disconnect safe", async () => {
     const fixture = moduleFixture();
-    const api = createPm2JavascriptApi({ pm2Home: "/run/sdar/pm2" }, fixture.module);
+    const api = createPm2JavascriptApi({ pm2Home: testPm2Home }, fixture.module);
     const options = startOptions();
 
     await connect(api);
@@ -61,7 +65,7 @@ describe("createPm2JavascriptApi", () => {
     const fixture = moduleFixture({
       connectError: new Error("daemon socket /private/pm2.sock rejected"),
     });
-    const api = createPm2JavascriptApi({ pm2Home: "/run/sdar/pm2" }, fixture.module);
+    const api = createPm2JavascriptApi({ pm2Home: testPm2Home }, fixture.module);
 
     const error = await connect(api).catch((reason: unknown) => reason);
 
@@ -80,7 +84,7 @@ describe("createPm2JavascriptApi", () => {
       listError: new Error("environment and daemon path must not escape"),
       stopThrows: true,
     });
-    const api = createPm2JavascriptApi({ pm2Home: "/run/sdar/pm2" }, fixture.module);
+    const api = createPm2JavascriptApi({ pm2Home: testPm2Home }, fixture.module);
     await connect(api);
 
     const listError = await listProcesses(api).catch((reason: unknown) => reason);

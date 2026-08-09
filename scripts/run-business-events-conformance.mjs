@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import process from "node:process";
 
-const directory = process.env.BUSINESS_EVENTS_REPORT_DIR ?? "reports/business-events-profile-v1";
+const directory =
+  process.env.BUSINESS_EVENTS_REPORT_DIR ??
+  (process.argv.includes("--verification")
+    ? resolve(tmpdir(), "sdar-business-events-profile-v1-verification")
+    : "reports/business-events-profile-v1");
 mkdirSync(directory, { recursive: true });
 const commit = command("git", ["rev-parse", "HEAD"]).stdout.trim();
 const ciRun = process.env.GITHUB_RUN_ID ?? "local";
@@ -211,7 +217,13 @@ function write(file, value) {
 }
 
 function command(executable, args, fail = true) {
-  const result = spawnSync(executable, args, { encoding: "utf8", env: process.env });
+  const resolvedExecutable =
+    process.platform === "win32" && executable === "pnpm" ? "pnpm.cmd" : executable;
+  const result = spawnSync(resolvedExecutable, args, {
+    encoding: "utf8",
+    env: process.env,
+    shell: process.platform === "win32",
+  });
   if (result.error !== undefined) throw result.error;
   if (fail && result.status !== 0)
     throw new Error(`${executable} failed with ${String(result.status)}`);

@@ -1,0 +1,56 @@
+{
+  "evidenceClass": "mixed",
+  "status": "ready",
+  "mainMergeReady": true,
+  "codeAndRepositoryBlockers": [],
+  "githubBlockers": [],
+  "blockers": [],
+  "github": {
+    "prNumber": 9,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
+    "prState": "OPEN",
+    "isDraft": false,
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "CLEAN",
+    "checkedCandidateSha": "fe46fc1a3b0361a12f3dee9e9352795f42f69631",
+    "requiredChecks": "passed",
+    "checkRuns": { "passed": 21, "failed": 0, "pending": 0 },
+    "reviewDecision": "none",
+    "independentReviewStatus": "passed",
+    "independentApprovals": 0,
+    "blockingReviewFindings": 0,
+    "unresolvedThreads": 0,
+    "independentReviewFindings": [
+      { "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT", "status": "resolved" },
+      { "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION", "status": "resolved" }
+    ],
+    "branchProtection": {
+      "pattern": "main",
+      "requiresApprovingReviews": true,
+      "requiredApprovingReviewCount": 0,
+      "requiresStatusChecks": true,
+      "requiresConversationResolution": true,
+      "requiresStrictStatusChecks": true,
+      "isAdminEnforced": true,
+      "allowsForcePushes": false,
+      "allowsDeletions": false
+    },
+    "checkedAt": "2026-08-09T19:49:51.5839451Z",
+    "note": "All 21 checks passed at the audited executable candidate SHA. PR #9 is ready for review, the independent code review has zero open blocking findings, and GitHub reports zero unresolved review threads. Any subsequent closeout commits are evidence-only and must receive the same protected checks before merge."
+  },
+  "externalQualificationBlockers": [
+    "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
+  ],
+  "automaticActionsNotTaken": [
+    "merge",
+    "tag",
+    "release",
+    "public deployment",
+    "force push",
+    "branch deletion"
+  ]
+}

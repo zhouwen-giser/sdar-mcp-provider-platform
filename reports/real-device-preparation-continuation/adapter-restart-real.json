@@ -1,0 +1,14 @@
+{
+  "evidenceClass": "real",
+  "phase": "C7_ADAPTER_RESTART_REAL",
+  "status": "passed_idle_reconnect_without_runtime_restart",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T19:44:55.189Z",
+  "providerId": "ha-light-lab",
+  "outageReadiness": "not_ready_during_controlled_adapter_stop",
+  "adapterRecovery": "describe_provider_passed",
+  "automaticReconnectWithoutRuntimeRestart": "passed_idle_only",
+  "inFlightTaskRecovery": "unverified",
+  "sourceReport": "real-recovery.json",
+  "blockers": ["REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED"]
+}

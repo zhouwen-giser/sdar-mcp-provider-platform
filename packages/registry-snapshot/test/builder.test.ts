@@ -97,6 +97,29 @@ describe("Registry Snapshot projection", () => {
       ]),
     ).toThrow("REGISTRY_CATALOG_PROVIDER_MISMATCH");
   });
+
+  it.each([
+    "Authorization: Bearer classified-registry-token",
+    "Internal resource light.private_lab_device",
+    "https://example.test/docs?password=classified",
+  ])(
+    "rejects sensitive values even when injected into public Catalog fields: %s",
+    (description) => {
+      const input = provider("provider-a", ["operate"]);
+      const unsafeTool = { ...input.catalog.document.tools[0], description } as CatalogTool;
+      const unsafe = {
+        ...input,
+        catalog: {
+          ...input.catalog,
+          document: { ...input.catalog.document, tools: [unsafeTool] },
+        },
+      };
+
+      expect(() => buildRegistrySnapshot("production", [unsafe])).toThrow(
+        "CATALOG_SENSITIVE_DATA_REJECTED",
+      );
+    },
+  );
 });
 
 function provider(providerId: string, tools: string[]): RegistryProviderInput {

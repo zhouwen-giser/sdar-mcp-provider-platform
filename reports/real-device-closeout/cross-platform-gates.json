@@ -1,0 +1,15 @@
+{
+  "evidenceClass": "mixed",
+  "status": "passed",
+  "protocolLock": {
+    "windows": "passed",
+    "linux": "passed",
+    "contentDrift": 0,
+    "lineEndingDrift": 0
+  },
+  "providerPackageLinuxSymlink": {
+    "status": "passed",
+    "expectedCode": "PACKAGE_ENTRY_SYMLINK_REJECTED",
+    "actualCode": "PACKAGE_ENTRY_SYMLINK_REJECTED"
+  }
+}

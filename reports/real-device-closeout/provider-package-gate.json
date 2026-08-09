@@ -1,0 +1,20 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "packageIds": ["builtin.home-assistant.climate", "builtin.home-assistant.light"],
+  "providerTypes": ["home_assistant.climate", "home_assistant.light"],
+  "protocolMode": "frozen_v1",
+  "lightOperations": ["light_get_state", "light_set_power", "light_set_brightness"],
+  "climateOperations": [
+    "climate_get_state",
+    "climate_set_hvac_mode",
+    "climate_set_power",
+    "climate_set_temperature"
+  ],
+  "realResourceStatus": "environment-qualified-by-report-only",
+  "qualificationScope": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ]
+}

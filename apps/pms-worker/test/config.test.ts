@@ -76,86 +76,95 @@ describe("PMS Worker production Runtime configuration", () => {
     ).rejects.toThrow(code);
   });
 
-  it("rejects empty, broad-permission and symlink secret files", async () => {
-    const fixture = await secureFixture();
-    const empty = join(fixture.directory, "empty");
-    await writeFile(empty, "", { mode: 0o600 });
-    await expect(
-      loadPmsWorkerConfig({ ...fixture.environment, PMS_DATABASE_URL_FILE: empty }),
-    ).rejects.toThrow("PMS_WORKER_SECRET_FILE_INVALID:PMS_DATABASE_URL_FILE");
+  it.skipIf(process.platform === "win32")(
+    "rejects empty, broad-permission and symlink secret files",
+    async () => {
+      const fixture = await secureFixture();
+      const empty = join(fixture.directory, "empty");
+      await writeFile(empty, "", { mode: 0o600 });
+      await expect(
+        loadPmsWorkerConfig({ ...fixture.environment, PMS_DATABASE_URL_FILE: empty }),
+      ).rejects.toThrow("PMS_WORKER_SECRET_FILE_INVALID:PMS_DATABASE_URL_FILE");
 
-    await chmod(fixture.provisioningCredential, 0o640);
-    await expect(loadPmsWorkerConfig(fixture.environment)).rejects.toThrow(
-      "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE",
-    );
-    await chmod(fixture.provisioningCredential, 0o600);
+      await chmod(fixture.provisioningCredential, 0o640);
+      await expect(loadPmsWorkerConfig(fixture.environment)).rejects.toThrow(
+        "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE",
+      );
+      await chmod(fixture.provisioningCredential, 0o600);
 
-    const link = join(fixture.directory, "credential-link");
-    await symlink(fixture.provisioningCredential, link);
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE: link,
-      }),
-    ).rejects.toThrow("PMS_WORKER_SECRET_FILE_INVALID:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE");
-  });
+      const link = join(fixture.directory, "credential-link");
+      await symlink(fixture.provisioningCredential, link);
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE: link,
+        }),
+      ).rejects.toThrow("PMS_WORKER_SECRET_FILE_INVALID:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE");
+    },
+  );
 
-  it("rejects unsafe and overlapping Runtime roots", async () => {
-    const fixture = await secureFixture();
-    await chmod(fixture.pm2Home, 0o755);
-    await expect(loadPmsWorkerConfig(fixture.environment)).rejects.toThrow(
-      "PMS_WORKER_ROOT_PERMISSIONS:PMS_PM2_HOME",
-    );
-    await chmod(fixture.pm2Home, 0o700);
+  it.skipIf(process.platform === "win32")(
+    "rejects unsafe and overlapping Runtime roots",
+    async () => {
+      const fixture = await secureFixture();
+      await chmod(fixture.pm2Home, 0o755);
+      await expect(loadPmsWorkerConfig(fixture.environment)).rejects.toThrow(
+        "PMS_WORKER_ROOT_PERMISSIONS:PMS_PM2_HOME",
+      );
+      await chmod(fixture.pm2Home, 0o700);
 
-    const rootLink = join(fixture.directory, "release-link");
-    await symlink(fixture.releaseRoot, rootLink, "dir");
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_RUNTIME_RELEASE_ROOT: rootLink,
-      }),
-    ).rejects.toThrow("PMS_WORKER_ROOT_INVALID:PMS_RUNTIME_RELEASE_ROOT");
+      const rootLink = join(fixture.directory, "release-link");
+      await symlink(fixture.releaseRoot, rootLink, "dir");
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_RUNTIME_RELEASE_ROOT: rootLink,
+        }),
+      ).rejects.toThrow("PMS_WORKER_ROOT_INVALID:PMS_RUNTIME_RELEASE_ROOT");
 
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_RUNTIME_CONFIG_CACHE_ROOT: fixture.secretRoot,
-      }),
-    ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_RUNTIME_CONFIG_CACHE_ROOT: fixture.secretRoot,
+        }),
+      ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
 
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: fixture.secretRoot,
-      }),
-    ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: fixture.secretRoot,
+        }),
+      ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
 
-    const nested = join(fixture.releaseRoot, "nested");
-    await mkdir(nested, { mode: 0o700 });
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_RUNTIME_SECRET_ROOT: nested,
-      }),
-    ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
-  });
+      const nested = join(fixture.releaseRoot, "nested");
+      await mkdir(nested, { mode: 0o700 });
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_RUNTIME_SECRET_ROOT: nested,
+        }),
+      ).rejects.toThrow("PMS_WORKER_ROOT_OVERLAP");
+    },
+  );
 
-  it("rejects a secret file under a group-writable parent", async () => {
-    const fixture = await secureFixture();
-    const unsafeParent = join(fixture.directory, "unsafe-parent");
-    const unsafeFile = join(unsafeParent, "database-url");
-    await mkdir(unsafeParent, { mode: 0o700 });
-    await writeFile(unsafeFile, "postgresql://local-only\n", { mode: 0o600 });
-    await chmod(unsafeParent, 0o770);
+  it.skipIf(process.platform === "win32")(
+    "rejects a secret file under a group-writable parent",
+    async () => {
+      const fixture = await secureFixture();
+      const unsafeParent = join(fixture.directory, "unsafe-parent");
+      const unsafeFile = join(unsafeParent, "database-url");
+      await mkdir(unsafeParent, { mode: 0o700 });
+      await writeFile(unsafeFile, "postgresql://local-only\n", { mode: 0o600 });
+      await chmod(unsafeParent, 0o770);
 
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_DATABASE_URL_FILE: unsafeFile,
-      }),
-    ).rejects.toThrow("PMS_WORKER_SECRET_PARENT_UNSAFE:PMS_DATABASE_URL_FILE");
-  });
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_DATABASE_URL_FILE: unsafeFile,
+        }),
+      ).rejects.toThrow("PMS_WORKER_SECRET_PARENT_UNSAFE:PMS_DATABASE_URL_FILE");
+    },
+  );
 
   it("rejects out-of-range and inverted Runtime timing bounds", async () => {
     const fixture = await secureFixture();

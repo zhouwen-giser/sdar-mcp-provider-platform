@@ -16,8 +16,17 @@ const images = Object.freeze({
 const environment = {
   ...process.env,
   RELEASE_ARTIFACT_PROJECT: project,
-  RELEASE_ARTIFACT_FIXTURE_ROOT: fixtureRoot,
 };
+const composeVolumes = Object.freeze({
+  "release-api": `${project}_release-api`,
+  "release-worker": `${project}_release-worker`,
+  "release-runtime-releases": `${project}_release-runtime-releases`,
+  "release-worker-state": `${project}_release-worker-state`,
+});
+const extractedAdapterContainer = `${project}-extracted-adapter`;
+const extractedRuntimeProcess = `${project}-extracted-runtime`;
+const extractedRuntimeDatabaseUrl =
+  "postgresql://sdar:release-ci-only@postgres:5432/sdar?options=-c%20search_path%3Drelease_artifact_runtime";
 
 cleanup();
 try {
@@ -35,7 +44,7 @@ try {
     ]);
   }
   await createFixtures();
-  assignFixtureOwnershipToRuntimeUser();
+  prepareComposeVolumes();
   try {
     command(
       "docker",
@@ -70,6 +79,7 @@ try {
     JSON.parse(command("docker", ["inspect", "--format", "{{json .State.Running}}", workerId])),
     "RELEASE_ARTIFACT_WORKER_EXITED",
   );
+  const extractedRuntime = await verifyExtractedRuntimeWithPm2();
   if (process.env.RELEASE_ARTIFACT_INJECT_FAILURE === "after-compose") {
     throw new Error("RELEASE_ARTIFACT_INJECTED_FAILURE");
   }
@@ -96,12 +106,16 @@ try {
       apiReady: true,
       workerRunning: true,
       webReadyAndApiReachable: true,
+      extractedRuntimePm2Ready: extractedRuntime.ready,
+      extractedRuntimeEntry: extractedRuntime.script,
+      extractedRuntimeCwd: extractedRuntime.cwd,
     },
     policy: {
       dependencySourceMapsAbsent: true,
       licensePolicyPassed: true,
       filesystemWhitelistPassed: true,
       testSecretsAbsent: true,
+      runtimeReleaseBundleSelfContained: true,
     },
     secretsIncluded: false,
   };
@@ -136,6 +150,7 @@ async function createFixtures() {
     secret(resolve(api, "management.token"), "management-ci-token"),
     secret(resolve(api, "runtime.token"), "runtime-ci-token"),
     secret(resolve(worker, "database-url"), "postgresql://sdar:release-ci-only@postgres:5432/sdar"),
+    secret(resolve(worker, "runtime-database-url"), extractedRuntimeDatabaseUrl),
     secret(
       resolve(worker, "provisioning.json"),
       JSON.stringify({
@@ -187,12 +202,6 @@ async function createFixtures() {
       ],
     }),
   );
-  const extraction = `${project}-runtime-extract`;
-  command("docker", ["create", "--name", extraction, images.runtime]);
-  for (const directory of ["dist", "proto", "migrations"]) {
-    command("docker", ["cp", `${extraction}:/app/${directory}/.`, resolve(release, directory)]);
-  }
-  command("docker", ["rm", extraction]);
   await writeFile(
     resolve(fixtureRoot, "runtime-releases", "runtime-releases.json"),
     `${JSON.stringify({
@@ -201,6 +210,178 @@ async function createFixtures() {
     })}\n`,
     { mode: 0o600 },
   );
+}
+
+async function verifyExtractedRuntimeWithPm2() {
+  composeExec("postgres", [
+    "psql",
+    "-U",
+    "sdar",
+    "-d",
+    "sdar",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-c",
+    "CREATE SCHEMA release_artifact_runtime",
+  ]);
+  command("docker", [
+    "run",
+    "--rm",
+    "--network",
+    `${project}_default`,
+    "--volume",
+    `${composeVolumes["release-runtime-releases"]}:/opt/sdar/runtime-releases:ro`,
+    "--volume",
+    `${composeVolumes["release-worker"]}:/run/release/worker:ro`,
+    "--workdir",
+    "/opt/sdar/runtime-releases/2.0.0-rc.1",
+    "--env",
+    "RUNTIME_ENV=test",
+    "--env",
+    "DATABASE_URL_FILE=/run/release/worker/runtime-database-url",
+    "--env",
+    "PROVIDER_ID=release-ci-provider",
+    "--entrypoint",
+    "node",
+    images.runtime,
+    "dist/apps/runtime/src/migrate.js",
+  ]);
+  command("docker", [
+    "run",
+    "--detach",
+    "--name",
+    extractedAdapterContainer,
+    "--network",
+    `${project}_default`,
+    "--env",
+    "ADAPTER_HOST=0.0.0.0",
+    "--env",
+    "ADAPTER_PORT=7001",
+    "--env",
+    "PROVIDER_ID=release-ci-provider",
+    "--env",
+    "LOG_LEVEL=error",
+    "--entrypoint",
+    "node",
+    images.runtime,
+    "/app/dist/examples/mock-adapter-typescript/src/main.js",
+  ]);
+
+  const runtimeEntry = "/opt/sdar/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js";
+  const runtimeCwd = "/opt/sdar/runtime-releases/2.0.0-rc.1";
+  const start = String.raw`
+const pm2=require("pm2");
+const options={
+  name:${JSON.stringify(extractedRuntimeProcess)},
+  script:${JSON.stringify(runtimeEntry)},
+  cwd:${JSON.stringify(runtimeCwd)},
+  exec_mode:"fork",
+  instances:1,
+  autorestart:false,
+  env:{
+    PATH:process.env.PATH,
+    RUNTIME_ENV:"test",
+    HOST:"127.0.0.1",
+    PORT:"18095",
+    PROVIDER_ID:"release-ci-provider",
+    DATABASE_URL_FILE:"/run/release/worker/runtime-database-url",
+    ADAPTER_ENDPOINT:${JSON.stringify(`${extractedAdapterContainer}:7001`)},
+    ADAPTER_TLS_MODE:"disabled",
+    AUTH_MODE:"trusted_headers",
+    LOG_LEVEL:"error",
+    OTEL_ENABLED:"false",
+    BUSINESS_EVENTS_ENABLED:"false",
+    PROVIDER_TELEMETRY_INGRESS_ENABLED:"false"
+  }
+};
+pm2.connect(error=>{
+  if(error)throw error;
+  pm2.start(options,error=>{
+    pm2.disconnect();
+    if(error)throw error;
+  });
+});`;
+  compose("exec", "-T", "-e", "PM2_HOME=/var/lib/sdar/pm2", "pms-worker", "node", "-e", start);
+  try {
+    let ready = false;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      try {
+        const output = compose(
+          "exec",
+          "-T",
+          "pms-worker",
+          "node",
+          "-e",
+          'fetch("http://127.0.0.1:18095/health/ready").then(r=>{if(!r.ok)process.exit(1);console.log("READY")}).catch(()=>process.exit(1))',
+        );
+        if (output.includes("READY")) {
+          ready = true;
+          break;
+        }
+      } catch {
+        // The exact extracted runtime has a bounded initialization window.
+      }
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 500));
+    }
+    assert(ready, "EXTRACTED_RUNTIME_PM2_READINESS_FAILED");
+    const describe = String.raw`
+const pm2=require("pm2");
+pm2.connect(error=>{
+  if(error)throw error;
+  pm2.describe(${JSON.stringify(extractedRuntimeProcess)},(error,items)=>{
+    pm2.disconnect();
+    if(error)throw error;
+    const item=items?.[0];
+    console.log(JSON.stringify({
+      state:item?.pm2_env?.status,
+      script:item?.pm2_env?.pm_exec_path,
+      cwd:item?.pm2_env?.pm_cwd
+    }));
+  });
+});`;
+    const descriptionOutput = compose(
+      "exec",
+      "-T",
+      "-e",
+      "PM2_HOME=/var/lib/sdar/pm2",
+      "pms-worker",
+      "node",
+      "-e",
+      describe,
+    );
+    const description = JSON.parse(lines(descriptionOutput).at(-1) ?? "{}");
+    assert(description.state === "online", "EXTRACTED_RUNTIME_PM2_NOT_ONLINE");
+    assert(description.script === runtimeEntry, "EXTRACTED_RUNTIME_ENTRY_MISMATCH");
+    assert(description.cwd === runtimeCwd, "EXTRACTED_RUNTIME_CWD_MISMATCH");
+    return { ready: true, script: description.script, cwd: description.cwd };
+  } finally {
+    const remove = String.raw`
+const pm2=require("pm2");
+pm2.connect(error=>{
+  if(error)process.exit(0);
+  pm2.delete(${JSON.stringify(extractedRuntimeProcess)},()=>pm2.disconnect());
+});`;
+    command(
+      "docker",
+      [
+        "compose",
+        "-p",
+        project,
+        "-f",
+        "deploy/release-compose.yml",
+        "exec",
+        "-T",
+        "-e",
+        "PM2_HOME=/var/lib/sdar/pm2",
+        "pms-worker",
+        "node",
+        "-e",
+        remove,
+      ],
+      { env: environment, ignoreFailure: true },
+    );
+    command("docker", ["rm", "--force", extractedAdapterContainer], { ignoreFailure: true });
+  }
 }
 
 function validateImage(name, image, inspection) {
@@ -263,7 +444,7 @@ async function secret(path, value) {
   await writeFile(path, value, { mode: 0o600 });
 }
 
-function assignFixtureOwnershipToRuntimeUser() {
+function prepareComposeVolumes() {
   const uid = command("docker", [
     "run",
     "--rm",
@@ -283,20 +464,57 @@ function assignFixtureOwnershipToRuntimeUser() {
     "node",
   ]).trim();
   assert(/^[1-9][0-9]*$/.test(uid) && /^[1-9][0-9]*$/.test(gid), "RUNTIME_USER_INVALID");
-  command("docker", [
-    "run",
-    "--rm",
-    "--user",
-    "0:0",
-    "--volume",
-    `${fixtureRoot}:/fixtures`,
-    "--entrypoint",
-    "chown",
-    images.runtime,
-    "-R",
-    `${uid}:${gid}`,
-    "/fixtures",
-  ]);
+  const sources = Object.freeze({
+    "release-api": "api",
+    "release-worker": "worker",
+    "release-runtime-releases": "runtime-releases",
+    "release-worker-state": "worker-state",
+  });
+  for (const [composeName, source] of Object.entries(sources)) {
+    const volume = composeVolumes[composeName];
+    command("docker", [
+      "volume",
+      "create",
+      "--label",
+      `com.docker.compose.project=${project}`,
+      "--label",
+      `com.docker.compose.volume=${composeName}`,
+      volume,
+    ]);
+    command("docker", [
+      "run",
+      "--rm",
+      "--user",
+      "0:0",
+      "--volume",
+      `${resolve(fixtureRoot, source)}:/source:ro`,
+      "--volume",
+      `${volume}:/target`,
+      "--entrypoint",
+      "sh",
+      images.runtime,
+      "-eu",
+      "-c",
+      `cp -a /source/. /target/ && chown -R ${uid}:${gid} /target && find /target -type d -exec chmod 0700 {} + && find /target -type f -exec chmod 0600 {} +`,
+    ]);
+    if (composeName === "release-runtime-releases") {
+      const releaseDirectories = ["dist", "proto", "migrations", "node_modules"];
+      command("docker", [
+        "run",
+        "--rm",
+        "--user",
+        "0:0",
+        "--volume",
+        `${volume}:/target`,
+        "--entrypoint",
+        "sh",
+        images.runtime,
+        "-eu",
+        "-c",
+        `release=/target/2.0.0-rc.1; mkdir -p "$release"; for directory in ${releaseDirectories.join(" ")}; do cp -a "/app/$directory" "$release/$directory"; done; chown -R ${uid}:${gid} /target; find /target -type d -exec chmod 0700 {} +; find /target -type f -exec chmod 0600 {} +`,
+      ]);
+    }
+  }
 }
 
 function compose(...args) {
@@ -312,6 +530,7 @@ function composeExec(service, args) {
 }
 
 function cleanup() {
+  command("docker", ["rm", "--force", extractedAdapterContainer], { ignoreFailure: true });
   command("node", ["scripts/cleanup-release-artifact-ci.mjs"], {
     env: environment,
     ignoreFailure: true,

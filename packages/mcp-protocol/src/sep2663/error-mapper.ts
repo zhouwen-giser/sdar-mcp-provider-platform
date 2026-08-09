@@ -13,6 +13,17 @@ const requestErrorKinds = new Set<RuntimeError["kind"]>([
 export function mapFrozenRuntimeError(error: unknown): FrozenProtocolError {
   if (error instanceof FrozenProtocolError) return error;
   if (!isRuntimeError(error)) {
+    const reasonCode = error instanceof Error ? error.message : undefined;
+    if (reasonCode !== undefined && frozenRequestReasonCodes.has(reasonCode)) {
+      return new FrozenProtocolError(
+        FrozenErrorCode.InvalidParams,
+        "Invalid request parameters.",
+        400,
+        {
+          reasonCode,
+        },
+      );
+    }
     return new FrozenProtocolError(FrozenErrorCode.InternalError, "Internal error", 500);
   }
   if (requestErrorKinds.has(error.kind)) {
@@ -35,3 +46,10 @@ export function mapFrozenRuntimeError(error: unknown): FrozenProtocolError {
     reasonCode: "BUSINESS_ERROR_CHANNEL_VIOLATION",
   });
 }
+
+const frozenRequestReasonCodes = new Set([
+  "IDEMPOTENCY_KEY_CONFLICT",
+  "INPUT_ANSWER_CONFLICT",
+  "TASK_NOT_FOUND",
+  "TASK_NOT_TERMINAL",
+]);

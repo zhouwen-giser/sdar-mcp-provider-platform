@@ -1,0 +1,26 @@
+{
+  "evidenceClass": "static",
+  "phase": "C2_CROSS_PLATFORM_GATES",
+  "lockPath": "protocol/protocol-baseline.lock.json",
+  "lockModified": false,
+  "windows": {
+    "runtime": "Windows PowerShell",
+    "coreAutocrlf": "true",
+    "files": 38,
+    "status": "passed",
+    "output": "Protocol lock verified for 38 files"
+  },
+  "linux": {
+    "runtime": "node:22-bookworm Docker container",
+    "platform": "linux",
+    "files": 38,
+    "status": "passed",
+    "output": "Protocol lock verified for 38 files"
+  },
+  "lineEndingPolicy": {
+    "protocolAndProtoText": "LF",
+    "windowsWorkingTreeObserved": "LF",
+    "contentDrift": 0
+  },
+  "noSecrets": true
+}

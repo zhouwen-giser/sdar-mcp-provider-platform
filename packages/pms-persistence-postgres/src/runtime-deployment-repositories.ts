@@ -67,6 +67,16 @@ export class PostgresRuntimeDeploymentRepository {
     return result.rows.map(deploymentFromRow);
   }
 
+  async listByEnvironment(environment: string): Promise<readonly RuntimeDeployment[]> {
+    const result = await this.db.query<RuntimeDeploymentRow>(
+      `${runtimeDeploymentSelect()}
+        WHERE environment=$1
+        ORDER BY provider_id,deployment_id`,
+      [environment],
+    );
+    return result.rows.map(deploymentFromRow);
+  }
+
   async listByProviderPaged(options: {
     readonly providerId: string;
     readonly environment?: string;

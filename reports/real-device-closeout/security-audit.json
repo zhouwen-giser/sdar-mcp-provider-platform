@@ -1,0 +1,22 @@
+{
+  "evidenceClass": "contract",
+  "status": "passed",
+  "dependencyAudit": "The current lockfile was audited after the dependency overrides: 0 high or critical, 6 moderate, and 1 low advisory.",
+  "dependencyAuditRefresh": "blocked_by_approval_policy_to_avoid_external_dependency_inventory_disclosure",
+  "sensitiveReportScan": {
+    "filesScanned": 93,
+    "tokenMatchCount": 0,
+    "entityIdMatchCount": 0,
+    "authorizationHeaderCount": 0,
+    "tokenFileReadForScanOnly": true,
+    "entityIdsReadForScanOnly": true
+  },
+  "realWriteGate": {
+    "climate": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID; climate_set_power additionally requires ALLOW_CLIMATE_POWER_TEST=YES",
+    "light": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
+    "invalidGateBehavior": "read-only; new real writes fail closed"
+  },
+  "noAuthorizationHeaderInReports": true,
+  "noTokenInReports": true,
+  "noEntityIdInReports": true
+}

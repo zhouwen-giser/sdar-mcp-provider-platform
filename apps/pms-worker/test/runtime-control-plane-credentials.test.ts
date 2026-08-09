@@ -74,11 +74,13 @@ describe("RuntimeControlPlaneCredentialResolver", () => {
     const token = await fixture.add("provider-a", "deployment-a", "instance-a", "safe-value");
     const resolver = await RuntimeControlPlaneCredentialResolver.create(fixture.root);
 
-    await chmod(token, 0o644);
-    await expect(resolveDefault(resolver)).rejects.toThrow(
-      "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_TOKEN_PERMISSIONS",
-    );
-    await chmod(token, 0o600);
+    if (process.platform !== "win32") {
+      await chmod(token, 0o644);
+      await expect(resolveDefault(resolver)).rejects.toThrow(
+        "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_TOKEN_PERMISSIONS",
+      );
+      await chmod(token, 0o600);
+    }
 
     await writeFile(token, "", { mode: 0o600 });
     await expect(resolveDefault(resolver)).rejects.toThrow(
@@ -93,10 +95,15 @@ describe("RuntimeControlPlaneCredentialResolver", () => {
     );
     await rm(duplicate);
 
-    const target = join(fixture.directory, "target-token");
-    await writeFile(target, "safe-value", { mode: 0o600 });
     await rm(token);
-    await symlink(target, token);
+    const target = join(fixture.directory, "target-token");
+    if (process.platform === "win32") {
+      await mkdir(target);
+      await symlink(target, token, "junction");
+    } else {
+      await writeFile(target, "safe-value", { mode: 0o600 });
+      await symlink(target, token);
+    }
     await expect(resolveDefault(resolver)).rejects.toThrow(
       "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_TOKEN_INVALID",
     );
@@ -107,20 +114,22 @@ describe("RuntimeControlPlaneCredentialResolver", () => {
     const token = await fixture.add("provider-a", "deployment-a", "instance-a", "safe-value");
     const instanceParent = join(token, "..");
     const resolver = await RuntimeControlPlaneCredentialResolver.create(fixture.root);
-    await chmod(instanceParent, 0o770);
-    await expect(resolveDefault(resolver)).rejects.toThrow(
-      "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_PARENT_UNSAFE",
-    );
-    await chmod(instanceParent, 0o700);
+    if (process.platform !== "win32") {
+      await chmod(instanceParent, 0o770);
+      await expect(resolveDefault(resolver)).rejects.toThrow(
+        "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_PARENT_UNSAFE",
+      );
+      await chmod(instanceParent, 0o700);
 
-    await chmod(fixture.root, 0o750);
-    await expect(RuntimeControlPlaneCredentialResolver.create(fixture.root)).rejects.toThrow(
-      "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT_PERMISSIONS",
-    );
-    await chmod(fixture.root, 0o700);
+      await chmod(fixture.root, 0o750);
+      await expect(RuntimeControlPlaneCredentialResolver.create(fixture.root)).rejects.toThrow(
+        "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT_PERMISSIONS",
+      );
+      await chmod(fixture.root, 0o700);
+    }
 
     const linkRoot = join(fixture.directory, "credential-root-link");
-    await symlink(fixture.root, linkRoot, "dir");
+    await symlink(fixture.root, linkRoot, process.platform === "win32" ? "junction" : "dir");
     await expect(RuntimeControlPlaneCredentialResolver.create(linkRoot)).rejects.toThrow(
       "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT_INVALID",
     );
@@ -130,7 +139,11 @@ describe("RuntimeControlPlaneCredentialResolver", () => {
     const fixture = await credentialFixture();
     const secretValue = "do-not-disclose-this-value";
     const token = await fixture.add("provider-a", "deployment-a", "instance-a", secretValue);
-    await chmod(token, 0o644);
+    if (process.platform === "win32") {
+      await writeFile(token, "", { mode: 0o600 });
+    } else {
+      await chmod(token, 0o644);
+    }
     const resolver = await RuntimeControlPlaneCredentialResolver.create(fixture.root);
 
     const error = await resolveDefault(resolver).catch((reason: unknown) => reason);

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { canonicalize } from "../../catalog-manager/src/index.js";
+import { assertCatalogPublicData, canonicalize } from "../../catalog-manager/src/index.js";
 import {
   type RegistryProviderInput,
   type RegistryProviderProjection,
@@ -37,6 +37,7 @@ export function buildRegistrySnapshot(
   });
   providers.sort((left, right) => left.providerId.localeCompare(right.providerId));
   const document = { environment, providers };
+  assertCatalogPublicData(document);
   const canonicalJson = canonicalize(document);
   return {
     document,

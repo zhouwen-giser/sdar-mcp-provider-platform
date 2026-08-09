@@ -16,6 +16,8 @@ import {
 } from "../../packages/vehicle-provider-core/src/index.js";
 import { NpcTankProviderRuntime } from "../../apps/npc-tank-provider-adapter/src/runtime.js";
 import { NpcTankProviderServer } from "../../apps/npc-tank-provider-adapter/src/server.js";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 const cleanup: (() => Promise<void> | void)[] = [];
@@ -59,8 +61,11 @@ describe("NPC Tank Adapter gRPC E2E", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
-        navigationReportPath: "/tmp/npc-tank-grpc-navigation.json",
-        eoScanReportPath: "/tmp/npc-tank-grpc-eo.json",
+        navigationReportPath: resolve(
+          tmpdir(),
+          `sdar-npc-tank-${String(process.pid)}-grpc-navigation.json`,
+        ),
+        eoScanReportPath: resolve(tmpdir(), `sdar-npc-tank-${String(process.pid)}-grpc-eo.json`),
       },
       store,
       ingress,

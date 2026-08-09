@@ -1,0 +1,20 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "environment": "home-lab",
+  "branch": "codex/ha-real-device-preparation",
+  "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "previousCandidateSha": "cd68a91d129ba50a240837c79526ebdfdfbfa05c",
+  "candidateHeadSha": "6d738a0727d02e865548753bde4373ce4d04fc13",
+  "originMainSha": "abd9db778848303d2966ac9b9e80f75207713109",
+  "startedAt": "2026-08-02T22:26:44.3004653Z",
+  "worktreeClean": true,
+  "nodeVersion": "v22.14.0",
+  "pnpmVersion": "11.13.1",
+  "dockerVersion": "29.6.1",
+  "candidateProtected": true,
+  "baseAndPreviousCandidateAncestors": true,
+  "notes": [
+    "Continuation uses the existing protected candidate lineage; no reset, discard, or reimplementation was performed.",
+    "Remote credentials and Home Assistant secrets are excluded from this artifact."
+  ]
+}

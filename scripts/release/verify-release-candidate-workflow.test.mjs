@@ -3,10 +3,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { assertReleaseCandidateWorkflow } from "./verify-release-candidate-workflow.mjs";
 
-const source = readFileSync(".github/workflows/release-candidate.yml", "utf8");
+const rawSource = readFileSync(".github/workflows/release-candidate.yml", "utf8");
+const source = rawSource.replace(/\r\n?/g, "\n");
 
 test("accepts the exact release candidate workflow", () => {
   assert.doesNotThrow(() => assertReleaseCandidateWorkflow(source));
+});
+
+test("accepts a CRLF workflow without changing its semantics", () => {
+  assert.doesNotThrow(() => assertReleaseCandidateWorkflow(rawSource));
 });
 
 test("rejects a missing required job", () => {
@@ -31,6 +36,14 @@ test("rejects an incomplete metadata dependency graph", () => {
     "      - release-artifacts",
   );
   assert.throws(() => assertReleaseCandidateWorkflow(changed), /RELEASE_WORKFLOW_NEEDS_INVALID/);
+});
+
+test("requires Linux provider regression to depend on the exact-candidate Windows gate", () => {
+  const changed = source.replace("    needs: provider-packages-windows\n", "");
+  assert.throws(
+    () => assertReleaseCandidateWorkflow(changed),
+    /RELEASE_WORKFLOW_WINDOWS_PROVIDER_GATE_MISSING/,
+  );
 });
 
 test("rejects publication from qualification", () => {

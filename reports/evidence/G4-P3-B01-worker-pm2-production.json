@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "taskId": "G4-P3-B01",
-  "generatedAt": "2026-07-29T05:22:29.329Z",
+  "generatedAt": "2026-08-09T19:10:38.570Z",
   "resourceClassification": {
     "postgres": "real local PostgreSQL",
     "pm2": "real repository-pinned JavaScript API",
@@ -27,65 +27,99 @@
   "assertions": {
     "identityMismatchNeverActive": true,
     "activeAfterCatalogRegistry": true,
-    "registryConsumerEndpoint": "http://127.0.0.1:18080/mcp",
+    "registryConsumerEndpoint": "http://127.0.0.1:19080/mcp",
     "runtimeSigkillRecovered": true,
     "adapterUnavailableNotActive": true,
     "workerStopPreservedRuntime": true,
     "pmsApiStopPreservedRuntime": true,
     "workerRestartResumedReconcile": true,
     "configRevisionSingleRestart": true,
-    "staleFenceRejected": true
+    "staleFenceRejected": true,
+    "twoDeploymentsActive": true,
+    "crossTokenConfigPullRejected": true,
+    "crossTokenConfigWatchRejected": true,
+    "crossTokenConfigAckRejected": true,
+    "crossTokenRegisterRejected": true,
+    "crossTokenHeartbeatRejected": true,
+    "missingCredentialDidNotStartPm2": true,
+    "identityMappingSurvivedApiWorkerRestart": true,
+    "isolatedRuntimeUnaffectedByPeerCrashOrRotation": true
   },
   "timeline": [
     {
+      "action": "missing_instance_credential",
+      "outcome": "pm2_not_started",
+      "at": "2026-08-09T19:08:27.351Z"
+    },
+    {
       "action": "identity_mismatch",
-      "outcome": "DEGRADED",
-      "at": "2026-07-29T05:21:55.948Z"
+      "outcome": "FAILED",
+      "at": "2026-08-09T19:08:32.384Z"
     },
     {
       "action": "initial_convergence",
       "outcome": "ACTIVE",
-      "at": "2026-07-29T05:21:58.175Z"
+      "at": "2026-08-09T19:08:50.198Z"
+    },
+    {
+      "action": "isolated_convergence",
+      "outcome": "ACTIVE",
+      "at": "2026-08-09T19:08:50.198Z"
+    },
+    {
+      "action": "cross_token_isolation",
+      "outcome": "ten_requests_rejected",
+      "at": "2026-08-09T19:08:50.281Z"
     },
     {
       "action": "runtime_sigkill",
-      "outcome": "DEGRADED",
-      "at": "2026-07-29T05:22:03.511Z"
+      "outcome": "PM2_AUTO_RECOVERED",
+      "at": "2026-08-09T19:08:57.951Z"
     },
     {
       "action": "runtime_recovered",
       "outcome": "ACTIVE",
-      "at": "2026-07-29T05:22:05.133Z"
+      "at": "2026-08-09T19:09:06.722Z"
     },
     {
       "action": "adapter_unavailable",
       "outcome": "DEGRADED",
-      "at": "2026-07-29T05:22:15.291Z"
+      "at": "2026-08-09T19:09:11.907Z"
     },
     {
       "action": "adapter_recovered",
       "outcome": "ACTIVE",
-      "at": "2026-07-29T05:22:20.627Z"
+      "at": "2026-08-09T19:09:19.046Z"
     },
     {
       "action": "worker_stopped",
       "outcome": "runtime_online",
-      "at": "2026-07-29T05:22:22.156Z"
+      "at": "2026-08-09T19:09:24.655Z"
     },
     {
       "action": "pms_api_stopped",
       "outcome": "runtime_online",
-      "at": "2026-07-29T05:22:23.673Z"
+      "at": "2026-08-09T19:09:27.159Z"
+    },
+    {
+      "action": "cross_token_isolation",
+      "outcome": "ten_requests_rejected",
+      "at": "2026-08-09T19:09:28.450Z"
     },
     {
       "action": "config_revision_changed",
       "outcome": "one_controlled_restart",
-      "at": "2026-07-29T05:22:29.278Z"
+      "at": "2026-08-09T19:10:22.046Z"
+    },
+    {
+      "action": "instance_token_rotated",
+      "outcome": "isolated_runtime_unchanged",
+      "at": "2026-08-09T19:10:35.141Z"
     },
     {
       "action": "stale_fence",
       "outcome": "rejected",
-      "at": "2026-07-29T05:22:29.328Z"
+      "at": "2026-08-09T19:10:38.569Z"
     }
   ]
 }

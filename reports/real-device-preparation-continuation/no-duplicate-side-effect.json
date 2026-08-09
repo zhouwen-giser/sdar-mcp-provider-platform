@@ -1,0 +1,23 @@
+{
+  "evidenceClass": "real",
+  "phase": "C7_NO_DUPLICATE_SIDE_EFFECT",
+  "status": "passed_scoped_bounded_light_runs",
+  "environment": "home-lab",
+  "observedAt": "2026-08-03T01:06:31.297Z",
+  "providerId": "ha-light-lab",
+  "resources": [
+    {
+      "resourceId": "living-room-main-light",
+      "status": "restored",
+      "sideEffectReplay": "none_observed"
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "status": "restored",
+      "sideEffectReplay": "none_observed"
+    }
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "sourceReport": "light-restore-recovery.json"
+}

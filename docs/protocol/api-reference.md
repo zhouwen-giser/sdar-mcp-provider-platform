@@ -76,19 +76,18 @@ x-sdar-admin-token: replace-with-secret-admin-token
 
 支持的方法：
 
-| 方法标识符                                | 中文说明                                                    |
-| ----------------------------------------- | ----------------------------------------------------------- |
-| `initialize`                              | 初始化 MCP 协议和能力协商                                   |
-| `tools/list`                              | 列出由 Provider Manifest 生成的 Tool（工具）                |
-| `tools/call`                              | 调用一个 Tool；可能直接返回结果或创建 Task                  |
-| `tasks/get`                               | 获取 Task 当前快照和最多 100 条最新 Observation（观察记录） |
-| `tasks/result`                            | 获取终态 Task 结果                                          |
-| `tasks/cancel`                            | 持久化取消请求；确认接收不代表 Task 已终止                  |
-| `tasks/update`                            | 回答 Task Input Request（输入请求）并返回命令接收凭据       |
-| `tasks/observations`                      | 分页读取 Task Observation 历史                              |
-| `io.sdar/taskExecution/checkAvailability` | 批量查询 Operation（操作）可用性                            |
-| `io.sdar/taskExecution/tasks/pause`       | 请求暂停支持该能力的 Task                                   |
-| `io.sdar/taskExecution/tasks/resume`      | 请求恢复支持该能力的 Task                                   |
+| 方法标识符                                 | 中文说明                                                    |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| `server/discover`                          | 返回冻结版本、能力和扩展发现信息                            |
+| `tools/list`                               | 列出由 Provider Manifest 生成的 Tool（工具）                |
+| `tools/call`                               | 调用一个 Tool；可能直接返回结果或创建 Task                  |
+| `tasks/get`                                | 获取 Task 当前快照和最多 100 条最新 Observation（观察记录） |
+| `tasks/cancel`                             | 持久化取消请求；确认接收不代表 Task 已终止                  |
+| `tasks/update`                             | 回答 Task Input Request（输入请求）并返回命令接收凭据       |
+| `io.sdar/taskExecution/tasks/observations` | 分页读取 Task Observation 历史                              |
+| `io.sdar/taskExecution/checkAvailability`  | 批量查询 Operation（操作）可用性                            |
+| `io.sdar/taskExecution/tasks/pause`        | 请求暂停支持该能力的 Task                                   |
+| `io.sdar/taskExecution/tasks/resume`       | 请求恢复支持该能力的 Task                                   |
 
 ### 2.1 通用调用样例
 
@@ -112,7 +111,7 @@ Authorization: Bearer replace-with-jwt
 `x-sdar-subject`（主体）、`x-sdar-tenant`（租户）；`AUTH_MODE=jwt_hs256` 时使用
 `Authorization: Bearer ...`（持有者令牌）。
 
-### 2.2 `tasks/observations`（Observation 分页）
+### 2.2 `io.sdar/taskExecution/tasks/observations`（Observation 分页）
 
 输入字段：
 
@@ -128,7 +127,7 @@ Authorization: Bearer replace-with-jwt
 {
   "jsonrpc": "2.0",
   "id": "observations-page-1",
-  "method": "tasks/observations",
+  "method": "io.sdar/taskExecution/tasks/observations",
   "params": {
     "taskId": "21e967e4-2e47-4ad1-95dd-ea7bc6d991a2",
     "limit": 2
@@ -177,7 +176,7 @@ Authorization: Bearer replace-with-jwt
 {
   "jsonrpc": "2.0",
   "id": "observations-page-2",
-  "method": "tasks/observations",
+  "method": "io.sdar/taskExecution/tasks/observations",
   "params": {
     "taskId": "21e967e4-2e47-4ad1-95dd-ea7bc6d991a2",
     "cursor": "11",

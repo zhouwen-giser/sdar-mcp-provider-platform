@@ -1,0 +1,138 @@
+{
+  "evidenceClass": "real",
+  "phase": "C6_REGISTRY_ENDPOINT_REAL_E2E",
+  "integrationRunId": "smpp-registry-e2e-6b93336e-2f11-4638-80f0-d8b75fb3c7a7",
+  "environment": "home-lab",
+  "startedAt": "2026-08-03T19:46:02.768Z",
+  "completedAt": "2026-08-03T19:46:03.555Z",
+  "status": "passed",
+  "pms": {
+    "apiBaseUrl": "http://127.0.0.1:8090",
+    "registry": {
+      "environment": "home-lab",
+      "revision": 3,
+      "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+      "providerIds": ["ha-climate-lab", "ha-light-lab"],
+      "providerCount": 2,
+      "containsSecretKeys": false,
+      "containsEntityIdKeys": false
+    },
+    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+    "bootstrapConsistency": {
+      "status": 200,
+      "sameChecksum": true,
+      "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\""
+    }
+  },
+  "runtimes": [
+    {
+      "providerId": "ha-climate-lab",
+      "endpoint": "http://127.0.0.1:18081/mcp",
+      "protocolSurface": {
+        "initialize": "not_applicable_to_frozen_runtime_surface",
+        "discovery": {
+          "status": 200,
+          "resultType": "complete",
+          "hasError": false
+        },
+        "toolsCall": "used_for_real_state_read"
+      },
+      "toolsList": {
+        "status": 200,
+        "toolNames": [
+          "climate_get_state",
+          "climate_set_power",
+          "climate_set_hvac_mode",
+          "climate_set_temperature"
+        ]
+      },
+      "mcpReadCount": 1
+    },
+    {
+      "providerId": "ha-light-lab",
+      "endpoint": "http://127.0.0.1:18080/mcp",
+      "protocolSurface": {
+        "initialize": "not_applicable_to_frozen_runtime_surface",
+        "discovery": {
+          "status": 200,
+          "resultType": "complete",
+          "hasError": false
+        },
+        "toolsCall": "used_for_real_state_read"
+      },
+      "toolsList": {
+        "status": 200,
+        "toolNames": ["light_get_state", "light_set_power", "light_set_brightness"]
+      },
+      "mcpReadCount": 2
+    }
+  ],
+  "resources": [
+    {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "runtimeTaskId": null,
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": null,
+      "state": {
+        "resourceId": "living-room-air-conditioner",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": "off",
+        "targetTemperature": 23,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T19:44:29.157337+00:00"
+      },
+      "status": 200
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "runtimeTaskId": null,
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": null,
+      "state": {
+        "resourceId": "living-room-main-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T19:44:40.414404+00:00"
+      },
+      "status": 200
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "runtimeTaskId": null,
+      "adapterExternalExecutionId": null,
+      "homeAssistantObservationId": null,
+      "state": {
+        "resourceId": "living-room-aux-light",
+        "power": "off",
+        "reachable": true,
+        "hvacMode": null,
+        "targetTemperature": null,
+        "currentTemperature": null,
+        "brightnessPercent": null,
+        "observedAt": "2026-08-03T19:44:49.616898+00:00"
+      },
+      "status": 200
+    }
+  ],
+  "activeTasks": 0,
+  "uncertainTasks": 0,
+  "errors": [],
+  "protocolQualification": {
+    "status": "passed",
+    "requiredMethods": ["server/discover", "tools/list", "tools/call"],
+    "initialize": "not_applicable_to_frozen_runtime_surface"
+  },
+  "sourceReport": "registry-backed-e2e.json",
+  "functionalGate": true,
+  "noSecrets": true,
+  "noEntityIds": true
+}

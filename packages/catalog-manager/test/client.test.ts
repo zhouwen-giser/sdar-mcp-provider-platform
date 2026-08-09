@@ -128,6 +128,44 @@ describe("CatalogDiscoveryClient", () => {
     expect(request?.body).toMatchObject({ jsonrpc: "2.0", method: "server/discover" });
     expect(firstCall?.[1]).toBeInstanceOf(AbortSignal);
   });
+
+  it("projects only frozen public discovery capabilities", async () => {
+    const response = discoveryResponse();
+    const result = response.result as Record<string, unknown>;
+    const capabilities = result.capabilities as Record<string, unknown>;
+    const extensions = capabilities.extensions as Record<string, unknown>;
+    extensions["io.sdar/privateDiagnostics"] = {
+      note: "Bearer catalog-private-value",
+    };
+
+    const catalog = await new CatalogDiscoveryClient(
+      transport([response, toolsResponse([tool("one")])]),
+    ).discover();
+
+    expect(catalog.discovery.capabilities).toEqual({
+      tools: {},
+      extensions: {
+        "io.modelcontextprotocol/tasks": {},
+        "io.sdar/taskExecution": { profileVersion: "1.0", taskNotifications: true },
+      },
+    });
+    expect(catalog.canonicalJson).not.toContain("catalog-private-value");
+  });
+
+  it.each([
+    "Authorization: Bearer classified-catalog-token",
+    "Internal resource climate.private_lab_device",
+    "https://example.test/docs?token=classified",
+  ])("rejects sensitive values in otherwise public Tool fields: %s", async (description) => {
+    const candidate = tool("unsafe");
+    candidate.description = description;
+
+    await expect(
+      new CatalogDiscoveryClient(
+        transport([discoveryResponse(), toolsResponse([candidate])]),
+      ).discover(),
+    ).rejects.toMatchObject({ code: "CATALOG_SENSITIVE_DATA", retryable: false });
+  });
 });
 
 function transport(responses: unknown[]): CatalogDiscoveryTransport & {

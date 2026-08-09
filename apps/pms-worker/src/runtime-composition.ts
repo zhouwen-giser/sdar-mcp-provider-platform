@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import * as grpc from "@grpc/grpc-js";
 import type { Pool } from "pg";
+import { GrpcAdapterGateway } from "../../../packages/adapter-protocol/src/index.js";
 import {
   RuntimeDeploymentReconciler,
   parseRuntimeConfigProfileLocator,
   toConfigurationTarget,
   verifyProviderIdentity,
+  type RuntimeReconcileAdapterTlsConfiguration,
+  type RuntimeReconcileProviderIdentityVerification,
   type RuntimeReconcileHealthResult,
   type RuntimeReconcileInstance,
   type RuntimeReconcileStore,
@@ -43,6 +48,7 @@ import {
   type RuntimeDeploymentSnapshot,
   type RuntimeDeploymentStatus,
   type RuntimeInfrastructureInstanceTarget,
+  type RuntimePortRange,
 } from "../../../packages/runtime-deployment/src/index.js";
 import {
   CatalogRegistryPublicationPhase,
@@ -52,13 +58,31 @@ import {
 import type { PmsWorkerConfig } from "./config.js";
 import { requirePmsWorkerRuntimeConfig } from "./config.js";
 import { PeriodicReconcileScheduler } from "./reconcile-scheduler.js";
+import { buildRegistryProviderProjection } from "./registry-provider-projection.js";
 import { createRuntimeDatabasePreparation } from "./runtime-database-preparation-job.js";
 import {
   RuntimeControlPlaneCredentialResolver,
   type RuntimeControlPlaneCredentialResolverContract,
 } from "./runtime-control-plane-credentials.js";
 
-const RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
+const DEFAULT_RUNTIME_PORT_RANGE = runtimePortRange(18_080, 19_079);
+const RUNTIME_BOOTSTRAP_RESERVED_KEYS = new Set([
+  "PORT",
+  "PROVIDER_ID",
+  "DATABASE_URL",
+  "DATABASE_URL_FILE",
+  "RUNTIME_DEPLOYMENT_ID",
+  "RUNTIME_INSTANCE_ID",
+  "OTEL_SERVICE_INSTANCE_ID",
+  "PMS_RUNTIME_CONFIG_URL",
+  "PMS_RUNTIME_CONFIG_TOKEN_FILE",
+  "PMS_RUNTIME_CONFIG_CACHE_PATH",
+  "PMS_RUNTIME_REGISTRATION_URL",
+  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
+  "PMS_BOOTSTRAP_CHECKSUM",
+  "PMS_CONFIG_REVISION",
+  "PMS_RUNTIME_VERSION",
+]);
 
 export interface ProductionRuntimeComposition {
   readonly reconciler: CatalogRegistryReconcileDecorator;
@@ -97,6 +121,10 @@ export async function createProductionRuntimeComposition(
   config: PmsWorkerConfig,
 ): Promise<ProductionRuntimeComposition> {
   const runtime = requirePmsWorkerRuntimeConfig(config);
+  const portRange =
+    runtime.runtimePortRange === undefined
+      ? DEFAULT_RUNTIME_PORT_RANGE
+      : runtimePortRange(runtime.runtimePortRange.start, runtime.runtimePortRange.end);
   const manifest = await loadRuntimeReleaseManifest(runtime.runtimeReleaseRoot);
   const releaseResolver = new RuntimeReleaseResolver(runtime.runtimeReleaseRoot, manifest);
   const api = createPm2JavascriptApi({ pm2Home: runtime.pm2Home });
@@ -118,6 +146,7 @@ export async function createProductionRuntimeComposition(
       runtime.runtimeConfigCacheRoot,
       runtime.runtimeControlPlaneUrl,
       runtimeControlPlaneCredentialResolver,
+      portRange,
     );
     const repositories = Object.freeze({
       runtimeDeployments: new PostgresRuntimeDeploymentRepository(pool),
@@ -159,15 +188,19 @@ export async function createProductionRuntimeComposition(
       repositories.catalogSnapshots,
       {
         providers: async ({ deployment, endpoint, catalog }) =>
-          Object.freeze([
-            Object.freeze({
-              providerId: deployment.providerId,
-              serverId: (await store.ensureInstance(deployment, 0)).target.instanceId,
-              protocolMode: "frozen_v1" as const,
-              effectiveEndpoint: endpoint.replace(/\/mcp$/, ""),
-              catalog,
+          buildRegistryProviderProjection({
+            deployment,
+            endpoint,
+            catalog,
+            deployments: await repositories.runtimeDeployments.listByEnvironment(
+              String(deployment.environment),
+            ),
+            activeCatalog: (providerId) => repositories.catalogSnapshots.active(providerId),
+            ensureInstance: async (candidate) => ({
+              instanceId: (await store.ensureInstance(candidate, 0)).target.instanceId,
             }),
-          ]),
+            runtimeBaseUrl: (candidate) => store.runtimeBaseUrl(candidate),
+          }),
       },
       repositories.registrySnapshots,
       {
@@ -226,7 +259,7 @@ export async function createProductionRuntimeComposition(
         if (closed) return;
         closed = true;
         try {
-          api.disconnect();
+          await processManager.close();
         } finally {
           await databaseResources?.close();
         }
@@ -248,6 +281,7 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
   readonly #processes: PostgresRuntimeProcessRepository;
   readonly #allocator: PostgresRuntimeInstanceAllocator;
   readonly #configuration: PostgresConfigurationRepository;
+  readonly #portRange: RuntimePortRange;
 
   constructor(
     private readonly pool: Pool,
@@ -255,11 +289,13 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
     private readonly configCacheRoot: string,
     private readonly runtimeControlPlaneUrl: string,
     private readonly runtimeControlPlaneCredentialResolver: RuntimeControlPlaneCredentialResolverContract,
+    portRange: RuntimePortRange,
   ) {
     this.#deployments = new PostgresRuntimeDeploymentRepository(pool);
     this.#processes = new PostgresRuntimeProcessRepository(pool);
     this.#allocator = new PostgresRuntimeInstanceAllocator(pool);
     this.#configuration = new PostgresConfigurationRepository(pool);
+    this.#portRange = portRange;
   }
 
   getDeployment(providerId: string, deploymentId: string) {
@@ -345,7 +381,7 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
       providerId: String(deployment.providerId),
       deploymentId: String(deployment.deploymentId),
       ordinal,
-      portRange: RUNTIME_PORT_RANGE,
+      portRange: this.#portRange,
     });
     const locator = parseRuntimeConfigProfileLocator(String(deployment.configProfileId));
     const revision = await this.#configuration.getPublishedRevision(toConfigurationTarget(locator));
@@ -447,21 +483,75 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
   }
 }
 
-class RuntimeProviderIdentityVerifier {
-  verify(input: {
+interface ProviderManifestGateway {
+  describeProvider(): Promise<{ readonly providerId: string }>;
+  close(): void;
+}
+
+export class RuntimeProviderIdentityVerifier {
+  constructor(
+    private readonly gateway: (input: {
+      readonly endpoint: string;
+      readonly providerId: string;
+      readonly timeoutMs: number;
+      readonly credentials: grpc.ChannelCredentials;
+    }) => ProviderManifestGateway = (input) => new GrpcAdapterGateway(input),
+    private readonly credentials: (
+      input: RuntimeReconcileAdapterTlsConfiguration,
+    ) => grpc.ChannelCredentials = adapterIdentityCredentials,
+  ) {}
+
+  async verify(input: {
     readonly expectedProviderId: string;
     readonly target: RuntimeInfrastructureInstanceTarget;
-  }) {
-    // Runtime readiness is fail-closed until DescribeProvider has been observed. This verifies
-    // the independent PMS/bootstrap relation; the health probe supplies the adapter relation.
-    return Promise.resolve(
-      verifyProviderIdentity(input.expectedProviderId, {
-        bootstrapProviderId: input.target.providerId,
-        adapterManifestProviderId: input.target.providerId,
+    readonly bootstrapProviderId: string;
+    readonly adapterEndpoint: string;
+    readonly adapterTls: RuntimeReconcileAdapterTlsConfiguration;
+    readonly timeoutMs: number;
+    readonly signal: AbortSignal;
+  }): Promise<RuntimeReconcileProviderIdentityVerification> {
+    assertProviderIdentitySignal(input.signal);
+    const gateway = this.gateway({
+      endpoint: input.adapterEndpoint,
+      providerId: input.expectedProviderId,
+      timeoutMs: input.timeoutMs,
+      credentials: this.credentials(input.adapterTls),
+    });
+    try {
+      const manifest = await gateway.describeProvider();
+      assertProviderIdentitySignal(input.signal);
+      return verifyProviderIdentity(input.expectedProviderId, {
+        bootstrapProviderId: input.bootstrapProviderId,
+        adapterManifestProviderId: manifest.providerId,
         describeProviderObserved: true,
-      }),
-    );
+      });
+    } catch {
+      assertProviderIdentitySignal(input.signal);
+      return Object.freeze({
+        valid: false,
+        reasonCode: "PROVIDER_IDENTITY_UNAVAILABLE",
+        mismatchRelations: Object.freeze([]),
+        retryable: true,
+      });
+    } finally {
+      gateway.close();
+    }
   }
+}
+
+function adapterIdentityCredentials(
+  input: RuntimeReconcileAdapterTlsConfiguration,
+): grpc.ChannelCredentials {
+  if (input.mode === "disabled") return grpc.credentials.createInsecure();
+  return grpc.credentials.createSsl(
+    readFileSync(input.caPath),
+    readFileSync(input.keyPath),
+    readFileSync(input.certPath),
+  );
+}
+
+function assertProviderIdentitySignal(signal: AbortSignal): void {
+  if (signal.aborted) throw new Error("RUNTIME_PROVIDER_IDENTITY_ABORTED");
 }
 
 class PostgresRuntimeLifecycleStore implements RuntimeLifecycleStore {
@@ -572,13 +662,15 @@ function targetFrom(
   });
 }
 
-function primitiveConfiguration(
+export function primitiveConfiguration(
   content: Readonly<Record<string, unknown>>,
 ): Readonly<Record<string, string | number | boolean>> {
   return Object.freeze(
     Object.fromEntries(
-      Object.entries(content).filter((entry): entry is [string, string | number | boolean] =>
-        ["string", "number", "boolean"].includes(typeof entry[1]),
+      Object.entries(content).filter(
+        (entry): entry is [string, string | number | boolean] =>
+          !RUNTIME_BOOTSTRAP_RESERVED_KEYS.has(entry[0]) &&
+          ["string", "number", "boolean"].includes(typeof entry[1]),
       ),
     ),
   );
