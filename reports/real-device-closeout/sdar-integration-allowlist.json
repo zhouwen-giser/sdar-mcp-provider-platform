@@ -45,17 +45,17 @@
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_get_state",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_set_hvac_mode",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_set_temperature",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-light-lab",
@@ -87,17 +87,17 @@
       {
         "providerId": "ha-climate-lab",
         "operation": "climate_get_state",
-        "qualification": "real_pass"
+        "qualification": "real_pass_time_scoped"
       },
       {
         "providerId": "ha-climate-lab",
         "operation": "climate_set_hvac_mode",
-        "qualification": "real_pass"
+        "qualification": "real_pass_time_scoped"
       },
       {
         "providerId": "ha-climate-lab",
         "operation": "climate_set_temperature",
-        "qualification": "real_pass"
+        "qualification": "real_pass_time_scoped"
       },
       {
         "providerId": "ha-light-lab",

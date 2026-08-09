@@ -101,15 +101,15 @@
           "files": [
             {
               "path": "apps/home-assistant-light-provider/src/execution/execution-engine.ts",
-              "sha256": "20009050595783f3f344459231f04a9db176e71c58ac9b7c738fa1b8fd21d608"
+              "sha256": "ba346a7c30679eaaf6bd3eeed656b7b785e0a09d7b962377e82e65d289319906"
             },
             {
               "path": "apps/home-assistant-light-provider/src/execution/snapshots.ts",
-              "sha256": "6a1ea6e408e52f92611ea7b7a42ca1bbfe0c52302ae163d99fb1559f37d417af"
+              "sha256": "023f185585b5cd094914e93797ff0eac784495df23da80d90912393e3b62835c"
             },
             {
               "path": "tests/integration/home-assistant-light-provider.test.ts",
-              "sha256": "ec00403cbcb09b2ab1f5b10bdee6fd652c55f616deac6d8710a21e8867e8fa9e"
+              "sha256": "ac71f8295927c3f956583d8f4e295dc9aa393adb674bccc5402ef153d6400b0b"
             },
             {
               "path": "tests/integration/home-assistant-light-runtime-e2e.test.ts",
@@ -137,19 +137,19 @@
             },
             {
               "path": "apps/home-assistant-light-provider/src/errors.ts",
-              "sha256": "d042ee733c74faa3ad4790fa521ded1237e78b0dd81b4b29c67a502123de39ca"
+              "sha256": "262af428e510f4b31c63af5979acf224a4343dbd5b08b4541c9cb8bd47cf7172"
             },
             {
               "path": "apps/home-assistant-light-provider/src/execution/execution-engine.ts",
-              "sha256": "20009050595783f3f344459231f04a9db176e71c58ac9b7c738fa1b8fd21d608"
+              "sha256": "ba346a7c30679eaaf6bd3eeed656b7b785e0a09d7b962377e82e65d289319906"
             },
             {
               "path": "apps/home-assistant-light-provider/src/execution/snapshots.ts",
-              "sha256": "6a1ea6e408e52f92611ea7b7a42ca1bbfe0c52302ae163d99fb1559f37d417af"
+              "sha256": "023f185585b5cd094914e93797ff0eac784495df23da80d90912393e3b62835c"
             },
             {
               "path": "apps/home-assistant-light-provider/src/home-assistant.ts",
-              "sha256": "450f61a5bc514296ce33e78839a17d539c52467b0882fea0189be3cf50566dbd"
+              "sha256": "18c20482f1c7bfca76cef8270038953c916462247bf0123667d5156f3d93239c"
             },
             {
               "path": "apps/home-assistant-light-provider/src/main.ts",
@@ -169,7 +169,7 @@
             },
             {
               "path": "apps/home-assistant-light-provider/src/store.ts",
-              "sha256": "00338cf07dd73308ef6b77f5011629e6f91631b0b72fe47f655cfe0555a6b672"
+              "sha256": "feedeef970860c59c3bf264d408ddf58be0d65a756fdc3886bee0153bf2d3674"
             },
             {
               "path": "apps/home-assistant-light-provider/src/telemetry.ts",
@@ -177,7 +177,7 @@
             },
             {
               "path": "apps/home-assistant-light-provider/src/types.ts",
-              "sha256": "6e35ce19a68431d14511e807118b1946e1bf16b383f9500b7beceaf218682012"
+              "sha256": "2ec48000def9af3186e0851dc3cd335c74e64eb116d7045cd0d25a38ca403839"
             }
           ]
         }

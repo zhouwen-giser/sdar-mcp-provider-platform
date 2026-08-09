@@ -7,6 +7,7 @@
     "Latest read-only Home Assistant preflight after live qualification"
   ],
   "inFlightScenario": "unverified",
-  "noAutomaticReplayAfterRestart": false,
+  "completedTaskReplayNotObserved": true,
+  "inFlightNoReplay": "unverified",
   "sourceReport": "reports/real-device-preparation-continuation/real-recovery.json"
 }

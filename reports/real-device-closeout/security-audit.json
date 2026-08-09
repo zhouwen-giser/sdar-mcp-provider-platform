@@ -12,7 +12,7 @@
     "entityIdsReadForScanOnly": true
   },
   "realWriteGate": {
-    "climate": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
+    "climate": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID; climate_set_power additionally requires ALLOW_CLIMATE_POWER_TEST=YES",
     "light": "requires ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES and non-empty REAL_DEVICE_TEST_RUN_ID",
     "invalidGateBehavior": "read-only; new real writes fail closed"
   },

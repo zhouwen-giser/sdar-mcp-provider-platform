@@ -1,8 +1,9 @@
 {
   "evidenceClass": "mixed",
-  "status": "no_code_findings",
+  "status": "independent_review_pending_or_blocked",
   "blockingMajorCount": 0,
   "codeAndRepositoryFindings": [],
+  "repositoryGateBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
   "realQualificationFindings": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
@@ -10,5 +11,5 @@
     "REAL_FAULT_INJECTION_UNVERIFIED",
     "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED"
   ],
-  "note": "Real-device qualification gaps are kept separate from candidate code review findings."
+  "note": "Independent-review findings, repository gates, and real-device qualification gaps are reported separately; an empty self-review list is not treated as independent approval."
 }

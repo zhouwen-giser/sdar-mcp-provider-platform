@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "3dad82697a7262a8d241eb6328b96aca058d3d0a",
+  "smppCandidateSha": "bfd45184e6229b55c42cf32320718c53a359ed5f",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registryRevision": 3,
@@ -64,17 +64,17 @@
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_get_state",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_set_hvac_mode",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-climate-lab",
       "operation": "climate_set_temperature",
-      "qualification": "real_pass"
+      "qualification": "real_pass_time_scoped"
     },
     {
       "providerId": "ha-light-lab",
@@ -103,8 +103,12 @@
   "externalResourceBlockers": [],
   "mainMergeReady": false,
   "mainMergeReadinessStatus": "not_ready",
-  "mainMergeBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
-  "mainMergeCodeBlockers": [],
+  "mainMergeBlockers": [
+    "WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION",
+    "PULL_REQUEST_IS_DRAFT",
+    "INDEPENDENT_REVIEW_NOT_PASSED"
+  ],
+  "mainMergeCodeBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
   "mainMergeGithubBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
   "mainMergeGithub": {
     "prNumber": 9,

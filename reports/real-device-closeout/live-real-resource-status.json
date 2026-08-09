@@ -41,7 +41,7 @@
     }
   },
   "qualifiedOperations": {
-    "climate_get_state": "real_pass",
+    "climate_get_state": "real_pass_time_scoped",
     "climate_set_hvac_mode": "real_pass_time_scoped",
     "climate_set_temperature": "real_pass_time_scoped",
     "climate_set_power": "real_pass_off_restore_only",

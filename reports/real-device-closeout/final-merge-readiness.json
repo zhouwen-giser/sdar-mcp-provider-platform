@@ -2,9 +2,13 @@
   "evidenceClass": "mixed",
   "status": "not_ready",
   "mainMergeReady": false,
-  "codeAndRepositoryBlockers": [],
+  "codeAndRepositoryBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
   "githubBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
-  "blockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
+  "blockers": [
+    "WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION",
+    "PULL_REQUEST_IS_DRAFT",
+    "INDEPENDENT_REVIEW_NOT_PASSED"
+  ],
   "github": {
     "prNumber": 9,
     "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",

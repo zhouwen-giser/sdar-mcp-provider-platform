@@ -1,8 +1,42 @@
 {
   "evidenceClass": "real",
-  "status": "passed_scoped_bounded_light_runs",
-  "sourceReport": "reports/real-device-preparation-continuation/no-duplicate-side-effect.json",
-  "scenarios": [],
+  "status": "passed_scoped_bounded_real_tasks",
+  "sourceReports": [
+    "reports/real-device-preparation/climate-real-qualification.json",
+    "reports/real-device-preparation/light-real-qualification.json",
+    "reports/real-device-preparation-continuation/no-duplicate-side-effect.json"
+  ],
+  "scenarios": [
+    {
+      "providerId": "ha-climate-lab",
+      "resourceId": "living-room-air-conditioner",
+      "operation": "climate_set_hvac_mode",
+      "runtimeTaskId": "5a0d4806-92e9-4c70-a84a-c6d61644a00e",
+      "sameArgumentsSameTask": true,
+      "sameTaskDifferentArgumentsRejected": true,
+      "sourceReport": "reports/real-device-preparation/climate-real-qualification.json"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-main-light",
+      "operation": "light_set_power",
+      "runtimeTaskId": "ef41e7e4-adee-4c0c-81ba-3212471ceca3",
+      "sameArgumentsSameTask": true,
+      "sameTaskDifferentArgumentsRejected": true,
+      "sourceReport": "reports/real-device-preparation/light-real-qualification.json"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "resourceId": "living-room-aux-light",
+      "operation": "light_set_power",
+      "runtimeTaskId": "4fa30353-fbf6-4209-8c62-0326d3a32840",
+      "sameArgumentsSameTask": true,
+      "sameTaskDifferentArgumentsRejected": true,
+      "sourceReport": "reports/real-device-preparation/light-real-qualification.json"
+    }
+  ],
+  "scope": "same idempotency key retry and conflicting-argument rejection on three executed Tasks",
+  "inFlightCrashReplay": "unverified_real_device",
   "activeTasks": 0,
   "uncertainTasks": 0,
   "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",

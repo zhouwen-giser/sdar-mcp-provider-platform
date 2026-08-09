@@ -1,7 +1,7 @@
 {
   "evidenceClass": "mixed",
   "status": "passed_code_and_repository_gates",
-  "generatedAt": "2026-08-09T15:50:41.2173132Z",
+  "generatedAt": "2026-08-09T19:49:51.5839451Z",
   "commands": {
     "installFrozen": {
       "command": "pnpm install --frozen-lockfile",
@@ -229,27 +229,37 @@
     "trackedSensitiveValueScan": "passed_0_exact_matches",
     "onlineDependencyAuditRefresh": "blocked_by_approval_policy",
     "mergeReadinessRegression": "8/8 passed",
-    "githubChecksAtCandidateSha": "20/20 passed"
+    "githubChecksAtCandidateSha": "21/21 passed"
   },
   "github": {
     "prNumber": 9,
     "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
     "prState": "OPEN",
-    "isDraft": true,
+    "isDraft": false,
     "mergeable": "MERGEABLE",
     "mergeStateStatus": "CLEAN",
-    "checkedCandidateSha": "b7bad1139aac75a5131caf5280dff9551c3ef665",
+    "checkedCandidateSha": "fe46fc1a3b0361a12f3dee9e9352795f42f69631",
     "requiredChecks": "passed",
     "checkRuns": {
-      "passed": 20,
+      "passed": 21,
       "failed": 0,
       "pending": 0
     },
     "reviewDecision": "none",
-    "independentReviewStatus": "not_received",
+    "independentReviewStatus": "passed",
     "independentApprovals": 0,
     "blockingReviewFindings": 0,
     "unresolvedThreads": 0,
+    "independentReviewFindings": [
+      {
+        "id": "PMS_ADAPTER_IDENTITY_MTLS_SUPPORT",
+        "status": "resolved"
+      },
+      {
+        "id": "DURABLE_STATE_CROSS_FIELD_VALIDATION",
+        "status": "resolved"
+      }
+    ],
     "branchProtection": {
       "pattern": "main",
       "requiresApprovingReviews": true,
@@ -261,8 +271,8 @@
       "allowsForcePushes": false,
       "allowsDeletions": false
     },
-    "checkedAt": "2026-08-09T15:50:41.2173132Z",
-    "note": "All checks passed at the audited candidate SHA. The PR remains Draft and has no independent review, so main merge readiness is false."
+    "checkedAt": "2026-08-09T19:49:51.5839451Z",
+    "note": "All 21 checks passed at the audited executable candidate SHA. PR #9 is ready for review, the independent code review has zero open blocking findings, and GitHub reports zero unresolved review threads. Any subsequent closeout commits are evidence-only and must receive the same protected checks before merge."
   },
   "hardGateConclusion": "Code and repository gates passed. Functional real-device scope passed. Overall readyForSdarIntegration remains false because real in-flight resilience, real fault injection, PMS-outage Task Authority, and explicit climate power-on qualification are incomplete."
 }
