@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildSdarIntegrationAllowlist,
   describeCurrentPreflight,
+  evaluateMainMergeReadiness,
   hasStateChangedSubscription,
   renderFaultMatrix,
   resolveCurrentRuntimeTaskCounts,
@@ -142,4 +143,47 @@ test("recognizes the current and legacy WebSocket report shapes", () => {
   );
   assert.equal(hasStateChangedSubscription({ ws: { subscribedEventType: "state_changed" } }), true);
   assert.equal(hasStateChangedSubscription({ websocket: {} }), false);
+});
+
+test("keeps a fully checked draft without independent review out of merge-ready state", () => {
+  const result = evaluateMainMergeReadiness([], {
+    requiredChecks: "passed",
+    prState: "OPEN",
+    isDraft: true,
+    independentReviewStatus: "not_received",
+    blockingReviewFindings: 0,
+    unresolvedThreads: 0,
+  });
+
+  assert.equal(result.mainMergeReady, false);
+  assert.deepEqual(result.githubBlockers, [
+    "PULL_REQUEST_IS_DRAFT",
+    "INDEPENDENT_REVIEW_NOT_PASSED",
+  ]);
+});
+
+test("requires clean code, checks, review, and threads together for merge readiness", () => {
+  const github = {
+    requiredChecks: "passed",
+    prState: "OPEN",
+    isDraft: false,
+    independentReviewStatus: "passed",
+    blockingReviewFindings: 0,
+    unresolvedThreads: 0,
+  };
+
+  assert.deepEqual(evaluateMainMergeReadiness([], github), {
+    status: "ready",
+    mainMergeReady: true,
+    codeAndRepositoryBlockers: [],
+    githubBlockers: [],
+    blockers: [],
+  });
+  assert.deepEqual(
+    evaluateMainMergeReadiness(["REPOSITORY_GATE_FAILED"], {
+      ...github,
+      unresolvedThreads: 1,
+    }).blockers,
+    ["REPOSITORY_GATE_FAILED", "UNRESOLVED_REVIEW_THREADS_NOT_CLEARED"],
+  );
 });

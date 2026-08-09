@@ -40,6 +40,37 @@ export function hasStateChangedSubscription(preflight) {
   return websocket?.subscribedEventType === "state_changed";
 }
 
+export function evaluateMainMergeReadiness(codeAndRepositoryBlockers, github) {
+  const githubBlockers = [];
+  if (github?.requiredChecks !== "passed") {
+    githubBlockers.push("GITHUB_REQUIRED_CHECKS_NOT_PASSED");
+  }
+  if (github?.prState !== "OPEN") {
+    githubBlockers.push("PULL_REQUEST_NOT_OPEN");
+  }
+  if (github?.isDraft !== false) {
+    githubBlockers.push("PULL_REQUEST_IS_DRAFT");
+  }
+  if (github?.independentReviewStatus !== "passed") {
+    githubBlockers.push("INDEPENDENT_REVIEW_NOT_PASSED");
+  }
+  if (github?.blockingReviewFindings !== 0) {
+    githubBlockers.push("BLOCKING_REVIEW_FINDINGS_NOT_CLEARED");
+  }
+  if (github?.unresolvedThreads !== 0) {
+    githubBlockers.push("UNRESOLVED_REVIEW_THREADS_NOT_CLEARED");
+  }
+
+  const blockers = [...codeAndRepositoryBlockers, ...githubBlockers];
+  return {
+    status: blockers.length === 0 ? "ready" : "not_ready",
+    mainMergeReady: blockers.length === 0,
+    codeAndRepositoryBlockers: [...codeAndRepositoryBlockers],
+    githubBlockers,
+    blockers,
+  };
+}
+
 export function buildSdarIntegrationAllowlist({
   environment,
   providerEndpoints,

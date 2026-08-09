@@ -6,6 +6,7 @@ import { format, resolveConfig } from "prettier";
 import {
   buildSdarIntegrationAllowlist,
   describeCurrentPreflight,
+  evaluateMainMergeReadiness,
   hasStateChangedSubscription,
   renderFaultMatrix,
   resolveCurrentRuntimeTaskCounts,
@@ -421,19 +422,10 @@ const mergeCodeBlockers = unique([
   ...(currentRuntimeTaskCounts.active === 0 ? [] : ["ACTIVE_RUNTIME_TASKS_REMAIN"]),
   ...(currentRuntimeTaskCounts.uncertain === 0 ? [] : ["UNCERTAIN_RUNTIME_TASKS_REMAIN"]),
 ]);
+const mergeReadinessEvaluation = evaluateMainMergeReadiness(mergeCodeBlockers, verification.github);
 const mainMergeReadiness = {
   evidenceClass: "mixed",
-  status:
-    mergeCodeBlockers.length === 0 &&
-    verification.github?.requiredChecks === "passed" &&
-    verification.github?.blockingReviewFindings === 0
-      ? "ready"
-      : "not_ready",
-  mainMergeReady:
-    mergeCodeBlockers.length === 0 &&
-    verification.github?.requiredChecks === "passed" &&
-    verification.github?.blockingReviewFindings === 0,
-  codeAndRepositoryBlockers: mergeCodeBlockers,
+  ...mergeReadinessEvaluation,
   github: verification.github ?? {
     requiredChecks: "not_verified",
     blockingReviewFindings: null,
@@ -673,7 +665,7 @@ const finalHandoff = {
   externalResourceBlockers: sdarIntegrationAllowlist.externalResourceBlockers,
   mainMergeReady: mainMergeReadiness.mainMergeReady,
   mainMergeReadinessStatus: mainMergeReadiness.status,
-  mainMergeBlockers: mainMergeReadiness.codeAndRepositoryBlockers,
+  mainMergeBlockers: mainMergeReadiness.blockers,
   blockingIssues: blockers,
   noSecrets: true,
   noEntityIds: true,
@@ -688,10 +680,10 @@ const knownLimitations = [
   "Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed.",
   "The Worker PM2 gate initially reproduced three identical Mock Adapter connection-refused attempts; a bounded startup-race fix was then verified with the full production-path gate.",
   "The first current verify:v2 attempt failed before container work because sandboxed Docker access was denied; the exact command subsequently passed with authorized Docker access.",
-  ...(verification.github?.requiredChecks === "passed"
+  ...(mainMergeReadiness.mainMergeReady
     ? []
     : [
-        "Protected-branch GitHub checks and review state are not yet fully passed; main merge readiness remains independent and false until they are.",
+        "Protected-branch GitHub checks, Draft state, independent review, or review-thread state are not fully passed; main merge readiness remains false.",
       ]),
   "No SDAR Agent Runtime was connected, and no public deployment, merge, tag, or release was performed.",
 ];
