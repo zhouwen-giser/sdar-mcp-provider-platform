@@ -1,11 +1,11 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-71aee8ac-d47d-455d-b6ff-5fee9be72a2d",
+  "integrationRunId": "smpp-registry-e2e-bb46d5cb-c4e2-4c8a-93c3-f94f76fb6955",
   "environment": "home-lab",
-  "startedAt": "2026-08-09T16:10:37.661Z",
-  "completedAt": "2026-08-09T16:10:38.735Z",
-  "status": "blocked_resource_unavailable",
+  "startedAt": "2026-08-09T16:18:27.120Z",
+  "completedAt": "2026-08-09T16:18:28.034Z",
+  "status": "passed",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
     "registry": {
@@ -86,13 +86,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-main-light",
-        "power": "unavailable",
-        "reachable": false,
+        "power": "on",
+        "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": null,
-        "observedAt": "2026-08-09T14:48:01.567976+00:00"
+        "brightnessPercent": 100,
+        "observedAt": "2026-08-09T16:14:11.583771+00:00"
       },
       "status": 200
     },
@@ -110,7 +110,7 @@
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-09T15:38:59.633049+00:00"
+        "observedAt": "2026-08-09T16:14:05.349370+00:00"
       },
       "status": 200
     }
@@ -125,7 +125,7 @@
   },
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "errors": ["HOME_ASSISTANT_RESOURCE_UNAVAILABLE"],
+  "errors": [],
   "protocolQualification": {
     "status": "passed",
     "requiredMethods": ["server/discover", "tools/list", "tools/call"],
