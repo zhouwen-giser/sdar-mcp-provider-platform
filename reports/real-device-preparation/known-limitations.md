@@ -8,7 +8,7 @@
 - Windows PM2 pidusage diagnostics report WMI ManagementException errors although Runtime readiness and task paths passed.
 - The Worker PM2 gate initially reproduced three identical Mock Adapter connection-refused attempts; a bounded startup-race fix was then verified with the full production-path gate.
 - The first current verify:v2 attempt failed before container work because sandboxed Docker access was denied; the exact command subsequently passed with authorized Docker access.
-- Protected-branch GitHub checks and review state are not yet fully passed; main merge readiness remains independent and false until they are.
+- Protected-branch checks passed 20/20 at the audited candidate SHA, but PR #9 remains Draft and has no independent Review/Approval; `mainMergeReady` remains false.
 - No SDAR Agent Runtime was connected, and no public deployment, merge, tag, or release was performed.
 
 Readiness: **NO**.

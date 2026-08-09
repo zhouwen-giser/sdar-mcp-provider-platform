@@ -103,7 +103,7 @@
   "externalResourceBlockers": [],
   "mainMergeReady": false,
   "mainMergeReadinessStatus": "not_ready",
-  "mainMergeBlockers": [],
+  "mainMergeBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
   "blockingIssues": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",

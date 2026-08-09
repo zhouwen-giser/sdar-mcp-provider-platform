@@ -3,10 +3,25 @@
   "status": "not_ready",
   "mainMergeReady": false,
   "codeAndRepositoryBlockers": [],
+  "githubBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
+  "blockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
   "github": {
-    "requiredChecks": "not_checked_before_pr",
-    "blockingReviewFindings": null,
-    "unresolvedThreads": null
+    "prNumber": 9,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
+    "prState": "OPEN",
+    "isDraft": true,
+    "checkedCandidateSha": "b7bad1139aac75a5131caf5280dff9551c3ef665",
+    "requiredChecks": "passed",
+    "checkRuns": {
+      "passed": 20,
+      "failed": 0,
+      "pending": 0
+    },
+    "independentReviewStatus": "not_received",
+    "independentApprovals": 0,
+    "blockingReviewFindings": 0,
+    "unresolvedThreads": 0,
+    "checkedAt": "2026-08-09T15:50:41.2173132Z"
   },
   "externalQualificationBlockers": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",

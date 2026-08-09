@@ -1,7 +1,7 @@
 {
   "evidenceClass": "mixed",
   "status": "passed_code_and_repository_gates",
-  "generatedAt": "2026-08-09T14:42:58.8642870Z",
+  "generatedAt": "2026-08-09T15:50:41.2173132Z",
   "commands": {
     "installFrozen": {
       "command": "pnpm install --frozen-lockfile",
@@ -227,12 +227,42 @@
     "currentRuntimeUncertainTasks": 0,
     "adapterWriteGateAfterRealQualification": "closed",
     "trackedSensitiveValueScan": "passed_0_exact_matches",
-    "onlineDependencyAuditRefresh": "blocked_by_approval_policy"
+    "onlineDependencyAuditRefresh": "blocked_by_approval_policy",
+    "mergeReadinessRegression": "8/8 passed",
+    "githubChecksAtCandidateSha": "20/20 passed"
   },
   "github": {
-    "requiredChecks": "not_checked_before_pr",
-    "blockingReviewFindings": null,
-    "unresolvedThreads": null
+    "prNumber": 9,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9",
+    "prState": "OPEN",
+    "isDraft": true,
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "CLEAN",
+    "checkedCandidateSha": "b7bad1139aac75a5131caf5280dff9551c3ef665",
+    "requiredChecks": "passed",
+    "checkRuns": {
+      "passed": 20,
+      "failed": 0,
+      "pending": 0
+    },
+    "reviewDecision": "none",
+    "independentReviewStatus": "not_received",
+    "independentApprovals": 0,
+    "blockingReviewFindings": 0,
+    "unresolvedThreads": 0,
+    "branchProtection": {
+      "pattern": "main",
+      "requiresApprovingReviews": true,
+      "requiredApprovingReviewCount": 0,
+      "requiresStatusChecks": true,
+      "requiresConversationResolution": true,
+      "requiresStrictStatusChecks": true,
+      "isAdminEnforced": true,
+      "allowsForcePushes": false,
+      "allowsDeletions": false
+    },
+    "checkedAt": "2026-08-09T15:50:41.2173132Z",
+    "note": "All checks passed at the audited candidate SHA. The PR remains Draft and has no independent review, so main merge readiness is false."
   },
   "hardGateConclusion": "Code and repository gates passed. Functional real-device scope passed. Overall readyForSdarIntegration remains false because real in-flight resilience, real fault injection, PMS-outage Task Authority, and explicit climate power-on qualification are incomplete."
 }

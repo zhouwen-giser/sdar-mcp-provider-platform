@@ -10,7 +10,10 @@
 ## Main merge readiness
 
 - Code/repository hard blockers: **none recorded**
-- Protected-branch GitHub checks/review state must be verified separately before merge.
+- GitHub checks at `b7bad1139aac75a5131caf5280dff9551c3ef665`: **20/20 passed**
+- PR [#9](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9): **OPEN / DRAFT**, mergeable and clean
+- Independent Review/Approval: **not received**; blocking findings: `0`; unresolved threads: `0`
+- Merge blockers: `PULL_REQUEST_IS_DRAFT`, `INDEPENDENT_REVIEW_NOT_PASSED`
 
 ## SDAR lab qualification
 
@@ -32,4 +35,4 @@
 - `REAL_FAULT_INJECTION_UNVERIFIED`
 - `PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED`
 
-No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, or force push was performed.
+No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, force push, or branch-protection change was performed.
