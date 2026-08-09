@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "repository": "zhouwen-giser/sdar-mcp-provider-platform",
   "smppBaseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "smppCandidateSha": "e75c517f03f328dfbc950a49d72479ac26b43875",
+  "smppCandidateSha": "3dad82697a7262a8d241eb6328b96aca058d3d0a",
   "branch": "codex/ha-real-device-preparation",
   "environment": "home-lab",
   "registryRevision": 3,
@@ -31,7 +31,11 @@
       "tools": ["light_get_state", "light_set_power", "light_set_brightness"]
     }
   ],
-  "realResourcesQualified": [],
+  "realResourcesQualified": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
   "historicallyQualifiedResources": [
     "living-room-air-conditioner",
     "living-room-main-light",
@@ -44,22 +48,46 @@
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "runtimeTaskCountSource": "historical_qualified_three_device_run",
-  "deviceState": "manual_restore_required",
-  "readyForSdarFunctionalIntegration": false,
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+  "deviceState": "restored",
+  "readyForSdarFunctionalIntegration": true,
   "readyForSdarResilienceIntegration": false,
   "readyForSdarFullCapabilityIntegration": false,
   "readyForSdarIntegration": false,
-  "allowedProviders": [],
-  "allowedResources": [],
-  "allowedOperations": [],
-  "forbiddenOrUnverifiedResources": [
+  "allowedProviders": ["ha-climate-lab", "ha-light-lab"],
+  "allowedResources": [
+    "living-room-air-conditioner",
+    "living-room-main-light",
+    "living-room-aux-light"
+  ],
+  "allowedOperations": [
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_get_state",
+      "qualification": "real_pass"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_hvac_mode",
+      "qualification": "real_pass"
+    },
+    {
+      "providerId": "ha-climate-lab",
+      "operation": "climate_set_temperature",
+      "qualification": "real_pass"
+    },
     {
       "providerId": "ha-light-lab",
-      "resourceId": "living-room-main-light",
-      "reason": "home_assistant_unavailable"
+      "operation": "light_get_state",
+      "qualification": "real_pass_time_scoped"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "operation": "light_set_power",
+      "qualification": "real_pass_time_scoped"
     }
   ],
+  "forbiddenOrUnverifiedResources": [],
   "forbiddenOrUnverifiedOperations": [
     {
       "providerId": "ha-climate-lab",
@@ -72,9 +100,7 @@
       "reason": "unverified_optional"
     }
   ],
-  "externalResourceBlockers": [
-    { "resourceId": "living-room-main-light", "reason": "home_assistant_unavailable" }
-  ],
+  "externalResourceBlockers": [],
   "mainMergeReady": false,
   "mainMergeReadinessStatus": "not_ready",
   "mainMergeBlockers": ["PULL_REQUEST_IS_DRAFT", "INDEPENDENT_REVIEW_NOT_PASSED"],
@@ -110,8 +136,6 @@
     "note": "All checks passed at the audited candidate SHA. The PR remains Draft and has no independent review, so main merge readiness is false."
   },
   "blockingIssues": [
-    "HA_PREFLIGHT_NOT_CURRENTLY_PASSED",
-    "MANUAL_RESTORE_REQUIRED_CURRENT_DEVICE_STATE",
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
     "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",

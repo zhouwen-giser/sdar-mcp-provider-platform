@@ -1,7 +1,7 @@
 {
   "evidenceClass": "static",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "candidateSha": "e75c517f03f328dfbc950a49d72479ac26b43875",
+  "candidateSha": "3dad82697a7262a8d241eb6328b96aca058d3d0a",
   "branch": "codex/ha-real-device-preparation",
   "changedFileCount": 215,
   "changedFiles": [

@@ -57,10 +57,8 @@
   ],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "runtimeTaskCountSource": "historical_qualified_three_device_run",
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
   "blockers": [
-    "HA_PREFLIGHT_NOT_CURRENTLY_PASSED",
-    "MANUAL_RESTORE_REQUIRED_CURRENT_DEVICE_STATE",
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
     "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",

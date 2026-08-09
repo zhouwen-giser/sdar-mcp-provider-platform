@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation closeout
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate SHA: `e75c517f03f328dfbc950a49d72479ac26b43875`
+- Candidate SHA: `3dad82697a7262a8d241eb6328b96aca058d3d0a`
 - Branch: `codex/ha-real-device-preparation`
 - Environment: `home-lab`
 - Main merge readiness: **NO**
@@ -19,10 +19,10 @@
 
 ## SDAR lab qualification
 
-- Functional three-device MCP path: **BLOCKED**
+- Functional three-device MCP path: **PASS**
 - Resilience qualification: **BLOCKED**
 - Full capability qualification: **BLOCKED**
-- Device state: **manual_restore_required**
+- Device state: **restored**
 - Active tasks: `0`; uncertain tasks: `0`
 - The qualification scope is exactly one configured climate resource and two configured light resources; it is not a blanket Home Assistant certification.
 - Climate HVAC mode, target temperature, safe power-off restoration, light power control, observation confirmation, and bounded idempotency passed for the executed lab run.
@@ -31,8 +31,6 @@
 
 ## Open SDAR blockers
 
-- `HA_PREFLIGHT_NOT_CURRENTLY_PASSED`
-- `MANUAL_RESTORE_REQUIRED_CURRENT_DEVICE_STATE`
 - `CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED`
 - `REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED`
 - `REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED`

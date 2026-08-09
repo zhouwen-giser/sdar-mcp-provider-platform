@@ -1,6 +1,6 @@
 # Known limitations
 
-- The latest read-only Home Assistant preflight failed for: living-room-main-light (unavailable). No device writes were attempted.
+- The latest read-only Home Assistant preflight passed for all configured resources.
 - The explicit climate power-on operation was not separately qualified; HVAC mode, target temperature, and safe power-off restoration were qualified.
 - Real in-flight Adapter/Runtime restart recovery and real PMS/HA outage recovery remain unverified.
 - REST 200 without observed target state was not injected against a real device.

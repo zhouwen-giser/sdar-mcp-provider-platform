@@ -5,6 +5,6 @@
   "inFlightScenario": "unverified",
   "postRestartActiveTasks": 0,
   "postRestartUncertainTasks": 0,
-  "runtimeTaskCountSource": "historical_qualified_three_device_run",
+  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
   "sourceReport": "reports/real-device-preparation-continuation/real-recovery.json"
 }
