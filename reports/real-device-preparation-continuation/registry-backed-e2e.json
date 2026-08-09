@@ -1,11 +1,11 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-4249fae3-e111-432c-84ba-4969264968c8",
+  "integrationRunId": "smpp-registry-e2e-71aee8ac-d47d-455d-b6ff-5fee9be72a2d",
   "environment": "home-lab",
-  "startedAt": "2026-08-09T14:46:30.262Z",
-  "completedAt": "2026-08-09T14:46:32.164Z",
-  "status": "passed",
+  "startedAt": "2026-08-09T16:10:37.661Z",
+  "completedAt": "2026-08-09T16:10:38.735Z",
+  "status": "blocked_resource_unavailable",
   "pms": {
     "apiBaseUrl": "http://127.0.0.1:8090",
     "registry": {
@@ -68,13 +68,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-air-conditioner",
-        "power": "on",
+        "power": "off",
         "reachable": true,
-        "hvacMode": "cool",
+        "hvacMode": "off",
         "targetTemperature": 16,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-09T13:57:50.382352+00:00"
+        "observedAt": "2026-08-09T15:01:58.722278+00:00"
       },
       "status": 200
     },
@@ -86,13 +86,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-main-light",
-        "power": "on",
-        "reachable": true,
+        "power": "unavailable",
+        "reachable": false,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": 100,
-        "observedAt": "2026-08-09T11:28:33.453479+00:00"
+        "brightnessPercent": null,
+        "observedAt": "2026-08-09T14:48:01.567976+00:00"
       },
       "status": 200
     },
@@ -104,13 +104,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "on",
+        "power": "off",
         "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": 100,
-        "observedAt": "2026-08-09T11:28:33.782813+00:00"
+        "brightnessPercent": null,
+        "observedAt": "2026-08-09T15:38:59.633049+00:00"
       },
       "status": 200
     }
@@ -125,7 +125,7 @@
   },
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "errors": [],
+  "errors": ["HOME_ASSISTANT_RESOURCE_UNAVAILABLE"],
   "protocolQualification": {
     "status": "passed",
     "requiredMethods": ["server/discover", "tools/list", "tools/call"],

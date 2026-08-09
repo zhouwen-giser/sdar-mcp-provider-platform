@@ -1,7 +1,7 @@
 # Registry-backed SMPP MCP read-only E2E
 
 - Evidence class: `real`
-- Status: `passed`
+- Status: `blocked_resource_unavailable`
 - Environment: `home-lab`
 - Registry revision/checksum: `3 / dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2`
 - Registry providers: ha-climate-lab, ha-light-lab
@@ -17,4 +17,4 @@ This report covers the PMS Registry-backed MCP read path only. No Home Assistant
 
 ## Errors
 
-- none
+- HOME_ASSISTANT_RESOURCE_UNAVAILABLE
