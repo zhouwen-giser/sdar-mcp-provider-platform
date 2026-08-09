@@ -2,7 +2,7 @@
 
 | Area                      | Evidence      | Status                                               |
 | ------------------------- | ------------- | ---------------------------------------------------- |
-| Home Assistant preflight  | real          | passed for three configured resources                |
+| Home Assistant preflight  | real          | blocked (failed)                                     |
 | Climate Provider          | real          | passed for executed mode/temperature/power-off scope |
 | Light Provider            | real          | passed for both configured lights                    |
 | Runtime idempotency       | real/contract | passed for bounded duplicate and conflict scenarios  |

@@ -1,9 +1,9 @@
 {
   "evidenceClass": "static",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "candidateSha": "044bb49b173cb12be73de4721d03c41bef19a3ba",
+  "candidateSha": "41a71c80fe8820f43fae8d8c336be7c113bfb46f",
   "branch": "codex/ha-real-device-preparation",
-  "changedFileCount": 212,
+  "changedFileCount": 215,
   "changedFiles": [
     ".codex/ha-real-device-continuation/blockers.md",
     ".codex/ha-real-device-continuation/decisions.md",
@@ -70,6 +70,7 @@
     "packages/pm2-runtime-adapter/test/process-manager.test.ts",
     "packages/pm2-runtime-adapter/test/release-resolver.test.ts",
     "packages/pms-application/src/runtime-reconcile.ts",
+    "packages/pms-application/test/provider-package-sync.test.ts",
     "packages/pms-application/test/runtime-reconcile.test.ts",
     "packages/pms-persistence-postgres/src/runtime-deployment-repositories.ts",
     "packages/provider-package-registry/test/registry.test.ts",
@@ -88,6 +89,7 @@
     "reports/evidence/G4-P1-B02-real-pm2-product-path.json",
     "reports/evidence/G4-P3-B01-worker-pm2-production.json",
     "reports/evidence/G5-P1-B02-runtime-credential-isolation.json",
+    "reports/evidence/G5-P2-B02-worker-lease-safety.json",
     "reports/evidence/migration-isolation.json",
     "reports/home-assistant-climate/provider-conformance.json",
     "reports/home-assistant-light/provider-conformance.json",
@@ -215,6 +217,7 @@
     "tests/unit/home-assistant-light-core.test.ts",
     "tests/unit/live-runtime-task-state.test.ts",
     "tests/unit/real-device-runner-protocol.test.ts",
+    "tests/worker-lease-safety/run-worker-lease-safety.mjs",
     "tests/worker-pm2-production/run-production-lifecycle.mjs",
     "tsconfig.json"
   ],
@@ -279,6 +282,7 @@
       "packages/pm2-runtime-adapter/test/pm2-javascript-api.test.ts",
       "packages/pm2-runtime-adapter/test/process-manager.test.ts",
       "packages/pm2-runtime-adapter/test/release-resolver.test.ts",
+      "packages/pms-application/test/provider-package-sync.test.ts",
       "packages/pms-application/test/runtime-reconcile.test.ts",
       "packages/provider-package-registry/test/registry.test.ts",
       "packages/runtime-migration-runner/test/runner.test.ts",
@@ -307,6 +311,7 @@
       "tests/unit/home-assistant-light-core.test.ts",
       "tests/unit/live-runtime-task-state.test.ts",
       "tests/unit/real-device-runner-protocol.test.ts",
+      "tests/worker-lease-safety/run-worker-lease-safety.mjs",
       "tests/worker-pm2-production/run-production-lifecycle.mjs"
     ],
     "reports": [
@@ -317,6 +322,7 @@
       "reports/evidence/G4-P1-B02-real-pm2-product-path.json",
       "reports/evidence/G4-P3-B01-worker-pm2-production.json",
       "reports/evidence/G5-P1-B02-runtime-credential-isolation.json",
+      "reports/evidence/G5-P2-B02-worker-lease-safety.json",
       "reports/evidence/migration-isolation.json",
       "reports/home-assistant-climate/provider-conformance.json",
       "reports/home-assistant-light/provider-conformance.json",

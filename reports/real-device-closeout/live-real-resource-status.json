@@ -1,13 +1,13 @@
 {
   "evidenceClass": "real",
-  "status": "passed",
+  "status": "blocked",
   "environment": "home-lab",
   "preflight": {
-    "status": "passed",
-    "completedAt": "2026-08-09T14:45:18.423Z",
+    "status": "failed",
+    "completedAt": "2026-08-09T16:10:08.110Z",
     "resourceCount": 3,
-    "allReachable": true,
-    "websocketStateChangedSubscribed": true,
+    "allReachable": false,
+    "websocketStateChangedSubscribed": false,
     "restWebSocketConsistent": true
   },
   "registry": {
@@ -27,11 +27,11 @@
     "completedAt": "2026-08-03T19:44:55.189Z",
     "resources": ["living-room-air-conditioner", "living-room-main-light", "living-room-aux-light"],
     "allRestored": true,
-    "currentPreflightPass": true,
-    "currentDeviceStateRestored": true,
+    "currentPreflightPass": false,
+    "currentDeviceStateRestored": false,
     "activeTasks": 0,
     "uncertainTasks": 0,
-    "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
+    "runtimeTaskCountSource": "historical_qualified_three_device_run",
     "climateSafety": "passed",
     "writesUsed": {
       "climateHvacMode": 1,

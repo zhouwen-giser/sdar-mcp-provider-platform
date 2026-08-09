@@ -666,6 +666,9 @@ const finalHandoff = {
   mainMergeReady: mainMergeReadiness.mainMergeReady,
   mainMergeReadinessStatus: mainMergeReadiness.status,
   mainMergeBlockers: mainMergeReadiness.blockers,
+  mainMergeCodeBlockers: mainMergeReadiness.codeAndRepositoryBlockers,
+  mainMergeGithubBlockers: mainMergeReadiness.githubBlockers,
+  mainMergeGithub: mainMergeReadiness.github,
   blockingIssues: blockers,
   noSecrets: true,
   noEntityIds: true,
@@ -682,9 +685,13 @@ const knownLimitations = [
   "The first current verify:v2 attempt failed before container work because sandboxed Docker access was denied; the exact command subsequently passed with authorized Docker access.",
   ...(mainMergeReadiness.mainMergeReady
     ? []
-    : [
-        "Protected-branch GitHub checks, Draft state, independent review, or review-thread state are not fully passed; main merge readiness remains false.",
-      ]),
+    : verification.github?.requiredChecks === "passed"
+      ? [
+          `Protected-branch checks passed at the audited candidate SHA, but merge readiness remains false because: ${mainMergeReadiness.githubBlockers.join(", ") || "code/repository blockers"}.`,
+        ]
+      : [
+          "Protected-branch GitHub checks, Draft state, independent review, or review-thread state are not fully passed; main merge readiness remains false.",
+        ]),
   "No SDAR Agent Runtime was connected, and no public deployment, merge, tag, or release was performed.",
 ];
 const finalReport = renderFinalReport(finalHandoff, verification, aggregateGates);
@@ -935,6 +942,10 @@ function renderLimitations(items, handoff) {
 }
 
 function renderFinalReport(handoff, verificationRun, aggregate) {
+  const github = verificationRun.github ?? {};
+  const pullRequest = github.prNumber
+    ? `[PR #${github.prNumber}](${github.url ?? "#"})`
+    : "Pull request";
   return [
     "# SMPP Home Assistant real-device preparation closeout",
     "",
@@ -947,10 +958,16 @@ function renderFinalReport(handoff, verificationRun, aggregate) {
     "",
     "## Main merge readiness",
     "",
-    ...(handoff.mainMergeBlockers.length === 0
+    ...(handoff.mainMergeCodeBlockers.length === 0
       ? ["- Code/repository hard blockers: **none recorded**"]
-      : handoff.mainMergeBlockers.map((item) => `- Code/repository blocker: \`${item}\``)),
-    "- Protected-branch GitHub checks/review state must be verified separately before merge.",
+      : handoff.mainMergeCodeBlockers.map((item) => `- Code/repository blocker: \`${item}\``)),
+    `- Required GitHub checks: **${github.requiredChecks ?? "not_verified"}**`,
+    `- ${pullRequest}: **${github.prState ?? "not_verified"}${github.isDraft === true ? " / DRAFT" : github.isDraft === false ? " / READY" : ""}**`,
+    `- Independent Review: **${github.independentReviewStatus ?? "not_verified"}**`,
+    `- Blocking review findings: \`${github.blockingReviewFindings ?? "not_verified"}\`; unresolved threads: \`${github.unresolvedThreads ?? "not_verified"}\``,
+    ...(handoff.mainMergeGithubBlockers.length === 0
+      ? ["- GitHub merge blockers: **none recorded**"]
+      : handoff.mainMergeGithubBlockers.map((item) => `- GitHub blocker: \`${item}\``)),
     "",
     "## SDAR lab qualification",
     "",
@@ -968,7 +985,7 @@ function renderFinalReport(handoff, verificationRun, aggregate) {
     "",
     ...handoff.blockingIssues.map((item) => `- \`${item}\``),
     "",
-    "No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, or force push was performed.",
+    "No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, force push, or branch-protection change was performed.",
     "",
   ].join("\n");
 }
@@ -1062,8 +1079,16 @@ function renderMergeReadiness(readiness) {
     "## GitHub protected-branch state",
     "",
     `- Required checks: **${readiness.github.requiredChecks}**`,
+    `- Pull request state: **${readiness.github.prState ?? "not verified"}${readiness.github.isDraft === true ? " / DRAFT" : readiness.github.isDraft === false ? " / READY" : ""}**`,
+    `- Independent Review: **${readiness.github.independentReviewStatus ?? "not verified"}**`,
     `- Blocking review findings: **${readiness.github.blockingReviewFindings ?? "not verified"}**`,
     `- Unresolved threads: **${readiness.github.unresolvedThreads ?? "not verified"}**`,
+    "",
+    "## GitHub blockers",
+    "",
+    ...(readiness.githubBlockers.length === 0
+      ? ["- None recorded."]
+      : readiness.githubBlockers.map((item) => `- \`${item}\``)),
     "",
     "Real-device qualification blockers are listed separately and do not become code-review findings by implication.",
     "",

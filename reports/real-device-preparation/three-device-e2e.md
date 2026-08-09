@@ -4,7 +4,7 @@
 - Status: **passed**
 - Integration run: `smpp-live-three-device-closeout-20260804-0345`
 - Resources: `3`
-- Restored: **yes**
+- Restored: **no**
 - Active tasks: `0`
 - Uncertain tasks: `0`
 

@@ -6,8 +6,8 @@
   "scenarios": [],
   "activeTasks": 0,
   "uncertainTasks": 0,
-  "runtimeTaskCountSource": "current_registry_backed_read_only_e2e",
-  "deviceState": "restored",
+  "runtimeTaskCountSource": "historical_qualified_three_device_run",
+  "deviceState": "manual_restore_required",
   "blockers": [
     "CLIENT_TIMEOUT_RETRY_UNVERIFIED",
     "REAL_IN_FLIGHT_RESTART_RECOVERY_UNVERIFIED",
