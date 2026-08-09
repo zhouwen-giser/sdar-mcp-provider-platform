@@ -19,7 +19,12 @@ const databaseUrl = withSearchPath(adminDatabaseUrl, schema);
 const admin = new Pool({ connectionString: adminDatabaseUrl });
 const pool = new Pool({ connectionString: databaseUrl });
 const activeWorkers = new Set();
-const leaseDurationMs = 300;
+// The 300 ms minimum is covered deterministically by job-execution unit tests. Keep this
+// real-PostgreSQL gate above transient CI scheduler stalls while still spanning more than
+// three renewal periods in the long-running scenarios.
+const leaseDurationMs = 1_000;
+const longHandlerDurationMs = 3_500;
+const scenarioTimeoutMs = 10_000;
 const assertions = {};
 const metrics = {};
 
@@ -81,7 +86,7 @@ async function scenarioContinuousRenewal() {
   await enqueue(jobs, "scenario-a");
   const workerAJobs = instrument(jobs);
   const workerBJobs = instrument(jobs);
-  const handlerA = handler("lease.scenario-a", async () => delay(1_050));
+  const handlerA = handler("lease.scenario-a", async () => delay(longHandlerDurationMs));
   const workerA = startWorker("scenario-a-worker-a", workerAJobs.repository, [handlerA]);
   await waitFor(
     () => Promise.resolve(workerAJobs.claims.length),
@@ -91,7 +96,7 @@ async function scenarioContinuousRenewal() {
     forbiddenHandler("lease.scenario-a"),
   ]);
 
-  const row = await waitForJob("scenario-a", "succeeded", 4_000);
+  const row = await waitForJob("scenario-a", "succeeded", scenarioTimeoutMs);
   await stopWorkers(workerA, workerB);
   assert(workerBJobs.claims.length === 0, "SCENARIO_A_WORKER_B_CLAIMED");
   assert(workerAJobs.renewals.get("scenario-a") >= 3, "SCENARIO_A_RENEWAL_COUNT_LOW");
@@ -127,7 +132,7 @@ async function scenarioLeaseLossTakeover() {
   await renewalLost.promise;
   const stoppingA = workerA.stop();
   await handlerAborted.promise;
-  const row = await waitForJob("scenario-b", "succeeded", 4_000);
+  const row = await waitForJob("scenario-b", "succeeded", scenarioTimeoutMs);
   await stoppingA;
   await stopWorkers(workerB);
 
@@ -178,7 +183,7 @@ async function scenarioUninterruptibleSql() {
   ]);
   await renewalLost.promise;
   const stoppingA = workerA.stop();
-  const row = await waitForJob("scenario-c", "succeeded", 4_000);
+  const row = await waitForJob("scenario-c", "succeeded", scenarioTimeoutMs);
   await stoppingA;
   await stopWorkers(workerB);
   const effects = await pool.query(
@@ -207,7 +212,7 @@ async function scenarioBatchRenewal() {
   const workerA = startWorker(
     "scenario-d-worker-a",
     workerAJobs.repository,
-    [handler("lease.scenario-d", () => delay(1_050))],
+    [handler("lease.scenario-d", () => delay(longHandlerDurationMs))],
     3,
   );
   await waitFor(
@@ -226,7 +231,7 @@ async function scenarioBatchRenewal() {
         )
       ).rows[0]?.count,
     (count) => count === 3,
-    5_000,
+    scenarioTimeoutMs,
   );
   await stopWorkers(workerA, workerB);
 
