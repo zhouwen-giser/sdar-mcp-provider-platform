@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation closeout
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate SHA: `8b786151e9a1a11c4ddabe24d878bbf98a12a552`
+- Candidate SHA: `044bb49b173cb12be73de4721d03c41bef19a3ba`
 - Branch: `codex/ha-real-device-preparation`
 - Environment: `home-lab`
 - Main merge readiness: **NO**
@@ -9,7 +9,7 @@
 
 ## Main merge readiness
 
-- Code/repository blocker: `WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION`
+- Code/repository hard blockers: **none recorded**
 - Protected-branch GitHub checks/review state must be verified separately before merge.
 
 ## SDAR lab qualification

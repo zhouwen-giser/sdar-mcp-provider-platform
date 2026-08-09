@@ -2,7 +2,7 @@
   "evidenceClass": "mixed",
   "status": "not_ready",
   "mainMergeReady": false,
-  "codeAndRepositoryBlockers": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
+  "codeAndRepositoryBlockers": [],
   "github": {
     "requiredChecks": "not_checked_before_pr",
     "blockingReviewFindings": null,

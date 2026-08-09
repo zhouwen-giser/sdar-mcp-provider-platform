@@ -1,8 +1,8 @@
 {
   "evidenceClass": "mixed",
-  "status": "open_code_findings",
-  "blockingMajorCount": 1,
-  "codeAndRepositoryFindings": ["WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION"],
+  "status": "no_code_findings",
+  "blockingMajorCount": 0,
+  "codeAndRepositoryFindings": [],
   "realQualificationFindings": [
     "CLIMATE_POWER_ON_NOT_SEPARATELY_QUALIFIED",
     "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",

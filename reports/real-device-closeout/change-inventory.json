@@ -1,7 +1,7 @@
 {
   "evidenceClass": "static",
   "baseSha": "abd9db778848303d2966ac9b9e80f75207713109",
-  "candidateSha": "8b786151e9a1a11c4ddabe24d878bbf98a12a552",
+  "candidateSha": "044bb49b173cb12be73de4721d03c41bef19a3ba",
   "branch": "codex/ha-real-device-preparation",
   "changedFileCount": 212,
   "changedFiles": [
@@ -164,12 +164,16 @@
     "scripts/enrich-real-report-execution-ids.mjs",
     "scripts/generate-sbom.mjs",
     "scripts/ha-real-preflight.mjs",
+    "scripts/live-runtime-task-state.ts",
     "scripts/probe-live-registry-contract.mjs",
     "scripts/protocol/verify-business-events-requirements-lock.mjs",
     "scripts/protocol/write-protocol-lock-diff-report.mjs",
     "scripts/provider-conformance-report.mjs",
     "scripts/provider-package-linux-symlink-check.mjs",
     "scripts/provider-package-self-check.mjs",
+    "scripts/real-device-closeout-lib.mjs",
+    "scripts/real-device-closeout-lib.test.mjs",
+    "scripts/release/release-artifact-volume-layout.test.mjs",
     "scripts/release/verify-release-candidate-workflow.mjs",
     "scripts/release/verify-release-candidate-workflow.test.mjs",
     "scripts/restore-live-smpp-climate.ts",
@@ -209,14 +213,10 @@
     "tests/provider-platform-e2e/home-assistant/vendor-managed.test.ts",
     "tests/security/home-assistant-climate-security.test.ts",
     "tests/unit/home-assistant-light-core.test.ts",
+    "tests/unit/live-runtime-task-state.test.ts",
     "tests/unit/real-device-runner-protocol.test.ts",
     "tests/worker-pm2-production/run-production-lifecycle.mjs",
-    "tsconfig.json",
-    "scripts/live-runtime-task-state.ts",
-    "scripts/real-device-closeout-lib.mjs",
-    "scripts/real-device-closeout-lib.test.mjs",
-    "scripts/release/release-artifact-volume-layout.test.mjs",
-    "tests/unit/live-runtime-task-state.test.ts"
+    "tsconfig.json"
   ],
   "categories": {
     "climateSafetyGate": [
@@ -305,9 +305,9 @@
       "tests/provider-platform-e2e/home-assistant/vendor-managed.test.ts",
       "tests/security/home-assistant-climate-security.test.ts",
       "tests/unit/home-assistant-light-core.test.ts",
+      "tests/unit/live-runtime-task-state.test.ts",
       "tests/unit/real-device-runner-protocol.test.ts",
-      "tests/worker-pm2-production/run-production-lifecycle.mjs",
-      "tests/unit/live-runtime-task-state.test.ts"
+      "tests/worker-pm2-production/run-production-lifecycle.mjs"
     ],
     "reports": [
       "reports/capacity/capacity-v2.json",

@@ -5,7 +5,7 @@
 
 ## Code and repository blockers
 
-- `WORKTREE_NOT_CLEAN_AT_CLOSEOUT_GENERATION`
+- None recorded.
 
 ## GitHub protected-branch state
 
