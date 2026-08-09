@@ -21,7 +21,7 @@
     "Docker CLI reported an unreadable user config warning; Docker version itself was available"
   ],
   "evidenceClass": "static",
-  "candidateSha": "41a71c80fe8820f43fae8d8c336be7c113bfb46f",
-  "capturedAt": "2026-08-09T16:12:13.199Z",
+  "candidateSha": "e75c517f03f328dfbc950a49d72479ac26b43875",
+  "capturedAt": "2026-08-09T16:15:05.318Z",
   "statusLines": []
 }

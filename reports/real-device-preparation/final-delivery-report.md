@@ -1,7 +1,7 @@
 # SMPP Home Assistant real-device preparation closeout
 
 - Base SHA: `abd9db778848303d2966ac9b9e80f75207713109`
-- Candidate SHA: `41a71c80fe8820f43fae8d8c336be7c113bfb46f`
+- Candidate SHA: `e75c517f03f328dfbc950a49d72479ac26b43875`
 - Branch: `codex/ha-real-device-preparation`
 - Environment: `home-lab`
 - Main merge readiness: **NO**
@@ -9,9 +9,13 @@
 
 ## Main merge readiness
 
-- Code/repository blocker: `PULL_REQUEST_IS_DRAFT`
-- Code/repository blocker: `INDEPENDENT_REVIEW_NOT_PASSED`
-- Protected-branch GitHub checks/review state must be verified separately before merge.
+- Code/repository hard blockers: **none recorded**
+- Required GitHub checks: **passed**
+- [PR #9](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/9): **OPEN / DRAFT**
+- Independent Review: **not_received**
+- Blocking review findings: `0`; unresolved threads: `0`
+- GitHub blocker: `PULL_REQUEST_IS_DRAFT`
+- GitHub blocker: `INDEPENDENT_REVIEW_NOT_PASSED`
 
 ## SDAR lab qualification
 
@@ -35,4 +39,4 @@
 - `REAL_FAULT_INJECTION_UNVERIFIED`
 - `PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED`
 
-No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, or force push was performed.
+No SDAR Agent Runtime was connected. No merge, tag, release, public deployment, force push, or branch-protection change was performed.
