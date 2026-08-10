@@ -5,6 +5,7 @@ import {
   mapVehicleTaskState,
   sanitizeFireResult,
   TrackArbiter,
+  UGV_OPERATION_TRACKS,
 } from "../../packages/vehicle-provider-core/src/index.js";
 import {
   assertExactSubscriptions,
@@ -126,6 +127,13 @@ describe("UGV task, track, availability and fire boundaries", () => {
     });
     expect(arbiter.acquire("stop", "vehicle_emergency_stop").accepted).toBe(true);
     expect(arbiter.owner("chassis")).toBe("stop");
+
+    const ugvArbiter = new TrackArbiter(true, "UGV", UGV_OPERATION_TRACKS);
+    expect(ugvArbiter.acquire("recon", "vehicle_area_recon").accepted).toBe(true);
+    expect(ugvArbiter.acquire("gimbal", "vehicle_control_gimbal")).toEqual({
+      accepted: false,
+      reasonCode: "UGV_EO_TRACK_BUSY",
+    });
   });
 
   it("returns UNKNOWN for stale or disconnected state and blocks unknown fire state", () => {

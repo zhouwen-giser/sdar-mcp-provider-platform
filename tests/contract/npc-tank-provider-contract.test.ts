@@ -1,6 +1,8 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { npcTankManifest } from "../../apps/npc-tank-provider-adapter/src/manifest.js";
 import { npcTankResource } from "../../apps/npc-tank-provider-adapter/src/server.js";
+import { protoStructToJson } from "../../packages/adapter-protocol/src/index.js";
 import {
   MemoryProviderStore,
   businessEventSourceCapabilities,
@@ -53,6 +55,35 @@ describe("NPC Tank manifest, resource dependencies and event contract", () => {
     };
     expect(modes(without)).not.toContain("circular");
     expect(modes(withCircular)).toContain("circular");
+  });
+
+  it("preserves the baseline NPC task outputs and fire cancellation capability", () => {
+    const manifest = npcTankManifest("p", "0.1.0", new MemoryProviderStore(), true);
+    const operations = manifest.operations as {
+      name: string;
+      outputSchema: unknown;
+      capabilities: { cancel: boolean };
+    }[];
+    const recon = operations.find((operation) => operation.name === "vehicle_area_recon");
+    const fire = operations.find((operation) => operation.name === "vehicle_fire_weapon");
+    const reconOutput = protoStructToJson(recon?.outputSchema);
+    const fireOutput = protoStructToJson(fire?.outputSchema);
+
+    expect(reconOutput).not.toHaveProperty("properties.coverability");
+    expect(reconOutput).not.toHaveProperty("properties.outOfRange");
+    expect(JSON.stringify(fireOutput)).not.toContain("fire_command_rejected");
+    expect(fire?.capabilities.cancel).toBe(true);
+  });
+
+  it("matches the reviewed baseline NPC public manifest byte-for-byte", () => {
+    const serialized = JSON.stringify(
+      npcTankManifest("isr.vehicle.npc-tank.npc-tank1", "0.1.0", new MemoryProviderStore(), true),
+    );
+
+    expect(Buffer.byteLength(serialized)).toBe(19_257);
+    expect(createHash("sha256").update(serialized).digest("hex")).toBe(
+      "521c64f3a88b56b47f449fcf574981cf9554900935aab790a80bfd4c27bf222c",
+    );
   });
 
   it("exposes one vehicle resource with internal tracks and no referee truth", () => {

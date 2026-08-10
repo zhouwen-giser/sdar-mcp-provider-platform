@@ -69,6 +69,8 @@ export interface DeviceMcpProfile<TTool extends string> {
   mockServerName: string;
   isAllowed(name: string): name is TTool;
   mockContracts(capturedAt?: string): CapturedToolContract[];
+  /** Opt in to reconnect, read retry, per-tool circuit and uncertain-mutation semantics. */
+  resilientCalls?: boolean;
   isMutating?(name: TTool): boolean;
   validateResult?(
     name: TTool,
@@ -106,6 +108,7 @@ const UGV_PROFILE: DeviceMcpProfile<UgvDeviceToolName> = {
   mockServerName: "mock-ugv-device-mcp",
   isAllowed: isAllowedUgvDeviceTool,
   mockContracts: mockUgvToolContracts,
+  resilientCalls: true,
   isMutating: isMutatingUgvDeviceTool,
   validateResult: validateUgvToolResult,
   mockResult: mockUgvResult,
@@ -186,6 +189,14 @@ export class StreamableHttpVehicleDeviceMcpClient<
   }
 
   async close(): Promise<void> {
+    if (this.profile.resilientCalls !== true) {
+      const transport = this.#transport;
+      await transport?.close();
+      this.#client = undefined;
+      this.#transport = undefined;
+      this.#setConnectionState("closed");
+      return;
+    }
     this.#closing = true;
     if (this.#reconnectTimer !== undefined) clearTimeout(this.#reconnectTimer);
     this.#reconnectTimer = undefined;
@@ -250,6 +261,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
     if (!this.profile.isAllowed(name))
       throw new Error(`${this.profile.errorPrefix}_DEVICE_TOOL_NOT_ALLOWED`);
     if (!this.hasTool(name)) throw new Error(`${this.profile.errorPrefix}_DEVICE_TOOL_UNAVAILABLE`);
+    if (this.profile.resilientCalls !== true) return this.#callLegacy(name, argumentsValue, taskId);
     this.#assertCircuitAllows(name);
     const mutating = callOptions.kind
       ? callOptions.kind === "mutating"
@@ -328,6 +340,42 @@ export class StreamableHttpVehicleDeviceMcpClient<
     }
   }
 
+  async #callLegacy(
+    name: TTool,
+    argumentsValue: Record<string, unknown>,
+    taskId?: string,
+  ): Promise<Record<string, unknown>> {
+    const client = this.#client;
+    if (client === undefined) throw new Error(`${this.profile.errorPrefix}_DEVICE_MCP_UNAVAILABLE`);
+    const started = Date.now();
+    let outcome: "accepted" | "rejected" | "timeout" | "protocol_error" = "accepted";
+    try {
+      const response = await client.callTool({ name, arguments: argumentsValue }, undefined, {
+        timeout: this.options.timeoutMs,
+      });
+      if (response.isError === true) {
+        outcome = "rejected";
+        throw new Error(`${this.profile.errorPrefix}_DEVICE_TOOL_REJECTED`);
+      }
+      // Profiles that have not opted in retain the reviewed shared-client
+      // result/error contract, including its historical UGV parse codes.
+      return parseToolResult(response, this.options.maxResponseBytes, "UGV");
+    } catch (error) {
+      outcome = isTimeout(error) ? "timeout" : "protocol_error";
+      throw error;
+    } finally {
+      await this.store.appendDeviceToolCall({
+        callId: randomUUID(),
+        ...(taskId === undefined ? {} : { taskId }),
+        toolName: name,
+        argumentHash: createHash("sha256").update(canonical(argumentsValue)).digest("hex"),
+        outcome,
+        durationMs: Date.now() - started,
+        occurredAt: new Date().toISOString(),
+      });
+    }
+  }
+
   async #connect(reconnecting: boolean): Promise<void> {
     if (this.connected()) return;
     if (this.#connectPromise !== undefined) return this.#connectPromise;
@@ -349,7 +397,8 @@ export class StreamableHttpVehicleDeviceMcpClient<
     const transport = new StreamableHTTPClientTransport(new URL(this.options.url), {
       requestInit: { headers },
     });
-    client.onclose = () => this.#transportClosed(client, transport);
+    if (this.profile.resilientCalls === true)
+      client.onclose = () => this.#transportClosed(client, transport);
     try {
       await client.connect(transport as unknown as Transport, { timeout: this.options.timeoutMs });
       const response = await client.listTools({}, { timeout: this.options.timeoutMs });
@@ -452,6 +501,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
   }
 
   #scheduleReconnect(): void {
+    if (this.profile.resilientCalls !== true) return;
     if (this.#closing || this.connected() || this.#reconnectTimer !== undefined) return;
     this.#setConnectionState("reconnecting");
     const reconnectInMs = this.#reconnectDelayMs;

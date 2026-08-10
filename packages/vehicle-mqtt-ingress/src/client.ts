@@ -77,7 +77,7 @@ export class VehicleMqttClient {
     });
     client.on("offline", () => this.#markDisconnected());
     client.on("close", () => this.#markDisconnected());
-    client.on("error", () => this.#markDisconnected());
+    if (this.requireValidatedIngress) client.on("error", () => this.#markDisconnected());
     client.on("message", (topic, payload, packet) => {
       try {
         this.ingress.handle(topic, payload, packet.retain);

@@ -11,6 +11,8 @@ import {
   DeviceToolCircuitOpenError,
   DeviceToolProtocolError,
   DeviceToolRejectedError,
+  NPC_TANK_DEVICE_TOOL_ALLOWLIST,
+  StreamableHttpNpcTankDeviceMcpClient,
   StreamableHttpUgvDeviceMcpClient,
   UGV_DEVICE_TOOL_ALLOWLIST,
   UncertainMutatingDeviceCallError,
@@ -383,6 +385,36 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
 });
 
 describe("Goal 10 UGV Device MCP transport safety", () => {
+  it("keeps the Streamable HTTP NPC client on the reviewed legacy call path", async () => {
+    const harness = new UgvMcpHarness(NPC_TANK_DEVICE_TOOL_ALLOWLIST);
+    await harness.start();
+    const tool = "npc_tank_get_capabilities";
+    try {
+      const auditFailingClient = npcTestClient(harness, new FailingAuditStore());
+      await auditFailingClient.connect();
+      await expect(auditFailingClient.call(tool, {})).rejects.toThrow("TEST_AUDIT_UNAVAILABLE");
+      expect(auditFailingClient.toolHealth(tool)).toMatchObject({
+        state: "healthy",
+        consecutiveFailures: 0,
+      });
+      await auditFailingClient.close();
+
+      harness.results.set(tool, "descriptive-only");
+      const legacyErrorClient = npcTestClient(harness, new MemoryProviderStore());
+      await legacyErrorClient.connect();
+      await expect(legacyErrorClient.call(tool, {})).rejects.toThrow(
+        "UGV_DEVICE_MCP_RESPONSE_CONFLICT",
+      );
+      expect(legacyErrorClient.toolHealth(tool)).toMatchObject({
+        state: "healthy",
+        consecutiveFailures: 0,
+      });
+      await legacyErrorClient.close();
+    } finally {
+      await harness.stop();
+    }
+  });
+
   it("reconnects and retries a dropped read response within the configured bound", async () => {
     const harness = new UgvMcpHarness();
     await harness.start();
@@ -581,13 +613,34 @@ function testClient(
   );
 }
 
+function npcTestClient(
+  harness: UgvMcpHarness,
+  store: MemoryProviderStore,
+): StreamableHttpNpcTankDeviceMcpClient {
+  return new StreamableHttpNpcTankDeviceMcpClient(
+    {
+      url: harness.url,
+      timeoutMs: 500,
+      maxResponseBytes: 65_536,
+      contractReportPath: join(
+        mkdtempSync(join(tmpdir(), "npc-device-contract-")),
+        "contract.json",
+      ),
+      useMockContractWhenUnavailable: false,
+    },
+    store,
+  );
+}
+
 class UgvMcpHarness {
   #server: Server | undefined;
   #port: number | undefined;
   dropNextToolCalls = 0;
-  readonly delays = new Map<UgvDeviceToolName, number>();
-  readonly results = new Map<UgvDeviceToolName, Record<string, unknown>>();
-  readonly toolCalls: { name: UgvDeviceToolName; arguments: Record<string, unknown> }[] = [];
+  readonly delays = new Map<string, number>();
+  readonly results = new Map<string, unknown>();
+  readonly toolCalls: { name: string; arguments: Record<string, unknown> }[] = [];
+
+  constructor(readonly toolNames: readonly string[] = UGV_DEVICE_TOOL_ALLOWLIST) {}
 
   get url(): string {
     if (this.#port === undefined) throw new Error("TEST_MCP_SERVER_NOT_STARTED");
@@ -625,7 +678,7 @@ class UgvMcpHarness {
     const requestObject = record(body) ? body : {};
     const params = record(requestObject.params) ? requestObject.params : {};
     if (requestObject.method === "tools/call" && typeof params.name === "string") {
-      const name = params.name as UgvDeviceToolName;
+      const name = params.name;
       const argumentsValue = record(params.arguments) ? params.arguments : {};
       this.toolCalls.push({ name, arguments: structuredClone(argumentsValue) });
       if (this.dropNextToolCalls > 0) {
@@ -636,7 +689,7 @@ class UgvMcpHarness {
     }
 
     const instance = new McpServer({ name: "goal10-device-test", version: "1.0.0" });
-    for (const name of UGV_DEVICE_TOOL_ALLOWLIST)
+    for (const name of this.toolNames)
       instance.registerTool(name, { description: name, inputSchema: {} }, async () => {
         const delayMs = this.delays.get(name);
         if (delayMs !== undefined) await wait(delayMs);
@@ -647,7 +700,9 @@ class UgvMcpHarness {
             : name === "get_capabilities"
               ? {}
               : commonResult(1, 0));
-        return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(result) ?? "undefined" }],
+        };
       });
     const transport = new StreamableHTTPServerTransport();
     try {

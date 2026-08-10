@@ -37,7 +37,7 @@ import {
   mapReconMotionStatus,
   mapVehicleTaskState,
   monotonicProgress,
-  OPERATION_TRACKS,
+  UGV_OPERATION_TRACKS,
   sanitizeFireResult,
   TrackArbiter,
   vehicleEvidence,
@@ -53,7 +53,7 @@ import type { UgvTelemetry } from "./telemetry.js";
 import { normalizeUgvCapabilities } from "./capabilities.js";
 import { deduplicateTargets, normalizeDeviceTargets } from "./targets.js";
 
-const OPERATIONS = new Set(Object.keys(OPERATION_TRACKS));
+const OPERATIONS = new Set(Object.keys(UGV_OPERATION_TRACKS));
 const SYNC_OPERATIONS = new Set([
   "vehicle_get_state",
   "vehicle_get_capabilities",
@@ -110,7 +110,7 @@ export class UgvProviderRuntime {
     readonly businessEvents: UgvBusinessEventHub,
     readonly telemetry: UgvTelemetry,
   ) {
-    this.arbiter = new TrackArbiter(options.allowNavigationWithRecon);
+    this.arbiter = new TrackArbiter(options.allowNavigationWithRecon, "UGV", UGV_OPERATION_TRACKS);
   }
 
   async initialize(): Promise<void> {
@@ -160,7 +160,7 @@ export class UgvProviderRuntime {
     const acquired = this.arbiter.acquire(input.taskId, input.operationName);
     if (!acquired.accepted) throw new Error(acquired.reasonCode);
     const now = new Date().toISOString();
-    const tracks = OPERATION_TRACKS[input.operationName] ?? [];
+    const tracks = UGV_OPERATION_TRACKS[input.operationName] ?? [];
     const observationCursors = initialObservationCursors(input.operationName, this.ingress);
     let execution: ProviderExecution = {
       taskId: input.taskId,
@@ -266,6 +266,7 @@ export class UgvProviderRuntime {
     const requiredTools = requiredUgvDeviceTools(operationName, argumentsValue);
     return checkVehicleAvailability({
       operationName,
+      operationTracks: UGV_OPERATION_TRACKS,
       snapshot: this.ingress.snapshot(),
       freshness: this.options.freshness,
       occupiedTracks: new Set(

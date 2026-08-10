@@ -43,7 +43,8 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
   )
     return result("UNKNOWN", code("STATE_STALE"));
   if (context.operationName !== "vehicle_emergency_stop")
-    for (const track of OPERATION_TRACKS[context.operationName] ?? []) {
+    for (const track of (context.operationTracks ?? OPERATION_TRACKS)[context.operationName] ??
+      []) {
       if (context.occupiedTracks.has(track)) return result("DISABLED", busy(track, prefix));
     }
   if (context.snapshot.health.components.communications === "fault")

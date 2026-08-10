@@ -35,6 +35,21 @@ describe("NPC Tank profile, topic and normalization unit contract", () => {
     expect(config.NPC_TANK_ADAPTER_DATABASE_URL).not.toContain("ugv_adapter");
   });
 
+  it("keeps legacy NPC connectivity setters silent and revision-updating", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    const topics: string[] = [];
+    ingress.onSnapshot((_snapshot, topic) => topics.push(topic));
+    const initialRevision = ingress.snapshot().revision;
+
+    ingress.setConnected(false, "2026-08-10T06:00:00.000Z");
+    const repeatedRevision = ingress.snapshot().revision;
+    ingress.setDeviceConnected(true, "2026-08-10T06:00:01.000Z");
+
+    expect(repeatedRevision).not.toBe(initialRevision);
+    expect(ingress.snapshot().connectivity.deviceMcpConnected).toBe(true);
+    expect(topics).toEqual([]);
+  });
+
   it("allows exactly 12 NPC topics and rejects UGV, referee and wildcard topics", () => {
     expect(NPC_TANK_MQTT_TOPICS).toHaveLength(12);
     expect(() => assertExactNpcTankSubscriptions(NPC_TANK_MQTT_TOPICS)).not.toThrow();
@@ -81,6 +96,134 @@ describe("NPC Tank profile, topic and normalization unit contract", () => {
       ),
     );
     expect(ingress.stateConflict()).toBe(true);
+  });
+
+  it("accepts the unchanged legacy mock status with named idle EO and weapon tracks", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.handle(
+      "/npc_tank1/status",
+      Buffer.from(
+        JSON.stringify({
+          vehicle_id: "npc_tank1",
+          role_name: "npc_tank1",
+          speed_kmh: 0,
+          chassis_task: { id: "mock-npc-mission-1", state: 1, progress: 10 },
+          eo_task: { id: "mock-npc-recon-1", state: -1, progress: 0 },
+          weapon_task: { id: "mock-npc-fire-1", state: -1, progress: 0 },
+          available: true,
+        }),
+      ),
+    );
+
+    expect(ingress.snapshot()).toMatchObject({
+      chassis: { mission: { id: "mock-npc-mission-1", state: 1, progress: 10 } },
+      payload: {
+        reconnaissance: { id: "mock-npc-recon-1", state: -1, progress: 0 },
+        weapon: { id: "mock-npc-fire-1", state: -1, progress: 0 },
+      },
+    });
+  });
+
+  it("preserves the complete legacy NPC task-track grammar", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.handle(
+      "/npc_tank1/status",
+      Buffer.from(
+        JSON.stringify({
+          vehicle_id: "npc_tank1",
+          role_name: "npc_tank1",
+          chassis_task: { id: -1, type: -1, state: 0, progress: 0 },
+          available: true,
+        }),
+      ),
+    );
+    expect(ingress.snapshot().chassis.mission).toEqual({
+      id: "-1",
+      type: -1,
+      state: 0,
+      progress: 0,
+    });
+
+    ingress.handle(
+      "/npc_tank1/mission_state",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "npc_tank1",
+          id: "idle-mission",
+          type: 1,
+          state: -1,
+          progress: 0,
+        }),
+      ),
+    );
+    expect(ingress.snapshot().chassis.mission).toEqual({
+      id: "idle-mission",
+      type: 1,
+      state: -1,
+      progress: 0,
+    });
+
+    expect(() =>
+      ingress.handle(
+        "/npc_tank1/status",
+        Buffer.from(
+          JSON.stringify({
+            vehicle_id: "npc_tank1",
+            role_name: "npc_tank1",
+            eo_task: { state: -1, progress: -1 },
+            available: true,
+          }),
+        ),
+      ),
+    ).toThrow("NPC_TANK_MQTT_TASK_PROGRESS_INVALID");
+  });
+
+  it("replaces the legacy EO track so an omitted task id cannot remain stale", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.handle(
+      "/npc_tank1/status",
+      Buffer.from(
+        JSON.stringify({
+          vehicle_id: "npc_tank1",
+          role_name: "npc_tank1",
+          eo_task: { id: "old-eo", state: 1, progress: 50 },
+          available: true,
+        }),
+      ),
+      false,
+      "2026-08-10T06:00:00.000Z",
+    );
+    ingress.handle(
+      "/npc_tank1/status",
+      Buffer.from(
+        JSON.stringify({
+          vehicle_id: "npc_tank1",
+          role_name: "npc_tank1",
+          eo_task: { state: -1, progress: 0 },
+          available: true,
+        }),
+      ),
+      false,
+      "2026-08-10T06:00:01.000Z",
+    );
+
+    expect(ingress.snapshot().payload.reconnaissance).toEqual({ state: -1, progress: 0 });
+  });
+
+  it("also replaces NPC reconnaissance observations coming from Device MCP reads", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
+    ingress.applyDeviceObservation(
+      { payload: { reconnaissance: { id: "old-eo", state: 1, progress: 50 } } },
+      ["payload"],
+      "2026-08-10T06:00:00.000Z",
+    );
+    ingress.applyDeviceObservation(
+      { payload: { reconnaissance: { state: -1, progress: 0 } } },
+      ["payload"],
+      "2026-08-10T06:00:01.000Z",
+    );
+
+    expect(ingress.snapshot().payload.reconnaissance).toEqual({ state: -1, progress: 0 });
   });
 });
 

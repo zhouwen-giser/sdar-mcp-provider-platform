@@ -153,6 +153,15 @@ describe("NPC Tank navigation, controls and recovery", () => {
 });
 
 describe("NPC Tank payload, circular EO and fire boundary", () => {
+  it("keeps Goal 10 UGV-only operations outside the NPC runtime", async () => {
+    const fixture = await createFixture();
+    for (const operationName of ["vehicle_get_capabilities", "vehicle_control_gimbal"])
+      expect(fixture.runtime.availability(operationName, {})).toMatchObject({
+        availability: "DISABLED",
+        reasonCode: "NPC_TANK_OPERATION_UNSUPPORTED",
+      });
+  });
+
   it("runs base recon and advertises circular scan only with the complete contract", async () => {
     const fixture = await createFixture();
     expect(fixture.runtime.circularScanSupported()).toBe(true);

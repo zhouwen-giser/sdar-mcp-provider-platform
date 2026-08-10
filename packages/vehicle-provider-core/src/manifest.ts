@@ -13,6 +13,8 @@ export interface VehicleManifestProfile {
   supportsGimbalControl?: boolean;
   supportsNavigationPlanning?: boolean;
   supportsFireCancellationBeforeDispatch?: boolean;
+  supportsFireCommandRejectedOutput?: boolean;
+  supportsReconCoverageOutput?: boolean;
   circularScanOmitsArea?: boolean;
 }
 
@@ -153,10 +155,15 @@ export function vehicleProviderManifest(
           profile.supportsCircularEoScan,
           profile.circularScanOmitsArea === true,
         ),
-        outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"], {
-          coverability: { type: "object", additionalProperties: true },
-          outOfRange: { type: "boolean" },
-        }),
+        outputSchema: taskOutput(
+          ["completed", "failed", "cancelled", "timeout"],
+          profile.supportsReconCoverageOutput === true
+            ? {
+                coverability: { type: "object", additionalProperties: true },
+                outOfRange: { type: "boolean" },
+              }
+            : {},
+        ),
         capabilities: caps(true, true, true, true, false, true),
         resourceBinding: binding,
       },
@@ -209,7 +216,7 @@ export function vehicleProviderManifest(
         ),
         outputSchema: taskOutput([
           "fire_command_accepted",
-          "fire_command_rejected",
+          ...(profile.supportsFireCommandRejectedOutput === true ? ["fire_command_rejected"] : []),
           "fire_cycle_completed",
           "target_not_found",
           "target_not_locked",
@@ -224,7 +231,7 @@ export function vehicleProviderManifest(
         capabilities: caps(
           false,
           true,
-          profile.supportsFireCancellationBeforeDispatch === true,
+          profile.supportsFireCancellationBeforeDispatch !== false,
           false,
           true,
           true,

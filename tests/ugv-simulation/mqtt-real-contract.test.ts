@@ -60,6 +60,21 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     expect(npcTankMqttQos("/npc_tank1/status")).toBe(1);
   });
 
+  it("emits UGV connection lifecycle snapshots only on state transitions", () => {
+    const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
+    const topics: string[] = [];
+    ingress.onSnapshot((_snapshot, topic) => topics.push(topic));
+    const initialRevision = ingress.snapshot().revision;
+
+    ingress.setConnected(false, "2026-08-10T06:00:00.000Z");
+    expect(ingress.snapshot().revision).toBe(initialRevision);
+    ingress.setConnected(true, "2026-08-10T06:00:01.000Z");
+    ingress.setDeviceConnected(true, "2026-08-10T06:00:02.000Z");
+    ingress.setDeviceConnected(true, "2026-08-10T06:00:03.000Z");
+
+    expect(topics).toEqual(["mqtt_connection", "device_mcp_connection"]);
+  });
+
   it("keeps wire mode explicit for direct and ROS String(JSON) fixtures", () => {
     expect(
       decodeMqttPayload(

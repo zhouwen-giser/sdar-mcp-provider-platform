@@ -33,6 +33,7 @@ export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
   createSnapshot(): TSnapshot;
   exactTopic(topic: string): boolean;
   normalize(topic: string, value: unknown): NormalizedMqttObservation;
+  connectionSnapshotEvents?: boolean;
   acceptedReasonCode: string;
   duplicateReasonCode: string;
   olderReasonCode: string;
@@ -43,6 +44,7 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
   createSnapshot: () => createUgvSnapshot(),
   exactTopic: exactUgvTopic,
   normalize: (topic, value) => normalizeMqttObservation(topic as never, value),
+  connectionSnapshotEvents: true,
   acceptedReasonCode: "UGV_MQTT_MESSAGE_ACCEPTED",
   duplicateReasonCode: "UGV_MQTT_DUPLICATE_IGNORED",
   olderReasonCode: "UGV_MQTT_OLDER_OBSERVATION_IGNORED",
@@ -88,24 +90,34 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     return () => this.#events.off("snapshot", listener);
   }
   setConnected(connected: boolean, observedAt = new Date().toISOString()): void {
-    if (this.#snapshot.connectivity.mqttConnected === connected) return;
+    if (
+      this.profile.connectionSnapshotEvents === true &&
+      this.#snapshot.connectivity.mqttConnected === connected
+    )
+      return;
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       { connectivity: { mqttConnected: connected } },
       observedAt,
       [],
     ) as TSnapshot;
-    this.#events.emit("snapshot", this.snapshot(), "mqtt_connection");
+    if (this.profile.connectionSnapshotEvents === true)
+      this.#events.emit("snapshot", this.snapshot(), "mqtt_connection");
   }
   setDeviceConnected(connected: boolean, observedAt = new Date().toISOString()): void {
-    if (this.#snapshot.connectivity.deviceMcpConnected === connected) return;
+    if (
+      this.profile.connectionSnapshotEvents === true &&
+      this.#snapshot.connectivity.deviceMcpConnected === connected
+    )
+      return;
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       { connectivity: { deviceMcpConnected: connected } },
       observedAt,
       [],
     ) as TSnapshot;
-    this.#events.emit("snapshot", this.snapshot(), "device_mcp_connection");
+    if (this.profile.connectionSnapshotEvents === true)
+      this.#events.emit("snapshot", this.snapshot(), "device_mcp_connection");
   }
   applyDeviceObservation(
     patch: SnapshotPatch,

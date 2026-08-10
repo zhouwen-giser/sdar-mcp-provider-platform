@@ -267,6 +267,7 @@ export interface SnapshotPatch {
 
 export interface AvailabilityContext {
   operationName: string;
+  operationTracks?: Readonly<Record<string, readonly VehicleTrack[]>>;
   snapshot: VehicleSnapshot;
   freshness: FreshnessPolicy;
   occupiedTracks: ReadonlySet<VehicleTrack>;

@@ -169,22 +169,32 @@ export function normalizeNpcTankMqttObservation(
     if (Object.hasOwn(rewritten, "role")) rewritten.role = "ugv";
   }
   try {
-    const normalized =
+    const normalized: NormalizedMqttObservation =
       topic === "/npc_tank1/status"
         ? composite(
             record(rewritten) ? rewritten : undefined,
             observationBase(rewritten, record(rewritten) ? rewritten : undefined),
             true,
           )
-        : topic === "/npc_tank1/detected_objects"
-          ? npcDetectedObjects(
-              record(rewritten) ? rewritten : undefined,
-              observationBase(rewritten, record(rewritten) ? rewritten : undefined),
-            )
-          : normalizeMqttObservation(
-              topic.replace("/npc_tank1/", "/ugv/") as UgvMqttTopic,
-              rewritten,
-            );
+        : topic === "/npc_tank1/mission_state"
+          ? {
+              ...observationBase(rewritten, record(rewritten) ? rewritten : undefined),
+              patch: {
+                chassis: {
+                  mission: legacyTrack(record(rewritten) ? rewritten : undefined),
+                },
+              },
+              domains: ["mission" as const],
+            }
+          : topic === "/npc_tank1/detected_objects"
+            ? npcDetectedObjects(
+                record(rewritten) ? rewritten : undefined,
+                observationBase(rewritten, record(rewritten) ? rewritten : undefined),
+              )
+            : normalizeMqttObservation(
+                topic.replace("/npc_tank1/", "/ugv/") as UgvMqttTopic,
+                rewritten,
+              );
     const targets = normalized.patch.payload?.targets;
     if (targets !== undefined)
       normalized.patch.payload = {
@@ -226,9 +236,12 @@ function composite(
       },
       domains: [],
     };
-  const chassisTask = record(object.chassis_task) ? track(object.chassis_task, true) : undefined;
-  const eoTask = record(object.eo_task) ? track(object.eo_task, true) : undefined;
-  const weaponTask = record(object.weapon_task) ? track(object.weapon_task, true) : undefined;
+  const normalizeTrack = legacyEoTaskAsReconnaissance
+    ? legacyTrack
+    : (value: Record<string, unknown> | undefined) => track(value, true);
+  const chassisTask = record(object.chassis_task) ? normalizeTrack(object.chassis_task) : undefined;
+  const eoTask = record(object.eo_task) ? normalizeTrack(object.eo_task) : undefined;
+  const weaponTask = record(object.weapon_task) ? normalizeTrack(object.weapon_task) : undefined;
   const speedKmh = optionalNumber(object.speed_kmh ?? object.veh_speed);
   const heading = optionalNumber(object.heading);
   const packetLossRate = optionalNumber(object.packet_loss_rate);
@@ -726,6 +739,23 @@ function track(object: Record<string, unknown> | undefined, compositeTrack: bool
   return {
     ...(taskId === undefined ? {} : { id: taskId }),
     ...(taskType === undefined ? {} : { type: taskType as string | number }),
+    state,
+    ...(progress === undefined ? {} : { progress }),
+  };
+}
+
+function legacyTrack(object: Record<string, unknown> | undefined) {
+  if (object === undefined) throw new Error("UGV_MQTT_TASK_TRACK_INVALID");
+  const state = integer(object.state) as VehicleTaskState;
+  if (!new Set([-1, 0, 1, 2, 3, 4, 5]).has(state as number))
+    throw new Error("UGV_MQTT_TASK_STATE_INVALID");
+  const progress = optionalNumber(object.progress);
+  const taskId = scalarText(object.id);
+  if (progress !== undefined && (progress < 0 || progress > 100))
+    throw new Error("UGV_MQTT_TASK_PROGRESS_INVALID");
+  return {
+    ...(taskId === undefined ? {} : { id: taskId }),
+    ...(object.type === undefined ? {} : { type: object.type as string | number }),
     state,
     ...(progress === undefined ? {} : { progress }),
   };

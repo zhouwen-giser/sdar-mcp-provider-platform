@@ -19,6 +19,8 @@ export function ugvManifest(
       supportsGimbalControl: true,
       supportsNavigationPlanning: true,
       supportsFireCancellationBeforeDispatch: true,
+      supportsFireCommandRejectedOutput: true,
+      supportsReconCoverageOutput: true,
       circularScanOmitsArea: true,
     },
     store,
