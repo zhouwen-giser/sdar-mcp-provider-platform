@@ -6,7 +6,7 @@ Qualification product SHA: `e1473ea6c7ea61ef0495e85cf19b6f7256143791`
 
 Source status: `TRACKED_SOURCE_CLEAN`
 
-Generated at: `2026-08-10T07:39:21Z`
+Generated at: `2026-08-10T08:02:26Z`
 
 ## Qualification summary
 
@@ -124,7 +124,7 @@ The real-control, recon, and effector switches remained false. Safe point, waypo
 
 The final product gate components all exited 0: changed-file Prettier check, lint, typecheck, build, detached protocol check, and the UGV/NPC Provider suites. UGV counts were unit 9, contract 6, integration 20, security 3, and gRPC E2E 1. NPC counts were unit 16, contract 7, integration 8, security 4, and E2E 1.
 
-The Goal 10 suite passed 49 tests across five files. An independent exact commit-object run passed 131/131 across 16 targeted files: UGV Provider 39, NPC Provider 36, Goal 10 core 39, and config/migration 17. The NPC+UGV Provider-platform suites passed 5/5 against temporary PostgreSQL, including a fire-decline case that reached final cancellation with zero Device MCP fire calls. Provider Package tests passed 13/13 plus self-check with UGV still `pending`; config compatibility passed 45/45. The PostgreSQL CAS and unique-active-fire-index checks, config schema, protected paths, frozen protocol, Docker deployment security, and diff checks passed.
+The Goal 10 suite passed 49 tests across five files. An exact timed run passed 131/131 across 16 targeted files: UGV Provider 39, NPC Provider 36, Goal 10 core 39, and config/migration 17. The NPC+UGV Provider-platform suites passed 5/5 against temporary PostgreSQL, including a fire-decline case that reached final cancellation with zero Device MCP fire calls. Provider Package tests passed 13/13 plus self-check with UGV still `pending`; config compatibility passed 45/45. Config schema, protected paths, frozen protocol, Docker deployment security, and qualification-product diff checks passed.
 
 Deterministic recovery covers Device MCP reconnect, uncertain-mutation no-retry, per-tool circuit half-open behavior, MQTT same-process reconnect and resubscription, duplicate-task replay and identity conflict, stale recon/gimbal observation rejection, and Adapter restart reconciliation. The real Compose restart proves process-level reconnection for read operations, not recovery of an active real mutating task.
 
