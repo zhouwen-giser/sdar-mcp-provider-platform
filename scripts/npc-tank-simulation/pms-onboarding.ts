@@ -1361,7 +1361,7 @@ function runtimeCredentialRelativePath(instanceId: string): string {
   ].join("/");
 }
 
-async function readSecureTextFile(path: string, code: string): Promise<string> {
+export async function readSecureTextFile(path: string, code: string): Promise<string> {
   if (!isAbsolute(path)) throw new Error(code);
   let status;
   let canonical;
@@ -1370,6 +1370,7 @@ async function readSecureTextFile(path: string, code: string): Promise<string> {
   } catch {
     throw new Error(code);
   }
+  const permissions = status.mode & 0o7777;
   if (
     status.isSymbolicLink() ||
     !status.isFile() ||
@@ -1377,7 +1378,7 @@ async function readSecureTextFile(path: string, code: string): Promise<string> {
     status.size < 1 ||
     status.size > MAX_CREDENTIAL_BYTES ||
     canonical !== resolve(path) ||
-    (process.platform !== "win32" && ((status.mode & ~0o600) !== 0 || (status.mode & 0o400) === 0))
+    (process.platform !== "win32" && ((permissions & ~0o600) !== 0 || (permissions & 0o400) === 0))
   ) {
     throw new Error(code);
   }

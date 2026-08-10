@@ -1,7 +1,9 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { run } from "../../scripts/npc-tank-simulation/pms-onboarding.js";
+import { readSecureTextFile, run } from "../../scripts/npc-tank-simulation/pms-onboarding.js";
 
 const root = resolve(process.cwd());
 const script = resolve(root, "scripts/npc-tank-simulation/pms-onboarding.ts");
@@ -90,5 +92,16 @@ describe("Goal 11 NPC Tank PMS onboarding script", () => {
         "/run/secrets/token",
       ]),
     ).rejects.toThrow("NPC_PMS_MANAGEMENT_TOKEN_SOURCE_CONFLICT");
+  });
+
+  it("accepts a regular Unix credential file whose permission bits are exactly 0600", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "npc-pms-credential-mode-"));
+    const token = join(directory, "management.token");
+    try {
+      await writeFile(token, "bounded-token\n", { mode: 0o600 });
+      await expect(readSecureTextFile(token, "TOKEN_INVALID")).resolves.toBe("bounded-token");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });
