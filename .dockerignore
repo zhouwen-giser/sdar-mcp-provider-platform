@@ -22,4 +22,5 @@ generated-python
 **/*.p12
 **/*.pfx
 deploy/ugv-simulation/secrets
+deploy/pms-console/secrets
 examples/mock-adapter-python/.venv

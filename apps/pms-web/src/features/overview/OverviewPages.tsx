@@ -26,7 +26,7 @@ export function DashboardPage() {
   const providers = useProviders();
   const deployments = useDeployments();
   const drafts = useConfigurationDrafts();
-  const registry = useRegistryLatest("production");
+  const registry = useRegistryLatest();
   const audit = useAuditEvents();
   const workspace = useClientWorkspace();
   const pending =

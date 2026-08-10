@@ -27,16 +27,58 @@ export interface Page<T> {
   readonly items: readonly T[];
   readonly nextCursor?: string;
 }
+export interface ProviderPackageListFilters {
+  readonly providerType?: string;
+  readonly hostingMode?: "vendor_managed" | "platform_managed";
+  readonly componentStatus?: "passed" | "partial" | "pending" | "failed";
+  readonly realResourceStatus?: "qualified" | "pending" | "failed" | "not_applicable";
+}
+export interface ProviderTypeListFilters {
+  readonly limit?: number;
+  readonly cursor?: string;
+  readonly status?: "active" | "deprecated";
+}
+export interface ProviderListFilters {
+  readonly limit?: number;
+  readonly cursor?: string;
+  readonly status?: "draft" | "active" | "degraded" | "disabled" | "retired";
+}
+export interface ResourceListFilters {
+  readonly limit?: number;
+  readonly cursor?: string;
+  readonly status?: "available" | "unavailable" | "retired";
+}
+export interface RuntimeDeploymentListFilters {
+  readonly environment?: string;
+  readonly status?: RuntimeDeploymentDto["status"];
+  readonly limit?: number;
+  readonly cursor?: string;
+}
+export interface RuntimeProcessListFilters {
+  readonly processState?: RuntimeProcessDto["processState"];
+  readonly observedHealth?: RuntimeProcessDto["observedHealth"];
+  readonly limit?: number;
+  readonly cursor?: string;
+}
 export interface ProviderGateway {
-  listProviderTypes(context?: GatewayContext): Promise<Page<ProviderTypeDto>>;
+  listProviderTypes(
+    context?: GatewayContext,
+    filters?: ProviderTypeListFilters,
+  ): Promise<Page<ProviderTypeDto>>;
   getProviderType(providerTypeId: string, context?: GatewayContext): Promise<ProviderTypeDto>;
-  listProviderPackages(context?: GatewayContext): Promise<Page<ProviderPackageDto>>;
+  listProviderPackages(
+    context?: GatewayContext,
+    filters?: ProviderPackageListFilters,
+  ): Promise<Page<ProviderPackageDto>>;
   getProviderPackage(
     packageId: string,
     version?: string,
     context?: GatewayContext,
   ): Promise<ProviderPackageDto>;
-  listProviders(context?: GatewayContext): Promise<Page<ProviderDto>>;
+  listProviders(
+    context?: GatewayContext,
+    filters?: ProviderListFilters,
+  ): Promise<Page<ProviderDto>>;
   getProvider(providerId: string, context?: GatewayContext): Promise<ProviderDto>;
   createProvider(
     input: RequestBody<"createProvider">,
@@ -49,7 +91,11 @@ export interface ProviderGateway {
   ): Promise<ProviderDto>;
 }
 export interface ResourceGateway {
-  listResources(environment: string, context?: GatewayContext): Promise<Page<ResourceDto>>;
+  listResources(
+    environment: string,
+    context?: GatewayContext,
+    filters?: ResourceListFilters,
+  ): Promise<Page<ResourceDto>>;
   getResource(
     environment: string,
     resourceId: string,
@@ -112,6 +158,7 @@ export interface RuntimeGateway {
   listDeployments(
     providerId: string,
     context?: GatewayContext,
+    filters?: RuntimeDeploymentListFilters,
   ): Promise<Page<RuntimeDeploymentDto>>;
   getDeployment(
     providerId: string,
@@ -151,6 +198,7 @@ export interface RuntimeGateway {
     providerId: string,
     deploymentId: string,
     context?: GatewayContext,
+    filters?: RuntimeProcessListFilters,
   ): Promise<Page<RuntimeProcessDto>>;
   getProcess(
     providerId: string,
@@ -160,7 +208,11 @@ export interface RuntimeGateway {
 }
 export interface RegistryGateway {
   latest(environment: string, context?: GatewayContext): Promise<RegistrySnapshotDto>;
-  history(environment: string, context?: GatewayContext): Promise<Page<RegistrySnapshotDto>>;
+  history(
+    environment: string,
+    context?: GatewayContext,
+    filters?: { readonly limit?: number },
+  ): Promise<Page<RegistrySnapshotDto>>;
   diff(
     environment: string,
     fromRevision: number,

@@ -158,6 +158,7 @@
     "dev:runtime": "tsx apps/runtime/src/main.ts",
     "dev:pms-api": "tsx apps/pms-api/src/main.ts",
     "dev:pms-web": "pnpm --filter @sdar/pms-web build && node scripts/serve-pms-web.mjs",
+    "test:pms-web-api-e2e": "node scripts/require-env.mjs TEST_DATABASE_URL && VITE_PMS_DATA_MODE=api pnpm --filter @sdar/pms-web build && pnpm --filter @sdar/pms-web exec playwright test --config playwright.real-api.config.ts",
     "dev:ugv-adapter": "tsx apps/ugv-provider-adapter/src/main.ts",
     "dev:npc-tank-adapter": "tsx apps/npc-tank-provider-adapter/src/main.ts",
     "dev:mock-ugv-device-mcp": "tsx apps/mock-ugv-device-mcp/src/main.ts",

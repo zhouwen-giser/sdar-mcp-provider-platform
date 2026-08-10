@@ -48,12 +48,36 @@ if [[ ! "$UGV_QUALIFICATION_GIT_SHA" =~ ^[0-9a-f]{40,64}$ ]]; then
 fi
 export UGV_QUALIFICATION_GIT_SHA
 export UGV_QUALIFICATION_SOURCE_STATUS="TRACKED_SOURCE_CLEAN"
+export PMS_CONSOLE_GIT_SHA="$UGV_QUALIFICATION_GIT_SHA"
 echo "Qualification source verified: $UGV_QUALIFICATION_GIT_SHA"
 compose=(docker compose --project-name "$project_name" --env-file "$env_file" -f "$deploy_dir/compose.yaml")
 
 "${compose[@]}" config --quiet
+pms_secret_root="$(
+  "${compose[@]}" config --format json | node --input-type=module -e '
+    import { dirname } from "node:path";
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const document = JSON.parse(source);
+    const volumes = document.services?.["pms-api"]?.volumes;
+    const api = Array.isArray(volumes)
+      ? volumes.find((entry) => entry?.target === "/run/pms-secrets/api")
+      : undefined;
+    if (api?.type !== "bind" || typeof api.source !== "string") process.exit(2);
+    process.stdout.write(`${dirname(api.source)}\n`);
+  '
+)" || {
+  echo "BLOCKED_CONFIGURATION: failed to resolve the PMS Console secret root." >&2
+  exit 2
+}
+node "$repo_root/deploy/pms-console/validate-secrets.mjs" \
+  "$pms_secret_root" \
+  "$repo_root"
 adapter_image="sdar-ugv-simulation-real/ugv-adapter:$UGV_QUALIFICATION_GIT_SHA"
 runtime_image="sdar-ugv-simulation-real/runtime:$UGV_QUALIFICATION_GIT_SHA"
+pms_api_image="sdar/pms-api:$UGV_QUALIFICATION_GIT_SHA"
+pms_worker_image="sdar/pms-worker:$UGV_QUALIFICATION_GIT_SHA"
+pms_web_image="sdar/pms-web:$UGV_QUALIFICATION_GIT_SHA"
 
 verify_image_revision() {
   local image="$1"
@@ -88,6 +112,46 @@ verify_running_service_image() {
   fi
 }
 
+for service in pms-postgres pms-api pms-worker pms-web; do
+  container_id="$("${compose[@]}" ps --quiet "$service")"
+  if [[ -z "$container_id" ]]; then
+    echo "BLOCKED_EXTERNAL_ENV: required PMS service is not running: $service" >&2
+    exit 2
+  fi
+  running="$(docker container inspect --format '{{ .State.Running }}' "$container_id")"
+  health="$(
+    docker container inspect \
+      --format '{{ if .State.Health }}{{ .State.Health.Status }}{{ else }}none{{ end }}' \
+      "$container_id"
+  )"
+  if [[ "$running" != "true" || "$health" != "healthy" ]]; then
+    echo "BLOCKED_EXTERNAL_ENV: required PMS service is unhealthy: $service" >&2
+    exit 2
+  fi
+done
+
+verify_image_revision "$pms_api_image"
+verify_image_revision "$pms_worker_image"
+verify_image_revision "$pms_web_image"
+verify_running_service_image pms-api "$pms_api_image"
+verify_running_service_image pms-worker "$pms_worker_image"
+verify_running_service_image pms-web "$pms_web_image"
+
+echo "Checking PMS DB, API, Worker, Web, and same-origin proxy boundary..."
+"${compose[@]}" exec -T pms-postgres pg_isready -U pms_admin -d pms >/dev/null
+"${compose[@]}" exec -T pms-api node -e \
+  "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+"${compose[@]}" exec -T pms-web node -e \
+  "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+published="$("${compose[@]}" port pms-web 8080)"
+web_port="${published##*:}"
+if [[ ! "$web_port" =~ ^[1-9][0-9]*$ ]]; then
+  echo "BLOCKED_CONFIGURATION: PMS Web published port is invalid." >&2
+  exit 2
+fi
+node "$repo_root/deploy/pms-console/smoke-client.mjs" \
+  "http://127.0.0.1:$web_port"
+
 verify_image_revision "$adapter_image"
 verify_image_revision "$runtime_image"
 verify_running_service_image ugv-adapter "$adapter_image"
@@ -114,4 +178,4 @@ node "$repo_root/scripts/ugv-simulation/read-only-smoke.mjs" \
   --env-file "$env_file" \
   --output "$evidence_path"
 
-echo "PASS: read-only Runtime smoke completed; evidence=$evidence_path"
+echo "PASS: PMS Console checks and read-only Runtime smoke completed; evidence=$evidence_path"

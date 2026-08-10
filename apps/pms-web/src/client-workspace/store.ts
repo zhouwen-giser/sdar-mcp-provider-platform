@@ -73,7 +73,7 @@ export interface WorkspaceSnapshot {
   readonly preferences: LocalPreferences;
 }
 
-const initial: WorkspaceSnapshot = {
+const mockInitial: WorkspaceSnapshot = {
   notifications: [
     {
       id: "notification-001",
@@ -227,9 +227,27 @@ const initial: WorkspaceSnapshot = {
   },
 };
 
+const apiInitial: WorkspaceSnapshot = {
+  notifications: [],
+  jobs: [],
+  operations: [],
+  incidents: [],
+  changes: [],
+  configurationDraftIds: [],
+  configurationRevisions: [],
+  preferences: {
+    density: "comfortable",
+    defaultEnvironment: "",
+    showFutureNavigation: false,
+  },
+};
+
 export class ClientWorkspaceStore {
-  private value = structuredClone(initial);
+  private value: WorkspaceSnapshot;
   private listeners = new Set<() => void>();
+  constructor(mode: "mock" | "api" = "mock") {
+    this.value = structuredClone(mode === "mock" ? mockInitial : apiInitial);
+  }
   snapshot = () => this.value;
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);

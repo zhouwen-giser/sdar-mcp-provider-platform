@@ -2,6 +2,20 @@ import { describe, expect, it, vi } from "vitest";
 import { ClientWorkspaceStore } from "../src/client-workspace/store.js";
 
 describe("client-only workspaces", () => {
+  it("starts API mode with a clean local-only workspace", () => {
+    const snapshot = new ClientWorkspaceStore("api").snapshot();
+    expect(snapshot).toMatchObject({
+      notifications: [],
+      jobs: [],
+      operations: [],
+      incidents: [],
+      changes: [],
+      configurationDraftIds: [],
+      configurationRevisions: [],
+    });
+    expect(snapshot.preferences.defaultEnvironment).toBe("");
+  });
+
   it("keeps notifications, incidents and changes outside contract gateways", () => {
     const store = new ClientWorkspaceStore();
     const listener = vi.fn();

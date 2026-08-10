@@ -22,10 +22,16 @@ import type {
   GatewayBundle,
   GatewayContext,
   Page,
+  ProviderListFilters,
+  ProviderPackageListFilters,
   ProviderGateway,
+  ProviderTypeListFilters,
   RegistryGateway,
+  ResourceListFilters,
   ResourceGateway,
+  RuntimeDeploymentListFilters,
   RuntimeGateway,
+  RuntimeProcessListFilters,
   ScenarioController,
 } from "../contracts/index.js";
 import { GatewayProblem } from "../contracts/index.js";
@@ -421,8 +427,23 @@ const audits: AuditEventDto[] = [
 function clone<T>(value: T): T {
   return structuredClone(value);
 }
-function page<T>(items: readonly T[]): Page<T> {
-  return { items: clone(items) };
+function page<T>(
+  items: readonly T[],
+  pagination: { readonly cursor?: string; readonly limit?: number } = {},
+): Page<T> {
+  const offset = parseMockCursor(pagination.cursor);
+  const limit = pagination.limit ?? items.length;
+  const values = items.slice(offset, offset + limit);
+  const nextOffset = offset + values.length;
+  return {
+    items: clone(values),
+    ...(nextOffset < items.length ? { nextCursor: String(nextOffset) } : {}),
+  };
+}
+function parseMockCursor(cursor: string | undefined): number {
+  if (cursor === undefined) return 0;
+  const value = Number(cursor);
+  return Number.isSafeInteger(value) && value >= 0 ? value : 0;
 }
 
 export class ContractMockStore
@@ -511,9 +532,15 @@ export class ContractMockStore
     this.revisionValue += 1;
     this.emit();
   }
-  async listProviderTypes(context?: GatewayContext) {
+  async listProviderTypes(context?: GatewayContext, filters: ProviderTypeListFilters = {}) {
     await this.gate(context);
-    return page(this.scenario === "empty" ? [] : providerTypes);
+    const data =
+      this.scenario === "empty"
+        ? []
+        : providerTypes.filter(
+            (item) => filters.status === undefined || item.status === filters.status,
+          );
+    return page(data, filters);
   }
   async getProviderType(id: string, context?: GatewayContext) {
     await this.gate(context);
@@ -521,9 +548,22 @@ export class ContractMockStore
     if (!found) this.raise("ENTITY_NOT_FOUND", 404, "Provider type not found", context);
     return clone(found);
   }
-  async listProviderPackages(context?: GatewayContext) {
+  async listProviderPackages(context?: GatewayContext, filters: ProviderPackageListFilters = {}) {
     await this.gate(context);
-    return page(this.scenario === "empty" ? [] : providerPackages);
+    const data =
+      this.scenario === "empty"
+        ? []
+        : providerPackages.filter(
+            (item) =>
+              (filters.providerType === undefined || item.providerType === filters.providerType) &&
+              (filters.hostingMode === undefined ||
+                item.hostingModes.includes(filters.hostingMode)) &&
+              (filters.componentStatus === undefined ||
+                item.qualification.componentStatus === filters.componentStatus) &&
+              (filters.realResourceStatus === undefined ||
+                item.qualification.realResourceStatus === filters.realResourceStatus),
+          );
+    return page(data);
   }
   async getProviderPackage(id: string, version?: string, context?: GatewayContext) {
     await this.gate(context);
@@ -533,14 +573,15 @@ export class ContractMockStore
     if (!found) this.raise("ENTITY_NOT_FOUND", 404, "Provider package not found", context);
     return clone(found);
   }
-  async listProviders(context?: GatewayContext) {
+  async listProviders(context?: GatewayContext, filters: ProviderListFilters = {}) {
     await this.gate(context);
     let data = clone(this.providerData);
     if (this.scenario === "empty") data = [];
     if (this.scenario === "provider-degraded" && data[0])
       data[0] = { ...data[0], status: "degraded" };
     if (this.scenario === "partial-data") data = data.slice(0, 1);
-    return page(data);
+    if (filters.status !== undefined) data = data.filter((item) => item.status === filters.status);
+    return page(data, filters);
   }
   async getProvider(id: string, context?: GatewayContext) {
     await this.gate(context);
@@ -587,13 +628,21 @@ export class ContractMockStore
     this.record("provider.status_updated", "provider", id, context);
     return clone(updated);
   }
-  async listResources(environment: string, context?: GatewayContext) {
+  async listResources(
+    environment: string,
+    context?: GatewayContext,
+    filters: ResourceListFilters = {},
+  ) {
     await this.gate(context);
-    return page(
+    const data =
       this.scenario === "empty"
         ? []
-        : this.resourceData.filter((item) => item.environment === environment),
-    );
+        : this.resourceData.filter(
+            (item) =>
+              item.environment === environment &&
+              (filters.status === undefined || item.status === filters.status),
+          );
+    return page(data, filters);
   }
   async getResource(environment: string, id: string, context?: GatewayContext) {
     await this.gate(context);
@@ -877,7 +926,11 @@ export class ContractMockStore
     );
     return clone(result);
   }
-  async listDeployments(providerId: string, context?: GatewayContext) {
+  async listDeployments(
+    providerId: string,
+    context?: GatewayContext,
+    filters: RuntimeDeploymentListFilters = {},
+  ) {
     await this.gate(context);
     let data = clone(this.deploymentData.filter((item) => item.providerId === providerId));
     if (this.scenario === "empty") data = [];
@@ -888,7 +941,10 @@ export class ContractMockStore
         observedRevision: Math.max(0, data[0].desiredRevision - 1),
       };
     if (this.scenario === "partial-data") data = data.slice(0, 1);
-    return page(data);
+    if (filters.environment !== undefined)
+      data = data.filter((item) => item.environment === filters.environment);
+    if (filters.status !== undefined) data = data.filter((item) => item.status === filters.status);
+    return page(data, filters);
   }
   async getDeployment(providerId: string, id: string, context?: GatewayContext) {
     await this.gate(context);
@@ -1007,7 +1063,12 @@ export class ContractMockStore
   ) {
     return this.deploymentIntent(id, input, "reconcile", context);
   }
-  async listProcesses(providerId: string, deploymentId: string, context?: GatewayContext) {
+  async listProcesses(
+    providerId: string,
+    deploymentId: string,
+    context?: GatewayContext,
+    filters: RuntimeProcessListFilters = {},
+  ) {
     await this.gate(context);
     const providerDeployments = new Set(
       this.deploymentData
@@ -1033,7 +1094,11 @@ export class ContractMockStore
         registrationFreshness: "stale",
       };
     if (this.scenario === "partial-data") data = data.slice(0, 1);
-    return page(data);
+    if (filters.processState !== undefined)
+      data = data.filter((item) => item.processState === filters.processState);
+    if (filters.observedHealth !== undefined)
+      data = data.filter((item) => item.observedHealth === filters.observedHealth);
+    return page(data, filters);
   }
   async getProcess(providerId: string, id: string, context?: GatewayContext) {
     await this.gate(context);
@@ -1055,9 +1120,16 @@ export class ContractMockStore
       this.raise("REGISTRY_SNAPSHOT_NOT_FOUND", 404, "Registry snapshot not found", context);
     return clone(found);
   }
-  async history(environment: string, context?: GatewayContext) {
+  async history(
+    environment: string,
+    context?: GatewayContext,
+    filters: { readonly limit?: number } = {},
+  ) {
     await this.gate(context);
-    return page(snapshots.filter((x) => x.environment === environment));
+    return page(
+      snapshots.filter((x) => x.environment === environment),
+      filters,
+    );
   }
   async diff(
     environment: string,
@@ -1105,9 +1177,7 @@ export class ContractMockStore
       data = data.filter((item) => item.correlationId === filters.correlationId);
     if (filters.occurredBefore !== undefined)
       data = data.filter((item) => item.occurredAt < filters.occurredBefore!);
-    if (filters.cursor !== undefined) data = data.slice(Number(filters.cursor));
-    if (filters.limit !== undefined) data = data.slice(0, filters.limit);
-    return page(data);
+    return page(data, filters);
   }
 }
 

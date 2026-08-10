@@ -14,13 +14,17 @@ import {
 import type { ConfigurationContentDto } from "./query-types.js";
 import { useClientWorkspace, useClientWorkspaceStore } from "../client-workspace/context.js";
 import type { AuditListFilters } from "../gateways/contracts/index.js";
+import type { Page } from "../gateways/contracts/index.js";
+import { dataMode } from "../gateways/factory.js";
+import { collectCursorPages, currentEnvironmentScope } from "./query-runtime.js";
+
+export { collectCursorPages, currentEnvironmentScope } from "./query-runtime.js";
 
 const context = (signal?: AbortSignal) => ({
   signal,
   correlationId: `corr-web-${Date.now()}`,
-  actorId: "prototype-admin",
+  actorId: "pms-web-local-operator",
 });
-const PRODUCT_ENVIRONMENTS = ["production", "staging"] as const;
 const PRODUCT_PROVIDER_IDS = ["ugv-prod-001", "ha-east-001", "npc-training-001"] as const;
 const PRODUCT_PROCESS_SCOPES = [
   ["ugv-prod-001", "deploy-001"],
@@ -31,7 +35,9 @@ export function useProviderTypes() {
   return useQuery({
     queryKey: queryKeys.providerTypes,
     queryFn: ({ signal }) =>
-      providers.listProviderTypes(context(signal)).then((page) => page.items),
+      collectCursorPages((cursor) =>
+        providers.listProviderTypes(context(signal), cursor === undefined ? {} : { cursor }),
+      ),
   });
 }
 export function useProviderPackages() {
@@ -41,7 +47,7 @@ export function useProviderPackages() {
     queryFn: ({ signal }) =>
       providers
         .listProviderPackages(context(signal))
-        .then((page) => page.items.map(mapProviderPackage)),
+        .then((page) => terminalItems(page, "listProviderPackages").map(mapProviderPackage)),
   });
 }
 export function useProviderPackage(id: string, version?: string) {
@@ -58,7 +64,9 @@ export function useProviders() {
   return useQuery({
     queryKey: queryKeys.providers,
     queryFn: ({ signal }) =>
-      providers.listProviders(context(signal)).then((page) => page.items.map(mapProvider)),
+      collectCursorPages((cursor) =>
+        providers.listProviders(context(signal), cursor === undefined ? {} : { cursor }),
+      ).then((items) => items.map(mapProvider)),
   });
 }
 export function useProvider(id: string) {
@@ -106,16 +114,27 @@ export function useUpdateProviderStatus() {
     },
   });
 }
-export function useResources(environments: readonly string[] = PRODUCT_ENVIRONMENTS) {
+export function useResources(environments?: readonly string[]) {
   const { resources } = useGateways();
+  const scope = environments ?? currentEnvironmentScope();
   return useQuery({
-    queryKey: queryKeys.resources(environments),
-    queryFn: async ({ signal }) =>
-      (
+    queryKey: queryKeys.resources(scope),
+    queryFn: async ({ signal }) => {
+      if (scope.length === 0) throw new Error("PMS_ENVIRONMENT_SCOPE_REQUIRED");
+      return (
         await Promise.all(
-          environments.map((environment) => resources.listResources(environment, context(signal))),
+          scope.map((environment) =>
+            collectCursorPages((cursor) =>
+              resources.listResources(
+                environment,
+                context(signal),
+                cursor === undefined ? {} : { cursor },
+              ),
+            ),
+          ),
         )
-      ).flatMap((page) => page.items.map(mapResource)),
+      ).flatMap((items) => items.map(mapResource));
+    },
   });
 }
 export function useResource(environment: string, id: string) {
@@ -133,7 +152,9 @@ export function useBindings(providerId: string) {
     queryKey: queryKeys.bindings(providerId),
     enabled: providerId.length > 0,
     queryFn: ({ signal }) =>
-      resources.listBindings(providerId, context(signal)).then((page) => page.items),
+      resources
+        .listBindings(providerId, context(signal))
+        .then((page) => terminalItems(page, "listProviderResourceBindings")),
   });
 }
 export function useBindResource() {
@@ -342,16 +363,34 @@ export function useRollbackConfigurationDraft() {
     },
   });
 }
-export function useDeployments(providerIds: readonly string[] = PRODUCT_PROVIDER_IDS) {
-  const { runtime } = useGateways();
+export function useDeployments(providerIds?: readonly string[]) {
+  const { providers, runtime } = useGateways();
+  const configuredProviderIds =
+    providerIds ?? (dataMode() === "mock" ? PRODUCT_PROVIDER_IDS : undefined);
   return useQuery({
-    queryKey: queryKeys.deployments(providerIds),
-    queryFn: async ({ signal }) =>
-      (
+    queryKey: queryKeys.deployments(configuredProviderIds ?? ["api-derived"]),
+    queryFn: async ({ signal }) => {
+      const ids =
+        configuredProviderIds ??
+        (
+          await collectCursorPages((cursor) =>
+            providers.listProviders(context(signal), cursor === undefined ? {} : { cursor }),
+          )
+        ).map((item) => item.providerId);
+      return (
         await Promise.all(
-          providerIds.map((providerId) => runtime.listDeployments(providerId, context(signal))),
+          ids.map((providerId) =>
+            collectCursorPages((cursor) =>
+              runtime.listDeployments(
+                providerId,
+                context(signal),
+                cursor === undefined ? {} : { cursor },
+              ),
+            ),
+          ),
         )
-      ).flatMap((page) => page.items.map(mapRuntimeDeployment)),
+      ).flatMap((items) => items.map(mapRuntimeDeployment));
+    },
   });
 }
 export function useDeployment(providerId: string, id: string) {
@@ -444,23 +483,52 @@ export function useScaleDeployment() {
     },
   });
 }
-export function useProcesses(
-  scopes: readonly (readonly [string, string])[] = PRODUCT_PROCESS_SCOPES,
-) {
-  const { runtime } = useGateways();
+export function useProcesses(scopes?: readonly (readonly [string, string])[]) {
+  const { providers, runtime } = useGateways();
+  const configuredScopes = scopes ?? (dataMode() === "mock" ? PRODUCT_PROCESS_SCOPES : undefined);
   return useQuery({
-    queryKey: queryKeys.processes(scopes),
-    queryFn: async ({ signal }) =>
-      (
+    queryKey: queryKeys.processes(configuredScopes ?? [["api-derived", "api-derived"]]),
+    queryFn: async ({ signal }) => {
+      let resolvedScopes = configuredScopes;
+      if (resolvedScopes === undefined) {
+        const providerIds = (
+          await collectCursorPages((cursor) =>
+            providers.listProviders(context(signal), cursor === undefined ? {} : { cursor }),
+          )
+        ).map((item) => item.providerId);
+        const deployments = (
+          await Promise.all(
+            providerIds.map((providerId) =>
+              collectCursorPages((cursor) =>
+                runtime.listDeployments(
+                  providerId,
+                  context(signal),
+                  cursor === undefined ? {} : { cursor },
+                ),
+              ),
+            ),
+          )
+        ).flat();
+        resolvedScopes = deployments.map((item) => [item.providerId, item.deploymentId] as const);
+      }
+      return (
         await Promise.all(
-          scopes.map(async ([providerId, deploymentId]) => ({
+          resolvedScopes.map(async ([providerId, deploymentId]) => ({
             providerId,
-            page: await runtime.listProcesses(providerId, deploymentId, context(signal)),
+            items: await collectCursorPages((cursor) =>
+              runtime.listProcesses(
+                providerId,
+                deploymentId,
+                context(signal),
+                cursor === undefined ? {} : { cursor },
+              ),
+            ),
           })),
         )
-      ).flatMap(({ providerId, page }) =>
-        page.items.map((item) => mapRuntimeProcess(item, providerId)),
-      ),
+      ).flatMap(({ providerId, items }) =>
+        items.map((item) => mapRuntimeProcess(item, providerId)),
+      );
+    },
   });
 }
 export function useProcess(providerId: string, id: string) {
@@ -474,29 +542,42 @@ export function useProcess(providerId: string, id: string) {
         .then((item) => mapRuntimeProcess(item, providerId)),
   });
 }
-export function useRegistryLatest(environment: string) {
+export function useRegistryLatest(environment?: string) {
   const { registry } = useGateways();
+  const resolvedEnvironment = environment ?? currentEnvironmentScope()[0] ?? "";
   return useQuery({
-    queryKey: queryKeys.registryLatest(environment),
-    queryFn: ({ signal }) =>
-      registry.latest(environment, context(signal)).then(mapRegistrySnapshot),
+    queryKey: queryKeys.registryLatest(resolvedEnvironment),
+    queryFn: ({ signal }) => {
+      if (resolvedEnvironment.length === 0)
+        return Promise.reject(new Error("PMS_ENVIRONMENT_SCOPE_REQUIRED"));
+      return registry.latest(resolvedEnvironment, context(signal)).then(mapRegistrySnapshot);
+    },
   });
 }
-export function useRegistryHistory(environment: string) {
+export function useRegistryHistory(environment?: string) {
   const { registry } = useGateways();
+  const resolvedEnvironment = environment ?? currentEnvironmentScope()[0] ?? "";
   return useQuery({
-    queryKey: queryKeys.registryHistory(environment),
-    queryFn: ({ signal }) =>
-      registry
-        .history(environment, context(signal))
-        .then((page) => page.items.map(mapRegistrySnapshot)),
+    queryKey: queryKeys.registryHistory(resolvedEnvironment),
+    queryFn: ({ signal }) => {
+      if (resolvedEnvironment.length === 0)
+        return Promise.reject(new Error("PMS_ENVIRONMENT_SCOPE_REQUIRED"));
+      return registry
+        .history(resolvedEnvironment, context(signal))
+        .then((page) => terminalItems(page, "listRegistryHistory").map(mapRegistrySnapshot));
+    },
   });
 }
-export function useRegistryDiff(environment: string, from: number, to: number) {
+export function useRegistryDiff(environment: string | undefined, from: number, to: number) {
   const { registry } = useGateways();
+  const resolvedEnvironment = environment ?? currentEnvironmentScope()[0] ?? "";
   return useQuery({
-    queryKey: queryKeys.registryDiff(environment, from, to),
-    queryFn: ({ signal }) => registry.diff(environment, from, to, context(signal)),
+    queryKey: queryKeys.registryDiff(resolvedEnvironment, from, to),
+    queryFn: ({ signal }) => {
+      if (resolvedEnvironment.length === 0)
+        return Promise.reject(new Error("PMS_ENVIRONMENT_SCOPE_REQUIRED"));
+      return registry.diff(resolvedEnvironment, from, to, context(signal));
+    },
   });
 }
 export function useAuditEvents(filters: AuditListFilters = {}) {
@@ -504,6 +585,15 @@ export function useAuditEvents(filters: AuditListFilters = {}) {
   return useQuery({
     queryKey: queryKeys.audit(filters),
     queryFn: ({ signal }) =>
-      audit.list(filters, context(signal)).then((page) => page.items.map(mapAuditEvent)),
+      collectCursorPages((cursor) =>
+        audit.list({ ...filters, ...(cursor === undefined ? {} : { cursor }) }, context(signal)),
+      ).then((items) => items.map(mapAuditEvent)),
   });
+}
+
+function terminalItems<T>(page: Page<T>, operationId: string): readonly T[] {
+  if (page.nextCursor !== undefined) {
+    throw new Error(`PMS_PAGINATION_CURSOR_UNFOLLOWABLE:${operationId}`);
+  }
+  return page.items;
 }

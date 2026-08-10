@@ -36,6 +36,7 @@ import {
   MutationFeedback,
   ProductPage,
 } from "../shared/product-components.js";
+import { dataMode } from "../../gateways/factory.js";
 
 export function ProviderListPage() {
   const query = useProviders();
@@ -145,6 +146,7 @@ export function ProviderCreatePage() {
   const types = useProviderTypes();
   const packages = useProviderPackages();
   const mutation = useCreateProvider();
+  const mockMode = dataMode() === "mock";
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<{
     providerId: string;
@@ -154,12 +156,12 @@ export function ProviderCreatePage() {
     hostingMode: "vendor_managed" | "platform_managed";
     adapterEndpoint: string;
   }>({
-    providerId: "provider-new-001",
-    providerTypeId: "ugv",
-    packageId: "ugv-provider",
-    packageVersion: "1.0.0",
+    providerId: mockMode ? "provider-new-001" : "",
+    providerTypeId: mockMode ? "ugv" : "",
+    packageId: mockMode ? "ugv-provider" : "",
+    packageVersion: mockMode ? "1.0.0" : "",
     hostingMode: "platform_managed",
-    adapterEndpoint: "127.0.0.1:8121",
+    adapterEndpoint: mockMode ? "127.0.0.1:8121" : "",
   });
   const submit = () => mutation.mutate(draft, { onSuccess: () => setStep(5) });
   return (

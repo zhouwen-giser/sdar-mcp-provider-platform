@@ -84,8 +84,11 @@ export function ResourceListPage() {
         />
         <select value={environment} onChange={(e) => setEnvironment(e.target.value)}>
           <option value="all">全部环境</option>
-          <option>production</option>
-          <option>staging</option>
+          {[...new Set((resources.data ?? []).map((item) => item.environment))]
+            .sort()
+            .map((value) => (
+              <option key={value}>{value}</option>
+            ))}
         </select>
       </FilterBar>
       <section className="panel">

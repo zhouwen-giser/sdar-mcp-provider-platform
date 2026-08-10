@@ -19,4 +19,4 @@ docker compose \
   -f "$deploy_dir/compose.yaml" \
   down --remove-orphans --timeout 30
 
-echo "UGV stack stopped. PostgreSQL and contract-report volumes were preserved."
+echo "Integrated stack stopped. PMS/UGV PostgreSQL, Worker state, and contract-report volumes were preserved."

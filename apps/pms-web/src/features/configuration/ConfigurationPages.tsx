@@ -24,7 +24,9 @@ import {
   useRollbackConfigurationDraft,
   useUpdateConfigurationDraft,
   useValidateConfigurationDraft,
+  currentEnvironmentScope,
 } from "../../queries/hooks.js";
+import { dataMode } from "../../gateways/factory.js";
 import { navigate } from "../../app/navigation.js";
 import {
   ContractBoundaryNote,
@@ -98,10 +100,12 @@ export function ConfigurationListPage() {
 export function ConfigurationCreatePage() {
   const [params] = useSearchParams();
   const mutation = useCreateConfigurationDraft();
+  const mockMode = dataMode() === "mock";
+  const environment = currentEnvironmentScope()[0] ?? "";
   const [draft, setDraft] = useState({
-    draftId: "draft-new-001",
-    definitionId: "runtime-config",
-    environment: "production",
+    draftId: mockMode ? "draft-new-001" : "",
+    definitionId: mockMode ? "runtime-config" : "",
+    environment,
     targetType: (params.get("targetType") ?? "runtime_deployment") as
       | "environment"
       | "provider_type"
@@ -109,9 +113,9 @@ export function ConfigurationCreatePage() {
       | "runtime_deployment"
       | "runtime_instance"
       | "collector",
-    targetId: params.get("targetId") ?? "deploy-001",
-    configGroup: "runtime",
-    dataId: "runtime-main",
+    targetId: params.get("targetId") ?? (mockMode ? "deploy-001" : ""),
+    configGroup: mockMode ? "runtime" : "",
+    dataId: mockMode ? "runtime-main" : "",
     contentText: JSON.stringify(
       {
         runtime: { port: 8201, logLevel: "info" },

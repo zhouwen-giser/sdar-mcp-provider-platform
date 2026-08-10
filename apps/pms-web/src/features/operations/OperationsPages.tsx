@@ -21,6 +21,7 @@ import {
 } from "../../queries/hooks.js";
 import { useClientWorkspace, useClientWorkspaceStore } from "../../client-workspace/context.js";
 import { navigate } from "../../app/navigation.js";
+import { dataMode } from "../../gateways/factory.js";
 import {
   LocalWorkspaceHeader,
   MutationFeedback,
@@ -30,8 +31,12 @@ import {
 export function OperationsPage({ detail = false }: { readonly detail?: boolean }) {
   const { operationId = "" } = useParams();
   const snapshot = useClientWorkspace();
+  const deployments = useDeployments();
   if (detail) {
     const item = snapshot.operations.find((value) => value.operationId === operationId);
+    const providerId = deployments.data?.find(
+      (deployment) => deployment.deploymentId === item?.subjectId,
+    )?.providerId;
     return item ? (
       <ProductPage
         title={item.operationId}
@@ -61,7 +66,13 @@ export function OperationsPage({ detail = false }: { readonly detail?: boolean }
             <h2>关联入口</h2>
             <div className="quick-actions">
               <Button
-                onClick={() => navigate(`/runtime/deployments/ugv-prod-001/${item.subjectId}`)}
+                disabled={providerId === undefined}
+                title={providerId === undefined ? "Deployment provider is not loaded" : undefined}
+                onClick={() =>
+                  providerId === undefined
+                    ? undefined
+                    : navigate(`/runtime/deployments/${providerId}/${item.subjectId}`)
+                }
               >
                 Deployment
               </Button>
@@ -150,7 +161,7 @@ export function RuntimeHealthPage() {
   const providers = useProviders();
   const deployments = useDeployments();
   const processes = useProcesses();
-  const registry = useRegistryLatest("production");
+  const registry = useRegistryLatest();
   const workspace = useClientWorkspace();
   return (
     <ProductPage
@@ -228,8 +239,12 @@ export function RuntimeHealthPage() {
 export function JobsPage({ detail = false }: { readonly detail?: boolean }) {
   const { jobId = "" } = useParams();
   const snapshot = useClientWorkspace();
+  const deployments = useDeployments();
   if (detail) {
     const job = snapshot.jobs.find((item) => item.jobId === jobId);
+    const providerId = deployments.data?.find(
+      (deployment) => deployment.deploymentId === job?.subjectId,
+    )?.providerId;
     return job ? (
       <ProductPage
         title={job.jobId}
@@ -263,7 +278,15 @@ export function JobsPage({ detail = false }: { readonly detail?: boolean }) {
             </Button>
           </section>
         </div>
-        <Button onClick={() => navigate(`/runtime/deployments/ugv-prod-001/${job.subjectId}`)}>
+        <Button
+          disabled={providerId === undefined}
+          title={providerId === undefined ? "Deployment provider is not loaded" : undefined}
+          onClick={() =>
+            providerId === undefined
+              ? undefined
+              : navigate(`/runtime/deployments/${providerId}/${job.subjectId}`)
+          }
+        >
           打开关联 Deployment
         </Button>
       </ProductPage>
@@ -385,17 +408,20 @@ export function IncidentsPage({
   const { incidentId = "" } = useParams();
   const snapshot = useClientWorkspace();
   const store = useClientWorkspaceStore();
+  const mockMode = dataMode() === "mock";
   const [title, setTitle] = useState("Runtime reconciliation failure");
-  const [deploymentId, setDeploymentId] = useState("deploy-001");
+  const [deploymentId, setDeploymentId] = useState(mockMode ? "deploy-001" : "");
   const [owner, setOwner] = useState("operator-a");
   const [note, setNote] = useState("");
   const [confirmClose, setConfirmClose] = useState(false);
-  const deployment = useDeployment(
-    "ugv-prod-001",
+  const deployments = useDeployments();
+  const selectedDeploymentId =
     mode === "detail"
       ? (snapshot.incidents.find((x) => x.incidentId === incidentId)?.deploymentId ?? "")
-      : "",
-  );
+      : "";
+  const selectedProviderId =
+    deployments.data?.find((item) => item.deploymentId === selectedDeploymentId)?.providerId ?? "";
+  const deployment = useDeployment(selectedProviderId, selectedDeploymentId);
   const processes = useProcesses();
   const reconcile = useRuntimeCommand("reconcile");
   if (mode === "rules")
@@ -525,7 +551,7 @@ export function IncidentsPage({
               <Button
                 onClick={() =>
                   navigate(
-                    `/runtime/deployments/${deployment.data?.providerId ?? "ugv-prod-001"}/${incident.deploymentId}`,
+                    `/runtime/deployments/${deployment.data?.providerId ?? selectedProviderId}/${incident.deploymentId}`,
                   )
                 }
               >

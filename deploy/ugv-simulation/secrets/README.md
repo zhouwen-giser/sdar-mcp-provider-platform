@@ -17,3 +17,16 @@ chmod 600 /absolute/path/to/the-secret-file
 ```
 
 Compose mounts these values as read-only files under `/run/secrets`; secret content is never copied into evidence. Git also ignores unrecognized files here as a secondary defense, but the external-file rule remains mandatory.
+
+## PMS Console secret root
+
+The integrated stack also requires `PMS_CONSOLE_SECRET_ROOT`. It is a single absolute directory
+outside the repository; do not place any PMS file in this documentation-only directory. Prepare
+the exact `postgres-password`, database URL, empty deferred-auth descriptors, PostgreSQL
+provisioning descriptor, and Runtime control-plane directory documented in
+[the standalone PMS Console secret guide](../../pms-console/secrets/README.md).
+
+The PMS preflight enforces the same non-symlink, ownership, permission, hostname, database, and
+password-consistency rules in both the standalone and integrated stacks. The PostgreSQL password
+is mounted through a Compose secret; the API and Worker credential/configuration files are mounted
+read-only and are never exposed through the browser-facing service.

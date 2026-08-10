@@ -1,9 +1,0 @@
-export default function ApiModeUnconfiguredPage() {
-  return (
-    <main className="fatal-error">
-      <h1>API data source is not configured</h1>
-      <p>该构建没有静默回退到 Mock。请配置正式 Gateway 后再启用 API 模式。</p>
-      <code>PMS_API_NOT_CONFIGURED</code>
-    </main>
-  );
-}

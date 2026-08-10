@@ -52,6 +52,8 @@ if [[ ! "$UGV_QUALIFICATION_GIT_SHA" =~ ^[0-9a-f]{40,64}$ ]]; then
 fi
 export UGV_QUALIFICATION_GIT_SHA
 export UGV_QUALIFICATION_SOURCE_STATUS="TRACKED_SOURCE_CLEAN"
+export PMS_CONSOLE_GIT_SHA="$UGV_QUALIFICATION_GIT_SHA"
+export VITE_PMS_DATA_MODE=api
 echo "Qualification source verified: $UGV_QUALIFICATION_GIT_SHA"
 
 qualification_tmp_root="${TMPDIR:-/tmp}"
@@ -72,13 +74,36 @@ if ! git -C "$repo_root" archive --format=tar "$UGV_QUALIFICATION_GIT_SHA" \
   exit 2
 fi
 export UGV_QUALIFICATION_BUILD_CONTEXT="$qualification_build_context"
+export PMS_CONSOLE_BUILD_CONTEXT="$qualification_build_context"
 echo "Immutable build context materialized from: $UGV_QUALIFICATION_GIT_SHA"
 
 compose=(docker compose --project-name "$project_name" --env-file "$env_file" -f "$deploy_dir/compose.yaml")
 
 "${compose[@]}" config --quiet
+pms_secret_root="$(
+  "${compose[@]}" config --format json | node --input-type=module -e '
+    import { dirname } from "node:path";
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const document = JSON.parse(source);
+    const volumes = document.services?.["pms-api"]?.volumes;
+    const api = Array.isArray(volumes)
+      ? volumes.find((entry) => entry?.target === "/run/pms-secrets/api")
+      : undefined;
+    if (api?.type !== "bind" || typeof api.source !== "string") process.exit(2);
+    process.stdout.write(`${dirname(api.source)}\n`);
+  '
+)" || {
+  echo "BLOCKED_CONFIGURATION: failed to resolve the PMS Console secret root." >&2
+  exit 2
+}
+node "$repo_root/deploy/pms-console/validate-secrets.mjs" \
+  "$pms_secret_root" \
+  "$repo_root"
 services="$("${compose[@]}" --profile preflight config --services)"
-for required_service in ugv-adapter-postgres ugv-runtime-postgres ugv-preflight ugv-adapter ugv-runtime; do
+for required_service in \
+  pms-postgres pms-api pms-worker pms-web \
+  ugv-adapter-postgres ugv-runtime-postgres ugv-preflight ugv-adapter ugv-runtime; do
   if [[ $'\n'"$services"$'\n' != *$'\n'"$required_service"$'\n'* ]]; then
     echo "BLOCKED_CONFIGURATION: required service missing: $required_service" >&2
     exit 2
@@ -86,7 +111,7 @@ for required_service in ugv-adapter-postgres ugv-runtime-postgres ugv-preflight 
 done
 while IFS= read -r service; do
   case "$service" in
-    ugv-adapter-postgres|ugv-runtime-postgres|ugv-preflight|ugv-adapter|ugv-runtime) ;;
+    pms-postgres|pms-api|pms-worker|pms-web|ugv-adapter-postgres|ugv-runtime-postgres|ugv-preflight|ugv-adapter|ugv-runtime) ;;
     *)
       echo "BLOCKED_CONFIGURATION: non-real service present: $service" >&2
       exit 2
@@ -94,8 +119,31 @@ while IFS= read -r service; do
   esac
 done <<<"$services"
 
-echo "Building the real-only UGV qualification images..."
-"${compose[@]}" build ugv-adapter ugv-runtime
+echo "Building PMS Console and real-only UGV images from one exact HEAD..."
+"${compose[@]}" build pms-api pms-worker pms-web ugv-adapter ugv-runtime
+
+verify_pms_image() {
+  local image="$1"
+  local revision user healthcheck
+  revision="$(
+    docker image inspect \
+      --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+      "$image" 2>/dev/null
+  )" || {
+    echo "BLOCKED_CONFIGURATION: qualified PMS image is missing: $image" >&2
+    exit 2
+  }
+  if [[ "$revision" != "$UGV_QUALIFICATION_GIT_SHA" ]]; then
+    echo "BLOCKED_CONFIGURATION: $image is not labeled with the qualification SHA." >&2
+    exit 2
+  fi
+  user="$(docker image inspect --format '{{ .Config.User }}' "$image")"
+  healthcheck="$(docker image inspect --format '{{ json .Config.Healthcheck }}' "$image")"
+  if [[ "$user" != "node" || "$healthcheck" == "null" ]]; then
+    echo "BLOCKED_CONFIGURATION: $image is missing the required non-root user or healthcheck." >&2
+    exit 2
+  fi
+}
 
 verify_real_image() {
   local image="$1"
@@ -118,6 +166,12 @@ verify_real_image() {
 }
 adapter_image="sdar-ugv-simulation-real/ugv-adapter:$UGV_QUALIFICATION_GIT_SHA"
 runtime_image="sdar-ugv-simulation-real/runtime:$UGV_QUALIFICATION_GIT_SHA"
+for pms_image in \
+  "sdar/pms-api:$UGV_QUALIFICATION_GIT_SHA" \
+  "sdar/pms-worker:$UGV_QUALIFICATION_GIT_SHA" \
+  "sdar/pms-web:$UGV_QUALIFICATION_GIT_SHA"; do
+  verify_pms_image "$pms_image"
+done
 verify_real_image "$adapter_image" ugv-provider-adapter
 verify_real_image "$runtime_image" runtime
 
@@ -134,15 +188,35 @@ run_preflight_without_build() {
   return "$exit_code"
 }
 
-echo "Checking real Device MCP and MQTT prerequisites (read-only)..."
-run_preflight_without_build
-
 wait_timeout="${UGV_COMPOSE_WAIT_TIMEOUT_SECONDS:-180}"
 if [[ ! "$wait_timeout" =~ ^[1-9][0-9]*$ ]]; then
   echo "BLOCKED_CONFIGURATION: UGV_COMPOSE_WAIT_TIMEOUT_SECONDS must be a positive integer." >&2
   exit 2
 fi
 
-echo "Starting PostgreSQL, UGV Adapter, and Runtime..."
-"${compose[@]}" up --detach --wait --wait-timeout "$wait_timeout" --remove-orphans
-echo "PASS: real-only UGV compatibility stack is healthy. Qualification status is evidence-gated; run: bash deploy/ugv-simulation/smoke.sh"
+echo "Starting the three isolated PostgreSQL 17 services..."
+"${compose[@]}" up --detach --wait --wait-timeout "$wait_timeout" \
+  pms-postgres ugv-adapter-postgres ugv-runtime-postgres
+
+echo "Checking real Device MCP and MQTT prerequisites (read-only)..."
+run_preflight_without_build
+
+echo "Starting PMS API..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-api
+echo "Starting PMS Worker..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-worker
+echo "Starting PMS Web in API mode..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-web
+
+echo "Starting the real UGV Adapter and Runtime..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" ugv-adapter
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" --remove-orphans ugv-runtime
+
+echo "Running the integrated non-destructive smoke suite..."
+bash "$deploy_dir/smoke.sh"
+echo "PASS: integrated PMS Console and real-only UGV stack is healthy at $UGV_QUALIFICATION_GIT_SHA"
