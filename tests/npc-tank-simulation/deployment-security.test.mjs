@@ -208,6 +208,10 @@ describe("Goal 11 NPC Tank deployment security", () => {
     expect(qualify).toContain("--control");
     expect(qualify).toContain("NOT_EXECUTED");
     expect(qualify).toContain("BLOCKED_IMPLEMENTATION");
+    const smoke = readFileSync(join(deploy, "smoke.sh"), "utf8");
+    expect(smoke).toContain('runtime_probe_service="pms-worker"');
+    expect(smoke).toContain("NPC_TANK_REQUIRE_PMS_REGISTRY=$registry_required");
+    expect(smoke).toContain('"$runtime_probe_service" node');
   });
 
   it("documents the observed wire defect and forbids direct PMS persistence", () => {

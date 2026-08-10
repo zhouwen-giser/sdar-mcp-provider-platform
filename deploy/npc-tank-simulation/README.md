@@ -105,6 +105,12 @@ scan, and performs Runtime reads through that endpoint. When false, the script c
 Registry as `NOT_EXECUTED` and uses the local published Runtime only for deployment readiness. The
 deployment contains no `psql`, SQL, or direct PMS table mutation path.
 
+The platform-managed Runtime is owned by Worker/PM2 and its Registry endpoint is deliberately a
+loopback address in the PMS API/Worker shared network namespace. Registry-required smoke therefore
+executes its endpoint probe in `pms-worker`; it does not rewrite the Registry URL or fall back to the
+Compose Runtime URL. The endpoint, server ID, revision, checksum, ETag, and Catalog data still come
+exclusively from the live Registry snapshot.
+
 ## Restart and teardown
 
 The required clean restart sequence is:

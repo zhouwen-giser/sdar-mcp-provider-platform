@@ -130,7 +130,36 @@ echo "Rechecking real Device MCP and passive MQTT contracts..."
 run_preflight_without_build
 
 echo "Calling Runtime read operations; Registry is authoritative when explicitly required..."
-"${compose[@]}" exec -T npc-tank-runtime node --input-type=module -e '
+registry_required="$(
+  "${compose[@]}" config --format json | node --input-type=module -e '
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const value = JSON.parse(source).services?.["npc-tank-runtime"]?.environment
+      ?.NPC_TANK_REQUIRE_PMS_REGISTRY;
+    if (value !== "true" && value !== "false") process.exit(2);
+    process.stdout.write(value);
+  '
+)" || blocked "failed to resolve NPC_TANK_REQUIRE_PMS_REGISTRY"
+registry_environment="$(
+  "${compose[@]}" config --format json | node --input-type=module -e '
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const value = JSON.parse(source).services?.["npc-tank-runtime"]?.environment
+      ?.NPC_TANK_PMS_ENVIRONMENT;
+    if (typeof value !== "string" || !/^[a-z][a-z0-9-]{0,62}$/.test(value)) process.exit(2);
+    process.stdout.write(value);
+  '
+)" || blocked "failed to resolve NPC_TANK_PMS_ENVIRONMENT"
+runtime_probe_service="npc-tank-runtime"
+if [[ "$registry_required" == "true" ]]; then
+  # Platform-managed Runtime endpoints are loopback URLs in the Worker/API shared
+  # network namespace. Probe from that owner while keeping Registry as authority.
+  runtime_probe_service="pms-worker"
+fi
+"${compose[@]}" exec -T \
+  -e "NPC_TANK_REQUIRE_PMS_REGISTRY=$registry_required" \
+  -e "NPC_TANK_PMS_ENVIRONMENT=$registry_environment" \
+  "$runtime_probe_service" node --input-type=module -e '
   const providerId = "isr.vehicle.npc-tank.npc-tank1";
   const resourceId = "vehicle:npc_tank1";
   const registryRequired = process.env.NPC_TANK_REQUIRE_PMS_REGISTRY === "true";
