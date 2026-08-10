@@ -7,6 +7,7 @@ import {
 import { PmsDomainError, PmsRepositoryError } from "../../../../packages/pms-domain/src/index.js";
 import { RuntimeDeploymentError } from "../../../../packages/runtime-deployment/src/index.js";
 import { requestContext } from "../context.js";
+import { ConsoleRequestMappingError } from "./request-mapping-error.js";
 
 export type ConsoleProblemCode =
   | "INVALID_REQUEST"
@@ -167,7 +168,7 @@ function classifyConsoleError(error: FastifyError): {
     return problem(status, code, error.message);
   }
   if (error instanceof RuntimeDeploymentError) return runtimeDeploymentProblem(error);
-  if (error instanceof RangeError || error instanceof TypeError) {
+  if (error instanceof ConsoleRequestMappingError) {
     return problem(400, "INVALID_DOMAIN_VALUE", "A supplied value is invalid");
   }
   return problem(500, "INTERNAL_ERROR", "An internal error occurred");

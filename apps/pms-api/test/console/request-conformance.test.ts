@@ -22,9 +22,9 @@ describe("Console request conformance", () => {
     await app.close();
   });
 
-  it("rejects enums, ranges and additional request properties", async () => {
+  it("rejects unsupported ranges and additional request properties independently", async () => {
     const { app } = createConsoleTestApp();
-    const response = await app.inject({
+    const invalidRange = await app.inject({
       method: "POST",
       url: "/api/console/v1/runtime-deployments/deployment-1/scale",
       headers: { "x-actor-id": "prototype-user" },
@@ -32,11 +32,91 @@ describe("Console request conformance", () => {
         providerId: "provider-1",
         expectedDesiredRevision: 1,
         desiredReplicas: 2,
+      },
+    });
+    expect(invalidRange.statusCode).toBe(400);
+    expect(invalidRange.json()).toMatchObject({ code: "INVALID_REQUEST" });
+
+    const extraProperty = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/providers",
+      headers: { "x-actor-id": "prototype-user" },
+      payload: {
+        providerId: "provider-1",
+        providerTypeId: "isr.vehicle.ugv",
         ignored: true,
       },
     });
-    expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ code: "INVALID_REQUEST" });
+    expect(extraProperty.statusCode).toBe(400);
+    expect(extraProperty.json()).toMatchObject({ code: "INVALID_REQUEST" });
+    await app.close();
+  });
+
+  it("rejects invalid date, optimistic-concurrency and identifier values", async () => {
+    const { app } = createConsoleTestApp();
+    const invalidDate = await app.inject({
+      method: "PATCH",
+      url: "/api/console/v1/providers/provider-1/status",
+      headers: { "x-actor-id": "prototype-user" },
+      payload: { status: "active", expectedUpdatedAt: "not-a-date" },
+    });
+    expect(invalidDate.statusCode).toBe(400);
+    expect(invalidDate.json()).toMatchObject({ code: "INVALID_REQUEST" });
+
+    const invalidRevision = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/runtime-deployments/deployment-1/start",
+      headers: { "x-actor-id": "prototype-user" },
+      payload: { providerId: "provider-1", expectedDesiredRevision: -1 },
+    });
+    expect(invalidRevision.statusCode).toBe(400);
+    expect(invalidRevision.json()).toMatchObject({ code: "INVALID_REQUEST" });
+
+    const invalidIdentifier = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/providers",
+      headers: { "x-actor-id": "prototype-user" },
+      payload: { providerId: "", providerTypeId: "isr.vehicle.ugv" },
+    });
+    expect(invalidIdentifier.statusCode).toBe(400);
+    expect(invalidIdentifier.json()).toMatchObject({ code: "INVALID_REQUEST" });
+    await app.close();
+  });
+
+  it("maps malformed and oversized JSON to Console ProblemDetails", async () => {
+    const { app } = createConsoleTestApp();
+    const malformed = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/providers",
+      headers: {
+        "content-type": "application/json",
+        "x-actor-id": "prototype-user",
+      },
+      payload: "{",
+    });
+    expect(malformed.statusCode).toBe(400);
+    expect(malformed.headers["content-type"]).toContain("application/problem+json");
+    expect(malformed.json()).toMatchObject({ status: 400, code: "INVALID_JSON" });
+
+    const oversized = await app.inject({
+      method: "POST",
+      url: "/api/console/v1/providers",
+      headers: {
+        "content-type": "application/json",
+        "x-actor-id": "prototype-user",
+      },
+      payload: JSON.stringify({
+        providerId: "provider-1",
+        providerTypeId: "isr.vehicle.ugv",
+        padding: "x".repeat(1_048_576),
+      }),
+    });
+    expect(oversized.statusCode).toBe(413);
+    expect(oversized.headers["content-type"]).toContain("application/problem+json");
+    expect(oversized.json()).toMatchObject({
+      status: 413,
+      code: "REQUEST_BODY_TOO_LARGE",
+    });
     await app.close();
   });
 
@@ -60,6 +140,7 @@ describe("Console request conformance", () => {
       payload: "not-json",
     });
     expect(invalidContentType.statusCode).toBe(400);
+    expect(invalidContentType.headers["content-type"]).toContain("application/problem+json");
     expect(invalidContentType.json()).toMatchObject({ code: "INVALID_REQUEST" });
     await app.close();
   });

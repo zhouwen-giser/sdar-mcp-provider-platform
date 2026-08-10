@@ -62,11 +62,15 @@ describe("Console ProblemDetails", () => {
     await app.close();
   });
 
-  it("redacts unexpected failures as INTERNAL_ERROR", async () => {
+  it.each([
+    ["Error", new Error("database password must never escape")],
+    ["TypeError", new TypeError("internal type detail must never escape")],
+    ["RangeError", new RangeError("internal range detail must never escape")],
+  ])("redacts unexpected %s failures as INTERNAL_ERROR", async (_name, failure) => {
     const { app } = createConsoleTestApp({
       management: {
         listProviderTypes: vi.fn(async () => {
-          throw new Error("database password must never escape");
+          throw failure;
         }),
       } as unknown as ProviderManagementService,
     });
@@ -79,7 +83,7 @@ describe("Console ProblemDetails", () => {
       code: "INTERNAL_ERROR",
       detail: "An internal error occurred",
     });
-    expect(response.body).not.toContain("database password");
+    expect(response.body).not.toContain(failure.message);
     await app.close();
   });
 });
