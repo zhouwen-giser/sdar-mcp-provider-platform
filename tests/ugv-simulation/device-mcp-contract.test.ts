@@ -385,14 +385,14 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
 });
 
 describe("Goal 10 UGV Device MCP transport safety", () => {
-  it("keeps the Streamable HTTP NPC client on the reviewed legacy call path", async () => {
+  it("keeps the Streamable HTTP NPC client on the resilient shared call path", async () => {
     const harness = new UgvMcpHarness(NPC_TANK_DEVICE_TOOL_ALLOWLIST);
     await harness.start();
     const tool = "npc_tank_get_capabilities";
     try {
       const auditFailingClient = npcTestClient(harness, new FailingAuditStore());
       await auditFailingClient.connect();
-      await expect(auditFailingClient.call(tool, {})).rejects.toThrow("TEST_AUDIT_UNAVAILABLE");
+      await expect(auditFailingClient.call(tool, {})).resolves.toEqual(commonResult(1, 0));
       expect(auditFailingClient.toolHealth(tool)).toMatchObject({
         state: "healthy",
         consecutiveFailures: 0,
@@ -400,16 +400,16 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       await auditFailingClient.close();
 
       harness.results.set(tool, "descriptive-only");
-      const legacyErrorClient = npcTestClient(harness, new MemoryProviderStore());
-      await legacyErrorClient.connect();
-      await expect(legacyErrorClient.call(tool, {})).rejects.toThrow(
-        "UGV_DEVICE_MCP_RESPONSE_CONFLICT",
+      const protocolErrorClient = npcTestClient(harness, new MemoryProviderStore());
+      await protocolErrorClient.connect();
+      await expect(protocolErrorClient.call(tool, {})).rejects.toThrow(
+        "NPC_TANK_DEVICE_MCP_RESPONSE_CONFLICT",
       );
-      expect(legacyErrorClient.toolHealth(tool)).toMatchObject({
-        state: "healthy",
-        consecutiveFailures: 0,
+      expect(protocolErrorClient.toolHealth(tool)).toMatchObject({
+        state: "degraded",
+        consecutiveFailures: 1,
       });
-      await legacyErrorClient.close();
+      await protocolErrorClient.close();
     } finally {
       await harness.stop();
     }

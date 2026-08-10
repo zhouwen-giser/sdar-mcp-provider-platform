@@ -19,9 +19,10 @@
     "evidenceRefs": [
       "docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json",
       "reports/npc-tank-provider-v1/component.json",
-      "reports/npc-tank-provider-v1/eo-scan-capability.json",
-      "reports/npc-tank-provider-v1/navigation-tool-selection.json",
-      "reports/npc-tank-provider-v1/external-interface-blocker.json"
+      "reports/npc-tank-simulation/MCP_CONTRACT_CAPTURE.json",
+      "reports/npc-tank-simulation/MQTT_TOPIC_MATRIX.json",
+      "reports/npc-tank-simulation/PROVIDER_CAPABILITY_MATRIX.json",
+      "reports/npc-tank-simulation/NPC_TANK_SIMULATION_QUALIFICATION_REPORT.md"
     ]
   }
 }

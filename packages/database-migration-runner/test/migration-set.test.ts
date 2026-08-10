@@ -61,7 +61,10 @@ describe("MigrationSet resolver", () => {
       "024_ugv_provider.sql",
       "026_ugv_single_active_fire.sql",
     ]);
-    expect(npcTank.map(({ filename }) => filename)).toEqual(["025_npc_tank_provider.sql"]);
+    expect(npcTank.map(({ filename }) => filename)).toEqual([
+      "025_npc_tank_provider.sql",
+      "026_allow_authoritative_status_tool.sql",
+    ]);
   });
 
   it("fails closed for unknown and traversal-shaped set names", async () => {

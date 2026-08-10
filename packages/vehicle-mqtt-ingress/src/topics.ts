@@ -25,22 +25,35 @@ export type UgvMqttTopic = (typeof UGV_MQTT_SUBSCRIPTIONS)[number]["topic"];
 // become the type authority for the expanded real-interface topic inventory.
 export const UGV_MQTT_TOPICS: readonly string[] = UGV_MQTT_SUBSCRIPTIONS.map(({ topic }) => topic);
 
-export const NPC_TANK_MQTT_TOPICS = [
-  "/npc_tank1/gnss",
-  "/npc_tank1/imu",
-  "/npc_tank1/speed",
-  "/npc_tank1/status",
-  "/npc_tank1/system_state",
-  "/npc_tank1/component_status",
-  "/npc_tank1/battery_range_km",
-  "/npc_tank1/mission_state",
-  "/npc_tank1/nav_state",
-  "/npc_tank1/detected_objects",
-  "/npc_tank1/target_detected",
-  "/npc_tank1/target/gnss",
+export const NPC_TANK_MQTT_SUBSCRIPTIONS = [
+  { topic: "status/npc_tank1", qos: 1 },
+  // Captured ROS String(JSON) compatibility alias for the richer status view.
+  { topic: "/npc_tank1/status", qos: 1 },
+  { topic: "/npc_tank1/gnss", qos: 1 },
+  { topic: "/npc_tank1/imu", qos: 1 },
+  // The real publisher was captured at QoS 0, but that is upstream drift from
+  // the Goal 11 protocol. SUBSCRIBE continues to request the declared QoS 1.
+  { topic: "/npc_tank1/speed", qos: 1 },
+  { topic: "/npc_tank1/battery_range_km", qos: 1 },
+  { topic: "/npc_tank1/mission_state", qos: 1 },
+  { topic: "/npc_tank1/nav_state", qos: 1 },
+  { topic: "/npc_tank1/system_state", qos: 1 },
+  { topic: "/npc_tank1/component_status", qos: 1 },
+  { topic: "/npc_tank1/eo/pose", qos: 1 },
+  { topic: "/npc_tank1/detected_objects", qos: 1 },
+  { topic: "/npc_tank1/target_detected", qos: 1 },
+  { topic: "/npc_tank1/target/gnss", qos: 1 },
+  { topic: "/npc_tank1/area_recon/status", qos: 1 },
+  { topic: "/npc_tank1/area_recon/targets", qos: 1 },
+  { topic: "/npc_tank1/area_recon/exception", qos: 1 },
+  { topic: "/npc_tank1/area_recon/coverage", qos: 0 },
 ] as const;
 
-export type NpcTankMqttTopic = (typeof NPC_TANK_MQTT_TOPICS)[number];
+export const NPC_TANK_MQTT_TOPICS: readonly string[] = NPC_TANK_MQTT_SUBSCRIPTIONS.map(
+  ({ topic }) => topic,
+);
+
+export type NpcTankMqttTopic = (typeof NPC_TANK_MQTT_SUBSCRIPTIONS)[number]["topic"];
 const TOPICS = new Set<string>(UGV_MQTT_TOPICS);
 const NPC_TOPICS = new Set<string>(NPC_TANK_MQTT_TOPICS);
 
@@ -81,7 +94,7 @@ export function ugvMqttQos(topic: string): 0 | 1 {
 }
 
 export function npcTankMqttQos(topic: string): 0 | 1 {
-  if (!exactNpcTankTopic(topic)) throw new Error("NPC_TANK_MQTT_TOPIC_NOT_ALLOWED");
-  // Preserve the existing NPC contract. Goal 10 changes only the UGV real boundary.
-  return topic.endsWith("/speed") ? 0 : 1;
+  const subscription = NPC_TANK_MQTT_SUBSCRIPTIONS.find((candidate) => candidate.topic === topic);
+  if (subscription === undefined) throw new Error("NPC_TANK_MQTT_TOPIC_NOT_ALLOWED");
+  return subscription.qos;
 }

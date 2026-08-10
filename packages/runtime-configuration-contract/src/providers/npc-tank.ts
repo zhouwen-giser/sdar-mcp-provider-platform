@@ -40,7 +40,7 @@ const NpcTankProviderInputBaseSchema = z.object({
   NPC_TANK_MQTT_MAX_JSON_NODES: z.coerce.number().int().min(16).max(100_000).default(4_096),
   NPC_TANK_MQTT_MAX_STRING_BYTES: z.coerce.number().int().min(64).max(1_048_576).default(16_384),
   NPC_TANK_MQTT_WIRE_MODE: z
-    .enum(["auto", "ros_message_json", "direct_domain_json"])
+    .enum(["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"])
     .default("auto"),
   NPC_TANK_CHASSIS_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   NPC_TANK_MISSION_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),

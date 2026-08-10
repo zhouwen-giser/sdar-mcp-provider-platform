@@ -328,7 +328,9 @@ function reconSchema(
   circularScanOmitsArea: boolean,
 ) {
   const required = circularScanOmitsArea
-    ? ["resourceId", "scanMode"]
+    ? supportsCircularEoScan
+      ? ["resourceId", "scanMode"]
+      : ["resourceId", "scanMode", "area"]
     : [
         "resourceId",
         ...(supportsScanModes ? ["scanMode"] : []),
@@ -367,7 +369,9 @@ function reconSchema(
             scanMode: {
               type: "string",
               enum: circularScanOmitsArea
-                ? ["area", "circular"]
+                ? supportsCircularEoScan
+                  ? ["area", "circular"]
+                  : ["area"]
                 : supportsCircularEoScan
                   ? ["area", "sector", "circular"]
                   : ["area", "sector"],
@@ -412,7 +416,7 @@ function reconSchema(
         : {}),
     },
     required,
-    ...(circularScanOmitsArea
+    ...(circularScanOmitsArea && supportsCircularEoScan
       ? {
           allOf: [
             {

@@ -101,7 +101,7 @@ describe("NPC Tank Adapter gRPC E2E", () => {
       providerId: "isr.vehicle.npc-tank.npc-tank1",
       providerType: "isr.vehicle.npc_tank",
     });
-    expect(manifest.operations).toHaveLength(9);
+    expect(manifest.operations).toHaveLength(11);
     const args = {
       resourceId: "vehicle:npc_tank1",
       mission: {
@@ -131,6 +131,10 @@ describe("NPC Tank Adapter gRPC E2E", () => {
       result: "accepted",
       accepted: { initialSnapshot: { state: "ACCEPTED" } },
     });
+    mission(ingress, 1, 50);
+    expect(
+      await gateway.getExecution("grpc-npc-nav-1", started.accepted?.externalExecutionId, options),
+    ).toMatchObject({ state: "RUNNING" });
     mission(ingress, 4, 100);
     const terminal = await gateway.getExecution(
       "grpc-npc-nav-1",
@@ -186,7 +190,7 @@ function mission(
     Buffer.from(
       JSON.stringify({
         entity_id: "npc_tank1",
-        id: "grpc-npc-mission",
+        id: 1,
         type: 1,
         state,
         progress,
@@ -206,9 +210,12 @@ function status(
         vehicle_id: "npc_tank1",
         role_name: "npc_tank1",
         speed_kmh: 0,
-        chassis_task: { state, progress },
-        eo_task: { state: -1, progress: 0 },
-        weapon_task: { state: -1, progress: 0 },
+        chassis_task:
+          state === -1
+            ? { id: -1, type: -1, state: -1, progress: -1 }
+            : { id: 1, type: 1, state, progress },
+        eo_task: { id: -1, type: -1, state: -1, progress: -1 },
+        weapon_task: { id: -1, type: -1, state: -1, progress: -1 },
         available: true,
       }),
     ),

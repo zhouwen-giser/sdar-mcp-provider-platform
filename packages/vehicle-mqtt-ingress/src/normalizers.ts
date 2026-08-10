@@ -28,6 +28,14 @@ export function normalizeMqttObservation(
 ): NormalizedMqttObservation {
   const object = record(value) ? value : undefined;
   validateIdentity(object);
+  return normalizeVehicleMqttObservation(topic, value, object);
+}
+
+function normalizeVehicleMqttObservation(
+  topic: UgvMqttTopic,
+  value: unknown,
+  object: Record<string, unknown> | undefined,
+): NormalizedMqttObservation {
   const base = observationBase(value, object);
   switch (topic) {
     case "/ugv/gnss": {
@@ -70,7 +78,7 @@ export function normalizeMqttObservation(
       };
     case "status/ugv":
     case "/ugv/status":
-      return composite(object, base, false);
+      return composite(object, base);
     case "/ugv/system_state":
       return {
         ...base,
@@ -161,52 +169,22 @@ export function normalizeNpcTankMqttObservation(
 ): NormalizedMqttObservation {
   const object = record(value) ? value : undefined;
   validateNpcTankIdentity(object);
-  const rewritten = structuredClone(value);
-  if (record(rewritten)) {
-    if (Object.hasOwn(rewritten, "entity_id")) rewritten.entity_id = "ugv1";
-    if (Object.hasOwn(rewritten, "vehicle_id")) rewritten.vehicle_id = "ugv1";
-    if (Object.hasOwn(rewritten, "role_name")) rewritten.role_name = "ugv";
-    if (Object.hasOwn(rewritten, "role")) rewritten.role = "ugv";
-  }
   try {
-    const normalized: NormalizedMqttObservation =
-      topic === "/npc_tank1/status"
-        ? composite(
-            record(rewritten) ? rewritten : undefined,
-            observationBase(rewritten, record(rewritten) ? rewritten : undefined),
-            true,
-          )
-        : topic === "/npc_tank1/mission_state"
-          ? {
-              ...observationBase(rewritten, record(rewritten) ? rewritten : undefined),
-              patch: {
-                chassis: {
-                  mission: legacyTrack(record(rewritten) ? rewritten : undefined),
-                },
-              },
-              domains: ["mission" as const],
-            }
-          : topic === "/npc_tank1/detected_objects"
-            ? npcDetectedObjects(
-                record(rewritten) ? rewritten : undefined,
-                observationBase(rewritten, record(rewritten) ? rewritten : undefined),
-              )
-            : normalizeMqttObservation(
-                topic.replace("/npc_tank1/", "/ugv/") as UgvMqttTopic,
-                rewritten,
-              );
-    const targets = normalized.patch.payload?.targets;
-    if (targets !== undefined)
-      normalized.patch.payload = {
-        ...normalized.patch.payload,
-        targets: targets.map((target) => ({ ...target, source: "mqtt" as const })),
-      };
-    return { ...normalized, canonicalPayload: value };
+    if (topic === "status/npc_tank1")
+      return npcAggregateStatus(object, observationBase(value, object));
+    return normalizeVehicleMqttObservation(npcEquivalentUgvTopic(topic), value, object);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("UGV_"))
       throw new Error(error.message.replace(/^UGV_/, "NPC_TANK_"), { cause: error });
     throw error;
   }
+}
+
+function npcEquivalentUgvTopic(topic: NpcTankMqttTopic): UgvMqttTopic {
+  if (topic === "/npc_tank1/status") return "/ugv/status";
+  const mapped = topic.replace("/npc_tank1/", "/ugv/");
+  if (mapped === topic) throw new Error("NPC_TANK_MQTT_TOPIC_NOT_ALLOWED");
+  return mapped as UgvMqttTopic;
 }
 
 export function deduplicateVehicleTargets(targets: readonly VehicleTarget[]): VehicleTarget[] {
@@ -222,7 +200,6 @@ export function deduplicateVehicleTargets(targets: readonly VehicleTarget[]): Ve
 function composite(
   object: Record<string, unknown> | undefined,
   base: Omit<NormalizedMqttObservation, "patch" | "domains">,
-  legacyEoTaskAsReconnaissance: boolean,
 ): NormalizedMqttObservation {
   if (object === undefined) throw new Error("UGV_MQTT_STATUS_INVALID");
   if (object.available === false)
@@ -231,17 +208,14 @@ function composite(
       patch: {
         connectivity: {
           mqttConnected: true,
-          ...(legacyEoTaskAsReconnaissance ? {} : { deviceAvailable: false }),
+          deviceAvailable: false,
         },
       },
       domains: [],
     };
-  const normalizeTrack = legacyEoTaskAsReconnaissance
-    ? legacyTrack
-    : (value: Record<string, unknown> | undefined) => track(value, true);
-  const chassisTask = record(object.chassis_task) ? normalizeTrack(object.chassis_task) : undefined;
-  const eoTask = record(object.eo_task) ? normalizeTrack(object.eo_task) : undefined;
-  const weaponTask = record(object.weapon_task) ? normalizeTrack(object.weapon_task) : undefined;
+  const chassisTask = record(object.chassis_task) ? track(object.chassis_task, true) : undefined;
+  const eoTask = record(object.eo_task) ? track(object.eo_task, true) : undefined;
+  const weaponTask = record(object.weapon_task) ? track(object.weapon_task, true) : undefined;
   const speedKmh = optionalNumber(object.speed_kmh ?? object.veh_speed);
   const heading = optionalNumber(object.heading);
   const packetLossRate = optionalNumber(object.packet_loss_rate);
@@ -252,9 +226,7 @@ function composite(
     patch: {
       chassis: {
         ...(speedKmh === undefined ? {} : { speedKmh }),
-        ...(legacyEoTaskAsReconnaissance || heading === undefined
-          ? {}
-          : { compassHeadingDeg: heading }),
+        ...(heading === undefined ? {} : { compassHeadingDeg: heading }),
         energy: optionalNumbers(object, {
           lowVoltageSoc: "lvbattery_soc",
           highVoltage1Soc: "hvbattery1_soc",
@@ -269,15 +241,13 @@ function composite(
         ...(chassisTask === undefined ? {} : { mission: chassisTask }),
       },
       payload: {
-        ...(legacyEoTaskAsReconnaissance || gimbal === undefined ? {} : { gimbal }),
-        ...(legacyEoTaskAsReconnaissance || eoTask === undefined ? {} : { eoTask }),
-        ...(legacyEoTaskAsReconnaissance && eoTask !== undefined ? { reconnaissance: eoTask } : {}),
+        ...(gimbal === undefined ? {} : { gimbal }),
+        ...(eoTask === undefined ? {} : { eoTask }),
         ...(weaponTask === undefined ? {} : { weapon: weaponTask }),
       },
       connectivity: {
-        ...(!legacyEoTaskAsReconnaissance &&
-        (object.available === true ||
-          (chassisTask !== undefined && eoTask !== undefined && weaponTask !== undefined))
+        ...(object.available === true ||
+        (chassisTask !== undefined && eoTask !== undefined && weaponTask !== undefined)
           ? { deviceAvailable: true }
           : {}),
         ...(packetLossRate === undefined ? {} : { packetLossRate }),
@@ -285,6 +255,67 @@ function composite(
       },
     },
     domains: ["chassis", "mission", "payload"],
+  };
+}
+
+function npcAggregateStatus(
+  object: Record<string, unknown> | undefined,
+  base: Omit<NormalizedMqttObservation, "patch" | "domains">,
+): NormalizedMqttObservation {
+  if (object === undefined) throw new Error("NPC_TANK_MQTT_STATUS_INVALID");
+  const positionValue = record(object.position) ? object.position : undefined;
+  if (object.position !== undefined && positionValue === undefined)
+    throw new Error("NPC_TANK_MQTT_STATUS_POSITION_INVALID");
+  const latitudeValue = optionalCoordinate(positionValue?.lat ?? positionValue?.latitude, latitude);
+  const longitudeValue = optionalCoordinate(
+    positionValue?.lon ?? positionValue?.longitude,
+    longitude,
+  );
+  const altitude = optionalStrictNumber(positionValue?.alt ?? positionValue?.altitude);
+  const speedKmh = optionalStrictNumber(object.speed);
+  const rangeKmValue = optionalStrictNumber(object.remainder_range);
+  if (rangeKmValue !== undefined && rangeKmValue < 0)
+    throw new Error("NPC_TANK_MQTT_BATTERY_RANGE_INVALID");
+  const rangeKm = rangeKmValue;
+  const mode = aggregateMode(object.mode);
+  const status = aggregateStatus(object.status);
+  const positionObserved = latitudeValue !== undefined && longitudeValue !== undefined;
+  const chassisObserved = positionObserved || speedKmh !== undefined || rangeKm !== undefined;
+  const healthObserved = mode !== undefined || status !== undefined;
+  return {
+    ...base,
+    patch: {
+      ...(chassisObserved
+        ? {
+            chassis: {
+              ...(!positionObserved
+                ? {}
+                : {
+                    position: {
+                      latitude: latitudeValue,
+                      longitude: longitudeValue,
+                      ...(altitude === undefined ? {} : { altitude }),
+                    },
+                  }),
+              ...(speedKmh === undefined ? {} : { speedKmh }),
+              ...(rangeKm === undefined ? {} : { energy: { rangeKm } }),
+            },
+          }
+        : {}),
+      ...(healthObserved
+        ? {
+            health: {
+              ...(status === undefined ? {} : { runState: status === "moving" ? 1 : 0 }),
+              ...(mode === undefined ? {} : { mode: mode === "autonomous" ? 1 : 0 }),
+            },
+          }
+        : {}),
+      connectivity: { mqttConnected: true, deviceAvailable: true },
+    },
+    domains: [
+      ...(chassisObserved ? (["chassis"] as const) : []),
+      ...(healthObserved ? (["health"] as const) : []),
+    ],
   };
 }
 
@@ -330,32 +361,6 @@ function detectedObjects(
   return {
     ...base,
     patch: { payload: { targets: deduplicateVehicleTargets(targets) } },
-    domains: ["target"],
-  };
-}
-
-function npcDetectedObjects(
-  object: Record<string, unknown> | undefined,
-  base: Omit<NormalizedMqttObservation, "patch" | "domains">,
-): NormalizedMqttObservation {
-  if (!Array.isArray(object?.objects)) throw new Error("UGV_MQTT_TARGETS_INVALID");
-  const observedAt = base.sourceObservedAt ?? new Date().toISOString();
-  const targets = object.objects.map((item): VehicleTarget => {
-    if (!record(item)) throw new Error("UGV_MQTT_TARGET_INVALID");
-    const position = optionalNumbers(item, { x: "x", y: "y", z: "z" });
-    const objectType = scalarText(item.object_type);
-    return {
-      targetId: legacyId(item.id),
-      ...(objectType === undefined ? {} : { objectType }),
-      ...(Object.keys(position).length === 0 ? {} : { position }),
-      coordinateFrame: "carla_world",
-      source: "mqtt",
-      observedAt,
-    };
-  });
-  return {
-    ...base,
-    patch: { payload: { targets } },
     domains: ["target"],
   };
 }
@@ -712,11 +717,44 @@ function validateIdentity(object: Record<string, unknown> | undefined): void {
 }
 
 function validateNpcTankIdentity(object: Record<string, unknown> | undefined): void {
-  const entity = object?.entity_id ?? object?.vehicle_id;
-  if (entity !== undefined && entity !== "npc_tank1")
+  for (const entity of [object?.entity_id, object?.device_id])
+    if (entity !== undefined && entity !== "npc_tank1")
+      throw new Error("NPC_TANK_MQTT_ENTITY_MISMATCH");
+  for (const role of [object?.role_name, object?.role])
+    if (role !== undefined && role !== "npc_tank1") throw new Error("NPC_TANK_MQTT_ROLE_MISMATCH");
+  const vehicleId = object?.vehicle_id;
+  if (
+    vehicleId !== undefined &&
+    vehicleId !== "npc_tank1" &&
+    !(
+      typeof vehicleId === "number" &&
+      Number.isSafeInteger(vehicleId) &&
+      vehicleId >= 0 &&
+      (object?.entity_id === "npc_tank1" || object?.role_name === "npc_tank1")
+    )
+  )
     throw new Error("NPC_TANK_MQTT_ENTITY_MISMATCH");
-  const role = object?.role_name ?? object?.role;
-  if (role !== undefined && role !== "npc_tank1") throw new Error("NPC_TANK_MQTT_ROLE_MISMATCH");
+}
+
+function aggregateMode(value: unknown): "manual" | "autonomous" | undefined {
+  if (value === undefined) return undefined;
+  if (value === "manual" || value === 0) return "manual";
+  if (value === "autonomous" || value === 1 || value === 2) return "autonomous";
+  throw new Error("NPC_TANK_MQTT_STATUS_MODE_INVALID");
+}
+
+function aggregateStatus(value: unknown): "idle" | "moving" | "stopped" | "error" | undefined {
+  if (value === undefined) return undefined;
+  if (value === "idle" || value === "moving" || value === "stopped" || value === "error")
+    return value;
+  throw new Error("NPC_TANK_MQTT_STATUS_STATE_INVALID");
+}
+
+function optionalCoordinate(
+  value: unknown,
+  parser: (candidate: unknown) => number,
+): number | undefined {
+  return value === undefined ? undefined : parser(value);
 }
 
 function track(object: Record<string, unknown> | undefined, compositeTrack: boolean) {
@@ -730,7 +768,11 @@ function track(object: Record<string, unknown> | undefined, compositeTrack: bool
   if (!new Set([0, 1, 2, 3, 4, 5]).has(state as number) && !negativeIdleSentinel)
     throw new Error("UGV_MQTT_TASK_STATE_INVALID");
   const emptySentinel = object.id === -1 || negativeIdleSentinel;
-  if (emptySentinel && state !== -1 && state !== 0)
+  // The captured rich NPC status can report an active track with id=-1 while
+  // retaining state/type/progress. Treat that composite identifier as absent;
+  // Runtime mission correlation then refuses to attribute it to a dispatched
+  // task. Dedicated mission-state topics remain strict.
+  if (emptySentinel && !compositeTrack && state !== -1 && state !== 0)
     throw new Error("UGV_MQTT_TASK_ID_SENTINEL_INVALID");
   const progress =
     emptySentinel && object.progress === -1 ? undefined : optionalPercent(object.progress);
@@ -739,23 +781,6 @@ function track(object: Record<string, unknown> | undefined, compositeTrack: bool
   return {
     ...(taskId === undefined ? {} : { id: taskId }),
     ...(taskType === undefined ? {} : { type: taskType as string | number }),
-    state,
-    ...(progress === undefined ? {} : { progress }),
-  };
-}
-
-function legacyTrack(object: Record<string, unknown> | undefined) {
-  if (object === undefined) throw new Error("UGV_MQTT_TASK_TRACK_INVALID");
-  const state = integer(object.state) as VehicleTaskState;
-  if (!new Set([-1, 0, 1, 2, 3, 4, 5]).has(state as number))
-    throw new Error("UGV_MQTT_TASK_STATE_INVALID");
-  const progress = optionalNumber(object.progress);
-  const taskId = scalarText(object.id);
-  if (progress !== undefined && (progress < 0 || progress > 100))
-    throw new Error("UGV_MQTT_TASK_PROGRESS_INVALID");
-  return {
-    ...(taskId === undefined ? {} : { id: taskId }),
-    ...(object.type === undefined ? {} : { type: object.type as string | number }),
     state,
     ...(progress === undefined ? {} : { progress }),
   };
@@ -848,12 +873,6 @@ function id(value: unknown): string {
   return trimmed;
 }
 
-function legacyId(value: unknown): string {
-  if ((typeof value !== "string" && typeof value !== "number") || String(value).length === 0)
-    throw new Error("UGV_MQTT_TARGET_ID_INVALID");
-  return String(value);
-}
-
 function latitude(value: unknown): number {
   const parsed = number(value);
   if (parsed < -90 || parsed > 90) throw new Error("UGV_MQTT_GNSS_INVALID");
@@ -874,6 +893,10 @@ function number(value: unknown): number {
 
 function optionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function optionalStrictNumber(value: unknown): number | undefined {
+  return value === undefined ? undefined : number(value);
 }
 
 function optionalNonnegativeNumber(value: unknown): number | undefined {

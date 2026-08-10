@@ -38,6 +38,14 @@ export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
   duplicateReasonCode: string;
   olderReasonCode: string;
   topicNotAllowedReasonCode: string;
+  targetAuthority?: {
+    detectedObjectsTopic: string;
+    reconTargetsTopic: string;
+  };
+  taskStateAuthority?: {
+    missionStateTopic: string;
+    compositeStatusTopics: readonly string[];
+  };
 }
 
 export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
@@ -49,6 +57,10 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
   duplicateReasonCode: "UGV_MQTT_DUPLICATE_IGNORED",
   olderReasonCode: "UGV_MQTT_OLDER_OBSERVATION_IGNORED",
   topicNotAllowedReasonCode: "UGV_MQTT_TOPIC_NOT_ALLOWED",
+  targetAuthority: {
+    detectedObjectsTopic: "/ugv/detected_objects",
+    reconTargetsTopic: "/ugv/area_recon/targets",
+  },
 };
 
 export function npcTankMqttProfile(
@@ -58,20 +70,34 @@ export function npcTankMqttProfile(
     createSnapshot: () => createNpcTankSnapshot(supportsCircularEoScan),
     exactTopic: exactNpcTankTopic,
     normalize: (topic, value) => normalizeNpcTankMqttObservation(topic as never, value),
+    connectionSnapshotEvents: true,
     acceptedReasonCode: "NPC_TANK_MQTT_MESSAGE_ACCEPTED",
     duplicateReasonCode: "NPC_TANK_MQTT_DUPLICATE_IGNORED",
     olderReasonCode: "NPC_TANK_MQTT_OLDER_OBSERVATION_IGNORED",
     topicNotAllowedReasonCode: "NPC_TANK_MQTT_TOPIC_NOT_ALLOWED",
+    targetAuthority: {
+      detectedObjectsTopic: "/npc_tank1/detected_objects",
+      reconTargetsTopic: "/npc_tank1/area_recon/targets",
+    },
+    taskStateAuthority: {
+      missionStateTopic: "/npc_tank1/mission_state",
+      // The compact canonical status deliberately is not a task authority.
+      compositeStatusTopics: ["/npc_tank1/status"],
+    },
   };
 }
 
 export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot> {
   readonly #events = new EventEmitter();
-  readonly #latest = new Map<string, { observedAt: string; hash: string }>();
+  readonly #latest = new Map<
+    string,
+    { observedAt: string; hash: string; timeAuthority: NormalizedMqttObservation["timeAuthority"] }
+  >();
+  readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
   readonly #authoritativeTaskStates = new Map<string, unknown>();
-  #ugvDetectedTargets: VehicleTarget[] = [];
-  #ugvReconTargets: VehicleTarget[] = [];
-  #ugvReconTargetsObserved = false;
+  #detectedTargets: VehicleTarget[] = [];
+  #reconTargets: VehicleTarget[] = [];
+  #reconTargetsObserved = false;
   #snapshot: TSnapshot;
   #sequence = 0;
   #stateConflict = false;
@@ -151,8 +177,9 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
     const observedAt = observation.sourceObservedAt ?? receivedAt;
     const hash = createHash("sha256").update(canonical(observation.canonicalPayload)).digest("hex");
-    const latest = this.#latest.get(topic);
-    if (latest?.observedAt === observedAt && latest.hash === hash)
+    const authorityCursor = `${topic}\0${observation.timeAuthority}`;
+    const latestForAuthority = this.#latestByAuthority.get(authorityCursor);
+    if (latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash)
       return {
         accepted: true,
         reasonCode: this.profile.duplicateReasonCode,
@@ -161,7 +188,10 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
-    if (latest !== undefined && Date.parse(observedAt) < Date.parse(latest.observedAt))
+    if (
+      latestForAuthority !== undefined &&
+      Date.parse(observedAt) < Date.parse(latestForAuthority.observedAt)
+    )
       return {
         accepted: true,
         reasonCode: this.profile.olderReasonCode,
@@ -170,11 +200,14 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
-    observation = this.#applyUgvTargetAuthority(topic, observation);
+    observation = this.#applyTargetAuthority(topic, observation);
     this.#sequence++;
-    if (topic === "/npc_tank1/mission_state")
+    if (topic === this.profile.taskStateAuthority?.missionStateTopic)
       this.#authoritativeTaskStates.set("mission_state", observation.patch.chassis?.mission?.state);
-    if (topic === "/npc_tank1/status" && observation.patch.chassis?.mission !== undefined)
+    if (
+      this.profile.taskStateAuthority?.compositeStatusTopics.includes(topic) === true &&
+      observation.patch.chassis?.mission !== undefined
+    )
       this.#authoritativeTaskStates.set(
         "status.chassis_task",
         observation.patch.chassis.mission.state,
@@ -189,7 +222,8 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       observedAt,
       observation.domains,
     ) as TSnapshot;
-    this.#latest.set(topic, { observedAt, hash });
+    this.#latest.set(topic, { observedAt, hash, timeAuthority: observation.timeAuthority });
+    this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
     this.#events.emit("snapshot", this.snapshot(), topic);
     return {
       accepted: true,
@@ -211,17 +245,17 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     return this.#stateConflict;
   }
 
-  #applyUgvTargetAuthority(
+  #applyTargetAuthority(
     topic: string,
     observation: NormalizedMqttObservation,
   ): NormalizedMqttObservation {
+    const authority = this.profile.targetAuthority;
+    if (authority === undefined) return observation;
     const targets = observation.patch.payload?.targets;
     if (targets === undefined) return observation;
-    if (topic === "/ugv/detected_objects") {
-      this.#ugvDetectedTargets = deduplicateVehicleTargets(targets);
-      const authoritative = this.#ugvReconTargetsObserved
-        ? this.#ugvReconTargets
-        : this.#ugvDetectedTargets;
+    if (topic === authority.detectedObjectsTopic) {
+      this.#detectedTargets = deduplicateVehicleTargets(targets);
+      const authoritative = this.#reconTargetsObserved ? this.#reconTargets : this.#detectedTargets;
       return {
         ...observation,
         patch: {
@@ -230,14 +264,14 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         },
         // Once the rich source has appeared, detected_objects is a secondary
         // view and must not refresh authoritative target freshness.
-        domains: this.#ugvReconTargetsObserved
+        domains: this.#reconTargetsObserved
           ? observation.domains.filter((domain) => domain !== "target")
           : observation.domains,
       };
     }
-    if (topic === "/ugv/area_recon/targets") {
-      this.#ugvReconTargetsObserved = true;
-      this.#ugvReconTargets = deduplicateVehicleTargets(targets);
+    if (topic === authority.reconTargetsTopic) {
+      this.#reconTargetsObserved = true;
+      this.#reconTargets = deduplicateVehicleTargets(targets);
       return {
         ...observation,
         patch: {
@@ -245,7 +279,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           payload: {
             ...observation.patch.payload,
             // An empty authoritative list intentionally clears stale targets.
-            targets: structuredClone(this.#ugvReconTargets),
+            targets: structuredClone(this.#reconTargets),
           },
         },
       };

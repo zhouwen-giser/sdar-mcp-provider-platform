@@ -1,0 +1,287 @@
+{
+  "schemaVersion": "1.0",
+  "documentStatus": "INITIAL_DRAFT_PENDING_FINAL_REAL_RUNS",
+  "evaluatedAt": "2026-08-10T10:49:08Z",
+  "provisionalQualificationStatus": "NPC_TANK_SIMULATION_PARTIAL",
+  "finalizationPending": true,
+  "providerPackageRealResourceStatus": "pending",
+  "evidencePolicy": {
+    "realContractCapture": "A live external connection and machine-readable inventory capture; it does not prove a tool call.",
+    "realPassiveCapture": "A live external MQTT subscription and bounded sample observation; it does not prove a Provider operation or a device mutation.",
+    "deterministicLocalTest": "A local unit, contract, integration, or simulated E2E test; it is never promoted to real external evidence.",
+    "notExecuted": "No qualifying execution evidence exists yet.",
+    "mockEvidenceUsedForQualification": false
+  },
+  "realContractEvidence": {
+    "deviceMcp": {
+      "status": "PASS_CONTRACT_CAPTURE_ONLY",
+      "server": "npc-tank-mcp-server",
+      "serverVersion": "1.26.0",
+      "protocolVersion": "2025-11-25",
+      "contractHash": "b06aa50a6e2fbe5bd0fa60cbc5578aeee887e5cfb3ec026edde1054f3c8d6be6",
+      "capturedToolCount": 15,
+      "inputSchemaCount": 15,
+      "outputSchemaCount": 0,
+      "annotationCount": 0,
+      "toolsListOnly": true,
+      "toolCallAttempted": false,
+      "mockFallbackEnabled": false,
+      "humanPredictionDrift": {
+        "predictedAbsentTool": "get_capabilities",
+        "authoritativeActualTool": "npc_tank_get_capabilities"
+      }
+    },
+    "mqtt": {
+      "status": "PASS_WITH_UPSTREAM_DRIFT_PASSIVE_ONLY",
+      "requestedTopicCount": 18,
+      "observedTopicCount": 15,
+      "canonicalStatusObserved": true,
+      "compatibilityStatusObserved": true,
+      "passiveSubscribeOnly": true,
+      "publishAttempted": false,
+      "requiredCompatibilityWireMode": "ros_bridge_json",
+      "goal11StrictWireModeSatisfied": false,
+      "simulatorInterfaceDefect": "SIMULATOR_INTERFACE_DEFECT_MIXED_MQTT_WIRE_SHAPES",
+      "publisherQosDrift": [
+        {
+          "topic": "/npc_tank1/speed",
+          "expectedQos": 1,
+          "observedQos": 0
+        }
+      ],
+      "unobservedTopics": [
+        "/npc_tank1/target_detected",
+        "/npc_tank1/target/gnss",
+        "/npc_tank1/area_recon/exception"
+      ]
+    }
+  },
+  "providerOperations": [
+    {
+      "requirement": "chassis, connectivity, and task state",
+      "providerOperation": "vehicle_get_state",
+      "externalPrimitive": "get_status plus normalized MQTT state",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "evidenceTier": "REAL_CONTRACT_AND_PASSIVE_TELEMETRY_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_TOOL_SCHEMA_AND_STATUS_TELEMETRY_OBSERVED",
+      "realProviderExecution": "NOT_EXECUTED_READ_ONLY_SMOKE_PENDING",
+      "deterministicEvidence": "PASS"
+    },
+    {
+      "requirement": "VehicleProfile capability facts",
+      "providerOperation": "vehicle_get_capabilities",
+      "externalPrimitive": "npc_tank_get_capabilities plus captured tool schemas",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_ALLOWLIST_SANITIZATION",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_TOOL_SCHEMA_CAPTURED_NO_REAL_TOOL_CALL",
+      "realProviderExecution": "NOT_EXECUTED_READ_ONLY_SMOKE_PENDING",
+      "deterministicEvidence": "PASS"
+    },
+    {
+      "requirement": "payload, gimbal, and reconnaissance state",
+      "providerOperation": "vehicle_get_payload_status",
+      "externalPrimitive": "npc_tank_area_recon_get_status plus MQTT reconnaissance status",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "evidenceTier": "REAL_CONTRACT_AND_PASSIVE_TELEMETRY_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_TOOL_SCHEMA_AND_RECON_STATUS_TELEMETRY_OBSERVED",
+      "realProviderExecution": "NOT_EXECUTED_READ_ONLY_SMOKE_PENDING",
+      "deterministicEvidence": "PASS"
+    },
+    {
+      "requirement": "local target observations",
+      "providerOperation": "vehicle_get_targets",
+      "externalPrimitive": "npc_tank_area_recon_get_targets plus normalized MQTT target authority",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_SANITIZATION_DEDUPLICATION_AND_EMPTY_CLEAR",
+      "evidenceTier": "REAL_CONTRACT_AND_PASSIVE_TELEMETRY_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_TOOL_SCHEMA_AND_RECON_TARGET_TOPIC_OBSERVED",
+      "realProviderExecution": "NOT_EXECUTED_READ_ONLY_SMOKE_PENDING",
+      "deterministicEvidence": "PASS_NONEMPTY_TARGETS_ARE_SYNTHETIC_ONLY"
+    },
+    {
+      "requirement": "laser ranging",
+      "providerOperation": "vehicle_laser_range",
+      "externalPrimitive": null,
+      "classification": "PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE",
+      "implementationStatus": "EXPOSED_AS_UNAVAILABLE_WITH_NO_DOWNSTREAM_OR_MOCK_FALLBACK",
+      "evidenceTier": "REAL_NEGATIVE_CONTRACT_FACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "ABSENT_FROM_REAL_15_TOOL_INVENTORY",
+      "realProviderExecution": "NOT_CALLED_BY_DESIGN",
+      "deterministicEvidence": "PASS_UNAVAILABLE_REASON_CODE"
+    },
+    {
+      "requirement": "distance, point, route, and return-home navigation",
+      "providerOperation": "vehicle_navigate",
+      "externalPrimitive": "path-follow, move-distance, return-home, and mission-control tools",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_INTEGER_MISSION_CHAIN_AND_OBSERVATION_CONFIRMATION",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_INPUT_SCHEMAS_CAPTURED_NO_CONTROL_CALL",
+      "realProviderExecution": "NOT_EXECUTED_REAL_CONTROL_FLAG_AND_SAFE_FIXTURES_MISSING",
+      "deterministicEvidence": "PASS"
+    },
+    {
+      "requirement": "area and circular reconnaissance",
+      "providerOperation": "vehicle_area_recon",
+      "externalPrimitive": "npc_tank_area_recon_configure plus npc_tank_area_recon_control",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_SEPARATE_RECON_MOTION_STATE",
+      "evidenceTier": "REAL_CONTRACT_AND_PASSIVE_TELEMETRY_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_SCHEMAS_AND_IDLE_RECON_TELEMETRY_OBSERVED_NO_RECON_MUTATION",
+      "realProviderExecution": "NOT_EXECUTED_RECON_FLAG_AND_SAFE_REGION_FIXTURE_MISSING",
+      "deterministicEvidence": "PASS_AREA_AND_CIRCULAR_MAPPING"
+    },
+    {
+      "requirement": "target lock and unlock",
+      "providerOperation": "vehicle_track_target",
+      "externalPrimitive": "npc_tank_area_recon_lock with lock true or false",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_INTEGER_TARGET_AND_MISSION_ID_VALIDATION",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_INPUT_SCHEMA_CAPTURED_NO_LOCK_CALL",
+      "realProviderExecution": "NOT_EXECUTED_RECON_FLAG_AND_OBSERVED_SAFE_TARGET_MISSING",
+      "deterministicEvidence": "PASS"
+    },
+    {
+      "requirement": "finite gimbal adjustment",
+      "providerOperation": "vehicle_control_gimbal",
+      "externalPrimitive": "npc_tank_gimbal_move",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_FOR_SHARED_ABSOLUTE_RELATIVE_RESET_SURFACE",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_INPUT_SCHEMA_CAPTURED_NO_GIMBAL_CALL",
+      "realProviderExecution": "NOT_EXECUTED_RECON_FLAG_MISSING",
+      "deterministicEvidence": "PASS_MANUAL_VELOCITY_REMAINS_BELOW_PUBLIC_SHARED_SCHEMA"
+    },
+    {
+      "requirement": "confirmed effector dispatch",
+      "providerOperation": "vehicle_fire_weapon",
+      "externalPrimitive": "npc_tank_area_recon_attack_confirm",
+      "classification": "COMPATIBLE_MAPPING_OPTIONAL_EFFECTOR_GATE",
+      "implementationStatus": "IMPLEMENTED_WITH_CONFIRMATION_DURABLE_FENCE_AND_SANITIZATION",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_INPUT_SCHEMA_CAPTURED_NO_EFFECTOR_CALL",
+      "realProviderExecution": "NOT_EXECUTED_EFFECTOR_DISABLED",
+      "deterministicEvidence": "PASS_NO_REAL_EFFECTOR_CLAIM"
+    },
+    {
+      "requirement": "independent emergency primitives",
+      "providerOperation": "vehicle_emergency_stop",
+      "externalPrimitive": "motion stop plus active chassis and reconnaissance stop/unlock controls",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_ATTEMPT_ALL_INDEPENDENT_PRIMITIVES",
+      "evidenceTier": "REAL_CONTRACT_PLUS_DETERMINISTIC_LOCAL_TEST",
+      "realEvidence": "REAL_INPUT_SCHEMAS_CAPTURED_NO_STOP_CALL",
+      "realProviderExecution": "NOT_EXECUTED_REAL_CONTROL_FLAG_MISSING",
+      "deterministicEvidence": "PASS"
+    }
+  ],
+  "crossCuttingCapabilities": [
+    {
+      "capability": "authoritative 15-tool allowlist and result validation",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "REAL_TOOLS_LIST_CAPTURE_ONLY",
+      "deterministicEvidence": "PASS",
+      "remainingGap": "The live server exposes no output schemas or annotations; real safe response shapes remain to be exercised."
+    },
+    {
+      "capability": "mixed-wire MQTT normalization",
+      "implementationStatus": "IMPLEMENTED_COMPATIBILITY_MODE",
+      "realEvidence": "PASSIVE_LIVE_SAMPLES_REQUIRE_ROS_BRIDGE_JSON",
+      "deterministicEvidence": "PASS",
+      "remainingGap": "The observed stream mixes envelope and direct-domain shapes, so neither Goal 11 strict final wire mode is truthful for the whole stream."
+    },
+    {
+      "capability": "task identity, observation cursor, mission correlation, and no blind mutation retry",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED",
+      "deterministicEvidence": "PASS",
+      "remainingGap": "No real mutating Runtime Task lifecycle has run."
+    },
+    {
+      "capability": "disconnect and restart recovery without duplicate side effects",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_FAULT_INJECTION_PENDING",
+      "deterministicEvidence": "PASS_SELECTED_LOCAL_RECOVERY_CASES",
+      "remainingGap": "Real MQTT, Device MCP, Adapter, Runtime, and active-task recovery remain pending."
+    },
+    {
+      "capability": "PMS onboarding and Registry authority",
+      "implementationStatus": "PENDING_FINAL_LIVE_RUN",
+      "realEvidence": "NOT_EXECUTED",
+      "deterministicEvidence": "NOT_CLAIMED",
+      "remainingGap": "Formal PMS API/application onboarding, Worker reconcile, Catalog, Registry revision/checksum/ETag, and Registry-backed E2E remain pending."
+    },
+    {
+      "capability": "PMS Web visibility",
+      "implementationStatus": "PENDING_FINAL_LIVE_RUN",
+      "realEvidence": "NOT_EXECUTED",
+      "deterministicEvidence": "NOT_CLAIMED",
+      "remainingGap": "Package, Provider, Resource, Deployment, Registry, and Audit UI visibility remain pending."
+    },
+    {
+      "capability": "independent one-click deployment and clean restart",
+      "implementationStatus": "IN_PROGRESS_PENDING_MAIN_AGENT_VALIDATION",
+      "realEvidence": "NOT_EXECUTED",
+      "deterministicEvidence": "NOT_INCLUDED_IN_THIS_MATRIX_TEST_RUN",
+      "remainingGap": "Exact-head image, no-mock Compose, health, smoke, and two-cycle clean restart evidence remain pending."
+    }
+  ],
+  "qualificationGateStatus": {
+    "mcpContract": "PASS_REAL_CAPTURE_NO_TOOL_CALL",
+    "mqttContract": "PARTIAL_REAL_PASSIVE_CAPTURE_WITH_MIXED_WIRE_AND_QOS_DRIFT",
+    "readOnlyProviderSmoke": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN",
+    "realControl": "NOT_EXECUTED_FLAG_AND_SAFE_FIXTURES_MISSING",
+    "realReconnaissance": "NOT_EXECUTED_FLAG_AND_SAFE_FIXTURE_MISSING",
+    "realEffector": "NOT_EXECUTED_EFFECTOR_DISABLED_OPTIONAL",
+    "runtimeE2e": "DETERMINISTIC_LOCAL_ONLY_REAL_REGISTRY_BACKED_RUN_PENDING",
+    "pmsOnboarding": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN",
+    "registryAuthority": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN",
+    "pmsWeb": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN",
+    "recovery": "DETERMINISTIC_LOCAL_ONLY_REAL_FAULT_INJECTION_PENDING",
+    "deployment": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN",
+    "fullRegression": "NOT_EXECUTED_PENDING_MAIN_AGENT_RUN"
+  },
+  "deterministicTestEvidence": {
+    "status": "PASS_TARGETED_LOCAL_NOT_REAL_EXTERNAL",
+    "testFiles": 7,
+    "testCount": 73,
+    "runs": [
+      {
+        "files": [
+          "tests/npc-tank-simulation/device-mcp-mapping.test.ts",
+          "tests/npc-tank-simulation/mqtt-real-contract.test.ts",
+          "tests/contract/npc-tank-provider-contract.test.ts"
+        ],
+        "passedTests": 29
+      },
+      {
+        "files": [
+          "tests/unit/npc-tank-provider-core.test.ts",
+          "tests/integration/npc-tank-provider-adapter.test.ts",
+          "tests/e2e/npc-tank-provider-grpc-e2e.test.ts",
+          "tests/security/npc-tank-provider-security.test.ts"
+        ],
+        "passedTests": 44
+      }
+    ],
+    "warning": "The integration and E2E labels above describe local deterministic test layers; they are not live simulator, PMS, or Registry evidence."
+  },
+  "evidenceRefs": [
+    "reports/npc-tank-simulation/MCP_CONTRACT_CAPTURE.json",
+    "reports/npc-tank-simulation/MCP_GAP_MATRIX.md",
+    "reports/npc-tank-simulation/MQTT_TOPIC_MATRIX.json",
+    "reports/npc-tank-simulation/MQTT_PAYLOAD_EVIDENCE.json",
+    "reports/npc-tank-simulation/MQTT_RAW_SAMPLE_INDEX.json"
+  ],
+  "redaction": {
+    "endpointValuesStored": false,
+    "credentialValuesStored": false,
+    "coordinateValuesStored": false,
+    "rawPayloadStored": false,
+    "mockQualificationEvidenceStored": false
+  }
+}

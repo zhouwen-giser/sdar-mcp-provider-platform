@@ -10,7 +10,7 @@ import { MemoryProviderStore } from "../../packages/provider-adapter-kit/src/ind
 import type { CapturedToolContract } from "../../packages/vehicle-device-mcp-client/src/index.js";
 
 describe("Goal 10 Provider boundary", () => {
-  it("adds only the two authorized UGV operations and leaves the NPC catalog at nine", () => {
+  it("keeps the shared UGV surface stable while Goal 11 brings NPC to the same eleven operations", () => {
     const store = new MemoryProviderStore();
     const ugv = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", store);
     const npc = npcTankManifest("isr.vehicle.npc-tank.npc-tank1", "1.0.0", store, false);
@@ -27,7 +27,19 @@ describe("Goal 10 Provider boundary", () => {
       "vehicle_fire_weapon",
       "vehicle_emergency_stop",
     ]);
-    expect(npc.operations as unknown[]).toHaveLength(9);
+    expect((npc.operations as { name: string }[]).map(({ name }) => name)).toEqual([
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets",
+      "vehicle_laser_range",
+      "vehicle_navigate",
+      "vehicle_area_recon",
+      "vehicle_track_target",
+      "vehicle_control_gimbal",
+      "vehicle_fire_weapon",
+      "vehicle_emergency_stop",
+    ]);
   });
 
   it("derives capability support from reported contracts and never fabricates physical limits", () => {

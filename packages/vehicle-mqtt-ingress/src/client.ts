@@ -123,6 +123,7 @@ export class NpcTankMqttClient extends VehicleMqttClient {
       assertExactNpcTankSubscriptions,
       npcTankMqttQos,
       "NPC_TANK",
+      true,
     );
   }
 }

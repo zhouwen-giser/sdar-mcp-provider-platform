@@ -53,6 +53,8 @@ export function createNpcTankSnapshot(
     },
     now,
   ) as NpcTankSnapshot;
+  snapshot.payload.eoTask = { state: "unknown" };
+  snapshot.payload.reconnaissance.motionStatus = "unknown";
   snapshot.payload.eoScan = { supported: supportsCircularEoScan };
   snapshot.revision = snapshotRevision(snapshot);
   return snapshot;
@@ -111,11 +113,7 @@ export function applySnapshotPatch(
     const reconnaissancePatch = structuredClone(patch.payload.reconnaissance);
     const cameraFault =
       reconnaissancePatch?.cameraFault ?? next.payload.reconnaissance.cameraFault ?? false;
-    if (
-      current.identity.vehicleType === "ugv" &&
-      cameraFault &&
-      reconnaissancePatch !== undefined
-    ) {
+    if (cameraFault && reconnaissancePatch !== undefined) {
       delete reconnaissancePatch.progress;
       delete reconnaissancePatch.coverage;
       reconnaissancePatch.progressAuthoritative = false;
@@ -127,31 +125,29 @@ export function applySnapshotPatch(
       reconnaissance:
         reconnaissancePatch === undefined
           ? next.payload.reconnaissance
-          : current.identity.vehicleType === "npc_tank"
-            ? { state: "unknown", ...reconnaissancePatch }
-            : {
-                ...next.payload.reconnaissance,
-                ...reconnaissancePatch,
-                ...(reconnaissancePatch.coverage === undefined
-                  ? {}
-                  : {
-                      coverage: {
-                        ...next.payload.reconnaissance.coverage,
-                        ...reconnaissancePatch.coverage,
-                      },
-                    }),
-                ...(reconnaissancePatch.lock === undefined
-                  ? {}
-                  : {
-                      lock: {
-                        ...next.payload.reconnaissance.lock,
-                        ...reconnaissancePatch.lock,
-                      },
-                    }),
-                ...(reconnaissancePatch.coverability === undefined
-                  ? {}
-                  : { coverability: reconnaissancePatch.coverability }),
-              },
+          : {
+              ...next.payload.reconnaissance,
+              ...reconnaissancePatch,
+              ...(reconnaissancePatch.coverage === undefined
+                ? {}
+                : {
+                    coverage: {
+                      ...next.payload.reconnaissance.coverage,
+                      ...reconnaissancePatch.coverage,
+                    },
+                  }),
+              ...(reconnaissancePatch.lock === undefined
+                ? {}
+                : {
+                    lock: {
+                      ...next.payload.reconnaissance.lock,
+                      ...reconnaissancePatch.lock,
+                    },
+                  }),
+              ...(reconnaissancePatch.coverability === undefined
+                ? {}
+                : { coverability: reconnaissancePatch.coverability }),
+            },
       weapon: patch.payload.weapon ?? next.payload.weapon,
       targets: patch.payload.targets ?? next.payload.targets,
       ...(patch.payload.gimbal === undefined

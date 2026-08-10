@@ -26,7 +26,7 @@ const limits = {
 };
 
 describe("Goal 10 UGV MQTT protocol-derived contract", () => {
-  it("uses the real UGV topic inventory and QoS without changing NPC policy", () => {
+  it("keeps the UGV contract while Goal 11 aligns NPC to the real 18-topic policy", () => {
     expect(UGV_MQTT_TOPICS).toEqual([
       "/ugv/gnss",
       "/ugv/imu",
@@ -55,8 +55,8 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     expect(ugvMqttQos("status/ugv")).toBe(1);
     expect(ugvMqttQos("/ugv/status")).toBe(1);
     expect(exactUgvTopic("/ugv/target/base64")).toBe(false);
-    expect(NPC_TANK_MQTT_TOPICS).toHaveLength(12);
-    expect(npcTankMqttQos("/npc_tank1/speed")).toBe(0);
+    expect(NPC_TANK_MQTT_TOPICS).toHaveLength(18);
+    expect(npcTankMqttQos("/npc_tank1/speed")).toBe(1);
     expect(npcTankMqttQos("/npc_tank1/status")).toBe(1);
   });
 
@@ -168,7 +168,7 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     });
   });
 
-  it("preserves the NPC composite snapshot shape while expanding UGV observations", () => {
+  it("uses the modern shared composite shape for NPC without treating EO as recon", () => {
     const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
     ingress.handle(
       "/npc_tank1/status",
@@ -179,18 +179,20 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
         eo_task: { id: "npc-eo", state: 4, progress: 100 },
       }),
     );
-    expect(ingress.snapshot().payload.reconnaissance).toMatchObject({
+    expect(ingress.snapshot().payload.eoTask).toMatchObject({
       id: "npc-eo",
       state: 4,
       progress: 100,
     });
-    expect(ingress.snapshot().payload).not.toHaveProperty("eoTask");
-    expect(ingress.snapshot().payload.reconnaissance).not.toHaveProperty("motionStatus");
-    expect(ingress.snapshot().chassis).not.toHaveProperty("compassHeadingDeg");
-    expect(ingress.snapshot().connectivity).not.toHaveProperty("deviceAvailable");
+    expect(ingress.snapshot().payload.reconnaissance).toMatchObject({
+      state: "unknown",
+      motionStatus: "unknown",
+    });
+    expect(ingress.snapshot().chassis.compassHeadingDeg).toBe(20);
+    expect(ingress.snapshot().connectivity.deviceAvailable).toBe(true);
   });
 
-  it("preserves NPC detected-object publication order and duplicate observations", () => {
+  it("deduplicates NPC detected objects using the modern target authority", () => {
     const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
     ingress.handle(
       "/npc_tank1/detected_objects",
@@ -208,9 +210,8 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
         .snapshot()
         .payload.targets.map((target) => [target.targetId, target.position?.x, target.source]),
     ).toEqual([
-      ["010", 1, "mqtt"],
-      ["2", 2, "mqtt"],
-      ["010", 3, "mqtt"],
+      ["10", 3, "mqtt_detected_objects"],
+      ["2", 2, "mqtt_detected_objects"],
     ]);
   });
 

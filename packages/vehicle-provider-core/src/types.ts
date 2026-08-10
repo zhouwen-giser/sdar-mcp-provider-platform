@@ -225,6 +225,10 @@ export interface NpcTankSnapshot extends VehicleSnapshot {
     vehicleType: "npc_tank";
     executionMode: "simulation";
   };
+  payload: VehicleSnapshot["payload"] & {
+    eoTask: VehicleTaskTrack;
+    reconnaissance: VehicleReconnaissanceState & { motionStatus: ReconMotionStatus };
+  };
 }
 
 export type FreshnessDomain = "chassis" | "health" | "mission" | "target" | "payload";

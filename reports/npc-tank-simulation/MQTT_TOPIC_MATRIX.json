@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_npc_tank_mqtt_topic_matrix",
+  "phase": "G11_REAL_MQTT_CAPTURE",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "startedAt": "2026-08-10T10:44:24.002Z",
+  "completedAt": "2026-08-10T10:44:25.025Z",
+  "endpoint": {
+    "scheme": "mqtt",
+    "hostKind": "lan-or-dns",
+    "hostHash": "6a321119728a4553",
+    "port": "1883",
+    "path": "[redacted-nonstandard]",
+    "pathHash": "8a5edab282632443"
+  },
+  "passiveSubscribeOnly": true,
+  "publishAttempted": false,
+  "requestedTopicCount": 18,
+  "observedTopicCount": 15,
+  "canonicalStatusObserved": true,
+  "compatibilityStatusObserved": true,
+  "compositeStatusObserved": true,
+  "subscriptionGrants": [
+    {
+      "topic": "/npc_tank1/area_recon/coverage",
+      "qos": 0
+    },
+    {
+      "topic": "/npc_tank1/area_recon/exception",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/area_recon/status",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/area_recon/targets",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/battery_range_km",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/component_status",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/detected_objects",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/eo/pose",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/gnss",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/imu",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/mission_state",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/nav_state",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/speed",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/status",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/system_state",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/target_detected",
+      "qos": 1
+    },
+    {
+      "topic": "/npc_tank1/target/gnss",
+      "qos": 1
+    },
+    {
+      "topic": "status/npc_tank1",
+      "qos": 1
+    }
+  ],
+  "topics": [
+    {
+      "topic": "status/npc_tank1",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 33
+    },
+    {
+      "topic": "/npc_tank1/status",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 5
+    },
+    {
+      "topic": "/npc_tank1/gnss",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 20
+    },
+    {
+      "topic": "/npc_tank1/imu",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 8
+    },
+    {
+      "topic": "/npc_tank1/speed",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 0,
+      "publisherQosMatchesExpected": false,
+      "retained": false,
+      "sampleCount": 10
+    },
+    {
+      "topic": "/npc_tank1/battery_range_km",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 1
+    },
+    {
+      "topic": "/npc_tank1/mission_state",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 1
+    },
+    {
+      "topic": "/npc_tank1/nav_state",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 1
+    },
+    {
+      "topic": "/npc_tank1/system_state",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 1
+    },
+    {
+      "topic": "/npc_tank1/component_status",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 2
+    },
+    {
+      "topic": "/npc_tank1/eo/pose",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 5
+    },
+    {
+      "topic": "/npc_tank1/detected_objects",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 5
+    },
+    {
+      "topic": "/npc_tank1/target_detected",
+      "expectedQos": 1,
+      "observed": false
+    },
+    {
+      "topic": "/npc_tank1/target/gnss",
+      "expectedQos": 1,
+      "observed": false
+    },
+    {
+      "topic": "/npc_tank1/area_recon/status",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 20
+    },
+    {
+      "topic": "/npc_tank1/area_recon/targets",
+      "expectedQos": 1,
+      "observed": true,
+      "observedQos": 1,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 5
+    },
+    {
+      "topic": "/npc_tank1/area_recon/exception",
+      "expectedQos": 1,
+      "observed": false
+    },
+    {
+      "topic": "/npc_tank1/area_recon/coverage",
+      "expectedQos": 0,
+      "observed": true,
+      "observedQos": 0,
+      "publisherQosMatchesExpected": true,
+      "retained": false,
+      "sampleCount": 1
+    }
+  ],
+  "publisherQosDrift": [
+    {
+      "topic": "/npc_tank1/speed",
+      "expectedQos": 1,
+      "observedQos": 0
+    }
+  ],
+  "requiredCompatibilityWireMode": "ros_bridge_json",
+  "simulatorInterfaceDefect": "SIMULATOR_INTERFACE_DEFECT_MIXED_MQTT_WIRE_SHAPES",
+  "rawPayloadStored": false
+}

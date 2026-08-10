@@ -1,0 +1,290 @@
+services:
+  # This is an overlay only. The PMS service definition remains authoritative in
+  # deploy/pms-console/compose.yaml; this adds externally scoped credentials.
+  pms-api:
+    environment:
+      PMS_MANAGEMENT_CREDENTIAL_FILE: /run/npc-pms-credentials/management.json
+      PMS_RUNTIME_CREDENTIAL_FILE: /run/npc-pms-credentials/runtime.json
+    volumes:
+      - type: bind
+        source: ${NPC_TANK_PMS_CREDENTIAL_ROOT:?NPC_TANK_PMS_CREDENTIAL_ROOT is required}
+        target: /run/npc-pms-credentials
+        read_only: true
+
+  # The onboarding command runs in Worker because only Worker owns database
+  # provisioning and PM2 Runtime state. The same scoped descriptors are
+  # mounted read-only so no credential text enters Compose environment data.
+  pms-worker:
+    environment:
+      PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: /run/npc-pms-credentials/runtime-control-plane
+    volumes:
+      - type: bind
+        source: ${NPC_TANK_PMS_CREDENTIAL_ROOT:?NPC_TANK_PMS_CREDENTIAL_ROOT is required}
+        target: /run/npc-pms-credentials
+        read_only: true
+
+  npc-runtime-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: npc_runtime
+      POSTGRES_DB: npc_runtime
+      POSTGRES_PASSWORD_FILE: /run/secrets/npc_runtime_db_password
+    volumes:
+      - npc-runtime-postgres-data:/var/lib/postgresql/data
+    secrets:
+      - npc_runtime_db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_runtime -d npc_runtime"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    networks:
+      - pms-console
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+  npc-adapter-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: npc_adapter
+      POSTGRES_DB: npc_adapter
+      POSTGRES_PASSWORD_FILE: /run/secrets/npc_adapter_db_password
+    volumes:
+      - npc-adapter-postgres-data:/var/lib/postgresql/data
+    secrets:
+      - npc_adapter_db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_adapter -d npc_adapter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    networks:
+      - pms-console
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+  npc-preflight:
+    profiles: ["preflight"]
+    image: sdar-npc-tank-simulation-real/npc-tank-adapter:${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${NPC_TANK_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: npc-real-adapter
+      args:
+        VCS_REF: ${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    command:
+      [
+        "node",
+        "scripts/npc-tank-simulation/capture-real-contracts.mjs",
+        "--env-file",
+        "/dev/null",
+        "--mcp-output",
+        "/var/lib/sdar/preflight/MCP_CONTRACT_CAPTURE.json",
+        "--topic-output",
+        "/var/lib/sdar/preflight/MQTT_TOPIC_MATRIX.json",
+        "--payload-output",
+        "/var/lib/sdar/preflight/MQTT_PAYLOAD_EVIDENCE.json",
+        "--raw-index-output",
+        "/var/lib/sdar/preflight/MQTT_RAW_SAMPLE_INDEX.json",
+      ]
+    environment:
+      NPC_TANK_SIM_DEVICE_MCP_URL: ${NPC_TANK_SIM_DEVICE_MCP_URL:-}
+      NPC_TANK_SIM_DEVICE_MCP_HEADERS_FILE: ${NPC_TANK_SIM_DEVICE_MCP_HEADERS_FILE:+/run/secrets/npc_device_mcp_headers}
+      NPC_TANK_SIM_DEVICE_MCP_TIMEOUT_MS: ${NPC_TANK_SIM_DEVICE_MCP_TIMEOUT_MS:-10000}
+      NPC_TANK_SIM_MQTT_URL: ${NPC_TANK_SIM_MQTT_URL:-}
+      NPC_TANK_SIM_MQTT_USERNAME: ${NPC_TANK_SIM_MQTT_USERNAME:-}
+      NPC_TANK_SIM_MQTT_PASSWORD_FILE: ${NPC_TANK_SIM_MQTT_PASSWORD_FILE:+/run/secrets/npc_mqtt_password}
+      NPC_TANK_PREFLIGHT_MQTT_CONNECT_TIMEOUT_MS: ${NPC_TANK_PREFLIGHT_MQTT_CONNECT_TIMEOUT_MS:-10000}
+      NPC_TANK_PREFLIGHT_MQTT_SAMPLE_TIMEOUT_MS: ${NPC_TANK_PREFLIGHT_MQTT_SAMPLE_TIMEOUT_MS:-20000}
+      NPC_TANK_MQTT_WIRE_MODE: ${NPC_TANK_MQTT_WIRE_MODE:-}
+      NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      NPC_TANK_ENABLE_REAL_CONTROL: ${NPC_TANK_ENABLE_REAL_CONTROL:-false}
+      NPC_TANK_ENABLE_RECON_TESTS: ${NPC_TANK_ENABLE_RECON_TESTS:-false}
+      NPC_TANK_ENABLE_EFFECTOR_TESTS: ${NPC_TANK_ENABLE_EFFECTOR_TESTS:-false}
+      NPC_TANK_REQUIRE_PMS_REGISTRY: ${NPC_TANK_REQUIRE_PMS_REGISTRY:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - npc-contract-reports:/var/lib/sdar
+    secrets:
+      - npc_device_mcp_headers
+      - npc_mqtt_password
+      - npc_mqtt_tls_ca
+      - npc_mqtt_tls_cert
+      - npc_mqtt_tls_key
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    networks:
+      - pms-console
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  npc-tank-adapter:
+    image: sdar-npc-tank-simulation-real/npc-tank-adapter:${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${NPC_TANK_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: npc-real-adapter
+      args:
+        VCS_REF: ${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    restart: unless-stopped
+    command:
+      - sh
+      - -eu
+      - -c
+      - >-
+        export NPC_TANK_ADAPTER_DATABASE_URL="$$(tr -d '\r\n' < /run/secrets/npc_adapter_database_url)";
+        node dist/apps/npc-tank-provider-adapter/src/migrate.js;
+        exec node dist/apps/npc-tank-provider-adapter/src/main.js
+    environment:
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      PROVIDER_VERSION: 0.1.0
+      ADAPTER_HOST: 0.0.0.0
+      ADAPTER_PORT: ${NPC_TANK_ADAPTER_PORT:-7013}
+      ADAPTER_TLS_MODE: disabled
+      NPC_TANK_ADAPTER_STORE_MODE: postgres
+      NPC_TANK_MQTT_URL: ${NPC_TANK_SIM_MQTT_URL:-}
+      NPC_TANK_MQTT_CLIENT_ID: ${NPC_TANK_SIM_MQTT_CLIENT_ID:-sdar-real-npc-tank-adapter-npc-tank1}
+      NPC_TANK_MQTT_USERNAME: ${NPC_TANK_SIM_MQTT_USERNAME:-}
+      NPC_TANK_MQTT_PASSWORD_FILE: ${NPC_TANK_SIM_MQTT_PASSWORD_FILE:+/run/secrets/npc_mqtt_password}
+      NPC_TANK_MQTT_TLS_MODE: ${NPC_TANK_SIM_MQTT_TLS_MODE:-disabled}
+      NPC_TANK_MQTT_TLS_CA_PATH: ${NPC_TANK_SIM_MQTT_TLS_CA_FILE:+/run/secrets/npc_mqtt_tls_ca}
+      NPC_TANK_MQTT_TLS_CERT_PATH: ${NPC_TANK_SIM_MQTT_TLS_CERT_FILE:+/run/secrets/npc_mqtt_tls_cert}
+      NPC_TANK_MQTT_TLS_KEY_PATH: ${NPC_TANK_SIM_MQTT_TLS_KEY_FILE:+/run/secrets/npc_mqtt_tls_key}
+      NPC_TANK_MQTT_SESSION_MODE: persistent
+      NPC_TANK_MQTT_WIRE_MODE: ${NPC_TANK_MQTT_WIRE_MODE:-}
+      NPC_TANK_DEVICE_MCP_URL: ${NPC_TANK_SIM_DEVICE_MCP_URL:-}
+      NPC_TANK_DEVICE_MCP_HEADERS_FILE: ${NPC_TANK_SIM_DEVICE_MCP_HEADERS_FILE:+/run/secrets/npc_device_mcp_headers}
+      NPC_TANK_DEVICE_MCP_TLS_MODE: ${NPC_TANK_SIM_DEVICE_MCP_TLS_MODE:-disabled}
+      NPC_TANK_DEVICE_MCP_TIMEOUT_MS: ${NPC_TANK_SIM_DEVICE_MCP_TIMEOUT_MS:-10000}
+      NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH: /var/lib/sdar/contracts/MCP_CONTRACT_CAPTURE.json
+      NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH: /var/lib/sdar/contracts/NAVIGATION_TOOL_SELECTION.json
+      NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH: /var/lib/sdar/contracts/CIRCULAR_RECON_CAPABILITY.json
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: npc-tank-runtime:7002
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      RUNTIME_ENV: test
+      LOG_LEVEL: ${NPC_TANK_LOG_LEVEL:-info}
+    expose:
+      - "${NPC_TANK_ADAPTER_PORT:-7013}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      npc-adapter-postgres:
+        condition: service_healthy
+    volumes:
+      - npc-contract-reports:/var/lib/sdar
+    secrets:
+      - npc_adapter_database_url
+      - npc_device_mcp_headers
+      - npc_mqtt_password
+      - npc_mqtt_tls_ca
+      - npc_mqtt_tls_cert
+      - npc_mqtt_tls_key
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    networks:
+      - pms-console
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s
+
+  npc-tank-runtime:
+    image: sdar-npc-tank-simulation-real/npc-tank-runtime:${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${NPC_TANK_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: npc-real-runtime
+      args:
+        VCS_REF: ${NPC_TANK_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      RUNTIME_ENV: test
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      DATABASE_URL_FILE: /run/secrets/npc_runtime_database_url
+      ADAPTER_ENDPOINT: npc-tank-adapter:${NPC_TANK_ADAPTER_PORT:-7013}
+      ADAPTER_TLS_MODE: disabled
+      AUTH_MODE: trusted_headers
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: "7002"
+      OTEL_ENABLED: "false"
+      LOG_LEVEL: ${NPC_TANK_LOG_LEVEL:-info}
+      PORT: "8080"
+      NPC_TANK_REQUIRE_PMS_REGISTRY: ${NPC_TANK_REQUIRE_PMS_REGISTRY:-false}
+      NPC_TANK_PMS_ENVIRONMENT: ${NPC_TANK_PMS_ENVIRONMENT:-simulation}
+    ports:
+      - "127.0.0.1:${NPC_TANK_RUNTIME_PORT:-19103}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+    depends_on:
+      npc-runtime-postgres:
+        condition: service_healthy
+      npc-tank-adapter:
+        condition: service_healthy
+    secrets:
+      - npc_runtime_database_url
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    networks:
+      - pms-console
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+volumes:
+  npc-adapter-postgres-data:
+  npc-runtime-postgres-data:
+  npc-contract-reports:
+
+secrets:
+  npc_adapter_db_password:
+    file: ${NPC_TANK_ADAPTER_DB_PASSWORD_FILE:?NPC_TANK_ADAPTER_DB_PASSWORD_FILE is required}
+  npc_adapter_database_url:
+    file: ${NPC_TANK_ADAPTER_DATABASE_URL_FILE:?NPC_TANK_ADAPTER_DATABASE_URL_FILE is required}
+  npc_runtime_db_password:
+    file: ${NPC_TANK_RUNTIME_DB_PASSWORD_FILE:?NPC_TANK_RUNTIME_DB_PASSWORD_FILE is required}
+  npc_runtime_database_url:
+    file: ${NPC_TANK_RUNTIME_DATABASE_URL_FILE:?NPC_TANK_RUNTIME_DATABASE_URL_FILE is required}
+  npc_device_mcp_headers:
+    file: ${NPC_TANK_SIM_DEVICE_MCP_HEADERS_FILE:-/dev/null}
+  npc_mqtt_password:
+    file: ${NPC_TANK_SIM_MQTT_PASSWORD_FILE:-/dev/null}
+  npc_mqtt_tls_ca:
+    file: ${NPC_TANK_SIM_MQTT_TLS_CA_FILE:-/dev/null}
+  npc_mqtt_tls_cert:
+    file: ${NPC_TANK_SIM_MQTT_TLS_CERT_FILE:-/dev/null}
+  npc_mqtt_tls_key:
+    file: ${NPC_TANK_SIM_MQTT_TLS_KEY_FILE:-/dev/null}

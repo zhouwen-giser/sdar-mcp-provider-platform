@@ -105,6 +105,49 @@ COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /a
 COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
 CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]
 
+FROM production-dependencies AS npc-real-production-dependencies
+RUN rm -rf node_modules/.pnpm/node_modules/@sdar \
+    && touch -h -d '@0' node_modules/.pnpm/node_modules
+
+FROM node:22-bookworm-slim AS npc-real-base
+ARG VCS_REF=unknown
+ENV NODE_ENV=production
+WORKDIR /app
+LABEL org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.source="https://github.com/zhouwen-giser/sdar-mcp-provider-platform" \
+      org.opencontainers.image.licenses="Apache-2.0"
+COPY --from=npc-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+COPY --from=build --chown=root:root /workspace/proto /app/proto
+COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+RUN mkdir -p /var/lib/sdar \
+    && chown node:node /var/lib/sdar \
+    && touch -d '@0' /var/lib/sdar /app
+USER node
+
+FROM npc-real-base AS npc-real-runtime
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR NPC Tank Qualification Runtime" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/dist/apps/runtime /app/dist/apps/runtime
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+CMD ["node", "dist/apps/runtime/src/main.js"]
+
+FROM npc-real-base AS npc-real-adapter
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR Real NPC Tank Provider Adapter" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/dist/apps/npc-tank-provider-adapter /app/dist/apps/npc-tank-provider-adapter
+COPY --from=build --chown=root:root /workspace/scripts/npc-tank-simulation/capture-real-contracts.mjs /app/scripts/npc-tank-simulation/capture-real-contracts.mjs
+COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation/lib.mjs /app/scripts/ugv-simulation/lib.mjs
+EXPOSE 7013
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+CMD ["node", "dist/apps/npc-tank-provider-adapter/src/main.js"]
+
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-10T10:02:11Z",
+  "baseSha": "ac3369ba9fa4e0ff6b6589525594b50291da02b7",
+  "goal10BaseRef": "codex/goal-10-ugv-simulation-real-interface",
+  "goal10MergeBase": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+  "branch": "codex/goal-11-npc-tank-simulation-real-interface",
+  "workingTree": {
+    "trackedChanges": 0,
+    "stagedChanges": 0,
+    "untrackedBeforeBaseline": [
+      "reports/npc-tank-simulation/GOAL10_INHERITANCE_READINESS.json",
+      "reports/npc-tank-simulation/GOAL10_INHERITANCE_READINESS.md"
+    ],
+    "sourceState": "CLEAN_EXCEPT_REQUIRED_PRE_BRANCH_READINESS_EVIDENCE"
+  },
+  "goal10": {
+    "ugvStatus": "UGV_SIMULATION_PARTIAL",
+    "ugvQualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+    "pmsConsoleStatus": "PMS_CONSOLE_PACKAGE_QUALIFIED",
+    "pmsConsoleQualificationSha": "7ca09d55aaf01dab9d6711fdd793530084897868"
+  },
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "git": "2.34.1",
+    "docker": "29.6.1",
+    "dockerCompose": "v5.3.1",
+    "postgresQualificationMajor": 17
+  },
+  "preEditRegression": {
+    "targetedSharedAndProviderSuite": {
+      "status": "PASS",
+      "testFiles": 16,
+      "tests": 131
+    },
+    "rootVerifyUgvNpcProvider": {
+      "status": "PRE_EXISTING_FORMAT_GATE_FAILURE",
+      "failedStage": "prettier --check .",
+      "preExistingFiles": [
+        "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+        "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+        "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json"
+      ],
+      "productTestsReached": false,
+      "sourceModifiedByAttempt": false
+    },
+    "sourceQualityExcludingPreExistingReportFormatting": {
+      "lint": "PASS",
+      "typecheck": "PASS",
+      "build": "PASS",
+      "detachedProtocolGenerationCheck": "PASS"
+    }
+  },
+  "safetyDefaults": {
+    "realControl": false,
+    "reconTests": false,
+    "effectorTests": false,
+    "endpointValuesRecorded": false
+  },
+  "remoteMutationAuthorized": false,
+  "status": "PASS"
+}

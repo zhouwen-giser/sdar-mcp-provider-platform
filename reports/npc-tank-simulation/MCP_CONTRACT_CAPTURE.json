@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_npc_tank_device_mcp_contract",
+  "phase": "G11_REAL_MCP_CAPTURE",
+  "status": "PASS",
+  "startedAt": "2026-08-10T10:44:23.642Z",
+  "completedAt": "2026-08-10T10:44:23.910Z",
+  "endpoint": {
+    "scheme": "http",
+    "hostKind": "lan-or-dns",
+    "hostHash": "6a321119728a4553",
+    "port": "19003",
+    "path": "/mcp",
+    "pathHash": "88fe637beab867e2"
+  },
+  "safety": {
+    "toolsListOnly": true,
+    "toolCallAttempted": false,
+    "mockFallbackEnabled": false,
+    "realControlAttempted": false
+  },
+  "serverInfo": {
+    "name": "npc-tank-mcp-server",
+    "version": "1.26.0"
+  },
+  "protocolVersion": "2025-11-25",
+  "toolCount": 15,
+  "capturedToolNames": [
+    "npc_tank_path_follow_mission",
+    "npc_tank_return_home",
+    "npc_tank_move_distance",
+    "npc_tank_mission_control",
+    "npc_tank_motion_stop",
+    "get_status",
+    "npc_tank_get_capabilities",
+    "npc_tank_area_recon_configure",
+    "npc_tank_area_recon_control",
+    "npc_tank_area_recon_lock",
+    "npc_tank_area_recon_get_status",
+    "npc_tank_area_recon_get_targets",
+    "npc_tank_area_recon_reset",
+    "npc_tank_area_recon_attack_confirm",
+    "npc_tank_gimbal_move"
+  ],
+  "expectedToolCount": 15,
+  "missingAuthoritativeTools": [],
+  "unknownTools": [],
+  "humanPredictionDrift": {
+    "missingPredictedTools": ["get_capabilities"],
+    "actualReplacementTools": ["npc_tank_get_capabilities"]
+  },
+  "inputSchemaCount": 15,
+  "outputSchemaCount": 0,
+  "annotationCount": 0,
+  "contractHash": "b06aa50a6e2fbe5bd0fa60cbc5578aeee887e5cfb3ec026edde1054f3c8d6be6",
+  "tools": [
+    {
+      "name": "npc_tank_path_follow_mission",
+      "description": "\n    发送路径跟随(航点机动)任务到 NPC 坦克（底盘机动 chassis 轨道）。\n\n    两种模式：\n      - 直行模式(need_plan=False，默认)：给定路点逐点直线机动，不做任何规划。\n      - 规划模式(need_plan=True)：以坦克**当前位置**为起点、给定的**最后一个**路点\n        为终点，调用 /plan_route 沿现有道路网规划**最短路径**，用规划出的稠密航点\n        替换原路点后再机动；给多个点时，前面的点作为途经点按顺序经过。\n        因此\"收到一个路点先规划再机动\"只需传单个目标点 + need_plan=True。\n\n    参数:\n        task_points: GPS坐标列表，如\n                     [{\"latitude\": 29.7205344, \"longitude\": 106.8147144},\n                      {\"latitude\": 29.7208012, \"longitude\": 106.8151233}]\n                     也支持 {\"lat\",\"lon\",\"alt\"} 键名、[lat, lon] 坐标对、单个点 dict、\n                     JSON 字符串（多包一层的嵌套列表会自动摊平）；与 json_url 二选一。\n        json_url: 指向 JSON 路径文件的 HTTP URL；提供时自动下载解析为路径点，\n                  与 task_points 二选一（两者都给以 json_url 为准）。\n        need_plan: 是否需要道路网最短路径规划，默认 False。\n        density: 规划航点密度档位 adaptive/dense/medium/sparse，默认 adaptive；\n                 仅 need_plan=True 时生效。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成并在返回中给出。\n\n    返回:\n        {mission_id, state, state_label, progress, message} —— 下达成功返回\"就绪(0)\"，\n        此时坦克不会移动；需调用 npc_tank_mission_control(\"start\", mission_id) 才开始执行。\n        规划模式下 message 含规划里程与航点数；规划失败返回\"失败(5)\"，不会退化为直行。\n        之后可用 npc_tank_mission_control(\"pause\"/\"terminate\") 暂停或终止（暂停后 start 恢复）；\n        进度/完成请用 get_status() 按 mission_id 查询。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_points": {
+            "default": null,
+            "title": "Task Points"
+          },
+          "json_url": {
+            "default": "",
+            "title": "Json Url",
+            "type": "string"
+          },
+          "need_plan": {
+            "default": false,
+            "title": "Need Plan",
+            "type": "boolean"
+          },
+          "density": {
+            "default": "adaptive",
+            "title": "Density",
+            "type": "string"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "npc_tank_path_follow_missionArguments"
+      },
+      "inputSchemaHash": "c771ffd75a061b97f8ceb6230243ca32a0c91d9b72ec0000bb72099306167b85",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_return_home",
+      "description": "\n    返航：按最近一次机动(路径跟随)任务所下发路径点的相反顺序重新下发一次路径跟随任务，\n    使 NPC 坦克沿原路返回起始点（底盘机动 chassis 轨道）。\n\n    需先执行过一次路径跟随任务（npc_tank_path_follow_mission），否则没有可供返航的\n    历史路径点。返航本身也会成为新的\"最近一次机动\"，再次调用返航将沿返航路径逆序返回。\n\n    参数:\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, progress, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "npc_tank_return_homeArguments"
+      },
+      "inputSchemaHash": "305aa6da628eb77289c1e1bea68027c0ed0637c11bc5c38746f6356010056820",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_move_distance",
+      "description": "\n    控制 NPC 坦克沿指定方向移动一定距离（底盘机动 chassis 轨道）。\n\n    以坦克当前位置和航向为基准，按\"前/后/左/右\"方向偏移给定距离，生成一个目标航点\n    并作为路径跟随任务下达。与其它机动任务一致：下达后坦克不会移动，需调用\n    npc_tank_mission_control(\"start\", mission_id) 才开始执行。\n\n    参数:\n        direction: 移动方向。可用 \"forward\"/\"back\"/\"left\"/\"right\"，或中文 \"前\"/\"后\"/\"左\"/\"右\"。\n        distance: 移动距离，单位米（必须 > 0）。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "distance": {
+            "title": "Distance",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["direction", "distance"],
+        "title": "npc_tank_move_distanceArguments"
+      },
+      "inputSchemaHash": "16dba6b57a3cf17044591d46feab23af13c3c3d1c39780aa09c75e0bbf373acb",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_mission_control",
+      "description": "\n    控制底盘机动任务的生命周期（开始 / 暂停 / 终止）。\n\n    下发路径/返航/移动任务后坦克不动，需 action=\"start\" 才开始执行；\n    暂停后再次 action=\"start\" 即恢复。\n\n    参数:\n        action: 控制动作。\n            - \"start\"     开始执行（暂停后调用即恢复）\n            - \"pause\"     暂停（坦克原地停车保持，start 恢复）\n            - \"terminate\" 终止并清除任务（未开始则直接作废；执行中则发取消停车）\n        mission_id: 目标任务ID（由下发任务时返回）。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["action"],
+        "title": "npc_tank_mission_controlArguments"
+      },
+      "inputSchemaHash": "980520249a90659b6ba75b9e5865baa3caa69b0825961c10ec0cf00ef1421f2a",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_motion_stop",
+      "description": "\n    机动停止：立即停止底盘运动，无需 mission_id。\n\n    取消当前正在执行/暂停的机动任务（若有）并停车；即使没有登记中的任务也会\n    下发停止指令兜底（如任务经其它渠道下发）。已下发未开始（就绪）的任务不受\n    影响，仍可用 npc_tank_mission_control(\"start\") 启动。\n\n    返回:\n        {mission_id, state, state_label, message}\n        （mission_id 为被终止任务的ID，无任务被终止时为 -1）\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "npc_tank_motion_stopArguments"
+      },
+      "inputSchemaHash": "0b1f61ca106f52b2c6361e253d9d68681c019a0cdd35aa912b65e6246be609e6",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "get_status",
+      "description": "\n    获取 NPC 坦克的综合实时状态(取自 /{role}/status,与 /ugv/status 同构的合并 JSON)。\n\n    返回字段(状态未到达时返回 {\"available\": false}):\n      - vehicle_id, role_name, entity_id\n      - position {x, y, z}, speed_kmh, control {throttle, steer, brake, reverse}\n      - 能源:lvbattery_soc / hvbattery1_soc / hvbattery2_soc / fuel1 / fuel2\n      - 热:motor_temp / engine_water_temp\n      - 行驶:ready_status / gear_status / veh_speed / brake_status / emergency_stop_status\n      - 惯导:heading / roll / pitch / ins_init / gnss / location_status\n      - 模式/网络:power_supply_status / operate_mode_status / fault /\n                  ping_status / packet_loss_rate / average_round_trip_time\n      - 任务轨道:chassis_task / eo_task / weapon_task,各含 {id, type, state, progress}\n        (state: 0 未开始, 1 运行中, 2 已暂停, 3 已终止, 4 已结束, 5 已失败)\n      - gimbal {yaw, pitch, zoom}: 光电当前姿态(载荷在线时)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "get_statusArguments"
+      },
+      "inputSchemaHash": "fbac902bfaec6cda6de77d6963f23beb60d4c8442f43edf844e1eacb5b20cb27",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_get_capabilities",
+      "description": "\n    获取 NPC 坦克的静态能力/配置(取自 /{role}/capabilities，由裁判从 entities.yaml 组装)。\n\n    与 get_status(动态实时状态)相对：这些是启动后基本不变的配置值，用于判断\n    \"能否打得到/看得到/跑得了\"等，不必高频轮询，取一次即可缓存使用。\n\n    返回字段(尚未收到该话题时返回 {\"available\": false}):\n      - entity_id, type, camp, max_hp\n      - eo {fov_deg, detection_range_m}          —— 光电最大视场角/探测距离\n        (坦克实际视场经变焦收窄，当前值另见 get_status 的 gimbal 与设备 /{role}/eo_fov)\n      - weapon {hit_range_m, damage, ammo, cooldown_s, hit_rate} —— 武器打击距离等\n      - chassis {full_range_km}                  —— 底盘满电/满油总可行驶里程\n        (当前剩余续航另见 /{role}/battery_range_km)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "npc_tank_get_capabilitiesArguments"
+      },
+      "inputSchemaHash": "da6108c4b0fa50aa2c720b09bac4af9d4d4b6bf8a040a7006df71a72988ad587",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_configure",
+      "description": "配置侦察动作 (对应文档 mar_motion_cfg_srv / MarMotionCfg)。\n\n    两种扫描样式，都支持**边走边侦察**（底盘机动与侦察不互斥，可先/同时下达\n    机动任务，车一边走一边扫）：\n      - scan_mode=1 区域侦察：圈定区域，云台在区域内蛇形覆盖扫描，只上报区域内\n        目标；每圈按当前机位重算格点，车移动后扫描仍对准区域。\n      - scan_mode=2 周扫侦察：不圈区域，光电以炮塔/车体为中心 360° 环扫，上报\n        视场内 + 探测半径内的所有目标；扫描方位随车体转动，行进中即沿途搜索。\n    配置成功后用 npc_tank_area_recon_control(1) 启动扫描。\n\n    Args:\n        region_points: 区域顶点 GNSS 列表，每点 [longitude, latitude, altitude]\n            (altitude 可省略，默认 0)。scan_mode=1 必填；scan_mode=2 周扫忽略此项。\n        region_type: 区域类型(RegionTypeEnum)：2-点,3-线,4-圆,5-多边形(默认)。\n            圆形时 points[0]=圆心、points[1]=圆上一点。\n        target_types: ZH 目标类型列表(TargetTypeEnum)，空表示所有类型\n            (坦克侦察 ugv=3/uav=4/quadruped=6)。\n        scan_num: 扫描次数(周扫=圈数)，达到后停止；0 表示不以次数停止。\n        lock_duration_limit: 锁定时长上限(秒)，超时自动解锁恢复；0 表示一直保持。\n        recon_type: ZH 设备类型：1-自适应,2-可见光,3-红外,4-DC。\n        scan_speed: 云台扫描速度(度/秒)。\n        scan_mode: 扫描样式：1-区域侦察(默认)，2-周扫侦察(360° 环扫，无需区域)。\n        scan_pitch: 周扫俯仰角(度，0=水平，负值向下压)；仅 scan_mode=2 生效。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, res, fail_data}。\n        区域侦察(scan_mode=1)另返回 coverability 结构化可覆盖性判定:\n        {coverable: \"full\"完全可覆盖 / \"partial\"部分超距 / \"none\"完全超距(仍接受\n        配置，可先机动靠近边走边侦察) / \"unknown\"机位不可用未预检, coverable_label,\n        region_min_dist_m, region_max_dist_m, detection_range_m}；周扫无此字段。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "region_points": {
+            "default": null,
+            "items": {},
+            "title": "Region Points",
+            "type": "array"
+          },
+          "region_type": {
+            "default": 5,
+            "title": "Region Type",
+            "type": "integer"
+          },
+          "target_types": {
+            "default": null,
+            "items": {},
+            "title": "Target Types",
+            "type": "array"
+          },
+          "scan_num": {
+            "default": 0,
+            "title": "Scan Num",
+            "type": "integer"
+          },
+          "lock_duration_limit": {
+            "default": 0,
+            "title": "Lock Duration Limit",
+            "type": "integer"
+          },
+          "recon_type": {
+            "default": 1,
+            "title": "Recon Type",
+            "type": "integer"
+          },
+          "scan_speed": {
+            "default": 30,
+            "title": "Scan Speed",
+            "type": "number"
+          },
+          "scan_mode": {
+            "default": 1,
+            "title": "Scan Mode",
+            "type": "integer"
+          },
+          "scan_pitch": {
+            "default": 0,
+            "title": "Scan Pitch",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "npc_tank_area_recon_configureArguments"
+      },
+      "inputSchemaHash": "2a0a0003faa79dfaf7dd67f388e2e4a0032b1b2bfbd70b436f2fe74aca1ac715",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_control",
+      "description": "控制侦察动作 (对应文档 mar_motion_ctrl_srv；区域侦察与周扫共用)。\n\n    启动=开始扫描；暂停=停止扫描并解除锁定(若有)，云台保持；继续=恢复扫描；\n    停止=结束动作，云台回到初始角度。\n    扫描期间车辆可正常机动(边走边侦察)，无需先停车。\n\n    Args:\n        cmd_type: 控制指令(CtrlCmdTypeEnum)：1-启动,2-暂停,3-继续,4-停止。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cmd_type": {
+            "title": "Cmd Type",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["cmd_type"],
+        "title": "npc_tank_area_recon_controlArguments"
+      },
+      "inputSchemaHash": "9aeebe5d591d96113dab467d1ffa130e842cb5e8011aae4daec47f72d5e99fd9",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_lock",
+      "description": "锁定 / 解除锁定并继续区域侦察（合并 mar_target_lock_srv 与 mar_unlock_and_continue_srv）。\n\n    - lock=True：对 target_id 目标锁定，光电持续跟踪使其居中，扫描挂起；配置\n      lock_duration_limit 时超时自动解锁；目标丢失时上报异常并自动恢复扫描。\n    - lock=False：解除锁定并继续侦察（此时 target_id 可省略）。\n\n    锁定前用 npc_tank_area_recon_get_targets 拿目标的 target_id。\n\n    Args:\n        lock: True 锁定 / False 解锁并继续。\n        target_id: 要锁定的目标编号（lock=True 时必填）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lock": {
+            "title": "Lock",
+            "type": "boolean"
+          },
+          "target_id": {
+            "default": 0,
+            "title": "Target Id",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["lock"],
+        "title": "npc_tank_area_recon_lockArguments"
+      },
+      "inputSchemaHash": "46bcdc4993aed9a60fa7c999f4b1f00aafc34f1916f80ca21fe2e3fc379f123f",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_get_status",
+      "description": "获取侦察动作状态 (对应文档 mar_report_status_msg / mar_report_mode_msg)。\n\n    返回 {status, status_label, scan_mode, scan_mode_label, scan_pitch,\n    out_of_range, camera_fault, scan_num, progress, work_mode, recon_type,\n    load_status, load_status_label, lock:{stage, target_id, role_name, duration_sec},\n    attack_ready, online, gimbal:{yaw,pitch,zoom}}。\n    status 为 MotionStatusEnum(1-空闲,3-就绪,5-运行中,8-暂停,9-被中断,11-结束…)；\n    scan_mode: 1-区域侦察/2-周扫侦察；progress: 配置了固定圈数(scan_num>0)时=圈数进度\n    ((已完成圈数+本圈完成度)/scan_num, 如配 10 圈扫完 2 圈=20%, 结束=100)；连续侦察\n    (scan_num=0)时 区域=面积覆盖率、周扫=本圈方位覆盖率(每圈清零重计)；\n    out_of_range=true 表示区域暂时超出探测半径(边走边侦察途中的过程态，不是失败)；\n    camera_fault=true 表示光电机位不可信(位姿零变换或远离载体)，此时覆盖率与目标已\n    停止累积、progress 停在故障前的值，应按载荷失效处理而非按低进度等待；\n    attack_ready=true 表示已锁定目标可打击确认。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "npc_tank_area_recon_get_statusArguments"
+      },
+      "inputSchemaHash": "9d98b99bc4d64f8831048484df6bbe0b062f759d1a79c04413d99c14dd9f7b7b",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_get_targets",
+      "description": "获取坦克光电当前检测/侦察到的目标列表（即\"检测目标 / detected objects\"，\n    取代旧的 npc_tank_get_targets / npc_tank_get_detected_objects；对应文档\n    mar_report_target_msg / MarTargetMsg）。锁定/打击用返回项的 target_id。\n\n    返回 {targets: [...]}。侦察运行时返回载荷上报的目标(字段完整:\n    capture_time_us/target_id/type/position/velocity/distance/confidence/threat/\n    damage/lock_time/pixel_pos/camp)；未启动/已停止侦察时列表为空——检测与\n    上报均由区域侦察驱动(画面框与目标列表同源一致)，拿 target_id 锁定/打击\n    前需先启动区域侦察。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "npc_tank_area_recon_get_targetsArguments"
+      },
+      "inputSchemaHash": "d75f0d07e5852d1610d1bf8c1f7f5092495594c728d58d527f1e3a586e20f476",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_reset",
+      "description": "重置动作状态为空闲态 (对应文档 mar_reset_motion_state_srv)。\n\n    只有行动结束(被中断/失败/正常结束)后调用才返回成功；行动未结束时返回失败。\n    重置后需重新配置(npc_tank_area_recon_configure)才能再次启动。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "npc_tank_area_recon_resetArguments"
+      },
+      "inputSchemaHash": "3d9785b52dc4352f23497f0387401b36ae30d4f3ff6626975f90f8172765a97f",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_area_recon_attack_confirm",
+      "description": "打击确认 (对应文档\"打击确认服务\")。\n\n    锁定目标(attack_ready=true)后调用：confirm=1 对当前锁定目标发起打击(经裁判\n    判定命中/毁伤)；confirm=2 不打击，停止本次侦察动作，任务结束。\n\n    Args:\n        confirm: 打击确认指令：1-打击，2-不打击。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}。confirm=1 时返回裁判\n        判定结果(命中/摧毁/拒止)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "title": "Confirm",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["confirm"],
+        "title": "npc_tank_area_recon_attack_confirmArguments"
+      },
+      "inputSchemaHash": "8b7d8360327fffc25c8602575e285c0422b9d49293236a7a597a757759a23d52",
+      "outputSchemaHash": null
+    },
+    {
+      "name": "npc_tank_gimbal_move",
+      "description": "\n    控制坦克光电云台指向（自由看某方向；侦察/锁定跟踪之外的手动指向）。\n\n    指向后可配合 npc_tank_get_targets 查看检测到的目标再决定锁定/打击。\n    注意：velocity 是**手动**周扫，只转云台、不上报侦察目标；要\"边转边搜索并上报\n    目标\"（含边走边周扫）请用侦察的周扫样式：npc_tank_area_recon_configure\n    (scan_mode=2) + npc_tank_area_recon_control(1)。\n    手动 EO 与侦察互斥(二者抢同一套伺服)，侦察非空闲时本工具会被拒(824)。\n\n    Args:\n        mode: 指向模式。\n            - \"absolute\" 转到绝对角 (yaw, pitch)，yaw_speed 为转向角速度\n            - \"relative\" 相对位移 (yaw=Δyaw, pitch=Δpitch, delta_zoom=Δzoom)\n            - \"velocity\" 持续周扫 (yaw_speed 度/秒；0 停止。坦克光电不支持 pitch 持续旋转)\n            - \"reset\"    回正归零（yaw=0, pitch=0, 变焦复位 1x）\n        yaw / pitch: absolute 目标角 / relative 位移量（度）。\n        yaw_speed: absolute/relative 的转向速度、velocity 的周扫速度（度/秒）。\n        pitch_speed: 仅为与 UGV 接口对齐保留；坦克光电两轴同速转向，velocity 模式不支持俯仰。\n        delta_zoom: relative 模式的变焦增量（正放大负缩小）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message} —— 到位/超时请用 get_status() 的 eo_task 查询。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "yaw": {
+            "default": 0,
+            "title": "Yaw",
+            "type": "number"
+          },
+          "pitch": {
+            "default": 0,
+            "title": "Pitch",
+            "type": "number"
+          },
+          "yaw_speed": {
+            "default": 30,
+            "title": "Yaw Speed",
+            "type": "number"
+          },
+          "pitch_speed": {
+            "default": 0,
+            "title": "Pitch Speed",
+            "type": "number"
+          },
+          "delta_zoom": {
+            "default": 0,
+            "title": "Delta Zoom",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": ["mode"],
+        "title": "npc_tank_gimbal_moveArguments"
+      },
+      "inputSchemaHash": "42fb52fc148f358f653139c5e1dbf73dfb37f239342f1f1b82e68dba9d7332c8",
+      "outputSchemaHash": null
+    }
+  ]
+}

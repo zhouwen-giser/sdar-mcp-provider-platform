@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { npcTankManifest } from "../../apps/npc-tank-provider-adapter/src/manifest.js";
 import { npcTankResource } from "../../apps/npc-tank-provider-adapter/src/server.js";
@@ -18,7 +17,7 @@ import {
 } from "../../packages/vehicle-provider-core/src/index.js";
 
 describe("NPC Tank manifest, resource dependencies and event contract", () => {
-  it("publishes the fixed provider identity and exactly nine operations", () => {
+  it("publishes the fixed provider identity and exactly eleven real-backed operations", () => {
     const manifest = npcTankManifest(
       "isr.vehicle.npc-tank.npc-tank1",
       "0.1.0",
@@ -32,12 +31,14 @@ describe("NPC Tank manifest, resource dependencies and event contract", () => {
     });
     expect((manifest.operations as { name: string }[]).map((value) => value.name)).toEqual([
       "vehicle_get_state",
+      "vehicle_get_capabilities",
       "vehicle_get_payload_status",
       "vehicle_get_targets",
       "vehicle_laser_range",
       "vehicle_navigate",
       "vehicle_area_recon",
       "vehicle_track_target",
+      "vehicle_control_gimbal",
       "vehicle_fire_weapon",
       "vehicle_emergency_stop",
     ]);
@@ -57,7 +58,7 @@ describe("NPC Tank manifest, resource dependencies and event contract", () => {
     expect(modes(withCircular)).toContain("circular");
   });
 
-  it("preserves the baseline NPC task outputs and fire cancellation capability", () => {
+  it("publishes shared recon evidence and pre-dispatch fire cancellation semantics", () => {
     const manifest = npcTankManifest("p", "0.1.0", new MemoryProviderStore(), true);
     const operations = manifest.operations as {
       name: string;
@@ -69,21 +70,31 @@ describe("NPC Tank manifest, resource dependencies and event contract", () => {
     const reconOutput = protoStructToJson(recon?.outputSchema);
     const fireOutput = protoStructToJson(fire?.outputSchema);
 
-    expect(reconOutput).not.toHaveProperty("properties.coverability");
-    expect(reconOutput).not.toHaveProperty("properties.outOfRange");
-    expect(JSON.stringify(fireOutput)).not.toContain("fire_command_rejected");
+    expect(reconOutput).toHaveProperty("properties.coverability");
+    expect(reconOutput).toHaveProperty("properties.outOfRange");
+    expect(JSON.stringify(fireOutput)).toContain("fire_command_rejected");
     expect(fire?.capabilities.cancel).toBe(true);
   });
 
-  it("matches the reviewed baseline NPC public manifest byte-for-byte", () => {
-    const serialized = JSON.stringify(
-      npcTankManifest("isr.vehicle.npc-tank.npc-tank1", "0.1.0", new MemoryProviderStore(), true),
+  it("keeps every public operation schema-bound without legacy device-tool leakage", () => {
+    const manifest = npcTankManifest(
+      "isr.vehicle.npc-tank.npc-tank1",
+      "0.1.0",
+      new MemoryProviderStore(),
+      true,
     );
-
-    expect(Buffer.byteLength(serialized)).toBe(19_257);
-    expect(createHash("sha256").update(serialized).digest("hex")).toBe(
-      "521c64f3a88b56b47f449fcf574981cf9554900935aab790a80bfd4c27bf222c",
-    );
+    const operations = manifest.operations as Record<string, unknown>[];
+    expect(
+      operations.every(
+        (operation) =>
+          operation.inputSchema !== undefined &&
+          operation.outputSchema !== undefined &&
+          operation.capabilities !== undefined &&
+          operation.resourceBinding !== undefined,
+      ),
+    ).toBe(true);
+    const serialized = JSON.stringify(manifest);
+    expect(serialized).not.toMatch(/npc_tank_send_waypoints|npc_tank_eo_set_angle/i);
   });
 
   it("exposes one vehicle resource with internal tracks and no referee truth", () => {

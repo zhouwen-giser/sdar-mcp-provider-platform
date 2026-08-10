@@ -24,16 +24,21 @@ export function decodeMqttPayload(
     if (!pureRosEnvelope(outer)) return outer;
     return rosEnvelope(outer, limits);
   }
-  const ros = rosEnvelope(outer, limits);
-  const direct = directDomain(outer);
   if (mode === "ros_message_json") {
-    if (ros === undefined) throw new Error("UGV_MQTT_WIRE_SHAPE_MISMATCH");
-    return ros;
+    if (!pureRosEnvelope(outer)) throw new Error("UGV_MQTT_WIRE_SHAPE_MISMATCH");
+    return rosEnvelope(outer, limits);
   }
   if (mode === "direct_domain_json") {
-    if (!direct) throw new Error("UGV_MQTT_WIRE_SHAPE_MISMATCH");
+    // A `data` member is an envelope discriminator at this boundary. Reject
+    // hybrid records so neither strict mode silently accepts the other mode.
+    if (!directDomain(outer) || (record(outer) && Object.hasOwn(outer, "data")))
+      throw new Error("UGV_MQTT_WIRE_SHAPE_MISMATCH");
     return outer;
   }
+  if (record(outer) && Object.hasOwn(outer, "data") && !pureRosEnvelope(outer))
+    throw new Error("UGV_MQTT_AMBIGUOUS_WIRE_SHAPE");
+  const ros = pureRosEnvelope(outer) ? rosEnvelope(outer, limits) : undefined;
+  const direct = directDomain(outer);
   if (ros !== undefined && direct) throw new Error("UGV_MQTT_AMBIGUOUS_WIRE_SHAPE");
   if (ros !== undefined) return ros;
   if (direct) return outer;
