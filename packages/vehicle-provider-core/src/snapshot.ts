@@ -23,7 +23,7 @@ const unknownComponents = () => ({
 });
 
 export function createUgvSnapshot(now = new Date().toISOString()): UgvSnapshot {
-  return createVehicleSnapshot(
+  const snapshot = createVehicleSnapshot(
     {
       providerId: "isr.vehicle.ugv.ugv1",
       resourceId: "vehicle:ugv1",
@@ -33,6 +33,10 @@ export function createUgvSnapshot(now = new Date().toISOString()): UgvSnapshot {
     },
     now,
   ) as UgvSnapshot;
+  snapshot.payload.eoTask = { state: "unknown" };
+  snapshot.payload.reconnaissance.motionStatus = "unknown";
+  snapshot.revision = snapshotRevision(snapshot);
+  return snapshot;
 }
 
 export function createNpcTankSnapshot(
@@ -104,10 +108,44 @@ export function applySnapshotPatch(
     };
   }
   if (patch.payload !== undefined) {
+    const reconnaissancePatch = structuredClone(patch.payload.reconnaissance);
+    const cameraFault =
+      reconnaissancePatch?.cameraFault ?? next.payload.reconnaissance.cameraFault ?? false;
+    if (cameraFault && reconnaissancePatch !== undefined) {
+      delete reconnaissancePatch.progress;
+      delete reconnaissancePatch.coverage;
+      reconnaissancePatch.progressAuthoritative = false;
+    }
     next.payload = {
       ...next.payload,
       ...patch.payload,
-      reconnaissance: patch.payload.reconnaissance ?? next.payload.reconnaissance,
+      ...(patch.payload.eoTask === undefined ? {} : { eoTask: patch.payload.eoTask }),
+      reconnaissance:
+        reconnaissancePatch === undefined
+          ? next.payload.reconnaissance
+          : {
+              ...next.payload.reconnaissance,
+              ...reconnaissancePatch,
+              ...(reconnaissancePatch.coverage === undefined
+                ? {}
+                : {
+                    coverage: {
+                      ...next.payload.reconnaissance.coverage,
+                      ...reconnaissancePatch.coverage,
+                    },
+                  }),
+              ...(reconnaissancePatch.lock === undefined
+                ? {}
+                : {
+                    lock: {
+                      ...next.payload.reconnaissance.lock,
+                      ...reconnaissancePatch.lock,
+                    },
+                  }),
+              ...(reconnaissancePatch.coverability === undefined
+                ? {}
+                : { coverability: reconnaissancePatch.coverability }),
+            },
       weapon: patch.payload.weapon ?? next.payload.weapon,
       targets: patch.payload.targets ?? next.payload.targets,
       ...(patch.payload.gimbal === undefined

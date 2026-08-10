@@ -21,6 +21,16 @@ describe("UGV Provider configuration contract", () => {
     });
   });
 
+  it("accepts the explicit heterogeneous ROS bridge wire profile", () => {
+    expect(loadUgvProviderConfiguration({ UGV_MQTT_WIRE_MODE: "ros_bridge_json" })).toMatchObject({
+      UGV_MQTT_WIRE_MODE: "ros_bridge_json",
+    });
+    expect(
+      (UgvProviderConfigurationDefinition.schema.properties as Record<string, { enum?: unknown[] }>)
+        .UGV_MQTT_WIRE_MODE?.enum,
+    ).toContain("ros_bridge_json");
+  });
+
   it("covers all 50 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync("../../docs/configuration/CONFIG_INVENTORY.json", "utf8"),

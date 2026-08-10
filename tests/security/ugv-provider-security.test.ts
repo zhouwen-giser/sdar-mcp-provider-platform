@@ -14,6 +14,7 @@ describe("UGV security isolation", () => {
     });
     for (const topic of [
       "/ugv/referee/status",
+      "/ugv/status/#",
       "/ugv/target/base64",
       "/entity/state",
       "/referee/events",

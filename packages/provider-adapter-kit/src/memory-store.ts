@@ -4,6 +4,7 @@ import { jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
 import { businessEventSourceCapabilities } from "./sources.js";
 import type {
   BusinessEventDraft,
+  CommandAckClaim,
   CommandAckRecord,
   DeviceToolCallRecord,
   ProviderExecution,
@@ -53,6 +54,24 @@ export class MemoryProviderStore implements ProviderStore {
     commandSequence: string,
   ): Promise<CommandAckRecord | undefined> {
     return Promise.resolve(clone(this.#acks.get(key(taskId, command, commandSequence))));
+  }
+  claimCommandAck(ack: CommandAckRecord): Promise<CommandAckClaim> {
+    const ackKey = key(ack.taskId, ack.command, ack.commandSequence);
+    const existing = this.#acks.get(ackKey);
+    if (existing !== undefined)
+      return Promise.resolve({ claimed: false, record: structuredClone(existing) });
+    const claimed = structuredClone(ack);
+    this.#acks.set(ackKey, claimed);
+    return Promise.resolve({ claimed: true, record: structuredClone(claimed) });
+  }
+  completeCommandAck(ack: CommandAckRecord, expectedReasonCode?: string): Promise<boolean> {
+    const ackKey = key(ack.taskId, ack.command, ack.commandSequence);
+    const existing = this.#acks.get(ackKey);
+    if (existing === undefined) return Promise.reject(new Error("COMMAND_ACK_CLAIM_REQUIRED"));
+    if (expectedReasonCode !== undefined && existing.response.reasonCode !== expectedReasonCode)
+      return Promise.resolve(false);
+    this.#acks.set(ackKey, structuredClone(ack));
+    return Promise.resolve(true);
   }
   putCommandAck(ack: CommandAckRecord): Promise<void> {
     this.#acks.set(key(ack.taskId, ack.command, ack.commandSequence), structuredClone(ack));

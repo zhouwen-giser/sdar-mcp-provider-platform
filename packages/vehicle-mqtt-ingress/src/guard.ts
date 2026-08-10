@@ -1,4 +1,4 @@
-export type MqttWireMode = "auto" | "ros_message_json" | "direct_domain_json";
+export type MqttWireMode = "auto" | "ros_message_json" | "direct_domain_json" | "ros_bridge_json";
 export interface JsonLimits {
   maxPayloadBytes: number;
   maxDepth: number;
@@ -19,6 +19,11 @@ export function decodeMqttPayload(
     throw new Error("UGV_MQTT_MALFORMED_JSON");
   }
   validateJsonShape(outer, limits);
+  if (mode === "ros_bridge_json") {
+    if (!record(outer)) throw new Error("UGV_MQTT_WIRE_SHAPE_MISMATCH");
+    if (!pureRosEnvelope(outer)) return outer;
+    return rosEnvelope(outer, limits);
+  }
   const ros = rosEnvelope(outer, limits);
   const direct = directDomain(outer);
   if (mode === "ros_message_json") {
@@ -68,6 +73,13 @@ function rosEnvelope(value: unknown, limits: JsonLimits): unknown {
     if (error instanceof Error && error.message.startsWith("UGV_MQTT_")) throw error;
     throw new Error("UGV_MQTT_INNER_JSON_INVALID", { cause: error });
   }
+}
+function pureRosEnvelope(value: unknown): value is Record<string, unknown> {
+  return (
+    record(value) &&
+    Object.hasOwn(value, "data") &&
+    Object.keys(value).every((key) => key === "data" || key === "layout" || key === "header")
+  );
 }
 function directDomain(value: unknown): boolean {
   return (

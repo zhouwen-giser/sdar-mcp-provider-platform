@@ -5,6 +5,7 @@ import { canonicalSha256, jsonToProtoStruct } from "../../adapter-protocol/src/i
 import { businessEventSourceCapabilities } from "./sources.js";
 import type {
   BusinessEventDraft,
+  CommandAckClaim,
   CommandAckRecord,
   DeviceToolCallRecord,
   ProviderExecution,
@@ -39,7 +40,7 @@ export class PostgresProviderStore implements ProviderStore {
     return result.rows.map((row) => row.payload);
   }
   async putExecution(execution: ProviderExecution): Promise<void> {
-    await this.pool.query(
+    const result = await this.pool.query(
       `INSERT INTO ${this.tables.execution}
        (task_id, external_execution_id, operation_name, argument_hash, resource_id, tracks,
         execution_context, downstream_mission_ids, state, revision, reason_code, progress, result,
@@ -75,6 +76,7 @@ export class PostgresProviderStore implements ProviderStore {
         execution.terminalAt ?? null,
       ],
     );
+    if (result.rowCount !== 1) throw new Error("TASK_IDENTITY_CONFLICT");
   }
   async getCommandAck(
     taskId: string,
@@ -86,6 +88,36 @@ export class PostgresProviderStore implements ProviderStore {
       [taskId, command, commandSequence],
     );
     return result.rows[0]?.payload;
+  }
+  async claimCommandAck(ack: CommandAckRecord): Promise<CommandAckClaim> {
+    const claimed = await this.pool.query<{ payload: CommandAckRecord }>(
+      `INSERT INTO ${this.tables.commandAck}(task_id, command, command_sequence, payload, created_at)
+       VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING payload`,
+      [ack.taskId, ack.command, ack.commandSequence, ack, ack.createdAt],
+    );
+    const inserted = claimed.rows[0]?.payload;
+    if (inserted !== undefined) return { claimed: true, record: inserted };
+    const existing = await this.getCommandAck(ack.taskId, ack.command, ack.commandSequence);
+    if (existing === undefined) throw new Error("COMMAND_ACK_CLAIM_LOST");
+    return { claimed: false, record: existing };
+  }
+  async completeCommandAck(ack: CommandAckRecord, expectedReasonCode?: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `UPDATE ${this.tables.commandAck} SET payload=$4, created_at=$5
+       WHERE task_id=$1 AND command=$2 AND command_sequence=$3
+         AND ($6::text IS NULL OR payload->'response'->>'reasonCode'=$6)`,
+      [
+        ack.taskId,
+        ack.command,
+        ack.commandSequence,
+        ack,
+        ack.createdAt,
+        expectedReasonCode ?? null,
+      ],
+    );
+    if (result.rowCount === 1) return true;
+    if (expectedReasonCode !== undefined) return false;
+    throw new Error("COMMAND_ACK_CLAIM_REQUIRED");
   }
   async putCommandAck(ack: CommandAckRecord): Promise<void> {
     await this.pool.query(

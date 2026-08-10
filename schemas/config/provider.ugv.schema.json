@@ -169,7 +169,7 @@
     "UGV_MQTT_USERNAME": { "type": "string" },
     "UGV_MQTT_WIRE_MODE": {
       "default": "auto",
-      "enum": ["auto", "ros_message_json", "direct_domain_json"],
+      "enum": ["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"],
       "type": "string"
     },
     "UGV_PAYLOAD_FRESHNESS_MS": {

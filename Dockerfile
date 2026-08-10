@@ -67,6 +67,42 @@ RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/n
     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json \
     && find node_modules -exec touch -h -d '@0' {} +
 
+FROM production-dependencies AS ugv-real-production-dependencies
+RUN rm -rf node_modules/.pnpm/node_modules/@sdar \
+    && touch -h -d '@0' node_modules/.pnpm/node_modules
+
+FROM node:22-bookworm-slim AS ugv-real-base
+ARG VCS_REF=unknown
+ENV NODE_ENV=production
+WORKDIR /app
+LABEL org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.source="https://github.com/zhouwen-giser/sdar-mcp-provider-platform" \
+      org.opencontainers.image.licenses="Apache-2.0"
+COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+COPY --from=build --chown=root:root /workspace/proto /app/proto
+COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+RUN mkdir -p /var/lib/sdar \
+    && chown node:node /var/lib/sdar \
+    && touch -d '@0' /var/lib/sdar /app
+USER node
+
+FROM ugv-real-base AS ugv-real-runtime
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR UGV Qualification Runtime" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/dist/apps/runtime /app/dist/apps/runtime
+CMD ["node", "dist/apps/runtime/src/main.js"]
+
+FROM ugv-real-base AS ugv-real-adapter
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR Real UGV Provider Adapter" \
+      org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /app/dist/apps/ugv-provider-adapter
+COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
+CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]
+
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app

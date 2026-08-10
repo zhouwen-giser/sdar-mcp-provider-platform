@@ -9,11 +9,13 @@ import {
   type SnapshotPatch,
   type UgvSnapshot,
   type VehicleSnapshot,
+  type VehicleTarget,
 } from "../../vehicle-provider-core/src/index.js";
 import { decodeMqttPayload, type JsonLimits, type MqttWireMode } from "./guard.js";
 import {
   normalizeMqttObservation,
   normalizeNpcTankMqttObservation,
+  deduplicateVehicleTargets,
   type NormalizedMqttObservation,
 } from "./normalizers.js";
 import { exactNpcTankTopic, exactUgvTopic } from "./topics.js";
@@ -65,6 +67,9 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   readonly #events = new EventEmitter();
   readonly #latest = new Map<string, { observedAt: string; hash: string }>();
   readonly #authoritativeTaskStates = new Map<string, unknown>();
+  #ugvDetectedTargets: VehicleTarget[] = [];
+  #ugvReconTargets: VehicleTarget[] = [];
+  #ugvReconTargetsObserved = false;
   #snapshot: TSnapshot;
   #sequence = 0;
   #stateConflict = false;
@@ -83,20 +88,24 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     return () => this.#events.off("snapshot", listener);
   }
   setConnected(connected: boolean, observedAt = new Date().toISOString()): void {
+    if (this.#snapshot.connectivity.mqttConnected === connected) return;
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       { connectivity: { mqttConnected: connected } },
       observedAt,
       [],
     ) as TSnapshot;
+    this.#events.emit("snapshot", this.snapshot(), "mqtt_connection");
   }
   setDeviceConnected(connected: boolean, observedAt = new Date().toISOString()): void {
+    if (this.#snapshot.connectivity.deviceMcpConnected === connected) return;
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       { connectivity: { deviceMcpConnected: connected } },
       observedAt,
       [],
     ) as TSnapshot;
+    this.#events.emit("snapshot", this.snapshot(), "device_mcp_connection");
   }
   applyDeviceObservation(
     patch: SnapshotPatch,
@@ -149,6 +158,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
+    observation = this.#applyUgvTargetAuthority(topic, observation);
     this.#sequence++;
     if (topic === "/npc_tank1/mission_state")
       this.#authoritativeTaskStates.set("mission_state", observation.patch.chassis?.mission?.state);
@@ -181,8 +191,54 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   ingestSequence(): number {
     return this.#sequence;
   }
+  observationCursor(topic: string): string | undefined {
+    const latest = this.#latest.get(topic);
+    return latest === undefined ? undefined : `${latest.observedAt}\0${latest.hash}`;
+  }
   stateConflict(): boolean {
     return this.#stateConflict;
+  }
+
+  #applyUgvTargetAuthority(
+    topic: string,
+    observation: NormalizedMqttObservation,
+  ): NormalizedMqttObservation {
+    const targets = observation.patch.payload?.targets;
+    if (targets === undefined) return observation;
+    if (topic === "/ugv/detected_objects") {
+      this.#ugvDetectedTargets = deduplicateVehicleTargets(targets);
+      const authoritative = this.#ugvReconTargetsObserved
+        ? this.#ugvReconTargets
+        : this.#ugvDetectedTargets;
+      return {
+        ...observation,
+        patch: {
+          ...observation.patch,
+          payload: { ...observation.patch.payload, targets: structuredClone(authoritative) },
+        },
+        // Once the rich source has appeared, detected_objects is a secondary
+        // view and must not refresh authoritative target freshness.
+        domains: this.#ugvReconTargetsObserved
+          ? observation.domains.filter((domain) => domain !== "target")
+          : observation.domains,
+      };
+    }
+    if (topic === "/ugv/area_recon/targets") {
+      this.#ugvReconTargetsObserved = true;
+      this.#ugvReconTargets = deduplicateVehicleTargets(targets);
+      return {
+        ...observation,
+        patch: {
+          ...observation.patch,
+          payload: {
+            ...observation.patch.payload,
+            // An empty authoritative list intentionally clears stale targets.
+            targets: structuredClone(this.#ugvReconTargets),
+          },
+        },
+      };
+    }
+    return observation;
   }
 }
 
