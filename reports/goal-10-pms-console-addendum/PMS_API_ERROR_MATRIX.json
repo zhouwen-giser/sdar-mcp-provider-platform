@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceGeneratedAt": "2026-08-10T09:34:46Z",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "status": "PASS",
+  "problemDetailsMediaType": "application/problem+json",
+  "frozenProblemCodeCount": 32,
+  "frozenProblemCodes": [
+    "INVALID_REQUEST",
+    "INVALID_JSON",
+    "REQUEST_BODY_TOO_LARGE",
+    "INTERNAL_ERROR",
+    "ROUTE_NOT_FOUND",
+    "INVALID_IDENTIFIER",
+    "INVALID_DOMAIN_VALUE",
+    "INVALID_STATE_TRANSITION",
+    "DUPLICATE_RESOURCE_BINDING",
+    "RESOURCE_BINDING_NOT_FOUND",
+    "ENTITY_ALREADY_EXISTS",
+    "ENTITY_NOT_FOUND",
+    "OPTIMISTIC_CONCURRENCY_CONFLICT",
+    "LEASE_NOT_OWNED",
+    "RUNTIME_DEPLOYMENT_NOT_FOUND",
+    "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
+    "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+    "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
+    "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED",
+    "RUNTIME_DEPLOYMENT_REVISION_CONFLICT",
+    "RUNTIME_PROCESS_NOT_FOUND",
+    "CONFIGURATION_DEFINITION_NOT_FOUND",
+    "CONFIGURATION_TARGET_NOT_ALLOWED",
+    "CONFIGURATION_BUSINESS_KEY_CONFLICT",
+    "CONFIGURATION_DRAFT_NOT_FOUND",
+    "CONFIGURATION_DRAFT_VERSION_CONFLICT",
+    "CONFIGURATION_DRAFT_NOT_VALIDATED",
+    "CONFIGURATION_PUBLISH_CONFLICT",
+    "CONFIGURATION_REVISION_NOT_FOUND",
+    "CONFIGURATION_ROLLBACK_TARGET_MISMATCH",
+    "CONFIGURATION_INPUT_INVALID",
+    "REGISTRY_SNAPSHOT_NOT_FOUND"
+  ],
+  "coverageNote": "The frozen enum was locked as a 32-code set. The executed cases below record only cases with concrete assertions; they do not claim that every frozen code was individually triggered.",
+  "executedCases": [
+    {
+      "case": "invalid correlation header on every frozen operation",
+      "scope": "36 HTTP injection cases",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/all-operations.test.ts"
+    },
+    {
+      "case": "missing X-Actor-ID on every mutating frozen operation",
+      "scope": "17 HTTP injection cases",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/all-operations.test.ts"
+    },
+    {
+      "case": "unsupported desiredReplicas=2 at Console transport",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "additional JSON property",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "invalid RFC3339 date-time",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "negative optimistic-concurrency revision",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "empty identifier",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "malformed JSON",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_JSON",
+      "assertedMediaType": "application/problem+json",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "oversized JSON body",
+      "scope": "HTTP injection",
+      "assertedStatus": 413,
+      "assertedCode": "REQUEST_BODY_TOO_LARGE",
+      "assertedMediaType": "application/problem+json",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "unknown query property",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": null,
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts",
+      "note": "The test asserts the status only; no problem code is claimed here."
+    },
+    {
+      "case": "unsupported text/plain content type",
+      "scope": "HTTP injection",
+      "assertedStatus": 400,
+      "assertedCode": "INVALID_REQUEST",
+      "assertedMediaType": "application/problem+json",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/request-conformance.test.ts"
+    },
+    {
+      "case": "repository optimistic-concurrency failure",
+      "scope": "HTTP injection",
+      "assertedStatus": 409,
+      "assertedCode": "OPTIMISTIC_CONCURRENCY_CONFLICT",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/problem-details.test.ts"
+    },
+    {
+      "case": "unexpected Error",
+      "scope": "HTTP injection",
+      "assertedStatus": 500,
+      "assertedCode": "INTERNAL_ERROR",
+      "assertedDetail": "An internal error occurred",
+      "sourceMessageRedacted": true,
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/problem-details.test.ts"
+    },
+    {
+      "case": "unexpected TypeError",
+      "scope": "HTTP injection",
+      "assertedStatus": 500,
+      "assertedCode": "INTERNAL_ERROR",
+      "assertedDetail": "An internal error occurred",
+      "sourceMessageRedacted": true,
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/problem-details.test.ts"
+    },
+    {
+      "case": "unexpected RangeError",
+      "scope": "HTTP injection",
+      "assertedStatus": 500,
+      "assertedCode": "INTERNAL_ERROR",
+      "assertedDetail": "An internal error occurred",
+      "sourceMessageRedacted": true,
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/problem-details.test.ts"
+    },
+    {
+      "case": "provider prerequisite unavailable",
+      "scope": "production RuntimeDeployment management facade",
+      "assertedStatus": null,
+      "assertedCode": "RUNTIME_DEPLOYMENT_PROVIDER_UNAVAILABLE",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/runtime-deployment-management.test.ts"
+    },
+    {
+      "case": "database profile prerequisite unavailable",
+      "scope": "production RuntimeDeployment management facade",
+      "assertedStatus": null,
+      "assertedCode": "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/runtime-deployment-management.test.ts"
+    },
+    {
+      "case": "configuration profile prerequisite unavailable",
+      "scope": "production RuntimeDeployment management facade",
+      "assertedStatus": null,
+      "assertedCode": "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/runtime-deployment-management.test.ts"
+    },
+    {
+      "case": "unsupported desired replica count at application boundary",
+      "scope": "RuntimeDeployment application service",
+      "assertedStatus": null,
+      "assertedCode": "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED",
+      "result": "PASS",
+      "evidence": "packages/pms-application/test/runtime-deployment.test.ts"
+    },
+    {
+      "case": "stale desired revision at application boundary",
+      "scope": "RuntimeDeployment application service",
+      "assertedStatus": null,
+      "assertedCode": "RUNTIME_DEPLOYMENT_REVISION_CONFLICT",
+      "result": "PASS",
+      "evidence": "packages/pms-application/test/runtime-deployment.test.ts"
+    },
+    {
+      "case": "deferred Console RuntimeProcess logs route",
+      "scope": "HTTP injection",
+      "assertedStatus": 404,
+      "assertedCode": null,
+      "assertedMediaType": "application/problem+json",
+      "result": "PASS",
+      "evidence": "apps/pms-api/test/console/runtime-processes.test.ts",
+      "note": "The test asserts status and media type only; no problem code is claimed here."
+    }
+  ],
+  "implementationRepair": {
+    "typedRequestMappingError": "ConsoleRequestMappingError",
+    "typedRequestMappingErrorsClassifiedAsClientErrors": true,
+    "unexpectedBuiltinErrorsClassifiedAsClientErrors": false,
+    "unexpectedErrorDetailRedacted": true
+  },
+  "containsSecretsOrRealEndpointValues": false
+}

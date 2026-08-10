@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "pms_web_real_api_browser_e2e",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "acceptanceGate": "F",
+  "status": "PASS",
+  "topology": ["browser", "pms-web", "pms-api", "isolated PostgreSQL 17"],
+  "execution": {
+    "command": "pnpm test:pms-web-api-e2e",
+    "databaseConnectionValueRecorded": false,
+    "exitCode": 0,
+    "testFiles": 1,
+    "testFilesPassed": 1,
+    "tests": 1,
+    "testsPassed": 1,
+    "durationSeconds": 8.3
+  },
+  "productionMode": {
+    "webBuildMode": "api",
+    "mockFallbackObserved": false,
+    "mockProviderIdsObserved": false,
+    "browserOriginsObserved": 1,
+    "browserOnlyConnectedToWebOrigin": true
+  },
+  "readFlows": [
+    {
+      "family": "providers",
+      "status": "PASS"
+    },
+    {
+      "family": "resources",
+      "status": "PASS"
+    },
+    {
+      "family": "configuration",
+      "status": "PASS"
+    },
+    {
+      "family": "runtime",
+      "status": "PASS"
+    },
+    {
+      "family": "registry",
+      "status": "PASS"
+    },
+    {
+      "family": "audit",
+      "status": "PASS"
+    }
+  ],
+  "safeWriteFlow": {
+    "resource": "synthetic provider",
+    "method": "PATCH",
+    "transition": "draft -> active",
+    "responseStatus": 200,
+    "persistedStateReadBack": true,
+    "writeCount": 1,
+    "unexpectedConsoleWrites": 0,
+    "runtimeControlWrites": 0
+  },
+  "problemDetailsRendering": {
+    "verified": true,
+    "responseStatus": 404,
+    "contentType": "application/problem+json",
+    "renderedFields": ["code", "title", "detail", "correlationId"]
+  },
+  "safetyAssertions": {
+    "machineRuntimeRegistrationRouteBlocked": true,
+    "machineRouteStatus": 404,
+    "machineRouteProblemCode": "PMS_WEB_API_ROUTE_NOT_ALLOWED",
+    "jobLeaseCountBefore": 0,
+    "jobLeaseCountAfter": 0,
+    "realUgvControlPerformed": false,
+    "movementPerformed": false,
+    "reconPerformed": false,
+    "gimbalPerformed": false,
+    "effectorPerformed": false,
+    "realEndpointValuesRecorded": false
+  },
+  "fixture": {
+    "database": "isolated PostgreSQL 17",
+    "provider": "synthetic",
+    "resource": "synthetic",
+    "runtimeDesiredState": "STOPPED",
+    "runtimeReplicas": 0,
+    "workerStarted": false
+  },
+  "sensitiveValuesRecorded": false
+}

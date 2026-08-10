@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceGeneratedAt": "2026-08-10T09:34:46Z",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "status": "PASS",
+  "database": {
+    "engine": "PostgreSQL",
+    "majorVersion": 17,
+    "isolation": "random per-suite PostgreSQL schema",
+    "connectionValueRecorded": false
+  },
+  "productionGate": {
+    "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-api-production",
+    "exitCode": 0,
+    "testFiles": 1,
+    "tests": 4,
+    "compositionFactory": "createPmsApiComposition",
+    "migrationRowsAsserted": 9,
+    "cases": [
+      {
+        "case": "file credentials expose Goal 2 routes with the production authorization matrix",
+        "result": "PASS"
+      },
+      {
+        "case": "RuntimeDeployment, reconcile job, and Audit commit or roll back atomically through the production API",
+        "result": "PASS"
+      },
+      {
+        "case": "Console RuntimeDeployment creation routes through production Application, Job, Audit, and rollback",
+        "result": "PASS"
+      },
+      {
+        "case": "Runtime registration persists across composition recreation and enforces CAS and freshness",
+        "result": "PASS"
+      }
+    ],
+    "evidence": "apps/pms-api/test/production-composition.test.ts"
+  },
+  "supportingPostgresqlGates": [
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms",
+      "result": "PASS",
+      "exitCode": 0,
+      "testFiles": 5,
+      "tests": 23
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-config",
+      "result": "PASS",
+      "exitCode": 0,
+      "testFiles": 3,
+      "tests": 16
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-config-e2e",
+      "result": "PASS",
+      "exitCode": 0,
+      "testFiles": 1,
+      "tests": 8
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-migrations",
+      "result": "PASS",
+      "exitCode": 0,
+      "testFiles": 2,
+      "tests": 9
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:registry-e2e",
+      "result": "PASS",
+      "exitCode": 0,
+      "testFiles": 1,
+      "tests": 4
+    }
+  ],
+  "validatedCapabilities": [
+    "migrations from an empty schema",
+    "repeat-safe migration application",
+    "upgrade preservation for existing PMS rows",
+    "production authorization wiring",
+    "provider package and management persistence",
+    "Configuration Draft, Validate, Preview, Publish, and Rollback",
+    "RuntimeDeployment create and desired-state commands",
+    "reconcile job enqueue and Audit atomicity",
+    "RuntimeProcess query",
+    "runtime configuration latest, watch, acknowledgement, and rollback flow",
+    "runtime registration persistence, CAS, and freshness",
+    "Registry latest, ETag/304, history, diff, bootstrap, and watch"
+  ],
+  "safety": {
+    "syntheticPmsDataOnly": true,
+    "realSimulatorContacted": false,
+    "realUgvMovementOrEffectorCommandIssued": false
+  },
+  "containsSecretsOrRealEndpointValues": false
+}

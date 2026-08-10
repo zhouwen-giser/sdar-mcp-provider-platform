@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "addendum_scope_and_safety_non_impact",
+  "status": "PASS",
+  "generatedAt": "2026-08-10T09:35:09Z",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "addendumStartHead": "c70d45ee117015db7571d8330025f8dc9096f3f5",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "comparison": "git diff --name-only c70d45ee117015db7571d8330025f8dc9096f3f5 7ca09d55aaf01dab9d6711fdd793530084897868",
+  "protectedPaths": {
+    "frozenPmsConsoleContract": {
+      "changed": false,
+      "paths": [
+        "contracts/pms-console-api/v1/openapi.yaml",
+        "contracts/pms-console-api/v1/dist/**",
+        "contracts/pms-console-api/v1/schemas/**",
+        "contracts/pms-console-api/v1/examples/**",
+        "contracts/pms-console-api/v1/contract-lock.json",
+        "contracts/pms-console-api/v1/ENDPOINT_SOURCE_MAP.json",
+        "contracts/pms-console-api/v1/ERROR_SOURCE_MAP.json"
+      ]
+    },
+    "protocol": {
+      "changed": false,
+      "paths": ["protocol/**", "proto frozen protocol files"]
+    },
+    "pmsDomainAndPersistence": {
+      "changed": false,
+      "paths": [
+        "packages/pms-domain/**",
+        "packages/pms-application/**",
+        "packages/pms-persistence-postgres/**",
+        "migrations/**"
+      ]
+    },
+    "ugvImplementation": {
+      "changed": false,
+      "paths": [
+        "apps/ugv-provider-adapter/**",
+        "packages/vehicle-device-mcp-client/**",
+        "packages/vehicle-mqtt-ingress/**",
+        "packages/vehicle-provider-core/**"
+      ]
+    }
+  },
+  "allowedChanges": {
+    "pmsApiTransportBoundaryChanged": true,
+    "pmsWebRealApiAndProxyChanged": true,
+    "pmsConsolePackagingAdded": true,
+    "ugvComposePackagingChanged": true,
+    "ugvProtocolOrBusinessBehaviorChanged": false,
+    "pmsWorkerApplicationSourceChanged": false,
+    "pmsWorkerImagePackagingChanged": true,
+    "dependencyVersionsChanged": false,
+    "lockfileChanged": false,
+    "migrationsChanged": false
+  },
+  "externalIntegration": {
+    "realSimulatorRemainsExternal": true,
+    "realDeviceMcpRemainsExternal": true,
+    "realMqttBrokerRemainsExternal": true,
+    "deviceMcpMockIntroduced": false,
+    "mqttMockIntroduced": false,
+    "runtimeOrProviderMockIntroduced": false,
+    "mockFallbackEnabled": false
+  },
+  "secrets": {
+    "committedSecretValues": false,
+    "committedAuthorizationValues": false,
+    "committedDatabasePasswords": false,
+    "committedTlsPrivateKeys": false,
+    "realEndpointValuesRecordedInAddendumEvidence": false,
+    "configurationFilesRemainIgnored": true,
+    "runtimeSecretRootExternalToRepository": true
+  },
+  "safety": {
+    "realControlAttempted": false,
+    "movementAttempted": false,
+    "navigationAttempted": false,
+    "reconAttempted": false,
+    "gimbalAttempted": false,
+    "effectorAttempted": false,
+    "mqttPublishAttempted": false,
+    "runtimeMutatingToolCalls": 0,
+    "jobLeaseRowsBefore": 0,
+    "jobLeaseRowsAfter": 0,
+    "qualificationReadOperations": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets"
+    ]
+  },
+  "verification": {
+    "protectedPathDiff": "EMPTY",
+    "frozenContractHashCheck": "PASS",
+    "composeContainsMocks": false,
+    "externalValuesRedacted": true,
+    "gateAExistingGoal10Protected": "PASS",
+    "gateKNoSecrets": "PASS"
+  }
+}

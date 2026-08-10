@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "integrated_pms_console_and_real_ugv_compose",
+  "phase": "A8_A10_FINAL_UGV_COMPOSE",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "generatedAt": "2026-08-10T09:35:09Z",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "composePath": "deploy/ugv-simulation/compose.yaml",
+  "oneClickCommand": "bash deploy/ugv-simulation/up.sh",
+  "explicitSmokeCommand": "bash deploy/ugv-simulation/smoke.sh",
+  "serviceInventory": {
+    "persistent": [
+      "pms-postgres",
+      "pms-api",
+      "pms-worker",
+      "pms-web",
+      "ugv-adapter-postgres",
+      "ugv-runtime-postgres",
+      "ugv-adapter",
+      "ugv-runtime"
+    ],
+    "persistentCount": 8,
+    "optionalOneShot": ["ugv-preflight"],
+    "optionalOneShotProfile": "preflight",
+    "postgres17Services": ["pms-postgres", "ugv-adapter-postgres", "ugv-runtime-postgres"],
+    "postgres17ServiceCount": 3,
+    "mockServicesPresent": false,
+    "simulatorPackaged": false,
+    "deviceMcpPackaged": false,
+    "mqttBrokerPackaged": false
+  },
+  "observedFinalState": {
+    "stack": "running",
+    "persistentServicesRunning": 8,
+    "pmsServiceHealth": {
+      "pms-postgres": "healthy",
+      "pms-api": "healthy",
+      "pms-worker": "healthy",
+      "pms-web": "healthy"
+    },
+    "ugvAdapter": "running",
+    "ugvRuntime": "ready",
+    "ugvRuntimeDependencies": "ready"
+  },
+  "deploymentSequence": {
+    "automaticIntegratedSmoke": "PASS",
+    "explicitIntegratedSmoke": "PASS",
+    "pmsConsoleChecks": "PASS",
+    "realExternalPreflight": "PASS_WITH_UPSTREAM_DRIFT",
+    "runtimeReadOnlySmoke": "PASS"
+  },
+  "pmsConsole": {
+    "sameOriginConsoleProxy": "PASS",
+    "nonConsoleApiPathBlocked": "PASS",
+    "imageRevisionsEqualQualificationHead": true,
+    "workerReleaseVersion": "2.0.0-rc.1",
+    "workerRuntimeEntryExecutable": true,
+    "workerRuntimeEntryOwner": "root:root",
+    "workerRuntimeEntryMode": "0555",
+    "workerStateRootOwnerUid": 1000,
+    "workerStateRootMode": "0700",
+    "jobLeaseRowsBefore": 0,
+    "jobLeaseRowsAfter": 0
+  },
+  "realExternalPreflight": {
+    "sourceRevision": "7ca09d55aaf01dab9d6711fdd793530084897868",
+    "status": "PASS_WITH_UPSTREAM_DRIFT",
+    "artifactLocation": "ugv-contract-reports:/var/lib/sdar/preflight/REAL_EXTERNAL_PREFLIGHT.json",
+    "deviceMcp": {
+      "connection": "PASS",
+      "toolsObserved": 15,
+      "expectedTools": 15,
+      "missingTools": [],
+      "mockFallbackEnabled": false
+    },
+    "mqtt": {
+      "connection": "PASS",
+      "mode": "passive_subscribe_only",
+      "publishAttempted": false,
+      "canonicalCompositeStatusTopic": "status/ugv",
+      "canonicalCompositeStatusObserved": false,
+      "compatibilityCompositeStatusTopic": "/ugv/status",
+      "compatibilityCompositeStatusObserved": true,
+      "publisherQosDrift": [
+        {
+          "topic": "/ugv/speed",
+          "observedQos": 0,
+          "expectedQos": 1
+        }
+      ]
+    },
+    "externalEndpointValuesRecorded": false,
+    "credentialValuesRecorded": false
+  },
+  "runtimeReadOnlyEvidence": {
+    "path": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+    "gitSha": "7ca09d55aaf01dab9d6711fdd793530084897868",
+    "status": "PASS",
+    "operations": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets"
+    ],
+    "operationCount": 4,
+    "allOperationsPassed": true,
+    "controlAttempted": false,
+    "mutatingToolCalls": 0
+  },
+  "safety": {
+    "realSimulatorExternal": true,
+    "mockFallbackEnabled": false,
+    "movementAttempted": false,
+    "reconAttempted": false,
+    "gimbalAttempted": false,
+    "effectorAttempted": false,
+    "mqttPublishAttempted": false,
+    "rawExternalPayloadRecorded": false,
+    "secretValuesRecorded": false
+  },
+  "acceptance": {
+    "gateJFinalGoal10ComposeIntegrated": "PASS",
+    "upstreamDriftBlocksPmsConsolePackaging": false,
+    "upstreamDriftPreservesUgvSimulationPartialStatus": true
+  }
+}

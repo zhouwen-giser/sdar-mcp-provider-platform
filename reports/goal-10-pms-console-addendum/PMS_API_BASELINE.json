@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceGeneratedAt": "2026-08-10T09:34:46Z",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "addendumStartHead": "c70d45ee117015db7571d8330025f8dc9096f3f5",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "startState": {
+    "workingTreeClean": true,
+    "trackedChanges": 0,
+    "untrackedFiles": 0,
+    "artifacts": {
+      "status": "reports/goal-10-pms-console-addendum/baseline/ADDENDUM_START_STATUS.txt",
+      "diff": "reports/goal-10-pms-console-addendum/baseline/ADDENDUM_START_DIFF.patch",
+      "changedFiles": "reports/goal-10-pms-console-addendum/baseline/ADDENDUM_START_CHANGED_FILES.txt",
+      "untrackedFiles": "reports/goal-10-pms-console-addendum/baseline/ADDENDUM_START_UNTRACKED_FILES.txt"
+    }
+  },
+  "frozenContract": {
+    "name": "pms-console-api",
+    "version": "1.0.0",
+    "status": "frozen",
+    "operationCount": 36,
+    "componentSchemaCount": 28,
+    "exampleCount": 15,
+    "problemCodeCount": 32,
+    "hashes": {
+      "openApiSha256": "dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042",
+      "schemaBundleSha256": "a0982fd32dd5647831b528571fbee3972eac29ee0e8f7295b960e0507bf4ab1a",
+      "endpointSourceMapSha256": "1ebf9c52c29044a0c14d19d73841a1822559a1d1ddef72f4abe399569ff1a396",
+      "errorSourceMapSha256": "3b72501425815462f7bbc11e5b080dc3baab3677bcea82d5701840d755ca2b6b"
+    },
+    "changedFromAddendumStart": false,
+    "conformanceResult": "PASS"
+  },
+  "validationScope": {
+    "consoleBasePath": "/api/console/v1",
+    "legacyBasePath": "/api/v1",
+    "databaseEngine": "PostgreSQL 17",
+    "realSimulatorContacted": false,
+    "realUgvCommandsIssued": false
+  },
+  "containsSecretsOrRealEndpointValues": false
+}

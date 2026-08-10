@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceGeneratedAt": "2026-08-10T09:34:46Z",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "addendumStartHead": "c70d45ee117015db7571d8330025f8dc9096f3f5",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "overallStatus": "PASS",
+  "environment": {
+    "database": "isolated PostgreSQL 17",
+    "databaseUrlRecorded": false,
+    "syntheticDataOnly": true
+  },
+  "commands": [
+    {
+      "command": "PMS_CONSOLE_VALIDATION_START_HEAD=c70d45ee117015db7571d8330025f8dc9096f3f5 pnpm pms-console-conformance:check",
+      "exitCode": 0,
+      "result": "PASS",
+      "facts": {
+        "frozenOperations": 36,
+        "registeredOperations": 36,
+        "missingOperations": 0,
+        "extraOperations": 0
+      }
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm --filter @sdar/pms-api test",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 32,
+      "tests": 132
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-api typecheck",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-api lint",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-api build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-api-production",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 1,
+      "tests": 4
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 5,
+      "tests": 23
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-config",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 3,
+      "tests": 16
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-config-e2e",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 1,
+      "tests": 8
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-migrations",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 2,
+      "tests": 9
+    },
+    {
+      "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:registry-e2e",
+      "exitCode": 0,
+      "result": "PASS",
+      "testFiles": 1,
+      "tests": 4
+    }
+  ],
+  "consoleConformance": {
+    "successfulOperationCases": 36,
+    "successfulOperationCasesPassed": 36,
+    "invalidCorrelationCases": 36,
+    "invalidCorrelationCasesPassed": 36,
+    "mutatingOperationCount": 17,
+    "missingActorCases": 17,
+    "missingActorCasesPassed": 17,
+    "problemDetailsMediaType": "application/problem+json",
+    "registryEtagAnd304": "PASS",
+    "empty204Body": "PASS"
+  },
+  "negativeCoverage": [
+    "malformed JSON",
+    "oversized request body",
+    "invalid RFC3339 date-time",
+    "negative optimistic-concurrency revision",
+    "empty identifier",
+    "additional request property",
+    "unsupported content type",
+    "unsupported desired replica count of 2",
+    "missing X-Actor-ID on every mutating operation",
+    "invalid X-Correlation-ID on every operation",
+    "unexpected Error, TypeError, and RangeError redaction"
+  ],
+  "sourceTests": [
+    "apps/pms-api/test/console/all-operations.test.ts",
+    "apps/pms-api/test/console/request-conformance.test.ts",
+    "apps/pms-api/test/console/problem-details.test.ts",
+    "apps/pms-api/test/console/registry.test.ts",
+    "apps/pms-api/test/console/legacy-regression.test.ts",
+    "apps/pms-api/test/production-composition.test.ts",
+    "apps/pms-api/test/runtime-config.e2e.test.ts",
+    "apps/pms-api/test/runtime-registration.test.ts",
+    "apps/pms-api/test/registry.e2e.test.ts"
+  ],
+  "containsSecretsOrRealEndpointValues": false
+}

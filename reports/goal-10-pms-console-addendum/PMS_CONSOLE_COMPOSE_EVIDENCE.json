@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "standalone_pms_console_fresh_deploy_and_restart",
+  "phase": "A7_A10_STANDALONE_PMS_CONSOLE",
+  "status": "PASS",
+  "generatedAt": "2026-08-10T09:35:09Z",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "composePath": "deploy/pms-console/compose.yaml",
+  "oneClickCommand": "bash deploy/pms-console/up.sh",
+  "explicitSmokeCommand": "bash deploy/pms-console/smoke.sh",
+  "services": {
+    "required": ["pms-postgres", "pms-api", "pms-worker", "pms-web"],
+    "requiredCount": 4,
+    "unexpectedServices": [],
+    "database": {
+      "service": "pms-postgres",
+      "engine": "PostgreSQL",
+      "majorVersion": 17,
+      "dedicatedToPmsConsole": true,
+      "persistentVolume": "pms-postgres-data"
+    },
+    "workerStateVolume": "pms-worker-state",
+    "pmsWebPublishedPortDefault": 8088,
+    "apiPublishedToHost": false
+  },
+  "freshDeployment": {
+    "status": "PASS_FRESH_STATE_PROVEN",
+    "preStartReadOnlyInventory": {
+      "matchingContainers": 0,
+      "matchingNamedVolumes": 0,
+      "result": "PASS"
+    },
+    "requestedDestructiveCommand": "bash deploy/pms-console/down.sh --volumes",
+    "requestedCommandExecution": "NOT_EXECUTED_SAFETY_REVIEW_REJECTED_NO_OP",
+    "materialEffectOfNonExecution": "NONE_NO_MATCHING_RESOURCES_EXISTED",
+    "firstUpFromEmptyProjectState": true,
+    "automaticSmoke": "PASS",
+    "explicitSmoke": "PASS"
+  },
+  "cleanRestart": {
+    "status": "PASS",
+    "downCommand": "bash deploy/pms-console/down.sh",
+    "namedVolumesPreserved": true,
+    "secondUpCommand": "bash deploy/pms-console/up.sh",
+    "secondAutomaticSmoke": "PASS",
+    "secondExplicitSmoke": "PASS",
+    "secondCycleServiceHealth": {
+      "pms-postgres": "healthy",
+      "pms-api": "healthy",
+      "pms-worker": "healthy",
+      "pms-web": "healthy"
+    }
+  },
+  "smokeAssertions": {
+    "pmsDatabaseReady": "PASS",
+    "pmsApiReady": "PASS",
+    "pmsWorkerRunning": "PASS",
+    "pmsWebReady": "PASS",
+    "sameOriginConsoleProxy": "PASS",
+    "nonConsoleApiPathBlocked": "PASS",
+    "qualifiedImageRevisionLabels": "PASS",
+    "runningContainersUseQualifiedImages": "PASS"
+  },
+  "workerQualification": {
+    "runtimeReleaseVersion": "2.0.0-rc.1",
+    "runtimeEntryExecutable": true,
+    "runtimeEntryOwner": "root:root",
+    "runtimeEntryMode": "0555",
+    "stateRootOwnerUid": 1000,
+    "stateRootMode": "0700",
+    "jobLeaseRowsBefore": 0,
+    "jobLeaseRowsAfter": 0,
+    "runtimeControlAttempted": false
+  },
+  "security": {
+    "imagesRunAsNonRootNodeUser": true,
+    "readOnlyApplicationFilesystems": true,
+    "credentialsMountedReadOnly": true,
+    "secretRootOutsideRepository": true,
+    "sameOriginProxyOnly": true,
+    "machineApiRoutesExposedByWeb": false,
+    "secretValuesRecorded": false
+  },
+  "acceptanceGates": {
+    "gateGUnifiedPmsConsolePackage": "PASS",
+    "gateHExactRevision": "PASS",
+    "gateICleanDeployment": "PASS_FRESH_STATE_PROVEN_AND_RESTART_PASSED"
+  }
+}

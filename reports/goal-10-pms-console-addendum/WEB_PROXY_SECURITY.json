@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "pms_web_proxy_security",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "acceptanceGate": "E",
+  "status": "PASS",
+  "routeBoundary": {
+    "forwardedPrefix": "/api/console/v1/**",
+    "arbitraryApiForwardingAllowed": false,
+    "checks": [
+      {
+        "route": "/api/console/v1/**",
+        "forwarded": true,
+        "status": "PASS"
+      },
+      {
+        "route": "/api/v1/runtime-config/**",
+        "forwarded": false,
+        "status": "PASS"
+      },
+      {
+        "route": "/api/v1/runtime-registration/**",
+        "forwarded": false,
+        "status": "PASS"
+      },
+      {
+        "route": "other /api/**",
+        "forwarded": false,
+        "status": "PASS"
+      }
+    ],
+    "localRejectionStatus": 404,
+    "localRejectionProblemCode": "PMS_WEB_API_ROUTE_NOT_ALLOWED"
+  },
+  "sameOriginConfiguration": {
+    "browserApiBase": "/api/console/v1",
+    "upstreamExposedInHtml": false,
+    "runtimeDataMode": "api"
+  },
+  "requestSafety": {
+    "requestBodyBounded": true,
+    "getAndHeadBodiesBounded": true,
+    "upstreamTimeoutEnforced": true,
+    "clientAbortPropagated": true,
+    "hopByHopHeadersForwarded": false,
+    "connectionNamedHeadersForwarded": false,
+    "browserHostForwarded": false,
+    "browserContentLengthForwarded": false
+  },
+  "errorSafety": {
+    "oversizeStatus": 413,
+    "timeoutStatus": 504,
+    "transportFailureStatus": 502,
+    "fixedProblemResponses": true,
+    "upstreamOriginLeaked": false,
+    "upstreamSecretMarkerLeaked": false,
+    "stackTraceLeaked": false
+  },
+  "validation": {
+    "command": "pnpm --filter @sdar/pms-web test",
+    "suite": "apps/pms-web/test/proxy-boundary.test.ts",
+    "exitCode": 0,
+    "tests": 7,
+    "testsPassed": 7,
+    "status": "PASS"
+  },
+  "browserE2ECorroboration": {
+    "machineRuntimeRegistrationRouteBlocked": true,
+    "browserOnlyConnectedToWebOrigin": true,
+    "status": "PASS"
+  },
+  "sensitiveValuesRecorded": false
+}
