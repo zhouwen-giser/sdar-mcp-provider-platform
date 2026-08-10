@@ -214,12 +214,7 @@ export class NpcTankProviderRuntime {
       updatedAt: now,
       evidence: [],
     };
-    try {
-      await this.store.putExecution(execution);
-    } catch (error) {
-      this.arbiter.release(input.taskId);
-      throw error;
-    }
+    await this.store.putExecution(execution);
     try {
       if (input.operationName !== "vehicle_fire_weapon") {
         const calls = npcStartDeviceCalls(
