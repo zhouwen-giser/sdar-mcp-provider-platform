@@ -55,7 +55,11 @@ describe("UGV Provider configuration contract", () => {
       applyMode: "immutable",
       overridePolicy: { mode: "forbidden" },
     });
+    const required = new Set(
+      (UgvProviderConfigurationDefinition.schema.required as readonly string[] | undefined) ?? [],
+    );
     for (const path of UgvProviderConfigurationDefinition.secretPaths) {
+      expect(required.has(path.slice(1))).toBe(false);
       expect(UgvProviderConfigurationDefinition.defaults).not.toHaveProperty(path.slice(1));
       expect(
         (

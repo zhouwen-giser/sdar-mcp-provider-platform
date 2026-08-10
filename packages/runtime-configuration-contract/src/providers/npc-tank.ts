@@ -161,6 +161,9 @@ const defaults = loadNpcTankProviderConfiguration({});
 const configurationSchema = z.toJSONSchema(NpcTankProviderResolvedSchema);
 const configurationProperties = configurationSchema.properties as
   Record<string, { default?: unknown }> | undefined;
+if (Array.isArray(configurationSchema.required)) {
+  configurationSchema.required = configurationSchema.required.filter((key) => !secretKeys.has(key));
+}
 for (const key of secretKeys) {
   const property = configurationProperties?.[key];
   if (property !== undefined) delete property.default;

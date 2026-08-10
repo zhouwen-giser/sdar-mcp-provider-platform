@@ -51,7 +51,12 @@ describe("NPC Tank Provider configuration contract", () => {
       applyMode: "immutable",
       overridePolicy: { mode: "forbidden" },
     });
+    const required = new Set(
+      (NpcTankProviderConfigurationDefinition.schema.required as readonly string[] | undefined) ??
+        [],
+    );
     for (const path of NpcTankProviderConfigurationDefinition.secretPaths) {
+      expect(required.has(path.slice(1))).toBe(false);
       expect(NpcTankProviderConfigurationDefinition.defaults).not.toHaveProperty(path.slice(1));
       expect(
         (
