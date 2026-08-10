@@ -11,11 +11,11 @@ This matrix is derived from:
 
 The real runtime `tools/list` capture is authoritative for tool names and machine input schemas. The bundled human-readable contract is used only where the machine contract is silent. The old Mock contract is comparison evidence, not a design authority.
 
-No tool was called while producing the source capture or this matrix. No real control, reconnaissance, effector action, or MQTT publish occurred.
+The authoritative source capture itself used `tools/list` only. Final qualification subsequently executed the four explicitly read-only tools (`get_status`, `npc_tank_get_capabilities`, `npc_tank_area_recon_get_status`, and `npc_tank_area_recon_get_targets`) and retained only result hashes. No real control, reconnaissance mutation, effector action, or MQTT publish occurred.
 
 | Capture fact     | Evidence                                                                              |
 | ---------------- | ------------------------------------------------------------------------------------- |
-| Status           | `PASS_WITH_CONTRACT_DRIFT`                                                            |
+| Status           | `PASS`                                                                                |
 | Server           | `npc-tank-mcp-server` `1.26.0`                                                        |
 | MCP protocol     | `2025-11-25`                                                                          |
 | Contract SHA-256 | `b06aa50a6e2fbe5bd0fa60cbc5578aeee887e5cfb3ec026edde1054f3c8d6be6`                    |
@@ -247,34 +247,30 @@ NPC must expose the final shared vehicle vocabulary, not device names:
 
 `npc_tank_area_recon_reset` remains internal. No `npc_move`, `npc_scan`, `npc_gimbal`, or other NPC-only public operation is permitted.
 
-## Required implementation and test closure
+## Implementation and test closure
 
-Before the MCP boundary can qualify:
-
-1. Replace the legacy NPC profile with the final shared resilient Streamable HTTP behavior: complete contract hashing, bounded reconnect/read retry, no mutation retry after uncertain dispatch, per-tool circuit health, and no Mock fallback.
-2. Parameterize the final UGV mapping/result-validation/start-flow implementation for NPC names and defaults instead of copying it. Preserve all UGV tests.
-3. Validate common output fields and integer mission correlation despite missing machine output schemas. Classify nonzero `error_code` as structured rejection, not success.
-4. Persist returned mission IDs before dependent start/control calls, and correlate all terminal observations by mission ID and post-dispatch cursor.
-5. Add the forward database migration and PostgreSQL test required to audit the unprefixed `get_status` tool.
-6. Replace legacy tests that freeze 23 tools, fallback navigation, separate EO circular tools, string target IDs, and nine Provider operations.
-7. Add exact-argument tests for all 15 captured tools, including negative schema/result cases, and retain the full Goal 10 UGV regression suite.
-8. Run read-only calls first. Control, recon, and effector evidence must remain separately gated and must require observation-confirmed terminal behavior.
+1. The legacy profile was replaced by the shared resilient Streamable HTTP behavior with exact contract hashing, bounded read retry/reconnect, per-tool circuit health, no uncertain-mutation retry, and no Mock fallback.
+2. The final UGV mapping/result-validation/start-flow abstractions were generalized through an NPC profile; UGV regression passed.
+3. Common results, nonzero `error_code`, integer mission IDs, dependent starts, mission correlation, and post-dispatch observation cursors are validated and covered by deterministic tests.
+4. Forward migration `026_npc_tank_get_status_tool_audit` admits only the exact unprefixed `get_status` exception without weakening the remaining audit constraint.
+5. Legacy 23-tool/fallback assumptions were removed from the real mapping and qualification path. All 15 captured tools have exact mapping/schema regression coverage.
+6. Four real read-only Device MCP calls passed. Control, recon, and effector calls remained separately gated and were not executed without explicit authorization and fixtures.
 
 ## Open contract differences
 
 | Difference                                              | Current disposition                                                                             |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | Actual capabilities name is prefixed                    | Bind `npc_tank_get_capabilities`; record the prediction drift as resolved by runtime authority. |
-| All 15 `outputSchema` values are absent                 | Open; validate common documented results locally and gather safe-call evidence.                 |
+| All 15 `outputSchema` values are absent                 | Locally mitigated by conservative result validation; four safe read shapes were hash-verified.  |
 | All annotations are absent                              | Open; safety classes in this report are conservative policy, not server-declared annotations.   |
 | Several enums/ranges are description-only               | Open; enforce documented values locally and reject unknown values.                              |
 | Array item schemas are weak/empty                       | Open; enforce shared WGS84 and integer target-type schemas locally.                             |
 | Laser ranging is absent                                 | `PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE`; no fabricated tool.                              |
 | Manual gimbal velocity is below the final public schema | Open shared-schema decision; never add an NPC-only operation or unbounded sweep.                |
-| Read descriptions mention referee/adjudication fields   | Resolve at Provider boundary by strict allowlisting/sanitization; verify with safe reads.       |
+| Read descriptions mention referee/adjudication fields   | Resolved at Provider boundary by strict allowlisting/sanitization; safe-read regression passed. |
 
 ## Matrix status
 
-`PASS_REAL_15_TOOL_GAP_CLASSIFIED_IMPLEMENTATION_PENDING`
+`PASS_REAL_15_TOOL_GAP_CLASSIFIED_IMPLEMENTED_READ_ONLY_VERIFIED`
 
-This status proves contract capture and migration classification only. It does not claim that any real read, control, reconnaissance, effector, Runtime Task, PMS, Registry, or deployment gate has passed.
+This status proves contract capture, mapping implementation, deterministic regression, and four real read-only calls. It does not claim real control, reconnaissance mutation, effector execution, or a real mutating Runtime Task lifecycle; those remain separately reported as not executed.

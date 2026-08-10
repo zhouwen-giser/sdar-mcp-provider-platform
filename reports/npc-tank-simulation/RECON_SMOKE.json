@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_recon_safety_gate",
+  "phase": "GOAL11_NPC_REAL_RECON_SMOKE",
+  "status": "NOT_EXECUTED",
+  "reasonCode": "NOT_EXECUTED_RECON_DISABLED_AND_SAFE_FIXTURE_MISSING",
+  "overallQualification": "NPC_TANK_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "command": "NOT_EXECUTED",
+  "exitCode": null,
+  "safety": {
+    "realControlEnabled": false,
+    "reconEnabled": false,
+    "reconRegionConfigured": false,
+    "controlAttempted": false,
+    "reconDeviceCalls": 0,
+    "mqttPublishAttempted": false,
+    "effectorEnabled": false,
+    "rawPayloadStored": false,
+    "coordinateValuesStored": false
+  },
+  "contractCapability": {
+    "areaRecon": true,
+    "circularRecon": true,
+    "circularMapping": "npc_tank_area_recon_configure scan_mode=2 followed by npc_tank_area_recon_control cmd_type=1",
+    "realLifecycleQualified": false
+  },
+  "checks": [
+    {
+      "operation": "vehicle_area_recon(area)",
+      "status": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+      "reasonCode": "NPC_TANK_ENABLE_RECON_TESTS_FALSE_AND_REGION_MISSING"
+    },
+    {
+      "operation": "vehicle_area_recon(circular)",
+      "status": "NOT_EXECUTED_RECON_DISABLED",
+      "reasonCode": "NPC_TANK_ENABLE_RECON_TESTS_FALSE"
+    },
+    {
+      "operation": "vehicle_area_recon(pause/resume/stop/reset)",
+      "status": "NOT_EXECUTED_RECON_DISABLED",
+      "reasonCode": "NO_REAL_RECON_TASK_STARTED"
+    },
+    {
+      "operation": "vehicle_track_target(lock/unlock)",
+      "status": "NOT_EXECUTED_SAFE_TARGET_MISSING",
+      "reasonCode": "NO_TARGET_FROM_EXPLICITLY_ENABLED_REAL_RECON"
+    },
+    {
+      "operation": "moving while reconnaissance",
+      "status": "NOT_EXECUTED_CONTROL_AND_RECON_DISABLED",
+      "reasonCode": "NO_SAFE_COMBINED_FIXTURE"
+    },
+    {
+      "operation": "camera fault and out-of-range behavior",
+      "status": "NOT_EXECUTED_FAULT_INJECTION_NOT_AUTHORIZED",
+      "reasonCode": "NO_SAFE_REAL_FAULT_FIXTURE"
+    },
+    {
+      "operation": "vehicle_fire_weapon",
+      "status": "NOT_EXECUTED_EFFECTOR_DISABLED",
+      "reasonCode": "NPC_TANK_ENABLE_EFFECTOR_TESTS_FALSE"
+    }
+  ],
+  "passiveObservations": {
+    "reconStatusTopicObserved": true,
+    "reconTargetsTopicObserved": true,
+    "eoPoseTopicObserved": true,
+    "realReconTaskStarted": false,
+    "interpretation": "Passive payload observations and read-only status calls prove compatibility only; they do not qualify a reconnaissance lifecycle."
+  },
+  "deterministicEvidence": {
+    "status": "PASS",
+    "classification": "DETERMINISTIC_REGRESSION_NOT_REAL_RECON_EVIDENCE",
+    "scope": [
+      "area and circular configure/control mapping",
+      "separate recon MotionStatus lifecycle",
+      "post-dispatch cursor and mission correlation",
+      "target normalization and authoritative empty clearing",
+      "lock/unlock conditional validation",
+      "cameraFault progress freeze and outOfRange process state"
+    ]
+  }
+}

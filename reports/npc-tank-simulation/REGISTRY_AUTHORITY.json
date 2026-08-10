@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceClass": "real",
+  "phase": "GOAL11_NPC_REGISTRY_AUTHORITY",
+  "status": "passed",
+  "observedAt": "2026-08-10T11:39:04.107Z",
+  "environment": "simulation",
+  "source": "live PMS Registry API",
+  "providerId": "isr.vehicle.npc-tank.npc-tank1",
+  "serverId": "runtime-32b1d426cc87-0",
+  "runtimeEndpoint": "http://127.0.0.1:18080/mcp",
+  "registryRevision": 1,
+  "registryChecksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+  "canonicalChecksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+  "etag": "\"f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e\"",
+  "conditionalStatus": 304,
+  "bootstrapChecksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+  "catalogRevision": 1,
+  "catalogToolCount": 11,
+  "catalogTools": [
+    "vehicle_area_recon",
+    "vehicle_control_gimbal",
+    "vehicle_emergency_stop",
+    "vehicle_fire_weapon",
+    "vehicle_get_capabilities",
+    "vehicle_get_payload_status",
+    "vehicle_get_state",
+    "vehicle_get_targets",
+    "vehicle_laser_range",
+    "vehicle_navigate",
+    "vehicle_track_target"
+  ],
+  "sensitiveFieldScan": {
+    "status": "passed",
+    "sensitiveKeys": 0
+  },
+  "endpointAuthority": "registry",
+  "runtimeReadOnly": {
+    "endpointSource": "registry",
+    "protocolVersion": "2026-07-28",
+    "serverDiscover": "passed",
+    "toolsList": "passed",
+    "requiredReadOperations": [
+      {
+        "operation": "vehicle_get_state",
+        "resultType": "complete",
+        "structuredContentSha256": "c6b49a870e8e780d2983a1c3f3115e24add4da9bad932a9fdac3fa0a65e9bf56",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_capabilities",
+        "resultType": "complete",
+        "structuredContentSha256": "108680a9ee0ddde7d09a470c9f7427833215f945c5d430c76232ce55deacaa18",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_payload_status",
+        "resultType": "complete",
+        "structuredContentSha256": "b127c3e3fe90a2548f977adc22565bcdc3e00932496d836e214ed8dc902c6134",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_targets",
+        "resultType": "complete",
+        "structuredContentSha256": "355ed3bd930599157f65115c97a6e3bb9da968e35fe47424a6a0e12e98b5fb34",
+        "valuesPersistedInEvidence": false
+      }
+    ],
+    "mutatingOperationsCalled": 0
+  },
+  "simulatorMutationCalls": 0
+}

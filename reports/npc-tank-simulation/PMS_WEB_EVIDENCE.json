@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceClass": "real",
+  "phase": "GOAL11_NPC_PMS_WEB_READ_ONLY",
+  "status": "PASS_REAL_API_MODE",
+  "observedAt": "2026-08-10T11:54:39.256Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "requestPolicy": {
+    "methods": ["GET"],
+    "writeRequests": 0,
+    "simulatorMutationCalls": 0
+  },
+  "web": {
+    "dataMode": "api",
+    "apiBase": "same-origin:/api/console/v1",
+    "upstreamLiteralExposed": false,
+    "uiRoutesServed": 6,
+    "rootDocumentSha256": "a1711cbac5a47b6c69f7223eb6a1c40152aac4ca1b219ed1842ce23a68e02153",
+    "nonConsoleApiBoundary": {
+      "status": 404,
+      "code": "PMS_WEB_API_ROUTE_NOT_ALLOWED"
+    },
+    "browserDomInspection": false,
+    "evidenceBoundary": "Live HTTP SPA routes and same-origin Console API visibility; no pixel or screenshot claim."
+  },
+  "package": {
+    "found": true,
+    "componentStatus": "passed",
+    "realResourceStatus": "pending",
+    "responseSha256": "c758ee4c5a07c281cd4c7a9c2f8e4ea3d8e3a7d3b25cb7b24cf72e0b3b2a863d"
+  },
+  "provider": {
+    "found": true,
+    "status": "active",
+    "hostingMode": "platform_managed",
+    "responseSha256": "51b40942d72489a4b76402bd992c35cb842166c47571e3319e92b005ea5a3240"
+  },
+  "resource": {
+    "found": true,
+    "status": "available",
+    "bindingFound": true,
+    "responseSha256": "50699657034499078b631b8502f91099a0a96b47710bccb8fc5d07a443cf7874"
+  },
+  "deployment": {
+    "found": true,
+    "status": "ACTIVE",
+    "desiredRevision": 0,
+    "observedRevision": 17,
+    "responseSha256": "442a82faecba7b9006b5b2792fd240bda9e9e982860f138537354e30e46a187c"
+  },
+  "registry": {
+    "found": true,
+    "revision": 1,
+    "etagMatched": true,
+    "conditionalStatus": 304,
+    "catalogToolCount": 11,
+    "responseSha256": "0676fdaa63c7e7a2ab0c7b88d6b114305fd15a1095cc433f35bdeb4170ec35e6"
+  },
+  "audit": {
+    "found": true,
+    "subjectType": "runtime_deployment",
+    "eventCount": 3,
+    "metadataExcluded": true,
+    "responseSha256": "a34cb36ee90af59810e89137f3cff930ce69cd869f4f1f867d585396c6c68edd"
+  },
+  "security": {
+    "sensitiveKeysObserved": 0,
+    "rawBodiesPrinted": false,
+    "credentialFilesReadByProbe": false,
+    "externalDeviceEndpointsCalled": 0
+  }
+}
