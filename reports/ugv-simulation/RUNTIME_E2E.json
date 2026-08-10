@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_runtime_e2e_mixed",
+  "phase": "G10_RUNTIME_E2E",
+  "status": "PARTIAL",
+  "reasonCode": "REAL_READ_ONLY_PATH_PASS_CONTROL_TASK_PATH_NOT_EXECUTED",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:31:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "path": [
+    "SMPP Runtime",
+    "UGV Provider Adapter",
+    "real Device MCP",
+    "simulator",
+    "real MQTT",
+    "UGV Provider Adapter",
+    "SMPP Runtime"
+  ],
+  "realReadOnlyPath": {
+    "status": "PASS",
+    "runtimeReady": true,
+    "runtimeToolCount": 11,
+    "catalogSha256": "fd7fc29a6c21678803e53c798fc435e3644ca08b513650237b9e67f3dd9670ff",
+    "operations": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets"
+    ],
+    "cycle1": {
+      "mqttConnected": true,
+      "deviceMcpConnected": true,
+      "deviceAvailable": true,
+      "targetCount": 0
+    },
+    "cycle2": {
+      "mqttConnected": true,
+      "deviceMcpConnected": true,
+      "deviceAvailable": true,
+      "targetCount": 0
+    }
+  },
+  "realTaskPath": {
+    "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+    "controlAttempted": false,
+    "mutatingToolCalls": 0,
+    "runtimeTaskLifecycleQualifiedAgainstRealSimulator": false,
+    "reasonCode": "UGV_ENABLE_REAL_CONTROL_FALSE"
+  },
+  "deterministicTaskPath": {
+    "status": "PASS",
+    "scope": [
+      "navigation lifecycle and cancellation observation",
+      "recon lifecycle and stale-observation rejection",
+      "gimbal post-dispatch lifecycle and cancellation mission ID",
+      "emergency-stop preemption",
+      "uncertain mutation no-retry",
+      "duplicate task replay and identity conflict",
+      "fire confirmation and decline without device fire call",
+      "restart reconciliation without duplicate mutation"
+    ],
+    "classification": "DETERMINISTIC_REGRESSION_NOT_REAL_CONTROL_EVIDENCE"
+  },
+  "formalPmsRegistry": {
+    "status": "NOT_EXECUTED_LIVE_PMS_NOT_PROVIDED",
+    "directDatabaseOnboardingUsed": false,
+    "providerPackagePromotionAllowed": false
+  },
+  "safety": {
+    "mockFallbackEnabledForRealEvidence": false,
+    "mqttPublishAttempted": false,
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false,
+    "rawPayloadStored": false
+  },
+  "evidenceRefs": [
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.cycle1.json",
+      "sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+      "startedAt": "2026-08-10T07:28:46.562Z",
+      "completedAt": "2026-08-10T07:28:46.747Z",
+      "command": "bash deploy/ugv-simulation/smoke.sh",
+      "exitCode": 0
+    },
+    {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+      "sha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1",
+      "startedAt": "2026-08-10T07:29:37.624Z",
+      "completedAt": "2026-08-10T07:29:38.839Z",
+      "command": "node scripts/ugv-simulation/preflight.mjs",
+      "exitCode": 0
+    },
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+      "sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+      "startedAt": "2026-08-10T07:29:39.181Z",
+      "completedAt": "2026-08-10T07:29:39.362Z",
+      "command": "bash deploy/ugv-simulation/smoke.sh",
+      "exitCode": 0
+    }
+  ]
+}

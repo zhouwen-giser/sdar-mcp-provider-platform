@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "deterministic_regression",
+  "phase": "G10_REGRESSION",
+  "status": "PASS",
+  "reasonCode": "UGV_NPC_AND_REPOSITORY_GATES_PASS",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:39:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "commands": [
+    {
+      "command": "final product gate components: changed-file Prettier check, pnpm lint, pnpm typecheck, pnpm build, pnpm proto:check:detached, UGV Provider tests, and NPC Provider tests",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "stages": {
+        "formatCheck": "PASS",
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "build": "PASS",
+        "detachedProtoCheck": "PASS"
+      },
+      "testCounts": {
+        "ugv": {
+          "unit": 9,
+          "contract": 6,
+          "integration": 20,
+          "security": 3,
+          "grpcE2e": 1,
+          "total": 39
+        },
+        "npcTank": {
+          "unit": 16,
+          "contract": 7,
+          "integration": 8,
+          "security": 4,
+          "grpcE2e": 1,
+          "total": 36
+        }
+      }
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "fileCount": 5,
+      "testCount": 49,
+      "breakdown": {
+        "deviceMcpContract": 15,
+        "mqttRealContract": 17,
+        "mqttClientReadiness": 4,
+        "providerBoundary": 3,
+        "deploymentSecurity": 10
+      }
+    },
+    {
+      "command": "TEST_DATABASE_URL=[redacted-temporary-postgres] pnpm exec vitest run tests/provider-platform-e2e/npc-tank/vendor-managed.test.ts tests/provider-platform-e2e/ugv/vendor-managed.test.ts",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "fileCount": 2,
+      "testCount": 5,
+      "notableAssertion": "A declined fire request reaches final cancellation and causes zero Device MCP fire calls."
+    },
+    {
+      "command": "pnpm test:provider-packages",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "fileCount": 2,
+      "testCount": 13,
+      "selfCheck": "PASS_4_PACKAGES_UGV_PENDING"
+    },
+    {
+      "command": "pnpm test:config-compat",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "fileCount": 9,
+      "testCount": 45
+    },
+    {
+      "command": "final commit-object targeted audit: 16 exact test files",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": "2026-08-10T07:38:52Z",
+      "timeAuthority": "Vitest final rerun plus independent commit-object audit",
+      "fileCount": 16,
+      "testCount": 131,
+      "groups": {
+        "ugvProvider": "5 files / 39 tests",
+        "npcProvider": "5 files / 36 tests",
+        "goal10Core": "4 files / 39 tests",
+        "configAndMigration": "2 files / 17 tests"
+      },
+      "files": [
+        "tests/unit/ugv-provider-core.test.ts",
+        "tests/contract/ugv-provider-contract.test.ts",
+        "tests/integration/ugv-provider-adapter.test.ts",
+        "tests/security/ugv-provider-security.test.ts",
+        "tests/e2e/ugv-provider-grpc-e2e.test.ts",
+        "tests/unit/npc-tank-provider-core.test.ts",
+        "tests/contract/npc-tank-provider-contract.test.ts",
+        "tests/integration/npc-tank-provider-adapter.test.ts",
+        "tests/security/npc-tank-provider-security.test.ts",
+        "tests/e2e/npc-tank-provider-grpc-e2e.test.ts",
+        "tests/ugv-simulation/device-mcp-contract.test.ts",
+        "tests/ugv-simulation/mqtt-real-contract.test.ts",
+        "tests/ugv-simulation/mqtt-client-readiness.test.ts",
+        "tests/ugv-simulation/provider-boundary.test.ts",
+        "tests/config-compat/config-compat.test.ts",
+        "packages/database-migration-runner/test/migration-set.test.ts"
+      ]
+    },
+    {
+      "command": "PostgresProviderStore migrations 024+026 CAS and unique-active-fire verification (connection string redacted)",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable",
+      "assertions": ["exactly one compare-and-set winner", "unique active fire index enforced"]
+    },
+    {
+      "command": "pnpm config:schema:check",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "command": "pnpm work:protected:check",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "command": "pnpm protocol:check:frozen",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation/deployment-security.test.mjs",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "testCount": 10
+    }
+  ],
+  "nonImpact": {
+    "npcPublicManifestAndCatalog": "PASS",
+    "npcRegressionSuite": "PASS_36_TESTS",
+    "protectedPaths": "PASS_NO_DIFF_FROM_BASE",
+    "frozenProtocol": "PASS_UNCHANGED",
+    "homeAssistantAndPmsProtectedAreas": "PASS_NO_DIFF_FROM_BASE"
+  },
+  "scopeNotes": {
+    "realControlTests": "NOT_EXECUTED",
+    "realReconTests": "NOT_EXECUTED",
+    "realEffectorTests": "NOT_EXECUTED",
+    "interpretation": "This report proves deterministic regression and repository integrity only; it does not promote unexecuted real-control gates."
+  }
+}

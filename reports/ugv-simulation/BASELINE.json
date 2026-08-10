@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "goal": "goal-10-ugv-simulation-real-interface",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "baseSha": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+  "reviewedMainSha": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+  "currentOriginMainShaAtBranchCreation": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+  "qualificationGitSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "startStatus": [],
+  "startTime": "2026-08-10T11:29:20+08:00",
+  "evidenceCutAt": "2026-08-10T07:29:39.362Z",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "repositoryBaselineDrift": false,
+  "externalInterfaceDriftObserved": true,
+  "protectedPathsDiffFromBase": false,
+  "npcBehaviorOrCatalogChanged": false,
+  "overall": "UGV_SIMULATION_PARTIAL",
+  "providerPackageRealResourceStatus": "pending",
+  "protocolInputSha256": "e4e936a05d9c4f1d0a29a871ca3b6bf902bedae1fe2ff5ee397a34b8cdb64dad",
+  "prdInputSha256": "d6e5a899b8c83d23df77a8ce2c4d460c2dc7c2908df308627f505dea7704a2ff",
+  "protectedPathsAggregateSha256": "e27a641cc3d763498922fc1dc6fac11afb0d9d1525d48da1f834a713b5c2777f",
+  "evidence": {
+    "hostPreflight": {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json",
+      "sha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+      "status": "PASS_WITH_UPSTREAM_DRIFT"
+    },
+    "composeCycle2Preflight": {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+      "sha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1",
+      "status": "PASS_WITH_UPSTREAM_DRIFT"
+    },
+    "mcpContractCapture": {
+      "path": "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+      "sha256": "9f4cca36aaacbe649ede430d4c1d1d5d079b27c9ec784317a0250eb952679519"
+    },
+    "readOnlySmokeCycle1": {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.cycle1.json",
+      "sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+      "status": "PASS"
+    },
+    "readOnlySmokeCycle2": {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+      "sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+      "status": "PASS"
+    }
+  },
+  "safety": {
+    "endpointsRedacted": true,
+    "mockFallbackEnabled": false,
+    "realControlAttempted": false,
+    "reconAttempted": false,
+    "pmsOnboardingAttempted": false,
+    "effectorAttempted": false,
+    "mqttPublishAttempted": false,
+    "rawPayloadStored": false
+  }
+}

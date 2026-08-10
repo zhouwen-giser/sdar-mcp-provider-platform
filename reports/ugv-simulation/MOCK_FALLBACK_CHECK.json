@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_evidence_isolation",
+  "phase": "G10_MOCK_FALLBACK_CHECK",
+  "status": "PASS",
+  "reasonCode": "REAL_EVIDENCE_MOCK_FALLBACK_DISABLED",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:31:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "checks": [
+    {
+      "check": "host preflight mock fallback",
+      "status": "PASS",
+      "value": false,
+      "evidencePath": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json"
+    },
+    {
+      "check": "cycle2 Compose preflight mock fallback",
+      "status": "PASS",
+      "value": false,
+      "evidencePath": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json"
+    },
+    {
+      "check": "live Device MCP server identity",
+      "status": "PASS",
+      "serverName": "ugv-mcp-server",
+      "serverVersion": "1.26.0",
+      "serverIdentifiesAsMock": false
+    },
+    {
+      "check": "real Compose service inventory",
+      "status": "PASS",
+      "mockServicesPresent": false,
+      "forbiddenServices": ["mqtt-ugv-test", "mock-ugv-device-mcp", "mock-ugv-mqtt-publisher"]
+    },
+    {
+      "check": "Adapter mock-contract environment gate",
+      "status": "PASS",
+      "configuredValue": false
+    },
+    {
+      "check": "real evidence payload policy",
+      "status": "PASS",
+      "rawPayloadStored": false,
+      "mqttPublishAttempted": false,
+      "controlAttempted": false
+    }
+  ],
+  "deterministicMocks": {
+    "presentInRepository": true,
+    "purpose": "contract and regression fixtures only",
+    "usedForRealEvidence": false,
+    "includedInRealCompose": false,
+    "interpretation": "Passing deterministic mock tests does not promote any real-interface qualification gate."
+  },
+  "commands": [
+    {
+      "command": "node scripts/ugv-simulation/preflight.mjs",
+      "exitCode": 0,
+      "startedAt": "2026-08-10T07:27:07.158Z",
+      "completedAt": "2026-08-10T07:27:08.464Z"
+    },
+    {
+      "command": "docker compose --profile preflight config --services",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamps unavailable"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json",
+      "sha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd"
+    },
+    {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+      "sha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1"
+    },
+    {
+      "path": "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+      "sha256": "9f4cca36aaacbe649ede430d4c1d1d5d079b27c9ec784317a0250eb952679519"
+    }
+  ],
+  "endpointDisclosure": "redacted",
+  "secretValuesRecorded": false
+}

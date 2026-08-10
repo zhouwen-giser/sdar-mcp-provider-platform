@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_recon_safety_gate",
+  "phase": "G10_REAL_RECON_SMOKE",
+  "status": "NOT_EXECUTED",
+  "reasonCode": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:31:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "command": "NOT_EXECUTED",
+  "exitCode": null,
+  "safety": {
+    "realControlEnabled": false,
+    "reconEnabled": false,
+    "reconRegionConfigured": false,
+    "controlAttempted": false,
+    "reconDeviceCalls": 0,
+    "mqttPublishAttempted": false,
+    "effectorEnabled": false,
+    "rawPayloadStored": false
+  },
+  "checks": [
+    {
+      "operation": "vehicle_area_recon(area)",
+      "status": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+      "reasonCode": "UGV_ENABLE_RECON_TESTS_FALSE_AND_REGION_MISSING"
+    },
+    {
+      "operation": "vehicle_area_recon(circular)",
+      "status": "NOT_EXECUTED_RECON_DISABLED",
+      "reasonCode": "UGV_ENABLE_RECON_TESTS_FALSE"
+    },
+    {
+      "operation": "vehicle_area_recon(pause/resume/cancel)",
+      "status": "NOT_EXECUTED_RECON_DISABLED",
+      "reasonCode": "NO_REAL_RECON_TASK_STARTED"
+    },
+    {
+      "operation": "vehicle_track_target",
+      "status": "NOT_EXECUTED_REAL_TARGET_UNAVAILABLE",
+      "reasonCode": "READ_ONLY_TARGET_COUNT_ZERO"
+    },
+    {
+      "operation": "vehicle_fire_weapon",
+      "status": "NOT_EXECUTED_EFFECTOR_DISABLED",
+      "reasonCode": "UGV_ENABLE_EFFECTOR_TESTS_FALSE"
+    }
+  ],
+  "passiveObservations": {
+    "reconStatusTopicObserved": true,
+    "eoPoseTopicObserved": true,
+    "realReconTaskStarted": false,
+    "realTargetCount": 0,
+    "interpretation": "Passive payload observations prove read compatibility only; they do not qualify a reconnaissance lifecycle."
+  },
+  "evidenceRefs": [
+    {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json",
+      "sha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+      "startedAt": "2026-08-10T07:27:07.158Z",
+      "completedAt": "2026-08-10T07:27:08.464Z",
+      "status": "PASS_WITH_UPSTREAM_DRIFT"
+    },
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.cycle1.json",
+      "sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+      "startedAt": "2026-08-10T07:28:46.562Z",
+      "completedAt": "2026-08-10T07:28:46.747Z",
+      "targetCount": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+      "sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+      "startedAt": "2026-08-10T07:29:39.181Z",
+      "completedAt": "2026-08-10T07:29:39.362Z",
+      "targetCount": 0,
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "recovery_mixed_real_and_deterministic",
+  "phase": "G10_RECOVERY",
+  "status": "PARTIAL",
+  "reasonCode": "REAL_CLEAN_RESTART_PASS_ACTIVE_REAL_TASK_RECOVERY_NOT_EXECUTED",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:31:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "checks": [
+    {
+      "check": "Device MCP read reconnect",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "A dropped read response reconnects and is retried only within the configured bound."
+    },
+    {
+      "check": "uncertain mutating Device MCP response",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "A lost mutating response is classified uncertain and is never retried automatically."
+    },
+    {
+      "check": "per-tool circuit recovery",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "Only the failing tool circuit opens and only one half-open probe is admitted."
+    },
+    {
+      "check": "MQTT same-process reconnect and resubscribe",
+      "status": "PASS",
+      "evidenceClass": "deterministic_client_event_sequence",
+      "assertion": "Readiness remains false until a valid SUBACK, a stale SUBACK is ignored, and all exact subscriptions are restored after reconnect."
+    },
+    {
+      "check": "Provider Adapter restart reconciliation",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "An active execution is restored without dispatching a duplicate side effect."
+    },
+    {
+      "check": "duplicate task replay and identity conflict",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "An identical duplicate replays the persisted execution and a conflicting identity is rejected without a new Device MCP call."
+    },
+    {
+      "check": "post-dispatch observation authority",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "Stale matching terminal observations cannot complete new recon or gimbal tasks."
+    },
+    {
+      "check": "clean real Compose restart",
+      "status": "PASS_WITH_UPSTREAM_DRIFT",
+      "evidenceClass": "real_external_read_only",
+      "assertion": "Two fresh Compose starts reached healthy state and both Runtime read-only smokes reconfirmed real MQTT, Device MCP, and device availability."
+    },
+    {
+      "check": "Runtime restart with an active real mutating task",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "evidenceClass": "real_control",
+      "assertion": "No active real task was created because the real-control gate remained closed."
+    }
+  ],
+  "composeRestart": {
+    "sequence": [
+      "initial down",
+      "cycle1 up",
+      "cycle1 smoke",
+      "down",
+      "cycle2 up",
+      "cycle2 smoke",
+      "final down"
+    ],
+    "allCommandExitCodes": 0,
+    "bothStartsHealthy": true,
+    "finalStackState": "down",
+    "namedDatabaseVolumesPreserved": true,
+    "namedContractVolumePreserved": true,
+    "commandTimingAuthority": "operator-observed; exact up/down timestamps unavailable",
+    "preQualificationDiagnostic": "A retained local database-volume configuration drift was found and corrected before the official successful sequence; the complete sequence was restarted after correction.",
+    "secretValuesRecorded": false
+  },
+  "safety": {
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false,
+    "mqttPublishAttempted": false,
+    "duplicateRealMutationPossible": false,
+    "rawPayloadStored": false
+  },
+  "commands": [
+    {
+      "command": "pnpm verify:ugv-npc-provider",
+      "exitCode": 0,
+      "time": null,
+      "timeAuthority": "operator-observed; exact time unavailable"
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation",
+      "exitCode": 0,
+      "time": null,
+      "timeAuthority": "operator-observed; exact time unavailable"
+    },
+    {
+      "command": "bash deploy/ugv-simulation/down.sh; up.sh; smoke.sh; down.sh; up.sh; smoke.sh; down.sh",
+      "exitCode": 0,
+      "time": null,
+      "timeAuthority": "operator-observed with nested evidence timestamps"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "path": "tests/ugv-simulation/device-mcp-contract.test.ts",
+      "suite": "Goal 10 UGV Device MCP transport safety"
+    },
+    {
+      "path": "tests/ugv-simulation/mqtt-client-readiness.test.ts",
+      "suite": "same-process reconnect and SUBACK readiness"
+    },
+    {
+      "path": "tests/integration/ugv-provider-adapter.test.ts",
+      "suite": "restart, identity, stale-observation and lifecycle recovery"
+    },
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.cycle1.json",
+      "sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+      "startedAt": "2026-08-10T07:28:46.562Z",
+      "completedAt": "2026-08-10T07:28:46.747Z"
+    },
+    {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+      "sha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1",
+      "startedAt": "2026-08-10T07:29:37.624Z",
+      "completedAt": "2026-08-10T07:29:38.839Z"
+    },
+    {
+      "path": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+      "sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+      "startedAt": "2026-08-10T07:29:39.181Z",
+      "completedAt": "2026-08-10T07:29:39.362Z"
+    }
+  ]
+}
