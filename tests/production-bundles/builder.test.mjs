@@ -104,6 +104,13 @@ for (const productId of PRODUCT_IDS) {
     assert.doesNotMatch(example, /https:\/\/|mqtts:\/\/|wss:\/\//);
     assert.doesNotMatch(example, /(?:TLS|HEADERS|PASSWORD)_(?:CA_|CERT_|KEY_)?FILE=/);
 
+    const upScript = await readFile(join(bundleDirectory, "bin", "up.sh"), "utf8");
+    assert.doesNotMatch(
+      upScript,
+      /\brun\b[^\n]*--no-build\b/,
+      `${productId}/up.sh must only use Compose run options supported by Compose v2`,
+    );
+
     for (const script of ["init.sh", "up.sh", "down.sh", "status.sh", "smoke.sh"]) {
       const metadata = await stat(join(bundleDirectory, "bin", script));
       assert.notEqual(metadata.mode & 0o111, 0, `${productId}/${script} must be executable`);

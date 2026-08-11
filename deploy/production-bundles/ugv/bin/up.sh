@@ -37,7 +37,7 @@ compose up --detach --no-build --pull never --wait --wait-timeout "$wait_timeout
   ugv-adapter-postgres ugv-runtime-postgres ugv-adapter ugv-runtime
 
 printf 'Applying idempotent PMS vendor-managed UGV seed...\n'
-compose --profile seed run --rm --no-deps --no-build --pull never pms-seed
+compose --profile seed run --rm --no-deps --pull never pms-seed
 
 bash "$script_dir/smoke.sh"
 printf 'PASS: UGV production bundle is ready; PMS Web is bound to %s:%s.\n' \
