@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G12",
+  "status": "blocked",
+  "evidenceClass": "isolated_deterministic_plus_same_goal_historical_real",
+  "observedAt": "2026-08-10T16:38:42.493Z",
+  "resilienceIntegrationReady": false,
+  "qualification": {
+    "projectionProducerContract": "passed",
+    "runtimeConfigLkgAndAckRecovery": "passed",
+    "controlledAdapterAndProviderRecovery": "passed",
+    "realInFlightAndFaultRecovery": "blocked"
+  },
+  "scopeBoundary": {
+    "dockerInvoked": false,
+    "liveDatabaseInvoked": false,
+    "liveServiceRestarted": false,
+    "nativeRegistryMutated": false,
+    "homeAssistantRealEndpointInvoked": false,
+    "testFailpointInvoked": false,
+    "deviceWritesAttempted": 0,
+    "physicalSideEffectsObserved": 0
+  },
+  "isolatedVerification": {
+    "testFilesPassed": 12,
+    "testsPassed": 77,
+    "testsFailed": 0,
+    "typecheck": "passed",
+    "eslint": "passed",
+    "prettier": "passed",
+    "diffCheck": "passed"
+  },
+  "projection": {
+    "conditional304": "passed",
+    "newRevisionAndChecksumBinding": "passed",
+    "badChecksumAndSchemaVectors": "passed",
+    "nativeRegistryAuthorityUnchanged": true,
+    "sameGoalLiveProjectionOutageAndLkg": "passed",
+    "realLiveRegistryMutationInG12": false
+  },
+  "runtimeConfigRecovery": {
+    "remote200CommitsChecksummedLkg": "passed",
+    "conditional304UsesLkgWithoutWrite": "passed",
+    "invalidDownloadDoesNotReplaceLkg": "passed",
+    "pmsOutageUsesLkg": "passed_controlled",
+    "noLkgFailsClosed": "passed",
+    "corruptLkgFailsClosed": "passed",
+    "watchReconnectPullsAuthoritativeLatest": "passed",
+    "ackOutboxPersistsAndReplays": "passed"
+  },
+  "windowsPortabilityRepair": {
+    "status": "passed",
+    "affectedArtifacts": ["runtime_config_lkg", "runtime_config_ack_outbox"],
+    "preservedGuarantees": [
+      "exclusive_staging_creation",
+      "staging_file_fsync",
+      "atomic_rename",
+      "staging_cleanup",
+      "posix_0600_enforcement_on_non_windows"
+    ],
+    "windowsDirectorySyncHandling": {
+      "platformGate": "win32_only",
+      "ignoredUnsupportedCodes": ["EPERM", "EINVAL", "ENOTSUP"],
+      "allOtherErrorsRethrown": true
+    },
+    "windowsPermissions": "inherited_acl_posix_mode_bits_not_used"
+  },
+  "controlledRuntimeAndProviderRecovery": [
+    {
+      "case": "runtime_restart_controller_backoff_and_limit",
+      "status": "passed_controlled"
+    },
+    {
+      "case": "adapter_engine_recreation_after_persisted_dispatch",
+      "status": "passed_controlled_no_duplicate_fake_call"
+    },
+    {
+      "case": "notification_disconnect_and_rest_poll_fallback",
+      "status": "passed_controlled"
+    },
+    {
+      "case": "home_assistant_unreachable_before_side_effect",
+      "status": "passed_fake"
+    },
+    {
+      "case": "rest_200_without_observed_target_state",
+      "status": "passed_fake_timeout_fail_closed"
+    },
+    {
+      "case": "provider_state_file_corrupted",
+      "status": "passed_temp_file_contract"
+    },
+    {
+      "case": "closed_write_gate_recovery",
+      "status": "passed_fake_no_call"
+    }
+  ],
+  "failpointGate": {
+    "scopesChecked": ["Process", "User", "Machine"],
+    "runtimeEnvTestPresent": false,
+    "realDeviceTestFailpointsYesPresent": false,
+    "allowRealDeviceSideEffectsYesPresent": false,
+    "realDeviceTestRunIdPresent": false,
+    "allowClimatePowerTestYesPresent": false,
+    "invoked": false,
+    "productionRejectionExercised": false
+  },
+  "realEvidenceBoundary": {
+    "sameGoalIdleAdapterRestart": "historically_passed_not_repeated",
+    "sameGoalReadOnlyPreflight": "historically_passed_not_repeated",
+    "inFlightAdapterRestart": "blocked_unverified",
+    "inFlightRuntimeRestart": "blocked_unverified",
+    "homeAssistantOutage": "blocked_unverified",
+    "rest200WithoutStateChange": "blocked_unverified",
+    "providerStateFileCorruption": "blocked_unverified",
+    "pmsOutageTaskAuthority": "blocked_unverified"
+  },
+  "taskAndSideEffectSafety": {
+    "duplicatePhysicalSideEffectsObserved": 0,
+    "orphanBindingsObserved": 0,
+    "orphanAttemptsObserved": 0,
+    "currentRunCreatedProviderTasks": false,
+    "activeAndUncertainCounts": "not_requeried_by_G12_no_database_scope",
+    "lastSameGoalObservation": {
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "deviceState": "restored"
+    }
+  },
+  "blockers": [
+    "REAL_IN_FLIGHT_ADAPTER_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_IN_FLIGHT_RUNTIME_RESTART_RECOVERY_UNVERIFIED",
+    "REAL_HOME_ASSISTANT_OUTAGE_RECOVERY_UNVERIFIED",
+    "REAL_REST_200_WITHOUT_STATE_CHANGE_UNVERIFIED",
+    "REAL_PROVIDER_STATE_FILE_CORRUPTION_UNVERIFIED",
+    "PMS_OUTAGE_TASK_AUTHORITY_UNVERIFIED",
+    "REAL_FAULT_INJECTION_GATES_ABSENT",
+    "PRODUCTION_FAILPOINT_REJECTION_NOT_EXERCISED"
+  ],
+  "evidenceReferences": [
+    "reports/real-device-closeout/recovery-fault-evidence.json",
+    "reports/real-device-closeout/final-handoff.json",
+    "reports/real-device-preparation-continuation/full-regression.json"
+  ],
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

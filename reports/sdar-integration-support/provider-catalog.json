@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G05",
+  "status": "passed",
+  "evidenceClass": "real_live_runtime_discovery_plus_sdar_postgresql_acceptance",
+  "observedAt": "2026-08-11T05:08:37.577Z",
+  "registryLineage": {
+    "smppSourceId": "home-lab-smpp",
+    "nativeRegistryRevision": 2,
+    "nativeRegistryChecksum": "57018a96c6c5dbd9a4713a7cc4fa5ea2730af592ee53593cdb41c59ad429384c",
+    "projectionContract": "sdar-registry-v1",
+    "projectedRegistryRevision": 2,
+    "projectedRegistryChecksum": "5be22b34105129a6197679c0a48a65939f952c9a064aa2b67965191f8314fce5"
+  },
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "bindingId": "mcp-binding-ha-climate-lab",
+      "bindingRevision": 17,
+      "runtimeToolRevision": 17,
+      "runtimeAction": "refreshed",
+      "catalogRevision": "2.0.0-rc.1:17",
+      "catalogChecksum": "3e5b37b927471e676157f89f84c086d7b0ad02b64bc2c0981ca990bafd1ea6a8",
+      "availability": "available",
+      "availabilityValidUntil": "2026-08-11T06:08:37.725Z",
+      "catalogObservedAt": "2026-08-11T05:08:37.725Z",
+      "runtimeDiscoveredAt": "2026-08-11T05:08:37.782Z",
+      "runtimeValidUntil": "2026-08-11T06:08:37.782Z",
+      "tools": [
+        { "name": "climate_get_state", "taskBehavior": "synchronous_only" },
+        { "name": "climate_set_hvac_mode", "taskBehavior": "task_required" },
+        { "name": "climate_set_power", "taskBehavior": "task_required" },
+        { "name": "climate_set_temperature", "taskBehavior": "task_required" }
+      ]
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "bindingId": "mcp-binding-ha-light-lab",
+      "bindingRevision": 17,
+      "runtimeToolRevision": 17,
+      "runtimeAction": "refreshed",
+      "catalogRevision": "2.0.0-rc.1:17",
+      "catalogChecksum": "a06cde6ed4113e0a28531c7f8ed7663af3d2968fdd0c62352991a4070011cc05",
+      "availability": "available",
+      "availabilityValidUntil": "2026-08-11T06:08:37.844Z",
+      "catalogObservedAt": "2026-08-11T05:08:37.844Z",
+      "runtimeDiscoveredAt": "2026-08-11T05:08:37.892Z",
+      "runtimeValidUntil": "2026-08-11T06:08:37.892Z",
+      "tools": [
+        { "name": "light_get_state", "taskBehavior": "synchronous_only" },
+        { "name": "light_set_brightness", "taskBehavior": "task_required" },
+        { "name": "light_set_power", "taskBehavior": "task_required" }
+      ]
+    }
+  ],
+  "checks": {
+    "runtimeServerDiscover": "passed",
+    "runtimeToolsList": "passed",
+    "controlAndRuntimeRevisionAligned": "17/17 passed",
+    "sameRevisionRuntimeReuse": "revision 16 passed",
+    "oneStepRuntimeRefreshCatchup": "revision 17 passed",
+    "schemaAndTaskBehavior": "passed",
+    "catalogChecksumAndRevision": "passed",
+    "freshnessPersistedBySdar": "passed",
+    "casRebindAndDriftAcceptance": "passed",
+    "registryUsedAsToolAuthority": false
+  },
+  "availabilityEvidenceScope": "available at observation; not asserted as current liveness",
+  "companionEvidenceReferences": [
+    "skill-driven-agent-runtime/reports/sdar-smpp-integration/raw/g05-align-post-restart.redacted.json",
+    "skill-driven-agent-runtime/reports/sdar-smpp-integration/raw/g05-fresh-post-restart.redacted.json"
+  ],
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G10",
+  "status": "blocked",
+  "disposition": "deferred_by_safety",
+  "evidenceClass": "real_environment_gate_observation",
+  "observedAt": "2026-08-10T16:22:14.664Z",
+  "resourceId": "living-room-air-conditioner",
+  "realClimateControlReady": false,
+  "blocker": {
+    "code": "REAL_DEVICE_WRITE_AUTHORITY_MISSING",
+    "missingRequiredGates": [
+      "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
+      "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
+    ],
+    "climatePowerGateApplicable": false,
+    "climatePowerReason": "climate_set_power is excluded from the qualified scenario"
+  },
+  "requiredSequence": [
+    { "operation": "climate_get_state", "status": "not_run_due_to_closed_write_gate" },
+    { "operation": "climate_set_hvac_mode", "status": "not_run_due_to_closed_write_gate" },
+    { "operation": "climate_set_temperature", "status": "not_run_due_to_closed_write_gate" },
+    { "operation": "climate_get_state", "status": "not_run_due_to_closed_write_gate" }
+  ],
+  "execution": {
+    "providerTasksCreated": 0,
+    "adapterWritesCalled": 0,
+    "homeAssistantWritesCalled": 0,
+    "climateSetPowerCalled": false,
+    "physicalWritesObserved": 0,
+    "stateChanged": false,
+    "partialReportedAsComplete": false,
+    "restorationAttempted": false,
+    "restoreStatus": "not_required_no_write_occurred"
+  },
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

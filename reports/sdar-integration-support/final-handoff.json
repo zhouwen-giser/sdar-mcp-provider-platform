@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T05:49:24.670Z",
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "environment": "home-lab",
+  "sdar": {
+    "repository": "zhouwen-giser/skill-driven-agent-runtime",
+    "branch": "codex/sdar-smpp-home-lab-integration",
+    "sha": "af88761891f6204bf6625bd423f382f025f59ba3"
+  },
+  "smpp": {
+    "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+    "branch": "codex/ha-real-device-preparation",
+    "sha": "5b17f12ff7312449cc7e3376795ff24c0375b9d9"
+  },
+  "publication": {
+    "candidateDefinition": "The SHAs identify the tested implementation and frozen contract candidates. Final handoff files are published in later evidence-only commits on the same Draft PR branches.",
+    "sdarDraftPullRequest": "https://github.com/zhouwen-giser/skill-driven-agent-runtime/pull/19",
+    "smppDraftPullRequest": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/10",
+    "merged": false,
+    "mergeAuthorized": false,
+    "supportBranchRetained": true
+  },
+  "registry": {
+    "nativeRevision": 2,
+    "nativeChecksum": "57018a96c6c5dbd9a4713a7cc4fa5ea2730af592ee53593cdb41c59ad429384c",
+    "projectionChecksum": "5be22b34105129a6197679c0a48a65939f952c9a064aa2b67965191f8314fce5",
+    "smppSourceId": "home-lab-smpp"
+  },
+  "providers": [
+    {
+      "providerId": "ha-climate-lab",
+      "serverId": "runtime-3ffb9721d7ae-0",
+      "bindingId": "mcp-binding-ha-climate-lab",
+      "catalogRevision": "2.0.0-rc.1:17",
+      "catalogChecksum": "3e5b37b927471e676157f89f84c086d7b0ad02b64bc2c0981ca990bafd1ea6a8"
+    },
+    {
+      "providerId": "ha-light-lab",
+      "serverId": "runtime-8e6e163f0b32-0",
+      "bindingId": "mcp-binding-ha-light-lab",
+      "catalogRevision": "2.0.0-rc.1:17",
+      "catalogChecksum": "a06cde6ed4113e0a28531c7f8ed7663af3d2968fdd0c62352991a4070011cc05"
+    }
+  ],
+  "availabilityEvidenceScope": "Provider availability was verified at the recorded G05 observation and G07 admission; this handoff does not assert current post-expiry liveness.",
+  "allowedResources": ["living-room-main-light", "living-room-air-conditioner"],
+  "blockedResources": [
+    {
+      "resourceId": "living-room-aux-light",
+      "disposition": "unverified_optional",
+      "reason": "Excluded from the final qualified allowlist because it was not Required and was not exercised by the final G07 execution."
+    }
+  ],
+  "allowedOperations": ["light_get_state", "climate_get_state"],
+  "blockedOperations": [
+    {
+      "operation": "light_set_power",
+      "disposition": "deferred_by_safety",
+      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+    },
+    {
+      "operation": "climate_set_hvac_mode",
+      "disposition": "deferred_by_safety",
+      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+    },
+    {
+      "operation": "climate_set_temperature",
+      "disposition": "deferred_by_safety",
+      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+    },
+    {
+      "operation": "light_set_brightness",
+      "disposition": "unverified_optional",
+      "reason": "Discovered in the provider catalog but not Required and not qualified by this Goal."
+    },
+    {
+      "operation": "climate_set_power",
+      "disposition": "not_required_excluded",
+      "reason": "Excluded from G10/G11; the dedicated climate-power gate was absent and no invocation occurred."
+    }
+  ],
+  "activeSdarTasks": 0,
+  "activeSmppTasks": 0,
+  "uncertainSdarTasks": 0,
+  "uncertainSmppTasks": 0,
+  "deviceRestoreStatus": "RESTORED",
+  "readiness": {
+    "projectionContractReady": true,
+    "registryIntegrationReady": true,
+    "providerBindingReady": true,
+    "capabilityGovernanceReady": true,
+    "readOnlyExecutionPlaneReady": true,
+    "a2aReadOnlyReady": false,
+    "realLightControlReady": false,
+    "realClimateControlReady": false,
+    "fullScenarioReady": false,
+    "resilienceIntegrationReady": false,
+    "crossRepositoryIntegrationReady": false
+  },
+  "safety": {
+    "writeAuthorityOpen": false,
+    "physicalDeviceWritesAttempted": 0,
+    "physicalDeviceWritesObserved": 0,
+    "restoreDisposition": "not_required_no_write_occurred"
+  },
+  "remainingBlockers": {
+    "code": [
+      {
+        "code": "A2A_TASK_UNDERSTANDING_NOT_COMPOSED",
+        "detail": "The standard Runtime entrypoint does not compose Task Understanding."
+      },
+      {
+        "code": "SDAR_PHASE13_RUNTIME_P95_REGRESSION",
+        "actualPercent": 39.981096754646735,
+        "maximumPercent": 10,
+        "rootCauseEstablished": false
+      }
+    ],
+    "external": [
+      {
+        "code": "A2A_MODEL_PROVIDER_AND_ROUTE_UNCONFIGURED",
+        "enabledModelProviderCount": 0,
+        "modelRouteCount": 0
+      },
+      {
+        "code": "REAL_DEVICE_SIDE_EFFECT_GATES_ABSENT",
+        "missingRequiredGates": [
+          "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
+          "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
+        ]
+      },
+      {
+        "code": "REAL_IN_FLIGHT_AND_FAULT_RECOVERY_UNVERIFIED",
+        "unverifiedClasses": [
+          "real in-flight SDAR remote-task restart",
+          "real in-flight SMPP Runtime restart",
+          "real in-flight Adapter restart",
+          "Home Assistant outage",
+          "REST 200 without observed state change",
+          "Provider state-file corruption",
+          "PMS outage task authority",
+          "production failpoint rejection"
+        ]
+      }
+    ]
+  },
+  "crossRepositoryIntegrationReady": false
+}

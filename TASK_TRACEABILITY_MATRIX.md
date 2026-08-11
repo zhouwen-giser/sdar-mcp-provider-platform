@@ -24,3 +24,23 @@ Phase R0 已完成真实仓库核验。持续维护的详细矩阵位于
 | RQ-CONFORMANCE | Profile 37-39 | R8-R9 | `packages/conformance-testkit` | P0-P4/cross-language | VERIFIED (R8 CI) |
 | Deployment/operations | Task package R9 | R9 | `Dockerfile`, Compose, `deploy/kubernetes`, operations docs | container/manifest/health | VERIFIED (R9 CI) |
 | Release integrity | Task package DoD | R9 | root scripts, CI, SBOM, changelog, reports | `pnpm verify`, audit, capacity | VERIFIED (READY PR / RC REF) |
+
+## SDAR × SMPP Home-Lab Integration 支持追踪（2026-08-11）
+
+本附录只追踪 Goal Run `019fca75-f48a-7780-ac5e-942503c6690e` 的当前候选树，不改变上表历史
+Runtime V1.0 精确提交证据。`VERIFIED` 表示本 Goal 有对应真实/合同证据；`BLOCKED` 与
+`DEFERRED_BY_SAFETY` 均不得提升为完成。
+
+| Requirement | Phase | SMPP authority/scope | Evidence | Status |
+| --- | --- | --- | --- | --- |
+| Registry prerequisite and projection | G01-G03 | Native Registry remains authoritative; projection is read-only, byte-locked and checksum-compatible | `reports/sdar-integration-support/projection-contract.json`; `projection-http.json`; native protected-file diff empty | VERIFIED |
+| SDAR Source support | G04 | Publish exact Climate/Light Candidates and native lineage; Registry creates no Tool/Task facts | `reports/sdar-integration-support/registry-lineage.json`; final post-restart Source replay | VERIFIED |
+| Binding and live Catalog support | G05 | PMS/Runtime endpoints expose exact Climate 4 / Light 3 Tools; Binding/Runtime revisions converge at 17 | `reports/sdar-integration-support/provider-catalog.json`; SDAR Binding/Catalog reports | VERIFIED |
+| Governed read-only support | G06-G07 | Exactly five capabilities/Skills at admission; Climate/Light read-only calls only; no physical write | SDAR `capability-map.json`, `skill-map.json`, `readonly-execution.json`; same-run replay | VERIFIED |
+| A2A read-only | G08 | SMPP received no call because SDAR failed closed before request submission | SDAR `a2a-readonly.json`: no model provider/routes and no standard Task Understanding composition | BLOCKED (SDAR) |
+| Main-light, climate and composite writes | G09-G11 | Required physical-write gates absent; historical Home Assistant preparation is not promoted into this Goal | `reports/sdar-integration-support/light-control.json`; `climate-control.json`; no physical write attempted | DEFERRED_BY_SAFETY |
+| Real resilience integration | G12 | Controlled/LKG/Adapter coverage exists; real in-flight restart, HA fault and corrupt-state cases absent | `reports/sdar-integration-support/recovery.json` | BLOCKED |
+| Full cross-repository verification | G13 | SMPP candidate platform gates passed, but overall acceptance also requires the authoritative SDAR full gate | SDAR `reports/verification/summary.json`: Phase 13 Runtime P95 regression `39.981096754646735% > 10%` | BLOCKED (SDAR) |
+| Task/device safety closeout | closeout | No physical write; no active or uncertain Goal Task; device state unchanged | SDAR `0/0`; SMPP `0/0`; device restore `RESTORED` | VERIFIED |
+| Independent Draft publication | G14-G15 | Retained support branch and SDAR branch published independently; no merge, tag or release | SMPP PR #10 at `5b17f12`; SDAR PR #19 at `af887618`; final handoffs | VERIFIED (BLOCKED DRAFTS) |
+| Overall readiness | G00-G15 | All Required readiness fields must be true | `crossRepositoryIntegrationReady=false`; `execplans/EP-SMPP-SDAR-HOME-LAB-INTEGRATION-SUPPORT.md` | BLOCKED |
