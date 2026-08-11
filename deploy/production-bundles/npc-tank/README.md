@@ -42,7 +42,7 @@ Compose 策略校验会确认：
 - 与交付镜像 CPU 架构匹配的 Linux 主机；`init.sh` 可由 UID `1000` 或 root 执行，容器以 UID `1000` 运行
 - Docker Engine 与 Docker Compose v2
 - Bash、OpenSSL（仅用于随机密钥）、`sha256sum`、`stat`、`awk`
-- 足够容纳离线镜像、四个持久卷和运行日志的磁盘空间
+- 足够容纳离线镜像、五个持久卷和运行日志的磁盘空间
 
 镜像已包含在交付包中，部署过程不需要访问镜像仓库或软件包仓库。
 

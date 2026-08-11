@@ -427,7 +427,7 @@ services:
     init: true
     read_only: true
     restart: "no"
-    command: ["node", "/opt/sdar-bundle/pms-seed.mjs"]
+    command: ["node", "/app/pms-seed.mjs"]
     environment:
       PMS_SEED_API_BASE_URL: http://pms-api:8090
       PMS_SEED_ADMIN_TOKEN_FILE: /run/secrets/pms_management_admin_token
@@ -440,7 +440,7 @@ services:
     volumes:
       - type: bind
         source: ./bin/pms-seed.mjs
-        target: /opt/sdar-bundle/pms-seed.mjs
+        target: /app/pms-seed.mjs
         read_only: true
       - type: bind
         source: ./secrets/pms/pms-database-url

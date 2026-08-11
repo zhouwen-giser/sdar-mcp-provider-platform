@@ -14,6 +14,7 @@ import {
   assertArchivePathSafety,
   assertNoBuildFields,
   assertNoRealEnvironmentEntries,
+  bundleReadmeText,
   imageLoaderScript,
   parseBuilderArguments,
   validateComposeDocument,
@@ -70,6 +71,24 @@ test("catalog locks both standalone products to the strict intranet plaintext pr
   }
 });
 
+test("bundle README reports the real-resource status rather than the aggregate qualification", () => {
+  for (const productId of PRODUCT_IDS) {
+    const product = productCatalog(productId);
+    const readme = bundleReadmeText(product, {
+      source: { revision },
+      qualification: {
+        status: product.qualificationStatus,
+        realResourceStatus: product.providerPackage.realResourceStatus,
+      },
+    });
+    assert.match(readme, /inherited real-resource status is `pending`/);
+    assert.equal(
+      readme.includes("real-resource status is `" + product.qualificationStatus + "`"),
+      false,
+    );
+  }
+});
+
 for (const productId of PRODUCT_IDS) {
   test(`${productId} Compose is offline, complete, and explicitly plaintext`, async () => {
     const inventory = inventories[productId];
@@ -95,6 +114,8 @@ for (const productId of PRODUCT_IDS) {
     assert.doesNotMatch(compose, /TLS_MODE:\s*(?:"?required"?)/);
     assert.doesNotMatch(compose, /TLS_(?:CA|CERT|KEY)_PATH|NODE_EXTRA_CA_CERTS/);
     assert.doesNotMatch(compose, /\.crt\b|\.pem\b|internal-pki/i);
+    assert.match(compose, /command:\s*\["node",\s*"\/app\/pms-seed\.mjs"\]/);
+    assert.match(compose, /target:\s*\/app\/pms-seed\.mjs/);
 
     const example = await readFile(join(bundleDirectory, ".env.example"), "utf8");
     assert.match(example, /ALLOW_INSECURE_INTERNAL_TRANSPORT=true/);
@@ -103,6 +124,12 @@ for (const productId of PRODUCT_IDS) {
     assert.match(example, /PMS_WEB_BIND_ADDRESS=0\.0\.0\.0/);
     assert.doesNotMatch(example, /https:\/\/|mqtts:\/\/|wss:\/\//);
     assert.doesNotMatch(example, /(?:TLS|HEADERS|PASSWORD)_(?:CA_|CERT_|KEY_)?FILE=/);
+
+    if (productId === "npc-tank") {
+      const deploymentReadme = await readFile(join(bundleDirectory, "README.md"), "utf8");
+      assert.match(deploymentReadme, /五个持久卷/);
+      assert.doesNotMatch(deploymentReadme, /四个持久卷/);
+    }
 
     const upScript = await readFile(join(bundleDirectory, "bin", "up.sh"), "utf8");
     assert.doesNotMatch(
