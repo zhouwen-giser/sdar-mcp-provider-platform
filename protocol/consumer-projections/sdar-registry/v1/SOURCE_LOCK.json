@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "contract": "sdar-registry-v1",
+  "sdar": {
+    "repository": "skill-driven-agent-runtime",
+    "commit": "a9957c82c17ca01e77528f3817c03d86224aaf88",
+    "algorithmFiles": [
+      {
+        "path": "packages/node-control-domain/src/configuration-revision.ts",
+        "sha256": "1dd13ece28842a01b98dc37d60900190095076fb212bb135e830299984f0e990"
+      },
+      {
+        "path": "packages/node-control-domain/src/smpp-registry.ts",
+        "sha256": "ae90e55cccd7e7263d7442c1179ceafc6c59757c84ebec5544260266c7487448"
+      },
+      {
+        "path": "packages/node-control-domain/test/smpp-registry.unit.test.ts",
+        "sha256": "dbdb97b3c556cb4bb84808c4a0f69a27ce1be510327193b75227dc35f3bd5d66"
+      }
+    ]
+  },
+  "smppNativeRegistry": {
+    "repository": "sdar-mcp-provider-platform",
+    "baselineCommit": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+    "authorityFiles": [
+      {
+        "path": "packages/registry-snapshot/src/model.ts",
+        "sha256": "7e59ea8486f4c4d669853b5c8a00daaa74d74910cb9f4ddf6f4ee88f2e794083"
+      },
+      {
+        "path": "packages/registry-snapshot/src/builder.ts",
+        "sha256": "ac4d3eeaaa662b5a0d4b0cc46b42a43fe568879a2c7c9b6165c4eb5d6af8949b"
+      },
+      {
+        "path": "packages/pms-persistence-postgres/src/registry-snapshot-repository.ts",
+        "sha256": "5aa606e442e516f5871ec86d40684a1f846de1634eef09d65f4c76810bd4d81a"
+      },
+      {
+        "path": "apps/pms-api/src/registry-routes.ts",
+        "sha256": "d5321f69cd1685607a605e2477beb4e0a393fe9050ebe6feafe7bf6f2f1b0bf0"
+      },
+      {
+        "path": "migrations/pms/008_registry_snapshot.sql",
+        "sha256": "98097e7b8ddc1ea51e006a6e8f8b1671f453f07118949591d577ec1347e0cc73"
+      }
+    ]
+  }
+}

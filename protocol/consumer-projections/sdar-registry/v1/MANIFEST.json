@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "contract": "sdar-registry-v1",
+  "hashAlgorithm": "sha256",
+  "bundleAlgorithm": "sha256 of UTF-8 path:sha256\\n records sorted by path with localeCompare",
+  "projectionSchemaSha256": "425cd331f7ee7e4294919ea307f05edb222b99fe5bbc9d320ae71959ed6ab34e",
+  "bundleSha256": "6668573cae45954bc1fc008243a7684949ff936c1cb8acf91512825a0d5f1e9e",
+  "files": [
+    {
+      "path": "checksum-vectors.json",
+      "sha256": "b7d86b6cc609850a9c8a7450bd42c0c5fa0c892d424bcf4680b550aff90f74c1"
+    },
+    {
+      "path": "CONTRACT.md",
+      "sha256": "d31cfc3e635524da82219a1f5b19c152e16fcf75aed86ad0c72c3fe595d1e633"
+    },
+    {
+      "path": "error-catalog.json",
+      "sha256": "93aeef3dd6f66ca98730748511110311ca7fcbe792d4c1cc4fd4bdc671a5fce3"
+    },
+    {
+      "path": "projection.schema.json",
+      "sha256": "425cd331f7ee7e4294919ea307f05edb222b99fe5bbc9d320ae71959ed6ab34e"
+    },
+    {
+      "path": "SOURCE_LOCK.json",
+      "sha256": "1d1d8b02848a613421c0b9dad681121cf090fb7b6010204e6afb12e9961f9be9"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "schemaVersion": "1.0",
+  "algorithm": "SDAR hashConfigurationRequest SHA-256 canonical JSON @ a9957c82c17ca01e77528f3817c03d86224aaf88",
+  "vectors": [
+    {
+      "id": "empty-provider-list",
+      "description": "An empty native Registry projection remains deterministic",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": []
+      },
+      "expectedChecksum": "3a8e6622e50cfe260783055eb973285f8ce831cd274688d542239112e9e0e212"
+    },
+    {
+      "id": "single-provider",
+      "description": "One strict provider candidate",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "http://127.0.0.1:18082/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          }
+        ]
+      },
+      "expectedChecksum": "966fe8ebcfaf1252108476600168551baf8127d5ac8d28d7b87dcff1cbee8687"
+    },
+    {
+      "id": "two-providers-unordered-input",
+      "description": "Candidate input order does not affect the composite-identity order",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "http://127.0.0.1:18082/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          },
+          {
+            "externalProviderId": "ha-climate-lab",
+            "externalServerId": "ha-climate-server",
+            "serverEndpoint": "http://127.0.0.1:18081/mcp",
+            "catalogRevision": "3",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          }
+        ]
+      },
+      "expectedChecksum": "f62e57954c291375f63d5b418fa4bd6053dee82366a85c50b08a6e616dd7bbed"
+    },
+    {
+      "id": "labels-reordered",
+      "description": "Label key insertion order does not affect canonical JSON",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "http://127.0.0.1:18082/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "protocolMode": "frozen_v1",
+              "environment": "home-lab"
+            }
+          }
+        ]
+      },
+      "expectedChecksum": "966fe8ebcfaf1252108476600168551baf8127d5ac8d28d7b87dcff1cbee8687",
+      "sameChecksumAs": "single-provider"
+    },
+    {
+      "id": "catalog-revision-number-to-string",
+      "description": "Native catalogRevision number is projected as a string before hashing",
+      "mappingInput": {
+        "catalogRevision": 7
+      },
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "http://127.0.0.1:18082/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          }
+        ]
+      },
+      "expectedProjectedCatalogRevision": "7",
+      "expectedChecksum": "966fe8ebcfaf1252108476600168551baf8127d5ac8d28d7b87dcff1cbee8687",
+      "sameChecksumAs": "single-provider"
+    },
+    {
+      "id": "different-smpp-source-id",
+      "description": "smppSourceId participates in the checksum",
+      "input": {
+        "smppSourceId": "secondary-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": []
+      },
+      "expectedChecksum": "d313bbcf907c4f6ae5c0210ee8dcfe01441f0bb97e875b48ef2331dc342d628b",
+      "differentChecksumFrom": "empty-provider-list"
+    },
+    {
+      "id": "different-revision",
+      "description": "Native revision participates in the checksum",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 5,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": []
+      },
+      "expectedChecksum": "603c11a1f44b0f11f37a0af5bbc2701d0e48476c5a843c937df53f5f2de66e8b",
+      "differentChecksumFrom": "empty-provider-list"
+    },
+    {
+      "id": "different-expires-at",
+      "description": "TTL-derived expiresAt participates in the checksum",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-08-05T00:00:00.000Z",
+        "candidates": []
+      },
+      "expectedChecksum": "39111cc1cb6f9fbb91501843d0385d31df132afa1ab97f4d4f0607841b2f13a9",
+      "differentChecksumFrom": "empty-provider-list"
+    },
+    {
+      "id": "normalized-endpoint",
+      "description": "Fragment and one trailing slash are removed before hashing",
+      "mappingInput": {
+        "effectiveEndpoint": "https://runtime.example/mcp/#ignored"
+      },
+      "expectedNormalizedEndpoint": "https://runtime.example/mcp",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "https://runtime.example/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          }
+        ]
+      },
+      "expectedChecksum": "554e39fb3ef778f1ae9507c6cf9224aa886927c303a441a9f4d162e92126d6aa"
+    },
+    {
+      "id": "credential-bearing-endpoint-rejected",
+      "description": "URL userinfo is rejected and never enters a projection",
+      "input": {
+        "smppSourceId": "home-lab-smpp",
+        "revision": 4,
+        "generatedAt": "2026-08-04T00:00:00.000Z",
+        "expiresAt": "2026-09-03T00:00:00.000Z",
+        "candidates": [
+          {
+            "externalProviderId": "ha-light-lab",
+            "externalServerId": "ha-light-server",
+            "serverEndpoint": "https://device-user:device-secret@runtime.example/mcp",
+            "catalogRevision": "7",
+            "labels": {
+              "environment": "home-lab",
+              "protocolMode": "frozen_v1"
+            }
+          }
+        ]
+      },
+      "expectedErrorCode": "SDAR_REGISTRY_PROJECTION_ENDPOINT_INVALID"
+    }
+  ]
+}
