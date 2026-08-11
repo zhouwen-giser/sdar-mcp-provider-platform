@@ -624,6 +624,10 @@ export async function validateStagedBundle(bundleRoot, options = {}) {
     revision: manifest.source.revision,
     postgres,
   });
+  assertComposeRunOptionCompatibility(
+    await readFile(join(deployRoot, "bin/up.sh"), "utf8"),
+    "PRODUCTION_BUNDLE_COMPOSE_RUN_OPTION_UNSUPPORTED",
+  );
   await assertNoForbiddenBundlePaths(root);
   await assertNoSecretMaterial(root);
   await assertChecksums(root);
@@ -745,6 +749,16 @@ export function assertNoBuildFields(value, path = "") {
     if (key === "build") throw coded("PRODUCTION_BUNDLE_COMPOSE_BUILD_FIELD_FORBIDDEN", childPath);
     assertNoBuildFields(child, childPath);
   }
+}
+
+export function assertComposeRunOptionCompatibility(source, code) {
+  const logicalCommands = source.replace(/\\\r?\n\s*/g, " ");
+  if (
+    /^\s*(?:(?:docker\s+)?compose|npc_compose)\b[^\n]*\brun\b[^\n]*--(?:pull|no-build)\b/m.test(
+      logicalCommands,
+    )
+  )
+    throw coded(code);
 }
 
 export function assertArchivePathSafety(entries, code) {

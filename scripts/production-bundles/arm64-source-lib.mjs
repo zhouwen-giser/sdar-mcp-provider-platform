@@ -28,6 +28,7 @@ import {
 import {
   assertArchivePathSafety,
   assertCleanCommittedHead,
+  assertComposeRunOptionCompatibility,
   assertNoBuildFields,
   assertNoRealEnvironmentEntries,
   coded,
@@ -558,6 +559,7 @@ export async function validateArm64SourceStaged(bundleRoot, options = {}) {
   const up = await readFile(join(deployRoot, "bin/up.sh"), "utf8");
   if (!up.includes("build-images.sh") || up.includes("load-images.sh"))
     throw coded("ARM64_SOURCE_UP_SCRIPT_INVALID");
+  assertComposeRunOptionCompatibility(up, "ARM64_SOURCE_COMPOSE_RUN_OPTION_UNSUPPORTED");
   const readme = await readFile(join(deployRoot, "README.md"), "utf8");
   if (
     !readme.includes("ARM64") ||

@@ -12,6 +12,7 @@ import {
 import {
   ProductionBundleError,
   assertArchivePathSafety,
+  assertComposeRunOptionCompatibility,
   assertNoBuildFields,
   assertNoRealEnvironmentEntries,
   bundleReadmeText,
@@ -132,10 +133,31 @@ for (const productId of PRODUCT_IDS) {
     }
 
     const upScript = await readFile(join(bundleDirectory, "bin", "up.sh"), "utf8");
+    assert.match(
+      upScript,
+      /^\s*(?:compose|npc_compose)\s+up\b[^\n]*--pull\s+never\b/m,
+      `${productId}/up.sh must keep the persistent-service no-pull policy`,
+    );
     assert.doesNotMatch(
       upScript,
       /\brun\b[^\n]*--no-build\b/,
       `${productId}/up.sh must only use Compose run options supported by Compose v2`,
+    );
+    assert.doesNotMatch(
+      upScript,
+      /\brun\b[^\n]*--pull\b/,
+      `${productId}/up.sh must not pass the unsupported --pull option to Compose run`,
+    );
+
+    const imagePreflight =
+      productId === "ugv"
+        ? upScript.indexOf('docker image inspect "$image"')
+        : upScript.indexOf("npc_verify_images");
+    const persistentStartup = upScript.search(/^\s*(?:compose|npc_compose)\s+up\b/m);
+    assert.ok(imagePreflight >= 0, `${productId}/up.sh must preflight its local images`);
+    assert.ok(
+      persistentStartup > imagePreflight,
+      `${productId}/up.sh must preflight images before starting persistent services`,
     );
 
     for (const script of ["init.sh", "up.sh", "down.sh", "status.sh", "smoke.sh"]) {
@@ -178,6 +200,24 @@ test("argument and archive safety checks fail closed", () => {
       error instanceof ProductionBundleError &&
       error.code === "PRODUCTION_BUNDLE_COMPOSE_BUILD_FIELD_FORBIDDEN",
   );
+});
+
+test("bundle lifecycle verifier rejects Compose run flags unavailable on older v2 releases", () => {
+  assert.doesNotThrow(() =>
+    assertComposeRunOptionCompatibility(
+      "compose --profile seed run --rm --no-deps pms-seed\ncompose up --pull never",
+      "UNSUPPORTED",
+    ),
+  );
+  for (const command of [
+    "compose --profile seed run --rm --pull never pms-seed",
+    "npc_compose --profile seed run \\\n      --no-build --rm pms-seed",
+  ]) {
+    assert.throws(
+      () => assertComposeRunOptionCompatibility(command, "UNSUPPORTED"),
+      (error) => error instanceof ProductionBundleError && error.code === "UNSUPPORTED",
+    );
+  }
 });
 
 test("generated offline image loader is valid Bash and verifies immutable image metadata", () => {

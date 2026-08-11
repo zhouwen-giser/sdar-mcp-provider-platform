@@ -27,7 +27,7 @@ npc_compose up --detach --no-build --pull never --wait --wait-timeout "$wait_tim
   "${services[@]}"
 
 printf '%s\n' 'Applying the idempotent vendor-managed NPC package/provider/resource seed...'
-npc_compose --profile seed run --rm --no-deps --pull never pms-seed
+npc_compose --profile seed run --rm --no-deps pms-seed
 
 bash "$bin_dir/smoke.sh"
 printf 'PASS: NPC internal-network production bundle is ready; PMS Web is available at http://%s:%s.\n' \
