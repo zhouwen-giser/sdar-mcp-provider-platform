@@ -19,7 +19,8 @@ import type { NormalizedLightState } from "../apps/home-assistant-light-provider
 import { reserveSideEffectBudget } from "./real-device-side-effect-budget.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const localRoot = resolve(root, ".local/ha-real-device");
+const localStateRoot = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(root, ".local"));
+const localRoot = resolve(localStateRoot, "ha-real-device");
 const resourcesPath = resolve(localRoot, "resources.local.json");
 const tokenPath = resolve(localRoot, "token.txt");
 const originalStatePath = resolve(localRoot, "original-state.json");

@@ -27,6 +27,7 @@ describe("PMS API bootstrap config", () => {
     expect(config.host).toBe("127.0.0.1");
     expect(config.port).toBe(8090);
     expect(config.runtimeHeartbeatTtlMs).toBe(30_000);
+    expect(config.sdarRegistryProjectionTtlSeconds).toBe(2_592_000);
     expect(config.databaseUrl).toBe("postgresql://127.0.0.1:5432/pms_runtime");
     expect(config.management.readers).toMatchObject([
       {
@@ -60,6 +61,35 @@ describe("PMS API bootstrap config", () => {
       protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
       tokenDigest: hashSecretToken("runtime-registration-token"),
     });
+  });
+
+  it("loads and validates the fixed SDAR Registry projection TTL", async () => {
+    const fixture = await createFixture({
+      runtimeVersion: "2.0.0",
+      databaseUrl: "postgresql://127.0.0.1:5432/pms_runtime",
+      protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+    });
+
+    await expect(
+      loadPmsApiBootstrapConfig(
+        baseEnvironment(fixture, { SDAR_REGISTRY_PROJECTION_TTL_SECONDS: "3600" }),
+      ),
+    ).resolves.toMatchObject({ sdarRegistryProjectionTtlSeconds: 3_600 });
+    await expect(
+      loadPmsApiBootstrapConfig(
+        baseEnvironment(fixture, { SDAR_REGISTRY_PROJECTION_TTL_SECONDS: "2592001" }),
+      ),
+    ).resolves.toMatchObject({ sdarRegistryProjectionTtlSeconds: 2_592_001 });
+
+    for (const value of ["0", "9007199254740992", "1.5", "3600seconds", ""]) {
+      await expect(
+        loadPmsApiBootstrapConfig(
+          baseEnvironment(fixture, { SDAR_REGISTRY_PROJECTION_TTL_SECONDS: value }),
+        ),
+      ).rejects.toMatchObject({
+        code: "PMS_API_SDAR_REGISTRY_PROJECTION_TTL_SECONDS_INVALID",
+      });
+    }
   });
 
   it("rejects disallowed inline secret environment variables", async () => {

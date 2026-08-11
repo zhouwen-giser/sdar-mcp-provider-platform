@@ -2,6 +2,7 @@ import * as crypto from "node:crypto";
 import { lstat, readFile, stat } from "node:fs/promises";
 import { dirname, isAbsolute } from "node:path";
 import type { PmsApiRole } from "./authorization.js";
+import { SDAR_REGISTRY_PROJECTION_TTL_SECONDS_DEFAULT } from "./sdar-registry-projection.js";
 
 export const PMS_API_FROZEN_PROTOCOL_VERSION = "2026-07-28";
 
@@ -48,6 +49,7 @@ export type PmsApiBootstrapErrorCode =
   | "PMS_API_RUNTIME_CREDENTIAL_FILE_NOT_CONFIGURED"
   | "PMS_API_RUNTIME_CREDENTIAL_FILE_INVALID"
   | "PMS_API_RUNTIME_HEARTBEAT_TTL_MS_INVALID"
+  | "PMS_API_SDAR_REGISTRY_PROJECTION_TTL_SECONDS_INVALID"
   | "PMS_API_CREDENTIAL_PATH_NOT_ABSOLUTE"
   | "PMS_API_CREDENTIAL_PATH_NOT_FILE"
   | "PMS_API_CREDENTIAL_PATH_IS_SYMLINK"
@@ -118,6 +120,7 @@ export interface PmsApiBootstrapConfig {
   readonly port: number;
   readonly databaseUrl: string;
   readonly runtimeHeartbeatTtlMs: number;
+  readonly sdarRegistryProjectionTtlSeconds: number;
   readonly managementCredentialFile: string;
   readonly runtimeCredentialFile: string;
   readonly management: PmsManagementCredentials;
@@ -143,6 +146,9 @@ export async function loadPmsApiBootstrapConfig(
   const host = parseHost(environment.PMS_API_HOST);
   const port = parsePort(environment.PMS_API_PORT);
   const runtimeHeartbeatTtlMs = parseHeartbeatTtl(environment.PMS_API_RUNTIME_HEARTBEAT_TTL_MS);
+  const sdarRegistryProjectionTtlSeconds = parseSdarRegistryProjectionTtl(
+    environment.SDAR_REGISTRY_PROJECTION_TTL_SECONDS,
+  );
 
   const databaseUrlFile = readRequiredAbsolutePath(
     environment.PMS_DATABASE_URL_FILE,
@@ -169,6 +175,7 @@ export async function loadPmsApiBootstrapConfig(
     port,
     databaseUrl,
     runtimeHeartbeatTtlMs,
+    sdarRegistryProjectionTtlSeconds,
     managementCredentialFile,
     runtimeCredentialFile,
     management,
@@ -196,6 +203,19 @@ function parseHeartbeatTtl(raw: string | undefined): number {
   const value = Number.parseInt(raw ?? String(PMS_API_RUNTIME_HEARTBEAT_TTL_MS_DEFAULT), 10);
   if (!Number.isSafeInteger(value) || value < 1_000 || value > 300_000) {
     throw new PmsApiBootstrapError("PMS_API_RUNTIME_HEARTBEAT_TTL_MS_INVALID");
+  }
+  return value;
+}
+
+function parseSdarRegistryProjectionTtl(raw: string | undefined): number {
+  const normalized = raw?.trim();
+  if (normalized !== undefined && !/^[1-9][0-9]*$/.test(normalized)) {
+    throw new PmsApiBootstrapError("PMS_API_SDAR_REGISTRY_PROJECTION_TTL_SECONDS_INVALID");
+  }
+  const value =
+    normalized === undefined ? SDAR_REGISTRY_PROJECTION_TTL_SECONDS_DEFAULT : Number(normalized);
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw new PmsApiBootstrapError("PMS_API_SDAR_REGISTRY_PROJECTION_TTL_SECONDS_INVALID");
   }
   return value;
 }

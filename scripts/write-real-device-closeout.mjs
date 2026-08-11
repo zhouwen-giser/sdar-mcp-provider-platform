@@ -13,6 +13,8 @@ import {
 } from "./real-device-closeout-lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const localStateRoot = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(root, ".local"));
+const haRealDeviceRoot = resolve(localStateRoot, "ha-real-device");
 const sourceRoot = resolve(root, "reports/real-device-preparation");
 const continuationRoot = resolve(root, "reports/real-device-preparation-continuation");
 const closeoutRoot = resolve(root, "reports/real-device-closeout");
@@ -943,9 +945,9 @@ async function scanReports() {
   const files = unique([...reportFiles, ...continuationFiles, ...closeoutFiles]).filter(
     (file) => !file.endsWith("verification-run.json"),
   );
-  const token = (await readFile(resolve(root, ".local/ha-real-device/token.txt"), "utf8")).trim();
+  const token = (await readFile(resolve(haRealDeviceRoot, "token.txt"), "utf8")).trim();
   const entityIds = JSON.parse(
-    await readFile(resolve(root, ".local/ha-real-device/resources.local.json"), "utf8"),
+    await readFile(resolve(haRealDeviceRoot, "resources.local.json"), "utf8"),
   );
   const entityValues = [
     entityIds.climate?.entityId,

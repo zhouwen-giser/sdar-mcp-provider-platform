@@ -6,7 +6,11 @@ import { contract } from "./lib.mjs";
 
 const input = path.join(contract, "openapi.yaml");
 const config = path.join(contract, "redocly.yaml");
-const executable = path.join(process.cwd(), "node_modules/.bin/redocly");
+const windows = process.platform === "win32";
+const executable = path.join(
+  process.cwd(),
+  `node_modules/.bin/${windows ? "redocly.cmd" : "redocly"}`,
+);
 const outputs = [
   [path.join(contract, "dist/openapi.bundle.json"), "json", false],
   [path.join(contract, "dist/openapi.bundle.yaml"), "yaml", false],
@@ -28,8 +32,9 @@ for (const [output, extension, dereferenced] of outputs) {
       "--config",
       config,
     ],
-    { stdio: "inherit" },
+    { stdio: "inherit", shell: windows },
   );
+  if (result.error !== undefined) console.error(result.error);
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
