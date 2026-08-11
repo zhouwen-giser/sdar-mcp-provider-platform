@@ -47,6 +47,70 @@ describe("DatabaseProfile and SecretRef", () => {
     expect(colon).not.toEqual(dash);
   });
 
+  it("accepts an exact safe database override only for preexisting databases", () => {
+    const create = (databaseName: string, databaseMode: "preexisting" | "provisioned") =>
+      createDatabaseProfile({
+        profileId: "database-profile-1",
+        providerId: providerId("provider-1"),
+        environment: environmentId("home-lab"),
+        clusterRef: "postgres-integration",
+        host: "127.0.0.1",
+        databaseMode,
+        databaseName,
+        adminSecretRef: secretRef("vault/postgres/provisioner"),
+        runtimeSecretRef: secretRef("vault/runtime/provider-1"),
+      });
+
+    const climate = create("smpp_climate_runtime_integration", "preexisting");
+    expect(climate.databaseName).toBe("smpp_climate_runtime_integration");
+    expect(climate.runtimeRoleName).toBe("smpp_climate_runtime_integration_app");
+    expect(create("smpp_climate_runtime_integration", "preexisting")).toEqual(climate);
+    expect(() => create("smpp_climate_runtime_integration", "provisioned")).toThrow(
+      expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }),
+    );
+  });
+
+  it.each([
+    "Smpp_climate_runtime_integration",
+    "smpp-climate-runtime-integration",
+    "1_smpp_climate_runtime_integration",
+    "smpp_climate_runtime_integration;drop_database",
+    "a".repeat(64),
+  ])("rejects an unsafe preexisting database identifier: %s", (databaseName) => {
+    expect(() =>
+      createDatabaseProfile({
+        profileId: "database-profile-1",
+        providerId: providerId("provider-1"),
+        environment: environmentId("home-lab"),
+        clusterRef: "postgres-integration",
+        host: "127.0.0.1",
+        databaseMode: "preexisting",
+        databaseName,
+        adminSecretRef: secretRef("vault/postgres/provisioner"),
+        runtimeSecretRef: secretRef("vault/runtime/provider-1"),
+      }),
+    ).toThrow(expect.objectContaining({ code: "INVALID_DOMAIN_VALUE" }));
+  });
+
+  it("derives a deterministic safe runtime role for a maximum-length database name", () => {
+    const databaseName = `a${"b".repeat(62)}`;
+    const profile = createDatabaseProfile({
+      profileId: "database-profile-1",
+      providerId: providerId("provider-1"),
+      environment: environmentId("home-lab"),
+      clusterRef: "postgres-integration",
+      host: "127.0.0.1",
+      databaseMode: "preexisting",
+      databaseName,
+      adminSecretRef: secretRef("vault/postgres/provisioner"),
+      runtimeSecretRef: secretRef("vault/runtime/provider-1"),
+    });
+
+    expect(profile.databaseName).toBe(databaseName);
+    expect(profile.runtimeRoleName).toMatch(/^[a-z][a-z0-9_]{0,62}$/);
+    expect(profile.runtimeRoleName).toHaveLength(63);
+  });
+
   it.each([
     { host: "postgresql://db.internal/runtime" },
     { host: "user@db.internal" },

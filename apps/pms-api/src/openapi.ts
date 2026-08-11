@@ -387,6 +387,33 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
         },
       },
+      "/api/v1/registry/{environment}/consumers/sdar/v1/sources/{smppSourceId}/latest": {
+        get: {
+          operationId: "getLatestSdarRegistryProjection",
+          parameters: sdarRegistryProjectionPathParameters(),
+          responses: sdarRegistryProjectionResponses(),
+        },
+      },
+      "/api/v1/registry/{environment}/consumers/sdar/v1/sources/{smppSourceId}/bootstrap": {
+        get: {
+          operationId: "bootstrapSdarRegistryProjection",
+          parameters: sdarRegistryProjectionPathParameters(),
+          responses: sdarRegistryProjectionResponses(),
+        },
+      },
+      "/api/v1/registry/{environment}/consumers/sdar/v1/sources/{smppSourceId}/watch": {
+        get: {
+          operationId: "watchSdarRegistryProjection",
+          parameters: sdarRegistryProjectionPathParameters(),
+          responses: {
+            "200": {
+              description: "SSE revision hints; consumers refetch latest after each hint",
+              headers: sdarRegistryProjectionLineageHeaders(),
+              content: { "text/event-stream": { schema: { type: "string" } } },
+            },
+          },
+        },
+      },
       "/api/v1/audit-events": {
         get: {
           operationId: "listAuditEvents",
@@ -424,6 +451,47 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
           },
           additionalProperties: false,
         },
+        SdarRegistryProjectionProvider: {
+          type: "object",
+          required: [
+            "externalProviderId",
+            "externalServerId",
+            "serverEndpoint",
+            "catalogRevision",
+            "labels",
+          ],
+          properties: {
+            externalProviderId: { type: "string", minLength: 1, maxLength: 256 },
+            externalServerId: { type: "string", minLength: 1, maxLength: 256 },
+            serverEndpoint: { type: "string", format: "uri", pattern: "^https?://" },
+            catalogRevision: { type: "string", pattern: "^[1-9][0-9]*$" },
+            labels: {
+              type: "object",
+              required: ["environment", "protocolMode"],
+              properties: {
+                environment: { type: "string", pattern: "^[a-z][a-z0-9-]{0,62}$" },
+                protocolMode: { const: "frozen_v1" },
+              },
+              additionalProperties: false,
+            },
+          },
+          additionalProperties: false,
+        },
+        SdarRegistryProjection: {
+          type: "object",
+          required: ["revision", "checksum", "generatedAt", "expiresAt", "providers"],
+          properties: {
+            revision: { type: "integer", minimum: 1 },
+            checksum: { type: "string", pattern: "^[0-9a-f]{64}$" },
+            generatedAt: { type: "string", format: "date-time" },
+            expiresAt: { type: "string", format: "date-time" },
+            providers: {
+              type: "array",
+              items: { $ref: "#/components/schemas/SdarRegistryProjectionProvider" },
+            },
+          },
+          additionalProperties: false,
+        },
       },
       securitySchemes: {
         managementToken: {
@@ -449,6 +517,59 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
   };
   applyManagementSecurity(document.paths);
   return Object.freeze(document);
+}
+
+function sdarRegistryProjectionPathParameters(): readonly Record<string, unknown>[] {
+  return [
+    {
+      name: "environment",
+      in: "path",
+      required: true,
+      schema: { type: "string", pattern: "^[a-z][a-z0-9-]{0,62}$" },
+    },
+    {
+      name: "smppSourceId",
+      in: "path",
+      required: true,
+      schema: {
+        type: "string",
+        minLength: 1,
+        maxLength: 128,
+        pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+      },
+    },
+  ];
+}
+
+function sdarRegistryProjectionResponses(): Record<string, unknown> {
+  return {
+    "200": {
+      description: "Strict SDAR Registry consumer projection",
+      headers: {
+        ETag: { schema: { type: "string" } },
+        ...sdarRegistryProjectionLineageHeaders(),
+      },
+      content: {
+        "application/json": { schema: { $ref: "#/components/schemas/SdarRegistryProjection" } },
+      },
+    },
+    "304": {
+      description: "The consumer already has this projection checksum",
+      headers: sdarRegistryProjectionLineageHeaders(),
+    },
+    "404": {
+      description: "No published native Registry LKG is available",
+      content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } },
+    },
+  };
+}
+
+function sdarRegistryProjectionLineageHeaders(): Record<string, unknown> {
+  return {
+    "X-SMPP-Native-Revision": { schema: { type: "string" } },
+    "X-SMPP-Native-Checksum": { schema: { type: "string" } },
+    "X-SMPP-Projection-Contract": { schema: { const: "sdar-registry-v1" } },
+  };
 }
 
 function applyManagementSecurity(

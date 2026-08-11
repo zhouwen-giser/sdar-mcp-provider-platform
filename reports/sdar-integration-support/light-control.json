@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G09",
+  "status": "partial",
+  "disposition": "real_provider_path_passed_sdar_task_plan_not_executed",
+  "evidenceClass": "real_smpp_runtime_adapter_home_assistant",
+  "observedAt": "2026-08-11T21:53:54.548Z",
+  "resourceId": "living-room-main-light",
+  "smppProviderPathReady": true,
+  "realLightControlReady": false,
+  "blocker": {
+    "code": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED",
+    "message": "The bounded real SMPP Runtime, Adapter and Home Assistant path passed, but this run did not create the required SDAR Goal, Plan, confirmation or MCP lineage."
+  },
+  "execution": {
+    "initialPower": "off",
+    "desiredPower": "on",
+    "changedPower": "on",
+    "restoredPower": "off",
+    "providerTasksCompleted": 2,
+    "physicalWritesObserved": 2,
+    "sameArgumentsSameTask": true,
+    "sameKeyDifferentArgumentsRejected": true,
+    "restoreStatus": "restored"
+  },
+  "authoritativeCountsAfterExecution": {
+    "activeTasks": 0,
+    "uncertainTasks": 0
+  },
+  "companionEvidenceReferences": [
+    "skill-driven-agent-runtime/reports/sdar-smpp-integration/raw/g09-main-light-real.redacted.json"
+  ],
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

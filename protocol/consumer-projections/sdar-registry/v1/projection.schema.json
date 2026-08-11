@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdar:smpp:consumer-projection:sdar-registry:v1",
+  "title": "SMPP SDAR Registry consumer projection v1",
+  "type": "object",
+  "required": ["revision", "checksum", "generatedAt", "expiresAt", "providers"],
+  "properties": {
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/provider"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "provider": {
+      "type": "object",
+      "required": [
+        "externalProviderId",
+        "externalServerId",
+        "serverEndpoint",
+        "catalogRevision",
+        "labels"
+      ],
+      "properties": {
+        "externalProviderId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "externalServerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "serverEndpoint": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://(?![^/?#]*@)"
+        },
+        "catalogRevision": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "labels": {
+          "type": "object",
+          "required": ["environment", "protocolMode"],
+          "properties": {
+            "environment": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,62}$"
+            },
+            "protocolMode": {
+              "const": "frozen_v1"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

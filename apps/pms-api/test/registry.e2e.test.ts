@@ -95,6 +95,53 @@ describe("SDAR Registry Snapshot API", () => {
     await app.close();
   });
 
+  it("projects the committed PostgreSQL native LKG through the strict SDAR consumer route", async () => {
+    const native = await repository.latest("production");
+    if (native === null) throw new Error("REGISTRY_NATIVE_LKG_MISSING");
+    const app = api();
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/v1/registry/production/consumers/sdar/v1/sources/home-lab-smpp/latest",
+      headers: authorization(),
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json<{
+      readonly revision: number;
+      readonly checksum: string;
+      readonly generatedAt: string;
+      readonly expiresAt: string;
+      readonly providers: readonly Record<string, unknown>[];
+    }>();
+    expect(Object.keys(body).sort()).toEqual([
+      "checksum",
+      "expiresAt",
+      "generatedAt",
+      "providers",
+      "revision",
+    ]);
+    expect(body).toMatchObject({
+      revision: native.revision,
+      generatedAt: native.publishedAt.toISOString(),
+      providers: [
+        {
+          externalProviderId: "provider-a",
+          externalServerId: "server-provider-a",
+          serverEndpoint: "https://provider-a.example.test/mcp",
+          catalogRevision: "1",
+          labels: { environment: "production", protocolMode: "frozen_v1" },
+        },
+      ],
+    });
+    expect(body.checksum).not.toBe(native.checksum);
+    expect(response.headers.etag).toBe(`"${body.checksum}"`);
+    expect(response.headers["x-smpp-native-revision"]).toBe(String(native.revision));
+    expect(response.headers["x-smpp-native-checksum"]).toBe(native.checksum);
+    expect(response.headers["x-smpp-projection-contract"]).toBe("sdar-registry-v1");
+    expect(JSON.stringify(body)).not.toMatch(/tools|taskBehavior|entity_id|secret/u);
+    await app.close();
+  });
+
   it("serves history, diff, LKG bootstrap, and an explicit empty fallback", async () => {
     await repository.publish(publication(["provider-b"]));
     const app = api();

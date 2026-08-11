@@ -6,18 +6,21 @@ import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
 import { reserveSideEffectBudget } from "./real-device-side-effect-budget.js";
 
 const ROOT = resolve(process.cwd());
+const LOCAL_STATE_ROOT = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(ROOT, ".local"));
+const PMS_CONTINUATION_ROOT = resolve(LOCAL_STATE_ROOT, "pms-continuation");
+const HA_REAL_DEVICE_ROOT = resolve(LOCAL_STATE_ROOT, "ha-real-device");
 const ENVIRONMENT = "home-lab";
 const API_BASE_URL = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const RUN_ID = process.env.REAL_DEVICE_TEST_RUN_ID?.trim() ?? "";
 const WRITE_GATE = process.env.ALLOW_REAL_DEVICE_SIDE_EFFECTS === "YES" && RUN_ID.length > 0;
 const CLIMATE_POWER_TEST_GATE = process.env.ALLOW_CLIMATE_POWER_TEST === "YES";
-const MANAGEMENT_TOKEN_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token");
-const LOCAL_RESOURCES_FILE = resolve(ROOT, ".local/ha-real-device/resources.local.json");
+const MANAGEMENT_TOKEN_FILE = resolve(PMS_CONTINUATION_ROOT, "secrets/pms-management.token");
+const LOCAL_RESOURCES_FILE = resolve(HA_REAL_DEVICE_ROOT, "resources.local.json");
 const REPORT_DIRECTORY = resolve(ROOT, "reports/real-device-preparation-continuation");
 const REPORT_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.json");
 const MARKDOWN_PATH = resolve(REPORT_DIRECTORY, "three-device-e2e.md");
-const STATE_PATH = resolve(ROOT, ".local/pms-continuation/three-device-run-state.json");
-const SIDE_EFFECT_BUDGET_PATH = resolve(ROOT, ".local/ha-real-device/side-effect-budget.json");
+const STATE_PATH = resolve(PMS_CONTINUATION_ROOT, "three-device-run-state.json");
+const SIDE_EFFECT_BUDGET_PATH = resolve(HA_REAL_DEVICE_ROOT, "side-effect-budget.json");
 
 const CLIMATE_RESOURCE = "living-room-air-conditioner";
 const LIGHT_RESOURCES = ["living-room-main-light", "living-room-aux-light"] as const;
@@ -907,8 +910,8 @@ async function runtimeTaskCounts(): Promise<JsonObject> {
     ["ha-light-lab", "ha-light-deployment"],
   ] as const) {
     const secretPath = resolve(
-      ROOT,
-      `.local/pms-continuation/roots/runtime-secrets/deployments/${deploymentId}/instances/database/runtime.secret`,
+      PMS_CONTINUATION_ROOT,
+      `roots/runtime-secrets/deployments/${deploymentId}/instances/database/runtime.secret`,
     );
     const url = (await readFile(secretPath, "utf8")).trim();
     const pool = new Pool({ connectionString: url, max: 1 });

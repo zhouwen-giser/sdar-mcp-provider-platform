@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G12",
+  "scenario": "goal_owned_light_adapter_provider_state_file_corruption",
+  "status": "partial",
+  "evidenceClass": "real_goal_owned_process_plus_source_order_and_live_read_only_recovery",
+  "observedAt": "2026-08-11T06:52:09.153Z",
+  "scope": {
+    "goalOwnedLightAdapterRestarted": true,
+    "climateServiceTouched": false,
+    "independentPort3001ServiceTouched": false,
+    "deviceWriteOperationInvoked": false,
+    "physicalWritesObserved": 0,
+    "testFailpointInvoked": false,
+    "productionCodeChanged": false
+  },
+  "protectedIndependentService": {
+    "port": 3001,
+    "processIdentityAndStartTimeUnchanged": true,
+    "unchangedAfterRecovery": true
+  },
+  "processTopology": {
+    "lightAdapter": {
+      "port": 27121,
+      "previousGoalOwnedProcessStoppedExactly": true,
+      "recoveredGoalOwnedProcessStarted": true,
+      "operationalInventoryUpdated": true
+    },
+    "lightRuntime": {
+      "port": 28180
+    }
+  },
+  "preflight": {
+    "writeGateScopesChecked": ["Process", "User", "Machine"],
+    "allowRealDeviceSideEffectsYesPresent": false,
+    "realDeviceTestRunIdPresent": false,
+    "allowClimatePowerTestYesPresent": false,
+    "runtimeEnvTestPresent": false,
+    "realDeviceTestFailpointsYesPresent": false,
+    "providerExecutions": 0,
+    "nonterminalProviderExecutions": 0,
+    "lightRuntime": {
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "totalProviderTasks": 0,
+      "totalAdmissions": 4
+    },
+    "stateBackup": {
+      "pathIncluded": false,
+      "sourceSha256": "04df9a2b3029d210687fa8f6c1355e30eae9abd2ec3319fd04712bcb82144fbc",
+      "backupSha256": "04df9a2b3029d210687fa8f6c1355e30eae9abd2ec3319fd04712bcb82144fbc",
+      "lengthBytes": 13165,
+      "byteExactBeforeFault": true
+    }
+  },
+  "faultAttempt": {
+    "method": "replace_live_state_bytes_then_launch_exact_goal_owned_entrypoint",
+    "corruptPayload": {
+      "contentIncluded": false,
+      "lengthBytes": 26,
+      "sha256": "4c52abdedaec892af74e4816b420cd8e4e12059482555169d54c4f81bf136306"
+    },
+    "wrapperTimeoutSeconds": 10,
+    "wrapperExitedOnProviderFailure": false,
+    "testChild": {
+      "terminationScope": "exact_test_process_only",
+      "terminationConfirmed": true,
+      "numericProcessIdentityPersistedInEvidence": false
+    },
+    "adapterPort27121": {
+      "listenerPresentAtPostTimeoutCheck": false,
+      "continuousNeverListenedEvidencePersisted": false
+    },
+    "lightRuntimeReadinessDuringOutageHttpStatus": 503,
+    "faultStartLogs": {
+      "stdoutLengthBytes": 0,
+      "stderrLengthBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactFailureLogCaptured": false,
+      "observedErrorCode": null,
+      "expectedSourceErrorCode": "INVALID_PROVIDER_STATE_FILE"
+    },
+    "homeAssistantRequest": {
+      "networkTraceCaptured": false,
+      "requestObservedInAvailableEvidence": false,
+      "conclusion": "not_empirically_proven; entrypoint source order constructs and synchronously validates JsonLightStore before rest.checkApi",
+      "sourceContract": {
+        "repository": "sdar-mcp-provider-platform",
+        "stateValidation": "apps/home-assistant-light-provider/src/store.ts",
+        "entrypointOrder": "apps/home-assistant-light-provider/src/main.ts"
+      }
+    }
+  },
+  "restoreAndRecovery": {
+    "stateRestoredBeforeAnyFurtherStartAttempt": true,
+    "sourceSha256BeforeFirstRecoveryStart": "04df9a2b3029d210687fa8f6c1355e30eae9abd2ec3319fd04712bcb82144fbc",
+    "backupSha256": "04df9a2b3029d210687fa8f6c1355e30eae9abd2ec3319fd04712bcb82144fbc",
+    "byteExactBeforeFirstRecoveryStart": true,
+    "restoredJsonParsed": true,
+    "restoredExecutions": 0,
+    "recoveredAdapterListenerPresent": true,
+    "lightRuntimeReadinessHttpStatus": 200,
+    "postRecoveryReadOnlyMcp": {
+      "operation": "light_get_state",
+      "writeOperationInvoked": false,
+      "httpStatus": 200,
+      "resultType": "complete",
+      "publicResourceIdMatched": true,
+      "entityIdIncluded": false,
+      "physicalWritesObserved": 0
+    },
+    "stateMutationAudit": {
+      "authoritativeIntegrityPoint": "source_equals_backup_before_first_recovery_start",
+      "readOnlyCallBeforeSha256": "a0b74ad150eea4860a82b364fa29364e10bfb56aa8b0617d1fe8a186947c66d4",
+      "readOnlyCallAfterSha256": "43cfa2dc0343f6c4f34cb5d427621755e6de985db89433f7306f852e8b160f7b",
+      "allowedChangedFields": ["pendingTelemetryEvents", "nextTelemetrySequence"],
+      "businessAndDesiredStateFieldsUnchanged": true,
+      "executionsBefore": 0,
+      "executionsAfter": 0,
+      "readOnlyCallTelemetryEventDelta": 2,
+      "newTelemetryEventTypes": ["RESOURCE_STATE", "RESOURCE_HEALTH"]
+    }
+  },
+  "postRecoveryAuthority": {
+    "sdar": {
+      "activeAgentTasks": 0,
+      "activeRemoteBindings": 0,
+      "uncertainInputs": 0,
+      "uncertainCancels": 0,
+      "pendingRemoteControlEvents": 0,
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "totalAgentTasks": 12,
+      "totalRemoteBindings": 0
+    },
+    "smppLightRuntime": {
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "totalProviderTasks": 0,
+      "totalAdmissions": 4
+    },
+    "smppClimateRuntime": {
+      "activeTasks": 0,
+      "uncertainTasks": 0,
+      "totalProviderTasks": 0,
+      "totalAdmissions": 1
+    }
+  },
+  "classification": {
+    "result": "partial",
+    "passedFailClosedClaimed": false,
+    "reason": "real process outage, byte-exact restore, readiness recovery and zero-task safety were observed, but the fault-start wrapper produced empty logs and did not persist continuous listener or numeric child identity evidence",
+    "remainingBlocker": "REAL_PROVIDER_STATE_FILE_CORRUPTION_UNVERIFIED",
+    "harnessAnomaly": "wrapper_did_not_exit_within_10_seconds"
+  },
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false,
+    "stateFileContentIncluded": false,
+    "backupPathIncluded": false
+  }
+}

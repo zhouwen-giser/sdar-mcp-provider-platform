@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G00_G07_REFRESH",
+  "status": "passed",
+  "evidenceClass": "real_home_assistant_read_only",
+  "environment": "home-lab",
+  "startedAt": "2026-08-10T15:54:43.213Z",
+  "completedAt": "2026-08-10T15:54:44.287Z",
+  "readOnly": true,
+  "sideEffectsAttempted": false,
+  "checks": {
+    "homeAssistantUrlReachable": "passed",
+    "tokenValid": "passed",
+    "configuredEntitiesExist": "passed",
+    "entityDomainsMatch": "passed",
+    "entitiesReachable": "passed",
+    "climateCapabilities": "passed",
+    "lightBrightnessCapabilities": "passed",
+    "webSocketConnected": "passed",
+    "webSocketStateChangedSubscription": "passed",
+    "restWebSocketInitialStateConsistent": "passed"
+  },
+  "resources": [
+    {
+      "resourceId": "living-room-air-conditioner",
+      "domain": "climate",
+      "state": "cool",
+      "reachable": true,
+      "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
+      "minTemperature": 16,
+      "maxTemperature": 31,
+      "targetTemperature": 16
+    },
+    {
+      "resourceId": "living-room-main-light",
+      "domain": "light",
+      "state": "off",
+      "reachable": true,
+      "supportsBrightness": true
+    },
+    {
+      "resourceId": "living-room-aux-light",
+      "domain": "light",
+      "state": "off",
+      "reachable": true,
+      "supportsBrightness": true
+    }
+  ],
+  "safetyGates": {
+    "allowRealDeviceSideEffects": false,
+    "realDeviceTestRunIdPresent": false,
+    "allowClimatePowerTest": false
+  },
+  "redaction": {
+    "tokenMatches": 0,
+    "entityIdMatches": 0,
+    "secretsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

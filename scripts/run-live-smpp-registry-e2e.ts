@@ -6,10 +6,12 @@ import { format, resolveConfig } from "prettier";
 import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
 
 const ROOT = resolve(process.cwd());
+const LOCAL_STATE_ROOT = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(ROOT, ".local"));
+const PMS_CONTINUATION_ROOT = resolve(LOCAL_STATE_ROOT, "pms-continuation");
 const ENVIRONMENT = "home-lab";
 const API_BASE_URL = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
-const DATABASE_URL_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms-database-url");
-const MANAGEMENT_TOKEN_FILE = resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token");
+const DATABASE_URL_FILE = resolve(PMS_CONTINUATION_ROOT, "secrets/pms-database-url");
+const MANAGEMENT_TOKEN_FILE = resolve(PMS_CONTINUATION_ROOT, "secrets/pms-management.token");
 const REPORT_DIRECTORY = resolve(ROOT, "reports/real-device-preparation-continuation");
 const REPORT_PATH = resolve(REPORT_DIRECTORY, "registry-backed-e2e.json");
 const MARKDOWN_PATH = resolve(REPORT_DIRECTORY, "registry-backed-e2e.md");
@@ -241,8 +243,8 @@ async function readRuntimeTaskCounts(
   deploymentId: string,
 ): Promise<JsonObject> {
   const credentialPath = resolve(
-    ROOT,
-    `.local/pms-continuation/roots/runtime-secrets/deployments/${deploymentId}/instances/database/runtime.secret`,
+    PMS_CONTINUATION_ROOT,
+    `roots/runtime-secrets/deployments/${deploymentId}/instances/database/runtime.secret`,
   );
   const connectionString = (await readFile(credentialPath, "utf8")).trim();
   const pool = new Pool({ connectionString, max: 1 });

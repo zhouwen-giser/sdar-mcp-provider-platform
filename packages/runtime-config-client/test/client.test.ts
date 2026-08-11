@@ -153,7 +153,7 @@ describe("RuntimeConfigClient", () => {
     });
   });
 
-  it("writes a 0600 staging artifact and atomically renames it", async () => {
+  it("writes a staging artifact, uses 0600 on POSIX, and atomically renames it", async () => {
     const directory = await mkdtemp(join(tmpdir(), "sdar-runtime-config-"));
     temporaryDirectories.push(directory);
     const path = join(directory, "runtime-config-lkg.json");
@@ -163,7 +163,7 @@ describe("RuntimeConfigClient", () => {
     await store.write(expected);
 
     expect(await store.read()).toEqual(expected);
-    expect((await stat(path)).mode & 0o777).toBe(0o600);
+    if (process.platform !== "win32") expect((await stat(path)).mode & 0o777).toBe(0o600);
     expect(await readdir(directory)).toEqual(["runtime-config-lkg.json"]);
   });
 

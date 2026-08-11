@@ -183,6 +183,44 @@ describe("PMS Worker production Runtime configuration", () => {
     ).rejects.toThrow("PMS_WORKER_RUNTIME_TIMEOUT_ORDER_INVALID");
   });
 
+  it("loads an explicit isolated Runtime port range", async () => {
+    const fixture = await secureFixture();
+    const config = await loadPmsWorkerConfig({
+      ...fixture.environment,
+      PMS_RUNTIME_PORT_RANGE_START: "28180",
+      PMS_RUNTIME_PORT_RANGE_END: "28199",
+    });
+
+    expect(requirePmsWorkerRuntimeConfig(config).runtimePortRange).toEqual({
+      start: 28_180,
+      end: 28_199,
+    });
+  });
+
+  it("rejects partial, inverted and oversized Runtime port ranges", async () => {
+    const fixture = await secureFixture();
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_RUNTIME_PORT_RANGE_START: "28180",
+      }),
+    ).rejects.toThrow("PMS_WORKER_RUNTIME_PORT_RANGE_PAIR_REQUIRED");
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_RUNTIME_PORT_RANGE_START: "28199",
+        PMS_RUNTIME_PORT_RANGE_END: "28180",
+      }),
+    ).rejects.toThrow("PMS_WORKER_CONFIG_BOUNDS");
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_RUNTIME_PORT_RANGE_START: "20000",
+        PMS_RUNTIME_PORT_RANGE_END: "30001",
+      }),
+    ).rejects.toThrow("PMS_WORKER_CONFIG_BOUNDS");
+  });
+
   it("rejects the legacy global Runtime token file without fallback", async () => {
     const fixture = await secureFixture();
     await expect(
