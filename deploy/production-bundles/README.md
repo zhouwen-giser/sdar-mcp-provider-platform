@@ -71,5 +71,6 @@ Outputs are written to `reports/production-bundles/delivery/`:
 
 The deployment host does not need Git, Node.js, or pnpm, but its Docker daemon must run natively on
 ARM64 with BuildKit enabled. The first build requires HTTPS access to Docker Hub, the npm registry,
-the grpc-tools binary host, and GitHub release assets. This build-time network requirement does not
-change the plaintext-only internal runtime transport profile.
+and the grpc-tools binary host. Repository-review tools with additional release-asset downloads are
+excluded from the production image build. This build-time network requirement does not change the
+plaintext-only internal runtime transport profile.

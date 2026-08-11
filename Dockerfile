@@ -31,6 +31,8 @@ COPY packages/operation-registry/package.json packages/operation-registry/packag
 COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
 COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
 COPY packages/pms-application/package.json packages/pms-application/package.json
+COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
 COPY packages/pms-domain/package.json packages/pms-domain/package.json
 COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
 COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
@@ -49,12 +51,21 @@ COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/pa
 COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
 COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
 COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
-RUN pnpm install --frozen-lockfile
+# Install the exact lockfile without running repository-review tooling side
+# effects. The production compiler only needs these reviewed lifecycle scripts;
+# openapi-changes is used by a separate breaking-change gate and otherwise
+# downloads an additional GitHub release asset during install.
+RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked \
+    --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile --ignore-scripts --prefer-offline \
+      --network-concurrency=8 --store-dir=/pnpm/store \
+    && pnpm rebuild esbuild grpc-tools
 COPY Dockerfile Dockerfile
 COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
 RUN node scripts/verify-docker-workspace-manifests.mjs
 COPY . .
-RUN test "$VITE_PMS_DATA_MODE" = api \
+RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked \
+    test "$VITE_PMS_DATA_MODE" = api \
     && pnpm build \
     && pnpm --filter @sdar/pms-web build \
     && cp -R dist/packages release-packages \
@@ -62,8 +73,11 @@ RUN test "$VITE_PMS_DATA_MODE" = api \
     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
 
 FROM build AS production-dependencies
-RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules \
-    && CI=true pnpm install --prod --offline --frozen-lockfile --filter='!@sdar/pms-web' \
+RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked \
+    --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked \
+    rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules \
+    && CI=true pnpm install --prod --offline --frozen-lockfile \
+      --filter='!@sdar/pms-web' --store-dir=/pnpm/store \
     && find node_modules -type f -name '*.map' -delete \
     && find node_modules -type f -iname '*.md' \
       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete \

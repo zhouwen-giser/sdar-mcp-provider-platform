@@ -85,6 +85,12 @@ test("Dockerfile allows the ARM64 package to pin every Node base stage", async (
   assert.match(dockerfile, /^ARG NODE_BASE_IMAGE=node:22-bookworm-slim$/m);
   assert.equal((dockerfile.match(/^FROM \$\{NODE_BASE_IMAGE\} AS /gm) ?? []).length, 6);
   assert.equal((dockerfile.match(/^FROM node:22-bookworm-slim AS /gm) ?? []).length, 0);
+  assert.match(dockerfile, /install --frozen-lockfile --ignore-scripts --prefer-offline/);
+  assert.match(dockerfile, /rebuild esbuild grpc-tools/);
+  assert.match(dockerfile, /type=cache,id=sdar-pnpm-store/);
+  assert.match(dockerfile, /--network-concurrency=8/);
+  assert.equal((dockerfile.match(/id=sdar-corepack/g) ?? []).length, 3);
+  assert.doesNotMatch(dockerfile, /rebuild[^\n]*openapi-changes/);
 });
 
 test("root ARM64 README states zero bundled images and native-build qualification boundary", () => {

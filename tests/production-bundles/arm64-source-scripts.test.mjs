@@ -45,7 +45,7 @@ test("ARM64 source image builder verifies integrity before Docker and pins its i
 test("ARM64 source image builder builds each application from the checked source archive", () => {
   const script = arm64BuildImagesScript();
 
-  assert.match(script, /DOCKER_BUILDKIT=1 docker build \\\n+    --platform linux\/arm64/);
+  assert.match(script, /DOCKER_BUILDKIT=1 docker build \\\n+ {4}--platform linux\/arm64/);
   assert.match(script, /--pull/);
   assert.match(script, /--target "\$target"/);
   assert.match(script, /--build-arg "NODE_BASE_IMAGE=\$NODE_BASE_IMAGE"/);

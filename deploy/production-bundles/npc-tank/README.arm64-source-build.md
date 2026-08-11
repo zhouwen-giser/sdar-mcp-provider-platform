@@ -15,8 +15,8 @@ Docker 从锁定源码现场构建五个应用镜像，并拉取锁定摘要的 
 
 - Docker Hub，用于拉取 Node.js 和 PostgreSQL 的 ARM64 基础镜像；
 - npm 软件包源，用于 Corepack、pnpm 和 lockfile 依赖；
-- gRPC 相关依赖下载站点；
-- GitHub 和 GitHub Releases。使用组织代理或内部镜像时，应根据构建日志放行等价地址。
+- gRPC 相关依赖下载站点。仅用于仓库审查、且会额外下载 GitHub Release 附件的工具
+  不会执行安装脚本；使用组织代理或内部镜像时，应根据构建日志放行等价地址。
 
 这些连接只服务于构建期软件供应链。本项目的 NPC Tank Runtime、PMS、Web 和 Provider
 镜像不会上传公共仓库，也不会从公共自研镜像仓库安装。构建完成后的真实业务链路仍是
@@ -57,7 +57,7 @@ Runtime 分别使用独立秘密。
 - UID 1000，或由 root 初始化并把运行状态和秘密归属设置为 UID/GID 1000；
 - 足够容纳源码、BuildKit cache、六个本地镜像、五个持久数据区域和日志的磁盘空间；
 - 到真实内网 Device MCP、MQTT 端点的 DNS、路由、防火墙和时钟同步正常；
-- 首次构建具备前述 Docker Hub、npm、gRPC 依赖站点和 GitHub HTTPS 出网能力。
+- 首次构建具备前述 Docker Hub、npm 和 gRPC 依赖站点的 HTTPS 出网能力。
 
 五个应用镜像在目标主机以 `linux/arm64` 构建。PostgreSQL 镜像不包含在 ZIP 中，也不
 从源码构建，而是按发布锁定的摘要拉取 ARM64 版本。构建脚本会核对平台、源码 revision、

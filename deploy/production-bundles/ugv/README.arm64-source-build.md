@@ -16,8 +16,8 @@ Docker 会拉取锁定的 ARM64 基础镜像并在本机从源码构建五个应
 
 - 首次构建必须能通过 HTTPS 访问 Docker Hub，以拉取 Node.js 和 PostgreSQL 的 ARM64
   基础镜像；
-- Docker 构建还必须能通过 HTTPS 访问 npm 软件包源、gRPC 相关依赖下载站点以及
-  GitHub/GitHub Releases。实际使用代理或内部镜像时，应根据构建日志放行等价地址；
+- Docker 构建还必须能通过 HTTPS 访问 npm 软件包源和 gRPC 相关依赖下载站点。仅用于
+  仓库审查、且会额外下载 GitHub Release 附件的工具不会执行安装脚本；
 - 本项目的 UGV Runtime、PMS、Web 和 Provider 镜像只在目标主机构建，不上传公共仓库；
 - 上述 HTTPS 只用于构建期软件供应链访问，不改变运行期的严格内网明文策略。
 
@@ -57,7 +57,7 @@ Docker Hub 和软件包源通常依赖部署主机及 Docker daemon 的标准 HT
 - UID 1000，或可由 root 初始化后把状态和秘密文件归属设置为 UID/GID 1000；
 - 足够容纳源码构建上下文、BuildKit cache、六个本地镜像、数据库卷和日志的磁盘空间；
 - 到真实内网 Device MCP、MQTT 端点的 DNS、路由、防火墙和时钟同步正常；
-- 首次构建具备前述 Docker Hub、npm、gRPC 依赖站点和 GitHub HTTPS 出网能力。
+- 首次构建具备前述 Docker Hub、npm 和 gRPC 依赖站点的 HTTPS 出网能力。
 
 五个应用镜像以 `linux/arm64` 为目标在本机生成。PostgreSQL 镜像不参与源码构建，
 而是由 Docker 按发布锁定的摘要拉取 ARM64 版本。构建脚本会检查操作系统、架构、源码
