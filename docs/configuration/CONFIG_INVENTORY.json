@@ -10,7 +10,7 @@
   "groups": {
     "bootstrap": {
       "description": "Cold-start Runtime identity, listener, database, Adapter, and authentication inputs.",
-      "items": 15
+      "items": 16
     },
     "runtime": {
       "description": "Runtime workers, limits, telemetry, events, notifications, and outbox inputs.",
@@ -18,7 +18,7 @@
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 128
+      "items": 130
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -28,15 +28,15 @@
   "components": {
     "runtime": {
       "source": "apps/runtime/src/config.ts",
-      "items": 98
+      "items": 99
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 50
+      "items": 51
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
-      "items": 52
+      "items": 53
     },
     "home-assistant-climate": {
       "source": "apps/home-assistant-climate-provider/src/config.ts",
@@ -52,13 +52,13 @@
         "Adapter mTLS requires CA, certificate, and key paths",
         "enabled Provider telemetry mTLS requires CA, certificate, and key paths",
         "production forbids development auth",
-        "production requires Adapter mTLS",
-        "production enabled Provider telemetry ingress requires mTLS",
+        "production requires Adapter mTLS unless internal plaintext transport is explicitly enabled",
+        "production enabled Provider telemetry ingress requires mTLS unless internal plaintext transport is explicitly enabled",
         "production forbids weak lease configuration",
-        "production enabled OTLP requires HTTPS",
+        "production enabled OTLP requires HTTPS unless internal plaintext transport is explicitly enabled",
         "required OTLP mTLS requires CA, certificate, and key paths",
         "webhook Outbox requires OUTBOX_WEBHOOK_URL",
-        "production Outbox webhook requires HTTPS",
+        "production Outbox webhook requires HTTPS unless internal plaintext transport is explicitly enabled",
         "enabled internal endpoints require INTERNAL_ADMIN_TOKEN",
         "claim lease durations must cover Adapter RPC, database publication budget, and safety margin"
       ]
@@ -68,8 +68,8 @@
       "source": "apps/ugv-provider-adapter/src/config.ts:superRefine",
       "rules": [
         "required Adapter, MQTT, and Provider telemetry TLS modes require their CA, certificate, and key paths",
-        "production requires Adapter mTLS",
-        "production requires MQTT TLS",
+        "production requires Adapter mTLS unless internal plaintext transport is explicitly enabled",
+        "production requires MQTT TLS unless internal plaintext transport is explicitly enabled",
         "production MQTT wire mode must be explicit",
         "production requires PostgreSQL store"
       ]
@@ -79,8 +79,8 @@
       "source": "apps/npc-tank-provider-adapter/src/config.ts:superRefine",
       "rules": [
         "required Adapter, MQTT, and Provider telemetry TLS modes require their CA, certificate, and key paths",
-        "production requires Adapter mTLS",
-        "production requires MQTT TLS",
+        "production requires Adapter mTLS unless internal plaintext transport is explicitly enabled",
+        "production requires MQTT TLS unless internal plaintext transport is explicitly enabled",
         "production MQTT wire mode must be explicit",
         "production requires PostgreSQL store"
       ]
@@ -98,13 +98,13 @@
     }
   ],
   "coverage": {
-    "expectedItems": 226,
-    "actualItems": 226,
+    "expectedItems": 229,
+    "actualItems": 229,
     "secretItems": 22,
     "byComponent": {
-      "runtime": 98,
-      "ugv": 50,
-      "npc-tank": 52,
+      "runtime": 99,
+      "ugv": 51,
+      "npc-tank": 53,
       "home-assistant-climate": 26
     }
   },
@@ -119,6 +119,21 @@
       "defaultValue": "development",
       "required": false,
       "validator": "z.enum([\"development\", \"test\", \"production\"]).default(\"development\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "pending_review"
+    },
+    {
+      "key": "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "component": "runtime",
+      "source": "apps/runtime/src/config.ts:10",
+      "group": "bootstrap",
+      "subgroup": "bootstrap",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "BooleanEnvironmentSchema.default(false)",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",
@@ -2317,6 +2332,21 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "component": "ugv",
+      "source": "apps/ugv-provider-adapter/src/config.ts:72",
+      "group": "provider",
+      "subgroup": "adapter",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "pending_review"
+    },
+    {
       "key": "LOG_LEVEL",
       "component": "ugv",
       "source": "apps/ugv-provider-adapter/src/config.ts:72",
@@ -3092,6 +3122,21 @@
       "defaultValue": "development",
       "required": false,
       "validator": "z.enum([\"development\", \"test\", \"production\"]).default(\"development\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "pending_review"
+    },
+    {
+      "key": "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "component": "npc-tank",
+      "source": "apps/npc-tank-provider-adapter/src/config.ts:82",
+      "group": "provider",
+      "subgroup": "adapter",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",

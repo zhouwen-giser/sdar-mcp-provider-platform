@@ -13,6 +13,7 @@
       "enum": ["disabled", "required"],
       "type": "string"
     },
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT": { "type": "boolean" },
     "LOG_LEVEL": {
       "default": "info",
       "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
@@ -192,7 +193,6 @@
     "ADAPTER_PORT",
     "ADAPTER_TLS_MODE",
     "UGV_ADAPTER_STORE_MODE",
-    "UGV_ADAPTER_DATABASE_URL",
     "UGV_ADAPTER_DATABASE_POOL_MAX",
     "UGV_MQTT_URL",
     "UGV_MQTT_CLIENT_ID",
@@ -223,6 +223,7 @@
     "PROVIDER_TELEMETRY_ENDPOINT",
     "PROVIDER_TELEMETRY_TLS_MODE",
     "RUNTIME_ENV",
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT",
     "LOG_LEVEL"
   ],
   "title": "provider.ugv",

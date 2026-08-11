@@ -25,7 +25,7 @@ describe("Runtime worker and event configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(definitionKeys).toHaveLength(99);
+    expect(definitionKeys).toHaveLength(100);
     expect(new Set(definitionKeys).size).toBe(definitionKeys.length);
     expect(definitionKeys).toEqual(inventoryKeys);
   });
@@ -54,6 +54,37 @@ describe("Runtime worker and event configuration contract", () => {
       loadRuntimeWorkerEventsEnvironment({ COMMAND_DISPATCH_CONCURRENCY: "129" }),
     ).toThrow();
     expect(() => loadRuntimeWorkerEventsEnvironment({ TTL_CLEANER_BATCH_SIZE: "10001" })).toThrow();
+  });
+
+  it("limits the internal plaintext opt-in to transport checks", () => {
+    const production = {
+      RUNTIME_ENV: "production",
+      AUTH_MODE: "jwt_hs256",
+      JWT_HS256_SECRET: "0123456789abcdef0123456789abcdef",
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true",
+      PROVIDER_TELEMETRY_TLS_MODE: "disabled",
+      OUTBOX_SINK: "webhook",
+      OUTBOX_WEBHOOK_URL: "http://events.internal/hook",
+    };
+    expect(() => loadRuntimeWorkerEventsEnvironment(production)).toThrow(
+      "production Provider telemetry ingress requires mTLS",
+    );
+    expect(
+      loadRuntimeWorkerEventsEnvironment({
+        ...production,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).toMatchObject({
+      AUTH_MODE: "jwt_hs256",
+      PROVIDER_TELEMETRY_TLS_MODE: "disabled",
+      OUTBOX_WEBHOOK_URL: "http://events.internal/hook",
+    });
+    expect(() =>
+      loadRuntimeWorkerEventsEnvironment({
+        RUNTIME_ENV: "production",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).toThrow("production forbids development auth");
   });
 
   it("uses conservative restart Apply Modes and marks secrets", () => {

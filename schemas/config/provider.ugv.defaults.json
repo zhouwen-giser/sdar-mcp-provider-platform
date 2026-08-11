@@ -6,6 +6,7 @@
     "ADAPTER_HOST": "0.0.0.0",
     "ADAPTER_PORT": 7010,
     "ADAPTER_TLS_MODE": "disabled",
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT": false,
     "LOG_LEVEL": "info",
     "PROVIDER_ID": "isr.vehicle.ugv.ugv1",
     "PROVIDER_TELEMETRY_ENABLED": true,

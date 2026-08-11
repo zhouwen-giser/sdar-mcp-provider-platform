@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.7
 FROM node:22-bookworm-slim AS build
 ARG VITE_PMS_DATA_MODE=api
 ENV PNPM_HOME=/pnpm
@@ -148,6 +147,47 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
 CMD ["node", "dist/apps/npc-tank-provider-adapter/src/main.js"]
 
+# Standalone production bundle targets intentionally derive from the real
+# provider images while giving the immutable artifacts production-specific
+# identities. Runtime production safety is enforced by configuration at boot.
+# The standalone bundles explicitly opt into plaintext transport for an
+# operator-enforced, strictly isolated internal network.
+FROM ugv-real-runtime AS ugv-production-runtime
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR UGV Production Runtime" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="ugv"
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+
+FROM ugv-real-adapter AS ugv-production-adapter
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR UGV Production Provider Adapter" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="ugv"
+EXPOSE 7010
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "const net=require('node:net');const socket=net.connect({host:'127.0.0.1',port:Number(process.env.ADAPTER_PORT||7010)},()=>socket.end());socket.setTimeout(2000,()=>socket.destroy(Error('timeout')));socket.on('error',()=>process.exit(1))"]
+
+FROM npc-real-runtime AS npc-tank-production-runtime
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR NPC Tank Production Runtime" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="npc-tank"
+
+FROM npc-real-adapter AS npc-tank-production-adapter
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SDAR NPC Tank Production Provider Adapter" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="npc-tank"
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "const net=require('node:net');const socket=net.connect({host:'127.0.0.1',port:Number(process.env.ADAPTER_PORT||7013)},()=>socket.end());socket.setTimeout(2000,()=>socket.destroy(Error('timeout')));socket.on('error',()=>process.exit(1))"]
+
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
@@ -194,6 +234,24 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
 CMD ["node", "dist/apps/pms-api/src/main.js"]
 
+FROM pms-api AS pms-api-ugv-production
+USER root
+RUN find /app/provider-packages -mindepth 1 -maxdepth 1 ! -name ugv -exec rm -rf -- {} + \
+    && find /app/dist/apps -mindepth 1 -maxdepth 1 ! -name pms-api -exec rm -rf -- {} + \
+    && test -f /app/provider-packages/ugv/provider-package.json
+USER node
+LABEL io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="ugv"
+
+FROM pms-api AS pms-api-npc-tank-production
+USER root
+RUN find /app/provider-packages -mindepth 1 -maxdepth 1 ! -name npc-tank -exec rm -rf -- {} + \
+    && find /app/dist/apps -mindepth 1 -maxdepth 1 ! -name pms-api -exec rm -rf -- {} + \
+    && test -f /app/provider-packages/npc-tank/provider-package.json
+USER node
+LABEL io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="npc-tank"
+
 FROM pms-base AS pms-worker
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="SDAR Provider Management Worker" \
@@ -227,6 +285,28 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
 CMD ["node", "dist/apps/pms-worker/src/main.js"]
 
+FROM pms-worker AS pms-worker-ugv-production
+USER root
+RUN find /app/provider-packages -mindepth 1 -maxdepth 1 ! -name ugv -exec rm -rf -- {} + \
+    && find /app/dist/apps -mindepth 1 -maxdepth 1 ! -name pms-worker -exec rm -rf -- {} + \
+    && find /app/runtime-releases/2.0.0-rc.1/dist/apps -mindepth 1 -maxdepth 1 ! -name runtime -exec rm -rf -- {} + \
+    && test -f /app/provider-packages/ugv/provider-package.json \
+    && test -f /app/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js
+USER node
+LABEL io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="ugv"
+
+FROM pms-worker AS pms-worker-npc-tank-production
+USER root
+RUN find /app/provider-packages -mindepth 1 -maxdepth 1 ! -name npc-tank -exec rm -rf -- {} + \
+    && find /app/dist/apps -mindepth 1 -maxdepth 1 ! -name pms-worker -exec rm -rf -- {} + \
+    && find /app/runtime-releases/2.0.0-rc.1/dist/apps -mindepth 1 -maxdepth 1 ! -name runtime -exec rm -rf -- {} + \
+    && test -f /app/provider-packages/npc-tank/provider-package.json \
+    && test -f /app/runtime-releases/2.0.0-rc.1/dist/apps/runtime/src/main.js
+USER node
+LABEL io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="npc-tank"
+
 FROM node:22-bookworm-slim AS pms-web
 ARG VCS_REF=unknown
 ENV NODE_ENV=production \
@@ -250,6 +330,12 @@ EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
 CMD ["node", "server.mjs"]
+
+FROM pms-web AS pms-web-production
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.revision="${VCS_REF}" \
+      io.sdar.production-bundle.profile="production" \
+      io.sdar.production-bundle.provider="shared"
 
 FROM runtime AS adapter-ts
 CMD ["node", "dist/examples/mock-adapter-typescript/src/main.js"]

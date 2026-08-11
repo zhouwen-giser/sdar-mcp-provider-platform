@@ -19,6 +19,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "Explicitly permits plaintext transport inside an operator-controlled internal network.",
+      "displayName": "Allow insecure internal transport",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "Runtime HTTP listen host.",
       "displayName": "Listen host",
       "overridePolicy": {

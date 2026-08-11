@@ -7,6 +7,7 @@ coverage/
 .runtime-data/
 .local/
 reports/runtime-v1/generated/
+reports/production-bundles/delivery/
 examples/mock-adapter-python/.venv/
 examples/mock-adapter-python/__pycache__/
 examples/mock-adapter-python/**/__pycache__/

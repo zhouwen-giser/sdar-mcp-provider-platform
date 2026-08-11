@@ -72,6 +72,7 @@ const UgvProviderInputBaseSchema = z.object({
   PROVIDER_TELEMETRY_TLS_CERT_PATH: optionalPath,
   PROVIDER_TELEMETRY_TLS_KEY_PATH: optionalPath,
   RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: bool.default(false),
   LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 });
 
@@ -102,9 +103,9 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
     if (mode === "required" && (!ca || !cert || !key))
       context.addIssue({ code: "custom", message: `${name}_MTLS_FILES_REQUIRED` });
   if (value.RUNTIME_ENV === "production") {
-    if (value.ADAPTER_TLS_MODE !== "required")
+    if (!value.ALLOW_INSECURE_INTERNAL_TRANSPORT && value.ADAPTER_TLS_MODE !== "required")
       context.addIssue({ code: "custom", message: "PRODUCTION_ADAPTER_MTLS_REQUIRED" });
-    if (value.UGV_MQTT_TLS_MODE !== "required")
+    if (!value.ALLOW_INSECURE_INTERNAL_TRANSPORT && value.UGV_MQTT_TLS_MODE !== "required")
       context.addIssue({ code: "custom", message: "PRODUCTION_MQTT_TLS_REQUIRED" });
     if (value.UGV_MQTT_WIRE_MODE === "auto")
       context.addIssue({ code: "custom", message: "PRODUCTION_MQTT_WIRE_MODE_MUST_BE_EXPLICIT" });
@@ -127,6 +128,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_ALLOW_NAVIGATION_WITH_RECON: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),
   PROVIDER_TELEMETRY_TLS_CA_PATH: z.string().optional(),
   PROVIDER_TELEMETRY_TLS_CERT_PATH: z.string().optional(),
   PROVIDER_TELEMETRY_TLS_KEY_PATH: z.string().optional(),

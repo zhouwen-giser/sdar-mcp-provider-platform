@@ -63,6 +63,32 @@ describe("PMS Worker production Runtime configuration", () => {
     ).rejects.toThrow("PMS_WORKER_CONFIG_REQUIRED:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE");
   });
 
+  it("permits a non-loopback HTTP control plane only with the internal transport opt-in", async () => {
+    const fixture = await secureFixture();
+    const plaintext = {
+      ...fixture.environment,
+      PMS_RUNTIME_CONTROL_PLANE_URL: "http://pms-api.internal:8090",
+    };
+
+    await expect(loadPmsWorkerConfig(plaintext)).rejects.toThrow(
+      "PMS_WORKER_CONTROL_PLANE_URL_INVALID",
+    );
+    await expect(
+      loadPmsWorkerConfig({
+        ...plaintext,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).resolves.toMatchObject({
+      runtime: { runtimeControlPlaneUrl: "http://pms-api.internal:8090/" },
+    });
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "yes",
+      }),
+    ).rejects.toThrow("PMS_WORKER_CONFIG_BOOLEAN_INVALID:ALLOW_INSECURE_INTERNAL_TRANSPORT");
+  });
+
   it.each([
     ["PMS_DATABASE_URL", "PMS_WORKER_INLINE_DATABASE_SECRET_REJECTED"],
     ["PMS_POSTGRES_PROVISIONING_PASSWORD", "PMS_WORKER_INLINE_PROVISIONING_SECRET_REJECTED"],

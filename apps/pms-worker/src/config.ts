@@ -48,6 +48,10 @@ export async function loadPmsWorkerConfig(
 ): Promise<PmsWorkerConfig> {
   rejectInlineSecrets(environment);
   rejectLegacyRuntimeTokenFile(environment);
+  const allowInsecureInternalTransport = booleanEnvironment(
+    environment.ALLOW_INSECURE_INTERNAL_TRANSPORT,
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+  );
   const databaseUrlFile = required(environment, "PMS_DATABASE_URL_FILE");
   await validateSecretFile(databaseUrlFile, "PMS_DATABASE_URL_FILE");
   const base = {
@@ -67,7 +71,7 @@ export async function loadPmsWorkerConfig(
   if (!runtimeConfigurationRequested(environment)) return Object.freeze(base);
   return Object.freeze({
     ...base,
-    runtime: await loadRuntimeConfig(environment),
+    runtime: await loadRuntimeConfig(environment, allowInsecureInternalTransport),
   });
 }
 
@@ -85,6 +89,7 @@ export function requirePmsWorkerRuntimeConfig(config: PmsWorkerConfig): PmsWorke
 
 async function loadRuntimeConfig(
   environment: Readonly<Record<string, string | undefined>>,
+  allowInsecureInternalTransport: boolean,
 ): Promise<PmsWorkerRuntimeConfig> {
   const postgresProvisioningCredentialFile = required(
     environment,
@@ -100,6 +105,7 @@ async function loadRuntimeConfig(
   );
   const runtimeControlPlaneUrl = validateControlPlaneUrl(
     required(environment, "PMS_RUNTIME_CONTROL_PLANE_URL"),
+    allowInsecureInternalTransport,
   );
   const roots = {
     runtimeReleaseRoot: required(environment, "PMS_RUNTIME_RELEASE_ROOT"),
@@ -164,7 +170,7 @@ function rejectLegacyRuntimeTokenFile(
   }
 }
 
-function validateControlPlaneUrl(source: string): string {
+function validateControlPlaneUrl(source: string, allowInsecureInternalTransport: boolean): string {
   let url: URL;
   try {
     url = new URL(source);
@@ -173,7 +179,8 @@ function validateControlPlaneUrl(source: string): string {
   }
   const loopback = ["127.0.0.1", "::1", "localhost"].includes(url.hostname);
   if (
-    (url.protocol !== "https:" && !(url.protocol === "http:" && loopback)) ||
+    (url.protocol !== "https:" &&
+      !(url.protocol === "http:" && (loopback || allowInsecureInternalTransport))) ||
     url.username.length > 0 ||
     url.password.length > 0 ||
     url.search.length > 0 ||
@@ -182,6 +189,12 @@ function validateControlPlaneUrl(source: string): string {
     throw new Error("PMS_WORKER_CONTROL_PLANE_URL_INVALID");
   }
   return url.toString();
+}
+
+function booleanEnvironment(value: string | undefined, name: string): boolean {
+  if (value === undefined || value === "false" || value === "0") return false;
+  if (value === "true" || value === "1") return true;
+  throw new Error(`PMS_WORKER_CONFIG_BOOLEAN_INVALID:${name}`);
 }
 
 function rejectInlineSecrets(environment: Readonly<Record<string, string | undefined>>): void {

@@ -9,14 +9,14 @@ configuration behavior.
 
 | Component                       | Source                                               |  Fields |
 | ------------------------------- | ---------------------------------------------------- | ------: |
-| Runtime                         | `apps/runtime/src/config.ts`                         |      98 |
-| UGV Provider                    | `apps/ugv-provider-adapter/src/config.ts`            |      50 |
-| NPC Tank Provider               | `apps/npc-tank-provider-adapter/src/config.ts`       |      52 |
+| Runtime                         | `apps/runtime/src/config.ts`                         |      99 |
+| UGV Provider                    | `apps/ugv-provider-adapter/src/config.ts`            |      51 |
+| NPC Tank Provider               | `apps/npc-tank-provider-adapter/src/config.ts`       |      53 |
 | Home Assistant Climate Provider | `apps/home-assistant-climate-provider/src/config.ts` |      26 |
-| **Total**                       | four current Zod schemas                             | **226** |
+| **Total**                       | four current Zod schemas                             | **229** |
 
-An independent AST key-set comparison verifies 226 expected, 226 inventoried,
-and 226 unique component/key pairs. Each JSON item records the source line,
+An independent AST key-set comparison verifies 229 expected, 229 inventoried,
+and 229 unique component/key pairs. Each JSON item records the source line,
 bootstrap/runtime/provider group, subgroup, exact validator expression, default
 presence and value, required status, Secret classification, and Apply Mode.
 
@@ -74,19 +74,21 @@ good future candidate.
 The JSON inventory records the source rule set for each component. Important
 existing constraints include:
 
-- Runtime production forbids development auth and weak lease configuration,
-  requires Adapter mTLS, requires mTLS for enabled Provider telemetry ingress,
-  requires HTTPS for enabled OTLP and configured Outbox webhook, and enforces
-  lease-duration safety equations.
-- UGV and NPC Tank production require Adapter mTLS, MQTT TLS, an explicit MQTT
-  wire mode, and PostgreSQL storage. Required TLS modes require CA,
+- Runtime production forbids development auth and weak lease configuration and
+  enforces lease-duration safety equations. Adapter/telemetry mTLS and
+  OTLP/Outbox HTTPS remain fail-closed unless the operator explicitly sets
+  `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` for an isolated internal network.
+- UGV and NPC Tank production require an explicit MQTT wire mode and PostgreSQL
+  storage. Adapter mTLS and MQTT TLS remain fail-closed unless the same explicit
+  internal-transport opt-in is set. Required TLS modes still require CA,
   certificate, and key paths.
 - Home Assistant forbids token environment values, requires
   `HOME_ASSISTANT_TOKEN_FILE`, restricts the URL protocol, guards production
   plaintext HTTP, validates required mTLS files, and rejects an empty token
   file.
 
-These are source facts, not relaxed or rewritten rules.
+The plaintext exception changes transport requirements only. Authentication,
+Secret handling, persistence, and production safety constraints remain active.
 
 ## Verification
 

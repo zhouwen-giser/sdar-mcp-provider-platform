@@ -35,6 +35,27 @@ describe("Runtime platform bootstrap identity and Secret File support", () => {
     });
   });
 
+  it("permits production PMS Config over HTTP only for explicit internal transport", () => {
+    const environment = {
+      RUNTIME_ENV: "production",
+      AUTH_MODE: "jwt_hs256",
+      JWT_HS256_SECRET: "0123456789abcdef0123456789abcdef",
+      PMS_DEPLOYMENT_ID: "deployment-1",
+      PMS_INSTANCE_ID: "instance-1",
+      PMS_RUNTIME_CONFIG_URL: "http://pms.internal",
+      PMS_RUNTIME_CONFIG_TOKEN_FILE: "/run/secrets/pms-token",
+      PMS_RUNTIME_CONFIG_CACHE_PATH: "/var/lib/sdar/runtime-config.json",
+    };
+    expect(() => loadRuntimeConfig(environment)).toThrow("production requires Adapter mTLS");
+
+    const allowed = {
+      ...environment,
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+    };
+    const bootstrap = loadRuntimeConfigClientBootstrap(loadRuntimeConfig(allowed), allowed);
+    expect(bootstrap?.baseUrl).toBe("http://pms.internal/");
+  });
+
   it("accepts matching legacy aliases and rejects every partial or conflicting identity", () => {
     expect(
       loadRuntimeConfig({

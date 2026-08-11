@@ -151,6 +151,7 @@ export const RuntimeWorkerEventsResolvedSchema = RuntimeWorkerEventsInputBaseSch
 const RuntimeWorkerEventsInputSchema = z
   .object({
     RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
+    ALLOW_INSECURE_INTERNAL_TRANSPORT: BooleanEnvironmentSchema.default(false),
     ...RuntimeWorkerEventsInputBaseSchema.shape,
   })
   .superRefine((value, context) => {
@@ -175,6 +176,7 @@ const RuntimeWorkerEventsInputSchema = z
       }
       if (
         value.PROVIDER_TELEMETRY_INGRESS_ENABLED &&
+        !value.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
         value.PROVIDER_TELEMETRY_TLS_MODE !== "required"
       ) {
         context.addIssue({
@@ -194,6 +196,7 @@ const RuntimeWorkerEventsInputSchema = z
     }
     if (
       value.RUNTIME_ENV === "production" &&
+      !value.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
       value.OUTBOX_WEBHOOK_URL !== undefined &&
       !value.OUTBOX_WEBHOOK_URL.startsWith("https://")
     ) {

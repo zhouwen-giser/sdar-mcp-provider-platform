@@ -113,6 +113,28 @@ describe("BootstrapConfigRenderer", () => {
       );
     }
   });
+
+  it("permits production PMS bootstrap over HTTP only with the internal transport opt-in", () => {
+    const value = input();
+    const pms = value.pms;
+    if (pms === undefined) throw new Error("TEST_PMS_BOOTSTRAP_MISSING");
+    const rendered = renderer.render({
+      ...value,
+      pms: { ...pms, baseUrl: "http://pms.internal" },
+      effectiveConfig: {
+        ...value.effectiveConfig,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: true,
+        ADAPTER_TLS_MODE: "disabled",
+      },
+    });
+
+    expect(rendered.environment).toMatchObject({
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      ADAPTER_TLS_MODE: "disabled",
+      PMS_RUNTIME_CONFIG_URL: "http://pms.internal/",
+      PMS_RUNTIME_REGISTRATION_URL: "http://pms.internal/",
+    });
+  });
 });
 
 function input(): BootstrapConfigRendererInput {

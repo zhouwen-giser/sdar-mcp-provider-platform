@@ -90,7 +90,11 @@ export function loadRuntimeConfigClientBootstrap(
   ) {
     throw new Error("PMS_RUNTIME_CONFIG_URL_INVALID");
   }
-  if (runtime.RUNTIME_ENV === "production" && url.protocol !== "https:") {
+  if (
+    runtime.RUNTIME_ENV === "production" &&
+    !runtime.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
+    url.protocol !== "https:"
+  ) {
     throw new Error("PMS_RUNTIME_CONFIG_PRODUCTION_HTTPS_REQUIRED");
   }
   return {

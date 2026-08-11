@@ -6,6 +6,7 @@
     "ADAPTER_HOST": "0.0.0.0",
     "ADAPTER_PORT": 7013,
     "ADAPTER_TLS_MODE": "disabled",
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT": false,
     "LOG_LEVEL": "info",
     "NPC_TANK_ADAPTER_DATABASE_POOL_MAX": 8,
     "NPC_TANK_ADAPTER_STORE_MODE": "postgres",
