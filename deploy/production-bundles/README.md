@@ -48,3 +48,28 @@ image identity drift, missing non-root users or healthchecks, and wrong producti
 labels. Both products intentionally use the `strict-intranet-plaintext` transport profile: HTTP,
 MQTT, Adapter gRPC, and Provider telemetry are unencrypted, and the operator must keep every bound
 port and upstream endpoint inside an isolated internal network.
+
+## ARM64 source-build deliveries
+
+The ARM64 variant intentionally contains no Docker image archive and does not publish or pull SDAR
+application images from a public registry. It carries the exact committed source archive. On a
+native Linux ARM64 deployment host, its verified `build-images.sh` pulls digest-pinned official
+Node/PostgreSQL ARM64 images and builds the five product application targets locally before the
+unchanged `--no-build --pull never` Compose startup path is allowed.
+
+Generate both ARM64 source-build ZIPs from a clean committed `HEAD`:
+
+```bash
+node scripts/production-bundles/build-arm64-source.mjs
+```
+
+Outputs are written to `reports/production-bundles/delivery/`:
+
+- `sdar-ugv-production-arm64-source-build-delivery.zip`
+- `sdar-npc-tank-production-arm64-source-build-delivery.zip`
+- one `.sha256` sidecar for each ZIP
+
+The deployment host does not need Git, Node.js, or pnpm, but its Docker daemon must run natively on
+ARM64 with BuildKit enabled. The first build requires HTTPS access to Docker Hub, the npm registry,
+the grpc-tools binary host, and GitHub release assets. This build-time network requirement does not
+change the plaintext-only internal runtime transport profile.

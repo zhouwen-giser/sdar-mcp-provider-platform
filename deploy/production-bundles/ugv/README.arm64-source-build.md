@@ -1,0 +1,149 @@
+# UGV ARM64 源码现场构建独立部署包
+
+本文档只适用于 `sdar-ugv-production-arm64-source-build-delivery.zip`。它与同目录
+`README.md` 描述的 AMD64 离线镜像包是两种不同交付形式：本包不包含 UGV 应用镜像、
+PMS 应用镜像或 PostgreSQL 镜像，也不会把本项目自行构建的镜像发布或推送到任何公共
+镜像仓库。
+
+交付 ZIP 携带发布版本对应的精确源码归档、`pnpm-lock.yaml`、Dockerfile、ARM64 构建
+计划、基础镜像摘要锁、部署配置和全包校验和。首次执行 `bin/up.sh` 时，目标主机上的
+Docker 会拉取锁定的 ARM64 基础镜像并在本机从源码构建五个应用镜像；构建结果只保留
+在该主机的 Docker image store 中。部署主机不需要预装 Git、Node.js 或 pnpm。
+
+## 网络边界
+
+源码构建阶段与运行阶段采用不同的网络边界：
+
+- 首次构建必须能通过 HTTPS 访问 Docker Hub，以拉取 Node.js 和 PostgreSQL 的 ARM64
+  基础镜像；
+- Docker 构建还必须能通过 HTTPS 访问 npm 软件包源、gRPC 相关依赖下载站点以及
+  GitHub/GitHub Releases。实际使用代理或内部镜像时，应根据构建日志放行等价地址；
+- 本项目的 UGV Runtime、PMS、Web 和 Provider 镜像只在目标主机构建，不上传公共仓库；
+- 上述 HTTPS 只用于构建期软件供应链访问，不改变运行期的严格内网明文策略。
+
+运行后，Device MCP 使用内网 `http://.../mcp`，MQTT 使用 `mqtt://`（或经审查的
+`ws://`），Runtime 与 Adapter RPC 以及 Provider telemetry 均不启用 TLS。部署包不
+生成或挂载应用侧 CA、证书和私钥，也不要求 HTTPS/MQTTS 终结器或安全网关。
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true` 是生产进程使用该策略的显式许可。
+
+Docker Hub 和软件包源通常依赖部署主机及 Docker daemon 的标准 HTTPS 信任配置。
+如果目标环境完全不能进行上述 HTTPS 出网，也没有等价内部代理或镜像源，则不能使用
+本源码现场构建包；应改用同目录 `README.md` 所描述的离线镜像交付包。
+
+## 服务清单
+
+部署包含八个常驻服务，并在启动时运行一次幂等的 `pms-seed`：
+
+| 服务                   | 用途                           | 主机暴露                     |
+| ---------------------- | ------------------------------ | ---------------------------- |
+| `pms-postgres`         | PMS 持久化                     | 不暴露                       |
+| `pms-api`              | PMS API                        | 不暴露                       |
+| `pms-worker`           | PMS Worker                     | 不暴露                       |
+| `pms-web`              | PMS Web 与 Console V1 同源代理 | 默认 `0.0.0.0:8088`，仅内网  |
+| `ugv-adapter-postgres` | UGV Adapter 状态               | 不暴露                       |
+| `ugv-runtime-postgres` | UGV Runtime 状态、任务与事件   | 不暴露                       |
+| `ugv-adapter`          | UGV Provider Adapter           | 不暴露                       |
+| `ugv-runtime`          | JWT 保护的 MCP Runtime         | 默认 `0.0.0.0:19100`，仅内网 |
+
+三个 PostgreSQL 服务位于 Docker 内部网络。PMS Web 当前没有最终用户认证闭环，必须
+依靠 VLAN、路由、主机防火墙和访问控制，把 `8088`、`19100` 及所有容器网络端口限制
+在授权内网内。Runtime 仍强制 JWT；不得把 Runtime JWT 签名密钥分发给普通调用方。
+
+## 目标主机要求
+
+- 原生 ARM64/AArch64 Linux Docker 主机；构建脚本会拒绝非 Linux ARM64 Docker server；
+- Docker Engine、可用的 BuildKit 和 Docker Compose v2；
+- Bash、GNU tar、OpenSSL、`sha256sum`、`stat`、`awk` 和常用 POSIX 工具；
+- UID 1000，或可由 root 初始化后把状态和秘密文件归属设置为 UID/GID 1000；
+- 足够容纳源码构建上下文、BuildKit cache、六个本地镜像、数据库卷和日志的磁盘空间；
+- 到真实内网 Device MCP、MQTT 端点的 DNS、路由、防火墙和时钟同步正常；
+- 首次构建具备前述 Docker Hub、npm、gRPC 依赖站点和 GitHub HTTPS 出网能力。
+
+五个应用镜像以 `linux/arm64` 为目标在本机生成。PostgreSQL 镜像不参与源码构建，
+而是由 Docker 按发布锁定的摘要拉取 ARM64 版本。构建脚本会检查操作系统、架构、源码
+revision、生产 Provider/profile 标签、非 root 用户和健康检查；任何检查失败都会在
+Compose 启动前终止，不会回退到 mock 镜像或其他 CPU 架构。
+
+## 首次部署
+
+先验证交付 ZIP 的旁路校验文件并解压：
+
+```bash
+sha256sum --check sdar-ugv-production-arm64-source-build-delivery.zip.sha256
+unzip sdar-ugv-production-arm64-source-build-delivery.zip
+cd sdar-ugv-production-arm64-source-build
+```
+
+初始化配置和秘密：
+
+```bash
+sudo bash deploy/ugv/bin/init.sh
+```
+
+`init.sh` 从 `.env.example` 创建权限受限的 `.env`，创建状态目录，并随机生成三个
+PostgreSQL 数据库凭据、PMS 管理凭据和 Runtime JWT HS256 密钥。它不会生成 TLS
+证书，也不会生成、复制或猜测真实 UGV 端点的凭据。重复执行会保留已有随机秘密，
+不会自动轮换。
+
+编辑 `deploy/ugv/.env`，至少设置真实内网端点和明确的 wire mode：
+
+```dotenv
+ALLOW_INSECURE_INTERNAL_TRANSPORT=true
+UGV_SIM_DEVICE_MCP_URL=http://device-mcp.intranet.local/mcp
+UGV_SIM_MQTT_URL=mqtt://mqtt.intranet.local:1883
+UGV_MQTT_WIRE_MODE=ros_bridge_json
+```
+
+不要在 `.env` 中加入 revision、平台、基础镜像、摘要、构建目标或可部署状态等发布
+身份键；它们只能来自交付流程生成的只读构建锁文件。
+
+启动：
+
+```bash
+bash deploy/ugv/bin/up.sh
+```
+
+`up.sh` 会在修改 Compose 状态前依次完成：交付包和源码归档校验、ARM64/BuildKit
+检查、摘要锁定的基础镜像拉取、五个生产应用镜像的本机源码构建和元数据核验。随后它
+启动八个常驻服务、执行幂等 PMS seed，并运行真实链路只读 smoke。构建过程中不会向
+公共或私有应用镜像仓库执行 push。
+
+## 状态、只读验证和停止
+
+```bash
+bash deploy/ugv/bin/status.sh
+bash deploy/ugv/bin/smoke.sh
+bash deploy/ugv/bin/down.sh
+```
+
+`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、JWT Runtime、
+真实 Device MCP/MQTT 连接和数据新鲜度，并只调用以下读取工具：
+
+- `vehicle_get_state`
+- `vehicle_get_capabilities`
+- `vehicle_get_payload_status`
+- `vehicle_get_targets`
+
+它不会调用导航、侦察、跟踪、激光、效应器或其他变更型操作。真实端点不可达、MQTT
+尚未收到数据或状态超过 `UGV_SMOKE_MAX_STATE_AGE_MS` 时，smoke 会失败，而不是使用
+模拟数据给出成功结果。
+
+`down.sh` 只停止容器，保留三个具名数据库卷、Worker 状态、合同捕获文件、`.env` 和
+秘密。不要使用 `docker compose down --volumes`，除非已经确认要永久删除数据库。
+
+## 数据、秘密与资格边界
+
+秘密和状态文件必须保持部署脚本设置的 UID 1000、目录 `0700`、文件 `0600` 权限。
+备份至少应覆盖数据库一致性备份、`deploy/ugv/.env`、`deploy/ugv/secrets/`、Worker
+状态和 UGV 合同报告，并按组织策略加密保存。JWT 或数据库密码轮换涉及多个消费者，
+应在维护窗口按整体迁移方案执行。
+
+本包仅提供从精确源码在原生 ARM64 主机生成部署镜像的可重复路径，不声称构建产物已经
+完成目标现场的生产认证。UGV Provider Package 的 real-resource 状态仍为 `pending`；
+当前异构 MQTT bridge 的 envelope、topic 和 QoS 差异仍属于部分资格。直接 Runtime
+容器是本部署的 vendor-managed 运行权威，platform-managed Runtime 和 PMS Registry
+权威闭环均为 `not_configured`。
+
+只有目标主机上的源码构建、八服务健康检查、PMS seed 以及真实只读 smoke 全部通过后，
+才能把该次现场部署记录为已验证；这不会把全局资格状态自动提升为 `qualified`，也不会
+授权执行任何真实设备副作用测试。

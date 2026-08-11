@@ -1,4 +1,6 @@
-FROM node:22-bookworm-slim AS build
+ARG NODE_BASE_IMAGE=node:22-bookworm-slim
+
+FROM ${NODE_BASE_IMAGE} AS build
 ARG VITE_PMS_DATA_MODE=api
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
@@ -72,7 +74,7 @@ FROM production-dependencies AS ugv-real-production-dependencies
 RUN rm -rf node_modules/.pnpm/node_modules/@sdar \
     && touch -h -d '@0' node_modules/.pnpm/node_modules
 
-FROM node:22-bookworm-slim AS ugv-real-base
+FROM ${NODE_BASE_IMAGE} AS ugv-real-base
 ARG VCS_REF=unknown
 ENV NODE_ENV=production
 WORKDIR /app
@@ -108,7 +110,7 @@ FROM production-dependencies AS npc-real-production-dependencies
 RUN rm -rf node_modules/.pnpm/node_modules/@sdar \
     && touch -h -d '@0' node_modules/.pnpm/node_modules
 
-FROM node:22-bookworm-slim AS npc-real-base
+FROM ${NODE_BASE_IMAGE} AS npc-real-base
 ARG VCS_REF=unknown
 ENV NODE_ENV=production
 WORKDIR /app
@@ -188,7 +190,7 @@ LABEL org.opencontainers.image.title="SDAR NPC Tank Production Provider Adapter"
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "const net=require('node:net');const socket=net.connect({host:'127.0.0.1',port:Number(process.env.ADAPTER_PORT||7013)},()=>socket.end());socket.setTimeout(2000,()=>socket.destroy(Error('timeout')));socket.on('error',()=>process.exit(1))"]
 
-FROM node:22-bookworm-slim AS runtime
+FROM ${NODE_BASE_IMAGE} AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=production-dependencies /workspace/node_modules /app/node_modules
@@ -201,7 +203,7 @@ RUN mkdir -p /var/lib/sdar \
 USER node
 CMD ["node", "dist/apps/runtime/src/main.js"]
 
-FROM node:22-bookworm-slim AS pms-base
+FROM ${NODE_BASE_IMAGE} AS pms-base
 ARG VCS_REF=unknown
 ENV NODE_ENV=production
 WORKDIR /app
@@ -307,7 +309,7 @@ USER node
 LABEL io.sdar.production-bundle.profile="production" \
       io.sdar.production-bundle.provider="npc-tank"
 
-FROM node:22-bookworm-slim AS pms-web
+FROM ${NODE_BASE_IMAGE} AS pms-web
 ARG VCS_REF=unknown
 ENV NODE_ENV=production \
     PMS_WEB_ROOT=/app/web \

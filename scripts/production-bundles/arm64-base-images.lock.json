@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux/arm64",
+  "resolvedAt": "2026-08-11",
+  "images": {
+    "node": {
+      "tag": "docker.io/library/node:22-bookworm-slim",
+      "indexDigest": "sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436",
+      "platformManifestDigest": "sha256:253da19867dd03e2f817f433d7782adefd2a2bac8729fcd4ebc6770665167a24"
+    },
+    "postgres": {
+      "tag": "docker.io/library/postgres:17-alpine",
+      "indexDigest": "sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193",
+      "platformManifestDigest": "sha256:b797483593b82cbea9a7ee41c88f324a90d10d9c2504d40e755d91c75456366d"
+    }
+  }
+}
