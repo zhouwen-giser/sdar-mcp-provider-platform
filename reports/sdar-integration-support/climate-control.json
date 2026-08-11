@@ -2,38 +2,46 @@
   "schemaVersion": 1,
   "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
   "phase": "G10",
-  "status": "blocked",
-  "disposition": "deferred_by_safety",
-  "evidenceClass": "real_environment_gate_observation",
-  "observedAt": "2026-08-10T16:22:14.664Z",
+  "status": "partial",
+  "disposition": "real_provider_path_passed_sdar_task_plan_not_executed",
+  "evidenceClass": "real_smpp_runtime_adapter_home_assistant",
+  "observedAt": "2026-08-11T21:51:48.044Z",
   "resourceId": "living-room-air-conditioner",
+  "smppProviderPathReady": true,
   "realClimateControlReady": false,
   "blocker": {
-    "code": "REAL_DEVICE_WRITE_AUTHORITY_MISSING",
-    "missingRequiredGates": [
-      "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
-      "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
-    ],
-    "climatePowerGateApplicable": false,
-    "climatePowerReason": "climate_set_power is excluded from the qualified scenario"
+    "code": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED",
+    "message": "The bounded real SMPP Runtime, Adapter and Home Assistant path passed, but this run did not create the required SDAR Goal, Plan, confirmation or MCP lineage."
   },
   "requiredSequence": [
-    { "operation": "climate_get_state", "status": "not_run_due_to_closed_write_gate" },
-    { "operation": "climate_set_hvac_mode", "status": "not_run_due_to_closed_write_gate" },
-    { "operation": "climate_set_temperature", "status": "not_run_due_to_closed_write_gate" },
-    { "operation": "climate_get_state", "status": "not_run_due_to_closed_write_gate" }
+    { "operation": "climate_get_state", "status": "passed" },
+    { "operation": "climate_set_hvac_mode", "status": "completed", "desired": "cool" },
+    { "operation": "climate_set_temperature", "status": "completed", "desired": 17 },
+    { "operation": "climate_set_temperature.restore", "status": "completed", "desired": 16 },
+    {
+      "operation": "climate_set_power.restore",
+      "status": "completed_after_300000ms_opposite_power_interval",
+      "desired": "off"
+    },
+    { "operation": "climate_get_state.final", "status": "passed" }
   ],
   "execution": {
-    "providerTasksCreated": 0,
-    "adapterWritesCalled": 0,
-    "homeAssistantWritesCalled": 0,
-    "climateSetPowerCalled": false,
-    "physicalWritesObserved": 0,
-    "stateChanged": false,
+    "providerTasksCompleted": 4,
+    "sameArgumentsSameTask": true,
+    "sameKeyDifferentArgumentsRejected": true,
+    "modeBeforeTemperature": true,
     "partialReportedAsComplete": false,
-    "restorationAttempted": false,
-    "restoreStatus": "not_required_no_write_occurred"
+    "restoreStatus": "restored",
+    "finalState": { "power": "off", "hvacMode": "off", "targetTemperature": 16 }
   },
+  "authoritativeCountsAfterExecution": {
+    "activeTasks": 0,
+    "uncertainTasks": 0
+  },
+  "evidenceReferences": [
+    "reports/real-device-preparation-continuation/three-device-e2e.json",
+    "reports/real-device-preparation-continuation/climate-restore-recovery.json"
+  ],
   "redaction": {
     "secretsIncluded": false,
     "endpointsIncluded": false,

@@ -62,8 +62,10 @@ The required branch is the retained `codex/ha-real-device-preparation`, initiall
 - [x] 2026-08-12 supported G08 end to end: one real SDAR A2A Task invoked the exact Light and
       Climate `get_state` operations once each through the live SMPP Runtimes, returned Provider
       evidence into one combined Outcome, and remained queryable after the SDAR Runtime restart.
-- [ ] G09-G11 are `deferred_by_safety`. Required write gates are absent, so SMPP created no physical
-      side effect and the light/climate/composite readiness fields remain false.
+- [ ] G09/G10 completed bounded real SMPP Runtime/Adapter/Home Assistant writes, idempotency checks
+      and restoration, but remain partial because the SDAR governed Goal/Plan path was not run.
+- [ ] G11 executed real parallel Climate/Light tasks but failed because the Climate objective did
+      not remain stable; all devices were restored and the process-scoped gates were closed.
 - [ ] G12 is blocked. Controlled Runtime/Adapter/provider and same-Goal read-only recovery coverage
       passed, but Required real in-flight restart, HA fault and corrupt-state cases were not executed.
 - [ ] G13 cross-repository acceptance is blocked by the SDAR full-run Phase 13 Runtime P95
@@ -98,8 +100,9 @@ The required branch is the retained `codex/ha-real-device-preparation`, initiall
   implementation files still have an empty diff.
 - Runtime readiness evidence is time-bounded. The G06 `available` observation is claimed only for
   its observation/G07 admission interval, not after its TTL expired.
-- G09-G11 were not inferred from the earlier Home Assistant preparation run. This Goal has zero
-  physical writes and device restore status `RESTORED`.
+- G09-G11 were executed under a unique process-scoped write run. G09/G10 provider paths passed;
+  G11 exposed a real Climate state reversion. The failure is preserved without result-seeking
+  retries, all devices are restored and the write gates are closed.
 
 ## Implementation and validation sequence
 
@@ -145,10 +148,10 @@ Canonical contract assets live at `protocol/consumer-projections/sdar-registry/v
 reports and final handoff live at `reports/sdar-integration-support/`; cross-repository state lives at
 `../.codex-sdar-smpp/`.
 
-Final Draft-publication outcome is `BLOCKED`: G01-G08 passed; G09-G11 are
-`deferred_by_safety`; G12 lacks Required real fault evidence; and G13 cross-repository acceptance is
+Final Draft-publication outcome is `BLOCKED`: G01-G08 passed; G09/G10 are provider-path partial and
+G11 failed its real device objective; G12 lacks Required real fault evidence; and G13 cross-repository acceptance is
 blocked by the SDAR Phase 13 full-run regression. Active/uncertain SDAR Tasks are `0/0`,
-active/uncertain SMPP Tasks are `0/0`, physical writes are `0`, device restore is `RESTORED`, and
+active/uncertain SMPP Tasks are `0/0`, device restore is `RESTORED`, write gates are closed, and
 `crossRepositoryIntegrationReady=false`. Independent commit/PR traceability and the final explicit
 code-versus-external blocker list are recorded in the final handoff; this status is not merge
 authorization.

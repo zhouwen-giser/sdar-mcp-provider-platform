@@ -2,36 +2,35 @@
   "schemaVersion": 1,
   "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
   "phase": "G09",
-  "status": "blocked",
-  "disposition": "deferred_by_safety",
-  "evidenceClass": "real_environment_gate_observation",
-  "observedAt": "2026-08-10T16:22:14.664Z",
+  "status": "partial",
+  "disposition": "real_provider_path_passed_sdar_task_plan_not_executed",
+  "evidenceClass": "real_smpp_runtime_adapter_home_assistant",
+  "observedAt": "2026-08-11T21:53:54.548Z",
   "resourceId": "living-room-main-light",
+  "smppProviderPathReady": true,
   "realLightControlReady": false,
   "blocker": {
-    "code": "REAL_DEVICE_WRITE_AUTHORITY_MISSING",
-    "missingRequiredGates": [
-      "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
-      "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
-    ]
+    "code": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED",
+    "message": "The bounded real SMPP Runtime, Adapter and Home Assistant path passed, but this run did not create the required SDAR Goal, Plan, confirmation or MCP lineage."
   },
   "execution": {
-    "providerTaskCreated": false,
-    "adapterWriteCalled": false,
-    "homeAssistantWriteCalled": false,
-    "physicalWritesObserved": 0,
-    "stateChanged": false,
-    "restorationAttempted": false,
-    "restoreStatus": "not_required_no_write_occurred"
+    "initialPower": "off",
+    "desiredPower": "on",
+    "changedPower": "on",
+    "restoredPower": "off",
+    "providerTasksCompleted": 2,
+    "physicalWritesObserved": 2,
+    "sameArgumentsSameTask": true,
+    "sameKeyDifferentArgumentsRejected": true,
+    "restoreStatus": "restored"
   },
-  "requiredChecks": {
-    "singleToolsCall": "not_run",
-    "sameTaskRetryNoDuplicateSideEffect": "not_run",
-    "notificationMatchesTasksGet": "not_run",
-    "runtimeRestartDoesNotReplayCall": "not_run",
-    "finalStateMatchesEvidence": "not_run",
-    "restorationSucceeded": "not_run_no_write_occurred"
+  "authoritativeCountsAfterExecution": {
+    "activeTasks": 0,
+    "uncertainTasks": 0
   },
+  "companionEvidenceReferences": [
+    "skill-driven-agent-runtime/reports/sdar-smpp-integration/raw/g09-main-light-real.redacted.json"
+  ],
   "redaction": {
     "secretsIncluded": false,
     "endpointsIncluded": false,

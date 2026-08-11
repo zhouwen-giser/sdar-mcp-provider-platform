@@ -5,6 +5,8 @@ import { Pool } from "pg";
 import { summarizeRuntimeTaskStates } from "./live-runtime-task-state.js";
 
 const ROOT = resolve(process.cwd());
+const LOCAL_STATE_ROOT = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(ROOT, ".local"));
+const PMS_CONTINUATION_ROOT = resolve(LOCAL_STATE_ROOT, "pms-continuation");
 const API = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const ENVIRONMENT = "home-lab";
 const RUN_ID = process.env.REAL_DEVICE_TEST_RUN_ID?.trim() ?? "";
@@ -46,7 +48,7 @@ const report: JsonObject = {
 try {
   if (!GATE_OPEN) throw new Error("REAL_DEVICE_SIDE_EFFECTS_GATE_CLOSED");
   const managementToken = (
-    await readFile(resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token"), "utf8")
+    await readFile(resolve(PMS_CONTINUATION_ROOT, "secrets/pms-management.token"), "utf8")
   ).trim();
   const registryResponse = await fetch(`${API}/api/v1/registry/${ENVIRONMENT}/latest`, {
     headers: {
@@ -296,8 +298,8 @@ async function taskCounts(): Promise<JsonObject> {
   const url = (
     await readFile(
       resolve(
-        ROOT,
-        ".local/pms-continuation/roots/runtime-secrets/deployments/ha-light-deployment/instances/database/runtime.secret",
+        PMS_CONTINUATION_ROOT,
+        "roots/runtime-secrets/deployments/ha-light-deployment/instances/database/runtime.secret",
       ),
       "utf8",
     )

@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-11T18:24:19.134Z",
+  "generatedAt": "2026-08-11T22:09:09.538Z",
   "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
   "environment": "home-lab",
   "sdar": {
     "repository": "zhouwen-giser/skill-driven-agent-runtime",
     "branch": "codex/sdar-smpp-home-lab-integration",
-    "sha": "93889e87088072ab12fe1a1c574d734d2fa629a7",
-    "localEvidenceHeadSha": "03bf7d84a12f27b3e05e87ff6a334544ac75e492"
+    "sha": "258c8113bd0523064525dd1f3b15c204e12cfba3",
+    "localEvidenceHeadSha": "258c8113bd0523064525dd1f3b15c204e12cfba3"
   },
   "smpp": {
     "repository": "zhouwen-giser/sdar-mcp-provider-platform",
     "branch": "codex/ha-real-device-preparation",
-    "sha": "5b17f12ff7312449cc7e3376795ff24c0375b9d9",
-    "localEvidenceHeadSha": "0982a194e465111ddb8abf4b188a2c059e529863"
+    "sha": "3d24d3dd1f01c35704ec0d247bdb55941608584f",
+    "localEvidenceHeadSha": "3d24d3dd1f01c35704ec0d247bdb55941608584f"
   },
   "publication": {
-    "candidateDefinition": "The SHAs identify the tested local implementation and evidence heads. Existing Draft PRs remain at their prior published heads until explicit push authorization is granted.",
+    "candidateDefinition": "The SHAs identify the pushed implementation heads exercised by the real-device run. This handoff is carried by a follow-up evidence commit on the same Draft PR branches.",
     "sdarDraftPullRequest": "https://github.com/zhouwen-giser/skill-driven-agent-runtime/pull/19",
     "smppDraftPullRequest": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/10",
     "merged": false,
     "mergeAuthorized": false,
     "supportBranchRetained": true,
-    "localCommitsPushed": false
+    "localCommitsPushed": true
   },
   "registry": {
     "nativeRevision": 2,
@@ -52,25 +52,25 @@
     {
       "resourceId": "living-room-aux-light",
       "disposition": "unverified_optional",
-      "reason": "Excluded from the final qualified allowlist because it was not Required and was not exercised by the final G07 execution."
+      "reason": "Exercised only as an optional participant in the failed G11 scenario; it is not promoted into the final qualified allowlist."
     }
   ],
   "allowedOperations": ["light_get_state", "climate_get_state"],
   "blockedOperations": [
     {
       "operation": "light_set_power",
-      "disposition": "deferred_by_safety",
-      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+      "disposition": "provider_path_only_sdar_governed_path_unverified",
+      "reasonCode": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED"
     },
     {
       "operation": "climate_set_hvac_mode",
-      "disposition": "deferred_by_safety",
-      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+      "disposition": "provider_path_only_sdar_governed_path_unverified",
+      "reasonCode": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED"
     },
     {
       "operation": "climate_set_temperature",
-      "disposition": "deferred_by_safety",
-      "reasonCode": "REAL_DEVICE_WRITE_AUTHORITY_MISSING"
+      "disposition": "provider_path_only_sdar_governed_path_unverified",
+      "reasonCode": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED"
     },
     {
       "operation": "light_set_brightness",
@@ -79,8 +79,8 @@
     },
     {
       "operation": "climate_set_power",
-      "disposition": "not_required_excluded",
-      "reason": "Excluded from G10/G11; the dedicated climate-power gate was absent and no invocation occurred."
+      "disposition": "restoration_only",
+      "reason": "Used only to restore the initially-off climate after the mandatory opposite-power interval; it was not a scenario objective."
     }
   ],
   "activeSdarTasks": 0,
@@ -88,6 +88,11 @@
   "uncertainSdarTasks": 0,
   "uncertainSmppTasks": 0,
   "deviceRestoreStatus": "RESTORED",
+  "providerPathReadiness": {
+    "realLightProviderPathReady": true,
+    "realClimateProviderPathReady": true,
+    "crossProviderObjectiveStable": false
+  },
   "readiness": {
     "projectionContractReady": true,
     "registryIntegrationReady": true,
@@ -103,9 +108,9 @@
   },
   "safety": {
     "writeAuthorityOpen": false,
-    "physicalDeviceWritesAttempted": 0,
-    "physicalDeviceWritesObserved": 0,
-    "restoreDisposition": "not_required_no_write_occurred"
+    "writeAuthorityOpenedForBoundedRun": true,
+    "boundedPhysicalWritesExecuted": true,
+    "restoreDisposition": "restored_original_state"
   },
   "remainingBlockers": {
     "code": [
@@ -118,11 +123,12 @@
     ],
     "external": [
       {
-        "code": "REAL_DEVICE_SIDE_EFFECT_GATES_ABSENT",
-        "missingRequiredGates": [
-          "ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES",
-          "REAL_DEVICE_TEST_RUN_ID=<unique non-empty value>"
-        ]
+        "code": "SDAR_GOVERNED_WRITE_PATH_NOT_EXECUTED",
+        "affectedPhases": ["G09", "G10"]
+      },
+      {
+        "code": "CLIMATE_OBJECTIVE_STATE_NOT_STABLE",
+        "affectedPhases": ["G11"]
       },
       {
         "code": "REAL_IN_FLIGHT_AND_FAULT_RECOVERY_UNVERIFIED",
