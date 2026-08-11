@@ -17,6 +17,8 @@ export const PRODUCTS = Object.freeze({
     stageOnlyArchiveName: "sdar-ugv-production-stage-only.zip",
     bundleRootName: "sdar-ugv-production",
     qualificationStatus: "UGV_SIMULATION_PARTIAL",
+    runtimeAuthority: "direct_container",
+    registryAuthority: "pms_worker",
     transportProfile: Object.freeze({
       id: "strict-intranet-plaintext",
       allowInsecureInternalTransport: true,
@@ -61,6 +63,8 @@ export const PRODUCTS = Object.freeze({
     stageOnlyArchiveName: "sdar-npc-tank-production-stage-only.zip",
     bundleRootName: "sdar-npc-tank-production",
     qualificationStatus: "NPC_TANK_SIMULATION_PARTIAL",
+    runtimeAuthority: "direct_container",
+    registryAuthority: "pms_worker",
     transportProfile: Object.freeze({
       id: "strict-intranet-plaintext",
       allowInsecureInternalTransport: true,

@@ -7,13 +7,16 @@ import {
 } from "../../pms-domain/src/index.js";
 import {
   databaseProfileId,
+  createRuntimeProcessProjection,
   requestRuntimeDeployment,
   runtimeConfigProfileId,
   runtimeDeploymentId,
   runtimeEnvironmentId,
+  runtimeInstanceId,
   runtimeProviderId,
   type RuntimeDeployment,
   type RuntimeDeploymentDesiredState,
+  type RuntimeProcessProjection,
   type RuntimeDeploymentSnapshot,
 } from "../../runtime-deployment/src/index.js";
 import { requireAuditContext, type AuditContext } from "./audit-service.js";
@@ -25,6 +28,7 @@ export type RuntimeDeploymentApplicationErrorCode =
   | "RUNTIME_DEPLOYMENT_CONFIG_PROFILE_UNAVAILABLE"
   | "RUNTIME_DEPLOYMENT_DATABASE_PROFILE_UNAVAILABLE"
   | "RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED"
+  | "RUNTIME_DEPLOYMENT_COMMAND_UNSUPPORTED"
   | "RUNTIME_DEPLOYMENT_REVISION_CONFLICT";
 
 export class RuntimeDeploymentApplicationError extends Error {
@@ -67,8 +71,13 @@ export interface RuntimeDeploymentJobPort {
 
 export interface RuntimeDeploymentApplicationRepositories {
   readonly deployments: RuntimeDeploymentRepositoryPort;
+  readonly processes: RuntimeDeploymentExpectedProcessPort;
   readonly jobs: RuntimeDeploymentJobPort;
   readonly audit: AuditRepository;
+}
+
+export interface RuntimeDeploymentExpectedProcessPort {
+  insertExpected(providerId: string, value: RuntimeProcessProjection): Promise<void>;
 }
 
 export interface RuntimeDeploymentApplicationUnitOfWork {
@@ -77,16 +86,36 @@ export interface RuntimeDeploymentApplicationUnitOfWork {
   ): Promise<T>;
 }
 
-export interface CreateRuntimeDeploymentInput {
+interface CreateRuntimeDeploymentInputBase {
   readonly deploymentId: string;
   readonly providerId: string;
   readonly environment: string;
   readonly runtimeVersion: string;
-  readonly databaseProfileId: string;
-  readonly configProfileId: string;
   readonly adapterEndpoint?: string;
   readonly desiredReplicas?: number;
 }
+
+export interface CreatePlatformManagedRuntimeDeploymentInput extends CreateRuntimeDeploymentInputBase {
+  readonly runtimeAuthority?: "platform_managed";
+  readonly databaseProfileId: string;
+  readonly configProfileId: string;
+  readonly directContainer?: never;
+}
+
+export interface CreateDirectContainerRuntimeDeploymentInput extends CreateRuntimeDeploymentInputBase {
+  readonly runtimeAuthority: "direct_container";
+  readonly adapterEndpoint: string;
+  readonly databaseProfileId?: never;
+  readonly configProfileId?: never;
+  readonly directContainer: {
+    readonly instanceId: string;
+    readonly controlEndpoint: string;
+    readonly advertisedEndpoint: string;
+  };
+}
+
+export type CreateRuntimeDeploymentInput =
+  CreatePlatformManagedRuntimeDeploymentInput | CreateDirectContainerRuntimeDeploymentInput;
 
 export type RuntimeDeploymentCommandType = "start" | "stop" | "restart" | "scale" | "reconcile";
 
@@ -124,22 +153,67 @@ export class RuntimeDeploymentApplicationService {
     const desiredReplicas = input.desiredReplicas ?? 1;
     assertReplicaCount(desiredReplicas);
     await this.#validatePrerequisites(input);
+    const common = {
+      deploymentId: runtimeDeploymentId(input.deploymentId),
+      providerId: runtimeProviderId(input.providerId),
+      environment: runtimeEnvironmentId(input.environment),
+      desiredState: "running",
+      desiredReplicas,
+      runtimeVersion: input.runtimeVersion,
+      ...(input.adapterEndpoint === undefined ? {} : { adapterEndpoint: input.adapterEndpoint }),
+    } as const;
     const aggregate = requestRuntimeDeployment(
-      {
-        deploymentId: runtimeDeploymentId(input.deploymentId),
-        providerId: runtimeProviderId(input.providerId),
-        environment: runtimeEnvironmentId(input.environment),
-        desiredState: "running",
-        desiredReplicas,
-        runtimeVersion: input.runtimeVersion,
-        databaseProfileId: databaseProfileId(input.databaseProfileId),
-        configProfileId: runtimeConfigProfileId(input.configProfileId),
-        ...(input.adapterEndpoint === undefined ? {} : { adapterEndpoint: input.adapterEndpoint }),
-      },
+      input.runtimeAuthority === "direct_container"
+        ? {
+            ...common,
+            runtimeAuthority: "direct_container",
+            adapterEndpoint: input.adapterEndpoint,
+            directContainer: {
+              instanceId: runtimeInstanceId(input.directContainer.instanceId),
+              controlEndpoint: input.directContainer.controlEndpoint,
+              advertisedEndpoint: input.directContainer.advertisedEndpoint,
+            },
+          }
+        : {
+            ...common,
+            runtimeAuthority: "platform_managed",
+            databaseProfileId: databaseProfileId(input.databaseProfileId),
+            configProfileId: runtimeConfigProfileId(input.configProfileId),
+          },
       this.#now(),
     );
     return this.unitOfWork.transaction(async (repositories) => {
       await repositories.deployments.insert(aggregate.snapshot);
+      if (aggregate.snapshot.runtimeAuthority === "direct_container") {
+        const direct = aggregate.snapshot.directContainer;
+        await repositories.processes.insertExpected(
+          input.providerId,
+          createRuntimeProcessProjection(
+            {
+              instanceId: direct.instanceId,
+              deploymentId: aggregate.snapshot.deploymentId,
+              processManager: "direct_container",
+              pm2Name: null,
+              port: null,
+              controlEndpoint: direct.controlEndpoint,
+              advertisedEndpoint: direct.advertisedEndpoint,
+            },
+            {
+              pid: null,
+              processState: "missing",
+              livenessState: "unknown",
+              readinessState: "unknown",
+              registrationState: "unregistered",
+              catalogState: "unknown",
+              configState: "externally_managed",
+              lastHeartbeatAt: null,
+              runtimeVersion: null,
+              configRevision: 0,
+              restartCount: 0,
+            },
+          ),
+        );
+      }
       await repositories.jobs.enqueue(
         this.#job(input.deploymentId, input.providerId, "create", context),
       );
@@ -164,6 +238,12 @@ export class RuntimeDeploymentApplicationService {
         );
       }
       const before = aggregate.snapshot;
+      if (before.runtimeAuthority === "direct_container" && input.command !== "reconcile") {
+        unavailable(
+          "RUNTIME_DEPLOYMENT_COMMAND_UNSUPPORTED",
+          "Direct-container Runtime lifecycle is controlled outside PMS; only reconcile is supported",
+        );
+      }
       const desired = commandDesiredState(input, before.desiredReplicas);
       if (desired === null && input.expectedDesiredRevision !== before.desiredRevision) {
         unavailable(
@@ -213,6 +293,7 @@ export class RuntimeDeploymentApplicationService {
         "Provider is unavailable for RuntimeDeployment",
       );
     }
+    if (input.runtimeAuthority === "direct_container") return;
     let locator: ReturnType<typeof parseRuntimeConfigProfileLocator>;
     try {
       locator = parseRuntimeConfigProfileLocator(input.configProfileId);

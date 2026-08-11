@@ -22,6 +22,7 @@ describe("RuntimeProcess observed-state projection", () => {
 
     expect(updated).toMatchObject({
       instanceId: "instance-01",
+      processManager: "pm2",
       pid: 202,
       observedRevision: 1,
     });
@@ -84,6 +85,27 @@ describe("RuntimeProcess observed-state projection", () => {
 
   it("requires every process, health, identity, heartbeat, Catalog, and config signal", () => {
     expect(health(processProjection())).toEqual({
+      health: "READY",
+      readyForActive: true,
+      reasonCode: "READY",
+    });
+  });
+
+  it("treats an externally managed direct-container config revision as ready", () => {
+    const process = createRuntimeProcessProjection(
+      {
+        instanceId: runtimeInstanceId("instance-direct"),
+        deploymentId: runtimeDeploymentId("deployment-direct"),
+        processManager: "direct_container",
+        pm2Name: null,
+        port: null,
+        controlEndpoint: "http://ugv-runtime:8080",
+        advertisedEndpoint: "http://192.168.1.7:19100",
+      },
+      observation({ configState: "externally_managed", configRevision: 0 }),
+    );
+
+    expect(evaluateRuntimeObservedHealth(process, { now, heartbeatStaleAfterMs: 30_000 })).toEqual({
       health: "READY",
       readyForActive: true,
       reasonCode: "READY",

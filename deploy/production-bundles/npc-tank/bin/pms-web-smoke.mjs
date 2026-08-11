@@ -36,6 +36,68 @@ if (
   fail("PMS_WEB_NPC_PROVIDER_NOT_PROJECTED");
 }
 
+const providerId = "isr.vehicle.npc-tank.npc-tank1";
+const deploymentId = "production-npc-tank-direct";
+const instanceId = "production-npc-tank-direct-1";
+const proxyHeaders = {
+  authorization: `Bearer ${token}`,
+  "x-correlation-id": "npc-production-pms-web-smoke",
+};
+const deployments = await json(
+  await request(
+    `/api/console/v1/runtime-deployments?providerId=${encodeURIComponent(providerId)}`,
+    { headers: proxyHeaders },
+  ),
+  "PMS_WEB_DEPLOYMENT_RESPONSE_INVALID",
+);
+const deployment = Array.isArray(deployments?.items)
+  ? deployments.items.find((value) => value?.deploymentId === deploymentId)
+  : undefined;
+if (
+  deployment?.status !== "ACTIVE" ||
+  deployment.desiredState !== "running" ||
+  deployment.databaseProfileId !== "not_applicable" ||
+  deployment.configProfileId !== "not_applicable"
+) {
+  fail("PMS_WEB_DIRECT_DEPLOYMENT_NOT_PROJECTED");
+}
+
+const processes = await json(
+  await request(
+    `/api/console/v1/runtime-processes?providerId=${encodeURIComponent(providerId)}&deploymentId=${encodeURIComponent(deploymentId)}`,
+    { headers: proxyHeaders },
+  ),
+  "PMS_WEB_PROCESS_RESPONSE_INVALID",
+);
+const runtimeProcess = Array.isArray(processes?.items)
+  ? processes.items.find((value) => value?.instanceId === instanceId)
+  : undefined;
+if (
+  runtimeProcess?.observedHealth !== "READY" ||
+  runtimeProcess.readyForActive !== true ||
+  runtimeProcess.registrationState !== "registered" ||
+  runtimeProcess.registrationFreshness !== "registered"
+) {
+  fail("PMS_WEB_DIRECT_PROCESS_NOT_PROJECTED");
+}
+
+const registry = await json(
+  await request("/api/console/v1/registry/production/latest", { headers: proxyHeaders }),
+  "PMS_WEB_REGISTRY_RESPONSE_INVALID",
+);
+const registryProvider = Array.isArray(registry?.document?.providers)
+  ? registry.document.providers.find((value) => value?.providerId === providerId)
+  : undefined;
+if (
+  registryProvider?.serverId !== instanceId ||
+  typeof registryProvider.effectiveEndpoint !== "string" ||
+  !registryProvider.effectiveEndpoint.endsWith("/mcp") ||
+  !Array.isArray(registryProvider.tools) ||
+  registryProvider.tools.length === 0
+) {
+  fail("PMS_WEB_REGISTRY_NOT_PROJECTED");
+}
+
 const blocked = await request("/api/v1/runtime-registration/instances/npc-smoke", {});
 const blockedBody = await json(blocked, "PMS_WEB_BOUNDARY_RESPONSE_INVALID");
 if (
@@ -46,7 +108,15 @@ if (
   fail("PMS_WEB_PROXY_BOUNDARY_INVALID");
 }
 
-process.stdout.write("NPC_PMS_WEB_SMOKE_PASS\n");
+process.stdout.write(
+  `${JSON.stringify({
+    status: "passed",
+    providerId,
+    deploymentId,
+    instanceId,
+    registryRevision: registry.revision,
+  })}\n`,
+);
 
 async function request(path, init) {
   try {

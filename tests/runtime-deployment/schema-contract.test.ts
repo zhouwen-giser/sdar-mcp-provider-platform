@@ -101,4 +101,58 @@ describe("RuntimeDeployment JSON Schema contract", () => {
 
     expect(validateProcess(serialized), JSON.stringify(validateProcess.errors)).toBe(true);
   });
+
+  it("validates direct-container intent and expected-instance projections without PM2 fields", () => {
+    const deployment = requestRuntimeDeployment(
+      {
+        deploymentId: runtimeDeploymentId("deployment-direct"),
+        providerId: runtimeProviderId("provider-1"),
+        environment: runtimeEnvironmentId("production"),
+        desiredState: "running",
+        desiredReplicas: 1,
+        runtimeVersion: "0.1.0",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: runtimeInstanceId("instance-direct"),
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      new Date("2026-07-26T00:00:00.000Z"),
+    ).snapshot;
+    if (deployment.runtimeAuthority !== "direct_container") {
+      throw new Error("DIRECT_CONTAINER_SNAPSHOT_EXPECTED");
+    }
+    const process = createRuntimeProcessProjection(
+      {
+        instanceId: deployment.directContainer.instanceId,
+        deploymentId: deployment.deploymentId,
+        processManager: "direct_container",
+        pm2Name: null,
+        port: null,
+        controlEndpoint: deployment.directContainer.controlEndpoint,
+        advertisedEndpoint: deployment.directContainer.advertisedEndpoint,
+      },
+      {
+        pid: null,
+        processState: "missing",
+        livenessState: "unknown",
+        readinessState: "unknown",
+        registrationState: "unregistered",
+        catalogState: "unknown",
+        configState: "externally_managed",
+        lastHeartbeatAt: null,
+        runtimeVersion: null,
+        configRevision: 0,
+        restartCount: 0,
+      },
+    );
+
+    expect(validateDeployment?.(deployment), JSON.stringify(validateDeployment?.errors)).toBe(true);
+    expect(
+      validateProcess({ ...process, lastHeartbeatAt: null }),
+      JSON.stringify(validateProcess.errors),
+    ).toBe(true);
+  });
 });

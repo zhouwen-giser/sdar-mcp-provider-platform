@@ -49,5 +49,5 @@ TEST_DATABASE_URL=<local-postgres> pnpm test:pms-api-production
 ```
 
 The gate creates an isolated schema and temporary credential/token files,
-exercises the real 001–009 migrations and production composition, and removes
+exercises the real 001–010 migrations and production composition, and removes
 its schema and credential files when complete.

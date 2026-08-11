@@ -54,6 +54,11 @@ export interface ResourceIdentityInput {
   readonly resourceId: string;
 }
 
+export interface UpdateResourceMetadataInput extends ResourceIdentityInput {
+  readonly metadata: Resource["metadata"];
+  readonly expectedUpdatedAt: Date;
+}
+
 export interface BindResourceInput extends ResourceIdentityInput {
   readonly providerId: string;
 }
@@ -276,6 +281,31 @@ export class ProviderManagementService {
         "resource",
         `${updated.environment}:${updated.resourceId}`,
         { status },
+      );
+      return persisted;
+    });
+  }
+
+  async updateResourceMetadata(
+    input: UpdateResourceMetadataInput,
+    audit: AuditContext,
+  ): Promise<Resource> {
+    requireAuditContext(audit);
+    const key = resourceKey(input);
+    return this.unitOfWork.transaction(async (repositories) => {
+      const existing = required(await repositories.resources.get(key), "Resource");
+      const updated = createResource({ ...existing, metadata: input.metadata });
+      await repositories.resources.update(updated, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+      });
+      const persisted = required(await repositories.resources.get(key), "Resource");
+      await appendAudit(
+        repositories.audit,
+        audit,
+        "resource.metadata_updated",
+        "resource",
+        `${updated.environment}:${updated.resourceId}`,
+        { updatedFields: Object.keys(input.metadata).sort() },
       );
       return persisted;
     });

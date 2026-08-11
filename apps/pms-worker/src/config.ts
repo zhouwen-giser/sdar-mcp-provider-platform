@@ -8,6 +8,7 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_CONFIG_CACHE_ROOT",
   "PMS_RUNTIME_CONTROL_PLANE_URL",
   "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
+  "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
   "PMS_PM2_HOME",
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
   "PMS_RUNTIME_RECONCILE_TIMEOUT_MS",
@@ -21,6 +22,8 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeConfigCacheRoot: string;
   readonly runtimeControlPlaneUrl: string;
   readonly runtimeControlPlaneCredentialRoot: string;
+  readonly externalRuntimeCatalogCredentialFile?: string;
+  readonly allowInsecureInternalTransport: boolean;
   readonly pm2Home: string;
   readonly runtimeReconcileIntervalMs: number;
   readonly runtimeReconcileTimeoutMs: number;
@@ -107,6 +110,14 @@ async function loadRuntimeConfig(
     required(environment, "PMS_RUNTIME_CONTROL_PLANE_URL"),
     allowInsecureInternalTransport,
   );
+  const externalRuntimeCatalogCredentialFile =
+    environment.PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE;
+  if (externalRuntimeCatalogCredentialFile !== undefined) {
+    await validateSecretFile(
+      externalRuntimeCatalogCredentialFile,
+      "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+    );
+  }
   const roots = {
     runtimeReleaseRoot: required(environment, "PMS_RUNTIME_RELEASE_ROOT"),
     runtimeSecretRoot: required(environment, "PMS_RUNTIME_SECRET_ROOT"),
@@ -151,6 +162,12 @@ async function loadRuntimeConfig(
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
     runtimeControlPlaneUrl,
     runtimeControlPlaneCredentialRoot: resolve(roots.runtimeControlPlaneCredentialRoot),
+    ...(externalRuntimeCatalogCredentialFile === undefined
+      ? {}
+      : {
+          externalRuntimeCatalogCredentialFile: resolve(externalRuntimeCatalogCredentialFile),
+        }),
+    allowInsecureInternalTransport,
     runtimeReleaseRoot: resolve(roots.runtimeReleaseRoot),
     runtimeSecretRoot: resolve(roots.runtimeSecretRoot),
     runtimeConfigCacheRoot: resolve(roots.runtimeConfigCacheRoot),

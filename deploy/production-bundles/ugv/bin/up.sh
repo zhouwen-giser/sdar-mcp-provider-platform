@@ -36,7 +36,7 @@ compose up --detach --no-build --pull never --wait --wait-timeout "$wait_timeout
   pms-postgres pms-api pms-worker pms-web \
   ugv-adapter-postgres ugv-runtime-postgres ugv-adapter ugv-runtime
 
-printf 'Applying idempotent PMS vendor-managed UGV seed...\n'
+printf 'Applying idempotent PMS UGV seed and direct-container Runtime admission...\n'
 compose --profile seed run --rm --no-deps pms-seed
 
 bash "$script_dir/smoke.sh"

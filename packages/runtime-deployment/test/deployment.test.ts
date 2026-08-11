@@ -6,9 +6,10 @@ import {
   runtimeConfigProfileId,
   runtimeDeploymentId,
   runtimeEnvironmentId,
+  runtimeInstanceId,
   runtimeProviderId,
   type RuntimeDeployment,
-  type RuntimeDeploymentSpec,
+  type PlatformManagedRuntimeDeploymentSpec,
   type RuntimeDeploymentStatus,
 } from "../src/index.js";
 
@@ -24,6 +25,7 @@ describe("RuntimeDeployment aggregate", () => {
       environment: "production",
       desiredState: "running",
       desiredReplicas: 1,
+      runtimeAuthority: "platform_managed",
       status: "REQUESTED",
       desiredRevision: 0,
       observedRevision: 0,
@@ -37,6 +39,40 @@ describe("RuntimeDeployment aggregate", () => {
       }),
     ]);
     expect(deployment.pullDomainEvents()).toEqual([]);
+  });
+
+  it("permits the database-free direct-container activation shortcut only for that authority", () => {
+    const deployment = requestRuntimeDeployment(
+      {
+        deploymentId: runtimeDeploymentId("deployment-direct"),
+        providerId: runtimeProviderId("provider:ugv1"),
+        environment: runtimeEnvironmentId("production"),
+        desiredState: "running",
+        desiredReplicas: 1,
+        runtimeVersion: "2.0.0-rc.1",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: runtimeInstanceId("runtime-direct-0"),
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      occurredAt,
+    );
+
+    expect(() => transition(createDeployment(), "CONFIG_PREPARING")).toThrow(
+      expect.objectContaining({ code: "INVALID_RUNTIME_DEPLOYMENT_TRANSITION" }),
+    );
+    expect(() => transition(deployment, "DATABASE_PROVISIONING")).toThrow(
+      expect.objectContaining({ code: "INVALID_RUNTIME_DEPLOYMENT_TRANSITION" }),
+    );
+    transition(deployment, "CONFIG_PREPARING");
+    expect(deployment.snapshot).toMatchObject({
+      runtimeAuthority: "direct_container",
+      status: "CONFIG_PREPARING",
+    });
+    expect(deployment.snapshot).not.toHaveProperty("databaseProfileId");
   });
 
   it("follows the full activation path and cannot treat process online as ACTIVE", () => {
@@ -206,11 +242,13 @@ describe("RuntimeDeployment aggregate", () => {
   });
 });
 
-function createDeployment(overrides: Partial<RuntimeDeploymentSpec> = {}): RuntimeDeployment {
+function createDeployment(
+  overrides: Partial<PlatformManagedRuntimeDeploymentSpec> = {},
+): RuntimeDeployment {
   return requestRuntimeDeployment({ ...spec(), ...overrides }, occurredAt);
 }
 
-function spec(): RuntimeDeploymentSpec {
+function spec(): PlatformManagedRuntimeDeploymentSpec {
   return {
     deploymentId: runtimeDeploymentId("deployment-1"),
     providerId: runtimeProviderId("provider:ugv1"),

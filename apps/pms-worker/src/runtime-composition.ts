@@ -10,6 +10,7 @@ import {
   toConfigurationTarget,
   verifyProviderIdentity,
   type RuntimeReconcileAdapterTlsConfiguration,
+  type RuntimeReconcileDirectInstance,
   type RuntimeReconcileProviderIdentityVerification,
   type RuntimeReconcileHealthResult,
   type RuntimeReconcileInstance,
@@ -49,6 +50,8 @@ import {
   type RuntimeDeploymentStatus,
   type RuntimeInfrastructureInstanceTarget,
   type RuntimePortRange,
+  type RuntimeProcessObservation,
+  type RuntimeProcessProjection,
 } from "../../../packages/runtime-deployment/src/index.js";
 import {
   CatalogRegistryPublicationPhase,
@@ -57,6 +60,11 @@ import {
 } from "./catalog-registry-phase.js";
 import type { PmsWorkerConfig } from "./config.js";
 import { requirePmsWorkerRuntimeConfig } from "./config.js";
+import {
+  ExternalRuntimeCatalogCredentialResolver,
+  NoExternalRuntimeCatalogCredentialResolver,
+} from "./external-runtime-catalog-credentials.js";
+import { ExternalRuntimeHealthProbe } from "./external-runtime-health.js";
 import { PeriodicReconcileScheduler } from "./reconcile-scheduler.js";
 import { buildRegistryProviderProjection } from "./registry-provider-projection.js";
 import { createRuntimeDatabasePreparation } from "./runtime-database-preparation-job.js";
@@ -140,6 +148,12 @@ export async function createProductionRuntimeComposition(
     });
     const runtimeControlPlaneCredentialResolver =
       await RuntimeControlPlaneCredentialResolver.create(runtime.runtimeControlPlaneCredentialRoot);
+    const externalRuntimeCatalogCredentialResolver =
+      runtime.externalRuntimeCatalogCredentialFile === undefined
+        ? new NoExternalRuntimeCatalogCredentialResolver()
+        : await ExternalRuntimeCatalogCredentialResolver.create(
+            runtime.externalRuntimeCatalogCredentialFile,
+          );
     const store = new PostgresRuntimeReconcileStore(
       pool,
       runtime.runtimeSecretRoot,
@@ -165,6 +179,9 @@ export async function createProductionRuntimeComposition(
       lifecycleStore,
     );
     const health = new RuntimeHealthProbe(processManager);
+    const externalHealth = new ExternalRuntimeHealthProbe({
+      allowInsecureInternalTransport: runtime.allowInsecureInternalTransport,
+    });
     const providerIdentity = new RuntimeProviderIdentityVerifier();
     const reconciler = new RuntimeDeploymentReconciler(
       store,
@@ -179,31 +196,50 @@ export async function createProductionRuntimeComposition(
       },
       processManager,
       providerIdentity,
+      {
+        probe: (input) =>
+          externalHealth.probe({
+            ...input,
+            timeoutMs: Math.min(input.timeoutMs, runtime.runtimeHealthTimeoutMs),
+          }),
+      },
     );
     const publication = new CatalogRegistryPublicationPhase(
-      new HttpCatalogRegistryDiscovery(),
+      new HttpCatalogRegistryDiscovery({
+        allowInsecureInternalTransport: runtime.allowInsecureInternalTransport,
+      }),
       {
-        resolve: async (deployment) => `${await store.runtimeBaseUrl(deployment)}/mcp`,
+        resolve: async (deployment) => {
+          const target = await store.runtimeControlTarget(deployment);
+          const authorization = await externalRuntimeCatalogCredentialResolver.authorization(
+            deployment,
+            target.instanceId,
+          );
+          return {
+            endpoint: runtimeMcpEndpoint(target.baseUrl),
+            ...(authorization === undefined ? {} : { authorization }),
+          };
+        },
       },
       repositories.catalogSnapshots,
       {
-        providers: async ({ deployment, endpoint, catalog }) =>
+        providers: async ({ deployment, catalog }) =>
           buildRegistryProviderProjection({
             deployment,
-            endpoint,
             catalog,
             deployments: await repositories.runtimeDeployments.listByEnvironment(
               String(deployment.environment),
             ),
             activeCatalog: (providerId) => repositories.catalogSnapshots.active(providerId),
             ensureInstance: async (candidate) => ({
-              instanceId: (await store.ensureInstance(candidate, 0)).target.instanceId,
+              instanceId: (await store.runtimeControlTarget(candidate)).instanceId,
             }),
-            runtimeBaseUrl: (candidate) => store.runtimeBaseUrl(candidate),
+            advertisedBaseUrl: (candidate) => store.runtimeAdvertisedBaseUrl(candidate),
           }),
       },
       repositories.registrySnapshots,
       {
+        recordCatalogState: (deployment, state) => store.recordCatalogState(deployment, state),
         activate: (deployment, expectedRevision) =>
           store.transitionSnapshot(deployment, "ACTIVE", expectedRevision),
         fail: async (deployment, expectedRevision, reasonCode) => {
@@ -222,6 +258,7 @@ export async function createProductionRuntimeComposition(
           ).snapshot;
         },
       },
+      { allowInsecureInternalTransport: runtime.allowInsecureInternalTransport },
     );
     const decorated = new CatalogRegistryReconcileDecorator(reconciler, publication);
     const scheduler = new PeriodicReconcileScheduler(
@@ -377,12 +414,18 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
     deployment: RuntimeDeploymentSnapshot,
     ordinal: 0,
   ): Promise<RuntimeReconcileInstance> {
+    if (deployment.runtimeAuthority === "direct_container") {
+      throw new Error("DIRECT_CONTAINER_INSTANCE_REQUIRES_OBSERVATION");
+    }
     const process = await this.#allocator.allocate({
       providerId: String(deployment.providerId),
       deploymentId: String(deployment.deploymentId),
       ordinal,
       portRange: this.#portRange,
     });
+    if (process.processManager === "direct_container") {
+      throw new Error("PLATFORM_MANAGED_INSTANCE_ALLOCATION_INVALID");
+    }
     const locator = parseRuntimeConfigProfileLocator(String(deployment.configProfileId));
     const revision = await this.#configuration.getPublishedRevision(toConfigurationTarget(locator));
     if (revision === null) throw new Error("RUNTIME_CONFIG_PUBLISHED_REVISION_NOT_FOUND");
@@ -425,46 +468,116 @@ class PostgresRuntimeReconcileStore implements RuntimeReconcileStore {
     });
   }
 
+  async getDirectInstance(
+    deployment: RuntimeDeploymentSnapshot,
+    ordinal: 0,
+  ): Promise<RuntimeReconcileDirectInstance> {
+    if (deployment.runtimeAuthority !== "direct_container") {
+      throw new Error("DIRECT_CONTAINER_INSTANCE_INVALID");
+    }
+    const process = await this.#processes.get(
+      String(deployment.providerId),
+      String(deployment.directContainer.instanceId),
+    );
+    if (
+      process?.processManager !== "direct_container" ||
+      String(process.deploymentId) !== String(deployment.deploymentId) ||
+      process.controlEndpoint !== deployment.directContainer.controlEndpoint ||
+      process.advertisedEndpoint !== deployment.directContainer.advertisedEndpoint
+    ) {
+      throw new Error("DIRECT_CONTAINER_EXPECTED_INSTANCE_NOT_FOUND");
+    }
+    const freshness = await this.pool.query<{ readonly fresh: boolean }>(
+      `SELECT EXISTS(
+         SELECT 1
+           FROM runtime_registration
+          WHERE deployment_id=$1 AND runtime_instance_id=$2
+            AND expires_at > clock_timestamp()
+       ) AS fresh`,
+      [String(deployment.deploymentId), String(process.instanceId)],
+    );
+    return Object.freeze({
+      target: targetFrom(
+        deployment,
+        String(process.instanceId),
+        `direct-container-${String(process.instanceId)}`,
+        ordinal,
+      ),
+      controlEndpoint: process.controlEndpoint,
+      advertisedEndpoint: process.advertisedEndpoint,
+      registrationState: process.registrationState,
+      registrationFresh: freshness.rows[0]?.fresh === true,
+    });
+  }
+
   async listInstances(
     providerId: string,
     deploymentId: string,
-  ): Promise<readonly RuntimeReconcileInstance[]> {
+  ): Promise<readonly (RuntimeReconcileInstance | RuntimeReconcileDirectInstance)[]> {
     const deployment = await this.requireDeployment(providerId, deploymentId);
+    if (deployment.snapshot.runtimeAuthority === "direct_container") {
+      return [await this.getDirectInstance(deployment.snapshot, 0)];
+    }
     const processes = await this.#processes.listByDeployment(providerId, deploymentId);
     return Promise.all(
       processes.map((_process, ordinal) => this.ensureInstance(deployment.snapshot, ordinal as 0)),
     );
   }
 
-  async runtimeBaseUrl(deployment: RuntimeDeploymentSnapshot): Promise<string> {
+  async runtimeControlTarget(
+    deployment: RuntimeDeploymentSnapshot,
+  ): Promise<{ readonly instanceId: string; readonly baseUrl: string }> {
+    if (deployment.runtimeAuthority === "direct_container") {
+      const instance = await this.getDirectInstance(deployment, 0);
+      return { instanceId: instance.target.instanceId, baseUrl: instance.controlEndpoint };
+    }
     const instance = await this.ensureInstance(deployment, 0);
-    return `http://127.0.0.1:${String(instance.httpPort)}`;
+    return {
+      instanceId: instance.target.instanceId,
+      baseUrl: `http://127.0.0.1:${String(instance.httpPort)}`,
+    };
+  }
+
+  async runtimeAdvertisedBaseUrl(deployment: RuntimeDeploymentSnapshot): Promise<string> {
+    if (deployment.runtimeAuthority === "direct_container") {
+      return (await this.getDirectInstance(deployment, 0)).advertisedEndpoint;
+    }
+    return (await this.runtimeControlTarget(deployment)).baseUrl;
+  }
+
+  async recordCatalogState(
+    deployment: RuntimeDeploymentSnapshot,
+    catalogState: "pending" | "valid" | "invalid",
+  ): Promise<void> {
+    const instanceId =
+      deployment.runtimeAuthority === "direct_container"
+        ? String(deployment.directContainer.instanceId)
+        : (await this.ensureInstance(deployment, 0)).target.instanceId;
+    await updateRuntimeProcessObservationWithRetry({
+      load: () => this.#processes.get(String(deployment.providerId), instanceId),
+      save: (updated, expectedRevision) =>
+        this.#processes.upsert(String(deployment.providerId), updated, expectedRevision),
+      patch: (current) => observation(current, { catalogState }),
+      failureCode: "RUNTIME_CATALOG_STATE_CONFLICT",
+    });
   }
 
   async recordHealth(
     target: RuntimeInfrastructureInstanceTarget,
     result: RuntimeReconcileHealthResult,
   ): Promise<void> {
-    const current = await this.#processes.get(target.providerId, target.instanceId);
-    if (current === null) throw new Error("RUNTIME_PROCESS_NOT_FOUND");
-    const updated = updateRuntimeProcessObservation(
-      current,
-      {
-        pid: current.pid,
-        processState: result.processState,
-        livenessState: result.live ? "live" : "dead",
-        readinessState: result.ready ? "ready" : "not_ready",
-        registrationState: current.registrationState,
-        catalogState: current.catalogState,
-        configState: current.configState,
-        lastHeartbeatAt: current.lastHeartbeatAt,
-        runtimeVersion: current.runtimeVersion,
-        configRevision: current.configRevision,
-        restartCount: current.restartCount,
-      },
-      current.observedRevision,
-    );
-    await this.#processes.upsert(target.providerId, updated, current.observedRevision);
+    await updateRuntimeProcessObservationWithRetry({
+      load: () => this.#processes.get(target.providerId, target.instanceId),
+      save: (updated, expectedRevision) =>
+        this.#processes.upsert(target.providerId, updated, expectedRevision),
+      patch: (current) =>
+        observation(current, {
+          processState: result.processState,
+          livenessState: result.live ? "live" : "dead",
+          readinessState: result.ready ? "ready" : "not_ready",
+        }),
+      failureCode: "RUNTIME_HEALTH_STATE_CONFLICT",
+    });
   }
 
   async recordOrphans(
@@ -660,6 +773,78 @@ function targetFrom(
     ordinal,
     processName,
   });
+}
+
+export function runtimeMcpEndpoint(baseUrl: string): string {
+  let endpoint: URL;
+  try {
+    endpoint = new URL(baseUrl);
+  } catch (error) {
+    throw new Error("RUNTIME_CONTROL_ENDPOINT_INVALID", { cause: error });
+  }
+  if (
+    !["http:", "https:"].includes(endpoint.protocol) ||
+    endpoint.username !== "" ||
+    endpoint.password !== "" ||
+    endpoint.pathname !== "/" ||
+    endpoint.search !== "" ||
+    endpoint.hash !== ""
+  ) {
+    throw new Error("RUNTIME_CONTROL_ENDPOINT_INVALID");
+  }
+  endpoint.pathname = "/mcp";
+  return endpoint.toString();
+}
+
+function observation(
+  current: RuntimeProcessProjection,
+  overrides: Partial<RuntimeProcessObservation>,
+): RuntimeProcessObservation {
+  return {
+    pid: current.pid,
+    processState: current.processState,
+    livenessState: current.livenessState,
+    readinessState: current.readinessState,
+    registrationState: current.registrationState,
+    catalogState: current.catalogState,
+    configState: current.configState,
+    lastHeartbeatAt: current.lastHeartbeatAt,
+    runtimeVersion: current.runtimeVersion,
+    configRevision: current.configRevision,
+    restartCount: current.restartCount,
+    ...overrides,
+  };
+}
+
+export async function updateRuntimeProcessObservationWithRetry(input: {
+  readonly load: () => Promise<RuntimeProcessProjection | null>;
+  readonly save: (updated: RuntimeProcessProjection, expectedRevision: number) => Promise<unknown>;
+  readonly patch: (current: RuntimeProcessProjection) => RuntimeProcessObservation;
+  readonly failureCode: string;
+  readonly maxAttempts?: number;
+}): Promise<void> {
+  const maxAttempts = input.maxAttempts ?? 5;
+  if (!Number.isSafeInteger(maxAttempts) || maxAttempts < 1 || maxAttempts > 20) {
+    throw new Error("RUNTIME_PROCESS_OBSERVATION_RETRY_INVALID");
+  }
+  let lastError: unknown;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const current = await input.load();
+    if (current === null) throw new Error("RUNTIME_PROCESS_NOT_FOUND");
+    const updated = updateRuntimeProcessObservation(
+      current,
+      input.patch(current),
+      current.observedRevision,
+    );
+    if (updated === current) return;
+    try {
+      await input.save(updated, current.observedRevision);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw new Error(input.failureCode, { cause: lastError });
 }
 
 export function primitiveConfiguration(

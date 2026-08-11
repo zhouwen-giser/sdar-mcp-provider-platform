@@ -54,12 +54,34 @@ const seed = service("pms-seed");
 if (Array.isArray(pmsApi.ports) && pmsApi.ports.length > 0) fail("PMS_API_HOST_PORT_FORBIDDEN");
 if (pmsWorker.network_mode !== "service:pms-api") fail("PMS_WORKER_NETWORK_AUTHORITY_INVALID");
 if (environment(pmsWorker).PMS_WORKSPACE_ROOT !== "/app") fail("PMS_WORKER_ROOT_INVALID");
+if (environment(pmsWorker).ALLOW_INSECURE_INTERNAL_TRANSPORT !== "true") {
+  fail("PMS_WORKER_INSECURE_INTERNAL_TRANSPORT_OPT_IN_REQUIRED");
+}
+if (
+  environment(pmsWorker).PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE !==
+  "/run/pms-secrets/external-runtime-catalog.json"
+) {
+  fail("PMS_WORKER_EXTERNAL_CATALOG_CREDENTIAL_INVALID");
+}
+if (!hasNetwork(pmsApi, "provider-plane")) fail("PMS_API_PROVIDER_NETWORK_REQUIRED");
 if (environment(seed).PMS_SEED_ADAPTER_ENDPOINT !== "npc-tank-adapter:7013") {
   fail("PMS_SEED_ADAPTER_ENDPOINT_INVALID");
 }
 if (environment(seed).PMS_SEED_CATALOG_ROOT !== "/app") {
   fail("PMS_SEED_CATALOG_ROOT_INVALID");
 }
+requiredValues(environment(seed), {
+  PMS_SEED_DEPLOYMENT_ID: "production-npc-tank-direct",
+  PMS_SEED_INSTANCE_ID: "production-npc-tank-direct-1",
+  PMS_SEED_RUNTIME_VERSION: "2.0.0-rc.1",
+  PMS_SEED_RUNTIME_CONTROL_ENDPOINT: "http://npc-tank-runtime:8080",
+});
+assertEndpoint(
+  environment(seed).PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT,
+  ["http:"],
+  "RUNTIME_ADVERTISED",
+  "/",
+);
 if (!Array.isArray(seed.profiles) || !seed.profiles.includes("seed")) {
   fail("PMS_SEED_PROFILE_REQUIRED");
 }
@@ -103,6 +125,13 @@ requiredValues(runtimeEnvironment, {
   ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
   ADAPTER_TLS_MODE: "disabled",
   AUTH_MODE: "jwt_hs256",
+  JWT_ISSUER: "sdar-npc-tank-production",
+  JWT_AUDIENCE: "sdar-runtime",
+  PMS_DEPLOYMENT_ID: "production-npc-tank-direct",
+  PMS_INSTANCE_ID: "production-npc-tank-direct-1",
+  PMS_RUNTIME_REGISTRATION_URL: "http://pms-api:8090",
+  PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "/run/secrets/pms-runtime-control-plane.token",
+  PMS_RUNTIME_HEARTBEAT_INTERVAL_MS: "10000",
   MCP_LEGACY_ENDPOINT_ENABLED: "false",
   BUSINESS_EVENTS_ENABLED: "true",
   BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true",
@@ -118,13 +147,22 @@ assertTransportTrustAbsent(runtimeEnvironment, "RUNTIME");
 for (const forbidden of [
   "PMS_RUNTIME_CONFIG_URL",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
-  "PMS_RUNTIME_REGISTRATION_URL",
-  "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
+  "PMS_RUNTIME_CONFIG_CACHE_PATH",
 ]) {
   if (runtimeEnvironment[forbidden] !== undefined)
-    fail(`DIRECT_RUNTIME_PMS_BOOTSTRAP_FORBIDDEN_${forbidden}`);
+    fail(`DIRECT_RUNTIME_CONFIG_AUTHORITY_FORBIDDEN_${forbidden}`);
 }
+if (!hasNetwork(runtime, "provider-plane")) fail("DIRECT_RUNTIME_PROVIDER_NETWORK_REQUIRED");
+if (hasNetwork(runtime, "control-plane")) fail("DIRECT_RUNTIME_CONTROL_NETWORK_REDUNDANT");
 assertPublishedPort(runtime, 8080, "NPC_RUNTIME");
+const advertisedUrl = new URL(environment(seed).PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT);
+const runtimePublishedPort = Number(object(runtime.ports[0], "NPC_RUNTIME_PORT_INVALID").published);
+if (
+  Number(advertisedUrl.port) !== runtimePublishedPort ||
+  Number(environment(seed).PMS_SEED_RUNTIME_PUBLISHED_PORT) !== runtimePublishedPort
+) {
+  fail("RUNTIME_ADVERTISED_PORT_MISMATCH");
+}
 
 for (const [name, value] of [
   ["npc-tank-adapter", adapter],
@@ -206,6 +244,15 @@ function assertPublishedPort(value, target, label) {
   ) {
     fail(`${label}_PORT_NOT_EXPLICIT`);
   }
+}
+
+function hasNetwork(value, name) {
+  return (
+    typeof value.networks === "object" &&
+    value.networks !== null &&
+    !Array.isArray(value.networks) &&
+    Object.prototype.hasOwnProperty.call(value.networks, name)
+  );
 }
 
 function assertTransportTrustAbsent(value, label) {

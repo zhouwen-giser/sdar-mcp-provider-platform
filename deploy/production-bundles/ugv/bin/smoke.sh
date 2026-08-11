@@ -32,7 +32,7 @@ compose exec -T pms-postgres pg_isready -U pms_admin -d pms >/dev/null
 compose exec -T ugv-adapter-postgres pg_isready -U ugv_adapter -d ugv_adapter >/dev/null
 compose exec -T ugv-runtime-postgres pg_isready -U ugv_runtime -d ugv_runtime >/dev/null
 compose exec -T pms-web node /opt/sdar-bundle/pms-web-smoke.mjs
-compose exec -T ugv-runtime node /opt/sdar-bundle/runtime-smoke.mjs
+compose --profile seed run --rm --no-deps pms-seed node /app/runtime-smoke.mjs
 
-printf 'SMOKE_PASS: eight services, PMS Web proxy, JWT Runtime, Device MCP, and MQTT read path are ready at %s.\n' \
+printf 'SMOKE_PASS: eight services, PMS-managed direct deployment, fresh heartbeat, Registry-backed JWT Runtime, Device MCP, and MQTT read path are ready at %s.\n' \
   "$(bundle_revision)"

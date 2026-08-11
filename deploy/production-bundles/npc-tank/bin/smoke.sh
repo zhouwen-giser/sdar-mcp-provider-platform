@@ -26,15 +26,8 @@ npc_compose exec -T pms-api node -e \
   "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(2)}).catch(()=>process.exit(2))"
 npc_compose exec -T pms-api node /opt/sdar-bundle/pms-web-smoke.mjs
 
-jwt_issuer="$(npc_env_literal NPC_TANK_RUNTIME_JWT_ISSUER "$NPC_BUNDLE_USER_ENV")"
-jwt_issuer="${jwt_issuer:-sdar-npc-tank-production}"
-jwt_audience="$(npc_env_literal NPC_TANK_RUNTIME_JWT_AUDIENCE "$NPC_BUNDLE_USER_ENV")"
-jwt_audience="${jwt_audience:-sdar-runtime}"
-npc_compose exec -T \
-  --env "JWT_ISSUER=$jwt_issuer" \
-  --env "JWT_AUDIENCE=$jwt_audience" \
-  npc-tank-runtime node /opt/sdar-bundle/runtime-read-smoke.mjs
+npc_compose --profile seed run --rm --no-deps \
+  pms-seed node /app/runtime-read-smoke.mjs
 
-printf 'SMOKE_PASS: eight services, PMS Web API routing, JWT Runtime, Device MCP, MQTT read path, and zero mutating Runtime calls verified at %s.\n' \
+printf 'SMOKE_PASS: eight services, PMS-managed direct deployment, fresh heartbeat, Registry-backed JWT Runtime, Device MCP, MQTT read path, and zero mutating Runtime calls verified at %s.\n' \
   "$(npc_bundle_revision)"
-printf '%s\n' 'Registry authority remains NOT_CONFIGURED; this smoke does not claim Registry/Catalog closure.'

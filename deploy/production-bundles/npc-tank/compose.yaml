@@ -82,6 +82,10 @@ services:
         target: /run/pms-secrets/management-admin.token
         read_only: true
       - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
+        target: /run/pms-secrets/runtime-control-plane
+        read_only: true
+      - type: bind
         source: ./bin/pms-web-smoke.mjs
         target: /opt/sdar-bundle/pms-web-smoke.mjs
         read_only: true
@@ -104,6 +108,7 @@ services:
         condition: service_healthy
     networks:
       - control-plane
+      - provider-plane
     mem_limit: 768m
     pids_limit: 192
     stop_grace_period: 30s
@@ -114,6 +119,7 @@ services:
     restart: unless-stopped
     network_mode: service:pms-api
     environment:
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
       PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
       PMS_WORKER_ID: npc-production-worker
       PMS_WORKER_POLL_INTERVAL_MS: "1000"
@@ -131,6 +137,7 @@ services:
       PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
       PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
       PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
+      PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: /run/pms-secrets/external-runtime-catalog.json
     volumes:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
@@ -139,6 +146,14 @@ services:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-worker/postgres-provisioning.json
         target: /run/pms-secrets/postgres-provisioning.json
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-worker/external-runtime-catalog.json
+        target: /run/pms-secrets/external-runtime-catalog.json
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
+        target: /run/pms-secrets/runtime-jwt-hs256
         read_only: true
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
@@ -339,8 +354,13 @@ services:
       ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
       ADAPTER_TLS_MODE: disabled
       AUTH_MODE: jwt_hs256
-      JWT_ISSUER: ${NPC_TANK_RUNTIME_JWT_ISSUER:-sdar-npc-tank-production}
-      JWT_AUDIENCE: ${NPC_TANK_RUNTIME_JWT_AUDIENCE:-sdar-runtime}
+      JWT_ISSUER: sdar-npc-tank-production
+      JWT_AUDIENCE: sdar-runtime
+      PMS_DEPLOYMENT_ID: production-npc-tank-direct
+      PMS_INSTANCE_ID: production-npc-tank-direct-1
+      PMS_RUNTIME_REGISTRATION_URL: http://pms-api:8090
+      PMS_RUNTIME_REGISTRATION_TOKEN_FILE: /run/secrets/pms-runtime-control-plane.token
+      PMS_RUNTIME_HEARTBEAT_INTERVAL_MS: "10000"
       MCP_LEGACY_ENDPOINT_ENABLED: "false"
       BUSINESS_EVENTS_ENABLED: "true"
       BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
@@ -364,6 +384,10 @@ services:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
         target: /run/secrets/runtime-jwt-hs256
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token
+        target: /run/secrets/pms-runtime-control-plane.token
         read_only: true
       - type: bind
         source: ./bin/runtime-read-smoke.mjs
@@ -409,6 +433,18 @@ services:
       PMS_SEED_CATALOG_ROOT: /app
       PMS_SEED_ENVIRONMENT: production
       PMS_SEED_ADAPTER_ENDPOINT: npc-tank-adapter:7013
+      PMS_SEED_DEPLOYMENT_ID: production-npc-tank-direct
+      PMS_SEED_INSTANCE_ID: production-npc-tank-direct-1
+      PMS_SEED_RUNTIME_VERSION: 2.0.0-rc.1
+      PMS_SEED_RUNTIME_CONTROL_ENDPOINT: http://npc-tank-runtime:8080
+      PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT: ${NPC_TANK_RUNTIME_ADVERTISED_URL:?NPC_TANK_RUNTIME_ADVERTISED_URL is required}
+      PMS_SEED_RUNTIME_PUBLISHED_PORT: ${NPC_TANK_RUNTIME_PORT:-19103}
+      PMS_SEED_WAIT_TIMEOUT_MS: ${NPC_TANK_PMS_AUTHORITY_WAIT_TIMEOUT_MS:-180000}
+      PMS_SEED_POLL_INTERVAL_MS: ${NPC_TANK_PMS_AUTHORITY_POLL_INTERVAL_MS:-2000}
+      PMS_SMOKE_API_BASE_URL: http://127.0.0.1:8090
+      PMS_SMOKE_ADMIN_TOKEN_FILE: /run/pms-secrets/management-admin.token
+      JWT_ISSUER: sdar-npc-tank-production
+      JWT_AUDIENCE: sdar-runtime
     volumes:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
@@ -421,6 +457,14 @@ services:
       - type: bind
         source: ./bin/pms-seed.mjs
         target: /app/pms-seed.mjs
+        read_only: true
+      - type: bind
+        source: ./bin/runtime-read-smoke.mjs
+        target: /app/runtime-read-smoke.mjs
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
+        target: /run/secrets/runtime-jwt-hs256
         read_only: true
     tmpfs:
       - /tmp:size=32m,mode=0700,uid=1000,gid=1000

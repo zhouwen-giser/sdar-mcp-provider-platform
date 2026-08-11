@@ -11,6 +11,7 @@ import {
 export function buildRegistrySnapshot(
   environment: string,
   inputs: readonly RegistryProviderInput[],
+  options: RegistryEndpointPolicy = {},
 ): RegistrySnapshotCandidate {
   validateRegistryEnvironment(environment);
   const providerIds = new Set<string>();
@@ -28,7 +29,7 @@ export function buildRegistrySnapshot(
       providerId: input.providerId,
       serverId: input.serverId,
       protocolMode: "frozen_v1",
-      effectiveEndpoint: effectiveEndpoint(input.effectiveEndpoint),
+      effectiveEndpoint: effectiveEndpoint(input.effectiveEndpoint, options),
       catalogRevision: input.catalog.revision,
       tools: [...input.catalog.document.tools].sort((left, right) =>
         left.name.localeCompare(right.name),
@@ -46,7 +47,12 @@ export function buildRegistrySnapshot(
   };
 }
 
-export function effectiveEndpoint(value: string): string {
+export interface RegistryEndpointPolicy {
+  /** Explicit deployment policy for plaintext endpoints on a controlled internal network. */
+  readonly allowInsecureInternalTransport?: boolean;
+}
+
+export function effectiveEndpoint(value: string, options: RegistryEndpointPolicy = {}): string {
   let url: URL;
   try {
     url = new URL(value);
@@ -56,7 +62,11 @@ export function effectiveEndpoint(value: string): string {
   const loopback =
     url.hostname === "127.0.0.1" || url.hostname === "::1" || url.hostname === "localhost";
   if (
-    (url.protocol !== "https:" && !(url.protocol === "http:" && loopback)) ||
+    (url.protocol !== "https:" &&
+      !(
+        url.protocol === "http:" &&
+        (loopback || options.allowInsecureInternalTransport === true)
+      )) ||
     url.username !== "" ||
     url.password !== "" ||
     url.search !== "" ||

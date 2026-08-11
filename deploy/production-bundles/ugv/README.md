@@ -53,7 +53,7 @@ sudo ./bin/init.sh
 
 - 从 `.env.example` 创建 `.env`（如不存在）；
 - 生成 3 个 PostgreSQL 数据库的独立随机凭据；
-- 生成 PMS 管理令牌、Runtime JWT HS256 密钥；
+- 生成 PMS 管理令牌、Runtime JWT HS256 密钥，以及绑定到固定 deployment/instance 的 Runtime registration 凭据；
 - 创建权限为 `0700` 的状态目录和权限为 `0600` 的秘密文件。
 
 它不会生成 TLS 证书，也不会生成、复制或猜测任何真实模拟器凭据。
@@ -65,9 +65,15 @@ ALLOW_INSECURE_INTERNAL_TRANSPORT=true
 UGV_SIM_DEVICE_MCP_URL=http://device-mcp.intranet.local/mcp
 UGV_SIM_MQTT_URL=mqtt://mqtt.intranet.local:1883
 UGV_MQTT_WIRE_MODE=ros_bridge_json
+UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
 ```
 
-生产入口要求 `ALLOW_INSECURE_INTERNAL_TRANSPORT` 精确为 `true`，并接受配置后的 `http://` Device MCP 以及 `mqtt://`（或 `ws://`）MQTT 地址；它仍会拒绝占位域名、URL 内嵌凭据、URL fragment 和未明确的 wire mode。默认开箱路径假定这两个严格内网端点无需 HTTP Header 或 MQTT 用户密码，不要求任何外部文件。底层 Provider 支持可选鉴权，但若真实端点确有鉴权，应通过经过审查的 Compose override 挂载相应秘密，而不是把秘密写入 `.env`。
+生产入口要求 `ALLOW_INSECURE_INTERNAL_TRANSPORT` 精确为 `true`，并接受配置后的 `http://` Device MCP 以及 `mqtt://`（或 `ws://`）MQTT 地址；它仍会拒绝占位域名、URL 内嵌凭据、URL fragment 和未明确的 wire mode。`UGV_RUNTIME_ADVERTISED_URL` 必须是其他内网消费者可达的 Runtime 基础地址（不带 `/mcp`），端口必须与 `UGV_RUNTIME_PORT` 一致。默认开箱路径假定真实端点无需 HTTP Header 或 MQTT 用户密码。
+
+从旧交付升级且保留既有 `.env` 时，`init.sh` 不会覆盖该文件；必须手动补入
+`UGV_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
+端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
+变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
 
 初始化后的权限可用以下命令复核：
 
@@ -96,7 +102,7 @@ sudo chmod 0600 .env
 ./bin/down.sh
 ```
 
-`smoke.sh` 只执行读取：验证 8 个容器健康、3 个 PostgreSQL 实例可用、PMS Web 同源代理边界，以及 JWT Runtime 的 `server/discover`、`tools/list` 和以下 4 个读取工具：
+`smoke.sh` 只执行读取：验证 8 个容器健康、3 个 PostgreSQL 实例可用、PMS Web 同源代理、`direct_container` RuntimeDeployment 为 `ACTIVE`、预期实例 registration/heartbeat 新鲜，并从 PMS Registry 发布的 advertised endpoint 调用 JWT Runtime 的 `server/discover`、`tools/list` 和以下 4 个读取工具：
 
 - `vehicle_get_state`
 - `vehicle_get_capabilities`
@@ -115,8 +121,10 @@ sudo chmod 0600 .env
 - vendor-managed Provider `isr.vehicle.ugv.ugv1`
 - production Resource `vehicle:ugv1`
 - Provider 与 Resource 的绑定
+- `direct_container` RuntimeDeployment `production-ugv-direct`
+- 预期 Runtime 实例 `production-ugv-direct-1`
 
-本包中的 Runtime 是 Compose 直接管理的 vendor-managed Runtime。seed 不创建 `RuntimeDeployment`，也不声称 PMS Worker 已发布 Catalog/Registry 权威；当前包没有配置 platform-managed Runtime 和 Registry 闭环，这两类权威状态均为 `not_configured`。PMS Worker 仍完整包含在部署中，供 PMS 控制面与后续受支持的部署路径使用。
+本包中的 Runtime 仍由 Compose 直接启动和重启；PMS Worker 对该部署识别为 `runtimeAuthority=direct_container`，不会通过 PM2 启动第二个 Runtime。Runtime 使用实例绑定令牌自行 register、持续 heartbeat；Worker 通过控制端点检查健康、发现 Catalog，并以 `registryAuthority=pms_worker` 发布配置的内网 advertised endpoint。Runtime 数据库和运行配置仍由 Compose/环境直接管理，不切换到 PMS Config/DB authority。
 
 ## 数据、备份与轮换
 

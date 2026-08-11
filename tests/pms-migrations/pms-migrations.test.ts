@@ -69,6 +69,7 @@ describe("PMS control-plane migration set", () => {
       "007_catalog_snapshot.sql",
       "008_registry_snapshot.sql",
       "009_runtime_registration.sql",
+      "010_external_runtime_deployment.sql",
     ]);
     expect(files.every(({ relativePath }) => relativePath.startsWith("migrations/pms/"))).toBe(
       true,

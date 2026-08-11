@@ -91,7 +91,13 @@ sudo bash deploy/npc-tank/bin/init.sh
 ALLOW_INSECURE_INTERNAL_TRANSPORT=true
 NPC_TANK_DEVICE_MCP_URL=http://npc-device-mcp.intranet.local/mcp
 NPC_TANK_MQTT_URL=mqtt://mqtt.intranet.local:1883
+NPC_TANK_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19103
 ```
+
+从旧交付升级且保留既有 `.env` 时，`init.sh` 不会覆盖该文件；必须手动补入
+`NPC_TANK_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
+端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
+变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
 
 不要把 revision、平台、基础镜像、摘要、构建目标或可部署状态等发布身份键写入用户
 `.env`；这些值只能来自发布流程生成的只读构建锁文件。
@@ -115,8 +121,9 @@ bash deploy/npc-tank/bin/smoke.sh
 bash deploy/npc-tank/bin/down.sh
 ```
 
-`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、JWT Runtime 和
-真实 Device MCP/MQTT 连接，并只调用以下四个读取工具：
+`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、ACTIVE 的
+`direct_container` RuntimeDeployment 和新鲜 registration/heartbeat，并从 PMS Registry
+发布的 advertised endpoint 验证 JWT Runtime 和真实 Device MCP/MQTT 连接，只调用以下四个读取工具：
 
 - `vehicle_get_state`
 - `vehicle_get_capabilities`
@@ -138,9 +145,10 @@ Docker 持久卷，并按组织的密钥托管策略加密保存。Runtime JWT �
 协调多个消费者，应在维护窗口按整体迁移方案执行。
 
 本包提供从精确源码在原生 ARM64 主机生成部署镜像的路径，但不把本机构建结果自动认定
-为生产认证。NPC Tank Provider Package 的 real-resource 状态仍为 `pending`。直接
-Runtime 容器是当前 vendor-managed 运行权威，PMS Registry 和 platform-managed
-Runtime 权威闭环均为 `not_configured`。
+为生产认证。NPC Tank Provider Package 的 real-resource 状态仍为 `pending`。Runtime
+容器由 Compose 直接启动；PMS 以 `runtimeAuthority=direct_container` 接纳，Runtime
+自行注册和心跳，Worker 跳过 PM2 并以 `registryAuthority=pms_worker` 发布 Catalog/
+Registry。production qualification 仍为 `NOT_CLAIMED`。
 
 只有目标主机上的源码构建、八服务健康检查、PMS seed 和真实只读 smoke 全部通过后，
 才能记录该次现场部署已经验证；该结果不会把全局资格状态提升为 `qualified`，也不会

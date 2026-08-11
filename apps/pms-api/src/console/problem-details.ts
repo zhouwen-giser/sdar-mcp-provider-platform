@@ -147,6 +147,9 @@ function classifyConsoleError(error: FastifyError): {
     return problem(error.code === "ENTITY_NOT_FOUND" ? 404 : 409, error.code, error.message);
   }
   if (error instanceof RuntimeDeploymentApplicationError) {
+    if (error.code === "RUNTIME_DEPLOYMENT_COMMAND_UNSUPPORTED") {
+      return problem(400, "INVALID_STATE_TRANSITION", error.message);
+    }
     const status =
       error.code === "RUNTIME_DEPLOYMENT_NOT_FOUND"
         ? 404

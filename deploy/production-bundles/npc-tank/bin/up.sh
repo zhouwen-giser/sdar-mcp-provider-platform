@@ -26,7 +26,7 @@ printf 'Starting eight NPC production services at revision %s...\n' "$(npc_bundl
 npc_compose up --detach --no-build --pull never --wait --wait-timeout "$wait_timeout" \
   "${services[@]}"
 
-printf '%s\n' 'Applying the idempotent vendor-managed NPC package/provider/resource seed...'
+printf '%s\n' 'Applying the idempotent NPC seed and direct-container Runtime admission...'
 npc_compose --profile seed run --rm --no-deps pms-seed
 
 bash "$bin_dir/smoke.sh"

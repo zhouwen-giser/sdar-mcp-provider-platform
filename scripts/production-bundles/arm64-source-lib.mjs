@@ -267,6 +267,8 @@ async function stageArm64SourceBundle({
       directory: `deploy/${product.deployDirectory}`,
       compose: `deploy/${product.deployDirectory}/compose.yaml`,
       transportProfile: product.transportProfile,
+      runtimeAuthority: product.runtimeAuthority,
+      registryAuthority: product.registryAuthority,
       services: composeInventory.services,
       persistentServices: composeInventory.persistentServices,
       seedServices: composeInventory.seedServices,
@@ -614,6 +616,8 @@ function validateRootManifest(manifest, options) {
   if (
     !isRecord(manifest.deployment) ||
     manifest.deployment.sourceBuildRequired !== true ||
+    manifest.deployment.runtimeAuthority !== "direct_container" ||
+    manifest.deployment.registryAuthority !== "pms_worker" ||
     manifest.deployment.includedImageCount !== 0 ||
     manifest.deployment.offlineImageCount !== 0 ||
     manifest.deployment.locallyBuiltApplicationImageCount !== 5 ||
@@ -707,7 +711,7 @@ async function validateBuildManifestTsv(path, records) {
 
 export function arm64RootReadme(product, manifest) {
   const deployPath = `deploy/${product.deployDirectory}`;
-  return `# ${product.title} — ARM64 source-build delivery\n\n本包面向原生 Linux ARM64（aarch64）主机，不包含 Docker 镜像，也不会从公共仓库拉取 SDAR 自研应用镜像。它携带提交 \`${manifest.source.revision}\` 的完整可导出源码；首次执行 \`${deployPath}/bin/up.sh\` 时，由 Docker 在部署主机现场构建 5 个应用镜像，并拉取摘要锁定的官方 Node/PostgreSQL 基础镜像。\n\n现场构建需要访问 Docker Hub、npm registry 和 grpc-tools 预编译制品站点，均使用这些公共服务的系统 CA/HTTPS。仅用于仓库审查、且会额外下载 GitHub Release 附件的工具被排除在生产镜像构建之外。此网络仅用于构建期依赖下载；运行期 Device MCP、MQTT、Adapter RPC 和 Provider telemetry 仍采用既定的严格内网明文策略，不要求自签证书或安全网关。\n\n部署主机无需 Git、Node.js 或 pnpm，但必须是原生 ARM64 Linux，并安装 Bash、Docker Engine（启用 BuildKit）、Docker Compose v2、OpenSSL 和 sha256sum。包内基础镜像以 digest 锁定；应用镜像只从本包源码构建，Compose 禁止隐式构建和拉取。\n\n本包可用于部署，但不声称已完成原生 ARM64 生产资格测试。real-resource status 仍为 \`${manifest.qualification.realResourceStatus}\`，production qualification 为 \`NOT_CLAIMED\`。\n\n运行：\n\n\`\`\`bash\ncd ${deployPath}\ncp .env.example .env\n# 填写真实内网 Device MCP 与 MQTT 地址。\nbash bin/init.sh\nbash bin/up.sh\n\`\`\`\n\n首次 \`up.sh\` 会校验全包、确认 Docker daemon 为 linux/arm64、在线拉取锁定基础镜像、现场构建并核验 5 个应用镜像，然后启动 8 个常驻服务、执行幂等 PMS seed 和只读 smoke。后续相同源码可复用 Docker BuildKit 缓存。\n`;
+  return `# ${product.title} — ARM64 source-build delivery\n\n本包面向原生 Linux ARM64（aarch64）主机，不包含 Docker 镜像，也不会从公共仓库拉取 SDAR 自研应用镜像。它携带提交 \`${manifest.source.revision}\` 的完整可导出源码；首次执行 \`${deployPath}/bin/up.sh\` 时，由 Docker 在部署主机现场构建 5 个应用镜像，并拉取摘要锁定的官方 Node/PostgreSQL 基础镜像。\n\n现场构建需要访问 Docker Hub、npm registry 和 grpc-tools 预编译制品站点，均使用这些公共服务的系统 CA/HTTPS。仅用于仓库审查、且会额外下载 GitHub Release 附件的工具被排除在生产镜像构建之外。此网络仅用于构建期依赖下载；运行期 Device MCP、MQTT、Adapter RPC 和 Provider telemetry 仍采用既定的严格内网明文策略，不要求自签证书或安全网关。\n\n部署主机无需 Git、Node.js 或 pnpm，但必须是原生 ARM64 Linux，并安装 Bash、Docker Engine（启用 BuildKit）、Docker Compose v2、OpenSSL 和 sha256sum。包内基础镜像以 digest 锁定；应用镜像只从本包源码构建，Compose 禁止隐式构建和拉取。\n\nCompose 直接启动 Runtime，PMS 以 \`direct_container\` RuntimeDeployment 接纳并由 Worker 发布 \`pms_worker\` Registry；Worker 不通过 PM2 启动第二个 Runtime。\n\n本包可用于部署，但不声称已完成原生 ARM64 生产资格测试。real-resource status 仍为 \`${manifest.qualification.realResourceStatus}\`，production qualification 为 \`NOT_CLAIMED\`。\n\n运行：\n\n\`\`\`bash\ncd ${deployPath}\ncp .env.example .env\n# 填写真实内网 Device MCP、MQTT 与 advertised Runtime 地址。\nbash bin/init.sh\nbash bin/up.sh\n\`\`\`\n\n首次 \`up.sh\` 会校验全包、确认 Docker daemon 为 linux/arm64、在线拉取锁定基础镜像、现场构建并核验 5 个应用镜像，然后启动 8 个常驻服务、执行幂等 PMS seed 和只读 smoke。后续相同源码可复用 Docker BuildKit 缓存。\n`;
 }
 
 async function createSourceArchive(repositoryRoot, source, destinationRoot) {

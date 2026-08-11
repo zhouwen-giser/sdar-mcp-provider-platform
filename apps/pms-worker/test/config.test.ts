@@ -36,6 +36,7 @@ describe("PMS Worker production Runtime configuration", () => {
       runtimeConfigCacheRoot: fixture.cacheRoot,
       runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
       runtimeControlPlaneCredentialRoot: fixture.controlPlaneCredentialRoot,
+      allowInsecureInternalTransport: false,
       pm2Home: fixture.pm2Home,
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,
@@ -87,6 +88,31 @@ describe("PMS Worker production Runtime configuration", () => {
         ALLOW_INSECURE_INTERNAL_TRANSPORT: "yes",
       }),
     ).rejects.toThrow("PMS_WORKER_CONFIG_BOOLEAN_INVALID:ALLOW_INSECURE_INTERNAL_TRANSPORT");
+  });
+
+  it("accepts only a private file descriptor for external Runtime catalog credentials", async () => {
+    const fixture = await secureFixture();
+    const descriptor = join(fixture.directory, "external-runtime-catalog-credentials.json");
+    await writeFile(descriptor, '{"credentials":[]}\n', { mode: 0o600 });
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+      }),
+    ).resolves.toMatchObject({
+      runtime: { externalRuntimeCatalogCredentialFile: descriptor },
+    });
+
+    await chmod(descriptor, 0o644);
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+      }),
+    ).rejects.toThrow(
+      "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+    );
   });
 
   it.each([

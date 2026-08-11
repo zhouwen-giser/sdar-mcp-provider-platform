@@ -61,7 +61,8 @@ const inventories = Object.freeze({
 test("catalog locks both standalone products to the strict intranet plaintext profile", () => {
   assert.deepEqual(PRODUCT_IDS, ["ugv", "npc-tank"]);
   for (const productId of PRODUCT_IDS) {
-    const profile = productCatalog(productId).transportProfile;
+    const product = productCatalog(productId);
+    const profile = product.transportProfile;
     assert.deepEqual(profile, {
       id: "strict-intranet-plaintext",
       allowInsecureInternalTransport: true,
@@ -69,6 +70,8 @@ test("catalog locks both standalone products to the strict intranet plaintext pr
       httpsRequired: false,
       mqttTlsRequired: false,
     });
+    assert.equal(product.runtimeAuthority, "direct_container");
+    assert.equal(product.registryAuthority, "pms_worker");
   }
 });
 
@@ -117,12 +120,21 @@ for (const productId of PRODUCT_IDS) {
     assert.doesNotMatch(compose, /\.crt\b|\.pem\b|internal-pki/i);
     assert.match(compose, /command:\s*\["node",\s*"\/app\/pms-seed\.mjs"\]/);
     assert.match(compose, /target:\s*\/app\/pms-seed\.mjs/);
+    assert.match(
+      compose,
+      /runtimeAuthority:\s*"direct_container"|PMS_SEED_RUNTIME_CONTROL_ENDPOINT/,
+    );
+    assert.match(compose, /PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE/);
+    assert.match(compose, /PMS_RUNTIME_REGISTRATION_URL/);
+    assert.match(compose, /PMS_RUNTIME_REGISTRATION_TOKEN_FILE/);
+    assert.doesNotMatch(compose, /PMS_RUNTIME_CONFIG_URL/);
 
     const example = await readFile(join(bundleDirectory, ".env.example"), "utf8");
     assert.match(example, /ALLOW_INSECURE_INTERNAL_TRANSPORT=true/);
     assert.match(example, /DEVICE_MCP_URL=http:\/\//);
     assert.match(example, /MQTT_URL=mqtt:\/\//);
     assert.match(example, /PMS_WEB_BIND_ADDRESS=0\.0\.0\.0/);
+    assert.match(example, /RUNTIME_ADVERTISED_URL=http:\/\//);
     assert.doesNotMatch(example, /https:\/\/|mqtts:\/\/|wss:\/\//);
     assert.doesNotMatch(example, /(?:TLS|HEADERS|PASSWORD)_(?:CA_|CERT_|KEY_)?FILE=/);
 
@@ -133,6 +145,25 @@ for (const productId of PRODUCT_IDS) {
     }
 
     const upScript = await readFile(join(bundleDirectory, "bin", "up.sh"), "utf8");
+    const initScript = await readFile(join(bundleDirectory, "bin", "init.sh"), "utf8");
+    const seedScript = await readFile(join(bundleDirectory, "bin", "pms-seed.mjs"), "utf8");
+    const smokeScript = await readFile(join(bundleDirectory, "bin", "smoke.sh"), "utf8");
+    assert.match(initScript, /"runtimeConfig":\s*\[\]/);
+    assert.match(initScript, /"runtimeRegistration":\s*\[/);
+    assert.match(initScript, /external-runtime-catalog\.json/);
+    assert.match(seedScript, /runtimeAuthority:\s*"direct_container"/);
+    assert.match(seedScript, /updateResourceMetadata/);
+    assert.match(seedScript, /OPTIMISTIC_CONCURRENCY_CONFLICT/);
+    assert.match(seedScript, /providerManagement\.getResource/);
+    const webSmoke = await readFile(join(bundleDirectory, "bin", "pms-web-smoke.mjs"), "utf8");
+    assert.match(webSmoke, /\/api\/console\/v1\/runtime-deployments/);
+    assert.match(webSmoke, /\/api\/console\/v1\/runtime-processes/);
+    assert.match(webSmoke, /\/api\/console\/v1\/registry\/production\/latest/);
+    assert.match(webSmoke, /not_applicable/);
+    assert.match(seedScript, /directContainer:\s*\{/);
+    assert.match(seedScript, /registrationFreshness\s*!==\s*"registered"/);
+    assert.match(seedScript, /registryAuthority:\s*"pms_worker"/);
+    assert.match(smokeScript, /runtime-smoke\.mjs|runtime-read-smoke\.mjs/);
     assert.match(
       upScript,
       /^\s*(?:compose|npc_compose)\s+up\b[^\n]*--pull\s+never\b/m,

@@ -536,6 +536,8 @@ async function stageProductBundle({
       directory: `deploy/${product.deployDirectory}`,
       compose: `deploy/${product.deployDirectory}/compose.yaml`,
       transportProfile: product.transportProfile,
+      runtimeAuthority: product.runtimeAuthority,
+      registryAuthority: product.registryAuthority,
       services: composeInventory.services,
       persistentServices: composeInventory.persistentServices,
       seedServices: composeInventory.seedServices,
@@ -839,6 +841,11 @@ function validateRootManifest(manifest, options) {
   if (!isRecord(manifest.deployment) || manifest.deployment.sourceBuildRequired !== false)
     throw coded("PRODUCTION_BUNDLE_MANIFEST_DEPLOYMENT_INVALID");
   if (
+    manifest.deployment.runtimeAuthority !== "direct_container" ||
+    manifest.deployment.registryAuthority !== "pms_worker"
+  )
+    throw coded("PRODUCTION_BUNDLE_MANIFEST_AUTHORITY_INVALID");
+  if (
     !isRecord(manifest.deployment.transportProfile) ||
     manifest.deployment.transportProfile.id !== "strict-intranet-plaintext" ||
     manifest.deployment.transportProfile.allowInsecureInternalTransport !== true ||
@@ -1069,7 +1076,7 @@ async function writeBundleReadme(bundleRoot, product, manifest) {
 
 export function bundleReadmeText(product, manifest) {
   const deployPath = `deploy/${product.deployDirectory}`;
-  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded in that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP and MQTT endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
+  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe Compose-started Runtime is admitted as a PMS RuntimeDeployment with runtime authority \`direct_container\`; PMS Worker observes it, consumes its heartbeat/catalog, and publishes Registry authority \`pms_worker\` without starting PM2.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded in that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP, MQTT, and advertised Runtime endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
 }
 
 async function createStageOnlyImageArchive(path, product, revision) {

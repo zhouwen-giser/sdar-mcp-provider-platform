@@ -246,6 +246,8 @@ const RUNTIME_DEPLOYMENT_APPLICATION_MESSAGES: Readonly<
     "The database prerequisite is unavailable for this RuntimeDeployment",
   RUNTIME_DEPLOYMENT_REPLICA_COUNT_UNSUPPORTED:
     "The requested Runtime replica count is unsupported",
+  RUNTIME_DEPLOYMENT_COMMAND_UNSUPPORTED:
+    "The requested lifecycle command is not supported by this Runtime authority",
   RUNTIME_DEPLOYMENT_REVISION_CONFLICT:
     "The RuntimeDeployment desired revision changed; reload and retry",
 };

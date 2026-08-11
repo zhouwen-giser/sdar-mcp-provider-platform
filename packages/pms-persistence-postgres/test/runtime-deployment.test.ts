@@ -162,6 +162,89 @@ describe("PostgreSQL RuntimeDeployment persistence", () => {
     });
   });
 
+  it("persists a direct-container deployment and expected instance without fake PM2 identity", async () => {
+    const repositories = postgresRuntimeDeploymentRepositories(pool);
+    const aggregate = requestRuntimeDeployment(
+      {
+        deploymentId: runtimeDeploymentId("deployment-direct"),
+        providerId: providerA,
+        environment,
+        desiredState: "running",
+        desiredReplicas: 1,
+        runtimeVersion: "2.0.0-rc.1",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: runtimeInstanceId("runtime-direct-0"),
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      now,
+    );
+    if (aggregate.snapshot.runtimeAuthority !== "direct_container") {
+      throw new Error("DIRECT_CONTAINER_SNAPSHOT_EXPECTED");
+    }
+    const expected = createRuntimeProcessProjection(
+      {
+        instanceId: aggregate.snapshot.directContainer.instanceId,
+        deploymentId: aggregate.snapshot.deploymentId,
+        processManager: "direct_container",
+        pm2Name: null,
+        port: null,
+        controlEndpoint: aggregate.snapshot.directContainer.controlEndpoint,
+        advertisedEndpoint: aggregate.snapshot.directContainer.advertisedEndpoint,
+      },
+      {
+        ...observation({
+          pid: null,
+          processState: "missing",
+          livenessState: "unknown",
+          readinessState: "unknown",
+          registrationState: "unregistered",
+          catalogState: "unknown",
+          configState: "externally_managed",
+          lastHeartbeatAt: null,
+          runtimeVersion: null,
+          configRevision: 0,
+        }),
+      },
+    );
+
+    await repositories.deployments.insert(aggregate.snapshot);
+    await expect(repositories.processes.upsert(providerA, expected, null)).resolves.toBe(true);
+    await expect(
+      repositories.deployments.get(providerA, aggregate.snapshot.deploymentId),
+    ).resolves.toMatchObject({ snapshot: aggregate.snapshot });
+    await expect(repositories.processes.get(providerA, expected.instanceId)).resolves.toMatchObject(
+      {
+        processManager: "direct_container",
+        pm2Name: null,
+        port: null,
+        controlEndpoint: "http://ugv-runtime:8080",
+        advertisedEndpoint: "http://192.168.1.7:19100",
+        configState: "externally_managed",
+      },
+    );
+
+    const raw = await pool.query<{
+      database_profile_id: string | null;
+      config_profile_id: string | null;
+      pm2_name: string | null;
+      port: number | null;
+    }>(
+      `SELECT deployment.database_profile_id,deployment.config_profile_id,
+              process.pm2_name,process.port
+         FROM runtime_deployment deployment
+         JOIN runtime_process process USING (deployment_id)
+        WHERE deployment.deployment_id=$1`,
+      [aggregate.snapshot.deploymentId],
+    );
+    expect(raw.rows).toEqual([
+      { database_profile_id: null, config_profile_id: null, pm2_name: null, port: null },
+    ]);
+  });
+
   it("appends action history idempotently and rejects key reuse with different content", async () => {
     const repositories = postgresRuntimeDeploymentRepositories(pool);
     const aggregate = deployment("deployment-action", providerA);

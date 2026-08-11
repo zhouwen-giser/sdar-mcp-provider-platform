@@ -130,6 +130,7 @@ async function productionConfig(databaseUrl: string): Promise<{
         runtimeConfigCacheRoot: cacheRoot,
         runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
         runtimeControlPlaneCredentialRoot: controlPlaneCredentialRoot,
+        allowInsecureInternalTransport: false,
         pm2Home,
         runtimeReconcileIntervalMs: 1_000,
         runtimeReconcileTimeoutMs: 5_000,

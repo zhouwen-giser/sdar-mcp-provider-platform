@@ -2,6 +2,8 @@ export * from "./bootstrap.js";
 export * from "./catalog-registry-phase.js";
 export * from "./composition.js";
 export * from "./config.js";
+export * from "./external-runtime-catalog-credentials.js";
+export * from "./external-runtime-health.js";
 export * from "./health.js";
 export * from "./job-execution.js";
 export * from "./job-registry.js";

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   rehydrateRuntimeDeployment,
   type RuntimeDeploymentSnapshot,
+  type RuntimeProcessProjection,
 } from "@sdar/runtime-deployment";
 import {
   RuntimeDeploymentApplicationService,
@@ -60,6 +61,86 @@ describe("RuntimeDeployment application use cases", () => {
         metadata: { desiredReplicas: 1 },
       }),
     ]);
+  });
+
+  it("admits a direct-container deployment and its expected instance atomically", async () => {
+    const harness = createHarness("database");
+    const created = await harness.service.create(
+      {
+        deploymentId: "deployment-direct",
+        providerId: "provider:A",
+        environment: "production",
+        runtimeVersion: "2.0.0-rc.1",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: "runtime-direct-0",
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      audit,
+    );
+
+    expect(created).toMatchObject({
+      runtimeAuthority: "direct_container",
+      status: "REQUESTED",
+      directContainer: { instanceId: "runtime-direct-0" },
+    });
+    expect(created).not.toHaveProperty("databaseProfileId");
+    expect(created).not.toHaveProperty("configProfileId");
+    expect(harness.processes.get("runtime-direct-0")).toMatchObject({
+      processManager: "direct_container",
+      pm2Name: null,
+      port: null,
+      processState: "missing",
+      registrationState: "unregistered",
+      configState: "externally_managed",
+      configRevision: 0,
+    });
+  });
+
+  it("rejects lifecycle commands for direct-container deployments but permits reconcile", async () => {
+    const harness = createHarness();
+    await harness.service.create(
+      {
+        deploymentId: "deployment-direct-command",
+        providerId: "provider:A",
+        environment: "production",
+        runtimeVersion: "2.0.0-rc.1",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: "runtime-direct-command-0",
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      audit,
+    );
+
+    await expect(
+      harness.service.command(
+        {
+          providerId: "provider:A",
+          deploymentId: "deployment-direct-command",
+          command: "stop",
+          expectedDesiredRevision: 0,
+        },
+        audit,
+      ),
+    ).rejects.toMatchObject({ code: "RUNTIME_DEPLOYMENT_COMMAND_UNSUPPORTED" });
+    await expect(
+      harness.service.command(
+        {
+          providerId: "provider:A",
+          deploymentId: "deployment-direct-command",
+          command: "reconcile",
+          expectedDesiredRevision: 0,
+        },
+        audit,
+      ),
+    ).resolves.toMatchObject({ runtimeAuthority: "direct_container" });
   });
 
   it("uses draining desired state for stop and never changes observed lifecycle directly", async () => {
@@ -222,6 +303,7 @@ function createInput(deploymentId: string) {
 
 function createHarness(unavailable?: "provider" | "config" | "database") {
   const deployments = new Map<string, RuntimeDeploymentSnapshot>();
+  const processes = new Map<string, RuntimeProcessProjection>();
   const jobs: {
     readonly jobId: string;
     readonly jobType: string;
@@ -247,6 +329,12 @@ function createHarness(unavailable?: "provider" | "config" | "database") {
       save: (value) => {
         deployments.set(value.deploymentId, value);
         return Promise.resolve(true);
+      },
+    },
+    processes: {
+      insertExpected: (_providerId, value) => {
+        processes.set(value.instanceId, value);
+        return Promise.resolve();
       },
     },
     jobs: {
@@ -277,5 +365,5 @@ function createHarness(unavailable?: "provider" | "config" | "database") {
       newId: () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, "0")}`,
     },
   );
-  return { service, deployments, jobs, audits };
+  return { service, deployments, processes, jobs, audits };
 }

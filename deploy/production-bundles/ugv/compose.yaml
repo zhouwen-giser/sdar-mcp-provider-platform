@@ -60,6 +60,10 @@ services:
         source: ./secrets/pms/api
         target: /run/pms-secrets/api
         read_only: true
+      - type: bind
+        source: ./secrets/pms/runtime-control-plane
+        target: /run/pms-secrets/runtime-control-plane
+        read_only: true
     tmpfs:
       - /tmp:size=32m,mode=0700,uid=1000,gid=1000
     healthcheck:
@@ -80,6 +84,7 @@ services:
     networks:
       - pms-database
       - pms-control
+      - ugv-service
     cap_drop:
       - ALL
     security_opt:
@@ -115,6 +120,7 @@ services:
       PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
       PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
       PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
+      PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: /run/pms-secrets/worker/external-runtime-catalog.json
     volumes:
       - type: bind
         source: ./secrets/pms/pms-database-url
@@ -123,6 +129,10 @@ services:
       - type: bind
         source: ./secrets/pms/worker
         target: /run/pms-secrets/worker
+        read_only: true
+      - type: bind
+        source: ./secrets/ugv/runtime
+        target: /run/pms-secrets/external-runtime
         read_only: true
       - type: bind
         source: ./runtime/pms-worker-state
@@ -363,8 +373,13 @@ services:
       ADAPTER_ENDPOINT: ugv-adapter:7010
       ADAPTER_TLS_MODE: disabled
       AUTH_MODE: jwt_hs256
-      JWT_ISSUER: ${UGV_RUNTIME_JWT_ISSUER:-sdar-production-ugv}
-      JWT_AUDIENCE: ${UGV_RUNTIME_JWT_AUDIENCE:-sdar-ugv-runtime}
+      JWT_ISSUER: sdar-production-ugv
+      JWT_AUDIENCE: sdar-ugv-runtime
+      PMS_DEPLOYMENT_ID: production-ugv-direct
+      PMS_INSTANCE_ID: production-ugv-direct-1
+      PMS_RUNTIME_REGISTRATION_URL: http://pms-api:8090
+      PMS_RUNTIME_REGISTRATION_TOKEN_FILE: /run/secrets/pms-runtime-control-plane.token
+      PMS_RUNTIME_HEARTBEAT_INTERVAL_MS: "10000"
       UGV_SMOKE_MAX_STATE_AGE_MS: ${UGV_SMOKE_MAX_STATE_AGE_MS:-30000}
       MCP_LEGACY_ENDPOINT_ENABLED: "false"
       ALLOW_WEAK_LEASE_CONFIGURATION: "false"
@@ -388,8 +403,8 @@ services:
         condition: service_healthy
     volumes:
       - type: bind
-        source: ./bin/runtime-smoke.mjs
-        target: /opt/sdar-bundle/runtime-smoke.mjs
+        source: ./secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token
+        target: /run/secrets/pms-runtime-control-plane.token
         read_only: true
     secrets:
       - ugv_runtime_database_url
@@ -435,6 +450,18 @@ services:
       PMS_SEED_ENVIRONMENT: production
       PMS_SEED_PROVIDER_ID: isr.vehicle.ugv.ugv1
       PMS_SEED_ADAPTER_ENDPOINT: ugv-adapter:7010
+      PMS_SEED_DEPLOYMENT_ID: production-ugv-direct
+      PMS_SEED_INSTANCE_ID: production-ugv-direct-1
+      PMS_SEED_RUNTIME_VERSION: 2.0.0-rc.1
+      PMS_SEED_RUNTIME_CONTROL_ENDPOINT: http://ugv-runtime:8080
+      PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT: ${UGV_RUNTIME_ADVERTISED_URL:?UGV_RUNTIME_ADVERTISED_URL is required}
+      PMS_SEED_RUNTIME_PUBLISHED_PORT: ${UGV_RUNTIME_PORT:-19100}
+      PMS_SEED_WAIT_TIMEOUT_MS: ${UGV_PMS_AUTHORITY_WAIT_TIMEOUT_MS:-180000}
+      PMS_SEED_POLL_INTERVAL_MS: ${UGV_PMS_AUTHORITY_POLL_INTERVAL_MS:-2000}
+      PMS_SMOKE_API_BASE_URL: http://pms-api:8090
+      PMS_SMOKE_ADMIN_TOKEN_FILE: /run/secrets/pms_management_admin_token
+      JWT_ISSUER: sdar-production-ugv
+      JWT_AUDIENCE: sdar-ugv-runtime
       PMS_SEED_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
       PMS_SEED_PACKAGE_ROOT: /app
     volumes:
@@ -443,11 +470,16 @@ services:
         target: /app/pms-seed.mjs
         read_only: true
       - type: bind
+        source: ./bin/runtime-smoke.mjs
+        target: /app/runtime-smoke.mjs
+        read_only: true
+      - type: bind
         source: ./secrets/pms/pms-database-url
         target: /run/pms-secrets/pms-database-url
         read_only: true
     secrets:
       - pms_management_admin_token
+      - runtime_jwt_hs256_secret
     tmpfs:
       - /tmp:size=16m,mode=0700,uid=1000,gid=1000
     depends_on:

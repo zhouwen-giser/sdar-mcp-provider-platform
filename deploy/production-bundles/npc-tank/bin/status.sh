@@ -20,4 +20,6 @@ printf 'PMS Web: http://%s:%s (plain internal-network access; no end-user authen
 printf 'NPC Runtime: http://%s:%s (JWT protected)\n' \
   "$(npc_required_env_literal NPC_TANK_RUNTIME_BIND_ADDRESS "$NPC_BUNDLE_USER_ENV")" \
   "$(npc_required_env_literal NPC_TANK_RUNTIME_PORT "$NPC_BUNDLE_USER_ENV")"
-printf '%s\n' 'Runtime authority: direct container; Registry authority: NOT_CONFIGURED.'
+printf 'Registry advertised Runtime base: %s\n' \
+  "$(npc_required_env_literal NPC_TANK_RUNTIME_ADVERTISED_URL "$NPC_BUNDLE_USER_ENV")"
+printf '%s\n' 'Runtime authority: direct_container; Registry authority: pms_worker.'

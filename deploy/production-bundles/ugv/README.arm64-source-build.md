@@ -92,7 +92,13 @@ ALLOW_INSECURE_INTERNAL_TRANSPORT=true
 UGV_SIM_DEVICE_MCP_URL=http://device-mcp.intranet.local/mcp
 UGV_SIM_MQTT_URL=mqtt://mqtt.intranet.local:1883
 UGV_MQTT_WIRE_MODE=ros_bridge_json
+UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
 ```
+
+从旧交付升级且保留既有 `.env` 时，`init.sh` 不会覆盖该文件；必须手动补入
+`UGV_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
+端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
+变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
 
 不要在 `.env` 中加入 revision、平台、基础镜像、摘要、构建目标或可部署状态等发布
 身份键；它们只能来自交付流程生成的只读构建锁文件。
@@ -116,8 +122,10 @@ bash deploy/ugv/bin/smoke.sh
 bash deploy/ugv/bin/down.sh
 ```
 
-`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、JWT Runtime、
-真实 Device MCP/MQTT 连接和数据新鲜度，并只调用以下读取工具：
+`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、ACTIVE 的
+`direct_container` RuntimeDeployment 和新鲜 registration/heartbeat，并从 PMS Registry
+发布的 advertised endpoint 验证 JWT Runtime、真实 Device MCP/MQTT 连接和数据新鲜度，
+只调用以下读取工具：
 
 - `vehicle_get_state`
 - `vehicle_get_capabilities`
@@ -140,9 +148,10 @@ bash deploy/ugv/bin/down.sh
 
 本包仅提供从精确源码在原生 ARM64 主机生成部署镜像的可重复路径，不声称构建产物已经
 完成目标现场的生产认证。UGV Provider Package 的 real-resource 状态仍为 `pending`；
-当前异构 MQTT bridge 的 envelope、topic 和 QoS 差异仍属于部分资格。直接 Runtime
-容器是本部署的 vendor-managed 运行权威，platform-managed Runtime 和 PMS Registry
-权威闭环均为 `not_configured`。
+当前异构 MQTT bridge 的 envelope、topic 和 QoS 差异仍属于部分资格。Runtime 容器由
+Compose 直接启动；PMS 以 `runtimeAuthority=direct_container` 接纳，Runtime 自行注册和
+心跳，Worker 跳过 PM2 并以 `registryAuthority=pms_worker` 发布 Catalog/Registry。
+production qualification 仍为 `NOT_CLAIMED`。
 
 只有目标主机上的源码构建、八服务健康检查、PMS seed 以及真实只读 smoke 全部通过后，
 才能把该次现场部署记录为已验证；这不会把全局资格状态自动提升为 `qualified`，也不会

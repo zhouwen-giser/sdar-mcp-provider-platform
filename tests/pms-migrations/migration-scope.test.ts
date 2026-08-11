@@ -26,7 +26,7 @@ describe("PMS migration set scope and upgrade behavior", () => {
     );
   });
 
-  it("applies 001-008 data and upgrades to 009 without dropping existing rows", async () => {
+  it("upgrades a populated 009 schema to direct-container support without dropping rows", async () => {
     const upgradeSchema = `pms_upgrade_${randomUUID().replaceAll("-", "")}`;
     const upgradePool = new Pool({
       connectionString,
@@ -76,11 +76,47 @@ describe("PMS migration set scope and upgrade behavior", () => {
         throw new Error("MIGRATION_009_NOT_FOUND");
       }
       await upgradePool.query(migration009);
+      const migration010 = sql[9];
+      if (migration010 === undefined) {
+        throw new Error("MIGRATION_010_NOT_FOUND");
+      }
+      await upgradePool.query(migration010);
 
       const processRows = await upgradePool.query<{ runtime_instance_id: string }>(
         `SELECT runtime_instance_id FROM runtime_process WHERE runtime_instance_id='legacy-instance'`,
       );
       expect(processRows.rows).toEqual([{ runtime_instance_id: "legacy-instance" }]);
+
+      const upgradedDeployment = await upgradePool.query<{
+        runtime_authority: string;
+        database_profile_id: string | null;
+        config_profile_id: string | null;
+      }>(
+        `SELECT runtime_authority,database_profile_id,config_profile_id
+           FROM runtime_deployment WHERE deployment_id='deployment-upgrade'`,
+      );
+      expect(upgradedDeployment.rows).toEqual([
+        {
+          runtime_authority: "platform_managed",
+          database_profile_id: "db-profile-1",
+          config_profile_id: "config-profile-1",
+        },
+      ]);
+      const upgradedProcess = await upgradePool.query<{
+        process_manager: string;
+        pm2_name: string | null;
+        port: number | null;
+      }>(
+        `SELECT process_manager,pm2_name,port
+           FROM runtime_process WHERE runtime_instance_id='legacy-instance'`,
+      );
+      expect(upgradedProcess.rows).toEqual([
+        {
+          process_manager: "pm2",
+          pm2_name: "sdar-runtime-production-upgrade-01",
+          port: 30001,
+        },
+      ]);
 
       const providerRows = await upgradePool.query<{ provider_id: string }>(
         `SELECT provider_id FROM provider WHERE provider_id='provider:scope'`,

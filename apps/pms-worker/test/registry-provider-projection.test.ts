@@ -12,12 +12,11 @@ describe("buildRegistryProviderProjection", () => {
 
     const result = await buildRegistryProviderProjection({
       deployment: current.snapshot,
-      endpoint: "http://127.0.0.1:18080/mcp",
       catalog: catalogA,
       deployments: [current, existing],
       activeCatalog: async (providerId) => (providerId === "provider-b" ? catalogB : null),
       ensureInstance: async (candidate) => ({ instanceId: `instance-${candidate.providerId}` }),
-      runtimeBaseUrl: async (candidate) =>
+      advertisedBaseUrl: async (candidate) =>
         candidate.providerId === "provider-b" ? "http://127.0.0.1:18081" : "http://127.0.0.1:18080",
     });
 
@@ -37,12 +36,11 @@ describe("buildRegistryProviderProjection", () => {
     await expect(
       buildRegistryProviderProjection({
         deployment: current.snapshot,
-        endpoint: "http://127.0.0.1:18080/mcp",
         catalog: catalog("provider-a", 1),
         deployments: [current, existing],
         activeCatalog: async () => null,
         ensureInstance: async (candidate) => ({ instanceId: `instance-${candidate.providerId}` }),
-        runtimeBaseUrl: async () => "http://127.0.0.1:18081",
+        advertisedBaseUrl: async () => "http://127.0.0.1:18081",
       }),
     ).rejects.toThrow("REGISTRY_ACTIVE_CATALOG_MISSING");
   });

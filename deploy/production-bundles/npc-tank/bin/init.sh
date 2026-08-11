@@ -28,13 +28,15 @@ state_root="$(npc_state_root_unresolved)"
 mkdir -p -- \
   "$state_root/secrets/pms-api" \
   "$state_root/secrets/pms-worker" \
-  "$state_root/secrets/runtime-control-plane"
+  "$state_root/secrets/runtime-control-plane" \
+  "$state_root/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1"
 chmod 0700 -- \
   "$state_root" \
   "$state_root/secrets" \
   "$state_root/secrets/pms-api" \
   "$state_root/secrets/pms-worker" \
-  "$state_root/secrets/runtime-control-plane"
+  "$state_root/secrets/runtime-control-plane" \
+  "$state_root/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1"
 
 random_hex() {
   openssl rand -hex 32
@@ -43,12 +45,19 @@ random_hex() {
 write_new_secret() {
   local path="$1"
   local value="$2"
+  local existing temporary
+  [[ ! -L "$path" ]] || npc_die "refusing generated-secret symlink: $path"
   if [[ -e "$path" ]]; then
     npc_validate_secret_file "$path" "existing generated secret"
-    return
+    existing="$(<"$path")"
+    [[ -n "$existing" && "$existing" != *$'\r'* && "$existing" != *$'\n'* ]] ||
+      npc_die "existing generated secret contains invalid whitespace"
+    value="$existing"
   fi
-  printf '%s\n' "$value" >"$path"
-  chmod 0600 "$path"
+  temporary="$path.tmp.$$"
+  printf '%s' "$value" >"$temporary"
+  chmod 0600 "$temporary"
+  mv -f -- "$temporary" "$path"
 }
 
 require_pair_or_absent() {
@@ -91,6 +100,9 @@ fi
 
 write_new_secret "$state_root/secrets/runtime-jwt-hs256" "$(random_hex)"
 write_new_secret "$state_root/secrets/pms-api/management-admin.token" "$(random_hex)"
+write_new_secret \
+  "$state_root/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token" \
+  "$(random_hex)"
 
 management_descriptor="$state_root/secrets/pms-api/management.json"
 if [[ ! -e "$management_descriptor" ]]; then
@@ -110,10 +122,52 @@ if [[ ! -e "$management_descriptor" ]]; then
 fi
 
 runtime_descriptor="$state_root/secrets/pms-api/runtime.json"
-if [[ ! -e "$runtime_descriptor" ]]; then
-  printf '%s\n' '{"runtimeConfig":[],"runtimeRegistration":[]}' >"$runtime_descriptor"
-  chmod 0600 "$runtime_descriptor"
+[[ ! -L "$runtime_descriptor" ]] || npc_die "refusing Runtime descriptor symlink"
+if [[ -e "$runtime_descriptor" ]]; then
+  npc_validate_secret_file "$runtime_descriptor" "existing Runtime descriptor"
 fi
+printf '%s\n' \
+  '{' \
+  '  "runtimeConfig": [],' \
+  '  "runtimeRegistration": [' \
+  '    {' \
+  '      "subjectId": "production-npc-tank-direct-registration",' \
+  '      "providerId": "isr.vehicle.npc-tank.npc-tank1",' \
+  '      "deploymentId": "production-npc-tank-direct",' \
+  '      "instanceId": "production-npc-tank-direct-1",' \
+  '      "runtimeVersion": "2.0.0-rc.1",' \
+  '      "protocolVersion": "2026-07-28",' \
+  '      "scopes": ["runtime:register", "runtime:heartbeat"],' \
+  '      "tokenFile": "/run/pms-secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token"' \
+  '    }' \
+  '  ]' \
+  '}' >"$runtime_descriptor"
+chmod 0600 "$runtime_descriptor"
+
+catalog_credential_descriptor="$state_root/secrets/pms-worker/external-runtime-catalog.json"
+[[ ! -L "$catalog_credential_descriptor" ]] || \
+  npc_die "refusing external catalog credential descriptor symlink"
+if [[ -e "$catalog_credential_descriptor" ]]; then
+  npc_validate_secret_file \
+    "$catalog_credential_descriptor" \
+    "existing external catalog credential descriptor"
+fi
+printf '%s\n' \
+  '{' \
+  '  "credentials": [' \
+  '    {' \
+  '      "providerId": "isr.vehicle.npc-tank.npc-tank1",' \
+  '      "deploymentId": "production-npc-tank-direct",' \
+  '      "instanceId": "production-npc-tank-direct-1",' \
+  '      "secretFile": "/run/pms-secrets/runtime-jwt-hs256",' \
+  '      "issuer": "sdar-npc-tank-production",' \
+  '      "audience": "sdar-runtime",' \
+  '      "subjectId": "pms-worker",' \
+  '      "tenantId": "pms-control"' \
+  '    }' \
+  '  ]' \
+  '}' >"$catalog_credential_descriptor"
+chmod 0600 "$catalog_credential_descriptor"
 
 provisioning_descriptor="$state_root/secrets/pms-worker/postgres-provisioning.json"
 if [[ ! -e "$provisioning_descriptor" ]]; then
@@ -140,6 +194,7 @@ fi
 npc_validate_secret_inventory
 
 printf '%s\n' \
-  'Internal database credentials, PMS credentials, and the Runtime JWT secret are ready.' \
+  'Internal database credentials, the instance-scoped PMS credential, and Runtime JWT are ready.' \
+  'The direct-container Runtime identity is production-npc-tank-direct/production-npc-tank-direct-1.' \
   'No TLS CA, certificate, key, MQTT password, or transport trust material is required.' \
   'Edit .env with the real internal HTTP Device MCP and MQTT endpoints, then run bin/up.sh.'

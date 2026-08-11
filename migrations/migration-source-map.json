@@ -2,8 +2,8 @@
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
   "inventory": {
-    "mappedProvenanceEntries": 30,
-    "ownerDirectoryFiles": 38
+    "mappedProvenanceEntries": 31,
+    "ownerDirectoryFiles": 39
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -31,7 +31,7 @@
     "pms": {
       "owner": "pms",
       "plannedDirectory": "migrations/pms",
-      "deliveredFiles": 9,
+      "deliveredFiles": 10,
       "namingRule": "NNN_lower_snake_case_description.sql",
       "versionScope": "Unique and append-only within the pms set, starting at 001."
     }
@@ -336,6 +336,16 @@
       "plannedPath": "migrations/providers/npc-tank/026_allow_authoritative_status_tool.sql",
       "pathState": "owner_directory",
       "sha256": "19864c5bce3b0e4486c6fe1a9b34d48eed609a73779d1882cb1dceac198ceef0"
+    },
+    {
+      "sequence": 31,
+      "legacyVersion": "010",
+      "owner": "pms",
+      "oldPath": "migrations/010_external_runtime_deployment.sql",
+      "newPath": "migrations/pms/010_external_runtime_deployment.sql",
+      "plannedPath": "migrations/pms/010_external_runtime_deployment.sql",
+      "pathState": "owner_directory",
+      "sha256": "ac7245d56b365e848853262aef5462dc0ba7a7d146be74fd6098957f7e0bf6a5"
     }
   ]
 }

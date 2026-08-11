@@ -207,6 +207,9 @@ npc_validate_secret_inventory() {
   npc_validate_secret_directory "$state_root/secrets/pms-worker" "PMS Worker secret root"
   npc_validate_secret_directory "$state_root/secrets/runtime-control-plane" \
     "Runtime control-plane credential root"
+  npc_validate_secret_directory \
+    "$state_root/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1" \
+    "direct Runtime instance credential root"
 
   local relative
   for relative in \
@@ -215,7 +218,9 @@ npc_validate_secret_inventory() {
     secrets/pms-api/management.json \
     secrets/pms-api/runtime.json \
     secrets/pms-api/management-admin.token \
+    secrets/pms-worker/external-runtime-catalog.json \
     secrets/pms-worker/postgres-provisioning.json \
+    secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token \
     secrets/npc-adapter-db-password \
     secrets/npc-adapter-database-url \
     secrets/npc-runtime-db-password \
@@ -229,9 +234,12 @@ npc_validate_secret_inventory() {
 }
 
 npc_validate_external_configuration() {
-  local device_url mqtt_url insecure_opt_in
+  local device_url mqtt_url insecure_opt_in runtime_advertised_url
   device_url="$(npc_required_env_literal NPC_TANK_DEVICE_MCP_URL "$NPC_BUNDLE_USER_ENV")"
   mqtt_url="$(npc_required_env_literal NPC_TANK_MQTT_URL "$NPC_BUNDLE_USER_ENV")"
+  runtime_advertised_url="$(
+    npc_required_env_literal NPC_TANK_RUNTIME_ADVERTISED_URL "$NPC_BUNDLE_USER_ENV"
+  )"
   insecure_opt_in="$(
     npc_required_env_literal ALLOW_INSECURE_INTERNAL_TRANSPORT "$NPC_BUNDLE_USER_ENV"
   )"
@@ -245,6 +253,14 @@ npc_validate_external_configuration() {
     npc_die "NPC_TANK_DEVICE_MCP_URL is still a placeholder"
   [[ ! "$mqtt_url" =~ REPLACE|mock|\.invalid ]] || \
     npc_die "NPC_TANK_MQTT_URL is still a placeholder"
+  [[ "$runtime_advertised_url" == http://* && "$runtime_advertised_url" != */mcp &&
+    "$runtime_advertised_url" != */mcp/ ]] || \
+    npc_die "NPC_TANK_RUNTIME_ADVERTISED_URL must be an HTTP base URL without /mcp"
+  [[ ! "$runtime_advertised_url" =~ REPLACE|mock|\.invalid|localhost|127\.0\.0\.1|0\.0\.0\.0 ]] || \
+    npc_die "NPC_TANK_RUNTIME_ADVERTISED_URL must identify the real intranet deployment host"
+  [[ "$runtime_advertised_url" != *"@"* && "$runtime_advertised_url" != *"?"* &&
+    "$runtime_advertised_url" != *"#"* ]] || \
+    npc_die "NPC_TANK_RUNTIME_ADVERTISED_URL must not contain credentials, query, or fragment"
 }
 
 npc_validate_compose() {

@@ -4,8 +4,12 @@ import type {
   RuntimeDeploymentApplicationUnitOfWork,
 } from "../../pms-application/src/index.js";
 import { PostgresAuditRepository, PostgresJobLeaseRepository } from "./audit-job-repositories.js";
-import { PostgresRuntimeDeploymentRepository } from "./runtime-deployment-repositories.js";
+import {
+  PostgresRuntimeDeploymentRepository,
+  PostgresRuntimeProcessRepository,
+} from "./runtime-deployment-repositories.js";
 import type { PmsSqlClient } from "./shared.js";
+import type { RuntimeProcessProjection } from "../../runtime-deployment/src/index.js";
 
 export class PostgresRuntimeDeploymentApplicationUnitOfWork implements RuntimeDeploymentApplicationUnitOfWork {
   constructor(private readonly pool: Pool) {}
@@ -32,8 +36,14 @@ export class PostgresRuntimeDeploymentApplicationUnitOfWork implements RuntimeDe
 export function runtimeDeploymentApplicationRepositories(
   client: PoolClient | PmsSqlClient,
 ): RuntimeDeploymentApplicationRepositories {
+  const processes = new PostgresRuntimeProcessRepository(client);
   return Object.freeze({
     deployments: new PostgresRuntimeDeploymentRepository(client),
+    processes: Object.freeze({
+      insertExpected: async (providerId: string, value: RuntimeProcessProjection) => {
+        await processes.upsert(providerId, value, null);
+      },
+    }),
     jobs: new PostgresJobLeaseRepository(client),
     audit: new PostgresAuditRepository(client),
   });

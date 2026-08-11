@@ -5,7 +5,7 @@ import type {
   RuntimeDeploymentApplicationService,
   RuntimeDeploymentCommandInput,
 } from "../../../packages/pms-application/src/index.js";
-import type { RuntimeDeploymentStatus } from "../../../packages/runtime-deployment/src/index.js";
+import type { RuntimeDeploymentSnapshot } from "../../../packages/runtime-deployment/src/index.js";
 import type { PostgresRuntimeDeploymentRepository } from "../../../packages/pms-persistence-postgres/src/index.js";
 import { PostgresRuntimeDeploymentRepository as Repo } from "../../../packages/pms-persistence-postgres/src/runtime-deployment-repositories.js";
 import type {
@@ -59,36 +59,34 @@ export class RuntimeDeploymentManagementFacade implements RuntimeDeploymentManag
   }
 }
 
-function toView(snapshot: {
-  readonly deploymentId: string;
-  readonly providerId: string;
-  readonly environment: string;
-  readonly desiredState: string;
-  readonly desiredReplicas: number;
-  readonly runtimeVersion: string;
-  readonly databaseProfileId: string;
-  readonly configProfileId: string;
-  readonly adapterEndpoint?: string;
-  readonly status: RuntimeDeploymentStatus;
-  readonly desiredRevision: number;
-  readonly observedRevision: number;
-}): RuntimeDeploymentView {
-  return Object.freeze({
+function toView(snapshot: RuntimeDeploymentSnapshot): RuntimeDeploymentView {
+  const common = {
     deploymentId: snapshot.deploymentId,
     providerId: snapshot.providerId,
     environment: snapshot.environment,
-    desiredState: snapshot.desiredState as RuntimeDeploymentView["desiredState"],
+    desiredState: snapshot.desiredState,
     desiredReplicas: snapshot.desiredReplicas,
     runtimeVersion: snapshot.runtimeVersion,
-    databaseProfileId: snapshot.databaseProfileId,
-    configProfileId: snapshot.configProfileId,
     ...(snapshot.adapterEndpoint === undefined
       ? {}
       : { adapterEndpoint: snapshot.adapterEndpoint }),
     status: snapshot.status,
     desiredRevision: snapshot.desiredRevision,
     observedRevision: snapshot.observedRevision,
-  });
+  } as const;
+  return snapshot.runtimeAuthority === "direct_container"
+    ? Object.freeze({
+        ...common,
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: snapshot.adapterEndpoint,
+        directContainer: Object.freeze({ ...snapshot.directContainer }),
+      })
+    : Object.freeze({
+        ...common,
+        runtimeAuthority: "platform_managed",
+        databaseProfileId: snapshot.databaseProfileId,
+        configProfileId: snapshot.configProfileId,
+      });
 }
 
 export type { PostgresRuntimeDeploymentRepository };

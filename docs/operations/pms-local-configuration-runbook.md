@@ -95,7 +95,7 @@ docker compose -f compose.yaml exec postgres \
   psql -U sdar -d postgres -c 'CREATE DATABASE sdar_pms;'
 ```
 
-如果出现 `database "sdar_pms" already exists`，表示数据库已经准备好，可以继续。PMS API 在首次启动时会自动执行 `migrations/pms/001` 到 `009`，不需要手动执行 SQL 迁移。
+如果出现 `database "sdar_pms" already exists`，表示数据库已经准备好，可以继续。PMS API 在首次启动时会自动执行 `migrations/pms/001` 到 `010`，不需要手动执行 SQL 迁移。
 
 ### 4.2 建立本地秘密目录
 

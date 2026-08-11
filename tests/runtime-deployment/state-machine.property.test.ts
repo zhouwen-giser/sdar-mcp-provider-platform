@@ -128,6 +128,7 @@ function atStatus(status: RuntimeDeploymentStatus) {
     desiredState: "running",
     desiredReplicas: 1,
     runtimeVersion: "0.1.0",
+    runtimeAuthority: "platform_managed",
     databaseProfileId: databaseProfileId("database-1"),
     configProfileId: runtimeConfigProfileId("config-1"),
     status,

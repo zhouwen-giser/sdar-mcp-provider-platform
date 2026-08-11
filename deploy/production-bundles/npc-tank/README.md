@@ -13,7 +13,8 @@ CA、受信 TLS 证书、HTTPS/MQTTS 终结器或安全网关。
 - NPC Tank Provider Adapter、NPC Tank Runtime
 
 此外，`pms-seed` 是一次性的初始化服务。它从 scoped PMS Worker 镜像内的权威
-Provider Package 创建或核对 NPC Provider Type、Provider、Resource 和 Binding。
+Provider Package 创建或核对 NPC Provider Type、Provider、Resource、Binding，以及正式的
+`direct_container` RuntimeDeployment 和预期实例。
 
 ## 内网传输策略
 
@@ -55,12 +56,18 @@ cp deploy/npc-tank/.env.example deploy/npc-tank/.env
 chmod 0600 deploy/npc-tank/.env
 ```
 
-编辑 `.env`，至少替换以下两个占位地址：
+编辑 `.env`，至少替换以下三个占位地址：
 
 ```dotenv
 NPC_TANK_DEVICE_MCP_URL=http://REAL_INTERNAL_DEVICE_MCP_HOST/mcp
 NPC_TANK_MQTT_URL=mqtt://REAL_INTERNAL_MQTT_HOST:1883
+NPC_TANK_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19103
 ```
+
+从旧交付升级且保留既有 `.env` 时，初始化脚本不会覆盖该文件；必须手动补入
+`NPC_TANK_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
+端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
+变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
 
 然后执行：
 
@@ -70,8 +77,9 @@ bash deploy/npc-tank/bin/up.sh
 ```
 
 `up.sh` 会先验证交付包校验和、载入并核对固定镜像、检查明文内网策略和秘密文件，
-随后启动服务、执行幂等 PMS seed，并运行只读真实链路 smoke test。smoke 只调用四个 NPC
-读取操作，不调用移动、侦察、火控等变更操作。
+随后启动服务、执行幂等 PMS seed，并运行只读真实链路 smoke test。seed 等待部署
+`ACTIVE`、实例 registration/heartbeat 新鲜及 Registry 发布完成；smoke 从 Registry 的
+advertised endpoint 调用四个 NPC 读取操作，不调用移动、侦察、火控等变更操作。
 
 ## 运维命令
 
@@ -87,6 +95,8 @@ bash deploy/npc-tank/bin/down.sh
 ## 资格边界
 
 本包提供完整、可重复加载的生产部署基础设施，但 Provider Package 的真实资源资格仍为
-`pending`。直接 Runtime 容器是当前运行权威；PMS Registry 权威闭环为
-`NOT_CONFIGURED`。只有在目标内网的真实 Device MCP 和 MQTT 可达、数据新鲜且只读 smoke
-通过后，才能把该次现场部署视为已验证。
+`pending`，production qualification 仍为 `NOT_CLAIMED`。Runtime 由 Compose 直接启动，
+PMS 以 `runtimeAuthority=direct_container` 接纳；Runtime 自行注册和心跳，PMS Worker
+跳过 PM2、发现 Catalog，并以 `registryAuthority=pms_worker` 发布 Registry。只有目标
+内网的真实 Device MCP/MQTT 可达、数据新鲜且 Registry-backed 只读 smoke 通过后，才能
+把该次现场部署视为已验证。

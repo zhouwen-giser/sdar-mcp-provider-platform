@@ -26,6 +26,7 @@ directories=(
   "$bundle_dir/secrets/pms/api"
   "$bundle_dir/secrets/pms/worker"
   "$bundle_dir/secrets/pms/runtime-control-plane"
+  "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1"
   "$bundle_dir/secrets/ugv/database"
   "$bundle_dir/secrets/ugv/runtime"
   "$bundle_dir/runtime/pms-worker-state/runtime-secrets"
@@ -41,11 +42,21 @@ done
 random_secret() {
   local path="$1"
   local bytes="$2"
+  local value temporary
+  [[ ! -L "$path" ]] || die "refusing secret symlink: $path"
   if [[ ! -e "$path" ]]; then
-    openssl rand -hex "$bytes" >"$path"
-  elif [[ -L "$path" || ! -s "$path" ]]; then
+    value="$(openssl rand -hex "$bytes")"
+  elif [[ ! -f "$path" || ! -s "$path" ]]; then
     die "refusing invalid existing secret: $path"
+  else
+    value="$(<"$path")"
   fi
+  [[ "$value" =~ ^[0-9a-f]+$ && "${#value}" -eq $((bytes * 2)) ]] ||
+    die "refusing malformed existing secret: $path"
+  temporary="$path.tmp.$$"
+  printf '%s' "$value" >"$temporary"
+  chmod 0600 "$temporary"
+  mv -f -- "$temporary" "$path"
 }
 
 random_secret "$bundle_dir/secrets/pms/postgres-password" 32
@@ -55,6 +66,9 @@ random_secret "$bundle_dir/secrets/ugv/database/adapter-password" 32
 random_secret "$bundle_dir/secrets/ugv/database/runtime-password" 32
 random_secret "$bundle_dir/secrets/ugv/runtime/jwt-hs256-secret" 48
 random_secret "$bundle_dir/secrets/pms/worker/runtime-database-password" 32
+random_secret \
+  "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token" \
+  48
 
 pms_password="$(<"$bundle_dir/secrets/pms/postgres-password")"
 adapter_password="$(<"$bundle_dir/secrets/ugv/database/adapter-password")"
@@ -98,14 +112,42 @@ management_descriptor="$(printf '%s' '{
 }')"
 runtime_descriptor="$(printf '%s' '{
   "runtimeConfig": [],
-  "runtimeRegistration": []
+  "runtimeRegistration": [
+    {
+      "subjectId": "production-ugv-direct-registration",
+      "providerId": "isr.vehicle.ugv.ugv1",
+      "deploymentId": "production-ugv-direct",
+      "instanceId": "production-ugv-direct-1",
+      "runtimeVersion": "2.0.0-rc.1",
+      "protocolVersion": "2026-07-28",
+      "scopes": ["runtime:register", "runtime:heartbeat"],
+      "tokenFile": "/run/pms-secrets/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token"
+    }
+  ]
+}')"
+catalog_credential_descriptor="$(printf '%s' '{
+  "credentials": [
+    {
+      "providerId": "isr.vehicle.ugv.ugv1",
+      "deploymentId": "production-ugv-direct",
+      "instanceId": "production-ugv-direct-1",
+      "secretFile": "/run/pms-secrets/external-runtime/jwt-hs256-secret",
+      "issuer": "sdar-production-ugv",
+      "audience": "sdar-ugv-runtime",
+      "subjectId": "pms-worker",
+      "tenantId": "pms-control"
+    }
+  ]
 }')"
 provisioning_descriptor="$(printf '{\n  "clusterRef": "bundle-pms-postgres",\n  "adminSecretRef": "file/production-ugv/pms-postgres-admin",\n  "adminDatabaseUrl": "postgresql://pms_admin:%s@pms-postgres:5432/pms",\n  "runtimePassword": "%s"\n}' "$pms_password" "$provisioned_runtime_password")"
 write_private "$bundle_dir/secrets/pms/api/management.json" "$management_descriptor"
 write_private "$bundle_dir/secrets/pms/api/runtime.json" "$runtime_descriptor"
+write_private \
+  "$bundle_dir/secrets/pms/worker/external-runtime-catalog.json" \
+  "$catalog_credential_descriptor"
 write_private "$bundle_dir/secrets/pms/worker/postgres-provisioning.json" "$provisioning_descriptor"
 
-write_private "$bundle_dir/runtime/.initialized" "schemaVersion=1"
+write_private "$bundle_dir/runtime/.initialized" "schemaVersion=2"
 
 find "$bundle_dir/secrets" "$bundle_dir/runtime" -type d -exec chmod 0700 {} +
 find "$bundle_dir/secrets" "$bundle_dir/runtime" -type f -exec chmod 0600 {} +
@@ -119,6 +161,7 @@ require_environment_file
 require_generated_layout
 
 printf '%s\n' \
-  'INITIALIZED: local database credentials and the Runtime JWT were created.' \
+  'INITIALIZED: local database, Runtime JWT, and instance-scoped PMS credentials were created.' \
+  'The direct-container Runtime identity is production-ugv-direct/production-ugv-direct-1.' \
   'REQUIRED: edit .env with the real intranet Device MCP and MQTT addresses.' \
   'No TLS certificate or external simulator credential is generated, mounted, or required.'

@@ -155,6 +155,7 @@ require_generated_layout() {
     "$bundle_dir/secrets/pms/api" \
     "$bundle_dir/secrets/pms/worker" \
     "$bundle_dir/secrets/pms/runtime-control-plane" \
+    "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1" \
     "$bundle_dir/secrets/ugv" \
     "$bundle_dir/secrets/ugv/database" \
     "$bundle_dir/secrets/ugv/runtime" \
@@ -176,8 +177,10 @@ require_generated_layout() {
     "$bundle_dir/secrets/pms/api/runtime.json" \
     "$bundle_dir/secrets/pms/api/management-reader.token" \
     "$bundle_dir/secrets/pms/api/management-admin.token" \
+    "$bundle_dir/secrets/pms/worker/external-runtime-catalog.json" \
     "$bundle_dir/secrets/pms/worker/postgres-provisioning.json" \
     "$bundle_dir/secrets/pms/worker/runtime-database-password" \
+    "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token" \
     "$bundle_dir/secrets/ugv/database/adapter-password" \
     "$bundle_dir/secrets/ugv/database/runtime-password" \
     "$bundle_dir/secrets/ugv/database/adapter-database-url" \
@@ -188,11 +191,12 @@ require_generated_layout() {
 }
 
 require_external_configuration() {
-  local insecure_opt_in device_url mqtt_url wire_mode
+  local insecure_opt_in device_url mqtt_url wire_mode runtime_advertised_url
   insecure_opt_in="$(required_env_value ALLOW_INSECURE_INTERNAL_TRANSPORT)"
   device_url="$(required_env_value UGV_SIM_DEVICE_MCP_URL)"
   mqtt_url="$(required_env_value UGV_SIM_MQTT_URL)"
   wire_mode="$(required_env_value UGV_MQTT_WIRE_MODE)"
+  runtime_advertised_url="$(required_env_value UGV_RUNTIME_ADVERTISED_URL)"
   [[ "$insecure_opt_in" == "true" ]] ||
     die "ALLOW_INSECURE_INTERNAL_TRANSPORT must be exactly true for this intranet bundle"
   [[ "$device_url" == http://* && "$device_url" == */mcp && "$device_url" != *".invalid"* ]] ||
@@ -205,6 +209,14 @@ require_external_configuration() {
     die "UGV_SIM_MQTT_URL is a placeholder or contains credentials/fragment"
   [[ "$wire_mode" == "ros_message_json" || "$wire_mode" == "direct_domain_json" ||
     "$wire_mode" == "ros_bridge_json" ]] || die "UGV_MQTT_WIRE_MODE must be explicit"
+  [[ "$runtime_advertised_url" == http://* && "$runtime_advertised_url" != */mcp &&
+    "$runtime_advertised_url" != */mcp/ ]] ||
+    die "UGV_RUNTIME_ADVERTISED_URL must be a plaintext HTTP Runtime base URL without /mcp"
+  [[ ! "$runtime_advertised_url" =~ REPLACE|mock|\.invalid|localhost|127\.0\.0\.1|0\.0\.0\.0 ]] ||
+    die "UGV_RUNTIME_ADVERTISED_URL must identify the real intranet deployment host"
+  [[ "$runtime_advertised_url" != *"@"* && "$runtime_advertised_url" != *"?"* &&
+    "$runtime_advertised_url" != *"#"* ]] ||
+    die "UGV_RUNTIME_ADVERTISED_URL must not contain credentials, query, or fragment"
 
 }
 

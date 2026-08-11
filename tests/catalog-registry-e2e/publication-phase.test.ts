@@ -146,7 +146,7 @@ describe("Ready to Catalog to Registry publication", () => {
     const state = { ...statePort([]), fail };
     const phase = new CatalogRegistryPublicationPhase(
       new HttpCatalogRegistryDiscovery(),
-      { resolve: () => Promise.resolve(runtimeEndpoint) },
+      { resolve: () => Promise.resolve({ endpoint: runtimeEndpoint }) },
       catalogs,
       projection(),
       {
@@ -175,7 +175,7 @@ describe("Ready to Catalog to Registry publication", () => {
   function publicationPhase(state: CatalogRegistryStatePort) {
     return new CatalogRegistryPublicationPhase(
       new HttpCatalogRegistryDiscovery(),
-      { resolve: () => Promise.resolve(runtimeEndpoint) },
+      { resolve: () => Promise.resolve({ endpoint: runtimeEndpoint }) },
       catalogs,
       projection(),
       registries,
@@ -187,11 +187,9 @@ describe("Ready to Catalog to Registry publication", () => {
     return {
       providers: ({
         deployment: value,
-        endpoint,
         catalog,
       }: {
         deployment: RuntimeDeploymentSnapshot;
-        endpoint: string;
         catalog: CatalogSnapshot;
       }): Promise<readonly RegistryProviderInput[]> => {
         return Promise.resolve([
@@ -199,7 +197,7 @@ describe("Ready to Catalog to Registry publication", () => {
             providerId: value.providerId,
             serverId: `server-${value.providerId}`,
             protocolMode: "frozen_v1",
-            effectiveEndpoint: endpoint,
+            effectiveEndpoint: runtimeEndpoint,
             catalog,
           },
         ]);
@@ -210,6 +208,9 @@ describe("Ready to Catalog to Registry publication", () => {
 
 function statePort(transitions: string[]): CatalogRegistryStatePort {
   return {
+    recordCatalogState() {
+      return Promise.resolve();
+    },
     activate(value) {
       transitions.push("ACTIVE");
       return Promise.resolve({
@@ -237,6 +238,7 @@ function deployment(provider: string, environment: string): RuntimeDeploymentSna
     desiredState: "running",
     desiredReplicas: 1,
     runtimeVersion: "2.0.0",
+    runtimeAuthority: "platform_managed",
     databaseProfileId: databaseProfileId(`database-${provider}`),
     configProfileId: runtimeConfigProfileId(`config-${provider}`),
     status: "DISCOVERING",
