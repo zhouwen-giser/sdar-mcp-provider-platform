@@ -59,8 +59,9 @@ The required branch is the retained `codex/ha-real-device-preparation`, initiall
       revision 2 and exactly two Candidates; revision-17 Climate/Light Bindings matched Runtime
       Tool revisions; exact Climate 4 / Light 3 catalogs and deterministic read-only execution plus
       same-run replay passed with no physical write.
-- [ ] G08 is blocked in SDAR before an A2A request by absent model providers/routes and missing Task
-      Understanding composition; SMPP received no G08 call.
+- [x] 2026-08-12 supported G08 end to end: one real SDAR A2A Task invoked the exact Light and
+      Climate `get_state` operations once each through the live SMPP Runtimes, returned Provider
+      evidence into one combined Outcome, and remained queryable after the SDAR Runtime restart.
 - [ ] G09-G11 are `deferred_by_safety`. Required write gates are absent, so SMPP created no physical
       side effect and the light/climate/composite readiness fields remain false.
 - [ ] G12 is blocked. Controlled Runtime/Adapter/provider and same-Goal read-only recovery coverage
@@ -128,8 +129,8 @@ requiring PostgreSQL use explicit isolated `TEST_DATABASE_URL`. Real evidence is
 simulated, contract, static or unverified results.
 
 Current candidate evidence passed the full SMPP platform gate before report-only refresh, plus the
-frozen contract verifier, native Registry protection check and G01-G07 live support. These SMPP
-passes do not override the blocked cross-repository G08-G13 requirements or the failed authoritative
+frozen contract verifier, native Registry protection check and G01-G08 live support. These SMPP
+passes do not override the blocked cross-repository G09-G13 requirements or the failed authoritative
 SDAR full verification. Final publication validation must re-run formatting/diff/protocol checks
 after all report and status edits.
 
@@ -144,8 +145,7 @@ Canonical contract assets live at `protocol/consumer-projections/sdar-registry/v
 reports and final handoff live at `reports/sdar-integration-support/`; cross-repository state lives at
 `../.codex-sdar-smpp/`.
 
-Final Draft-publication outcome is `BLOCKED`: G01-G07 passed; G08 is blocked upstream in SDAR;
-G09-G11 are
+Final Draft-publication outcome is `BLOCKED`: G01-G08 passed; G09-G11 are
 `deferred_by_safety`; G12 lacks Required real fault evidence; and G13 cross-repository acceptance is
 blocked by the SDAR Phase 13 full-run regression. Active/uncertain SDAR Tasks are `0/0`,
 active/uncertain SMPP Tasks are `0/0`, physical writes are `0`, device restore is `RESTORED`, and
