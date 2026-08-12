@@ -42,16 +42,20 @@ npc_env_literal() {
   local key="$1"
   local file="$2"
   local value
-  value="$(
+  local -a values=()
+  while IFS= read -r value; do
+    values+=("$value")
+  done < <(
     awk -v wanted="$key" '
       $0 ~ "^[[:space:]]*" wanted "[[:space:]]*=" {
         sub("^[[:space:]]*" wanted "[[:space:]]*=", "")
         sub("\\r$", "")
         print
-        exit
       }
     ' "$file"
-  )"
+  )
+  [[ "${#values[@]}" -le 1 ]] || npc_die "duplicate $key in $(basename -- "$file")"
+  value="${values[0]:-}"
   if [[ "$value" == \"*\" && "$value" == *\" ]]; then
     value="${value:1:${#value}-2}"
   elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
@@ -66,6 +70,16 @@ npc_required_env_literal() {
   local value
   value="$(npc_env_literal "$1" "$2")"
   [[ -n "$value" ]] || npc_die "$1 is required in $(basename -- "$2")"
+  printf '%s\n' "$value"
+}
+
+npc_optional_env_literal() {
+  local key="$1"
+  local file="$2"
+  local fallback="$3"
+  local value
+  value="$(npc_env_literal "$key" "$file")" || return $?
+  [[ -n "$value" ]] || value="$fallback"
   printf '%s\n' "$value"
 }
 
@@ -231,6 +245,7 @@ npc_validate_secret_inventory() {
 
 npc_validate_external_configuration() {
   local device_url mqtt_url insecure_opt_in runtime_advertised_url
+  local otel_enabled otel_endpoint otel_timeout otel_authority
   device_url="$(npc_required_env_literal NPC_TANK_DEVICE_MCP_URL "$NPC_BUNDLE_USER_ENV")"
   mqtt_url="$(npc_required_env_literal NPC_TANK_MQTT_URL "$NPC_BUNDLE_USER_ENV")"
   runtime_advertised_url="$(
@@ -239,6 +254,13 @@ npc_validate_external_configuration() {
   insecure_opt_in="$(
     npc_required_env_literal ALLOW_INSECURE_INTERNAL_TRANSPORT "$NPC_BUNDLE_USER_ENV"
   )"
+  otel_enabled="$(
+    npc_optional_env_literal NPC_TANK_OTEL_ENABLED "$NPC_BUNDLE_USER_ENV" false
+  )" || return $?
+  otel_timeout="$(
+    npc_optional_env_literal \
+      NPC_TANK_OTEL_EXPORTER_OTLP_TIMEOUT_MS "$NPC_BUNDLE_USER_ENV" 10000
+  )" || return $?
   [[ "$insecure_opt_in" == "true" ]] || \
     npc_die "ALLOW_INSECURE_INTERNAL_TRANSPORT must be the literal true"
   [[ "$device_url" == http://* && "$device_url" == */mcp ]] || \
@@ -257,6 +279,30 @@ npc_validate_external_configuration() {
   [[ "$runtime_advertised_url" != *"@"* && "$runtime_advertised_url" != *"?"* &&
     "$runtime_advertised_url" != *"#"* ]] || \
     npc_die "NPC_TANK_RUNTIME_ADVERTISED_URL must not contain credentials, query, or fragment"
+  [[ "$otel_enabled" == "true" || "$otel_enabled" == "false" ]] || \
+    npc_die "NPC_TANK_OTEL_ENABLED must be exactly true or false"
+  [[ "$otel_timeout" =~ ^[0-9]+$ && "${#otel_timeout}" -le 5 ]] || \
+    npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_TIMEOUT_MS must be an integer from 100 through 60000"
+  (( 10#$otel_timeout >= 100 && 10#$otel_timeout <= 60000 )) || \
+    npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_TIMEOUT_MS must be an integer from 100 through 60000"
+  if [[ "$otel_enabled" == "true" ]]; then
+    otel_endpoint="$(
+      npc_required_env_literal NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT "$NPC_BUNDLE_USER_ENV"
+    )"
+    [[ "$otel_endpoint" == http://* ]] || \
+      npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT must be a plaintext OTLP/HTTP base URL"
+    otel_authority="${otel_endpoint#http://}"
+    otel_authority="${otel_authority%%/*}"
+    [[ -n "$otel_authority" && "$otel_authority" != *[[:space:]]* ]] || \
+      npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT must include a valid intranet host"
+    [[ ! "$otel_endpoint" =~ REPLACE|mock|\.invalid|localhost|127\.0\.0\.1|0\.0\.0\.0 ]] || \
+      npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT must identify the real intranet Collector"
+    [[ "$otel_endpoint" != *"@"* && "$otel_endpoint" != *"?"* &&
+      "$otel_endpoint" != *"#"* ]] || \
+      npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT must not contain credentials, query, or fragment"
+    [[ ! "$otel_endpoint" =~ /v1/(traces|logs|metrics)/?$ ]] || \
+      npc_die "NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT must be a base URL without an OTLP signal path"
+  fi
 }
 
 npc_validate_compose() {

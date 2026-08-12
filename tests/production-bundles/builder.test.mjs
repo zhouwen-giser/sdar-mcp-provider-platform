@@ -22,6 +22,7 @@ import {
   imageLoaderScript,
   parseBuilderArguments,
   validateComposeDocument,
+  validateOtlpBundleConfiguration,
 } from "../../scripts/production-bundles/lib.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -81,6 +82,19 @@ const inventories = Object.freeze({
   }),
 });
 
+const otlpProfiles = Object.freeze({
+  ugv: Object.freeze({
+    environmentPrefix: "UGV",
+    runtimeService: "ugv-runtime",
+    instanceId: "production-ugv-direct-1",
+  }),
+  "npc-tank": Object.freeze({
+    environmentPrefix: "NPC_TANK",
+    runtimeService: "npc-tank-runtime",
+    instanceId: "production-npc-tank-direct-1",
+  }),
+});
+
 test("catalog locks both standalone products to the strict intranet plaintext profile", () => {
   assert.deepEqual(PRODUCT_IDS, ["ugv", "npc-tank"]);
   for (const productId of PRODUCT_IDS) {
@@ -111,6 +125,8 @@ test("bundle README reports the real-resource status rather than the aggregate q
     assert.match(readme, /inherited real-resource status is `pending`/);
     assert.match(readme, /PMS Web `\/api\/v1\/\*\*` proxy/);
     assert.match(readme, /Runtime `\/mcp` endpoint is anonymous/);
+    assert.match(readme, /Runtime OTLP\/HTTP export is configurable/);
+    assert.match(readme, /\/v1\/traces.*\/v1\/logs.*\/v1\/metrics/s);
     assert.equal(
       readme.includes("real-resource status is `" + product.qualificationStatus + "`"),
       false,
@@ -127,6 +143,9 @@ for (const productId of PRODUCT_IDS) {
       inventory.deployDirectory,
     );
     const compose = await readFile(join(bundleDirectory, "compose.yaml"), "utf8");
+    await assert.doesNotReject(() =>
+      validateOtlpBundleConfiguration(bundleDirectory, productCatalog(productId)),
+    );
     const validated = validateComposeDocument({
       source: compose,
       product: productCatalog(productId),
@@ -159,6 +178,61 @@ for (const productId of PRODUCT_IDS) {
     assert.match(compose, /PMS_RUNTIME_REGISTRATION_URL/);
     assert.match(compose, /PMS_RUNTIME_REGISTRATION_TOKEN_FILE/);
     assert.doesNotMatch(compose, /PMS_RUNTIME_CONFIG_URL/);
+
+    const otlp = otlpProfiles[productId];
+    const expectedOtlpEnvironment = Object.freeze({
+      enabled: `OTEL_ENABLED: \${${otlp.environmentPrefix}_OTEL_ENABLED:-false}`,
+      endpoint: `OTEL_EXPORTER_OTLP_ENDPOINT: \${${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_ENDPOINT:-http://127.0.0.1:4318}`,
+      timeout: `OTEL_EXPORTER_OTLP_TIMEOUT_MS: \${${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS:-10000}`,
+      tlsMode: "OTEL_EXPORTER_OTLP_TLS_MODE: disabled",
+      instanceId: `OTEL_SERVICE_INSTANCE_ID: ${otlp.instanceId}`,
+    });
+    for (const [name, expected] of Object.entries(expectedOtlpEnvironment)) {
+      assert.ok(
+        compose.includes(expected),
+        `${otlp.runtimeService} must expose the production OTLP ${name} contract`,
+      );
+    }
+    assert.doesNotMatch(
+      compose,
+      /OTEL_EXPORTER_OTLP_(?:CA_PATH|CERT_PATH|KEY_PATH|HEADERS_FILE)\s*:/,
+    );
+
+    const otlpContractMutations = [
+      compose.replace(expectedOtlpEnvironment.enabled, 'OTEL_ENABLED: "true"'),
+      compose.replace(
+        expectedOtlpEnvironment.endpoint,
+        `OTEL_EXPORTER_OTLP_ENDPOINT: \${${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_ENDPOINT:-http://127.0.0.1:4319}`,
+      ),
+      compose.replace(
+        expectedOtlpEnvironment.timeout,
+        `OTEL_EXPORTER_OTLP_TIMEOUT_MS: \${${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS:-10001}`,
+      ),
+      compose.replace(expectedOtlpEnvironment.tlsMode, "OTEL_EXPORTER_OTLP_TLS_MODE: required"),
+      compose.replace(
+        expectedOtlpEnvironment.instanceId,
+        "OTEL_SERVICE_INSTANCE_ID: wrong-instance",
+      ),
+      ...["CA_PATH", "CERT_PATH", "KEY_PATH", "HEADERS_FILE"].map((suffix) =>
+        compose.replace(
+          expectedOtlpEnvironment.tlsMode,
+          `${expectedOtlpEnvironment.tlsMode}\n      OTEL_EXPORTER_OTLP_${suffix}: /run/secrets/otel-${suffix.toLowerCase()}`,
+        ),
+      ),
+    ];
+    for (const mutation of otlpContractMutations) {
+      assert.notEqual(mutation, compose, "OTLP negative-test mutation must change Compose");
+      assert.throws(
+        () =>
+          validateComposeDocument({
+            source: mutation,
+            product: productCatalog(productId),
+            revision,
+            postgres,
+          }),
+        (error) => error instanceof ProductionBundleError,
+      );
+    }
 
     for (const [mutation, code] of [
       [
@@ -219,8 +293,25 @@ for (const productId of PRODUCT_IDS) {
     assert.match(example, /MQTT_URL=mqtt:\/\//);
     assert.match(example, /PMS_WEB_BIND_ADDRESS=0\.0\.0\.0/);
     assert.match(example, /RUNTIME_ADVERTISED_URL=http:\/\//);
+    assert.match(example, new RegExp(`^${otlp.environmentPrefix}_OTEL_ENABLED=false$`, "m"));
+    assert.match(
+      example,
+      new RegExp(
+        `^${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_ENDPOINT=http://[^\\s]*(?:REPLACE|invalid)[^\\s]*:4318/?$`,
+        "im",
+      ),
+    );
+    assert.match(
+      example,
+      new RegExp(`^${otlp.environmentPrefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000$`, "m"),
+    );
+    assert.doesNotMatch(
+      example,
+      new RegExp(`^${otlp.environmentPrefix}_OTEL_SERVICE_INSTANCE_ID=`, "m"),
+    );
     assert.doesNotMatch(example, /https:\/\/|mqtts:\/\/|wss:\/\//);
     assert.doesNotMatch(example, /(?:TLS|HEADERS|PASSWORD)_(?:CA_|CERT_|KEY_)?FILE=/);
+    assert.doesNotMatch(example, /OTEL_EXPORTER_OTLP_(?:CA_PATH|CERT_PATH|KEY_PATH|HEADERS_FILE)=/);
 
     if (productId === "npc-tank") {
       const deploymentReadme = await readFile(join(bundleDirectory, "README.md"), "utf8");

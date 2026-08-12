@@ -805,6 +805,19 @@ export function validateAnonymousIntranetCompose(services, product) {
   )
     throw coded("PRODUCTION_BUNDLE_RUNTIME_AUTH_MODE_INVALID", runtimeServiceName);
   assertExplicitInsecureOptIn(runtimeEnvironment, runtimeServiceName);
+  const otlpPrefix = product.id === "ugv" ? "UGV" : "NPC_TANK";
+  const otlpInstanceId =
+    product.id === "ugv" ? "production-ugv-direct-1" : "production-npc-tank-direct-1";
+  if (
+    runtimeEnvironment.OTEL_ENABLED !== `\${${otlpPrefix}_OTEL_ENABLED:-false}` ||
+    runtimeEnvironment.OTEL_EXPORTER_OTLP_ENDPOINT !==
+      `\${${otlpPrefix}_OTEL_EXPORTER_OTLP_ENDPOINT:-http://127.0.0.1:4318}` ||
+    runtimeEnvironment.OTEL_EXPORTER_OTLP_TIMEOUT_MS !==
+      `\${${otlpPrefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS:-10000}` ||
+    runtimeEnvironment.OTEL_EXPORTER_OTLP_TLS_MODE !== "disabled" ||
+    runtimeEnvironment.OTEL_SERVICE_INSTANCE_ID !== otlpInstanceId
+  )
+    throw coded("PRODUCTION_BUNDLE_OTLP_CONFIGURATION_INVALID", runtimeServiceName);
 
   const forbiddenEnvironmentKeys = [
     "PMS_MANAGEMENT_CREDENTIAL_FILE",
@@ -812,6 +825,10 @@ export function validateAnonymousIntranetCompose(services, product) {
     "JWT_HS256_SECRET",
     "JWT_ISSUER",
     "JWT_AUDIENCE",
+    "OTEL_EXPORTER_OTLP_CA_PATH",
+    "OTEL_EXPORTER_OTLP_CERT_PATH",
+    "OTEL_EXPORTER_OTLP_KEY_PATH",
+    "OTEL_EXPORTER_OTLP_HEADERS_FILE",
   ];
   for (const [serviceName, serviceValue] of Object.entries(services)) {
     const service = requiredComposeService(services, serviceName);
@@ -844,6 +861,44 @@ export async function validateAnonymousIntranetLifecycle(deployRoot, product) {
     if (file === "pms-web-smoke.mjs" && !source.includes(`/sources/${sourceId}/latest`))
       throw coded("PRODUCTION_BUNDLE_SDAR_PROJECTION_SMOKE_MISSING", product.id);
   }
+  await validateOtlpBundleConfiguration(deployRoot, product);
+}
+
+export async function validateOtlpBundleConfiguration(deployRoot, product) {
+  const prefix = product.id === "ugv" ? "UGV" : "NPC_TANK";
+  const environmentExample = await readFile(join(deployRoot, ".env.example"), "utf8");
+  for (const expected of [
+    `${prefix}_OTEL_ENABLED=false`,
+    `${prefix}_OTEL_EXPORTER_OTLP_ENDPOINT=http://REPLACE_WITH_OTLP_COLLECTOR_HOST:4318`,
+    `${prefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000`,
+  ]) {
+    if (!environmentExample.split(/\r?\n/u).includes(expected))
+      throw coded("PRODUCTION_BUNDLE_OTLP_ENV_EXAMPLE_INVALID", expected);
+  }
+  if (
+    new RegExp(`^${prefix}_OTEL_SERVICE_INSTANCE_ID=`, "mu").test(environmentExample) ||
+    /OTEL_EXPORTER_OTLP_(?:CA|CERT|KEY|HEADERS)(?:_PATH|_FILE)?=/u.test(environmentExample)
+  )
+    throw coded("PRODUCTION_BUNDLE_OTLP_ENV_SECURITY_PROFILE_INVALID", product.id);
+
+  const common = await readFile(join(deployRoot, "bin/common.sh"), "utf8");
+  if (
+    !common.includes(`${prefix}_OTEL_ENABLED`) ||
+    !common.includes(`${prefix}_OTEL_EXPORTER_OTLP_ENDPOINT`) ||
+    !common.includes(`${prefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS`) ||
+    !common.includes("must be a base URL without an OTLP signal path")
+  )
+    throw coded("PRODUCTION_BUNDLE_OTLP_LIFECYCLE_VALIDATION_MISSING", product.id);
+
+  const readme = await readFile(join(deployRoot, "README.md"), "utf8");
+  if (
+    !readme.includes("OTLP/HTTP") ||
+    !readme.includes("/v1/traces") ||
+    !readme.includes("/v1/logs") ||
+    !readme.includes("/v1/metrics") ||
+    !readme.includes("up.sh")
+  )
+    throw coded("PRODUCTION_BUNDLE_OTLP_DOCUMENTATION_MISSING", product.id);
 }
 
 function requiredComposeService(services, name) {
@@ -1225,7 +1280,7 @@ async function writeBundleReadme(bundleRoot, product, manifest) {
 
 export function bundleReadmeText(product, manifest) {
   const deployPath = `deploy/${product.deployDirectory}`;
-  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. External PMS management/SDAR projection requests are accepted anonymously through the PMS Web \`/api/v1/**\` proxy, and the Runtime \`/mcp\` endpoint is anonymous. Database passwords and the instance-scoped Runtime-to-PMS registration token remain internal implementation credentials. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe Compose-started Runtime is admitted as a PMS RuntimeDeployment with runtime authority \`direct_container\`; PMS Worker observes it, consumes its heartbeat/catalog, and publishes Registry authority \`pms_worker\` without starting PM2.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded by that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP, MQTT, and advertised Runtime endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
+  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. External PMS management/SDAR projection requests are accepted anonymously through the PMS Web \`/api/v1/**\` proxy, and the Runtime \`/mcp\` endpoint is anonymous. Database passwords and the instance-scoped Runtime-to-PMS registration token remain internal implementation credentials. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe Compose-started Runtime is admitted as a PMS RuntimeDeployment with runtime authority \`direct_container\`; PMS Worker observes it, consumes its heartbeat/catalog, and publishes Registry authority \`pms_worker\` without starting PM2.\n\nRuntime OTLP/HTTP export is configurable in the deployment \`.env\` and remains disabled by default. When enabled with a real intranet Collector base URL, Runtime appends \`/v1/traces\`, \`/v1/logs\`, and \`/v1/metrics\`; the strict intranet profile does not add TLS certificates or authentication headers.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded by that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP, MQTT, and advertised Runtime endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
 }
 
 async function createStageOnlyImageArchive(path, product, revision) {

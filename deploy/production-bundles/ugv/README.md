@@ -70,6 +70,30 @@ UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
 
 生产入口要求 `ALLOW_INSECURE_INTERNAL_TRANSPORT` 精确为 `true`，并接受配置后的 `http://` Device MCP 以及 `mqtt://`（或 `ws://`）MQTT 地址；它仍会拒绝占位域名、URL 内嵌凭据、URL fragment 和未明确的 wire mode。`UGV_RUNTIME_ADVERTISED_URL` 必须是其他内网消费者可达的 Runtime 基础地址（不带 `/mcp`），端口必须与 `UGV_RUNTIME_PORT` 一致。默认开箱路径假定真实端点无需 HTTP Header 或 MQTT 用户密码。
 
+### 可选：启用 Runtime OTLP 导出
+
+OTLP 导出默认关闭。需要把 Runtime 的 traces、logs 和 metrics 推送到内网 OpenTelemetry
+Collector 时，在 `.env` 中设置：
+
+```dotenv
+UGV_OTEL_ENABLED=true
+UGV_OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.intranet.local:4318
+UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+```
+
+`UGV_OTEL_EXPORTER_OTLP_ENDPOINT` 是 OTLP/HTTP 基础地址，通常使用端口 `4318`，不要包含
+`/v1/traces`、`/v1/logs` 或 `/v1/metrics`；Runtime 会自动追加对应的 signal 路径。服务
+实例 ID 固定为 PMS direct-container 实例 `production-ugv-direct-1`，不由现场配置。若
+Collector 运行在部署主机上，应填写 Runtime 容器可达的主机内网地址，不能填写
+`127.0.0.1` 或 `localhost`。
+
+本包的严格内网策略固定使用明文 HTTP，不挂载 OTLP TLS CA/证书/私钥，也不发送 OTLP
+认证 headers；Collector 及其监听端口必须只在隔离内网可达。超时值单位为毫秒，必须
+在 `100` 到 `60000` 之间。旧 `.env` 不含上述键时仍按默认值保持关闭，兼容原
+部署。修改配置后重新执行
+`./bin/up.sh`，Compose 会重建配置发生变化的 `ugv-runtime`，其他未变化服务保持原状；
+无需重新生成或发布交付包。
+
 从旧交付升级且保留既有 `.env` 时，`init.sh` 不会覆盖该文件；必须手动补入
 `UGV_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
