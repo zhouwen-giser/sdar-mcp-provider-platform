@@ -544,7 +544,11 @@ describe("PMS API production composition", () => {
     });
 
     await pool.query(
-      "UPDATE runtime_registration SET expires_at=clock_timestamp() WHERE runtime_instance_id=$1",
+      `UPDATE runtime_registration
+          SET registered_at=clock_timestamp() - interval '3 seconds',
+              last_heartbeat_at=clock_timestamp() - interval '2 seconds',
+              expires_at=clock_timestamp() - interval '1 second'
+        WHERE runtime_instance_id=$1`,
       [instanceId],
     );
     const stale = await requiredComposition().app.inject({
