@@ -10,7 +10,7 @@
   "candidate": {
     "verifiedCandidateSha": "23eb2ed1c14830a8a6b328d3a67df1badcd492ab",
     "verifiedRemoteSha": "23eb2ed1c14830a8a6b328d3a67df1badcd492ab",
-    "reportOnlyDeliverySha": "PENDING_REPORT_ONLY_DELIVERY_COMMIT",
+    "reportOnlyDeliverySha": "84e5af71979e05e95f45664cadf2ab357a6c3df2",
     "verificationIsolation": "Exact candidate checked through clean worktree/archive environments; the later report-only delivery commit does not alter runtime code."
   },
   "verificationResult": "PASS",

@@ -8,10 +8,10 @@ SDAR x SMPP x Home Assistant integration, while preserving at-most-once physical
 - Base SHA: `cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef`
 - Final merged-main SHA: `cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef`
 - Verified candidate SHA: `23eb2ed1c14830a8a6b328d3a67df1badcd492ab`
-- Report-only delivery SHA: `PENDING_REPORT_ONLY_DELIVERY_COMMIT`
+- Report-only evidence commit SHA: `84e5af71979e05e95f45664cadf2ab357a6c3df2`
 
 The verified candidate is the exact runtime-code candidate that passed the gates below. The later
-report-only delivery commit contains evidence documents and no runtime implementation change.
+report-only evidence commit contains evidence documents and no runtime implementation change.
 
 ## Fixed breakpoints
 

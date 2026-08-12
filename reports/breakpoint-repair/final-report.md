@@ -24,12 +24,12 @@ base/head metadata is confirmed.
 | Final merged-main SHA               | `cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef` |
 | Verified candidate SHA              | `23eb2ed1c14830a8a6b328d3a67df1badcd492ab` |
 | Verified remote branch SHA          | `23eb2ed1c14830a8a6b328d3a67df1badcd492ab` |
-| Report-only delivery SHA            | `PENDING_REPORT_ONLY_DELIVERY_COMMIT`      |
+| Report-only evidence commit SHA     | `84e5af71979e05e95f45664cadf2ab357a6c3df2` |
 | Candidate relation to `origin/main` | 8 ahead / 0 behind                         |
 
-The report-only delivery commit will add or update evidence documents after code verification. It
-must not be confused with the exact code candidate above and must contain no runtime implementation
-change.
+The report-only evidence commit added or updated evidence documents after code verification. It
+must not be confused with the exact code candidate above and contains no runtime implementation
+change. Later PR-metadata-only updates also do not alter the verified runtime code.
 
 ## Breakpoint disposition
 
