@@ -137,6 +137,8 @@
     "production-bundles:verify": "node scripts/production-bundles/verify.mjs",
     "production-bundles:arm64-source:build": "node scripts/production-bundles/build-arm64-source.mjs",
     "production-bundles:arm64-source:verify": "node scripts/production-bundles/verify-arm64-source.mjs",
+    "production-bundles:package:ugv": "node scripts/production-bundles/package-ugv.mjs",
+    "production-bundles:package:npc-tank": "node scripts/production-bundles/package-npc-tank.mjs",
     "test:production-bundles": "node --test tests/production-bundles/*.test.mjs",
     "verify:ugv-provider": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check:detached && pnpm test:ugv-provider:unit && pnpm test:ugv-provider:contract && pnpm test:ugv-provider:integration && pnpm test:ugv-provider:security && pnpm test:ugv-provider:e2e",
     "verify:ugv-provider:work": "pnpm work:protected:check && pnpm work:generated:check && pnpm verify:ugv-provider && node scripts/ugv-work-checks.mjs reports-check",

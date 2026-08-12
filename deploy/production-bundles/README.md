@@ -49,6 +49,32 @@ labels. Both products intentionally use the `strict-intranet-plaintext` transpor
 MQTT, Adapter gRPC, and Provider telemetry are unencrypted, and the operator must keep every bound
 port and upstream endpoint inside an isolated internal network.
 
+## Product-specific automated packagers
+
+Use the two product-specific entry points when only one independent delivery must be generated.
+They always build into a temporary directory, verify the ZIP and its SHA-256 sidecar, and only then
+replace that product's final artifacts. They never remove or overwrite the other product's files.
+The source tree must still be a clean committed `HEAD`.
+
+The default is the ARM64 source-build delivery:
+
+```bash
+pnpm production-bundles:package:ugv
+pnpm production-bundles:package:npc-tank
+```
+
+Select the amd64 offline delivery, or both variants for one product, explicitly:
+
+```bash
+pnpm production-bundles:package:ugv --variant amd64-offline
+pnpm production-bundles:package:npc-tank --variant all
+```
+
+Use `--output-dir /absolute/or/relative/path` to publish somewhere other than
+`reports/production-bundles/delivery/`. The `amd64-offline` and `all` modes refuse to start unless
+the Docker Server reports `linux/amd64`; the ARM64 source-build mode does not require Docker on the
+packaging host. Neither script pushes an application image or stores registry credentials.
+
 ## ARM64 source-build deliveries
 
 The ARM64 variant intentionally contains no Docker image archive and does not publish or pull SDAR

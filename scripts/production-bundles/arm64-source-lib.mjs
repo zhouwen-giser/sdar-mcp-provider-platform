@@ -503,6 +503,9 @@ export async function validateArm64SourceStaged(bundleRoot, options = {}) {
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
     ".npmrc",
+    "scripts/production-bundles/package-product-lib.mjs",
+    "scripts/production-bundles/package-ugv.mjs",
+    "scripts/production-bundles/package-npc-tank.mjs",
     `deploy/production-bundles/${productCatalog(manifest.bundle.product).deployDirectory}/compose.yaml`,
   ]) {
     if (!sourceEntries.includes(required))

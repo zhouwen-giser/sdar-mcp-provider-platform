@@ -34,6 +34,9 @@ const DEFAULT_REPOSITORY_ROOT = resolve(SCRIPT_DIRECTORY, "../..");
 const TEXT_FILE_LIMIT = 2 * 1024 * 1024;
 const PROVIDER_LABEL = "io.sdar.production-bundle.provider";
 const PROFILE_LABEL = "io.sdar.production-bundle.profile";
+const OFFLINE_IMAGE_OS = "linux";
+const OFFLINE_IMAGE_ARCHITECTURE = "amd64";
+const OFFLINE_IMAGE_PLATFORM = `${OFFLINE_IMAGE_OS}/${OFFLINE_IMAGE_ARCHITECTURE}`;
 const REQUIRED_SOURCE_ARCHIVE_PATHS = Object.freeze([
   "Dockerfile",
   "LICENSE",
@@ -54,6 +57,9 @@ const REQUIRED_SOURCE_ARCHIVE_PATHS = Object.freeze([
   "migrations/migration-source-map.json",
   "deploy/production-bundles/README.md",
   "scripts/production-bundles/build.mjs",
+  "scripts/production-bundles/package-product-lib.mjs",
+  "scripts/production-bundles/package-ugv.mjs",
+  "scripts/production-bundles/package-npc-tank.mjs",
 ]);
 const SECRET_TEXT_PATTERNS = Object.freeze([
   Object.freeze({
@@ -304,6 +310,8 @@ async function buildApplicationImages({
       "docker",
       [
         "build",
+        "--platform",
+        OFFLINE_IMAGE_PLATFORM,
         "--file",
         join(buildContext, "Dockerfile"),
         "--target",
@@ -334,6 +342,8 @@ async function buildApplicationImages({
         revision,
         user: inspected.Config?.User,
         healthcheck: true,
+        os: inspected.Os,
+        architecture: inspected.Architecture,
         providerLabel: image.providerLabel,
         profileLabel: image.profileLabel,
       }),
@@ -341,13 +351,14 @@ async function buildApplicationImages({
   }
 
   if (pullPostgres) {
-    run("docker", ["image", "pull", postgresImage], {
+    run("docker", ["image", "pull", "--platform", OFFLINE_IMAGE_PLATFORM, postgresImage], {
       code: "PRODUCTION_BUNDLE_POSTGRES_PULL_FAILED",
       detail: postgresImage,
       inherit: true,
     });
   }
   const upstream = inspectDockerImage(postgresImage);
+  assertOfflineImagePlatform(upstream, postgresImage);
   const upstreamDigest = selectPostgresDigest(upstream, postgresImage);
   const digest = upstreamDigest.slice(upstreamDigest.indexOf("@") + 1);
   if (!/^sha256:[0-9a-f]{64}$/.test(digest))
@@ -359,6 +370,7 @@ async function buildApplicationImages({
   });
   const tagged = inspectDockerImage(reference);
   if (tagged.Id !== upstream.Id) throw coded("PRODUCTION_BUNDLE_POSTGRES_IMAGE_ID_MISMATCH");
+  assertOfflineImagePlatform(tagged, reference);
   const postgres = Object.freeze({
     kind: "infrastructure",
     role: "postgres",
@@ -370,6 +382,8 @@ async function buildApplicationImages({
     upstreamReference: upstreamDigest,
     user: tagged.Config?.User ?? "",
     healthcheck: tagged.Config?.Healthcheck !== null && tagged.Config?.Healthcheck !== undefined,
+    os: tagged.Os,
+    architecture: tagged.Architecture,
   });
   return Object.freeze({ deployable: true, application, postgres });
 }
@@ -390,6 +404,8 @@ function stageOnlyImageBuild(revision, products) {
           revision,
           user: "node",
           healthcheck: true,
+          os: OFFLINE_IMAGE_OS,
+          architecture: OFFLINE_IMAGE_ARCHITECTURE,
           providerLabel: image.role === "pms-web" ? "shared" : product.id,
           profileLabel: "production",
         }),
@@ -410,6 +426,8 @@ function stageOnlyImageBuild(revision, products) {
       upstreamReference: "STAGE_ONLY_NOT_BUILT",
       user: "postgres",
       healthcheck: false,
+      os: OFFLINE_IMAGE_OS,
+      architecture: OFFLINE_IMAGE_ARCHITECTURE,
     }),
   });
 }
@@ -516,6 +534,7 @@ async function stageProductBundle({
       deployable: !stageOnly,
       generatedFromCommittedHead: true,
       productionQualificationClaimed: false,
+      targetPlatform: OFFLINE_IMAGE_PLATFORM,
     }),
     source: Object.freeze({
       repository: "sdar-mcp-provider-platform",
@@ -543,6 +562,7 @@ async function stageProductBundle({
       seedServices: composeInventory.seedServices,
       applicationImageCount: imageRecords.length,
       offlineImageCount: images.length,
+      targetPlatform: OFFLINE_IMAGE_PLATFORM,
       hostRequirements: ["bash", "Docker Engine", "Docker Compose v2", "openssl", "sha256sum"],
       sourceBuildRequired: false,
       gitRequiredOnDeploymentHost: false,
@@ -834,6 +854,11 @@ function validateRootManifest(manifest, options) {
     throw coded("PRODUCTION_BUNDLE_MANIFEST_DEPLOYABLE_MISMATCH");
   if (manifest.bundle.productionQualificationClaimed !== false)
     throw coded("PRODUCTION_BUNDLE_QUALIFICATION_OVERCLAIM");
+  if (
+    manifest.bundle.targetPlatform !== OFFLINE_IMAGE_PLATFORM ||
+    manifest.deployment?.targetPlatform !== OFFLINE_IMAGE_PLATFORM
+  )
+    throw coded("PRODUCTION_BUNDLE_MANIFEST_PLATFORM_INVALID");
   if (!isRecord(manifest.source) || !/^[0-9a-f]{40,64}$/.test(manifest.source.revision))
     throw coded("PRODUCTION_BUNDLE_MANIFEST_SOURCE_INVALID");
   if (!Array.isArray(manifest.images) || manifest.images.length !== 6)
@@ -892,6 +917,8 @@ function validateImageManifest(imageManifest, manifest) {
       image.revision !== manifest.source.revision ||
       image.user !== "node" ||
       image.healthcheck !== true ||
+      image.os !== OFFLINE_IMAGE_OS ||
+      image.architecture !== OFFLINE_IMAGE_ARCHITECTURE ||
       image.providerLabel !== expectedProviderLabel ||
       image.profileLabel !== "production"
     )
@@ -907,6 +934,11 @@ function validateImageManifest(imageManifest, manifest) {
       !/^sha256:[0-9a-f]{64}$/.test(postgres[0].digest))
   )
     throw coded("PRODUCTION_BUNDLE_POSTGRES_IMAGE_METADATA_INVALID");
+  if (
+    postgres[0].os !== OFFLINE_IMAGE_OS ||
+    postgres[0].architecture !== OFFLINE_IMAGE_ARCHITECTURE
+  )
+    throw coded("PRODUCTION_BUNDLE_POSTGRES_IMAGE_PLATFORM_INVALID");
 }
 
 async function writeChecksums(bundleRoot) {
@@ -922,6 +954,8 @@ async function writeImageManifestTsv(path, images) {
     "role",
     "reference",
     "image_id",
+    "os",
+    "architecture",
     "revision",
     "user",
     "healthcheck",
@@ -936,6 +970,8 @@ async function writeImageManifestTsv(path, images) {
       image.role,
       image.reference,
       image.id,
+      image.os,
+      image.architecture,
       image.revision ?? "-",
       image.user || "-",
       String(image.healthcheck),
@@ -954,7 +990,7 @@ async function validateImageManifestTsv(path, images) {
   const source = await readFile(path, "utf8");
   const lines = source.trimEnd().split("\n");
   const expectedHeader =
-    "kind\trole\treference\timage_id\trevision\tuser\thealthcheck\tprovider_label\tprofile_label\tdigest";
+    "kind\trole\treference\timage_id\tos\tarchitecture\trevision\tuser\thealthcheck\tprovider_label\tprofile_label\tdigest";
   if (lines.shift() !== expectedHeader) throw coded("PRODUCTION_BUNDLE_IMAGE_TSV_HEADER_INVALID");
   if (lines.length !== images.length) throw coded("PRODUCTION_BUNDLE_IMAGE_TSV_COUNT_INVALID");
   const expected = images.map((image) =>
@@ -963,6 +999,8 @@ async function validateImageManifestTsv(path, images) {
       image.role,
       image.reference,
       image.id,
+      image.os,
+      image.architecture,
       image.revision ?? "-",
       image.user || "-",
       String(image.healthcheck),
@@ -1014,15 +1052,22 @@ done < "$image_env"
 [[ "$postgres_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || fail "POSTGRES_DIGEST is invalid"
 
 count=0
-while IFS=$'\\t' read -r kind role reference expected_id revision expected_user expected_health provider profile digest; do
+while IFS=$'\\t' read -r kind role reference expected_id expected_os expected_arch revision expected_user expected_health provider profile digest; do
   if [[ "$kind" == "kind" ]]; then
-    [[ "$role" == "role" && "$reference" == "reference" ]] || fail "manifest header is invalid"
+    [[ "$role" == "role" && "$reference" == "reference" && "$expected_os" == "os" && "$expected_arch" == "architecture" ]] ||
+      fail "manifest header is invalid"
     continue
   fi
   [[ -n "$reference" && -n "$expected_id" ]] || fail "manifest row is incomplete"
   actual_id="$(docker image inspect --format '{{.Id}}' "$reference" 2>/dev/null)" ||
     fail "image is missing: $reference"
   [[ "$actual_id" == "$expected_id" ]] || fail "image ID mismatch: $reference"
+  actual_os="$(docker image inspect --format '{{.Os}}' "$reference")"
+  actual_arch="$(docker image inspect --format '{{.Architecture}}' "$reference")"
+  [[ "$expected_os" == "linux" && "$expected_arch" == "amd64" ]] ||
+    fail "manifest image platform is invalid: $reference"
+  [[ "$actual_os" == "$expected_os" && "$actual_arch" == "$expected_arch" ]] ||
+    fail "image platform mismatch: $reference"
   if [[ "$kind" == "application" ]]; then
     actual_revision="$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$reference")"
     actual_user="$(docker image inspect --format '{{.Config.User}}' "$reference")"
@@ -1046,7 +1091,7 @@ while IFS=$'\\t' read -r kind role reference expected_id revision expected_user 
   count=$((count + 1))
 done < "$manifest"
 [[ "$count" -eq 6 ]] || fail "exactly six offline images are required"
-printf 'PASS: six offline images match IDs, revision, users, healthchecks, labels, and digest.\\n'
+printf 'PASS: six linux/amd64 offline images match IDs, revision, users, healthchecks, labels, and digest.\\n'
 `;
 }
 
@@ -1112,6 +1157,7 @@ function exportDockerImages(references, destination) {
 }
 
 function validateApplicationImage(inspected, image, revision) {
+  assertOfflineImagePlatform(inspected, image.reference);
   if (!/^sha256:[0-9a-f]{64}$/.test(inspected.Id ?? ""))
     throw coded("PRODUCTION_BUNDLE_IMAGE_ID_INVALID", image.reference);
   const labels = inspected.Config?.Labels;
@@ -1125,6 +1171,11 @@ function validateApplicationImage(inspected, image, revision) {
     throw coded("PRODUCTION_BUNDLE_IMAGE_USER_INVALID", image.reference);
   if (inspected.Config?.Healthcheck === null || inspected.Config?.Healthcheck === undefined)
     throw coded("PRODUCTION_BUNDLE_IMAGE_HEALTHCHECK_MISSING", image.reference);
+}
+
+export function assertOfflineImagePlatform(inspected, reference = "image") {
+  if (inspected.Os !== OFFLINE_IMAGE_OS || inspected.Architecture !== OFFLINE_IMAGE_ARCHITECTURE)
+    throw coded("PRODUCTION_BUNDLE_IMAGE_PLATFORM_INVALID", reference);
 }
 
 function inspectDockerImage(reference) {

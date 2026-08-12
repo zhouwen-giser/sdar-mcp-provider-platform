@@ -1,5 +1,5 @@
-export const BUNDLE_SCHEMA_VERSION = 1;
-export const IMAGE_MANIFEST_SCHEMA_VERSION = 1;
+export const BUNDLE_SCHEMA_VERSION = 2;
+export const IMAGE_MANIFEST_SCHEMA_VERSION = 2;
 export const DEFAULT_POSTGRES_IMAGE = "postgres:17-alpine";
 
 const sharedWebImage = Object.freeze({

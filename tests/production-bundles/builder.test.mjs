@@ -5,6 +5,8 @@ import test from "node:test";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  BUNDLE_SCHEMA_VERSION,
+  IMAGE_MANIFEST_SCHEMA_VERSION,
   PRODUCT_IDS,
   bundleImageEnvironment,
   productCatalog,
@@ -15,6 +17,7 @@ import {
   assertComposeRunOptionCompatibility,
   assertNoBuildFields,
   assertNoRealEnvironmentEntries,
+  assertOfflineImagePlatform,
   bundleReadmeText,
   imageLoaderScript,
   parseBuilderArguments,
@@ -27,6 +30,26 @@ const postgres = Object.freeze({
   reference: "sdar/production-postgres:17-alpine-bbbbbbbbbbbb",
   digest: `sha256:${"b".repeat(64)}`,
   digest12: "b".repeat(12),
+});
+
+test("offline bundle schema v2 locks linux/amd64 image identity", () => {
+  assert.equal(BUNDLE_SCHEMA_VERSION, 2);
+  assert.equal(IMAGE_MANIFEST_SCHEMA_VERSION, 2);
+  assert.doesNotThrow(() =>
+    assertOfflineImagePlatform({ Os: "linux", Architecture: "amd64" }, "expected"),
+  );
+  for (const inspected of [
+    { Os: "linux", Architecture: "arm64" },
+    { Os: "windows", Architecture: "amd64" },
+    { Os: "linux" },
+  ]) {
+    assert.throws(
+      () => assertOfflineImagePlatform(inspected, "unexpected"),
+      (error) =>
+        error instanceof ProductionBundleError &&
+        error.code === "PRODUCTION_BUNDLE_IMAGE_PLATFORM_INVALID",
+    );
+  }
 });
 
 const inventories = Object.freeze({
@@ -258,5 +281,10 @@ test("generated offline image loader is valid Bash and verifies immutable image 
   assert.match(loader, /sha256sum --check --strict SHA256SUMS/);
   assert.match(loader, /docker image load --input "\$archive"/);
   assert.match(loader, /\[\[ "\$actual_id" == "\$expected_id" \]\]/);
+  assert.match(loader, /actual_os=.*\.Os/);
+  assert.match(loader, /actual_arch=.*\.Architecture/);
+  assert.match(loader, /"\$expected_os" == "linux"/);
+  assert.match(loader, /"\$expected_arch" == "amd64"/);
+  assert.match(loader, /image platform mismatch/);
   assert.match(loader, /\[\[ "\$count" -eq 6 \]\]/);
 });
