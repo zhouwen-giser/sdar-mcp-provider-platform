@@ -38,7 +38,9 @@ describe("controlled SDAR Registry and frozen MCP interop", () => {
     const adapterPort = await bindMockAdapter(adapter, "127.0.0.1:0");
     runtime = createRuntime(
       loadRuntimeConfig({
-        RUNTIME_ENV: "test",
+        RUNTIME_ENV: "production",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        AUTH_MODE: "anonymous",
         HOST: "127.0.0.1",
         PORT: "18080",
         PROVIDER_ID: providerId,
@@ -176,8 +178,6 @@ describe("controlled SDAR Registry and frozen MCP interop", () => {
         "mcp-protocol-version": "2026-07-28",
         "mcp-method": method,
         ...(name === undefined ? {} : { "mcp-name": name }),
-        "x-sdar-subject": "controlled-sdar-user",
-        "x-sdar-tenant": "controlled-sdar-tenant",
       },
       payload: {
         jsonrpc: "2.0",
@@ -200,8 +200,6 @@ describe("controlled SDAR Registry and frozen MCP interop", () => {
         "content-type": "application/json",
         "mcp-protocol-version": "2026-07-28",
         "mcp-method": "subscriptions/listen",
-        "x-sdar-subject": "controlled-sdar-user",
-        "x-sdar-tenant": "controlled-sdar-tenant",
       },
       body: JSON.stringify({
         jsonrpc: "2.0",

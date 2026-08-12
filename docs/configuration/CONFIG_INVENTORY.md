@@ -75,20 +75,29 @@ The JSON inventory records the source rule set for each component. Important
 existing constraints include:
 
 - Runtime production forbids development auth and weak lease configuration and
-  enforces lease-duration safety equations. Adapter/telemetry mTLS and
+  enforces lease-duration safety equations. The explicit `anonymous` auth mode is
+  accepted in production only together with
+  `ALLOW_INSECURE_INTERNAL_TRANSPORT=true`; all callers then share one fixed
+  authorization domain. Adapter/telemetry mTLS and
   OTLP/Outbox HTTPS remain fail-closed unless the operator explicitly sets
   `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` for an isolated internal network.
 - UGV and NPC Tank production require an explicit MQTT wire mode and PostgreSQL
   storage. Adapter mTLS and MQTT TLS remain fail-closed unless the same explicit
   internal-transport opt-in is set. Required TLS modes still require CA,
   certificate, and key paths.
+- PMS Worker external Runtime Catalog authentication defaults to
+  `PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE=file_credentials`. The independent
+  `anonymous_intranet` mode requires `ALLOW_INSECURE_INTERNAL_TRANSPORT=true`;
+  the transport opt-in alone never disables Catalog credentials.
 - Home Assistant forbids token environment values, requires
   `HOME_ASSISTANT_TOKEN_FILE`, restricts the URL protocol, guards production
   plaintext HTTP, validates required mTLS files, and rejects an empty token
   file.
 
-The plaintext exception changes transport requirements only. Authentication,
-Secret handling, persistence, and production safety constraints remain active.
+The internal-network exception changes transport requirements and, only when
+`AUTH_MODE=anonymous` is selected independently, permits shared anonymous Runtime
+access. Secret handling for databases and control-plane registration,
+persistence, and the remaining production safety constraints stay active.
 
 ## Verification
 

@@ -32,6 +32,7 @@ import {
   assertNoBuildFields,
   assertNoRealEnvironmentEntries,
   coded,
+  validateAnonymousIntranetLifecycle,
   validateComposeDocument,
 } from "./lib.mjs";
 import { arm64BuildImagesScript } from "./arm64-source-scripts.mjs";
@@ -553,6 +554,7 @@ export async function validateArm64SourceStaged(bundleRoot, options = {}) {
     revision: manifest.source.revision,
     postgres,
   });
+  await validateAnonymousIntranetLifecycle(deployRoot, product);
   validateArm64Compose(compose);
   const imageEnvironment = await readFile(join(deployRoot, ".bundle-images.env"), "utf8");
   if (imageEnvironment !== bundleImageEnvironment(manifest.source.revision, postgres, true))

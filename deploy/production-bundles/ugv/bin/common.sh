@@ -158,7 +158,6 @@ require_generated_layout() {
     "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1" \
     "$bundle_dir/secrets/ugv" \
     "$bundle_dir/secrets/ugv/database" \
-    "$bundle_dir/secrets/ugv/runtime" \
     "$bundle_dir/runtime" \
     "$bundle_dir/runtime/pms-worker-state" \
     "$bundle_dir/runtime/pms-worker-state/runtime-secrets" \
@@ -173,19 +172,14 @@ require_generated_layout() {
     "$bundle_dir/runtime/.initialized" \
     "$bundle_dir/secrets/pms/postgres-password" \
     "$bundle_dir/secrets/pms/pms-database-url" \
-    "$bundle_dir/secrets/pms/api/management.json" \
     "$bundle_dir/secrets/pms/api/runtime.json" \
-    "$bundle_dir/secrets/pms/api/management-reader.token" \
-    "$bundle_dir/secrets/pms/api/management-admin.token" \
-    "$bundle_dir/secrets/pms/worker/external-runtime-catalog.json" \
     "$bundle_dir/secrets/pms/worker/postgres-provisioning.json" \
     "$bundle_dir/secrets/pms/worker/runtime-database-password" \
     "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token" \
     "$bundle_dir/secrets/ugv/database/adapter-password" \
     "$bundle_dir/secrets/ugv/database/runtime-password" \
     "$bundle_dir/secrets/ugv/database/adapter-database-url" \
-    "$bundle_dir/secrets/ugv/database/runtime-database-url" \
-    "$bundle_dir/secrets/ugv/runtime/jwt-hs256-secret"; do
+    "$bundle_dir/secrets/ugv/database/runtime-database-url"; do
     require_private_file "$file" 1048576
   done
 }

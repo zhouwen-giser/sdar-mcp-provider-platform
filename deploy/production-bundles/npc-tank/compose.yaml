@@ -56,11 +56,12 @@ services:
     image: sdar/production-npc-tank-pms-api:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
     restart: unless-stopped
     environment:
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
       PMS_API_HOST: 0.0.0.0
       PMS_API_PORT: "8090"
       PMS_API_RUNTIME_HEARTBEAT_TTL_MS: "30000"
+      PMS_API_MANAGEMENT_AUTH_MODE: anonymous_intranet
       PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
-      PMS_MANAGEMENT_CREDENTIAL_FILE: /run/pms-secrets/management.json
       PMS_RUNTIME_CREDENTIAL_FILE: /run/pms-secrets/runtime.json
     expose:
       - "8090"
@@ -70,16 +71,8 @@ services:
         target: /run/pms-secrets/pms-database-url
         read_only: true
       - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-api/management.json
-        target: /run/pms-secrets/management.json
-        read_only: true
-      - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-api/runtime.json
         target: /run/pms-secrets/runtime.json
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-api/management-admin.token
-        target: /run/pms-secrets/management-admin.token
         read_only: true
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
@@ -120,6 +113,7 @@ services:
     network_mode: service:pms-api
     environment:
       ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
+      PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: anonymous_intranet
       PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
       PMS_WORKER_ID: npc-production-worker
       PMS_WORKER_POLL_INTERVAL_MS: "1000"
@@ -137,7 +131,6 @@ services:
       PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
       PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
       PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
-      PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: /run/pms-secrets/external-runtime-catalog.json
     volumes:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
@@ -146,14 +139,6 @@ services:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-worker/postgres-provisioning.json
         target: /run/pms-secrets/postgres-provisioning.json
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-worker/external-runtime-catalog.json
-        target: /run/pms-secrets/external-runtime-catalog.json
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
-        target: /run/pms-secrets/runtime-jwt-hs256
         read_only: true
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
@@ -189,6 +174,7 @@ services:
       PMS_WEB_PORT: "8080"
       PMS_WEB_PROXY_MAX_BODY_BYTES: ${PMS_WEB_PROXY_MAX_BODY_BYTES:-1048576}
       PMS_WEB_PROXY_TIMEOUT_MS: ${PMS_WEB_PROXY_TIMEOUT_MS:-10000}
+      PMS_WEB_RAW_API_PROXY_ENABLED: "true"
     ports:
       - "${PMS_WEB_BIND_ADDRESS:-0.0.0.0}:${PMS_WEB_PORT:-8089}:8080"
     tmpfs:
@@ -341,7 +327,6 @@ services:
       - -eu
       - -c
       - >-
-        export JWT_HS256_SECRET="$$(tr -d '\r\n' < /run/secrets/runtime-jwt-hs256)";
         node dist/apps/runtime/src/migrate.js;
         exec node dist/apps/runtime/src/main.js
     environment:
@@ -353,9 +338,7 @@ services:
       ADAPTER_ENDPOINT: npc-tank-adapter:7013
       ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
       ADAPTER_TLS_MODE: disabled
-      AUTH_MODE: jwt_hs256
-      JWT_ISSUER: sdar-npc-tank-production
-      JWT_AUDIENCE: sdar-runtime
+      AUTH_MODE: anonymous
       PMS_DEPLOYMENT_ID: production-npc-tank-direct
       PMS_INSTANCE_ID: production-npc-tank-direct-1
       PMS_RUNTIME_REGISTRATION_URL: http://pms-api:8090
@@ -380,10 +363,6 @@ services:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/npc-runtime-database-url
         target: /run/secrets/npc-runtime-database-url
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
-        target: /run/secrets/runtime-jwt-hs256
         read_only: true
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token
@@ -428,7 +407,6 @@ services:
     environment:
       PMS_SEED_API_BASE_URL: http://127.0.0.1:8090
       PMS_SEED_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
-      PMS_SEED_MANAGEMENT_TOKEN_FILE: /run/pms-secrets/management-admin.token
       PMS_SEED_ACTOR_ID: npc-production-admin
       PMS_SEED_CATALOG_ROOT: /app
       PMS_SEED_ENVIRONMENT: production
@@ -442,17 +420,10 @@ services:
       PMS_SEED_WAIT_TIMEOUT_MS: ${NPC_TANK_PMS_AUTHORITY_WAIT_TIMEOUT_MS:-180000}
       PMS_SEED_POLL_INTERVAL_MS: ${NPC_TANK_PMS_AUTHORITY_POLL_INTERVAL_MS:-2000}
       PMS_SMOKE_API_BASE_URL: http://127.0.0.1:8090
-      PMS_SMOKE_ADMIN_TOKEN_FILE: /run/pms-secrets/management-admin.token
-      JWT_ISSUER: sdar-npc-tank-production
-      JWT_AUDIENCE: sdar-runtime
     volumes:
       - type: bind
         source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
         target: /run/pms-secrets/pms-database-url
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-api/management-admin.token
-        target: /run/pms-secrets/management-admin.token
         read_only: true
       - type: bind
         source: ./bin/pms-seed.mjs
@@ -461,10 +432,6 @@ services:
       - type: bind
         source: ./bin/runtime-read-smoke.mjs
         target: /app/runtime-read-smoke.mjs
-        read_only: true
-      - type: bind
-        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-jwt-hs256
-        target: /run/secrets/runtime-jwt-hs256
         read_only: true
     tmpfs:
       - /tmp:size=32m,mode=0700,uid=1000,gid=1000

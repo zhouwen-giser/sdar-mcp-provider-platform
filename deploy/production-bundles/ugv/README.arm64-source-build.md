@@ -34,20 +34,24 @@ Docker Hub 和软件包源通常依赖部署主机及 Docker daemon 的标准 HT
 
 部署包含八个常驻服务，并在启动时运行一次幂等的 `pms-seed`：
 
-| 服务                   | 用途                           | 主机暴露                     |
-| ---------------------- | ------------------------------ | ---------------------------- |
-| `pms-postgres`         | PMS 持久化                     | 不暴露                       |
-| `pms-api`              | PMS API                        | 不暴露                       |
-| `pms-worker`           | PMS Worker                     | 不暴露                       |
-| `pms-web`              | PMS Web 与 Console V1 同源代理 | 默认 `0.0.0.0:8088`，仅内网  |
-| `ugv-adapter-postgres` | UGV Adapter 状态               | 不暴露                       |
-| `ugv-runtime-postgres` | UGV Runtime 状态、任务与事件   | 不暴露                       |
-| `ugv-adapter`          | UGV Provider Adapter           | 不暴露                       |
-| `ugv-runtime`          | JWT 保护的 MCP Runtime         | 默认 `0.0.0.0:19100`，仅内网 |
+| 服务                   | 用途                                  | 主机暴露                     |
+| ---------------------- | ------------------------------------- | ---------------------------- |
+| `pms-postgres`         | PMS 持久化                            | 不暴露                       |
+| `pms-api`              | PMS API                               | 不暴露                       |
+| `pms-worker`           | PMS Worker                            | 不暴露                       |
+| `pms-web`              | PMS Web、Console V1 与 `/api/v1` 代理 | 默认 `0.0.0.0:8088`，仅内网  |
+| `ugv-adapter-postgres` | UGV Adapter 状态                      | 不暴露                       |
+| `ugv-runtime-postgres` | UGV Runtime 状态、任务与事件          | 不暴露                       |
+| `ugv-adapter`          | UGV Provider Adapter                  | 不暴露                       |
+| `ugv-runtime`          | 匿名 MCP Runtime                      | 默认 `0.0.0.0:19100`，仅内网 |
 
-三个 PostgreSQL 服务位于 Docker 内部网络。PMS Web 当前没有最终用户认证闭环，必须
-依靠 VLAN、路由、主机防火墙和访问控制，把 `8088`、`19100` 及所有容器网络端口限制
-在授权内网内。Runtime 仍强制 JWT；不得把 Runtime JWT 签名密钥分发给普通调用方。
+三个 PostgreSQL 服务和 `pms-api` 位于 Docker 内部网络，`pms-api` 不发布主机端口。
+PMS Web 通过同源 `/api/v1` 代理匿名开放管理 API 与 SDAR consumer projection，Runtime
+`/mcp` 也允许匿名访问。必须依靠 VLAN、路由、主机防火墙和访问控制，把 `8088`、
+`19100` 及所有容器网络端口限制在授权内网内。
+PMS Worker 仅因 Compose 另行设置
+`PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE=anonymous_intranet` 才无凭据发现 Runtime；
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true` 单独存在时仍按默认 `file_credentials` 失败关闭。
 
 ## 目标主机要求
 
@@ -81,9 +85,9 @@ sudo bash deploy/ugv/bin/init.sh
 ```
 
 `init.sh` 从 `.env.example` 创建权限受限的 `.env`，创建状态目录，并随机生成三个
-PostgreSQL 数据库凭据、PMS 管理凭据和 Runtime JWT HS256 密钥。它不会生成 TLS
-证书，也不会生成、复制或猜测真实 UGV 端点的凭据。重复执行会保留已有随机秘密，
-不会自动轮换。
+PostgreSQL 数据库凭据及 Runtime 向 PMS 注册所需的实例绑定令牌。它不会生成 PMS
+管理凭据、Runtime JWT、TLS 证书，也不会生成、复制或猜测真实 UGV 端点的凭据。
+重复执行会保留已有随机秘密，不会自动轮换。
 
 编辑 `deploy/ugv/.env`，至少设置真实内网端点和明确的 wire mode：
 
@@ -99,6 +103,10 @@ UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
 `UGV_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
 变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
+
+从带 PMS 管理令牌和 Runtime JWT 的旧包升级时，使用本版本 ZIP 中的源码重新构建应用
+镜像，保留 `.env`、`runtime/` 和数据库卷后再运行 `init.sh`、`up.sh`。旧凭据文件可以
+暂时留存用于回滚，但新 Compose 不再挂载、读取或校验它们。
 
 不要在 `.env` 中加入 revision、平台、基础镜像、摘要、构建目标或可部署状态等发布
 身份键；它们只能来自交付流程生成的只读构建锁文件。
@@ -122,10 +130,14 @@ bash deploy/ugv/bin/smoke.sh
 bash deploy/ugv/bin/down.sh
 ```
 
-`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、ACTIVE 的
-`direct_container` RuntimeDeployment 和新鲜 registration/heartbeat，并从 PMS Registry
-发布的 advertised endpoint 验证 JWT Runtime、真实 Device MCP/MQTT 连接和数据新鲜度，
-只调用以下读取工具：
+`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 匿名 `/api/v1` 管理代理、
+匿名 SDAR projection、ACTIVE 的 `direct_container` RuntimeDeployment 和新鲜
+registration/heartbeat，并从 PMS Registry 发布的 advertised endpoint 匿名验证 Runtime、
+真实 Device MCP/MQTT 连接和数据新鲜度，只调用以下读取工具：
+
+PMS Web 检查会先从容器网络执行，再用现场构建且已经校验的本地 PMS Web 镜像运行
+`docker run --network host`（仅使用前序已核验存在的本地镜像），请求 `.env` 中实际发布的地址和端口；
+`0.0.0.0`/`::` 会分别规范为 `127.0.0.1`/`::1`。宿主无需 Node.js 或 curl，验证过程也不会拉取镜像。
 
 - `vehicle_get_state`
 - `vehicle_get_capabilities`
@@ -136,6 +148,12 @@ bash deploy/ugv/bin/down.sh
 尚未收到数据或状态超过 `UGV_SMOKE_MAX_STATE_AGE_MS` 时，smoke 会失败，而不是使用
 模拟数据给出成功结果。
 
+SDAR 使用
+`http://<PMS_WEB_HOST>:<PMS_WEB_PORT>/api/v1/registry/production/consumers/sdar/v1/sources/ugv-smpp/latest`
+匿名读取 projection，再匿名调用返回的 `serverEndpoint`；无需也不应直连 `pms-api:8090`。
+SDAR 客户端必须支持 credential mode `none`（不发送 `Authorization`）；仍强制
+`credentialRef`/Bearer 的旧版客户端需先升级，不能配置伪造 token。
+
 `down.sh` 只停止容器，保留三个具名数据库卷、Worker 状态、合同捕获文件、`.env` 和
 秘密。不要使用 `docker compose down --volumes`，除非已经确认要永久删除数据库。
 
@@ -143,8 +161,8 @@ bash deploy/ugv/bin/down.sh
 
 秘密和状态文件必须保持部署脚本设置的 UID 1000、目录 `0700`、文件 `0600` 权限。
 备份至少应覆盖数据库一致性备份、`deploy/ugv/.env`、`deploy/ugv/secrets/`、Worker
-状态和 UGV 合同报告，并按组织策略加密保存。JWT 或数据库密码轮换涉及多个消费者，
-应在维护窗口按整体迁移方案执行。
+状态和 UGV 合同报告，并按组织策略加密保存。数据库密码或 Runtime registration 令牌
+轮换涉及多个内部消费者，应在维护窗口按整体迁移方案执行。
 
 本包仅提供从精确源码在原生 ARM64 主机生成部署镜像的可重复路径，不声称构建产物已经
 完成目标现场的生产认证。UGV Provider Package 的 real-resource 状态仍为 `pending`；

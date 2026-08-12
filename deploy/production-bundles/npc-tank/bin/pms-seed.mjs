@@ -39,7 +39,6 @@ const waitTimeoutMs = boundedInteger("PMS_SEED_WAIT_TIMEOUT_MS", 180_000, 10_000
 const pollIntervalMs = boundedInteger("PMS_SEED_POLL_INTERVAL_MS", 2_000, 250, 10_000);
 const catalogRoot = required("PMS_SEED_CATALOG_ROOT");
 const databaseUrl = await secureText(required("PMS_SEED_DATABASE_URL_FILE"));
-const token = await secureText(required("PMS_SEED_MANAGEMENT_TOKEN_FILE"));
 const correlationId = `npc-production-seed-${randomUUID()}`;
 const pool = new Pool({ connectionString: databaseUrl, max: 2 });
 const unitOfWork = new PostgresPmsUnitOfWork(pool);
@@ -370,7 +369,6 @@ async function api(method, path, body = undefined) {
     method,
     headers: {
       accept: "application/json",
-      authorization: `Bearer ${token}`,
       "x-actor-id": actorId,
       "x-correlation-id": correlationId,
       ...(body === undefined ? {} : { "content-type": "application/json" }),

@@ -1,4 +1,4 @@
-const origin = new URL("http://127.0.0.1:8080");
+const origin = smokeOrigin(process.env.PMS_WEB_SMOKE_ORIGIN ?? "http://127.0.0.1:8080");
 
 const page = await boundedFetch(new URL("/", origin));
 const html = await page.text();
@@ -95,33 +95,53 @@ if (
   throw new Error("UGV_SMOKE_PMS_WEB_REGISTRY_NOT_VISIBLE");
 }
 
-const blocked = await boundedFetch(
-  new URL("/api/v1/runtime-registration/instances/ugv-production-smoke", origin),
+const rawProvider = await json(
+  await boundedFetch(new URL(`/api/v1/providers/${encodeURIComponent(providerId)}`, origin), {
+    headers: proxyHeaders,
+  }),
+  "UGV_SMOKE_PMS_WEB_RAW_PROVIDER_RESPONSE_INVALID",
 );
-let blockedBody;
-try {
-  blockedBody = await blocked.json();
-} catch {
-  throw new Error("UGV_SMOKE_PMS_WEB_BOUNDARY_NON_JSON");
+if (rawProvider?.providerId !== providerId || rawProvider.status !== "active") {
+  throw new Error("UGV_SMOKE_PMS_WEB_RAW_MANAGEMENT_API_NOT_VISIBLE");
 }
+
+const projectionResponse = await boundedFetch(
+  new URL("/api/v1/registry/production/consumers/sdar/v1/sources/ugv-smpp/latest", origin),
+  { headers: proxyHeaders },
+);
+const projection = await json(
+  projectionResponse,
+  "UGV_SMOKE_PMS_WEB_SDAR_PROJECTION_RESPONSE_INVALID",
+);
+const projectionProvider = Array.isArray(projection?.providers)
+  ? projection.providers.find((value) => value?.externalProviderId === providerId)
+  : undefined;
 if (
-  blocked.status !== 404 ||
-  blockedBody?.status !== 404 ||
-  blockedBody?.code !== "PMS_WEB_API_ROUTE_NOT_ALLOWED"
+  projectionResponse.headers.get("x-smpp-projection-contract") !== "sdar-registry-v1" ||
+  !/^"[0-9a-f]{64}"$/.test(projectionResponse.headers.get("etag") ?? "") ||
+  JSON.stringify(Object.keys(projection ?? {}).sort()) !==
+    JSON.stringify(["checksum", "expiresAt", "generatedAt", "providers", "revision"]) ||
+  projectionProvider?.externalServerId !== instanceId ||
+  projectionProvider.serverEndpoint !== registryProvider.effectiveEndpoint ||
+  projectionProvider.catalogRevision !== String(registryProvider.catalogRevision)
 ) {
-  throw new Error("UGV_SMOKE_PMS_WEB_PROXY_BOUNDARY_INVALID");
+  throw new Error("UGV_SMOKE_PMS_WEB_SDAR_PROJECTION_INVALID");
 }
 
 process.stdout.write(
   `${JSON.stringify({
     status: "passed",
+    smokeOrigin: origin.origin,
     dataMode: "api",
     apiBase: "/api/console/v1",
     providerId,
     deploymentId,
     instanceId,
     registryRevision: registry.revision,
-    directManagementApiBlocked: true,
+    rawManagementApiAnonymous: true,
+    sdarProjectionAnonymous: true,
+    projectionRevision: projection.revision,
+    projectionChecksum: projection.checksum,
   })}\n`,
 );
 
@@ -141,5 +161,25 @@ async function json(response, code) {
     throw new Error(code);
   }
   if (response.status !== 200) throw new Error(code);
+  return value;
+}
+
+function smokeOrigin(source) {
+  let value;
+  try {
+    value = new URL(source);
+  } catch {
+    throw new Error("UGV_SMOKE_PMS_WEB_ORIGIN_INVALID");
+  }
+  if (
+    value.protocol !== "http:" ||
+    value.username.length > 0 ||
+    value.password.length > 0 ||
+    value.pathname !== "/" ||
+    value.search.length > 0 ||
+    value.hash.length > 0
+  ) {
+    throw new Error("UGV_SMOKE_PMS_WEB_ORIGIN_INVALID");
+  }
   return value;
 }

@@ -17,7 +17,7 @@ done < <(npc_persistent_services)
 printf 'PMS Web: http://%s:%s (plain internal-network access; no end-user authentication)\n' \
   "$(npc_required_env_literal PMS_WEB_BIND_ADDRESS "$NPC_BUNDLE_USER_ENV")" \
   "$(npc_required_env_literal PMS_WEB_PORT "$NPC_BUNDLE_USER_ENV")"
-printf 'NPC Runtime: http://%s:%s (JWT protected)\n' \
+printf 'NPC Runtime: http://%s:%s (anonymous isolated-intranet access)\n' \
   "$(npc_required_env_literal NPC_TANK_RUNTIME_BIND_ADDRESS "$NPC_BUNDLE_USER_ENV")" \
   "$(npc_required_env_literal NPC_TANK_RUNTIME_PORT "$NPC_BUNDLE_USER_ENV")"
 printf 'Registry advertised Runtime base: %s\n' \

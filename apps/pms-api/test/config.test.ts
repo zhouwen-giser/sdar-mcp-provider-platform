@@ -28,6 +28,7 @@ describe("PMS API bootstrap config", () => {
     expect(config.port).toBe(8090);
     expect(config.runtimeHeartbeatTtlMs).toBe(30_000);
     expect(config.sdarRegistryProjectionTtlSeconds).toBe(2_592_000);
+    expect(config.managementAuthMode).toBe("file_credentials");
     expect(config.databaseUrl).toBe("postgresql://127.0.0.1:5432/pms_runtime");
     expect(config.management.readers).toMatchObject([
       {
@@ -61,6 +62,68 @@ describe("PMS API bootstrap config", () => {
       protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
       tokenDigest: hashSecretToken("runtime-registration-token"),
     });
+  });
+
+  it("requires an explicit insecure-transport opt-in for anonymous intranet management", async () => {
+    const fixture = await createFixture({
+      runtimeVersion: "2.0.0",
+      databaseUrl: "postgresql://127.0.0.1:5432/pms_runtime",
+      protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+    });
+    const withoutManagementFile = { ...baseEnvironment(fixture) };
+    delete withoutManagementFile.PMS_MANAGEMENT_CREDENTIAL_FILE;
+
+    const config = await loadPmsApiBootstrapConfig({
+      ...withoutManagementFile,
+      PMS_API_MANAGEMENT_AUTH_MODE: "anonymous_intranet",
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+    });
+    expect(config).toMatchObject({
+      managementAuthMode: "anonymous_intranet",
+      runtimeCredentialFile: fixture.runtimeCredentialPath,
+    });
+    expect(config).not.toHaveProperty("managementCredentialFile");
+    expect(config.management).toEqual({ readers: [], administrators: [] });
+
+    for (const optIn of [undefined, "false", "TRUE", "1"]) {
+      await expect(
+        loadPmsApiBootstrapConfig({
+          ...withoutManagementFile,
+          PMS_API_MANAGEMENT_AUTH_MODE: "anonymous_intranet",
+          ...(optIn === undefined ? {} : { ALLOW_INSECURE_INTERNAL_TRANSPORT: optIn }),
+        }),
+      ).rejects.toMatchObject({
+        code: "PMS_API_ANONYMOUS_INTRANET_TRANSPORT_OPT_IN_REQUIRED",
+      });
+    }
+  });
+
+  it("rejects unknown management auth modes and still requires Runtime credentials", async () => {
+    const fixture = await createFixture({
+      runtimeVersion: "2.0.0",
+      databaseUrl: "postgresql://127.0.0.1:5432/pms_runtime",
+      protocolVersion: PMS_API_FROZEN_PROTOCOL_VERSION,
+    });
+    for (const mode of ["", "file", "anonymous", "ANONYMOUS_INTRANET"]) {
+      await expect(
+        loadPmsApiBootstrapConfig({
+          ...baseEnvironment(fixture),
+          PMS_API_MANAGEMENT_AUTH_MODE: mode,
+          ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        }),
+      ).rejects.toMatchObject({ code: "PMS_API_MANAGEMENT_AUTH_MODE_INVALID" });
+    }
+
+    const withoutCredentialFiles = { ...baseEnvironment(fixture) };
+    delete withoutCredentialFiles.PMS_MANAGEMENT_CREDENTIAL_FILE;
+    delete withoutCredentialFiles.PMS_RUNTIME_CREDENTIAL_FILE;
+    await expect(
+      loadPmsApiBootstrapConfig({
+        ...withoutCredentialFiles,
+        PMS_API_MANAGEMENT_AUTH_MODE: "anonymous_intranet",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).rejects.toMatchObject({ code: "PMS_API_RUNTIME_CREDENTIAL_FILE_NOT_CONFIGURED" });
   });
 
   it("loads and validates the fixed SDAR Registry projection TTL", async () => {

@@ -88,8 +88,15 @@ export class ExternalRuntimeCatalogCredentialResolver implements ExternalRuntime
 }
 
 export class NoExternalRuntimeCatalogCredentialResolver implements ExternalRuntimeCatalogAuthorizationPort {
+  readonly #allowUnauthenticatedDirect: boolean;
+
+  constructor(options: { readonly allowUnauthenticatedDirect?: boolean } = {}) {
+    this.#allowUnauthenticatedDirect = options.allowUnauthenticatedDirect === true;
+  }
+
   authorization(deployment: RuntimeDeploymentSnapshot): Promise<string | undefined> {
     if (deployment.runtimeAuthority === "direct_container") {
+      if (this.#allowUnauthenticatedDirect) return Promise.resolve(undefined);
       return Promise.reject(new Error("EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_NOT_CONFIGURED"));
     }
     return Promise.resolve(undefined);

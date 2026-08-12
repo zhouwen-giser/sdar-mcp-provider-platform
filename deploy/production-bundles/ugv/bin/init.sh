@@ -28,7 +28,6 @@ directories=(
   "$bundle_dir/secrets/pms/runtime-control-plane"
   "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1"
   "$bundle_dir/secrets/ugv/database"
-  "$bundle_dir/secrets/ugv/runtime"
   "$bundle_dir/runtime/pms-worker-state/runtime-secrets"
   "$bundle_dir/runtime/pms-worker-state/runtime-cache"
   "$bundle_dir/runtime/pms-worker-state/pm2"
@@ -60,11 +59,8 @@ random_secret() {
 }
 
 random_secret "$bundle_dir/secrets/pms/postgres-password" 32
-random_secret "$bundle_dir/secrets/pms/api/management-reader.token" 32
-random_secret "$bundle_dir/secrets/pms/api/management-admin.token" 32
 random_secret "$bundle_dir/secrets/ugv/database/adapter-password" 32
 random_secret "$bundle_dir/secrets/ugv/database/runtime-password" 32
-random_secret "$bundle_dir/secrets/ugv/runtime/jwt-hs256-secret" 48
 random_secret "$bundle_dir/secrets/pms/worker/runtime-database-password" 32
 random_secret \
   "$bundle_dir/secrets/pms/runtime-control-plane/providers/isr.vehicle.ugv.ugv1/deployments/production-ugv-direct/instances/production-ugv-direct-1/control-plane.token" \
@@ -94,22 +90,6 @@ write_private \
   "$bundle_dir/secrets/ugv/database/runtime-database-url" \
   "postgresql://ugv_runtime:${runtime_password}@ugv-runtime-postgres:5432/ugv_runtime"
 
-management_descriptor="$(printf '%s' '{
-  "management": {
-    "reader": [
-      {
-        "subjectId": "production-ugv-reader",
-        "tokenFile": "/run/pms-secrets/api/management-reader.token"
-      }
-    ],
-    "administrator": [
-      {
-        "subjectId": "production-ugv-admin",
-        "tokenFile": "/run/pms-secrets/api/management-admin.token"
-      }
-    ]
-  }
-}')"
 runtime_descriptor="$(printf '%s' '{
   "runtimeConfig": [],
   "runtimeRegistration": [
@@ -125,26 +105,8 @@ runtime_descriptor="$(printf '%s' '{
     }
   ]
 }')"
-catalog_credential_descriptor="$(printf '%s' '{
-  "credentials": [
-    {
-      "providerId": "isr.vehicle.ugv.ugv1",
-      "deploymentId": "production-ugv-direct",
-      "instanceId": "production-ugv-direct-1",
-      "secretFile": "/run/pms-secrets/external-runtime/jwt-hs256-secret",
-      "issuer": "sdar-production-ugv",
-      "audience": "sdar-ugv-runtime",
-      "subjectId": "pms-worker",
-      "tenantId": "pms-control"
-    }
-  ]
-}')"
 provisioning_descriptor="$(printf '{\n  "clusterRef": "bundle-pms-postgres",\n  "adminSecretRef": "file/production-ugv/pms-postgres-admin",\n  "adminDatabaseUrl": "postgresql://pms_admin:%s@pms-postgres:5432/pms",\n  "runtimePassword": "%s"\n}' "$pms_password" "$provisioned_runtime_password")"
-write_private "$bundle_dir/secrets/pms/api/management.json" "$management_descriptor"
 write_private "$bundle_dir/secrets/pms/api/runtime.json" "$runtime_descriptor"
-write_private \
-  "$bundle_dir/secrets/pms/worker/external-runtime-catalog.json" \
-  "$catalog_credential_descriptor"
 write_private "$bundle_dir/secrets/pms/worker/postgres-provisioning.json" "$provisioning_descriptor"
 
 write_private "$bundle_dir/runtime/.initialized" "schemaVersion=2"
@@ -161,7 +123,8 @@ require_environment_file
 require_generated_layout
 
 printf '%s\n' \
-  'INITIALIZED: local database, Runtime JWT, and instance-scoped PMS credentials were created.' \
+  'INITIALIZED: local database and instance-scoped Runtime registration credentials were created.' \
   'The direct-container Runtime identity is production-ugv-direct/production-ugv-direct-1.' \
+  'PMS management and Runtime MCP use anonymous access on the isolated intranet.' \
   'REQUIRED: edit .env with the real intranet Device MCP and MQTT addresses.' \
   'No TLS certificate or external simulator credential is generated, mounted, or required.'

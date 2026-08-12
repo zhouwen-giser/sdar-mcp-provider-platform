@@ -1178,6 +1178,7 @@ async function updateOperationalGauges(
 
 function authenticationOptions(config: RuntimeConfig): AuthenticationOptions {
   if (config.AUTH_MODE === "development") return { mode: "development" };
+  if (config.AUTH_MODE === "anonymous") return { mode: "anonymous" };
   if (config.AUTH_MODE === "trusted_headers") return { mode: "trusted_headers" };
   if (config.JWT_HS256_SECRET === undefined) throw new Error("JWT_HS256_SECRET_REQUIRED");
   return {

@@ -56,7 +56,7 @@ describe("Runtime worker and event configuration contract", () => {
     expect(() => loadRuntimeWorkerEventsEnvironment({ TTL_CLEANER_BATCH_SIZE: "10001" })).toThrow();
   });
 
-  it("limits the internal plaintext opt-in to transport checks", () => {
+  it("requires the internal transport opt-in for anonymous production access", () => {
     const production = {
       RUNTIME_ENV: "production",
       AUTH_MODE: "jwt_hs256",
@@ -85,6 +85,19 @@ describe("Runtime worker and event configuration contract", () => {
         ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
       }),
     ).toThrow("production forbids development auth");
+    expect(() =>
+      loadRuntimeWorkerEventsEnvironment({
+        RUNTIME_ENV: "production",
+        AUTH_MODE: "anonymous",
+      }),
+    ).toThrow("production anonymous auth requires explicit insecure internal transport");
+    expect(
+      loadRuntimeWorkerEventsEnvironment({
+        RUNTIME_ENV: "production",
+        AUTH_MODE: "anonymous",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).toMatchObject({ AUTH_MODE: "anonymous" });
   });
 
   it("uses conservative restart Apply Modes and marks secrets", () => {

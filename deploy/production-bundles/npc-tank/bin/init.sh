@@ -98,28 +98,9 @@ if [[ ! -e "$runtime_password_file" ]]; then
     "postgresql://npc_runtime:$runtime_password@npc-runtime-postgres:5432/npc_runtime"
 fi
 
-write_new_secret "$state_root/secrets/runtime-jwt-hs256" "$(random_hex)"
-write_new_secret "$state_root/secrets/pms-api/management-admin.token" "$(random_hex)"
 write_new_secret \
   "$state_root/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token" \
   "$(random_hex)"
-
-management_descriptor="$state_root/secrets/pms-api/management.json"
-if [[ ! -e "$management_descriptor" ]]; then
-  printf '%s\n' \
-    '{' \
-    '  "management": {' \
-    '    "reader": [],' \
-    '    "administrator": [' \
-    '      {' \
-    '        "subjectId": "npc-production-admin",' \
-    '        "tokenFile": "/run/pms-secrets/management-admin.token"' \
-    '      }' \
-    '    ]' \
-    '  }' \
-    '}' >"$management_descriptor"
-  chmod 0600 "$management_descriptor"
-fi
 
 runtime_descriptor="$state_root/secrets/pms-api/runtime.json"
 [[ ! -L "$runtime_descriptor" ]] || npc_die "refusing Runtime descriptor symlink"
@@ -143,31 +124,6 @@ printf '%s\n' \
   '  ]' \
   '}' >"$runtime_descriptor"
 chmod 0600 "$runtime_descriptor"
-
-catalog_credential_descriptor="$state_root/secrets/pms-worker/external-runtime-catalog.json"
-[[ ! -L "$catalog_credential_descriptor" ]] || \
-  npc_die "refusing external catalog credential descriptor symlink"
-if [[ -e "$catalog_credential_descriptor" ]]; then
-  npc_validate_secret_file \
-    "$catalog_credential_descriptor" \
-    "existing external catalog credential descriptor"
-fi
-printf '%s\n' \
-  '{' \
-  '  "credentials": [' \
-  '    {' \
-  '      "providerId": "isr.vehicle.npc-tank.npc-tank1",' \
-  '      "deploymentId": "production-npc-tank-direct",' \
-  '      "instanceId": "production-npc-tank-direct-1",' \
-  '      "secretFile": "/run/pms-secrets/runtime-jwt-hs256",' \
-  '      "issuer": "sdar-npc-tank-production",' \
-  '      "audience": "sdar-runtime",' \
-  '      "subjectId": "pms-worker",' \
-  '      "tenantId": "pms-control"' \
-  '    }' \
-  '  ]' \
-  '}' >"$catalog_credential_descriptor"
-chmod 0600 "$catalog_credential_descriptor"
 
 provisioning_descriptor="$state_root/secrets/pms-worker/postgres-provisioning.json"
 if [[ ! -e "$provisioning_descriptor" ]]; then
@@ -194,7 +150,8 @@ fi
 npc_validate_secret_inventory
 
 printf '%s\n' \
-  'Internal database credentials, the instance-scoped PMS credential, and Runtime JWT are ready.' \
+  'Internal database credentials and the instance-scoped Runtime registration credential are ready.' \
   'The direct-container Runtime identity is production-npc-tank-direct/production-npc-tank-direct-1.' \
+  'PMS management and Runtime MCP use anonymous access on the isolated intranet.' \
   'No TLS CA, certificate, key, MQTT password, or transport trust material is required.' \
   'Edit .env with the real internal HTTP Device MCP and MQTT endpoints, then run bin/up.sh.'

@@ -24,4 +24,11 @@ VITE_PMS_DATA_MODE=mock
 VITE_PMS_ENABLE_PROTOTYPE_TOOLS=false
 ```
 
-`api` mode is deliberately fail-closed until a real OpenAPI Gateway is implemented. It never silently falls back to Mock.
+`api` mode uses the production same-origin gateway and never silently falls back to Mock.
+
+The production server always proxies the same-origin `/api/console/v1` surface. Raw PMS routes
+remain blocked by default. An isolated deployment can explicitly set
+`PMS_WEB_RAW_API_PROXY_ENABLED=true` to proxy `/api/v1` and `/api/v1/**` to
+`PMS_WEB_API_UPSTREAM`; all other `/api/**` paths remain blocked. This proxy does not inject
+credentials. It streams upstream responses so Registry watch/SSE connections remain live and are
+cancelled when the downstream client disconnects.

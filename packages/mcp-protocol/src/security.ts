@@ -4,6 +4,7 @@ import type { AuthorizationContext, ExecutionMode } from "../../domain/src/index
 
 export type AuthenticationOptions =
   | { mode: "development" }
+  | { mode: "anonymous" }
   | { mode: "trusted_headers" }
   | {
       mode: "jwt_hs256";
@@ -19,7 +20,9 @@ export function createAuthorizationResolver(options: AuthenticationOptions): Aut
     const identity =
       options.mode === "jwt_hs256"
         ? jwtIdentity(request, options)
-        : trustedIdentity(request, options.mode === "development");
+        : options.mode === "anonymous"
+          ? anonymousIdentity()
+          : trustedIdentity(request, options.mode === "development");
     const modeHeader = header(request, "x-sdar-execution-mode") ?? "live";
     if (!isExecutionMode(modeHeader)) throw new Error("INVALID_EXECUTION_MODE");
     const simulationId = header(request, "x-sdar-simulation-id") ?? null;
@@ -35,6 +38,12 @@ export function createAuthorizationResolver(options: AuthenticationOptions): Aut
       correlationId: correlationId(request),
     };
   };
+}
+
+function anonymousIdentity(): { subject: string; tenant: string } {
+  // Anonymous internal transport deliberately has one shared authorization domain. Identity-bearing
+  // request headers are ignored so a caller cannot manufacture isolation or impersonate a tenant.
+  return { subject: "internal-anonymous", tenant: "default" };
 }
 
 function trustedIdentity(

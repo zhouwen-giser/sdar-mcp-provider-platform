@@ -1,8 +1,4 @@
-import { readFile } from "node:fs/promises";
-
-const baseUrl = new URL("http://pms-web:8080");
-const token = (await readFile("/run/pms-secrets/management-admin.token", "utf8")).trim();
-if (token.length < 16 || /\s/.test(token)) fail("PMS_WEB_SMOKE_TOKEN_INVALID");
+const baseUrl = smokeOrigin(process.env.PMS_WEB_SMOKE_ORIGIN ?? "http://pms-web:8080");
 
 const page = await request("/", {});
 const html = await page.text();
@@ -17,7 +13,6 @@ if (
 
 const providers = await request("/api/console/v1/providers", {
   headers: {
-    authorization: `Bearer ${token}`,
     "x-correlation-id": "npc-production-pms-web-smoke",
   },
 });
@@ -40,7 +35,6 @@ const providerId = "isr.vehicle.npc-tank.npc-tank1";
 const deploymentId = "production-npc-tank-direct";
 const instanceId = "production-npc-tank-direct-1";
 const proxyHeaders = {
-  authorization: `Bearer ${token}`,
   "x-correlation-id": "npc-production-pms-web-smoke",
 };
 const deployments = await json(
@@ -98,23 +92,51 @@ if (
   fail("PMS_WEB_REGISTRY_NOT_PROJECTED");
 }
 
-const blocked = await request("/api/v1/runtime-registration/instances/npc-smoke", {});
-const blockedBody = await json(blocked, "PMS_WEB_BOUNDARY_RESPONSE_INVALID");
+const rawProviderResponse = await request(`/api/v1/providers/${encodeURIComponent(providerId)}`, {
+  headers: proxyHeaders,
+});
+const rawProvider = await json(rawProviderResponse, "PMS_WEB_RAW_PROVIDER_RESPONSE_INVALID");
 if (
-  blocked.status !== 404 ||
-  blockedBody?.status !== 404 ||
-  blockedBody?.code !== "PMS_WEB_API_ROUTE_NOT_ALLOWED"
+  rawProviderResponse.status !== 200 ||
+  rawProvider?.providerId !== providerId ||
+  rawProvider.status !== "active"
 ) {
-  fail("PMS_WEB_PROXY_BOUNDARY_INVALID");
+  fail("PMS_WEB_RAW_MANAGEMENT_API_NOT_VISIBLE");
+}
+
+const projectionResponse = await request(
+  "/api/v1/registry/production/consumers/sdar/v1/sources/npc-tank-smpp/latest",
+  { headers: proxyHeaders },
+);
+const projection = await json(projectionResponse, "PMS_WEB_SDAR_PROJECTION_RESPONSE_INVALID");
+const projectionProvider = Array.isArray(projection?.providers)
+  ? projection.providers.find((value) => value?.externalProviderId === providerId)
+  : undefined;
+if (
+  projectionResponse.status !== 200 ||
+  projectionResponse.headers.get("x-smpp-projection-contract") !== "sdar-registry-v1" ||
+  !/^"[0-9a-f]{64}"$/.test(projectionResponse.headers.get("etag") ?? "") ||
+  JSON.stringify(Object.keys(projection ?? {}).sort()) !==
+    JSON.stringify(["checksum", "expiresAt", "generatedAt", "providers", "revision"]) ||
+  projectionProvider?.externalServerId !== instanceId ||
+  projectionProvider.serverEndpoint !== registryProvider.effectiveEndpoint ||
+  projectionProvider.catalogRevision !== String(registryProvider.catalogRevision)
+) {
+  fail("PMS_WEB_SDAR_PROJECTION_INVALID");
 }
 
 process.stdout.write(
   `${JSON.stringify({
     status: "passed",
+    smokeOrigin: baseUrl.origin,
     providerId,
     deploymentId,
     instanceId,
     registryRevision: registry.revision,
+    rawManagementApiAnonymous: true,
+    sdarProjectionAnonymous: true,
+    projectionRevision: projection.revision,
+    projectionChecksum: projection.checksum,
   })}\n`,
 );
 
@@ -140,4 +162,24 @@ async function json(response, code) {
 function fail(code) {
   process.stderr.write(`BLOCKED_EXTERNAL_ENV:${code}\n`);
   process.exit(2);
+}
+
+function smokeOrigin(source) {
+  let value;
+  try {
+    value = new URL(source);
+  } catch {
+    fail("PMS_WEB_SMOKE_ORIGIN_INVALID");
+  }
+  if (
+    value.protocol !== "http:" ||
+    value.username.length > 0 ||
+    value.password.length > 0 ||
+    value.pathname !== "/" ||
+    value.search.length > 0 ||
+    value.hash.length > 0
+  ) {
+    fail("PMS_WEB_SMOKE_ORIGIN_INVALID");
+  }
+  return value;
 }

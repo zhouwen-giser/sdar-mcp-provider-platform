@@ -118,6 +118,47 @@ describe("PMS API production composition", () => {
     expect(fixture.end).toHaveBeenCalledTimes(1);
   });
 
+  it("opens only management routes in the explicit anonymous intranet mode", async () => {
+    const fixture = poolFixture();
+    const composition = await createPmsApiComposition(
+      anonymousIntranetConfig(),
+      dependencies(fixture.pool),
+    );
+    await composition.app.ready();
+
+    await expect(
+      composition.app.inject({ method: "GET", url: "/api/v1/provider-packages" }),
+    ).resolves.toMatchObject({ statusCode: 200 });
+    const openapi = await composition.app.inject({
+      method: "GET",
+      url: "/api/v1/openapi.json",
+    });
+    expect(
+      openapi.json<{
+        paths: Record<string, Record<string, Record<string, unknown>>>;
+      }>().paths["/api/v1/registry/{environment}/consumers/sdar/v1/sources/{smppSourceId}/latest"]
+        ?.get,
+    ).toMatchObject({ security: [], "x-sdar-access-mode": "anonymous_intranet" });
+    await expect(
+      composition.app.inject({
+        method: "GET",
+        url: "/api/v1/runtime-deployments?providerId=provider-1",
+      }),
+    ).resolves.toMatchObject({ statusCode: 200 });
+    await expect(
+      composition.app.inject({ method: "GET", url: runtimeConfigUrl("latest") }),
+    ).resolves.toMatchObject({ statusCode: 401 });
+    await expect(
+      composition.app.inject({
+        method: "POST",
+        url: runtimeRegistrationUrl("register"),
+        payload: registrationBody(),
+      }),
+    ).resolves.toMatchObject({ statusCode: 401 });
+
+    await composition.close();
+  });
+
   it("cleans the Pool when construction fails before Fastify is created", async () => {
     const fixture = poolFixture();
     await expect(
@@ -176,6 +217,7 @@ function config(): PmsApiBootstrapConfig {
     databaseUrl: "postgresql://not-a-secret@localhost/pms",
     runtimeHeartbeatTtlMs: 30_000,
     sdarRegistryProjectionTtlSeconds: 2_592_000,
+    managementAuthMode: "file_credentials",
     managementCredentialFile: "/credentials/management.json",
     runtimeCredentialFile: "/credentials/runtime.json",
     management: {
@@ -193,6 +235,16 @@ function config(): PmsApiBootstrapConfig {
         registrationPrincipal("registration-heartbeat", ["runtime:heartbeat"]),
       ],
     },
+  };
+}
+
+function anonymousIntranetConfig(): PmsApiBootstrapConfig {
+  const { managementCredentialFile, ...base } = config();
+  void managementCredentialFile;
+  return {
+    ...base,
+    managementAuthMode: "anonymous_intranet",
+    management: { readers: [], administrators: [] },
   };
 }
 

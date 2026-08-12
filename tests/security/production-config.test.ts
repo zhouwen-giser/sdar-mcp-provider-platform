@@ -59,6 +59,27 @@ describe("H4 production fail-closed configuration", () => {
     });
   });
 
+  it("allows anonymous production access only behind the explicit internal transport opt-in", () => {
+    expect(() =>
+      loadRuntimeConfig({
+        RUNTIME_ENV: "production",
+        AUTH_MODE: "anonymous",
+      }),
+    ).toThrow("production anonymous auth requires explicit insecure internal transport");
+
+    expect(
+      loadRuntimeConfig({
+        RUNTIME_ENV: "production",
+        AUTH_MODE: "anonymous",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).toMatchObject({
+      RUNTIME_ENV: "production",
+      AUTH_MODE: "anonymous",
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: true,
+    });
+  });
+
   it("production_otel_rejects_plain_http", () => {
     expect(() =>
       loadRuntimeConfig({

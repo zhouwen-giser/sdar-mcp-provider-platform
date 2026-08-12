@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import { PassThrough } from "node:stream";
 import { describe, expect, it } from "vitest";
@@ -9,6 +9,43 @@ import {
 import { createLogger, RuntimeMetrics } from "../../packages/observability/src/index.js";
 
 describe("Runtime security boundaries", () => {
+  it("uses one fixed anonymous authorization domain and ignores caller identity headers", () => {
+    const resolve = createAuthorizationResolver({ mode: "anonymous" });
+    const expectedHash = createHash("sha256")
+      .update("default\u0000internal-anonymous")
+      .digest("hex");
+
+    const anonymous = resolve(request({}));
+    const attemptedIdentityOverride = resolve(
+      request({
+        authorization: "Bearer caller-supplied-value",
+        "x-sdar-subject": "forged-subject",
+        "x-sdar-tenant": "forged-tenant",
+      }),
+    );
+    const simulation = resolve(
+      request({
+        "x-sdar-execution-mode": "simulation",
+        "x-sdar-simulation-id": "anonymous-simulation",
+      }),
+    );
+
+    expect(anonymous).toMatchObject({
+      hash: expectedHash,
+      executionMode: "live",
+      simulationId: null,
+    });
+    expect(attemptedIdentityOverride.hash).toBe(expectedHash);
+    expect(simulation).toMatchObject({
+      hash: expectedHash,
+      executionMode: "simulation",
+      simulationId: "anonymous-simulation",
+    });
+    expect(() => resolve(request({ "x-sdar-execution-mode": "simulation" }))).toThrow(
+      "INVALID_SIMULATION_CONTEXT",
+    );
+  });
+
   it("requires trusted identity and binds authorization plus execution mode", () => {
     const resolve = createAuthorizationResolver({ mode: "trusted_headers" });
     expect(() => resolve(request({}))).toThrow("AUTHENTICATION_REQUIRED");

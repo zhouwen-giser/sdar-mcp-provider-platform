@@ -33,21 +33,24 @@ Docker Hub 和软件包源通常使用部署主机及 Docker daemon 的标准 HT
 
 `bin/up.sh` 启动以下八个常驻服务，并运行一次幂等的 `pms-seed`：
 
-| 服务                   | 用途                           | 主机暴露                     |
-| ---------------------- | ------------------------------ | ---------------------------- |
-| `pms-postgres`         | PMS 持久化                     | 不暴露                       |
-| `pms-api`              | PMS API                        | 不暴露                       |
-| `pms-worker`           | PMS Worker                     | 不暴露                       |
-| `pms-web`              | PMS Web 与 Console V1 同源代理 | 默认 `0.0.0.0:8089`，仅内网  |
-| `npc-adapter-postgres` | NPC Adapter 状态               | 不暴露                       |
-| `npc-runtime-postgres` | NPC Runtime 状态、任务与事件   | 不暴露                       |
-| `npc-tank-adapter`     | NPC Tank Provider Adapter      | 不暴露                       |
-| `npc-tank-runtime`     | JWT 保护的 MCP Runtime         | 默认 `0.0.0.0:19103`，仅内网 |
+| 服务                   | 用途                                  | 主机暴露                     |
+| ---------------------- | ------------------------------------- | ---------------------------- |
+| `pms-postgres`         | PMS 持久化                            | 不暴露                       |
+| `pms-api`              | PMS API                               | 不暴露                       |
+| `pms-worker`           | PMS Worker                            | 不暴露                       |
+| `pms-web`              | PMS Web、Console V1 与 `/api/v1` 代理 | 默认 `0.0.0.0:8089`，仅内网  |
+| `npc-adapter-postgres` | NPC Adapter 状态                      | 不暴露                       |
+| `npc-runtime-postgres` | NPC Runtime 状态、任务与事件          | 不暴露                       |
+| `npc-tank-adapter`     | NPC Tank Provider Adapter             | 不暴露                       |
+| `npc-tank-runtime`     | 匿名 MCP Runtime                      | 默认 `0.0.0.0:19103`，仅内网 |
 
-三个 PostgreSQL 服务只位于 Docker 内部网络。PMS Web 当前没有最终用户认证闭环，部署
-方必须通过 VLAN、路由和主机防火墙，把 `8089`、`19103` 及容器网络限制在授权内网内，
-不得路由到办公公网、互联网或其他不受信网段。Runtime 仍强制 JWT；PMS、数据库和
-Runtime 分别使用独立秘密。
+三个 PostgreSQL 服务和 `pms-api` 只位于 Docker 内部网络，`pms-api` 不发布主机端口。
+PMS Web 通过同源 `/api/v1` 匿名开放管理 API 与 SDAR consumer projection，Runtime
+`/mcp` 也允许匿名访问。部署方必须通过 VLAN、路由和主机防火墙，把 `8089`、`19103`
+及容器网络限制在授权内网内，不得路由到办公公网、互联网或其他不受信网段。
+PMS Worker 的无凭据 Catalog 发现由 Compose 中独立的
+`PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE=anonymous_intranet` 明确启用，并同时要求
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true`；明文传输许可本身不会改变默认凭据模式。
 
 ## 目标主机要求
 
@@ -80,10 +83,10 @@ cd sdar-npc-tank-production-arm64-source-build
 sudo bash deploy/npc-tank/bin/init.sh
 ```
 
-`init.sh` 从 `.env.example` 创建 `.env`，随机生成三个 PostgreSQL 数据库凭据、PMS
-管理凭据和 Runtime JWT HS256 密钥，并把状态目录和秘密文件限制为 UID 1000 可读。
-它不会生成 TLS 证书或私钥，也不会生成、复制或猜测真实 NPC 端点凭据。重复执行会保留
-已有秘密，不会自动轮换。
+`init.sh` 从 `.env.example` 创建 `.env`，随机生成三个 PostgreSQL 数据库凭据及 Runtime
+向 PMS 注册所需的实例绑定令牌，并把状态目录和秘密文件限制为 UID 1000 可读。它不会
+生成 PMS 管理凭据、Runtime JWT、TLS 证书或私钥，也不会生成、复制或猜测真实 NPC
+端点凭据。重复执行会保留已有秘密，不会自动轮换。
 
 编辑 `deploy/npc-tank/.env`，至少替换真实内网端点：
 
@@ -98,6 +101,10 @@ NPC_TANK_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19103
 `NPC_TANK_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
 变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
+
+从带 PMS 管理令牌和 Runtime JWT 的旧包升级时，使用本版本 ZIP 中的源码重新构建应用
+镜像，保留 `.env`、`state/` 和数据库卷后再运行 `init.sh`、`up.sh`。旧凭据文件可以
+暂时留存用于回滚，但新 Compose 不再挂载、读取或校验它们。
 
 不要把 revision、平台、基础镜像、摘要、构建目标或可部署状态等发布身份键写入用户
 `.env`；这些值只能来自发布流程生成的只读构建锁文件。
@@ -121,9 +128,14 @@ bash deploy/npc-tank/bin/smoke.sh
 bash deploy/npc-tank/bin/down.sh
 ```
 
-`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 同源代理、ACTIVE 的
-`direct_container` RuntimeDeployment 和新鲜 registration/heartbeat，并从 PMS Registry
-发布的 advertised endpoint 验证 JWT Runtime 和真实 Device MCP/MQTT 连接，只调用以下四个读取工具：
+`smoke.sh` 检查八个容器、三个 PostgreSQL 实例、PMS Web 匿名 `/api/v1` 管理代理、
+匿名 SDAR projection、ACTIVE 的 `direct_container` RuntimeDeployment 和新鲜
+registration/heartbeat，并从 PMS Registry 发布的 advertised endpoint 匿名验证 Runtime
+和真实 Device MCP/MQTT 连接，只调用以下四个读取工具：
+
+PMS Web smoke 会先从容器网络执行，再用现场构建且已经校验的本地 PMS Web 镜像运行
+`docker run --network host`（仅使用前序已核验存在的本地镜像），请求 `.env` 中实际发布的地址和端口；
+`0.0.0.0`/`::` 会分别规范为 `127.0.0.1`/`::1`。宿主无需 Node.js 或 curl，验证过程也不会拉取镜像。
 
 - `vehicle_get_state`
 - `vehicle_get_capabilities`
@@ -134,6 +146,12 @@ bash deploy/npc-tank/bin/down.sh
 失败，不会用 mock 数据给出成功结果。当前 NPC smoke 不单独断言 MQTT telemetry 的
 采样新鲜度，因此通过结果只代表连接和四个只读调用通过，不能扩展声称新鲜数据已验证。
 
+SDAR 使用
+`http://<PMS_WEB_HOST>:<PMS_WEB_PORT>/api/v1/registry/production/consumers/sdar/v1/sources/npc-tank-smpp/latest`
+匿名读取 projection，再匿名调用返回的 `serverEndpoint`；无需也不应直连 `pms-api:8090`。
+SDAR 客户端必须支持 credential mode `none`（不发送 `Authorization`）；仍强制
+`credentialRef`/Bearer 的旧版客户端需先升级，不能配置伪造 token。
+
 `down.sh` 只停止容器，保留 PostgreSQL 数据卷、Worker 状态、合约报告、`.env` 和秘密。
 除非已经确认要永久删除数据库，否则不要使用 `docker compose down --volumes`。
 
@@ -141,8 +159,8 @@ bash deploy/npc-tank/bin/down.sh
 
 秘密和状态目录必须保持初始化脚本设置的 UID 1000、目录 `0700`、文件 `0600` 权限。
 备份至少覆盖三个数据库的一致性备份、`deploy/npc-tank/.env`、配置的 `state/` 目录和
-Docker 持久卷，并按组织的密钥托管策略加密保存。Runtime JWT 或数据库密码轮换需要
-协调多个消费者，应在维护窗口按整体迁移方案执行。
+Docker 持久卷，并按组织的密钥托管策略加密保存。数据库密码或 Runtime registration
+令牌轮换需要协调多个内部消费者，应在维护窗口按整体迁移方案执行。
 
 本包提供从精确源码在原生 ARM64 主机生成部署镜像的路径，但不把本机构建结果自动认定
 为生产认证。NPC Tank Provider Package 的 real-resource 状态仍为 `pending`。Runtime

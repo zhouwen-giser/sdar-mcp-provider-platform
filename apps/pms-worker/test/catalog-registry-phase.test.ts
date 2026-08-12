@@ -42,6 +42,25 @@ describe("HttpCatalogRegistryDiscovery transport policy", () => {
       "Bearer signed-short-lived-token",
     );
   });
+
+  it("does not synthesize authorization when unauthenticated direct discovery is explicit", async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(() =>
+      Promise.resolve(new Response("unavailable", { status: 503 })),
+    );
+    await expect(
+      new HttpCatalogRegistryDiscovery({
+        allowInsecureInternalTransport: true,
+        fetch,
+      }).discover({
+        endpoint: "http://runtime.internal:8080/mcp",
+        timeoutMs: 1_000,
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toThrow();
+
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(new Headers(fetch.mock.calls[0]?.[1]?.headers).has("authorization")).toBe(false);
+  });
 });
 
 describe("CatalogRegistryPublicationPhase process projection", () => {

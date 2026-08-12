@@ -43,6 +43,10 @@ const upstreamTimeoutMs = parseBoundedInteger(
   120_000,
   "PMS_WEB_PROXY_TIMEOUT_MS_INVALID",
 );
+const rawApiProxyEnabled = parseBooleanFlag(
+  process.env.PMS_WEB_RAW_API_PROXY_ENABLED,
+  "PMS_WEB_RAW_API_PROXY_ENABLED_INVALID",
+);
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -103,8 +107,11 @@ async function handleRequest(request, response) {
     return;
   }
 
-  if (isConsoleApiPath(requestUrl.pathname)) {
-    await proxyConsoleApi(request, response, requestUrl);
+  if (
+    isConsoleApiPath(requestUrl.pathname) ||
+    (rawApiProxyEnabled && isRawApiPath(requestUrl.pathname))
+  ) {
+    await proxyApi(request, response, requestUrl);
     return;
   }
 
@@ -167,8 +174,18 @@ function parseBoundedInteger(source, fallback, minimum, maximum, code) {
   return value;
 }
 
+function parseBooleanFlag(source, code) {
+  if (source === undefined || source === "false") return false;
+  if (source === "true") return true;
+  throw new Error(code);
+}
+
 function isConsoleApiPath(pathname) {
   return pathname === CONSOLE_API_BASE || pathname.startsWith(`${CONSOLE_API_BASE}/`);
+}
+
+function isRawApiPath(pathname) {
+  return pathname === "/api/v1" || pathname.startsWith("/api/v1/");
 }
 
 async function serveStatic(response, pathname) {
@@ -196,7 +213,7 @@ async function serveStatic(response, pathname) {
   createReadStream(target).pipe(response);
 }
 
-async function proxyConsoleApi(request, response, requestUrl) {
+async function proxyApi(request, response, requestUrl) {
   const method = request.method ?? "GET";
   const requestBody = await readBody(request, maxBodyBytes);
   const body = ["GET", "HEAD"].includes(method) ? undefined : requestBody;
@@ -205,36 +222,44 @@ async function proxyConsoleApi(request, response, requestUrl) {
   const target = new URL(apiUpstream);
   target.pathname = requestUrl.pathname;
   target.search = requestUrl.search;
-  const upstream = await sendUpstreamRequest({
+  await streamUpstreamResponse({
     body,
     method,
     request,
     response,
     target,
   });
-  if (response.destroyed) throw new ClientAbort();
-
-  response.writeHead(upstream.status, filterHeaders(upstream.headers, ["content-length"]));
-  response.end(method === "HEAD" ? undefined : upstream.body);
 }
 
-async function sendUpstreamRequest({ body, method, request, response, target }) {
+async function streamUpstreamResponse({ body, method, request, response, target }) {
   return new Promise((resolvePromise, rejectPromise) => {
-    let finished = false;
+    let settled = false;
     let timedOut = false;
     let clientAborted = false;
-    const finish = (callback) => {
-      if (finished) return;
-      finished = true;
+    let upstreamResponse;
+    const settle = (callback) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
       request.off("aborted", abortForClient);
       response.off("close", abortForClient);
+      response.off("finish", succeed);
+      upstreamResponse?.off("aborted", upstreamAborted);
+      upstreamResponse?.off("error", upstreamErrored);
       callback();
     };
-    const fail = (error) => finish(() => rejectPromise(error));
+    const succeed = () => settle(resolvePromise);
+    const fail = (error) => settle(() => rejectPromise(error));
+    const upstreamAborted = () => {
+      fail(new HttpProblem(502, "PMS_WEB_UPSTREAM_BAD_GATEWAY", "Bad Gateway"));
+    };
+    const upstreamErrored = () => {
+      fail(new HttpProblem(502, "PMS_WEB_UPSTREAM_BAD_GATEWAY", "Bad Gateway"));
+    };
     const abortForClient = () => {
       if (response.writableEnded) return;
       clientAborted = true;
+      upstreamResponse?.destroy();
       upstreamRequest.destroy();
       fail(new ClientAbort());
     };
@@ -245,24 +270,22 @@ async function sendUpstreamRequest({ body, method, request, response, target }) 
         method,
         headers: filterHeaders(request.headers, ["host", "content-length"]),
       },
-      (upstreamResponse) => {
-        const chunks = [];
-        upstreamResponse.on("data", (chunk) => chunks.push(chunk));
-        upstreamResponse.once("aborted", () => {
-          fail(new HttpProblem(502, "PMS_WEB_UPSTREAM_BAD_GATEWAY", "Bad Gateway"));
-        });
-        upstreamResponse.once("error", () => {
-          fail(new HttpProblem(502, "PMS_WEB_UPSTREAM_BAD_GATEWAY", "Bad Gateway"));
-        });
-        upstreamResponse.once("end", () => {
-          finish(() =>
-            resolvePromise({
-              status: upstreamResponse.statusCode ?? 502,
-              headers: upstreamResponse.headers,
-              body: Buffer.concat(chunks),
-            }),
-          );
-        });
+      (candidate) => {
+        upstreamResponse = candidate;
+        if (isEventStream(upstreamResponse.headers["content-type"])) clearTimeout(timeout);
+        upstreamResponse.once("aborted", upstreamAborted);
+        upstreamResponse.once("error", upstreamErrored);
+        response.once("finish", succeed);
+        response.writeHead(
+          upstreamResponse.statusCode ?? 502,
+          filterHeaders(upstreamResponse.headers),
+        );
+        if (method === "HEAD") {
+          upstreamResponse.resume();
+          upstreamResponse.once("end", () => response.end());
+        } else {
+          upstreamResponse.pipe(response);
+        }
       },
     );
     const timeout = setTimeout(() => {
@@ -285,6 +308,11 @@ async function sendUpstreamRequest({ body, method, request, response, target }) 
     });
     upstreamRequest.end(body);
   });
+}
+
+function isEventStream(contentType) {
+  const value = Array.isArray(contentType) ? contentType[0] : contentType;
+  return typeof value === "string" && value.toLowerCase().startsWith("text/event-stream");
 }
 
 function filterHeaders(headers, additionallyBlocked = []) {

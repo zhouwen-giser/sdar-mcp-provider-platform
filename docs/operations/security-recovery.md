@@ -1,8 +1,12 @@
 # Security, Recovery, and Telemetry
 
-Runtime has three inbound authentication modes:
+Runtime has four inbound authentication modes:
 
 - `development` supplies a fixed anonymous identity and is intended only for local Compose;
+- `anonymous` supplies the fixed `internal-anonymous/default` identity, ignores caller-supplied
+  identity headers, and is accepted in production only with
+  `ALLOW_INSECURE_INTERNAL_TRANSPORT=true`; every caller shares Task visibility, idempotency, and
+  subscription quota state, so this mode is limited to an isolated trusted network;
 - `trusted_headers` requires `x-sdar-subject` and `x-sdar-tenant` from an authenticated trusted proxy;
 - `jwt_hs256` requires a secret of at least 32 characters and validates HS256, `exp`, optional `nbf`, configured issuer/audience, `sub`, and `tenant`.
 

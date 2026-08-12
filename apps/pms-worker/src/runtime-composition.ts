@@ -150,7 +150,10 @@ export async function createProductionRuntimeComposition(
       await RuntimeControlPlaneCredentialResolver.create(runtime.runtimeControlPlaneCredentialRoot);
     const externalRuntimeCatalogCredentialResolver =
       runtime.externalRuntimeCatalogCredentialFile === undefined
-        ? new NoExternalRuntimeCatalogCredentialResolver()
+        ? new NoExternalRuntimeCatalogCredentialResolver({
+            allowUnauthenticatedDirect:
+              runtime.externalRuntimeCatalogAuthMode === "anonymous_intranet",
+          })
         : await ExternalRuntimeCatalogCredentialResolver.create(
             runtime.externalRuntimeCatalogCredentialFile,
           );

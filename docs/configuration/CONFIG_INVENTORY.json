@@ -629,7 +629,7 @@
       "defaultDefined": true,
       "defaultValue": "development",
       "required": false,
-      "validator": "z.enum([\"development\", \"trusted_headers\", \"jwt_hs256\"]).default(\"development\")",
+      "validator": "z.enum([\"development\", \"anonymous\", \"trusted_headers\", \"jwt_hs256\"]).default(\"development\")",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",

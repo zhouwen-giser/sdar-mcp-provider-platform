@@ -44,10 +44,11 @@ services:
     read_only: true
     restart: unless-stopped
     environment:
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?ALLOW_INSECURE_INTERNAL_TRANSPORT must be explicitly true}
       PMS_API_HOST: 0.0.0.0
       PMS_API_PORT: "8090"
+      PMS_API_MANAGEMENT_AUTH_MODE: anonymous_intranet
       PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
-      PMS_MANAGEMENT_CREDENTIAL_FILE: /run/pms-secrets/api/management.json
       PMS_RUNTIME_CREDENTIAL_FILE: /run/pms-secrets/api/runtime.json
     expose:
       - "8090"
@@ -57,8 +58,8 @@ services:
         target: /run/pms-secrets/pms-database-url
         read_only: true
       - type: bind
-        source: ./secrets/pms/api
-        target: /run/pms-secrets/api
+        source: ./secrets/pms/api/runtime.json
+        target: /run/pms-secrets/api/runtime.json
         read_only: true
       - type: bind
         source: ./secrets/pms/runtime-control-plane
@@ -103,6 +104,7 @@ services:
     network_mode: service:pms-api
     environment:
       ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?ALLOW_INSECURE_INTERNAL_TRANSPORT must be explicitly true}
+      PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: anonymous_intranet
       PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
       PMS_WORKER_ID: production-ugv-worker
       PMS_WORKER_POLL_INTERVAL_MS: "1000"
@@ -120,7 +122,6 @@ services:
       PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
       PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
       PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
-      PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: /run/pms-secrets/worker/external-runtime-catalog.json
     volumes:
       - type: bind
         source: ./secrets/pms/pms-database-url
@@ -129,10 +130,6 @@ services:
       - type: bind
         source: ./secrets/pms/worker
         target: /run/pms-secrets/worker
-        read_only: true
-      - type: bind
-        source: ./secrets/ugv/runtime
-        target: /run/pms-secrets/external-runtime
         read_only: true
       - type: bind
         source: ./runtime/pms-worker-state
@@ -177,6 +174,7 @@ services:
       PMS_WEB_PORT: "8080"
       PMS_WEB_PROXY_MAX_BODY_BYTES: ${PMS_WEB_PROXY_MAX_BODY_BYTES:-1048576}
       PMS_WEB_PROXY_TIMEOUT_MS: ${PMS_WEB_PROXY_TIMEOUT_MS:-10000}
+      PMS_WEB_RAW_API_PROXY_ENABLED: "true"
     ports:
       - "${PMS_WEB_BIND_ADDRESS:-0.0.0.0}:${PMS_WEB_PORT:-8088}:8080"
     volumes:
@@ -359,7 +357,6 @@ services:
       - sh
       - -ec
       - |
-        export JWT_HS256_SECRET="$$(cat /run/secrets/runtime_jwt_hs256_secret)"
         node dist/apps/runtime/src/migrate.js
         exec node dist/apps/runtime/src/main.js
     environment:
@@ -372,9 +369,7 @@ services:
       DATABASE_POOL_MAX: ${UGV_RUNTIME_DATABASE_POOL_MAX:-10}
       ADAPTER_ENDPOINT: ugv-adapter:7010
       ADAPTER_TLS_MODE: disabled
-      AUTH_MODE: jwt_hs256
-      JWT_ISSUER: sdar-production-ugv
-      JWT_AUDIENCE: sdar-ugv-runtime
+      AUTH_MODE: anonymous
       PMS_DEPLOYMENT_ID: production-ugv-direct
       PMS_INSTANCE_ID: production-ugv-direct-1
       PMS_RUNTIME_REGISTRATION_URL: http://pms-api:8090
@@ -408,7 +403,6 @@ services:
         read_only: true
     secrets:
       - ugv_runtime_database_url
-      - runtime_jwt_hs256_secret
     tmpfs:
       - /tmp:size=64m,mode=0700,uid=1000,gid=1000
     healthcheck:
@@ -445,7 +439,6 @@ services:
     command: ["node", "/app/pms-seed.mjs"]
     environment:
       PMS_SEED_API_BASE_URL: http://pms-api:8090
-      PMS_SEED_ADMIN_TOKEN_FILE: /run/secrets/pms_management_admin_token
       PMS_SEED_ACTOR_ID: production-ugv-admin
       PMS_SEED_ENVIRONMENT: production
       PMS_SEED_PROVIDER_ID: isr.vehicle.ugv.ugv1
@@ -459,9 +452,6 @@ services:
       PMS_SEED_WAIT_TIMEOUT_MS: ${UGV_PMS_AUTHORITY_WAIT_TIMEOUT_MS:-180000}
       PMS_SEED_POLL_INTERVAL_MS: ${UGV_PMS_AUTHORITY_POLL_INTERVAL_MS:-2000}
       PMS_SMOKE_API_BASE_URL: http://pms-api:8090
-      PMS_SMOKE_ADMIN_TOKEN_FILE: /run/secrets/pms_management_admin_token
-      JWT_ISSUER: sdar-production-ugv
-      JWT_AUDIENCE: sdar-ugv-runtime
       PMS_SEED_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
       PMS_SEED_PACKAGE_ROOT: /app
     volumes:
@@ -477,9 +467,6 @@ services:
         source: ./secrets/pms/pms-database-url
         target: /run/pms-secrets/pms-database-url
         read_only: true
-    secrets:
-      - pms_management_admin_token
-      - runtime_jwt_hs256_secret
     tmpfs:
       - /tmp:size=16m,mode=0700,uid=1000,gid=1000
     depends_on:
@@ -515,8 +502,6 @@ volumes:
 secrets:
   pms_postgres_password:
     file: ./secrets/pms/postgres-password
-  pms_management_admin_token:
-    file: ./secrets/pms/api/management-admin.token
   ugv_adapter_postgres_password:
     file: ./secrets/ugv/database/adapter-password
   ugv_runtime_postgres_password:
@@ -525,5 +510,3 @@ secrets:
     file: ./secrets/ugv/database/adapter-database-url
   ugv_runtime_database_url:
     file: ./secrets/ugv/database/runtime-database-url
-  runtime_jwt_hs256_secret:
-    file: ./secrets/ugv/runtime/jwt-hs256-secret

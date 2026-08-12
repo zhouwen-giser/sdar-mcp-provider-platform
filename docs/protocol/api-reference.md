@@ -109,7 +109,10 @@ Authorization: Bearer replace-with-jwt
 
 `AUTH_MODE=trusted_headers`（受信代理头认证）时，认证代理必须清除客户端伪造值并设置
 `x-sdar-subject`（主体）、`x-sdar-tenant`（租户）；`AUTH_MODE=jwt_hs256` 时使用
-`Authorization: Bearer ...`（持有者令牌）。
+`Authorization: Bearer ...`（持有者令牌）。`AUTH_MODE=anonymous` 仅用于显式许可的受信
+内网：请求不需要凭据，所有调用共享固定的 `internal-anonymous/default` 授权域，调用方提交的
+身份请求头不会创建独立身份或租户隔离；`x-sdar-execution-mode`、`x-sdar-simulation-id` 和
+`x-correlation-id` 的既有校验仍然生效。
 
 ### 2.2 `io.sdar/taskExecution/tasks/observations`（Observation 分页）
 

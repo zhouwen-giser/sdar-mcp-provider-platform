@@ -215,17 +215,13 @@ npc_validate_secret_inventory() {
   for relative in \
     secrets/pms-postgres-password \
     secrets/pms-database-url \
-    secrets/pms-api/management.json \
     secrets/pms-api/runtime.json \
-    secrets/pms-api/management-admin.token \
-    secrets/pms-worker/external-runtime-catalog.json \
     secrets/pms-worker/postgres-provisioning.json \
     secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token \
     secrets/npc-adapter-db-password \
     secrets/npc-adapter-database-url \
     secrets/npc-runtime-db-password \
-    secrets/npc-runtime-database-url \
-    secrets/runtime-jwt-hs256; do
+    secrets/npc-runtime-database-url; do
     npc_validate_secret_file "$state_root/$relative" "$relative"
     [[ "$(stat -c '%u' "$state_root/$relative")" == "1000" ]] || \
       npc_die "$relative must be owned by UID 1000"

@@ -7,9 +7,18 @@ Set the following environment variables in deployment startup:
 - `PMS_API_HOST` (optional, default `127.0.0.1`)
 - `PMS_API_PORT` (optional, default `8090`)
 - `PMS_API_RUNTIME_HEARTBEAT_TTL_MS` (optional, default `30000`, min `1000`, max `300000`)
+- `PMS_API_MANAGEMENT_AUTH_MODE` (optional, default `file_credentials`): either
+  `file_credentials` or `anonymous_intranet`
 - `PMS_DATABASE_URL_FILE` (required): path to file containing database URL
-- `PMS_MANAGEMENT_CREDENTIAL_FILE` (required): path to management credential descriptor
+- `PMS_MANAGEMENT_CREDENTIAL_FILE` (required in `file_credentials` mode): path to management
+  credential descriptor
 - `PMS_RUNTIME_CREDENTIAL_FILE` (required): path to runtime credential descriptor
+
+`anonymous_intranet` is a deployment-only opt-in for an isolated trusted network. It is accepted
+only when `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` is also set exactly; it does not read or require
+`PMS_MANAGEMENT_CREDENTIAL_FILE`. Runtime Config and Runtime Registration credentials remain
+mandatory and their authorization checks are unchanged. Any missing or invalid management-auth
+mode fails closed; omitting the mode always retains file-backed management authentication.
 
 The bootstrap process refuses inline secrets in environment variables:
 
@@ -89,6 +98,11 @@ All checks are platform aware; Unix-only permission checks are skipped when runn
   - `/api/v1/runtime-config/*`
   - `/api/v1/runtime-registration/*`
     are excluded from management-authorizer protection and are protected by runtime-specific authorizers.
+- `anonymous_intranet` removes authentication from all management API reads and writes. Mutating
+  routes still require `X-Actor-ID` for audit attribution. Do not enable this mode on a routable or
+  untrusted network. The generated OpenAPI document marks management operations with `security: []`
+  and `x-sdar-access-mode: anonymous_intranet`; Runtime Config and Runtime Registration operations
+  retain their scoped bearer requirements.
 
 ## Production composition
 

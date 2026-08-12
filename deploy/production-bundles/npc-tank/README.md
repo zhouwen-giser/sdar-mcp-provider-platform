@@ -21,22 +21,30 @@ Provider Package 创建或核对 NPC Provider Type、Provider、Resource、Bindi
 此包固定设置 `ALLOW_INSECURE_INTERNAL_TRANSPORT=true`，同时保持生产模式。启动前的
 Compose 策略校验会确认：
 
-| 链路                        | 协议/模式                                         |
-| --------------------------- | ------------------------------------------------- |
-| Device MCP → Adapter        | `http://.../mcp`，TLS disabled                    |
-| MQTT → Adapter              | `mqtt://...`，TLS disabled，默认匿名连接          |
-| Runtime → Adapter           | 内部 gRPC，TLS disabled                           |
-| Adapter → Runtime telemetry | 内部 gRPC，TLS disabled                           |
-| PMS Web                     | 内网 HTTP，默认发布在 `0.0.0.0:8089`              |
-| NPC Runtime                 | 内网 HTTP，默认发布在 `0.0.0.0:19103`，仍强制 JWT |
+| 链路                        | 协议/模式                                          |
+| --------------------------- | -------------------------------------------------- |
+| Device MCP → Adapter        | `http://.../mcp`，TLS disabled                     |
+| MQTT → Adapter              | `mqtt://...`，TLS disabled，默认匿名连接           |
+| Runtime → Adapter           | 内部 gRPC，TLS disabled                            |
+| Adapter → Runtime telemetry | 内部 gRPC，TLS disabled                            |
+| PMS Web                     | 内网 HTTP，匿名代理 `/api/v1`，默认 `0.0.0.0:8089` |
+| NPC Runtime                 | 匿名 MCP，默认发布在 `0.0.0.0:19103`               |
 
-初始化脚本不会生成证书或私钥，Compose 也不会挂载或校验 TLS 信任材料。JWT 签名
-密钥、PMS 凭据和三个 PostgreSQL 数据库凭据仍由 `bin/init.sh` 随机生成并以 `0600`
-文件保存。Device MCP 默认不附加认证 headers，MQTT 默认匿名连接。
+初始化脚本不会生成证书、私钥、PMS 管理凭据或 Runtime JWT，Compose 也不会挂载或
+校验这些材料。三个 PostgreSQL 数据库凭据及 Runtime 向 PMS 注册所需的实例绑定令牌
+仍由 `bin/init.sh` 随机生成并以 `0600` 文件保存。Device MCP 默认不附加认证 headers，
+MQTT 默认匿名连接。
+
+PMS Worker 的 Catalog 应用鉴权不是从明文传输许可推导：本包还显式固定
+`PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE=anonymous_intranet`。只有该模式和
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true` 同时存在，Worker 才会无 `Authorization` 发现
+Compose Runtime；删除前者会恢复默认的 `file_credentials` 失败关闭行为。
 
 该选择把网络边界责任交给部署环境：部署主机和 Device MCP/MQTT 必须位于受控 VLAN
-或物理隔离网段，防火墙只能允许所需的内网来源。尤其 PMS Web 当前没有最终用户认证，
-不得把 `8089`、`19103` 或任何容器网络端口路由到办公公网、互联网或其他不受信网段。
+或物理隔离网段，防火墙只能允许所需的内网来源。`pms-api` 不发布主机端口；PMS Web
+通过同源 `/api/v1` 匿名开放管理 API 与 SDAR consumer projection，Runtime `/mcp` 也
+允许匿名访问。不得把 `8089`、`19103` 或任何容器网络端口路由到办公公网、互联网或
+其他不受信网段。
 
 ## 主机要求
 
@@ -69,6 +77,11 @@ NPC_TANK_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19103
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需
 变更，必须先备份，并在维护窗口使用单独评审的部署重建或数据迁移程序。
 
+从带 PMS 管理令牌和 Runtime JWT 的旧包升级到本版本时，必须换用新交付 ZIP，保留
+`.env`、`state/` 和数据库卷后重新运行 `init.sh`、`up.sh`。旧管理令牌、Runtime JWT
+和 external catalog credential 文件可暂时留存用于回滚，但新 Compose 不再挂载、读取
+或校验它们。
+
 然后执行：
 
 ```bash
@@ -77,9 +90,23 @@ bash deploy/npc-tank/bin/up.sh
 ```
 
 `up.sh` 会先验证交付包校验和、载入并核对固定镜像、检查明文内网策略和秘密文件，
-随后启动服务、执行幂等 PMS seed，并运行只读真实链路 smoke test。seed 等待部署
-`ACTIVE`、实例 registration/heartbeat 新鲜及 Registry 发布完成；smoke 从 Registry 的
-advertised endpoint 调用四个 NPC 读取操作，不调用移动、侦察、火控等变更操作。
+随后启动服务、通过匿名内网 PMS API 执行幂等 seed，并运行只读真实链路 smoke test。
+seed 等待部署 `ACTIVE`、实例 registration/heartbeat 新鲜及 Registry 发布完成；smoke
+通过 PMS Web 匿名验证 `/api/v1` 原始管理路由和 SDAR projection，再从 Registry 的
+advertised endpoint 匿名调用四个 NPC 读取操作，不调用移动、侦察、火控等变更操作。
+
+PMS Web smoke 会先从容器网络执行，再用已经通过镜像校验的本地 PMS Web 镜像运行一次
+`docker run --network host`（仅使用前序已核验存在的本地镜像），请求 `.env` 中实际发布的
+`PMS_WEB_BIND_ADDRESS:PMS_WEB_PORT`；绑定地址为 `0.0.0.0`/`::` 时分别使用
+`127.0.0.1`/`::1` 回环验证。
+该检查不要求宿主安装 Node.js 或 curl，也不会从仓库拉取镜像。
+
+SDAR 应匿名访问
+`http://<PMS_WEB_HOST>:<PMS_WEB_PORT>/api/v1/registry/production/consumers/sdar/v1/sources/npc-tank-smpp/latest`
+并使用 projection 中的 `serverEndpoint` 匿名调用 Runtime `/mcp`，无需也不应直连
+`pms-api:8090`。
+SDAR 客户端必须支持 credential mode `none`（两次请求均不发送 `Authorization`）；仍
+强制 `credentialRef`/Bearer 的旧版客户端需先升级，不能配置伪造 token。
 
 ## 运维命令
 

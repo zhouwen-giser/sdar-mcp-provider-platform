@@ -68,6 +68,21 @@ describe("external Runtime catalog credentials", () => {
     await expect(resolver.authorization(deployment("direct_container"))).rejects.toThrow(
       "EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_NOT_CONFIGURED",
     );
+    const explicitlyClosed = new NoExternalRuntimeCatalogCredentialResolver({
+      allowUnauthenticatedDirect: false,
+    });
+    await expect(explicitlyClosed.authorization(deployment("direct_container"))).rejects.toThrow(
+      "EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_NOT_CONFIGURED",
+    );
+  });
+
+  it("omits direct-container authorization only for the explicit internal opt-in", async () => {
+    const resolver = new NoExternalRuntimeCatalogCredentialResolver({
+      allowUnauthenticatedDirect: true,
+    });
+
+    await expect(resolver.authorization(deployment("direct_container"))).resolves.toBeUndefined();
+    await expect(resolver.authorization(deployment("platform_managed"))).resolves.toBeUndefined();
   });
 
   it("rejects whitespace in the raw HS256 secret instead of normalizing it", async () => {

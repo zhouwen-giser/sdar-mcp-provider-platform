@@ -23,7 +23,9 @@ const RuntimeWorkerEventsInputBaseSchema = z.object({
   PROVIDER_TELEMETRY_MAX_DEPTH: z.coerce.number().int().min(1).max(64).default(16),
   PROVIDER_TELEMETRY_MAX_NODES: z.coerce.number().int().min(16).max(100_000).default(4_096),
   PROVIDER_TELEMETRY_RATE_LIMIT: z.coerce.number().int().min(1).max(100_000).default(600),
-  AUTH_MODE: z.enum(["development", "trusted_headers", "jwt_hs256"]).default("development"),
+  AUTH_MODE: z
+    .enum(["development", "anonymous", "trusted_headers", "jwt_hs256"])
+    .default("development"),
   MCP_LEGACY_ENDPOINT_ENABLED: BooleanEnvironmentSchema.default(false),
   BUSINESS_EVENTS_ENABLED: BooleanEnvironmentSchema.default(false),
   BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: BooleanEnvironmentSchema.default(false),
@@ -173,6 +175,12 @@ const RuntimeWorkerEventsInputSchema = z
     if (value.RUNTIME_ENV === "production") {
       if (value.AUTH_MODE === "development") {
         context.addIssue({ code: "custom", message: "production forbids development auth" });
+      }
+      if (value.AUTH_MODE === "anonymous" && !value.ALLOW_INSECURE_INTERNAL_TRANSPORT) {
+        context.addIssue({
+          code: "custom",
+          message: "production anonymous auth requires explicit insecure internal transport",
+        });
       }
       if (
         value.PROVIDER_TELEMETRY_INGRESS_ENABLED &&

@@ -39,7 +39,6 @@ const pollIntervalMs = boundedInteger("PMS_SEED_POLL_INTERVAL_MS", 2_000, 250, 1
 const packageRoot = required("PMS_SEED_PACKAGE_ROOT");
 const apiBaseUrl = internalApiUrl(required("PMS_SEED_API_BASE_URL"));
 const databaseUrl = await secretText(required("PMS_SEED_DATABASE_URL_FILE"), 8_192);
-const token = await secretText(required("PMS_SEED_ADMIN_TOKEN_FILE"), 8_192);
 const correlationId = `ugv-production-seed-${randomUUID()}`;
 const pool = new Pool({ connectionString: databaseUrl, max: 2 });
 const unitOfWork = new PostgresPmsUnitOfWork(pool);
@@ -370,7 +369,6 @@ async function api(method, path, body = undefined) {
     method,
     headers: {
       accept: "application/json",
-      authorization: `Bearer ${token}`,
       "x-actor-id": actorId,
       "x-correlation-id": correlationId,
       ...(body === undefined ? {} : { "content-type": "application/json" }),

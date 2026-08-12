@@ -32,7 +32,7 @@
     "ARGUMENT_MAX_NODES": { "default": 10000, "maximum": 100000, "minimum": 16, "type": "integer" },
     "AUTH_MODE": {
       "default": "development",
-      "enum": ["development", "trusted_headers", "jwt_hs256"],
+      "enum": ["development", "anonymous", "trusted_headers", "jwt_hs256"],
       "type": "string"
     },
     "BUSINESS_EVENT_CLOCK_SKEW_SAFETY_MS": {

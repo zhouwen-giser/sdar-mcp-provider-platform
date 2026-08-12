@@ -8,6 +8,7 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_CONFIG_CACHE_ROOT",
   "PMS_RUNTIME_CONTROL_PLANE_URL",
   "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
+  "PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE",
   "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
   "PMS_PM2_HOME",
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
@@ -17,6 +18,8 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_PORT_RANGE_END",
 ] as const;
 
+export type PmsExternalRuntimeCatalogAuthMode = "file_credentials" | "anonymous_intranet";
+
 export interface PmsWorkerRuntimeConfig {
   readonly postgresProvisioningCredentialFile: string;
   readonly runtimeReleaseRoot: string;
@@ -24,6 +27,7 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeConfigCacheRoot: string;
   readonly runtimeControlPlaneUrl: string;
   readonly runtimeControlPlaneCredentialRoot: string;
+  readonly externalRuntimeCatalogAuthMode: PmsExternalRuntimeCatalogAuthMode;
   readonly externalRuntimeCatalogCredentialFile?: string;
   readonly allowInsecureInternalTransport: boolean;
   readonly pm2Home: string;
@@ -114,6 +118,18 @@ async function loadRuntimeConfig(
   );
   const externalRuntimeCatalogCredentialFile =
     environment.PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE;
+  const externalRuntimeCatalogAuthMode = externalRuntimeCatalogAuthenticationMode(
+    environment.PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE,
+  );
+  if (externalRuntimeCatalogAuthMode === "anonymous_intranet" && !allowInsecureInternalTransport) {
+    throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_ANONYMOUS_INTRANET_REQUIRES_OPT_IN");
+  }
+  if (
+    externalRuntimeCatalogAuthMode === "anonymous_intranet" &&
+    externalRuntimeCatalogCredentialFile !== undefined
+  ) {
+    throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FORBIDDEN");
+  }
   if (externalRuntimeCatalogCredentialFile !== undefined) {
     await validateSecretFile(
       externalRuntimeCatalogCredentialFile,
@@ -165,6 +181,7 @@ async function loadRuntimeConfig(
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
     runtimeControlPlaneUrl,
     runtimeControlPlaneCredentialRoot: resolve(roots.runtimeControlPlaneCredentialRoot),
+    externalRuntimeCatalogAuthMode,
     ...(externalRuntimeCatalogCredentialFile === undefined
       ? {}
       : {
@@ -182,6 +199,14 @@ async function loadRuntimeConfig(
       ? {}
       : { runtimePortRange: runtimePortRangeOverride }),
   });
+}
+
+function externalRuntimeCatalogAuthenticationMode(
+  value: string | undefined,
+): PmsExternalRuntimeCatalogAuthMode {
+  if (value === undefined || value === "file_credentials") return "file_credentials";
+  if (value === "anonymous_intranet") return "anonymous_intranet";
+  throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE_INVALID");
 }
 
 function optionalRuntimePortRange(

@@ -646,6 +646,7 @@ export async function validateStagedBundle(bundleRoot, options = {}) {
     revision: manifest.source.revision,
     postgres,
   });
+  await validateAnonymousIntranetLifecycle(deployRoot, product);
   assertComposeRunOptionCompatibility(
     await readFile(join(deployRoot, "bin/up.sh"), "utf8"),
     "PRODUCTION_BUNDLE_COMPOSE_RUN_OPTION_UNSUPPORTED",
@@ -686,6 +687,7 @@ export function validateComposeDocument({ source, product, revision, postgres })
   if (!isRecord(document) || !isRecord(document.services))
     throw coded("PRODUCTION_BUNDLE_COMPOSE_SERVICES_INVALID");
   assertNoBuildFields(document);
+  validateAnonymousIntranetCompose(document.services, product);
   const expectedApplicationImages = new Set(
     product.images.map((image) => applicationImageReference(image, revision)),
   );
@@ -758,6 +760,108 @@ export function validateComposeDocument({ source, product, revision, postgres })
     seedServices: Object.freeze(seedServices.sort()),
     postgresServices,
   });
+}
+
+export function validateAnonymousIntranetCompose(services, product) {
+  const pmsApi = requiredComposeService(services, "pms-api");
+  const pmsApiEnvironment = requiredComposeEnvironment(pmsApi, "pms-api");
+  if (pmsApiEnvironment.PMS_API_MANAGEMENT_AUTH_MODE !== "anonymous_intranet")
+    throw coded("PRODUCTION_BUNDLE_PMS_API_AUTH_MODE_INVALID");
+  assertExplicitInsecureOptIn(pmsApiEnvironment, "pms-api");
+  if (pmsApiEnvironment.PMS_MANAGEMENT_CREDENTIAL_FILE !== undefined)
+    throw coded("PRODUCTION_BUNDLE_PMS_MANAGEMENT_CREDENTIAL_FORBIDDEN");
+  if (pmsApi.ports !== undefined) throw coded("PRODUCTION_BUNDLE_PMS_API_HOST_PORT_FORBIDDEN");
+
+  const pmsWeb = requiredComposeService(services, "pms-web");
+  const pmsWebEnvironment = requiredComposeEnvironment(pmsWeb, "pms-web");
+  if (
+    pmsWebEnvironment.PMS_WEB_DATA_MODE !== "api" ||
+    pmsWebEnvironment.PMS_WEB_API_UPSTREAM !== "http://pms-api:8090" ||
+    pmsWebEnvironment.PMS_WEB_RAW_API_PROXY_ENABLED !== "true"
+  )
+    throw coded("PRODUCTION_BUNDLE_PMS_WEB_RAW_PROXY_INVALID");
+  if (
+    !Array.isArray(pmsWeb.ports) ||
+    pmsWeb.ports.length !== 1 ||
+    typeof pmsWeb.ports[0] !== "string" ||
+    !pmsWeb.ports[0].endsWith(":8080")
+  )
+    throw coded("PRODUCTION_BUNDLE_PMS_WEB_HOST_PORT_INVALID");
+
+  const pmsWorker = requiredComposeService(services, "pms-worker");
+  const pmsWorkerEnvironment = requiredComposeEnvironment(pmsWorker, "pms-worker");
+  assertExplicitInsecureOptIn(pmsWorkerEnvironment, "pms-worker");
+  if (pmsWorkerEnvironment.PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE !== "anonymous_intranet")
+    throw coded("PRODUCTION_BUNDLE_PMS_WORKER_CATALOG_AUTH_MODE_INVALID");
+  if (pmsWorkerEnvironment.PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE !== undefined)
+    throw coded("PRODUCTION_BUNDLE_PMS_WORKER_CATALOG_CREDENTIAL_FORBIDDEN");
+
+  const runtimeServiceName = product.id === "ugv" ? "ugv-runtime" : "npc-tank-runtime";
+  const runtime = requiredComposeService(services, runtimeServiceName);
+  const runtimeEnvironment = requiredComposeEnvironment(runtime, runtimeServiceName);
+  if (
+    runtimeEnvironment.RUNTIME_ENV !== "production" ||
+    runtimeEnvironment.AUTH_MODE !== "anonymous"
+  )
+    throw coded("PRODUCTION_BUNDLE_RUNTIME_AUTH_MODE_INVALID", runtimeServiceName);
+  assertExplicitInsecureOptIn(runtimeEnvironment, runtimeServiceName);
+
+  const forbiddenEnvironmentKeys = [
+    "PMS_MANAGEMENT_CREDENTIAL_FILE",
+    "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+    "JWT_HS256_SECRET",
+    "JWT_ISSUER",
+    "JWT_AUDIENCE",
+  ];
+  for (const [serviceName, serviceValue] of Object.entries(services)) {
+    const service = requiredComposeService(services, serviceName);
+    const environment = service.environment;
+    if (environment !== undefined && !isRecord(environment))
+      throw coded("PRODUCTION_BUNDLE_COMPOSE_ENVIRONMENT_INVALID", serviceName);
+    for (const key of forbiddenEnvironmentKeys) {
+      if (isRecord(environment) && environment[key] !== undefined)
+        throw coded("PRODUCTION_BUNDLE_EXTERNAL_CREDENTIAL_FORBIDDEN", `${serviceName}:${key}`);
+    }
+    if (
+      /management-(?:admin|reader)\.(?:json|token)|runtime[-_]jwt|external-runtime-catalog/i.test(
+        JSON.stringify(serviceValue),
+      )
+    )
+      throw coded("PRODUCTION_BUNDLE_EXTERNAL_CREDENTIAL_MOUNT_FORBIDDEN", serviceName);
+  }
+}
+
+export async function validateAnonymousIntranetLifecycle(deployRoot, product) {
+  const runtimeSmokeName = product.id === "ugv" ? "runtime-smoke.mjs" : "runtime-read-smoke.mjs";
+  const files = ["pms-seed.mjs", "pms-web-smoke.mjs", runtimeSmokeName];
+  const sourceId = product.id === "ugv" ? "ugv-smpp" : "npc-tank-smpp";
+  for (const file of files) {
+    const source = await readFile(join(deployRoot, "bin", file), "utf8");
+    if (/\bauthorization\b/i.test(source))
+      throw coded("PRODUCTION_BUNDLE_EXTERNAL_AUTHORIZATION_FORBIDDEN", file);
+    if (/management-(?:admin|reader)\.token|runtime[-_]jwt|external-runtime-catalog/i.test(source))
+      throw coded("PRODUCTION_BUNDLE_EXTERNAL_CREDENTIAL_REFERENCE_FORBIDDEN", file);
+    if (file === "pms-web-smoke.mjs" && !source.includes(`/sources/${sourceId}/latest`))
+      throw coded("PRODUCTION_BUNDLE_SDAR_PROJECTION_SMOKE_MISSING", product.id);
+  }
+}
+
+function requiredComposeService(services, name) {
+  const service = services[name];
+  if (!isRecord(service)) throw coded("PRODUCTION_BUNDLE_COMPOSE_SERVICE_REQUIRED", name);
+  return service;
+}
+
+function requiredComposeEnvironment(service, name) {
+  if (!isRecord(service.environment))
+    throw coded("PRODUCTION_BUNDLE_COMPOSE_ENVIRONMENT_INVALID", name);
+  return service.environment;
+}
+
+function assertExplicitInsecureOptIn(environment, serviceName) {
+  const value = environment.ALLOW_INSECURE_INTERNAL_TRANSPORT;
+  if (typeof value !== "string" || !value.startsWith("${ALLOW_INSECURE_INTERNAL_TRANSPORT:?"))
+    throw coded("PRODUCTION_BUNDLE_INSECURE_OPT_IN_INVALID", serviceName);
 }
 
 export function assertNoBuildFields(value, path = "") {
@@ -1121,7 +1225,7 @@ async function writeBundleReadme(bundleRoot, product, manifest) {
 
 export function bundleReadmeText(product, manifest) {
   const deployPath = `deploy/${product.deployDirectory}`;
-  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe Compose-started Runtime is admitted as a PMS RuntimeDeployment with runtime authority \`direct_container\`; PMS Worker observes it, consumes its heartbeat/catalog, and publishes Registry authority \`pms_worker\` without starting PM2.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded in that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP, MQTT, and advertised Runtime endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
+  return `# ${product.title}\n\nThis is a self-contained offline deployment bundle. It includes five application images, the pinned PostgreSQL image, deployment configuration, checksums, and the complete source archive for commit \`${manifest.source.revision}\`.\n\nIt does not contain a real \`.env\`, credentials, simulator endpoints, or Git metadata. Configure the examples under \`${deployPath}\` before deployment. A stage-only archive has \`DEPLOYABLE=false\` and is intentionally rejected by its lifecycle scripts.\n\nThe transport profile is \`strict-intranet-plaintext\`: HTTP, MQTT, Adapter gRPC, and Provider telemetry do not use TLS. External PMS management/SDAR projection requests are accepted anonymously through the PMS Web \`/api/v1/**\` proxy, and the Runtime \`/mcp\` endpoint is anonymous. Database passwords and the instance-scoped Runtime-to-PMS registration token remain internal implementation credentials. Deploy it only where VLAN/firewall isolation keeps all exposed ports and upstream endpoints inside the trusted internal network.\n\nThe Compose-started Runtime is admitted as a PMS RuntimeDeployment with runtime authority \`direct_container\`; PMS Worker observes it, consumes its heartbeat/catalog, and publishes Registry authority \`pms_worker\` without starting PM2.\n\nThe bundle is deployable infrastructure, not a claim of completed production qualification. Its inherited real-resource status is \`${manifest.qualification.realResourceStatus}\`; mutating real-device tests remain opt-in. The directly exposed SBOM covers the application Runtime scope recorded by that document; it is not asserted to cover PostgreSQL or every complete image layer.\n\nRun:\n\n\`\`\`bash\ncp ${deployPath}/.env.example ${deployPath}/.env\n# Set the internal Device MCP, MQTT, and advertised Runtime endpoints documented by the deployment README.\nbash ${deployPath}/bin/init.sh\nbash ${deployPath}/bin/up.sh\n\`\`\`\n`;
 }
 
 async function createStageOnlyImageArchive(path, product, revision) {

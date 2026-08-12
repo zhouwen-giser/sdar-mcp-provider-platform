@@ -5,18 +5,26 @@ The authoritative machine-readable contract is served at `GET /api/v1/openapi.js
 ## Authentication boundaries
 
 - Health, API discovery, and the OpenAPI document are public.
-- Provider Package, Provider Type, Provider, Resource, binding, and Config Draft reads require a
-  management principal with `reader` or `administrator`.
-- Management writes require `administrator`; `x-actor-id` must exactly match the authenticated
-  subject so Audit attribution cannot be spoofed.
+- With the default `PMS_API_MANAGEMENT_AUTH_MODE=file_credentials`, Provider Package, Provider
+  Type, Provider, Resource, binding, Config Draft, Runtime Deployment, Runtime Process, Registry,
+  and Audit reads require a management principal with `reader` or `administrator`.
+- In that default mode, management writes require `administrator`; `x-actor-id` must exactly match
+  the authenticated subject so Audit attribution cannot be spoofed.
+- `PMS_API_MANAGEMENT_AUTH_MODE=anonymous_intranet` removes management authentication only when
+  `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` is also set. It is a deployment-only profile for an
+  isolated network. Runtime Config and Runtime Registration authorization are not relaxed, and
+  mutating management requests still require `x-actor-id` for audit attribution.
 - Runtime Config latest, watch, and Ack use the separate `RuntimeConfigClientAuthorizer` port.
   Management credentials are not Runtime credentials and Runtime credentials are not accepted by
   management routes.
-- Production bootstrap installs deny-all authorizers until deployment wiring supplies the
-  corresponding credential verifiers. There is no anonymous fallback.
+- Production bootstrap defaults to file-backed management credentials. Anonymous access is never
+  inferred from a missing credential file; it requires both explicit settings above.
 
-The OpenAPI document exposes distinct `managementToken` and `runtimeConfigToken` bearer schemes.
-Management operations also carry `x-sdar-required-role`.
+The OpenAPI document reflects the active access profile. In the default mode it exposes distinct
+`managementToken`, `runtimeConfigToken`, and `runtimeRegistrationToken` bearer schemes, and
+management operations carry `x-sdar-required-role`. In `anonymous_intranet` mode, management
+operations instead declare `security: []` and `x-sdar-access-mode: anonymous_intranet`; the Runtime
+Config and Runtime Registration bearer contracts remain unchanged.
 
 ## Input and output safety
 

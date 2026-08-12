@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { spawn, type ChildProcess } from "node:child_process";
 import { once } from "node:events";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -37,9 +39,14 @@ let upstream: Server;
 let upstreamOrigin = "";
 let web: ChildProcess;
 let webOrigin = "";
+let rawApiWeb: ChildProcess;
+let rawApiWebOrigin = "";
 let webStderr = "";
+let rawApiWebStderr = "";
 let abortStarted: (() => void) | undefined;
 let abortObserved: (() => void) | undefined;
+let rawWatchStarted: (() => void) | undefined;
+let rawWatchClosed: (() => void) | undefined;
 
 beforeAll(async () => {
   fixtureRoot = await mkdtemp(join(tmpdir(), "pms-web-proxy-boundary-"));
@@ -61,6 +68,19 @@ beforeAll(async () => {
         const observed = () => abortObserved?.();
         request.once("aborted", observed);
         response.once("close", observed);
+        return;
+      }
+      if (captured.url.endsWith("/watch")) {
+        response.writeHead(200, {
+          "cache-control": "no-cache",
+          "content-type": "text/event-stream; charset=utf-8",
+          "x-smpp-projection-contract": "sdar-registry-v1",
+        });
+        response.write('event: revision\ndata: {"revision":1}\n\n');
+        rawWatchStarted?.();
+        const closed = () => rawWatchClosed?.();
+        request.once("aborted", closed);
+        response.once("close", closed);
         return;
       }
 
@@ -106,6 +126,30 @@ beforeAll(async () => {
     webStderr += chunk;
   });
   webOrigin = await waitForWebReady(web);
+
+  rawApiWeb = spawn(process.execPath, [serverScript], {
+    cwd: repositoryRoot,
+    env: {
+      ...process.env,
+      NODE_ENV: "test",
+      PMS_WEB_API_BASE: "/api/console/v1",
+      PMS_WEB_API_UPSTREAM: upstreamOrigin,
+      PMS_WEB_DATA_MODE: "api",
+      PMS_WEB_HOST: "127.0.0.1",
+      PMS_WEB_PORT: "0",
+      PMS_WEB_PROXY_MAX_BODY_BYTES: "64",
+      PMS_WEB_PROXY_TIMEOUT_MS: "75",
+      PMS_WEB_RAW_API_PROXY_ENABLED: "true",
+      PMS_WEB_ROOT: fixtureRoot,
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (rawApiWeb.stderr === null) throw new Error("PMS_WEB_RAW_API_STDERR_PIPE_REQUIRED");
+  rawApiWeb.stderr.setEncoding("utf8");
+  rawApiWeb.stderr.on("data", (chunk: string) => {
+    rawApiWebStderr += chunk;
+  });
+  rawApiWebOrigin = await waitForWebReady(rawApiWeb);
 }, 10_000);
 
 afterAll(async () => {
@@ -113,6 +157,11 @@ afterAll(async () => {
     web.kill("SIGTERM");
     await Promise.race([once(web, "exit"), delay(2_000)]);
     if (web.exitCode === null) web.kill("SIGKILL");
+  }
+  if (rawApiWeb?.exitCode === null) {
+    rawApiWeb.kill("SIGTERM");
+    await Promise.race([once(rawApiWeb, "exit"), delay(2_000)]);
+    if (rawApiWeb.exitCode === null) rawApiWeb.kill("SIGKILL");
   }
   if (upstream !== undefined) {
     upstream.closeAllConnections();
@@ -259,6 +308,55 @@ describe("PMS Web production proxy boundary", () => {
     client.destroy();
     await withTimeout(aborted, 2_000, "UPSTREAM_ABORT_NOT_PROPAGATED");
     expect(webStderr).toBe("");
+  });
+
+  it("proxies raw API v1 only after the explicit opt-in", async () => {
+    const root = await request(`${rawApiWebOrigin}/api/v1`);
+    expect(root.status).toBe(201);
+    expect(JSON.parse(root.body)).toMatchObject({ path: "/api/v1" });
+
+    const projectionPath = "/api/v1/registry/production/consumers/sdar/v1/sources/sdar-node/latest";
+    const projection = await request(`${rawApiWebOrigin}${projectionPath}`, {
+      headers: { "if-none-match": '"projection-checksum"' },
+    });
+    expect(projection.status).toBe(201);
+    expect(JSON.parse(projection.body)).toMatchObject({ path: projectionPath });
+    expect(capturedRequests.at(-1)?.headers["if-none-match"]).toBe('"projection-checksum"');
+
+    for (const path of ["/api/v2", "/api/raw", "/api/console/v10/providers"]) {
+      const blocked = await request(`${rawApiWebOrigin}${path}`);
+      expect(blocked.status, path).toBe(404);
+    }
+    expect(rawApiWebStderr).toBe("");
+  });
+
+  it("streams raw API watch responses and cancels the upstream on disconnect", async () => {
+    let signalStarted: () => void = () => undefined;
+    let signalClosed: () => void = () => undefined;
+    const started = new Promise<void>((resolvePromise) => {
+      signalStarted = resolvePromise;
+    });
+    const closed = new Promise<void>((resolvePromise) => {
+      signalClosed = resolvePromise;
+    });
+    rawWatchStarted = signalStarted;
+    rawWatchClosed = signalClosed;
+    const controller = new AbortController();
+    const response = await fetch(
+      `${rawApiWebOrigin}/api/v1/registry/production/consumers/sdar/v1/sources/sdar-node/watch`,
+      { signal: controller.signal },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/event-stream");
+    expect(response.headers.get("x-smpp-projection-contract")).toBe("sdar-registry-v1");
+    await withTimeout(started, 2_000, "RAW_WATCH_NOT_STARTED");
+    const reader = response.body?.getReader();
+    if (reader === undefined) throw new Error("RAW_WATCH_BODY_MISSING");
+    const first = await withTimeout(reader.read(), 2_000, "RAW_WATCH_FIRST_EVENT_MISSING");
+    expect(new TextDecoder().decode(first.value)).toContain("event: revision");
+    controller.abort();
+    await withTimeout(closed, 2_000, "RAW_WATCH_UPSTREAM_NOT_CANCELLED");
+    expect(rawApiWebStderr).toBe("");
   });
 });
 

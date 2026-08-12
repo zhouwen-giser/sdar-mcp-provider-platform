@@ -1,20 +1,8 @@
-import { createHmac } from "node:crypto";
-import { readFile } from "node:fs/promises";
-
-const secret = (await readFile("/run/secrets/runtime_jwt_hs256_secret", "utf8")).trim();
-if (secret.length < 32 || /\s/.test(secret)) throw new Error("UGV_SMOKE_JWT_SECRET_INVALID");
-
-const issuer = required("JWT_ISSUER");
-const audience = required("JWT_AUDIENCE");
 const providerId = "isr.vehicle.ugv.ugv1";
 const deploymentId = "production-ugv-direct";
 const instanceId = "production-ugv-direct-1";
 const environment = "production";
 const apiBaseUrl = internalApiUrl(required("PMS_SMOKE_API_BASE_URL"));
-const adminToken = (await readFile(required("PMS_SMOKE_ADMIN_TOKEN_FILE"), "utf8")).trim();
-if (adminToken.length < 16 || adminToken.length > 8_192 || /\s/.test(adminToken)) {
-  throw new Error("UGV_SMOKE_PMS_ADMIN_TOKEN_INVALID");
-}
 const advertisedBaseUrl = productionBaseUrl(required("PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT"));
 const expectedRegistryEndpoint = new URL("/mcp", advertisedBaseUrl).toString();
 const deployment = await pms(
@@ -43,15 +31,6 @@ if (
 }
 const endpoint = new URL(registryProvider.effectiveEndpoint);
 const maximumStateAgeMs = positiveInteger("UGV_SMOKE_MAX_STATE_AGE_MS", 30_000, 300_000);
-const now = Math.floor(Date.now() / 1_000);
-const token = jwt(secret, {
-  sub: "ugv-production-read-only-smoke",
-  tenant: "ugv-production",
-  iss: issuer,
-  aud: audience,
-  nbf: now - 5,
-  exp: now + 120,
-});
 const requiredReads = [
   "vehicle_get_state",
   "vehicle_get_capabilities",
@@ -121,7 +100,6 @@ async function pms(path) {
   const response = await fetch(new URL(path, apiBaseUrl), {
     headers: {
       accept: "application/json",
-      authorization: `Bearer ${adminToken}`,
       "x-actor-id": "production-ugv-admin",
       "x-correlation-id": `ugv-production-pms-smoke-${String(Date.now())}`,
     },
@@ -181,7 +159,6 @@ async function rpc(method, params = {}, operation = undefined) {
     method: "POST",
     headers: {
       accept: "application/json, text/event-stream",
-      authorization: `Bearer ${token}`,
       "content-type": "application/json",
       "mcp-protocol-version": "2026-07-28",
       "mcp-method": method,
@@ -250,15 +227,6 @@ function assertCapabilities(capabilities) {
     (key) => !new Set(["resourceId", "observedAt", "available"]).has(key),
   );
   if (meaningful.length === 0) throw new Error("UGV_SMOKE_CAPABILITIES_EMPTY");
-}
-
-function jwt(signingSecret, claims) {
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
-  const payload = Buffer.from(JSON.stringify(claims)).toString("base64url");
-  const signature = createHmac("sha256", signingSecret)
-    .update(`${header}.${payload}`)
-    .digest("base64url");
-  return `${header}.${payload}.${signature}`;
 }
 
 function positiveInteger(name, fallback, maximum) {

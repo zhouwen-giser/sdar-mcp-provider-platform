@@ -26,8 +26,27 @@ npc_compose exec -T pms-api node -e \
   "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(2)}).catch(()=>process.exit(2))"
 npc_compose exec -T pms-api node /opt/sdar-bundle/pms-web-smoke.mjs
 
+pms_web_smoke_host="$(npc_required_env_literal PMS_WEB_BIND_ADDRESS "$NPC_BUNDLE_USER_ENV")"
+[[ "$pms_web_smoke_host" == "0.0.0.0" ]] && pms_web_smoke_host="127.0.0.1"
+[[ "$pms_web_smoke_host" == "::" || "$pms_web_smoke_host" == "[::]" ]] && pms_web_smoke_host="::1"
+if [[ "$pms_web_smoke_host" == \[*\] ]]; then
+  pms_web_smoke_url_host="$pms_web_smoke_host"
+elif [[ "$pms_web_smoke_host" == *:* ]]; then
+  pms_web_smoke_url_host="[$pms_web_smoke_host]"
+else
+  pms_web_smoke_url_host="$pms_web_smoke_host"
+fi
+pms_web_smoke_origin="http://$pms_web_smoke_url_host:$(npc_required_env_literal PMS_WEB_PORT "$NPC_BUNDLE_USER_ENV")"
+pms_web_smoke_image="sdar/production-pms-web:$(npc_bundle_revision)"
+docker run --rm --network host --read-only --cap-drop ALL \
+  --security-opt no-new-privileges:true \
+  --env "PMS_WEB_SMOKE_ORIGIN=$pms_web_smoke_origin" \
+  --entrypoint node \
+  --volume "$bin_dir/pms-web-smoke.mjs:/opt/sdar-bundle/pms-web-smoke.mjs:ro" \
+  "$pms_web_smoke_image" /opt/sdar-bundle/pms-web-smoke.mjs
+
 npc_compose --profile seed run --rm --no-deps \
   pms-seed node /app/runtime-read-smoke.mjs
 
-printf 'SMOKE_PASS: eight services, PMS-managed direct deployment, fresh heartbeat, Registry-backed JWT Runtime, Device MCP, MQTT read path, and zero mutating Runtime calls verified at %s.\n' \
+printf 'SMOKE_PASS: eight services, container and host-published anonymous PMS Web raw API/SDAR projection, anonymous Runtime MCP, PMS-managed direct deployment, fresh heartbeat, Device MCP, MQTT read path, and zero mutating Runtime calls verified at %s.\n' \
   "$(npc_bundle_revision)"

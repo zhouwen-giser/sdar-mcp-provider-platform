@@ -12,7 +12,7 @@ require_image_lock
 compose ps
 printf 'PMS Web: http://%s:%s\n' \
   "$(required_env_value PMS_WEB_BIND_ADDRESS)" "$(required_env_value PMS_WEB_PORT)"
-printf 'UGV Runtime: http://%s:%s (JWT protected)\n' \
+printf 'UGV Runtime: http://%s:%s (anonymous isolated-intranet access)\n' \
   "$(required_env_value UGV_RUNTIME_BIND_ADDRESS)" "$(required_env_value UGV_RUNTIME_PORT)"
 printf 'Registry advertised Runtime base: %s\n' \
   "$(required_env_value UGV_RUNTIME_ADVERTISED_URL)"

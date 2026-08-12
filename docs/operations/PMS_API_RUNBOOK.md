@@ -2,13 +2,12 @@
 
 ## Start-up
 
-1. Place the database URL, credential descriptors, and each referenced token
-   in separate regular files. Use absolute paths and restrictive permissions
-   (`0600` for files; no group/other write permission on their parent
-   directories).
-2. Set `PMS_DATABASE_URL_FILE`, `PMS_MANAGEMENT_CREDENTIAL_FILE`, and
-   `PMS_RUNTIME_CREDENTIAL_FILE`. Set `PMS_API_HOST`, `PMS_API_PORT`, and
-   `PMS_API_RUNTIME_HEARTBEAT_TTL_MS` as required.
+1. Place the database URL, required credential descriptors, and each referenced token in separate
+   regular files. Use absolute paths and restrictive permissions (`0600` for files; no group/other
+   write permission on their parent directories).
+2. Set `PMS_DATABASE_URL_FILE` and `PMS_RUNTIME_CREDENTIAL_FILE`. In the default
+   `file_credentials` management mode, also set `PMS_MANAGEMENT_CREDENTIAL_FILE`. Set
+   `PMS_API_HOST`, `PMS_API_PORT`, and `PMS_API_RUNTIME_HEARTBEAT_TTL_MS` as required.
 3. Start `apps/pms-api/src/main.ts`. It applies the PMS migration set before
    accepting traffic. Inline database URLs or tokens are intentionally refused.
 4. Check `/health/live`, then `/health/ready`. Readiness verifies PostgreSQL.
@@ -27,6 +26,12 @@ Authentication failures are best-effort audited with request/correlation IDs,
 target IDs, reason code, and optional source IP. Tokens, authorization headers,
 credential paths, configuration bodies, and database URLs are never written to
 Audit metadata.
+
+For a strictly isolated trusted intranet only, management authentication can be disabled with both
+`PMS_API_MANAGEMENT_AUTH_MODE=anonymous_intranet` and
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true`. In that mode the management credential descriptor is not
+required, but Runtime Config/Registration credentials remain required. The default
+`file_credentials` mode and all other modes fail closed.
 
 ## Shutdown and recovery
 

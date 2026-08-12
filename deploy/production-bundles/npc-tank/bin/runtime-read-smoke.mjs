@@ -1,20 +1,8 @@
-import { createHmac } from "node:crypto";
-import { readFile } from "node:fs/promises";
-
-const secret = (await readFile("/run/secrets/runtime-jwt-hs256", "utf8")).trim();
-if (secret.length < 32 || /\s/.test(secret)) throw new Error("RUNTIME_JWT_SECRET_INVALID");
-const issuer = process.env.JWT_ISSUER;
-const audience = process.env.JWT_AUDIENCE;
-if (!issuer || !audience) throw new Error("RUNTIME_JWT_POLICY_MISSING");
 const providerId = "isr.vehicle.npc-tank.npc-tank1";
 const deploymentId = "production-npc-tank-direct";
 const instanceId = "production-npc-tank-direct-1";
 const environment = "production";
 const apiBaseUrl = internalApiUrl(required("PMS_SMOKE_API_BASE_URL"));
-const adminToken = (await readFile(required("PMS_SMOKE_ADMIN_TOKEN_FILE"), "utf8")).trim();
-if (adminToken.length < 16 || adminToken.length > 8_192 || /\s/.test(adminToken)) {
-  throw new Error("NPC_SMOKE_PMS_ADMIN_TOKEN_INVALID");
-}
 const advertisedBaseUrl = productionBaseUrl(required("PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT"));
 const expectedRegistryEndpoint = new URL("/mcp", advertisedBaseUrl).toString();
 const deployment = await pms(
@@ -42,14 +30,6 @@ if (
   throw new Error("NPC_SMOKE_REGISTRY_AUTHORITY_INVALID");
 }
 const endpoint = new URL(registryProvider.effectiveEndpoint);
-const token = jwt(secret, {
-  sub: "npc-production-read-only-smoke",
-  tenant: "npc-production",
-  iss: issuer,
-  aud: audience,
-  nbf: Math.floor(Date.now() / 1000) - 5,
-  exp: Math.floor(Date.now() / 1000) + 120,
-});
 const resourceId = "vehicle:npc_tank1";
 let requestId = 1;
 
@@ -116,7 +96,6 @@ async function pms(path) {
   const response = await fetch(new URL(path, apiBaseUrl), {
     headers: {
       accept: "application/json",
-      authorization: `Bearer ${adminToken}`,
       "x-actor-id": "npc-production-admin",
       "x-correlation-id": `npc-production-pms-smoke-${String(Date.now())}`,
     },
@@ -176,7 +155,6 @@ async function rpc(method, params = {}, operation = undefined) {
     method: "POST",
     headers: {
       accept: "application/json, text/event-stream",
-      authorization: `Bearer ${token}`,
       "content-type": "application/json",
       "mcp-protocol-version": "2026-07-28",
       "mcp-method": method,
@@ -210,15 +188,6 @@ async function rpc(method, params = {}, operation = undefined) {
     throw new Error(`NPC_RUNTIME_RPC_FAILED_${method.replaceAll("/", "_")}`);
   }
   return body.result;
-}
-
-function jwt(signingSecret, payload) {
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
-  const claims = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const signature = createHmac("sha256", signingSecret)
-    .update(`${header}.${claims}`)
-    .digest("base64url");
-  return `${header}.${claims}.${signature}`;
 }
 
 function required(name) {

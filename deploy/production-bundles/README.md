@@ -47,7 +47,11 @@ real `.env`/private-key paths, recognizable secret material, unsafe archive path
 image identity drift, missing non-root users or healthchecks, and wrong production provider/profile
 labels. Both products intentionally use the `strict-intranet-plaintext` transport profile: HTTP,
 MQTT, Adapter gRPC, and Provider telemetry are unencrypted, and the operator must keep every bound
-port and upstream endpoint inside an isolated internal network.
+port and upstream endpoint inside an isolated internal network. The package profile also uses
+anonymous PMS management and Runtime MCP access: `pms-api` has no host port, while `pms-web`
+anonymously proxies raw `/api/v1` routes (including SDAR consumer projections), and each Runtime
+publishes anonymous `/mcp`. Database credentials and the Runtime-to-PMS registration token remain
+file-backed internal secrets.
 
 ## Product-specific automated packagers
 

@@ -52,16 +52,28 @@ const runtime = service("npc-tank-runtime");
 const seed = service("pms-seed");
 
 if (Array.isArray(pmsApi.ports) && pmsApi.ports.length > 0) fail("PMS_API_HOST_PORT_FORBIDDEN");
+const pmsApiEnvironment = environment(pmsApi);
+requiredValues(pmsApiEnvironment, {
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+  PMS_API_MANAGEMENT_AUTH_MODE: "anonymous_intranet",
+  PMS_RUNTIME_CREDENTIAL_FILE: "/run/pms-secrets/runtime.json",
+});
+if (
+  pmsApiEnvironment.PMS_MANAGEMENT_CREDENTIAL_FILE !== undefined ||
+  /management(?:-admin|-reader)?\.(?:json|token)/i.test(JSON.stringify(pmsApi))
+) {
+  fail("PMS_API_MANAGEMENT_CREDENTIAL_FORBIDDEN");
+}
 if (pmsWorker.network_mode !== "service:pms-api") fail("PMS_WORKER_NETWORK_AUTHORITY_INVALID");
 if (environment(pmsWorker).PMS_WORKSPACE_ROOT !== "/app") fail("PMS_WORKER_ROOT_INVALID");
 if (environment(pmsWorker).ALLOW_INSECURE_INTERNAL_TRANSPORT !== "true") {
   fail("PMS_WORKER_INSECURE_INTERNAL_TRANSPORT_OPT_IN_REQUIRED");
 }
-if (
-  environment(pmsWorker).PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE !==
-  "/run/pms-secrets/external-runtime-catalog.json"
-) {
-  fail("PMS_WORKER_EXTERNAL_CATALOG_CREDENTIAL_INVALID");
+if (environment(pmsWorker).PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE !== "anonymous_intranet") {
+  fail("PMS_WORKER_EXTERNAL_CATALOG_AUTH_MODE_INVALID");
+}
+if (environment(pmsWorker).PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE !== undefined) {
+  fail("PMS_WORKER_EXTERNAL_CATALOG_CREDENTIAL_FORBIDDEN");
 }
 if (!hasNetwork(pmsApi, "provider-plane")) fail("PMS_API_PROVIDER_NETWORK_REQUIRED");
 if (environment(seed).PMS_SEED_ADAPTER_ENDPOINT !== "npc-tank-adapter:7013") {
@@ -90,7 +102,8 @@ const webEnvironment = environment(pmsWeb);
 if (
   webEnvironment.PMS_WEB_DATA_MODE !== "api" ||
   webEnvironment.PMS_WEB_API_BASE !== "/api/console/v1" ||
-  webEnvironment.PMS_WEB_API_UPSTREAM !== "http://pms-api:8090"
+  webEnvironment.PMS_WEB_API_UPSTREAM !== "http://pms-api:8090" ||
+  webEnvironment.PMS_WEB_RAW_API_PROXY_ENABLED !== "true"
 ) {
   fail("PMS_WEB_API_MODE_INVALID");
 }
@@ -124,9 +137,7 @@ requiredValues(runtimeEnvironment, {
   ADAPTER_ENDPOINT: "npc-tank-adapter:7013",
   ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
   ADAPTER_TLS_MODE: "disabled",
-  AUTH_MODE: "jwt_hs256",
-  JWT_ISSUER: "sdar-npc-tank-production",
-  JWT_AUDIENCE: "sdar-runtime",
+  AUTH_MODE: "anonymous",
   PMS_DEPLOYMENT_ID: "production-npc-tank-direct",
   PMS_INSTANCE_ID: "production-npc-tank-direct-1",
   PMS_RUNTIME_REGISTRATION_URL: "http://pms-api:8090",
@@ -140,6 +151,23 @@ requiredValues(runtimeEnvironment, {
   ALLOW_WEAK_LEASE_CONFIGURATION: "false",
   INTERNAL_ENDPOINTS_ENABLED: "false",
 });
+for (const forbidden of ["JWT_HS256_SECRET", "JWT_ISSUER", "JWT_AUDIENCE"]) {
+  if (runtimeEnvironment[forbidden] !== undefined)
+    fail(`RUNTIME_AUTH_CREDENTIAL_FORBIDDEN_${forbidden}`);
+}
+if (/runtime-jwt|jwt-hs256/i.test(JSON.stringify(runtime))) {
+  fail("RUNTIME_AUTH_SECRET_MOUNT_FORBIDDEN");
+}
+for (const forbidden of [
+  "PMS_SEED_ADMIN_TOKEN_FILE",
+  "PMS_SEED_MANAGEMENT_TOKEN_FILE",
+  "PMS_SMOKE_ADMIN_TOKEN_FILE",
+  "JWT_ISSUER",
+  "JWT_AUDIENCE",
+]) {
+  if (environment(seed)[forbidden] !== undefined)
+    fail(`SEED_AUTH_CREDENTIAL_FORBIDDEN_${forbidden}`);
+}
 if (!absoluteSecretPath(runtimeEnvironment.DATABASE_URL_FILE)) {
   fail("RUNTIME_SECRET_PATH_INVALID_DATABASE_URL_FILE");
 }
