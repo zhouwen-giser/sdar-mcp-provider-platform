@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import { Pool, type QueryResultRow } from "pg";
 import {
   auditEventId,
@@ -27,46 +26,19 @@ import {
   type RuntimeDatabaseConnectionFactory,
 } from "../packages/postgres-provisioner/src/index.js";
 import type { PostgresProvisioningSpec } from "../packages/runtime-deployment/src/index.js";
+import {
+  resolveLivePmsOnboardingConfig,
+  type LivePmsOnboardingProviderConfig,
+} from "./live-pms-onboarding-config.js";
 
-const ROOT = resolve(process.cwd());
-const API_BASE_URL = "http://127.0.0.1:8090";
+const CONFIG = resolveLivePmsOnboardingConfig();
+const ROOT = CONFIG.root;
+const API_BASE_URL = CONFIG.apiBaseUrl;
 const ENVIRONMENT = "home-lab";
 const RUNTIME_VERSION = "2.0.0-rc.1";
 const ACTOR_ID = "smpp-continuation-admin";
-
-const PATHS = Object.freeze({
-  resources: resolve(ROOT, ".local/ha-real-device/resources.local.json"),
-  databaseUrl: resolve(ROOT, ".local/pms-continuation/secrets/pms-database-url"),
-  managementToken: resolve(ROOT, ".local/pms-continuation/secrets/pms-management.token"),
-  provisioning: resolve(ROOT, ".local/pms-continuation/secrets/postgres-provisioning.json"),
-  climateResources: resolve(ROOT, ".local/pms-continuation/config/climates.json"),
-  lightResources: resolve(ROOT, ".local/pms-continuation/config/lights.json"),
-  climateState: resolve(ROOT, ".local/pms-continuation/roots/provider-state/climate.json"),
-  lightState: resolve(ROOT, ".local/pms-continuation/roots/provider-state/light.json"),
-});
-
-const PROVIDERS = Object.freeze({
-  climate: Object.freeze({
-    providerId: "ha-climate-lab",
-    providerTypeId: "home_assistant.climate",
-    packageId: "builtin.home-assistant.climate",
-    packageVersion: "0.1.0",
-    adapterEndpoint: "127.0.0.1:17020",
-    deploymentId: "ha-climate-deployment",
-    databaseProfileId: "ha-climate-db-profile",
-    configDraftId: "ha-climate-runtime-config",
-  }),
-  light: Object.freeze({
-    providerId: "ha-light-lab",
-    providerTypeId: "home_assistant.light",
-    packageId: "builtin.home-assistant.light",
-    packageVersion: "0.1.0",
-    adapterEndpoint: "127.0.0.1:17021",
-    deploymentId: "ha-light-deployment",
-    databaseProfileId: "ha-light-db-profile",
-    configDraftId: "ha-light-runtime-config",
-  }),
-});
+const PATHS = CONFIG.paths;
+const PROVIDERS = CONFIG.providers;
 
 interface LocalResources {
   readonly homeAssistantUrl: string;
@@ -307,7 +279,7 @@ async function ensureProviderType(
 
 async function ensureProvider(
   api: PmsApiClient,
-  input: (typeof PROVIDERS)["climate"] | (typeof PROVIDERS)["light"],
+  input: LivePmsOnboardingProviderConfig,
 ): Promise<ProviderRecord> {
   const existing = await api.getOrNull<ProviderRecord>(`/api/v1/providers/${input.providerId}`);
   if (existing !== null) return existing;
@@ -392,8 +364,8 @@ async function ensureProviderConfiguration(
   const content =
     kind === "climate"
       ? {
-          ADAPTER_HOST: "127.0.0.1",
-          ADAPTER_PORT: 17020,
+          ADAPTER_HOST: provider.adapterHost,
+          ADAPTER_PORT: provider.adapterPort,
           ADAPTER_TLS_MODE: "disabled",
           HOME_ASSISTANT_URL: homeAssistantUrl,
           HOME_ASSISTANT_TOKEN_FILE: { secretRef: "file/v1/home-lab/ha-climate-lab/token" },
@@ -404,8 +376,8 @@ async function ensureProviderConfiguration(
           RUNTIME_ENV: "development",
         }
       : {
-          ADAPTER_HOST: "127.0.0.1",
-          ADAPTER_PORT: 17021,
+          ADAPTER_HOST: provider.adapterHost,
+          ADAPTER_PORT: provider.adapterPort,
           ADAPTER_TLS_MODE: "disabled",
           HOME_ASSISTANT_URL: homeAssistantUrl,
           HOME_ASSISTANT_TOKEN_FILE: { secretRef: "file/v1/home-lab/ha-light-lab/token" },
@@ -440,7 +412,7 @@ async function ensureProviderConfiguration(
 
 async function ensureRuntimeConfiguration(
   api: PmsApiClient,
-  provider: (typeof PROVIDERS)["climate"] | (typeof PROVIDERS)["light"],
+  provider: LivePmsOnboardingProviderConfig,
   configProfileId: string,
 ): Promise<string> {
   const content = {
@@ -539,12 +511,20 @@ let sharedPmsPool: Pool | undefined;
 
 async function ensureDatabaseProfile(
   pool: Pool,
-  provider: (typeof PROVIDERS)["climate"] | (typeof PROVIDERS)["light"],
+  provider: LivePmsOnboardingProviderConfig,
   credentials: ProvisioningCredentials,
   correlationId: string,
 ) {
   const repository = new PostgresDatabaseProfileRepository(pool);
   const existing = await repository.get(provider.providerId, ENVIRONMENT);
+  if (
+    existing !== null &&
+    provider.databaseName !== undefined &&
+    (existing.profile.databaseMode !== "preexisting" ||
+      existing.profile.databaseName !== provider.databaseName)
+  ) {
+    throw new Error("PMS_DATABASE_PROFILE_OVERRIDE_MISMATCH");
+  }
   const profile =
     existing?.profile ??
     createDatabaseProfile({
@@ -554,7 +534,8 @@ async function ensureDatabaseProfile(
       clusterRef: credentials.clusterRef,
       host: "127.0.0.1",
       port: 55432,
-      databaseMode: "provisioned",
+      databaseMode: provider.databaseMode,
+      ...(provider.databaseName === undefined ? {} : { databaseName: provider.databaseName }),
       sslMode: "disable",
       adminSecretRef: secretRef(credentials.adminSecretRef),
       runtimeSecretRef: secretRef(`file/v1/${provider.deploymentId}/database/runtime`),
@@ -755,7 +736,7 @@ function runtimeDatabaseUrl(spec: PostgresProvisioningSpec, password: string): s
 
 async function ensureDeployment(
   api: PmsApiClient,
-  provider: (typeof PROVIDERS)["climate"] | (typeof PROVIDERS)["light"],
+  provider: LivePmsOnboardingProviderConfig,
   configProfileId: string,
 ): Promise<RuntimeDeploymentRecord> {
   const existing = await api.getOrNull<RuntimeDeploymentRecord>(

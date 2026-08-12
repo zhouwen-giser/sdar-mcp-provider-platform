@@ -27,6 +27,10 @@ import {
   type RuntimeRegistrationAuthorizationErrorCode,
   type RuntimeRegistrationErrorCode,
 } from "../../../packages/runtime-registration/src/index.js";
+import {
+  SdarRegistryProjectionError,
+  type SdarRegistryProjectionErrorCode,
+} from "./sdar-registry-projection.js";
 
 export interface PmsErrorEnvelope {
   readonly error: {
@@ -89,6 +93,9 @@ function classifyError(error: FastifyError): PublicError {
     return runtimeRegistrationAuthorizationError(error.code);
   }
   if (error instanceof RuntimeRegistrationError) return runtimeRegistrationError(error.code);
+  if (error instanceof SdarRegistryProjectionError) {
+    return sdarRegistryProjectionError(error.code);
+  }
   if (error.code === "FST_ERR_CTP_BODY_TOO_LARGE") {
     return {
       statusCode: 413,
@@ -106,6 +113,22 @@ function classifyError(error: FastifyError): PublicError {
     return { statusCode: 400, code: "INVALID_JSON", message: "Request body is not valid JSON" };
   }
   return { statusCode: 500, code: "INTERNAL_ERROR", message: "An internal error occurred" };
+}
+
+function sdarRegistryProjectionError(code: SdarRegistryProjectionErrorCode): PublicError {
+  const statusCode =
+    code === "SDAR_REGISTRY_PROJECTION_NOT_FOUND"
+      ? 404
+      : code === "SDAR_REGISTRY_PROJECTION_SOURCE_ID_INVALID"
+        ? 400
+        : 500;
+  const message =
+    code === "SDAR_REGISTRY_PROJECTION_NOT_FOUND"
+      ? "No published Registry snapshot is available for SDAR projection"
+      : code === "SDAR_REGISTRY_PROJECTION_SOURCE_ID_INVALID"
+        ? "The SMPP source identifier is invalid"
+        : "The Registry snapshot cannot be projected safely";
+  return { statusCode, code, message };
 }
 
 function runtimeRegistrationAuthorizationError(

@@ -13,7 +13,8 @@ export class FileRuntimeConfigCacheStore implements RuntimeConfigCacheStore {
   async read(): Promise<unknown> {
     try {
       const file = await stat(this.#path);
-      if (!file.isFile() || (file.mode & 0o077) !== 0) throw new Error("CACHE_MODE_INVALID");
+      const insecureUnixMode = process.platform !== "win32" && (file.mode & 0o077) !== 0;
+      if (!file.isFile() || insecureUnixMode) throw new Error("CACHE_MODE_INVALID");
       return JSON.parse(await readFile(this.#path, "utf8")) as unknown;
     } catch (error) {
       if (hasCode(error, "ENOENT")) return null;
@@ -39,7 +40,14 @@ export class FileRuntimeConfigCacheStore implements RuntimeConfigCacheStore {
       stagingCreated = false;
       const directoryHandle = await open(directory, "r");
       try {
-        await directoryHandle.sync();
+        try {
+          await directoryHandle.sync();
+        } catch (error) {
+          // Windows does not support fsync on directory handles. The staging
+          // file itself was synced before the atomic rename, so tolerate only
+          // the platform's documented unsupported-operation errors here.
+          if (!isUnsupportedWindowsDirectorySync(error)) throw error;
+        }
       } finally {
         await directoryHandle.close();
       }
@@ -55,5 +63,12 @@ function hasCode(error: unknown, code: string): boolean {
     error !== null &&
     "code" in error &&
     (error as { readonly code?: unknown }).code === code
+  );
+}
+
+function isUnsupportedWindowsDirectorySync(error: unknown): boolean {
+  return (
+    process.platform === "win32" &&
+    ["EPERM", "EINVAL", "ENOTSUP"].some((code) => hasCode(error, code))
   );
 }

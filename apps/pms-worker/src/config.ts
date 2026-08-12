@@ -13,6 +13,8 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
   "PMS_RUNTIME_RECONCILE_TIMEOUT_MS",
   "PMS_RUNTIME_HEALTH_TIMEOUT_MS",
+  "PMS_RUNTIME_PORT_RANGE_START",
+  "PMS_RUNTIME_PORT_RANGE_END",
 ] as const;
 
 export interface PmsWorkerRuntimeConfig {
@@ -158,6 +160,7 @@ async function loadRuntimeConfig(
   if (runtimeHealthTimeoutMs > runtimeReconcileTimeoutMs) {
     throw new Error("PMS_WORKER_RUNTIME_TIMEOUT_ORDER_INVALID");
   }
+  const runtimePortRangeOverride = optionalRuntimePortRange(environment);
   return Object.freeze({
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
     runtimeControlPlaneUrl,
@@ -175,7 +178,27 @@ async function loadRuntimeConfig(
     runtimeReconcileIntervalMs,
     runtimeReconcileTimeoutMs,
     runtimeHealthTimeoutMs,
+    ...(runtimePortRangeOverride === undefined
+      ? {}
+      : { runtimePortRange: runtimePortRangeOverride }),
   });
+}
+
+function optionalRuntimePortRange(
+  environment: Readonly<Record<string, string | undefined>>,
+): PmsWorkerRuntimeConfig["runtimePortRange"] {
+  const startSource = environment.PMS_RUNTIME_PORT_RANGE_START;
+  const endSource = environment.PMS_RUNTIME_PORT_RANGE_END;
+  if (startSource === undefined && endSource === undefined) return undefined;
+  if (startSource === undefined || endSource === undefined) {
+    throw new Error("PMS_WORKER_RUNTIME_PORT_RANGE_PAIR_REQUIRED");
+  }
+  const start = boundedInteger(startSource, 0, 1_024, 65_535);
+  const end = boundedInteger(endSource, 0, 1_024, 65_535);
+  if (start > end || end - start > 10_000) {
+    throw new Error("PMS_WORKER_CONFIG_BOUNDS");
+  }
+  return Object.freeze({ start, end });
 }
 
 function rejectLegacyRuntimeTokenFile(

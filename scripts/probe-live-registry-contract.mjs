@@ -4,9 +4,11 @@ import { resolve } from "node:path";
 import { TextDecoder } from "node:util";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const localStateRoot = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(root, ".local"));
+const pmsContinuationRoot = resolve(localStateRoot, "pms-continuation");
 const apiBaseUrl = process.env.SMPP_PMS_API_URL ?? "http://127.0.0.1:8090";
 const environment = "home-lab";
-const tokenPath = resolve(root, ".local/pms-continuation/secrets/pms-management.token");
+const tokenPath = resolve(pmsContinuationRoot, "secrets/pms-management.token");
 const reportPath = resolve(
   root,
   "reports/real-device-preparation-continuation/live-registry-contract.json",

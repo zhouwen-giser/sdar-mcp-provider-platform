@@ -1,14 +1,16 @@
 {
   "evidenceClass": "real",
   "phase": "P6_CLIMATE_RESTORE_RECOVERY",
-  "integrationRunId": "smpp-live-climate-restore-20260804-0329",
+  "integrationRunId": "019fca75-f48a-7780-ac5e-942503c6690e-g09-g11-c7e36bbf-4620-4f44-800a-83c15ec4095b",
   "environment": "home-lab",
-  "startedAt": "2026-08-03T19:30:49.431Z",
-  "completedAt": "2026-08-03T19:30:52.067Z",
+  "startedAt": "2026-08-11T21:51:44.833Z",
+  "completedAt": "2026-08-11T21:51:48.044Z",
   "status": "passed",
   "safetyGate": {
     "allowRealDeviceSideEffects": true,
     "runIdPresent": true,
+    "climatePowerTestGateOpen": true,
+    "writeGateOpen": true,
     "writeBudget": {
       "climatePowerOff": 1
     },
@@ -21,9 +23,9 @@
     "power": "off",
     "reachable": true,
     "hvacMode": "off",
-    "targetTemperature": 23,
+    "targetTemperature": 16,
     "currentTemperature": null,
-    "observedAt": "2026-08-03T19:12:33.121057+00:00",
+    "observedAt": "2026-08-11T15:33:54.603540+00:00",
     "observationId": null
   },
   "currentBeforeRestore": {
@@ -31,20 +33,21 @@
     "power": "on",
     "reachable": true,
     "hvacMode": "cool",
-    "targetTemperature": 23,
+    "targetTemperature": 16,
     "currentTemperature": null,
-    "observedAt": "2026-08-03T19:25:47.437224+00:00",
+    "observedAt": "2026-08-11T21:45:28.435682+00:00",
     "observationId": null
   },
   "wait": {
     "safetyIntervalMs": 300000,
+    "remainingMs": 0,
     "waitedMs": 0,
     "reason": "opposite climate power operation"
   },
   "task": {
     "status": "completed",
-    "runtimeTaskId": "3d54ca1b-5b6d-44eb-8293-860988fcead1",
-    "correlationId": "smpp-live-climate-restore-20260804-0329:restore-power-off",
+    "runtimeTaskId": "b18ce96e-5183-49f4-b3c4-fa266bf88b47",
+    "correlationId": "019fca75-f48a-7780-ac5e-942503c6690e-g09-g11-c7e36bbf-4620-4f44-800a-83c15ec4095b:restore-power-off",
     "finalTask": {
       "status": "completed",
       "revision": null,
@@ -56,8 +59,8 @@
             "items": [
               {
                 "producer": ["home-assistant"],
-                "evidenceId": "home-assistant-climate-3d54ca1b-5b6d-44eb-8293-860988fcead1-3",
-                "observedAt": "2026-08-03T19:30:50.792588+00:00",
+                "evidenceId": "home-assistant-climate-b18ce96e-5183-49f4-b3c4-fa266bf88b47-4",
+                "observedAt": "2026-08-11T21:51:46.286602+00:00",
                 "payloadRef": {
                   "kind": "structured_content",
                   "jsonPointer": "/power"
@@ -79,7 +82,7 @@
         "structuredContent": {
           "power": "off",
           "confirmed": true,
-          "observedAt": "2026-08-03T19:30:50.792588+00:00",
+          "observedAt": "2026-08-11T21:51:46.286602+00:00",
           "resourceId": "living-room-air-conditioner"
         }
       },
@@ -93,12 +96,15 @@
     "power": "off",
     "reachable": true,
     "hvacMode": "off",
-    "targetTemperature": 23,
+    "targetTemperature": 16,
     "currentTemperature": null,
-    "observedAt": "2026-08-03T19:30:50.792588+00:00",
+    "observedAt": "2026-08-11T21:51:46.286602+00:00",
     "observationId": null
   },
-  "activeTasks": 0,
-  "uncertainTasks": 0,
+  "deviceRestoreStatus": "restored",
+  "manualRestoreRequired": false,
+  "activeTasks": null,
+  "uncertainTasks": null,
+  "runtimeTaskCountSource": "not_queried",
   "errors": []
 }

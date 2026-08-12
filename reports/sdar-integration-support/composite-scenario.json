@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G11",
+  "status": "failed",
+  "disposition": "real_device_objective_not_stable",
+  "evidenceClass": "real_smpp_runtime_adapter_home_assistant",
+  "observedAt": "2026-08-11T22:09:09.538Z",
+  "fullScenarioReady": false,
+  "failure": {
+    "code": "CLIMATE_OBJECTIVE_STATE_NOT_STABLE",
+    "message": "The Climate Runtime Task confirmed cool, but Home Assistant returned to off within about three seconds. The two light Tasks completed and all devices were subsequently restored."
+  },
+  "execution": {
+    "crossProviderParallelDispatchObserved": true,
+    "parallelDispatchWindowMs": 546.0089,
+    "parallelTasksCompleted": [
+      "climate_set_hvac_mode",
+      "light_set_power:living-room-main-light",
+      "light_set_power:living-room-aux-light"
+    ],
+    "temperatureTaskCompleted": true,
+    "objectiveStateStable": false,
+    "restoreStatus": "restored"
+  },
+  "objectiveObservation": {
+    "climate": { "power": "off", "hvacMode": "off", "targetTemperature": 17 },
+    "mainLight": { "power": "on" },
+    "auxiliaryLight": { "power": "on" }
+  },
+  "finalState": {
+    "climate": { "power": "off", "hvacMode": "off", "targetTemperature": 16 },
+    "mainLight": { "power": "off" },
+    "auxiliaryLight": { "power": "off" }
+  },
+  "authoritativeCountsAfterExecution": {
+    "activeTasks": 0,
+    "uncertainTasks": 0,
+    "writeGateOpen": false
+  },
+  "evidenceReferences": [
+    "reports/real-device-preparation-continuation/light-restore-recovery.json"
+  ],
+  "companionEvidenceReferences": [
+    "skill-driven-agent-runtime/reports/sdar-smpp-integration/raw/g11-cross-provider-final.redacted.json"
+  ],
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}

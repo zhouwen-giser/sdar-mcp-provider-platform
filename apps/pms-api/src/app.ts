@@ -41,6 +41,7 @@ import type { AuditRepository } from "../../../packages/pms-domain/src/index.js"
 import type { RegistrySnapshotRepository } from "../../../packages/registry-snapshot/src/index.js";
 import { registerAuditRoutes } from "./audit-routes.js";
 import { registerRegistryRoutes } from "./registry-routes.js";
+import { registerSdarRegistryProjectionRoutes } from "./sdar-registry-projection-routes.js";
 import {
   consoleApiDependencies,
   registerConsoleApiRoutes,
@@ -68,6 +69,7 @@ export interface PmsApiOptions {
   readonly registrySnapshots?: RegistrySnapshotRepository;
   readonly audit?: Pick<AuditRepository, "list">;
   readonly registryWatchPollIntervalMs?: number;
+  readonly sdarRegistryProjectionTtlSeconds?: number;
   readonly managementAuthorizer?: PmsApiRoleAuthorizer;
   readonly authenticationRejectionAudit?: AuthenticationRejectionAuditPort;
 }
@@ -145,6 +147,14 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
   }
   if (options.registrySnapshots !== undefined) {
     registerRegistryRoutes(app, options.registrySnapshots, {
+      ...(options.registryWatchPollIntervalMs === undefined
+        ? {}
+        : { pollIntervalMs: options.registryWatchPollIntervalMs }),
+    });
+    registerSdarRegistryProjectionRoutes(app, options.registrySnapshots, {
+      ...(options.sdarRegistryProjectionTtlSeconds === undefined
+        ? {}
+        : { ttlSeconds: options.sdarRegistryProjectionTtlSeconds }),
       ...(options.registryWatchPollIntervalMs === undefined
         ? {}
         : { pollIntervalMs: options.registryWatchPollIntervalMs }),

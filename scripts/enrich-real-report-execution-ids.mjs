@@ -3,7 +3,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const localRoot = resolve(root, ".local/ha-real-device");
+const localStateRoot = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(root, ".local"));
+const localRoot = resolve(localStateRoot, "ha-real-device");
 
 for (const name of ["climate", "light"]) {
   const reportPath = resolve(

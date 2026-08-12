@@ -175,6 +175,7 @@ function config(): PmsApiBootstrapConfig {
     port: 8090,
     databaseUrl: "postgresql://not-a-secret@localhost/pms",
     runtimeHeartbeatTtlMs: 30_000,
+    sdarRegistryProjectionTtlSeconds: 2_592_000,
     managementCredentialFile: "/credentials/management.json",
     runtimeCredentialFile: "/credentials/runtime.json",
     management: {

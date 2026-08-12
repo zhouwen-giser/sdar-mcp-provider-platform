@@ -111,6 +111,7 @@ export async function createPmsApiComposition(
       runtimeConfigWatch: watch,
       runtimeConfigAcknowledgements: new RuntimeConfigAcknowledgementService(unitOfWork),
       registrySnapshots: new PostgresRegistrySnapshotRepository(pool),
+      sdarRegistryProjectionTtlSeconds: config.sdarRegistryProjectionTtlSeconds,
       audit,
       authenticationRejectionAudit,
       readiness: () => readiness(pool),

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "contract": "sdar-registry-v1",
+  "errors": [
+    {
+      "code": "SDAR_REGISTRY_PROJECTION_NOT_FOUND",
+      "httpStatus": 404,
+      "message": "No published Registry snapshot is available for SDAR projection",
+      "retryable": true
+    },
+    {
+      "code": "SDAR_REGISTRY_PROJECTION_SOURCE_ID_INVALID",
+      "httpStatus": 400,
+      "message": "The SMPP source identifier is invalid",
+      "retryable": false
+    },
+    {
+      "code": "INVALID_REQUEST",
+      "httpStatus": 400,
+      "message": "Request validation failed",
+      "retryable": false
+    },
+    {
+      "code": "SDAR_REGISTRY_PROJECTION_ENDPOINT_INVALID",
+      "httpStatus": 500,
+      "message": "The Registry snapshot cannot be projected safely",
+      "retryable": false
+    },
+    {
+      "code": "SDAR_REGISTRY_PROJECTION_NATIVE_SNAPSHOT_INVALID",
+      "httpStatus": 500,
+      "message": "The Registry snapshot cannot be projected safely",
+      "retryable": false
+    },
+    {
+      "code": "SDAR_REGISTRY_PROJECTION_TTL_INVALID",
+      "httpStatus": 500,
+      "message": "The Registry snapshot cannot be projected safely",
+      "retryable": false
+    }
+  ]
+}

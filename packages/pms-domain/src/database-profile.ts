@@ -45,6 +45,7 @@ export interface CreateDatabaseProfileInput {
   readonly host: string;
   readonly port?: number;
   readonly databaseMode?: DatabaseMode;
+  readonly databaseName?: string;
   readonly sslMode?: PostgresSslMode;
   readonly adminSecretRef: SecretRef;
   readonly runtimeSecretRef: SecretRef;
@@ -53,6 +54,7 @@ export interface CreateDatabaseProfileInput {
 const LOGICAL_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const SECRET_REF = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$/;
 const HOST = /^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$/;
+const POSTGRES_IDENTIFIER = /^[a-z][a-z0-9_]{0,62}$/;
 
 export function databaseProfileId(value: string): DatabaseProfileId {
   return parse(value, "profileId", LOGICAL_ID) as DatabaseProfileId;
@@ -102,7 +104,12 @@ export function createDatabaseProfile(input: CreateDatabaseProfileInput): Databa
   if (input.adminSecretRef.secretRef === input.runtimeSecretRef.secretRef) {
     invalid("secretSeparation");
   }
-  const names = providerDatabaseNames(input.providerId);
+  const names =
+    input.databaseName === undefined
+      ? providerDatabaseNames(input.providerId)
+      : databaseMode === "preexisting"
+        ? preexistingDatabaseNames(input.databaseName)
+        : invalid("databaseName");
   return Object.freeze({
     profileId,
     providerId: input.providerId,
@@ -116,6 +123,19 @@ export function createDatabaseProfile(input: CreateDatabaseProfileInput): Databa
     adminSecretRef: secretRef(String(input.adminSecretRef.secretRef)),
     runtimeSecretRef: secretRef(String(input.runtimeSecretRef.secretRef)),
   });
+}
+
+function preexistingDatabaseNames(databaseName: string): {
+  readonly databaseName: string;
+  readonly runtimeRoleName: string;
+} {
+  const validatedDatabaseName = parse(databaseName, "databaseName", POSTGRES_IDENTIFIER);
+  const directRuntimeRoleName = `${validatedDatabaseName}_app`;
+  const runtimeRoleName =
+    directRuntimeRoleName.length <= 63
+      ? directRuntimeRoleName
+      : `${validatedDatabaseName.slice(0, 46)}_${stableDigest(validatedDatabaseName)}_app`;
+  return Object.freeze({ databaseName: validatedDatabaseName, runtimeRoleName });
 }
 
 function hasSecretRef(value: unknown): value is SecretRef {

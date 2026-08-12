@@ -52,6 +52,36 @@
       "sizeBytes": 12858
     },
     {
+      "path": "consumer-projections/sdar-registry/v1/checksum-vectors.json",
+      "sha256": "b7d86b6cc609850a9c8a7450bd42c0c5fa0c892d424bcf4680b550aff90f74c1",
+      "sizeBytes": 7520
+    },
+    {
+      "path": "consumer-projections/sdar-registry/v1/CONTRACT.md",
+      "sha256": "d31cfc3e635524da82219a1f5b19c152e16fcf75aed86ad0c72c3fe595d1e633",
+      "sizeBytes": 4340
+    },
+    {
+      "path": "consumer-projections/sdar-registry/v1/error-catalog.json",
+      "sha256": "93aeef3dd6f66ca98730748511110311ca7fcbe792d4c1cc4fd4bdc671a5fce3",
+      "sizeBytes": 1177
+    },
+    {
+      "path": "consumer-projections/sdar-registry/v1/MANIFEST.json",
+      "sha256": "863dfd9046aa12a17dfa4751e63f2660c15b8472f9a162b94dddc04541138cd8",
+      "sizeBytes": 1046
+    },
+    {
+      "path": "consumer-projections/sdar-registry/v1/projection.schema.json",
+      "sha256": "425cd331f7ee7e4294919ea307f05edb222b99fe5bbc9d320ae71959ed6ab34e",
+      "sizeBytes": 1936
+    },
+    {
+      "path": "consumer-projections/sdar-registry/v1/SOURCE_LOCK.json",
+      "sha256": "1d1d8b02848a613421c0b9dad681121cf090fb7b6010204e6afb12e9961f9be9",
+      "sizeBytes": 1756
+    },
+    {
       "path": "fixtures/business-events/invalid/invalid-decimal-sequence.json",
       "sha256": "ade4ede1589142750113c52487e3364eac93bb94047537ca31349760bee2bb8a",
       "sizeBytes": 481

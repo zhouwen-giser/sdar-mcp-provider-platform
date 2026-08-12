@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "contract": "sdar-registry-v1",
+  "canonicalAssetCount": 6,
+  "manifestSha256": "863dfd9046aa12a17dfa4751e63f2660c15b8472f9a162b94dddc04541138cd8",
+  "bundleSha256": "6668573cae45954bc1fc008243a7684949ff936c1cb8acf91512825a0d5f1e9e",
+  "projectionSchemaSha256": "425cd331f7ee7e4294919ea307f05edb222b99fe5bbc9d320ae71959ed6ab34e",
+  "checksumVectorClasses": 10,
+  "projectionContractFrozen": true,
+  "checksumVectorsByteCompatible": true,
+  "nativeRegistryUnchanged": true,
+  "canonicalByteIdentical": true,
+  "executedChecksumVectors": 10,
+  "smppNativeAuthorityVerified": true,
+  "evidenceClass": "deterministic_cross_repository_contract"
+}

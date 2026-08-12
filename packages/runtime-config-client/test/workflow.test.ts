@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -212,10 +212,11 @@ describe("RuntimeConfigWorkflow", () => {
     expect(latestCalls).toBe(2);
   });
 
-  it("persists a checksummed 0600 Ack outbox", async () => {
+  it("persists a checksummed Ack outbox with 0600 mode on POSIX", async () => {
     const directory = await mkdtemp(join(tmpdir(), "sdar-runtime-ack-"));
     temporaryDirectories.push(directory);
-    const outbox = new FileRuntimeConfigAckOutbox(join(directory, "acks.json"));
+    const path = join(directory, "acks.json");
+    const outbox = new FileRuntimeConfigAckOutbox(path);
     const record: RuntimeConfigAckOutboxRecord = {
       target,
       acknowledgement: {
@@ -227,6 +228,7 @@ describe("RuntimeConfigWorkflow", () => {
 
     await outbox.put(record);
     expect(await outbox.list()).toEqual([record]);
+    if (process.platform !== "win32") expect((await stat(path)).mode & 0o777).toBe(0o600);
     await outbox.remove(record.acknowledgement.revisionId);
     expect(await outbox.list()).toEqual([]);
   });

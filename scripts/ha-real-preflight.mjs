@@ -7,8 +7,9 @@ import { format, resolveConfig } from "prettier";
 import WebSocket from "ws";
 
 const workspace = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const defaultResourcesPath = resolve(workspace, ".local/ha-real-device/resources.local.json");
-const defaultTokenPath = resolve(workspace, ".local/ha-real-device/token.txt");
+const localStateRoot = resolve(process.env.SMPP_LOCAL_STATE_ROOT ?? resolve(workspace, ".local"));
+const defaultResourcesPath = resolve(localStateRoot, "ha-real-device/resources.local.json");
+const defaultTokenPath = resolve(localStateRoot, "ha-real-device/token.txt");
 const reportJsonPath = resolve(workspace, "reports/real-device-preparation/ha-preflight.json");
 const reportMarkdownPath = resolve(workspace, "reports/real-device-preparation/ha-preflight.md");
 const timeoutMs = 8_000;

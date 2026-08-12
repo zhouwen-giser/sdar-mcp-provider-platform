@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
+  "phase": "G03_G04",
+  "status": "passed",
+  "evidenceClass": "real_live_goal_service_plus_cross_repository_consumer",
+  "observedAt": "2026-08-10T14:34:11.356Z",
+  "smppSourceId": "home-lab-smpp",
+  "environment": "home-lab",
+  "nativeRegistry": {
+    "revision": 2,
+    "checksum": "57018a96c6c5dbd9a4713a7cc4fa5ea2730af592ee53593cdb41c59ad429384c",
+    "providerCount": 2,
+    "protectedAuthorityFilesChanged": false
+  },
+  "sdarProjection": {
+    "contract": "sdar-registry-v1",
+    "revision": 2,
+    "checksum": "5be22b34105129a6197679c0a48a65939f952c9a064aa2b67965191f8314fce5",
+    "generatedAt": "2026-08-10T14:12:37.383Z",
+    "expiresAt": "2026-09-09T14:12:37.383Z",
+    "candidateProviderIds": ["ha-climate-lab", "ha-light-lab"]
+  },
+  "checks": {
+    "latest200": "passed",
+    "conditional304": "passed",
+    "bootstrap": "passed",
+    "watchHint": "passed",
+    "nativeLineageHeaders": "passed",
+    "sdarSourcePersistence": "passed",
+    "sdarRestartRecovery": "passed",
+    "registryOutageWithUnexpiredLkg": "passed",
+    "badChecksumAndExpiryFailClosed": "passed",
+    "registryCreatedCallableTools": false
+  },
+  "redaction": {
+    "secretsIncluded": false,
+    "endpointsIncluded": false,
+    "entityIdsIncluded": false
+  }
+}
