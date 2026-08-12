@@ -72,6 +72,30 @@ NPC_TANK_MQTT_URL=mqtt://REAL_INTERNAL_MQTT_HOST:1883
 NPC_TANK_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19103
 ```
 
+### 可选：启用 Runtime OTLP 导出
+
+OTLP 导出默认关闭。需要把 Runtime 的 traces、logs 和 metrics 推送到内网 OpenTelemetry
+Collector 时，在 `.env` 中设置：
+
+```dotenv
+NPC_TANK_OTEL_ENABLED=true
+NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.intranet.local:4318
+NPC_TANK_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+```
+
+`NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT` 是 OTLP/HTTP 基础地址，通常使用端口 `4318`，不要
+包含 `/v1/traces`、`/v1/logs` 或 `/v1/metrics`；Runtime 会自动追加对应的 signal 路径。
+服务实例 ID 固定为 PMS direct-container 实例 `production-npc-tank-direct-1`，不由现场
+配置。若 Collector 运行在部署主机上，应填写 Runtime 容器可达的主机内网地址，不能
+填写 `127.0.0.1` 或 `localhost`。
+
+本包的严格内网策略固定使用明文 HTTP，不挂载 OTLP TLS CA/证书/私钥，也不发送 OTLP
+认证 headers；Collector 及其监听端口必须只在隔离内网可达。超时值单位为毫秒，必须
+在 `100` 到 `60000` 之间。旧 `.env` 不含上述键时仍按默认值保持关闭，兼容原
+部署。修改配置后重新执行
+`bash deploy/npc-tank/bin/up.sh`，Compose 会重建配置发生变化的 `npc-tank-runtime`，其他
+未变化服务保持原状；无需重新生成或发布交付包。
+
 从旧交付升级且保留既有 `.env` 时，初始化脚本不会覆盖该文件；必须手动补入
 `NPC_TANK_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需

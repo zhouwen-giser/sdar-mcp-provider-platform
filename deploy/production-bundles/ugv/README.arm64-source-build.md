@@ -99,6 +99,29 @@ UGV_MQTT_WIRE_MODE=ros_bridge_json
 UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
 ```
 
+### 可选：启用 Runtime OTLP 导出
+
+OTLP 导出默认关闭。需要把 Runtime 的 traces、logs 和 metrics 推送到内网 OpenTelemetry
+Collector 时，在 `deploy/ugv/.env` 中设置：
+
+```dotenv
+UGV_OTEL_ENABLED=true
+UGV_OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.intranet.local:4318
+UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+```
+
+Endpoint 是 OTLP/HTTP 基础地址，通常使用端口 `4318`，不能包含 `/v1/traces`、
+`/v1/logs` 或 `/v1/metrics`；Runtime 会自动追加对应路径。服务实例 ID 固定为 PMS
+direct-container 实例 `production-ugv-direct-1`，不由现场配置。若 Collector 运行在部署
+主机上，应填写 Runtime 容器可达的主机内网地址，不能填写 `127.0.0.1` 或 `localhost`。
+严格内网运行策略只允许明文 HTTP，不配置 OTLP TLS CA/证书/私钥，也不发送认证
+headers；Collector 端口必须限制在隔离内网。超时值单位为毫秒，必须在 `100` 到
+`60000` 之间。
+
+保留旧 `.env` 且不补这些键时仍保持默认关闭。修改后重新执行
+`bash deploy/ugv/bin/up.sh`，Compose 会重建配置变化的 `ugv-runtime` 并保留其他未变化
+服务；无需重新生成 ZIP，也无需重新构建应用镜像。
+
 从旧交付升级且保留既有 `.env` 时，`init.sh` 不会覆盖该文件；必须手动补入
 `UGV_RUNTIME_ADVERTISED_URL`。首次 seed 后 direct-container 的 control/advertised
 端点属于部署身份的一部分，不能只编辑 `.env` 改址。当前包不提供自动改址流程；如需

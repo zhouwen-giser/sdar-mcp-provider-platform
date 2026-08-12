@@ -58,6 +58,22 @@ for (const productId of PRODUCT_IDS) {
       assert.equal(service.build, undefined);
       assert.doesNotMatch(String(service.image), /ghcr\.io|docker\.io\/.*sdar/i);
     }
+    const prefix = productId === "ugv" ? "UGV" : "NPC_TANK";
+    const runtimeName = productId === "ugv" ? "ugv-runtime" : "npc-tank-runtime";
+    const instanceId =
+      productId === "ugv" ? "production-ugv-direct-1" : "production-npc-tank-direct-1";
+    const runtimeEnvironment = document.services[runtimeName].environment;
+    assert.equal(runtimeEnvironment.OTEL_ENABLED, `\${${prefix}_OTEL_ENABLED:-false}`);
+    assert.equal(
+      runtimeEnvironment.OTEL_EXPORTER_OTLP_ENDPOINT,
+      `\${${prefix}_OTEL_EXPORTER_OTLP_ENDPOINT:-http://127.0.0.1:4318}`,
+    );
+    assert.equal(
+      runtimeEnvironment.OTEL_EXPORTER_OTLP_TIMEOUT_MS,
+      `\${${prefix}_OTEL_EXPORTER_OTLP_TIMEOUT_MS:-10000}`,
+    );
+    assert.equal(runtimeEnvironment.OTEL_EXPORTER_OTLP_TLS_MODE, "disabled");
+    assert.equal(runtimeEnvironment.OTEL_SERVICE_INSTANCE_ID, instanceId);
   });
 
   test(`${productId} has a dedicated ARM64 source-build deployment guide`, async () => {
@@ -76,6 +92,10 @@ for (const productId of PRODUCT_IDS) {
     assert.match(source, /不包含.*镜像|零镜像/);
     assert.match(source, /Docker Hub/);
     assert.match(source, /npm/);
+    assert.match(source, /OTLP\/HTTP/);
+    assert.match(source, /\/v1\/traces/);
+    assert.match(source, /\/v1\/logs/);
+    assert.match(source, /\/v1\/metrics/);
     assert.doesNotMatch(source, /镜像已包含在交付包中|离线加载并核对/);
   });
 }
@@ -103,4 +123,6 @@ test("root ARM64 README states zero bundled images and native-build qualificatio
   assert.match(readme, /不会从公共仓库拉取 SDAR 自研应用镜像/);
   assert.match(readme, /原生 Linux ARM64/);
   assert.match(readme, /NOT_CLAIMED/);
+  assert.match(readme, /OTLP\/HTTP/);
+  assert.match(readme, /\/v1\/traces/);
 });

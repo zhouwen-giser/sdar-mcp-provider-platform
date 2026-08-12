@@ -54,6 +54,23 @@ required_env_value() {
   printf '%s\n' "$value"
 }
 
+optional_env_value() {
+  local name="$1"
+  local fallback="$2"
+  local value status
+  if value="$(env_value "$name")"; then
+    :
+  else
+    status=$?
+    [[ "$status" -eq 1 ]] || return "$status"
+    value="$fallback"
+  fi
+  [[ -n "$value" ]] || value="$fallback"
+  [[ "$value" != *'$('* && "$value" != *'`'* && "$value" != *$'\n'* ]] ||
+    die "$name contains forbidden shell syntax"
+  printf '%s\n' "$value"
+}
+
 file_mode() {
   stat -c '%a' -- "$1" 2>/dev/null || die "cannot inspect permissions: $1"
 }
@@ -103,7 +120,12 @@ require_environment_file() {
     UGV_SIM_MQTT_PASSWORD_FILE \
     UGV_SIM_MQTT_TLS_CA_FILE \
     UGV_SIM_MQTT_TLS_CERT_FILE \
-    UGV_SIM_MQTT_TLS_KEY_FILE; do
+    UGV_SIM_MQTT_TLS_KEY_FILE \
+    UGV_OTEL_EXPORTER_OTLP_CA_FILE \
+    UGV_OTEL_EXPORTER_OTLP_CERT_FILE \
+    UGV_OTEL_EXPORTER_OTLP_KEY_FILE \
+    UGV_OTEL_EXPORTER_OTLP_HEADERS_FILE \
+    UGV_OTEL_SERVICE_INSTANCE_ID; do
     if env_value_from "$env_file" "$key" >/dev/null 2>&1; then
       die "$key is not used by the certificate-free intranet bundle"
     fi
@@ -186,11 +208,14 @@ require_generated_layout() {
 
 require_external_configuration() {
   local insecure_opt_in device_url mqtt_url wire_mode runtime_advertised_url
+  local otel_enabled otel_endpoint otel_timeout otel_authority
   insecure_opt_in="$(required_env_value ALLOW_INSECURE_INTERNAL_TRANSPORT)"
   device_url="$(required_env_value UGV_SIM_DEVICE_MCP_URL)"
   mqtt_url="$(required_env_value UGV_SIM_MQTT_URL)"
   wire_mode="$(required_env_value UGV_MQTT_WIRE_MODE)"
   runtime_advertised_url="$(required_env_value UGV_RUNTIME_ADVERTISED_URL)"
+  otel_enabled="$(optional_env_value UGV_OTEL_ENABLED false)" || return $?
+  otel_timeout="$(optional_env_value UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS 10000)" || return $?
   [[ "$insecure_opt_in" == "true" ]] ||
     die "ALLOW_INSECURE_INTERNAL_TRANSPORT must be exactly true for this intranet bundle"
   [[ "$device_url" == http://* && "$device_url" == */mcp && "$device_url" != *".invalid"* ]] ||
@@ -211,7 +236,28 @@ require_external_configuration() {
   [[ "$runtime_advertised_url" != *"@"* && "$runtime_advertised_url" != *"?"* &&
     "$runtime_advertised_url" != *"#"* ]] ||
     die "UGV_RUNTIME_ADVERTISED_URL must not contain credentials, query, or fragment"
-
+  [[ "$otel_enabled" == "true" || "$otel_enabled" == "false" ]] ||
+    die "UGV_OTEL_ENABLED must be exactly true or false"
+  [[ "$otel_timeout" =~ ^[0-9]+$ && "${#otel_timeout}" -le 5 ]] ||
+    die "UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS must be an integer from 100 through 60000"
+  (( 10#$otel_timeout >= 100 && 10#$otel_timeout <= 60000 )) ||
+    die "UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS must be an integer from 100 through 60000"
+  if [[ "$otel_enabled" == "true" ]]; then
+    otel_endpoint="$(required_env_value UGV_OTEL_EXPORTER_OTLP_ENDPOINT)"
+    [[ "$otel_endpoint" == http://* ]] ||
+      die "UGV_OTEL_EXPORTER_OTLP_ENDPOINT must be a plaintext OTLP/HTTP base URL"
+    otel_authority="${otel_endpoint#http://}"
+    otel_authority="${otel_authority%%/*}"
+    [[ -n "$otel_authority" && "$otel_authority" != *[[:space:]]* ]] ||
+      die "UGV_OTEL_EXPORTER_OTLP_ENDPOINT must include a valid intranet host"
+    [[ ! "$otel_endpoint" =~ REPLACE|mock|\.invalid|localhost|127\.0\.0\.1|0\.0\.0\.0 ]] ||
+      die "UGV_OTEL_EXPORTER_OTLP_ENDPOINT must identify the real intranet Collector"
+    [[ "$otel_endpoint" != *"@"* && "$otel_endpoint" != *"?"* &&
+      "$otel_endpoint" != *"#"* ]] ||
+      die "UGV_OTEL_EXPORTER_OTLP_ENDPOINT must not contain credentials, query, or fragment"
+    [[ ! "$otel_endpoint" =~ /v1/(traces|logs|metrics)/?$ ]] ||
+      die "UGV_OTEL_EXPORTER_OTLP_ENDPOINT must be a base URL without an OTLP signal path"
+  fi
 }
 
 require_initialized_bundle() {

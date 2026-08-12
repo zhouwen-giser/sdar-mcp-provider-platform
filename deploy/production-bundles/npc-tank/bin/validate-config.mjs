@@ -150,7 +150,10 @@ requiredValues(runtimeEnvironment, {
   PROVIDER_TELEMETRY_TLS_MODE: "disabled",
   ALLOW_WEAK_LEASE_CONFIGURATION: "false",
   INTERNAL_ENDPOINTS_ENABLED: "false",
+  OTEL_EXPORTER_OTLP_TLS_MODE: "disabled",
+  OTEL_SERVICE_INSTANCE_ID: "production-npc-tank-direct-1",
 });
+assertOtlpConfiguration(runtimeEnvironment, "NPC_TANK");
 for (const forbidden of ["JWT_HS256_SECRET", "JWT_ISSUER", "JWT_AUDIENCE"]) {
   if (runtimeEnvironment[forbidden] !== undefined)
     fail(`RUNTIME_AUTH_CREDENTIAL_FORBIDDEN_${forbidden}`);
@@ -298,8 +301,49 @@ function assertTransportTrustAbsent(value, label) {
     "PROVIDER_TELEMETRY_TLS_CA_PATH",
     "PROVIDER_TELEMETRY_TLS_CERT_PATH",
     "PROVIDER_TELEMETRY_TLS_KEY_PATH",
+    "OTEL_EXPORTER_OTLP_CA_PATH",
+    "OTEL_EXPORTER_OTLP_CERT_PATH",
+    "OTEL_EXPORTER_OTLP_KEY_PATH",
+    "OTEL_EXPORTER_OTLP_HEADERS_FILE",
   ]) {
     if (value[key] !== undefined) fail(`${label}_TRANSPORT_TRUST_FORBIDDEN_${key}`);
+  }
+}
+
+function assertOtlpConfiguration(value, label) {
+  if (value.OTEL_ENABLED !== "true" && value.OTEL_ENABLED !== "false") {
+    fail(`${label}_OTEL_ENABLED_INVALID`);
+  }
+  if (!/^[0-9]+$/.test(value.OTEL_EXPORTER_OTLP_TIMEOUT_MS ?? "")) {
+    fail(`${label}_OTEL_TIMEOUT_INVALID`);
+  }
+  const timeout = Number(value.OTEL_EXPORTER_OTLP_TIMEOUT_MS);
+  if (!Number.isSafeInteger(timeout) || timeout < 100 || timeout > 60_000) {
+    fail(`${label}_OTEL_TIMEOUT_INVALID`);
+  }
+  const endpoint = value.OTEL_EXPORTER_OTLP_ENDPOINT;
+  let url;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    fail(`${label}_OTEL_ENDPOINT_INVALID`);
+  }
+  if (
+    url.protocol !== "http:" ||
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.search.length > 0 ||
+    url.hash.length > 0 ||
+    /\/v1\/(?:traces|logs|metrics)\/?$/u.test(url.pathname)
+  ) {
+    fail(`${label}_OTEL_ENDPOINT_INVALID`);
+  }
+  if (
+    value.OTEL_ENABLED === "true" &&
+    (/REPLACE|mock|invalid/i.test(url.hostname) ||
+      ["localhost", "127.0.0.1", "::1", "0.0.0.0"].includes(url.hostname))
+  ) {
+    fail(`${label}_OTEL_ENDPOINT_UNCONFIGURED`);
   }
 }
 

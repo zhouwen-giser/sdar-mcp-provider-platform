@@ -53,6 +53,39 @@ anonymously proxies raw `/api/v1` routes (including SDAR consumer projections), 
 publishes anonymous `/mcp`. Database credentials and the Runtime-to-PMS registration token remain
 file-backed internal secrets.
 
+## Optional Runtime OTLP export
+
+Both product templates expose an opt-in OTLP/HTTP exporter through the generated deployment
+`.env`. Export is disabled by default, including when an older `.env` does not contain the new
+keys. Set the matching product-prefixed values before running `bin/up.sh`:
+
+```dotenv
+# UGV
+UGV_OTEL_ENABLED=true
+UGV_OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.intranet.local:4318
+UGV_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+
+# NPC Tank
+NPC_TANK_OTEL_ENABLED=true
+NPC_TANK_OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.intranet.local:4318
+NPC_TANK_OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+```
+
+The endpoint is an OTLP/HTTP base URL, normally on port `4318`; do not include `/v1/traces`,
+`/v1/logs`, or `/v1/metrics`, because the Runtime appends those signal paths. The service instance
+identity is fixed to the product's PMS direct-container instance (`production-ugv-direct-1` or
+`production-npc-tank-direct-1`) and is not an operator setting. Under the
+`strict-intranet-plaintext` profile this exporter is HTTP-only and sends no TLS credentials or
+authorization headers, so the Collector must be reachable only through the isolated internal
+network. If it runs on the deployment host, use an address reachable from the Runtime container,
+not `127.0.0.1` or `localhost`.
+
+The timeout value is in milliseconds and must be between `100` and `60000`.
+
+After changing these values, rerun the product's `bin/up.sh`. Compose recreates the Runtime whose
+configuration changed and leaves unchanged services in place; no bundle rebuild or repackaging is
+required.
+
 ## Product-specific automated packagers
 
 Use the two product-specific entry points when only one independent delivery must be generated.
