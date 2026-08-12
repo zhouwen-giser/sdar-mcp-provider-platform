@@ -1,6 +1,6 @@
 # SMPP Breakpoint Repair Final Report
 
-Status: `VERIFIED_AWAITING_NON_DRAFT_PR`
+Status: `READY_FOR_PROTECTED_REVIEW`
 
 ## Outcome
 
@@ -10,9 +10,9 @@ Home Assistant state remains matched for the configured stable duration and obse
 Persisted dispatch and confirmation state allow restart/reconciliation without a duplicate physical
 side effect in the covered crash windows.
 
-This is a ready-for-protected-review code candidate, not a production-readiness claim. Final delivery
-status becomes `READY_FOR_PROTECTED_REVIEW` only after the required non-Draft PR is created and its
-base/head metadata is confirmed.
+This is a ready-for-protected-review code candidate, not a production-readiness claim. The required
+non-Draft PR has been created with its base and head metadata confirmed. Merge, tag, release, and
+deployment remain human-controlled.
 
 ## Source and candidate lock
 
@@ -106,12 +106,10 @@ GitHub connector.
 
 ## Pull request delivery
 
-- PR number: `PENDING_NON_DRAFT_PR_NUMBER`
-- PR URL: `PENDING_NON_DRAFT_PR_URL`
+- PR number: `13`
+- PR URL: `https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/13`
 - Base: `main`
 - Head: `fix/smpp-breakpoint-repair`
-- Draft: `false` (to be confirmed after creation)
+- State: `open`
+- Draft: `false` (confirmed at creation)
 - Merge: not performed; protected review remains human-controlled.
-
-After PR creation, replace the two PR placeholders and record the report-only delivery commit
-separately from the verified candidate SHA.

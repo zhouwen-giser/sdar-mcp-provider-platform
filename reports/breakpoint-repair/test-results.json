@@ -112,5 +112,13 @@
     "registryLineageChanged": false,
     "adapterProtocolChanged": false
   },
+  "pullRequest": {
+    "number": 13,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/13",
+    "state": "open",
+    "isDraft": false,
+    "base": "main",
+    "head": "fix/smpp-breakpoint-repair"
+  },
   "externalBlockers": []
 }
