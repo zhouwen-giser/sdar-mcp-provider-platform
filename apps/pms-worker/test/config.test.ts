@@ -105,15 +105,17 @@ describe("PMS Worker production Runtime configuration", () => {
       runtime: { externalRuntimeCatalogCredentialFile: descriptor },
     });
 
-    await chmod(descriptor, 0o644);
-    await expect(
-      loadPmsWorkerConfig({
-        ...fixture.environment,
-        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
-      }),
-    ).rejects.toThrow(
-      "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
-    );
+    if (process.platform !== "win32") {
+      await chmod(descriptor, 0o644);
+      await expect(
+        loadPmsWorkerConfig({
+          ...fixture.environment,
+          PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+        }),
+      ).rejects.toThrow(
+        "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+      );
+    }
   });
 
   it("keeps external Runtime catalog authentication fail-closed unless anonymous mode is explicit", async () => {
