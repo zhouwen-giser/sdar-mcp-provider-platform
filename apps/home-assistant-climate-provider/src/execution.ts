@@ -6,7 +6,12 @@ import type { HomeAssistantClimateClient } from "./home-assistant.js";
 import type { ClimateResourceRegistry } from "./resources.js";
 import type { ClimateStore } from "./store.js";
 import type { ClimateTelemetry } from "./telemetry.js";
-import type { ClimateExecution, ExecutionContextRecord, NormalizedClimateState } from "./types.js";
+import type {
+  ClimateConfirmationPolicy,
+  ClimateExecution,
+  ExecutionContextRecord,
+  NormalizedClimateState,
+} from "./types.js";
 export interface StartClimateInput {
   taskId: string;
   operationName: "climate_set_power" | "climate_set_hvac_mode" | "climate_set_temperature";
@@ -21,6 +26,7 @@ export interface StartClimateInput {
 export interface ClimateExecutionEngineOptions {
   powerSideEffectsEnabled?: boolean;
   now?: () => number;
+  confirmationPolicy?: ClimateConfirmationPolicy;
   hooks?: {
     afterDispatchIntentPersisted?: (execution: ClimateExecution) => void | Promise<void>;
     afterHomeAssistantCall?: (execution: ClimateExecution) => void | Promise<void>;
@@ -33,18 +39,38 @@ export class ClimateExecutionEngine {
   readonly #taskLocks = new Map<string, Promise<void>>();
   readonly #powerSideEffectsEnabled: boolean;
   readonly #now: () => number;
+  readonly #confirmationPolicy: ClimateConfirmationPolicy;
 
   constructor(
     readonly store: ClimateStore,
     readonly registry: ClimateResourceRegistry,
     readonly rest: HomeAssistantClimateClient,
     readonly telemetry: ClimateTelemetry,
-    readonly confirmMs: number,
+    confirmationTimeoutOrPolicy: number | ClimateConfirmationPolicy,
     readonly sideEffectsEnabled: boolean,
     readonly options: ClimateExecutionEngineOptions = {},
   ) {
     this.#powerSideEffectsEnabled = options.powerSideEffectsEnabled ?? sideEffectsEnabled;
     this.#now = options.now ?? Date.now;
+    const confirmationTimeoutMs =
+      typeof confirmationTimeoutOrPolicy === "number"
+        ? confirmationTimeoutOrPolicy
+        : confirmationTimeoutOrPolicy.confirmationTimeoutMs;
+    const configuredPolicy =
+      typeof confirmationTimeoutOrPolicy === "number"
+        ? (options.confirmationPolicy ?? {
+            confirmationTimeoutMs,
+            minimumStableDurationMs: Math.min(
+              5_000,
+              Math.max(1, Math.floor(confirmationTimeoutMs / 3)),
+            ),
+            minimumMatchingObservations: 3,
+          })
+        : confirmationTimeoutOrPolicy;
+    if (configuredPolicy.confirmationTimeoutMs !== confirmationTimeoutMs) {
+      throw new Error("HOME_ASSISTANT_CONFIRMATION_POLICY_INVALID");
+    }
+    this.#confirmationPolicy = validateConfirmationPolicy(configuredPolicy);
   }
 
   async start(input: StartClimateInput): Promise<ClimateExecution> {
@@ -111,7 +137,13 @@ export class ClimateExecutionEngine {
       revision: 1,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
-      confirmationDeadlineAt: new Date(now.getTime() + this.confirmMs).toISOString(),
+      confirmationDeadlineAt: new Date(
+        now.getTime() + this.#confirmationPolicy.confirmationTimeoutMs,
+      ).toISOString(),
+      confirmationPolicy: { ...this.#confirmationPolicy },
+      confirmationBaselineObservedAt: observed.observedAt,
+      matchingObservationCount: 0,
+      lastObservedState: observed,
       lastSnapshot: {},
       commandAcks: {},
     };
@@ -124,6 +156,10 @@ export class ClimateExecutionEngine {
   async recover(): Promise<void> {
     for (const execution of this.store.list()) {
       if (execution.state === "SUCCEEDED" || execution.state === "TECHNICAL_FAILED") continue;
+      if (this.#deadlineReached(execution)) {
+        await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+        continue;
+      }
       if (!this.#resourceStillAllowlisted(execution)) {
         await this.#fail(execution, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
         continue;
@@ -164,49 +200,54 @@ export class ClimateExecutionEngine {
   }
 
   async poll(id: string): Promise<void> {
+    await this.#withTaskLock(id, () => this.#poll(id));
+  }
+
+  async #poll(id: string): Promise<void> {
     const x = this.store.get(id);
     if (x?.state !== "CONFIRMING") return;
+    if (this.#deadlineReached(x)) {
+      await this.#fail(x, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     const resource = this.#activeResource(x);
     if (resource === undefined) {
       await this.#fail(x, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
       return;
     }
     try {
-      await this.observe(
-        normalizeClimateState(x.resourceId, await this.rest.getState(resource.entityId)),
+      const state = normalizeClimateState(
+        x.resourceId,
+        await this.rest.getState(resource.entityId),
       );
+      await this.telemetry.observed(state);
+      await this.#applyObservation(id, state);
     } catch {
       // Polling remains best effort until the persisted confirmation deadline.
     }
     const current = this.store.get(id);
-    if (
-      current?.state === "CONFIRMING" &&
-      this.#now() >= Date.parse(current.confirmationDeadlineAt)
-    ) {
+    if (current?.state === "CONFIRMING" && this.#deadlineReached(current)) {
       await this.#fail(current, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
     }
   }
 
   async observe(state: NormalizedClimateState): Promise<void> {
     await this.telemetry.observed(state);
-    for (const x of this.store.list()) {
-      const resource = this.#activeResource(x);
-      if (
-        resource !== undefined &&
-        x.resourceId === state.resourceId &&
-        x.entityId === resource.entityId &&
-        x.state === "CONFIRMING" &&
-        confirmed(x, state)
-      ) {
-        const done = advance({ ...x, confirmedState: state }, "SUCCEEDED");
-        this.store.set(done);
-        await this.telemetry.progress(done);
-      }
+    const taskIds = this.store
+      .list()
+      .filter((execution) => execution.resourceId === state.resourceId)
+      .map(({ taskId }) => taskId);
+    for (const taskId of taskIds) {
+      await this.#withTaskLock(taskId, () => this.#applyObservation(taskId, state));
     }
   }
 
   async #dispatch(x: ClimateExecution): Promise<void> {
     if (x.dispatchState !== "NOT_STARTED" || x.sideEffectDispatched) return;
+    if (this.#deadlineReached(x)) {
+      await this.#fail(x, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     if (x.executionContext.executionMode !== "LIVE")
       throw new ClimateProviderError("EXECUTION_MODE_NOT_LIVE", false);
     if (!this.sideEffectsEnabled)
@@ -220,6 +261,10 @@ export class ClimateExecutionEngine {
       resource.resourceId,
       await this.rest.getState(resource.entityId),
     );
+    if (this.#deadlineReached(x)) {
+      await this.#fail(x, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     if (!observed.reachable) throw new ClimateProviderError("RESOURCE_UNAVAILABLE", true);
     this.#validateDesiredState(x, observed);
     const effectivePowerIntent = powerIntent(x.desiredState, observed);
@@ -227,9 +272,18 @@ export class ClimateExecutionEngine {
       throw new ClimateProviderError("CLIMATE_POWER_SIDE_EFFECTS_GATE_CLOSED", false);
 
     if (confirmed(x, observed)) {
-      const done = advance({ ...x, confirmedState: observed }, "SUCCEEDED");
-      this.store.set(done);
-      await this.telemetry.progress(done);
+      const confirming = advance(
+        {
+          ...x,
+          confirmationBaselineObservedAt: observed.observedAt,
+          lastObservedState: observed,
+        },
+        "CONFIRMING",
+        this.#now(),
+      );
+      this.store.set(confirming);
+      await this.telemetry.progress(confirming);
+      await this.#applyObservation(confirming.taskId, observed);
       return;
     }
 
@@ -266,7 +320,14 @@ export class ClimateExecutionEngine {
         };
       }
       marked = advance(
-        { ...latest, sideEffectDispatched: true, dispatchState: "INTENT_PERSISTED" },
+        {
+          ...latest,
+          sideEffectDispatched: true,
+          dispatchState: "INTENT_PERSISTED",
+          confirmationBaselineObservedAt: observed.observedAt,
+          matchingObservationCount: 0,
+          lastObservedState: observed,
+        },
         "PENDING_SIDE_EFFECT",
         this.#now(),
       );
@@ -278,6 +339,10 @@ export class ClimateExecutionEngine {
     }
     if (marked === undefined) return;
     await this.options.hooks?.afterDispatchIntentPersisted?.(marked);
+    if (this.#deadlineReached(marked)) {
+      await this.#fail(marked, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
 
     const data: Record<string, unknown> = { entity_id: resource.entityId };
     let service: "turn_on" | "turn_off" | "set_hvac_mode" | "set_temperature";
@@ -339,10 +404,96 @@ export class ClimateExecutionEngine {
     await this.poll(execution.taskId);
   }
 
-  async #fail(execution: ClimateExecution, reasonCode: string, retryable: boolean): Promise<void> {
+  async #applyObservation(taskId: string, state: NormalizedClimateState): Promise<void> {
+    const execution = this.store.get(taskId);
+    if (execution?.state !== "CONFIRMING") return;
+    const now = this.#now();
+    const resource = this.#activeResource(execution);
+    if (
+      resource === undefined ||
+      execution.resourceId !== state.resourceId ||
+      execution.entityId !== resource.entityId
+    ) {
+      return;
+    }
+    if (this.#deadlineReached(execution, now)) {
+      await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false, now);
+      return;
+    }
+
+    const observedAt = Date.parse(state.observedAt);
+    const baselineAt = Date.parse(execution.confirmationBaselineObservedAt ?? "");
+    const previousObservedAt = Date.parse(execution.lastObservedState?.observedAt ?? "");
+    if (
+      !Number.isFinite(observedAt) ||
+      (Number.isFinite(baselineAt) && observedAt < baselineAt) ||
+      (Number.isFinite(previousObservedAt) && observedAt < previousObservedAt)
+    ) {
+      return;
+    }
+
+    if (!state.reachable || !confirmed(execution, state)) {
+      const resetCandidate: ClimateExecution = {
+        ...execution,
+        matchingObservationCount: 0,
+        lastObservedState: state,
+      };
+      delete resetCandidate.candidateConfirmedAt;
+      delete resetCandidate.lastMatchingObservationAt;
+      const reset = advance(resetCandidate, "CONFIRMING", now);
+      this.store.set(reset);
+      await this.telemetry.progress(reset);
+      return;
+    }
+
+    const previousMatchAt = Date.parse(execution.lastMatchingObservationAt ?? "");
+    const existingCandidateAt = execution.candidateConfirmedAt;
+    const startsCandidate = existingCandidateAt === undefined;
+    const candidateConfirmedAt = existingCandidateAt ?? new Date(now).toISOString();
+    const matchingObservationCount = startsCandidate
+      ? 1
+      : now > previousMatchAt
+        ? (execution.matchingObservationCount ?? 1) + 1
+        : (execution.matchingObservationCount ?? 1);
+    const candidate = {
+      ...execution,
+      candidateConfirmedAt,
+      matchingObservationCount,
+      lastMatchingObservationAt:
+        now > previousMatchAt || execution.lastMatchingObservationAt === undefined
+          ? new Date(now).toISOString()
+          : execution.lastMatchingObservationAt,
+      lastObservedState: state,
+    };
+    const policy = execution.confirmationPolicy ?? this.#confirmationPolicy;
+    const stableFor = now - Date.parse(candidateConfirmedAt);
+    if (
+      matchingObservationCount >= policy.minimumMatchingObservations &&
+      stableFor >= policy.minimumStableDurationMs
+    ) {
+      const done = advance({ ...candidate, confirmedState: state }, "SUCCEEDED", now);
+      this.store.set(done);
+      await this.telemetry.progress(done);
+      return;
+    }
+    const confirming = advance(candidate, "CONFIRMING", now);
+    this.store.set(confirming);
+    await this.telemetry.progress(confirming);
+  }
+
+  #deadlineReached(execution: ClimateExecution, now = this.#now()): boolean {
+    return now >= Date.parse(execution.confirmationDeadlineAt);
+  }
+
+  async #fail(
+    execution: ClimateExecution,
+    reasonCode: string,
+    retryable: boolean,
+    now = this.#now(),
+  ): Promise<void> {
     const current = this.store.get(execution.taskId) ?? execution;
     if (current.state === "SUCCEEDED" || current.state === "TECHNICAL_FAILED") return;
-    const failed = failedExecution(current, reasonCode, retryable, this.#now());
+    const failed = failedExecution(current, reasonCode, retryable, now);
     this.store.set(failed);
     await this.telemetry.progress(failed);
   }
@@ -530,4 +681,19 @@ export class ClimateConfirmationWorker {
     if (this.#timer !== undefined) clearInterval(this.#timer);
     this.#timer = undefined;
   }
+}
+
+function validateConfirmationPolicy(policy: ClimateConfirmationPolicy): ClimateConfirmationPolicy {
+  if (
+    !Number.isInteger(policy.confirmationTimeoutMs) ||
+    policy.confirmationTimeoutMs <= 0 ||
+    !Number.isInteger(policy.minimumStableDurationMs) ||
+    policy.minimumStableDurationMs <= 0 ||
+    policy.minimumStableDurationMs >= policy.confirmationTimeoutMs ||
+    !Number.isInteger(policy.minimumMatchingObservations) ||
+    policy.minimumMatchingObservations < 2
+  ) {
+    throw new Error("HOME_ASSISTANT_CONFIRMATION_POLICY_INVALID");
+  }
+  return { ...policy };
 }

@@ -55,7 +55,11 @@ const engine = new ClimateExecutionEngine(
   registry,
   rest,
   telemetry,
-  config.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS,
+  {
+    confirmationTimeoutMs: config.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS,
+    minimumStableDurationMs: config.HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS,
+    minimumMatchingObservations: config.HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS,
+  },
   sideEffectsEnabled,
   { powerSideEffectsEnabled: climatePowerSideEffectsEnabled },
 );

@@ -1,5 +1,7 @@
 proto/** text eol=lf
 protocol/**/*.json text eol=lf
+protocol/**/*.md text eol=lf
+*.sh text eol=lf
 protocol/frozen/* -text -diff
 protocol/upstream/mcp-2026-07-28/schema.json -text -diff
 protocol/*.schema.json text eol=lf

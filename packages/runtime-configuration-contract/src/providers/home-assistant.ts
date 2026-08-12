@@ -25,6 +25,18 @@ const HomeAssistantClimateInputBaseSchema = z.object({
   HOME_ASSISTANT_ALLOW_INSECURE_HTTP: bool.default(false),
   HOME_ASSISTANT_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
   HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+  HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(60_000)
+    .optional(),
+  HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS: z.coerce
+    .number()
+    .int()
+    .min(2)
+    .max(100)
+    .default(3),
   HOME_ASSISTANT_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(500),
   HOME_ASSISTANT_WS_RECONNECT_MIN_MS: z.coerce.number().int().positive().default(500),
   HOME_ASSISTANT_WS_RECONNECT_MAX_MS: z.coerce.number().int().positive().default(30_000),
@@ -45,6 +57,7 @@ export const HomeAssistantClimateResolvedSchema = HomeAssistantClimateInputBaseS
   ADAPTER_TLS_CERT_PATH: z.string().optional(),
   ADAPTER_TLS_KEY_PATH: z.string().optional(),
   HOME_ASSISTANT_ALLOW_INSECURE_HTTP: z.boolean(),
+  HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: z.number().int().min(1).max(60_000),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
   PROVIDER_TELEMETRY_TLS_CA_PATH: z.string().optional(),
   PROVIDER_TELEMETRY_TLS_CERT_PATH: z.string().optional(),
@@ -63,9 +76,19 @@ export function loadHomeAssistantClimateConfiguration(
   if (Object.hasOwn(environment, "HOME_ASSISTANT_TOKEN")) {
     throw new Error("HOME_ASSISTANT_TOKEN_ENVIRONMENT_FORBIDDEN");
   }
-  const value = HomeAssistantClimateResolvedSchema.parse(
-    HomeAssistantClimateInputBaseSchema.parse(environment),
-  );
+  const input = HomeAssistantClimateInputBaseSchema.parse(environment);
+  const value = HomeAssistantClimateResolvedSchema.parse({
+    ...input,
+    HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS:
+      input.HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS ??
+      Math.min(5_000, Math.max(1, Math.floor(input.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS / 3))),
+  });
+  if (
+    value.HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS >=
+    value.HOME_ASSISTANT_CONFIRM_TIMEOUT_MS
+  ) {
+    throw new Error("HOME_ASSISTANT_CONFIRMATION_POLICY_INVALID");
+  }
   const url = new URL(value.HOME_ASSISTANT_URL);
   if (
     value.RUNTIME_ENV === "production" &&
@@ -150,6 +173,8 @@ export const HomeAssistantClimateConfigurationDefinition = parseConfigurationDef
     HOME_ASSISTANT_ALLOW_INSECURE_HTTP: false,
     HOME_ASSISTANT_REQUEST_TIMEOUT_MS: 5_000,
     HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: 15_000,
+    HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: 5_000,
+    HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS: 3,
     HOME_ASSISTANT_POLL_INTERVAL_MS: 500,
     HOME_ASSISTANT_WS_RECONNECT_MIN_MS: 500,
     HOME_ASSISTANT_WS_RECONNECT_MAX_MS: 30_000,

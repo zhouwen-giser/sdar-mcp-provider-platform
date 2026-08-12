@@ -17,3 +17,5 @@ The Adapter never accepts a Home Assistant domain, service, or entity identifier
 Use `LIGHT_RESOURCES_FILE` and `HOME_ASSISTANT_TOKEN_FILE`. A token is read from the file only; `HOME_ASSISTANT_TOKEN` is rejected. Real writes additionally require both `ALLOW_REAL_DEVICE_SIDE_EFFECTS=YES` and a non-empty `REAL_DEVICE_TEST_RUN_ID`. Missing either gate fails closed after the read-only state path.
 
 The Provider uses `vendor_managed` hosting. PMS may manage the Provider Package and Runtime Deployment, but the Adapter is started by the local controlled process or Compose deployment.
+
+Task cancellation and pause/resume are not supported; a negative Adapter Ack never implies physical rollback.

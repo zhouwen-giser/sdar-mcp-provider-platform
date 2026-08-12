@@ -1,0 +1,9 @@
+{
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "mainSha": "cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef",
+  "mainCommitMessage": "Merge pull request #12 from zhouwen-giser/codex/goal-11-npc-tank-simulation-real-interface",
+  "observedAt": "2026-08-12T14:03:12.2663478Z",
+  "nodeVersion": "v22.14.0",
+  "pnpmVersion": "11.13.1",
+  "workingTreeClean": true
+}

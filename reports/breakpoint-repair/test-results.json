@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "1.0",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "branch": "fix/smpp-breakpoint-repair",
+  "base": {
+    "sourceLockSha": "cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef",
+    "finalMergedMainSha": "cc5dca8fab499826c8d1011e6f790e5fb0a8e3ef",
+    "originMainBehindCountAtVerification": 0
+  },
+  "candidate": {
+    "verifiedCandidateSha": "23eb2ed1c14830a8a6b328d3a67df1badcd492ab",
+    "verifiedRemoteSha": "23eb2ed1c14830a8a6b328d3a67df1badcd492ab",
+    "reportOnlyDeliverySha": "84e5af71979e05e95f45664cadf2ab357a6c3df2",
+    "verificationIsolation": "Exact candidate checked through clean worktree/archive environments; the later report-only delivery commit does not alter runtime code."
+  },
+  "verificationResult": "PASS",
+  "breakpoints": {
+    "BP-SMPP-001": "FIXED",
+    "BP-SMPP-002": "FIXED",
+    "BP-SMPP-003": "ALREADY_FIXED_ON_MAIN",
+    "BP-SMPP-004": "PARTIALLY_FIXED",
+    "BP-SMPP-005": "DEFERRED"
+  },
+  "gates": [
+    {
+      "command": "pnpm verify:v2",
+      "result": "PASS",
+      "durationSeconds": 1111.1,
+      "scope": "Formal full-repository verification, including frozen protocol, Runtime, business events, static, integration, recovery, security, E2E, conformance, and capacity gates."
+    },
+    {
+      "command": "pnpm verify:platform",
+      "result": "PASS",
+      "durationSeconds": 274.7,
+      "scope": "SMPP platform aggregate, including format, lint, typecheck, build, protocol, SBOM, Registry projection, packages, PMS, fault injection, security, and platform E2E."
+    },
+    {
+      "command": "pnpm container:check",
+      "result": "PASS",
+      "durationSeconds": 50.4,
+      "scope": "Compose configuration, Docker build check, and Runtime image contract."
+    },
+    {
+      "command": "pnpm test:production-bundles",
+      "result": "PASS",
+      "durationSeconds": 2.4,
+      "testDurationSeconds": 1.017,
+      "testsPassed": 33,
+      "testsTotal": 33,
+      "scope": "Clean git archive of the exact candidate in ephemeral Linux node:22-bookworm-slim with yaml 2.9.0 mounted read-only."
+    }
+  ],
+  "focusedEvidence": [
+    {
+      "name": "Climate focused selection",
+      "result": "PASS",
+      "files": 7,
+      "testsPassed": 40,
+      "testsTotal": 40
+    },
+    {
+      "command": "pnpm test:ha-climate",
+      "result": "PASS",
+      "files": 5,
+      "testsPassed": 33,
+      "testsTotal": 33
+    },
+    {
+      "command": "pnpm test:fault-injection",
+      "result": "PASS",
+      "files": 5,
+      "testsPassed": 39,
+      "testsTotal": 39
+    },
+    {
+      "command": "pnpm test:ha-climate:e2e",
+      "result": "PASS",
+      "testsPassed": 1,
+      "testsTotal": 1
+    },
+    {
+      "command": "pnpm test:recovery",
+      "result": "PASS",
+      "testsPassed": 9,
+      "testsTotal": 9
+    },
+    {
+      "command": "pnpm test:provider-platform-ha",
+      "result": "PASS",
+      "testsPassed": 4,
+      "testsTotal": 4
+    }
+  ],
+  "requiredStaticGates": {
+    "formatCheck": "PASS via verify:platform",
+    "lint": "PASS via verify:platform and verify:v2",
+    "typecheck": "PASS via verify:platform and verify:v2",
+    "build": "PASS via verify:platform and verify:v2",
+    "protocolCheck": "PASS via verify:platform and verify:v2",
+    "gitDiffCheck": "PASS"
+  },
+  "safety": {
+    "physicalDeviceWrites": 0,
+    "realDeviceWriteGatesEnabled": false,
+    "deterministicFakeHomeAssistant": true,
+    "realDeviceQualificationClaimed": false,
+    "productionReadyClaimed": false
+  },
+  "compatibility": {
+    "registryProjectionChanged": false,
+    "registryChecksumChanged": false,
+    "registryLineageChanged": false,
+    "adapterProtocolChanged": false
+  },
+  "pullRequest": {
+    "number": 13,
+    "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/13",
+    "state": "open",
+    "isDraft": false,
+    "base": "main",
+    "head": "fix/smpp-breakpoint-repair"
+  },
+  "externalBlockers": []
+}

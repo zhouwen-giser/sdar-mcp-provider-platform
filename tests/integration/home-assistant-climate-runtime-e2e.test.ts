@@ -3,7 +3,10 @@ import { Pool } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadRuntimeConfig } from "../../apps/runtime/src/config.js";
 import { createRuntime, type RuntimeApplication } from "../../apps/runtime/src/runtime.js";
-import { ClimateExecutionEngine } from "../../apps/home-assistant-climate-provider/src/execution.js";
+import {
+  ClimateConfirmationWorker,
+  ClimateExecutionEngine,
+} from "../../apps/home-assistant-climate-provider/src/execution.js";
 import {
   HomeAssistantClimateClient,
   HomeAssistantClimateWebSocket,
@@ -20,6 +23,7 @@ let fake: FakeHomeAssistantClimate;
 let provider: ClimateProviderServer;
 let ws: HomeAssistantClimateWebSocket;
 let telemetry: ProviderClimateTelemetry;
+let confirmationWorker: ClimateConfirmationWorker;
 let runtime: RuntimeApplication;
 let runtimeUrl: URL;
 let pool: Pool;
@@ -65,7 +69,19 @@ beforeAll(async () => {
     registry,
     store,
   );
-  const engine = new ClimateExecutionEngine(store, registry, rest, telemetry, 3000, true);
+  const engine = new ClimateExecutionEngine(
+    store,
+    registry,
+    rest,
+    telemetry,
+    {
+      confirmationTimeoutMs: 3_000,
+      minimumStableDurationMs: 200,
+      minimumMatchingObservations: 3,
+    },
+    true,
+  );
+  confirmationWorker = new ClimateConfirmationWorker(store, engine, 50);
   ws = new HomeAssistantClimateWebSocket({
     baseUrl: fake.url,
     token: fake.token,
@@ -111,8 +127,10 @@ beforeAll(async () => {
   runtimeUrl = new URL(`http://127.0.0.1:${String(address.port)}/mcp`);
   telemetry.start();
   ws.start();
+  confirmationWorker.start();
 });
 afterAll(async () => {
+  confirmationWorker.stop();
   ws.stop();
   telemetry.stop();
   await runtime.app.close();

@@ -70,11 +70,13 @@ describe("Home Assistant climate recovery", () => {
         ]),
         new HomeAssistantClimateClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
         new NoopClimateTelemetry(),
-        2000,
+        fastConfirmationPolicy(),
         true,
       );
       await engine.recover();
       expect(fake.serviceCalls).toHaveLength(1);
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      await engine.poll("recover");
       await new Promise((resolve) => setTimeout(resolve, 30));
       await engine.poll("recover");
       expect(restarted.get("recover")?.state).toBe("SUCCEEDED");
@@ -105,7 +107,7 @@ describe("Home Assistant climate recovery", () => {
         registry,
         client,
         new NoopClimateTelemetry(),
-        2000,
+        fastConfirmationPolicy(),
         true,
         {
           hooks: {
@@ -134,13 +136,76 @@ describe("Home Assistant climate recovery", () => {
         registry,
         client,
         new NoopClimateTelemetry(),
-        2000,
+        fastConfirmationPolicy(),
         true,
       );
       await recovered.recover();
+      await new Promise((resolve) => setTimeout(resolve, 30));
       await recovered.poll("post-call-crash");
       expect(fake.serviceCalls).toHaveLength(1);
       expect(store.get("post-call-crash")?.state).toBe("SUCCEEDED");
+    } finally {
+      await fake.close();
+    }
+  });
+
+  it("does not call Home Assistant after an intent-persisted crash", async () => {
+    const fake = new FakeHomeAssistantClimate();
+    fake.setState("climate.recovery", "cool", {
+      temperature: 24,
+      min_temp: 16,
+      max_temp: 30,
+      hvac_modes: ["cool"],
+    });
+    await fake.start();
+    try {
+      const store = new MemoryClimateStore();
+      const registry = recoveryRegistry("climate.recovery");
+      const client = new HomeAssistantClimateClient({
+        baseUrl: fake.url,
+        token: fake.token,
+        timeoutMs: 1000,
+      });
+      const crashing = new ClimateExecutionEngine(
+        store,
+        registry,
+        client,
+        new NoopClimateTelemetry(),
+        fastConfirmationPolicy(),
+        true,
+        {
+          hooks: {
+            afterDispatchIntentPersisted: () => {
+              throw new Error("SIMULATED_INTENT_PERSISTED_CRASH");
+            },
+          },
+        },
+      );
+      await expect(
+        crashing.start({
+          taskId: "intent-persisted-crash",
+          operationName: "climate_set_temperature",
+          resourceId: "recovery",
+          temperature: 21,
+          argumentHash: "b".repeat(64),
+          executionContext: liveContext(),
+        }),
+      ).rejects.toThrow("SIMULATED_INTENT_PERSISTED_CRASH");
+      expect(fake.serviceCalls).toHaveLength(0);
+      expect(store.get("intent-persisted-crash")?.dispatchState).toBe("INTENT_PERSISTED");
+
+      const recovered = new ClimateExecutionEngine(
+        store,
+        registry,
+        client,
+        new NoopClimateTelemetry(),
+        fastConfirmationPolicy(),
+        true,
+      );
+      await recovered.recover();
+      await recovered.recover();
+      expect(fake.serviceCalls).toHaveLength(0);
+      expect(store.get("intent-persisted-crash")?.state).toBe("CONFIRMING");
     } finally {
       await fake.close();
     }
@@ -163,7 +228,7 @@ describe("Home Assistant climate recovery", () => {
         recoveryRegistry("climate.recovery"),
         new HomeAssistantClimateClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
         new NoopClimateTelemetry(),
-        2000,
+        fastConfirmationPolicy(),
         false,
       );
       await engine.recover();
@@ -207,7 +272,7 @@ describe("Home Assistant climate recovery", () => {
         recoveryRegistry("climate.new"),
         new HomeAssistantClimateClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
         new NoopClimateTelemetry(),
-        2000,
+        fastConfirmationPolicy(),
         true,
       );
       await engine.recover();
@@ -235,7 +300,7 @@ describe("Home Assistant climate recovery", () => {
         timeoutMs: 100,
       }),
       new NoopClimateTelemetry(),
-      2000,
+      fastConfirmationPolicy(),
       true,
     );
     await engine.recover();
@@ -253,6 +318,47 @@ describe("Home Assistant climate recovery", () => {
         operationName: "climate_set_power",
         desiredState: { type: "temperature", temperature: 21 },
       }),
+      pendingExecution({
+        taskId: "dispatch-invariant",
+        dispatchState: "CALL_RETURNED",
+        sideEffectDispatched: false,
+      }),
+      pendingExecution({
+        taskId: "invalid-deadline",
+        confirmationDeadlineAt: "not-an-instant",
+      }),
+      pendingExecution({
+        taskId: "invalid-candidate",
+        matchingObservationCount: 1,
+      }),
+      pendingExecution({
+        taskId: "candidate-before-created",
+        state: "CONFIRMING",
+        sideEffectDispatched: true,
+        dispatchState: "CALL_RETURNED",
+        createdAt: new Date(2_000).toISOString(),
+        updatedAt: new Date(3_000).toISOString(),
+        confirmationDeadlineAt: new Date(4_000).toISOString(),
+        candidateConfirmedAt: new Date(1_000).toISOString(),
+        lastMatchingObservationAt: new Date(2_500).toISOString(),
+        matchingObservationCount: 2,
+      }),
+      {
+        ...pendingExecution({
+          taskId: "succeeded-without-confirmed-state",
+          sideEffectDispatched: true,
+          dispatchState: "CALL_RETURNED",
+        }),
+        state: "SUCCEEDED" as const,
+      },
+      pendingExecution({
+        taskId: "invalid-policy",
+        confirmationPolicy: {
+          confirmationTimeoutMs: 1_000,
+          minimumStableDurationMs: 1_000,
+          minimumMatchingObservations: 2,
+        },
+      }),
     ];
     for (const execution of corruptions) {
       const path = join(mkdtempSync(join(tmpdir(), "climate-corrupt-")), "state.json");
@@ -260,7 +366,7 @@ describe("Home Assistant climate recovery", () => {
         path,
         JSON.stringify({
           version: 1,
-          executions: { corrupt: execution },
+          executions: { [execution.taskId]: execution },
           pendingTelemetryEvents: [],
           nextTelemetrySequence: 1,
         }),
@@ -316,4 +422,12 @@ function pendingExecution(overrides: Partial<ClimateExecution> = {}): ClimateExe
   };
   execution.lastSnapshot = snapshot(execution);
   return execution;
+}
+
+function fastConfirmationPolicy() {
+  return {
+    confirmationTimeoutMs: 2_000,
+    minimumStableDurationMs: 20,
+    minimumMatchingObservations: 2,
+  } as const;
 }

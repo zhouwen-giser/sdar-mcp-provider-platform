@@ -5,7 +5,10 @@ import { dirname, resolve } from "node:path";
 import { Pool } from "pg";
 import { loadRuntimeConfig } from "../apps/runtime/src/config.js";
 import { createRuntime } from "../apps/runtime/src/runtime.js";
-import { ClimateExecutionEngine } from "../apps/home-assistant-climate-provider/src/execution.js";
+import {
+  ClimateConfirmationWorker,
+  ClimateExecutionEngine,
+} from "../apps/home-assistant-climate-provider/src/execution.js";
 import {
   HomeAssistantClimateClient,
   HomeAssistantClimateWebSocket,
@@ -101,6 +104,7 @@ let runtime: ReturnType<typeof createRuntime> | undefined;
 let provider: ClimateProviderServer | undefined;
 let websocket: HomeAssistantClimateWebSocket | undefined;
 let telemetry: ProviderClimateTelemetry | undefined;
+let confirmationWorker: ClimateConfirmationWorker | undefined;
 let runtimeSchema: string | undefined;
 let adminPool: Pool | undefined;
 
@@ -145,10 +149,15 @@ try {
     resources,
     rest,
     telemetry,
-    20_000,
+    {
+      confirmationTimeoutMs: 20_000,
+      minimumStableDurationMs: 5_000,
+      minimumMatchingObservations: 3,
+    },
     writesEnabled,
     { powerSideEffectsEnabled: writesEnabled && climatePowerTestGateOpen },
   );
+  confirmationWorker = new ClimateConfirmationWorker(store, engine, 500);
   websocket = new HomeAssistantClimateWebSocket({
     baseUrl: local.url,
     token: local.token,
@@ -217,6 +226,7 @@ try {
   };
   telemetry.start();
   websocket.start();
+  confirmationWorker.start();
 
   report.initialize = "not_applicable_to_frozen_runtime_surface";
   report.discovery = await readOnlyCall(mcpUrl, "server/discover", {}, undefined, 2);
@@ -458,6 +468,7 @@ try {
     "utf8",
   );
   websocket?.stop();
+  confirmationWorker?.stop();
   telemetry?.stop();
   await runtime?.app.close().catch(() => undefined);
   await runtime?.pool.end().catch(() => undefined);

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,11 @@ afterEach(() => {
 });
 
 describe("Docker workspace manifest verification", () => {
+  it("excludes nested workspace dependency links from the build context", () => {
+    const ignored = readFileSync(join(repositoryRoot, ".dockerignore"), "utf8").split(/\r?\n/u);
+    expect(ignored).toContain("**/node_modules");
+  });
+
   it("stages every real workspace manifest exactly once", () => {
     const result = verifyDockerWorkspaceManifests({ rootDirectory: repositoryRoot });
     expect([...result.stagedManifests].sort()).toEqual([...result.requiredManifests].sort());

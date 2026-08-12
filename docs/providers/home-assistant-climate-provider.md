@@ -42,8 +42,12 @@ restoration instead of waiting through an active five-minute opposite-power inte
 - `climate_set_temperature`: calls `climate.set_temperature` after range validation.
 
 HTTP success is not completion proof. The Provider completes Tasks only after WebSocket
-`state_changed` or REST polling confirms the desired state. Task identity and pending telemetry
-are atomically persisted for restart recovery. Duplicate `taskId` does not repeat a side effect.
+`state_changed` or REST polling confirms the desired state across the configured uninterrupted
+stability window and minimum matching-observation count. A mismatch resets the candidate window;
+an expired confirmation deadline fails before either success or a recovered late dispatch. The
+default policy is five stable seconds and three matching observations within a fifteen-second
+deadline. Task identity, dispatch state, candidate confirmation state, and pending telemetry are
+atomically persisted for restart recovery. Duplicate `taskId` does not repeat a side effect.
 
 Resource state, current/target temperature metrics, resource health, and Task progress are sent
 through Runtime `ProviderTelemetryIngress`. Delivery failure does not change control outcomes.
