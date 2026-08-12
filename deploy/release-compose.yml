@@ -75,7 +75,8 @@ services:
     image: sdar/pms-web:0.1.0-rc
     read_only: true
     environment:
-      PMS_WEB_API_BASE: http://pms-api:8090
+      PMS_WEB_API_BASE: /api/console/v1
+      PMS_WEB_API_UPSTREAM: http://pms-api:8090
     depends_on:
       pms-api:
         condition: service_healthy

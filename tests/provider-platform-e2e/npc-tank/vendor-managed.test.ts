@@ -36,9 +36,11 @@ const expectedOperations = [
   "vehicle_get_state",
   "vehicle_get_payload_status",
   "vehicle_get_targets",
+  "vehicle_get_capabilities",
   "vehicle_laser_range",
   "vehicle_navigate",
   "vehicle_area_recon",
+  "vehicle_control_gimbal",
   "vehicle_track_target",
   "vehicle_fire_weapon",
   "vehicle_emergency_stop",
@@ -209,8 +211,10 @@ describe("vendor_managed NPC Tank Provider platform integration", () => {
       publishedAt: new Date(),
     });
 
-    expect(catalogPublication.snapshot.document.tools).toHaveLength(9);
-    expect(registryPublication.snapshot.document.providers[0]?.tools).toHaveLength(9);
+    expect(catalogPublication.snapshot.document.tools).toHaveLength(expectedOperations.length);
+    expect(registryPublication.snapshot.document.providers[0]?.tools).toHaveLength(
+      expectedOperations.length,
+    );
     expect(JSON.stringify(registryPublication.snapshot)).not.toContain("qualified");
     expect(
       (

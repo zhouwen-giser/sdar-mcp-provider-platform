@@ -71,7 +71,7 @@ try {
   composeExec("pms-web", [
     "node",
     "-e",
-    String.raw`fetch("http://127.0.0.1:8080/").then(async r=>{const html=await r.text();if(!r.ok||!html.includes("http://pms-api:8090")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web");const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(m=>m[1]);if(!assets.some(p=>p.endsWith(".js"))||!assets.some(p=>p.endsWith(".css")))throw Error("assets");await Promise.all([...assets,"/providers/one","/health/live","/health/ready"].map(async p=>{const a=await fetch("http://127.0.0.1:8080"+p);if(!a.ok)throw Error(p)}));return fetch("http://pms-api:8090/health/ready")}).then(r=>{if(!r.ok)process.exit(1)})`,
+    String.raw`fetch("http://127.0.0.1:8080/").then(async r=>{const html=await r.text();if(!r.ok||!html.includes("/api/console/v1")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web");const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(m=>m[1]);if(!assets.some(p=>p.endsWith(".js"))||!assets.some(p=>p.endsWith(".css")))throw Error("assets");await Promise.all([...assets,"/providers/one","/health/live","/health/ready"].map(async p=>{const a=await fetch("http://127.0.0.1:8080"+p);if(!a.ok)throw Error(p)}));return fetch("http://pms-api:8090/health/ready")}).then(r=>{if(!r.ok)process.exit(1)})`,
   ]);
   const workerId = compose("ps", "-q", "pms-worker").trim();
   assert(workerId.length > 0, "RELEASE_ARTIFACT_WORKER_CONTAINER_MISSING");
@@ -389,7 +389,15 @@ function validateImage(name, image, inspection) {
   const allowed = {
     runtime: ["dist", "migrations", "node_modules", "proto"],
     api: ["dist", "migrations", "node_modules", "packages", "provider-packages"],
-    worker: ["dist", "migrations", "node_modules", "packages", "proto", "provider-packages"],
+    worker: [
+      "dist",
+      "migrations",
+      "node_modules",
+      "packages",
+      "proto",
+      "provider-packages",
+      "runtime-releases",
+    ],
     web: ["server.mjs", "web"],
   }[name];
   const actual = lines(
