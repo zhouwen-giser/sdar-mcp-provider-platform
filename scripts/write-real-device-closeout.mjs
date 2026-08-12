@@ -366,7 +366,7 @@ const releasePackaging = {
         image: runtimeImage.image,
         base: runtimeImage.base,
         sizeBytes: runtimeImage.sizeBytes,
-        maximumBytes: runtimeImage.maximumBytes,
+        sizeLimitEnforced: runtimeImage.sizeLimitEnforced === true,
         filesystemHash: runtimeImage.filesystemHash,
         frozenLockfile: runtimeImage.frozenLockfile,
         productionDependenciesOnly: runtimeImage.productionDependenciesOnly,
