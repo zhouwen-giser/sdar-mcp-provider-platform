@@ -42,8 +42,9 @@ Light Adapter services over local gRPC with in-memory stores. For both providers
 - `callServiceCount` remains zero;
 - no physical rollback is implied.
 
-The focused contract test has passed during development. Its result will be rerun and recorded with
-the final candidate; this report does not substitute for the repository-wide verification gate.
+The contract test passed on exact candidate
+`23eb2ed1c14830a8a6b328d3a67df1badcd492ab`, including the real in-memory gRPC negative-Ack and
+zero-Home-Assistant-call assertions. The candidate also passed `verify:platform` and `verify:v2`.
 
 ## Compatibility
 

@@ -1,6 +1,6 @@
 # BP-SMPP-002 Provider Crash, Restart, and Reconciliation
 
-Status: `PARTIALLY_FIXED`
+Status: `FIXED`
 
 ## Baseline result
 
@@ -19,7 +19,7 @@ Two deadline-ordering gaps remained reproducible on main:
 1. An expired `NOT_STARTED` record could still dispatch a late physical write during recovery.
 2. A matching observation could be accepted as success after `confirmationDeadlineAt`.
 
-The working-tree repair checks the deadline before recovery dispatch, before a normal dispatch, and
+The repair checks the deadline before recovery dispatch, before a normal dispatch, and
 before observation success. It also persists candidate confirmation state so recovery can continue
 the same stability window.
 
@@ -53,7 +53,7 @@ The fake Home Assistant client records `callServiceCount`. Required assertions i
 - expired `NOT_STARTED` recovery fails with zero HA calls;
 - corrupt persisted records fail closed instead of being interpreted optimistically.
 
-Final pass counts and command results are intentionally reserved for `test-results.json`.
+The final pass counts and command results are recorded in `test-results.json`.
 
 ## State and telemetry consistency
 
@@ -71,8 +71,12 @@ the physical control outcome if telemetry delivery fails.
 - No real-device side-effect environment gate is enabled.
 - No SDAR-owned issue is repaired in this repository.
 
-## Remaining qualification
+## Final qualification
 
-Promotion to `FIXED` requires the final deterministic fault suite, Climate/Light integration suites,
-database-backed recovery gates where available, full repository verification, and a clean final
-candidate. Until those gates complete, BP-SMPP-002 remains `PARTIALLY_FIXED`.
+Exact candidate `23eb2ed1c14830a8a6b328d3a67df1badcd492ab` passed `test:recovery` (9/9),
+`test:fault-injection` (5 files / 39 tests), the Home Assistant provider-platform E2E selection (4
+tests), `verify:platform`, and the formal full-repository `verify:v2` gate. The deterministic
+`callServiceCount` assertions prove that the same task does not produce a duplicate Home Assistant
+side effect across the covered crash/recovery windows. These results qualify the code-owned
+breakpoint as `FIXED`; the broader process/network fault matrix remains explicitly bounded under
+BP-SMPP-004 rather than being presented as production qualification.

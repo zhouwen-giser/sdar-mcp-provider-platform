@@ -1,6 +1,6 @@
 # BP-SMPP-001 Climate Stable Confirmation
 
-Status: `PARTIALLY_FIXED`
+Status: `FIXED`
 
 ## Breakpoint
 
@@ -16,7 +16,7 @@ regress immediately after it is received.
 
 ## Repair semantics
 
-The working-tree repair uses this internal progression:
+The repair uses this internal progression:
 
 ```text
 PENDING_SIDE_EFFECT
@@ -75,7 +75,8 @@ candidate window or turn a completed dispatch back into a new Home Assistant cal
 ## Regression matrix
 
 The deterministic suite `tests/integration/home-assistant-climate-stability.test.ts` contains the
-following cases. Final candidate results are deliberately not asserted in this draft report.
+following cases. They passed on exact candidate
+`23eb2ed1c14830a8a6b328d3a67df1badcd492ab`.
 
 | Scenario              | Required outcome                                                                                                     |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -97,9 +98,10 @@ following cases. Final candidate results are deliberately not asserted in this d
 - Tests use deterministic fake Home Assistant clients. Physical-device write authority remains
   closed.
 
-## Remaining qualification
+## Final qualification
 
-Promotion to `FIXED` requires the focused Climate tests, recovery tests, configuration schema gate,
-integration tests, and the repository's full verification command to pass on the final branch after
-the latest `origin/main` has been merged. Until that evidence is recorded, the honest status remains
-`PARTIALLY_FIXED`.
+The focused Climate selection passed 7 files / 40 tests; `test:ha-climate` passed 5 files / 33
+tests; the Climate Runtime E2E passed 1/1; `test:fault-injection` passed 5 files / 39 tests; and the
+formal `verify:platform` and `verify:v2` gates passed on the exact candidate. The historical
+transient-match regression is permanently included in the deterministic suite. No real-device
+write gate was enabled and no physical device write occurred during this qualification.
