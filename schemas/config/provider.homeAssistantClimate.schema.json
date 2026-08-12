@@ -15,6 +15,17 @@
     },
     "CLIMATE_RESOURCES_FILE": { "minLength": 1, "type": "string" },
     "HOME_ASSISTANT_ALLOW_INSECURE_HTTP": { "type": "boolean" },
+    "HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS": {
+      "default": 3,
+      "maximum": 100,
+      "minimum": 2,
+      "type": "integer"
+    },
+    "HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS": {
+      "maximum": 60000,
+      "minimum": 1,
+      "type": "integer"
+    },
     "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS": {
       "default": 15000,
       "exclusiveMinimum": 0,
@@ -95,6 +106,8 @@
     "HOME_ASSISTANT_ALLOW_INSECURE_HTTP",
     "HOME_ASSISTANT_REQUEST_TIMEOUT_MS",
     "HOME_ASSISTANT_CONFIRM_TIMEOUT_MS",
+    "HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS",
+    "HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS",
     "HOME_ASSISTANT_POLL_INTERVAL_MS",
     "HOME_ASSISTANT_WS_RECONNECT_MIN_MS",
     "HOME_ASSISTANT_WS_RECONNECT_MAX_MS",

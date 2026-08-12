@@ -46,7 +46,7 @@ afterEach(async () => {
 });
 describe("Home Assistant climate Provider", () => {
   it("exposes four operations and executes idempotent mode and temperature controls", async () => {
-    const { store } = await setup();
+    const { store, engine } = await setup();
     expect((await gateway?.describeProvider())?.operations.map((o) => o.name)).toEqual([
       "climate_get_state",
       "climate_set_power",
@@ -59,7 +59,10 @@ describe("Home Assistant climate Provider", () => {
       { resourceId: resource.resourceId, hvacMode: "cool" },
       options,
     );
-    await wait(() => store.get("mode-task")?.state === "SUCCEEDED");
+    await wait(async () => {
+      await engine.poll("mode-task");
+      return store.get("mode-task")?.state === "SUCCEEDED";
+    });
     await gateway?.startOperation(
       "climate_set_hvac_mode",
       { resourceId: resource.resourceId, hvacMode: "cool" },
@@ -71,7 +74,10 @@ describe("Home Assistant climate Provider", () => {
       { resourceId: resource.resourceId, targetTemperature: 22.5 },
       { taskId: "temperature-task", argumentHash: "b".repeat(64) },
     );
-    await wait(() => store.get("temperature-task")?.state === "SUCCEEDED");
+    await wait(async () => {
+      await engine.poll("temperature-task");
+      return store.get("temperature-task")?.state === "SUCCEEDED";
+    });
     expect(fake.serviceCalls[1]).toMatchObject({
       service: "set_temperature",
       data: { entity_id: resource.entityId, temperature: 22.5 },
@@ -121,7 +127,11 @@ describe("Home Assistant climate Provider", () => {
       registry,
       rest,
       new NoopClimateTelemetry(),
-      2000,
+      {
+        confirmationTimeoutMs: 2_000,
+        minimumStableDurationMs: 50,
+        minimumMatchingObservations: 2,
+      },
       true,
     );
     ws = new HomeAssistantClimateWebSocket({

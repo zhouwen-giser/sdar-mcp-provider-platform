@@ -39,6 +39,12 @@ export interface ExecutionContextRecord {
   correlationId: string;
 }
 
+export interface ClimateConfirmationPolicy {
+  confirmationTimeoutMs: number;
+  minimumStableDurationMs: number;
+  minimumMatchingObservations: number;
+}
+
 export interface ClimateExecution {
   taskId: string;
   externalExecutionId: string;
@@ -64,6 +70,16 @@ export interface ClimateExecution {
   createdAt: string;
   updatedAt: string;
   confirmationDeadlineAt: string;
+  /** Policy snapshot frozen when this execution was admitted. Optional only for legacy state. */
+  confirmationPolicy?: ClimateConfirmationPolicy;
+  /** Source timestamp observed immediately before dispatch. Optional only for legacy state files. */
+  confirmationBaselineObservedAt?: string;
+  /** Provider-clock start of the current uninterrupted matching window. */
+  candidateConfirmedAt?: string;
+  matchingObservationCount?: number;
+  /** Provider-clock receipt time of the latest accepted matching observation. */
+  lastMatchingObservationAt?: string;
+  lastObservedState?: NormalizedClimateState;
   confirmedState?: NormalizedClimateState;
   lastSnapshot: Record<string, unknown>;
   commandAcks: Record<string, Record<string, unknown>>;

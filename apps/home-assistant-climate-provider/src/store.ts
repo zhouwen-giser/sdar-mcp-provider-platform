@@ -106,7 +106,12 @@ function valid(v: unknown): v is StateDocument {
     )
   )
     return false;
-  if (!Object.values(v.executions).every(validExecution)) return false;
+  if (
+    !Object.entries(v.executions).every(
+      ([taskId, execution]) => validExecution(execution) && execution.taskId === taskId,
+    )
+  )
+    return false;
   const guard = v.climatePowerGuard;
   return (
     guard === undefined ||
@@ -134,6 +139,36 @@ function validExecution(value: unknown): value is ClimateExecution {
     (value.operationName === "climate_set_hvac_mode" && desired.type === "hvac_mode") ||
     (value.operationName === "climate_set_temperature" && desired.type === "temperature");
   const dispatchState = value.dispatchState;
+  const matchingObservationCount = value.matchingObservationCount;
+  const candidateChronologyValid =
+    validInstant(value.createdAt) &&
+    validInstant(value.updatedAt) &&
+    validInstant(value.confirmationDeadlineAt) &&
+    validInstant(value.candidateConfirmedAt) &&
+    validInstant(value.lastMatchingObservationAt) &&
+    Date.parse(value.createdAt) <= Date.parse(value.candidateConfirmedAt) &&
+    Date.parse(value.candidateConfirmedAt) <= Date.parse(value.lastMatchingObservationAt) &&
+    Date.parse(value.lastMatchingObservationAt) <= Date.parse(value.updatedAt) &&
+    Date.parse(value.lastMatchingObservationAt) < Date.parse(value.confirmationDeadlineAt);
+  const stableCandidateValid =
+    matchingObservationCount === undefined
+      ? value.candidateConfirmedAt === undefined && value.lastMatchingObservationAt === undefined
+      : typeof matchingObservationCount === "number" &&
+        Number.isInteger(matchingObservationCount) &&
+        matchingObservationCount >= 0 &&
+        (matchingObservationCount === 0
+          ? value.candidateConfirmedAt === undefined &&
+            value.lastMatchingObservationAt === undefined
+          : value.state !== "PENDING_SIDE_EFFECT" && candidateChronologyValid);
+  const dispatchInvariantValid =
+    dispatchState === undefined ||
+    (dispatchState === "NOT_STARTED"
+      ? value.sideEffectDispatched === false
+      : value.sideEffectDispatched === true);
+  const confirmedStateValid =
+    value.state === "SUCCEEDED"
+      ? validConfirmedState(value, value.confirmedState)
+      : value.confirmedState === undefined;
   return (
     typeof value.taskId === "string" &&
     value.taskId.length > 0 &&
@@ -159,13 +194,83 @@ function validExecution(value: unknown): value is ClimateExecution {
       dispatchState === "NOT_STARTED" ||
       dispatchState === "INTENT_PERSISTED" ||
       dispatchState === "CALL_RETURNED") &&
+    dispatchInvariantValid &&
     Number.isInteger(value.revision) &&
-    typeof value.createdAt === "string" &&
-    typeof value.updatedAt === "string" &&
-    typeof value.confirmationDeadlineAt === "string" &&
+    validInstant(value.createdAt) &&
+    validInstant(value.updatedAt) &&
+    validInstant(value.confirmationDeadlineAt) &&
+    (value.confirmationPolicy === undefined || validConfirmationPolicy(value.confirmationPolicy)) &&
+    (value.confirmationBaselineObservedAt === undefined ||
+      validInstant(value.confirmationBaselineObservedAt)) &&
+    stableCandidateValid &&
+    (value.lastObservedState === undefined || validNormalizedState(value.lastObservedState)) &&
+    confirmedStateValid &&
     record(value.lastSnapshot) &&
     record(value.commandAcks)
   );
+}
+
+function validConfirmationPolicy(value: unknown): boolean {
+  if (!record(value)) return false;
+  return (
+    typeof value.confirmationTimeoutMs === "number" &&
+    Number.isInteger(value.confirmationTimeoutMs) &&
+    value.confirmationTimeoutMs > 0 &&
+    typeof value.minimumStableDurationMs === "number" &&
+    Number.isInteger(value.minimumStableDurationMs) &&
+    value.minimumStableDurationMs > 0 &&
+    value.minimumStableDurationMs < value.confirmationTimeoutMs &&
+    typeof value.minimumMatchingObservations === "number" &&
+    Number.isInteger(value.minimumMatchingObservations) &&
+    value.minimumMatchingObservations >= 2
+  );
+}
+
+function validConfirmedState(execution: Record<string, unknown>, state: unknown): boolean {
+  if (!validNormalizedState(state) || !record(state) || !record(execution.desiredState)) {
+    return false;
+  }
+  if (state.resourceId !== execution.resourceId || state.reachable !== true) {
+    return false;
+  }
+  const desired = execution.desiredState;
+  if (desired.type === "power") return state.power === desired.power;
+  if (desired.type === "hvac_mode") return state.hvacMode === desired.hvacMode;
+  return (
+    desired.type === "temperature" &&
+    typeof desired.temperature === "number" &&
+    typeof state.targetTemperature === "number" &&
+    Math.abs(state.targetTemperature - desired.temperature) <= 0.1
+  );
+}
+
+function validNormalizedState(value: unknown): boolean {
+  if (!record(value)) return false;
+  return (
+    typeof value.resourceId === "string" &&
+    (value.power === "on" ||
+      value.power === "off" ||
+      value.power === "unknown" ||
+      value.power === "unavailable") &&
+    typeof value.reachable === "boolean" &&
+    (value.hvacMode === null || typeof value.hvacMode === "string") &&
+    nullableFinite(value.currentTemperature) &&
+    nullableFinite(value.targetTemperature) &&
+    typeof value.temperatureUnit === "string" &&
+    nullableFinite(value.minTemperature) &&
+    nullableFinite(value.maxTemperature) &&
+    Array.isArray(value.supportedHvacModes) &&
+    value.supportedHvacModes.every((mode) => typeof mode === "string") &&
+    validInstant(value.observedAt)
+  );
+}
+
+function nullableFinite(value: unknown): boolean {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+function validInstant(value: unknown): value is string {
+  return typeof value === "string" && Number.isFinite(Date.parse(value));
 }
 
 function record(value: unknown): value is Record<string, unknown> {

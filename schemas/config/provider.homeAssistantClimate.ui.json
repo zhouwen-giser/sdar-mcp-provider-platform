@@ -181,6 +181,34 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "Home Assistant Climate Provider home_assistant_confirm_minimum_stable_duration_ms setting.",
+      "displayName": "HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Home Assistant Climate Provider home_assistant_confirm_minimum_matching_observations setting.",
+      "displayName": "HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "Home Assistant Climate Provider home_assistant_poll_interval_ms setting.",
       "displayName": "HOME_ASSISTANT_POLL_INTERVAL_MS",
       "overridePolicy": {

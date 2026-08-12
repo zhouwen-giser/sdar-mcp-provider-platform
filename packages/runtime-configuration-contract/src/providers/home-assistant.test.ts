@@ -23,6 +23,11 @@ describe("Home Assistant Climate configuration contract", () => {
     });
 
     expect(configuration.homeAssistantToken).toBe("classified-token");
+    expect(configuration).toMatchObject({
+      HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: 15_000,
+      HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: 5_000,
+      HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS: 3,
+    });
     expect(JSON.stringify(homeAssistantClimateLogContext(configuration))).not.toContain(
       "classified-token",
     );
@@ -31,9 +36,12 @@ describe("Home Assistant Climate configuration contract", () => {
     );
   });
 
-  it("covers all 26 inventory fields and omits Secret defaults", () => {
+  it("covers all 28 inventory fields and omits Secret defaults", () => {
     const inventory = JSON.parse(
-      readFileSync("../../docs/configuration/CONFIG_INVENTORY.json", "utf8"),
+      readFileSync(
+        new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
+        "utf8",
+      ),
     ) as { items: { component: string; key: string }[] };
     const expected = inventory.items
       .filter(({ component }) => component === "home-assistant-climate")
@@ -43,7 +51,7 @@ describe("Home Assistant Climate configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(26);
+    expect(actual).toHaveLength(28);
     expect(actual).toEqual(expected);
     for (const path of HomeAssistantClimateConfigurationDefinition.secretPaths) {
       expect(HomeAssistantClimateConfigurationDefinition.defaults).not.toHaveProperty(
@@ -81,5 +89,51 @@ describe("Home Assistant Climate configuration contract", () => {
         loadHomeAssistantClimateConfiguration({ ...base, HOME_ASSISTANT_URL: unsafeUrl }),
       ).toThrow("HOME_ASSISTANT_URL_SENSITIVE_COMPONENT_FORBIDDEN");
     }
+  });
+
+  it("rejects an unbounded or impossible stable-confirmation policy", () => {
+    const directory = mkdtempSync(join(tmpdir(), "sdar-ha-policy-"));
+    const tokenFile = join(directory, "token");
+    writeFileSync(tokenFile, "classified-token\n");
+    const base = {
+      HOME_ASSISTANT_URL: "http://127.0.0.1:8123",
+      HOME_ASSISTANT_TOKEN_FILE: tokenFile,
+      CLIMATE_RESOURCES_FILE: join(directory, "climates.json"),
+      PROVIDER_STATE_PATH: join(directory, "state.json"),
+      RUNTIME_ENV: "test",
+    };
+    expect(() =>
+      loadHomeAssistantClimateConfiguration({
+        ...base,
+        HOME_ASSISTANT_CONFIRM_MINIMUM_MATCHING_OBSERVATIONS: "1",
+      }),
+    ).toThrow();
+    expect(() =>
+      loadHomeAssistantClimateConfiguration({
+        ...base,
+        HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: "5000",
+        HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: "5000",
+      }),
+    ).toThrow("HOME_ASSISTANT_CONFIRMATION_POLICY_INVALID");
+  });
+
+  it("derives a bounded stable window for legacy custom timeout-only configuration", () => {
+    const directory = mkdtempSync(join(tmpdir(), "sdar-ha-legacy-policy-"));
+    const tokenFile = join(directory, "token");
+    writeFileSync(tokenFile, "classified-token\n");
+
+    const configuration = loadHomeAssistantClimateConfiguration({
+      HOME_ASSISTANT_URL: "http://127.0.0.1:8123",
+      HOME_ASSISTANT_TOKEN_FILE: tokenFile,
+      CLIMATE_RESOURCES_FILE: join(directory, "climates.json"),
+      PROVIDER_STATE_PATH: join(directory, "state.json"),
+      HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: "3000",
+      RUNTIME_ENV: "test",
+    });
+
+    expect(configuration).toMatchObject({
+      HOME_ASSISTANT_CONFIRM_TIMEOUT_MS: 3_000,
+      HOME_ASSISTANT_CONFIRM_MINIMUM_STABLE_DURATION_MS: 1_000,
+    });
   });
 });
