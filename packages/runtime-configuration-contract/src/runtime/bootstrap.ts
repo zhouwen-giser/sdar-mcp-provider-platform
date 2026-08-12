@@ -5,9 +5,13 @@ import { parseConfigurationDefinition } from "../model.js";
 const LEGACY_DATABASE_URL_DEFAULT = "postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime";
 
 const AdapterEndpointSchema = z.string().refine(validAdapterEndpoint);
+const BooleanEnvironmentSchema = z
+  .union([z.string(), z.boolean()])
+  .transform((value) => parseBooleanEnvironment(value));
 
 const RuntimeBootstrapInputSchema = z.object({
   RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: BooleanEnvironmentSchema.default(false),
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(8080),
   PROVIDER_ID: z.string().min(1).max(128).default("mock-provider"),
@@ -24,6 +28,7 @@ const RuntimeBootstrapInputSchema = z.object({
 
 export const RuntimeBootstrapResolvedSchema = z.object({
   RUNTIME_ENV: z.enum(["development", "test", "production"]),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),
   HOST: z.string(),
   PORT: z.number().int().min(1).max(65_535),
   PROVIDER_ID: z.string().min(1).max(128),
@@ -77,6 +82,7 @@ export function loadRuntimeBootstrapEnvironment(
 
   return RuntimeBootstrapResolvedSchema.parse({
     RUNTIME_ENV: input.RUNTIME_ENV,
+    ALLOW_INSECURE_INTERNAL_TRANSPORT: input.ALLOW_INSECURE_INTERNAL_TRANSPORT,
     HOST: input.HOST,
     PORT: input.PORT,
     PROVIDER_ID: input.PROVIDER_ID,
@@ -106,6 +112,7 @@ export const RuntimeBootstrapConfigurationDefinition = parseConfigurationDefinit
     additionalProperties: false,
     properties: {
       RUNTIME_ENV: { enum: ["development", "test", "production"] },
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: { type: "boolean" },
       HOST: { type: "string" },
       PORT: { type: "integer", minimum: 1, maximum: 65_535 },
       PROVIDER_ID: { type: "string", minLength: 1, maxLength: 128 },
@@ -122,6 +129,7 @@ export const RuntimeBootstrapConfigurationDefinition = parseConfigurationDefinit
   },
   defaults: {
     RUNTIME_ENV: "development",
+    ALLOW_INSECURE_INTERNAL_TRANSPORT: false,
     HOST: "0.0.0.0",
     PORT: 8080,
     PROVIDER_ID: "mock-provider",
@@ -133,6 +141,12 @@ export const RuntimeBootstrapConfigurationDefinition = parseConfigurationDefinit
   secretPaths: ["/DATABASE_URL", "/DATABASE_URL_FILE", "/ADAPTER_TLS_KEY_PATH"],
   fields: [
     field("RUNTIME_ENV", "Runtime environment", "Runtime safety profile.", "restart_required"),
+    field(
+      "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "Allow insecure internal transport",
+      "Explicitly permits plaintext transport inside an operator-controlled internal network.",
+      "restart_required",
+    ),
     field("HOST", "Listen host", "Runtime HTTP listen host.", "restart_required"),
     field("PORT", "Listen port", "Runtime HTTP listen port.", "restart_required"),
     field(
@@ -236,4 +250,18 @@ function validAdapterEndpoint(value: string): boolean {
   if (!/^(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\]):\d{1,5}$/.test(value)) return false;
   const port = Number(value.slice(value.lastIndexOf(":") + 1));
   return Number.isInteger(port) && port >= 1 && port <= 65_535;
+}
+
+function parseBooleanEnvironment(value: string | boolean): boolean {
+  if (typeof value === "boolean") return value;
+  switch (value.toLowerCase()) {
+    case "true":
+    case "1":
+      return true;
+    case "false":
+    case "0":
+      return false;
+    default:
+      throw new Error(`INVALID_BOOLEAN_ENV:${value}`);
+  }
 }

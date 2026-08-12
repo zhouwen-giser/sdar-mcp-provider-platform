@@ -15,6 +15,10 @@ describe("production infrastructure", () => {
     expect(toUiProblem(new Error("API_DATA_SOURCE_NOT_CONFIGURED")).code).toBe(
       "PMS_API_NOT_CONFIGURED",
     );
+    expect(toUiProblem(new Error("PMS_ENVIRONMENT_SCOPE_REQUIRED"))).toMatchObject({
+      code: "PMS_ENVIRONMENT_SCOPE_REQUIRED",
+      retryable: false,
+    });
   });
 
   it("guards prototype routes and rejects generic public pages", () => {

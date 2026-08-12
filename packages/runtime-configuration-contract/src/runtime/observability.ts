@@ -8,6 +8,7 @@ const BooleanEnvironmentSchema = z
 const RuntimeObservabilityInputSchema = z
   .object({
     RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
+    ALLOW_INSECURE_INTERNAL_TRANSPORT: BooleanEnvironmentSchema.default(false),
     LOG_LEVEL: z.string().default("info"),
     OTEL_ENABLED: BooleanEnvironmentSchema.default(false),
     OTEL_EXPORTER_OTLP_ENDPOINT: z.url().default("http://127.0.0.1:4318"),
@@ -33,6 +34,7 @@ const RuntimeObservabilityInputSchema = z
     }
     if (
       value.RUNTIME_ENV === "production" &&
+      !value.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
       value.OTEL_ENABLED &&
       !value.OTEL_EXPORTER_OTLP_ENDPOINT.toLowerCase().startsWith("https://")
     ) {

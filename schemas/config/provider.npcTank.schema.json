@@ -13,6 +13,7 @@
       "enum": ["disabled", "required"],
       "type": "string"
     },
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT": { "type": "boolean" },
     "LOG_LEVEL": {
       "default": "info",
       "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
@@ -162,7 +163,7 @@
     "NPC_TANK_MQTT_USERNAME": { "type": "string" },
     "NPC_TANK_MQTT_WIRE_MODE": {
       "default": "auto",
-      "enum": ["auto", "ros_message_json", "direct_domain_json"],
+      "enum": ["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"],
       "type": "string"
     },
     "NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH": {
@@ -219,7 +220,6 @@
     "ADAPTER_PORT",
     "ADAPTER_TLS_MODE",
     "NPC_TANK_ADAPTER_STORE_MODE",
-    "NPC_TANK_ADAPTER_DATABASE_URL",
     "NPC_TANK_ADAPTER_DATABASE_POOL_MAX",
     "NPC_TANK_MQTT_URL",
     "NPC_TANK_MQTT_CLIENT_ID",
@@ -252,6 +252,7 @@
     "PROVIDER_TELEMETRY_ENDPOINT",
     "PROVIDER_TELEMETRY_TLS_MODE",
     "RUNTIME_ENV",
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT",
     "LOG_LEVEL"
   ],
   "title": "provider.npcTank",

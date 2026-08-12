@@ -75,6 +75,26 @@ describe("Registry Snapshot projection", () => {
     );
   });
 
+  it("allows non-loopback HTTP only under the explicit internal transport policy", () => {
+    expect(() => effectiveEndpoint("http://runtime.internal:8080")).toThrow(
+      "REGISTRY_EFFECTIVE_ENDPOINT_INVALID",
+    );
+    expect(
+      effectiveEndpoint("http://runtime.internal:8080", {
+        allowInsecureInternalTransport: true,
+      }),
+    ).toBe("http://runtime.internal:8080/mcp");
+    expect(
+      buildRegistrySnapshot(
+        "production",
+        [{ ...provider("provider-a", ["operate"]), effectiveEndpoint: "http://10.0.0.7:19100" }],
+        {
+          allowInsecureInternalTransport: true,
+        },
+      ).document.providers[0]?.effectiveEndpoint,
+    ).toBe("http://10.0.0.7:19100/mcp");
+  });
+
   it("rejects duplicate Provider or Server identities and catalog identity drift", () => {
     expect(() =>
       buildRegistrySnapshot("production", [

@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-10T10:08:00Z",
+  "goal10BaseSha": "ac3369ba9fa4e0ff6b6589525594b50291da02b7",
+  "goal10ProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "preGoal10BaseSha": "981792b9cb22f8b3117fe3ab26f639de71487d1f",
+  "status": "PASS",
+  "classificationVocabulary": [
+    "SHARED_REUSE",
+    "NPC_PROFILE_CONFIGURATION",
+    "NPC_SPECIFIC_MAPPING",
+    "NOT_APPLICABLE",
+    "UGV_ONLY_EXTERNAL_CAPABILITY"
+  ],
+  "entries": [
+    {
+      "feature": "Streamable HTTP MCP initialize, tools/list, tools/call and bounded response handling",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "tests/ugv-simulation/device-mcp-contract.test.ts"
+      ],
+      "npcAction": "Use the shared resilient client; keep only an NPC DeviceMcpProfile wrapper."
+    },
+    {
+      "feature": "Machine contract capture including inputSchema, outputSchema, annotations and hashes",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json"
+      ],
+      "npcAction": "Capture the real NPC contract before changing the profile allowlist."
+    },
+    {
+      "feature": "No-Mock-fallback qualification gate",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": [
+        "packages/runtime-configuration-contract/src/providers/ugv.ts",
+        "deploy/ugv-simulation/up.sh"
+      ],
+      "npcAction": "Require NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT=false in qualification."
+    },
+    {
+      "feature": "Exact Device MCP tool allowlist",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": ["packages/vehicle-device-mcp-client/src/tool-allowlist.ts"],
+      "npcAction": "Replace the legacy 23-tool list with the captured real inventory; record unknown extras without guessing."
+    },
+    {
+      "feature": "Downstream tool names and argument mapping",
+      "classification": "NPC_SPECIFIC_MAPPING",
+      "goal10Evidence": ["packages/vehicle-device-mcp-client/src/tool-mapping.ts"],
+      "npcAction": "Map the standard vehicle inputs to captured npc_tank_* schemas and the get_status exception."
+    },
+    {
+      "feature": "Structured result validation and non-zero error_code rejection",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/ugv-result.ts",
+        "tests/ugv-simulation/device-mcp-contract.test.ts"
+      ],
+      "npcAction": "Generalize the validator prefix/profile without weakening UGV semantics."
+    },
+    {
+      "feature": "Integer downstream mission_id capture, persistence and command chaining",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "npcAction": "Persist the accepted integer mission ID before start/follow-up calls and correlate observations."
+    },
+    {
+      "feature": "Bounded read reconnect/retry",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "reports/ugv-simulation/RECOVERY_EVIDENCE.json"
+      ],
+      "npcAction": "Enable through the NPC client profile."
+    },
+    {
+      "feature": "Uncertain mutating response is never automatically retried",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "reports/ugv-simulation/RECOVERY_EVIDENCE.json"
+      ],
+      "npcAction": "Classify NPC mutating tools with the shared mutation policy."
+    },
+    {
+      "feature": "Per-tool circuit breaker and half-open probe",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "tests/ugv-simulation/device-mcp-contract.test.ts"
+      ],
+      "npcAction": "Reuse with NPC reason-code prefix."
+    },
+    {
+      "feature": "MQTT exact-subscription and reconnect/SUBACK readiness framework",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/client.ts",
+        "tests/ugv-simulation/mqtt-client-readiness.test.ts"
+      ],
+      "npcAction": "Enable validated ingress readiness for NPC."
+    },
+    {
+      "feature": "NPC exact topic and QoS inventory",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": ["packages/vehicle-mqtt-ingress/src/topics.ts"],
+      "npcAction": "Derive from passive capture; coverage is expected QoS 0 and other documented topics QoS 1."
+    },
+    {
+      "feature": "Explicit MQTT wire mode",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/guard.ts",
+        "packages/runtime-configuration-contract/src/providers/ugv.ts"
+      ],
+      "npcAction": "Use auto only during discovery; freeze ros_message_json or direct_domain_json for qualification."
+    },
+    {
+      "feature": "Composite status canonical/compatibility topic handling",
+      "classification": "NPC_SPECIFIC_MAPPING",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/topics.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Prove status/npc_tank1 or an observed compatibility alias before retaining aliases."
+    },
+    {
+      "feature": "ROS-message JSON normalization framework and identity guards",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/guard.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Parameterize entity identity instead of rewriting NPC payloads as UGV legacy data."
+    },
+    {
+      "feature": "available=false and device readiness handling",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/availability.ts",
+        "tests/ugv-simulation/provider-boundary.test.ts"
+      ],
+      "npcAction": "Apply the same fail-closed resource transition to NPC."
+    },
+    {
+      "feature": "Chassis MissionState 0..5 normalization",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/task-state-mapper.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Remove the NPC legacy task-state projection."
+    },
+    {
+      "feature": "Recon MotionStatus 1..13/99 normalization independent of MissionState",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/task-state-mapper.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Use the shared recon state model for area and circular scans."
+    },
+    {
+      "feature": "cameraFault, outOfRange, coverage and progress authority semantics",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/snapshot.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Remove UGV-only guards so the generic semantics apply to NPC."
+    },
+    {
+      "feature": "Rich target metadata, deduplication and authoritative empty-list clearing",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/ingress.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "npcAction": "Parameterize topic authority for npc_tank1 and preserve local sensor metadata."
+    },
+    {
+      "feature": "Duplicate, older and stale telemetry rejection",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-mqtt-ingress/src/ingress.ts",
+        "packages/vehicle-provider-core/src/availability.ts"
+      ],
+      "npcAction": "Reuse unchanged with NPC reason codes."
+    },
+    {
+      "feature": "Chassis movement and reconnaissance concurrency",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/track-arbiter.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "npcAction": "Allow chassis plus recon; keep manual gimbal versus recon exclusivity if the real behavior confirms it."
+    },
+    {
+      "feature": "Standard 11-operation vehicle Provider manifest",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/manifest.ts",
+        "apps/ugv-provider-adapter/src/manifest.ts"
+      ],
+      "npcAction": "Reuse vehicle_get_capabilities and vehicle_control_gimbal where supported; do not create NPC-only public operations."
+    },
+    {
+      "feature": "NPC capability facts and navigation default",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": ["apps/ugv-provider-adapter/src/capabilities.ts"],
+      "npcAction": "Report needPlanDefault=false, circular recon, manual yaw sweep, no continuous pitch sweep and external EO media."
+    },
+    {
+      "feature": "Gimbal downstream argument and observation mapping",
+      "classification": "NPC_SPECIFIC_MAPPING",
+      "goal10Evidence": [
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "npcAction": "Use captured npc_tank_gimbal_move schema while preserving the standard vehicle_control_gimbal surface."
+    },
+    {
+      "feature": "Provider business events, evidence and telemetry redaction",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "packages/vehicle-provider-core/src/business-events.ts",
+        "packages/vehicle-provider-core/src/telemetry.ts"
+      ],
+      "npcAction": "Reuse with NPC provider/resource identity."
+    },
+    {
+      "feature": "Serialized mutation lifecycle, observation cursors, task replay and restart reconciliation",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "tests/integration/ugv-provider-adapter.test.ts"
+      ],
+      "npcAction": "Generalize lifecycle helpers or bring NPC onto the same shared execution engine; do not patch the legacy parallel lifecycle."
+    },
+    {
+      "feature": "Provider persistence scope and get_status audit compatibility",
+      "classification": "NPC_PROFILE_CONFIGURATION",
+      "goal10Evidence": [
+        "packages/provider-adapter-kit/src/postgres-store.ts",
+        "migrations/providers/npc-tank/025_npc_tank_provider.sql"
+      ],
+      "npcAction": "Preserve NPC table isolation and add a forward migration if the captured unprefixed get_status tool requires it."
+    },
+    {
+      "feature": "Legacy separate EO circular-scan trio",
+      "classification": "NOT_APPLICABLE",
+      "goal10Evidence": ["packages/vehicle-device-mcp-client/src/npc-tank.ts"],
+      "npcAction": "Do not require eo_scan_start/stop/set_angle when canonical circular recon is scan_mode=2 configure plus control."
+    },
+    {
+      "feature": "Laser range and other tools absent from the real NPC contract",
+      "classification": "UGV_ONLY_EXTERNAL_CAPABILITY",
+      "goal10Evidence": ["packages/vehicle-provider-core/src/manifest.ts"],
+      "npcAction": "Record PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE if live tools/list does not expose the capability; never fabricate it."
+    },
+    {
+      "feature": "Exact-HEAD image labels and immutable build context",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": ["Dockerfile", "deploy/pms-console/up.sh", "deploy/ugv-simulation/up.sh"],
+      "npcAction": "Build NPC Adapter/Runtime and inherited PMS images from exact Goal 11 HEAD and verify OCI revisions."
+    },
+    {
+      "feature": "PMS Console deployment and Registry integration pattern",
+      "classification": "SHARED_REUSE",
+      "goal10Evidence": [
+        "deploy/pms-console/compose.yaml",
+        "reports/goal-10-pms-console-addendum/FINAL_REPORT.md"
+      ],
+      "npcAction": "Layer NPC Compose on the PMS base, onboard through PMS APIs, and obtain the final Runtime endpoint from Registry authority."
+    }
+  ],
+  "summary": {
+    "entryCount": 32,
+    "sharedReuse": 20,
+    "npcProfileConfiguration": 7,
+    "npcSpecificMapping": 3,
+    "notApplicable": 1,
+    "ugvOnlyExternalCapability": 1,
+    "legacyNpcImplementationIsTarget": false
+  }
+}

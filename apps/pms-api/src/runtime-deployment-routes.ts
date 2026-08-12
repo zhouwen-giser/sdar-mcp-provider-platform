@@ -7,25 +7,46 @@ import type {
 import { RuntimeDeploymentApplicationError } from "../../../packages/pms-application/src/index.js";
 import { PmsDomainError } from "../../../packages/pms-domain/src/index.js";
 import type {
+  RuntimeDeploymentAuthority,
   RuntimeDeploymentDesiredState,
   RuntimeDeploymentStatus,
 } from "../../../packages/runtime-deployment/src/index.js";
 import { requestContext } from "./context.js";
 
-export interface RuntimeDeploymentView {
+interface RuntimeDeploymentViewBase {
   readonly deploymentId: string;
   readonly providerId: string;
   readonly environment: string;
   readonly desiredState: RuntimeDeploymentDesiredState;
   readonly desiredReplicas: number;
   readonly runtimeVersion: string;
-  readonly databaseProfileId: string;
-  readonly configProfileId: string;
   readonly adapterEndpoint?: string;
+  readonly runtimeAuthority: RuntimeDeploymentAuthority;
   readonly status: RuntimeDeploymentStatus;
   readonly desiredRevision: number;
   readonly observedRevision: number;
 }
+
+export type RuntimeDeploymentView = RuntimeDeploymentViewBase &
+  (
+    | {
+        readonly runtimeAuthority: "platform_managed";
+        readonly databaseProfileId: string;
+        readonly configProfileId: string;
+        readonly directContainer?: never;
+      }
+    | {
+        readonly runtimeAuthority: "direct_container";
+        readonly adapterEndpoint: string;
+        readonly databaseProfileId?: never;
+        readonly configProfileId?: never;
+        readonly directContainer: {
+          readonly instanceId: string;
+          readonly controlEndpoint: string;
+          readonly advertisedEndpoint: string;
+        };
+      }
+  );
 
 export interface RuntimeDeploymentListQuery {
   readonly providerId: string;
@@ -68,17 +89,6 @@ interface DeploymentListRequestQuery extends ProviderScopeQuery {
   readonly cursor?: string;
 }
 
-interface CreateDeploymentBody {
-  readonly deploymentId: string;
-  readonly providerId: string;
-  readonly environment: string;
-  readonly runtimeVersion: string;
-  readonly databaseProfileId: string;
-  readonly configProfileId: string;
-  readonly adapterEndpoint?: string;
-  readonly desiredReplicas?: number;
-}
-
 interface DeploymentActionBody {
   readonly providerId: string;
   readonly expectedDesiredRevision: number;
@@ -107,30 +117,11 @@ export function registerRuntimeDeploymentRoutes(
   app: FastifyInstance,
   service: RuntimeDeploymentManagementPort,
 ): void {
-  app.post<{ Body: CreateDeploymentBody }>(
+  app.post<{ Body: CreateRuntimeDeploymentInput }>(
     "/api/v1/runtime-deployments",
     {
       schema: {
-        body: objectSchema(
-          {
-            deploymentId: identifierSchema(),
-            providerId: identifierSchema(),
-            environment: environmentSchema(),
-            runtimeVersion: { type: "string", minLength: 1, maxLength: 128 },
-            databaseProfileId: identifierSchema(),
-            configProfileId: identifierSchema(),
-            adapterEndpoint: { type: "string", minLength: 1, maxLength: 512 },
-            desiredReplicas: replicaSchema(),
-          },
-          [
-            "deploymentId",
-            "providerId",
-            "environment",
-            "runtimeVersion",
-            "databaseProfileId",
-            "configProfileId",
-          ],
-        ),
+        body: createDeploymentSchema(),
       },
     },
     async (request, reply) => {
@@ -277,6 +268,56 @@ function environmentSchema() {
 
 function replicaSchema() {
   return { type: "integer", minimum: 0, maximum: 1 };
+}
+
+function createDeploymentSchema() {
+  const base = objectSchema(
+    {
+      deploymentId: identifierSchema(),
+      providerId: identifierSchema(),
+      environment: environmentSchema(),
+      runtimeVersion: { type: "string", minLength: 1, maxLength: 128 },
+      adapterEndpoint: { type: "string", minLength: 1, maxLength: 512 },
+      desiredReplicas: replicaSchema(),
+      runtimeAuthority: { enum: ["platform_managed", "direct_container"] },
+      databaseProfileId: identifierSchema(),
+      configProfileId: identifierSchema(),
+      directContainer: objectSchema(
+        {
+          instanceId: identifierSchema(),
+          controlEndpoint: baseEndpointSchema(),
+          advertisedEndpoint: baseEndpointSchema(),
+        },
+        ["instanceId", "controlEndpoint", "advertisedEndpoint"],
+      ),
+    },
+    ["deploymentId", "providerId", "environment", "runtimeVersion"],
+  );
+  return {
+    ...base,
+    allOf: [
+      {
+        if: {
+          required: ["runtimeAuthority"],
+          properties: { runtimeAuthority: { const: "direct_container" } },
+        },
+        then: {
+          required: ["adapterEndpoint", "directContainer"],
+          not: {
+            anyOf: [{ required: ["databaseProfileId"] }, { required: ["configProfileId"] }],
+          },
+        },
+        else: {
+          required: ["databaseProfileId", "configProfileId"],
+          not: { required: ["directContainer"] },
+        },
+      },
+    ],
+  };
+}
+
+function baseEndpointSchema() {
+  return { type: "string", minLength: 8, maxLength: 2_048, pattern: "^https?://[^/?#]+/?$" };
 }
 
 function deploymentParams() {

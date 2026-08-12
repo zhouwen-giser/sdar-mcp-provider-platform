@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_exact_head_compose_deployment",
+  "phase": "GOAL11_NPC_DEPLOYMENT",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "reasonCode": "DEPLOYMENT_PASS_EXTERNAL_MQTT_WIRE_AND_QOS_DRIFT_PRESERVED",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "oneClickCommand": "bash deploy/npc-tank-simulation/up.sh",
+  "shutdownCommand": "bash deploy/npc-tank-simulation/down.sh",
+  "compose": {
+    "base": "deploy/pms-console/compose.yaml",
+    "overlay": "deploy/npc-tank-simulation/compose.yaml",
+    "pmsServicesDuplicatedInOverlay": false,
+    "projectName": "sdar-npc-tank-simulation-real",
+    "serviceCountIncludingPreflightProfile": 9,
+    "services": [
+      "pms-postgres",
+      "pms-api",
+      "pms-worker",
+      "pms-web",
+      "npc-runtime-postgres",
+      "npc-adapter-postgres",
+      "npc-preflight",
+      "npc-tank-adapter",
+      "npc-tank-runtime"
+    ],
+    "mockServices": [],
+    "realEvidenceUsedMockFallback": false
+  },
+  "exactHeadImages": [
+    {
+      "image": "sdar/pms-api:<qualification-product-sha>",
+      "user": "node",
+      "ociRevision": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+      "imageId": "sha256:7b9a4d26f7efd3f21ae07cc0f329c636428bffcd907650759baf3a7194d3e687"
+    },
+    {
+      "image": "sdar/pms-worker:<qualification-product-sha>",
+      "user": "node",
+      "ociRevision": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+      "imageId": "sha256:52e66414132438d30c09bbdd85122766cc79c349244e3120e6c8a7c618d50396"
+    },
+    {
+      "image": "sdar/pms-web:<qualification-product-sha>",
+      "user": "node",
+      "ociRevision": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+      "imageId": "sha256:a287fbd862e9642b50e062602ba89948695a59eee8c627cc835dac08998ad136"
+    },
+    {
+      "image": "sdar-npc-tank-simulation-real/npc-tank-adapter:<qualification-product-sha>",
+      "user": "node",
+      "ociRevision": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+      "imageId": "sha256:d99b5fc22ceaa69059b8b2097356b22e48c7991cc8803c7bc6ee5f77b846219a"
+    },
+    {
+      "image": "sdar-npc-tank-simulation-real/npc-tank-runtime:<qualification-product-sha>",
+      "user": "node",
+      "ociRevision": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+      "imageId": "sha256:cdb2d19e0492d25700487ef2372978433a7f0f9c2e41c3a2cc3b230c97198c05"
+    }
+  ],
+  "healthInspection": {
+    "runningServiceCount": 8,
+    "healthyServiceCount": 8,
+    "preflightIsOneShot": true,
+    "preflightExitCode": 0,
+    "pmsConsoleSecretPreflight": "PASS",
+    "pmsConsoleHttpSmoke": "PASS",
+    "registryBackedRuntimeReadSmoke": "PASS"
+  },
+  "realExternalPreflight": {
+    "deviceMcpToolCount": 15,
+    "mqttRequestedTopicCount": 18,
+    "captureObservedTopicCount": 15,
+    "restartCycleObservedTopicCounts": [14, 14],
+    "authoritativeStatusObserved": true,
+    "explicitWireMode": "ros_bridge_json",
+    "upstreamDrift": [
+      "SIMULATOR_INTERFACE_DEFECT_MIXED_MQTT_WIRE_SHAPES",
+      "MQTT_SPEED_PUBLISHER_QOS_0_EXPECTED_1"
+    ]
+  },
+  "cleanRestart": {
+    "requiredCycles": 2,
+    "successfulCycles": 2,
+    "independentSmokesPassed": 2,
+    "registryAuthorityRequired": true,
+    "registryFingerprintStable": true,
+    "finalStackState": "down",
+    "persistentVolumesPreserved": true
+  },
+  "security": {
+    "secretFilesMountedReadOnly": true,
+    "realEnvTracked": false,
+    "externalEndpointValuesStored": false,
+    "nonRootLocalImages": true,
+    "mockQualificationEvidence": false
+  }
+}

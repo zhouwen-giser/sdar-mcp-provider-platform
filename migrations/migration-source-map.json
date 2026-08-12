@@ -2,8 +2,8 @@
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
   "inventory": {
-    "mappedProvenanceEntries": 28,
-    "ownerDirectoryFiles": 36
+    "mappedProvenanceEntries": 31,
+    "ownerDirectoryFiles": 39
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -21,17 +21,17 @@
     "provider:ugv": {
       "owner": "provider:ugv",
       "plannedDirectory": "migrations/providers/ugv",
-      "deliveredFiles": 1
+      "deliveredFiles": 2
     },
     "provider:npc-tank": {
       "owner": "provider:npc-tank",
       "plannedDirectory": "migrations/providers/npc-tank",
-      "deliveredFiles": 1
+      "deliveredFiles": 2
     },
     "pms": {
       "owner": "pms",
       "plannedDirectory": "migrations/pms",
-      "deliveredFiles": 9,
+      "deliveredFiles": 10,
       "namingRule": "NNN_lower_snake_case_description.sql",
       "versionScope": "Unique and append-only within the pms set, starting at 001."
     }
@@ -316,6 +316,36 @@
       "plannedPath": "migrations/runtime/024_accepted_task_substate.sql",
       "pathState": "owner_directory",
       "sha256": "25a0432bd8cdd04cbe4a56762827fd219857c0ca24c260c7911857c75aa78287"
+    },
+    {
+      "sequence": 29,
+      "legacyVersion": "026",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/026_ugv_single_active_fire.sql",
+      "newPath": "migrations/providers/ugv/026_ugv_single_active_fire.sql",
+      "plannedPath": "migrations/providers/ugv/026_ugv_single_active_fire.sql",
+      "pathState": "owner_directory",
+      "sha256": "cf6c8510803c6bf9c62e79d83de6c113bc0a27b945c99532d07537965d0b3079"
+    },
+    {
+      "sequence": 30,
+      "legacyVersion": "026",
+      "owner": "provider:npc-tank",
+      "oldPath": "migrations/026_allow_authoritative_status_tool.sql",
+      "newPath": "migrations/providers/npc-tank/026_allow_authoritative_status_tool.sql",
+      "plannedPath": "migrations/providers/npc-tank/026_allow_authoritative_status_tool.sql",
+      "pathState": "owner_directory",
+      "sha256": "19864c5bce3b0e4486c6fe1a9b34d48eed609a73779d1882cb1dceac198ceef0"
+    },
+    {
+      "sequence": 31,
+      "legacyVersion": "010",
+      "owner": "pms",
+      "oldPath": "migrations/010_external_runtime_deployment.sql",
+      "newPath": "migrations/pms/010_external_runtime_deployment.sql",
+      "plannedPath": "migrations/pms/010_external_runtime_deployment.sql",
+      "pathState": "owner_directory",
+      "sha256": "ac7245d56b365e848853262aef5462dc0ba7a7d146be74fd6098957f7e0bf6a5"
     }
   ]
 }

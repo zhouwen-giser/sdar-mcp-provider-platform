@@ -115,6 +115,18 @@ describe("Runtime registration integration", () => {
         PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "/run/secrets/token",
       }),
     ).toThrow("PMS_RUNTIME_REGISTRATION_PRODUCTION_HTTPS_REQUIRED");
+    const internalProduction = {
+      ...production,
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: true,
+    };
+    expect(
+      loadRuntimeRegistrationBootstrap(internalProduction, {
+        PMS_DEPLOYMENT_ID: "deployment-1",
+        PMS_INSTANCE_ID: "instance-1",
+        PMS_RUNTIME_REGISTRATION_URL: "http://pms.internal",
+        PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "/run/secrets/token",
+      })?.baseUrl,
+    ).toBe("http://pms.internal/");
     expect(() =>
       loadRuntimeRegistrationBootstrap(loadRuntimeConfig({ RUNTIME_ENV: "test" }), {
         PMS_RUNTIME_REGISTRATION_TOKEN_FILE: "/run/secrets/token",

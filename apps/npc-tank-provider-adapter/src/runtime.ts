@@ -1,7 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
 import {
   jsonToProtoStruct,
   protoStructToJson,
@@ -12,24 +10,34 @@ import type {
   ProviderExecution,
   ProviderExecutionState,
   ProviderStore,
-  StartVehicleOperation,
-  VehicleCommandIdentity,
 } from "../../../packages/provider-adapter-kit/src/index.js";
-import {
-  NPC_OPERATION_REQUIRED_TOOLS,
-  npcCircularScanSupported,
-  npcControlDeviceCalls,
-  npcFireConfirmationCalls,
-  npcStartDeviceCalls,
-  selectNpcNavigationTool,
-  type NpcNavigationToolSelection,
-  type NpcTankDeviceMcpClient,
-  type NpcTankDeviceToolName,
+import type {
+  NpcTankDeviceMcpClient,
+  NpcTankDeviceToolName,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
-import type { VehicleMqttIngress } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
+import {
+  npcControlDeviceCalls,
+  canonicalNpcTankMissionId,
+  DeviceToolRejectedError,
+  executeNpcTankStartFlow,
+  npcCircularScanSupported,
+  npcFireConfirmationCalls,
+  missionIdFromNpcTankResult,
+  parseNpcTankMissionId,
+  requiredNpcTankDeviceTools,
+  selectNpcNavigationTool,
+  UncertainMutatingDeviceCallError,
+  type NpcNavigationToolSelection,
+} from "../../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  normalizeNpcTankMqttObservation,
+  type VehicleMqttIngress,
+} from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 import {
   assertNoRefereeData,
   checkVehicleAvailability,
+  freshnessState,
+  mapReconMotionStatus,
   mapVehicleTaskState,
   monotonicProgress,
   OPERATION_TRACKS,
@@ -40,18 +48,46 @@ import {
   type FreshnessPolicy,
   type NpcTankSnapshot,
   type VehicleBusinessEventHub,
+  type VehicleReconnaissanceState,
   type VehicleTaskTrack,
   type VehicleTelemetry,
   type VehicleTrack,
 } from "../../../packages/vehicle-provider-core/src/index.js";
+import { normalizeNpcTankCapabilities } from "./capabilities.js";
+import { deduplicateNpcTankTargets, normalizeNpcTankDeviceTargets } from "./targets.js";
 
 const OPERATIONS = new Set(Object.keys(OPERATION_TRACKS));
 const SYNC_OPERATIONS = new Set([
   "vehicle_get_state",
+  "vehicle_get_capabilities",
   "vehicle_get_payload_status",
   "vehicle_get_targets",
   "vehicle_laser_range",
 ]);
+const FIRE_DISPATCH_COMMAND = "fire_dispatch";
+const FIRE_DISPATCH_SEQUENCE = "0";
+const FIRE_DISPATCH_NOT_ARMED = "NPC_TANK_FIRE_DISPATCH_NOT_ARMED";
+const FIRE_DISPATCH_ABORTED = "NPC_TANK_FIRE_DISPATCH_ABORTED";
+const FIRE_LOCAL_CANCELLATION_REASONS = new Set([
+  "NPC_TANK_FIRE_CONFIRMATION_REJECTED",
+  "NPC_TANK_FIRE_CANCELLED_BEFORE_DISPATCH",
+]);
+
+export interface StartVehicleOperation {
+  taskId: string;
+  operationName: string;
+  arguments: Record<string, unknown>;
+  argumentHash: string;
+  executionContext: ExecutionContextRecord;
+}
+export interface CommandIdentity {
+  taskId: string;
+  externalExecutionId: string;
+  operationName: string;
+  argumentHash: string;
+  executionContext: ExecutionContextRecord;
+  commandSequence: string;
+}
 
 export class NpcTankProviderRuntime {
   readonly arbiter: TrackArbiter;
@@ -65,16 +101,21 @@ export class NpcTankProviderRuntime {
   #circularScanSupported = false;
   #unsubscribeSnapshot: (() => void) | undefined;
   #poller: NodeJS.Timeout | undefined;
+  #deviceReconnect: Promise<void> | undefined;
+  #mutationTail: Promise<void> = Promise.resolve();
+  #pollPromise: Promise<void> | undefined;
+  #lastObservedSnapshot: NpcTankSnapshot | undefined;
+  readonly #freshnessStates = new Map<string, "fresh" | "stale" | "unknown">();
   constructor(
     readonly options: {
       providerId: string;
-      providerVersion: string;
+      providerVersion?: string;
       freshness: FreshnessPolicy;
       allowNavigationWithRecon: boolean;
       fireRequiresChassisStopped: boolean;
       pollIntervalMs: number;
-      navigationReportPath: string;
-      eoScanReportPath: string;
+      navigationReportPath?: string;
+      eoScanReportPath?: string;
     },
     readonly store: ProviderStore,
     readonly ingress: VehicleMqttIngress<NpcTankSnapshot>,
@@ -82,7 +123,7 @@ export class NpcTankProviderRuntime {
     readonly businessEvents: VehicleBusinessEventHub,
     readonly telemetry: VehicleTelemetry,
   ) {
-    this.arbiter = new TrackArbiter(options.allowNavigationWithRecon, "NPC_TANK");
+    this.arbiter = new TrackArbiter(options.allowNavigationWithRecon, "NPC_TANK", OPERATION_TRACKS);
   }
 
   async initialize(): Promise<void> {
@@ -91,11 +132,6 @@ export class NpcTankProviderRuntime {
     this.#navigation = selectNpcNavigationTool(this.device.contracts());
     this.#circularScanSupported = npcCircularScanSupported(this.device.contracts());
     this.ingress.setDeviceConnected(this.device.connected());
-    this.ingress.applyDeviceObservation(
-      { payload: { eoScan: { supported: this.#circularScanSupported } } },
-      ["payload"],
-    );
-    this.#writeCapabilityReports();
     this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic) => {
       void this.#observe(snapshot, topic);
     });
@@ -105,6 +141,7 @@ export class NpcTankProviderRuntime {
   async close(): Promise<void> {
     if (this.#poller !== undefined) clearInterval(this.#poller);
     this.#unsubscribeSnapshot?.();
+    await this.#mutationTail.catch(() => undefined);
     await this.device.close();
     await this.store.close();
   }
@@ -118,65 +155,17 @@ export class NpcTankProviderRuntime {
     return structuredClone(this.#navigation);
   }
   executionSnapshot(execution: ProviderExecution): Record<string, unknown> {
-    return npcExecutionSnapshot(execution);
+    return executionSnapshot(execution);
+  }
+  start(
+    input: StartVehicleOperation,
+  ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
+    return this.#serializeMutation(() => this.#start(input));
   }
 
-  availability(
-    operationName: string,
-    argumentsValue: Record<string, unknown>,
-    ignoreOwnedByTaskId?: string,
-  ): AvailabilityDecision {
-    const result = (
-      availability: AvailabilityDecision["availability"],
-      reasonCode: string,
-    ): AvailabilityDecision => ({
-      availability,
-      riskLevel:
-        operationName === "vehicle_fire_weapon" || operationName === "vehicle_emergency_stop"
-          ? "HIGH"
-          : operationName.startsWith("vehicle_get_") || operationName === "vehicle_laser_range"
-            ? "LOW"
-            : "MEDIUM",
-      reasonCode,
-      description: reasonCode,
-    });
-    if (!OPERATIONS.has(operationName)) return result("DISABLED", "NPC_TANK_OPERATION_UNSUPPORTED");
-    if (this.ingress.stateConflict()) return result("UNKNOWN", "NPC_TASK_STATE_CONFLICT");
-    if (
-      operationName === "vehicle_navigate" &&
-      this.#navigation.selected === undefined &&
-      object(argumentsValue.mission) &&
-      (argumentsValue.mission.type === "point" || argumentsValue.mission.type === "route")
-    )
-      return result("UNKNOWN", "NPC_TANK_NAVIGATION_TOOL_UNAVAILABLE");
-    const required = [...(NPC_OPERATION_REQUIRED_TOOLS[operationName] ?? [])];
-    if (operationName === "vehicle_navigate" && this.#navigation.selected !== undefined)
-      required.push(this.#navigation.selected);
-    if (operationName === "vehicle_area_recon" && argumentsValue.scanMode === "circular")
-      required.push("npc_tank_eo_scan_start", "npc_tank_eo_scan_stop", "npc_tank_eo_set_angle");
-    return checkVehicleAvailability({
-      operationName,
-      snapshot: this.ingress.snapshot(),
-      freshness: this.options.freshness,
-      occupiedTracks: new Set(
-        [...this.arbiter.occupied()].filter(
-          (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
-        ),
-      ),
-      requiredToolsPresent: required.every((tool) => this.device.hasTool(tool)),
-      ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
-      allowNavigationWithRecon: this.options.allowNavigationWithRecon,
-      fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,
-      reasonPrefix: "NPC_TANK",
-      circularScanSupported: this.#circularScanSupported,
-      ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
-    });
-  }
-
-  async start(input: StartVehicleOperation): Promise<{
-    externalExecutionId: string;
-    initialSnapshot: Record<string, unknown>;
-  }> {
+  async #start(
+    input: StartVehicleOperation,
+  ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
     validateStart(input);
     if (SYNC_OPERATIONS.has(input.operationName)) return this.#synchronous(input);
     const existing = await this.store.getExecution(input.taskId);
@@ -184,7 +173,7 @@ export class NpcTankProviderRuntime {
       assertIdentity(existing, input);
       return {
         externalExecutionId: existing.externalExecutionId,
-        initialSnapshot: npcExecutionSnapshot(existing),
+        initialSnapshot: executionSnapshot(existing),
       };
     }
     const decision = this.availability(input.operationName, input.arguments);
@@ -193,6 +182,7 @@ export class NpcTankProviderRuntime {
     if (!acquired.accepted) throw new Error(acquired.reasonCode);
     const now = new Date().toISOString();
     const tracks = OPERATION_TRACKS[input.operationName] ?? [];
+    const observationCursors = initialObservationCursors(input.operationName, this.ingress);
     let execution: ProviderExecution = {
       taskId: input.taskId,
       externalExecutionId: `npc_tank1:${tracks[0] ?? "query"}:${randomUUID()}`,
@@ -203,7 +193,7 @@ export class NpcTankProviderRuntime {
       arguments: structuredClone(input.arguments),
       executionContext: structuredClone(input.executionContext),
       downstreamMissionIds: [],
-      providerRevision: this.options.providerVersion,
+      ...(observationCursors === undefined ? {} : { observationCursors }),
       state: input.operationName === "vehicle_fire_weapon" ? "WAITING_INPUT" : "ACCEPTED",
       revision: 1,
       reasonCode:
@@ -214,22 +204,36 @@ export class NpcTankProviderRuntime {
       updatedAt: now,
       evidence: [],
     };
-    await this.store.putExecution(execution);
+    try {
+      await this.store.putExecution(execution);
+    } catch (error) {
+      this.arbiter.release(input.taskId);
+      throw error;
+    }
     try {
       if (input.operationName !== "vehicle_fire_weapon") {
-        const calls = npcStartDeviceCalls(
-          input.operationName,
-          input.arguments,
-          this.#navigation,
-          this.#circularScanSupported,
-        );
-        if (calls[0] !== undefined) execution.selectedDeviceTool = calls[0].name;
-        for (const call of calls) {
-          const result = await this.#callDevice(call.name, call.arguments, input.taskId);
-          const missionId = missionIdOf(result);
-          if (missionId !== undefined && !execution.downstreamMissionIds.includes(missionId))
-            execution.downstreamMissionIds.push(missionId);
+        const dispatchCursors = initialObservationCursors(input.operationName, this.ingress);
+        const dispatchExecution = withObservationBaselines(execution, dispatchCursors);
+        if (dispatchExecution.revision !== execution.revision) {
+          execution = dispatchExecution;
+          await this.store.putExecution(execution);
         }
+        const deviceArguments =
+          input.operationName === "vehicle_emergency_stop"
+            ? await this.#emergencyStopArguments(input.arguments)
+            : input.arguments;
+        await executeNpcTankStartFlow(
+          input.operationName,
+          deviceArguments,
+          (name, argumentsValue) => this.#callDevice(name, argumentsValue, input.taskId),
+          {
+            onMissionId: async (missionId) => {
+              if (execution.downstreamMissionIds.includes(missionId)) return;
+              execution = withMissionId(execution, missionId);
+              await this.store.putExecution(execution);
+            },
+          },
+        );
         execution = transition(execution, "STARTING", "NPC_TANK_WAITING_DEVICE_CONFIRMATION");
         await this.store.putExecution(execution);
         await this.#startedEvent(execution);
@@ -237,39 +241,95 @@ export class NpcTankProviderRuntime {
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
         { transition: execution.state, reasonCode: execution.reasonCode },
-        { operationName: execution.operationName },
+        identityTelemetry(execution),
       );
       return {
         externalExecutionId: execution.externalExecutionId,
-        initialSnapshot: npcExecutionSnapshot(execution),
+        initialSnapshot: executionSnapshot(execution),
       };
     } catch (error) {
+      if (error instanceof UncertainMutatingDeviceCallError) {
+        execution = transition(execution, "STARTING", "UNCERTAIN_EXECUTION_STATE");
+        await this.store.putExecution(execution);
+        return {
+          externalExecutionId: execution.externalExecutionId,
+          initialSnapshot: executionSnapshot(execution),
+        };
+      }
       this.arbiter.release(input.taskId);
       const failed = terminal(
         execution,
-        "TECHNICAL_FAILED",
+        error instanceof DeviceToolRejectedError ? "BUSINESS_FAILED" : "TECHNICAL_FAILED",
         reason(error),
         {
           resourceId: "vehicle:npc_tank1",
           status: "failed",
           observedAt: new Date().toISOString(),
         },
-        input.operationName,
       );
       await this.store.putExecution(failed);
       throw error;
     }
   }
 
-  async get(taskId: string): Promise<ProviderExecution | undefined> {
-    const execution = await this.store.getExecution(taskId);
-    if (execution === undefined) return undefined;
-    return this.#refresh(execution);
+  availability(
+    operationName: string,
+    argumentsValue: Record<string, unknown>,
+    ignoreOwnedByTaskId?: string,
+  ): AvailabilityDecision {
+    if (!OPERATIONS.has(operationName))
+      return {
+        availability: "DISABLED",
+        riskLevel: "LOW",
+        reasonCode: "NPC_TANK_OPERATION_UNSUPPORTED",
+        description: "NPC_TANK_OPERATION_UNSUPPORTED",
+      };
+    if (operationName === "vehicle_laser_range")
+      return {
+        availability: "DISABLED",
+        riskLevel: "LOW",
+        reasonCode: "PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE",
+        description: "PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE",
+      };
+    const requiredTools = requiredNpcTankDeviceTools(operationName, argumentsValue);
+    return checkVehicleAvailability({
+      operationName,
+      operationTracks: OPERATION_TRACKS,
+      snapshot: this.ingress.snapshot(),
+      freshness: this.options.freshness,
+      occupiedTracks: new Set(
+        [...this.arbiter.occupied()].filter(
+          (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
+        ),
+      ),
+      requiredToolsPresent: requiredTools.every((tool) => this.device.toolAvailable(tool)),
+      ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
+      allowNavigationWithRecon: this.options.allowNavigationWithRecon,
+      fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,
+      reasonPrefix: "NPC_TANK",
+      circularScanSupported: this.#circularScanSupported,
+      ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
+    });
   }
 
-  async command(
+  get(taskId: string): Promise<ProviderExecution | undefined> {
+    return this.#serializeMutation(async () => {
+      const execution = await this.store.getExecution(taskId);
+      if (execution === undefined) return undefined;
+      return this.#refresh(execution);
+    });
+  }
+
+  command(
     command: "pause" | "resume" | "cancel",
-    identity: VehicleCommandIdentity,
+    identity: CommandIdentity,
+  ): Promise<Record<string, unknown>> {
+    return this.#serializeMutation(() => this.#command(command, identity));
+  }
+
+  async #command(
+    command: "pause" | "resume" | "cancel",
+    identity: CommandIdentity,
   ): Promise<Record<string, unknown>> {
     const old = await this.store.getCommandAck(identity.taskId, command, identity.commandSequence);
     if (old !== undefined) return old.response;
@@ -277,13 +337,31 @@ export class NpcTankProviderRuntime {
     if (execution === undefined) return this.#ack(identity, command, false, "EXECUTION_NOT_FOUND");
     if (!sameIdentity(execution, identity))
       return this.#ack(identity, command, false, "TASK_IDENTITY_CONFLICT");
+    if (execution.operationName === "vehicle_fire_weapon" && command === "cancel") {
+      if (execution.state === "WAITING_INPUT")
+        return this.#cancelUndispatchedFire(
+          execution,
+          identity,
+          command,
+          true,
+          "NPC_TANK_FIRE_CANCELLED_BEFORE_DISPATCH",
+        );
+      return this.#ack(identity, command, false, "NPC_TANK_FIRE_CANCEL_UNSUPPORTED_AFTER_DISPATCH");
+    }
     if (!commandSupported(execution.operationName, command))
       return this.#ack(identity, command, false, `${command.toUpperCase()}_NOT_SUPPORTED`);
     try {
+      const persistedMissionId = execution.downstreamMissionIds.at(-1);
+      if (
+        persistedMissionId === undefined &&
+        (execution.operationName === "vehicle_navigate" ||
+          execution.operationName === "vehicle_area_recon")
+      )
+        throw new Error("NPC_TANK_PERSISTED_MISSION_ID_REQUIRED");
       for (const call of npcControlDeviceCalls(
         execution.operationName,
         command,
-        execution.arguments.scanMode === "circular",
+        persistedMissionId ?? 0,
       ))
         await this.#callDevice(call.name, call.arguments, execution.taskId);
       const targetState =
@@ -297,25 +375,66 @@ export class NpcTankProviderRuntime {
       await this.store.putExecution(transition(execution, targetState, reasonCode));
       return await this.#ack(identity, command, true, reasonCode);
     } catch (error) {
+      if (error instanceof UncertainMutatingDeviceCallError) {
+        const uncertainState = command === "cancel" ? "STOPPING" : execution.state;
+        await this.store.putExecution(
+          transition(execution, uncertainState, "UNCERTAIN_EXECUTION_STATE"),
+        );
+      }
       return this.#ack(identity, command, false, reason(error));
     }
   }
 
-  async updateFire(
-    identity: VehicleCommandIdentity,
+  updateFire(identity: CommandIdentity, responses: unknown): Promise<Record<string, unknown>> {
+    return this.#serializeMutation(() => this.#updateFire(identity, responses));
+  }
+
+  async #updateFire(
+    identity: CommandIdentity,
     responses: unknown,
   ): Promise<Record<string, unknown>> {
     const command = "update";
     const old = await this.store.getCommandAck(identity.taskId, command, identity.commandSequence);
     if (old !== undefined) return old.response;
-    const execution = await this.store.getExecution(identity.taskId);
+    let execution = await this.store.getExecution(identity.taskId);
     if (execution === undefined) return this.#ack(identity, command, false, "EXECUTION_NOT_FOUND");
     if (!sameIdentity(execution, identity))
       return this.#ack(identity, command, false, "TASK_IDENTITY_CONFLICT");
+    const existingDispatch = await this.store.getCommandAck(
+      identity.taskId,
+      FIRE_DISPATCH_COMMAND,
+      FIRE_DISPATCH_SEQUENCE,
+    );
+    const existingCancellation = fireCancellationReason(existingDispatch);
+    if (
+      existingCancellation !== undefined &&
+      execution.operationName === "vehicle_fire_weapon" &&
+      execution.state === "WAITING_INPUT"
+    ) {
+      try {
+        await this.#persistLocalFireCancellation(execution, existingCancellation);
+      } catch {
+        return replayCommandResponse(
+          this.#fireDispatchRecord(identity, true, "UNCERTAIN_EXECUTION_STATE").response,
+          identity,
+        );
+      }
+    }
+    if (existingDispatch !== undefined)
+      return replayCommandResponse(existingDispatch.response, identity);
     if (execution.operationName !== "vehicle_fire_weapon" || execution.state !== "WAITING_INPUT")
       return this.#ack(identity, command, false, "NPC_TANK_FIRE_CONFIRMATION_NOT_EXPECTED");
-    if (!acceptedConfirmation(responses))
-      return this.#ack(identity, command, false, "NPC_TANK_FIRE_CONFIRMATION_REJECTED");
+    const confirmation = fireConfirmationDecision(responses);
+    if (confirmation === "declined")
+      return this.#cancelUndispatchedFire(
+        execution,
+        identity,
+        command,
+        true,
+        "NPC_TANK_FIRE_CONFIRMATION_REJECTED",
+      );
+    if (confirmation !== "accepted")
+      return this.#ack(identity, command, false, "NPC_TANK_FIRE_CONFIRMATION_INVALID");
     const decision = this.availability(
       execution.operationName,
       execution.arguments,
@@ -323,25 +442,59 @@ export class NpcTankProviderRuntime {
     );
     if (decision.availability !== "AVAILABLE")
       return this.#ack(identity, command, false, decision.reasonCode);
+    const targetId = text(execution.arguments.targetId);
+    const unarmed = this.#fireDispatchRecord(identity, true, FIRE_DISPATCH_NOT_ARMED);
+    const claim = await this.store.claimCommandAck(unarmed);
+    if (!claim.claimed) return replayCommandResponse(claim.record.response, identity);
+    const dispatchCursor = operationObservationCursor(execution.operationName, this.ingress);
+    execution = transition(
+      withObservationBaselines(
+        execution,
+        dispatchCursor === undefined ? {} : { track: dispatchCursor },
+      ),
+      "STARTING",
+      "NPC_TANK_FIRE_DISPATCH_PREPARED",
+    );
+    const armed = this.#fireDispatchRecord(identity, true, "UNCERTAIN_EXECUTION_STATE");
+    try {
+      await this.store.putExecution(execution);
+      await this.#emitExecutionTransition(execution, execution);
+    } catch {
+      return await this.#abortFireBeforeDispatch(execution, identity, unarmed);
+    }
+    try {
+      const armedClaimed = await this.store.completeCommandAck(armed, FIRE_DISPATCH_NOT_ARMED);
+      if (!armedClaimed) return await this.#abortFireBeforeDispatch(execution, identity, unarmed);
+    } catch {
+      return await this.#abortFireBeforeDispatch(execution, identity, unarmed);
+    }
     try {
       let stripped = 0;
-      for (const call of npcFireConfirmationCalls(text(execution.arguments.targetId))) {
+      for (const call of npcFireConfirmationCalls(
+        targetId,
+        execution.downstreamMissionIds.at(-1) ?? 0,
+      )) {
         const downstream = await this.device.call(call.name, call.arguments, execution.taskId);
+        const missionId = missionIdFromNpcTankResult(call.name, downstream);
+        if (missionId === undefined) throw new Error("NPC_TANK_DEVICE_MISSION_ID_REQUIRED");
+        const canonicalMissionId = canonicalNpcTankMissionId(missionId);
+        if (!execution.downstreamMissionIds.includes(canonicalMissionId)) {
+          execution = withMissionId(execution, canonicalMissionId);
+          await this.store.putExecution(execution);
+        }
         const sanitized = sanitizeFireResult(downstream);
         stripped += sanitized.strippedFields;
         sanitizeObject(sanitized.value);
       }
       const next = transition(execution, "STARTING", "NPC_TANK_FIRE_COMMAND_ACCEPTED");
-      next.selectedDeviceTool = "npc_tank_attack_target";
       next.result = {
         resourceId: "vehicle:npc_tank1",
         status: "fire_command_accepted",
-        localOnly: true,
-        confirmed: true,
         observedAt: next.updatedAt,
       };
       next.evidence.push(npcEvidence("vehicle.weapon.local_result", next.updatedAt, "/status"));
       await this.store.putExecution(next);
+      await this.#emitExecutionTransition(execution, next);
       await this.businessEvents.publish({
         sourceId: "vehicle.execution",
         scope: "task",
@@ -352,7 +505,7 @@ export class NpcTankProviderRuntime {
         externalExecutionId: next.externalExecutionId,
         resourceRef: "vehicle:npc_tank1",
         severityHint: "warning",
-        rawPayload: { operation: next.operationName, status: "fire_command_accepted" },
+        rawPayload: { taskId: next.taskId, status: "fire_command_accepted" },
       });
       if (stripped > 0)
         await this.telemetry.emit(
@@ -361,15 +514,41 @@ export class NpcTankProviderRuntime {
             diagnostic: "fire_verdict_fields_stripped",
             countBucket: stripped > 4 ? "many" : "few",
           },
-          { operationName: next.operationName },
+          identityTelemetry(next),
         );
-      return await this.#ack(identity, command, true, "NPC_TANK_FIRE_CONFIRMATION_ACCEPTED");
+      return await this.#completeFireClaim(identity, true, "NPC_TANK_FIRE_CONFIRMATION_ACCEPTED");
     } catch (error) {
-      return this.#ack(identity, command, false, reason(error));
+      if (error instanceof DeviceToolRejectedError) {
+        const failed = terminal(execution, "BUSINESS_FAILED", reason(error), {
+          resourceId: "vehicle:npc_tank1",
+          status: "fire_command_rejected",
+          observedAt: new Date().toISOString(),
+        });
+        try {
+          await this.store.putExecution(failed);
+          this.arbiter.release(failed.taskId);
+          await this.#emitExecutionTransition(execution, failed);
+          return await this.#completeFireClaim(identity, true, reason(error));
+        } catch {
+          return replayCommandResponse(armed.response, identity);
+        }
+      }
+      const uncertain = transition(execution, "STARTING", "UNCERTAIN_EXECUTION_STATE");
+      await this.store.putExecution(uncertain).catch(() => undefined);
+      await this.#emitExecutionTransition(execution, uncertain).catch(() => undefined);
+      // Keep the durable claim pending. A retry must reconcile observations and
+      // must never dispatch a second fire command after an ambiguous outcome.
+      return replayCommandResponse(armed.response, identity);
     }
   }
 
-  async reconcile(
+  reconcile(
+    input: StartVehicleOperation & { externalExecutionId?: string },
+  ): Promise<Record<string, unknown>> {
+    return this.#serializeMutation(() => this.#reconcile(input));
+  }
+
+  async #reconcile(
     input: StartVehicleOperation & { externalExecutionId?: string },
   ): Promise<Record<string, unknown>> {
     const execution = await this.store.getExecution(input.taskId);
@@ -377,7 +556,7 @@ export class NpcTankProviderRuntime {
       return {
         status: "NOT_FOUND",
         reasonCode: "EXECUTION_NOT_FOUND",
-        message: "NPC Tank execution does not exist.",
+        message: "Execution does not exist.",
         retryable: false,
       };
     if (
@@ -393,106 +572,129 @@ export class NpcTankProviderRuntime {
         message: "Execution identity conflicts.",
         retryable: false,
       };
-    if (this.ingress.stateConflict())
-      return {
-        status: "CONFLICT",
-        externalExecutionId: execution.externalExecutionId,
-        reasonCode: "NPC_TASK_STATE_CONFLICT",
-        message: "Authoritative NPC task tracks conflict.",
-        retryable: true,
-      };
     if (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected)
       return {
         status: "TRANSIENT_UNAVAILABLE",
         externalExecutionId: execution.externalExecutionId,
         reasonCode: "UNCERTAIN_EXECUTION_STATE",
-        message: "MQTT and NPC Device MCP cannot jointly confirm execution.",
+        message: "MQTT and Device MCP cannot jointly confirm the execution.",
         retryable: true,
       };
     const refreshed = await this.#refresh(execution);
     return {
       status: "FOUND",
-      snapshot: npcExecutionSnapshot(refreshed),
+      snapshot: executionSnapshot(refreshed),
       externalExecutionId: refreshed.externalExecutionId,
       reasonCode: "EXECUTION_FOUND",
-      message: "Execution reconciled from NPC public observations.",
+      message: "Execution reconciled from local NPC_TANK observations.",
       retryable: false,
     };
   }
 
-  async recover(): Promise<void> {
+  recover(): Promise<void> {
+    return this.#serializeMutation(() => this.#recover());
+  }
+
+  async #recover(): Promise<void> {
     for (const execution of await this.store.listActiveExecutions()) {
-      if (execution.resourceId !== "vehicle:npc_tank1")
-        throw new Error("NPC_TANK_CROSS_PROVIDER_EXECUTION_FORBIDDEN");
+      if (execution.operationName === "vehicle_fire_weapon") {
+        const dispatch = await this.store.getCommandAck(
+          execution.taskId,
+          FIRE_DISPATCH_COMMAND,
+          FIRE_DISPATCH_SEQUENCE,
+        );
+        if (await this.#recoverPreDispatchFireFence(execution, dispatch)) continue;
+      }
       this.arbiter.restore(execution.taskId, vehicleTracks(execution.tracks));
       if (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected) {
-        const uncertain = transition(execution, execution.state, "UNCERTAIN_EXECUTION_STATE");
-        await this.store.putExecution(uncertain);
-      } else {
-        await this.#refresh(execution);
-      }
+        execution.reasonCode = "UNCERTAIN_EXECUTION_STATE";
+        execution.updatedAt = new Date().toISOString();
+        execution.revision++;
+        await this.store.putExecution(execution);
+      } else await this.#refresh(execution);
     }
   }
-  async pollActive(): Promise<void> {
+  pollActive(): Promise<void> {
+    if (this.#pollPromise !== undefined) return this.#pollPromise;
+    const poll = this.#serializeMutation(() => this.#pollActive());
+    this.#pollPromise = poll;
+    void poll.then(
+      () => {
+        if (this.#pollPromise === poll) this.#pollPromise = undefined;
+      },
+      () => {
+        if (this.#pollPromise === poll) this.#pollPromise = undefined;
+      },
+    );
+    return poll;
+  }
+
+  async #pollActive(): Promise<void> {
+    await this.#ensureDeviceConnection();
+    await this.#emitResourceTransitions(this.ingress.snapshot());
     for (const execution of await this.store.listActiveExecutions()) await this.#refresh(execution);
+  }
+
+  async #ensureDeviceConnection(): Promise<void> {
+    if (this.device.connected()) {
+      if (!this.ingress.snapshot().connectivity.deviceMcpConnected)
+        this.ingress.setDeviceConnected(true);
+      return;
+    }
+    this.ingress.setDeviceConnected(false);
+    if (this.#deviceReconnect !== undefined) return this.#deviceReconnect;
+    this.#deviceReconnect = this.device
+      .connect()
+      .then(() => this.ingress.setDeviceConnected(this.device.connected()))
+      .catch(() => this.ingress.setDeviceConnected(false))
+      .finally(() => {
+        this.#deviceReconnect = undefined;
+      });
+    return this.#deviceReconnect;
   }
 
   async #synchronous(input: StartVehicleOperation) {
     const observedAt = new Date().toISOString();
     let result: Record<string, unknown>;
     if (input.operationName === "vehicle_get_state") {
-      result = selectSnapshot(this.ingress.snapshot(), input.arguments.include);
+      let deviceStatus: Record<string, unknown> | undefined;
+      if (this.device.hasTool("get_status")) {
+        deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
+        const observation = normalizeNpcTankMqttObservation("/npc_tank1/status", deviceStatus);
+        this.ingress.applyDeviceObservation(
+          observation.patch,
+          [],
+          observation.sourceObservedAt ?? observedAt,
+        );
+      }
+      result = {
+        ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
+        mqttIngressSequence: this.ingress.ingestSequence(),
+        ...(deviceStatus === undefined ? {} : { deviceStatus }),
+      };
+    } else if (input.operationName === "vehicle_get_capabilities") {
+      const capabilities = await this.#callDevice("npc_tank_get_capabilities", {}, input.taskId);
+      result = normalizeNpcTankCapabilities(capabilities, this.device.contracts(), observedAt);
     } else if (input.operationName === "vehicle_get_payload_status") {
-      const [status, exceptions] = await Promise.all([
-        this.#callDevice("npc_tank_area_recon_get_status", {}, input.taskId),
-        this.#callDevice("npc_tank_area_recon_get_exceptions", {}, input.taskId),
-      ]);
-      const payloadErrorCodes = Array.isArray(exceptions.exceptions)
-        ? exceptions.exceptions.map(String)
-        : [];
-      const reconnaissance = deviceTrack(status.reconnaissance ?? status);
-      const weapon = deviceTrack(status.weapon);
+      const status = await this.#callDevice("npc_tank_area_recon_get_status", {}, input.taskId);
+      const observation = normalizeNpcTankMqttObservation("/npc_tank1/area_recon/status", status);
       this.ingress.applyDeviceObservation(
-        {
-          payload: {
-            online: status.online === true || status.load_status === true,
-            ...(record(status.gimbal) ? { gimbal: status.gimbal } : {}),
-            ...(record(status.laser) ? { laser: status.laser } : {}),
-            ...(reconnaissance === undefined ? {} : { reconnaissance }),
-            ...(weapon === undefined ? {} : { weapon }),
-            ...(typeof status.locked_target_id === "string"
-              ? { lockedTargetId: status.locked_target_id }
-              : {}),
-            attackReady: status.attack_ready === true,
-            eoScan: {
-              supported: this.#circularScanSupported,
-              ...(typeof status.eo_scan_active === "boolean"
-                ? { active: status.eo_scan_active }
-                : {}),
-              ...(status.eo_scan_mode === "circular"
-                ? { mode: "circular" as const }
-                : { mode: "unknown" as const }),
-              ...(typeof status.eo_angle === "number" ? { angle: status.eo_angle } : {}),
-              ...(typeof status.eo_zoom === "number" ? { zoom: status.eo_zoom } : {}),
-              ...(status.angle_unit === "rad" || status.angle_unit === "deg"
-                ? { angleUnit: status.angle_unit }
-                : { angleUnit: "unknown" as const }),
-            },
-          },
-          health: { payloadErrorCodes },
-        },
-        ["payload"],
-        observedAt,
+        observation.patch,
+        [],
+        observation.sourceObservedAt ?? observedAt,
       );
+      const payload = this.ingress.snapshot().payload;
       result = {
         resourceId: "vehicle:npc_tank1",
-        online: status.online ?? status.load_status ?? false,
-        ...(record(status.gimbal) ? { gimbal: status.gimbal } : {}),
-        ...(record(status.laser) ? { laser: status.laser } : {}),
-        reconnaissance: record(status.reconnaissance) ? status.reconnaissance : status,
-        weapon: record(status.weapon) ? status.weapon : {},
-        supportsCircularEoScan: this.#circularScanSupported,
-        payloadErrorCodes,
+        online: payload.online ?? false,
+        ...(payload.gimbal === undefined ? {} : { gimbal: payload.gimbal }),
+        ...(payload.laser === undefined ? {} : { laser: payload.laser }),
+        reconnaissance: payload.reconnaissance,
+        eoTask: payload.eoTask,
+        weapon: payload.weapon,
+        ...(payload.lockedTargetId === undefined ? {} : { lockedTargetId: payload.lockedTargetId }),
+        attackReady: payload.attackReady === true,
+        payloadErrorCodes: this.ingress.snapshot().health.payloadErrorCodes,
         observedAt,
       };
     } else if (input.operationName === "vehicle_get_targets") {
@@ -505,29 +707,19 @@ export class NpcTankProviderRuntime {
         );
         deviceTargets = Array.isArray(response.targets) ? response.targets : [];
       }
+      const mqttTargets = this.ingress.snapshot().payload.targets;
+      const normalizedDeviceTargets = normalizeNpcTankDeviceTargets(deviceTargets, observedAt);
       result = {
         resourceId: "vehicle:npc_tank1",
-        targets: [
-          ...this.ingress.snapshot().payload.targets,
-          ...deviceTargets.map((value) => ({
-            ...sanitizeObject(value),
-            source: "device_mcp",
-            observedAt,
-          })),
-        ],
-        freshness: {
-          targetObservedAt: this.ingress.snapshot().freshness.targetObservedAt ?? null,
-        },
+        targets: deduplicateNpcTankTargets(
+          mqttTargets as unknown as Record<string, unknown>[],
+          normalizedDeviceTargets,
+        ),
+        freshness: { targetObservedAt: this.ingress.snapshot().freshness.targetObservedAt ?? null },
         observedAt,
       };
     } else {
-      const response = await this.#callDevice("npc_tank_laser_range", {}, input.taskId);
-      result = {
-        resourceId: "vehicle:npc_tank1",
-        distanceM: finite(response.distance_m ?? response.distance),
-        valid: response.valid !== false,
-        observedAt,
-      };
+      throw new Error("PRD_REQUIRED_EXTERNAL_INTERFACE_UNAVAILABLE");
     }
     const sanitized = sanitizeFireResult(result).value;
     assertNoRefereeData(sanitized);
@@ -547,67 +739,101 @@ export class NpcTankProviderRuntime {
         result: jsonToProtoStruct(sanitizeObject(sanitized)),
         retryable: false,
         observedAt: timestamp(observedAt),
-        evidence: [npcEvidence("vehicle.state.observation", observedAt, "/revision")],
+        evidence: [synchronousEvidence(input.operationName, observedAt)],
       },
     };
   }
 
   async #refresh(execution: ProviderExecution): Promise<ProviderExecution> {
-    if (isTerminal(execution.state) || execution.state === "WAITING_INPUT") return execution;
-    if (this.ingress.stateConflict()) {
-      if (execution.reasonCode === "NPC_TASK_STATE_CONFLICT") return execution;
-      const conflict = transition(execution, execution.state, "NPC_TASK_STATE_CONFLICT");
-      await this.store.putExecution(conflict);
-      this.events.emit(execution.taskId, npcExecutionSnapshot(conflict));
-      return conflict;
+    if (isTerminal(execution.state)) return execution;
+    if (execution.operationName === "vehicle_fire_weapon") {
+      const dispatch = await this.store.getCommandAck(
+        execution.taskId,
+        FIRE_DISPATCH_COMMAND,
+        FIRE_DISPATCH_SEQUENCE,
+      );
+      if (await this.#recoverPreDispatchFireFence(execution, dispatch)) {
+        return (await this.store.getExecution(execution.taskId)) ?? execution;
+      }
     }
+    if (execution.state === "WAITING_INPUT") return execution;
     const snapshot = this.ingress.snapshot();
     let next = execution;
     if (execution.operationName === "vehicle_navigate")
-      next = applyTrack(execution, snapshot.chassis.mission, "completed");
+      next = applyTrack(
+        execution,
+        snapshot.chassis.mission,
+        "completed",
+        operationObservationCursor(execution.operationName, this.ingress),
+      );
     else if (execution.operationName === "vehicle_area_recon")
-      next = applyTrack(execution, snapshot.payload.reconnaissance, "completed");
-    else if (execution.operationName === "vehicle_fire_weapon")
-      next = applyTrack(execution, snapshot.payload.weapon, "fire_cycle_completed");
-    else if (execution.operationName === "vehicle_track_target") {
+      next = applyReconTrack(
+        execution,
+        snapshot.payload.reconnaissance,
+        this.ingress.observationCursor("/npc_tank1/area_recon/status"),
+      );
+    else if (execution.operationName === "vehicle_control_gimbal")
+      next = applyTrack(
+        execution,
+        snapshot.payload.eoTask,
+        "completed",
+        operationObservationCursor(execution.operationName, this.ingress),
+      );
+    else if (execution.operationName === "vehicle_fire_weapon") {
+      // A fire call with an ambiguous outcome and no returned mission ID cannot
+      // be correlated to weapon telemetry. Keep it uncertain instead of
+      // accepting an unrelated post-dispatch weapon track.
+      if (execution.downstreamMissionIds.length === 0) return execution;
+      next = applyTrack(
+        execution,
+        snapshot.payload.weapon,
+        "fire_cycle_completed",
+        operationObservationCursor(execution.operationName, this.ingress),
+      );
+    } else if (execution.operationName === "vehicle_track_target") {
+      if (
+        !isNewOperationObservation(
+          execution,
+          operationObservationCursor(execution.operationName, this.ingress),
+        )
+      )
+        return execution;
       const targetId = text(execution.arguments.targetId);
-      if (snapshot.payload.lockedTargetId === targetId) {
+      const observedLockedTarget =
+        snapshot.payload.reconnaissance.lock?.stage === 3
+          ? snapshot.payload.reconnaissance.lock.targetId
+          : snapshot.payload.lockedTargetId;
+      if (observedLockedTarget === targetId) {
         if (execution.state !== "RUNNING")
           next = transition(execution, "RUNNING", "NPC_TANK_TARGET_LOCK_CONFIRMED");
       } else if (execution.state === "RUNNING")
-        next = terminal(
+        next = terminal(execution, "BUSINESS_FAILED", "NPC_TANK_TARGET_LOST", {
+          resourceId: "vehicle:npc_tank1",
+          status: "target_lost",
+          observedAt: new Date().toISOString(),
+        });
+    } else if (execution.operationName === "vehicle_emergency_stop") {
+      if (
+        isNewOperationObservation(
           execution,
-          "BUSINESS_FAILED",
-          "NPC_TANK_TARGET_LOST",
-          {
-            resourceId: "vehicle:npc_tank1",
-            status: "target_lost",
-            observedAt: new Date().toISOString(),
-          },
-          execution.operationName,
-        );
-    } else if (
-      execution.operationName === "vehicle_emergency_stop" &&
-      (snapshot.chassis.speedKmh ?? 0) <= 0.1 &&
-      snapshot.chassis.mission.state !== 1 &&
-      snapshot.payload.reconnaissance.state !== 1 &&
-      snapshot.payload.weapon.state !== 1
-    ) {
-      next = terminal(
-        execution,
-        "SUCCEEDED",
-        "NPC_TANK_LOCAL_STOP_CONFIRMED",
-        {
+          operationObservationCursor(execution.operationName, this.ingress),
+        ) &&
+        (snapshot.chassis.speedKmh ?? 0) <= 0.1 &&
+        snapshot.chassis.mission.state !== 1 &&
+        !reconMotionActive(snapshot.payload.reconnaissance.motionStatus) &&
+        snapshot.payload.eoTask.state !== 1 &&
+        snapshot.payload.weapon.state !== 1 &&
+        (snapshot.payload.reconnaissance.lock?.stage ?? 1) === 1
+      )
+        next = terminal(execution, "SUCCEEDED", "NPC_TANK_LOCAL_STOP_CONFIRMED", {
           resourceId: "vehicle:npc_tank1",
           status: "stopped",
           observedAt: new Date().toISOString(),
-        },
-        execution.operationName,
-      );
+        });
     }
     if (next.revision !== execution.revision) {
       await this.store.putExecution(next);
-      this.events.emit(execution.taskId, npcExecutionSnapshot(next));
+      this.events.emit(execution.taskId, executionSnapshot(next));
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
         {
@@ -615,7 +841,7 @@ export class NpcTankProviderRuntime {
           reasonCode: next.reasonCode,
           progressBucket: progressBucket(next.progress),
         },
-        { operationName: next.operationName },
+        identityTelemetry(next),
       );
       await this.#transitionEvent(execution, next);
       if (isTerminal(next.state)) this.arbiter.release(next.taskId);
@@ -630,56 +856,440 @@ export class NpcTankProviderRuntime {
       snapshot: snapshot as unknown as Record<string, unknown>,
     });
     await this.telemetry.emit("RESOURCE_STATE", {
-      providerType: "isr.vehicle.npc_tank",
-      vehicleType: "npc_tank",
       source: topicCategory(topic),
       revisionChanged: true,
     });
-    if (topic === "/npc_tank1/detected_objects" && snapshot.payload.targets.length > 0)
-      await this.businessEvents.publish({
-        sourceId: "vehicle.target",
-        scope: "resource",
-        occurredAt: snapshot.freshness.targetObservedAt ?? snapshot.observedAt,
-        eventType: "vehicle.target.detected",
-        description: "NPC Tank local sensors detected one or more targets.",
-        reasonCode: "NPC_TANK_TARGET_DETECTED",
-        resourceRef: "vehicle:npc_tank1",
-        severityHint: "info",
-        rawPayload: { targetCountBucket: bucket(snapshot.payload.targets.length) },
-      });
     await this.pollActive();
+  }
+
+  async #emitResourceTransitions(snapshot: NpcTankSnapshot): Promise<void> {
+    const previous = this.#lastObservedSnapshot;
+    this.#lastObservedSnapshot = structuredClone(snapshot);
+    if (previous !== undefined) {
+      await this.#connectivityEvent(
+        "mqtt",
+        previous.connectivity.mqttConnected,
+        snapshot.connectivity.mqttConnected,
+        snapshot.observedAt,
+      );
+      await this.#connectivityEvent(
+        "device_mcp",
+        previous.connectivity.deviceMcpConnected,
+        snapshot.connectivity.deviceMcpConnected,
+        snapshot.observedAt,
+      );
+      if (
+        previous.payload.reconnaissance.cameraFault !== true &&
+        snapshot.payload.reconnaissance.cameraFault === true
+      )
+        await this.#resourceEvent(
+          "vehicle.payload.camera_fault",
+          "NPC_TANK_CAMERA_FAULT",
+          "NPC Tank electro-optical camera pose is not trustworthy.",
+          snapshot.observedAt,
+          "warning",
+          { cameraFault: true },
+        );
+      if (
+        previous.payload.reconnaissance.cameraFault === true &&
+        snapshot.payload.reconnaissance.cameraFault === false
+      )
+        await this.#resourceEvent(
+          "vehicle.payload.camera_recovered",
+          "NPC_TANK_CAMERA_RECOVERED",
+          "NPC Tank electro-optical camera observation recovered.",
+          snapshot.observedAt,
+          "info",
+          { cameraFault: false },
+        );
+      const previousTargets = new Set(previous.payload.targets.map((target) => target.targetId));
+      const currentTargets = new Set(snapshot.payload.targets.map((target) => target.targetId));
+      const detected = [...currentTargets].filter((targetId) => !previousTargets.has(targetId));
+      const lost = [...previousTargets].filter((targetId) => !currentTargets.has(targetId));
+      if (detected.length > 0)
+        await this.#targetEvent(
+          "vehicle.target.detected",
+          "NPC_TANK_TARGET_DETECTED",
+          detected.length,
+          snapshot.observedAt,
+        );
+      if (lost.length > 0)
+        await this.#targetEvent(
+          "vehicle.target.lost",
+          "NPC_TANK_TARGET_LOST",
+          lost.length,
+          snapshot.observedAt,
+        );
+    }
+    for (const domain of ["chassis", "health", "mission", "target", "payload"] as const) {
+      const current = freshnessState(snapshot, domain, this.options.freshness);
+      const old = this.#freshnessStates.get(domain);
+      this.#freshnessStates.set(domain, current);
+      if (old === "fresh" && current === "stale")
+        await this.#resourceEvent(
+          "vehicle.telemetry.stale",
+          "NPC_TANK_TELEMETRY_STALE",
+          `NPC_TANK ${domain} telemetry became stale.`,
+          snapshot.observedAt,
+          "warning",
+          { domain },
+        );
+      if (old === "stale" && current === "fresh")
+        await this.#resourceEvent(
+          "vehicle.telemetry.recovered",
+          "NPC_TANK_TELEMETRY_RECOVERED",
+          `NPC_TANK ${domain} telemetry recovered.`,
+          snapshot.observedAt,
+          "info",
+          { domain },
+        );
+    }
+  }
+
+  async #connectivityEvent(
+    channel: "mqtt" | "device_mcp",
+    previous: boolean,
+    current: boolean,
+    observedAt: string,
+  ): Promise<void> {
+    if (previous === current) return;
+    const restored = current;
+    await this.#resourceEvent(
+      `vehicle.connectivity.${channel}_${restored ? "restored" : "disconnected"}`,
+      `NPC_TANK_${channel.toUpperCase()}_${restored ? "RESTORED" : "DISCONNECTED"}`,
+      `NPC_TANK ${channel} connectivity ${restored ? "restored" : "disconnected"}.`,
+      observedAt,
+      restored ? "info" : "warning",
+      { channel, connected: current },
+    );
+  }
+
+  async #targetEvent(
+    eventType: "vehicle.target.detected" | "vehicle.target.lost",
+    reasonCode: string,
+    count: number,
+    observedAt: string,
+  ): Promise<void> {
+    await this.businessEvents.publish({
+      sourceId: "vehicle.target",
+      scope: "resource",
+      occurredAt: observedAt,
+      eventType,
+      description: reasonCode,
+      reasonCode,
+      resourceRef: "vehicle:npc_tank1",
+      severityHint: "info",
+      rawPayload: { targetCountBucket: bucket(count) },
+    });
+  }
+
+  async #resourceEvent(
+    eventType: string,
+    reasonCode: string,
+    description: string,
+    occurredAt: string,
+    severityHint: "info" | "warning",
+    rawPayload: Record<string, unknown>,
+  ): Promise<void> {
+    await this.businessEvents.publish({
+      sourceId: "vehicle.health",
+      scope: "resource",
+      occurredAt,
+      eventType,
+      description,
+      reasonCode,
+      resourceRef: "vehicle:npc_tank1",
+      severityHint,
+      rawPayload,
+    });
+  }
+
+  #serializeMutation<T>(work: () => Promise<T>): Promise<T> {
+    const result = this.#mutationTail.then(work, work);
+    this.#mutationTail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
+  async #emergencyStopArguments(
+    argumentsValue: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const active = await this.store.listActiveExecutions();
+    const chassis = active.find((execution) => execution.operationName === "vehicle_navigate");
+    const recon = active.find((execution) =>
+      ["vehicle_area_recon", "vehicle_track_target"].includes(execution.operationName),
+    );
+    return {
+      ...argumentsValue,
+      ...(chassis?.downstreamMissionIds.at(-1) === undefined
+        ? {}
+        : { chassisMissionId: chassis.downstreamMissionIds.at(-1) }),
+      ...(recon?.downstreamMissionIds.at(-1) === undefined
+        ? {}
+        : { reconMissionId: recon.downstreamMissionIds.at(-1) }),
+    };
   }
 
   async #callDevice(
     name: NpcTankDeviceToolName,
     argumentsValue: Record<string, unknown>,
     taskId: string,
-  ): Promise<Record<string, unknown>> {
-    const result = await this.device.call(name, argumentsValue, taskId);
-    return sanitizeObject(sanitizeFireResult(result).value);
+  ) {
+    try {
+      const result = await this.device.call(name, argumentsValue, taskId);
+      this.ingress.setDeviceConnected(this.device.connected());
+      return sanitizeObject(sanitizeFireResult(result).value);
+    } catch (error) {
+      this.ingress.setDeviceConnected(this.device.connected());
+      throw error;
+    }
   }
-  async #ack(
-    identity: VehicleCommandIdentity,
+  async #ack(identity: CommandIdentity, command: string, accepted: boolean, reasonCode: string) {
+    const record = this.#ackRecord(identity, command, accepted, reasonCode);
+    await this.store.putCommandAck(record);
+    return record.response;
+  }
+  async #completeFireClaim(identity: CommandIdentity, accepted: boolean, reasonCode: string) {
+    const record = this.#fireDispatchRecord(identity, accepted, reasonCode);
+    if (await this.store.completeCommandAck(record, "UNCERTAIN_EXECUTION_STATE"))
+      return replayCommandResponse(record.response, identity);
+    const winner = await this.store.getCommandAck(
+      identity.taskId,
+      FIRE_DISPATCH_COMMAND,
+      FIRE_DISPATCH_SEQUENCE,
+    );
+    if (winner === undefined) throw new Error("COMMAND_ACK_CLAIM_LOST");
+    return replayCommandResponse(winner.response, identity);
+  }
+  async #cancelUndispatchedFire(
+    execution: ProviderExecution,
+    identity: CommandIdentity,
+    command: "cancel" | "update",
+    accepted: boolean,
+    reasonCode: string,
+  ): Promise<Record<string, unknown>> {
+    const fence = this.#fireDispatchRecord(identity, accepted, reasonCode);
+    const claim = await this.store.claimCommandAck(fence);
+    if (!claim.claimed) {
+      const existingCancellation = fireCancellationReason(claim.record);
+      if (existingCancellation !== undefined) {
+        const current = (await this.store.getExecution(execution.taskId)) ?? execution;
+        if (!isTerminal(current.state))
+          await this.#persistLocalFireCancellation(current, existingCancellation);
+        if (command === "update") return replayCommandResponse(claim.record.response, identity);
+        return this.#ack(identity, command, true, existingCancellation);
+      }
+      if (fireDispatchReason(claim.record) === FIRE_DISPATCH_NOT_ARMED) {
+        let cancelled: boolean;
+        try {
+          cancelled = await this.store.completeCommandAck(fence, FIRE_DISPATCH_NOT_ARMED);
+        } catch {
+          return this.#ack(identity, command, true, "UNCERTAIN_EXECUTION_STATE");
+        }
+        if (cancelled) {
+          const current = (await this.store.getExecution(execution.taskId)) ?? execution;
+          if (!isTerminal(current.state))
+            await this.#persistLocalFireCancellation(current, reasonCode);
+          return this.#ack(identity, command, true, reasonCode);
+        }
+        const winner = await this.store.getCommandAck(
+          execution.taskId,
+          FIRE_DISPATCH_COMMAND,
+          FIRE_DISPATCH_SEQUENCE,
+        );
+        const winnerCancellation = fireCancellationReason(winner);
+        if (winnerCancellation !== undefined) {
+          const current = (await this.store.getExecution(execution.taskId)) ?? execution;
+          if (!isTerminal(current.state))
+            await this.#persistLocalFireCancellation(current, winnerCancellation);
+          if (command === "update" && winner !== undefined)
+            return replayCommandResponse(winner.response, identity);
+          return this.#ack(identity, command, true, winnerCancellation);
+        }
+        if (command === "update" && winner !== undefined)
+          return replayCommandResponse(winner.response, identity);
+        return this.#ack(
+          identity,
+          command,
+          false,
+          "NPC_TANK_FIRE_CANCEL_UNSUPPORTED_AFTER_DISPATCH",
+        );
+      }
+      if (command === "update") return replayCommandResponse(claim.record.response, identity);
+      return this.#ack(identity, command, false, "NPC_TANK_FIRE_CANCEL_UNSUPPORTED_AFTER_DISPATCH");
+    }
+    try {
+      await this.#persistLocalFireCancellation(execution, reasonCode);
+      return await this.#ack(identity, command, accepted, reasonCode);
+    } catch {
+      return this.#ack(identity, command, true, "UNCERTAIN_EXECUTION_STATE");
+    }
+  }
+  async #persistLocalFireCancellation(
+    execution: ProviderExecution,
+    reasonCode: string,
+  ): Promise<void> {
+    const cancelled = terminal(execution, "CANCELLED", reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "cancelled",
+      observedAt: new Date().toISOString(),
+    });
+    await this.store.putExecution(cancelled);
+    this.arbiter.release(cancelled.taskId);
+    await this.#emitExecutionTransition(execution, cancelled);
+  }
+  async #persistFireTechnicalFailure(
+    execution: ProviderExecution,
+    reasonCode: string,
+  ): Promise<void> {
+    const failed = terminal(execution, "TECHNICAL_FAILED", reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "fire_command_rejected",
+      observedAt: new Date().toISOString(),
+    });
+    await this.store.putExecution(failed);
+    this.arbiter.release(failed.taskId);
+    await this.#emitExecutionTransition(execution, failed);
+  }
+  async #abortFireBeforeDispatch(
+    execution: ProviderExecution,
+    identity: CommandIdentity,
+    unarmed: CommandAckRecord,
+  ): Promise<Record<string, unknown>> {
+    const aborted = this.#fireDispatchRecord(identity, true, FIRE_DISPATCH_ABORTED);
+    let winner: CommandAckRecord | undefined;
+    try {
+      if (await this.store.completeCommandAck(aborted, FIRE_DISPATCH_NOT_ARMED)) winner = aborted;
+      else {
+        winner = await this.store.getCommandAck(
+          identity.taskId,
+          FIRE_DISPATCH_COMMAND,
+          FIRE_DISPATCH_SEQUENCE,
+        );
+        if (
+          fireDispatchReason(winner) === "UNCERTAIN_EXECUTION_STATE" &&
+          (await this.store.completeCommandAck(aborted, "UNCERTAIN_EXECUTION_STATE"))
+        )
+          winner = aborted;
+        else
+          winner = await this.store.getCommandAck(
+            identity.taskId,
+            FIRE_DISPATCH_COMMAND,
+            FIRE_DISPATCH_SEQUENCE,
+          );
+      }
+    } catch {
+      winner = await this.store
+        .getCommandAck(identity.taskId, FIRE_DISPATCH_COMMAND, FIRE_DISPATCH_SEQUENCE)
+        .catch(() => undefined);
+    }
+    const current =
+      (await this.store.getExecution(execution.taskId).catch(() => undefined)) ?? execution;
+    const cancellationReason = fireCancellationReason(winner);
+    if (cancellationReason !== undefined) {
+      if (!isTerminal(current.state))
+        await this.#persistLocalFireCancellation(current, cancellationReason).catch(
+          () => undefined,
+        );
+    } else if (
+      fireDispatchReason(winner) === FIRE_DISPATCH_ABORTED ||
+      fireDispatchReason(winner) === FIRE_DISPATCH_NOT_ARMED ||
+      fireDispatchReason(winner) === "UNCERTAIN_EXECUTION_STATE"
+    ) {
+      if (!isTerminal(current.state))
+        await this.#persistFireTechnicalFailure(current, FIRE_DISPATCH_ABORTED).catch(
+          () => undefined,
+        );
+    }
+    return replayCommandResponse((winner ?? unarmed).response, identity);
+  }
+  async #recoverPreDispatchFireFence(
+    execution: ProviderExecution,
+    dispatch: CommandAckRecord | undefined,
+  ): Promise<boolean> {
+    const cancellationReason = fireCancellationReason(dispatch);
+    if (cancellationReason !== undefined) {
+      await this.#persistLocalFireCancellation(execution, cancellationReason);
+      return true;
+    }
+    const dispatchReason = fireDispatchReason(dispatch);
+    if (dispatchReason === FIRE_DISPATCH_ABORTED) {
+      await this.#persistFireTechnicalFailure(execution, FIRE_DISPATCH_ABORTED);
+      return true;
+    }
+    if (dispatchReason !== FIRE_DISPATCH_NOT_ARMED || dispatch === undefined) return false;
+    const aborted = structuredClone(dispatch);
+    aborted.response = {
+      ...aborted.response,
+      accepted: true,
+      reasonCode: FIRE_DISPATCH_ABORTED,
+      message: FIRE_DISPATCH_ABORTED,
+    };
+    aborted.createdAt = new Date().toISOString();
+    if (await this.store.completeCommandAck(aborted, FIRE_DISPATCH_NOT_ARMED)) {
+      await this.#persistFireTechnicalFailure(execution, FIRE_DISPATCH_ABORTED);
+      return true;
+    }
+    const winner = await this.store.getCommandAck(
+      execution.taskId,
+      FIRE_DISPATCH_COMMAND,
+      FIRE_DISPATCH_SEQUENCE,
+    );
+    const winnerCancellation = fireCancellationReason(winner);
+    if (winnerCancellation !== undefined) {
+      await this.#persistLocalFireCancellation(execution, winnerCancellation);
+      return true;
+    }
+    if (fireDispatchReason(winner) === FIRE_DISPATCH_ABORTED) {
+      await this.#persistFireTechnicalFailure(execution, FIRE_DISPATCH_ABORTED);
+      return true;
+    }
+    return false;
+  }
+  async #emitExecutionTransition(
+    previous: ProviderExecution,
+    next: ProviderExecution,
+  ): Promise<void> {
+    this.events.emit(next.taskId, executionSnapshot(next));
+    await this.telemetry
+      .emit(
+        "EXECUTION_PROGRESS",
+        { transition: next.state, reasonCode: next.reasonCode },
+        identityTelemetry(next),
+      )
+      .catch(() => undefined);
+    await this.#transitionEvent(previous, next).catch(() => undefined);
+  }
+  #fireDispatchRecord(
+    identity: CommandIdentity,
+    accepted: boolean,
+    reasonCode: string,
+  ): CommandAckRecord {
+    const record = this.#ackRecord(identity, FIRE_DISPATCH_COMMAND, accepted, reasonCode);
+    record.commandSequence = FIRE_DISPATCH_SEQUENCE;
+    return record;
+  }
+  #ackRecord(
+    identity: CommandIdentity,
     command: string,
     accepted: boolean,
     reasonCode: string,
-  ) {
-    const response = {
-      accepted,
-      reasonCode,
-      message: reasonCode,
-      commandSequence: identity.commandSequence,
-      identity,
-    };
-    const record: CommandAckRecord = {
+  ): CommandAckRecord {
+    return {
       taskId: identity.taskId,
       command,
       commandSequence: identity.commandSequence,
-      response,
+      response: {
+        accepted,
+        reasonCode,
+        message: reasonCode,
+        commandSequence: identity.commandSequence,
+        identity,
+      },
       createdAt: new Date().toISOString(),
     };
-    await this.store.putCommandAck(record);
-    return response;
   }
   async #startedEvent(execution: ProviderExecution): Promise<void> {
     const eventType =
@@ -687,7 +1297,9 @@ export class NpcTankProviderRuntime {
         ? "vehicle.payload.recon_started"
         : execution.operationName === "vehicle_navigate"
           ? "vehicle.mission.started"
-          : undefined;
+          : execution.operationName === "vehicle_control_gimbal"
+            ? "vehicle.gimbal.control_started"
+            : undefined;
     if (eventType !== undefined)
       await this.businessEvents.publish(taskEvent(execution, eventType, execution.reasonCode));
   }
@@ -698,8 +1310,12 @@ export class NpcTankProviderRuntime {
       eventType = "vehicle.mission.resumed";
     else if (next.operationName === "vehicle_area_recon" && next.state === "SUCCEEDED")
       eventType = "vehicle.payload.recon_completed";
-    else if (next.operationName === "vehicle_area_recon" && isFailure(next.state))
+    else if (next.operationName === "vehicle_area_recon" && next.state === "BUSINESS_FAILED")
       eventType = "vehicle.payload.recon_failed";
+    else if (next.operationName === "vehicle_control_gimbal" && next.state === "SUCCEEDED")
+      eventType = "vehicle.gimbal.control_completed";
+    else if (next.operationName === "vehicle_control_gimbal" && isFailure(next.state))
+      eventType = "vehicle.gimbal.control_failed";
     else if (
       next.operationName === "vehicle_track_target" &&
       next.reasonCode === "NPC_TANK_TARGET_LOCK_CONFIRMED"
@@ -723,49 +1339,9 @@ export class NpcTankProviderRuntime {
     if (eventType !== undefined)
       await this.businessEvents.publish(taskEvent(next, eventType, next.reasonCode));
   }
-  #writeCapabilityReports(): void {
-    for (const [path, value] of [
-      [
-        this.options.navigationReportPath,
-        {
-          schemaVersion: "1.0",
-          status:
-            this.#navigation.selected === undefined
-              ? "NPC_TANK_NAVIGATION_TOOL_UNAVAILABLE"
-              : "PASS",
-          selectedAt: new Date().toISOString(),
-          startupFrozen: true,
-          ...this.#navigation,
-        },
-      ],
-      [
-        this.options.eoScanReportPath,
-        {
-          schemaVersion: "1.0",
-          status: "PASS",
-          capturedAt: new Date().toISOString(),
-          supportsCircularEoScan: this.#circularScanSupported,
-          requiredTools: [
-            "npc_tank_eo_scan_start",
-            "npc_tank_eo_scan_stop",
-            "npc_tank_eo_set_angle",
-          ],
-          reasonCode: this.#circularScanSupported
-            ? "NPC_TANK_CIRCULAR_SCAN_AVAILABLE"
-            : "NPC_TANK_CIRCULAR_SCAN_UNSUPPORTED",
-        },
-      ],
-    ] as const) {
-      mkdirSync(dirname(path), { recursive: true });
-      writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, {
-        encoding: "utf8",
-        mode: 0o600,
-      });
-    }
-  }
 }
 
-export function npcExecutionSnapshot(execution: ProviderExecution): Record<string, unknown> {
+export function executionSnapshot(execution: ProviderExecution): Record<string, unknown> {
   const result =
     execution.result === undefined ? undefined : sanitizeFireResult(execution.result).value;
   if (result !== undefined) assertNoRefereeData(result);
@@ -801,7 +1377,7 @@ export function npcExecutionSnapshot(execution: ProviderExecution): Record<strin
               method: "elicitation/create",
               params: jsonToProtoStruct({
                 message:
-                  "Confirm one local NPC Tank fire-control cycle. This does not assert hit or destruction.",
+                  "Confirm one local NPC_TANK fire-control cycle. This does not assert hit or destruction.",
                 requestedSchema: {
                   type: "object",
                   properties: { confirmed: { type: "boolean", const: true } },
@@ -820,62 +1396,263 @@ function applyTrack(
   execution: ProviderExecution,
   track: VehicleTaskTrack,
   successStatus: string,
+  observationCursor?: string,
 ): ProviderExecution {
+  if (!isNewOperationObservation(execution, observationCursor)) return execution;
+  if (!trackBelongsToExecution(execution, track))
+    return execution.reasonCode === "NPC_TANK_DOWNSTREAM_MISSION_ID_MISMATCH"
+      ? execution
+      : transition(execution, execution.state, "NPC_TANK_DOWNSTREAM_MISSION_ID_MISMATCH");
   const mapped = mapVehicleTaskState(track.state, true, "NPC_TANK");
+  const armed = execution.observationCursors?.trackActive !== undefined;
+  if (!armed && isMappedTerminal(mapped.state)) {
+    if (execution.reasonCode === "NPC_TANK_TASK_TERMINAL_UNCONFIRMED") return execution;
+    return transition(execution, execution.state, "NPC_TANK_TASK_TERMINAL_UNCONFIRMED");
+  }
+  const current =
+    armed || !isObservedActiveState(mapped.state)
+      ? execution
+      : withObservationCursor(execution, "trackActive", observationCursor);
   if (mapped.state === "RECONCILE") {
-    if (execution.reasonCode === mapped.reasonCode) return execution;
-    return transition(execution, execution.state, mapped.reasonCode);
+    if (current.reasonCode === mapped.reasonCode) return current;
+    return transition(current, current.state, mapped.reasonCode);
   }
-  const progress = monotonicProgress(execution.progress, track.progress);
-  if (mapped.state === "SUCCEEDED") {
-    const fire = execution.operationName === "vehicle_fire_weapon";
-    return terminal(
-      execution,
-      "SUCCEEDED",
-      fire ? "NPC_TANK_FIRE_CYCLE_COMPLETED" : mapped.reasonCode,
-      {
-        resourceId: "vehicle:npc_tank1",
-        status: successStatus,
-        ...(fire ? { localOnly: true, confirmed: true } : {}),
-        reasonCode: fire ? "NPC_TANK_FIRE_CYCLE_COMPLETED" : mapped.reasonCode,
-        observedAt: track.observedAt ?? new Date().toISOString(),
-      },
-      execution.operationName,
-    );
-  }
+  const progress = monotonicProgress(current.progress, track.progress);
+  if (mapped.state === "SUCCEEDED")
+    return terminal(current, "SUCCEEDED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: successStatus,
+      observedAt: track.observedAt ?? new Date().toISOString(),
+    });
   if (mapped.state === "BUSINESS_FAILED")
-    return terminal(
-      execution,
-      "BUSINESS_FAILED",
-      mapped.reasonCode,
-      {
-        resourceId: "vehicle:npc_tank1",
-        status: "failed",
-        observedAt: track.observedAt ?? new Date().toISOString(),
-      },
-      execution.operationName,
-    );
+    return terminal(current, "BUSINESS_FAILED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "failed",
+      observedAt: track.observedAt ?? new Date().toISOString(),
+    });
   if (mapped.state === "CANCELLED")
-    return terminal(
-      execution,
-      "CANCELLED",
-      mapped.reasonCode,
-      {
-        resourceId: "vehicle:npc_tank1",
-        status: "cancelled",
-        observedAt: track.observedAt ?? new Date().toISOString(),
-      },
-      execution.operationName,
-    );
+    return terminal(current, "CANCELLED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "cancelled",
+      observedAt: track.observedAt ?? new Date().toISOString(),
+    });
   if (
-    execution.state === "STOPPING" &&
+    current.state === "STOPPING" &&
     (mapped.state === "STARTING" || mapped.state === "RUNNING" || mapped.state === "PAUSED")
   )
-    return execution;
-  if (execution.state === "RESUMING" && mapped.state === "PAUSED") return execution;
-  if (mapped.state === execution.state && progress === execution.progress) return execution;
-  const next = transition(execution, mapped.state, mapped.reasonCode);
+    return current;
+  if (current.state === "RESUMING" && mapped.state === "PAUSED") return current;
+  if (mapped.state === current.state && progress === current.progress) return current;
+  const next = transition(current, mapped.state, mapped.reasonCode);
   if (progress !== undefined) next.progress = progress;
+  return next;
+}
+
+function isObservedActiveState(state: ProviderExecutionState | "RECONCILE"): boolean {
+  return state === "RUNNING" || state === "PAUSED" || state === "RESUMING" || state === "STOPPING";
+}
+
+function isMappedTerminal(state: ProviderExecutionState | "RECONCILE"): boolean {
+  return (
+    state === "SUCCEEDED" ||
+    state === "BUSINESS_FAILED" ||
+    state === "CANCELLED" ||
+    state === "TECHNICAL_FAILED"
+  );
+}
+
+function applyReconTrack(
+  execution: ProviderExecution,
+  reconnaissance: NpcTankSnapshot["payload"]["reconnaissance"],
+  observationCursor: string | undefined,
+): ProviderExecution {
+  if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
+    return execution;
+  const observedAt = observationCursorTimestamp(observationCursor);
+  if (!trackBelongsToExecution(execution, reconnaissance, true))
+    return execution.reasonCode === "NPC_TANK_DOWNSTREAM_MISSION_ID_MISMATCH"
+      ? execution
+      : transition(execution, execution.state, "NPC_TANK_DOWNSTREAM_MISSION_ID_MISMATCH");
+  if (reconnaissance.cameraFault === true) {
+    if (execution.reasonCode === "NPC_TANK_RECON_CAMERA_FAULT") return execution;
+    return transition(execution, execution.state, "NPC_TANK_RECON_CAMERA_FAULT");
+  }
+  const mapped = mapReconMotionStatus(reconnaissance.motionStatus, true, "NPC_TANK");
+  const armed = execution.observationCursors?.reconnaissanceActive !== undefined;
+  if (!armed && isMappedTerminal(mapped.state)) {
+    if (execution.reasonCode === "NPC_TANK_RECON_TERMINAL_UNCONFIRMED") return execution;
+    return transition(execution, execution.state, "NPC_TANK_RECON_TERMINAL_UNCONFIRMED");
+  }
+  const current =
+    armed || !isReconActiveState(mapped.state)
+      ? execution
+      : withObservationCursor(execution, "reconnaissanceActive", observationCursor);
+  const progress =
+    reconnaissance.progressAuthoritative === false
+      ? current.progress
+      : monotonicProgress(current.progress, reconnaissance.progress);
+  if (mapped.state === "RECONCILE") {
+    if (current.reasonCode === mapped.reasonCode) return current;
+    return transition(current, current.state, mapped.reasonCode);
+  }
+  if (mapped.state === "SUCCEEDED")
+    return terminal(current, "SUCCEEDED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "completed",
+      observedAt,
+      ...(reconnaissance.coverability === undefined
+        ? {}
+        : { coverability: reconnaissance.coverability }),
+    });
+  if (mapped.state === "BUSINESS_FAILED")
+    return terminal(current, "BUSINESS_FAILED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "failed",
+      observedAt,
+      outOfRange: reconnaissance.outOfRange === true,
+    });
+  if (mapped.state === "CANCELLED")
+    return terminal(current, "CANCELLED", mapped.reasonCode, {
+      resourceId: "vehicle:npc_tank1",
+      status: "cancelled",
+      observedAt,
+    });
+  if (
+    current.state === "STOPPING" &&
+    (mapped.state === "STARTING" || mapped.state === "RUNNING" || mapped.state === "PAUSED")
+  )
+    return current;
+  if (mapped.state === current.state && progress === current.progress) return current;
+  const next = transition(current, mapped.state, mapped.reasonCode);
+  if (progress !== undefined) next.progress = progress;
+  return next;
+}
+
+function isReconActiveState(state: ProviderExecutionState | "RECONCILE"): boolean {
+  return (
+    state === "STARTING" ||
+    state === "RUNNING" ||
+    state === "PAUSED" ||
+    state === "RESUMING" ||
+    state === "STOPPING"
+  );
+}
+
+function trackBelongsToExecution(
+  execution: ProviderExecution,
+  track: Pick<VehicleTaskTrack, "id">,
+  allowMissingObservedId = false,
+): boolean {
+  if (execution.downstreamMissionIds.length === 0) return true;
+  if (track.id === undefined) return allowMissingObservedId;
+  try {
+    return execution.downstreamMissionIds.includes(String(parseNpcTankMissionId(track.id)));
+  } catch {
+    return false;
+  }
+}
+
+function initialObservationCursors(
+  operationName: string,
+  ingress: VehicleMqttIngress<NpcTankSnapshot>,
+): Record<string, string> | undefined {
+  if (operationName === "vehicle_area_recon") {
+    const cursor = ingress.observationCursor("/npc_tank1/area_recon/status");
+    return cursor === undefined ? {} : { reconnaissance: cursor };
+  }
+  const cursor = operationObservationCursor(operationName, ingress);
+  return cursor === undefined ? undefined : { track: cursor };
+}
+
+function operationObservationCursor(
+  operationName: string,
+  ingress: VehicleMqttIngress<NpcTankSnapshot>,
+): string | undefined {
+  const topics =
+    operationName === "vehicle_navigate"
+      ? ["/npc_tank1/mission_state", "status/npc_tank1", "/npc_tank1/status"]
+      : operationName === "vehicle_area_recon"
+        ? ["/npc_tank1/area_recon/status"]
+        : operationName === "vehicle_track_target"
+          ? ["/npc_tank1/area_recon/status", "status/npc_tank1", "/npc_tank1/status"]
+          : operationName === "vehicle_control_gimbal" || operationName === "vehicle_fire_weapon"
+            ? ["status/npc_tank1", "/npc_tank1/status"]
+            : operationName === "vehicle_emergency_stop"
+              ? [
+                  "/npc_tank1/mission_state",
+                  "/npc_tank1/area_recon/status",
+                  "status/npc_tank1",
+                  "/npc_tank1/status",
+                ]
+              : [];
+  const observations = topics.flatMap((topic) => {
+    const cursor = ingress.observationCursor(topic);
+    return cursor === undefined ? [] : [[topic, cursor]];
+  });
+  return observations.length === 0 ? undefined : JSON.stringify(observations);
+}
+
+function isNewReconObservation(
+  execution: ProviderExecution,
+  observationCursor: string | undefined,
+): boolean {
+  return (
+    observationCursor !== undefined &&
+    observationCursor !== execution.observationCursors?.reconnaissance
+  );
+}
+
+function isNewOperationObservation(
+  execution: ProviderExecution,
+  observationCursor: string | undefined,
+): boolean {
+  return (
+    observationCursor !== undefined && observationCursor !== execution.observationCursors?.track
+  );
+}
+
+function observationCursorTimestamp(cursor: string | undefined): string {
+  const separator = cursor?.indexOf("\0") ?? -1;
+  const observedAt = separator < 1 ? undefined : cursor?.slice(0, separator);
+  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
+    throw new Error("NPC_TANK_RECON_OBSERVATION_CURSOR_INVALID");
+  return observedAt;
+}
+
+function reconMotionActive(status: VehicleReconnaissanceState["motionStatus"]): boolean {
+  return new Set([2, 4, 5, 6, 7, 8, 12]).has(status as number);
+}
+
+function withMissionId(execution: ProviderExecution, missionId: string): ProviderExecution {
+  const next = structuredClone(execution);
+  next.downstreamMissionIds.push(missionId);
+  next.revision++;
+  next.updatedAt = new Date().toISOString();
+  return next;
+}
+function withObservationCursor(
+  execution: ProviderExecution,
+  name: string,
+  cursor: string | undefined,
+): ProviderExecution {
+  if (cursor === undefined) return execution;
+  const next = structuredClone(execution);
+  next.observationCursors = { ...next.observationCursors, [name]: cursor };
+  next.revision++;
+  next.updatedAt = new Date().toISOString();
+  return next;
+}
+function withObservationBaselines(
+  execution: ProviderExecution,
+  cursors: Record<string, string> | undefined,
+): ProviderExecution {
+  const normalized = cursors ?? {};
+  if (JSON.stringify(execution.observationCursors ?? {}) === JSON.stringify(normalized))
+    return execution;
+  const next = structuredClone(execution);
+  next.observationCursors = structuredClone(normalized);
+  next.revision++;
+  next.updatedAt = new Date().toISOString();
   return next;
 }
 function transition(
@@ -895,7 +1672,6 @@ function terminal(
   state: ProviderExecutionState,
   reasonCode: string,
   result: Record<string, unknown>,
-  operationName: string,
 ): ProviderExecution {
   const next = transition(execution, state, reasonCode);
   const sanitized = sanitizeFireResult(result).value;
@@ -905,7 +1681,7 @@ function terminal(
   if (state === "SUCCEEDED") next.progress = 100;
   next.evidence.push(
     npcEvidence(
-      operationName === "vehicle_fire_weapon"
+      execution.operationName === "vehicle_fire_weapon"
         ? "vehicle.weapon.local_result"
         : "vehicle.mission.state",
       next.updatedAt,
@@ -925,12 +1701,16 @@ function taskEvent(execution: ProviderExecution, eventType: string, reasonCode: 
     externalExecutionId: execution.externalExecutionId,
     resourceRef: "vehicle:npc_tank1",
     severityHint: isFailure(execution.state) ? ("warning" as const) : ("info" as const),
-    rawPayload: { operation: execution.operationName, state: execution.state },
+    rawPayload: {
+      taskId: execution.taskId,
+      operation: execution.operationName,
+      state: execution.state,
+    },
   };
 }
 function selectSnapshot(snapshot: NpcTankSnapshot, include: unknown): Record<string, unknown> {
   const requested = Array.isArray(include)
-    ? new Set(include.filter((value): value is string => typeof value === "string"))
+    ? new Set(include.filter((x): x is string => typeof x === "string"))
     : new Set(["chassis", "payload", "health", "targets"]);
   const result: Record<string, unknown> = {
     identity: snapshot.identity,
@@ -945,14 +1725,44 @@ function selectSnapshot(snapshot: NpcTankSnapshot, include: unknown): Record<str
   if (requested.has("targets")) result.targets = snapshot.payload.targets;
   return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
 }
-function acceptedConfirmation(value: unknown): boolean {
-  if (!Array.isArray(value)) return false;
-  return value.some((item) => {
-    if (!record(item) || item.key !== "fire_confirmation") return false;
+function synchronousEvidence(operationName: string, observedAt: string) {
+  const evidenceType =
+    operationName === "vehicle_get_targets"
+      ? "vehicle.target.observation"
+      : operationName === "vehicle_get_payload_status" || operationName === "vehicle_laser_range"
+        ? "vehicle.payload.status"
+        : "vehicle.state.observation";
+  return npcEvidence(evidenceType, observedAt, "/observedAt");
+}
+function npcEvidence(type: string, observedAt: string, jsonPointer: string) {
+  return vehicleEvidence(type, observedAt, jsonPointer, "resource:vehicle:npc_tank1", [
+    "isr.vehicle.npc-tank.npc-tank1",
+    "npc-tank-adapter",
+  ]);
+}
+function fireConfirmationDecision(value: unknown): "accepted" | "declined" | "invalid" {
+  if (!Array.isArray(value)) return "invalid";
+  for (const item of value) {
+    if (!record(item) || item.key !== "fire_confirmation") continue;
     const result = protoStructToJson(item.result);
     const content = record(result.content) ? result.content : undefined;
-    return result.action === "accept" && (content?.confirmed === true || result.confirmed === true);
-  });
+    if (result.action === "accept" && (content?.confirmed === true || result.confirmed === true))
+      return "accepted";
+    if (result.action === "decline" || result.action === "cancel" || result.action === "reject")
+      return "declined";
+    return "invalid";
+  }
+  return "invalid";
+}
+function fireCancellationReason(recordValue: CommandAckRecord | undefined): string | undefined {
+  const reasonCode = fireDispatchReason(recordValue);
+  return typeof reasonCode === "string" && FIRE_LOCAL_CANCELLATION_REASONS.has(reasonCode)
+    ? reasonCode
+    : undefined;
+}
+function fireDispatchReason(recordValue: CommandAckRecord | undefined): string | undefined {
+  const reasonCode = recordValue?.response.reasonCode;
+  return typeof reasonCode === "string" ? reasonCode : undefined;
 }
 function validateStart(input: StartVehicleOperation): void {
   if (!OPERATIONS.has(input.operationName)) throw new Error("NPC_TANK_OPERATION_UNSUPPORTED");
@@ -967,22 +1777,30 @@ function validateStart(input: StartVehicleOperation): void {
 }
 function assertIdentity(existing: ProviderExecution, input: StartVehicleOperation): void {
   if (
-    existing.resourceId !== "vehicle:npc_tank1" ||
     existing.operationName !== input.operationName ||
     existing.argumentHash !== input.argumentHash ||
     !sameContext(existing.executionContext, input.executionContext)
   )
     throw new Error("TASK_IDENTITY_CONFLICT");
 }
-function sameIdentity(execution: ProviderExecution, identity: VehicleCommandIdentity): boolean {
+function sameIdentity(execution: ProviderExecution, identity: CommandIdentity): boolean {
   return (
-    execution.resourceId === "vehicle:npc_tank1" &&
     execution.taskId === identity.taskId &&
     execution.externalExecutionId === identity.externalExecutionId &&
     execution.operationName === identity.operationName &&
     execution.argumentHash === identity.argumentHash &&
     sameContext(execution.executionContext, identity.executionContext)
   );
+}
+function replayCommandResponse(
+  response: Record<string, unknown>,
+  identity: CommandIdentity,
+): Record<string, unknown> {
+  return {
+    ...structuredClone(response),
+    commandSequence: identity.commandSequence,
+    identity: structuredClone(identity),
+  };
 }
 function sameContext(left: ExecutionContextRecord, right: ExecutionContextRecord): boolean {
   return (
@@ -998,12 +1816,15 @@ function commandSupported(operationName: string, command: string): boolean {
     "vehicle_navigate",
     "vehicle_area_recon",
     "vehicle_track_target",
-    "vehicle_fire_weapon",
+    "vehicle_control_gimbal",
   ].includes(operationName);
 }
-function missionIdOf(result: Record<string, unknown>): string | undefined {
-  const value = result.mission_id ?? result.missionId;
-  return typeof value === "string" && value.length > 0 ? value : undefined;
+function identityTelemetry(execution: ProviderExecution) {
+  return {
+    taskId: execution.taskId,
+    externalExecutionId: execution.externalExecutionId,
+    operationName: execution.operationName,
+  };
 }
 function isTerminal(state: ProviderExecutionState): boolean {
   return (
@@ -1024,9 +1845,6 @@ function reason(error: unknown): string {
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
-function object(value: unknown): value is Record<string, unknown> {
-  return record(value);
-}
 function sanitizeObject(value: unknown): Record<string, unknown> {
   if (!record(value)) throw new Error("NPC_TANK_DEVICE_MCP_STRUCTURED_RESULT_REQUIRED");
   return value;
@@ -1034,29 +1852,6 @@ function sanitizeObject(value: unknown): Record<string, unknown> {
 function text(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) throw new Error("NPC_TANK_TEXT_INVALID");
   return value;
-}
-function finite(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0)
-    throw new Error("NPC_TANK_LASER_RANGE_INVALID");
-  return value;
-}
-function deviceTrack(value: unknown): VehicleTaskTrack | undefined {
-  if (!record(value) || !new Set([-1, 0, 1, 2, 3, 4, 5]).has(value.state as number))
-    return undefined;
-  const id = scalarText(value.id);
-  return {
-    state: value.state as -1 | 0 | 1 | 2 | 3 | 4 | 5,
-    ...(id === undefined ? {} : { id }),
-    ...(typeof value.progress === "number" && value.progress >= 0 && value.progress <= 100
-      ? { progress: value.progress }
-      : {}),
-    observedAt: new Date().toISOString(),
-  };
-}
-function scalarText(value: unknown): string | undefined {
-  if (typeof value === "string") return value;
-  if (typeof value === "number" && Number.isFinite(value)) return String(value);
-  return undefined;
 }
 function vehicleTracks(values: string[]): VehicleTrack[] {
   const tracks = values.filter(
@@ -1088,10 +1883,4 @@ function progressBucket(value: number | undefined): string {
 }
 function bucket(value: number): string {
   return value === 0 ? "zero" : value === 1 ? "one" : value <= 5 ? "few" : "many";
-}
-function npcEvidence(type: string, observedAt: string, jsonPointer: string) {
-  return vehicleEvidence(type, observedAt, jsonPointer, "resource:vehicle:npc_tank1", [
-    "isr.vehicle.npc-tank.npc-tank1",
-    "npc-tank-adapter",
-  ]);
 }

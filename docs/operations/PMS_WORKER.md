@@ -26,18 +26,20 @@ The following Runtime lifecycle inputs are an atomic group. Supplying any one re
 The production bootstrap also requires this group; omission fails closed with
 `PMS_WORKER_RUNTIME_CONFIG_REQUIRED`.
 
-| Variable                                    | Requirement | Purpose                                      |
-| ------------------------------------------- | ----------- | -------------------------------------------- |
-| `PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE` | required    | File-only provisioning authority             |
-| `PMS_RUNTIME_RELEASE_ROOT`                  | required    | Versioned, read-only Runtime release root    |
-| `PMS_RUNTIME_SECRET_ROOT`                   | required    | Private Runtime secret-file root             |
-| `PMS_RUNTIME_CONFIG_CACHE_ROOT`             | required    | Private per-Runtime configuration cache root |
-| `PMS_RUNTIME_CONTROL_PLANE_URL`             | required    | HTTPS, or loopback HTTP, PMS Runtime API URL |
-| `PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT` | required    | Private per-instance credential tree         |
-| `PMS_PM2_HOME`                              | required    | Private isolated PM2 state directory         |
-| `PMS_RUNTIME_RECONCILE_INTERVAL_MS`         | required    | Bounded periodic reconcile interval          |
-| `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`          | required    | Bounded end-to-end reconcile timeout         |
-| `PMS_RUNTIME_HEALTH_TIMEOUT_MS`             | required    | Bounded health/identity probe timeout        |
+| Variable                                       | Requirement        | Purpose                                                                            |
+| ---------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------- |
+| `PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE`    | required           | File-only provisioning authority                                                   |
+| `PMS_RUNTIME_RELEASE_ROOT`                     | required           | Versioned, read-only Runtime release root                                          |
+| `PMS_RUNTIME_SECRET_ROOT`                      | required           | Private Runtime secret-file root                                                   |
+| `PMS_RUNTIME_CONFIG_CACHE_ROOT`                | required           | Private per-Runtime configuration cache root                                       |
+| `PMS_RUNTIME_CONTROL_PLANE_URL`                | required           | HTTPS, or loopback HTTP, PMS Runtime API URL                                       |
+| `PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT`    | required           | Private per-instance credential tree                                               |
+| `PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE`       | `file_credentials` | External direct-container Catalog auth: `file_credentials` or `anonymous_intranet` |
+| `PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE` | unset              | Optional private deployment-bound Catalog credential descriptor                    |
+| `PMS_PM2_HOME`                                 | required           | Private isolated PM2 state directory                                               |
+| `PMS_RUNTIME_RECONCILE_INTERVAL_MS`            | required           | Bounded periodic reconcile interval                                                |
+| `PMS_RUNTIME_RECONCILE_TIMEOUT_MS`             | required           | Bounded end-to-end reconcile timeout                                               |
+| `PMS_RUNTIME_HEALTH_TIMEOUT_MS`                | required           | Bounded health/identity probe timeout                                              |
 
 `PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE` contains one JSON object with exactly `clusterRef`,
 `adminSecretRef`, `adminDatabaseUrl`, and `runtimePassword`. The cluster and secret references bind
@@ -67,6 +69,16 @@ The credential root must be canonical, existing, non-symlink and no broader than
 must be canonical, regular, non-symlink, non-empty, singly linked and no broader than `0600`.
 Identity traversal, unsafe parents, missing files and reused hard links fail closed. The legacy
 `PMS_RUNTIME_CONTROL_PLANE_TOKEN_FILE` variable is rejected and has no production fallback.
+
+External direct-container Catalog discovery has its own application-authentication switch and does
+not inherit transport policy. `PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE` defaults to
+`file_credentials`; with that default, a direct-container deployment without a matching entry in
+`PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE` fails closed. Existing private credential
+descriptors continue to resolve deployment-bound Bearer values. `anonymous_intranet` permits a
+direct-container Catalog request without `Authorization`, but it is accepted only when
+`ALLOW_INSECURE_INTERNAL_TRANSPORT=true` is also explicit. Enabling plaintext internal transport by
+itself never enables anonymous Catalog access. Supplying a Catalog credential descriptor together
+with `anonymous_intranet` is contradictory and rejected during Worker startup.
 
 PMS API credential descriptors remain explicit per principal. Adding or rotating a V0.1 Runtime
 credential requires an atomic credential-tree and API-descriptor update followed by a PMS API

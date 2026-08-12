@@ -33,6 +33,8 @@ export interface ProviderExecution {
   arguments: Record<string, unknown>;
   executionContext: ExecutionContextRecord;
   downstreamMissionIds: string[];
+  /** Source-observation cursors captured before dispatch, used to reject stale task telemetry. */
+  observationCursors?: Record<string, string>;
   selectedDeviceTool?: string;
   providerRevision?: string;
   state: ProviderExecutionState;
@@ -62,6 +64,11 @@ export interface CommandAckRecord {
   commandSequence: string;
   response: Record<string, unknown>;
   createdAt: string;
+}
+
+export interface CommandAckClaim {
+  claimed: boolean;
+  record: CommandAckRecord;
 }
 
 export interface DeviceToolCallRecord {
@@ -105,6 +112,13 @@ export interface ProviderStore {
     command: string,
     commandSequence: string,
   ): Promise<CommandAckRecord | undefined>;
+  /** Atomically reserve one command identity before dispatching a physical mutation. */
+  claimCommandAck(ack: CommandAckRecord): Promise<CommandAckClaim>;
+  /**
+   * Atomically replace a previously claimed command. When expectedReasonCode is
+   * supplied, false means another actor already advanced the durable fence.
+   */
+  completeCommandAck(ack: CommandAckRecord, expectedReasonCode?: string): Promise<boolean>;
   putCommandAck(ack: CommandAckRecord): Promise<void>;
   appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void>;
   putSnapshot(record: SnapshotRecord): Promise<void>;

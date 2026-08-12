@@ -15,7 +15,7 @@ describe("NPC Tank security and provider isolation", () => {
       { maxPayloadBytes: 1024, maxDepth: 8, maxNodes: 128, maxStringBytes: 256 },
       npcTankMqttProfile(),
     );
-    expect(NPC_TANK_MQTT_TOPICS).toHaveLength(12);
+    expect(NPC_TANK_MQTT_TOPICS).toHaveLength(18);
     for (const topic of [
       "/npc_tank1/referee/status",
       "/npc_tank1/target/base64",

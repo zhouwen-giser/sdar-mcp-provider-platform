@@ -46,6 +46,7 @@ import {
   consoleApiDependencies,
   registerConsoleApiRoutes,
 } from "./console/register-console-routes.js";
+import type { PmsManagementAuthMode } from "./config.js";
 
 export interface PmsReadiness {
   readonly ready: boolean;
@@ -70,6 +71,7 @@ export interface PmsApiOptions {
   readonly audit?: Pick<AuditRepository, "list">;
   readonly registryWatchPollIntervalMs?: number;
   readonly sdarRegistryProjectionTtlSeconds?: number;
+  readonly managementAuthMode?: PmsManagementAuthMode;
   readonly managementAuthorizer?: PmsApiRoleAuthorizer;
   readonly authenticationRejectionAudit?: AuthenticationRejectionAuditPort;
 }
@@ -83,7 +85,9 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
     attachRequestContext(request, reply);
     done();
   });
-  const managementAuthorizer = options.managementAuthorizer;
+  const managementAuthMode = options.managementAuthMode ?? "file_credentials";
+  const managementAuthorizer =
+    managementAuthMode === "file_credentials" ? options.managementAuthorizer : undefined;
   if (managementAuthorizer !== undefined) {
     app.addHook("preHandler", async (request) => {
       try {
@@ -108,7 +112,7 @@ export function createPmsApi(options: PmsApiOptions = {}): FastifyInstance {
     request: requestContext(request),
     links: { openapi: "/api/v1/openapi.json" },
   }));
-  app.get("/api/v1/openapi.json", () => pmsOpenApiDocument());
+  app.get("/api/v1/openapi.json", () => pmsOpenApiDocument({ managementAuthMode }));
   if (options.providerPackages !== undefined) {
     registerProviderPackageRoutes(app, options.providerPackages);
   }

@@ -103,6 +103,7 @@ export const DEPLOYMENT = {
   desiredState: "running",
   desiredReplicas: 1,
   runtimeVersion: "1.0.0",
+  runtimeAuthority: "platform_managed",
   databaseProfileId: "db-1",
   configProfileId: "config-1",
   status: "ACTIVE",

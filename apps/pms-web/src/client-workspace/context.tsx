@@ -6,12 +6,13 @@ import {
   useSyncExternalStore,
 } from "react";
 import { ClientWorkspaceStore } from "./store.js";
+import { dataMode } from "../gateways/factory.js";
 const Context = createContext<ClientWorkspaceStore | undefined>(undefined);
 export function ClientWorkspaceProvider({
   children,
   store,
 }: PropsWithChildren<{ readonly store?: ClientWorkspaceStore }>) {
-  const value = useMemo(() => store ?? new ClientWorkspaceStore(), [store]);
+  const value = useMemo(() => store ?? new ClientWorkspaceStore(dataMode()), [store]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 export function useClientWorkspaceStore() {

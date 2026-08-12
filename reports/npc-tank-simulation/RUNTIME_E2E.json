@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_runtime_e2e_mixed",
+  "phase": "GOAL11_NPC_RUNTIME_E2E",
+  "status": "PARTIAL",
+  "reasonCode": "REAL_REGISTRY_BACKED_READ_ONLY_PASS_MUTATING_TASK_LIFECYCLE_NOT_EXECUTED",
+  "overallQualification": "NPC_TANK_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "path": [
+    "PMS Registry",
+    "SMPP Runtime",
+    "NPC Tank Provider Adapter",
+    "real Device MCP",
+    "simulator",
+    "real MQTT",
+    "NPC Tank Provider Adapter",
+    "SMPP Runtime"
+  ],
+  "registryAuthority": {
+    "status": "PASS",
+    "revision": 1,
+    "checksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+    "canonicalChecksumMatched": true,
+    "etagConditionalStatus": 304,
+    "serverId": "runtime-32b1d426cc87-0",
+    "endpointSource": "registry",
+    "directAdapterEndpointSubstitutionUsed": false
+  },
+  "realReadOnlyPath": {
+    "status": "PASS",
+    "runtimeReady": true,
+    "runtimeToolCount": 11,
+    "catalogRevision": 1,
+    "operations": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets"
+    ],
+    "successfulCleanStartCycles": 2,
+    "mutatingOperationsCalled": 0
+  },
+  "realTaskPath": {
+    "status": "NOT_EXECUTED_REAL_CONTROL_AND_RECON_DISABLED",
+    "controlAttempted": false,
+    "reconAttempted": false,
+    "effectorAttempted": false,
+    "mutatingToolCalls": 0,
+    "runtimeTaskLifecycleQualifiedAgainstRealSimulator": false,
+    "reasonCode": "EXPLICIT_ENABLE_FLAGS_AND_SAFE_FIXTURES_MISSING"
+  },
+  "deterministicTaskPath": {
+    "status": "PASS",
+    "scope": [
+      "navigation lifecycle and cancellation observation",
+      "recon lifecycle and stale-observation rejection",
+      "gimbal post-dispatch lifecycle and mission correlation",
+      "emergency-stop preemption",
+      "uncertain mutation no-retry",
+      "duplicate task replay and conflicting identity rejection",
+      "restart reconciliation without duplicate mutation",
+      "frozen Task protocol compatibility"
+    ],
+    "classification": "DETERMINISTIC_REGRESSION_NOT_REAL_CONTROL_EVIDENCE"
+  },
+  "formalPmsRegistry": {
+    "status": "PASS",
+    "onboardingAuthority": "PMS API/application plus Worker reconcile",
+    "runtimeStatus": "ACTIVE",
+    "catalogPublished": true,
+    "registryPublished": true,
+    "directDatabaseOnboardingUsed": false,
+    "providerPackageRealResourceStatus": "pending"
+  },
+  "safety": {
+    "mockFallbackEnabledForRealEvidence": false,
+    "mqttPublishAttempted": false,
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false,
+    "rawPayloadStored": false
+  },
+  "evidenceRefs": [
+    "reports/npc-tank-simulation/READ_ONLY_SMOKE.json",
+    "reports/npc-tank-simulation/PMS_ONBOARDING.json",
+    "reports/npc-tank-simulation/REGISTRY_AUTHORITY.json",
+    "reports/npc-tank-simulation/RECOVERY_EVIDENCE.json"
+  ]
+}

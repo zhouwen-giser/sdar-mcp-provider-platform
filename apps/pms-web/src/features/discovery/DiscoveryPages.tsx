@@ -15,6 +15,7 @@ import {
   Timeline,
 } from "../../components/ui.js";
 import {
+  currentEnvironmentScope,
   useDeployments,
   useRegistryDiff,
   useRegistryHistory,
@@ -48,8 +49,8 @@ export function CatalogPage({
   readonly mode?: "list" | "provider" | "operation" | "revisions" | "revision" | "compare";
 }) {
   const { providerId = "", operationName = "", revision = "" } = useParams();
-  const latest = useRegistryLatest("production");
-  const history = useRegistryHistory("production");
+  const latest = useRegistryLatest();
+  const history = useRegistryHistory();
   const deployments = useDeployments();
   const reconcile = useRuntimeCommand("reconcile");
   const workspace = useClientWorkspaceStore();
@@ -334,11 +335,12 @@ export function RegistryPage({
   readonly mode?: "latest" | "revision" | "compare" | "publish";
 }) {
   const { revision = "" } = useParams();
-  const latest = useRegistryLatest("production");
-  const history = useRegistryHistory("production");
+  const environment = currentEnvironmentScope()[0] ?? "selected environment";
+  const latest = useRegistryLatest();
+  const history = useRegistryHistory();
   const from = history.data?.[1]?.revision ?? 3;
   const to = history.data?.[0]?.revision ?? 4;
-  const diff = useRegistryDiff("production", from, to);
+  const diff = useRegistryDiff(undefined, from, to);
   if (mode === "publish")
     return (
       <ProductPage
@@ -386,7 +388,7 @@ export function RegistryPage({
     return (
       <ProductPage
         title="Registry Diff"
-        description={`比较 production revision ${from} → ${to}。`}
+        description={`比较 ${environment} revision ${from} → ${to}。`}
         classification="FROZEN_API"
       >
         <section className="panel">
@@ -617,7 +619,7 @@ export function ConformancePage({
 }
 
 export function McpExplorerPage({ historyMode = false }: { readonly historyMode?: boolean }) {
-  const registry = useRegistryLatest("production");
+  const registry = useRegistryLatest();
   const [request, setRequest] = useState(JSON.stringify({ target: { x: 10, y: 4 } }, null, 2));
   const [result, setResult] = useState<unknown>();
   const localHistory = [

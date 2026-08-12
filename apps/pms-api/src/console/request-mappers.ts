@@ -18,11 +18,12 @@ import type {
   ResourceStatus,
 } from "../../../../packages/pms-domain/src/index.js";
 import { requestContext } from "../context.js";
+import { ConsoleRequestMappingError } from "./request-mapping-error.js";
 
 export function consoleAuditContext(request: FastifyRequest): AuditContext {
   const actor = request.headers["x-actor-id"];
   if (typeof actor !== "string" || actor.trim().length === 0) {
-    throw new RangeError("PMS_CONSOLE_ACTOR_ID_INVALID");
+    throw new ConsoleRequestMappingError("PMS_CONSOLE_ACTOR_ID_INVALID");
   }
   return {
     actorId: actor,
@@ -185,14 +186,16 @@ function optionalString(
 
 function string(value: Readonly<Record<string, unknown>>, field: string): string {
   const candidate = value[field];
-  if (typeof candidate !== "string") throw new TypeError(`PMS_CONSOLE_STRING_REQUIRED:${field}`);
+  if (typeof candidate !== "string") {
+    throw new ConsoleRequestMappingError(`PMS_CONSOLE_STRING_REQUIRED:${field}`);
+  }
   return candidate;
 }
 
 function integer(value: Readonly<Record<string, unknown>>, field: string): number {
   const candidate = value[field];
   if (!Number.isSafeInteger(candidate)) {
-    throw new TypeError(`PMS_CONSOLE_INTEGER_REQUIRED:${field}`);
+    throw new ConsoleRequestMappingError(`PMS_CONSOLE_INTEGER_REQUIRED:${field}`);
   }
   return candidate as number;
 }
@@ -205,14 +208,14 @@ function date(value: Readonly<Record<string, unknown>>, field: string): Date {
   const source = string(value, field);
   const candidate = new Date(source);
   if (!Number.isFinite(candidate.getTime())) {
-    throw new TypeError(`PMS_CONSOLE_DATE_INVALID:${field}`);
+    throw new ConsoleRequestMappingError(`PMS_CONSOLE_DATE_INVALID:${field}`);
   }
   return candidate;
 }
 
 function record(value: unknown): Readonly<Record<string, unknown>> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new TypeError("PMS_CONSOLE_OBJECT_REQUIRED");
+    throw new ConsoleRequestMappingError("PMS_CONSOLE_OBJECT_REQUIRED");
   }
   return value as Readonly<Record<string, unknown>>;
 }

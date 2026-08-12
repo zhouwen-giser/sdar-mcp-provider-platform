@@ -8,6 +8,8 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_CONFIG_CACHE_ROOT",
   "PMS_RUNTIME_CONTROL_PLANE_URL",
   "PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT",
+  "PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE",
+  "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
   "PMS_PM2_HOME",
   "PMS_RUNTIME_RECONCILE_INTERVAL_MS",
   "PMS_RUNTIME_RECONCILE_TIMEOUT_MS",
@@ -16,6 +18,8 @@ const RUNTIME_CONFIGURATION_KEYS = [
   "PMS_RUNTIME_PORT_RANGE_END",
 ] as const;
 
+export type PmsExternalRuntimeCatalogAuthMode = "file_credentials" | "anonymous_intranet";
+
 export interface PmsWorkerRuntimeConfig {
   readonly postgresProvisioningCredentialFile: string;
   readonly runtimeReleaseRoot: string;
@@ -23,6 +27,9 @@ export interface PmsWorkerRuntimeConfig {
   readonly runtimeConfigCacheRoot: string;
   readonly runtimeControlPlaneUrl: string;
   readonly runtimeControlPlaneCredentialRoot: string;
+  readonly externalRuntimeCatalogAuthMode: PmsExternalRuntimeCatalogAuthMode;
+  readonly externalRuntimeCatalogCredentialFile?: string;
+  readonly allowInsecureInternalTransport: boolean;
   readonly pm2Home: string;
   readonly runtimeReconcileIntervalMs: number;
   readonly runtimeReconcileTimeoutMs: number;
@@ -50,6 +57,10 @@ export async function loadPmsWorkerConfig(
 ): Promise<PmsWorkerConfig> {
   rejectInlineSecrets(environment);
   rejectLegacyRuntimeTokenFile(environment);
+  const allowInsecureInternalTransport = booleanEnvironment(
+    environment.ALLOW_INSECURE_INTERNAL_TRANSPORT,
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+  );
   const databaseUrlFile = required(environment, "PMS_DATABASE_URL_FILE");
   await validateSecretFile(databaseUrlFile, "PMS_DATABASE_URL_FILE");
   const base = {
@@ -69,7 +80,7 @@ export async function loadPmsWorkerConfig(
   if (!runtimeConfigurationRequested(environment)) return Object.freeze(base);
   return Object.freeze({
     ...base,
-    runtime: await loadRuntimeConfig(environment),
+    runtime: await loadRuntimeConfig(environment, allowInsecureInternalTransport),
   });
 }
 
@@ -87,6 +98,7 @@ export function requirePmsWorkerRuntimeConfig(config: PmsWorkerConfig): PmsWorke
 
 async function loadRuntimeConfig(
   environment: Readonly<Record<string, string | undefined>>,
+  allowInsecureInternalTransport: boolean,
 ): Promise<PmsWorkerRuntimeConfig> {
   const postgresProvisioningCredentialFile = required(
     environment,
@@ -102,7 +114,28 @@ async function loadRuntimeConfig(
   );
   const runtimeControlPlaneUrl = validateControlPlaneUrl(
     required(environment, "PMS_RUNTIME_CONTROL_PLANE_URL"),
+    allowInsecureInternalTransport,
   );
+  const externalRuntimeCatalogCredentialFile =
+    environment.PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE;
+  const externalRuntimeCatalogAuthMode = externalRuntimeCatalogAuthenticationMode(
+    environment.PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE,
+  );
+  if (externalRuntimeCatalogAuthMode === "anonymous_intranet" && !allowInsecureInternalTransport) {
+    throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_ANONYMOUS_INTRANET_REQUIRES_OPT_IN");
+  }
+  if (
+    externalRuntimeCatalogAuthMode === "anonymous_intranet" &&
+    externalRuntimeCatalogCredentialFile !== undefined
+  ) {
+    throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FORBIDDEN");
+  }
+  if (externalRuntimeCatalogCredentialFile !== undefined) {
+    await validateSecretFile(
+      externalRuntimeCatalogCredentialFile,
+      "PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+    );
+  }
   const roots = {
     runtimeReleaseRoot: required(environment, "PMS_RUNTIME_RELEASE_ROOT"),
     runtimeSecretRoot: required(environment, "PMS_RUNTIME_SECRET_ROOT"),
@@ -148,6 +181,13 @@ async function loadRuntimeConfig(
     postgresProvisioningCredentialFile: resolve(postgresProvisioningCredentialFile),
     runtimeControlPlaneUrl,
     runtimeControlPlaneCredentialRoot: resolve(roots.runtimeControlPlaneCredentialRoot),
+    externalRuntimeCatalogAuthMode,
+    ...(externalRuntimeCatalogCredentialFile === undefined
+      ? {}
+      : {
+          externalRuntimeCatalogCredentialFile: resolve(externalRuntimeCatalogCredentialFile),
+        }),
+    allowInsecureInternalTransport,
     runtimeReleaseRoot: resolve(roots.runtimeReleaseRoot),
     runtimeSecretRoot: resolve(roots.runtimeSecretRoot),
     runtimeConfigCacheRoot: resolve(roots.runtimeConfigCacheRoot),
@@ -159,6 +199,14 @@ async function loadRuntimeConfig(
       ? {}
       : { runtimePortRange: runtimePortRangeOverride }),
   });
+}
+
+function externalRuntimeCatalogAuthenticationMode(
+  value: string | undefined,
+): PmsExternalRuntimeCatalogAuthMode {
+  if (value === undefined || value === "file_credentials") return "file_credentials";
+  if (value === "anonymous_intranet") return "anonymous_intranet";
+  throw new Error("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE_INVALID");
 }
 
 function optionalRuntimePortRange(
@@ -187,7 +235,7 @@ function rejectLegacyRuntimeTokenFile(
   }
 }
 
-function validateControlPlaneUrl(source: string): string {
+function validateControlPlaneUrl(source: string, allowInsecureInternalTransport: boolean): string {
   let url: URL;
   try {
     url = new URL(source);
@@ -196,7 +244,8 @@ function validateControlPlaneUrl(source: string): string {
   }
   const loopback = ["127.0.0.1", "::1", "localhost"].includes(url.hostname);
   if (
-    (url.protocol !== "https:" && !(url.protocol === "http:" && loopback)) ||
+    (url.protocol !== "https:" &&
+      !(url.protocol === "http:" && (loopback || allowInsecureInternalTransport))) ||
     url.username.length > 0 ||
     url.password.length > 0 ||
     url.search.length > 0 ||
@@ -205,6 +254,12 @@ function validateControlPlaneUrl(source: string): string {
     throw new Error("PMS_WORKER_CONTROL_PLANE_URL_INVALID");
   }
   return url.toString();
+}
+
+function booleanEnvironment(value: string | undefined, name: string): boolean {
+  if (value === undefined || value === "false" || value === "0") return false;
+  if (value === "true" || value === "1") return true;
+  throw new Error(`PMS_WORKER_CONFIG_BOOLEAN_INVALID:${name}`);
 }
 
 function rejectInlineSecrets(environment: Readonly<Record<string, string | undefined>>): void {

@@ -21,7 +21,17 @@ describe("UGV Provider configuration contract", () => {
     });
   });
 
-  it("covers all 50 inventory fields", () => {
+  it("accepts the explicit heterogeneous ROS bridge wire profile", () => {
+    expect(loadUgvProviderConfiguration({ UGV_MQTT_WIRE_MODE: "ros_bridge_json" })).toMatchObject({
+      UGV_MQTT_WIRE_MODE: "ros_bridge_json",
+    });
+    expect(
+      (UgvProviderConfigurationDefinition.schema.properties as Record<string, { enum?: unknown[] }>)
+        .UGV_MQTT_WIRE_MODE?.enum,
+    ).toContain("ros_bridge_json");
+  });
+
+  it("covers all 51 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync("../../docs/configuration/CONFIG_INVENTORY.json", "utf8"),
     ) as { items: { component: string; key: string }[] };
@@ -33,7 +43,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(50);
+    expect(actual).toHaveLength(51);
     expect(actual).toEqual(expected);
   });
 
@@ -45,7 +55,11 @@ describe("UGV Provider configuration contract", () => {
       applyMode: "immutable",
       overridePolicy: { mode: "forbidden" },
     });
+    const required = new Set(
+      (UgvProviderConfigurationDefinition.schema.required as readonly string[] | undefined) ?? [],
+    );
     for (const path of UgvProviderConfigurationDefinition.secretPaths) {
+      expect(required.has(path.slice(1))).toBe(false);
       expect(UgvProviderConfigurationDefinition.defaults).not.toHaveProperty(path.slice(1));
       expect(
         (
@@ -58,10 +72,26 @@ describe("UGV Provider configuration contract", () => {
     }
   });
 
-  it("retains production fail-closed validation", () => {
+  it("keeps production fail-closed by default and permits explicit internal plaintext", () => {
     expect(() => loadUgvProviderConfiguration({ RUNTIME_ENV: "production" })).toThrow(
       "PRODUCTION_ADAPTER_MTLS_REQUIRED",
     );
+    expect(
+      loadUgvProviderConfiguration({
+        RUNTIME_ENV: "production",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        UGV_MQTT_WIRE_MODE: "direct_domain_json",
+      }),
+    ).toMatchObject({
+      RUNTIME_ENV: "production",
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: true,
+      ADAPTER_TLS_MODE: "disabled",
+      UGV_MQTT_TLS_MODE: "disabled",
+      UGV_ADAPTER_STORE_MODE: "postgres",
+    });
+    expect(() =>
+      loadUgvProviderConfiguration({ ALLOW_INSECURE_INTERNAL_TRANSPORT: "yes" }),
+    ).toThrow();
     expect(() =>
       loadUgvProviderConfiguration({
         UGV_MQTT_TLS_MODE: "required",

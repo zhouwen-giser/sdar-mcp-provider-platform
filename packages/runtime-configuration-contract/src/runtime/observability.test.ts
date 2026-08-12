@@ -54,6 +54,18 @@ describe("Runtime observability configuration contract", () => {
         OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector.example.test:4318",
       }),
     ).toThrow("production OTLP requires HTTPS");
+    expect(
+      loadRuntimeObservabilityEnvironment({
+        RUNTIME_ENV: "production",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        OTEL_ENABLED: "true",
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector.internal:4318",
+      }),
+    ).toMatchObject({
+      OTEL_ENABLED: true,
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector.internal:4318",
+      OTEL_EXPORTER_OTLP_TLS_MODE: "disabled",
+    });
     expect(() =>
       loadRuntimeObservabilityEnvironment({
         OTEL_EXPORTER_OTLP_TLS_MODE: "required",

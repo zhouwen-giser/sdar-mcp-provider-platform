@@ -2,14 +2,21 @@ import type { VehicleTrack } from "./types.js";
 
 export const OPERATION_TRACKS: Record<string, VehicleTrack[]> = {
   vehicle_get_state: [],
+  vehicle_get_capabilities: [],
   vehicle_get_payload_status: [],
   vehicle_get_targets: [],
   vehicle_laser_range: [],
   vehicle_navigate: ["chassis"],
   vehicle_area_recon: ["eo"],
   vehicle_track_target: ["eo"],
+  vehicle_control_gimbal: ["eo"],
   vehicle_fire_weapon: ["eo", "weapon"],
   vehicle_emergency_stop: ["chassis", "eo", "weapon"],
+};
+
+/** Backward-compatible alias retained for Goal 10 UGV consumers. */
+export const UGV_OPERATION_TRACKS: Record<string, VehicleTrack[]> = {
+  ...OPERATION_TRACKS,
 };
 
 export class TrackArbiter {
@@ -17,6 +24,7 @@ export class TrackArbiter {
   constructor(
     readonly allowNavigationWithRecon = true,
     readonly reasonPrefix = "UGV",
+    readonly operationTracks: Readonly<Record<string, readonly VehicleTrack[]>> = OPERATION_TRACKS,
   ) {}
   occupied(): ReadonlySet<VehicleTrack> {
     return new Set(this.#owners.keys());
@@ -25,7 +33,7 @@ export class TrackArbiter {
     return this.#owners.get(track);
   }
   acquire(taskId: string, operationName: string): { accepted: boolean; reasonCode: string } {
-    const tracks = OPERATION_TRACKS[operationName] ?? [];
+    const tracks = this.operationTracks[operationName] ?? [];
     if (operationName === "vehicle_emergency_stop") {
       for (const track of tracks) this.#owners.set(track, taskId);
       return { accepted: true, reasonCode: `${this.reasonPrefix}_EMERGENCY_PREEMPTED_TRACKS` };

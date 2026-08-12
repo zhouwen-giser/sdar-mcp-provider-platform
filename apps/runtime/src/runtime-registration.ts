@@ -84,7 +84,11 @@ export function loadRuntimeRegistrationBootstrap(
   ) {
     throw new Error("PMS_RUNTIME_REGISTRATION_URL_INVALID");
   }
-  if (runtime.RUNTIME_ENV === "production" && url.protocol !== "https:") {
+  if (
+    runtime.RUNTIME_ENV === "production" &&
+    !runtime.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
+    url.protocol !== "https:"
+  ) {
     throw new Error("PMS_RUNTIME_REGISTRATION_PRODUCTION_HTTPS_REQUIRED");
   }
   return Object.freeze({

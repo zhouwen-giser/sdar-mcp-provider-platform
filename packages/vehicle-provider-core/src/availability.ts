@@ -19,9 +19,12 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
     description: reasonCode,
   });
   if (!context.snapshot.connectivity.mqttConnected)
-    return result("UNKNOWN", code("MQTT_UNAVAILABLE"));
+    if (context.operationName !== "vehicle_get_capabilities")
+      return result("UNKNOWN", code("MQTT_UNAVAILABLE"));
   if (!context.snapshot.connectivity.deviceMcpConnected)
     return result("UNKNOWN", code("DEVICE_MCP_UNAVAILABLE"));
+  if (context.snapshot.connectivity.deviceAvailable === false)
+    return result("DISABLED", code("DEVICE_UNAVAILABLE"));
   if (
     context.operationName === "vehicle_area_recon" &&
     context.circularScanSupported === false &&
@@ -29,6 +32,8 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
   )
     return result("DISABLED", code("CIRCULAR_SCAN_UNSUPPORTED"));
   if (!context.requiredToolsPresent) return result("UNKNOWN", code("TOOL_UNAVAILABLE"));
+  if (context.operationName === "vehicle_get_capabilities")
+    return result("AVAILABLE", code("AVAILABLE"));
   const requiredDomains = domains(context.operationName);
   if (
     requiredDomains.some(
@@ -38,7 +43,8 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
   )
     return result("UNKNOWN", code("STATE_STALE"));
   if (context.operationName !== "vehicle_emergency_stop")
-    for (const track of OPERATION_TRACKS[context.operationName] ?? []) {
+    for (const track of (context.operationTracks ?? OPERATION_TRACKS)[context.operationName] ??
+      []) {
       if (context.occupiedTracks.has(track)) return result("DISABLED", busy(track, prefix));
     }
   if (context.snapshot.health.components.communications === "fault")
@@ -55,7 +61,8 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
     return result("DISABLED", code("PATH_BLOCKED"));
   if (
     context.operationName === "vehicle_area_recon" ||
-    context.operationName === "vehicle_track_target"
+    context.operationName === "vehicle_track_target" ||
+    context.operationName === "vehicle_control_gimbal"
   ) {
     if (context.snapshot.payload.online === false) return result("DISABLED", code("SENSOR_BLIND"));
     if (context.snapshot.health.components.sensor === "fault")
@@ -89,6 +96,7 @@ function domains(operationName: string) {
   if (
     operationName === "vehicle_area_recon" ||
     operationName === "vehicle_track_target" ||
+    operationName === "vehicle_control_gimbal" ||
     operationName === "vehicle_get_payload_status" ||
     operationName === "vehicle_laser_range"
   )

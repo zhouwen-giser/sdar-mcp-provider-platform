@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_runtime_read_only",
+  "phase": "G10_READ_ONLY_SMOKE",
+  "status": "PASS",
+  "reasonCode": "REAL_RUNTIME_READ_ONLY_READY",
+  "command": "bash deploy/ugv-simulation/smoke.sh",
+  "exitCode": 0,
+  "startedAt": "2026-08-10T09:29:39.680Z",
+  "completedAt": "2026-08-10T09:29:39.826Z",
+  "gitSha": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "endpoints": {
+    "runtimeMcp": {
+      "scheme": "http",
+      "hostKind": "loopback",
+      "hostHash": "12ca17b49af22894",
+      "port": "19100",
+      "path": "/mcp",
+      "pathHash": "88fe637beab867e2"
+    },
+    "deviceMcp": {
+      "scheme": "http",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "19000",
+      "path": "/mcp",
+      "pathHash": "88fe637beab867e2"
+    },
+    "mqtt": {
+      "scheme": "mqtt",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "1883",
+      "path": "[redacted-nonstandard]",
+      "pathHash": "8a5edab282632443"
+    }
+  },
+  "safety": {
+    "readOnly": true,
+    "controlAttempted": false,
+    "mutatingToolCalls": 0,
+    "realControlConfigured": false,
+    "controlStatus": "NOT_EXECUTED_READ_ONLY_SCRIPT",
+    "pointNavigationStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+    "routeNavigationStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+    "reconConfigured": false,
+    "reconStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+    "effectorConfigured": false,
+    "effectorStatus": "NOT_EXECUTED_READ_ONLY_SCRIPT"
+  },
+  "runtimeReady": {
+    "httpStatus": 200,
+    "status": "ready",
+    "dependencyStates": {
+      "adapter": "ready",
+      "adapterManifest": "ready",
+      "businessEventFinalizer": "ready",
+      "businessEventIngest": "ready",
+      "businessEventPersistence": "ready",
+      "businessEventProjection": "ready",
+      "businessEventReplay": "ready",
+      "businessEventRetention": "ready",
+      "commandDispatcher": "ready",
+      "database": "ready",
+      "outboxCleaner": "ready",
+      "outboxPublisher": "ready",
+      "providerTelemetryIngress": "ready",
+      "recovery": "ready",
+      "scheduler": "ready",
+      "ttlCleaner": "ready"
+    }
+  },
+  "discovery": {
+    "httpStatus": 200,
+    "responseSha256": "8e5ccf3bb71ea9aee181c9a65b5ac7bd14ed621779ee1f40d4e79684b3e603a0"
+  },
+  "toolsList": {
+    "httpStatus": 200,
+    "toolCount": 11,
+    "toolNames": [
+      "vehicle_area_recon",
+      "vehicle_control_gimbal",
+      "vehicle_emergency_stop",
+      "vehicle_fire_weapon",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_state",
+      "vehicle_get_targets",
+      "vehicle_laser_range",
+      "vehicle_navigate",
+      "vehicle_track_target"
+    ],
+    "catalogSha256": "fd7fc29a6c21678803e53c798fc435e3644ca08b513650237b9e67f3dd9670ff"
+  },
+  "reads": [
+    {
+      "operation": "vehicle_get_state",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "fe9877183dd7f570360b53ecd3345ec1836c3be3e6ab5f707b524cf80d4233b4",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "mqttConnected": true,
+        "deviceMcpConnected": true,
+        "deviceAvailable": true,
+        "mqttIngressSequence": 2041,
+        "chassisObservedAt": "2026-08-10T09:29:39.759Z",
+        "missionState": 1,
+        "revision": "9ab9d0e6ec3375fe7af9400378e91dcf8898da362bfd2496f1e61076888dad59"
+      }
+    },
+    {
+      "operation": "vehicle_get_capabilities",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "11d906b366a05fb2bef8bdab42041098dab81dce8dd48055e98e14fc1e704bd5",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "capabilityKeys": [
+          "available",
+          "deviceReported",
+          "navigation",
+          "observedAt",
+          "payload",
+          "resourceId",
+          "source"
+        ]
+      }
+    },
+    {
+      "operation": "vehicle_get_payload_status",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "bfeb7dacf59380fbc977a0e486a105a3cc016fe3fd3ed249752a144b18182608",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "online": true,
+        "cameraFault": false,
+        "reconnaissanceState": -1,
+        "payloadErrorCount": 0
+      }
+    },
+    {
+      "operation": "vehicle_get_targets",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "047fc5df2f7ad1be7aaed6ac387ad0ae2ec89189eb56e7f45887a4945b4e077b",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "targetCount": 0,
+        "observedAt": "2026-08-10T09:29:39.812Z"
+      }
+    }
+  ],
+  "failure": null
+}

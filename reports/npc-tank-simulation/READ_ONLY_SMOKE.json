@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_device_and_registry_runtime_read_only",
+  "phase": "GOAL11_NPC_READ_ONLY_SMOKE",
+  "status": "PASS",
+  "reasonCode": "REAL_DEVICE_AND_REGISTRY_BACKED_RUNTIME_READS_PASS",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "endpoints": {
+    "deviceMcp": {
+      "scheme": "http",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "19003",
+      "path": "/mcp",
+      "pathHash": "88fe637beab867e2"
+    },
+    "mqtt": {
+      "scheme": "mqtt",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "1883",
+      "path": "[redacted-nonstandard]",
+      "pathHash": "8a5edab282632443"
+    },
+    "runtime": {
+      "source": "PMS Registry",
+      "storedAsInternalLoopbackOnly": true
+    }
+  },
+  "safety": {
+    "readOnly": true,
+    "deviceMutatingToolCalls": 0,
+    "runtimeMutatingOperations": 0,
+    "mqttPublishAttempted": false,
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false,
+    "mockFallbackEnabled": false,
+    "rawValuesStored": false,
+    "coordinateValuesStored": false
+  },
+  "deviceMcp": {
+    "server": "npc-tank-mcp-server",
+    "serverVersion": "1.26.0",
+    "protocolVersion": "2025-11-25",
+    "toolCount": 15,
+    "toolsListStatus": "PASS",
+    "reads": [
+      {
+        "operation": "get_status",
+        "status": "PASS",
+        "resultSha256": "267e60f7123992d7852a32da179f776ff9eac11faf02ea65fe6adbb61b886440",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "npc_tank_get_capabilities",
+        "status": "PASS",
+        "resultSha256": "88163f52cbb522b3fc2f1509cd2ac0fb13d21dc922eecd0bb45f3829b5319c6f",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "npc_tank_area_recon_get_status",
+        "status": "PASS",
+        "resultSha256": "de732b55d215c86def9d304c80895929ade35f592035d0bf59f2b82847ea04f6",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "npc_tank_area_recon_get_targets",
+        "status": "PASS",
+        "resultSha256": "fdb0ee76ceb430dee616cf0e21ff861d03133c7dd19e9641f024932c2063074b",
+        "valuesPersistedInEvidence": false
+      }
+    ]
+  },
+  "mqtt": {
+    "status": "PASS_WITH_UPSTREAM_DRIFT",
+    "requestedTopicCount": 18,
+    "captureObservedTopicCount": 15,
+    "restartCycleObservedTopicCounts": [14, 14],
+    "canonicalStatusObserved": true,
+    "compatibilityStatusObserved": true,
+    "explicitWireMode": "ros_bridge_json",
+    "simulatorInterfaceDefect": "SIMULATOR_INTERFACE_DEFECT_MIXED_MQTT_WIRE_SHAPES",
+    "publisherQosDrift": [
+      {
+        "topic": "/npc_tank1/speed",
+        "expectedQos": 1,
+        "observedQos": 0
+      }
+    ]
+  },
+  "runtime": {
+    "endpointAuthority": "registry",
+    "registryRevision": 1,
+    "registryChecksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+    "serverId": "runtime-32b1d426cc87-0",
+    "protocolVersion": "2026-07-28",
+    "discoverStatus": "PASS",
+    "toolsListStatus": "PASS",
+    "toolCount": 11,
+    "reads": [
+      {
+        "operation": "vehicle_get_state",
+        "resultType": "complete",
+        "structuredContentSha256": "c6b49a870e8e780d2983a1c3f3115e24add4da9bad932a9fdac3fa0a65e9bf56",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_capabilities",
+        "resultType": "complete",
+        "structuredContentSha256": "108680a9ee0ddde7d09a470c9f7427833215f945c5d430c76232ce55deacaa18",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_payload_status",
+        "resultType": "complete",
+        "structuredContentSha256": "b127c3e3fe90a2548f977adc22565bcdc3e00932496d836e214ed8dc902c6134",
+        "valuesPersistedInEvidence": false
+      },
+      {
+        "operation": "vehicle_get_targets",
+        "resultType": "complete",
+        "structuredContentSha256": "355ed3bd930599157f65115c97a6e3bb9da968e35fe47424a6a0e12e98b5fb34",
+        "valuesPersistedInEvidence": false
+      }
+    ]
+  },
+  "commands": [
+    {
+      "command": "four explicit Device MCP read-only calls (hash-only output)",
+      "exitCode": 0
+    },
+    {
+      "command": "bash deploy/npc-tank-simulation/smoke.sh",
+      "successfulRuns": 5,
+      "failedRuns": 0
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "path": "reports/npc-tank-simulation/MCP_CONTRACT_CAPTURE.json",
+      "sha256": "9a2ad36556c4b914c0657782d924a1995edd405de175877d75c967539a5bd47e"
+    },
+    {
+      "path": "reports/npc-tank-simulation/MQTT_TOPIC_MATRIX.json",
+      "sha256": "a8882717083662c20d82ae52c75f03a4e6397a0bfae85f833582d90ea8048666"
+    },
+    {
+      "path": "reports/npc-tank-simulation/REGISTRY_AUTHORITY.json",
+      "sha256": "cb1f255640f9f3570a4347ef582f3c56a2a870f88e690348c1f6830862083140"
+    }
+  ]
+}

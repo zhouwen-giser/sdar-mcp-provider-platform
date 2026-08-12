@@ -2,6 +2,8 @@ import { type ReactNode, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useScenario } from "../app/providers/app-providers.js";
 import { PRODUCT_SCENARIOS } from "../scenarios/types.js";
+import { dataMode } from "../gateways/factory.js";
+import { preserveNavigationContext } from "../app/navigation.js";
 
 const navigation = [
   [
@@ -102,14 +104,14 @@ function GlobalHeader() {
   const [search, setSearch] = useState("");
   return (
     <header className="global-header">
-      <NavLink className="brand" to="/dashboard">
+      <NavLink className="brand" to={preserveNavigationContext("/dashboard")}>
         SDAR <span>Provider Management</span>
       </NavLink>
       <form
         className="global-search"
         onSubmit={(event) => {
           event.preventDefault();
-          void navigate(`/search?q=${encodeURIComponent(search)}`);
+          void navigate(preserveNavigationContext(`/search?q=${encodeURIComponent(search)}`));
         }}
       >
         <span>全局搜索</span>
@@ -141,7 +143,7 @@ function SideNavigation() {
           {items.map(([label, path]) => (
             <NavLink
               key={path}
-              to={path}
+              to={preserveNavigationContext(path)}
               className={
                 location.pathname === path ||
                 (path !== "/dashboard" && location.pathname.startsWith(path))
@@ -157,22 +159,38 @@ function SideNavigation() {
       {import.meta.env.DEV && import.meta.env.VITE_PMS_ENABLE_PROTOTYPE_TOOLS !== "false" ? (
         <section>
           <h2>Prototype Tools</h2>
-          <NavLink to="/_prototype/components">组件展示</NavLink>
-          <NavLink to="/_prototype/scenarios">场景展示</NavLink>
+          <NavLink to={preserveNavigationContext("/_prototype/components")}>组件展示</NavLink>
+          <NavLink to={preserveNavigationContext("/_prototype/scenarios")}>场景展示</NavLink>
         </section>
       ) : null}
     </nav>
   );
 }
 function EnvironmentSelector() {
-  const [environment, setEnvironment] = useState("production");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const selected = new URLSearchParams(location.search).get("environment");
+  const environment = selected ?? (dataMode() === "mock" ? "production" : "");
+  const updateEnvironment = (value: string) => {
+    const query = new URLSearchParams(location.search);
+    if (value.trim().length === 0) query.delete("environment");
+    else query.set("environment", value.trim());
+    void navigate(`${location.pathname}${query.size === 0 ? "" : `?${query}`}`, { replace: true });
+  };
   return (
     <label className="environment-selector">
       <span>环境</span>
-      <select value={environment} onChange={(event) => setEnvironment(event.target.value)}>
-        <option value="production">production</option>
-        <option value="staging">staging</option>
-      </select>
+      <input
+        aria-label="环境"
+        list="pms-environment-suggestions"
+        placeholder="输入 environment"
+        value={environment}
+        onChange={(event) => updateEnvironment(event.target.value)}
+      />
+      <datalist id="pms-environment-suggestions">
+        <option value="production" />
+        <option value="staging" />
+      </datalist>
     </label>
   );
 }

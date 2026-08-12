@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "pms_web_real_api_mode",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "acceptanceGate": "D",
+  "status": "PASS",
+  "architecture": [
+    "feature_page",
+    "query_or_mutation_hook",
+    "domain_gateway",
+    "real_console_http_adapter",
+    "/api/console/v1/**"
+  ],
+  "frozenContractCoverage": {
+    "expectedOperations": 36,
+    "implementedOperations": 36,
+    "missingOperations": 0,
+    "extraOperations": 0,
+    "methodAndPathMappingVerified": true
+  },
+  "apiModeChecks": {
+    "realHttpGatewayImplemented": true,
+    "sameOriginBrowserBase": "/api/console/v1",
+    "mockFallbackAllowed": false,
+    "productionMockModeFailsClosed": true,
+    "apiWorkspaceStartsWithoutMockServerTruth": true,
+    "sampleScopeConstantsAuthoritative": false,
+    "scopeDerivedFromApiOrNavigation": true,
+    "pagesCallFetchDirectly": false
+  },
+  "problemDetailsMapping": {
+    "verified": true,
+    "preservedFields": ["status", "code", "title", "detail", "correlationId"],
+    "retryableInvented": false
+  },
+  "pagination": {
+    "opaqueNextCursorPreserved": true,
+    "silentFirstPageTruncationAllowed": false,
+    "unfollowableContractCursorFailsExplicitly": true
+  },
+  "validation": [
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web typecheck",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web lint",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web build",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @sdar/pms-web test",
+      "exitCode": 0,
+      "testFiles": 12,
+      "testFilesPassed": 12,
+      "tests": 44,
+      "testsPassed": 44,
+      "status": "PASS"
+    }
+  ],
+  "sensitiveValuesRecorded": false
+}

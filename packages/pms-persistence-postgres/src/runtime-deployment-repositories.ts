@@ -10,8 +10,10 @@ import {
   runtimeInstanceId,
   runtimeProviderId,
   type RuntimeDeployment,
+  type RuntimeDeploymentAuthority,
   type RuntimeDeploymentSnapshot,
   type RuntimeDeploymentStatus,
+  type RuntimeProcessManager,
   type RuntimeProcessProjection,
 } from "../../runtime-deployment/src/index.js";
 import {
@@ -29,9 +31,13 @@ interface RuntimeDeploymentRow extends QueryResultRow {
   desired_state: RuntimeDeploymentSnapshot["desiredState"];
   desired_replicas: number;
   runtime_version: string;
-  database_profile_id: string;
-  config_profile_id: string;
+  database_profile_id: string | null;
+  config_profile_id: string | null;
   adapter_endpoint: string | null;
+  runtime_authority: RuntimeDeploymentAuthority;
+  direct_instance_id: string | null;
+  direct_control_endpoint: string | null;
+  direct_advertised_endpoint: string | null;
   status: RuntimeDeploymentSnapshot["status"];
   desired_revision: string;
   observed_revision: string;
@@ -121,8 +127,9 @@ export class PostgresRuntimeDeploymentRepository {
         `INSERT INTO runtime_deployment(
            deployment_id,provider_id,environment,desired_state,desired_replicas,
            runtime_version,database_profile_id,config_profile_id,adapter_endpoint,
-           status,desired_revision,observed_revision
-         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+           runtime_authority,direct_instance_id,direct_control_endpoint,
+           direct_advertised_endpoint,status,desired_revision,observed_revision
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
         deploymentValues(value),
       );
     } catch (error) {
@@ -166,9 +173,12 @@ export class PostgresRuntimeDeploymentRepository {
 interface RuntimeProcessRow extends QueryResultRow {
   runtime_instance_id: string;
   deployment_id: string;
-  pm2_name: string;
+  process_manager: RuntimeProcessManager;
+  pm2_name: string | null;
   pid: number | null;
-  port: number;
+  port: number | null;
+  control_endpoint: string | null;
+  advertised_endpoint: string | null;
   process_state: RuntimeProcessProjection["processState"];
   liveness_state: RuntimeProcessProjection["livenessState"];
   readiness_state: RuntimeProcessProjection["readinessState"];
@@ -271,14 +281,20 @@ export class PostgresRuntimeProcessRepository {
     try {
       const result = await this.db.query(
         `INSERT INTO runtime_process(
-           runtime_instance_id,deployment_id,environment,pm2_name,pid,port,
+           runtime_instance_id,deployment_id,environment,process_manager,pm2_name,pid,port,
+           control_endpoint,advertised_endpoint,
            process_state,liveness_state,readiness_state,registration_state,
            catalog_state,config_state,last_heartbeat_at,runtime_version,
            config_revision,restart_count,observed_revision
          )
-         SELECT $1,$2,deployment.environment,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16
+         SELECT $1,$2,deployment.environment,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
+                $15,$16,$17,$18,$19
            FROM runtime_deployment deployment
-          WHERE deployment.deployment_id=$2 AND deployment.provider_id=$17`,
+          WHERE deployment.deployment_id=$2 AND deployment.provider_id=$20
+            AND (
+              (deployment.runtime_authority='platform_managed' AND $3='pm2')
+              OR (deployment.runtime_authority='direct_container' AND $3='direct_container')
+            )`,
         [...processValues(value), providerId],
       );
       if (result.rowCount !== 1) throw concurrencyConflict("RuntimeProcess");
@@ -439,13 +455,15 @@ export class PostgresRuntimeDeploymentUnitOfWork {
 function runtimeDeploymentSelect(): string {
   return `SELECT deployment_id,provider_id,environment,desired_state,desired_replicas,
                  runtime_version,database_profile_id,config_profile_id,adapter_endpoint,
-                 status,desired_revision,observed_revision
+                 runtime_authority,direct_instance_id,direct_control_endpoint,
+                 direct_advertised_endpoint,status,desired_revision,observed_revision
             FROM runtime_deployment`;
 }
 
 function runtimeProcessSelect(): string {
-  return `SELECT process.runtime_instance_id,process.deployment_id,process.pm2_name,
-                 process.pid,process.port,process.process_state,process.liveness_state,
+  return `SELECT process.runtime_instance_id,process.deployment_id,process.process_manager,
+                 process.pm2_name,process.pid,process.port,process.control_endpoint,
+                 process.advertised_endpoint,process.process_state,process.liveness_state,
                  process.readiness_state,process.registration_state,process.catalog_state,
                  process.config_state,process.last_heartbeat_at,process.runtime_version,
                  process.config_revision,process.restart_count,process.observed_revision
@@ -462,29 +480,54 @@ function runtimeDeploymentActionSelect(): string {
 }
 
 function deploymentFromRow(row: RuntimeDeploymentRow): RuntimeDeployment {
-  return rehydrateRuntimeDeployment({
+  const common = {
     deploymentId: runtimeDeploymentId(row.deployment_id),
     providerId: runtimeProviderId(row.provider_id),
     environment: runtimeEnvironmentId(row.environment),
     desiredState: row.desired_state,
     desiredReplicas: row.desired_replicas,
     runtimeVersion: row.runtime_version,
-    databaseProfileId: databaseProfileId(row.database_profile_id),
-    configProfileId: runtimeConfigProfileId(row.config_profile_id),
     ...(row.adapter_endpoint === null ? {} : { adapterEndpoint: row.adapter_endpoint }),
     status: row.status,
     desiredRevision: Number(row.desired_revision),
     observedRevision: Number(row.observed_revision),
+  } as const;
+  if (row.runtime_authority === "direct_container") {
+    if (
+      row.database_profile_id !== null ||
+      row.config_profile_id !== null ||
+      row.adapter_endpoint === null ||
+      row.direct_instance_id === null ||
+      row.direct_control_endpoint === null ||
+      row.direct_advertised_endpoint === null
+    ) {
+      throw new TypeError("PMS_RUNTIME_DEPLOYMENT_AUTHORITY_SPEC_INVALID");
+    }
+    return rehydrateRuntimeDeployment({
+      ...common,
+      runtimeAuthority: "direct_container",
+      adapterEndpoint: row.adapter_endpoint,
+      directContainer: {
+        instanceId: runtimeInstanceId(row.direct_instance_id),
+        controlEndpoint: row.direct_control_endpoint,
+        advertisedEndpoint: row.direct_advertised_endpoint,
+      },
+    });
+  }
+  if (row.database_profile_id === null || row.config_profile_id === null) {
+    throw new TypeError("PMS_RUNTIME_DEPLOYMENT_AUTHORITY_SPEC_INVALID");
+  }
+  return rehydrateRuntimeDeployment({
+    ...common,
+    runtimeAuthority: "platform_managed",
+    databaseProfileId: databaseProfileId(row.database_profile_id),
+    configProfileId: runtimeConfigProfileId(row.config_profile_id),
   });
 }
 
 function processFromRow(row: RuntimeProcessRow): RuntimeProcessProjection {
-  return rehydrateRuntimeProcessProjection({
-    instanceId: runtimeInstanceId(row.runtime_instance_id),
-    deploymentId: runtimeDeploymentId(row.deployment_id),
-    pm2Name: row.pm2_name,
+  const observation = {
     pid: row.pid,
-    port: row.port,
     processState: row.process_state,
     livenessState: row.liveness_state,
     readinessState: row.readiness_state,
@@ -496,6 +539,37 @@ function processFromRow(row: RuntimeProcessRow): RuntimeProcessProjection {
     configRevision: row.config_revision === null ? null : Number(row.config_revision),
     restartCount: row.restart_count,
     observedRevision: Number(row.observed_revision),
+  } as const;
+  if (row.process_manager === "direct_container") {
+    if (
+      row.pm2_name !== null ||
+      row.port !== null ||
+      row.control_endpoint === null ||
+      row.advertised_endpoint === null
+    ) {
+      throw new TypeError("PMS_RUNTIME_PROCESS_IDENTITY_INVALID");
+    }
+    return rehydrateRuntimeProcessProjection({
+      instanceId: runtimeInstanceId(row.runtime_instance_id),
+      deploymentId: runtimeDeploymentId(row.deployment_id),
+      processManager: "direct_container",
+      pm2Name: null,
+      port: null,
+      controlEndpoint: row.control_endpoint,
+      advertisedEndpoint: row.advertised_endpoint,
+      ...observation,
+    });
+  }
+  if (row.pm2_name === null || row.port === null) {
+    throw new TypeError("PMS_RUNTIME_PROCESS_IDENTITY_INVALID");
+  }
+  return rehydrateRuntimeProcessProjection({
+    instanceId: runtimeInstanceId(row.runtime_instance_id),
+    deploymentId: runtimeDeploymentId(row.deployment_id),
+    processManager: "pm2",
+    pm2Name: row.pm2_name,
+    port: row.port,
+    ...observation,
   });
 }
 
@@ -528,9 +602,13 @@ function deploymentValues(value: RuntimeDeploymentSnapshot): unknown[] {
     value.desiredState,
     value.desiredReplicas,
     value.runtimeVersion,
-    value.databaseProfileId,
-    value.configProfileId,
+    value.runtimeAuthority === "platform_managed" ? value.databaseProfileId : null,
+    value.runtimeAuthority === "platform_managed" ? value.configProfileId : null,
     value.adapterEndpoint ?? null,
+    value.runtimeAuthority,
+    value.runtimeAuthority === "direct_container" ? value.directContainer.instanceId : null,
+    value.runtimeAuthority === "direct_container" ? value.directContainer.controlEndpoint : null,
+    value.runtimeAuthority === "direct_container" ? value.directContainer.advertisedEndpoint : null,
     value.status,
     value.desiredRevision,
     value.observedRevision,
@@ -541,9 +619,12 @@ function processValues(value: RuntimeProcessProjection): readonly unknown[] {
   return [
     value.instanceId,
     value.deploymentId,
+    value.processManager ?? "pm2",
     value.pm2Name,
     value.pid,
     value.port,
+    value.processManager === "direct_container" ? value.controlEndpoint : null,
+    value.processManager === "direct_container" ? value.advertisedEndpoint : null,
     value.processState,
     value.livenessState,
     value.readinessState,
@@ -603,8 +684,13 @@ function processIdentityEqual(
   return (
     left.instanceId === right.instanceId &&
     left.deploymentId === right.deploymentId &&
+    (left.processManager ?? "pm2") === (right.processManager ?? "pm2") &&
     left.pm2Name === right.pm2Name &&
-    left.port === right.port
+    left.port === right.port &&
+    (left.processManager === "direct_container" ? left.controlEndpoint : undefined) ===
+      (right.processManager === "direct_container" ? right.controlEndpoint : undefined) &&
+    (left.processManager === "direct_container" ? left.advertisedEndpoint : undefined) ===
+      (right.processManager === "direct_container" ? right.advertisedEndpoint : undefined)
   );
 }
 

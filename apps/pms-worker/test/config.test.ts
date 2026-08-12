@@ -36,6 +36,8 @@ describe("PMS Worker production Runtime configuration", () => {
       runtimeConfigCacheRoot: fixture.cacheRoot,
       runtimeControlPlaneUrl: "http://127.0.0.1:8090/",
       runtimeControlPlaneCredentialRoot: fixture.controlPlaneCredentialRoot,
+      externalRuntimeCatalogAuthMode: "file_credentials",
+      allowInsecureInternalTransport: false,
       pm2Home: fixture.pm2Home,
       runtimeReconcileIntervalMs: 15_000,
       runtimeReconcileTimeoutMs: 120_000,
@@ -61,6 +63,108 @@ describe("PMS Worker production Runtime configuration", () => {
         PMS_RUNTIME_RELEASE_ROOT: fixture.releaseRoot,
       }),
     ).rejects.toThrow("PMS_WORKER_CONFIG_REQUIRED:PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE");
+  });
+
+  it("permits a non-loopback HTTP control plane only with the internal transport opt-in", async () => {
+    const fixture = await secureFixture();
+    const plaintext = {
+      ...fixture.environment,
+      PMS_RUNTIME_CONTROL_PLANE_URL: "http://pms-api.internal:8090",
+    };
+
+    await expect(loadPmsWorkerConfig(plaintext)).rejects.toThrow(
+      "PMS_WORKER_CONTROL_PLANE_URL_INVALID",
+    );
+    await expect(
+      loadPmsWorkerConfig({
+        ...plaintext,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).resolves.toMatchObject({
+      runtime: { runtimeControlPlaneUrl: "http://pms-api.internal:8090/" },
+    });
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "yes",
+      }),
+    ).rejects.toThrow("PMS_WORKER_CONFIG_BOOLEAN_INVALID:ALLOW_INSECURE_INTERNAL_TRANSPORT");
+  });
+
+  it("accepts only a private file descriptor for external Runtime catalog credentials", async () => {
+    const fixture = await secureFixture();
+    const descriptor = join(fixture.directory, "external-runtime-catalog-credentials.json");
+    await writeFile(descriptor, '{"credentials":[]}\n', { mode: 0o600 });
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+      }),
+    ).resolves.toMatchObject({
+      runtime: { externalRuntimeCatalogCredentialFile: descriptor },
+    });
+
+    await chmod(descriptor, 0o644);
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+      }),
+    ).rejects.toThrow(
+      "PMS_WORKER_SECRET_FILE_PERMISSIONS:PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE",
+    );
+  });
+
+  it("keeps external Runtime catalog authentication fail-closed unless anonymous mode is explicit", async () => {
+    const fixture = await secureFixture();
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+      }),
+    ).resolves.toMatchObject({
+      runtime: { externalRuntimeCatalogAuthMode: "file_credentials" },
+    });
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: "anonymous_intranet",
+      }),
+    ).rejects.toThrow("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_ANONYMOUS_INTRANET_REQUIRES_OPT_IN");
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: "anonymous_intranet",
+      }),
+    ).resolves.toMatchObject({
+      runtime: {
+        allowInsecureInternalTransport: true,
+        externalRuntimeCatalogAuthMode: "anonymous_intranet",
+      },
+    });
+
+    const descriptor = join(fixture.directory, "anonymous-external-runtime-credentials.json");
+    await writeFile(descriptor, '{"credentials":[]}\n', { mode: 0o600 });
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: "anonymous_intranet",
+        PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE: descriptor,
+      }),
+    ).rejects.toThrow("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FORBIDDEN");
+
+    await expect(
+      loadPmsWorkerConfig({
+        ...fixture.environment,
+        PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: "disabled",
+      }),
+    ).rejects.toThrow("PMS_WORKER_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE_INVALID");
   });
 
   it.each([

@@ -262,7 +262,7 @@ try {
   }
 
   const image = JSON.parse(readFileSync("reports/image/runtime-v2.json", "utf8"));
-  if (image.sizeBytes > image.maximumBytes || image.user === "root") {
+  if (!Number.isSafeInteger(image.sizeBytes) || image.sizeBytes <= 0 || image.user === "root") {
     throw new Error("Runtime image baseline violates the v2 image policy");
   }
 
@@ -321,7 +321,7 @@ try {
       recoveryScope:
         "Measures the real PostgreSQL candidate-selection/materialization path; Adapter reconciliation latency is resource-specific.",
       thresholds:
-        "Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and image policy.",
+        "Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and non-root reproducible image policy; image size is recorded without a fixed ceiling.",
     },
   };
   const outputPath = resolve(

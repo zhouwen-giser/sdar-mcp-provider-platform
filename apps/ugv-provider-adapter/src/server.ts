@@ -52,9 +52,11 @@ function ugvResource(snapshot: UgvSnapshot): Record<string, unknown> {
     health:
       !snapshot.connectivity.mqttConnected || !snapshot.connectivity.deviceMcpConnected
         ? "unknown"
-        : Object.values(snapshot.health.components).some((value) => value === "fault")
+        : snapshot.connectivity.deviceAvailable === false
           ? "degraded"
-          : "healthy",
+          : Object.values(snapshot.health.components).some((value) => value === "fault")
+            ? "degraded"
+            : "healthy",
     labels: {},
     metadata: jsonToProtoStruct({
       entityId: "ugv1",

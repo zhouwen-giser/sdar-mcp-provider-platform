@@ -22,24 +22,31 @@ import {
 export interface CatalogRegistryDiscoveryPort {
   discover(input: {
     readonly endpoint: string;
+    readonly authorization?: string;
     readonly timeoutMs: number;
     readonly signal: AbortSignal;
   }): Promise<DiscoveredCatalog>;
 }
 
 export interface CatalogRegistryEndpointPort {
-  resolve(deployment: RuntimeDeploymentSnapshot): Promise<string>;
+  resolve(deployment: RuntimeDeploymentSnapshot): Promise<{
+    readonly endpoint: string;
+    readonly authorization?: string;
+  }>;
 }
 
 export interface CatalogRegistryProjectionPort {
   providers(input: {
     readonly deployment: RuntimeDeploymentSnapshot;
-    readonly endpoint: string;
     readonly catalog: CatalogSnapshotPublication["snapshot"];
   }): Promise<readonly RegistryProviderInput[]>;
 }
 
 export interface CatalogRegistryStatePort {
+  recordCatalogState(
+    deployment: RuntimeDeploymentSnapshot,
+    state: "pending" | "valid" | "invalid",
+  ): Promise<void>;
   activate(
     deployment: RuntimeDeploymentSnapshot,
     expectedObservedRevision: number,
@@ -55,6 +62,7 @@ export type CatalogRegistryFailureCode =
   | "CATALOG_ENDPOINT_RESOLUTION_FAILED"
   | "CATALOG_DISCOVERY_FAILED"
   | "CATALOG_COMMIT_FAILED"
+  | "CATALOG_STATE_COMMIT_FAILED"
   | "REGISTRY_PROJECTION_FAILED"
   | "REGISTRY_COMMIT_FAILED";
 
@@ -72,6 +80,7 @@ export class CatalogRegistryPublicationPhase {
     private readonly projections: CatalogRegistryProjectionPort,
     private readonly registries: RegistrySnapshotRepository,
     private readonly state: CatalogRegistryStatePort,
+    private readonly options: { readonly allowInsecureInternalTransport?: boolean } = {},
   ) {}
 
   async close(
@@ -82,9 +91,14 @@ export class CatalogRegistryPublicationPhase {
       throw new Error("CATALOG_REGISTRY_PHASE_REQUIRES_DISCOVERING");
     }
     const expectedRevision = deployment.observedRevision;
-    let endpoint: string;
     try {
-      endpoint = await this.endpoints.resolve(deployment);
+      await this.state.recordCatalogState(deployment, "pending");
+    } catch (error) {
+      return this.#failed(deployment, expectedRevision, "CATALOG_STATE_COMMIT_FAILED", error);
+    }
+    let target: Awaited<ReturnType<CatalogRegistryEndpointPort["resolve"]>>;
+    try {
+      target = await this.endpoints.resolve(deployment);
     } catch (error) {
       return this.#failed(
         deployment,
@@ -96,11 +110,13 @@ export class CatalogRegistryPublicationPhase {
     let discovered: DiscoveredCatalog;
     try {
       discovered = await this.discovery.discover({
-        endpoint,
+        endpoint: target.endpoint,
+        ...(target.authorization === undefined ? {} : { authorization: target.authorization }),
         timeoutMs: context.timeoutMs,
         signal: context.signal,
       });
     } catch (error) {
+      await this.#recordInvalidCatalog(deployment);
       return this.#failed(deployment, expectedRevision, "CATALOG_DISCOVERY_FAILED", error);
     }
     let catalog: CatalogSnapshotPublication;
@@ -113,13 +129,18 @@ export class CatalogRegistryPublicationPhase {
         discoveredAt: new Date(),
       });
     } catch (error) {
+      await this.#recordInvalidCatalog(deployment);
       return this.#failed(deployment, expectedRevision, "CATALOG_COMMIT_FAILED", error);
+    }
+    try {
+      await this.state.recordCatalogState(deployment, "valid");
+    } catch (error) {
+      return this.#failed(deployment, expectedRevision, "CATALOG_STATE_COMMIT_FAILED", error);
     }
     let providers: readonly RegistryProviderInput[];
     try {
       providers = await this.projections.providers({
         deployment,
-        endpoint,
         catalog: catalog.snapshot,
       });
     } catch (error) {
@@ -128,7 +149,7 @@ export class CatalogRegistryPublicationPhase {
     let registry: RegistrySnapshotPublication;
     try {
       registry = await this.registries.publish({
-        candidate: buildRegistrySnapshot(deployment.environment, providers),
+        candidate: buildRegistrySnapshot(deployment.environment, providers, this.options),
         actorId: "pms-worker",
         correlationId: context.correlationId,
         publishedAt: new Date(),
@@ -149,6 +170,14 @@ export class CatalogRegistryPublicationPhase {
     await this.state.fail(deployment, expectedRevision, reasonCode);
     throw new CatalogRegistryPublicationError(reasonCode, { cause });
   }
+
+  async #recordInvalidCatalog(deployment: RuntimeDeploymentSnapshot): Promise<void> {
+    try {
+      await this.state.recordCatalogState(deployment, "invalid");
+    } catch {
+      // Preserve the primary discovery/commit failure classification.
+    }
+  }
 }
 
 export class CatalogRegistryPublicationError extends Error {
@@ -162,20 +191,57 @@ export class CatalogRegistryPublicationError extends Error {
 }
 
 export class HttpCatalogRegistryDiscovery implements CatalogRegistryDiscoveryPort {
+  constructor(
+    private readonly options: {
+      readonly allowInsecureInternalTransport?: boolean;
+      readonly fetch?: typeof globalThis.fetch;
+    } = {},
+  ) {}
+
   async discover(input: {
     readonly endpoint: string;
+    readonly authorization?: string;
     readonly timeoutMs: number;
     readonly signal: AbortSignal;
   }): Promise<DiscoveredCatalog> {
     if (input.signal.aborted) throw new Error("CATALOG_DISCOVERY_ABORTED");
+    const endpoint = validatedCatalogEndpoint(
+      input.endpoint,
+      this.options.allowInsecureInternalTransport === true,
+    );
     return new CatalogDiscoveryClient(
-      new HttpCatalogDiscoveryTransport({ endpoint: input.endpoint }),
+      new HttpCatalogDiscoveryTransport({
+        endpoint,
+        ...(input.authorization === undefined ? {} : { authorization: input.authorization }),
+        ...(this.options.fetch === undefined ? {} : { fetch: this.options.fetch }),
+      }),
       {
         timeoutMs: input.timeoutMs,
         maxAttempts: 3,
       },
     ).discover();
   }
+}
+
+function validatedCatalogEndpoint(source: string, allowInsecureInternalTransport: boolean): string {
+  let endpoint: URL;
+  try {
+    endpoint = new URL(source);
+  } catch (error) {
+    throw new Error("CATALOG_ENDPOINT_INVALID", { cause: error });
+  }
+  const loopback = ["127.0.0.1", "::1", "localhost"].includes(endpoint.hostname);
+  if (
+    (endpoint.protocol !== "https:" &&
+      !(endpoint.protocol === "http:" && (loopback || allowInsecureInternalTransport))) ||
+    endpoint.username !== "" ||
+    endpoint.password !== "" ||
+    endpoint.search !== "" ||
+    endpoint.hash !== ""
+  ) {
+    throw new Error("CATALOG_ENDPOINT_INVALID");
+  }
+  return endpoint.toString();
 }
 
 export class CatalogRegistryReconcileDecorator {

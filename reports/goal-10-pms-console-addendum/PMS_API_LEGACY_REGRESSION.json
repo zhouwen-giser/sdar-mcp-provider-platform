@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceGeneratedAt": "2026-08-10T09:34:46Z",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "status": "PASS",
+  "fullPackageSuite": {
+    "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm --filter @sdar/pms-api test",
+    "exitCode": 0,
+    "testFiles": 32,
+    "tests": 132
+  },
+  "routeFamilies": [
+    {
+      "routeFamily": "/health/live and /health/ready",
+      "result": "PASS",
+      "evidence": [
+        "apps/pms-api/test/app.test.ts",
+        "apps/pms-api/test/production-composition.test.ts"
+      ]
+    },
+    {
+      "routeFamily": "/api/v1 and /api/v1/**",
+      "result": "PASS",
+      "evidence": [
+        "apps/pms-api/test/console/legacy-regression.test.ts",
+        "apps/pms-api/test/app.test.ts",
+        "apps/pms-api/test/management.test.ts",
+        "apps/pms-api/test/runtime-deployment.test.ts"
+      ],
+      "legacyEnvelopePreserved": true,
+      "legacyNotFoundUsesConsoleProblemDetails": false
+    },
+    {
+      "routeFamily": "/api/v1/runtime-config/**",
+      "result": "PASS",
+      "standaloneGate": {
+        "command": "TEST_DATABASE_URL=<redacted-postgresql-17-url> pnpm test:pms-config-e2e",
+        "exitCode": 0,
+        "testFiles": 1,
+        "tests": 8
+      },
+      "evidence": [
+        "apps/pms-api/test/runtime-config.e2e.test.ts",
+        "apps/pms-api/test/production-composition.test.ts"
+      ]
+    },
+    {
+      "routeFamily": "/api/v1/runtime-registration/**",
+      "result": "PASS",
+      "evidence": [
+        "apps/pms-api/test/runtime-registration.test.ts",
+        "apps/pms-api/test/production-composition.test.ts"
+      ]
+    }
+  ],
+  "consoleAdapterRegression": {
+    "consoleBasePath": "/api/console/v1",
+    "legacyBasePath": "/api/v1",
+    "legacyEnvelopeChanged": false,
+    "legacyRoutesRemoved": false
+  },
+  "containsSecretsOrRealEndpointValues": false
+}

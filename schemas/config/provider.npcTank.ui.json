@@ -713,6 +713,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "NPC Tank Provider allow_insecure_internal_transport setting.",
+      "displayName": "ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/ALLOW_INSECURE_INTERNAL_TRANSPORT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "NPC Tank Provider log_level setting.",
       "displayName": "LOG_LEVEL",
       "overridePolicy": {

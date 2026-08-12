@@ -39,7 +39,9 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_MQTT_MAX_JSON_DEPTH: z.coerce.number().int().min(1).max(64).default(16),
   UGV_MQTT_MAX_JSON_NODES: z.coerce.number().int().min(16).max(100_000).default(4_096),
   UGV_MQTT_MAX_STRING_BYTES: z.coerce.number().int().min(64).max(1_048_576).default(16_384),
-  UGV_MQTT_WIRE_MODE: z.enum(["auto", "ros_message_json", "direct_domain_json"]).default("auto"),
+  UGV_MQTT_WIRE_MODE: z
+    .enum(["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"])
+    .default("auto"),
   UGV_CHASSIS_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   UGV_MISSION_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   UGV_HEALTH_FRESHNESS_MS: z.coerce.number().int().positive().default(5_000),
@@ -70,6 +72,7 @@ const UgvProviderInputBaseSchema = z.object({
   PROVIDER_TELEMETRY_TLS_CERT_PATH: optionalPath,
   PROVIDER_TELEMETRY_TLS_KEY_PATH: optionalPath,
   RUNTIME_ENV: z.enum(["development", "test", "production"]).default("development"),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: bool.default(false),
   LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 });
 
@@ -100,9 +103,9 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
     if (mode === "required" && (!ca || !cert || !key))
       context.addIssue({ code: "custom", message: `${name}_MTLS_FILES_REQUIRED` });
   if (value.RUNTIME_ENV === "production") {
-    if (value.ADAPTER_TLS_MODE !== "required")
+    if (!value.ALLOW_INSECURE_INTERNAL_TRANSPORT && value.ADAPTER_TLS_MODE !== "required")
       context.addIssue({ code: "custom", message: "PRODUCTION_ADAPTER_MTLS_REQUIRED" });
-    if (value.UGV_MQTT_TLS_MODE !== "required")
+    if (!value.ALLOW_INSECURE_INTERNAL_TRANSPORT && value.UGV_MQTT_TLS_MODE !== "required")
       context.addIssue({ code: "custom", message: "PRODUCTION_MQTT_TLS_REQUIRED" });
     if (value.UGV_MQTT_WIRE_MODE === "auto")
       context.addIssue({ code: "custom", message: "PRODUCTION_MQTT_WIRE_MODE_MUST_BE_EXPLICIT" });
@@ -125,6 +128,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_ALLOW_NAVIGATION_WITH_RECON: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
+  ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),
   PROVIDER_TELEMETRY_TLS_CA_PATH: z.string().optional(),
   PROVIDER_TELEMETRY_TLS_CERT_PATH: z.string().optional(),
   PROVIDER_TELEMETRY_TLS_KEY_PATH: z.string().optional(),
@@ -151,6 +155,9 @@ const defaults = loadUgvProviderConfiguration({});
 const configurationSchema = z.toJSONSchema(UgvProviderResolvedSchema);
 const configurationProperties = configurationSchema.properties as
   Record<string, { default?: unknown }> | undefined;
+if (Array.isArray(configurationSchema.required)) {
+  configurationSchema.required = configurationSchema.required.filter((key) => !secretKeys.has(key));
+}
 for (const key of secretKeys) {
   const property = configurationProperties?.[key];
   if (property !== undefined) delete property.default;

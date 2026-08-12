@@ -7,6 +7,7 @@ import type {
 
 const EFFECTIVE_CONFIG_ALLOWLIST = new Set([
   "RUNTIME_ENV",
+  "ALLOW_INSECURE_INTERNAL_TRANSPORT",
   "HOST",
   "DATABASE_POOL_MAX",
   "ADAPTER_ENDPOINT",
@@ -111,7 +112,12 @@ export class BootstrapConfigRenderer {
       PMS_RUNTIME_VERSION: input.target.runtimeVersion,
     };
     if (input.pms !== undefined) {
-      validatePms(input.pms, environment.RUNTIME_ENV);
+      validatePms(
+        input.pms,
+        environment.RUNTIME_ENV,
+        environment.ALLOW_INSECURE_INTERNAL_TRANSPORT === "true" ||
+          environment.ALLOW_INSECURE_INTERNAL_TRANSPORT === "1",
+      );
       environment.PMS_RUNTIME_CONFIG_URL = new URL(input.pms.baseUrl).toString();
       environment.PMS_RUNTIME_CONFIG_TOKEN_FILE = input.pms.tokenFile;
       environment.PMS_RUNTIME_CONFIG_CACHE_PATH = input.pms.cachePath;
@@ -193,6 +199,7 @@ function validateInput(input: BootstrapConfigRendererInput): void {
 function validatePms(
   pms: NonNullable<BootstrapConfigRendererInput["pms"]>,
   runtimeEnvironment: string | undefined,
+  allowInsecureInternalTransport: boolean,
 ): void {
   let url: URL;
   try {
@@ -204,7 +211,9 @@ function validatePms(
     !["http:", "https:"].includes(url.protocol) ||
     url.username.length > 0 ||
     url.password.length > 0 ||
-    (runtimeEnvironment === "production" && url.protocol !== "https:")
+    (runtimeEnvironment === "production" &&
+      !allowInsecureInternalTransport &&
+      url.protocol !== "https:")
   ) {
     throw new BootstrapConfigRendererError("BOOTSTRAP_CONFIG_PMS_URL_INVALID", "baseUrl");
   }

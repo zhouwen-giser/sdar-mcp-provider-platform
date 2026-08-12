@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "1.0",
+  "evaluatedAt": "2026-08-10T07:29:39.362Z",
+  "qualificationGitSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "overall": "UGV_SIMULATION_PARTIAL",
+  "providerPackageRealResourceStatus": "pending",
+  "prdSha256": "d6e5a899b8c83d23df77a8ce2c4d460c2dc7c2908df308627f505dea7704a2ff",
+  "items": [
+    {
+      "requirement": "VehicleProfile capability facts",
+      "owner": "Provider",
+      "providerOperation": "vehicle_get_capabilities",
+      "externalPrimitive": "get_capabilities",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "PASS_TWO_CYCLES"
+    },
+    {
+      "requirement": "chassis and connectivity state",
+      "owner": "Provider",
+      "providerOperation": "vehicle_get_state",
+      "externalPrimitive": "get_status plus MQTT",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "PASS_TWO_CYCLES"
+    },
+    {
+      "requirement": "payload and reconnaissance state",
+      "owner": "Provider",
+      "providerOperation": "vehicle_get_payload_status",
+      "externalPrimitive": "ugv_area_recon_get_status plus MQTT",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "PASS_TWO_CYCLES"
+    },
+    {
+      "requirement": "target observations",
+      "owner": "Provider",
+      "providerOperation": "vehicle_get_targets",
+      "externalPrimitive": "ugv_area_recon_get_targets plus MQTT",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "PASS_TWO_CYCLES_TARGET_COUNT_ZERO"
+    },
+    {
+      "requirement": "forward/backward bounded motion",
+      "owner": "Provider",
+      "providerOperation": "vehicle_navigate",
+      "externalPrimitive": "ugv_move_distance",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "requirement": "point/route navigation",
+      "owner": "Provider",
+      "providerOperation": "vehicle_navigate",
+      "externalPrimitive": "ugv_path_follow_mission",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "requirement": "return home",
+      "owner": "Provider",
+      "providerOperation": "vehicle_navigate",
+      "externalPrimitive": "ugv_return_home",
+      "classification": "EXACT_MATCH",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "requirement": "pause/resume/cancel",
+      "owner": "Provider",
+      "providerOperation": "task controls",
+      "externalPrimitive": "ugv_mission_control",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "requirement": "emergency stop",
+      "owner": "Provider",
+      "providerOperation": "vehicle_emergency_stop",
+      "externalPrimitive": "ugv_motion_stop plus active-track controls",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "requirement": "EO search",
+      "owner": "Provider",
+      "providerOperation": "vehicle_area_recon",
+      "externalPrimitive": "recon configure/control/status",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "requirement": "EO target track/stop",
+      "owner": "Provider",
+      "providerOperation": "vehicle_track_target/cancel",
+      "externalPrimitive": "ugv_area_recon_lock(lock=true/false)",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "requirement": "bounded view adjustment",
+      "owner": "Provider",
+      "providerOperation": "vehicle_control_gimbal",
+      "externalPrimitive": "ugv_gimbal_move",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "requirement": "effector confirmation",
+      "owner": "Provider optional effector gate",
+      "providerOperation": "vehicle_fire_weapon",
+      "externalPrimitive": "ugv_area_recon_attack_confirm",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED_WITH_CONFIRMATION_AND_SANITIZATION",
+      "realEvidence": "NOT_EXECUTED_EFFECTOR_DISABLED"
+    },
+    {
+      "requirement": "tool result and mission identity validation",
+      "owner": "Provider",
+      "providerOperation": "internal boundary",
+      "externalPrimitive": "error_code/state/mission_id/res/cmd_res/fail_data",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "READ_PATHS_PASS_MUTATING_PATHS_DETERMINISTIC_ONLY"
+    },
+    {
+      "requirement": "per-tool unavailable after repeated failure",
+      "owner": "Provider",
+      "providerOperation": "availability",
+      "externalPrimitive": "local health policy",
+      "classification": "COMPATIBLE_MAPPING",
+      "implementationStatus": "IMPLEMENTED",
+      "realEvidence": "DETERMINISTIC_REGRESSION_ONLY"
+    },
+    {
+      "requirement": "power on/off",
+      "owner": "Provider gap",
+      "providerOperation": null,
+      "externalPrimitive": null,
+      "classification": "MISSING_ON_SIMULATOR",
+      "implementationStatus": "NOT_SYNTHESIZED",
+      "realEvidence": "ABSENT_FROM_LIVE_15_TOOL_INVENTORY"
+    },
+    {
+      "requirement": "direct radius/angle turn",
+      "owner": "Provider gap",
+      "providerOperation": null,
+      "externalPrimitive": null,
+      "classification": "MISSING_ON_SIMULATOR",
+      "implementationStatus": "NOT_SYNTHESIZED",
+      "realEvidence": "ABSENT_FROM_LIVE_15_TOOL_INVENTORY"
+    },
+    {
+      "requirement": "brightness/focus",
+      "owner": "Provider gap",
+      "providerOperation": null,
+      "externalPrimitive": null,
+      "classification": "MISSING_ON_SIMULATOR",
+      "implementationStatus": "NOT_SYNTHESIZED",
+      "realEvidence": "ABSENT_FROM_LIVE_15_TOOL_INVENTORY"
+    },
+    {
+      "requirement": "capture image/video",
+      "owner": "Provider gap",
+      "providerOperation": null,
+      "externalPrimitive": null,
+      "classification": "MISSING_ON_SIMULATOR",
+      "implementationStatus": "NOT_SYNTHESIZED",
+      "realEvidence": "ABSENT_FROM_LIVE_15_TOOL_INVENTORY"
+    },
+    {
+      "requirement": "planning/arbitration/memory/history/offline backfill/coordination",
+      "owner": "Agent",
+      "providerOperation": null,
+      "externalPrimitive": null,
+      "classification": "EXACT_MATCH",
+      "implementationStatus": "CORRECTLY_EXCLUDED_FROM_PROVIDER",
+      "realEvidence": "NOT_APPLICABLE"
+    }
+  ],
+  "externalQualification": {
+    "deviceMcpReadOnly": "PASS",
+    "mqttReadOnly": "PASS_WITH_UPSTREAM_DRIFT",
+    "runtimeReadOnly": "PASS_TWO_CYCLES",
+    "realControl": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+    "reconnaissance": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+    "pmsOnboarding": "NOT_EXECUTED_EXTERNAL_ENV_UNAVAILABLE",
+    "effector": "NOT_EXECUTED_EFFECTOR_DISABLED"
+  },
+  "evidence": {
+    "mcpContractCaptureSha256": "9f4cca36aaacbe649ede430d4c1d1d5d079b27c9ec784317a0250eb952679519",
+    "hostPreflightSha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+    "composeCycle2PreflightSha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1",
+    "readOnlySmokeCycle1Sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+    "readOnlySmokeCycle2Sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7"
+  }
+}

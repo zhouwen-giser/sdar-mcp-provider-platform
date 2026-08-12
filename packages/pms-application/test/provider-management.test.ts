@@ -103,10 +103,35 @@ describe("Provider management application", () => {
       resourceId: "vehicle:2",
     });
     if (resource.updatedAt === undefined) throw new Error("RESOURCE_TOKEN_MISSING");
+    const metadataUpdated = await service.updateResourceMetadata(
+      {
+        environment: "production",
+        resourceId: "vehicle:2",
+        metadata: { runtimeAuthority: "direct_container", registryAuthority: "pms_worker" },
+        expectedUpdatedAt: resource.updatedAt,
+      },
+      audit,
+    );
+    expect(metadataUpdated.metadata).toEqual({
+      runtimeAuthority: "direct_container",
+      registryAuthority: "pms_worker",
+    });
+    if (metadataUpdated.updatedAt === undefined) throw new Error("UPDATED_RESOURCE_TOKEN_MISSING");
+    await expect(
+      service.updateResourceMetadata(
+        {
+          environment: "production",
+          resourceId: "vehicle:2",
+          metadata: { registryAuthority: "not_configured" },
+          expectedUpdatedAt: resource.updatedAt,
+        },
+        audit,
+      ),
+    ).rejects.toMatchObject({ code: "OPTIMISTIC_CONCURRENCY_CONFLICT" });
     const retired = await service.updateResourceStatus(
       { environment: "production", resourceId: "vehicle:2" },
       "retired",
-      resource.updatedAt,
+      metadataUpdated.updatedAt,
       audit,
     );
     if (retired.updatedAt === undefined) throw new Error("UPDATED_RESOURCE_TOKEN_MISSING");

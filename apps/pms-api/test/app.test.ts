@@ -39,6 +39,23 @@ describe("PMS control-plane API foundation", () => {
     await app.close();
   });
 
+  it("publishes the configured anonymous intranet management access profile", async () => {
+    const app = createPmsApi({ managementAuthMode: "anonymous_intranet" });
+    const openapi = await app.inject({ method: "GET", url: "/api/v1/openapi.json" });
+
+    expect(openapi.statusCode).toBe(200);
+    expect(openapi.json()).toEqual(
+      pmsOpenApiDocument({ managementAuthMode: "anonymous_intranet" }),
+    );
+    expect(
+      openapi.json<{
+        paths: Record<string, Record<string, Record<string, unknown>>>;
+      }>().paths["/api/v1/registry/{environment}/consumers/sdar/v1/sources/{smppSourceId}/latest"]
+        ?.get,
+    ).toMatchObject({ security: [], "x-sdar-access-mode": "anonymous_intranet" });
+    await app.close();
+  });
+
   it("propagates safe request and correlation IDs in response context", async () => {
     const app = createPmsApi();
     const response = await app.inject({

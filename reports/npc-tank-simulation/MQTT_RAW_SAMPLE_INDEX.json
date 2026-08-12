@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_npc_tank_mqtt_raw_sample_redaction_index",
+  "phase": "G11_REAL_MQTT_CAPTURE",
+  "status": "PASS_REDACTED_INDEX_ONLY",
+  "samples": [
+    {
+      "topic": "/npc_tank1/area_recon/coverage",
+      "receivedAt": "2026-08-10T10:44:24.755Z",
+      "byteLength": 306,
+      "sha256": "19e9dfc35deb193f2048f72ca097e828d6e170ec827e155f9971f81354174e52",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/area_recon/status",
+      "receivedAt": "2026-08-10T10:44:24.028Z",
+      "byteLength": 730,
+      "sha256": "0e34bc4d721c1e3ebac3b609e1a6f7e1d7d67386276350687e91aea6a8d989c3",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/area_recon/targets",
+      "receivedAt": "2026-08-10T10:44:24.153Z",
+      "byteLength": 29,
+      "sha256": "b7ada490a1c2cf97206e4c87d600ef383976bd58883cb2de47358e5f7663c1aa",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/battery_range_km",
+      "receivedAt": "2026-08-10T10:44:24.227Z",
+      "byteLength": 29,
+      "sha256": "99a995665119bda634903d8c6956951c1d82967ddc4d123201187fbbb901a157",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/component_status",
+      "receivedAt": "2026-08-10T10:44:24.439Z",
+      "byteLength": 251,
+      "sha256": "a6f29c5d7dc4105c128d10265ba7cb4aed624fea6b24c348a53dd38295802dcb",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/detected_objects",
+      "receivedAt": "2026-08-10T10:44:24.151Z",
+      "byteLength": 100,
+      "sha256": "0aa9e2a482011a270e94d4bdafd45ef152ee75c2dbc09f447b9c1cf3efbaae14",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/eo/pose",
+      "receivedAt": "2026-08-10T10:44:24.141Z",
+      "byteLength": 68,
+      "sha256": "b2dbe865b570526077daf2f86eac9e2a67ae739ddad6c87e0ec387ec7996727d",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/gnss",
+      "receivedAt": "2026-08-10T10:44:24.028Z",
+      "byteLength": 310,
+      "sha256": "05dfae682718ac8ab0813367729e06a043ea199252ca99868e0ffd6a17ad6c09",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/imu",
+      "receivedAt": "2026-08-10T10:44:24.028Z",
+      "byteLength": 54,
+      "sha256": "c90dcb652cbe044156cbddd4f8f315ffc6b1a026a6c3aa01caf30d2527b8489b",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/mission_state",
+      "receivedAt": "2026-08-10T10:44:24.207Z",
+      "byteLength": 155,
+      "sha256": "19930b231a0fd170d54a65c8daa19764d66c2f2180dbfc8152b31cc846713274",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/nav_state",
+      "receivedAt": "2026-08-10T10:44:24.206Z",
+      "byteLength": 264,
+      "sha256": "9f980e5fab012679f018e663865e37abf73c08ead12dac2f063f59226956d3fc",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/speed",
+      "receivedAt": "2026-08-10T10:44:24.071Z",
+      "byteLength": 28,
+      "sha256": "592212767bf8cc2408292524cd900e8163103124578e7e320f0bb3ba389fa8b4",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/status",
+      "receivedAt": "2026-08-10T10:44:24.024Z",
+      "byteLength": 1294,
+      "sha256": "93ce5934a63c1ca1f96c4c631b2393269d0a21607db456c821e18bf4086a7623",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "/npc_tank1/system_state",
+      "receivedAt": "2026-08-10T10:44:24.206Z",
+      "byteLength": 283,
+      "sha256": "c3aac9aafff445c692a26b2fc5a1bdaf0634f46e79a7b28b6763fd18d18c9423",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    },
+    {
+      "topic": "status/npc_tank1",
+      "receivedAt": "2026-08-10T10:44:24.028Z",
+      "byteLength": 158,
+      "sha256": "c49a4ab826ea758778011c7626fe925f6b42545f635443e635898c69b98283cc",
+      "rawStored": false,
+      "redaction": "STRUCTURE_ONLY"
+    }
+  ],
+  "rawPayloadStored": false,
+  "reason": "Real payload bytes are represented only by bounded metadata, hashes, and key/type structure."
+}

@@ -15,14 +15,42 @@ export type RuntimeLivenessState = "unknown" | "live" | "dead";
 export type RuntimeReadinessState = "unknown" | "ready" | "not_ready";
 export type RuntimeRegistrationState = "unregistered" | "registered" | "identity_mismatch";
 export type RuntimeCatalogState = "unknown" | "pending" | "valid" | "invalid";
-export type RuntimeConfigState = "unknown" | "current" | "stale" | "rejected" | "restart_required";
+export type RuntimeConfigState =
+  "unknown" | "current" | "externally_managed" | "stale" | "rejected" | "restart_required";
 
-export interface RuntimeProcessIdentity {
+export const RUNTIME_PROCESS_MANAGERS = ["pm2", "direct_container"] as const;
+export type RuntimeProcessManager = (typeof RUNTIME_PROCESS_MANAGERS)[number];
+
+interface RuntimeProcessIdentityBase {
   readonly instanceId: RuntimeInstanceId;
   readonly deploymentId: RuntimeDeploymentId;
+}
+
+/**
+ * A missing processManager is accepted only as a backwards-compatible spelling
+ * of the legacy PM2 identity. Rehydrated and newly allocated projections always
+ * expose it explicitly.
+ */
+export interface Pm2RuntimeProcessIdentity extends RuntimeProcessIdentityBase {
+  readonly processManager?: "pm2";
   readonly pm2Name: string;
   readonly port: number;
+  readonly controlEndpoint?: never;
+  readonly advertisedEndpoint?: never;
 }
+
+export interface DirectContainerRuntimeProcessIdentity extends RuntimeProcessIdentityBase {
+  readonly processManager: "direct_container";
+  readonly pm2Name: null;
+  readonly port: null;
+  /** PMS-only base URL used for probes and catalog discovery. */
+  readonly controlEndpoint: string;
+  /** Consumer-reachable base URL used when publishing Registry endpoints. */
+  readonly advertisedEndpoint: string;
+}
+
+export type RuntimeProcessIdentity =
+  Pm2RuntimeProcessIdentity | DirectContainerRuntimeProcessIdentity;
 
 export interface RuntimeProcessObservation {
   readonly pid: number | null;
@@ -38,10 +66,10 @@ export interface RuntimeProcessObservation {
   readonly restartCount: number;
 }
 
-export interface RuntimeProcessProjection
-  extends RuntimeProcessIdentity, RuntimeProcessObservation {
-  readonly observedRevision: number;
-}
+export type RuntimeProcessProjection = RuntimeProcessIdentity &
+  RuntimeProcessObservation & {
+    readonly observedRevision: number;
+  };
 
 export type RuntimeObservedHealth =
   "STOPPED" | "STARTING" | "NOT_READY" | "STALE" | "DEGRADED" | "FAILED" | "READY";
@@ -115,10 +143,7 @@ export function updateRuntimeProcessObservation(
     );
   }
   return freezeProjection({
-    instanceId: current.instanceId,
-    deploymentId: current.deploymentId,
-    pm2Name: current.pm2Name,
-    port: current.port,
+    ...current,
     ...observation,
     observedRevision: current.observedRevision + 1,
   });
@@ -184,11 +209,60 @@ function evaluation(
 }
 
 function validateIdentity(identity: RuntimeProcessIdentity): void {
-  if (!/^sdar-runtime-[a-z0-9][a-z0-9-]{0,126}$/.test(identity.pm2Name)) {
+  const raw = identity as unknown as {
+    readonly processManager?: unknown;
+    readonly pm2Name?: unknown;
+    readonly port?: unknown;
+    readonly controlEndpoint?: unknown;
+    readonly advertisedEndpoint?: unknown;
+  };
+  if (raw.processManager === "direct_container") {
+    if (raw.pm2Name !== null) invalidProjection("pm2Name");
+    if (raw.port !== null) invalidProjection("port");
+    if (typeof raw.controlEndpoint !== "string") invalidProjection("controlEndpoint");
+    if (typeof raw.advertisedEndpoint !== "string") invalidProjection("advertisedEndpoint");
+    validateEndpoint(raw.controlEndpoint, "controlEndpoint");
+    validateEndpoint(raw.advertisedEndpoint, "advertisedEndpoint");
+    return;
+  }
+  if (raw.processManager !== undefined && raw.processManager !== "pm2") {
+    invalidProjection("processManager");
+  }
+  if (
+    typeof raw.pm2Name !== "string" ||
+    !/^sdar-runtime-[a-z0-9][a-z0-9-]{0,126}$/.test(raw.pm2Name)
+  ) {
     invalidProjection("pm2Name");
   }
-  if (!Number.isSafeInteger(identity.port) || identity.port < 1 || identity.port > 65_535) {
+  if (
+    typeof raw.port !== "number" ||
+    !Number.isSafeInteger(raw.port) ||
+    raw.port < 1 ||
+    raw.port > 65_535
+  ) {
     invalidProjection("port");
+  }
+}
+
+function validateEndpoint(value: string, field: string): void {
+  if (value.trim() !== value || value.length === 0 || value.length > 2_048) {
+    invalidProjection(field);
+  }
+  let endpoint: URL;
+  try {
+    endpoint = new URL(value);
+  } catch {
+    invalidProjection(field);
+  }
+  if (
+    !["http:", "https:"].includes(endpoint.protocol) ||
+    endpoint.username.length > 0 ||
+    endpoint.password.length > 0 ||
+    endpoint.search.length > 0 ||
+    endpoint.hash.length > 0 ||
+    endpoint.pathname !== "/"
+  ) {
+    invalidProjection(field);
   }
 }
 
@@ -236,10 +310,11 @@ function observationsEqual(
 function freezeProjection(projection: RuntimeProcessProjection): RuntimeProcessProjection {
   return Object.freeze({
     ...projection,
+    processManager: projection.processManager ?? "pm2",
     ...(projection.lastHeartbeatAt === null
       ? { lastHeartbeatAt: null }
       : { lastHeartbeatAt: new Date(projection.lastHeartbeatAt) }),
-  });
+  }) as RuntimeProcessProjection;
 }
 
 function requireNonNegativeInteger(value: number, field: string): void {

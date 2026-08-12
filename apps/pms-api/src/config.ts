@@ -24,6 +24,7 @@ export const runtimeRegistrationScopes = ["runtime:register", "runtime:heartbeat
 
 export type RuntimeConfigScope = (typeof runtimeConfigScopes)[number];
 export type RuntimeRegistrationScope = (typeof runtimeRegistrationScopes)[number];
+export type PmsManagementAuthMode = "file_credentials" | "anonymous_intranet";
 
 const RUNTIME_CONFIG_SCOPE_SET = new Set(runtimeConfigScopes);
 const RUNTIME_REGISTRATION_SCOPE_SET = new Set(runtimeRegistrationScopes);
@@ -46,6 +47,8 @@ export type PmsApiBootstrapErrorCode =
   | "PMS_API_DATABASE_URL_FILE_EMPTY"
   | "PMS_API_MANAGEMENT_CREDENTIAL_FILE_NOT_CONFIGURED"
   | "PMS_API_MANAGEMENT_CREDENTIAL_FILE_INVALID"
+  | "PMS_API_MANAGEMENT_AUTH_MODE_INVALID"
+  | "PMS_API_ANONYMOUS_INTRANET_TRANSPORT_OPT_IN_REQUIRED"
   | "PMS_API_RUNTIME_CREDENTIAL_FILE_NOT_CONFIGURED"
   | "PMS_API_RUNTIME_CREDENTIAL_FILE_INVALID"
   | "PMS_API_RUNTIME_HEARTBEAT_TTL_MS_INVALID"
@@ -121,7 +124,8 @@ export interface PmsApiBootstrapConfig {
   readonly databaseUrl: string;
   readonly runtimeHeartbeatTtlMs: number;
   readonly sdarRegistryProjectionTtlSeconds: number;
-  readonly managementCredentialFile: string;
+  readonly managementAuthMode: PmsManagementAuthMode;
+  readonly managementCredentialFile?: string;
   readonly runtimeCredentialFile: string;
   readonly management: PmsManagementCredentials;
   readonly runtime: PmsRuntimeCredentials;
@@ -149,6 +153,10 @@ export async function loadPmsApiBootstrapConfig(
   const sdarRegistryProjectionTtlSeconds = parseSdarRegistryProjectionTtl(
     environment.SDAR_REGISTRY_PROJECTION_TTL_SECONDS,
   );
+  const managementAuthMode = parseManagementAuthMode(
+    environment.PMS_API_MANAGEMENT_AUTH_MODE,
+    environment.ALLOW_INSECURE_INTERNAL_TRANSPORT,
+  );
 
   const databaseUrlFile = readRequiredAbsolutePath(
     environment.PMS_DATABASE_URL_FILE,
@@ -156,19 +164,31 @@ export async function loadPmsApiBootstrapConfig(
   );
   const databaseUrl = await readCredentialText(databaseUrlFile, "PMS_API_DATABASE_URL_FILE_EMPTY");
 
-  const managementCredentialFile = readRequiredAbsolutePath(
-    environment.PMS_MANAGEMENT_CREDENTIAL_FILE,
-    "PMS_API_MANAGEMENT_CREDENTIAL_FILE_NOT_CONFIGURED",
-  );
   const runtimeCredentialFile = readRequiredAbsolutePath(
     environment.PMS_RUNTIME_CREDENTIAL_FILE,
     "PMS_API_RUNTIME_CREDENTIAL_FILE_NOT_CONFIGURED",
   );
+  const runtime = await parseRuntimeCredentialFile(runtimeCredentialFile);
 
-  const { management, runtime } = await parseCredentialFiles(
-    managementCredentialFile,
-    runtimeCredentialFile,
+  if (managementAuthMode === "anonymous_intranet") {
+    return {
+      host,
+      port,
+      databaseUrl,
+      runtimeHeartbeatTtlMs,
+      sdarRegistryProjectionTtlSeconds,
+      managementAuthMode,
+      runtimeCredentialFile,
+      management: { readers: [], administrators: [] },
+      runtime,
+    };
+  }
+
+  const managementCredentialFile = readRequiredAbsolutePath(
+    environment.PMS_MANAGEMENT_CREDENTIAL_FILE,
+    "PMS_API_MANAGEMENT_CREDENTIAL_FILE_NOT_CONFIGURED",
   );
+  const management = await parseManagementCredentialFile(managementCredentialFile);
 
   return {
     host,
@@ -176,11 +196,26 @@ export async function loadPmsApiBootstrapConfig(
     databaseUrl,
     runtimeHeartbeatTtlMs,
     sdarRegistryProjectionTtlSeconds,
+    managementAuthMode,
     managementCredentialFile,
     runtimeCredentialFile,
     management,
     runtime,
   };
+}
+
+function parseManagementAuthMode(
+  raw: string | undefined,
+  insecureTransportOptIn: string | undefined,
+): PmsManagementAuthMode {
+  const mode = raw ?? "file_credentials";
+  if (mode !== "file_credentials" && mode !== "anonymous_intranet") {
+    throw new PmsApiBootstrapError("PMS_API_MANAGEMENT_AUTH_MODE_INVALID");
+  }
+  if (mode === "anonymous_intranet" && insecureTransportOptIn !== "true") {
+    throw new PmsApiBootstrapError("PMS_API_ANONYMOUS_INTRANET_TRANSPORT_OPT_IN_REQUIRED");
+  }
+  return mode;
 }
 
 function parseHost(value: string | undefined): string {
@@ -228,38 +263,38 @@ function rejectInlineSecrets(environment: NodeJS.ProcessEnv): void {
   }
 }
 
-async function parseCredentialFiles(
+async function parseManagementCredentialFile(
   managementCredentialFile: string,
-  runtimeCredentialFile: string,
-): Promise<{
-  readonly management: PmsManagementCredentials;
-  readonly runtime: PmsRuntimeCredentials;
-}> {
+): Promise<PmsManagementCredentials> {
   const managementSource = await readCredentialText(
     managementCredentialFile,
     "PMS_API_MANAGEMENT_CREDENTIAL_FILE_INVALID",
   );
-  const runtimeSource = await readCredentialText(
-    runtimeCredentialFile,
-    "PMS_API_RUNTIME_CREDENTIAL_FILE_INVALID",
-  );
-
   const managementDescriptor = parseDescriptor(
     managementSource,
     "PMS_API_MANAGEMENT_CREDENTIAL_FILE_INVALID",
+  );
+  if (containsPlainToken(managementDescriptor)) {
+    throw new PmsApiBootstrapError("PMS_API_CREDENTIAL_DESCRIPTOR_PLAINTEXT_TOKEN");
+  }
+  return parseManagementCredentials(managementDescriptor);
+}
+
+async function parseRuntimeCredentialFile(
+  runtimeCredentialFile: string,
+): Promise<PmsRuntimeCredentials> {
+  const runtimeSource = await readCredentialText(
+    runtimeCredentialFile,
+    "PMS_API_RUNTIME_CREDENTIAL_FILE_INVALID",
   );
   const runtimeDescriptor = parseDescriptor(
     runtimeSource,
     "PMS_API_RUNTIME_CREDENTIAL_FILE_INVALID",
   );
-
-  if (containsPlainToken(managementDescriptor) || containsPlainToken(runtimeDescriptor)) {
+  if (containsPlainToken(runtimeDescriptor)) {
     throw new PmsApiBootstrapError("PMS_API_CREDENTIAL_DESCRIPTOR_PLAINTEXT_TOKEN");
   }
-
-  const management = await parseManagementCredentials(managementDescriptor);
-  const runtime = await parseRuntimeCredentials(runtimeDescriptor);
-  return { management, runtime };
+  return parseRuntimeCredentials(runtimeDescriptor);
 }
 
 function parseDescriptor(

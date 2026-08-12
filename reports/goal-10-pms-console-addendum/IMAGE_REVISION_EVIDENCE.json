@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "exact_head_pms_images",
+  "phase": "A9_EXACT_HEAD_IMAGE_VERIFICATION",
+  "status": "PASS",
+  "generatedAt": "2026-08-10T09:35:09Z",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "expectedRevision": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "buildProvenance": {
+    "source": "immutable git archive of exact HEAD",
+    "revisionBuildArgument": "VCS_REF",
+    "sameHeadForAllImages": true,
+    "sourceSecretsIncluded": false,
+    "localEnvironmentIncluded": false
+  },
+  "images": [
+    {
+      "service": "pms-api",
+      "image": "sdar/pms-api:7ca09d55aaf01dab9d6711fdd793530084897868",
+      "dockerfileTarget": "pms-api",
+      "ociRevision": "7ca09d55aaf01dab9d6711fdd793530084897868",
+      "revisionMatchesExpected": true,
+      "configuredUser": "node",
+      "nonRootUserCheck": "PASS",
+      "healthcheck": {
+        "present": true,
+        "kind": "HTTP readiness",
+        "path": "/health/ready"
+      },
+      "runningContainerImageMatchesQualifiedImage": true,
+      "status": "PASS"
+    },
+    {
+      "service": "pms-worker",
+      "image": "sdar/pms-worker:7ca09d55aaf01dab9d6711fdd793530084897868",
+      "dockerfileTarget": "pms-worker",
+      "ociRevision": "7ca09d55aaf01dab9d6711fdd793530084897868",
+      "revisionMatchesExpected": true,
+      "configuredUser": "node",
+      "nonRootUserCheck": "PASS",
+      "healthcheck": {
+        "present": true,
+        "kind": "PID liveness"
+      },
+      "runtimeRelease": {
+        "version": "2.0.0-rc.1",
+        "root": "/app/runtime-releases",
+        "entrypointExecutable": true,
+        "entrypointOwner": "root:root",
+        "entrypointMode": "0555"
+      },
+      "stateRoots": {
+        "ownerUid": 1000,
+        "mode": "0700"
+      },
+      "runningContainerImageMatchesQualifiedImage": true,
+      "status": "PASS"
+    },
+    {
+      "service": "pms-web",
+      "image": "sdar/pms-web:7ca09d55aaf01dab9d6711fdd793530084897868",
+      "dockerfileTarget": "pms-web",
+      "ociRevision": "7ca09d55aaf01dab9d6711fdd793530084897868",
+      "revisionMatchesExpected": true,
+      "configuredUser": "node",
+      "nonRootUserCheck": "PASS",
+      "healthcheck": {
+        "present": true,
+        "kind": "HTTP readiness",
+        "path": "/health/ready"
+      },
+      "runningContainerImageMatchesQualifiedImage": true,
+      "status": "PASS"
+    }
+  ],
+  "verification": {
+    "allImagesPresent": true,
+    "allRevisionLabelsMatchExactHead": true,
+    "allImagesRunAsNode": true,
+    "allImagesHaveHealthchecks": true,
+    "standaloneSmokeVerifiedLabels": true,
+    "integratedSmokeVerifiedLabels": true,
+    "gateH": "PASS"
+  },
+  "redaction": {
+    "imageIdsRecorded": false,
+    "externalEndpointsRecorded": false,
+    "secretValuesRecorded": false
+  }
+}

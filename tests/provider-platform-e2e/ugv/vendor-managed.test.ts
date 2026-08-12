@@ -9,6 +9,7 @@ import { UgvProviderServer } from "../../../apps/ugv-provider-adapter/src/server
 import { UgvTelemetry } from "../../../apps/ugv-provider-adapter/src/telemetry.js";
 import { loadRuntimeConfig } from "../../../apps/runtime/src/config.js";
 import { createRuntime } from "../../../apps/runtime/src/runtime.js";
+import type { AuthorizationContext } from "../../../packages/domain/src/index.js";
 import {
   CatalogDiscoveryClient,
   HttpCatalogDiscoveryTransport,
@@ -20,12 +21,24 @@ import {
 } from "../../../packages/pms-persistence-postgres/src/index.js";
 import { MemoryProviderStore } from "../../../packages/provider-adapter-kit/src/index.js";
 import { loadProviderPackageRegistry } from "../../../packages/provider-package-registry/src/index.js";
+import { OperationRegistry } from "../../../packages/operation-registry/src/index.js";
+import {
+  OperationSnapshotRepository,
+  TaskRepository,
+} from "../../../packages/persistence-postgres/src/index.js";
 import { buildRegistrySnapshot } from "../../../packages/registry-snapshot/src/index.js";
+import { DurableCommandDispatcher, TaskEngine } from "../../../packages/task-engine/src/index.js";
 import { MockUgvDeviceMcpClient } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 
 const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const providerId = "isr.vehicle.ugv.platform-e2e";
+const authorization: AuthorizationContext = {
+  hash: "a".repeat(64),
+  executionMode: "simulation",
+  simulationId: "ugv-platform-e2e",
+  correlationId: "ugv-fire-decline-platform-e2e",
+};
 
 describe("vendor_managed UGV Provider platform integration", () => {
   const connectionString = requiredDatabaseUrl();
@@ -36,7 +49,11 @@ describe("vendor_managed UGV Provider platform integration", () => {
   let pmsPool: Pool | undefined;
   let adapterRuntime: UgvProviderRuntime | undefined;
   let adapterServer: UgvProviderServer | undefined;
+  let adapterStore: MemoryProviderStore;
+  let adapterIngress: VehicleMqttIngress;
+  let device: MockUgvDeviceMcpClient;
   let runtime: ReturnType<typeof createRuntime> | undefined;
+  let taskEngine: TaskEngine;
   let runtimeAddress: string;
   const providerDatabaseProvisionCalls = 0;
 
@@ -65,14 +82,15 @@ describe("vendor_managed UGV Provider platform integration", () => {
     await runPmsMigrations(pmsPool, workspaceRoot);
     await seedProviderBinding(pmsPool);
 
-    const store = new MemoryProviderStore();
-    const ingress = new VehicleMqttIngress("direct_domain_json", {
+    adapterStore = new MemoryProviderStore();
+    adapterIngress = new VehicleMqttIngress("direct_domain_json", {
       maxPayloadBytes: 65_536,
       maxDepth: 16,
       maxNodes: 4_096,
       maxStringBytes: 16_384,
     });
-    seedUgv(ingress);
+    seedUgv(adapterIngress);
+    device = new MockUgvDeviceMcpClient();
     adapterRuntime = new UgvProviderRuntime(
       {
         providerId,
@@ -81,10 +99,10 @@ describe("vendor_managed UGV Provider platform integration", () => {
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
       },
-      store,
-      ingress,
-      new MockUgvDeviceMcpClient(),
-      new UgvBusinessEventHub(store),
+      adapterStore,
+      adapterIngress,
+      device,
+      new UgvBusinessEventHub(adapterStore),
       new UgvTelemetry({
         providerId,
         enabled: false,
@@ -102,8 +120,8 @@ describe("vendor_managed UGV Provider platform integration", () => {
         tlsMode: "disabled",
       },
       adapterRuntime,
-      store,
-      new UgvBusinessEventHub(store),
+      adapterStore,
+      new UgvBusinessEventHub(adapterStore),
     );
     const adapterPort = await adapterServer.start();
 
@@ -121,9 +139,19 @@ describe("vendor_managed UGV Provider platform integration", () => {
         OTEL_ENABLED: "false",
         PROVIDER_TELEMETRY_INGRESS_ENABLED: "false",
         BUSINESS_EVENTS_ENABLED: "false",
+        SCHEDULER_POLL_MS: "60000",
       }),
     );
-    await runtime.initialize();
+    const manifest = new OperationRegistry().validate(await runtime.initialize());
+    const operationSnapshots = await new OperationSnapshotRepository(runtime.pool).saveManifest(
+      manifest,
+    );
+    taskEngine = new TaskEngine(
+      manifest,
+      operationSnapshots,
+      runtime.gateway,
+      new TaskRepository(runtime.pool),
+    );
     runtimeAddress = await runtime.app.listen({ host: "127.0.0.1", port: 0 });
   });
 
@@ -138,7 +166,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
     await admin.end();
   });
 
-  it("starts ready with matching identity and discovers the nine authoritative operations", async () => {
+  it("starts ready with matching identity and discovers the eleven authoritative operations", async () => {
     if (runtime === undefined) throw new Error("RUNTIME_NOT_STARTED");
     const [live, ready] = await Promise.all([
       fetch(`${runtimeAddress}/health/live`),
@@ -158,12 +186,14 @@ describe("vendor_managed UGV Provider platform integration", () => {
     expect(catalog.tools.map(({ name }) => name)).toEqual(
       [
         "vehicle_get_state",
+        "vehicle_get_capabilities",
         "vehicle_get_payload_status",
         "vehicle_get_targets",
         "vehicle_laser_range",
         "vehicle_navigate",
         "vehicle_area_recon",
         "vehicle_track_target",
+        "vehicle_control_gimbal",
         "vehicle_fire_weapon",
         "vehicle_emergency_stop",
       ].sort((left, right) => left.localeCompare(right)),
@@ -197,7 +227,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
       publishedAt: new Date(),
     });
 
-    expect(catalogPublication.snapshot.document.tools).toHaveLength(9);
+    expect(catalogPublication.snapshot.document.tools).toHaveLength(11);
     const projection = registryPublication.snapshot.document.providers[0];
     expect(projection).toMatchObject({
       providerId,
@@ -215,6 +245,70 @@ describe("vendor_managed UGV Provider platform integration", () => {
         )
       ).rows[0]?.count,
     ).toBe(1);
+  });
+
+  it("maps an acknowledged fire decline to platform cancellation without a device fire call", async () => {
+    if (runtime === undefined) throw new Error("RUNTIME_NOT_STARTED");
+    seedUgv(adapterIngress);
+    seedFireReady(adapterIngress);
+    const fireOperation = taskEngine.manifest.operations.find(
+      ({ name }) => name === "vehicle_fire_weapon",
+    );
+    if (fireOperation === undefined) throw new Error("UGV_FIRE_OPERATION_MISSING");
+
+    expect(device.calls).toEqual([]);
+    const created = await taskEngine.callOperation(
+      fireOperation,
+      {
+        resourceId: "vehicle:ugv1",
+        targetId: "101",
+        engagementMode: "single",
+        requireConfirmation: true,
+      },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("UGV_FIRE_TASK_NOT_CREATED");
+    const taskId = String(created.task.taskId);
+    expect(created.task).toMatchObject({ status: "input_required" });
+    expect(await adapterStore.getExecution(taskId)).toMatchObject({ state: "WAITING_INPUT" });
+
+    await taskEngine.updateTaskInputResponses(
+      taskId,
+      { fire_confirmation: { action: "decline" } },
+      authorization,
+    );
+    const dispatched = await new DurableCommandDispatcher(
+      runtime.gateway,
+      new TaskRepository(runtime.pool),
+    ).tick();
+    expect(dispatched).toMatchObject({ claimed: 1, acknowledged: 1, rejected: 0 });
+
+    const command = await runtime.pool.query<{
+      state: string;
+      adapter_ack: { accepted?: boolean; reasonCode?: string } | null;
+    }>(
+      `SELECT state,adapter_ack
+         FROM task_command
+        WHERE task_id=$1 AND command_type='UPDATE'`,
+      [taskId],
+    );
+    expect(command.rows[0]).toMatchObject({
+      state: "ACKNOWLEDGED",
+      adapter_ack: { accepted: true, reasonCode: "UGV_FIRE_CONFIRMATION_REJECTED" },
+    });
+    expect(await adapterStore.getExecution(taskId)).toMatchObject({
+      state: "CANCELLED",
+      reasonCode: "UGV_FIRE_CONFIRMATION_REJECTED",
+      result: { status: "cancelled" },
+    });
+
+    expect(await taskEngine.getTask(taskId, authorization)).toMatchObject({
+      status: "cancelled",
+    });
+    expect(await new TaskRepository(runtime.pool).getById(taskId)).toMatchObject({
+      internalState: "TERMINAL_CANCELLED",
+    });
+    expect(device.calls).toEqual([]);
   });
 });
 
@@ -255,10 +349,23 @@ function seedUgv(ingress: VehicleMqttIngress): void {
     ),
   );
   ingress.handle(
-    "/ugv/status",
+    "status/ugv",
     Buffer.from(
       '{"vehicle_id":"ugv1","role_name":"ugv","speed_kmh":0,"chassis_task":{"state":-1,"progress":0},"eo_task":{"state":-1,"progress":0},"weapon_task":{"state":-1,"progress":0},"available":true}',
     ),
+  );
+}
+
+function seedFireReady(ingress: VehicleMqttIngress): void {
+  ingress.handle(
+    "/ugv/detected_objects",
+    Buffer.from(
+      '{"entity_id":"ugv1","objects":[{"id":101,"object_type":"3:target-vehicle","x":1,"y":2,"z":0}]}',
+    ),
+  );
+  ingress.applyDeviceObservation(
+    { payload: { online: true, lockedTargetId: "101", attackReady: true } },
+    [],
   );
 }
 

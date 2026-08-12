@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0",
+  "evaluatedAt": "2026-08-10T07:29:39.362Z",
+  "qualificationGitSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "overall": "UGV_SIMULATION_PARTIAL",
+  "providerPackageRealResourceStatus": "pending",
+  "contractConformance": "PASS_WITH_LIMITATIONS",
+  "realReadOnlyConformance": "PASS",
+  "realMutatingConformance": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+  "authority": {
+    "serverName": "ugv-mcp-server",
+    "serverVersion": "1.26.0",
+    "protocolVersion": "2025-11-25",
+    "toolCount": 15,
+    "liveContractHash": "3725dba7b92e587ecb3fd670bc54e00633828370e9063f96809b8f7c1400935a",
+    "capturePath": "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+    "captureSha256": "9f4cca36aaacbe649ede430d4c1d1d5d079b27c9ec784317a0250eb952679519",
+    "outputSchemaCount": 0,
+    "annotationCount": 0,
+    "mockFallbackEnabled": false
+  },
+  "captureProvenance": {
+    "rawCaptureEmbedsQualificationGitSha": false,
+    "rawCapturePreservedByteForByte": true,
+    "bindingMethod": "This conformance envelope binds the raw capture SHA-256 to qualificationGitSha; both real preflight envelopes independently record the same product SHA and live contract hash.",
+    "hostPreflightSha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+    "composeCycle2PreflightSha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1"
+  },
+  "items": [
+    {
+      "semanticAction": "live_tool_inventory",
+      "externalTool": "tools/list",
+      "productBinding": "UGV_DEVICE_TOOL_ALLOWLIST",
+      "classification": "EXACT_MATCH",
+      "evidenceStatus": "LIVE_CAPTURE_PASS",
+      "note": "The live 15-tool inventory matches the supplied protocol inventory."
+    },
+    {
+      "semanticAction": "output_schema_and_annotations",
+      "externalTool": "all live tools",
+      "productBinding": "local strict result validation",
+      "classification": "MISSING_ON_SIMULATOR",
+      "evidenceStatus": "LIVE_CAPTURED_ABSENT"
+    },
+    {
+      "semanticAction": "path_mission",
+      "externalTool": "ugv_path_follow_mission",
+      "productBinding": "vehicle_navigate(point|route)",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "semanticAction": "return_home",
+      "externalTool": "ugv_return_home",
+      "productBinding": "vehicle_navigate(return_home)",
+      "classification": "EXACT_MATCH",
+      "evidenceStatus": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "semanticAction": "move_distance",
+      "externalTool": "ugv_move_distance",
+      "productBinding": "vehicle_navigate(distance)",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "semanticAction": "mission_control",
+      "externalTool": "ugv_mission_control",
+      "productBinding": "pause/resume/cancel with integer mission correlation",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "semanticAction": "motion_stop",
+      "externalTool": "ugv_motion_stop",
+      "productBinding": "vehicle_emergency_stop",
+      "classification": "EXACT_MATCH",
+      "evidenceStatus": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "semanticAction": "device_status",
+      "externalTool": "get_status",
+      "productBinding": "vehicle_get_state",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "REAL_READ_PASS_TWO_CYCLES"
+    },
+    {
+      "semanticAction": "capabilities",
+      "externalTool": "get_capabilities",
+      "productBinding": "vehicle_get_capabilities",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "REAL_READ_PASS_TWO_CYCLES"
+    },
+    {
+      "semanticAction": "recon_configure",
+      "externalTool": "ugv_area_recon_configure",
+      "productBinding": "vehicle_area_recon start",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "semanticAction": "recon_control",
+      "externalTool": "ugv_area_recon_control",
+      "productBinding": "vehicle_area_recon lifecycle",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_RECON_DISABLED"
+    },
+    {
+      "semanticAction": "target_lock_unlock",
+      "externalTool": "ugv_area_recon_lock",
+      "productBinding": "vehicle_track_target and cancel",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_SAFE_FIXTURE_MISSING"
+    },
+    {
+      "semanticAction": "recon_status",
+      "externalTool": "ugv_area_recon_get_status",
+      "productBinding": "vehicle_get_payload_status and lifecycle refresh",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "REAL_READ_PASS_TWO_CYCLES"
+    },
+    {
+      "semanticAction": "recon_targets",
+      "externalTool": "ugv_area_recon_get_targets",
+      "productBinding": "vehicle_get_targets",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "REAL_READ_PASS_TWO_CYCLES_TARGET_COUNT_ZERO"
+    },
+    {
+      "semanticAction": "recon_reset",
+      "externalTool": "ugv_area_recon_reset",
+      "productBinding": "allowlisted internal primitive only",
+      "classification": "EXTRA_ON_SIMULATOR",
+      "evidenceStatus": "LIVE_SCHEMA_CAPTURE_ONLY"
+    },
+    {
+      "semanticAction": "attack_confirm",
+      "externalTool": "ugv_area_recon_attack_confirm",
+      "productBinding": "vehicle_fire_weapon confirmation flow",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_EFFECTOR_DISABLED"
+    },
+    {
+      "semanticAction": "gimbal",
+      "externalTool": "ugv_gimbal_move",
+      "productBinding": "vehicle_control_gimbal",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "NOT_EXECUTED_REAL_CONTROL_DISABLED"
+    },
+    {
+      "semanticAction": "laser_range_optional_extension",
+      "externalTool": null,
+      "productBinding": "vehicle_laser_range fail-closed availability",
+      "classification": "MISSING_ON_SIMULATOR",
+      "evidenceStatus": "ABSENT_FROM_LIVE_TOOLS_LIST"
+    },
+    {
+      "semanticAction": "business_result_validation",
+      "externalTool": "all used tools",
+      "productBinding": "error_code/state/message/res/cmd_res/fail_data and identity validators",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "REAL_READ_PASS_MUTATING_DETERMINISTIC_ONLY"
+    },
+    {
+      "semanticAction": "integer_mission_id_chaining",
+      "externalTool": "mission lifecycle tools",
+      "productBinding": "durable integer mission ID correlation",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "DETERMINISTIC_REGRESSION_ONLY"
+    },
+    {
+      "semanticAction": "device_mcp_reconnect",
+      "externalTool": "Streamable HTTP transport",
+      "productBinding": "bounded reconnect and per-tool health",
+      "classification": "COMPATIBLE_MAPPING",
+      "evidenceStatus": "CLEAN_COMPOSE_RESTART_PASS_ACTIVE_TASK_NOT_EXECUTED"
+    }
+  ],
+  "runtimeReadOnlyEvidence": {
+    "cycle1Sha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b",
+    "cycle2Sha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+    "runtimeToolCount": 11,
+    "operations": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets"
+    ]
+  },
+  "safety": {
+    "endpointsRedacted": true,
+    "controlAttempted": false,
+    "reconAttempted": false,
+    "effectorAttempted": false,
+    "rawDeviceResultsStored": false
+  }
+}

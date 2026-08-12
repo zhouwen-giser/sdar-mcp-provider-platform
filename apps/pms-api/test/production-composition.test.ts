@@ -45,7 +45,7 @@ describe("PMS API production composition", () => {
     const migrationRows = await pool.query<{ count: string }>(
       "SELECT count(*) FROM pms_schema_migration",
     );
-    expect(migrationRows.rows[0]?.count).toBe("9");
+    expect(migrationRows.rows[0]?.count).toBe("10");
 
     await seedProvider(pool, providerA);
     await seedProvider(pool, providerB);

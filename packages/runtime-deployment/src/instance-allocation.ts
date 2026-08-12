@@ -103,6 +103,7 @@ export function runtimeProcessIdentity(
   return Object.freeze({
     instanceId: identity.instanceId,
     deploymentId: identity.deploymentId,
+    processManager: "pm2",
     pm2Name: identity.pm2Name,
     port,
   });

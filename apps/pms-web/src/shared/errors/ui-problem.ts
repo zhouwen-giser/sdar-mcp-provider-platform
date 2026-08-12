@@ -28,6 +28,13 @@ export function toUiProblem(error: unknown): UiProblem {
       detail: "Console API V1 adapter 尚未配置；生产模式不会回退到 Mock。",
       retryable: false,
     };
+  if (message === "PMS_ENVIRONMENT_SCOPE_REQUIRED")
+    return {
+      code: "PMS_ENVIRONMENT_SCOPE_REQUIRED",
+      title: "请选择 Environment",
+      detail: "API 模式不会使用示例 Environment；请通过顶部范围选择器或 URL 选择真实范围。",
+      retryable: false,
+    };
   return {
     code: "PMS_UI_UNEXPECTED",
     title: "页面处理失败",

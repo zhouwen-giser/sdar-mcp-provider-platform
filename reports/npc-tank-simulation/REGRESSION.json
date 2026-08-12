@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "goal11_final_regression",
+  "phase": "GOAL11_NPC_FULL_REGRESSION",
+  "status": "PASS_WITH_PREEXISTING_FORMAT_EXCEPTIONS",
+  "reasonCode": "ALL_GOAL11_AND_SHARED_GATES_PASS_THREE_UNCHANGED_GOAL10_REPORTS_FAIL_FORMAT_CHECK",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "runs": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm protocol:check",
+      "exitCode": 0,
+      "status": "PASS",
+      "validatedSchemas": 11,
+      "frozenConformanceCases": 74,
+      "lockedFiles": 38
+    },
+    {
+      "command": "pnpm test:unit",
+      "exitCode": 0,
+      "status": "PASS",
+      "testFiles": 35,
+      "passedTests": 142
+    },
+    {
+      "command": "pnpm test:contract",
+      "exitCode": 0,
+      "status": "PASS_AFTER_SANDBOX_ONLY_DIAGNOSTIC",
+      "testFiles": 4,
+      "passedTests": 22,
+      "diagnostic": "The sandbox run denied python3 spawn with EPERM; the authorized identical rerun passed."
+    },
+    {
+      "command": "NPC and UGV integration/security/E2E targeted run",
+      "exitCode": 0,
+      "status": "PASS",
+      "testFiles": 6,
+      "passedTests": 52
+    },
+    {
+      "command": "NPC real-contract, deployment, config, package-registry, and Worker targeted run",
+      "exitCode": 0,
+      "status": "PASS",
+      "testFiles": 10,
+      "passedTests": 66
+    },
+    {
+      "command": "UGV simulation transport/provider/deployment regression",
+      "exitCode": 0,
+      "status": "PASS",
+      "testFiles": 5,
+      "passedTests": 49
+    },
+    {
+      "command": "pnpm test:ha-climate",
+      "exitCode": 0,
+      "status": "PASS_AFTER_SANDBOX_ONLY_DIAGNOSTIC",
+      "testFiles": 4,
+      "passedTests": 20,
+      "diagnostic": "The sandbox denied loopback listen with EPERM; the authorized identical rerun passed."
+    },
+    {
+      "command": "pnpm test:ha-light",
+      "exitCode": 0,
+      "status": "PASS_AFTER_SANDBOX_ONLY_DIAGNOSTIC",
+      "testFiles": 2,
+      "passedTests": 9,
+      "diagnostic": "The sandbox denied loopback listen with EPERM; the authorized identical rerun passed."
+    },
+    {
+      "command": "PMS Console exact-head up/smoke and two clean restart cycles",
+      "exitCode": 0,
+      "status": "PASS",
+      "successfulIntegratedSmokes": 5
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 1,
+      "status": "PREEXISTING_UNRELATED_FAILURE_CLASSIFIED",
+      "unchangedSinceGoal10Base": true,
+      "files": [
+        "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+        "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+        "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json"
+      ]
+    },
+    {
+      "command": "Goal11 changed-file and NPC report Prettier check",
+      "exitCode": 0,
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "npcRegression": "PASS",
+    "ugvRegression": "PASS",
+    "haRegression": "PASS",
+    "sharedVehicleRegression": "PASS",
+    "pmsRegistryRegression": "PASS",
+    "pmsConsoleSmoke": "PASS",
+    "frozenProtocol": "PASS",
+    "trackedGoal11Formatting": "PASS",
+    "preexistingUnrelatedFormatting": "FAIL_CLASSIFIED_NOT_INTRODUCED_BY_GOAL11"
+  },
+  "scopeBoundary": {
+    "databaseBackedProviderPlatformNpcSuite": "NOT_RUN_SEPARATELY; equivalent NPC migrations were exercised by exact-head Adapter/Runtime/PMS deployments and targeted migration/config tests",
+    "realControlTests": "NOT_EXECUTED_SAFETY_GATES_CLOSED",
+    "realReconTests": "NOT_EXECUTED_SAFETY_GATES_CLOSED"
+  }
+}

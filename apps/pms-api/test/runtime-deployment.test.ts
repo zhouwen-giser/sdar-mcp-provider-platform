@@ -14,8 +14,28 @@ const deployment: RuntimeDeploymentView = {
   desiredState: "running",
   desiredReplicas: 1,
   runtimeVersion: "0.1.0",
+  runtimeAuthority: "platform_managed",
   databaseProfileId: "database-1",
   configProfileId: "config-1",
+  status: "REQUESTED",
+  desiredRevision: 0,
+  observedRevision: 0,
+};
+
+const directDeployment: RuntimeDeploymentView = {
+  deploymentId: "runtime-direct-1",
+  providerId: "provider-1",
+  environment: "production",
+  desiredState: "running",
+  desiredReplicas: 1,
+  runtimeVersion: "0.1.0",
+  runtimeAuthority: "direct_container",
+  adapterEndpoint: "ugv-adapter:50051",
+  directContainer: {
+    instanceId: "runtime-direct-instance-1",
+    controlEndpoint: "http://ugv-runtime:8080",
+    advertisedEndpoint: "http://192.168.1.7:19100",
+  },
   status: "REQUESTED",
   desiredRevision: 0,
   observedRevision: 0,
@@ -58,6 +78,66 @@ describe("RuntimeDeployment management API", () => {
       },
       { actorId: "admin-1", correlationId: "operation-create-1" },
     );
+    await app.close();
+  });
+
+  it("accepts the discriminated direct-container admission contract", async () => {
+    const create = vi.fn(() => Promise.resolve(directDeployment));
+    const app = createPmsApi({ runtimeDeployments: service({ create }) });
+    const payload = {
+      deploymentId: "runtime-direct-1",
+      providerId: "provider-1",
+      environment: "production",
+      runtimeVersion: "0.1.0",
+      runtimeAuthority: "direct_container" as const,
+      adapterEndpoint: "ugv-adapter:50051",
+      directContainer: {
+        instanceId: "runtime-direct-instance-1",
+        controlEndpoint: "http://ugv-runtime:8080",
+        advertisedEndpoint: "http://192.168.1.7:19100",
+      },
+    };
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/runtime-deployments",
+      headers: { "x-actor-id": "admin-1", "x-correlation-id": "operation-direct-1" },
+      payload,
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(response.json()).toMatchObject({ deployment: directDeployment });
+    expect(create).toHaveBeenCalledWith(payload, {
+      actorId: "admin-1",
+      correlationId: "operation-direct-1",
+    });
+    await app.close();
+  });
+
+  it("rejects mixed direct-container and platform-managed fields", async () => {
+    const create = vi.fn(() => Promise.resolve(directDeployment));
+    const app = createPmsApi({ runtimeDeployments: service({ create }) });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/runtime-deployments",
+      headers: { "x-actor-id": "admin-1" },
+      payload: {
+        deploymentId: "runtime-direct-1",
+        providerId: "provider-1",
+        environment: "production",
+        runtimeVersion: "0.1.0",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        databaseProfileId: "must-not-be-accepted",
+        directContainer: {
+          instanceId: "runtime-direct-instance-1",
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(create).not.toHaveBeenCalled();
     await app.close();
   });
 

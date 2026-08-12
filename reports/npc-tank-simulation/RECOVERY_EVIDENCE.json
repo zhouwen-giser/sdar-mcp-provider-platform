@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "recovery_mixed_real_and_deterministic",
+  "phase": "GOAL11_NPC_RECOVERY",
+  "status": "PARTIAL",
+  "reasonCode": "REAL_CLEAN_RESTART_PASS_ACTIVE_REAL_TASK_INTERRUPTION_NOT_EXECUTED",
+  "overallQualification": "NPC_TANK_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "checks": [
+    {
+      "check": "Device MCP read reconnect",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "A dropped read response reconnects and retries only within the configured bound."
+    },
+    {
+      "check": "uncertain mutating Device MCP response",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "A lost mutating response is classified uncertain and is never retried automatically."
+    },
+    {
+      "check": "per-tool circuit recovery",
+      "status": "PASS",
+      "evidenceClass": "deterministic_transport_fault_injection",
+      "assertion": "Only the failing tool circuit opens and a bounded half-open probe is admitted."
+    },
+    {
+      "check": "MQTT reconnect and exact resubscribe",
+      "status": "PASS",
+      "evidenceClass": "deterministic_client_event_sequence",
+      "assertion": "Readiness remains false until valid SUBACK and exact subscriptions are restored after reconnect."
+    },
+    {
+      "check": "telemetry stale and duplicate rejection",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "Older or duplicate observations cannot regress state or complete a newer task."
+    },
+    {
+      "check": "Provider Adapter restart reconciliation",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "An active execution is restored without dispatching a duplicate side effect."
+    },
+    {
+      "check": "duplicate task replay and identity conflict",
+      "status": "PASS",
+      "evidenceClass": "deterministic_provider_integration",
+      "assertion": "An identical duplicate replays persisted execution and conflicting arguments are rejected without a new Device MCP call."
+    },
+    {
+      "check": "clean real Compose restart",
+      "status": "PASS_WITH_UPSTREAM_DRIFT",
+      "evidenceClass": "real_external_read_only",
+      "assertion": "Two complete down/up/smoke cycles reached healthy state and reconfirmed real Device MCP, MQTT, Registry, and Runtime reads."
+    },
+    {
+      "check": "Runtime restart with active real mutating task",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "evidenceClass": "real_control",
+      "assertion": "No active real task was created because control and recon gates remained closed."
+    },
+    {
+      "check": "running real task plus MQTT or Device MCP interruption",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "evidenceClass": "real_control",
+      "assertion": "Interrupting a real active task was not safe without explicit fixtures and authorization."
+    }
+  ],
+  "composeRestart": {
+    "sequence": [
+      "exact-head initial up and Registry-backed smoke",
+      "cycle1 down",
+      "cycle1 up",
+      "cycle1 independent smoke",
+      "cycle2 down",
+      "cycle2 up",
+      "cycle2 independent smoke",
+      "final down"
+    ],
+    "allCommandExitCodes": 0,
+    "bothStartsHealthy": true,
+    "cycleMqttSampleCounts": [14, 14],
+    "authoritativeStatusObservedEachCycle": true,
+    "registryFingerprintStable": {
+      "revision": 1,
+      "checksum": "f02f4b00f448c448688604c369781cc3af9ec0737ce95b7a016bc99b8bc0086e",
+      "serverId": "runtime-32b1d426cc87-0",
+      "catalogRevision": 1,
+      "catalogToolCount": 11
+    },
+    "finalStackState": "down",
+    "namedDatabaseVolumesPreserved": true,
+    "namedWorkerStateVolumePreserved": true,
+    "namedContractVolumePreserved": true,
+    "secretValuesRecorded": false
+  },
+  "safety": {
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false,
+    "mqttPublishAttempted": false,
+    "duplicateRealMutationPossible": false,
+    "rawPayloadStored": false
+  },
+  "evidenceRefs": [
+    "tests/ugv-simulation/device-mcp-contract.test.ts",
+    "tests/ugv-simulation/mqtt-client-readiness.test.ts",
+    "tests/integration/npc-tank-provider-adapter.test.ts",
+    "reports/npc-tank-simulation/READ_ONLY_SMOKE.json",
+    "reports/npc-tank-simulation/REGISTRY_AUTHORITY.json"
+  ]
+}

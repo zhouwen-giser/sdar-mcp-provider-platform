@@ -1,11 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RuntimeInfrastructureInstanceTarget } from "../../../packages/runtime-deployment/src/index.js";
+import {
+  createRuntimeProcessProjection,
+  runtimeDeploymentId,
+  runtimeInstanceId,
+  updateRuntimeProcessObservation,
+  type RuntimeInfrastructureInstanceTarget,
+  type RuntimeProcessObservation,
+} from "../../../packages/runtime-deployment/src/index.js";
 import {
   RuntimeProviderIdentityVerifier,
   primitiveConfiguration,
+  runtimeMcpEndpoint,
+  updateRuntimeProcessObservationWithRetry,
 } from "../src/runtime-composition.js";
 
 describe("runtime bootstrap configuration projection", () => {
+  it("joins /mcp without duplicating a normalized base URL slash", () => {
+    expect(runtimeMcpEndpoint("http://ugv-runtime:8080/")).toBe("http://ugv-runtime:8080/mcp");
+  });
+
   it("does not pass PMS-owned immutable fields to the bootstrap renderer", () => {
     expect(
       primitiveConfiguration({
@@ -113,6 +126,77 @@ describe("runtime bootstrap configuration projection", () => {
     });
   });
 });
+
+describe("Runtime process observation CAS retry", () => {
+  it("re-reads a concurrent heartbeat and preserves it while committing catalog state", async () => {
+    const initial = createRuntimeProcessProjection(
+      {
+        instanceId: runtimeInstanceId("instance-a"),
+        deploymentId: runtimeDeploymentId("deployment-a"),
+        processManager: "direct_container",
+        pm2Name: null,
+        port: null,
+        controlEndpoint: "http://runtime.internal:8080",
+        advertisedEndpoint: "http://192.168.1.7:19100",
+      },
+      processObservation(),
+    );
+    const heartbeatAt = new Date("2026-08-11T00:00:10.000Z");
+    const heartbeat = updateRuntimeProcessObservation(
+      initial,
+      {
+        ...processObservation(),
+        registrationState: "registered",
+        readinessState: "ready",
+        lastHeartbeatAt: heartbeatAt,
+        runtimeVersion: "2.0.0",
+        configRevision: 0,
+      },
+      initial.observedRevision,
+    );
+    const load = vi.fn().mockResolvedValueOnce(initial).mockResolvedValueOnce(heartbeat);
+    const save = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("RUNTIME_PROCESS_REVISION_CONFLICT"))
+      .mockResolvedValueOnce(true);
+
+    await updateRuntimeProcessObservationWithRetry({
+      load,
+      save,
+      patch: (current) => ({ ...processObservation(current), catalogState: "valid" }),
+      failureCode: "RUNTIME_CATALOG_STATE_CONFLICT",
+    });
+
+    expect(load).toHaveBeenCalledTimes(2);
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save.mock.calls[1]?.[0]).toMatchObject({
+      observedRevision: 2,
+      registrationState: "registered",
+      readinessState: "ready",
+      lastHeartbeatAt: heartbeatAt,
+      catalogState: "valid",
+    });
+    expect(save.mock.calls[1]?.[1]).toBe(1);
+  });
+});
+
+function processObservation(
+  current?: ReturnType<typeof createRuntimeProcessProjection>,
+): RuntimeProcessObservation {
+  return {
+    pid: current?.pid ?? null,
+    processState: current?.processState ?? "missing",
+    livenessState: current?.livenessState ?? "unknown",
+    readinessState: current?.readinessState ?? "unknown",
+    registrationState: current?.registrationState ?? "unregistered",
+    catalogState: current?.catalogState ?? "unknown",
+    configState: current?.configState ?? "externally_managed",
+    lastHeartbeatAt: current?.lastHeartbeatAt ?? null,
+    runtimeVersion: current?.runtimeVersion ?? null,
+    configRevision: current?.configRevision ?? 0,
+    restartCount: current?.restartCount ?? 0,
+  };
+}
 
 function target(providerId: string): RuntimeInfrastructureInstanceTarget {
   return {

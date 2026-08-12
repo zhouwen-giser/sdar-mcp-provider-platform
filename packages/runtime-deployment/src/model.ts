@@ -4,11 +4,23 @@ import type {
   RuntimeConfigProfileId,
   RuntimeDeploymentId,
   RuntimeEnvironmentId,
+  RuntimeInstanceId,
   RuntimeProviderId,
 } from "./ids.js";
 
 export const RUNTIME_DEPLOYMENT_DESIRED_STATES = ["running", "stopped", "draining"] as const;
 export type RuntimeDeploymentDesiredState = (typeof RUNTIME_DEPLOYMENT_DESIRED_STATES)[number];
+
+export const RUNTIME_DEPLOYMENT_AUTHORITIES = ["platform_managed", "direct_container"] as const;
+export type RuntimeDeploymentAuthority = (typeof RUNTIME_DEPLOYMENT_AUTHORITIES)[number];
+
+export interface DirectContainerRuntimeDeploymentSpec {
+  readonly instanceId: RuntimeInstanceId;
+  /** PMS-only base URL. It must not include the MCP `/mcp` suffix. */
+  readonly controlEndpoint: string;
+  /** Consumer-reachable base URL. It must not include the MCP `/mcp` suffix. */
+  readonly advertisedEndpoint: string;
+}
 
 export const RUNTIME_DEPLOYMENT_STATUSES = [
   "REQUESTED",
@@ -26,23 +38,46 @@ export const RUNTIME_DEPLOYMENT_STATUSES = [
 ] as const;
 export type RuntimeDeploymentStatus = (typeof RUNTIME_DEPLOYMENT_STATUSES)[number];
 
-export interface RuntimeDeploymentSpec {
+interface RuntimeDeploymentSpecBase {
   readonly deploymentId: RuntimeDeploymentId;
   readonly providerId: RuntimeProviderId;
   readonly environment: RuntimeEnvironmentId;
   readonly desiredState: RuntimeDeploymentDesiredState;
   readonly desiredReplicas: number;
   readonly runtimeVersion: string;
-  readonly databaseProfileId: DatabaseProfileId;
-  readonly configProfileId: RuntimeConfigProfileId;
   readonly adapterEndpoint?: string;
 }
 
-export interface RuntimeDeploymentSnapshot extends RuntimeDeploymentSpec {
+export interface PlatformManagedRuntimeDeploymentSpec extends RuntimeDeploymentSpecBase {
+  /** Omission preserves the V0.1 platform-managed create contract. */
+  readonly runtimeAuthority?: "platform_managed";
+  readonly databaseProfileId: DatabaseProfileId;
+  readonly configProfileId: RuntimeConfigProfileId;
+  readonly directContainer?: never;
+}
+
+export interface DirectContainerRuntimeDeployment extends RuntimeDeploymentSpecBase {
+  readonly runtimeAuthority: "direct_container";
+  readonly adapterEndpoint: string;
+  readonly databaseProfileId?: never;
+  readonly configProfileId?: never;
+  readonly directContainer: DirectContainerRuntimeDeploymentSpec;
+}
+
+export type RuntimeDeploymentSpec =
+  PlatformManagedRuntimeDeploymentSpec | DirectContainerRuntimeDeployment;
+
+type NormalizedRuntimeDeploymentSpec =
+  | (Omit<PlatformManagedRuntimeDeploymentSpec, "runtimeAuthority"> & {
+      readonly runtimeAuthority: "platform_managed";
+    })
+  | DirectContainerRuntimeDeployment;
+
+export type RuntimeDeploymentSnapshot = NormalizedRuntimeDeploymentSpec & {
   readonly status: RuntimeDeploymentStatus;
   readonly desiredRevision: number;
   readonly observedRevision: number;
-}
+};
 
 export interface RuntimeDeploymentTransitionPrecondition {
   readonly expectedStatus: RuntimeDeploymentStatus;
@@ -95,16 +130,7 @@ const AllowedTransitions: Readonly<
 });
 
 export class RuntimeDeployment {
-  readonly #identity: Pick<
-    RuntimeDeploymentSpec,
-    | "deploymentId"
-    | "providerId"
-    | "environment"
-    | "runtimeVersion"
-    | "databaseProfileId"
-    | "configProfileId"
-    | "adapterEndpoint"
-  >;
+  readonly #identity: Omit<NormalizedRuntimeDeploymentSpec, "desiredState" | "desiredReplicas">;
   #desiredState: RuntimeDeploymentDesiredState;
   #desiredReplicas: number;
   #status: RuntimeDeploymentStatus;
@@ -116,17 +142,28 @@ export class RuntimeDeployment {
     validateSpec(snapshot);
     requireRevision(snapshot.desiredRevision, "desiredRevision");
     requireRevision(snapshot.observedRevision, "observedRevision");
-    this.#identity = Object.freeze({
+    const common = {
       deploymentId: snapshot.deploymentId,
       providerId: snapshot.providerId,
       environment: snapshot.environment,
       runtimeVersion: snapshot.runtimeVersion,
-      databaseProfileId: snapshot.databaseProfileId,
-      configProfileId: snapshot.configProfileId,
       ...(snapshot.adapterEndpoint === undefined
         ? {}
         : { adapterEndpoint: snapshot.adapterEndpoint }),
-    });
+    };
+    this.#identity =
+      snapshot.runtimeAuthority === "direct_container"
+        ? Object.freeze({
+            ...common,
+            runtimeAuthority: "direct_container",
+            directContainer: Object.freeze({ ...snapshot.directContainer }),
+          })
+        : Object.freeze({
+            ...common,
+            runtimeAuthority: "platform_managed",
+            databaseProfileId: snapshot.databaseProfileId,
+            configProfileId: snapshot.configProfileId,
+          });
     this.#desiredState = snapshot.desiredState;
     this.#desiredReplicas = snapshot.desiredReplicas;
     this.#status = snapshot.status;
@@ -138,15 +175,22 @@ export class RuntimeDeployment {
   static request(spec: RuntimeDeploymentSpec, occurredAt: Date): RuntimeDeployment {
     validateSpec(spec);
     requireDate(occurredAt);
-    const deployment = new RuntimeDeployment(
-      {
-        ...spec,
-        status: "REQUESTED",
-        desiredRevision: 0,
-        observedRevision: 0,
-      },
-      [],
-    );
+    const normalized: RuntimeDeploymentSnapshot =
+      spec.runtimeAuthority === "direct_container"
+        ? {
+            ...spec,
+            status: "REQUESTED",
+            desiredRevision: 0,
+            observedRevision: 0,
+          }
+        : {
+            ...spec,
+            runtimeAuthority: "platform_managed",
+            status: "REQUESTED",
+            desiredRevision: 0,
+            observedRevision: 0,
+          };
+    const deployment = new RuntimeDeployment(normalized, []);
     deployment.#events.push(
       freezeEvent({
         type: "RuntimeDeploymentRequested",
@@ -172,7 +216,7 @@ export class RuntimeDeployment {
       status: this.#status,
       desiredRevision: this.#desiredRevision,
       observedRevision: this.#observedRevision,
-    });
+    }) as RuntimeDeploymentSnapshot;
   }
 
   changeDesiredState(
@@ -220,7 +264,12 @@ export class RuntimeDeployment {
     requireRevision(precondition.expectedRevision, "expectedRevision");
     requireDate(occurredAt);
     if (target === this.#status) {
-      assertIdempotentTransition(precondition, this.#status, this.#observedRevision);
+      assertIdempotentTransition(
+        precondition,
+        this.#status,
+        this.#observedRevision,
+        this.#identity.runtimeAuthority,
+      );
       return false;
     }
     if (precondition.expectedStatus !== this.#status) {
@@ -234,7 +283,7 @@ export class RuntimeDeployment {
       );
     }
     assertRevision(precondition.expectedRevision, this.#observedRevision, "observed");
-    if (!AllowedTransitions[this.#status].includes(target)) {
+    if (!allowedTransitions(this.#status, this.#identity.runtimeAuthority).includes(target)) {
       throw new RuntimeDeploymentError(
         "INVALID_RUNTIME_DEPLOYMENT_TRANSITION",
         `Invalid RuntimeDeployment transition: ${this.#status} -> ${target}`,
@@ -280,7 +329,59 @@ function validateSpec(spec: RuntimeDeploymentSpec): void {
   if (spec.adapterEndpoint?.trim().length === 0) {
     invalidSpec("adapterEndpoint");
   }
+  const raw = spec as unknown as {
+    readonly runtimeAuthority?: unknown;
+    readonly adapterEndpoint?: unknown;
+    readonly databaseProfileId?: unknown;
+    readonly configProfileId?: unknown;
+    readonly directContainer?: unknown;
+  };
+  const authority = raw.runtimeAuthority ?? "platform_managed";
+  if (authority !== "platform_managed" && authority !== "direct_container") {
+    invalidSpec("runtimeAuthority");
+  }
+  if (authority === "direct_container") {
+    const direct = raw.directContainer;
+    if (typeof direct !== "object" || direct === null) invalidSpec("directContainer");
+    if (typeof raw.adapterEndpoint !== "string") invalidSpec("adapterEndpoint");
+    if (raw.databaseProfileId !== undefined) invalidSpec("databaseProfileId");
+    if (raw.configProfileId !== undefined) invalidSpec("configProfileId");
+    const instanceId = Reflect.get(direct, "instanceId") as unknown;
+    const controlEndpoint = Reflect.get(direct, "controlEndpoint") as unknown;
+    const advertisedEndpoint = Reflect.get(direct, "advertisedEndpoint") as unknown;
+    if (typeof instanceId !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(instanceId)) {
+      invalidSpec("directContainer.instanceId");
+    }
+    if (typeof controlEndpoint !== "string") invalidSpec("directContainer.controlEndpoint");
+    if (typeof advertisedEndpoint !== "string") invalidSpec("directContainer.advertisedEndpoint");
+    validateBaseEndpoint(controlEndpoint, "directContainer.controlEndpoint");
+    validateBaseEndpoint(advertisedEndpoint, "directContainer.advertisedEndpoint");
+  } else {
+    if (raw.directContainer !== undefined) invalidSpec("directContainer");
+    if (raw.databaseProfileId === undefined) invalidSpec("databaseProfileId");
+    if (raw.configProfileId === undefined) invalidSpec("configProfileId");
+  }
   validateDesiredState(spec.desiredState, spec.desiredReplicas);
+}
+
+function validateBaseEndpoint(value: string, field: string): void {
+  if (value.trim() !== value || value.length === 0 || value.length > 2_048) invalidSpec(field);
+  let endpoint: URL;
+  try {
+    endpoint = new URL(value);
+  } catch {
+    invalidSpec(field);
+  }
+  if (
+    !["http:", "https:"].includes(endpoint.protocol) ||
+    endpoint.username.length > 0 ||
+    endpoint.password.length > 0 ||
+    endpoint.search.length > 0 ||
+    endpoint.hash.length > 0 ||
+    endpoint.pathname !== "/"
+  ) {
+    invalidSpec(field);
+  }
 }
 
 function validateDesiredState(
@@ -315,6 +416,7 @@ function assertIdempotentTransition(
   precondition: RuntimeDeploymentTransitionPrecondition,
   actualStatus: RuntimeDeploymentStatus,
   actualRevision: number,
+  authority: RuntimeDeploymentAuthority,
 ): void {
   if (
     precondition.expectedStatus === actualStatus &&
@@ -324,7 +426,7 @@ function assertIdempotentTransition(
   }
   if (
     precondition.expectedRevision === actualRevision - 1 &&
-    AllowedTransitions[precondition.expectedStatus].includes(actualStatus)
+    allowedTransitions(precondition.expectedStatus, authority).includes(actualStatus)
   ) {
     return;
   }
@@ -339,6 +441,16 @@ function assertIdempotentTransition(
     );
   }
   assertRevision(precondition.expectedRevision, actualRevision, "observed");
+}
+
+function allowedTransitions(
+  current: RuntimeDeploymentStatus,
+  authority: RuntimeDeploymentAuthority,
+): readonly RuntimeDeploymentStatus[] {
+  if (authority === "direct_container" && current === "REQUESTED") {
+    return ["CONFIG_PREPARING", "DRAINING", "STOPPED", "FAILED"];
+  }
+  return AllowedTransitions[current];
 }
 
 function requireRevision(value: number, field: string): void {

@@ -5,6 +5,7 @@ import {
   mapVehicleTaskState,
   sanitizeFireResult,
   TrackArbiter,
+  UGV_OPERATION_TRACKS,
 } from "../../packages/vehicle-provider-core/src/index.js";
 import {
   assertExactSubscriptions,
@@ -17,10 +18,12 @@ import {
 const limits = { maxPayloadBytes: 4096, maxDepth: 8, maxNodes: 128, maxStringBytes: 256 };
 
 describe("UGV MQTT exact routing and normalization", () => {
-  it("contains only the 12 frozen UGV topics and rejects wildcard or referee topics", () => {
-    expect(UGV_MQTT_TOPICS).toHaveLength(12);
+  it("contains the 18 real-boundary UGV topics and rejects wildcard or referee topics", () => {
+    expect(UGV_MQTT_TOPICS).toHaveLength(18);
     expect(() => assertExactSubscriptions(UGV_MQTT_TOPICS)).not.toThrow();
     expect(exactUgvTopic("/ugv/referee/status")).toBe(false);
+    expect(exactUgvTopic("/ugv/status")).toBe(true);
+    expect(exactUgvTopic("status/ugv")).toBe(true);
     expect(exactUgvTopic("/ugv/target/base64")).toBe(false);
     expect(exactUgvTopic("/npc_tank1/status")).toBe(false);
     expect(() => assertExactSubscriptions(["/ugv/#"])).toThrow("UGV_MQTT_TOPIC_NOT_ALLOWED");
@@ -124,6 +127,13 @@ describe("UGV task, track, availability and fire boundaries", () => {
     });
     expect(arbiter.acquire("stop", "vehicle_emergency_stop").accepted).toBe(true);
     expect(arbiter.owner("chassis")).toBe("stop");
+
+    const ugvArbiter = new TrackArbiter(true, "UGV", UGV_OPERATION_TRACKS);
+    expect(ugvArbiter.acquire("recon", "vehicle_area_recon").accepted).toBe(true);
+    expect(ugvArbiter.acquire("gimbal", "vehicle_control_gimbal")).toEqual({
+      accepted: false,
+      reasonCode: "UGV_EO_TRACK_BUSY",
+    });
   });
 
   it("returns UNKNOWN for stale or disconnected state and blocks unknown fire state", () => {

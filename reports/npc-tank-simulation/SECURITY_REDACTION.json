@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "goal11_security_and_redaction",
+  "phase": "GOAL11_NPC_SECURITY_REDACTION",
+  "status": "PASS",
+  "reasonCode": "SECRETS_ENDPOINT_VALUES_COORDINATES_AND_RAW_PAYLOADS_EXCLUDED",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "checks": [
+    {
+      "check": "real .env is ignored and untracked",
+      "status": "PASS"
+    },
+    {
+      "check": "credential and database URL files remain outside the repository",
+      "status": "PASS"
+    },
+    {
+      "check": "credential files and roots have restrictive permission validation",
+      "status": "PASS"
+    },
+    {
+      "check": "external endpoints are represented only by scheme, host kind/hash, port, and path hash",
+      "status": "PASS"
+    },
+    {
+      "check": "Device MCP read responses are represented only by result hashes",
+      "status": "PASS"
+    },
+    {
+      "check": "MQTT evidence contains structure, bounded metadata, and hashes only",
+      "status": "PASS"
+    },
+    {
+      "check": "Registry snapshot contains no sensitive keys",
+      "status": "PASS",
+      "sensitiveKeys": 0
+    },
+    {
+      "check": "PMS Web projections contain no sensitive keys and exclude Audit metadata",
+      "status": "PASS",
+      "sensitiveKeys": 0
+    },
+    {
+      "check": "Compose real qualification stack contains no simulator mock service",
+      "status": "PASS"
+    },
+    {
+      "check": "delivery policy excludes real .env, credential files, databases, logs, raw MQTT, coordinates, and recursive delivery artifacts",
+      "status": "PASS_STATIC_POLICY",
+      "postPackagingVerificationRequired": true
+    }
+  ],
+  "redaction": {
+    "externalEndpointValuesStored": false,
+    "authorizationValuesStored": false,
+    "tokenValuesStored": false,
+    "passwordValuesStored": false,
+    "databaseUrlsStored": false,
+    "coordinateValuesStored": false,
+    "rawMqttPayloadStored": false,
+    "base64ImageOrVideoStored": false,
+    "mockQualificationEvidenceStored": false
+  },
+  "repository": {
+    "realEnvTracked": false,
+    "credentialFilesTracked": false,
+    "providerPackageRealResourceStatus": "pending",
+    "remoteMutationPerformed": false
+  },
+  "deliveryAcceptance": {
+    "allowedEnvFile": ".env.example",
+    "forbiddenPatterns": [
+      "real .env or .env.*",
+      "credential/token/password files",
+      "database files",
+      "raw MQTT payloads",
+      "coordinate values",
+      "recursive delivery directory"
+    ],
+    "artifactVerificationRecordedOutsideEvidenceCut": "ZIP listing, unzip integrity, sidecar verification, patch apply-check, and non-printing secret scans are final artifact gates."
+  }
+}

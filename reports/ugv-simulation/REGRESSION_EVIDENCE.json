@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "deterministic_regression",
+  "phase": "G10_REGRESSION",
+  "status": "PASS",
+  "reasonCode": "UGV_NPC_AND_REPOSITORY_GATES_PASS",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:55:25Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "commands": [
+    {
+      "name": "source-quality-gates",
+      "command": "pnpm exec prettier --check apps/ugv-provider-adapter/src/manifest.ts apps/ugv-provider-adapter/src/runtime.ts packages/vehicle-device-mcp-client/src/client.ts packages/vehicle-mqtt-ingress/src/client.ts packages/vehicle-mqtt-ingress/src/ingress.ts packages/vehicle-mqtt-ingress/src/normalizers.ts packages/vehicle-provider-core/src/availability.ts packages/vehicle-provider-core/src/manifest.ts packages/vehicle-provider-core/src/snapshot.ts packages/vehicle-provider-core/src/track-arbiter.ts packages/vehicle-provider-core/src/types.ts tests/contract/npc-tank-provider-contract.test.ts tests/contract/ugv-provider-contract.test.ts tests/integration/npc-tank-provider-adapter.test.ts tests/ugv-simulation/device-mcp-contract.test.ts tests/ugv-simulation/mqtt-real-contract.test.ts tests/unit/npc-tank-provider-core.test.ts tests/unit/ugv-provider-core.test.ts && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check:detached",
+      "startedAt": "2026-08-10T07:53:22Z",
+      "completedAt": "2026-08-10T07:54:21Z",
+      "exitCode": 0,
+      "stages": {
+        "changedProductAndTestFileFormatCheck": "PASS_18_FILES",
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "build": "PASS",
+        "detachedProtoCheck": "PASS"
+      }
+    },
+    {
+      "name": "targeted-product-and-isolation-regression",
+      "command": "pnpm exec vitest run tests/unit/ugv-provider-core.test.ts tests/contract/ugv-provider-contract.test.ts tests/integration/ugv-provider-adapter.test.ts tests/security/ugv-provider-security.test.ts tests/e2e/ugv-provider-grpc-e2e.test.ts tests/unit/npc-tank-provider-core.test.ts tests/contract/npc-tank-provider-contract.test.ts tests/integration/npc-tank-provider-adapter.test.ts tests/security/npc-tank-provider-security.test.ts tests/e2e/npc-tank-provider-grpc-e2e.test.ts tests/ugv-simulation/device-mcp-contract.test.ts tests/ugv-simulation/mqtt-real-contract.test.ts tests/ugv-simulation/mqtt-client-readiness.test.ts tests/ugv-simulation/provider-boundary.test.ts tests/config-compat/config-compat.test.ts packages/database-migration-runner/test/migration-set.test.ts",
+      "startedAt": "2026-08-10T07:54:21Z",
+      "completedAt": "2026-08-10T07:54:32Z",
+      "exitCode": 0,
+      "fileCount": 16,
+      "testCount": 131,
+      "groups": {
+        "ugvProvider": "5 files / 39 tests",
+        "npcProvider": "5 files / 36 tests",
+        "goal10Core": "4 files / 39 tests",
+        "configAndMigration": "2 files / 17 tests"
+      },
+      "files": [
+        "tests/unit/ugv-provider-core.test.ts",
+        "tests/contract/ugv-provider-contract.test.ts",
+        "tests/integration/ugv-provider-adapter.test.ts",
+        "tests/security/ugv-provider-security.test.ts",
+        "tests/e2e/ugv-provider-grpc-e2e.test.ts",
+        "tests/unit/npc-tank-provider-core.test.ts",
+        "tests/contract/npc-tank-provider-contract.test.ts",
+        "tests/integration/npc-tank-provider-adapter.test.ts",
+        "tests/security/npc-tank-provider-security.test.ts",
+        "tests/e2e/npc-tank-provider-grpc-e2e.test.ts",
+        "tests/ugv-simulation/device-mcp-contract.test.ts",
+        "tests/ugv-simulation/mqtt-real-contract.test.ts",
+        "tests/ugv-simulation/mqtt-client-readiness.test.ts",
+        "tests/ugv-simulation/provider-boundary.test.ts",
+        "tests/config-compat/config-compat.test.ts",
+        "packages/database-migration-runner/test/migration-set.test.ts"
+      ]
+    },
+    {
+      "name": "goal-10-suite",
+      "command": "pnpm exec vitest run tests/ugv-simulation",
+      "startedAt": "2026-08-10T07:54:32Z",
+      "completedAt": "2026-08-10T07:54:36Z",
+      "exitCode": 0,
+      "fileCount": 5,
+      "testCount": 49,
+      "breakdown": {
+        "deviceMcpContract": 15,
+        "mqttRealContract": 17,
+        "mqttClientReadiness": 4,
+        "providerBoundary": 3,
+        "deploymentSecurity": 10
+      }
+    },
+    {
+      "name": "repository-integrity-gates",
+      "command": "pnpm test:provider-packages && pnpm test:config-compat && pnpm config:schema:check && pnpm work:protected:check && pnpm protocol:check:frozen && git diff --check 981792b9cb22f8b3117fe3ab26f639de71487d1f e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+      "startedAt": "2026-08-10T07:54:36Z",
+      "completedAt": "2026-08-10T07:54:45Z",
+      "exitCode": 0,
+      "stages": {
+        "providerPackages": "PASS_2_FILES_13_TESTS_SELF_CHECK_4_PACKAGES_UGV_PENDING",
+        "configCompatibility": "PASS_9_FILES_45_TESTS",
+        "configSchema": "PASS",
+        "protectedPaths": "PASS_10_TREES_NO_DIFF_FROM_BASE",
+        "frozenProtocol": "PASS_d33623c49d20e1cf1e66a4ae02ba02949811a5c6b2666437154d25f729f9a845",
+        "qualificationProductDiffCheck": "PASS"
+      }
+    },
+    {
+      "name": "provider-platform-postgres-e2e",
+      "command": "TEST_DATABASE_URL=[redacted-ephemeral-postgres] pnpm exec vitest run tests/provider-platform-e2e/npc-tank/vendor-managed.test.ts tests/provider-platform-e2e/ugv/vendor-managed.test.ts",
+      "environment": "TEST_DATABASE_URL pointed to a disposable PostgreSQL container that was removed after the run; credentials are intentionally redacted.",
+      "startedAt": "2026-08-10T07:55:18Z",
+      "completedAt": "2026-08-10T07:55:25Z",
+      "exitCode": 0,
+      "fileCount": 2,
+      "testCount": 5,
+      "notableAssertion": "A declined fire request reaches final cancellation and causes zero Device MCP fire calls."
+    }
+  ],
+  "nonImpact": {
+    "npcPublicManifestAndCatalog": "PASS",
+    "npcRegressionSuite": "PASS_36_TESTS",
+    "protectedPaths": "PASS_NO_DIFF_FROM_BASE",
+    "frozenProtocol": "PASS_UNCHANGED",
+    "homeAssistantAndPmsProtectedAreas": "PASS_NO_DIFF_FROM_BASE"
+  },
+  "scopeNotes": {
+    "realControlTests": "NOT_EXECUTED",
+    "realReconTests": "NOT_EXECUTED",
+    "realEffectorTests": "NOT_EXECUTED",
+    "interpretation": "This report proves deterministic regression and repository integrity only; it does not promote unexecuted real-control gates."
+  }
+}

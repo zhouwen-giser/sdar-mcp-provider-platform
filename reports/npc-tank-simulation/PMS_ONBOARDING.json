@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceClass": "real",
+  "phase": "GOAL11_NPC_PMS_FORMAL_ONBOARDING",
+  "status": "passed",
+  "startedAt": "2026-08-10T11:39:03.797Z",
+  "completedAt": "2026-08-10T11:39:04.107Z",
+  "environment": "simulation",
+  "correlationId": "npc-goal11-onboarding-26558e21-ec7e-4627-bdbf-0b846e26076a",
+  "safety": {
+    "simulatorMutationCalls": 0,
+    "simulatorControlCalls": 0,
+    "simulatorReconCalls": 0,
+    "simulatorEffectorCalls": 0
+  },
+  "authorityPath": {
+    "packageProjection": "pms-application/ProviderPackageSynchronizer",
+    "providerType": "PMS API",
+    "provider": "PMS API",
+    "resource": "PMS API",
+    "binding": "PMS API",
+    "configuration": "PMS API",
+    "databaseProfile": "pms-domain/repository/PostgresProvisioner",
+    "deployment": "PMS API",
+    "runtime": "PMS Worker reconcile/PM2",
+    "catalog": "PMS Worker discovery",
+    "registry": "PMS Worker publication",
+    "directAuthorityTableWrites": false
+  },
+  "package": {
+    "packageId": "builtin.isr.vehicle.npc-tank",
+    "packageVersion": "0.1.0",
+    "providerType": "isr.vehicle.npc_tank",
+    "componentStatus": "passed",
+    "realResourceStatus": "pending",
+    "sync": {
+      "inserted": 0,
+      "updated": 0,
+      "unchanged": 4
+    }
+  },
+  "providerType": {
+    "providerTypeId": "isr.vehicle.npc_tank",
+    "status": "active"
+  },
+  "provider": {
+    "providerId": "isr.vehicle.npc-tank.npc-tank1",
+    "status": "active"
+  },
+  "resource": {
+    "resourceId": "vehicle:npc_tank1",
+    "resourceType": "isr.vehicle.npc_tank",
+    "status": "available"
+  },
+  "binding": {
+    "providerId": "isr.vehicle.npc-tank.npc-tank1",
+    "resourceId": "vehicle:npc_tank1",
+    "environment": "simulation"
+  },
+  "databaseProfile": {
+    "profileId": "npc-tank-runtime-db-profile",
+    "provisionStatus": "ready",
+    "revision": 1
+  },
+  "configuration": {
+    "provider": {
+      "configProfileId": "not_applicable",
+      "revision": 1,
+      "checksum": "ff5975ff96d6134b200d8250983cdbc445060e7347e0b090952c09c13eb6c8e8",
+      "publication": "reused"
+    },
+    "runtime": {
+      "configProfileId": "rtcfg.v1.c2ltdWxhdGlvbg.cnVudGltZV9kZXBsb3ltZW50.bnBjLXRhbmstcnVudGltZS1kZXBsb3ltZW50.cnVudGltZS5ib290c3RyYXA.cHJvY2Vzcw",
+      "revision": 1,
+      "checksum": "8c36fcb640c0be8b3f707940a225292dd9a9161e473084bb685c5ade023a87c7",
+      "publication": "reused"
+    }
+  },
+  "deployment": {
+    "deploymentId": "npc-tank-runtime-deployment",
+    "providerId": "isr.vehicle.npc-tank.npc-tank1",
+    "status": "ACTIVE",
+    "desiredRevision": 0,
+    "observedRevision": 8
+  },
+  "workerReconcile": {
+    "status": "ACTIVE",
+    "runtimeInstanceId": "runtime-32b1d426cc87-0",
+    "catalogPublished": true,
+    "registryPublished": true
+  },
+  "nextAuthority": "live Registry snapshot"
+}

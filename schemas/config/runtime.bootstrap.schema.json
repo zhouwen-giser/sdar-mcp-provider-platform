@@ -13,6 +13,7 @@
       "x-sdar-secretRef": true
     },
     "ADAPTER_TLS_MODE": { "enum": ["disabled", "required"] },
+    "ALLOW_INSECURE_INTERNAL_TRANSPORT": { "type": "boolean" },
     "DATABASE_POOL_MAX": { "maximum": 100, "minimum": 1, "type": "integer" },
     "DATABASE_URL": {
       "format": "uri",

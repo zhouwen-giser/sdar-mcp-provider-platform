@@ -7,6 +7,7 @@ import {
   runtimeDeploymentId,
   runtimeEnvironmentId,
   runtimeInfrastructureOperationContext,
+  runtimeInstanceId,
   runtimeProviderId,
   type RuntimeDeployment,
   type RuntimeDeploymentSnapshot,
@@ -15,6 +16,7 @@ import {
 import {
   RuntimeDeploymentReconciler,
   type RuntimeReconcileHealthResult,
+  type RuntimeReconcileDirectInstance,
   type RuntimeReconcileInstance,
   type RuntimeReconcileProviderIdentityPort,
   type RuntimeReconcileStore,
@@ -343,6 +345,100 @@ describe("RuntimeDeploymentReconciler", () => {
     expect(store.transitions).toEqual(["FAILED"]);
   });
 
+  it("reconciles a fresh registered direct container without database or PM2 operations", async () => {
+    const direct = directInstance({ registrationState: "registered", registrationFresh: true });
+    const store = new MemoryReconcileStore(directDeployment("REQUESTED"), direct);
+    const database = databasePort(store);
+    const lifecycle = lifecyclePort();
+    const processInventory = inventory([]);
+    const inventoryList = vi.spyOn(processInventory, "list");
+    const externalHealth = readyHealth();
+    const identity = validIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      database,
+      lifecycle,
+      readyHealth(),
+      processInventory,
+      identity,
+      externalHealth,
+    );
+
+    const result = await reconciler.reconcile(input("direct-ready"));
+
+    expect(result).toMatchObject({
+      deployment: { runtimeAuthority: "direct_container", status: "DISCOVERING" },
+      progressed: true,
+      orphanProcessNames: [],
+    });
+    expect(store.transitions).toEqual([
+      "CONFIG_PREPARING",
+      "STARTING",
+      "HEALTH_CHECKING",
+      "DISCOVERING",
+    ]);
+    expect(database.execute).not.toHaveBeenCalled();
+    expect(lifecycle.start).not.toHaveBeenCalled();
+    expect(lifecycle.stop).not.toHaveBeenCalled();
+    expect(inventoryList).not.toHaveBeenCalled();
+    expect(externalHealth.probe).toHaveBeenCalledOnce();
+    expect(identity.verify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        adapterEndpoint: "ugv-adapter:17021",
+        adapterTls: { mode: "disabled" },
+      }),
+    );
+  });
+
+  it("waits for direct Runtime self-registration and a fresh heartbeat before probing", async () => {
+    const direct = directInstance({ registrationState: "unregistered", registrationFresh: false });
+    const store = new MemoryReconcileStore(directDeployment("REQUESTED"), direct);
+    const database = databasePort(store);
+    const lifecycle = lifecyclePort();
+    const processInventory = inventory([]);
+    const externalHealth = readyHealth();
+    const identity = validIdentity();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      database,
+      lifecycle,
+      readyHealth(),
+      processInventory,
+      identity,
+      externalHealth,
+    );
+
+    const result = await reconciler.reconcile(input("direct-wait-registration"));
+
+    expect(result.deployment.status).toBe("STARTING");
+    expect(store.transitions).toEqual(["CONFIG_PREPARING", "STARTING"]);
+    expect(database.execute).not.toHaveBeenCalled();
+    expect(lifecycle.start).not.toHaveBeenCalled();
+    expect(externalHealth.probe).not.toHaveBeenCalled();
+    expect(identity.verify).not.toHaveBeenCalled();
+  });
+
+  it("degrades an ACTIVE direct container as soon as its registration expires", async () => {
+    const direct = directInstance({ registrationState: "registered", registrationFresh: false });
+    const store = new MemoryReconcileStore(directDeployment("ACTIVE"), direct);
+    const externalHealth = readyHealth();
+    const reconciler = new RuntimeDeploymentReconciler(
+      store,
+      databasePort(store),
+      lifecyclePort(),
+      readyHealth(),
+      inventory([]),
+      validIdentity(),
+      externalHealth,
+    );
+
+    const result = await reconciler.reconcile(input("direct-stale-heartbeat"));
+
+    expect(result.deployment.status).toBe("DEGRADED");
+    expect(store.transitions).toEqual(["DEGRADED"]);
+    expect(externalHealth.probe).not.toHaveBeenCalled();
+  });
+
   it("checks cancellation after an uninterruptible database call before later state writes", async () => {
     const store = new MemoryReconcileStore(deployment("REQUESTED"));
     const controller = new AbortController();
@@ -459,7 +555,10 @@ class MemoryReconcileStore implements RuntimeReconcileStore {
   readonly orphans: string[][] = [];
   readonly failureCodes: string[] = [];
 
-  constructor(public current: RuntimeDeployment) {}
+  constructor(
+    public current: RuntimeDeployment,
+    private readonly direct?: RuntimeReconcileDirectInstance,
+  ) {}
 
   getDeployment(providerId: string, deploymentId: string): Promise<RuntimeDeployment | null> {
     return Promise.resolve(
@@ -509,6 +608,11 @@ class MemoryReconcileStore implements RuntimeReconcileStore {
     const created = instance("sdar-runtime-provider-a-0");
     this.instances.push(created);
     return Promise.resolve(created);
+  }
+
+  getDirectInstance(): Promise<RuntimeReconcileDirectInstance> {
+    if (this.direct === undefined) throw new Error("DIRECT_INSTANCE_NOT_CONFIGURED");
+    return Promise.resolve(this.direct);
   }
 
   listInstances(): Promise<readonly RuntimeReconcileInstance[]> {
@@ -662,6 +766,29 @@ function instance(processName: string): RuntimeReconcileInstance {
   };
 }
 
+function directInstance(
+  overrides: Partial<
+    Pick<RuntimeReconcileDirectInstance, "registrationState" | "registrationFresh">
+  > = {},
+): RuntimeReconcileDirectInstance {
+  return {
+    target: {
+      providerId: "provider-a",
+      deploymentId: "deployment-1",
+      environment: "production",
+      runtimeVersion: "2.0.0-rc.1",
+      instanceId: "instance-1",
+      ordinal: 0,
+      processName: "direct-container-instance-1",
+    },
+    controlEndpoint: "http://runtime.internal:8080",
+    advertisedEndpoint: "http://192.168.1.7:19100",
+    registrationState: "registered",
+    registrationFresh: true,
+    ...overrides,
+  };
+}
+
 function input(suffix = "1", signal?: AbortSignal) {
   return {
     providerId: "provider-a",
@@ -697,6 +824,31 @@ function deployment(
     desiredState,
     desiredReplicas: desiredState === "running" ? 1 : 0,
     desiredRevision: desiredState === "running" ? 0 : 1,
+    status,
+    observedRevision: observedRevision(status),
+  });
+}
+
+function directDeployment(status: RuntimeDeploymentStatus): RuntimeDeployment {
+  return rehydrateRuntimeDeployment({
+    ...requestRuntimeDeployment(
+      {
+        deploymentId: runtimeDeploymentId("deployment-1"),
+        providerId: runtimeProviderId("provider-a"),
+        environment: runtimeEnvironmentId("production"),
+        desiredState: "running",
+        desiredReplicas: 1,
+        runtimeVersion: "2.0.0-rc.1",
+        adapterEndpoint: "ugv-adapter:17021",
+        runtimeAuthority: "direct_container",
+        directContainer: {
+          instanceId: runtimeInstanceId("instance-1"),
+          controlEndpoint: "http://runtime.internal:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      new Date("2026-07-26T00:00:00.000Z"),
+    ).snapshot,
     status,
     observedRevision: observedRevision(status),
   });

@@ -1,0 +1,326 @@
+[
+  {
+    "operationId": "listProviderPackages",
+    "method": "GET",
+    "path": "/api/console/v1/provider-packages",
+    "successStatuses": [200],
+    "sourceService": "ProviderPackageQueryService.list",
+    "familyTest": "apps/pms-api/test/console/provider-packages.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getProviderPackage",
+    "method": "GET",
+    "path": "/api/console/v1/provider-packages/{packageId}",
+    "successStatuses": [200],
+    "sourceService": "ProviderPackageQueryService.get",
+    "familyTest": "apps/pms-api/test/console/provider-packages.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listProviderTypes",
+    "method": "GET",
+    "path": "/api/console/v1/provider-types",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.listProviderTypes",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getProviderType",
+    "method": "GET",
+    "path": "/api/console/v1/provider-types/{providerTypeId}",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.getProviderType",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listProviders",
+    "method": "GET",
+    "path": "/api/console/v1/providers",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.listProviders",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "createProvider",
+    "method": "POST",
+    "path": "/api/console/v1/providers",
+    "successStatuses": [201],
+    "sourceService": "ProviderManagementService.createProvider",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getProvider",
+    "method": "GET",
+    "path": "/api/console/v1/providers/{providerId}",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.getProvider",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "updateProviderStatus",
+    "method": "PATCH",
+    "path": "/api/console/v1/providers/{providerId}/status",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.updateProviderStatus",
+    "familyTest": "apps/pms-api/test/console/providers.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listResources",
+    "method": "GET",
+    "path": "/api/console/v1/resources",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.listResources",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "createResource",
+    "method": "POST",
+    "path": "/api/console/v1/resources",
+    "successStatuses": [201],
+    "sourceService": "ProviderManagementService.createResource",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getResource",
+    "method": "GET",
+    "path": "/api/console/v1/resources/{environment}/{resourceId}",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.getResource",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "updateResourceStatus",
+    "method": "PATCH",
+    "path": "/api/console/v1/resources/{environment}/{resourceId}/status",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.updateResourceStatus",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listProviderResourceBindings",
+    "method": "GET",
+    "path": "/api/console/v1/providers/{providerId}/resource-bindings",
+    "successStatuses": [200],
+    "sourceService": "ProviderManagementService.listProviderResources",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "bindProviderResource",
+    "method": "POST",
+    "path": "/api/console/v1/providers/{providerId}/resource-bindings",
+    "successStatuses": [201],
+    "sourceService": "ProviderManagementService.bindResource",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "unbindProviderResource",
+    "method": "DELETE",
+    "path": "/api/console/v1/providers/{providerId}/resource-bindings/{environment}/{resourceId}",
+    "successStatuses": [204],
+    "sourceService": "ProviderManagementService.unbindResource",
+    "familyTest": "apps/pms-api/test/console/resources.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "createConfigurationDraft",
+    "method": "POST",
+    "path": "/api/console/v1/configuration-drafts",
+    "successStatuses": [201],
+    "sourceService": "ConfigurationCenter.createDraft",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getConfigurationDraft",
+    "method": "GET",
+    "path": "/api/console/v1/configuration-drafts/{draftId}",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationCenter.getDraft",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "updateConfigurationDraft",
+    "method": "PATCH",
+    "path": "/api/console/v1/configuration-drafts/{draftId}",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationCenter.updateDraft",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "validateConfigurationDraft",
+    "method": "POST",
+    "path": "/api/console/v1/configuration-drafts/{draftId}/validate",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationCenter.validateDraft",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "previewEffectiveConfiguration",
+    "method": "GET",
+    "path": "/api/console/v1/configuration-drafts/{draftId}/effective",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationCenter.effectivePreview",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "publishConfigurationDraft",
+    "method": "POST",
+    "path": "/api/console/v1/configuration-drafts/{draftId}/publish",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationPublicationService.publish",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "rollbackConfigurationDraft",
+    "method": "POST",
+    "path": "/api/console/v1/configuration-drafts/{draftId}/rollback",
+    "successStatuses": [200],
+    "sourceService": "ConfigurationPublicationService.rollback",
+    "familyTest": "apps/pms-api/test/console/configuration.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listRuntimeDeployments",
+    "method": "GET",
+    "path": "/api/console/v1/runtime-deployments",
+    "successStatuses": [200],
+    "sourceService": "RuntimeDeploymentManagementPort.list",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "createRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.create",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getRuntimeDeployment",
+    "method": "GET",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}",
+    "successStatuses": [200],
+    "sourceService": "RuntimeDeploymentManagementPort.get",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "startRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}/start",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.command",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "stopRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}/stop",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.command",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "restartRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}/restart",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.command",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "scaleRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}/scale",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.command",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "reconcileRuntimeDeployment",
+    "method": "POST",
+    "path": "/api/console/v1/runtime-deployments/{deploymentId}/reconcile",
+    "successStatuses": [202],
+    "sourceService": "RuntimeDeploymentManagementPort.command",
+    "familyTest": "apps/pms-api/test/console/runtime-deployments.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listRuntimeProcesses",
+    "method": "GET",
+    "path": "/api/console/v1/runtime-processes",
+    "successStatuses": [200],
+    "sourceService": "RuntimeProcessQueryService.list",
+    "familyTest": "apps/pms-api/test/console/runtime-processes.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getRuntimeProcess",
+    "method": "GET",
+    "path": "/api/console/v1/runtime-processes/{instanceId}",
+    "successStatuses": [200],
+    "sourceService": "RuntimeProcessQueryService.get",
+    "familyTest": "apps/pms-api/test/console/runtime-processes.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "getLatestRegistrySnapshot",
+    "method": "GET",
+    "path": "/api/console/v1/registry/{environment}/latest",
+    "successStatuses": [200, 304],
+    "sourceService": "RegistrySnapshotRepository.latest",
+    "familyTest": "apps/pms-api/test/console/registry.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listRegistryHistory",
+    "method": "GET",
+    "path": "/api/console/v1/registry/{environment}/history",
+    "successStatuses": [200],
+    "sourceService": "RegistrySnapshotRepository.history",
+    "familyTest": "apps/pms-api/test/console/registry.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "diffRegistrySnapshots",
+    "method": "GET",
+    "path": "/api/console/v1/registry/{environment}/diff",
+    "successStatuses": [200],
+    "sourceService": "RegistrySnapshotRepository.diff",
+    "familyTest": "apps/pms-api/test/console/registry.test.ts",
+    "result": "PASS"
+  },
+  {
+    "operationId": "listAuditEvents",
+    "method": "GET",
+    "path": "/api/console/v1/audit-events",
+    "successStatuses": [200],
+    "sourceService": "AuditRepository.list",
+    "familyTest": "apps/pms-api/test/console/audit.test.ts",
+    "result": "PASS"
+  }
+]

@@ -36,7 +36,11 @@ const EnvironmentSchema = z
     ) {
       context.addIssue({ code: "custom", message: "mTLS requires CA, certificate, and key paths" });
     }
-    if (value.RUNTIME_ENV === "production" && value.ADAPTER_TLS_MODE !== "required") {
+    if (
+      value.RUNTIME_ENV === "production" &&
+      !value.ALLOW_INSECURE_INTERNAL_TRANSPORT &&
+      value.ADAPTER_TLS_MODE !== "required"
+    ) {
       context.addIssue({ code: "custom", message: "production requires Adapter mTLS" });
     }
   });

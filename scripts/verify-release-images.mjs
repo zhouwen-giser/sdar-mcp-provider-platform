@@ -288,16 +288,18 @@ async function webSmoke() {
     "--network",
     network,
     "-e",
-    "PMS_WEB_API_BASE=https://pms.example.test/api",
+    "PMS_WEB_API_BASE=/api/console/v1",
+    "-e",
+    "PMS_WEB_API_UPSTREAM=http://pms-api:8090",
     images.web,
   ]);
-  waitFor(() =>
+  waitForContainer(name, () =>
     command("docker", [
       "exec",
       name,
       "node",
       "-e",
-      String.raw`fetch("http://127.0.0.1:8080/").then(async r=>{const html=await r.text();if(!r.ok||!html.includes("https://pms.example.test/api")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web");const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(m=>m[1]);if(!assets.some(p=>p.endsWith(".js"))||!assets.some(p=>p.endsWith(".css")))throw Error("assets");await Promise.all([...assets,"/providers/one","/health/live","/health/ready"].map(async p=>{const a=await fetch("http://127.0.0.1:8080"+p);if(!a.ok)throw Error(p)}))})`,
+      String.raw`fetch("http://127.0.0.1:8080/").then(async r=>{const html=await r.text();if(!r.ok||!html.includes("/api/console/v1")||r.headers.get("x-content-type-options")!=="nosniff")throw Error("web");const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(m=>m[1]);if(!assets.some(p=>p.endsWith(".js"))||!assets.some(p=>p.endsWith(".css")))throw Error("assets");await Promise.all([...assets,"/providers/one","/health/live","/health/ready"].map(async p=>{const a=await fetch("http://127.0.0.1:8080"+p);if(!a.ok)throw Error(p)}))})`,
     ]),
   );
   stopCleanly(name);

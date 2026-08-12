@@ -1,0 +1,6 @@
+.env
+.bundle-images.env
+state/
+images/*.tar
+images/*.tar.gz
+images/*.tgz

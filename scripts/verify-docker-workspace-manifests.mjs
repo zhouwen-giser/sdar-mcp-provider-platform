@@ -13,9 +13,9 @@ export function verifyDockerWorkspaceManifests({
     manifestsForPattern(rootDirectory, pattern),
   );
   const dockerfile = readFileSync(dockerfilePath, "utf8");
-  const installOffset = dockerfile.indexOf("RUN pnpm install --frozen-lockfile");
+  const installOffset = dockerfile.indexOf("install --frozen-lockfile");
   if (installOffset === -1) {
-    throw new Error("Dockerfile is missing RUN pnpm install --frozen-lockfile");
+    throw new Error("Dockerfile is missing a frozen pnpm install");
   }
 
   const stagedManifests = dockerfile

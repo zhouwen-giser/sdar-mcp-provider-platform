@@ -1,0 +1,440 @@
+name: sdar-ugv-simulation-real
+
+services:
+  pms-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pms_admin
+      POSTGRES_DB: pms
+      POSTGRES_PASSWORD_FILE: /run/secrets/pms_postgres_password
+    volumes:
+      - pms-postgres-data:/var/lib/postgresql/data
+    secrets:
+      - pms_postgres_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pms_admin -d pms"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    networks:
+      - ugv-real
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+  pms-api:
+    image: sdar/pms-api:${PMS_CONSOLE_GIT_SHA:-unverified}
+    build:
+      context: ${PMS_CONSOLE_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: pms-api
+      args:
+        VCS_REF: ${PMS_CONSOLE_GIT_SHA:-unverified}
+        VITE_PMS_DATA_MODE: api
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      PMS_API_HOST: 0.0.0.0
+      PMS_API_PORT: "8090"
+      PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
+      PMS_MANAGEMENT_CREDENTIAL_FILE: /run/pms-secrets/api/management.json
+      PMS_RUNTIME_CREDENTIAL_FILE: /run/pms-secrets/api/runtime.json
+    expose:
+      - "8090"
+    volumes:
+      - type: bind
+        source: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/pms-database-url
+        target: /run/pms-secrets/pms-database-url
+        read_only: true
+      - type: bind
+        source: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/api
+        target: /run/pms-secrets/api
+        read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+    depends_on:
+      pms-postgres:
+        condition: service_healthy
+    networks:
+      - ugv-real
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+  pms-worker:
+    image: sdar/pms-worker:${PMS_CONSOLE_GIT_SHA:-unverified}
+    build:
+      context: ${PMS_CONSOLE_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: pms-worker
+      args:
+        VCS_REF: ${PMS_CONSOLE_GIT_SHA:-unverified}
+        VITE_PMS_DATA_MODE: api
+    init: true
+    read_only: true
+    restart: unless-stopped
+    network_mode: service:pms-api
+    environment:
+      PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
+      PMS_WORKER_ID: pms-console-worker
+      PMS_WORKER_POLL_INTERVAL_MS: "1000"
+      PMS_WORKER_LEASE_DURATION_MS: "30000"
+      PMS_WORKER_CLAIM_LIMIT: "10"
+      PMS_WORKER_RETRY_DELAY_MS: "5000"
+      PMS_WORKSPACE_ROOT: /app
+      PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE: /run/pms-secrets/worker/postgres-provisioning.json
+      PMS_RUNTIME_RELEASE_ROOT: /app/runtime-releases
+      PMS_RUNTIME_SECRET_ROOT: /var/lib/sdar/runtime-secrets
+      PMS_RUNTIME_CONFIG_CACHE_ROOT: /var/lib/sdar/runtime-cache
+      PMS_RUNTIME_CONTROL_PLANE_URL: http://127.0.0.1:8090
+      PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: /var/lib/sdar/runtime-control-plane
+      PMS_PM2_HOME: /var/lib/sdar/pm2
+      PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
+      PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
+      PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
+    volumes:
+      - type: bind
+        source: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/pms-database-url
+        target: /run/pms-secrets/pms-database-url
+        read_only: true
+      - type: bind
+        source: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/worker
+        target: /run/pms-secrets/worker
+        read_only: true
+      - type: bind
+        source: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/runtime-control-plane
+        target: /var/lib/sdar/runtime-control-plane
+        read_only: true
+      - pms-worker-state:/var/lib/sdar
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    depends_on:
+      pms-postgres:
+        condition: service_healthy
+      pms-api:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 35s
+
+  pms-web:
+    image: sdar/pms-web:${PMS_CONSOLE_GIT_SHA:-unverified}
+    build:
+      context: ${PMS_CONSOLE_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: pms-web
+      args:
+        VCS_REF: ${PMS_CONSOLE_GIT_SHA:-unverified}
+        VITE_PMS_DATA_MODE: api
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      PMS_WEB_DATA_MODE: api
+      PMS_WEB_API_BASE: /api/console/v1
+      PMS_WEB_API_UPSTREAM: http://pms-api:8090
+      PMS_WEB_HOST: 0.0.0.0
+      PMS_WEB_PORT: "8080"
+      PMS_WEB_PROXY_MAX_BODY_BYTES: ${PMS_WEB_PROXY_MAX_BODY_BYTES:-1048576}
+      PMS_WEB_PROXY_TIMEOUT_MS: ${PMS_WEB_PROXY_TIMEOUT_MS:-10000}
+    ports:
+      - "${PMS_WEB_BIND_ADDRESS:-127.0.0.1}:${PMS_WEB_PORT:-8088}:8080"
+    tmpfs:
+      - /tmp:size=16m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    depends_on:
+      pms-api:
+        condition: service_healthy
+    networks:
+      - ugv-real
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s
+
+  ugv-adapter-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_adapter
+      POSTGRES_PASSWORD: ${UGV_ADAPTER_DB_PASSWORD:-}
+      POSTGRES_DB: ugv_adapter
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    volumes:
+      - ugv-adapter-postgres-data:/var/lib/postgresql/data
+    networks:
+      - ugv-real
+    security_opt:
+      - no-new-privileges:true
+
+  ugv-runtime-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_runtime
+      POSTGRES_PASSWORD: ${UGV_RUNTIME_DB_PASSWORD:-}
+      POSTGRES_DB: ugv_runtime
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    volumes:
+      - ugv-runtime-postgres-data:/var/lib/postgresql/data
+    networks:
+      - ugv-real
+    security_opt:
+      - no-new-privileges:true
+
+  ugv-preflight:
+    profiles: ["preflight"]
+    image: sdar-ugv-simulation-real/ugv-adapter:${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${UGV_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: ugv-real-adapter
+      args:
+        VCS_REF: ${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    command:
+      [
+        "node",
+        "scripts/ugv-simulation/preflight.mjs",
+        "--output",
+        "/var/lib/sdar/preflight/REAL_EXTERNAL_PREFLIGHT.json",
+      ]
+    environment:
+      UGV_QUALIFICATION_GIT_SHA: ${UGV_QUALIFICATION_GIT_SHA:-unknown}
+      UGV_QUALIFICATION_SOURCE_STATUS: ${UGV_QUALIFICATION_SOURCE_STATUS:-UNVERIFIED}
+      UGV_SIM_DEVICE_MCP_URL: ${UGV_SIM_DEVICE_MCP_URL:-}
+      UGV_SIM_DEVICE_MCP_HEADERS_FILE: ${UGV_SIM_DEVICE_MCP_HEADERS_FILE:+/run/secrets/ugv_device_mcp_headers}
+      UGV_SIM_DEVICE_MCP_TLS_MODE: ${UGV_SIM_DEVICE_MCP_TLS_MODE:-disabled}
+      UGV_SIM_DEVICE_MCP_TIMEOUT_MS: ${UGV_SIM_DEVICE_MCP_TIMEOUT_MS:-10000}
+      UGV_SIM_MQTT_URL: ${UGV_SIM_MQTT_URL:-}
+      UGV_SIM_MQTT_USERNAME: ${UGV_SIM_MQTT_USERNAME:-}
+      UGV_SIM_MQTT_PASSWORD_FILE: ${UGV_SIM_MQTT_PASSWORD_FILE:+/run/secrets/ugv_mqtt_password}
+      UGV_SIM_MQTT_TLS_MODE: ${UGV_SIM_MQTT_TLS_MODE:-disabled}
+      UGV_SIM_MQTT_TLS_CA_FILE: ${UGV_SIM_MQTT_TLS_CA_FILE:+/run/secrets/ugv_mqtt_tls_ca}
+      UGV_SIM_MQTT_TLS_CERT_FILE: ${UGV_SIM_MQTT_TLS_CERT_FILE:+/run/secrets/ugv_mqtt_tls_cert}
+      UGV_SIM_MQTT_TLS_KEY_FILE: ${UGV_SIM_MQTT_TLS_KEY_FILE:+/run/secrets/ugv_mqtt_tls_key}
+      UGV_MQTT_WIRE_MODE: ${UGV_MQTT_WIRE_MODE:-}
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      UGV_ADAPTER_DB_PASSWORD: ${UGV_ADAPTER_DB_PASSWORD:-}
+      UGV_RUNTIME_DB_PASSWORD: ${UGV_RUNTIME_DB_PASSWORD:-}
+      UGV_PREFLIGHT_MQTT_CONNECT_TIMEOUT_MS: ${UGV_PREFLIGHT_MQTT_CONNECT_TIMEOUT_MS:-10000}
+      UGV_PREFLIGHT_MQTT_SAMPLE_TIMEOUT_MS: ${UGV_PREFLIGHT_MQTT_SAMPLE_TIMEOUT_MS:-20000}
+      UGV_ENABLE_REAL_CONTROL: ${UGV_ENABLE_REAL_CONTROL:-false}
+      UGV_TEST_DISTANCE_M: ${UGV_TEST_DISTANCE_M:-1}
+      UGV_TEST_SAFE_POINT_JSON: ${UGV_TEST_SAFE_POINT_JSON:-}
+      UGV_TEST_SAFE_WAYPOINTS_JSON: ${UGV_TEST_SAFE_WAYPOINTS_JSON:-}
+      UGV_ENABLE_RECON_TESTS: ${UGV_ENABLE_RECON_TESTS:-false}
+      UGV_TEST_RECON_REGION_JSON: ${UGV_TEST_RECON_REGION_JSON:-}
+      UGV_ENABLE_EFFECTOR_TESTS: ${UGV_ENABLE_EFFECTOR_TESTS:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ugv-contract-reports:/var/lib/sdar
+    secrets:
+      - ugv_device_mcp_headers
+      - ugv_mqtt_password
+      - ugv_mqtt_tls_ca
+      - ugv_mqtt_tls_cert
+      - ugv_mqtt_tls_key
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - ugv-real
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  ugv-adapter:
+    image: sdar-ugv-simulation-real/ugv-adapter:${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${UGV_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: ugv-real-adapter
+      args:
+        VCS_REF: ${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    restart: unless-stopped
+    command:
+      [
+        "sh",
+        "-c",
+        "node dist/apps/ugv-provider-adapter/src/migrate.js && exec node dist/apps/ugv-provider-adapter/src/main.js",
+      ]
+    environment:
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      PROVIDER_VERSION: 1.0.0
+      ADAPTER_HOST: 0.0.0.0
+      ADAPTER_PORT: 7010
+      ADAPTER_TLS_MODE: disabled
+      UGV_ADAPTER_STORE_MODE: postgres
+      UGV_ADAPTER_DATABASE_URL: postgresql://ugv_adapter:${UGV_ADAPTER_DB_PASSWORD:-}@ugv-adapter-postgres:5432/ugv_adapter
+      UGV_MQTT_URL: ${UGV_SIM_MQTT_URL:-}
+      UGV_MQTT_CLIENT_ID: ${UGV_SIM_MQTT_CLIENT_ID:-sdar-real-ugv-adapter-ugv1}
+      UGV_MQTT_USERNAME: ${UGV_SIM_MQTT_USERNAME:-}
+      UGV_MQTT_PASSWORD_FILE: ${UGV_SIM_MQTT_PASSWORD_FILE:+/run/secrets/ugv_mqtt_password}
+      UGV_MQTT_TLS_MODE: ${UGV_SIM_MQTT_TLS_MODE:-disabled}
+      UGV_MQTT_TLS_CA_PATH: ${UGV_SIM_MQTT_TLS_CA_FILE:+/run/secrets/ugv_mqtt_tls_ca}
+      UGV_MQTT_TLS_CERT_PATH: ${UGV_SIM_MQTT_TLS_CERT_FILE:+/run/secrets/ugv_mqtt_tls_cert}
+      UGV_MQTT_TLS_KEY_PATH: ${UGV_SIM_MQTT_TLS_KEY_FILE:+/run/secrets/ugv_mqtt_tls_key}
+      UGV_MQTT_SESSION_MODE: persistent
+      UGV_MQTT_WIRE_MODE: ${UGV_MQTT_WIRE_MODE:-}
+      UGV_DEVICE_MCP_URL: ${UGV_SIM_DEVICE_MCP_URL:-}
+      UGV_DEVICE_MCP_HEADERS_FILE: ${UGV_SIM_DEVICE_MCP_HEADERS_FILE:+/run/secrets/ugv_device_mcp_headers}
+      UGV_DEVICE_MCP_TLS_MODE: ${UGV_SIM_DEVICE_MCP_TLS_MODE:-disabled}
+      UGV_DEVICE_MCP_TIMEOUT_MS: ${UGV_SIM_DEVICE_MCP_TIMEOUT_MS:-10000}
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      UGV_DEVICE_MCP_CONTRACT_REPORT_PATH: /var/lib/sdar/contracts/MCP_CONTRACT_CAPTURE.json
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: ugv-runtime:7002
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      RUNTIME_ENV: test
+      LOG_LEVEL: ${UGV_LOG_LEVEL:-info}
+    expose:
+      - "7010"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      ugv-adapter-postgres:
+        condition: service_healthy
+    volumes:
+      - ugv-contract-reports:/var/lib/sdar
+    secrets:
+      - ugv_device_mcp_headers
+      - ugv_mqtt_password
+      - ugv_mqtt_tls_ca
+      - ugv_mqtt_tls_cert
+      - ugv_mqtt_tls_key
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - ugv-real
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s
+
+  ugv-runtime:
+    image: sdar-ugv-simulation-real/runtime:${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    build:
+      context: ${UGV_QUALIFICATION_BUILD_CONTEXT:-../..}
+      dockerfile: Dockerfile
+      target: ugv-real-runtime
+      args:
+        VCS_REF: ${UGV_QUALIFICATION_GIT_SHA:-unknown}
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      RUNTIME_ENV: test
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      DATABASE_URL: postgresql://ugv_runtime:${UGV_RUNTIME_DB_PASSWORD:-}@ugv-runtime-postgres:5432/ugv_runtime
+      ADAPTER_ENDPOINT: ugv-adapter:7010
+      ADAPTER_TLS_MODE: disabled
+      AUTH_MODE: trusted_headers
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: 7002
+      OTEL_ENABLED: "false"
+      LOG_LEVEL: ${UGV_LOG_LEVEL:-info}
+      PORT: 8080
+    ports:
+      - "127.0.0.1:${UGV_RUNTIME_PORT:-19100}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+    depends_on:
+      ugv-runtime-postgres:
+        condition: service_healthy
+      ugv-adapter:
+        condition: service_started
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - ugv-real
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+networks:
+  ugv-real:
+    driver: bridge
+
+volumes:
+  pms-postgres-data:
+  pms-worker-state:
+  ugv-adapter-postgres-data:
+  ugv-runtime-postgres-data:
+  ugv-contract-reports:
+
+secrets:
+  pms_postgres_password:
+    file: ${PMS_CONSOLE_SECRET_ROOT:?PMS_CONSOLE_SECRET_ROOT is required}/postgres-password
+  ugv_device_mcp_headers:
+    file: ${UGV_SIM_DEVICE_MCP_HEADERS_FILE:-/dev/null}
+  ugv_mqtt_password:
+    file: ${UGV_SIM_MQTT_PASSWORD_FILE:-/dev/null}
+  ugv_mqtt_tls_ca:
+    file: ${UGV_SIM_MQTT_TLS_CA_FILE:-/dev/null}
+  ugv_mqtt_tls_cert:
+    file: ${UGV_SIM_MQTT_TLS_CERT_FILE:-/dev/null}
+  ugv_mqtt_tls_key:
+    file: ${UGV_SIM_MQTT_TLS_KEY_FILE:-/dev/null}

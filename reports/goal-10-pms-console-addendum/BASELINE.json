@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "goal_10_pms_console_addendum_baseline",
+  "branch": "codex/goal-10-ugv-simulation-real-interface",
+  "addendumStartHead": "c70d45ee117015db7571d8330025f8dc9096f3f5",
+  "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+  "startState": {
+    "trackedChanges": 0,
+    "untrackedFiles": 0,
+    "status": "CLEAN"
+  },
+  "baselineFiles": {
+    "head": "baseline/ADDENDUM_START_HEAD.txt",
+    "branch": "baseline/ADDENDUM_START_BRANCH.txt",
+    "status": "baseline/ADDENDUM_START_STATUS.txt",
+    "diff": "baseline/ADDENDUM_START_DIFF.patch",
+    "changedFiles": "baseline/ADDENDUM_START_CHANGED_FILES.txt",
+    "untrackedFiles": "baseline/ADDENDUM_START_UNTRACKED_FILES.txt"
+  },
+  "commits": [
+    {
+      "sha": "6c736bb9debc7d9f9bffd805c1652b2da69e5d71",
+      "subject": "docs(pms): capture console addendum baseline"
+    },
+    {
+      "sha": "b17d1282191292681edf7f9c5f0429d493a0d71c",
+      "subject": "fix(pms): harden console request error mapping"
+    },
+    {
+      "sha": "7ca09d55aaf01dab9d6711fdd793530084897868",
+      "subject": "feat(pms): integrate real console package"
+    }
+  ],
+  "protectionPolicy": {
+    "resetUsed": false,
+    "cleanUsed": false,
+    "stashUsed": false,
+    "rebaseUsed": false,
+    "pushPerformed": false,
+    "pullRequestCreated": false
+  },
+  "result": "PASS"
+}

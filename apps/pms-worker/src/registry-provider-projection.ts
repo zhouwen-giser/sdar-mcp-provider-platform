@@ -7,14 +7,13 @@ import type {
 
 export interface RegistryProviderProjectionInput {
   readonly deployment: RuntimeDeploymentSnapshot;
-  readonly endpoint: string;
   readonly catalog: CatalogSnapshot;
   readonly deployments: readonly RuntimeDeployment[];
   readonly activeCatalog: (providerId: string) => Promise<CatalogSnapshot | null>;
   readonly ensureInstance: (
     deployment: RuntimeDeploymentSnapshot,
   ) => Promise<{ readonly instanceId: string }>;
-  readonly runtimeBaseUrl: (deployment: RuntimeDeploymentSnapshot) => Promise<string>;
+  readonly advertisedBaseUrl: (deployment: RuntimeDeploymentSnapshot) => Promise<string>;
 }
 
 export async function buildRegistryProviderProjection(
@@ -36,12 +35,12 @@ export async function buildRegistryProviderProjection(
       : await input.activeCatalog(String(snapshot.providerId));
     if (catalog === null) throw new Error("REGISTRY_ACTIVE_CATALOG_MISSING");
     const instance = await input.ensureInstance(snapshot);
-    const endpoint = isCurrent ? input.endpoint : `${await input.runtimeBaseUrl(snapshot)}/mcp`;
+    const endpoint = await input.advertisedBaseUrl(snapshot);
     providers.push({
       providerId: String(snapshot.providerId),
       serverId: instance.instanceId,
       protocolMode: "frozen_v1",
-      effectiveEndpoint: endpoint.replace(/\/mcp$/, ""),
+      effectiveEndpoint: endpoint.replace(/\/mcp\/?$/, ""),
       catalog,
     });
   }

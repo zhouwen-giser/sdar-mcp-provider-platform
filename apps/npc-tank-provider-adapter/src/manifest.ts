@@ -16,6 +16,13 @@ export function npcTankManifest(
       displayKind: "NPC Tank",
       supportsScanModes: true,
       supportsCircularEoScan,
+      supportsCapabilityQuery: true,
+      supportsGimbalControl: true,
+      supportsNavigationPlanning: true,
+      supportsFireCancellationBeforeDispatch: true,
+      supportsFireCommandRejectedOutput: true,
+      supportsReconCoverageOutput: true,
+      circularScanOmitsArea: true,
     },
     store,
   );

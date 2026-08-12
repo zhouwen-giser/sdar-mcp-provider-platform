@@ -1,5 +1,9 @@
-# OpenAPI Gateway placeholder
+# Console V1 HTTP Gateway
 
-This directory intentionally contains no generated client and no simulated backend contract.
-Future integration path: generated OpenAPI DTO -> domain mapper -> UI ViewModel -> feature query hooks.
-Production must fail closed when `VITE_PMS_DATA_MODE=api` until a real gateway is configured.
+`http-gateways.ts` implements the complete frozen Console V1 Gateway Bundle over the same-origin
+`/api/console/v1` boundary. The adapter uses the generated DTOs, preserves opaque pagination
+cursors, maps `application/problem+json` into `GatewayProblem`, and never adds authentication
+semantics that are absent from the frozen contract.
+
+Mock mode remains a separate explicit development path. Production mode fails closed when its data
+mode or same-origin Console base is missing or invalid; it never falls back to Mock data.

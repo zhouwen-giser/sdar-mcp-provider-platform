@@ -22,8 +22,7 @@
         "desiredState",
         "desiredReplicas",
         "runtimeVersion",
-        "databaseProfileId",
-        "configProfileId",
+        "runtimeAuthority",
         "status",
         "desiredRevision",
         "observedRevision"
@@ -62,6 +61,27 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 512
+        },
+        "runtimeAuthority": {
+          "enum": ["platform_managed", "direct_container"]
+        },
+        "directContainer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["instanceId", "controlEndpoint", "advertisedEndpoint"],
+          "properties": {
+            "instanceId": {
+              "$ref": "#/$defs/logicalId"
+            },
+            "controlEndpoint": {
+              "type": "string",
+              "pattern": "^https?://[^/?#]+/?$"
+            },
+            "advertisedEndpoint": {
+              "type": "string",
+              "pattern": "^https?://[^/?#]+/?$"
+            }
+          }
         },
         "status": {
           "enum": [
@@ -109,6 +129,47 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "runtimeAuthority": {
+                "const": "platform_managed"
+              }
+            }
+          },
+          "then": {
+            "required": ["databaseProfileId", "configProfileId"],
+            "properties": {
+              "databaseProfileId": { "$ref": "#/$defs/logicalId" },
+              "configProfileId": { "$ref": "#/$defs/logicalId" },
+              "directContainer": false
+            }
+          },
+          "else": {
+            "required": ["adapterEndpoint", "directContainer"],
+            "properties": {
+              "adapterEndpoint": { "type": "string", "minLength": 1, "maxLength": 512 },
+              "directContainer": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["instanceId", "controlEndpoint", "advertisedEndpoint"],
+                "properties": {
+                  "instanceId": { "$ref": "#/$defs/logicalId" },
+                  "controlEndpoint": {
+                    "type": "string",
+                    "pattern": "^https?://[^/?#]+/?$"
+                  },
+                  "advertisedEndpoint": {
+                    "type": "string",
+                    "pattern": "^https?://[^/?#]+/?$"
+                  }
+                }
+              },
+              "databaseProfileId": false,
+              "configProfileId": false
+            }
+          }
         }
       ]
     },
@@ -118,6 +179,7 @@
       "required": [
         "instanceId",
         "deploymentId",
+        "processManager",
         "pm2Name",
         "pid",
         "port",
@@ -140,8 +202,11 @@
         "deploymentId": {
           "$ref": "#/$defs/logicalId"
         },
+        "processManager": {
+          "enum": ["pm2", "direct_container"]
+        },
         "pm2Name": {
-          "type": "string",
+          "type": ["string", "null"],
           "pattern": "^sdar-runtime-[a-z0-9][a-z0-9-]{0,126}$"
         },
         "pid": {
@@ -149,9 +214,17 @@
           "minimum": 1
         },
         "port": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 1,
           "maximum": 65535
+        },
+        "controlEndpoint": {
+          "type": "string",
+          "pattern": "^https?://[^/?#]+/?$"
+        },
+        "advertisedEndpoint": {
+          "type": "string",
+          "pattern": "^https?://[^/?#]+/?$"
         },
         "processState": {
           "enum": ["missing", "starting", "online", "stopping", "stopped", "errored"]
@@ -169,7 +242,14 @@
           "enum": ["unknown", "pending", "valid", "invalid"]
         },
         "configState": {
-          "enum": ["unknown", "current", "stale", "rejected", "restart_required"]
+          "enum": [
+            "unknown",
+            "current",
+            "externally_managed",
+            "stale",
+            "rejected",
+            "restart_required"
+          ]
         },
         "lastHeartbeatAt": {
           "type": ["string", "null"],
@@ -195,7 +275,26 @@
         "observedRevision": {
           "$ref": "#/$defs/nonNegativeRevision"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "processManager": { "const": "pm2" },
+            "pm2Name": { "type": "string" },
+            "port": { "type": "integer" },
+            "controlEndpoint": false,
+            "advertisedEndpoint": false
+          }
+        },
+        {
+          "required": ["controlEndpoint", "advertisedEndpoint"],
+          "properties": {
+            "processManager": { "const": "direct_container" },
+            "pm2Name": { "type": "null" },
+            "port": { "type": "null" }
+          }
+        }
+      ]
     }
   }
 }

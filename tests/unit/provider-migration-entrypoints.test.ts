@@ -20,10 +20,11 @@ describe("Provider Migration entrypoints", () => {
 
     await runUgvProviderMigrations(executor, workspaceRoot);
 
-    expect(executor.statements).toHaveLength(1);
-    expect(executor.statements[0]).toContain("CREATE TABLE IF NOT EXISTS ugv_execution");
-    expect(executor.statements[0]).not.toContain("npc_tank_");
-    expect(executor.statements[0]).not.toContain("runtime_schema_migration");
+    expect(executor.statements).toHaveLength(2);
+    const statements = executor.statements.join("\n");
+    expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_execution");
+    expect(statements).not.toContain("npc_tank_");
+    expect(statements).not.toContain("runtime_schema_migration");
   });
 
   it("binds the NPC Tank entrypoint exclusively to provider:npc-tank", async () => {
@@ -31,9 +32,11 @@ describe("Provider Migration entrypoints", () => {
 
     await runNpcTankProviderMigrations(executor, workspaceRoot);
 
-    expect(executor.statements).toHaveLength(1);
-    expect(executor.statements[0]).toContain("CREATE TABLE IF NOT EXISTS npc_tank_execution");
-    expect(executor.statements[0]).not.toContain("ugv_");
-    expect(executor.statements[0]).not.toContain("runtime_schema_migration");
+    expect(executor.statements).toHaveLength(2);
+    const statements = executor.statements.join("\n");
+    expect(statements).toContain("CREATE TABLE IF NOT EXISTS npc_tank_execution");
+    expect(statements).toContain("tool_name = 'get_status'");
+    expect(statements).not.toContain("ugv_");
+    expect(statements).not.toContain("runtime_schema_migration");
   });
 });

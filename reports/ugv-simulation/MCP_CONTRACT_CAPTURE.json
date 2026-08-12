@@ -1,0 +1,403 @@
+{
+  "mode": "captured",
+  "capturedAt": "2026-08-10T07:29:31.289Z",
+  "serverInfo": {
+    "name": "ugv-mcp-server",
+    "version": "1.26.0"
+  },
+  "protocolVersion": "2025-11-25",
+  "tools": [
+    {
+      "name": "ugv_path_follow_mission",
+      "description": "\n    发送路径跟随任务到 UGV 车辆（底盘机动 chassis 轨道）。\n\n    两种模式：\n      - 直行模式(need_plan=False)：给定路点逐点直线机动，不做任何规划。\n      - 规划模式(need_plan=True)：以车辆**当前位置**为起点、给定的**最后一个**路点\n        为终点，调用 /plan_route 沿现有道路网规划**最短路径**（终点自动落到路网上\n        离目标点最近的点），用规划出的稠密航点替换原路点后再机动；给多个点时，\n        前面的点作为途经点按顺序经过。\n    need_plan 缺省(None)时自动判断：**只给一个点=目标点机动，自动启用道路网规划**；\n    多个点=按给定路点直行。下发成功后规划路点即在战场图上显示(/ugv/planned_path)，\n    车辆保持不动，调用 ugv_mission_control(\"start\", mission_id) 才开始沿路点机动。\n\n    参数:\n        task_points: GPS坐标列表，如\n                     [{\"latitude\": 29.7205344, \"longitude\": 106.8147144},\n                      {\"latitude\": 29.7208012, \"longitude\": 106.8151233}]\n                     与 json_url 二选一。也接受 lat/lon 键名、[lat, lon] 坐标对、\n                     单个点 dict、JSON 字符串（多包一层的嵌套列表会自动摊平）。\n        json_url: 指向 JSON 路径文件的 HTTP URL；提供时自动下载解析为路径点，\n                  与 task_points 二选一（两者都给以 json_url 为准）。\n        need_plan: 是否需要道路网最短路径规划。缺省 None=自动（单点启用、多点直行）；\n                    显式传 True/False 可强制指定。\n        density: 规划航点密度档位 adaptive/dense/medium/sparse，默认 adaptive；\n                 仅规划模式生效。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成并在返回中给出。\n\n    返回:\n        {mission_id, state, state_label, progress, message} —— 下达成功返回\"就绪(0)\"，\n        此时车辆不会移动；需调用 ugv_mission_control(\"start\", mission_id) 才开始执行。\n        规划模式下 message 含规划里程与航点数；规划失败返回\"失败(5)\"，不会退化为直行。\n        之后可用 ugv_mission_control(\"pause\"/\"terminate\") 暂停或终止；\n        进度/完成请用 get_status() 按 mission_id 查询。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_points": {
+            "default": null,
+            "title": "Task Points"
+          },
+          "json_url": {
+            "default": "",
+            "title": "Json Url",
+            "type": "string"
+          },
+          "need_plan": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Need Plan"
+          },
+          "density": {
+            "default": "adaptive",
+            "title": "Density",
+            "type": "string"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "ugv_path_follow_missionArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "bdab046bac7e06652cd61b1c0d1bca4cb12c797ec4512714a67cad644d0d9311"
+    },
+    {
+      "name": "ugv_return_home",
+      "description": "\n    返航：按最近一次机动(路径跟随)任务所下发路径点的相反顺序重新下发一次路径跟随任务，\n    使 UGV 沿原路返回起始点（底盘机动 chassis 轨道）。\n\n    需先执行过一次路径跟随任务（ugv_path_follow_mission 或 ugv_path_follow_mission_by_json_url），\n    否则没有可供返航的历史路径点。返航本身也会成为新的\"最近一次机动\"，\n    再次调用返航将沿返航路径逆序返回。\n\n    参数:\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, progress, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "ugv_return_homeArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "06687bfdfaa3d1f9ad48f6e5de057610d3fd04538bff744e60ff04a0a7ee6a25"
+    },
+    {
+      "name": "ugv_move_distance",
+      "description": "\n    控制 UGV 沿指定方向移动一定距离（底盘机动 chassis 轨道）。\n\n    以车辆当前位置和航向为基准，按\"前/后/左/右\"方向偏移给定距离，生成一个目标航点\n    并作为路径跟随任务下达。与其它机动任务一致：下达后车辆不会移动，需调用\n    ugv_start_mission(mission_id) 才开始执行；期间可用 ugv_pause_mission / ugv_terminate_mission。\n\n    参数:\n        direction: 移动方向。可用 \"forward\"/\"back\"/\"left\"/\"right\"，或中文 \"前\"/\"后\"/\"左\"/\"右\"。\n        distance: 移动距离，单位米（必须 > 0）。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "distance": {
+            "title": "Distance",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "direction",
+          "distance"
+        ],
+        "title": "ugv_move_distanceArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "f9b73ca709db456e6c46e164a42d19bb5dc5e7cd5313a47e58c573bff3155333"
+    },
+    {
+      "name": "ugv_mission_control",
+      "description": "\n    控制底盘机动任务的生命周期（开始 / 暂停 / 终止）。\n\n    下发路径/返航/移动任务后车辆不动，需 action=\"start\" 才开始执行；\n    暂停后再次 action=\"start\" 即恢复。\n\n    参数:\n        action: 控制动作。\n            - \"start\"     开始执行（暂停态下调用则恢复）\n            - \"pause\"     暂停（车辆原地保持，可 start 恢复）\n            - \"terminate\" 终止并清除任务（未开始则直接作废；执行/暂停中则发取消停车）\n        mission_id: 目标任务ID（由下发任务时返回）。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ugv_mission_controlArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "83af48af745175e28023d29a745215ce9f411b8e372260070be90eed0f5918b6"
+    },
+    {
+      "name": "ugv_motion_stop",
+      "description": "\n    机动停止：立即停止底盘运动，无需 mission_id。\n\n    取消当前正在执行/暂停的机动任务（若有）并停车；即使没有登记中的任务也会\n    下发停止指令兜底（如任务经其它渠道下发）。已下发未开始（就绪）的任务不受\n    影响，仍可用 ugv_mission_control(\"start\") 启动。\n\n    返回:\n        {mission_id, state, state_label, message}\n        （mission_id 为被终止任务的ID，无任务被终止时为 -1）\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "ugv_motion_stopArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "8e60a641bd2d62fb265190e644f2d11bf970781dc3b47bdb671c4ede7be3dad7"
+    },
+    {
+      "name": "get_status",
+      "description": "\n    获取 UGV 的综合实时状态(取自 /ugv/status,CARLA 原始 + 仿真派生的合并 JSON)。\n\n    返回字段(车辆未就绪/状态未到达时返回 {\"available\": false}):\n      - vehicle_id, role_name, entity_id\n      - position {x, y, z}, speed_kmh, control {throttle, steer, brake, reverse}\n      - 能源:lvbattery_soc / hvbattery1_soc / hvbattery2_soc / fuel1 / fuel2\n      - 热:motor_temp / engine_water_temp\n      - 行驶:ready_status / gear_status / veh_speed / brake_status / emergency_stop_status\n      - 惯导:heading / roll / pitch / ins_init / gnss / location_status\n      - 模式/网络:power_supply_status / operate_mode_status / fault /\n                  ping_status / packet_loss_rate / average_round_trip_time\n      - 任务轨道:chassis_task / eo_task / weapon_task,各含 {id, type, state, progress}\n        (state: 0 未开始, 1 运行中, 2 已暂停, 3 已终止, 4 已结束, 5 已失败)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "get_statusArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "b7157a6708b985f3ce7f13cc5617cc0ee4c84fde4d23fdcdc57cfb89749cd36a"
+    },
+    {
+      "name": "get_capabilities",
+      "description": "\n    获取 UGV 的静态能力/配置(取自 /ugv/capabilities,由裁判从 entities.yaml 组装)。\n\n    与 get_status(动态实时状态)相对：这些是启动后基本不变的配置值，用于判断\n    \"能否打得到/看得到/跑得了\"等，不必高频轮询，取一次即可缓存使用。\n\n    返回字段(尚未收到该话题时返回 {\"available\": false}):\n      - entity_id, type, camp, max_hp\n      - eo {fov_deg, detection_range_m}          —— 光电最大视场角/探测距离\n        (实时变焦后的当前视场另见 get_status 的 gimbal 与设备 /ugv/eo_fov)\n      - weapon {hit_range_m, damage, ammo, cooldown_s, hit_rate} —— 武器打击距离等\n      - chassis {full_range_km}                  —— 底盘满电/满油总可行驶里程\n        (当前剩余续航另见 /ugv/battery_range_km)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "get_capabilitiesArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "45924635f6613d29c53ec771f9f74c1f3efe26238fff6dac4d31ebc2046aee44"
+    },
+    {
+      "name": "ugv_area_recon_configure",
+      "description": "配置侦察动作 (对应文档 mar_motion_cfg_srv / MarMotionCfg)。\n\n    两种扫描样式，都支持**边走边侦察**（底盘机动与侦察不互斥，可先/同时下达\n    机动任务，车一边走一边扫）：\n      - scan_mode=1 区域侦察：界面画点圈定区域，云台在区域内蛇形覆盖扫描，\n        只上报区域内目标；每圈按当前机位重算格点，车移动后扫描仍对准区域。\n      - scan_mode=2 周扫侦察：不圈区域，云台以车体为中心 360° 环扫，上报视场内\n        + 探测半径内的所有目标；扫描方位随车体转动，行进中即沿途搜索。\n    配置成功后用 ugv_area_recon_control(1) 启动扫描。\n\n    Args:\n        region_points: 区域顶点 GNSS 列表，每点 [longitude, latitude, altitude]\n            (altitude 可省略，默认 0)。scan_mode=1 必填；scan_mode=2 周扫忽略此项。\n        region_type: 区域类型(RegionTypeEnum)：2-点,3-线,4-圆,5-多边形(默认)。\n            圆形时 points[0]=圆心、points[1]=圆上一点。\n        target_types: ZH 目标类型列表(TargetTypeEnum)，空表示所有类型(如 [2]=坦克)。\n        scan_num: 扫描次数(周扫=圈数)，达到后停止；0 表示不以次数停止。\n        lock_duration_limit: 锁定时长上限(秒)，超时自动解锁恢复；0 表示一直保持。\n        recon_type: ZH 设备类型：1-自适应,2-可见光,3-红外,4-DC。\n        scan_speed: 云台扫描速度(度/秒)。\n        scan_mode: 扫描样式：1-区域侦察(默认)，2-周扫侦察(360° 环扫，无需区域)。\n        scan_pitch: 周扫俯仰角(度，0=水平，负值向下压)；仅 scan_mode=2 生效。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, res, fail_data}(res/fail_data 对应 MotionCfgRes)。\n        区域侦察(scan_mode=1)另返回 coverability 结构化可覆盖性判定:\n        {coverable: \"full\"完全可覆盖 / \"partial\"部分超距 / \"none\"完全超距(仍接受\n        配置，可先机动靠近边走边侦察) / \"unknown\"机位不可用未预检, coverable_label,\n        region_min_dist_m, region_max_dist_m, detection_range_m}；周扫无此字段。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "region_points": {
+            "default": null,
+            "items": {},
+            "title": "Region Points",
+            "type": "array"
+          },
+          "region_type": {
+            "default": 5,
+            "title": "Region Type",
+            "type": "integer"
+          },
+          "target_types": {
+            "default": null,
+            "items": {},
+            "title": "Target Types",
+            "type": "array"
+          },
+          "scan_num": {
+            "default": 0,
+            "title": "Scan Num",
+            "type": "integer"
+          },
+          "lock_duration_limit": {
+            "default": 0,
+            "title": "Lock Duration Limit",
+            "type": "integer"
+          },
+          "recon_type": {
+            "default": 1,
+            "title": "Recon Type",
+            "type": "integer"
+          },
+          "scan_speed": {
+            "default": 30,
+            "title": "Scan Speed",
+            "type": "number"
+          },
+          "scan_mode": {
+            "default": 1,
+            "title": "Scan Mode",
+            "type": "integer"
+          },
+          "scan_pitch": {
+            "default": 0,
+            "title": "Scan Pitch",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "ugv_area_recon_configureArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "34f51e463e1ad4a07daf9b7621ef0fb83f609a888e991b19269976fd1338bc47"
+    },
+    {
+      "name": "ugv_area_recon_control",
+      "description": "控制侦察动作 (对应文档 mar_motion_ctrl_srv；区域侦察与周扫共用)。\n\n    启动=开始扫描；暂停=停止扫描并解除锁定(若有)，云台保持；继续=恢复扫描；\n    停止=结束动作，云台回到初始角度。\n    扫描期间车辆可正常机动(边走边侦察)，无需先停车。\n\n    Args:\n        cmd_type: 控制指令(CtrlCmdTypeEnum)：1-启动,2-暂停,3-继续,4-停止。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cmd_type": {
+            "title": "Cmd Type",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cmd_type"
+        ],
+        "title": "ugv_area_recon_controlArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "d89027b1a9e0c9ed082a560fe0ec1924e6c6da3194d99cf21c4d79fd35a27d54"
+    },
+    {
+      "name": "ugv_area_recon_lock",
+      "description": "锁定 / 解除锁定并继续区域侦察（合并 mar_target_lock_srv 与 mar_unlock_and_continue_srv）。\n\n    - lock=True：对 target_id 目标锁定，光电/云台持续跟踪使其居中，扫描挂起；\n      配置 lock_duration_limit 时超时自动解锁；目标丢失时上报异常并自动恢复扫描。\n    - lock=False：解除锁定并继续侦察（此时 target_id 可省略）。\n\n    锁定前用 ugv_area_recon_get_targets 拿目标的 target_id。\n\n    Args:\n        lock: True 锁定 / False 解锁并继续。\n        target_id: 要锁定的目标编号（lock=True 时必填）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lock": {
+            "title": "Lock",
+            "type": "boolean"
+          },
+          "target_id": {
+            "default": 0,
+            "title": "Target Id",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "lock"
+        ],
+        "title": "ugv_area_recon_lockArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "6044b85bd3786a0226dab406db61e6be282fffd8dd5ba456c6478b2e9b09a33d"
+    },
+    {
+      "name": "ugv_area_recon_get_status",
+      "description": "获取侦察动作状态 (对应文档 mar_report_status_msg / mar_report_mode_msg)。\n\n    返回 {status, status_label, scan_mode, scan_mode_label, scan_pitch,\n    out_of_range, camera_fault, scan_num, progress, work_mode, recon_type,\n    load_status, load_status_label, lock:{stage, target_id, role_name, duration_sec},\n    attack_ready, online, gimbal}。\n    status 为 MotionStatusEnum(1-空闲,3-就绪,5-运行中,8-暂停,9-被中断,11-结束…)；\n    scan_mode: 1-区域侦察/2-周扫侦察；progress: 配置了固定圈数(scan_num>0)时=圈数进度\n    ((已完成圈数+本圈完成度)/scan_num, 如配 10 圈扫完 2 圈=20%, 结束=100)；连续侦察\n    (scan_num=0)时 区域=面积覆盖率、周扫=本圈方位覆盖率(每圈清零重计)；\n    out_of_range=true 表示区域暂时超出探测半径(边走边侦察途中的过程态，不是失败)；\n    camera_fault=true 表示光电机位不可信(位姿零变换或远离载体)，此时覆盖率与目标已\n    停止累积、progress 停在故障前的值，应按载荷失效处理而非按低进度等待；\n    work_mode: 1-自动,2-遥控；attack_ready=true 表示已锁定目标可打击确认。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "ugv_area_recon_get_statusArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "d72c81dc1cef14da36f886eeb3899c8bc0652d1dd015e8fdcd439db89da28797"
+    },
+    {
+      "name": "ugv_area_recon_get_targets",
+      "description": "获取当前侦察到的目标列表 (对应文档 mar_report_target_msg / MarTargetMsg)。\n\n    返回 {targets: [MarTargetInfo, ...]}，每个目标含 capture_time_us、target_id、\n    type(TargetTypeEnum)、position(PointGNSS)、velocity(VelocityENU)、distance、\n    confidence、threat、damage、lock_time、pixel_pos(PixelPosition) 及 camp。\n    锁定/打击用 target_id。\n\n    侦察动作运行时返回载荷上报的目标(字段完整)；未启动/已停止侦察时列表为\n    空——检测与上报均由区域侦察驱动(画面框与目标列表同源一致)，拿 target_id\n    锁定/打击前需先启动区域侦察。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "ugv_area_recon_get_targetsArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "c996eade8d3cda0fd2582ed6a9f766fb92232086f1b18f6cc36cc2853cabb969"
+    },
+    {
+      "name": "ugv_area_recon_reset",
+      "description": "重置动作状态为空闲态 (对应文档 mar_reset_motion_state_srv)。\n\n    只有行动结束(被中断/失败/正常结束)后调用才返回成功；行动未结束时返回失败。\n    重置后需重新配置(ugv_area_recon_configure)才能再次启动。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "title": "ugv_area_recon_resetArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "3bbf3da0021534d7565e38edfc3800ea0db59291d4e783313aca9a8a467a48ea"
+    },
+    {
+      "name": "ugv_area_recon_attack_confirm",
+      "description": "打击确认 (对应文档\"打击确认服务\")。\n\n    锁定目标(attack_ready=true)后调用：confirm=1 对当前锁定目标发起打击(经裁判\n    判定命中/毁伤)；confirm=2 不打击，停止本次侦察动作，任务结束。\n\n    Args:\n        confirm: 打击确认指令：1-打击，2-不打击。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}。confirm=1 时只负责下发\n        打击指令(接收到指令即返回)，命中结果经 /referee/event 或 get_status 武器轨道查询。\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "title": "Confirm",
+            "type": "integer"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confirm"
+        ],
+        "title": "ugv_area_recon_attack_confirmArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "8eec6da1b13500105899477d9933471e7dd9c13ac2fc475fb9a5435c84fe6fae"
+    },
+    {
+      "name": "ugv_gimbal_move",
+      "description": "\n    控制光电云台指向（自由看某方向；侦察/锁定之外的手动指向）。\n\n    侦察是自动扫描、锁定是跟踪已检测目标；本工具用于两者都不适用时的\n    手动指向——例如朝某方向观察、抬高俯仰看远处、交战后转回正前方。\n    指向后可配合 ugv_area_recon_get_targets 查看检测到的目标再决定锁定/打击。\n    注意：velocity 模式只是**手动**让云台连续转，不上报侦察目标；要\"边转边搜索\n    并上报目标\"请用侦察的周扫样式(area_recon_configure scan_mode=2 + control(1))。\n    手动 EO 与侦察互斥(二者抢同一套伺服)，侦察非空闲时本工具会被拒(824)。\n\n    Args:\n        mode: 指向模式。\n            - \"absolute\" 转到绝对角 (yaw, pitch)\n            - \"relative\" 相对位移 (yaw=Δyaw, pitch=Δpitch, delta_zoom=Δzoom)\n            - \"velocity\" 持续旋转 (yaw_speed, pitch_speed；全 0 停止)\n            - \"reset\"    回中归零\n        yaw / pitch: absolute 目标角 / relative 位移量（度）。\n        yaw_speed / pitch_speed: 运动速度（度/秒）；velocity 模式作为旋转速度。\n        delta_zoom: relative 模式的变焦增量（正放大负缩小）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message}\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "yaw": {
+            "default": 0,
+            "title": "Yaw",
+            "type": "number"
+          },
+          "pitch": {
+            "default": 0,
+            "title": "Pitch",
+            "type": "number"
+          },
+          "yaw_speed": {
+            "default": 30,
+            "title": "Yaw Speed",
+            "type": "number"
+          },
+          "pitch_speed": {
+            "default": 30,
+            "title": "Pitch Speed",
+            "type": "number"
+          },
+          "delta_zoom": {
+            "default": 0,
+            "title": "Delta Zoom",
+            "type": "number"
+          },
+          "mission_id": {
+            "default": 0,
+            "title": "Mission Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "ugv_gimbal_moveArguments"
+      },
+      "capturedAt": "2026-08-10T07:29:31.288Z",
+      "schemaHash": "db051e08c0a18ae3a92a6ab89698c1ce79cf4a8de9394e043ba239b8f5246a54"
+    }
+  ],
+  "callableTools": [
+    "ugv_path_follow_mission",
+    "ugv_return_home",
+    "ugv_move_distance",
+    "ugv_mission_control",
+    "ugv_motion_stop",
+    "get_status",
+    "get_capabilities",
+    "ugv_area_recon_configure",
+    "ugv_area_recon_control",
+    "ugv_area_recon_lock",
+    "ugv_area_recon_get_status",
+    "ugv_area_recon_get_targets",
+    "ugv_area_recon_reset",
+    "ugv_area_recon_attack_confirm",
+    "ugv_gimbal_move"
+  ]
+}

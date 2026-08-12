@@ -24,28 +24,26 @@ it does not share the UGV ledger. Runtime remains Task Authority and the MCP
 data plane. Package metadata is only a pre-deployment preview. The formal
 Operation Catalog comes from Runtime `server/discover` and `tools/list`.
 
-## Conditional capabilities
+## Captured capabilities
 
-The Provider advertises circular EO scan only when all three required Device
-MCP tool contracts are valid. Navigation prefers
-`npc_tank_path_follow_mission` and falls back to `npc_tank_send_waypoints` only
-when the primary contract is absent or invalid. These rules are evidenced by:
-
-- `reports/npc-tank-provider-v1/eo-scan-capability.json`;
-- `reports/npc-tank-provider-v1/navigation-tool-selection.json`.
-
-They describe conditional behavior and do not turn captured Mock MCP tools
-into a real-device qualification claim.
+The real Device MCP inventory contains 15 tools. Navigation uses only the
+captured `npc_tank_path_follow_mission`; the old `npc_tank_send_waypoints`
+fallback is not part of the authoritative contract and is rejected. Circular
+EO reconnaissance is advertised only when both captured configure/control
+schemas expose their required fields. Runtime discovery remains the formal
+public Operation Catalog.
 
 ## Qualification
 
-Component status is `passed` against the supplied protocol and Mock Level 1
-contract, backed by `reports/npc-tank-provider-v1/component.json` and
-`docs/baseline/PROVIDER_QUALIFICATION_BASELINE.json`.
+Component status remains `passed`. Goal 11 adds a real read-only Device MCP
+contract capture and passive MQTT evidence under
+`reports/npc-tank-simulation/`; Mock fixtures are used only for deterministic
+regression.
 
-Real-resource status remains `pending`. Real NPC Tank Device MCP conformance,
-real ISR MQTT schemas, and real-interface smoke were unavailable, as recorded
-in `reports/npc-tank-provider-v1/external-interface-blocker.json`.
+Real-resource status remains `pending` because the repository vocabulary has
+no partial state and the complete core real qualification gates have not all
+passed. The qualification report records the exact passed, partial, and
+not-executed gates without upgrading this package field.
 
 `apps/mock-npc-tank-device-mcp` and
 `apps/mock-npc-tank-mqtt-publisher` remain test fixtures and are not production

@@ -121,8 +121,10 @@ export function mapRuntimeDeployment(value: RuntimeDeploymentView): unknown {
     desiredState: value.desiredState,
     desiredReplicas: value.desiredReplicas,
     runtimeVersion: value.runtimeVersion,
-    databaseProfileId: value.databaseProfileId,
-    configProfileId: value.configProfileId,
+    databaseProfileId:
+      value.runtimeAuthority !== "direct_container" ? value.databaseProfileId : "not_applicable",
+    configProfileId:
+      value.runtimeAuthority !== "direct_container" ? value.configProfileId : "not_applicable",
     ...optional("adapterEndpoint", value.adapterEndpoint),
     status: value.status,
     desiredRevision: value.desiredRevision,

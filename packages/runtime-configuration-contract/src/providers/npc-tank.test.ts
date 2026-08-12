@@ -27,7 +27,7 @@ describe("NPC Tank Provider configuration contract", () => {
     }
   });
 
-  it("covers all 52 inventory fields", () => {
+  it("covers all 53 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync("../../docs/configuration/CONFIG_INVENTORY.json", "utf8"),
     ) as { items: { component: string; key: string }[] };
@@ -39,7 +39,7 @@ describe("NPC Tank Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(52);
+    expect(actual).toHaveLength(53);
     expect(actual).toEqual(expected);
   });
 
@@ -51,7 +51,12 @@ describe("NPC Tank Provider configuration contract", () => {
       applyMode: "immutable",
       overridePolicy: { mode: "forbidden" },
     });
+    const required = new Set(
+      (NpcTankProviderConfigurationDefinition.schema.required as readonly string[] | undefined) ??
+        [],
+    );
     for (const path of NpcTankProviderConfigurationDefinition.secretPaths) {
+      expect(required.has(path.slice(1))).toBe(false);
       expect(NpcTankProviderConfigurationDefinition.defaults).not.toHaveProperty(path.slice(1));
       expect(
         (
@@ -82,5 +87,21 @@ describe("NPC Tank Provider configuration contract", () => {
         NPC_TANK_MQTT_WIRE_MODE: "auto",
       }),
     ).toThrow("PRODUCTION_MQTT_WIRE_MODE_MUST_BE_EXPLICIT");
+  });
+
+  it("permits plaintext production transport only through the explicit internal opt-in", () => {
+    expect(
+      loadNpcTankProviderConfiguration({
+        RUNTIME_ENV: "production",
+        ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        NPC_TANK_MQTT_WIRE_MODE: "direct_domain_json",
+      }),
+    ).toMatchObject({
+      RUNTIME_ENV: "production",
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: true,
+      ADAPTER_TLS_MODE: "disabled",
+      NPC_TANK_MQTT_TLS_MODE: "disabled",
+      NPC_TANK_ADAPTER_STORE_MODE: "postgres",
+    });
   });
 });

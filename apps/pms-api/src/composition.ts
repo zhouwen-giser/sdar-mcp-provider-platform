@@ -95,7 +95,10 @@ export async function createPmsApiComposition(
     const authenticationRejectionAudit = new PmsApiAuthenticationRejectionAudit(audit);
 
     app = (dependencies.createApp ?? createPmsApi)({
-      managementAuthorizer: new FilePmsApiRoleAuthorizer(config.management),
+      managementAuthMode: config.managementAuthMode,
+      ...(config.managementAuthMode === "file_credentials"
+        ? { managementAuthorizer: new FilePmsApiRoleAuthorizer(config.management) }
+        : {}),
       providerPackages,
       management: new ProviderManagementService(unitOfWork),
       runtimeDeployments: new RuntimeDeploymentManagementFacade(pool, runtimeDeploymentApplication),

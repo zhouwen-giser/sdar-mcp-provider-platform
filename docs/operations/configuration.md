@@ -21,7 +21,7 @@ Runtime（运行时）启动时读取一次环境变量，并在监听端口前�
 | `ADAPTER_TLS_CA_PATH`                          | unset                   | 用于校验 Adapter 的 PEM CA 证书包路径               |
 | `ADAPTER_TLS_CERT_PATH`                        | unset                   | Runtime 访问 Adapter 的 PEM 客户端证书路径          |
 | `ADAPTER_TLS_KEY_PATH`                         | unset                   | Runtime 访问 Adapter 的 PEM 客户端私钥路径          |
-| `AUTH_MODE`                                    | `development`           | 认证模式：开发、可信请求头或 HS256 JWT              |
+| `AUTH_MODE`                                    | `development`           | 认证模式：开发、匿名、请求头或 HS256 JWT            |
 | `JWT_HS256_SECRET`                             | unset                   | HS256 JWT 密钥，至少 32 个字符                      |
 | `JWT_ISSUER` / `JWT_AUDIENCE`                  | unset                   | 可选的 JWT 签发者和受众精确约束                     |
 | `HTTP_BODY_LIMIT_BYTES`                        | `1048576`               | Fastify HTTP 请求体上限，范围 1 KiB–16 MiB          |
@@ -100,9 +100,9 @@ Runtime（运行时）启动时读取一次环境变量，并在监听端口前�
 | `PROVIDER_TELEMETRY_MAX_NODES`                 | `4096`                  | Provider 属性/载荷 JSON 最大节点数                  |
 | `PROVIDER_TELEMETRY_RATE_LIMIT`                | `600`                   | 每个副本每分钟接受的 Provider 事件上限              |
 
-`development`（开发认证）仅限本地 Compose。`trusted_headers`（可信请求头认证）要求前置认证代理删除客户端自行提交的 `x-sdar-subject`（主体）和 `x-sdar-tenant`（租户）请求头；`jwt_hs256`（HS256 JWT 认证）是独立生产模式。数据库、JWT 和 mTLS 密钥材料必须通过部署平台轮换，不得放入 ConfigMap 或命令行参数。
+`development`（开发认证）仅限本地 Compose。`anonymous`（匿名内网模式）只在生产环境同时显式设置 `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` 时允许；它忽略调用方提供的 `Authorization`、`x-sdar-subject` 和 `x-sdar-tenant` 身份值，并把所有调用固定映射到共享的 `internal-anonymous/default` 授权域。因此不同内网客户端之间没有 Task 可见性、取消、幂等或订阅配额隔离，只能在已由 VLAN、路由和主机防火墙完成信任隔离的网络使用。`trusted_headers`（可信请求头认证）要求前置认证代理删除客户端自行提交的 `x-sdar-subject`（主体）和 `x-sdar-tenant`（租户）请求头；`jwt_hs256`（HS256 JWT 认证）是独立生产模式。数据库、JWT 和 mTLS 密钥材料必须通过部署平台轮换，不得放入 ConfigMap 或命令行参数。
 
-生产启动要求非开发认证、`ADAPTER_TLS_MODE=required`（Adapter 必须使用双向 TLS）、完整的三个证书路径，以及 `ALLOW_WEAK_LEASE_CONFIGURATION=false`（禁止弱租约配置）。布尔值仅接受 `true`、`false`、`1` 或 `0`；歧义值会使启动失败。生产环境启用 Provider 遥测入口时必须使用 mTLS，客户端证书 `CN`（通用名称）必须同时等于配置和 Manifest 中的 Provider 标识符。
+生产启动要求非开发认证，以及 `ALLOW_WEAK_LEASE_CONFIGURATION=false`（禁止弱租约配置）。默认情况下还要求 `ADAPTER_TLS_MODE=required`（Adapter 必须使用双向 TLS）及完整的三个证书路径；显式 `ALLOW_INSECURE_INTERNAL_TRANSPORT=true` 会放宽受信内网传输检查，并且是生产匿名模式的必要条件。布尔值仅接受 `true`、`false`、`1` 或 `0`；歧义值会使启动失败。未开启内网传输许可时，生产环境启用 Provider 遥测入口必须使用 mTLS，客户端证书 `CN`（通用名称）必须同时等于配置和 Manifest 中的 Provider 标识符。
 
 进程内限流器有容量上限，但按副本独立计数；生产环境应在 Ingress/API Gateway 配置全局来源或租户限流。`IDEMPOTENCY_LEASE_MS`（幂等租约）必须大于 Adapter RPC 超时，同时不超过上游 HTTP 超时预算。声明/完成和 Task 发布使用短数据库事务；已借出的 `PoolClient`（数据库连接池客户端）不得跨越 Adapter RPC，也不得在提交后再次借用。命令和调度声明受并发配置限制，并在 Adapter RPC 执行期间续租。
 

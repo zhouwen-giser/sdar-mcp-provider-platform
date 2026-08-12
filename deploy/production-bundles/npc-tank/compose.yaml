@@ -1,0 +1,456 @@
+name: sdar-production-npc-tank
+
+x-application-security: &application-security
+  init: true
+  pull_policy: never
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+x-postgres-security: &postgres-security
+  pull_policy: never
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+  stop_grace_period: 30s
+
+services:
+  pms-postgres:
+    <<: *postgres-security
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    environment:
+      POSTGRES_USER: pms_admin
+      POSTGRES_DB: pms
+      POSTGRES_PASSWORD_FILE: /run/secrets/pms-postgres-password
+    volumes:
+      - pms-postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-postgres-password
+        target: /run/secrets/pms-postgres-password
+        read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pms_admin -d pms"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - control-plane
+    mem_limit: 1g
+    pids_limit: 256
+
+  pms-api:
+    <<: *application-security
+    image: sdar/production-npc-tank-pms-api:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    restart: unless-stopped
+    environment:
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
+      PMS_API_HOST: 0.0.0.0
+      PMS_API_PORT: "8090"
+      PMS_API_RUNTIME_HEARTBEAT_TTL_MS: "30000"
+      PMS_API_MANAGEMENT_AUTH_MODE: anonymous_intranet
+      PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
+      PMS_RUNTIME_CREDENTIAL_FILE: /run/pms-secrets/runtime.json
+    expose:
+      - "8090"
+    volumes:
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
+        target: /run/pms-secrets/pms-database-url
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-api/runtime.json
+        target: /run/pms-secrets/runtime.json
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
+        target: /run/pms-secrets/runtime-control-plane
+        read_only: true
+      - type: bind
+        source: ./bin/pms-web-smoke.mjs
+        target: /opt/sdar-bundle/pms-web-smoke.mjs
+        read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8090/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    depends_on:
+      pms-postgres:
+        condition: service_healthy
+    networks:
+      - control-plane
+      - provider-plane
+    mem_limit: 768m
+    pids_limit: 192
+    stop_grace_period: 30s
+
+  pms-worker:
+    <<: *application-security
+    image: sdar/production-npc-tank-pms-worker:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    restart: unless-stopped
+    network_mode: service:pms-api
+    environment:
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
+      PMS_EXTERNAL_RUNTIME_CATALOG_AUTH_MODE: anonymous_intranet
+      PMS_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
+      PMS_WORKER_ID: npc-production-worker
+      PMS_WORKER_POLL_INTERVAL_MS: "1000"
+      PMS_WORKER_LEASE_DURATION_MS: "30000"
+      PMS_WORKER_CLAIM_LIMIT: "10"
+      PMS_WORKER_RETRY_DELAY_MS: "5000"
+      PMS_WORKSPACE_ROOT: /app
+      PMS_POSTGRES_PROVISIONING_CREDENTIAL_FILE: /run/pms-secrets/postgres-provisioning.json
+      PMS_RUNTIME_RELEASE_ROOT: /app/runtime-releases
+      PMS_RUNTIME_SECRET_ROOT: /var/lib/sdar/runtime-secrets
+      PMS_RUNTIME_CONFIG_CACHE_ROOT: /var/lib/sdar/runtime-cache
+      PMS_RUNTIME_CONTROL_PLANE_URL: http://127.0.0.1:8090
+      PMS_RUNTIME_CONTROL_PLANE_CREDENTIAL_ROOT: /var/lib/sdar/runtime-control-plane
+      PMS_PM2_HOME: /var/lib/sdar/pm2
+      PMS_RUNTIME_RECONCILE_INTERVAL_MS: "5000"
+      PMS_RUNTIME_RECONCILE_TIMEOUT_MS: "30000"
+      PMS_RUNTIME_HEALTH_TIMEOUT_MS: "3000"
+    volumes:
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
+        target: /run/pms-secrets/pms-database-url
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-worker/postgres-provisioning.json
+        target: /run/pms-secrets/postgres-provisioning.json
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane
+        target: /var/lib/sdar/runtime-control-plane
+        read_only: true
+      - pms-worker-state:/var/lib/sdar
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    depends_on:
+      pms-postgres:
+        condition: service_healthy
+      pms-api:
+        condition: service_healthy
+    mem_limit: 1g
+    pids_limit: 256
+    stop_grace_period: 35s
+
+  pms-web:
+    <<: *application-security
+    image: sdar/production-pms-web:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    restart: unless-stopped
+    environment:
+      PMS_WEB_DATA_MODE: api
+      PMS_WEB_API_BASE: /api/console/v1
+      PMS_WEB_API_UPSTREAM: http://pms-api:8090
+      PMS_WEB_HOST: 0.0.0.0
+      PMS_WEB_PORT: "8080"
+      PMS_WEB_PROXY_MAX_BODY_BYTES: ${PMS_WEB_PROXY_MAX_BODY_BYTES:-1048576}
+      PMS_WEB_PROXY_TIMEOUT_MS: ${PMS_WEB_PROXY_TIMEOUT_MS:-10000}
+      PMS_WEB_RAW_API_PROXY_ENABLED: "true"
+    ports:
+      - "${PMS_WEB_BIND_ADDRESS:-0.0.0.0}:${PMS_WEB_PORT:-8089}:8080"
+    tmpfs:
+      - /tmp:size=16m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    depends_on:
+      pms-api:
+        condition: service_healthy
+    networks:
+      - control-plane
+    mem_limit: 384m
+    pids_limit: 128
+    stop_grace_period: 20s
+
+  npc-adapter-postgres:
+    <<: *postgres-security
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    environment:
+      POSTGRES_USER: npc_adapter
+      POSTGRES_DB: npc_adapter
+      POSTGRES_PASSWORD_FILE: /run/secrets/npc-adapter-db-password
+    volumes:
+      - npc-adapter-postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/npc-adapter-db-password
+        target: /run/secrets/npc-adapter-db-password
+        read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_adapter -d npc_adapter"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - provider-plane
+    mem_limit: 1g
+    pids_limit: 256
+
+  npc-runtime-postgres:
+    <<: *postgres-security
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    environment:
+      POSTGRES_USER: npc_runtime
+      POSTGRES_DB: npc_runtime
+      POSTGRES_PASSWORD_FILE: /run/secrets/npc-runtime-db-password
+    volumes:
+      - npc-runtime-postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/npc-runtime-db-password
+        target: /run/secrets/npc-runtime-db-password
+        read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_runtime -d npc_runtime"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - provider-plane
+    mem_limit: 1g
+    pids_limit: 256
+
+  npc-tank-adapter:
+    <<: *application-security
+    image: sdar/production-npc-tank-adapter:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    restart: unless-stopped
+    command:
+      - sh
+      - -eu
+      - -c
+      - >-
+        export NPC_TANK_ADAPTER_DATABASE_URL="$$(tr -d '\r\n' < /run/secrets/npc-adapter-database-url)";
+        node dist/apps/npc-tank-provider-adapter/src/migrate.js;
+        exec node dist/apps/npc-tank-provider-adapter/src/main.js
+    environment:
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      PROVIDER_VERSION: 0.1.0
+      ADAPTER_HOST: 0.0.0.0
+      ADAPTER_PORT: "7013"
+      RUNTIME_ENV: production
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
+      ADAPTER_TLS_MODE: disabled
+      NPC_TANK_ADAPTER_STORE_MODE: postgres
+      NPC_TANK_MQTT_URL: ${NPC_TANK_MQTT_URL:?NPC_TANK_MQTT_URL is required}
+      NPC_TANK_MQTT_CLIENT_ID: ${NPC_TANK_MQTT_CLIENT_ID:-sdar-production-npc-tank1}
+      NPC_TANK_MQTT_TLS_MODE: disabled
+      NPC_TANK_MQTT_SESSION_MODE: persistent
+      NPC_TANK_MQTT_WIRE_MODE: ros_bridge_json
+      NPC_TANK_DEVICE_MCP_URL: ${NPC_TANK_DEVICE_MCP_URL:?NPC_TANK_DEVICE_MCP_URL is required}
+      NPC_TANK_DEVICE_MCP_TLS_MODE: disabled
+      NPC_TANK_DEVICE_MCP_TIMEOUT_MS: ${NPC_TANK_DEVICE_MCP_TIMEOUT_MS:-10000}
+      NPC_TANK_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      NPC_TANK_DEVICE_MCP_CONTRACT_REPORT_PATH: /var/lib/sdar/contracts/MCP_CONTRACT_CAPTURE.json
+      NPC_TANK_NAVIGATION_SELECTION_REPORT_PATH: /var/lib/sdar/contracts/NAVIGATION_TOOL_SELECTION.json
+      NPC_TANK_EO_SCAN_CAPABILITY_REPORT_PATH: /var/lib/sdar/contracts/CIRCULAR_RECON_CAPABILITY.json
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: npc-tank-runtime:7002
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      LOG_LEVEL: ${NPC_TANK_LOG_LEVEL:-info}
+    expose:
+      - "7013"
+    volumes:
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/npc-adapter-database-url
+        target: /run/secrets/npc-adapter-database-url
+        read_only: true
+      - npc-contract-reports:/var/lib/sdar
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const s=require('node:net').connect(7013,'127.0.0.1',()=>{s.end();process.exit(0)});s.setTimeout(2000,()=>process.exit(1));s.on('error',()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    depends_on:
+      npc-adapter-postgres:
+        condition: service_healthy
+    networks:
+      - provider-plane
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    mem_limit: 768m
+    pids_limit: 192
+    stop_grace_period: 30s
+
+  npc-tank-runtime:
+    <<: *application-security
+    image: sdar/production-npc-tank-runtime:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    restart: unless-stopped
+    command:
+      - sh
+      - -eu
+      - -c
+      - >-
+        node dist/apps/runtime/src/migrate.js;
+        exec node dist/apps/runtime/src/main.js
+    environment:
+      RUNTIME_ENV: production
+      HOST: 0.0.0.0
+      PORT: "8080"
+      PROVIDER_ID: isr.vehicle.npc-tank.npc-tank1
+      DATABASE_URL_FILE: /run/secrets/npc-runtime-database-url
+      ADAPTER_ENDPOINT: npc-tank-adapter:7013
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: ${ALLOW_INSECURE_INTERNAL_TRANSPORT:?must be explicitly true}
+      ADAPTER_TLS_MODE: disabled
+      AUTH_MODE: anonymous
+      PMS_DEPLOYMENT_ID: production-npc-tank-direct
+      PMS_INSTANCE_ID: production-npc-tank-direct-1
+      PMS_RUNTIME_REGISTRATION_URL: http://pms-api:8090
+      PMS_RUNTIME_REGISTRATION_TOKEN_FILE: /run/secrets/pms-runtime-control-plane.token
+      PMS_RUNTIME_HEARTBEAT_INTERVAL_MS: "10000"
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: "7002"
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      ALLOW_WEAK_LEASE_CONFIGURATION: "false"
+      INTERNAL_ENDPOINTS_ENABLED: "false"
+      OTEL_ENABLED: "false"
+      LOG_LEVEL: ${NPC_TANK_LOG_LEVEL:-info}
+    ports:
+      - "${NPC_TANK_RUNTIME_BIND_ADDRESS:-0.0.0.0}:${NPC_TANK_RUNTIME_PORT:-19103}:8080"
+    expose:
+      - "7002"
+    volumes:
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/npc-runtime-database-url
+        target: /run/secrets/npc-runtime-database-url
+        read_only: true
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/runtime-control-plane/providers/isr.vehicle.npc-tank.npc-tank1/deployments/production-npc-tank-direct/instances/production-npc-tank-direct-1/control-plane.token
+        target: /run/secrets/pms-runtime-control-plane.token
+        read_only: true
+      - type: bind
+        source: ./bin/runtime-read-smoke.mjs
+        target: /opt/sdar-bundle/runtime-read-smoke.mjs
+        read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=0700,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 20s
+    depends_on:
+      npc-runtime-postgres:
+        condition: service_healthy
+      npc-tank-adapter:
+        condition: service_healthy
+    networks:
+      - provider-plane
+    mem_limit: 1g
+    pids_limit: 256
+    stop_grace_period: 45s
+
+  pms-seed:
+    <<: *application-security
+    profiles: ["seed"]
+    image: sdar/production-npc-tank-pms-worker:${BUNDLE_REVISION:?BUNDLE_REVISION is required}
+    network_mode: service:pms-api
+    restart: "no"
+    command: ["node", "/app/pms-seed.mjs"]
+    environment:
+      PMS_SEED_API_BASE_URL: http://127.0.0.1:8090
+      PMS_SEED_DATABASE_URL_FILE: /run/pms-secrets/pms-database-url
+      PMS_SEED_ACTOR_ID: npc-production-admin
+      PMS_SEED_CATALOG_ROOT: /app
+      PMS_SEED_ENVIRONMENT: production
+      PMS_SEED_ADAPTER_ENDPOINT: npc-tank-adapter:7013
+      PMS_SEED_DEPLOYMENT_ID: production-npc-tank-direct
+      PMS_SEED_INSTANCE_ID: production-npc-tank-direct-1
+      PMS_SEED_RUNTIME_VERSION: 2.0.0-rc.1
+      PMS_SEED_RUNTIME_CONTROL_ENDPOINT: http://npc-tank-runtime:8080
+      PMS_SEED_RUNTIME_ADVERTISED_ENDPOINT: ${NPC_TANK_RUNTIME_ADVERTISED_URL:?NPC_TANK_RUNTIME_ADVERTISED_URL is required}
+      PMS_SEED_RUNTIME_PUBLISHED_PORT: ${NPC_TANK_RUNTIME_PORT:-19103}
+      PMS_SEED_WAIT_TIMEOUT_MS: ${NPC_TANK_PMS_AUTHORITY_WAIT_TIMEOUT_MS:-180000}
+      PMS_SEED_POLL_INTERVAL_MS: ${NPC_TANK_PMS_AUTHORITY_POLL_INTERVAL_MS:-2000}
+      PMS_SMOKE_API_BASE_URL: http://127.0.0.1:8090
+    volumes:
+      - type: bind
+        source: ${BUNDLE_STATE_ROOT:-./state}/secrets/pms-database-url
+        target: /run/pms-secrets/pms-database-url
+        read_only: true
+      - type: bind
+        source: ./bin/pms-seed.mjs
+        target: /app/pms-seed.mjs
+        read_only: true
+      - type: bind
+        source: ./bin/runtime-read-smoke.mjs
+        target: /app/runtime-read-smoke.mjs
+        read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=0700,uid=1000,gid=1000
+    depends_on:
+      pms-postgres:
+        condition: service_healthy
+      pms-api:
+        condition: service_healthy
+    mem_limit: 512m
+    pids_limit: 128
+
+networks:
+  control-plane:
+    internal: true
+  provider-plane:
+
+volumes:
+  pms-postgres-data:
+  pms-worker-state:
+  npc-adapter-postgres-data:
+  npc-runtime-postgres-data:
+  npc-contract-reports:

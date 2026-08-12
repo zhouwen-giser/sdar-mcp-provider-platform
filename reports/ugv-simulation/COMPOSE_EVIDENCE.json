@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_compose_restart",
+  "phase": "G10_COMPOSE",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "reasonCode": "REAL_ONLY_COMPOSE_CLEAN_RESTART_READY_WITH_UPSTREAM_DRIFT",
+  "overallQualification": "UGV_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T07:31:21Z",
+  "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "composePath": "deploy/ugv-simulation/compose.yaml",
+  "oneClickCommands": [
+    "bash deploy/ugv-simulation/up.sh",
+    "bash deploy/ugv-simulation/smoke.sh",
+    "bash deploy/ugv-simulation/down.sh"
+  ],
+  "services": {
+    "required": ["ugv-adapter-postgres", "ugv-runtime-postgres", "ugv-adapter", "ugv-runtime"],
+    "optionalOneShot": ["ugv-preflight"],
+    "mockServicesPresent": false,
+    "externalSimulatorPackaged": false,
+    "linuxHostGatewaySupported": true,
+    "lanEndpointModeSupported": true
+  },
+  "validation": {
+    "composeConfig": "PASS",
+    "realOnlyServiceAllowlist": "PASS",
+    "sourceQualification": "PASS_TRACKED_SOURCE_CLEAN",
+    "secretFileValidation": "PASS",
+    "dockerDeploymentSecurityTests": "PASS_10_OF_10",
+    "runtimeContractReportPersistence": "PASS_NAMED_VOLUME",
+    "namedDatabaseVolumesPreserved": true,
+    "namedContractVolumePreserved": true,
+    "finalComposePsAll": "EMPTY",
+    "finalStackState": "down",
+    "preservedNamedVolumes": [
+      "ugv-adapter-postgres-data",
+      "ugv-runtime-postgres-data",
+      "ugv-contract-reports"
+    ],
+    "images": [
+      {
+        "target": "ugv-adapter",
+        "ociRevision": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+        "imageIdRedacted": "sha256:63a7787...cd99"
+      },
+      {
+        "target": "ugv-runtime",
+        "ociRevision": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+        "imageIdRedacted": "sha256:d19781d...a8e9"
+      }
+    ]
+  },
+  "sequence": [
+    {
+      "order": 1,
+      "step": "initial_down",
+      "command": "bash deploy/ugv-simulation/down.sh",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamp unavailable"
+    },
+    {
+      "order": 2,
+      "step": "cycle1_up",
+      "command": "bash deploy/ugv-simulation/up.sh",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamp unavailable",
+      "health": "healthy",
+      "containerPreflight": "PASS_WITH_UPSTREAM_DRIFT"
+    },
+    {
+      "order": 3,
+      "step": "cycle1_smoke",
+      "command": "bash deploy/ugv-simulation/smoke.sh",
+      "exitCode": 0,
+      "startedAt": "2026-08-10T07:28:46.562Z",
+      "completedAt": "2026-08-10T07:28:46.747Z",
+      "health": "ready",
+      "evidencePath": "reports/ugv-simulation/READ_ONLY_SMOKE.cycle1.json",
+      "evidenceSha256": "7ba6c377fb9f16a5c1dab0a29e645a6d0527bd9444c9719229fb310ef556ca3b"
+    },
+    {
+      "order": 4,
+      "step": "cycle1_down",
+      "command": "bash deploy/ugv-simulation/down.sh",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamp unavailable"
+    },
+    {
+      "order": 5,
+      "step": "cycle2_up",
+      "command": "bash deploy/ugv-simulation/up.sh",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamp unavailable",
+      "health": "healthy",
+      "containerPreflight": "PASS_WITH_UPSTREAM_DRIFT"
+    },
+    {
+      "order": 6,
+      "step": "cycle2_smoke",
+      "command": "bash deploy/ugv-simulation/smoke.sh",
+      "exitCode": 0,
+      "startedAt": "2026-08-10T07:29:39.181Z",
+      "completedAt": "2026-08-10T07:29:39.362Z",
+      "health": "ready",
+      "evidencePath": "reports/ugv-simulation/READ_ONLY_SMOKE.json",
+      "evidenceSha256": "59336e2ac2e7490a8dba753443961e3ca4f4645c46df00b2c84526ac15914de7",
+      "nestedPreflight": {
+        "status": "PASS_WITH_UPSTREAM_DRIFT",
+        "exitCode": 0,
+        "startedAt": "2026-08-10T07:29:37.624Z",
+        "completedAt": "2026-08-10T07:29:38.839Z",
+        "evidencePath": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.compose-cycle2.json",
+        "evidenceSha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1"
+      }
+    },
+    {
+      "order": 7,
+      "step": "final_down",
+      "command": "bash deploy/ugv-simulation/down.sh",
+      "exitCode": 0,
+      "startedAt": null,
+      "completedAt": null,
+      "timeAuthority": "operator-observed; exact timestamp unavailable",
+      "finalStackState": "down"
+    }
+  ],
+  "externalEvidence": {
+    "hostPreflight": {
+      "path": "reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json",
+      "sha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+      "startedAt": "2026-08-10T07:27:07.158Z",
+      "completedAt": "2026-08-10T07:27:08.464Z",
+      "exitCode": 0
+    },
+    "deviceMcpContractHash": "3725dba7b92e587ecb3fd670bc54e00633828370e9063f96809b8f7c1400935a",
+    "persistentContractArtifact": {
+      "path": "reports/ugv-simulation/MCP_CONTRACT_CAPTURE.json",
+      "sha256": "9f4cca36aaacbe649ede430d4c1d1d5d079b27c9ec784317a0250eb952679519"
+    },
+    "mqttWireMode": "ros_bridge_json",
+    "canonicalStatusObserved": false,
+    "compatibilityStatusAliasObserved": true,
+    "publisherQosDrift": [
+      {
+        "topic": "/ugv/speed",
+        "observedQos": 0,
+        "expectedProtocolQos": 1
+      }
+    ]
+  },
+  "preQualificationDiagnostic": {
+    "status": "RESOLVED_BEFORE_OFFICIAL_SEQUENCE",
+    "summary": "A retained local database-volume configuration drift was corrected, and the entire successful sequence was restarted afterward.",
+    "secretValuesRecorded": false
+  },
+  "localIgnoredConfiguration": {
+    "status": "CONFIGURED_AND_VALIDATED",
+    "trackedByGit": false,
+    "fileMode": "0600",
+    "wireMode": "ros_bridge_json",
+    "realEndpointValuesChangedDuringCloseout": false,
+    "includedInDelivery": false,
+    "validationWithoutOverrides": "PASS_EXACT_QUALIFICATION_SHA",
+    "secretValuesRecorded": false
+  },
+  "safety": {
+    "mockFallbackEnabled": false,
+    "controlAttempted": false,
+    "mqttPublishAttempted": false,
+    "reconAttempted": false,
+    "effectorAttempted": false,
+    "rawPayloadStored": false,
+    "finalStackRunning": false
+  }
+}

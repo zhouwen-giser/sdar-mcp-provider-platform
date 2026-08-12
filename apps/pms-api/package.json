@@ -7,7 +7,10 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run test"
+    "test": "vitest run test",
+    "typecheck": "pnpm --dir ../.. typecheck",
+    "lint": "eslint src test",
+    "build": "pnpm --dir ../.. build"
   },
   "dependencies": {
     "@sdar/configuration-center": "workspace:*",

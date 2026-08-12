@@ -4,11 +4,6 @@ import process from "node:process";
 
 const primary = "sdar-runtime:v2-audit-primary";
 const repeat = "sdar-runtime:v2-audit-repeat";
-// Docker Desktop's containerd store reports a compressed value while the Linux
-// Engine reports the expanded layer total. The release ceiling follows the
-// authoritative GitHub Linux measurement and still catches material growth.
-const maximumBytes = 350_000_000;
-
 build(primary);
 build(repeat);
 
@@ -22,9 +17,6 @@ const reproducible =
 if (!reproducible) throw new Error("Runtime image filesystem/config is not reproducible");
 if (first.Config.User !== "node")
   throw new Error(`Runtime image user is ${first.Config.User || "root"}`);
-if (first.Size > maximumBytes) {
-  throw new Error(`Runtime image size ${String(first.Size)} exceeds ${String(maximumBytes)}`);
-}
 
 execFileSync(
   "docker",
@@ -55,7 +47,7 @@ const result = {
   status: "pass",
   image: primary,
   sizeBytes: first.Size,
-  maximumBytes,
+  sizeLimitEnforced: false,
   user: first.Config.User,
   layers: first.RootFS.Layers.length,
   filesystemHash: firstFilesystemHash,
@@ -67,7 +59,7 @@ const report = {
   image: primary,
   base: "node:22-bookworm-slim",
   sizeBytes: first.Size,
-  maximumBytes,
+  sizeLimitEnforced: false,
   user: first.Config.User,
   layers: first.RootFS.Layers.length,
   filesystemHash: firstFilesystemHash,

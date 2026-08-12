@@ -9,6 +9,13 @@ export interface VehicleManifestProfile {
   displayKind: string;
   supportsScanModes: boolean;
   supportsCircularEoScan: boolean;
+  supportsCapabilityQuery?: boolean;
+  supportsGimbalControl?: boolean;
+  supportsNavigationPlanning?: boolean;
+  supportsFireCancellationBeforeDispatch?: boolean;
+  supportsFireCommandRejectedOutput?: boolean;
+  supportsReconCoverageOutput?: boolean;
+  circularScanOmitsArea?: boolean;
 }
 
 export function vehicleProviderManifest(
@@ -36,12 +43,13 @@ export function vehicleProviderManifest(
   });
   const schema = (properties: Record<string, unknown>, required: string[]) =>
     jsonToProtoStruct({ type: "object", properties, required, additionalProperties: false });
-  const taskOutput = (statuses: string[]) =>
+  const taskOutput = (statuses: string[], optionalProperties: Record<string, unknown> = {}) =>
     schema(
       {
         resourceId,
         status: { type: "string", enum: statuses },
         observedAt: { type: "string", format: "date-time" },
+        ...optionalProperties,
       },
       ["resourceId", "status", "observedAt"],
     );
@@ -72,6 +80,19 @@ export function vehicleProviderManifest(
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
+      ...(profile.supportsCapabilityQuery === true
+        ? [
+            {
+              name: "vehicle_get_capabilities",
+              description: `Read device-reported ${profile.displayKind} capability facts without inventing unsupported limits.`,
+              execution: "SYNCHRONOUS",
+              inputSchema: schema({ resourceId }, ["resourceId"]),
+              outputSchema: jsonToProtoStruct({ type: "object", additionalProperties: true }),
+              capabilities: caps(false, false, false, false, false, false),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
       {
         name: "vehicle_get_payload_status",
         description: `Read local ${profile.displayKind} payload, gimbal, laser and task status.`,
@@ -119,7 +140,7 @@ export function vehicleProviderManifest(
         name: "vehicle_navigate",
         description: "Run a point, route, distance or return-home chassis mission.",
         execution: "TASK_REQUIRED",
-        inputSchema: navigationSchema(resourceId),
+        inputSchema: navigationSchema(resourceId, profile.supportsNavigationPlanning === true),
         outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"]),
         capabilities: caps(true, true, true, true, false, true),
         resourceBinding: binding,
@@ -132,8 +153,17 @@ export function vehicleProviderManifest(
           resourceId,
           profile.supportsScanModes,
           profile.supportsCircularEoScan,
+          profile.circularScanOmitsArea === true,
         ),
-        outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"]),
+        outputSchema: taskOutput(
+          ["completed", "failed", "cancelled", "timeout"],
+          profile.supportsReconCoverageOutput === true
+            ? {
+                coverability: { type: "object", additionalProperties: true },
+                outOfRange: { type: "boolean" },
+              }
+            : {},
+        ),
         capabilities: caps(true, true, true, true, false, true),
         resourceBinding: binding,
       },
@@ -155,6 +185,20 @@ export function vehicleProviderManifest(
         capabilities: caps(false, true, true, false, false, true),
         resourceBinding: binding,
       },
+      ...(profile.supportsGimbalControl === true
+        ? [
+            {
+              name: "vehicle_control_gimbal",
+              description:
+                "Run a finite absolute, relative, or reset electro-optical gimbal adjustment.",
+              execution: "TASK_REQUIRED",
+              inputSchema: gimbalSchema(resourceId),
+              outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"]),
+              capabilities: caps(false, true, true, false, false, true),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
       {
         name: "vehicle_fire_weapon",
         description:
@@ -172,6 +216,7 @@ export function vehicleProviderManifest(
         ),
         outputSchema: taskOutput([
           "fire_command_accepted",
+          ...(profile.supportsFireCommandRejectedOutput === true ? ["fire_command_rejected"] : []),
           "fire_cycle_completed",
           "target_not_found",
           "target_not_locked",
@@ -183,7 +228,14 @@ export function vehicleProviderManifest(
           "timeout",
           "cancelled",
         ]),
-        capabilities: caps(false, true, true, false, true, true),
+        capabilities: caps(
+          false,
+          true,
+          profile.supportsFireCancellationBeforeDispatch !== false,
+          false,
+          true,
+          true,
+        ),
         resourceBinding: binding,
       },
       {
@@ -199,7 +251,7 @@ export function vehicleProviderManifest(
   };
 }
 
-function navigationSchema(resourceId: Record<string, unknown>) {
+function navigationSchema(resourceId: Record<string, unknown>, supportsPlanning: boolean) {
   const point = {
     type: "object",
     properties: {
@@ -251,6 +303,18 @@ function navigationSchema(resourceId: Record<string, unknown>) {
       },
       speedLimitKmh: { type: "number", exclusiveMinimum: 0 },
       stopOnObstacle: { type: "boolean" },
+      ...(supportsPlanning
+        ? {
+            planningMode: {
+              type: "string",
+              enum: ["auto", "road_network", "direct"],
+            },
+            density: {
+              type: "string",
+              enum: ["adaptive", "dense", "medium", "sparse"],
+            },
+          }
+        : {}),
     },
     required: ["resourceId", "mission"],
     additionalProperties: false,
@@ -261,7 +325,21 @@ function reconSchema(
   resourceId: Record<string, unknown>,
   supportsScanModes: boolean,
   supportsCircularEoScan: boolean,
+  circularScanOmitsArea: boolean,
 ) {
+  const required = circularScanOmitsArea
+    ? supportsCircularEoScan
+      ? ["resourceId", "scanMode"]
+      : ["resourceId", "scanMode", "area"]
+    : [
+        "resourceId",
+        ...(supportsScanModes ? ["scanMode"] : []),
+        "scanCount",
+        "zoom",
+        "stopOnTarget",
+        "targetTypes",
+      ];
+  if (!circularScanOmitsArea) required.splice(1, 0, "area");
   return jsonToProtoStruct({
     type: "object",
     properties: {
@@ -290,25 +368,94 @@ function reconSchema(
         ? {
             scanMode: {
               type: "string",
-              enum: supportsCircularEoScan ? ["area", "sector", "circular"] : ["area", "sector"],
+              enum: circularScanOmitsArea
+                ? supportsCircularEoScan
+                  ? ["area", "circular"]
+                  : ["area"]
+                : supportsCircularEoScan
+                  ? ["area", "sector", "circular"]
+                  : ["area", "sector"],
             },
-            angle: { type: "number" },
-            angleUnit: { type: "string", enum: ["rad", "deg"] },
+            ...(circularScanOmitsArea
+              ? {}
+              : {
+                  angle: { type: "number" },
+                  angleUnit: { type: "string", enum: ["rad", "deg"] },
+                }),
           }
         : {}),
-      scanCount: { type: "integer", minimum: 1, maximum: 1000 },
-      zoom: { type: "number", exclusiveMinimum: 0 },
-      stopOnTarget: { type: "boolean" },
-      targetTypes: { type: "array", maxItems: 128, items: { type: "string", maxLength: 64 } },
+      scanCount: { type: "integer", minimum: circularScanOmitsArea ? 0 : 1, maximum: 1000 },
+      ...(circularScanOmitsArea
+        ? {
+            regionType: { type: "integer", enum: [2, 3, 4, 5] },
+            targetTypes: {
+              type: "array",
+              maxItems: 128,
+              items: { type: "integer", minimum: 0 },
+            },
+            lockDurationLimitSec: { type: "integer", minimum: 0 },
+            reconType: {
+              oneOf: [
+                { type: "integer", enum: [1, 2, 3, 4] },
+                { type: "string", enum: ["adaptive", "visible", "infrared", "dc"] },
+              ],
+            },
+            scanSpeed: { type: "number", exclusiveMinimum: 0 },
+          }
+        : {
+            zoom: { type: "number", exclusiveMinimum: 0 },
+            stopOnTarget: { type: "boolean" },
+            targetTypes: {
+              type: "array",
+              maxItems: 128,
+              items: { type: "string", maxLength: 64 },
+            },
+          }),
+      ...(supportsCircularEoScan && circularScanOmitsArea
+        ? { scanPitch: { type: "number", minimum: -90, maximum: 90 } }
+        : {}),
     },
-    required: [
-      "resourceId",
-      "area",
-      ...(supportsScanModes ? ["scanMode"] : []),
-      "scanCount",
-      "zoom",
-      "stopOnTarget",
-      "targetTypes",
+    required,
+    ...(circularScanOmitsArea && supportsCircularEoScan
+      ? {
+          allOf: [
+            {
+              if: { properties: { scanMode: { const: "circular" } }, required: ["scanMode"] },
+              then: {},
+              else: { properties: { area: {} }, required: ["area"] },
+            },
+          ],
+        }
+      : {}),
+    additionalProperties: false,
+  });
+}
+
+function gimbalSchema(resourceId: Record<string, unknown>) {
+  return jsonToProtoStruct({
+    type: "object",
+    properties: {
+      resourceId,
+      mode: { type: "string", enum: ["absolute", "relative", "reset"] },
+      yaw: { type: "number", minimum: -180, maximum: 180 },
+      pitch: { type: "number", minimum: -90, maximum: 90 },
+      yawSpeed: { type: "number", exclusiveMinimum: 0 },
+      pitchSpeed: { type: "number", exclusiveMinimum: 0 },
+      deltaZoom: { type: "number" },
+    },
+    required: ["resourceId", "mode"],
+    allOf: [
+      {
+        if: { properties: { mode: { const: "reset" } }, required: ["mode"] },
+        then: {},
+        else: {
+          anyOf: [
+            { properties: { yaw: {} }, required: ["yaw"] },
+            { properties: { pitch: {} }, required: ["pitch"] },
+            { properties: { deltaZoom: {} }, required: ["deltaZoom"] },
+          ],
+        },
+      },
     ],
     additionalProperties: false,
   });

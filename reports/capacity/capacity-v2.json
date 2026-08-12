@@ -122,7 +122,7 @@
       "image": "sdar-runtime:v2-audit-primary",
       "base": "node:22-bookworm-slim",
       "sizeBytes": 101472946,
-      "maximumBytes": 350000000,
+      "sizeLimitEnforced": false,
       "user": "node",
       "layers": 11,
       "filesystemHash": "6fc98ef3c6eaa0fbb890acb89a1581d7d248c3802b74fc0e9f2f08e65251a929",
@@ -137,6 +137,6 @@
   "interpretation": {
     "productionSlo": false,
     "recoveryScope": "Measures the real PostgreSQL candidate-selection/materialization path; Adapter reconciliation latency is resource-specific.",
-    "thresholds": "Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and image policy."
+    "thresholds": "Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and non-root reproducible image policy; image size is recorded without a fixed ceiling."
   }
 }

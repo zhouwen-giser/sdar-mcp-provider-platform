@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+deploy_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+repo_root="$(CDPATH= cd -- "$deploy_dir/../.." && pwd)"
+env_file="${UGV_SIM_ENV_FILE:-$deploy_dir/.env}"
+project_name="sdar-ugv-simulation-real"
+
+if [[ ! -f "$env_file" ]]; then
+  echo "BLOCKED_EXTERNAL_ENV: configuration file not found: $env_file" >&2
+  echo "Copy $deploy_dir/.env.example to $deploy_dir/.env and configure real endpoints." >&2
+  exit 2
+fi
+if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
+  echo "BLOCKED_EXTERNAL_ENV: Docker Compose v2 is required." >&2
+  exit 2
+fi
+if ! command -v node >/dev/null 2>&1; then
+  echo "BLOCKED_EXTERNAL_ENV: Node.js 22 or newer is required." >&2
+  exit 2
+fi
+if ! node "$repo_root/scripts/ugv-simulation/validate-node-version.mjs"; then
+  exit 2
+fi
+if ! command -v git >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
+  echo "BLOCKED_EXTERNAL_ENV: git and tar are required for the immutable build context." >&2
+  exit 2
+fi
+
+shopt -s nullglob dotglob
+for candidate in "$deploy_dir/secrets"/*; do
+  case "$(basename -- "$candidate")" in
+    README.md|.gitignore) ;;
+    *)
+      echo "BLOCKED_CONFIGURATION: the repository secret directory must contain documentation only." >&2
+      exit 2
+      ;;
+  esac
+done
+shopt -u nullglob dotglob
+
+if ! UGV_QUALIFICATION_GIT_SHA="$(
+  node "$repo_root/scripts/ugv-simulation/validate-deployment.mjs" \
+    --repo-root "$repo_root" \
+    --env-file "$env_file"
+)"; then
+  exit 2
+fi
+if [[ ! "$UGV_QUALIFICATION_GIT_SHA" =~ ^[0-9a-f]{40,64}$ ]]; then
+  echo "BLOCKED_CONFIGURATION: qualification source SHA is invalid." >&2
+  exit 2
+fi
+export UGV_QUALIFICATION_GIT_SHA
+export UGV_QUALIFICATION_SOURCE_STATUS="TRACKED_SOURCE_CLEAN"
+export PMS_CONSOLE_GIT_SHA="$UGV_QUALIFICATION_GIT_SHA"
+export VITE_PMS_DATA_MODE=api
+echo "Qualification source verified: $UGV_QUALIFICATION_GIT_SHA"
+
+qualification_tmp_root="${TMPDIR:-/tmp}"
+if [[ ! -d "$qualification_tmp_root" ]]; then
+  echo "BLOCKED_CONFIGURATION: temporary directory root does not exist." >&2
+  exit 2
+fi
+qualification_build_context="$(mktemp -d "$qualification_tmp_root/sdar-ugv-build-context.XXXXXXXX")"
+cleanup_qualification_build_context() {
+  if [[ -n "${qualification_build_context:-}" && -d "$qualification_build_context" ]]; then
+    rm -rf -- "$qualification_build_context"
+  fi
+}
+trap cleanup_qualification_build_context EXIT
+if ! git -C "$repo_root" archive --format=tar "$UGV_QUALIFICATION_GIT_SHA" \
+  | tar -xf - -C "$qualification_build_context"; then
+  echo "BLOCKED_CONFIGURATION: failed to materialize the exact-HEAD build context." >&2
+  exit 2
+fi
+export UGV_QUALIFICATION_BUILD_CONTEXT="$qualification_build_context"
+export PMS_CONSOLE_BUILD_CONTEXT="$qualification_build_context"
+echo "Immutable build context materialized from: $UGV_QUALIFICATION_GIT_SHA"
+
+compose=(docker compose --project-name "$project_name" --env-file "$env_file" -f "$deploy_dir/compose.yaml")
+
+"${compose[@]}" config --quiet
+pms_secret_root="$(
+  "${compose[@]}" config --format json | node --input-type=module -e '
+    import { dirname } from "node:path";
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const document = JSON.parse(source);
+    const volumes = document.services?.["pms-api"]?.volumes;
+    const api = Array.isArray(volumes)
+      ? volumes.find((entry) => entry?.target === "/run/pms-secrets/api")
+      : undefined;
+    if (api?.type !== "bind" || typeof api.source !== "string") process.exit(2);
+    process.stdout.write(`${dirname(api.source)}\n`);
+  '
+)" || {
+  echo "BLOCKED_CONFIGURATION: failed to resolve the PMS Console secret root." >&2
+  exit 2
+}
+node "$repo_root/deploy/pms-console/validate-secrets.mjs" \
+  "$pms_secret_root" \
+  "$repo_root"
+services="$("${compose[@]}" --profile preflight config --services)"
+for required_service in \
+  pms-postgres pms-api pms-worker pms-web \
+  ugv-adapter-postgres ugv-runtime-postgres ugv-preflight ugv-adapter ugv-runtime; do
+  if [[ $'\n'"$services"$'\n' != *$'\n'"$required_service"$'\n'* ]]; then
+    echo "BLOCKED_CONFIGURATION: required service missing: $required_service" >&2
+    exit 2
+  fi
+done
+while IFS= read -r service; do
+  case "$service" in
+    pms-postgres|pms-api|pms-worker|pms-web|ugv-adapter-postgres|ugv-runtime-postgres|ugv-preflight|ugv-adapter|ugv-runtime) ;;
+    *)
+      echo "BLOCKED_CONFIGURATION: non-real service present: $service" >&2
+      exit 2
+      ;;
+  esac
+done <<<"$services"
+
+echo "Building PMS Console and real-only UGV images from one exact HEAD..."
+"${compose[@]}" build pms-api pms-worker pms-web ugv-adapter ugv-runtime
+
+verify_pms_image() {
+  local image="$1"
+  local revision user healthcheck
+  revision="$(
+    docker image inspect \
+      --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+      "$image" 2>/dev/null
+  )" || {
+    echo "BLOCKED_CONFIGURATION: qualified PMS image is missing: $image" >&2
+    exit 2
+  }
+  if [[ "$revision" != "$UGV_QUALIFICATION_GIT_SHA" ]]; then
+    echo "BLOCKED_CONFIGURATION: $image is not labeled with the qualification SHA." >&2
+    exit 2
+  fi
+  user="$(docker image inspect --format '{{ .Config.User }}' "$image")"
+  healthcheck="$(docker image inspect --format '{{ json .Config.Healthcheck }}' "$image")"
+  if [[ "$user" != "node" || "$healthcheck" == "null" ]]; then
+    echo "BLOCKED_CONFIGURATION: $image is missing the required non-root user or healthcheck." >&2
+    exit 2
+  fi
+}
+
+verify_real_image() {
+  local image="$1"
+  local expected_app="$2"
+  local revision
+  if ! revision="$(
+    docker image inspect \
+      --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+      "$image"
+  )" || [[ "$revision" != "$UGV_QUALIFICATION_GIT_SHA" ]]; then
+    echo "BLOCKED_CONFIGURATION: $image is not labeled with the qualification SHA." >&2
+    exit 2
+  fi
+  if ! docker run --rm --entrypoint sh "$image" -c \
+    'test -d /app/dist/apps && test "$(find /app/dist/apps -mindepth 1 -maxdepth 1 -type d -printf "%f\n")" = "$1" && test ! -d /app/node_modules/.pnpm/node_modules/@sdar && { test "$1" != ugv-provider-adapter || { test -f /app/scripts/ugv-simulation/preflight.mjs && test -f /app/scripts/ugv-simulation/lib.mjs; }; }' \
+    sh "$expected_app"; then
+    echo "BLOCKED_CONFIGURATION: $image contains an unexpected application artifact." >&2
+    exit 2
+  fi
+}
+adapter_image="sdar-ugv-simulation-real/ugv-adapter:$UGV_QUALIFICATION_GIT_SHA"
+runtime_image="sdar-ugv-simulation-real/runtime:$UGV_QUALIFICATION_GIT_SHA"
+for pms_image in \
+  "sdar/pms-api:$UGV_QUALIFICATION_GIT_SHA" \
+  "sdar/pms-worker:$UGV_QUALIFICATION_GIT_SHA" \
+  "sdar/pms-web:$UGV_QUALIFICATION_GIT_SHA"; do
+  verify_pms_image "$pms_image"
+done
+verify_real_image "$adapter_image" ugv-provider-adapter
+verify_real_image "$runtime_image" runtime
+
+run_preflight_without_build() {
+  local exit_code=0
+  "${compose[@]}" --profile preflight up \
+    --no-build \
+    --no-deps \
+    --force-recreate \
+    --pull never \
+    --exit-code-from ugv-preflight \
+    ugv-preflight || exit_code=$?
+  "${compose[@]}" --profile preflight rm --force --stop ugv-preflight >/dev/null 2>&1 || true
+  return "$exit_code"
+}
+
+wait_timeout="${UGV_COMPOSE_WAIT_TIMEOUT_SECONDS:-180}"
+if [[ ! "$wait_timeout" =~ ^[1-9][0-9]*$ ]]; then
+  echo "BLOCKED_CONFIGURATION: UGV_COMPOSE_WAIT_TIMEOUT_SECONDS must be a positive integer." >&2
+  exit 2
+fi
+
+echo "Starting the three isolated PostgreSQL 17 services..."
+"${compose[@]}" up --detach --wait --wait-timeout "$wait_timeout" \
+  pms-postgres ugv-adapter-postgres ugv-runtime-postgres
+
+echo "Checking real Device MCP and MQTT prerequisites (read-only)..."
+run_preflight_without_build
+
+echo "Starting PMS API..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-api
+echo "Starting PMS Worker..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-worker
+echo "Starting PMS Web in API mode..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" pms-web
+
+echo "Starting the real UGV Adapter and Runtime..."
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" ugv-adapter
+"${compose[@]}" up --detach --no-build --no-deps --pull never \
+  --wait --wait-timeout "$wait_timeout" --remove-orphans ugv-runtime
+
+echo "Running the integrated non-destructive smoke suite..."
+bash "$deploy_dir/smoke.sh"
+echo "PASS: integrated PMS Console and real-only UGV stack is healthy at $UGV_QUALIFICATION_GIT_SHA"

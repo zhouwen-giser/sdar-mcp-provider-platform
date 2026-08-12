@@ -73,7 +73,7 @@ describe("UGV Adapter gRPC E2E", () => {
     cleanup.push(() => gateway.close());
 
     const manifest = await gateway.describeProvider();
-    expect(manifest.operations).toHaveLength(9);
+    expect(manifest.operations).toHaveLength(11);
     expect(manifest.businessEventSources?.map((source) => source.sourceId)).toEqual([
       "vehicle.execution",
       "vehicle.health",
@@ -108,7 +108,14 @@ describe("UGV Adapter gRPC E2E", () => {
 
     ingress.handle(
       "/ugv/mission_state",
-      Buffer.from('{"entity_id":"ugv1","id":"grpc-mission","type":1,"state":4,"progress":100}'),
+      Buffer.from('{"entity_id":"ugv1","id":1,"type":1,"state":1,"progress":50}'),
+    );
+    expect(
+      await gateway.getExecution("grpc-nav-1", started.accepted?.externalExecutionId, options),
+    ).toMatchObject({ state: "RUNNING" });
+    ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from('{"entity_id":"ugv1","id":1,"type":1,"state":4,"progress":100}'),
     );
     const terminal = await gateway.getExecution(
       "grpc-nav-1",
@@ -150,7 +157,7 @@ function seed(ingress: VehicleMqttIngress): void {
     ),
   );
   ingress.handle(
-    "/ugv/status",
+    "status/ugv",
     Buffer.from(
       '{"vehicle_id":"ugv1","role_name":"ugv","speed_kmh":0,"chassis_task":{"state":-1,"progress":0},"eo_task":{"state":-1,"progress":0},"weapon_task":{"state":-1,"progress":0},"available":true}',
     ),

@@ -38,6 +38,10 @@ describe("migration source-map provenance", () => {
     expect(sequenceFor(source, "migrations/providers/npc-tank/025_npc_tank_provider.sql")).toBe(26);
     expect(sequenceFor(source, "migrations/pms/009_runtime_registration.sql")).toBe(27);
     expect(sequenceFor(source, "migrations/runtime/024_accepted_task_substate.sql")).toBe(28);
+    expect(sequenceFor(source, "migrations/providers/ugv/026_ugv_single_active_fire.sql")).toBe(29);
+    expect(
+      sequenceFor(source, "migrations/providers/npc-tank/026_allow_authoritative_status_tool.sql"),
+    ).toBe(30);
   });
 });
 

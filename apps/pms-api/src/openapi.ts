@@ -1,4 +1,13 @@
-export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
+import type { PmsManagementAuthMode } from "./config.js";
+
+export interface PmsOpenApiDocumentOptions {
+  readonly managementAuthMode?: PmsManagementAuthMode;
+}
+
+export function pmsOpenApiDocument(
+  options: PmsOpenApiDocumentOptions = {},
+): Readonly<Record<string, unknown>> {
+  const managementAuthMode = options.managementAuthMode ?? "file_credentials";
   const document = {
     openapi: "3.1.0",
     info: {
@@ -515,7 +524,7 @@ export function pmsOpenApiDocument(): Readonly<Record<string, unknown>> {
       },
     },
   };
-  applyManagementSecurity(document.paths);
+  applyManagementSecurity(document.paths, managementAuthMode);
   return Object.freeze(document);
 }
 
@@ -574,6 +583,7 @@ function sdarRegistryProjectionLineageHeaders(): Record<string, unknown> {
 
 function applyManagementSecurity(
   paths: Record<string, Record<string, Record<string, unknown>>>,
+  managementAuthMode: PmsManagementAuthMode,
 ): void {
   const prefixes = [
     "/api/v1/provider-packages",
@@ -589,6 +599,12 @@ function applyManagementSecurity(
   for (const [path, operations] of Object.entries(paths)) {
     if (!prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) continue;
     for (const [method, operation] of Object.entries(operations)) {
+      if (managementAuthMode === "anonymous_intranet") {
+        operation.security = [];
+        delete operation["x-sdar-required-role"];
+        operation["x-sdar-access-mode"] = "anonymous_intranet";
+        continue;
+      }
       operation.security = [{ managementToken: [] }];
       operation["x-sdar-required-role"] =
         method === "get" ? "reader_or_administrator" : "administrator";

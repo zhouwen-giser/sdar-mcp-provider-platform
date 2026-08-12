@@ -4,10 +4,12 @@ import { Pool } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   databaseProfileId,
+  createRuntimeProcessProjection,
   requestRuntimeDeployment,
   runtimeConfigProfileId,
   runtimeDeploymentId,
   runtimeEnvironmentId,
+  runtimeInstanceId,
   runtimeProviderId,
 } from "@sdar/runtime-deployment";
 import { PostgresRuntimeDeploymentApplicationUnitOfWork, runPmsMigrations } from "../src/index.js";
@@ -90,6 +92,75 @@ describe("PostgresRuntimeDeploymentApplicationUnitOfWork", () => {
     } finally {
       await checkPool.end();
     }
+  });
+
+  it("commits direct-container deployment and expected process in the same transaction", async () => {
+    const uow = new PostgresRuntimeDeploymentApplicationUnitOfWork(pool);
+    const snapshot = requestRuntimeDeployment(
+      {
+        deploymentId: runtimeDeploymentId("uow-direct"),
+        providerId: providerA,
+        environment,
+        desiredState: "running",
+        desiredReplicas: 1,
+        runtimeVersion: "2.0.0-rc.1",
+        runtimeAuthority: "direct_container",
+        adapterEndpoint: "ugv-adapter:50051",
+        directContainer: {
+          instanceId: runtimeInstanceId("uow-direct-instance"),
+          controlEndpoint: "http://ugv-runtime:8080",
+          advertisedEndpoint: "http://192.168.1.7:19100",
+        },
+      },
+      now,
+    ).snapshot;
+    if (snapshot.runtimeAuthority !== "direct_container") {
+      throw new Error("DIRECT_CONTAINER_SNAPSHOT_EXPECTED");
+    }
+
+    await uow.transaction(async (repos) => {
+      await repos.deployments.insert(snapshot);
+      await repos.processes.insertExpected(
+        providerA,
+        createRuntimeProcessProjection(
+          {
+            instanceId: snapshot.directContainer.instanceId,
+            deploymentId: snapshot.deploymentId,
+            processManager: "direct_container",
+            pm2Name: null,
+            port: null,
+            controlEndpoint: snapshot.directContainer.controlEndpoint,
+            advertisedEndpoint: snapshot.directContainer.advertisedEndpoint,
+          },
+          {
+            pid: null,
+            processState: "missing",
+            livenessState: "unknown",
+            readinessState: "unknown",
+            registrationState: "unregistered",
+            catalogState: "unknown",
+            configState: "externally_managed",
+            lastHeartbeatAt: null,
+            runtimeVersion: null,
+            configRevision: 0,
+            restartCount: 0,
+          },
+        ),
+      );
+    });
+
+    const result = await pool.query<{
+      runtime_authority: string;
+      process_manager: string;
+    }>(
+      `SELECT deployment.runtime_authority,process.process_manager
+         FROM runtime_deployment deployment
+         JOIN runtime_process process USING (deployment_id)
+        WHERE deployment.deployment_id='uow-direct'`,
+    );
+    expect(result.rows).toEqual([
+      { runtime_authority: "direct_container", process_manager: "direct_container" },
+    ]);
   });
 
   it("rolls back deployment, job, and audit when the transaction rejects", async () => {

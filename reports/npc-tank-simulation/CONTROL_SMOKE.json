@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_control_safety_gate",
+  "phase": "GOAL11_NPC_REAL_CONTROL_SMOKE",
+  "status": "NOT_EXECUTED",
+  "reasonCode": "NOT_EXECUTED_REAL_CONTROL_DISABLED_AND_SAFE_FIXTURES_MISSING",
+  "overallQualification": "NPC_TANK_SIMULATION_PARTIAL",
+  "generatedAt": "2026-08-10T12:04:34Z",
+  "qualificationProductSha": "67eb73729588b9f6fc46f8ea448ec2f3046243f0",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "command": "NOT_EXECUTED",
+  "exitCode": null,
+  "safety": {
+    "realControlEnabled": false,
+    "controlAttempted": false,
+    "deviceMutatingToolCalls": 0,
+    "runtimeMutatingOperations": 0,
+    "mqttPublishAttempted": false,
+    "reconEnabled": false,
+    "effectorEnabled": false,
+    "coordinatesStored": false,
+    "rawPayloadStored": false
+  },
+  "fixtures": {
+    "distanceMConfigured": false,
+    "safePointConfigured": false,
+    "safeWaypointsConfigured": false,
+    "priorSafeRouteAvailable": false
+  },
+  "checks": [
+    {
+      "operation": "vehicle_navigate(distance)",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "reasonCode": "NPC_TANK_ENABLE_REAL_CONTROL_FALSE"
+    },
+    {
+      "operation": "vehicle_navigate(point)",
+      "status": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+      "reasonCode": "NPC_TANK_TEST_SAFE_POINT_JSON_MISSING"
+    },
+    {
+      "operation": "vehicle_navigate(route)",
+      "status": "NOT_EXECUTED_SAFE_FIXTURE_MISSING",
+      "reasonCode": "NPC_TANK_TEST_SAFE_WAYPOINTS_JSON_MISSING"
+    },
+    {
+      "operation": "vehicle_navigate(pause/resume/cancel)",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "reasonCode": "NO_REAL_NAVIGATION_TASK_STARTED"
+    },
+    {
+      "operation": "vehicle_navigate(return_home)",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "reasonCode": "NO_PRIOR_SAFE_REAL_ROUTE"
+    },
+    {
+      "operation": "vehicle_emergency_stop",
+      "status": "NOT_EXECUTED_REAL_CONTROL_DISABLED",
+      "reasonCode": "NO_REAL_CONTROL_SEQUENCE_STARTED"
+    },
+    {
+      "operation": "vehicle_control_gimbal",
+      "status": "NOT_EXECUTED_RECON_DISABLED",
+      "reasonCode": "NPC_TANK_ENABLE_RECON_TESTS_FALSE"
+    },
+    {
+      "operation": "vehicle_fire_weapon",
+      "status": "NOT_EXECUTED_EFFECTOR_DISABLED",
+      "reasonCode": "NPC_TANK_ENABLE_EFFECTOR_TESTS_FALSE"
+    }
+  ],
+  "deterministicEvidence": {
+    "status": "PASS",
+    "classification": "DETERMINISTIC_REGRESSION_NOT_REAL_CONTROL_EVIDENCE",
+    "scope": [
+      "exact distance/point/route argument mapping",
+      "integer mission persistence and dependent start",
+      "pause/resume/terminate mapping",
+      "post-dispatch observation authority",
+      "emergency independent-primitive behavior",
+      "uncertain mutation no-retry",
+      "duplicate task replay and conflicting identity rejection"
+    ]
+  },
+  "note": "No safe coordinate or distance was invented. Real control requires a separate explicit enable flag and user-provided bounded fixtures."
+}

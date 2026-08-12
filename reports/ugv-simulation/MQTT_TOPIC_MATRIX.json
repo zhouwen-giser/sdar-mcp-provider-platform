@@ -1,0 +1,225 @@
+{
+  "schemaVersion": "1.0",
+  "evaluatedAt": "2026-08-10T07:29:38.839Z",
+  "qualificationGitSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+  "sourceStatus": "TRACKED_SOURCE_CLEAN",
+  "overall": "UGV_SIMULATION_PARTIAL",
+  "providerPackageRealResourceStatus": "pending",
+  "liveInventory": "PASS_WITH_UPSTREAM_DRIFT",
+  "wireMode": "ros_bridge_json",
+  "passiveSubscribeOnly": true,
+  "configuredSubscriptionCount": 18,
+  "exactSubscriptionGrantCount": 18,
+  "boundedSampleCount": 11,
+  "observedSubscribedTopicCount": 11,
+  "unsampledSubscribedTopicCount": 7,
+  "unsampledEventAndReconTopicCount": 6,
+  "topics": [
+    {
+      "topic": "status/ugv",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "canonical composite status",
+      "classification": "SEMANTIC_MISMATCH",
+      "note": "Canonical topic was not observed while /ugv/status was active."
+    },
+    {
+      "topic": "/ugv/status",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "upstream legacy composite status alias",
+      "classification": "EXTRA_ON_SIMULATOR",
+      "note": "Product accepts this alias without claiming canonical conformance."
+    },
+    {
+      "topic": "/ugv/gnss",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "WGS84 position",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/imu",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "attitude",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/speed",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 0,
+      "purpose": "speed",
+      "classification": "SEMANTIC_MISMATCH",
+      "note": "Publisher QoS drift is preserved as a qualification failure."
+    },
+    {
+      "topic": "/ugv/battery_range_km",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "remaining range",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "chassis MissionState",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/nav_state",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "navigation telemetry",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/system_state",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "system health",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/component_status",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "component health",
+      "classification": "EXACT_MATCH"
+    },
+    {
+      "topic": "/ugv/eo/pose",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "gimbal observation",
+      "classification": "COMPATIBLE_MAPPING"
+    },
+    {
+      "topic": "/ugv/detected_objects",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "CARLA detections",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/target_detected",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "target event",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/target/gnss",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "target GNSS",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/area_recon/status",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": true,
+      "publisherQos": 1,
+      "purpose": "Recon MotionStatus and fault facts",
+      "classification": "COMPATIBLE_MAPPING"
+    },
+    {
+      "topic": "/ugv/area_recon/targets",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "rich target list",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/area_recon/exception",
+      "expectedQos": 1,
+      "grantedQos": 1,
+      "observed": false,
+      "purpose": "payload exception",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/area_recon/coverage",
+      "expectedQos": 0,
+      "grantedQos": 0,
+      "observed": false,
+      "purpose": "coverage evidence",
+      "classification": "UNVERIFIED_EXTERNAL_ENV"
+    },
+    {
+      "topic": "/ugv/target/base64",
+      "expectedQos": 1,
+      "grantedQos": null,
+      "observed": false,
+      "purpose": "large screenshot deliberately not consumed",
+      "classification": "EXACT_MATCH",
+      "scopeDisposition": "INTENTIONALLY_EXCLUDED"
+    }
+  ],
+  "upstreamDrift": [
+    {
+      "reasonCode": "CANONICAL_STATUS_TOPIC_NOT_OBSERVED",
+      "expected": "status/ugv",
+      "observedAlias": "/ugv/status"
+    },
+    {
+      "reasonCode": "PUBLISHER_QOS_MISMATCH",
+      "topic": "/ugv/speed",
+      "expectedQos": 1,
+      "observedQos": 0
+    }
+  ],
+  "unsampledSubscribedTopics": [
+    "/ugv/area_recon/coverage",
+    "/ugv/area_recon/exception",
+    "/ugv/area_recon/targets",
+    "/ugv/detected_objects",
+    "/ugv/target_detected",
+    "/ugv/target/gnss",
+    "status/ugv"
+  ],
+  "unsampledEventAndReconTopics": [
+    "/ugv/area_recon/coverage",
+    "/ugv/area_recon/exception",
+    "/ugv/area_recon/targets",
+    "/ugv/detected_objects",
+    "/ugv/target_detected",
+    "/ugv/target/gnss"
+  ],
+  "evidence": {
+    "hostPreflightSha256": "c169836e65b09862695597f9c58293a7a06da0c1d5f7e466b61ed22d9885ffcd",
+    "composeCycle2PreflightSha256": "89c8a689584bf53a39a36318d748141999b607f99e6ca43dd3780352aab096e1"
+  },
+  "safety": {
+    "endpointRedacted": true,
+    "mqttPublishAttempted": false,
+    "rawPayloadStored": false
+  }
+}

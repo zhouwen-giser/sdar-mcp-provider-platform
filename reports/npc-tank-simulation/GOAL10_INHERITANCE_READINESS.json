@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-10T10:00:51Z",
+  "status": "PASS_GOAL11_BRANCH_CREATION_ALLOWED",
+  "goal10Base": {
+    "ref": "codex/goal-10-ugv-simulation-real-interface",
+    "sha": "ac3369ba9fa4e0ff6b6589525594b50291da02b7",
+    "selectionRule": "START_GATE local branch priority",
+    "workingTreeBeforeReadinessEvidence": "CLEAN",
+    "remoteTrackingShaMatches": true,
+    "reportOnlyDeliveryCommitAtHead": true
+  },
+  "ugv": {
+    "status": "UGV_SIMULATION_PARTIAL",
+    "qualificationProductSha": "e1473ea6c7ea61ef0495e85cf19b6f7256143791",
+    "usablePartialBase": true,
+    "partialReasonsAreExternalOrSafetyBounded": true,
+    "openReasons": [
+      "canonical status/ugv was not observed; compatibility /ugv/status was observed",
+      "live /ugv/speed publisher QoS was 0 rather than expected 1",
+      "real control and reconnaissance were not enabled and safe coordinate fixtures were absent"
+    ],
+    "sharedSourceChangedAfterQualificationProduct": false,
+    "sharedSourceDiffScope": [
+      "apps/ugv-provider-adapter/**",
+      "packages/vehicle-device-mcp-client/**",
+      "packages/vehicle-mqtt-ingress/**",
+      "packages/vehicle-provider-core/**",
+      "packages/provider-adapter-kit/**",
+      "packages/runtime-configuration-contract/**",
+      "provider-packages/ugv/**"
+    ],
+    "sharedFoundations": {
+      "realDeviceMcpClientBehavior": "PASS_REAL_READ_ONLY_AND_DETERMINISTIC_MUTATION_SEMANTICS",
+      "resultAndErrorValidation": "PASS_DETERMINISTIC",
+      "integerMissionIdHandling": "PASS_DETERMINISTIC",
+      "mqttTransportAndTopicFramework": "PASS_WITH_UPSTREAM_TOPIC_AND_QOS_DRIFT",
+      "stateNormalization": "PASS_DETERMINISTIC",
+      "reconnectAndRecoveryFramework": "PASS_DETERMINISTIC_AND_REAL_CLEAN_RESTART",
+      "toolHealthAndCircuitBreaker": "PASS_DETERMINISTIC",
+      "providerRuntimeTaskLifecycle": "PASS_DETERMINISTIC_READ_ONLY_REAL",
+      "mockFallbackDisabled": "PASS",
+      "ugvRegression": "PASS_39_UGV_PROVIDER_TESTS_AND_49_GOAL10_TESTS"
+    }
+  },
+  "pmsConsole": {
+    "status": "PMS_CONSOLE_PACKAGE_QUALIFIED",
+    "qualificationHead": "7ca09d55aaf01dab9d6711fdd793530084897868",
+    "consoleContractConformance": "PASS_36_OF_36",
+    "realApiWebMode": "PASS",
+    "workerAndProductionComposition": "PASS",
+    "registryAuthorityFramework": "PASS_REGISTRY_E2E_AND_PRODUCTION_COMPOSITION",
+    "unifiedComposePackaging": "PASS"
+  },
+  "requiredArtifacts": {
+    "ugvFinalReport": "reports/ugv-simulation/UGV_SIMULATION_QUALIFICATION_REPORT.md",
+    "pmsConsoleFinalReport": "reports/goal-10-pms-console-addendum/FINAL_REPORT.md",
+    "ugvCompose": "deploy/ugv-simulation/compose.yaml",
+    "pmsConsoleCompose": "deploy/pms-console/compose.yaml",
+    "pmsConsoleUp": "deploy/pms-console/up.sh",
+    "pmsConsoleSmoke": "deploy/pms-console/smoke.sh",
+    "allPresent": true
+  },
+  "decision": {
+    "startGate": "PASS",
+    "goal11BranchMayBeCreated": true,
+    "reason": "Goal 10 UGV blockers are upstream/safety-specific while shared vehicle foundations pass; the PMS Console addendum is qualified."
+  },
+  "safety": {
+    "npcEndpointInspected": false,
+    "realControlAttempted": false,
+    "realReconAttempted": false,
+    "realEffectorAttempted": false
+  }
+}

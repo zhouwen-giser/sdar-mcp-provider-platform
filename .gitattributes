@@ -14,8 +14,10 @@ reports/**/*.json text eol=lf
 /coverage/** export-ignore
 /dist/** export-ignore
 /reports/** export-ignore
-/reports/platform-v0.1/** -export-ignore
-/reports/sbom/runtime-v1.cdx.json -export-ignore
+/reports/platform-v0.1 !export-ignore
+/reports/platform-v0.1/** !export-ignore
+/reports/sbom !export-ignore
+/reports/sbom/runtime-v1.cdx.json !export-ignore
 /reports/ci/** export-ignore
 /reports/evidence/** export-ignore
 /.env* export-ignore

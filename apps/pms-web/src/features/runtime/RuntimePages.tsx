@@ -27,6 +27,7 @@ import {
   useProviders,
   useRuntimeCommand,
   useScaleDeployment,
+  currentEnvironmentScope,
 } from "../../queries/hooks.js";
 import { useAuditEvents } from "../../queries/hooks.js";
 import { useClientWorkspace, useClientWorkspaceStore } from "../../client-workspace/context.js";
@@ -37,6 +38,7 @@ import {
   MutationFeedback,
   ProductPage,
 } from "../shared/product-components.js";
+import { dataMode } from "../../gateways/factory.js";
 
 export function RuntimeDeploymentListPage() {
   const query = useDeployments();
@@ -136,15 +138,19 @@ export function RuntimeDeploymentCreatePage() {
   const [params] = useSearchParams();
   const mutation = useCreateDeployment();
   const workspace = useClientWorkspaceStore();
+  const mockMode = dataMode() === "mock";
+  const environment = currentEnvironmentScope()[0] ?? "";
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState({
-    deploymentId: "deploy-new-001",
-    providerId: params.get("providerId") ?? "ugv-prod-001",
-    environment: "production",
-    runtimeVersion: "2.0.0-rc.1",
-    databaseProfileId: "db-profile-001",
-    configProfileId: "production:runtime_deployment:deploy-new-001:runtime:runtime-main",
-    adapterEndpoint: "127.0.0.1:8101",
+    deploymentId: mockMode ? "deploy-new-001" : "",
+    providerId: params.get("providerId") ?? (mockMode ? "ugv-prod-001" : ""),
+    environment,
+    runtimeVersion: mockMode ? "2.0.0-rc.1" : "",
+    databaseProfileId: mockMode ? "db-profile-001" : "",
+    configProfileId: mockMode
+      ? "production:runtime_deployment:deploy-new-001:runtime:runtime-main"
+      : "",
+    adapterEndpoint: mockMode ? "127.0.0.1:8101" : "",
     desiredReplicas: 1 as 0 | 1,
   });
   const submit = () =>
@@ -217,13 +223,21 @@ export function RuntimeDeploymentCreatePage() {
           {step === 4 ? (
             <div className="grid-two">
               <FormField label="Environment">
-                <select
-                  value={draft.environment}
-                  onChange={(e) => setDraft((x) => ({ ...x, environment: e.target.value }))}
-                >
-                  <option>production</option>
-                  <option>staging</option>
-                </select>
+                {mockMode ? (
+                  <select
+                    value={draft.environment}
+                    onChange={(e) => setDraft((x) => ({ ...x, environment: e.target.value }))}
+                  >
+                    <option>production</option>
+                    <option>staging</option>
+                  </select>
+                ) : (
+                  <input
+                    value={draft.environment}
+                    placeholder="真实 Environment ID"
+                    onChange={(e) => setDraft((x) => ({ ...x, environment: e.target.value }))}
+                  />
+                )}
               </FormField>
               <FormField label="Desired Replicas">
                 <select

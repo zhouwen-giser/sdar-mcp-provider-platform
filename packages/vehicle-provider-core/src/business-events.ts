@@ -23,6 +23,9 @@ const TASK_EVENTS = new Set([
   "vehicle.weapon.fire_started",
   "vehicle.weapon.fire_completed",
   "vehicle.weapon.fire_failed",
+  "vehicle.gimbal.control_started",
+  "vehicle.gimbal.control_completed",
+  "vehicle.gimbal.control_failed",
 ]);
 const RESOURCE_EVENTS = new Set([
   "vehicle.chassis.path_blocked",
@@ -35,7 +38,16 @@ const RESOURCE_EVENTS = new Set([
   "vehicle.payload.gimbal_fault",
   "vehicle.payload.weapon_fault",
   "vehicle.payload.offline",
+  "vehicle.payload.camera_fault",
+  "vehicle.payload.camera_recovered",
+  "vehicle.connectivity.mqtt_disconnected",
+  "vehicle.connectivity.mqtt_restored",
+  "vehicle.connectivity.device_mcp_disconnected",
+  "vehicle.connectivity.device_mcp_restored",
+  "vehicle.telemetry.stale",
+  "vehicle.telemetry.recovered",
   "vehicle.target.detected",
+  "vehicle.target.lost",
 ]);
 
 export class VehicleBusinessEventHub {
@@ -90,7 +102,7 @@ export interface VehicleTargetEventDraft {
   sourceId: "vehicle.target";
   scope: "resource";
   occurredAt: string;
-  eventType: "vehicle.target.detected";
+  eventType: "vehicle.target.detected" | "vehicle.target.lost";
   description: string;
   reasonCode: string;
   resourceRef?: string;
