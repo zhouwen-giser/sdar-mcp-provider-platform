@@ -102,6 +102,10 @@ export class LightExecutionEngine {
   async recover(): Promise<void> {
     for (const execution of this.store.list()) {
       if (execution.state === "SUCCEEDED" || execution.state === "TECHNICAL_FAILED") continue;
+      if (this.#deadlineReached(execution)) {
+        await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+        continue;
+      }
       if (!this.#resourceStillAllowlisted(execution)) {
         await this.#fail(execution, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
         continue;
@@ -140,6 +144,10 @@ export class LightExecutionEngine {
   async poll(taskId: string): Promise<void> {
     const execution = this.store.get(taskId);
     if (execution?.state !== "CONFIRMING") return;
+    if (this.#deadlineReached(execution)) {
+      await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     const resource = this.#activeResource(execution);
     if (resource === undefined) {
       await this.#fail(execution, "RECOVERY_RESOURCE_NOT_ALLOWLISTED", false);
@@ -169,10 +177,15 @@ export class LightExecutionEngine {
         resource !== undefined &&
         execution.resourceId === state.resourceId &&
         execution.entityId === resource.entityId &&
-        execution.state === "CONFIRMING" &&
-        confirmed(execution, state)
+        execution.state === "CONFIRMING"
       ) {
-        const done = advance({ ...execution, confirmedState: state }, "SUCCEEDED");
+        const now = this.#now();
+        if (this.#deadlineReached(execution, now)) {
+          await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false, now);
+          continue;
+        }
+        if (!confirmed(execution, state)) continue;
+        const done = advance({ ...execution, confirmedState: state }, "SUCCEEDED", now);
         this.store.set(done);
         await this.telemetry.progress(done);
       }
@@ -181,6 +194,10 @@ export class LightExecutionEngine {
 
   async #dispatch(execution: LightExecution): Promise<void> {
     if (execution.dispatchState !== "NOT_STARTED" || execution.sideEffectDispatched) return;
+    if (this.#deadlineReached(execution)) {
+      await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     if (execution.executionContext.executionMode !== "LIVE")
       throw new LightProviderError("EXECUTION_MODE_NOT_LIVE", false);
     if (!this.sideEffectsEnabled)
@@ -192,6 +209,10 @@ export class LightExecutionEngine {
       resource.resourceId,
       await this.rest.getState(resource.entityId),
     );
+    if (this.#deadlineReached(execution)) {
+      await this.#fail(execution, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     if (!observed.reachable) throw new LightProviderError("RESOURCE_UNAVAILABLE", true);
     if (execution.desiredState.type === "brightness" && !observed.supportsBrightness)
       throw new LightProviderError("BRIGHTNESS_NOT_SUPPORTED", false);
@@ -208,6 +229,10 @@ export class LightExecutionEngine {
     );
     this.store.set(marked);
     await this.options.hooks?.afterDispatchIntentPersisted?.(marked);
+    if (this.#deadlineReached(marked)) {
+      await this.#fail(marked, "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT", false);
+      return;
+    }
     if (marked.desiredState.type === "power") {
       try {
         if (marked.desiredState.power === "on") await this.rest.turnOn(resource.entityId);
@@ -247,12 +272,21 @@ export class LightExecutionEngine {
     await this.poll(execution.taskId);
   }
 
-  async #fail(execution: LightExecution, reasonCode: string, retryable: boolean): Promise<void> {
+  async #fail(
+    execution: LightExecution,
+    reasonCode: string,
+    retryable: boolean,
+    now = this.#now(),
+  ): Promise<void> {
     const current = this.store.get(execution.taskId) ?? execution;
     if (current.state === "SUCCEEDED" || current.state === "TECHNICAL_FAILED") return;
-    const failed = failedExecution(current, reasonCode, retryable, this.#now());
+    const failed = failedExecution(current, reasonCode, retryable, now);
     this.store.set(failed);
     await this.telemetry.progress(failed);
+  }
+
+  #deadlineReached(execution: LightExecution, now = this.#now()): boolean {
+    return now >= Date.parse(execution.confirmationDeadlineAt);
   }
 
   #activeResource(execution: LightExecution) {

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "goalRunId": "019fca75-f48a-7780-ac5e-942503c6690e",
   "contract": "sdar-registry-v1",
-  "observedAt": "2026-08-10T14:34:11.356Z",
+  "observedAt": "2026-08-15T11:47:09.200Z",
   "status": "passed",
   "evidenceClass": "real_live_goal_service",
   "liveGoalServiceVerified": true,
@@ -25,14 +25,14 @@
   },
   "nativeLineage": {
     "revision": 2,
-    "checksum": "57018a96c6c5dbd9a4713a7cc4fa5ea2730af592ee53593cdb41c59ad429384c"
+    "checksum": "153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0"
   },
   "projection": {
     "revision": 2,
-    "checksum": "5be22b34105129a6197679c0a48a65939f952c9a064aa2b67965191f8314fce5",
-    "etag": "\"5be22b34105129a6197679c0a48a65939f952c9a064aa2b67965191f8314fce5\"",
-    "generatedAt": "2026-08-10T14:12:37.383Z",
-    "expiresAt": "2026-09-09T14:12:37.383Z",
+    "checksum": "15990223e48042eac08dcb1a0fd9300f420a1f30aa230f53d4b15acacd73dca1",
+    "etag": "\"15990223e48042eac08dcb1a0fd9300f420a1f30aa230f53d4b15acacd73dca1\"",
+    "generatedAt": "2026-08-15T11:31:20.779Z",
+    "expiresAt": "2026-09-14T11:31:20.779Z",
     "providerIds": ["ha-climate-lab", "ha-light-lab"],
     "watchEvent": "revision"
   },

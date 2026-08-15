@@ -1,8 +1,8 @@
 {
   "evidenceClass": "real",
   "phase": "P1_HA_READ_ONLY_PREFLIGHT",
-  "startedAt": "2026-08-09T16:17:00.319Z",
-  "completedAt": "2026-08-09T16:17:01.262Z",
+  "startedAt": "2026-08-15T17:29:23.585Z",
+  "completedAt": "2026-08-15T17:29:24.483Z",
   "status": "passed",
   "readOnly": true,
   "sideEffectsAttempted": false,
@@ -69,7 +69,7 @@
       "displayName": "Living room air conditioner",
       "state": "off",
       "reachable": true,
-      "observedAt": "2026-08-09T15:01:58.722278+00:00",
+      "observedAt": "2026-08-15T16:40:57.186232+00:00",
       "supportedHvacModes": ["heat", "dry", "cool", "fan_only", "off"],
       "minTemperature": 16,
       "maxTemperature": 31,
@@ -82,11 +82,11 @@
       "entityHash": "48d411259a1aaeffd9111bc10a9444ff2a092e79e51e1bd337a32e59c19d7928",
       "domain": "light",
       "displayName": "餐厅灯",
-      "state": "on",
+      "state": "off",
       "reachable": true,
-      "observedAt": "2026-08-09T16:14:11.583771+00:00",
+      "observedAt": "2026-08-15T17:25:42.892867+00:00",
       "supportsBrightness": true,
-      "brightnessPercent": 100
+      "brightnessPercent": null
     },
     {
       "resourceId": "living-room-aux-light",
@@ -95,7 +95,7 @@
       "displayName": "客厅灯",
       "state": "off",
       "reachable": true,
-      "observedAt": "2026-08-09T16:14:05.349370+00:00",
+      "observedAt": "2026-08-15T17:21:26.044786+00:00",
       "supportsBrightness": true,
       "brightnessPercent": null
     }

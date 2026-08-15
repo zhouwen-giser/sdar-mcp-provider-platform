@@ -5,6 +5,7 @@ const DEFAULT_CLIMATE_ADAPTER_HOST = "127.0.0.1";
 const DEFAULT_CLIMATE_ADAPTER_PORT = 17_020;
 const DEFAULT_LIGHT_ADAPTER_HOST = "127.0.0.1";
 const DEFAULT_LIGHT_ADAPTER_PORT = 17_021;
+const DEFAULT_POSTGRES_PORT = 55_432;
 const HOST = /^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$/;
 const POSTGRES_IDENTIFIER = /^[a-z][a-z0-9_]{0,62}$/;
 
@@ -27,6 +28,7 @@ export interface LivePmsOnboardingConfig {
   readonly root: string;
   readonly localStateRoot: string;
   readonly apiBaseUrl: string;
+  readonly postgresPort: number;
   readonly paths: {
     readonly resources: string;
     readonly databaseUrl: string;
@@ -50,6 +52,11 @@ export function resolveLivePmsOnboardingConfig(
   const root = resolve(repositoryRoot);
   const localStateRoot = resolveLocalStateRoot(root, environment.SMPP_LOCAL_STATE_ROOT);
   const apiBaseUrl = parseApiBaseUrl(environment.SMPP_PMS_API_URL ?? DEFAULT_API_BASE_URL);
+  const postgresPort = parsePort(
+    environment.SMPP_POSTGRES_PORT,
+    DEFAULT_POSTGRES_PORT,
+    "SMPP_POSTGRES_PORT_INVALID",
+  );
   const climate = providerConfig({
     providerId: "ha-climate-lab",
     providerTypeId: "home_assistant.climate",
@@ -81,6 +88,7 @@ export function resolveLivePmsOnboardingConfig(
     root,
     localStateRoot,
     apiBaseUrl,
+    postgresPort,
     paths: Object.freeze({
       resources: resolve(localStateRoot, "ha-real-device/resources.local.json"),
       databaseUrl: resolve(localStateRoot, "pms-continuation/secrets/pms-database-url"),
@@ -160,12 +168,14 @@ function parseAdapterHost(value: string): string {
 }
 
 function parseAdapterPort(value: string | undefined, defaultPort: number): number {
+  return parsePort(value, defaultPort, "SMPP_ADAPTER_PORT_INVALID");
+}
+
+function parsePort(value: string | undefined, defaultPort: number, code: string): number {
   if (value === undefined) return defaultPort;
-  if (!/^\d+$/.test(value)) throw new Error("SMPP_ADAPTER_PORT_INVALID");
+  if (!/^\d+$/.test(value)) throw new Error(code);
   const port = Number(value);
-  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
-    throw new Error("SMPP_ADAPTER_PORT_INVALID");
-  }
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) throw new Error(code);
   return port;
 }
 

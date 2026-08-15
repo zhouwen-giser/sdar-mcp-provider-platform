@@ -54,6 +54,27 @@ describe("Home Assistant light Provider", () => {
     expect(
       (await gateway?.describeProvider())?.operations.map((operation) => operation.name),
     ).toEqual(["light_get_state", "light_set_power", "light_set_brightness"]);
+    const availability = await gateway?.checkAvailability([
+      {
+        requestId: "read-availability",
+        operationName: "light_get_state",
+        arguments: { resourceId: resource.resourceId },
+      },
+      {
+        requestId: "power-availability",
+        operationName: "light_set_power",
+        arguments: { resourceId: resource.resourceId, power: "on" },
+      },
+    ]);
+    expect(availability?.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ requestId: "read-availability", riskLevel: "LOW" }),
+        expect.objectContaining({
+          requestId: "power-availability",
+          riskLevel: "HIGH",
+        }),
+      ]),
+    );
     const state = await gateway?.startOperation(
       "light_get_state",
       { resourceId: resource.resourceId },
@@ -196,6 +217,65 @@ describe("Home Assistant light Provider", () => {
       state: "TECHNICAL_FAILED",
       failureReasonCode: "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT",
     });
+  });
+
+  it("rejects expired recovery before a late write or late success", async () => {
+    const store = new MemoryLightStore();
+    const startedAt = Date.parse("2026-08-10T00:00:00.000Z");
+    const deadline = new Date(startedAt + 1000).toISOString();
+    const base: LightExecution = {
+      taskId: "expired-before-dispatch",
+      externalExecutionId: "expired-before-dispatch-execution",
+      operationName: "light_set_power",
+      resourceId: resource.resourceId,
+      entityId: resource.entityId,
+      argumentHash: "0".repeat(64),
+      executionContext: liveLightContext(),
+      desiredState: { type: "power", power: "off" },
+      state: "PENDING_SIDE_EFFECT",
+      sideEffectDispatched: false,
+      dispatchState: "NOT_STARTED",
+      revision: 1,
+      createdAt: new Date(startedAt).toISOString(),
+      updatedAt: new Date(startedAt).toISOString(),
+      confirmationDeadlineAt: deadline,
+      lastSnapshot: {},
+      commandAcks: {},
+    };
+    store.set(base);
+    store.set({
+      ...base,
+      taskId: "expired-after-intent",
+      externalExecutionId: "expired-after-intent-execution",
+      argumentHash: "1".repeat(64),
+      desiredState: { type: "power", power: "on" },
+      sideEffectDispatched: true,
+      dispatchState: "INTENT_PERSISTED",
+    });
+    fake.setState(resource.entityId, "on", {
+      brightness: 128,
+      supported_color_modes: ["brightness"],
+    });
+    fake.suppressChanges = true;
+
+    const recovered = new LightExecutionEngine(
+      store,
+      new LightResourceRegistry([resource]),
+      new HomeAssistantLightClient({ baseUrl: fake.url, token: fake.token, timeoutMs: 1000 }),
+      new NoopLightTelemetry(),
+      1000,
+      true,
+      { now: () => startedAt + 2000 },
+    );
+    await recovered.recover();
+
+    expect(fake.serviceCalls).toHaveLength(0);
+    for (const taskId of ["expired-before-dispatch", "expired-after-intent"]) {
+      expect(store.get(taskId)).toMatchObject({
+        state: "TECHNICAL_FAILED",
+        failureReasonCode: "HOME_ASSISTANT_STATE_CONFIRMATION_TIMEOUT",
+      });
+    }
   });
 
   it("rejects non-live writes and serializes concurrent duplicate admission", async () => {

@@ -1,33 +1,33 @@
 {
   "evidenceClass": "real",
   "phase": "P6_MCP_REAL_DEVICE_E2E_READ_ONLY",
-  "integrationRunId": "smpp-registry-e2e-bb46d5cb-c4e2-4c8a-93c3-f94f76fb6955",
+  "integrationRunId": "smpp-registry-e2e-de446f1c-9ff7-4a43-b8de-36d6b34a5525",
   "environment": "home-lab",
-  "startedAt": "2026-08-09T16:18:27.120Z",
-  "completedAt": "2026-08-09T16:18:28.034Z",
+  "startedAt": "2026-08-15T11:48:34.512Z",
+  "completedAt": "2026-08-15T11:48:35.355Z",
   "status": "passed",
   "pms": {
-    "apiBaseUrl": "http://127.0.0.1:8090",
+    "apiBaseUrl": "http://127.0.0.1:28090",
     "registry": {
       "environment": "home-lab",
-      "revision": 3,
-      "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
+      "revision": 2,
+      "checksum": "153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0",
       "providerIds": ["ha-climate-lab", "ha-light-lab"],
       "providerCount": 2,
       "containsSecretKeys": false,
       "containsEntityIdKeys": false
     },
-    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
+    "etag": "\"153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0\"",
     "bootstrapConsistency": {
       "status": 200,
       "sameChecksum": true,
-      "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\""
+      "etag": "\"153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0\""
     }
   },
   "runtimes": [
     {
       "providerId": "ha-climate-lab",
-      "endpoint": "http://127.0.0.1:18081/mcp",
+      "endpoint": "http://127.0.0.1:28180/mcp",
       "protocolSurface": {
         "initialize": "not_applicable_to_frozen_runtime_surface",
         "discovery": { "status": 200, "resultType": "complete", "hasError": false },
@@ -46,7 +46,7 @@
     },
     {
       "providerId": "ha-light-lab",
-      "endpoint": "http://127.0.0.1:18080/mcp",
+      "endpoint": "http://127.0.0.1:28181/mcp",
       "protocolSurface": {
         "initialize": "not_applicable_to_frozen_runtime_surface",
         "discovery": { "status": 200, "resultType": "complete", "hasError": false },
@@ -68,13 +68,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-air-conditioner",
-        "power": "off",
+        "power": "on",
         "reachable": true,
-        "hvacMode": "off",
+        "hvacMode": "cool",
         "targetTemperature": 16,
         "currentTemperature": null,
         "brightnessPercent": null,
-        "observedAt": "2026-08-09T15:01:58.722278+00:00"
+        "observedAt": "2026-08-15T08:31:44.394717+00:00"
       },
       "status": 200
     },
@@ -92,7 +92,7 @@
         "targetTemperature": null,
         "currentTemperature": null,
         "brightnessPercent": 100,
-        "observedAt": "2026-08-09T16:14:11.583771+00:00"
+        "observedAt": "2026-08-15T10:56:24.707844+00:00"
       },
       "status": 200
     },
@@ -104,13 +104,13 @@
       "homeAssistantObservationId": null,
       "state": {
         "resourceId": "living-room-aux-light",
-        "power": "off",
+        "power": "on",
         "reachable": true,
         "hvacMode": null,
         "targetTemperature": null,
         "currentTemperature": null,
-        "brightnessPercent": null,
-        "observedAt": "2026-08-09T16:14:05.349370+00:00"
+        "brightnessPercent": 56,
+        "observedAt": "2026-08-15T11:22:41.853822+00:00"
       },
       "status": 200
     }

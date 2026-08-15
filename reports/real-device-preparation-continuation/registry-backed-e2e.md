@@ -3,7 +3,7 @@
 - Evidence class: `real`
 - Status: `passed`
 - Environment: `home-lab`
-- Registry revision/checksum: `3 / dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2`
+- Registry revision/checksum: `2 / 153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0`
 - Registry providers: ha-climate-lab, ha-light-lab
 - Runtime MCP reads: `3`
 - Active/uncertain tasks: `0 / 0`

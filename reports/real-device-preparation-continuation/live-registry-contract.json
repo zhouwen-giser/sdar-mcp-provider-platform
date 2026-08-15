@@ -3,7 +3,7 @@
   "phase": "C5_LIVE_REGISTRY_CONTRACT",
   "status": "passed",
   "environment": "home-lab",
-  "observedAt": "2026-08-03T22:30:37.093Z",
+  "observedAt": "2026-08-15T11:47:08.821Z",
   "source": "live PMS Registry API",
   "checks": {
     "latest": true,
@@ -20,12 +20,12 @@
     "noEntityIdKeys": true
   },
   "registry": {
-    "revision": 3,
-    "checksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
-    "etag": "\"dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2\"",
-    "bootstrapChecksum": "dd7d0f9e7c447447aceaa134a684baa0a2650314f3f51f515930c70b325ea4d2",
-    "historyCount": 3,
-    "historyRevisions": [3, 2, 1],
+    "revision": 2,
+    "checksum": "153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0",
+    "etag": "\"153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0\"",
+    "bootstrapChecksum": "153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0",
+    "historyCount": 2,
+    "historyRevisions": [2, 1],
     "providerIds": ["ha-climate-lab", "ha-light-lab"],
     "latestStatus": 200,
     "bootstrapStatus": 200,

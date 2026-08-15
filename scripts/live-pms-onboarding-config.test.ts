@@ -9,6 +9,7 @@ describe("live PMS onboarding configuration", () => {
     const config = resolveLivePmsOnboardingConfig({}, root);
 
     expect(config.apiBaseUrl).toBe("http://127.0.0.1:8090");
+    expect(config.postgresPort).toBe(55_432);
     expect(config.localStateRoot).toBe(resolve(root, ".local"));
     expect(config.paths.resources).toBe(
       resolve(root, ".local/ha-real-device/resources.local.json"),
@@ -35,6 +36,7 @@ describe("live PMS onboarding configuration", () => {
       {
         SMPP_LOCAL_STATE_ROOT: localStateRoot,
         SMPP_PMS_API_URL: "http://127.0.0.1:28090/",
+        SMPP_POSTGRES_PORT: "55451",
         SMPP_CLIMATE_ADAPTER_HOST: "LOCALHOST",
         SMPP_CLIMATE_ADAPTER_PORT: "27020",
         SMPP_LIGHT_ADAPTER_HOST: "127.0.0.2",
@@ -47,6 +49,7 @@ describe("live PMS onboarding configuration", () => {
 
     expect(config.localStateRoot).toBe(localStateRoot);
     expect(config.apiBaseUrl).toBe("http://127.0.0.1:28090");
+    expect(config.postgresPort).toBe(55_451);
     expect(config.paths.databaseUrl).toBe(
       resolve(localStateRoot, "pms-continuation/secrets/pms-database-url"),
     );
@@ -72,6 +75,7 @@ describe("live PMS onboarding configuration", () => {
     [{ SMPP_PMS_API_URL: "http://token@127.0.0.1:8090" }, "SMPP_PMS_API_URL_INVALID"],
     [{ SMPP_CLIMATE_ADAPTER_HOST: "http://127.0.0.1" }, "SMPP_ADAPTER_HOST_INVALID"],
     [{ SMPP_LIGHT_ADAPTER_PORT: "0" }, "SMPP_ADAPTER_PORT_INVALID"],
+    [{ SMPP_POSTGRES_PORT: "65536" }, "SMPP_POSTGRES_PORT_INVALID"],
     [
       { SMPP_CLIMATE_RUNTIME_DATABASE_NAME: "smpp-climate-runtime-integration" },
       "SMPP_RUNTIME_DATABASE_NAME_INVALID",
