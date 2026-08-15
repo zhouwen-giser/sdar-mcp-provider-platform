@@ -533,7 +533,7 @@ async function ensureDatabaseProfile(
       environment: environmentId(ENVIRONMENT),
       clusterRef: credentials.clusterRef,
       host: "127.0.0.1",
-      port: 55432,
+      port: CONFIG.postgresPort,
       databaseMode: provider.databaseMode,
       ...(provider.databaseName === undefined ? {} : { databaseName: provider.databaseName }),
       sslMode: "disable",
