@@ -54,6 +54,27 @@ describe("Home Assistant light Provider", () => {
     expect(
       (await gateway?.describeProvider())?.operations.map((operation) => operation.name),
     ).toEqual(["light_get_state", "light_set_power", "light_set_brightness"]);
+    const availability = await gateway?.checkAvailability([
+      {
+        requestId: "read-availability",
+        operationName: "light_get_state",
+        arguments: { resourceId: resource.resourceId },
+      },
+      {
+        requestId: "power-availability",
+        operationName: "light_set_power",
+        arguments: { resourceId: resource.resourceId, power: "on" },
+      },
+    ]);
+    expect(availability?.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ requestId: "read-availability", riskLevel: "LOW" }),
+        expect.objectContaining({
+          requestId: "power-availability",
+          riskLevel: "HIGH",
+        }),
+      ]),
+    );
     const state = await gateway?.startOperation(
       "light_get_state",
       { resourceId: resource.resourceId },

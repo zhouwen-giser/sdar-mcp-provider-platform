@@ -138,7 +138,10 @@ export class LightProviderServer {
     const base = {
       requestId: check.requestId ?? "",
       operationName: check.operationName ?? "",
-      riskLevel: "LOW",
+      riskLevel:
+        check.operationName === "light_set_power" || check.operationName === "light_set_brightness"
+          ? "HIGH"
+          : "LOW",
       reservationMode: "NONE",
     };
     try {
