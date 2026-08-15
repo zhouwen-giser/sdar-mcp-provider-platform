@@ -25,14 +25,8 @@
     "etag": "\"153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0\"",
     "bootstrapChecksum": "153cfb30a3199842fdb8ad2700b9aae28cd070fb115c1739c0636e533bdb96b0",
     "historyCount": 2,
-    "historyRevisions": [
-      2,
-      1
-    ],
-    "providerIds": [
-      "ha-climate-lab",
-      "ha-light-lab"
-    ],
+    "historyRevisions": [2, 1],
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
     "latestStatus": 200,
     "bootstrapStatus": 200,
     "historyStatus": 200,

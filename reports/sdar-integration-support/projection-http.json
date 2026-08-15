@@ -6,11 +6,7 @@
   "status": "passed",
   "evidenceClass": "real_live_goal_service",
   "liveGoalServiceVerified": true,
-  "routes": [
-    "latest",
-    "bootstrap",
-    "watch"
-  ],
+  "routes": ["latest", "bootstrap", "watch"],
   "checks": {
     "latest200": true,
     "projectionChecksum": true,
@@ -37,10 +33,7 @@
     "etag": "\"15990223e48042eac08dcb1a0fd9300f420a1f30aa230f53d4b15acacd73dca1\"",
     "generatedAt": "2026-08-15T11:31:20.779Z",
     "expiresAt": "2026-09-14T11:31:20.779Z",
-    "providerIds": [
-      "ha-climate-lab",
-      "ha-light-lab"
-    ],
+    "providerIds": ["ha-climate-lab", "ha-light-lab"],
     "watchEvent": "revision"
   },
   "contractAssets": {
