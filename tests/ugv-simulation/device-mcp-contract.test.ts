@@ -421,7 +421,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     const store = new MemoryProviderStore();
     const client = testClient(harness, store, { readRetryAttempts: 1 });
     const states: string[] = [];
+    const calls: { retries: number; attempts: number; uncertain: boolean }[] = [];
     client.onConnectionState((state) => states.push(state));
+    client.onCallObservation((observation) => calls.push(observation));
     try {
       await client.connect();
       harness.dropNextToolCalls = 1;
@@ -431,6 +433,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       expect(states).toContain("disconnected");
       expect(states.at(-1)).toBe("connected");
       expect(store.toolCalls.at(-1)?.outcome).toBe("accepted");
+      expect(calls).toEqual([
+        expect.objectContaining({ attempts: 2, retries: 1, uncertain: false }),
+      ]);
     } finally {
       await client.close();
       await harness.stop();
@@ -443,6 +448,8 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     await harness.start();
     const store = new MemoryProviderStore();
     const client = testClient(harness, store, { timeoutMs: 30, readRetryAttempts: 4 });
+    const calls: { retries: number; attempts: number; uncertain: boolean }[] = [];
+    client.onCallObservation((observation) => calls.push(observation));
     try {
       await client.connect();
       await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
@@ -451,6 +458,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       expect(harness.toolCalls.filter(({ name }) => name === "ugv_motion_stop")).toHaveLength(1);
       expect(client.connected()).toBe(false);
       expect(store.toolCalls.at(-1)?.outcome).toBe("timeout");
+      expect(calls).toEqual([
+        expect.objectContaining({ attempts: 1, retries: 0, uncertain: true }),
+      ]);
     } finally {
       await client.close();
       await harness.stop();

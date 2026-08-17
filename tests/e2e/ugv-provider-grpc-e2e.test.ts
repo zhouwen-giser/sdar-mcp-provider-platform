@@ -41,6 +41,7 @@ describe("UGV Adapter gRPC E2E", () => {
         freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
+        stationaryStabilityMs: 0,
         pollIntervalMs: 60_000,
       },
       store,
@@ -117,6 +118,11 @@ describe("UGV Adapter gRPC E2E", () => {
       "/ugv/mission_state",
       Buffer.from('{"entity_id":"ugv1","id":1,"type":1,"state":4,"progress":100}'),
     );
+    ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.1001,"longitude":114.1001}'),
+    );
+    ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
     const terminal = await gateway.getExecution(
       "grpc-nav-1",
       started.accepted?.externalExecutionId,

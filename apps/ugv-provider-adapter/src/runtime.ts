@@ -17,6 +17,7 @@ import type {
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
   controlDeviceCalls,
+  buildUgvCompatibilityProfile,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
   executeUgvStartFlow,
@@ -34,15 +35,23 @@ import {
   assertNoRefereeData,
   checkVehicleAvailability,
   freshnessState,
+  isNewAuthority,
   mapReconMotionStatus,
   mapVehicleTaskState,
   monotonicProgress,
+  capturePhysicalDispatchBaseline,
+  navigationPhysicalConfirmation,
+  navigationTerminalFacts,
+  reconTerminalFacts,
+  stationaryPhysicalConfirmation,
   UGV_OPERATION_TRACKS,
   sanitizeFireResult,
   TrackArbiter,
   vehicleEvidence,
   type AvailabilityDecision,
   type FreshnessPolicy,
+  type PhysicalDispatchBaseline,
+  type PhysicalObservationAuthority,
   type UgvSnapshot,
   type VehicleReconnaissanceState,
   type VehicleTaskTrack,
@@ -51,6 +60,7 @@ import {
 import type { UgvBusinessEventHub } from "./business-events.js";
 import type { UgvTelemetry } from "./telemetry.js";
 import { normalizeUgvCapabilities } from "./capabilities.js";
+import { UgvOperationHealthTracker } from "./operation-health.js";
 import { deduplicateTargets, normalizeDeviceTargets } from "./targets.js";
 
 const OPERATIONS = new Set(Object.keys(UGV_OPERATION_TRACKS));
@@ -92,16 +102,31 @@ export class UgvProviderRuntime {
   #unsubscribeSnapshot: (() => void) | undefined;
   #poller: NodeJS.Timeout | undefined;
   #deviceReconnect: Promise<void> | undefined;
+  #unsubscribeToolHealth: (() => void) | undefined;
+  #unsubscribeCallObservation: (() => void) | undefined;
   #mutationTail: Promise<void> = Promise.resolve();
   #pollPromise: Promise<void> | undefined;
   #lastObservedSnapshot: UgvSnapshot | undefined;
   readonly #freshnessStates = new Map<string, "fresh" | "stale" | "unknown">();
+  readonly operationHealth: UgvOperationHealthTracker;
   constructor(
     readonly options: {
       providerId: string;
+      resourceId?: string;
+      entityId?: string;
+      executionMode?: "simulation" | "live";
       freshness: FreshnessPolicy;
       allowNavigationWithRecon: boolean;
+      fireEnabled?: boolean;
       fireRequiresChassisStopped: boolean;
+      stationarySpeedThresholdKmh?: number;
+      stationaryStabilityMs?: number;
+      physicalConfirmationTimeoutMs?: number;
+      failureBudget?: {
+        degradedThreshold: number;
+        openThreshold: number;
+        recoverySuccessThreshold: number;
+      };
       pollIntervalMs: number;
     },
     readonly store: ProviderStore,
@@ -111,11 +136,41 @@ export class UgvProviderRuntime {
     readonly telemetry: UgvTelemetry,
   ) {
     this.arbiter = new TrackArbiter(options.allowNavigationWithRecon, "UGV", UGV_OPERATION_TRACKS);
+    this.operationHealth = new UgvOperationHealthTracker(
+      options.failureBudget ?? {
+        degradedThreshold: 2,
+        openThreshold: 3,
+        recoverySuccessThreshold: 2,
+      },
+    );
   }
 
   async initialize(): Promise<void> {
     await this.store.initialize();
     await this.device.connect();
+    this.#unsubscribeToolHealth = this.device.onToolHealth((health) => {
+      for (const transition of this.operationHealth.recordToolHealth(health))
+        void this.#operationHealthTransition(transition.previous, transition.current);
+    });
+    this.#unsubscribeCallObservation = this.device.onCallObservation((observation) => {
+      const quality = `${observation.toolName}:${observation.kind}:${observation.outcome}`;
+      void this.telemetry.metric("device_mcp_call_total", 1, "call", quality);
+      void this.telemetry.metric(
+        "device_mcp_call_latency_ms",
+        observation.durationMs,
+        "ms",
+        quality,
+      );
+      if (observation.retries > 0)
+        void this.telemetry.metric(
+          "device_mcp_retry_total",
+          observation.retries,
+          "retry",
+          `${observation.toolName}:${observation.outcome}`,
+        );
+      if (observation.uncertain)
+        void this.telemetry.metric("device_mcp_uncertain_total", 1, "call", observation.toolName);
+    });
     this.ingress.setDeviceConnected(this.device.connected());
     this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic) => {
       void this.#observe(snapshot, topic);
@@ -126,6 +181,8 @@ export class UgvProviderRuntime {
   async close(): Promise<void> {
     if (this.#poller !== undefined) clearInterval(this.#poller);
     this.#unsubscribeSnapshot?.();
+    this.#unsubscribeToolHealth?.();
+    this.#unsubscribeCallObservation?.();
     await this.#mutationTail.catch(() => undefined);
     await this.device.close();
     await this.store.close();
@@ -145,7 +202,7 @@ export class UgvProviderRuntime {
   async #start(
     input: StartUgvOperation,
   ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
-    validateStart(input);
+    validateStart(input, this.options);
     if (SYNC_OPERATIONS.has(input.operationName)) return this.#synchronous(input);
     const existing = await this.store.getExecution(input.taskId);
     if (existing !== undefined) {
@@ -162,17 +219,24 @@ export class UgvProviderRuntime {
     const now = new Date().toISOString();
     const tracks = UGV_OPERATION_TRACKS[input.operationName] ?? [];
     const observationCursors = initialObservationCursors(input.operationName, this.ingress);
+    const dispatchBaseline = capturePhysicalDispatchBaseline(
+      this.ingress.snapshot(),
+      operationObservationAuthorities(input.operationName, this.ingress),
+      now,
+    );
     let execution: ProviderExecution = {
       taskId: input.taskId,
-      externalExecutionId: `ugv1:${tracks[0] ?? "query"}:${randomUUID()}`,
+      externalExecutionId: `${this.options.resourceId ?? "vehicle:ugv1"}:${tracks[0] ?? "query"}:${randomUUID()}`,
       operationName: input.operationName,
       argumentHash: input.argumentHash,
-      resourceId: "vehicle:ugv1",
+      providerId: this.options.providerId,
+      resourceId: this.options.resourceId ?? "vehicle:ugv1",
       tracks,
       arguments: structuredClone(input.arguments),
       executionContext: structuredClone(input.executionContext),
       downstreamMissionIds: [],
       ...(observationCursors === undefined ? {} : { observationCursors }),
+      dispatchBaseline: dispatchBaseline as unknown as Record<string, unknown>,
       state: input.operationName === "vehicle_fire_weapon" ? "WAITING_INPUT" : "ACCEPTED",
       revision: 1,
       reasonCode:
@@ -216,6 +280,13 @@ export class UgvProviderRuntime {
         execution = transition(execution, "STARTING", "UGV_WAITING_DEVICE_CONFIRMATION");
         await this.store.putExecution(execution);
         await this.#startedEvent(execution);
+        await this.telemetry.metric(
+          "provider_task_start_latency_ms",
+          Math.max(0, Date.now() - Date.parse(execution.createdAt)),
+          "ms",
+          execution.operationName,
+          identityTelemetry(execution),
+        );
       }
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
@@ -241,7 +312,7 @@ export class UgvProviderRuntime {
         error instanceof DeviceToolRejectedError ? "BUSINESS_FAILED" : "TECHNICAL_FAILED",
         reason(error),
         {
-          resourceId: "vehicle:ugv1",
+          resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "failed",
           observedAt: new Date().toISOString(),
         },
@@ -263,8 +334,26 @@ export class UgvProviderRuntime {
         reasonCode: "UGV_OPERATION_UNSUPPORTED",
         description: "UGV_OPERATION_UNSUPPORTED",
       };
+    if (operationName === "vehicle_fire_weapon" && this.options.fireEnabled !== true)
+      return {
+        availability: "DISABLED",
+        riskLevel: "HIGH",
+        reasonCode: "UGV_FIRE_DISABLED",
+        description: "UGV_FIRE_DISABLED",
+      };
+    const operationHealth = this.operationHealth.snapshot(operationName);
+    if (operationHealth.state === "OPEN" || operationHealth.state === "RECOVERING")
+      return {
+        availability: "UNKNOWN",
+        riskLevel: operationName === "vehicle_emergency_stop" ? "HIGH" : "MEDIUM",
+        reasonCode: operationHealth.reasonCode,
+        description: operationHealth.reasonCode,
+      };
     const requiredTools = requiredUgvDeviceTools(operationName, argumentsValue);
-    return checkVehicleAvailability({
+    const toolFacts = buildUgvCompatibilityProfile(this.device.contracts())
+      .flatMap((operation) => operation.tools)
+      .filter((fact) => requiredTools.includes(fact.toolName));
+    const decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
       snapshot: this.ingress.snapshot(),
@@ -274,13 +363,22 @@ export class UgvProviderRuntime {
           (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
         ),
       ),
-      requiredToolsPresent: requiredTools.every((tool) => this.device.toolAvailable(tool)),
+      requiredToolsPresent:
+        requiredTools.every((tool) => this.device.toolAvailable(tool)) &&
+        toolFacts.every((fact) => fact.status === "PRESENT_COMPATIBLE"),
       ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
       allowNavigationWithRecon: this.options.allowNavigationWithRecon,
       fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,
       circularScanSupported: true,
       ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
     });
+    return operationHealth.state === "DEGRADED" && decision.availability === "AVAILABLE"
+      ? {
+          ...decision,
+          reasonCode: "PUBLIC_AVAILABILITY_DEGRADED_REPRESENTATION_GAP",
+          description: "PUBLIC_AVAILABILITY_DEGRADED_REPRESENTATION_GAP",
+        }
+      : decision;
   }
 
   get(taskId: string): Promise<ProviderExecution | undefined> {
@@ -329,6 +427,20 @@ export class UgvProviderRuntime {
           execution.operationName === "vehicle_area_recon")
       )
         throw new Error("UGV_PERSISTED_MISSION_ID_REQUIRED");
+      const commandBaseline = capturePhysicalDispatchBaseline(
+        this.ingress.snapshot(),
+        operationObservationAuthorities(execution.operationName, this.ingress),
+      );
+      const fenced = transition(
+        execution,
+        execution.state,
+        `UGV_${command.toUpperCase()}_DISPATCH_FENCED`,
+      );
+      fenced.controlConfirmation = {
+        command,
+        baseline: commandBaseline,
+      };
+      await this.store.putExecution(fenced);
       for (const call of controlDeviceCalls(
         execution.operationName,
         command,
@@ -343,13 +455,14 @@ export class UgvProviderRuntime {
           : command === "resume"
             ? "UGV_RESUME_REQUEST_ACCEPTED"
             : "UGV_CANCEL_REQUEST_ACCEPTED";
-      await this.store.putExecution(transition(execution, targetState, reasonCode));
+      await this.store.putExecution(transition(fenced, targetState, reasonCode));
       return await this.#ack(identity, command, true, reasonCode);
     } catch (error) {
       if (error instanceof UncertainMutatingDeviceCallError) {
         const uncertainState = command === "cancel" ? "STOPPING" : execution.state;
+        const fenced = (await this.store.getExecution(execution.taskId)) ?? execution;
         await this.store.putExecution(
-          transition(execution, uncertainState, "UNCERTAIN_EXECUTION_STATE"),
+          transition(fenced, uncertainState, "UNCERTAIN_EXECUTION_STATE"),
         );
       }
       return this.#ack(identity, command, false, reason(error));
@@ -459,11 +572,19 @@ export class UgvProviderRuntime {
       }
       const next = transition(execution, "STARTING", "UGV_FIRE_COMMAND_ACCEPTED");
       next.result = {
-        resourceId: "vehicle:ugv1",
+        resourceId: this.options.resourceId ?? "vehicle:ugv1",
         status: "fire_command_accepted",
         observedAt: next.updatedAt,
       };
-      next.evidence.push(vehicleEvidence("vehicle.weapon.local_result", next.updatedAt, "/status"));
+      next.evidence.push(
+        vehicleEvidence(
+          "vehicle.weapon.local_result",
+          next.updatedAt,
+          "/status",
+          `resource:${next.resourceId}`,
+          [this.options.providerId, "ugv-adapter"],
+        ),
+      );
       await this.store.putExecution(next);
       await this.#emitExecutionTransition(execution, next);
       await this.businessEvents.publish({
@@ -474,7 +595,7 @@ export class UgvProviderRuntime {
         description: "Local UGV fire-control cycle started.",
         reasonCode: "UGV_FIRE_COMMAND_ACCEPTED",
         externalExecutionId: next.externalExecutionId,
-        resourceRef: "vehicle:ugv1",
+        resourceRef: this.options.resourceId ?? "vehicle:ugv1",
         severityHint: "warning",
         rawPayload: { taskId: next.taskId, status: "fire_command_accepted" },
       });
@@ -491,7 +612,7 @@ export class UgvProviderRuntime {
     } catch (error) {
       if (error instanceof DeviceToolRejectedError) {
         const failed = terminal(execution, "BUSINESS_FAILED", reason(error), {
-          resourceId: "vehicle:ugv1",
+          resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "fire_command_rejected",
           observedAt: new Date().toISOString(),
         });
@@ -645,7 +766,12 @@ export class UgvProviderRuntime {
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
       const capabilities = await this.#callDevice("get_capabilities", {}, input.taskId);
-      result = normalizeUgvCapabilities(capabilities, this.device.contracts(), observedAt);
+      result = normalizeUgvCapabilities(
+        capabilities,
+        this.device.contracts(),
+        observedAt,
+        this.options.resourceId ?? "vehicle:ugv1",
+      );
     } else if (input.operationName === "vehicle_get_payload_status") {
       const status = await this.#callDevice("ugv_area_recon_get_status", {}, input.taskId);
       const observation = normalizeMqttObservation("/ugv/area_recon/status", status);
@@ -656,7 +782,7 @@ export class UgvProviderRuntime {
       );
       const payload = this.ingress.snapshot().payload;
       result = {
-        resourceId: "vehicle:ugv1",
+        resourceId: this.options.resourceId ?? "vehicle:ugv1",
         online: payload.online ?? false,
         ...(payload.gimbal === undefined ? {} : { gimbal: payload.gimbal }),
         ...(payload.laser === undefined ? {} : { laser: payload.laser }),
@@ -677,7 +803,7 @@ export class UgvProviderRuntime {
       const mqttTargets = this.ingress.snapshot().payload.targets;
       const normalizedDeviceTargets = normalizeDeviceTargets(deviceTargets, observedAt);
       result = {
-        resourceId: "vehicle:ugv1",
+        resourceId: this.options.resourceId ?? "vehicle:ugv1",
         targets: deduplicateTargets(
           mqttTargets as unknown as Record<string, unknown>[],
           normalizedDeviceTargets,
@@ -689,7 +815,7 @@ export class UgvProviderRuntime {
       const response = await this.#callDevice("ugv_laser_range", {}, input.taskId);
       const distanceM = finite(response.distance_m ?? response.distance);
       result = {
-        resourceId: "vehicle:ugv1",
+        resourceId: this.options.resourceId ?? "vehicle:ugv1",
         distanceM,
         valid: response.valid !== false,
         observedAt,
@@ -697,7 +823,7 @@ export class UgvProviderRuntime {
     }
     const sanitized = sanitizeFireResult(result).value;
     assertNoRefereeData(sanitized);
-    const externalExecutionId = `ugv1:sync:${input.taskId || randomUUID()}`;
+    const externalExecutionId = `${this.options.resourceId ?? "vehicle:ugv1"}:sync:${input.taskId || randomUUID()}`;
     return {
       externalExecutionId,
       initialSnapshot: {
@@ -713,7 +839,14 @@ export class UgvProviderRuntime {
         result: jsonToProtoStruct(sanitizeObject(sanitized)),
         retryable: false,
         observedAt: timestamp(observedAt),
-        evidence: [synchronousEvidence(input.operationName, observedAt)],
+        evidence: [
+          synchronousEvidence(
+            input.operationName,
+            observedAt,
+            this.options.resourceId ?? "vehicle:ugv1",
+            this.options.providerId,
+          ),
+        ],
       },
     };
   }
@@ -733,20 +866,77 @@ export class UgvProviderRuntime {
     if (execution.state === "WAITING_INPUT") return execution;
     const snapshot = this.ingress.snapshot();
     let next = execution;
-    if (execution.operationName === "vehicle_navigate")
+    if (execution.operationName === "vehicle_navigate") {
+      const baseline = executionPhysicalBaseline(execution);
+      const currentAuthorities = operationObservationAuthorities(
+        execution.operationName,
+        this.ingress,
+      );
+      const missionId = execution.downstreamMissionIds.at(-1);
+      const confirmation = navigationPhysicalConfirmation({
+        snapshot,
+        baseline,
+        ...(missionId === undefined ? {} : { missionId }),
+        currentAuthorities,
+        freshness: this.options.freshness,
+        stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
+      });
+      const requestedDistanceM = requestedDistance(execution.arguments);
       next = applyTrack(
         execution,
         snapshot.chassis.mission,
         "completed",
         operationObservationCursor(execution.operationName, this.ingress),
+        {
+          confirmation,
+          stabilitySatisfied: confirmationStabilitySatisfied(
+            baseline,
+            currentAuthorities,
+            this.options.stationaryStabilityMs ?? 0,
+          ),
+          facts: navigationTerminalFacts({
+            snapshot,
+            baseline,
+            ...(missionId === undefined ? {} : { missionId }),
+            ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
+            confirmation,
+          }),
+          controlObservationIsNew: controlObservationIsNew(execution, this.ingress),
+        },
       );
-    else if (execution.operationName === "vehicle_area_recon")
+      if (
+        !isTerminal(next.state) &&
+        physicalConfirmationPending(next.reasonCode) &&
+        physicalConfirmationExpired(baseline, this.options.physicalConfirmationTimeoutMs ?? 30_000)
+      )
+        next = terminal(next, "TECHNICAL_FAILED", "UGV_PHYSICAL_CONFIRMATION_TIMEOUT", {
+          resourceId: execution.resourceId,
+          status: "timeout",
+          observedAt: snapshot.observedAt,
+          ...navigationTerminalFacts({
+            snapshot,
+            baseline,
+            ...(missionId === undefined ? {} : { missionId }),
+            ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
+            confirmation,
+          }),
+        });
+    } else if (execution.operationName === "vehicle_area_recon") {
+      const baseline = executionPhysicalBaseline(execution);
+      const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+      const reconMissionId = execution.downstreamMissionIds.at(-1);
       next = applyReconTrack(
         execution,
         snapshot.payload.reconnaissance,
         this.ingress.observationCursor("/ugv/area_recon/status"),
+        reconTerminalFacts({
+          snapshot,
+          ...(reconMissionId === undefined ? {} : { expectedMissionId: reconMissionId }),
+          ...(authority === undefined ? {} : { currentAuthority: authority }),
+          baseline,
+        }),
       );
-    else if (execution.operationName === "vehicle_control_gimbal")
+    } else if (execution.operationName === "vehicle_control_gimbal")
       next = applyTrack(
         execution,
         snapshot.payload.eoTask,
@@ -782,17 +972,27 @@ export class UgvProviderRuntime {
           next = transition(execution, "RUNNING", "UGV_TARGET_LOCK_CONFIRMED");
       } else if (execution.state === "RUNNING")
         next = terminal(execution, "BUSINESS_FAILED", "UGV_TARGET_LOST", {
-          resourceId: "vehicle:ugv1",
+          resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "target_lost",
           observedAt: new Date().toISOString(),
         });
     } else if (execution.operationName === "vehicle_emergency_stop") {
+      const baseline = executionPhysicalBaseline(execution);
+      const authorities = operationObservationAuthorities(execution.operationName, this.ingress);
+      const stopConfirmation = stationaryPhysicalConfirmation({
+        snapshot,
+        baseline,
+        currentAuthorities: authorities,
+        freshness: this.options.freshness,
+        stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
+      });
       if (
-        isNewOperationObservation(
-          execution,
-          operationObservationCursor(execution.operationName, this.ingress),
+        stopConfirmation.confirmed &&
+        confirmationStabilitySatisfied(
+          baseline,
+          authorities,
+          this.options.stationaryStabilityMs ?? 0,
         ) &&
-        (snapshot.chassis.speedKmh ?? 0) <= 0.1 &&
         snapshot.chassis.mission.state !== 1 &&
         !reconMotionActive(snapshot.payload.reconnaissance.motionStatus) &&
         snapshot.payload.eoTask.state !== 1 &&
@@ -800,9 +1000,28 @@ export class UgvProviderRuntime {
         (snapshot.payload.reconnaissance.lock?.stage ?? 1) === 1
       )
         next = terminal(execution, "SUCCEEDED", "UGV_LOCAL_STOP_CONFIRMED", {
-          resourceId: "vehicle:ugv1",
+          resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "stopped",
-          observedAt: new Date().toISOString(),
+          finalSpeedKmh: snapshot.chassis.speedKmh,
+          missionState: snapshot.chassis.mission.state,
+          reconMotionStatus: snapshot.payload.reconnaissance.motionStatus,
+          eoTaskState: snapshot.payload.eoTask.state,
+          weaponTaskState: snapshot.payload.weapon.state,
+          targetUnlocked: (snapshot.payload.reconnaissance.lock?.stage ?? 1) === 1,
+          observationAuthority: "post_dispatch",
+          snapshotRevision: snapshot.revision,
+          observedAt: snapshot.observedAt,
+        });
+      else if (!stopConfirmation.confirmed && execution.reasonCode !== stopConfirmation.reasonCode)
+        next = transition(execution, execution.state, stopConfirmation.reasonCode);
+      if (
+        !isTerminal(next.state) &&
+        physicalConfirmationExpired(baseline, this.options.physicalConfirmationTimeoutMs ?? 30_000)
+      )
+        next = terminal(next, "TECHNICAL_FAILED", "UGV_PHYSICAL_CONFIRMATION_TIMEOUT", {
+          resourceId: execution.resourceId,
+          status: "timeout",
+          observedAt: snapshot.observedAt,
         });
     }
     if (next.revision !== execution.revision) {
@@ -818,7 +1037,36 @@ export class UgvProviderRuntime {
         identityTelemetry(next),
       );
       await this.#transitionEvent(execution, next);
-      if (isTerminal(next.state)) this.arbiter.release(next.taskId);
+      if (next.state === "PAUSED" && next.controlConfirmation?.command === "pause")
+        await this.#confirmationLatencyMetric("pause_confirmation_latency_ms", next);
+      if (isTerminal(next.state)) {
+        await this.telemetry.metric(
+          "provider_task_terminal_latency_ms",
+          Math.max(0, Date.now() - Date.parse(next.createdAt)),
+          "ms",
+          `${next.operationName}:${next.state}`,
+          identityTelemetry(next),
+        );
+        if (next.operationName === "vehicle_emergency_stop")
+          await this.#confirmationLatencyMetric("emergency_stop_confirmation_latency_ms", next);
+        if (next.operationName === "vehicle_navigate")
+          await this.telemetry.metric(
+            "navigation_terminal_results",
+            1,
+            "result",
+            next.state,
+            identityTelemetry(next),
+          );
+        if (next.operationName === "vehicle_area_recon")
+          await this.telemetry.metric(
+            "recon_terminal_results",
+            1,
+            "result",
+            next.state,
+            identityTelemetry(next),
+          );
+        this.arbiter.release(next.taskId);
+      }
     }
     return next;
   }
@@ -833,7 +1081,33 @@ export class UgvProviderRuntime {
       source: topicCategory(topic),
       revisionChanged: true,
     });
+    for (const [domain, observedAt] of Object.entries({
+      chassis: snapshot.freshness.chassisObservedAt,
+      mission: snapshot.freshness.missionObservedAt,
+      health: snapshot.freshness.healthObservedAt,
+      target: snapshot.freshness.targetObservedAt,
+      payload: snapshot.freshness.payloadObservedAt,
+    }))
+      if (observedAt !== undefined)
+        await this.telemetry.metric(
+          "snapshot_freshness_seconds",
+          Math.max(0, (Date.now() - Date.parse(observedAt)) / 1_000),
+          "s",
+          domain,
+        );
     await this.pollActive();
+  }
+
+  async #confirmationLatencyMetric(metricName: string, execution: ProviderExecution) {
+    const baseline = execution.controlConfirmation?.baseline ?? execution.dispatchBaseline;
+    if (!record(baseline) || typeof baseline.capturedAt !== "string") return;
+    await this.telemetry.metric(
+      metricName,
+      Math.max(0, Date.now() - Date.parse(baseline.capturedAt)),
+      "ms",
+      execution.operationName,
+      identityTelemetry(execution),
+    );
   }
 
   async #emitResourceTransitions(snapshot: UgvSnapshot): Promise<void> {
@@ -951,7 +1225,7 @@ export class UgvProviderRuntime {
       eventType,
       description: reasonCode,
       reasonCode,
-      resourceRef: "vehicle:ugv1",
+      resourceRef: this.options.resourceId ?? "vehicle:ugv1",
       severityHint: "info",
       rawPayload: { targetCountBucket: bucket(count) },
     });
@@ -972,10 +1246,43 @@ export class UgvProviderRuntime {
       eventType,
       description,
       reasonCode,
-      resourceRef: "vehicle:ugv1",
+      resourceRef: this.options.resourceId ?? "vehicle:ugv1",
       severityHint,
       rawPayload,
     });
+  }
+
+  async #operationHealthTransition(
+    previous: ReturnType<UgvOperationHealthTracker["snapshot"]>,
+    current: ReturnType<UgvOperationHealthTracker["snapshot"]>,
+  ): Promise<void> {
+    await this.telemetry.metric(
+      "device_tool_health_transition_total",
+      1,
+      "transition",
+      `${current.operationName}:${previous.state}:${current.state}`,
+    );
+    await this.telemetry.metric(
+      "operation_availability_transition_total",
+      1,
+      "transition",
+      `${current.operationName}:${previous.state}:${current.state}`,
+    );
+    await this.telemetry.emit("PROVIDER_DIAGNOSTIC", {
+      diagnostic: "operation_health_transition",
+      operation: current.operationName,
+      from: previous.state,
+      to: current.state,
+      reasonCode: current.reasonCode,
+    });
+    await this.#resourceEvent(
+      `vehicle.availability.${current.state.toLowerCase()}`,
+      current.reasonCode,
+      `${current.operationName} health changed from ${previous.state} to ${current.state}.`,
+      new Date().toISOString(),
+      current.state === "HEALTHY" ? "info" : "warning",
+      { operationName: current.operationName, healthState: current.state },
+    );
   }
 
   #serializeMutation<T>(work: () => Promise<T>): Promise<T> {
@@ -1101,7 +1408,7 @@ export class UgvProviderRuntime {
     reasonCode: string,
   ): Promise<void> {
     const cancelled = terminal(execution, "CANCELLED", reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "cancelled",
       observedAt: new Date().toISOString(),
     });
@@ -1114,7 +1421,7 @@ export class UgvProviderRuntime {
     reasonCode: string,
   ): Promise<void> {
     const failed = terminal(execution, "TECHNICAL_FAILED", reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "fire_command_rejected",
       observedAt: new Date().toISOString(),
     });
@@ -1363,6 +1670,12 @@ function applyTrack(
   track: VehicleTaskTrack,
   successStatus: string,
   observationCursor?: string,
+  physical?: {
+    confirmation: ReturnType<typeof navigationPhysicalConfirmation>;
+    stabilitySatisfied: boolean;
+    facts: Record<string, unknown>;
+    controlObservationIsNew: boolean;
+  },
 ): ProviderExecution {
   if (!isNewOperationObservation(execution, observationCursor)) return execution;
   if (!trackBelongsToExecution(execution, track))
@@ -1384,24 +1697,57 @@ function applyTrack(
     return transition(current, current.state, mapped.reasonCode);
   }
   const progress = monotonicProgress(current.progress, track.progress);
-  if (mapped.state === "SUCCEEDED")
+  if (
+    mapped.state === "PAUSED" &&
+    execution.controlConfirmation?.command === "pause" &&
+    (physical?.confirmation.stationary !== true ||
+      !physical.confirmation.speedFresh ||
+      !physical.controlObservationIsNew ||
+      !physical.stabilitySatisfied)
+  )
+    return transition(current, current.state, "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING");
+  if (
+    mapped.state === "RUNNING" &&
+    execution.controlConfirmation?.command === "resume" &&
+    physical?.controlObservationIsNew !== true
+  )
+    return transition(current, current.state, "UGV_RESUME_PHYSICAL_CONFIRMATION_PENDING");
+  if (mapped.state === "SUCCEEDED") {
+    if (
+      physical !== undefined &&
+      (!physical.confirmation.confirmed || !physical.stabilitySatisfied)
+    )
+      return transition(current, current.state, physical.confirmation.reasonCode);
     return terminal(current, "SUCCEEDED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: successStatus,
       observedAt: track.observedAt ?? new Date().toISOString(),
+      ...physical?.facts,
     });
+  }
   if (mapped.state === "BUSINESS_FAILED")
     return terminal(current, "BUSINESS_FAILED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "failed",
       observedAt: track.observedAt ?? new Date().toISOString(),
     });
-  if (mapped.state === "CANCELLED")
+  if (mapped.state === "CANCELLED") {
+    if (
+      physical !== undefined &&
+      execution.controlConfirmation?.command === "cancel" &&
+      (!physical.confirmation.speedFresh ||
+        physical.confirmation.stationary !== true ||
+        !physical.controlObservationIsNew ||
+        !physical.stabilitySatisfied)
+    )
+      return transition(current, current.state, "UGV_CANCEL_PHYSICAL_CONFIRMATION_PENDING");
     return terminal(current, "CANCELLED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "cancelled",
       observedAt: track.observedAt ?? new Date().toISOString(),
+      ...physical?.facts,
     });
+  }
   if (
     current.state === "STOPPING" &&
     (mapped.state === "STARTING" || mapped.state === "RUNNING" || mapped.state === "PAUSED")
@@ -1431,6 +1777,7 @@ function applyReconTrack(
   execution: ProviderExecution,
   reconnaissance: UgvSnapshot["payload"]["reconnaissance"],
   observationCursor: string | undefined,
+  terminalFacts: Record<string, unknown> = {},
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
     return execution;
@@ -1463,25 +1810,28 @@ function applyReconTrack(
   }
   if (mapped.state === "SUCCEEDED")
     return terminal(current, "SUCCEEDED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "completed",
       observedAt,
       ...(reconnaissance.coverability === undefined
         ? {}
         : { coverability: reconnaissance.coverability }),
+      ...terminalFacts,
     });
   if (mapped.state === "BUSINESS_FAILED")
     return terminal(current, "BUSINESS_FAILED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "failed",
       observedAt,
       outOfRange: reconnaissance.outOfRange === true,
+      ...terminalFacts,
     });
   if (mapped.state === "CANCELLED")
     return terminal(current, "CANCELLED", mapped.reasonCode, {
-      resourceId: "vehicle:ugv1",
+      resourceId: execution.resourceId,
       status: "cancelled",
       observedAt,
+      ...terminalFacts,
     });
   if (
     current.state === "STOPPING" &&
@@ -1516,6 +1866,124 @@ function trackBelongsToExecution(
   } catch {
     return false;
   }
+}
+
+function executionPhysicalBaseline(execution: ProviderExecution): PhysicalDispatchBaseline {
+  const value = execution.dispatchBaseline;
+  if (
+    record(value) &&
+    typeof value.capturedAt === "string" &&
+    typeof value.snapshotRevision === "string"
+  )
+    return value as unknown as PhysicalDispatchBaseline;
+  return {
+    capturedAt: execution.createdAt,
+    snapshotRevision: execution.latestSnapshotRevision ?? "unknown",
+    mission: { state: "unknown" },
+    observationAuthorities: [],
+  };
+}
+
+function operationObservationAuthorities(
+  operationName: string,
+  ingress: VehicleMqttIngress,
+): PhysicalObservationAuthority[] {
+  const topics =
+    operationName === "vehicle_navigate"
+      ? [
+          "/ugv/mission_state",
+          "/ugv/gnss",
+          "/ugv/speed",
+          "/ugv/nav_state",
+          "status/ugv",
+          "/ugv/status",
+        ]
+      : operationName === "vehicle_area_recon"
+        ? ["/ugv/area_recon/status", "/ugv/area_recon/coverage", "/ugv/area_recon/targets"]
+        : operationName === "vehicle_emergency_stop"
+          ? [
+              "/ugv/mission_state",
+              "/ugv/speed",
+              "/ugv/area_recon/status",
+              "status/ugv",
+              "/ugv/status",
+            ]
+          : [];
+  return topics.flatMap((topic) => {
+    const authority = ingress.observationAuthority(topic);
+    return authority === undefined ? [] : [authority];
+  });
+}
+
+function controlObservationIsNew(
+  execution: ProviderExecution,
+  ingress: VehicleMqttIngress,
+): boolean {
+  const baselineValue = execution.controlConfirmation?.baseline;
+  if (!record(baselineValue)) return false;
+  const baseline = baselineValue as unknown as PhysicalDispatchBaseline;
+  const current = operationObservationAuthorities(execution.operationName, ingress);
+  const newTopics = new Set(
+    current
+      .filter((authority) => {
+        const old = baseline.observationAuthorities.find(
+          (candidate) => candidate.topic === authority.topic,
+        );
+        return old === undefined || isNewAuthority(baseline.observationAuthorities, authority);
+      })
+      .map((authority) => authority.topic),
+  );
+  const missionIsNew = [...newTopics].some((topic) =>
+    ["/ugv/mission_state", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(topic),
+  );
+  if (execution.controlConfirmation?.command === "resume") return missionIsNew;
+  const speedIsNew = [...newTopics].some((topic) =>
+    ["/ugv/speed", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(topic),
+  );
+  return missionIsNew && speedIsNew;
+}
+
+function confirmationStabilitySatisfied(
+  baseline: PhysicalDispatchBaseline,
+  current: readonly PhysicalObservationAuthority[],
+  stabilityMs: number,
+): boolean {
+  if (stabilityMs <= 0) return true;
+  const currentTime = current.reduce(
+    (latest, authority) => Math.max(latest, Date.parse(authority.observedAt)),
+    Number.NEGATIVE_INFINITY,
+  );
+  return (
+    Number.isFinite(currentTime) && currentTime - Date.parse(baseline.capturedAt) >= stabilityMs
+  );
+}
+
+function physicalConfirmationExpired(
+  baseline: PhysicalDispatchBaseline,
+  timeoutMs: number,
+  now = Date.now(),
+): boolean {
+  const capturedAt = Date.parse(baseline.capturedAt);
+  return Number.isFinite(capturedAt) && now - capturedAt >= timeoutMs;
+}
+
+function physicalConfirmationPending(reasonCode: string): boolean {
+  return new Set([
+    "UGV_PHYSICAL_OBSERVATION_NOT_NEW",
+    "UGV_TERMINAL_POSITION_UNCONFIRMED",
+    "UGV_TERMINAL_SPEED_UNCONFIRMED",
+    "UGV_TERMINAL_STATIONARY_UNCONFIRMED",
+    "UGV_MISSION_CORRELATION_UNCONFIRMED",
+    "UGV_CANCEL_PHYSICAL_CONFIRMATION_PENDING",
+    "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING",
+    "UGV_RESUME_PHYSICAL_CONFIRMATION_PENDING",
+  ]).has(reasonCode);
+}
+
+function requestedDistance(argumentsValue: Record<string, unknown>): number | undefined {
+  const mission = record(argumentsValue.mission) ? argumentsValue.mission : undefined;
+  const value = mission?.distanceM ?? mission?.distance;
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
 function initialObservationCursors(
@@ -1647,6 +2115,8 @@ function terminal(
         : "vehicle.mission.state",
       next.updatedAt,
       "/status",
+      `resource:${execution.resourceId}`,
+      [execution.providerId ?? "ugv-provider", "ugv-adapter"],
     ),
   );
   return next;
@@ -1660,7 +2130,7 @@ function taskEvent(execution: ProviderExecution, eventType: string, reasonCode: 
     description: reasonCode,
     reasonCode,
     externalExecutionId: execution.externalExecutionId,
-    resourceRef: "vehicle:ugv1",
+    resourceRef: execution.resourceId,
     severityHint: isFailure(execution.state) ? ("warning" as const) : ("info" as const),
     rawPayload: {
       taskId: execution.taskId,
@@ -1686,14 +2156,22 @@ function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string,
   if (requested.has("targets")) result.targets = snapshot.payload.targets;
   return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
 }
-function synchronousEvidence(operationName: string, observedAt: string) {
+function synchronousEvidence(
+  operationName: string,
+  observedAt: string,
+  resourceId: string,
+  providerId: string,
+) {
   const evidenceType =
     operationName === "vehicle_get_targets"
       ? "vehicle.target.observation"
       : operationName === "vehicle_get_payload_status" || operationName === "vehicle_laser_range"
         ? "vehicle.payload.status"
         : "vehicle.state.observation";
-  return vehicleEvidence(evidenceType, observedAt, "/observedAt");
+  return vehicleEvidence(evidenceType, observedAt, "/observedAt", `resource:${resourceId}`, [
+    providerId,
+    "ugv-adapter",
+  ]);
 }
 function fireConfirmationDecision(value: unknown): "accepted" | "declined" | "invalid" {
   if (!Array.isArray(value)) return "invalid";
@@ -1719,15 +2197,25 @@ function fireDispatchReason(recordValue: CommandAckRecord | undefined): string |
   const reasonCode = recordValue?.response.reasonCode;
   return typeof reasonCode === "string" ? reasonCode : undefined;
 }
-function validateStart(input: StartUgvOperation): void {
+function validateStart(
+  input: StartUgvOperation,
+  options: Pick<UgvProviderRuntime["options"], "resourceId" | "executionMode" | "fireEnabled">,
+): void {
   if (!OPERATIONS.has(input.operationName)) throw new Error("UGV_OPERATION_UNSUPPORTED");
   if (!input.taskId || !input.argumentHash) throw new Error("UGV_START_IDENTITY_INVALID");
-  if (input.arguments.resourceId !== "vehicle:ugv1") throw new Error("UGV_RESOURCE_NOT_FOUND");
-  if (
-    input.executionContext.executionMode !== "SIMULATION" &&
-    input.executionContext.executionMode !== "2"
-  )
-    throw new Error("UGV_EXECUTION_MODE_UNSUPPORTED");
+  if (input.arguments.resourceId !== (options.resourceId ?? "vehicle:ugv1"))
+    throw new Error("UGV_RESOURCE_NOT_FOUND");
+  if (input.operationName === "vehicle_fire_weapon" && options.fireEnabled !== true)
+    throw new Error("UGV_FIRE_DISABLED");
+  const requestedMode = normalizeExecutionMode(input.executionContext.executionMode);
+  if (requestedMode !== (options.executionMode ?? "simulation"))
+    throw new Error("UGV_EXECUTION_MODE_MISMATCH");
+}
+
+function normalizeExecutionMode(value: string): "simulation" | "live" {
+  if (value === "SIMULATION" || value === "2" || value === "simulation") return "simulation";
+  if (value === "LIVE" || value === "1" || value === "live") return "live";
+  throw new Error("UGV_EXECUTION_MODE_MISMATCH");
 }
 function assertIdentity(existing: ProviderExecution, input: StartUgvOperation): void {
   if (

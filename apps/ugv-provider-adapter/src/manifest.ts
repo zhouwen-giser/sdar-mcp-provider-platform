@@ -5,13 +5,14 @@ export function ugvManifest(
   providerId: string,
   version: string,
   store: ProviderStore,
+  resourceId = "vehicle:ugv1",
 ): Record<string, unknown> {
   return vehicleProviderManifest(
     {
       providerId,
       providerType: "isr.vehicle.ugv",
       providerVersion: version,
-      resourceId: "vehicle:ugv1",
+      resourceId,
       displayKind: "UGV",
       supportsScanModes: true,
       supportsCircularEoScan: true,

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-17T01:56:09.475Z",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "branch": "codex/ugv-provider-pre-simulator-hardening",
+  "head": "2e0626f2b2159d7c11061625c15274863479e217",
+  "originMain": "2e0626f2b2159d7c11061625c15274863479e217",
+  "reviewedMain": "2e0626f2b2159d7c11061625c15274863479e217",
+  "reviewedGoal11Head": "007426caf45f32bd8c77eae4ad264b8bae59df6a",
+  "commitsAfterGoal11": 21,
+  "worktreeCleanBeforeBranch": true,
+  "simulatorAvailableForQualification": false,
+  "externalQualificationPolicy": "PENDING_SIMULATOR",
+  "truthBoundary": "Mock and deterministic observation evidence cannot qualify an external simulator or physical motion."
+}

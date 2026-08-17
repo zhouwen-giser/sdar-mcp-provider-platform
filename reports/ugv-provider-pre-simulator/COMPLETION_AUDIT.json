@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "finalClassification": "UGV_PROVIDER_PRE_SIM_READY",
+  "simulatorQualification": "SIMULATOR_QUALIFICATION_PENDING",
+  "tasks": [
+    { "id": "U0", "status": "PASS", "evidence": ["BASELINE.json", "BASELINE_DRIFT.json"] },
+    { "id": "U1", "status": "PASS", "evidence": ["PRD_GAP_MATRIX.json"] },
+    {
+      "id": "U2",
+      "status": "PASS",
+      "evidence": ["CONFIGURATION_EVIDENCE.json", "REGRESSION.json"]
+    },
+    { "id": "U3", "status": "PASS", "evidence": ["IDENTITY_EVIDENCE.json"] },
+    {
+      "id": "U4",
+      "status": "PASS",
+      "evidence": ["CONFIGURATION_EVIDENCE.json", "PREFLIGHT_LOCAL.json"]
+    },
+    {
+      "id": "U5",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR_CONTRACT",
+      "evidence": ["COMPATIBILITY_PROFILE.json"]
+    },
+    { "id": "U6", "status": "PASS", "evidence": ["NAVIGATION_EVIDENCE_TESTS.json"] },
+    {
+      "id": "U7",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+      "evidence": ["NAVIGATION_EVIDENCE_TESTS.json"]
+    },
+    {
+      "id": "U8",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+      "evidence": ["CONTROL_CONFIRMATION_TESTS.json"]
+    },
+    {
+      "id": "U9",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+      "evidence": ["EMERGENCY_STOP_TESTS.json"]
+    },
+    {
+      "id": "U10",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR_OBSERVATION",
+      "evidence": ["RECON_EVIDENCE_TESTS.json"]
+    },
+    {
+      "id": "U11",
+      "status": "PASS",
+      "evidence": ["RETRY_TOOL_HEALTH.json", "AVAILABILITY_FAILURE_BUDGET.json"]
+    },
+    {
+      "id": "U12",
+      "status": "PASS",
+      "evidence": ["NAVIGATION_EVIDENCE_TESTS.json", "CONTROL_CONFIRMATION_TESTS.json"]
+    },
+    { "id": "U13", "status": "PASS", "evidence": ["REGRESSION.json"] },
+    {
+      "id": "U14",
+      "status": "PASS_LOCAL",
+      "externalStatus": "PENDING_SIMULATOR",
+      "evidence": ["PREFLIGHT_LOCAL.json"]
+    },
+    {
+      "id": "U15",
+      "status": "PASS",
+      "evidence": [
+        "NAVIGATION_EVIDENCE_TESTS.json",
+        "CONTROL_CONFIRMATION_TESTS.json",
+        "EMERGENCY_STOP_TESTS.json",
+        "RECON_EVIDENCE_TESTS.json"
+      ]
+    },
+    { "id": "U16", "status": "PASS", "evidence": ["RECOVERY_TESTS.json"] },
+    {
+      "id": "U17",
+      "status": "PASS",
+      "evidence": ["CONFIGURATION_EVIDENCE.json", "REGRESSION.json"]
+    },
+    { "id": "U18", "status": "PASS", "evidence": ["OPERATION_QUALIFICATION_MATRIX.json"] },
+    { "id": "U19", "status": "PASS", "evidence": ["SIMULATOR_DEPENDENCY_MATRIX.json"] },
+    { "id": "U20", "status": "PASS", "evidence": ["REGRESSION.json"] },
+    {
+      "id": "U21",
+      "status": "PASS",
+      "evidence": [
+        "FINAL_REPORT.md",
+        "KNOWN_LIMITATIONS.md",
+        "delivery/ugv-provider-pre-simulator-delivery.zip.sha256"
+      ]
+    }
+  ],
+  "readinessLabels": [
+    "LIVE_MODE_READY",
+    "CONTRACT_GATE_READY",
+    "EVIDENCE_MODEL_READY",
+    "CONTROL_CONFIRMATION_READY",
+    "RETRY_HEALTH_READY",
+    "PREFLIGHT_READY",
+    "PRODUCTIZATION_READY",
+    "SIMULATOR_QUALIFICATION_PENDING"
+  ]
+}

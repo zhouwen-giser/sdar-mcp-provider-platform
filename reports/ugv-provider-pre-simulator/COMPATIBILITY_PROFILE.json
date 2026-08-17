@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "status": "MOCK_CONTRACT_PASS",
+  "externalStatus": "PENDING_SIMULATOR_CONTRACT",
+  "classifications": [
+    "PRESENT_COMPATIBLE",
+    "PRESENT_SCHEMA_MISMATCH",
+    "MISSING_REQUIRED",
+    "MISSING_OPTIONAL",
+    "UNVERIFIED_EXTERNAL"
+  ],
+  "operationFacts": {
+    "vehicle_get_state": { "required": ["get_status"], "kind": "read" },
+    "vehicle_get_capabilities": { "required": ["get_capabilities"], "kind": "read" },
+    "vehicle_get_payload_status": { "required": ["get_status"], "kind": "read" },
+    "vehicle_get_targets": { "optional": ["ugv_area_recon_get_targets"], "kind": "read" },
+    "vehicle_laser_range": { "optional": ["ugv_laser_range"], "kind": "read" },
+    "vehicle_navigate": {
+      "requiredAny": ["ugv_move_distance", "ugv_path_follow_mission"],
+      "required": ["ugv_mission_control"],
+      "missionIdRequired": true,
+      "kind": "mutating"
+    },
+    "vehicle_area_recon": {
+      "required": ["ugv_area_recon_configure", "ugv_area_recon_control"],
+      "missionIdRequired": true,
+      "kind": "mutating"
+    },
+    "vehicle_track_target": { "optional": ["ugv_target_track"], "kind": "mutating" },
+    "vehicle_control_gimbal": { "optional": ["ugv_gimbal_control"], "kind": "mutating" },
+    "vehicle_fire_weapon": { "policy": "disabled", "kind": "mutating" },
+    "vehicle_emergency_stop": { "required": ["ugv_motion_stop"], "kind": "mutating" }
+  },
+  "truthBoundary": "Only deterministic fixtures were classified; no external tools/list was observed."
+}

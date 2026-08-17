@@ -28,6 +28,8 @@ export interface ProviderExecution {
   externalExecutionId: string;
   operationName: string;
   argumentHash: string;
+  /** Public Provider identity that owns the execution and its evidence. */
+  providerId?: string;
   resourceId: string;
   tracks: string[];
   arguments: Record<string, unknown>;
@@ -35,6 +37,10 @@ export interface ProviderExecution {
   downstreamMissionIds: string[];
   /** Source-observation cursors captured before dispatch, used to reject stale task telemetry. */
   observationCursors?: Record<string, string>;
+  /** Objective vehicle facts and observation authority captured before physical dispatch. */
+  dispatchBaseline?: Record<string, unknown>;
+  /** Persisted post-command evidence fence used for pause/resume/cancel confirmation. */
+  controlConfirmation?: Record<string, unknown>;
   selectedDeviceTool?: string;
   providerRevision?: string;
   state: ProviderExecutionState;

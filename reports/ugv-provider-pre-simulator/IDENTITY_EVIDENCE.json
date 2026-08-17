@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_PASS",
+  "publicIdentity": {
+    "providerId": "configured",
+    "resourceId": "configured",
+    "vehicleType": "configured",
+    "defaultProviderId": "isr.vehicle.ugv.ugv1",
+    "defaultResourceId": "vehicle:ugv1"
+  },
+  "privateIdentity": {
+    "entityId": "configured",
+    "defaultEntityId": "ugv1",
+    "exposureRule": "not emitted as the public Resource identity"
+  },
+  "propagation": [
+    "Provider manifest",
+    "capability response",
+    "snapshot",
+    "Task externalExecutionId and result",
+    "Evidence producer and subject",
+    "Business Events",
+    "Provider telemetry",
+    "PMS seed Resource"
+  ],
+  "recovery": "providerId, resourceId and physical baselines persist in ProviderExecution JSON",
+  "externalObservation": "PENDING_SIMULATOR_OBSERVATION"
+}

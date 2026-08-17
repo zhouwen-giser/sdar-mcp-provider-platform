@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_PASS",
+  "defaults": {
+    "executionMode": "simulation",
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "resourceId": "vehicle:ugv1",
+    "entityId": "ugv1",
+    "vehicleType": "ugv",
+    "fireEnabled": false,
+    "mockDeviceMcp": false,
+    "store": "postgres"
+  },
+  "productionProfile": {
+    "executionMode": "live",
+    "fireEnabled": false,
+    "mockDeviceMcp": false,
+    "store": "postgres",
+    "identitySource": "product-prefixed environment mapped into the UGV configuration contract"
+  },
+  "inventory": {
+    "ugvFields": 65,
+    "totalFields": 245,
+    "generatedArtifacts": [
+      "schemas/config/provider.ugv.schema.json",
+      "schemas/config/provider.ugv.defaults.json",
+      "schemas/config/provider.ugv.ui.json"
+    ]
+  },
+  "verification": [
+    "CONFIGURATION_SCHEMA_CHECK_OK",
+    "production bundle semantic validator",
+    "UGV configuration compatibility tests"
+  ]
+}

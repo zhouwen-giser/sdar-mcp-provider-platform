@@ -21,6 +21,20 @@ export interface VehicleCapabilityProfile {
   needPlanDefault?: boolean;
   movingWhileRecon?: boolean;
   continuousPitchSweep?: boolean;
+  engineeringProfile?: VehicleEngineeringProfile;
+}
+
+export interface VehicleEngineeringProfile {
+  provenance: {
+    authority: "device_reported" | "managed_configuration" | "unconfigured";
+    source: string;
+    observedAt?: string;
+  };
+  minimumTurningRadiusM?: number | null;
+  maximumGradePercent?: number | null;
+  obstacleCrossingHeightM?: number | null;
+  nominalDetectionRangeM?: number | null;
+  physicalDimensionsM?: { length: number; width: number; height: number } | null;
 }
 
 /**
@@ -96,6 +110,14 @@ export function normalizeVehicleCapabilities(
       laserRange: profile.laserRangeTool !== undefined && tools.has(profile.laserRangeTool),
     },
     deviceReported: reported,
+    engineeringProfile: profile.engineeringProfile ?? {
+      provenance: { authority: "unconfigured", source: "not_supplied" },
+      minimumTurningRadiusM: null,
+      maximumGradePercent: null,
+      obstacleCrossingHeightM: null,
+      nominalDetectionRangeM: null,
+      physicalDimensionsM: null,
+    },
     observedAt,
   };
 }

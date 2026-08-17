@@ -3,6 +3,7 @@ export type ReconMotionStatus =
   1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 99 | "unknown";
 export type ComponentHealth = "normal" | "fault" | "unknown";
 export type VehicleTrack = "chassis" | "eo" | "weapon";
+export type VehicleExecutionMode = "simulation" | "live";
 
 export interface VehicleTaskTrack {
   id?: string;
@@ -119,7 +120,7 @@ export interface VehicleIdentity {
   resourceId: string;
   entityId: string;
   vehicleType: string;
-  executionMode: "simulation";
+  executionMode: VehicleExecutionMode;
 }
 
 export interface VehicleSnapshot {
@@ -204,13 +205,7 @@ export interface VehicleSnapshot {
 }
 
 export interface UgvSnapshot extends VehicleSnapshot {
-  identity: {
-    providerId: "isr.vehicle.ugv.ugv1";
-    resourceId: "vehicle:ugv1";
-    entityId: "ugv1";
-    vehicleType: "ugv";
-    executionMode: "simulation";
-  };
+  identity: VehicleIdentity;
   payload: VehicleSnapshot["payload"] & {
     eoTask: VehicleTaskTrack;
     reconnaissance: VehicleReconnaissanceState & { motionStatus: ReconMotionStatus };

@@ -796,6 +796,22 @@ export function validateAnonymousIntranetCompose(services, product) {
   if (pmsWorkerEnvironment.PMS_EXTERNAL_RUNTIME_CATALOG_CREDENTIAL_FILE !== undefined)
     throw coded("PRODUCTION_BUNDLE_PMS_WORKER_CATALOG_CREDENTIAL_FORBIDDEN");
 
+  if (product.id === "ugv") {
+    const adapterEnvironment = requiredComposeEnvironment(
+      requiredComposeService(services, "ugv-adapter"),
+      "ugv-adapter",
+    );
+    if (
+      adapterEnvironment.UGV_EXECUTION_MODE !== "live" ||
+      adapterEnvironment.UGV_FIRE_ENABLED !== "false" ||
+      adapterEnvironment.UGV_RESOURCE_ID !== "${UGV_RESOURCE_ID:-vehicle:ugv1}" ||
+      adapterEnvironment.UGV_ENTITY_ID !== "${UGV_ENTITY_ID:-ugv1}" ||
+      adapterEnvironment.UGV_VEHICLE_TYPE !== "${UGV_VEHICLE_TYPE:-ugv}" ||
+      adapterEnvironment.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT !== "false"
+    )
+      throw coded("PRODUCTION_BUNDLE_UGV_LIVE_SAFETY_PROFILE_INVALID");
+  }
+
   const runtimeServiceName = product.id === "ugv" ? "ugv-runtime" : "npc-tank-runtime";
   const runtime = requiredComposeService(services, runtimeServiceName);
   const runtimeEnvironment = requiredComposeEnvironment(runtime, runtimeServiceName);

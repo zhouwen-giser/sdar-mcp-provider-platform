@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0",
+  "provider": "UGV",
+  "truthBoundary": "No simulator or physical qualification was performed.",
+  "operations": [
+    {
+      "operation": "vehicle_get_state",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NOT_APPLICABLE_READ",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    },
+    {
+      "operation": "vehicle_get_capabilities",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NOT_APPLICABLE_READ",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    },
+    {
+      "operation": "vehicle_get_payload_status",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NOT_APPLICABLE_READ",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    },
+    {
+      "operation": "vehicle_get_targets",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NOT_APPLICABLE_READ",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY_OPTIONAL_TOOL"
+    },
+    {
+      "operation": "vehicle_laser_range",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NOT_APPLICABLE_READ",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY_OPTIONAL_TOOL"
+    },
+    {
+      "operation": "vehicle_navigate",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    },
+    {
+      "operation": "vehicle_area_recon",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    },
+    {
+      "operation": "vehicle_track_target",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY_OPTIONAL_TOOL"
+    },
+    {
+      "operation": "vehicle_control_gimbal",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "MOCK_CONTRACT_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_OBSERVATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY_OPTIONAL_TOOL"
+    },
+    {
+      "operation": "vehicle_fire_weapon",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "ZERO_PHYSICAL_CALLS_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "NOT_APPLICABLE_DISABLED",
+      "overall": "DISABLED_BY_POLICY"
+    },
+    {
+      "operation": "vehicle_emergency_stop",
+      "contract": "LOCAL_IMPLEMENTATION_PASS",
+      "mock": "DETERMINISTIC_OBSERVATION_PASS",
+      "externalContract": "PENDING_SIMULATOR_CONTRACT",
+      "externalObservation": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+      "recovery": "LOCAL_IMPLEMENTATION_PASS",
+      "uncertain": "NO_AUTOMATIC_REPLAY",
+      "performance": "PENDING_SIMULATOR_OBSERVATION",
+      "overall": "PRE_SIM_READY"
+    }
+  ]
+}

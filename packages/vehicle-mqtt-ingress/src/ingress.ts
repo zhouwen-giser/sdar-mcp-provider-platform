@@ -8,6 +8,7 @@ import {
   type NpcTankSnapshot,
   type SnapshotPatch,
   type UgvSnapshot,
+  type VehicleIdentity,
   type VehicleSnapshot,
   type VehicleTarget,
 } from "../../vehicle-provider-core/src/index.js";
@@ -63,6 +64,18 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
   },
 };
 
+export function ugvMqttProfile(identity: VehicleIdentity): VehicleMqttProfile<UgvSnapshot> {
+  return {
+    ...UGV_MQTT_PROFILE,
+    createSnapshot: () => createUgvSnapshot(identity),
+    normalize: (topic, value) =>
+      normalizeMqttObservation(topic as never, value, {
+        entityId: identity.entityId,
+        vehicleType: identity.vehicleType,
+      }),
+  };
+}
+
 export function npcTankMqttProfile(
   supportsCircularEoScan = false,
 ): VehicleMqttProfile<NpcTankSnapshot> {
@@ -91,7 +104,13 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   readonly #events = new EventEmitter();
   readonly #latest = new Map<
     string,
-    { observedAt: string; hash: string; timeAuthority: NormalizedMqttObservation["timeAuthority"] }
+    {
+      observedAt: string;
+      hash: string;
+      timeAuthority: NormalizedMqttObservation["timeAuthority"];
+      sourceSequence?: string;
+      ingestSequence: number;
+    }
   >();
   readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
   readonly #authoritativeTaskStates = new Map<string, unknown>();
@@ -222,7 +241,15 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       observedAt,
       observation.domains,
     ) as TSnapshot;
-    this.#latest.set(topic, { observedAt, hash, timeAuthority: observation.timeAuthority });
+    this.#latest.set(topic, {
+      observedAt,
+      hash,
+      timeAuthority: observation.timeAuthority,
+      ...(observation.sourceSequence === undefined
+        ? {}
+        : { sourceSequence: observation.sourceSequence }),
+      ingestSequence: this.#sequence,
+    });
     this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
     this.#events.emit("snapshot", this.snapshot(), topic);
     return {
@@ -240,6 +267,28 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   observationCursor(topic: string): string | undefined {
     const latest = this.#latest.get(topic);
     return latest === undefined ? undefined : `${latest.observedAt}\0${latest.hash}`;
+  }
+  observationAuthority(topic: string):
+    | {
+        topic: string;
+        observedAt: string;
+        timeAuthority: "source" | "ingest";
+        sourceSequence?: string;
+        ingestSequence: number;
+        cursor: string;
+      }
+    | undefined {
+    const latest = this.#latest.get(topic);
+    return latest === undefined
+      ? undefined
+      : {
+          topic,
+          observedAt: latest.observedAt,
+          timeAuthority: latest.timeAuthority,
+          ...(latest.sourceSequence === undefined ? {} : { sourceSequence: latest.sourceSequence }),
+          ingestSequence: latest.ingestSequence,
+          cursor: `${latest.observedAt}\0${latest.hash}`,
+        };
   }
   stateConflict(): boolean {
     return this.#stateConflict;

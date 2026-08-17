@@ -5,12 +5,13 @@ export function normalizeUgvCapabilities(
   result: Record<string, unknown>,
   contracts: readonly CapturedToolContract[],
   observedAt = new Date().toISOString(),
+  resourceId = "vehicle:ugv1",
 ): Record<string, unknown> {
   return normalizeVehicleCapabilities(
     result,
     contracts,
     {
-      resourceId: "vehicle:ugv1",
+      resourceId,
       pathFollowTool: "ugv_path_follow_mission",
       moveDistanceTool: "ugv_move_distance",
       returnHomeTool: "ugv_return_home",

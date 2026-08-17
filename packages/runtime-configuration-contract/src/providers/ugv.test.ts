@@ -31,9 +31,12 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 51 inventory fields", () => {
+  it("covers all 65 inventory fields", () => {
     const inventory = JSON.parse(
-      readFileSync("../../docs/configuration/CONFIG_INVENTORY.json", "utf8"),
+      readFileSync(
+        new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
+        "utf8",
+      ),
     ) as { items: { component: string; key: string }[] };
     const expected = inventory.items
       .filter(({ component }) => component === "ugv")
@@ -43,7 +46,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(51);
+    expect(actual).toHaveLength(65);
     expect(actual).toEqual(expected);
   });
 
@@ -98,5 +101,49 @@ describe("UGV Provider configuration contract", () => {
         UGV_MQTT_TLS_CA_PATH: "/run/secrets/ca",
       }),
     ).toThrow("UGV_MQTT_MTLS_FILES_REQUIRED");
+  });
+
+  it("defaults to simulation, disables fire, and rejects live mock execution", () => {
+    expect(loadUgvProviderConfiguration({})).toMatchObject({
+      UGV_RESOURCE_ID: "vehicle:ugv1",
+      UGV_ENTITY_ID: "ugv1",
+      UGV_VEHICLE_TYPE: "ugv",
+      UGV_EXECUTION_MODE: "simulation",
+      UGV_FIRE_ENABLED: false,
+    });
+    expect(() =>
+      loadUgvProviderConfiguration({
+        UGV_EXECUTION_MODE: "live",
+        UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "true",
+      }),
+    ).toThrow("UGV_LIVE_MOCK_CONTRACT_FORBIDDEN");
+    expect(loadUgvProviderConfiguration({ UGV_EXECUTION_MODE: "live" })).toMatchObject({
+      UGV_EXECUTION_MODE: "live",
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: false,
+      UGV_ADAPTER_STORE_MODE: "postgres",
+    });
+  });
+
+  it("accepts configured single-resource identity and rejects unsafe identity forms", () => {
+    expect(
+      loadUgvProviderConfiguration({
+        PROVIDER_ID: "isr.vehicle.ugv.alpha-1",
+        UGV_RESOURCE_ID: "vehicle:alpha-1",
+        UGV_ENTITY_ID: "alpha_1",
+        UGV_VEHICLE_TYPE: "ugv_alpha",
+      }),
+    ).toMatchObject({
+      PROVIDER_ID: "isr.vehicle.ugv.alpha-1",
+      UGV_RESOURCE_ID: "vehicle:alpha-1",
+      UGV_ENTITY_ID: "alpha_1",
+      UGV_VEHICLE_TYPE: "ugv_alpha",
+    });
+    for (const environment of [
+      { PROVIDER_ID: " provider" },
+      { UGV_RESOURCE_ID: "vehicle alpha" },
+      { UGV_ENTITY_ID: "alpha/one" },
+      { UGV_VEHICLE_TYPE: "UGV" },
+    ])
+      expect(() => loadUgvProviderConfiguration(environment)).toThrow();
   });
 });

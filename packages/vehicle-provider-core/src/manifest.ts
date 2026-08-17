@@ -53,6 +53,9 @@ export function vehicleProviderManifest(
       },
       ["resourceId", "status", "observedAt"],
     );
+  const nullable = (value: Record<string, unknown>) => ({
+    anyOf: [value, { type: "null" }],
+  });
   return {
     adapterProtocolVersion: ADAPTER_PROTOCOL_VERSION,
     providerId: profile.providerId,
@@ -141,7 +144,23 @@ export function vehicleProviderManifest(
         description: "Run a point, route, distance or return-home chassis mission.",
         execution: "TASK_REQUIRED",
         inputSchema: navigationSchema(resourceId, profile.supportsNavigationPlanning === true),
-        outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"]),
+        outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"], {
+          requestedDistanceM: { type: "number", minimum: 0 },
+          startPosition: { type: "object", additionalProperties: true },
+          endPosition: { type: "object", additionalProperties: true },
+          observedDisplacementM: { type: "number", minimum: 0 },
+          finalHeadingDeg: { type: "number" },
+          finalSpeedKmh: { type: "number", minimum: 0 },
+          missionId: nullable({ type: "string" }),
+          missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+          snapshotRevision: { type: "string" },
+          stationaryAtCompletion: nullable({ type: "boolean" }),
+          correlationStrength: {
+            type: "string",
+            enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
+          },
+          observationAuthority: { type: "string" },
+        }),
         capabilities: caps(true, true, true, true, false, true),
         resourceBinding: binding,
       },
@@ -159,8 +178,25 @@ export function vehicleProviderManifest(
           ["completed", "failed", "cancelled", "timeout"],
           profile.supportsReconCoverageOutput === true
             ? {
-                coverability: { type: "object", additionalProperties: true },
-                outOfRange: { type: "boolean" },
+                coverability: nullable({ type: "object", additionalProperties: true }),
+                outOfRange: nullable({ type: "boolean" }),
+                missionId: nullable({ type: "string" }),
+                scanMode: nullable({ type: "number" }),
+                progress: nullable({ type: "number" }),
+                coverage: nullable({ type: "object", additionalProperties: true }),
+                observedTargetCount: { type: "integer", minimum: 0 },
+                terminalMotionStatus: {
+                  anyOf: [{ type: "number" }, { type: "string" }],
+                },
+                cameraFault: nullable({ type: "boolean" }),
+                exception: nullable({ type: "object", additionalProperties: true }),
+                snapshotRevision: { type: "string" },
+                correlationStrength: {
+                  type: "string",
+                  enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
+                },
+                observationIsNew: { type: "boolean" },
+                timeAuthority: { type: "string" },
               }
             : {},
         ),
@@ -243,7 +279,16 @@ export function vehicleProviderManifest(
         description: `Preempt and stop only this ${profile.displayKind}'s local tracks.`,
         execution: "TASK_REQUIRED",
         inputSchema: schema({ resourceId }, ["resourceId"]),
-        outputSchema: taskOutput(["stopped", "timeout", "failed"]),
+        outputSchema: taskOutput(["stopped", "timeout", "failed"], {
+          finalSpeedKmh: { type: "number", minimum: 0 },
+          missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+          reconMotionStatus: { anyOf: [{ type: "integer" }, { type: "string" }] },
+          eoTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+          weaponTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+          targetUnlocked: { type: "boolean" },
+          observationAuthority: { type: "string" },
+          snapshotRevision: { type: "string" },
+        }),
         capabilities: caps(false, true, false, false, false, true),
         resourceBinding: binding,
       },

@@ -111,6 +111,8 @@ assertPublishedPort(pmsWeb, 8080, "PMS_WEB");
 const adapterEnvironment = environment(adapter);
 requiredValues(adapterEnvironment, {
   PROVIDER_ID: "isr.vehicle.ugv.ugv1",
+  UGV_EXECUTION_MODE: "live",
+  UGV_FIRE_ENABLED: "false",
   RUNTIME_ENV: "production",
   ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
   ADAPTER_TLS_MODE: "disabled",
@@ -123,6 +125,14 @@ requiredValues(adapterEnvironment, {
   PROVIDER_TELEMETRY_ENDPOINT: "ugv-runtime:7002",
   PROVIDER_TELEMETRY_TLS_MODE: "disabled",
 });
+for (const key of ["UGV_RESOURCE_ID", "UGV_ENTITY_ID", "UGV_VEHICLE_TYPE"]) {
+  if (typeof adapterEnvironment[key] !== "string" || adapterEnvironment[key].length === 0) {
+    fail(`UGV_IDENTITY_INVALID_${key}`);
+  }
+}
+if (environment(seed).PMS_SEED_RESOURCE_ID !== adapterEnvironment.UGV_RESOURCE_ID) {
+  fail("UGV_SEED_RESOURCE_ID_MISMATCH");
+}
 if (
   !new Set(["ros_message_json", "direct_domain_json", "ros_bridge_json"]).has(
     adapterEnvironment.UGV_MQTT_WIRE_MODE,

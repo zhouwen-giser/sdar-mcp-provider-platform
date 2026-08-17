@@ -19,7 +19,11 @@
       "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
       "type": "string"
     },
-    "PROVIDER_ID": { "default": "isr.vehicle.ugv.ugv1", "minLength": 1, "type": "string" },
+    "PROVIDER_ID": {
+      "default": "isr.vehicle.ugv.ugv1",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
     "PROVIDER_TELEMETRY_ENABLED": { "type": "boolean" },
     "PROVIDER_TELEMETRY_ENDPOINT": {
       "default": "127.0.0.1:7002",
@@ -69,6 +73,18 @@
       "type": "integer"
     },
     "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT": { "type": "boolean" },
+    "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS": {
+      "default": 5000,
+      "maximum": 300000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD": {
+      "default": 3,
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+    },
     "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH": {
       "default": "reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json",
       "minLength": 1,
@@ -83,6 +99,12 @@
       "default": 65536,
       "maximum": 1048576,
       "minimum": 1024,
+      "type": "integer"
+    },
+    "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS": {
+      "default": 1,
+      "maximum": 3,
+      "minimum": 0,
       "type": "integer"
     },
     "UGV_DEVICE_MCP_TIMEOUT_MS": {
@@ -101,12 +123,23 @@
       "format": "uri",
       "type": "string"
     },
+    "UGV_ENTITY_ID": {
+      "default": "ugv1",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+      "type": "string"
+    },
+    "UGV_EXECUTION_MODE": {
+      "default": "simulation",
+      "enum": ["simulation", "live"],
+      "type": "string"
+    },
     "UGV_EXECUTION_POLL_INTERVAL_MS": {
       "default": 250,
       "maximum": 9007199254740991,
       "minimum": 50,
       "type": "integer"
     },
+    "UGV_FIRE_ENABLED": { "type": "boolean" },
     "UGV_FIRE_REQUIRES_CHASSIS_STOPPED": { "type": "boolean" },
     "UGV_HEALTH_FRESHNESS_MS": {
       "default": 5000,
@@ -173,10 +206,51 @@
       "enum": ["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"],
       "type": "string"
     },
+    "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD": {
+      "default": 2,
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "UGV_OPERATION_FAILURE_OPEN_THRESHOLD": {
+      "default": 3,
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD": {
+      "default": 2,
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+    },
     "UGV_PAYLOAD_FRESHNESS_MS": {
       "default": 3000,
       "exclusiveMinimum": 0,
       "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS": {
+      "default": 30000,
+      "maximum": 300000,
+      "minimum": 100,
+      "type": "integer"
+    },
+    "UGV_RESOURCE_ID": {
+      "default": "vehicle:ugv1",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "UGV_STATIONARY_SPEED_THRESHOLD_KMH": {
+      "default": 0.1,
+      "maximum": 5,
+      "minimum": 0,
+      "type": "number"
+    },
+    "UGV_STATIONARY_STABILITY_MS": {
+      "default": 500,
+      "maximum": 60000,
+      "minimum": 0,
       "type": "integer"
     },
     "UGV_TARGET_FRESHNESS_MS": {
@@ -184,11 +258,16 @@
       "exclusiveMinimum": 0,
       "maximum": 9007199254740991,
       "type": "integer"
-    }
+    },
+    "UGV_VEHICLE_TYPE": { "default": "ugv", "pattern": "^[a-z][a-z0-9_-]{0,63}$", "type": "string" }
   },
   "required": [
     "PROVIDER_ID",
     "PROVIDER_VERSION",
+    "UGV_RESOURCE_ID",
+    "UGV_ENTITY_ID",
+    "UGV_VEHICLE_TYPE",
+    "UGV_EXECUTION_MODE",
     "ADAPTER_HOST",
     "ADAPTER_PORT",
     "ADAPTER_TLS_MODE",
@@ -215,9 +294,19 @@
     "UGV_DEVICE_MCP_TLS_MODE",
     "UGV_DEVICE_MCP_MAX_RESPONSE_BYTES",
     "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+    "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
+    "UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD",
+    "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS",
     "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
     "UGV_ALLOW_NAVIGATION_WITH_RECON",
+    "UGV_FIRE_ENABLED",
     "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+    "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
+    "UGV_STATIONARY_STABILITY_MS",
+    "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
+    "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
+    "UGV_OPERATION_FAILURE_OPEN_THRESHOLD",
+    "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD",
     "UGV_EXECUTION_POLL_INTERVAL_MS",
     "PROVIDER_TELEMETRY_ENABLED",
     "PROVIDER_TELEMETRY_ENDPOINT",

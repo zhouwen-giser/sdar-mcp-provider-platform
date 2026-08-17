@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "sourceRevision": "2e0626f2b2159d7c11061625c15274863479e217",
+  "worktreeDelivery": true,
+  "checks": [
+    {
+      "name": "affected UGV, Device MCP, shared NPC, integration and physical-evidence suites",
+      "testFiles": 10,
+      "tests": 117,
+      "status": "PASS"
+    },
+    {
+      "name": "UGV gRPC, PostgreSQL platform and restart recovery",
+      "testFiles": 3,
+      "tests": 5,
+      "status": "PASS",
+      "database": "temporary PostgreSQL 17 database and role; removed after run",
+      "note": "gRPC listener bound to loopback only"
+    },
+    {
+      "name": "production bundle and local preflight Node tests",
+      "tests": 35,
+      "status": "PASS"
+    },
+    { "name": "UGV config compatibility", "tests": 7, "status": "PASS" },
+    {
+      "name": "configuration schema generated check",
+      "status": "PASS",
+      "result": "CONFIGURATION_SCHEMA_CHECK_OK"
+    },
+    { "name": "TypeScript noEmit", "status": "PASS" },
+    { "name": "affected ESLint", "status": "PASS" },
+    {
+      "name": "repository build",
+      "status": "PASS",
+      "commandEquivalent": "generate-proto plus tsc tsconfig.build.json"
+    },
+    { "name": "generated artifacts self-check", "status": "PASS", "generatedFiles": 9 },
+    { "name": "protected files check", "status": "PASS", "protectedFiles": 10 },
+    { "name": "git diff whitespace check", "status": "PASS" }
+  ],
+  "externalChecks": {
+    "deviceMcp": "PENDING_SIMULATOR_CONTRACT",
+    "mqtt": "PENDING_SIMULATOR_OBSERVATION",
+    "physical": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"
+  },
+  "environmentNotes": [
+    "pnpm dependency-status attempted an interactive modules purge and its alternate store was sandbox-inaccessible; direct repository binaries ran the same type/build/lint gates successfully",
+    "initial sandboxed Device MCP run could not bind 127.0.0.1; the identical suite passed 15/15 with loopback permission"
+  ]
+}

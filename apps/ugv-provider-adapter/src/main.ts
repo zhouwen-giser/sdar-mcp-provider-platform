@@ -7,6 +7,7 @@ import { StreamableHttpUgvDeviceMcpClient } from "../../../packages/vehicle-devi
 import {
   UgvMqttClient,
   VehicleMqttIngress,
+  ugvMqttProfile,
 } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 import { UgvBusinessEventHub } from "./business-events.js";
 import { loadUgvProviderConfig } from "./config.js";
@@ -29,12 +30,23 @@ const store =
         config.UGV_ADAPTER_DATABASE_POOL_MAX,
       )
     : new MemoryProviderStore();
-const ingress = new VehicleMqttIngress(config.UGV_MQTT_WIRE_MODE, {
-  maxPayloadBytes: config.UGV_MQTT_MAX_PAYLOAD_BYTES,
-  maxDepth: config.UGV_MQTT_MAX_JSON_DEPTH,
-  maxNodes: config.UGV_MQTT_MAX_JSON_NODES,
-  maxStringBytes: config.UGV_MQTT_MAX_STRING_BYTES,
-});
+const identity = {
+  providerId: config.PROVIDER_ID,
+  resourceId: config.UGV_RESOURCE_ID,
+  entityId: config.UGV_ENTITY_ID,
+  vehicleType: config.UGV_VEHICLE_TYPE,
+  executionMode: config.UGV_EXECUTION_MODE,
+} as const;
+const ingress = new VehicleMqttIngress(
+  config.UGV_MQTT_WIRE_MODE,
+  {
+    maxPayloadBytes: config.UGV_MQTT_MAX_PAYLOAD_BYTES,
+    maxDepth: config.UGV_MQTT_MAX_JSON_DEPTH,
+    maxNodes: config.UGV_MQTT_MAX_JSON_NODES,
+    maxStringBytes: config.UGV_MQTT_MAX_STRING_BYTES,
+  },
+  ugvMqttProfile(identity),
+);
 const mqtt = new UgvMqttClient(
   {
     url: config.UGV_MQTT_URL,
@@ -61,11 +73,15 @@ const device = new StreamableHttpUgvDeviceMcpClient(
     maxResponseBytes: config.UGV_DEVICE_MCP_MAX_RESPONSE_BYTES,
     contractReportPath: config.UGV_DEVICE_MCP_CONTRACT_REPORT_PATH,
     useMockContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT,
+    readRetryAttempts: config.UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS,
+    circuitBreakerThreshold: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD,
+    circuitBreakerResetMs: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS,
   },
   store,
 );
 const telemetry = new UgvTelemetry({
   providerId: config.PROVIDER_ID,
+  resourceId: config.UGV_RESOURCE_ID,
   enabled: config.PROVIDER_TELEMETRY_ENABLED,
   endpoint: config.PROVIDER_TELEMETRY_ENDPOINT,
   tlsMode: config.PROVIDER_TELEMETRY_TLS_MODE,
@@ -79,10 +95,13 @@ const telemetry = new UgvTelemetry({
     ? { keyPath: config.PROVIDER_TELEMETRY_TLS_KEY_PATH }
     : {}),
 });
-const businessEvents = new UgvBusinessEventHub(store);
+const businessEvents = new UgvBusinessEventHub(store, config.UGV_RESOURCE_ID);
 const runtime = new UgvProviderRuntime(
   {
     providerId: config.PROVIDER_ID,
+    resourceId: config.UGV_RESOURCE_ID,
+    entityId: config.UGV_ENTITY_ID,
+    executionMode: config.UGV_EXECUTION_MODE,
     freshness: {
       chassis: config.UGV_CHASSIS_FRESHNESS_MS,
       mission: config.UGV_MISSION_FRESHNESS_MS,
@@ -91,7 +110,16 @@ const runtime = new UgvProviderRuntime(
       payload: config.UGV_PAYLOAD_FRESHNESS_MS,
     },
     allowNavigationWithRecon: config.UGV_ALLOW_NAVIGATION_WITH_RECON,
+    fireEnabled: config.UGV_FIRE_ENABLED,
     fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
+    stationarySpeedThresholdKmh: config.UGV_STATIONARY_SPEED_THRESHOLD_KMH,
+    stationaryStabilityMs: config.UGV_STATIONARY_STABILITY_MS,
+    physicalConfirmationTimeoutMs: config.UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS,
+    failureBudget: {
+      degradedThreshold: config.UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD,
+      openThreshold: config.UGV_OPERATION_FAILURE_OPEN_THRESHOLD,
+      recoverySuccessThreshold: config.UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD,
+    },
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
   },
   store,
@@ -104,6 +132,7 @@ const server = new UgvProviderServer(
   {
     providerId: config.PROVIDER_ID,
     providerVersion: config.PROVIDER_VERSION,
+    identity,
     host: config.ADAPTER_HOST,
     port: config.ADAPTER_PORT,
     tlsMode: config.ADAPTER_TLS_MODE,

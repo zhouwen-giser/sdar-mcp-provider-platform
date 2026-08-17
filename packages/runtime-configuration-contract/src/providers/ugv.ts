@@ -9,10 +9,17 @@ const optionalPath = z
   .transform((value) => value.trim() || undefined)
   .optional();
 const tls = z.enum(["disabled", "required"]);
+const publicIdentity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$/);
+const privateEntityIdentity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/);
+const vehicleType = z.string().regex(/^[a-z][a-z0-9_-]{0,63}$/);
 
 const UgvProviderInputBaseSchema = z.object({
-  PROVIDER_ID: z.string().min(1).default("isr.vehicle.ugv.ugv1"),
+  PROVIDER_ID: publicIdentity.default("isr.vehicle.ugv.ugv1"),
   PROVIDER_VERSION: z.string().min(1).default("1.0.0"),
+  UGV_RESOURCE_ID: publicIdentity.default("vehicle:ugv1"),
+  UGV_ENTITY_ID: privateEntityIdentity.default("ugv1"),
+  UGV_VEHICLE_TYPE: vehicleType.default("ugv"),
+  UGV_EXECUTION_MODE: z.enum(["simulation", "live"]).default("simulation"),
   ADAPTER_HOST: z.string().min(1).default("0.0.0.0"),
   ADAPTER_PORT: z.coerce.number().int().min(1).max(65_535).default(7010),
   ADAPTER_TLS_MODE: tls.default("disabled"),
@@ -58,12 +65,32 @@ const UgvProviderInputBaseSchema = z.object({
     .max(1_048_576)
     .default(65_536),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: bool.default(false),
+  UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS: z.coerce.number().int().min(0).max(3).default(1),
+  UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().int().min(1).max(100).default(3),
+  UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(300_000)
+    .default(5_000),
   UGV_DEVICE_MCP_CONTRACT_REPORT_PATH: z
     .string()
     .min(1)
     .default("reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json"),
   UGV_ALLOW_NAVIGATION_WITH_RECON: bool.default(true),
+  UGV_FIRE_ENABLED: bool.default(false),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: bool.default(true),
+  UGV_STATIONARY_SPEED_THRESHOLD_KMH: z.coerce.number().min(0).max(5).default(0.1),
+  UGV_STATIONARY_STABILITY_MS: z.coerce.number().int().min(0).max(60_000).default(500),
+  UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(300_000)
+    .default(30_000),
+  UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD: z.coerce.number().int().min(1).max(100).default(2),
+  UGV_OPERATION_FAILURE_OPEN_THRESHOLD: z.coerce.number().int().min(1).max(100).default(3),
+  UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD: z.coerce.number().int().min(1).max(100).default(2),
   UGV_EXECUTION_POLL_INTERVAL_MS: z.coerce.number().int().min(50).default(250),
   PROVIDER_TELEMETRY_ENABLED: bool.default(true),
   PROVIDER_TELEMETRY_ENDPOINT: z.string().min(1).default("127.0.0.1:7002"),
@@ -112,6 +139,17 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
     if (value.UGV_ADAPTER_STORE_MODE !== "postgres")
       context.addIssue({ code: "custom", message: "PRODUCTION_POSTGRES_STORE_REQUIRED" });
   }
+  if (value.UGV_EXECUTION_MODE === "live") {
+    if (value.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT)
+      context.addIssue({ code: "custom", message: "UGV_LIVE_MOCK_CONTRACT_FORBIDDEN" });
+    if (value.UGV_ADAPTER_STORE_MODE !== "postgres")
+      context.addIssue({ code: "custom", message: "UGV_LIVE_POSTGRES_STORE_REQUIRED" });
+  }
+  if (value.UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD >= value.UGV_OPERATION_FAILURE_OPEN_THRESHOLD)
+    context.addIssue({
+      code: "custom",
+      message: "UGV_OPERATION_FAILURE_THRESHOLDS_INVALID",
+    });
 });
 
 export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
@@ -126,6 +164,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_DEVICE_MCP_HEADERS_FILE: z.string().optional(),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: z.boolean(),
   UGV_ALLOW_NAVIGATION_WITH_RECON: z.boolean(),
+  UGV_FIRE_ENABLED: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
   ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),
@@ -177,7 +216,13 @@ export const UgvProviderConfigurationDefinition = parseConfigurationDefinition({
   defaults: Object.fromEntries(Object.entries(defaults).filter(([key]) => !secretKeys.has(key))),
   secretPaths: configurationKeys.filter((key) => secretKeys.has(key)).map((key) => `/${key}`),
   fields: configurationKeys.map((key) => {
-    const immutable = key === "PROVIDER_ID" || key === "PROVIDER_VERSION";
+    const immutable =
+      key === "PROVIDER_ID" ||
+      key === "PROVIDER_VERSION" ||
+      key === "UGV_RESOURCE_ID" ||
+      key === "UGV_ENTITY_ID" ||
+      key === "UGV_VEHICLE_TYPE" ||
+      key === "UGV_EXECUTION_MODE";
     return {
       path: `/${key}`,
       displayName: key,

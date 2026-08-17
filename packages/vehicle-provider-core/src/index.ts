@@ -4,6 +4,7 @@ export * from "./capabilities.js";
 export * from "./evidence.js";
 export * from "./fire-result-sanitizer.js";
 export * from "./manifest.js";
+export * from "./physical-evidence.js";
 export * from "./snapshot.js";
 export * from "./targets.js";
 export * from "./task-state-mapper.js";

@@ -65,10 +65,16 @@ ALLOW_INSECURE_INTERNAL_TRANSPORT=true
 UGV_SIM_DEVICE_MCP_URL=http://device-mcp.intranet.local/mcp
 UGV_SIM_MQTT_URL=mqtt://mqtt.intranet.local:1883
 UGV_MQTT_WIRE_MODE=ros_bridge_json
-UGV_RUNTIME_ADVERTISED_URL=http://192.168.1.7:19100
+UGV_RUNTIME_ADVERTISED_URL=http://REPLACE_WITH_UGV_RUNTIME_HOST:19100
 ```
 
 生产入口要求 `ALLOW_INSECURE_INTERNAL_TRANSPORT` 精确为 `true`，并接受配置后的 `http://` Device MCP 以及 `mqtt://`（或 `ws://`）MQTT 地址；它仍会拒绝占位域名、URL 内嵌凭据、URL fragment 和未明确的 wire mode。`UGV_RUNTIME_ADVERTISED_URL` 必须是其他内网消费者可达的 Runtime 基础地址（不带 `/mcp`），端口必须与 `UGV_RUNTIME_PORT` 一致。默认开箱路径假定真实端点无需 HTTP Header 或 MQTT 用户密码。
+
+UGV Adapter 在本生产包中固定为 `UGV_EXECUTION_MODE=live`，因此只接受 Runtime/SDAR 的
+LIVE 执行上下文；模式不一致会以 `UGV_EXECUTION_MODE_MISMATCH` 失败关闭。Device MCP mock
+回退和 `vehicle_fire_weapon` 均固定禁用。`.env` 可配置单资源公开身份、只读调用重试、
+Tool circuit breaker、停车确认阈值和 Operation failure budget；Fire 开关不作为现场可编辑
+配置暴露。
 
 ### 可选：启用 Runtime OTLP 导出
 
