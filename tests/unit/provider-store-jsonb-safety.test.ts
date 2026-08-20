@@ -17,7 +17,7 @@ describe("PostgresProviderStore JSONB safety", () => {
     ["non_finite_number", { progress: Number.NaN }, "$/progress"],
     ["bigint", { sequence: 1n }, "$/sequence"],
   ] as const)("rejects %s without including the unsafe value", (kind, value, path) => {
-    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrowError(
+    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrow(
       expect.objectContaining({
         code: "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
         rootName: "execution",
@@ -36,7 +36,7 @@ describe("PostgresProviderStore JSONB safety", () => {
   it("rejects cycles with a stable, value-free diagnostic", () => {
     const value: Record<string, unknown> = {};
     value.self = value;
-    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrowError(
+    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrow(
       expect.objectContaining({
         code: "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
         rootName: "execution",

@@ -399,7 +399,7 @@ export class ProviderStoreJsonbUnsafePayloadError extends Error {
 }
 
 export function assertPostgresJsonbSafe(value: unknown, rootName: string): void {
-  const active = new WeakSet<object>();
+  const active = new WeakSet();
   const visit = (current: unknown, path: string): void => {
     if (typeof current === "string") {
       if (current.includes("\0"))
@@ -437,5 +437,5 @@ function diagnosticPathSegment(value: string): string {
     .slice(0, 128)
     .replaceAll("~", "~0")
     .replaceAll("/", "~1")
-    .replace(/[\u0000-\u001f\u007f]/g, "?");
+    .replace(/\p{Cc}/gu, "?");
 }

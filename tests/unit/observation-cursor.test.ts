@@ -40,7 +40,7 @@ describe("ObservationCursorCodecV1", () => {
       const second = encodeObservationCursorV1(structuredClone(payload));
       expect(first).toBe(second);
       expect(first).toMatch(/^oc1\.[A-Za-z0-9_-]+$/);
-      expect(first).not.toMatch(/[\u0000-\u001f]/);
+      expect(hasControlCharacter(first)).toBe(false);
       expect(decodeObservationCursorV1(first)).toEqual(payload);
     }
   });
@@ -148,7 +148,7 @@ describe("VehicleMqttIngress observation cursors", () => {
     );
     for (const authority of ingress.fieldObservationAuthorities()) {
       expect(authority.cursor).toMatch(/^oc1\.[A-Za-z0-9_-]+$/);
-      expect(authority.cursor).not.toMatch(/[\u0000-\u001f]/);
+      expect(hasControlCharacter(authority.cursor)).toBe(false);
       expect(decodeObservationCursorV1(authority.cursor)).toMatchObject({
         kind: "field",
         field: authority.field,
@@ -203,4 +203,9 @@ function json(value: unknown): Buffer {
 function required<T>(value: T | undefined): T {
   if (value === undefined) throw new Error("OBSERVATION_CURSOR_TEST_VALUE_REQUIRED");
   return value;
+}
+
+function hasControlCharacter(value: string): boolean {
+  for (let index = 0; index < value.length; index++) if (value.charCodeAt(index) < 32) return true;
+  return false;
 }

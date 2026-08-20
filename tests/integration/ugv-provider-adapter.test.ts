@@ -1017,10 +1017,10 @@ describe("UGV long-running operation integration", () => {
       state: "RUNNING",
     });
     reconStatus(fixture.ingress, 11, 100, undefined, "1");
-    await expect(fixture.runtime.get("recon-legacy-cursor")).resolves.toMatchObject({
-      state: "SUCCEEDED",
-      result: expect.objectContaining({ observedAt: expect.stringMatching(/^\d{4}-/) }),
-    });
+    const completed = required(await fixture.runtime.get("recon-legacy-cursor"));
+    expect(completed.state).toBe("SUCCEEDED");
+    expect(typeof completed.result?.observedAt).toBe("string");
+    expect(String(completed.result?.observedAt)).toMatch(/^\d{4}-/);
   });
 
   it("requires fire confirmation and strips destroyed/damage from every persisted output", async () => {

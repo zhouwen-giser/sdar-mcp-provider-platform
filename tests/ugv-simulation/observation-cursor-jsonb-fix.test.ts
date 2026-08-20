@@ -102,14 +102,11 @@ describe("UGV observation cursor JSONB regression", () => {
     const journal = await store.listMutationJournal("cursor-navigation-start");
     expect(execution.downstreamMissionIds).toEqual(["1"]);
     expect(JSON.stringify(execution)).not.toContain("\\u0000");
-    expect(
+    const storedAuthorities =
       (execution.dispatchBaseline as { observationAuthorities?: { cursor: string }[] })
-        .observationAuthorities,
-    ).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ cursor: expect.stringMatching(/^oc1\./) }),
-      ]),
-    );
+        .observationAuthorities ?? [];
+    expect(storedAuthorities.length).toBeGreaterThan(0);
+    for (const authority of storedAuthorities) expect(authority.cursor).toMatch(/^oc1\./);
     expect(journal).toEqual([
       expect.objectContaining({
         phase: "PRIMARY",
