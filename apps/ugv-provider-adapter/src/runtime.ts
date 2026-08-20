@@ -1,12 +1,14 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import {
+  canonicalJson,
   jsonToProtoStruct,
   protoStructToJson,
 } from "../../../packages/adapter-protocol/src/index.js";
 import type {
   CommandAckRecord,
   ExecutionContextRecord,
+  MutationJournalEntry,
   ProviderExecution,
   ProviderExecutionState,
   ProviderStore,
@@ -24,6 +26,7 @@ import {
   canonicalUgvMissionId,
   DeviceToolRejectedError,
   executeUgvStartFlow,
+  type ExecuteUgvStartFlowOptions,
   fireConfirmationCalls,
   missionIdFromUgvResult,
   parseUgvMissionId,
@@ -323,6 +326,7 @@ export class UgvProviderRuntime {
           deviceArguments,
           (name, argumentsValue) => this.#callDevice(name, argumentsValue, input.taskId),
           {
+            ...this.#journaledMultiStepStart(input.taskId),
             onMissionId: async (missionId) => {
               if (execution.downstreamMissionIds.includes(missionId)) return;
               execution = withMissionId(execution, missionId);
@@ -1392,6 +1396,62 @@ export class UgvProviderRuntime {
       throw error;
     }
   }
+
+  #journaledMultiStepStart(taskId: string): ExecuteUgvStartFlowOptions {
+    const activeSteps = new Map<"PRIMARY" | "FOLLOWUP", MutationJournalEntry>();
+    return {
+      beforeMutationDispatch: async ({ phase, call }) => {
+        const intent: MutationJournalEntry = {
+          taskId,
+          stepId: startStepId(phase),
+          phase,
+          toolName: call.name,
+          argumentHash: mutationHash(call.arguments),
+          state: "INTENT_PERSISTED",
+          intentPersistedAt: new Date().toISOString(),
+        };
+        const claim = await this.store.claimMutationJournal(intent);
+        if (!claim.claimed) throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
+        const dispatching: MutationJournalEntry = {
+          ...intent,
+          state: "DISPATCHING",
+          dispatchedAt: new Date().toISOString(),
+        };
+        if (!(await this.store.advanceMutationJournal(dispatching, "INTENT_PERSISTED")))
+          throw new Error("UGV_MUTATION_JOURNAL_DISPATCH_CONFLICT");
+        activeSteps.set(phase, dispatching);
+      },
+      afterMutationAccepted: async ({ phase, result, canonicalMissionId }) => {
+        const dispatching = requiredJournalStep(activeSteps, phase);
+        const accepted: MutationJournalEntry = {
+          ...dispatching,
+          state: "ACCEPTED",
+          ...(canonicalMissionId === undefined ? {} : { externalMissionId: canonicalMissionId }),
+          resultHash: mutationHash(result),
+          completedAt: new Date().toISOString(),
+        };
+        if (!(await this.store.advanceMutationJournal(accepted, "DISPATCHING")))
+          throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
+        activeSteps.set(phase, accepted);
+      },
+      afterMutationFailed: async ({ phase, error }) => {
+        const dispatching = requiredJournalStep(activeSteps, phase);
+        const rejectedResult = error instanceof DeviceToolRejectedError ? error.result : undefined;
+        const missionId = rejectedResultMissionId(dispatching.toolName, rejectedResult);
+        const completed: MutationJournalEntry = {
+          ...dispatching,
+          state: error instanceof DeviceToolRejectedError ? "REJECTED" : "UNCERTAIN",
+          ...(missionId === undefined ? {} : { externalMissionId: missionId }),
+          ...(rejectedResult === undefined ? {} : { resultHash: mutationHash(rejectedResult) }),
+          completedAt: new Date().toISOString(),
+        };
+        if (!(await this.store.advanceMutationJournal(completed, "DISPATCHING")))
+          throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
+        activeSteps.set(phase, completed);
+      },
+    };
+  }
+
   async #ack(identity: CommandIdentity, command: string, accepted: boolean, reasonCode: string) {
     const record = this.#ackRecord(identity, command, accepted, reasonCode);
     await this.store.putCommandAck(record);
@@ -2261,6 +2321,34 @@ function fireCancellationReason(recordValue: CommandAckRecord | undefined): stri
 function fireDispatchReason(recordValue: CommandAckRecord | undefined): string | undefined {
   const reasonCode = recordValue?.response.reasonCode;
   return typeof reasonCode === "string" ? reasonCode : undefined;
+}
+function startStepId(phase: "PRIMARY" | "FOLLOWUP"): string {
+  return phase === "PRIMARY" ? "start:01:primary" : "start:02:followup";
+}
+function mutationHash(value: unknown): string {
+  return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+}
+function requiredJournalStep(
+  entries: ReadonlyMap<"PRIMARY" | "FOLLOWUP", MutationJournalEntry>,
+  phase: "PRIMARY" | "FOLLOWUP",
+): MutationJournalEntry {
+  const entry = entries.get(phase);
+  if (entry === undefined) throw new Error("UGV_MUTATION_JOURNAL_DISPATCH_REQUIRED");
+  return entry;
+}
+function rejectedResultMissionId(
+  toolName: string,
+  result: Record<string, unknown> | undefined,
+): string | undefined {
+  if (result === undefined) return undefined;
+  const knownTool = UGV_DEVICE_TOOL_ALLOWLIST.find((candidate) => candidate === toolName);
+  if (knownTool === undefined) return undefined;
+  try {
+    const missionId = missionIdFromUgvResult(knownTool, result);
+    return missionId === undefined ? undefined : canonicalUgvMissionId(missionId);
+  } catch {
+    return undefined;
+  }
 }
 function validateStart(
   input: StartUgvOperation,

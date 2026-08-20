@@ -8,6 +8,8 @@ import {
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
 import {
   MemoryProviderStore,
+  type MutationJournalEntry,
+  type MutationJournalState,
   type ProviderExecution,
 } from "../../packages/provider-adapter-kit/src/index.js";
 import { synchronousResult } from "../../packages/task-engine/src/result-contract.js";
@@ -34,6 +36,37 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("persists every navigation dispatch fence and mission ID before transport dependencies", async () => {
+    const events: string[] = [];
+    const store = new DispatchOrderStore(events);
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => {
+      events.push("transport:PRIMARY");
+      return acceptedMutationResult(1, 0);
+    });
+    device.handlers.set("ugv_mission_control", () => {
+      events.push("transport:FOLLOWUP");
+      return acceptedMutationResult(1, 1);
+    });
+    const fixture = await createFixture(false, store, {}, device);
+
+    await fixture.runtime.start(
+      startInput("nav-dispatch-order", "vehicle_navigate", navigateArgs()),
+    );
+
+    expect(events).toEqual([
+      "journal:PRIMARY:INTENT_PERSISTED",
+      "journal:PRIMARY:DISPATCHING",
+      "transport:PRIMARY",
+      "execution:mission:1",
+      "journal:PRIMARY:ACCEPTED",
+      "journal:FOLLOWUP:INTENT_PERSISTED",
+      "journal:FOLLOWUP:DISPATCHING",
+      "transport:FOLLOWUP",
+      "journal:FOLLOWUP:ACCEPTED",
+    ]);
+  });
+
   it("fails closed on execution-mode mismatch before any physical call", async () => {
     const fixture = await createFixture();
     const input = startInput("live-mismatch", "vehicle_navigate", navigateArgs());
@@ -204,6 +237,27 @@ describe("UGV long-running operation integration", () => {
       },
     ]);
     expect(started.initialSnapshot).toMatchObject({ state: "ACCEPTED" });
+    const journal = await fixture.store.listMutationJournal("nav-1");
+    expect(journal).toEqual([
+      expect.objectContaining({
+        stepId: "start:01:primary",
+        phase: "PRIMARY",
+        toolName: "ugv_path_follow_mission",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+      expect.objectContaining({
+        stepId: "start:02:followup",
+        phase: "FOLLOWUP",
+        toolName: "ugv_mission_control",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+    ]);
+    for (const entry of journal) {
+      expect(entry.argumentHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(entry.resultHash).toMatch(/^[a-f0-9]{64}$/);
+    }
 
     mission(fixture.ingress, 1, 25);
     let execution = await fixture.runtime.get("nav-1");
@@ -361,6 +415,22 @@ describe("UGV long-running operation integration", () => {
   it("runs area recon and fails target tracking truthfully when lock is lost", async () => {
     const fixture = await createFixture(true);
     await fixture.runtime.start(startInput("recon-1", "vehicle_area_recon", reconArgs()));
+    expect(await fixture.store.listMutationJournal("recon-1")).toEqual([
+      expect.objectContaining({
+        stepId: "start:01:primary",
+        phase: "PRIMARY",
+        toolName: "ugv_area_recon_configure",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+      expect.objectContaining({
+        stepId: "start:02:followup",
+        phase: "FOLLOWUP",
+        toolName: "ugv_area_recon_control",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+    ]);
     reconStatus(fixture.ingress, 5, 50);
     expect((await fixture.runtime.get("recon-1"))?.state).toBe("RUNNING");
     reconStatus(fixture.ingress, 11, 100);
@@ -1066,6 +1136,46 @@ class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {
   override contracts(): CapturedToolContract[] {
     return this.fixtureContracts.map((contract) => structuredClone(contract));
   }
+}
+
+class DispatchOrderStore extends MemoryProviderStore {
+  #missionRecorded = false;
+
+  constructor(readonly events: string[]) {
+    super();
+  }
+
+  override putExecution(execution: ProviderExecution): Promise<void> {
+    const missionId = execution.downstreamMissionIds[0];
+    if (!this.#missionRecorded && missionId !== undefined) {
+      this.#missionRecorded = true;
+      this.events.push(`execution:mission:${missionId}`);
+    }
+    return super.putExecution(execution);
+  }
+
+  override claimMutationJournal(entry: MutationJournalEntry) {
+    this.events.push(`journal:${entry.phase}:${entry.state}`);
+    return super.claimMutationJournal(entry);
+  }
+
+  override advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ) {
+    this.events.push(`journal:${entry.phase}:${entry.state}`);
+    return super.advanceMutationJournal(entry, expectedState);
+  }
+}
+
+function acceptedMutationResult(missionId: number, state: number): Record<string, unknown> {
+  return {
+    mission_id: missionId,
+    state,
+    state_label: "accepted",
+    message: "accepted",
+    error_code: 0,
+  };
 }
 
 function withoutOutputSchema(contract: CapturedToolContract): CapturedToolContract {

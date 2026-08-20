@@ -298,13 +298,23 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         onMissionId: (canonical) => {
           events.push(`persist:${canonical}`);
         },
+        beforeMutationDispatch: ({ phase, call }) => {
+          events.push(`journal:${phase}:dispatching:${call.name}`);
+        },
+        afterMutationAccepted: ({ phase, canonicalMissionId }) => {
+          events.push(`journal:${phase}:accepted:${String(canonicalMissionId)}`);
+        },
       },
     );
 
     expect(events).toEqual([
+      "journal:PRIMARY:dispatching:ugv_move_distance",
       "call:ugv_move_distance:0",
       "persist:42",
+      "journal:PRIMARY:accepted:42",
+      "journal:FOLLOWUP:dispatching:ugv_mission_control",
       "call:ugv_mission_control:42",
+      "journal:FOLLOWUP:accepted:42",
     ]);
     expect(result.missionIds).toEqual([42]);
     expect(result.canonicalMissionIds).toEqual(["42"]);

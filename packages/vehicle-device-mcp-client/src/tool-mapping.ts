@@ -17,9 +17,31 @@ export type UgvDeviceInvoker = (
   argumentsValue: Record<string, unknown>,
 ) => Promise<Record<string, unknown>>;
 
+export type UgvStartMutationPhase = "PRIMARY" | "FOLLOWUP";
+
+export interface UgvStartMutationCall {
+  phase: UgvStartMutationPhase;
+  call: DeviceToolCall;
+}
+
+export interface UgvAcceptedStartMutationCall extends UgvStartMutationCall {
+  result: Record<string, unknown>;
+  canonicalMissionId?: string;
+}
+
+export interface UgvFailedStartMutationCall extends UgvStartMutationCall {
+  error: unknown;
+}
+
 export interface ExecuteUgvStartFlowOptions {
   /** Called before a dependent mutating follow-up is dispatched. */
   onMissionId?: (canonicalMissionId: string, numericMissionId: number) => void | Promise<void>;
+  /** Persists durable intent and dispatching state immediately before transport. */
+  beforeMutationDispatch?: (context: UgvStartMutationCall) => void | Promise<void>;
+  /** Persists the accepted outcome after any allocated mission ID is durable. */
+  afterMutationAccepted?: (context: UgvAcceptedStartMutationCall) => void | Promise<void>;
+  /** Persists an explicitly rejected or uncertain dispatched outcome. */
+  afterMutationFailed?: (context: UgvFailedStartMutationCall) => void | Promise<void>;
   /** Injectable for deterministic bounded-velocity tests. */
   delay?: (durationMs: number) => Promise<void>;
 }
@@ -49,36 +71,59 @@ export async function executeUgvStartFlow(
   const run = async (
     call: DeviceToolCall,
     persistMissionId = true,
+    phase?: UgvStartMutationPhase,
   ): Promise<Record<string, unknown>> => {
-    calls.push(structuredClone(call));
-    const result = validateUgvToolResult(
-      call.name,
-      await invoke(call.name, structuredClone(call.arguments)),
-      call.arguments,
-    );
-    results.push(structuredClone(result));
-    const missionId = missionIdFromUgvResult(call.name, result);
-    if (
-      persistMissionId &&
-      missionId !== undefined &&
-      missionId >= 0 &&
-      !missionIds.includes(missionId)
-    ) {
-      missionIds.push(missionId);
-      await options.onMissionId?.(canonicalUgvMissionId(missionId), missionId);
+    const callSnapshot = structuredClone(call);
+    calls.push(callSnapshot);
+    if (phase !== undefined)
+      await options.beforeMutationDispatch?.({ phase, call: structuredClone(callSnapshot) });
+    try {
+      const result = validateUgvToolResult(
+        call.name,
+        await invoke(call.name, structuredClone(call.arguments)),
+        call.arguments,
+      );
+      results.push(structuredClone(result));
+      const missionId = missionIdFromUgvResult(call.name, result);
+      const canonicalMissionId =
+        missionId === undefined ? undefined : canonicalUgvMissionId(missionId);
+      if (
+        persistMissionId &&
+        missionId !== undefined &&
+        missionId >= 0 &&
+        !missionIds.includes(missionId)
+      ) {
+        missionIds.push(missionId);
+        await options.onMissionId?.(canonicalUgvMissionId(missionId), missionId);
+      }
+      if (phase !== undefined)
+        await options.afterMutationAccepted?.({
+          phase,
+          call: structuredClone(callSnapshot),
+          result: structuredClone(result),
+          ...(canonicalMissionId === undefined ? {} : { canonicalMissionId }),
+        });
+      return result;
+    } catch (error) {
+      if (phase !== undefined)
+        await options.afterMutationFailed?.({
+          phase,
+          call: structuredClone(callSnapshot),
+          error,
+        });
+      throw error;
     }
-    return result;
   };
 
   const initialCalls = startDeviceCalls(operationName, argumentsValue);
   if (operationName === "vehicle_navigate" || operationName === "vehicle_area_recon") {
     const initial = required(initialCalls[0], "UGV_INITIAL_DEVICE_CALL_REQUIRED");
-    const initialResult = await run(initial);
+    const initialResult = await run(initial, true, "PRIMARY");
     const missionId = required(
       missionIdFromUgvResult(initial.name, initialResult),
       "UGV_DEVICE_MISSION_ID_REQUIRED",
     );
-    await run(buildUgvStartFollowupCall(operationName, missionId), false);
+    await run(buildUgvStartFollowupCall(operationName, missionId), false, "FOLLOWUP");
   } else if (operationName === "vehicle_emergency_stop") {
     let firstError: Error | undefined;
     for (const call of initialCalls)
