@@ -392,6 +392,269 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     });
   });
 
+  it("uses the live status alias top-level stamp as source time", () => {
+    const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
+    const sourceSeconds = Date.parse("2026-08-20T00:00:01.000Z") / 1_000;
+    ingress.handle(
+      "/ugv/status",
+      json({
+        data: JSON.stringify({
+          stamp: { sec: sourceSeconds, nanosec: 123_000_000 },
+          heading: 42.5,
+        }),
+      }),
+      false,
+      "2026-08-20T00:00:02.000Z",
+    );
+
+    expect(ingress.fieldObservationAuthority("chassis.heading")).toMatchObject({
+      topic: "/ugv/status",
+      observedAt: "2026-08-20T00:00:01.123Z",
+      timeAuthority: "source",
+    });
+    expect(ingress.snapshot().observedAt).toBe("2026-08-20T00:00:01.123Z");
+  });
+
+  it("treats a zero ROS stamp as unset and falls back to ingest time", () => {
+    const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
+    ingress.handle(
+      "/ugv/gnss",
+      json({
+        header: { stamp: { sec: 0, nanosec: 0 } },
+        latitude: 30.1,
+        longitude: 114.1,
+      }),
+      false,
+      "2026-08-20T00:00:02.000Z",
+    );
+
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")).toMatchObject({
+      topic: "/ugv/gnss",
+      observedAt: "2026-08-20T00:00:02.000Z",
+      timeAuthority: "ingest",
+    });
+  });
+
+  it("keeps canonical status authoritative and uses the alias only after canonical expiry", () => {
+    const ingress = directIngress();
+    const snapshotTopics: string[] = [];
+    ingress.onSnapshot((_snapshot, topic) => snapshotTopics.push(topic));
+    ingress.handle(
+      "status/ugv",
+      json({
+        available: true,
+        heading: 10,
+        veh_speed: 1,
+        lvbattery_soc: 80,
+        chassis_task: { id: 10, type: 1, state: 1, progress: 10 },
+        eo_task: { id: 20, type: 2, state: 1, progress: 20 },
+        gimbal: { yaw: 1, pitch: 2, zoom: 3 },
+      }),
+      false,
+      "2026-08-20T00:00:00.000Z",
+    );
+    const canonicalRevision = ingress.snapshot().revision;
+
+    const equalTimeAlias = ingress.handle(
+      "/ugv/status",
+      json({ heading: 100, veh_speed: 100 }),
+      false,
+      "2026-08-20T00:00:00.000Z",
+    );
+    expect(equalTimeAlias.revision).toBe(canonicalRevision);
+
+    const freshAlias = ingress.handle(
+      "/ugv/status",
+      json({
+        available: false,
+        heading: 99,
+        veh_speed: 99,
+        lvbattery_soc: 1,
+        chassis_task: { id: 99, type: 1, state: 4, progress: 100 },
+        eo_task: { id: 99, type: 2, state: 4, progress: 100 },
+        gimbal: { yaw: 99, pitch: 99, zoom: 99 },
+      }),
+      false,
+      "2026-08-20T00:00:01.000Z",
+    );
+    expect(freshAlias.revision).toBe(canonicalRevision);
+    expect(ingress.snapshot()).toMatchObject({
+      observedAt: "2026-08-20T00:00:00.000Z",
+      chassis: {
+        compassHeadingDeg: 10,
+        speedKmh: 1,
+        energy: { lowVoltageSoc: 80 },
+        mission: { id: "10", state: 1 },
+      },
+      payload: { eoTask: { id: "20", state: 1 }, gimbal: { yaw: 1, pitch: 2, zoom: 3 } },
+      connectivity: { deviceAvailable: true },
+    });
+    expect(ingress.fieldObservationAuthority("chassis.heading")?.topic).toBe("status/ugv");
+
+    const boundaryAlias = ingress.handle(
+      "/ugv/status",
+      json({ heading: 98, veh_speed: 98 }),
+      false,
+      "2026-08-20T00:00:03.000Z",
+    );
+    expect(boundaryAlias.revision).toBe(canonicalRevision);
+
+    ingress.handle(
+      "/ugv/status",
+      json({
+        available: true,
+        heading: 40,
+        veh_speed: 4,
+        lvbattery_soc: 70,
+        chassis_task: { id: 40, type: 1, state: 4, progress: 100 },
+        eo_task: { id: 50, type: 2, state: 4, progress: 100 },
+        gimbal: { yaw: 4, pitch: 5, zoom: 6 },
+      }),
+      false,
+      "2026-08-20T00:00:03.001Z",
+    );
+    expect(ingress.snapshot()).toMatchObject({
+      observedAt: "2026-08-20T00:00:03.001Z",
+      chassis: {
+        compassHeadingDeg: 40,
+        speedKmh: 4,
+        energy: { lowVoltageSoc: 70 },
+        mission: { id: "40", state: 4 },
+      },
+      payload: { eoTask: { id: "50", state: 4 }, gimbal: { yaw: 4, pitch: 5, zoom: 6 } },
+    });
+    expect(ingress.fieldObservationAuthority("chassis.heading")?.topic).toBe("/ugv/status");
+
+    ingress.handle(
+      "status/ugv",
+      json({ heading: 50, veh_speed: 5 }),
+      false,
+      "2026-08-20T00:00:04.000Z",
+    );
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 50, speedKmh: 5 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")?.topic).toBe("status/ugv");
+    expect(snapshotTopics).toEqual(["status/ugv", "/ugv/status", "status/ugv"]);
+  });
+
+  it("promotes an unchanged suppressed alias when canonical status expires", () => {
+    const ingress = directIngress();
+    ingress.handle(
+      "status/ugv",
+      json({ heading: 10, veh_speed: 1, available: true }),
+      false,
+      "2026-08-20T00:00:00.000Z",
+    );
+    const alias = {
+      stamp: { sec: Date.parse("2026-08-20T00:00:01.000Z") / 1_000, nanosec: 0 },
+      heading: 20,
+      veh_speed: 2,
+      available: true,
+    };
+    ingress.handle("/ugv/status", json(alias), false, "2026-08-20T00:00:01.000Z");
+    expect(ingress.snapshot().chassis.compassHeadingDeg).toBe(10);
+
+    const fallback = ingress.handle("/ugv/status", json(alias), false, "2026-08-20T00:00:03.001Z");
+    expect(fallback.duplicate).toBe(false);
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 20, speedKmh: 2 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")?.topic).toBe("/ugv/status");
+  });
+
+  it("refreshes canonical liveness on a duplicate heartbeat", () => {
+    const ingress = directIngress();
+    const canonical = {
+      header: { stamp: { sec: Date.parse("2026-08-20T00:00:00.000Z") / 1_000, nanosec: 0 } },
+      heading: 10,
+      veh_speed: 1,
+      available: true,
+    };
+    ingress.handle("status/ugv", json(canonical), false, "2026-08-20T00:00:00.000Z");
+    const canonicalRevision = ingress.snapshot().revision;
+    ingress.handle("status/ugv", json(canonical), false, "2026-08-20T00:00:02.900Z");
+    const alias = ingress.handle(
+      "/ugv/status",
+      json({ heading: 99, veh_speed: 99, available: false }),
+      false,
+      "2026-08-20T00:00:04.100Z",
+    );
+    expect(alias.revision).toBe(canonicalRevision);
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 10, speedKmh: 1 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")?.topic).toBe("status/ugv");
+  });
+
+  it("resets canonical high-water when it retakes authority and accepts its next sample", () => {
+    const ingress = directIngress();
+    ingress.handle(
+      "status/ugv",
+      json({
+        header: { stamp: { sec: Date.parse("2026-08-20T00:01:40.000Z") / 1_000, nanosec: 0 } },
+        heading: 10,
+        veh_speed: 1,
+        available: true,
+      }),
+      false,
+      "2026-08-20T00:00:00.000Z",
+    );
+    ingress.handle(
+      "/ugv/status",
+      json({
+        stamp: { sec: Date.parse("2026-08-20T00:03:20.000Z") / 1_000, nanosec: 0 },
+        heading: 20,
+        veh_speed: 2,
+        available: true,
+      }),
+      false,
+      "2026-08-20T00:00:03.001Z",
+    );
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 20, speedKmh: 2 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")).toMatchObject({
+      topic: "/ugv/status",
+      observedAt: "2026-08-20T00:03:20.000Z",
+    });
+
+    ingress.handle(
+      "status/ugv",
+      json({
+        header: { stamp: { sec: Date.parse("2026-08-20T00:01:30.000Z") / 1_000, nanosec: 0 } },
+        heading: 30,
+        veh_speed: 3,
+        available: true,
+      }),
+      false,
+      "2026-08-20T00:00:04.000Z",
+    );
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 30, speedKmh: 3 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")).toMatchObject({
+      topic: "status/ugv",
+      observedAt: "2026-08-20T00:01:30.000Z",
+    });
+    expect(ingress.observationAuthority("status/ugv")).toMatchObject({
+      observedAt: "2026-08-20T00:01:30.000Z",
+      timeAuthority: "source",
+    });
+
+    const nextCanonical = ingress.handle(
+      "status/ugv",
+      json({
+        header: { stamp: { sec: Date.parse("2026-08-20T00:01:31.000Z") / 1_000, nanosec: 0 } },
+        heading: 31,
+        veh_speed: 3.1,
+        available: true,
+      }),
+      false,
+      "2026-08-20T00:00:05.000Z",
+    );
+    expect(nextCanonical.olderObservation).toBe(false);
+    expect(ingress.snapshot().chassis).toMatchObject({ compassHeadingDeg: 31, speedKmh: 3.1 });
+    expect(ingress.fieldObservationAuthority("chassis.heading")).toMatchObject({
+      topic: "status/ugv",
+      observedAt: "2026-08-20T00:01:31.000Z",
+    });
+    expect(ingress.observationAuthority("status/ugv")).toMatchObject({
+      observedAt: "2026-08-20T00:01:31.000Z",
+      timeAuthority: "source",
+    });
+  });
+
   it("accepts the live empty chassis task sentinel without accepting active negative progress", () => {
     const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
     ingress.handle(
@@ -471,7 +734,7 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     expect(ingress.stateConflict()).toBe(false);
 
     ingress.handle(
-      "/ugv/status",
+      "status/ugv",
       json({ available: true, chassis_task: { id: 7, type: 1, state: 4, progress: 100 } }),
     );
     expect(ingress.stateConflict()).toBe(true);
