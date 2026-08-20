@@ -107,6 +107,29 @@ describe("UGV Provider operation and source contract", () => {
     ).not.toThrow();
   });
 
+  it("accepts authoritative navigation evidence in the declared terminal output", () => {
+    const manifest = new OperationRegistry().validate(
+      testManifest() as unknown as ProviderManifest,
+    );
+    const navigate = manifest.operations.find(({ name }) => name === "vehicle_navigate");
+    expect(navigate).toBeDefined();
+    expect(() =>
+      navigate?.validateOutput({
+        resourceId: "vehicle:ugv1",
+        status: "completed",
+        observedAt: "2026-08-20T12:31:18.576Z",
+        positionAuthority: {
+          field: "chassis.position.local",
+          topic: "/ugv/nav_state",
+          observedAt: "2026-08-20T12:31:18.576Z",
+          timeAuthority: "source",
+          cursor: "oc1.test",
+        },
+        displacementUnavailableReason: "POSITION_AUTHORITY_MISMATCH",
+      }),
+    ).not.toThrow();
+  });
+
   it("publishes versioned closed Vehicle DTO schemas", () => {
     const operations = testManifest().operations as { name: string; outputSchema: unknown }[];
     const stateSchema = protoStructToJson(

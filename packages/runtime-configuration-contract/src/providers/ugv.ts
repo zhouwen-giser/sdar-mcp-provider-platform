@@ -54,6 +54,7 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_HEALTH_FRESHNESS_MS: z.coerce.number().int().positive().default(5_000),
   UGV_TARGET_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   UGV_PAYLOAD_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
+  UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: z.coerce.number().int().min(0).max(5_000).default(1_000),
   UGV_DEVICE_MCP_URL: z.url().default("http://127.0.0.1:19000/mcp"),
   UGV_DEVICE_MCP_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
   UGV_DEVICE_MCP_TLS_MODE: tls.default("disabled"),

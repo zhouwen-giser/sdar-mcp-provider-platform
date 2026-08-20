@@ -1192,6 +1192,7 @@ export class UgvProviderRuntime {
         execution,
         snapshot.payload.reconnaissance,
         this.ingress.observationCursor("/ugv/area_recon/status"),
+        authority?.observedAt,
         reconCorrelationStrength(snapshot.payload.reconnaissance, reconMissionId),
         reconTerminalFacts({
           snapshot,
@@ -1380,7 +1381,7 @@ export class UgvProviderRuntime {
     const fresh =
       authority !== undefined &&
       Number.isFinite(age) &&
-      age >= 0 &&
+      age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
       age <= this.options.freshness.chassis &&
       speedKmh !== undefined;
     if (!fresh)
@@ -2508,7 +2509,11 @@ function applyTrack(
       : transition(execution, execution.state, "UGV_DOWNSTREAM_MISSION_ID_MISMATCH");
   const mapped = mapVehicleTaskState(track.state, true);
   const armed = execution.observationCursors?.trackActive !== undefined;
-  if (!armed && isMappedTerminal(mapped.state)) {
+  const immediateCompletionProven =
+    mapped.state === "SUCCEEDED" &&
+    physical?.confirmation.confirmed === true &&
+    physical.stabilitySatisfied;
+  if (!armed && isMappedTerminal(mapped.state) && !immediateCompletionProven) {
     if (execution.reasonCode === "UGV_TASK_TERMINAL_UNCONFIRMED") return execution;
     return transition(execution, execution.state, "UGV_TASK_TERMINAL_UNCONFIRMED");
   }
@@ -2603,12 +2608,16 @@ function applyReconTrack(
   execution: ProviderExecution,
   reconnaissance: UgvSnapshot["payload"]["reconnaissance"],
   observationCursor: string | undefined,
+  observedAt: string | undefined,
   correlation: CorrelationStrength,
   terminalFacts: Record<string, unknown> = {},
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
     return execution;
-  const observedAt = observationCursorTimestamp(observationCursor);
+  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
+    return execution.reasonCode === "UGV_RECON_CORRELATION_UNKNOWN"
+      ? execution
+      : transition(execution, execution.state, "UGV_RECON_CORRELATION_UNKNOWN");
   if (correlation === "MISMATCH")
     return execution.reasonCode === "UGV_DOWNSTREAM_MISSION_ID_MISMATCH"
       ? execution
@@ -2737,16 +2746,18 @@ function taskPhaseObservation(
   }
   if (execution.operationName === "vehicle_area_recon") {
     const cursor = ingress.observationCursor("/ugv/area_recon/status");
+    const authority = ingress.observationAuthority("/ugv/area_recon/status");
     const track = snapshot.payload.reconnaissance;
     if (
       !isNewReconObservation(execution, cursor) ||
+      authority === undefined ||
       !trackBelongsToExecution(execution, track, true)
     )
       return undefined;
     const mapped = mapReconMotionStatus(track.motionStatus, true).state;
     if (mapped === "RECONCILE") return undefined;
     return {
-      observedAt: observationCursorTimestamp(cursor),
+      observedAt: authority.observedAt,
       startObserved: mapped === "STARTING" || isObservedActiveState(mapped),
       activeObserved: isObservedActiveState(mapped),
       terminalObserved: isMappedTerminal(mapped),
@@ -3013,14 +3024,6 @@ function isNewOperationObservation(
   return (
     observationCursor !== undefined && observationCursor !== execution.observationCursors?.track
   );
-}
-
-function observationCursorTimestamp(cursor: string | undefined): string {
-  const separator = cursor?.indexOf("\0") ?? -1;
-  const observedAt = separator < 1 ? undefined : cursor?.slice(0, separator);
-  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
-    throw new Error("UGV_RECON_OBSERVATION_CURSOR_INVALID");
-  return observedAt;
 }
 
 function reconMotionActive(status: VehicleReconnaissanceState["motionStatus"]): boolean {

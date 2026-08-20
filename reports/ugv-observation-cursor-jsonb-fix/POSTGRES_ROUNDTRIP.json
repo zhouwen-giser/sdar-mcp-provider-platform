@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "database": "temporary PostgreSQL 17-alpine",
+  "testFile": "tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts",
+  "flow": "VehicleMqttIngress -> capturePhysicalDispatchBaseline -> ProviderExecution -> PostgresProviderStore -> getExecution",
+  "cursorByteEquality": true,
+  "authorityEquality": true,
+  "nulPresent": false,
+  "unsafeNulDiagnostic": {
+    "code": "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
+    "path": "$/observationCursors/track",
+    "rawValueDisclosed": false
+  },
+  "schemaMigration": false
+}

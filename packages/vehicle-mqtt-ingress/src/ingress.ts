@@ -4,6 +4,7 @@ import {
   applySnapshotPatch,
   createNpcTankSnapshot,
   createUgvSnapshot,
+  encodeObservationCursorV1,
   type FieldObservationAuthority,
   type FreshnessDomain,
   type NpcTankSnapshot,
@@ -215,7 +216,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
     const observedAt = observation.sourceObservedAt ?? receivedAt;
     const hash = createHash("sha256").update(canonical(observation.canonicalPayload)).digest("hex");
-    const authorityCursor = `${topic}\0${observation.timeAuthority}`;
+    const authorityCursor = JSON.stringify([topic, observation.timeAuthority]);
     const latestForAuthority = this.#latestByAuthority.get(authorityCursor);
     if (latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash)
       return {
@@ -273,7 +274,18 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   }
   observationCursor(topic: string): string | undefined {
     const latest = this.#latest.get(topic);
-    return latest === undefined ? undefined : `${latest.observedAt}\0${latest.hash}`;
+    return latest === undefined
+      ? undefined
+      : encodeObservationCursorV1({
+          version: 1,
+          kind: "topic",
+          topic,
+          observedAt: latest.observedAt,
+          timeAuthority: latest.timeAuthority,
+          ...(latest.sourceSequence === undefined ? {} : { sourceSequence: latest.sourceSequence }),
+          ingestSequence: latest.ingestSequence,
+          payloadHash: latest.hash,
+        });
   }
   observationAuthority(topic: string):
     | {
@@ -294,7 +306,18 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           timeAuthority: latest.timeAuthority,
           ...(latest.sourceSequence === undefined ? {} : { sourceSequence: latest.sourceSequence }),
           ingestSequence: latest.ingestSequence,
-          cursor: `${latest.observedAt}\0${latest.hash}`,
+          cursor: encodeObservationCursorV1({
+            version: 1,
+            kind: "topic",
+            topic,
+            observedAt: latest.observedAt,
+            timeAuthority: latest.timeAuthority,
+            ...(latest.sourceSequence === undefined
+              ? {}
+              : { sourceSequence: latest.sourceSequence }),
+            ingestSequence: latest.ingestSequence,
+            payloadHash: latest.hash,
+          }),
         };
   }
   fieldObservationAuthority(field: VehicleObservationField): FieldObservationAuthority | undefined {
@@ -418,7 +441,19 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           : { sourceSequence: observation.sourceSequence }),
         ingestSequence: this.#sequence,
         payloadHash,
-        cursor: `${field}\0${observedAt}\0${observation.sourceSequence ?? String(this.#sequence)}\0${payloadHash}`,
+        cursor: encodeObservationCursorV1({
+          version: 1,
+          kind: "field",
+          field,
+          topic,
+          observedAt,
+          timeAuthority: observation.timeAuthority,
+          ...(observation.sourceSequence === undefined
+            ? {}
+            : { sourceSequence: observation.sourceSequence }),
+          ingestSequence: this.#sequence,
+          payloadHash,
+        }),
       });
     }
     return accepted;

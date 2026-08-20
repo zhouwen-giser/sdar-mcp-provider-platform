@@ -1,0 +1,1446 @@
+diff --git a/apps/npc-tank-provider-adapter/src/runtime.ts b/apps/npc-tank-provider-adapter/src/runtime.ts
+index eb80929..f9e7741 100644
+--- a/apps/npc-tank-provider-adapter/src/runtime.ts
++++ b/apps/npc-tank-provider-adapter/src/runtime.ts
+@@ -767 +767,2 @@ export class NpcTankProviderRuntime {
+-    else if (execution.operationName === "vehicle_area_recon")
++    else if (execution.operationName === "vehicle_area_recon") {
++      const authority = this.ingress.observationAuthority("/npc_tank1/area_recon/status");
+@@ -771,0 +773 @@ export class NpcTankProviderRuntime {
++        authority?.observedAt,
+@@ -773 +775 @@ export class NpcTankProviderRuntime {
+-    else if (execution.operationName === "vehicle_control_gimbal")
++    } else if (execution.operationName === "vehicle_control_gimbal")
+@@ -1465,0 +1468 @@ function applyReconTrack(
++  observedAt: string | undefined,
+@@ -1469 +1472 @@ function applyReconTrack(
+-  const observedAt = observationCursorTimestamp(observationCursor);
++  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt))) return execution;
+@@ -1612,8 +1614,0 @@ function isNewOperationObservation(
+-function observationCursorTimestamp(cursor: string | undefined): string {
+-  const separator = cursor?.indexOf("\0") ?? -1;
+-  const observedAt = separator < 1 ? undefined : cursor?.slice(0, separator);
+-  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
+-    throw new Error("NPC_TANK_RECON_OBSERVATION_CURSOR_INVALID");
+-  return observedAt;
+-}
+-
+diff --git a/apps/ugv-provider-adapter/src/runtime.ts b/apps/ugv-provider-adapter/src/runtime.ts
+index 8e813bf..b8731f7 100644
+--- a/apps/ugv-provider-adapter/src/runtime.ts
++++ b/apps/ugv-provider-adapter/src/runtime.ts
+@@ -1194,0 +1195 @@ export class UgvProviderRuntime {
++        authority?.observedAt,
+@@ -2605,0 +2607 @@ function applyReconTrack(
++  observedAt: string | undefined,
+@@ -2611 +2613,4 @@ function applyReconTrack(
+-  const observedAt = observationCursorTimestamp(observationCursor);
++  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
++    return execution.reasonCode === "UGV_RECON_CORRELATION_UNKNOWN"
++      ? execution
++      : transition(execution, execution.state, "UGV_RECON_CORRELATION_UNKNOWN");
+@@ -2739,0 +2745 @@ function taskPhaseObservation(
++    const authority = ingress.observationAuthority("/ugv/area_recon/status");
+@@ -2742,0 +2749 @@ function taskPhaseObservation(
++      authority === undefined ||
+@@ -2749 +2756 @@ function taskPhaseObservation(
+-      observedAt: observationCursorTimestamp(cursor),
++      observedAt: authority.observedAt,
+@@ -3018,8 +3024,0 @@ function isNewOperationObservation(
+-function observationCursorTimestamp(cursor: string | undefined): string {
+-  const separator = cursor?.indexOf("\0") ?? -1;
+-  const observedAt = separator < 1 ? undefined : cursor?.slice(0, separator);
+-  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
+-    throw new Error("UGV_RECON_OBSERVATION_CURSOR_INVALID");
+-  return observedAt;
+-}
+-
+diff --git a/packages/provider-adapter-kit/src/postgres-store.ts b/packages/provider-adapter-kit/src/postgres-store.ts
+index af59eec..3090871 100644
+--- a/packages/provider-adapter-kit/src/postgres-store.ts
++++ b/packages/provider-adapter-kit/src/postgres-store.ts
+@@ -50,0 +51 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(execution, "execution");
+@@ -100,0 +102 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(ack, "commandAck");
+@@ -112,0 +115 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(ack, "commandAck");
+@@ -130,0 +134 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(ack, "commandAck");
+@@ -156,0 +161 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(entry, "mutationJournal");
+@@ -178,0 +184 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(entry, "mutationJournal");
+@@ -212,0 +219 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(record.snapshot, "snapshot");
+@@ -219,0 +227 @@ export class PostgresProviderStore implements ProviderStore {
++    assertPostgresJsonbSafe(draft.rawPayload, "businessEvent.rawPayload");
+@@ -378,0 +387,55 @@ function timestamp(value: string): { seconds: string; nanos: number } {
++
++export class ProviderStoreJsonbUnsafePayloadError extends Error {
++  readonly code = "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD";
++
++  constructor(
++    readonly rootName: string,
++    readonly path: string,
++    readonly unsafeKind: "nul_string" | "non_finite_number" | "bigint" | "cyclic_reference",
++  ) {
++    super(`PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD root=${rootName} path=${path} kind=${unsafeKind}`);
++    this.name = "ProviderStoreJsonbUnsafePayloadError";
++  }
++}
++
++export function assertPostgresJsonbSafe(value: unknown, rootName: string): void {
++  const active = new WeakSet();
++  const visit = (current: unknown, path: string): void => {
++    if (typeof current === "string") {
++      if (current.includes("\0"))
++        throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "nul_string");
++      return;
++    }
++    if (typeof current === "number") {
++      if (!Number.isFinite(current))
++        throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "non_finite_number");
++      return;
++    }
++    if (typeof current === "bigint")
++      throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "bigint");
++    if (current === null || typeof current !== "object") return;
++    if (active.has(current))
++      throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "cyclic_reference");
++    active.add(current);
++    if (Array.isArray(current)) {
++      for (const [index, child] of current.entries()) visit(child, `${path}/${String(index)}`);
++    } else {
++      for (const [key, child] of Object.entries(current)) {
++        const childPath = `${path}/${diagnosticPathSegment(key)}`;
++        if (key.includes("\0"))
++          throw new ProviderStoreJsonbUnsafePayloadError(rootName, childPath, "nul_string");
++        visit(child, childPath);
++      }
++    }
++    active.delete(current);
++  };
++  visit(value, "$");
++}
++
++function diagnosticPathSegment(value: string): string {
++  return value
++    .slice(0, 128)
++    .replaceAll("~", "~0")
++    .replaceAll("/", "~1")
++    .replace(/\p{Cc}/gu, "?");
++}
+diff --git a/packages/vehicle-mqtt-ingress/src/ingress.ts b/packages/vehicle-mqtt-ingress/src/ingress.ts
+index 23c78b7..1f70c6d 100644
+--- a/packages/vehicle-mqtt-ingress/src/ingress.ts
++++ b/packages/vehicle-mqtt-ingress/src/ingress.ts
+@@ -6,0 +7 @@ import {
++  encodeObservationCursorV1,
+@@ -218 +219 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
+-    const authorityCursor = `${topic}\0${observation.timeAuthority}`;
++    const authorityCursor = JSON.stringify([topic, observation.timeAuthority]);
+@@ -276 +277,12 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
+-    return latest === undefined ? undefined : `${latest.observedAt}\0${latest.hash}`;
++    return latest === undefined
++      ? undefined
++      : encodeObservationCursorV1({
++          version: 1,
++          kind: "topic",
++          topic,
++          observedAt: latest.observedAt,
++          timeAuthority: latest.timeAuthority,
++          ...(latest.sourceSequence === undefined ? {} : { sourceSequence: latest.sourceSequence }),
++          ingestSequence: latest.ingestSequence,
++          payloadHash: latest.hash,
++        });
+@@ -297 +309,12 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
+-          cursor: `${latest.observedAt}\0${latest.hash}`,
++          cursor: encodeObservationCursorV1({
++            version: 1,
++            kind: "topic",
++            topic,
++            observedAt: latest.observedAt,
++            timeAuthority: latest.timeAuthority,
++            ...(latest.sourceSequence === undefined
++              ? {}
++              : { sourceSequence: latest.sourceSequence }),
++            ingestSequence: latest.ingestSequence,
++            payloadHash: latest.hash,
++          }),
+@@ -421 +444,13 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
+-        cursor: `${field}\0${observedAt}\0${observation.sourceSequence ?? String(this.#sequence)}\0${payloadHash}`,
++        cursor: encodeObservationCursorV1({
++          version: 1,
++          kind: "field",
++          field,
++          topic,
++          observedAt,
++          timeAuthority: observation.timeAuthority,
++          ...(observation.sourceSequence === undefined
++            ? {}
++            : { sourceSequence: observation.sourceSequence }),
++          ingestSequence: this.#sequence,
++          payloadHash,
++        }),
+diff --git a/packages/vehicle-provider-core/src/index.ts b/packages/vehicle-provider-core/src/index.ts
+index 2878411..4fd146b 100644
+--- a/packages/vehicle-provider-core/src/index.ts
++++ b/packages/vehicle-provider-core/src/index.ts
+@@ -7,0 +8 @@ export * from "./manifest.js";
++export * from "./observation-cursor.js";
+diff --git a/packages/vehicle-provider-core/src/observation-cursor.ts b/packages/vehicle-provider-core/src/observation-cursor.ts
+new file mode 100644
+index 0000000..a7f904e
+--- /dev/null
++++ b/packages/vehicle-provider-core/src/observation-cursor.ts
+@@ -0,0 +1,151 @@
++import type { VehicleObservationField } from "./physical-evidence.js";
++
++const PREFIX = "oc1.";
++const MAX_TOKEN_LENGTH = 4096;
++const MAX_TOPIC_LENGTH = 2048;
++const MAX_SOURCE_SEQUENCE_LENGTH = 1024;
++const RFC3339 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
++const PAYLOAD_HASH = /^[a-f0-9]{64}$/;
++const BASE64URL = /^[A-Za-z0-9_-]+$/;
++
++const VEHICLE_OBSERVATION_FIELDS = new Set<VehicleObservationField>([
++  "chassis.position.geodetic",
++  "chassis.position.local",
++  "chassis.speed",
++  "chassis.heading",
++  "chassis.mission",
++  "payload.recon",
++  "payload.targets",
++  "payload.gimbal",
++]);
++
++export interface TopicObservationCursorV1 {
++  version: 1;
++  kind: "topic";
++  topic: string;
++  observedAt: string;
++  timeAuthority: "source" | "ingest";
++  sourceSequence?: string;
++  ingestSequence: number;
++  payloadHash: string;
++}
++
++export interface FieldObservationCursorV1 {
++  version: 1;
++  kind: "field";
++  field: VehicleObservationField;
++  topic: string;
++  observedAt: string;
++  timeAuthority: "source" | "ingest";
++  sourceSequence?: string;
++  ingestSequence: number;
++  payloadHash: string;
++}
++
++export type ObservationCursorV1 = TopicObservationCursorV1 | FieldObservationCursorV1;
++
++export function encodeObservationCursorV1(payload: ObservationCursorV1): string {
++  if (!validObservationCursorPayload(payload)) throw new Error("OBSERVATION_CURSOR_V1_INVALID");
++  const canonical =
++    payload.kind === "topic"
++      ? {
++          version: 1 as const,
++          kind: "topic" as const,
++          topic: payload.topic,
++          observedAt: payload.observedAt,
++          timeAuthority: payload.timeAuthority,
++          ...(payload.sourceSequence === undefined
++            ? {}
++            : { sourceSequence: payload.sourceSequence }),
++          ingestSequence: payload.ingestSequence,
++          payloadHash: payload.payloadHash,
++        }
++      : {
++          version: 1 as const,
++          kind: "field" as const,
++          field: payload.field,
++          topic: payload.topic,
++          observedAt: payload.observedAt,
++          timeAuthority: payload.timeAuthority,
++          ...(payload.sourceSequence === undefined
++            ? {}
++            : { sourceSequence: payload.sourceSequence }),
++          ingestSequence: payload.ingestSequence,
++          payloadHash: payload.payloadHash,
++        };
++  const token = `${PREFIX}${Buffer.from(JSON.stringify(canonical), "utf8").toString("base64url")}`;
++  if (token.length > MAX_TOKEN_LENGTH) throw new Error("OBSERVATION_CURSOR_V1_TOO_LONG");
++  return token;
++}
++
++export function decodeObservationCursorV1(token: string): ObservationCursorV1 | undefined {
++  if (token.length <= PREFIX.length || token.length > MAX_TOKEN_LENGTH || !token.startsWith(PREFIX))
++    return undefined;
++  const encoded = token.slice(PREFIX.length);
++  if (!BASE64URL.test(encoded)) return undefined;
++  let bytes: Buffer;
++  try {
++    bytes = Buffer.from(encoded, "base64url");
++  } catch {
++    return undefined;
++  }
++  if (bytes.toString("base64url") !== encoded) return undefined;
++  let value: unknown;
++  try {
++    value = JSON.parse(bytes.toString("utf8"));
++  } catch {
++    return undefined;
++  }
++  return validObservationCursorPayload(value) ? value : undefined;
++}
++
++function validObservationCursorPayload(value: unknown): value is ObservationCursorV1 {
++  if (!record(value) || value.version !== 1) return false;
++  if (value.kind !== "topic" && value.kind !== "field") return false;
++  const expectedKeys = new Set([
++    "version",
++    "kind",
++    ...(value.kind === "field" ? ["field"] : []),
++    "topic",
++    "observedAt",
++    "timeAuthority",
++    ...(value.sourceSequence === undefined ? [] : ["sourceSequence"]),
++    "ingestSequence",
++    "payloadHash",
++  ]);
++  if (
++    Object.keys(value).length !== expectedKeys.size ||
++    Object.keys(value).some((key) => !expectedKeys.has(key))
++  )
++    return false;
++  if (
++    typeof value.topic !== "string" ||
++    value.topic.length === 0 ||
++    value.topic.length > MAX_TOPIC_LENGTH ||
++    typeof value.observedAt !== "string" ||
++    value.observedAt.length > 64 ||
++    !RFC3339.test(value.observedAt) ||
++    !Number.isFinite(Date.parse(value.observedAt)) ||
++    (value.timeAuthority !== "source" && value.timeAuthority !== "ingest") ||
++    !Number.isSafeInteger(value.ingestSequence) ||
++    (value.ingestSequence as number) < 0 ||
++    typeof value.payloadHash !== "string" ||
++    !PAYLOAD_HASH.test(value.payloadHash)
++  )
++    return false;
++  if (
++    value.sourceSequence !== undefined &&
++    (typeof value.sourceSequence !== "string" ||
++      value.sourceSequence.length > MAX_SOURCE_SEQUENCE_LENGTH)
++  )
++    return false;
++  return (
++    value.kind === "topic" ||
++    (typeof value.field === "string" &&
++      VEHICLE_OBSERVATION_FIELDS.has(value.field as VehicleObservationField))
++  );
++}
++
++function record(value: unknown): value is Record<string, unknown> {
++  return value !== null && typeof value === "object" && !Array.isArray(value);
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/BASELINE.json b/reports/ugv-observation-cursor-jsonb-fix/BASELINE.json
+new file mode 100644
+index 0000000..fdb488b
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/BASELINE.json
+@@ -0,0 +1,15 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T11:27:00Z",
++  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
++  "sourceBranch": "codex/ugv-provider-template-stabilization",
++  "sourceSha": "32f338a844587fd137c606663154d08b9fe96f53",
++  "targetBranch": "codex/fix-ugv-observation-cursor-jsonb",
++  "startStatus": "clean",
++  "reviewedBlobs": {
++    "packages/vehicle-mqtt-ingress/src/ingress.ts": "23c78b7225ac6aa97ae403afe07a69712080c870",
++    "apps/ugv-provider-adapter/src/runtime.ts": "8e813bffba98837ba1121614aef114ddf3afce00",
++    "packages/provider-adapter-kit/src/postgres-store.ts": "af59eecc58fef6d5c2a1c338ec4707ef22e4f40e"
++  },
++  "drift": false
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/BASELINE_DRIFT.md b/reports/ugv-observation-cursor-jsonb-fix/BASELINE_DRIFT.md
+new file mode 100644
+index 0000000..3a29f08
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/BASELINE_DRIFT.md
+@@ -0,0 +1,9 @@
++# Baseline Drift Review
++
++- Source branch: `codex/ugv-provider-template-stabilization`
++- Source SHA: `32f338a844587fd137c606663154d08b9fe96f53`
++- Target branch: `codex/fix-ugv-observation-cursor-jsonb`
++- Start status: clean
++- Reviewed Blob drift: none
++
++The three reviewed source blobs exactly matched the task package. No reinterpretation of the root cause was required.
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/CURSOR_CODEC_TESTS.json b/reports/ugv-observation-cursor-jsonb-fix/CURSOR_CODEC_TESTS.json
+new file mode 100644
+index 0000000..0421783
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/CURSOR_CODEC_TESTS.json
+@@ -0,0 +1,16 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "testFile": "tests/unit/observation-cursor.test.ts",
++  "coverage": [
++    "topic encode/decode",
++    "field encode/decode",
++    "determinism",
++    "identity field changes",
++    "strict prefix/base64url/JSON/version/kind/field/key/time/sequence/hash validation",
++    "4096 character bound",
++    "no control characters"
++  ],
++  "format": "^oc1\\.[A-Za-z0-9_-]+$",
++  "newDependencies": false
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/CURSOR_INVENTORY.json b/reports/ugv-observation-cursor-jsonb-fix/CURSOR_INVENTORY.json
+new file mode 100644
+index 0000000..fc087ec
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/CURSOR_INVENTORY.json
+@@ -0,0 +1,57 @@
++{
++  "schemaVersion": "1.0",
++  "status": "complete",
++  "entries": [
++    {
++      "path": "packages/vehicle-provider-core/src/observation-cursor.ts",
++      "symbol": "encodeObservationCursorV1/decodeObservationCursorV1",
++      "role": "single shared topic/field codec",
++      "persisted": true,
++      "resolution": "oc1 base64url canonical JSON"
++    },
++    {
++      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
++      "symbol": "observationCursor/observationAuthority",
++      "role": "topic cursor producer",
++      "persisted": true,
++      "resolution": "ObservationCursorCodecV1 topic payload"
++    },
++    {
++      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
++      "symbol": "applyFieldAuthorities",
++      "role": "field cursor producer",
++      "persisted": true,
++      "resolution": "ObservationCursorCodecV1 field payload"
++    },
++    {
++      "path": "apps/ugv-provider-adapter/src/runtime.ts",
++      "symbol": "initialObservationCursors/dispatchBaseline/lastStationarySpeedCursor",
++      "role": "cursor persistence and equality consumer",
++      "persisted": true,
++      "resolution": "opaque equality only; explicit authority observedAt"
++    },
++    {
++      "path": "apps/npc-tank-provider-adapter/src/runtime.ts",
++      "symbol": "applyReconTrack",
++      "role": "shared ingress cursor consumer",
++      "persisted": true,
++      "resolution": "opaque equality only; explicit authority observedAt"
++    },
++    {
++      "path": "packages/provider-adapter-kit/src/postgres-store.ts",
++      "symbol": "putExecution and JSONB write boundaries",
++      "role": "persistence boundary",
++      "persisted": true,
++      "resolution": "fail-closed JSONB safety diagnostic"
++    },
++    {
++      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
++      "symbol": "latestByAuthority key",
++      "role": "process-local deduplication key",
++      "persisted": false,
++      "resolution": "JSON tuple; no NUL delimiter"
++    }
++  ],
++  "remainingCursorDelimiterParsers": 0,
++  "remainingPersistedNulCursorProducers": 0
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/FINAL_REPORT.md b/reports/ugv-observation-cursor-jsonb-fix/FINAL_REPORT.md
+new file mode 100644
+index 0000000..48f6bd0
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/FINAL_REPORT.md
+@@ -0,0 +1,56 @@
++# UGV Observation Cursor JSONB Fix — Final Report
++
++## Result
++
++`UGV_OBSERVATION_CURSOR_JSONB_FIX_QUALIFIED`
++
++## Baseline
++
++The target branch was created from remote source SHA `32f338a844587fd137c606663154d08b9fe96f53`. The reviewed Ingress, UGV Runtime and PostgreSQL Store blobs matched the task package exactly.
++
++## Root cause confirmation
++
++Topic and Field Observation Cursors contained U+0000 delimiters. The full ProviderExecution was passed to PostgreSQL as JSONB before any Device MCP mutation, and PostgreSQL rejected the Cursor string.
++
++## Changes
++
++- Added one shared `ObservationCursorCodecV1` using `oc1.<base64url(canonical-json)>`.
++- Migrated Topic and Field Cursor producers to the shared codec.
++- Removed UGV and NPC Runtime delimiter parsing; explicit Observation Authority timestamps are authoritative.
++- Added fail-closed JSONB safety diagnostics without raw payload values.
++- Preserved legacy safe opaque Cursor equality behavior.
++
++## PostgreSQL proof
++
++An actual `VehicleMqttIngress` baseline and ProviderExecution were persisted to and read from PostgreSQL 17. Cursor bytes and authority metadata survived unchanged. A negative NUL payload was rejected as `PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD` before SQL execution.
++
++## Navigation startup proof
++
++The real PostgreSQL Store, real Ingress, UGV Runtime and Fake Device MCP produced exactly one `ugv_path_follow_mission` and one `ugv_mission_control(start)` call. The mission ID and both accepted Mutation Journal entries were durable.
++
++## Side-effect ordering proof
++
++Observed order was Execution persistence, primary intent, primary dispatch, mission-ID persistence, follow-up intent and follow-up dispatch. Initial Execution persistence failure produced zero journals, zero device calls and released the chassis track.
++
++## Restart/recovery proof
++
++After closing and reopening the Store and Runtime, the non-terminal Execution and both accepted journal records were recovered without primary or follow-up redispatch.
++
++## Shared regression
++
++Focused UGV/NPC/shared regression passed 50 files and 309 tests. PostgreSQL regression passed 2 files and 4 tests. Formatting, ESLint, typecheck, build and frozen protocol checks passed.
++
++## Compatibility
++
++- Protocol changes: none.
++- Database migrations: none.
++- Real control executed: false.
++- New dependencies: none.
++
++## Deferred follow-ups
++
++The local Mock MQTT publisher's fixed position behavior remains intentionally out of scope.
++
++## Delivery artifacts
++
++The delivery directory contains a ZIP, SHA-256 sidecar and patch generated after this report commit.
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/FOLLOW_UPS.md b/reports/ugv-observation-cursor-jsonb-fix/FOLLOW_UPS.md
+new file mode 100644
+index 0000000..637f7e8
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/FOLLOW_UPS.md
+@@ -0,0 +1,9 @@
++# Follow-ups
++
++## Local mock physical movement
++
++The local Mock MQTT publisher emits a fixed position and does not follow point-navigation targets. This is independent of the Cursor JSONB fix and was deliberately not changed.
++
++## LIVE retest
++
++No real control was executed in this Goal. A later controlled retest must use a new idempotency key and follow `LIVE_RETEST_RUNBOOK.md`.
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/INGRESS_CURSOR_TESTS.json b/reports/ugv-observation-cursor-jsonb-fix/INGRESS_CURSOR_TESTS.json
+new file mode 100644
+index 0000000..8638c79
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/INGRESS_CURSOR_TESTS.json
+@@ -0,0 +1,13 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "testFile": "tests/unit/observation-cursor.test.ts",
++  "coverage": [
++    "actual UGV mission/position/speed/recon ingress",
++    "topic authority uses oc1",
++    "field authority uses oc1",
++    "duplicate message is deterministic",
++    "sequence/payload change changes token",
++    "shared NPC ingress uses oc1"
++  ]
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/LIVE_RETEST_RUNBOOK.md b/reports/ugv-observation-cursor-jsonb-fix/LIVE_RETEST_RUNBOOK.md
+new file mode 100644
+index 0000000..876c10f
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/LIVE_RETEST_RUNBOOK.md
+@@ -0,0 +1,16 @@
++# LIVE Retest Runbook
++
++This runbook is for a separately authorized maintenance window. It was not executed by this Goal.
++
++1. Build and deploy the commit containing this fix.
++2. Confirm Runtime, Adapter, MQTT and Device MCP readiness using read-only probes.
++3. Confirm the target vehicle and route are safe for movement.
++4. Use a newly generated idempotency key for exactly one `vehicle_navigate` call.
++5. Observe Execution persistence, both accepted journal entries, the returned mission ID and physical telemetry.
++6. Do not retry automatically if the outcome is uncertain.
++
++The following old idempotency key is permanently forbidden for reuse:
++
++```text
++ugv-nav-20260818-10681344630
++```
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/NAVIGATION_START_REGRESSION.json b/reports/ugv-observation-cursor-jsonb-fix/NAVIGATION_START_REGRESSION.json
+new file mode 100644
+index 0000000..267c020
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/NAVIGATION_START_REGRESSION.json
+@@ -0,0 +1,21 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "executionMode": "SIMULATION",
++  "store": "PostgreSQL",
++  "ingress": "VehicleMqttIngress",
++  "device": "MockUgvDeviceMcpClient",
++  "executionSaved": true,
++  "primary": {
++    "tool": "ugv_path_follow_mission",
++    "journalState": "ACCEPTED",
++    "callCount": 1
++  },
++  "missionIdPersisted": "1",
++  "followup": {
++    "tool": "ugv_mission_control",
++    "journalState": "ACCEPTED",
++    "callCount": 1
++  },
++  "adapterInternalError": false
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/PERSISTENCE_FAILURE_SAFETY.json b/reports/ugv-observation-cursor-jsonb-fix/PERSISTENCE_FAILURE_SAFETY.json
+new file mode 100644
+index 0000000..620d2c8
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/PERSISTENCE_FAILURE_SAFETY.json
+@@ -0,0 +1,9 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "failure": "initial ProviderExecution putExecution rejection",
++  "mutationJournalCount": 0,
++  "deviceMutationCallCount": 0,
++  "chassisTrackReleased": true,
++  "ghostExecutionPresent": false
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/POSTGRES_ROUNDTRIP.json b/reports/ugv-observation-cursor-jsonb-fix/POSTGRES_ROUNDTRIP.json
+new file mode 100644
+index 0000000..5361bac
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/POSTGRES_ROUNDTRIP.json
+@@ -0,0 +1,16 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "database": "temporary PostgreSQL 17-alpine",
++  "testFile": "tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts",
++  "flow": "VehicleMqttIngress -> capturePhysicalDispatchBaseline -> ProviderExecution -> PostgresProviderStore -> getExecution",
++  "cursorByteEquality": true,
++  "authorityEquality": true,
++  "nulPresent": false,
++  "unsafeNulDiagnostic": {
++    "code": "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
++    "path": "$/observationCursors/track",
++    "rawValueDisclosed": false
++  },
++  "schemaMigration": false
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/RESTART_RECOVERY.json b/reports/ugv-observation-cursor-jsonb-fix/RESTART_RECOVERY.json
+new file mode 100644
+index 0000000..af0bd9c
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/RESTART_RECOVERY.json
+@@ -0,0 +1,10 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "storeRestarted": true,
++  "executionRecovered": true,
++  "cursorRoundtripPreserved": true,
++  "primaryRedispatchCount": 0,
++  "followupRedispatchCount": 0,
++  "journalPreserved": true
++}
+diff --git a/reports/ugv-observation-cursor-jsonb-fix/SHARED_REGRESSION.json b/reports/ugv-observation-cursor-jsonb-fix/SHARED_REGRESSION.json
+new file mode 100644
+index 0000000..47e0791
+--- /dev/null
++++ b/reports/ugv-observation-cursor-jsonb-fix/SHARED_REGRESSION.json
+@@ -0,0 +1,30 @@
++{
++  "schemaVersion": "1.0",
++  "status": "pass",
++  "focused": {
++    "files": 50,
++    "tests": 309,
++    "areas": [
++      "vehicle provider core",
++      "vehicle MQTT ingress",
++      "provider adapter kit",
++      "UGV unit/contract/integration/security/e2e",
++      "NPC unit/contract/integration/security/e2e",
++      "UGV and NPC MQTT contracts"
++    ]
++  },
++  "postgres": {
++    "files": 2,
++    "tests": 4,
++    "status": "pass"
++  },
++  "repositoryGates": {
++    "format": "pass",
++    "lint": "pass",
++    "typecheck": "pass",
++    "build": "pass",
++    "protocolCheck": "pass"
++  },
++  "protocolSchemaCases": 74,
++  "protocolChanges": []
++}
+diff --git a/tests/integration/ugv-provider-adapter.test.ts b/tests/integration/ugv-provider-adapter.test.ts
+index 0e013c2..2f0c8ef 100644
+--- a/tests/integration/ugv-provider-adapter.test.ts
++++ b/tests/integration/ugv-provider-adapter.test.ts
+@@ -1005,0 +1006,20 @@ describe("UGV long-running operation integration", () => {
++  it("treats a legacy safe cursor as opaque and uses explicit Recon authority time", async () => {
++    const fixture = await createFixture();
++    await fixture.runtime.start(
++      startInput("recon-legacy-cursor", "vehicle_area_recon", reconArgs()),
++    );
++    const persisted = required(await fixture.store.getExecution("recon-legacy-cursor"));
++    persisted.observationCursors = { reconnaissance: "source:41" };
++    await fixture.store.putExecution(persisted);
++
++    reconStatus(fixture.ingress, 5, 50, undefined, "1");
++    await expect(fixture.runtime.get("recon-legacy-cursor")).resolves.toMatchObject({
++      state: "RUNNING",
++    });
++    reconStatus(fixture.ingress, 11, 100, undefined, "1");
++    const completed = required(await fixture.runtime.get("recon-legacy-cursor"));
++    expect(completed.state).toBe("SUCCEEDED");
++    expect(typeof completed.result?.observedAt).toBe("string");
++    expect(String(completed.result?.observedAt)).toMatch(/^\d{4}-/);
++  });
++
+diff --git a/tests/npc-tank-simulation/mqtt-real-contract.test.ts b/tests/npc-tank-simulation/mqtt-real-contract.test.ts
+index 87fe8b7..de4fc6c 100644
+--- a/tests/npc-tank-simulation/mqtt-real-contract.test.ts
++++ b/tests/npc-tank-simulation/mqtt-real-contract.test.ts
+@@ -383,0 +384,2 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
++      false,
++      "2027-01-15T08:00:02.000Z",
+@@ -387,0 +390,2 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
++      false,
++      "2027-01-15T08:00:03.000Z",
+@@ -399 +403,6 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
+-    ingress.handle("/npc_tank1/area_recon/status", rosString({ status: 8, camera_fault: false }));
++    ingress.handle(
++      "/npc_tank1/area_recon/status",
++      rosString({ status: 8, camera_fault: false }),
++      false,
++      "2027-01-15T08:00:04.000Z",
++    );
+@@ -453 +462,6 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
+-    ingress.handle("/npc_tank1/area_recon/targets", rosString({ targets: [] }));
++    ingress.handle(
++      "/npc_tank1/area_recon/targets",
++      rosString({ targets: [] }),
++      false,
++      "2027-01-15T08:00:02.000Z",
++    );
+diff --git a/tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts b/tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts
+new file mode 100644
+index 0000000..d67f179
+--- /dev/null
++++ b/tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts
+@@ -0,0 +1,408 @@
++import { randomUUID } from "node:crypto";
++import { resolve } from "node:path";
++import { Pool } from "pg";
++import { afterAll, beforeAll, describe, expect, it } from "vitest";
++import { UgvBusinessEventHub } from "../../apps/ugv-provider-adapter/src/business-events.js";
++import { runUgvProviderMigrations } from "../../apps/ugv-provider-adapter/src/migrate.js";
++import { UgvProviderRuntime } from "../../apps/ugv-provider-adapter/src/runtime.js";
++import { UgvTelemetry } from "../../apps/ugv-provider-adapter/src/telemetry.js";
++import {
++  MemoryProviderStore,
++  PostgresProviderStore,
++  type MutationJournalClaim,
++  type MutationJournalEntry,
++  type MutationJournalState,
++  type ProviderExecution,
++} from "../../packages/provider-adapter-kit/src/index.js";
++import { MockUgvDeviceMcpClient } from "../../packages/vehicle-device-mcp-client/src/index.js";
++import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
++import {
++  capturePhysicalDispatchBaseline,
++  decodeObservationCursorV1,
++} from "../../packages/vehicle-provider-core/src/index.js";
++
++const databaseUrl = process.env.TEST_DATABASE_URL;
++if (databaseUrl === undefined) throw new Error("TEST_DATABASE_URL is required");
++
++describe("UGV observation cursor JSONB regression", () => {
++  const admin = new Pool({ connectionString: databaseUrl });
++  const schema = `ugv_cursor_fix_${randomUUID().replaceAll("-", "")}`;
++  const scopedUrl = withSearchPath(databaseUrl, schema);
++
++  beforeAll(async () => {
++    await admin.query(`CREATE SCHEMA ${schema}`);
++    const migrationPool = new Pool({ connectionString: scopedUrl, max: 1 });
++    try {
++      await runUgvProviderMigrations(migrationPool, resolve(import.meta.dirname, "../.."));
++    } finally {
++      await migrationPool.end();
++    }
++  });
++
++  afterAll(async () => {
++    await admin.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
++    await admin.end();
++  });
++
++  it("round-trips actual ingress cursors and authorities through PostgreSQL JSONB", async () => {
++    const ingress = seededIngress();
++    const authorities = ingress.fieldObservationAuthorities([
++      "chassis.position.geodetic",
++      "chassis.speed",
++      "chassis.mission",
++    ]);
++    const baseline = capturePhysicalDispatchBaseline(
++      ingress.snapshot(),
++      authorities,
++      "2026-08-20T00:00:04.000Z",
++    );
++    const execution = completedExecution("cursor-postgres-roundtrip", ingress, baseline);
++    expect(JSON.stringify(execution)).not.toContain("\\u0000");
++    for (const authority of authorities) {
++      expect(decodeObservationCursorV1(authority.cursor)).toMatchObject({
++        kind: "field",
++        field: authority.field,
++        topic: authority.topic,
++        observedAt: authority.observedAt,
++      });
++    }
++
++    const store = new PostgresProviderStore(scopedUrl, 1, "ugv");
++    await store.initialize();
++    try {
++      await store.putExecution(execution);
++      expect(await store.getExecution(execution.taskId)).toEqual(execution);
++      const unsafe = structuredClone(execution);
++      unsafe.taskId = "cursor-postgres-unsafe";
++      unsafe.externalExecutionId = "vehicle:ugv1:chassis:cursor-postgres-unsafe";
++      unsafe.observationCursors = { track: "unsafe\0cursor" };
++      await expect(store.putExecution(unsafe)).rejects.toMatchObject({
++        code: "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
++        rootName: "execution",
++        path: "$/observationCursors/track",
++        unsafeKind: "nul_string",
++      });
++      expect(await store.getExecution(unsafe.taskId)).toBeUndefined();
++    } finally {
++      await store.close();
++    }
++  });
++
++  it("persists navigation, journals both mutations, and recovers without redispatch", async () => {
++    const events: string[] = [];
++    const store = new ObservedPostgresStore(scopedUrl, events);
++    await store.initialize();
++    const ingress = seededIngress();
++    const device = observedDevice(events);
++    const runtime = runtimeFixture(store, ingress, device);
++    await runtime.initialize();
++
++    await runtime.start(startInput("cursor-navigation-start"));
++    const execution = required(await store.getExecution("cursor-navigation-start"));
++    const journal = await store.listMutationJournal("cursor-navigation-start");
++    expect(execution.downstreamMissionIds).toEqual(["1"]);
++    expect(JSON.stringify(execution)).not.toContain("\\u0000");
++    const storedAuthorities =
++      (execution.dispatchBaseline as { observationAuthorities?: { cursor: string }[] })
++        .observationAuthorities ?? [];
++    expect(storedAuthorities.length).toBeGreaterThan(0);
++    for (const authority of storedAuthorities) expect(authority.cursor).toMatch(/^oc1\./);
++    expect(journal).toEqual([
++      expect.objectContaining({
++        phase: "PRIMARY",
++        toolName: "ugv_path_follow_mission",
++        state: "ACCEPTED",
++        externalMissionId: "1",
++      }),
++      expect.objectContaining({
++        phase: "FOLLOWUP",
++        toolName: "ugv_mission_control",
++        state: "ACCEPTED",
++        externalMissionId: "1",
++      }),
++    ]);
++    expect(device.calls.map(({ name }) => name)).toEqual([
++      "ugv_path_follow_mission",
++      "ugv_mission_control",
++    ]);
++    expect(events).toEqual([
++      "execution:initial",
++      "journal:PRIMARY:INTENT_PERSISTED",
++      "journal:PRIMARY:DISPATCHING",
++      "transport:PRIMARY",
++      "execution:mission:1",
++      "journal:PRIMARY:ACCEPTED",
++      "journal:FOLLOWUP:INTENT_PERSISTED",
++      "journal:FOLLOWUP:DISPATCHING",
++      "transport:FOLLOWUP",
++      "journal:FOLLOWUP:ACCEPTED",
++    ]);
++    await runtime.close();
++
++    const recoveredStore = new ObservedPostgresStore(scopedUrl, []);
++    await recoveredStore.initialize();
++    const recoveredDevice = new MockUgvDeviceMcpClient();
++    const recovered = runtimeFixture(recoveredStore, ingress, recoveredDevice);
++    await recovered.initialize();
++    try {
++      expect(await recovered.get("cursor-navigation-start")).toMatchObject({
++        downstreamMissionIds: ["1"],
++        state: "STARTING",
++      });
++      expect(recoveredDevice.calls).toHaveLength(0);
++      expect(await recoveredStore.listMutationJournal("cursor-navigation-start")).toEqual(journal);
++    } finally {
++      await recovered.close();
++    }
++  });
++
++  it("releases the track and performs no mutation when initial execution persistence fails", async () => {
++    const store = new InitialExecutionFailingStore();
++    const ingress = seededIngress();
++    const device = new MockUgvDeviceMcpClient();
++    const runtime = runtimeFixture(store, ingress, device);
++    await runtime.initialize();
++    try {
++      await expect(runtime.start(startInput("cursor-persistence-failure"))).rejects.toThrow(
++        "TEST_EXECUTION_WRITE_FAILED",
++      );
++      expect(await store.listMutationJournal("cursor-persistence-failure")).toEqual([]);
++      expect(device.calls).toHaveLength(0);
++      expect(runtime.arbiter.owner("chassis")).toBeUndefined();
++      expect(await store.getExecution("cursor-persistence-failure")).toBeUndefined();
++    } finally {
++      await runtime.close();
++    }
++  });
++});
++
++class ObservedPostgresStore extends PostgresProviderStore {
++  #initialRecorded = false;
++  #missionRecorded = false;
++
++  constructor(
++    connectionString: string,
++    readonly events: string[],
++  ) {
++    super(connectionString, 1, "ugv");
++  }
++
++  override async putExecution(execution: ProviderExecution): Promise<void> {
++    await super.putExecution(execution);
++    if (!this.#initialRecorded && execution.taskId === "cursor-navigation-start") {
++      this.#initialRecorded = true;
++      this.events.push("execution:initial");
++    }
++    if (!this.#missionRecorded && execution.downstreamMissionIds[0] !== undefined) {
++      this.#missionRecorded = true;
++      this.events.push(`execution:mission:${execution.downstreamMissionIds[0]}`);
++    }
++  }
++
++  override async claimMutationJournal(entry: MutationJournalEntry): Promise<MutationJournalClaim> {
++    const result = await super.claimMutationJournal(entry);
++    this.events.push(`journal:${entry.phase}:${entry.state}`);
++    return result;
++  }
++
++  override async advanceMutationJournal(
++    entry: MutationJournalEntry,
++    expectedState: MutationJournalState,
++  ): Promise<boolean> {
++    const result = await super.advanceMutationJournal(entry, expectedState);
++    this.events.push(`journal:${entry.phase}:${entry.state}`);
++    return result;
++  }
++}
++
++class InitialExecutionFailingStore extends MemoryProviderStore {
++  override putExecution(): Promise<void> {
++    return Promise.reject(new Error("TEST_EXECUTION_WRITE_FAILED"));
++  }
++}
++
++function observedDevice(events: string[]): MockUgvDeviceMcpClient {
++  const device = new MockUgvDeviceMcpClient();
++  device.handlers.set("ugv_path_follow_mission", () => {
++    events.push("transport:PRIMARY");
++    return acceptedMutationResult(1, 0);
++  });
++  device.handlers.set("ugv_mission_control", () => {
++    events.push("transport:FOLLOWUP");
++    return acceptedMutationResult(1, 1);
++  });
++  return device;
++}
++
++function runtimeFixture(
++  store: MemoryProviderStore | PostgresProviderStore,
++  ingress: VehicleMqttIngress,
++  device: MockUgvDeviceMcpClient,
++): UgvProviderRuntime {
++  return new UgvProviderRuntime(
++    {
++      providerId: "isr.vehicle.ugv.ugv1",
++      freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
++      allowNavigationWithRecon: true,
++      fireRequiresChassisStopped: true,
++      fireEnabled: true,
++      stationaryStabilityMs: 0,
++      stationaryMinimumSamples: 1,
++      pollIntervalMs: 60_000,
++    },
++    store,
++    ingress,
++    device,
++    new UgvBusinessEventHub(store),
++    new UgvTelemetry({
++      providerId: "isr.vehicle.ugv.ugv1",
++      enabled: false,
++      endpoint: "127.0.0.1:7002",
++      tlsMode: "disabled",
++    }),
++  );
++}
++
++function seededIngress(): VehicleMqttIngress {
++  const ingress = new VehicleMqttIngress("direct_domain_json", {
++    maxPayloadBytes: 65_536,
++    maxDepth: 16,
++    maxNodes: 4096,
++    maxStringBytes: 16_384,
++  });
++  ingress.setConnected(true);
++  const now = Date.now();
++  ingress.handle(
++    "/ugv/gnss",
++    json({ entity_id: "ugv1", latitude: 30.1, longitude: 114.1, altitude: 10 }),
++    false,
++    new Date(now - 300).toISOString(),
++  );
++  ingress.handle(
++    "/ugv/component_status",
++    json({
++      entity_id: "ugv1",
++      power_battery: 0,
++      lvbattery: 0,
++      fuel: 0,
++      water_temp: 0,
++      motor: 0,
++      sensor: 0,
++      gnss: 0,
++      comms: 0,
++      weapon: 0,
++      navigation: 0,
++    }),
++    false,
++    new Date(now - 200).toISOString(),
++  );
++  ingress.handle(
++    "status/ugv",
++    json({
++      vehicle_id: "ugv1",
++      role_name: "ugv",
++      speed_kmh: 0,
++      eo_task: { state: -1, progress: 0 },
++      weapon_task: { state: -1, progress: 0 },
++      available: true,
++    }),
++    false,
++    new Date(now - 100).toISOString(),
++  );
++  ingress.handle(
++    "/ugv/mission_state",
++    json({ entity_id: "ugv1", type: 1, state: 0, progress: 0 }),
++    false,
++    new Date(now).toISOString(),
++  );
++  return ingress;
++}
++
++function completedExecution(
++  taskId: string,
++  ingress: VehicleMqttIngress,
++  baseline: ReturnType<typeof capturePhysicalDispatchBaseline>,
++): ProviderExecution {
++  const observedAt = "2026-08-20T00:00:04.000Z";
++  return {
++    taskId,
++    externalExecutionId: `vehicle:ugv1:chassis:${taskId}`,
++    operationName: "vehicle_navigate",
++    argumentHash: "a".repeat(64),
++    providerId: "isr.vehicle.ugv.ugv1",
++    resourceId: "vehicle:ugv1",
++    tracks: ["chassis"],
++    arguments: navigateArguments(),
++    executionContext: {
++      authorizationContextHash: "b".repeat(64),
++      executionMode: "SIMULATION",
++      simulationId: "cursor-jsonb-test",
++      correlationId: taskId,
++    },
++    downstreamMissionIds: ["1"],
++    observationCursors: {
++      track: JSON.stringify([
++        ["/ugv/mission_state", required(ingress.observationCursor("/ugv/mission_state"))],
++      ]),
++    },
++    dispatchBaseline: baseline as unknown as Record<string, unknown>,
++    lastStationarySpeedCursor: required(ingress.fieldObservationAuthority("chassis.speed")).cursor,
++    state: "SUCCEEDED",
++    revision: 4,
++    reasonCode: "UGV_TASK_SUCCEEDED",
++    progress: 100,
++    createdAt: observedAt,
++    updatedAt: observedAt,
++    terminalAt: observedAt,
++    evidence: [],
++  };
++}
++
++function startInput(taskId: string) {
++  return {
++    taskId,
++    operationName: "vehicle_navigate",
++    arguments: navigateArguments(),
++    argumentHash: "a".repeat(64),
++    executionContext: {
++      authorizationContextHash: "b".repeat(64),
++      executionMode: "SIMULATION" as const,
++      simulationId: "cursor-jsonb-test",
++      correlationId: taskId,
++    },
++  };
++}
++
++function navigateArguments() {
++  return {
++    resourceId: "vehicle:ugv1",
++    mission: { type: "point", target: { latitude: 30.2, longitude: 114.2 } },
++    speedLimitKmh: 20,
++    stopOnObstacle: true,
++  };
++}
++
++function acceptedMutationResult(missionId: number, state: number): Record<string, unknown> {
++  return {
++    mission_id: missionId,
++    state,
++    state_label: "accepted",
++    message: "accepted",
++    error_code: 0,
++  };
++}
++
++function json(value: unknown): Buffer {
++  return Buffer.from(JSON.stringify(value));
++}
++
++function required<T>(value: T | undefined): T {
++  if (value === undefined) throw new Error("UGV_CURSOR_JSONB_TEST_VALUE_REQUIRED");
++  return value;
++}
++
++function withSearchPath(connectionString: string, schema: string): string {
++  const url = new URL(connectionString);
++  url.searchParams.set("options", `-c search_path=${schema}`);
++  return url.toString();
++}
+diff --git a/tests/ugv-simulation/pre-simulator-hardening.test.ts b/tests/ugv-simulation/pre-simulator-hardening.test.ts
+index efadc39..07621cb 100644
+--- a/tests/ugv-simulation/pre-simulator-hardening.test.ts
++++ b/tests/ugv-simulation/pre-simulator-hardening.test.ts
+@@ -575 +575 @@ function authorities(observedAt: string, sequence: number): PhysicalObservationA
+-    cursor: `${observedAt}\0${String(sequence)}`,
++    cursor: `legacy-safe:${observedAt}:${String(sequence)}`,
+diff --git a/tests/unit/observation-cursor.test.ts b/tests/unit/observation-cursor.test.ts
+new file mode 100644
+index 0000000..b1f9a28
+--- /dev/null
++++ b/tests/unit/observation-cursor.test.ts
+@@ -0,0 +1,211 @@
++import { describe, expect, it } from "vitest";
++import {
++  decodeObservationCursorV1,
++  encodeObservationCursorV1,
++  type FieldObservationCursorV1,
++  type TopicObservationCursorV1,
++} from "../../packages/vehicle-provider-core/src/index.js";
++import {
++  npcTankMqttProfile,
++  VehicleMqttIngress,
++} from "../../packages/vehicle-mqtt-ingress/src/index.js";
++
++const hash = "a".repeat(64);
++const topicPayload: TopicObservationCursorV1 = {
++  version: 1,
++  kind: "topic",
++  topic: "/ugv/mission_state",
++  observedAt: "2026-08-20T00:00:00.000Z",
++  timeAuthority: "source",
++  sourceSequence: "41",
++  ingestSequence: 7,
++  payloadHash: hash,
++};
++const fieldPayload: FieldObservationCursorV1 = {
++  version: 1,
++  kind: "field",
++  field: "chassis.mission",
++  topic: "/ugv/mission_state",
++  observedAt: "2026-08-20T00:00:00.000Z",
++  timeAuthority: "source",
++  sourceSequence: "41",
++  ingestSequence: 7,
++  payloadHash: hash,
++};
++
++describe("ObservationCursorCodecV1", () => {
++  it("round-trips deterministic topic and field cursors without JSONB-unsafe bytes", () => {
++    for (const payload of [topicPayload, fieldPayload]) {
++      const first = encodeObservationCursorV1(payload);
++      const second = encodeObservationCursorV1(structuredClone(payload));
++      expect(first).toBe(second);
++      expect(first).toMatch(/^oc1\.[A-Za-z0-9_-]+$/);
++      expect(hasControlCharacter(first)).toBe(false);
++      expect(decodeObservationCursorV1(first)).toEqual(payload);
++    }
++  });
++
++  it("changes the cursor whenever an identity field changes", () => {
++    const baseline = encodeObservationCursorV1(topicPayload);
++    for (const changed of [
++      { ...topicPayload, topic: "/ugv/status" },
++      { ...topicPayload, observedAt: "2026-08-20T00:00:01.000Z" },
++      { ...topicPayload, sourceSequence: "42" },
++      { ...topicPayload, ingestSequence: 8 },
++      { ...topicPayload, payloadHash: "b".repeat(64) },
++    ])
++      expect(encodeObservationCursorV1(changed)).not.toBe(baseline);
++  });
++
++  it.each([
++    ["invalid prefix", "oc2.abc"],
++    ["invalid base64url", "oc1.a+bc"],
++    ["invalid JSON", raw("not-json")],
++    ["unknown version", raw({ ...topicPayload, version: 2 })],
++    ["unknown kind", raw({ ...topicPayload, kind: "other" })],
++    ["unknown field", raw({ ...fieldPayload, field: "chassis.unknown" })],
++    ["extra field", raw({ ...topicPayload, extra: true })],
++    ["invalid observedAt", raw({ ...topicPayload, observedAt: "not-a-time" })],
++    ["invalid ingestSequence", raw({ ...topicPayload, ingestSequence: -1 })],
++    ["invalid payloadHash", raw({ ...topicPayload, payloadHash: "A".repeat(64) })],
++    ["noncanonical base64url", "oc1.Zg"],
++    ["overlong token", `oc1.${"a".repeat(4096)}`],
++  ])("rejects %s", (_label, token) => {
++    expect(decodeObservationCursorV1(token)).toBeUndefined();
++  });
++});
++
++describe("VehicleMqttIngress observation cursors", () => {
++  it("uses one oc1 codec for UGV topic and field authorities", () => {
++    const ingress = ugvIngress();
++    const receivedAt = "2026-08-20T00:00:00.000Z";
++    const message = {
++      header: { stamp: { sec: 1_700_000_000, nanosec: 0 }, seq: 41 },
++      entity_id: "ugv1",
++      id: 7,
++      type: 1,
++      state: 1,
++      progress: 20,
++    };
++    ingress.handle("/ugv/mission_state", json(message), false, receivedAt);
++    const topicCursor = required(ingress.observationCursor("/ugv/mission_state"));
++    const topicAuthority = required(ingress.observationAuthority("/ugv/mission_state"));
++    const fieldAuthority = required(ingress.fieldObservationAuthority("chassis.mission"));
++
++    expect(topicAuthority.cursor).toBe(topicCursor);
++    expect(decodeObservationCursorV1(topicCursor)).toMatchObject({
++      kind: "topic",
++      topic: "/ugv/mission_state",
++      observedAt: topicAuthority.observedAt,
++      sourceSequence: "41",
++      ingestSequence: 1,
++    });
++    expect(decodeObservationCursorV1(fieldAuthority.cursor)).toMatchObject({
++      kind: "field",
++      field: "chassis.mission",
++      topic: "/ugv/mission_state",
++      observedAt: fieldAuthority.observedAt,
++      sourceSequence: "41",
++      ingestSequence: 1,
++    });
++    expect(JSON.stringify({ topicCursor, topicAuthority, fieldAuthority })).not.toContain(
++      "\\u0000",
++    );
++
++    const duplicate = ingress.handle("/ugv/mission_state", json(message), false, receivedAt);
++    expect(duplicate.duplicate).toBe(true);
++    expect(ingress.observationCursor("/ugv/mission_state")).toBe(topicCursor);
++
++    ingress.handle(
++      "/ugv/mission_state",
++      json({ ...message, header: { ...message.header, seq: 42 }, progress: 21 }),
++      false,
++      receivedAt,
++    );
++    expect(ingress.observationCursor("/ugv/mission_state")).not.toBe(topicCursor);
++  });
++
++  it("emits JSONB-safe oc1 cursors for all UGV physical fields", () => {
++    const ingress = ugvIngress();
++    ingress.handle(
++      "/ugv/gnss",
++      json({ latitude: 30.1, longitude: 114.1, altitude: 10 }),
++      false,
++      "2026-08-20T00:00:00.000Z",
++    );
++    ingress.handle("/ugv/speed", json({ speed_kmh: 0 }), false, "2026-08-20T00:00:01.000Z");
++    ingress.handle(
++      "/ugv/mission_state",
++      json({ entity_id: "ugv1", id: 7, type: 1, state: 1, progress: 20 }),
++      false,
++      "2026-08-20T00:00:02.000Z",
++    );
++    ingress.handle(
++      "/ugv/area_recon/status",
++      json({ status: 5, progress: 40, camera_fault: false }),
++      false,
++      "2026-08-20T00:00:03.000Z",
++    );
++    for (const authority of ingress.fieldObservationAuthorities()) {
++      expect(authority.cursor).toMatch(/^oc1\.[A-Za-z0-9_-]+$/);
++      expect(hasControlCharacter(authority.cursor)).toBe(false);
++      expect(decodeObservationCursorV1(authority.cursor)).toMatchObject({
++        kind: "field",
++        field: authority.field,
++        topic: authority.topic,
++        observedAt: authority.observedAt,
++      });
++    }
++  });
++
++  it("preserves the shared NPC ingress behavior with oc1 cursors", () => {
++    const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
++    ingress.handle(
++      "/npc_tank1/gnss",
++      json({ latitude: 30.1, longitude: 114.1 }),
++      false,
++      "2026-08-20T00:00:00.000Z",
++    );
++    const topic = required(ingress.observationCursor("/npc_tank1/gnss"));
++    const field = required(ingress.fieldObservationAuthority("chassis.position.geodetic"));
++    expect(decodeObservationCursorV1(topic)).toMatchObject({
++      kind: "topic",
++      topic: "/npc_tank1/gnss",
++    });
++    expect(decodeObservationCursorV1(field.cursor)).toMatchObject({
++      kind: "field",
++      field: "chassis.position.geodetic",
++      topic: "/npc_tank1/gnss",
++    });
++  });
++});
++
++const limits = {
++  maxPayloadBytes: 65_536,
++  maxDepth: 16,
++  maxNodes: 4096,
++  maxStringBytes: 16_384,
++};
++
++function ugvIngress(): VehicleMqttIngress {
++  return new VehicleMqttIngress("direct_domain_json", limits);
++}
++
++function raw(value: unknown): string {
++  const content = typeof value === "string" ? value : JSON.stringify(value);
++  return `oc1.${Buffer.from(content, "utf8").toString("base64url")}`;
++}
++
++function json(value: unknown): Buffer {
++  return Buffer.from(JSON.stringify(value));
++}
++
++function required<T>(value: T | undefined): T {
++  if (value === undefined) throw new Error("OBSERVATION_CURSOR_TEST_VALUE_REQUIRED");
++  return value;
++}
++
++function hasControlCharacter(value: string): boolean {
++  for (let index = 0; index < value.length; index++) if (value.charCodeAt(index) < 32) return true;
++  return false;
++}
+diff --git a/tests/unit/provider-store-jsonb-safety.test.ts b/tests/unit/provider-store-jsonb-safety.test.ts
+new file mode 100644
+index 0000000..74db0a2
+--- /dev/null
++++ b/tests/unit/provider-store-jsonb-safety.test.ts
+@@ -0,0 +1,48 @@
++import { describe, expect, it } from "vitest";
++import {
++  assertPostgresJsonbSafe,
++  ProviderStoreJsonbUnsafePayloadError,
++} from "../../packages/provider-adapter-kit/src/index.js";
++
++describe("PostgresProviderStore JSONB safety", () => {
++  it("accepts ordinary JSON-compatible payloads and repeated non-cyclic references", () => {
++    const shared = { cursor: "oc1.safe" };
++    expect(() =>
++      assertPostgresJsonbSafe({ authorities: [shared, shared], finite: 42 }, "execution"),
++    ).not.toThrow();
++  });
++
++  it.each([
++    ["nul_string", { cursor: "unsafe\0cursor" }, "$/cursor"],
++    ["non_finite_number", { progress: Number.NaN }, "$/progress"],
++    ["bigint", { sequence: 1n }, "$/sequence"],
++  ] as const)("rejects %s without including the unsafe value", (kind, value, path) => {
++    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrow(
++      expect.objectContaining({
++        code: "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
++        rootName: "execution",
++        path,
++        unsafeKind: kind,
++      }),
++    );
++    try {
++      assertPostgresJsonbSafe(value, "execution");
++    } catch (error) {
++      expect(error).toBeInstanceOf(ProviderStoreJsonbUnsafePayloadError);
++      expect(String(error)).not.toContain("unsafe\0cursor");
++    }
++  });
++
++  it("rejects cycles with a stable, value-free diagnostic", () => {
++    const value: Record<string, unknown> = {};
++    value.self = value;
++    expect(() => assertPostgresJsonbSafe(value, "execution")).toThrow(
++      expect.objectContaining({
++        code: "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD",
++        rootName: "execution",
++        path: "$/self",
++        unsafeKind: "cyclic_reference",
++      }),
++    );
++  });
++});

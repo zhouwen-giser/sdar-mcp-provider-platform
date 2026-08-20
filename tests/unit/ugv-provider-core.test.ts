@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkVehicleAvailability,
   createUgvSnapshot,
+  freshnessState,
   mapVehicleTaskState,
   sanitizeFireResult,
   TrackArbiter,
@@ -20,6 +21,7 @@ import {
 } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 
 const limits = { maxPayloadBytes: 4096, maxDepth: 8, maxNodes: 128, maxStringBytes: 256 };
+const freshness = { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 };
 
 describe("UGV MQTT exact routing and normalization", () => {
   it("contains the 18 real-boundary UGV topics and rejects wildcard or referee topics", () => {
@@ -188,7 +190,6 @@ describe("UGV task, track, availability and fire boundaries", () => {
 
   it("returns UNKNOWN for stale or disconnected state and blocks unknown fire state", () => {
     const snapshot = createUgvSnapshot();
-    const freshness = { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 };
     expect(
       checkVehicleAvailability({
         operationName: "vehicle_navigate",
@@ -200,6 +201,34 @@ describe("UGV task, track, availability and fire boundaries", () => {
         fireRequiresChassisStopped: true,
       }),
     ).toMatchObject({ availability: "UNKNOWN", reasonCode: "UGV_MQTT_UNAVAILABLE" });
+  });
+
+  it("accepts only bounded future observation skew", () => {
+    const now = Date.parse("2026-08-20T12:00:00.000Z");
+    const snapshot = createUgvSnapshot();
+    snapshot.freshness.chassisObservedAt = "2026-08-20T12:00:00.500Z";
+
+    expect(
+      freshnessState(
+        snapshot,
+        "chassis",
+        {
+          chassis: 3_000,
+          mission: 3_000,
+          health: 5_000,
+          target: 3_000,
+          payload: 3_000,
+          maximumFutureSkewMs: 1_000,
+        },
+        now,
+      ),
+    ).toBe("fresh");
+    expect(freshnessState(snapshot, "chassis", freshness, now)).toBe("stale");
+
+    snapshot.freshness.chassisObservedAt = "2026-08-20T12:00:01.001Z";
+    expect(
+      freshnessState(snapshot, "chassis", { ...freshness, maximumFutureSkewMs: 1_000 }, now),
+    ).toBe("stale");
   });
 
   it("strips every nested referee verdict field from fire responses", () => {

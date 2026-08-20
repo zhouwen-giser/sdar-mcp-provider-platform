@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "focused": {
+    "files": 50,
+    "tests": 309,
+    "areas": [
+      "vehicle provider core",
+      "vehicle MQTT ingress",
+      "provider adapter kit",
+      "UGV unit/contract/integration/security/e2e",
+      "NPC unit/contract/integration/security/e2e",
+      "UGV and NPC MQTT contracts"
+    ]
+  },
+  "postgres": {
+    "files": 2,
+    "tests": 4,
+    "status": "pass"
+  },
+  "repositoryGates": {
+    "format": "pass",
+    "lint": "pass",
+    "typecheck": "pass",
+    "build": "pass",
+    "protocolCheck": "pass"
+  },
+  "protocolSchemaCases": 74,
+  "protocolChanges": []
+}

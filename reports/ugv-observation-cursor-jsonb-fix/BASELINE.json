@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T11:27:00Z",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "sourceBranch": "codex/ugv-provider-template-stabilization",
+  "sourceSha": "32f338a844587fd137c606663154d08b9fe96f53",
+  "targetBranch": "codex/fix-ugv-observation-cursor-jsonb",
+  "startStatus": "clean",
+  "reviewedBlobs": {
+    "packages/vehicle-mqtt-ingress/src/ingress.ts": "23c78b7225ac6aa97ae403afe07a69712080c870",
+    "apps/ugv-provider-adapter/src/runtime.ts": "8e813bffba98837ba1121614aef114ddf3afce00",
+    "packages/provider-adapter-kit/src/postgres-store.ts": "af59eecc58fef6d5c2a1c338ec4707ef22e4f40e"
+  },
+  "drift": false
+}

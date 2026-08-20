@@ -92,8 +92,12 @@ export function stationaryPhysicalConfirmation(input: {
   const speedKmh = input.snapshot.chassis.speedKmh;
   const speedAuthority = authorityForField(input.currentAuthorities, "chassis.speed");
   const speedFresh =
-    authorityFreshness(speedAuthority, input.freshness.chassis, input.now) === "fresh" &&
-    speedKmh !== undefined;
+    authorityFreshness(
+      speedAuthority,
+      input.freshness.chassis,
+      input.freshness.maximumFutureSkewMs,
+      input.now,
+    ) === "fresh" && speedKmh !== undefined;
   const stationary = stationaryFromSpeed(speedKmh, speedFresh, input.stationarySpeedThresholdKmh);
   const observationIsNew = isNewAuthority(input.baseline.observationAuthorities, speedAuthority);
   const confirmed = observationIsNew && speedFresh && stationary === true;
@@ -168,12 +172,20 @@ export function navigationPhysicalConfirmation(input: {
   const positionAuthority = position?.authority;
   const speedAuthority = authorityForField(authorities, "chassis.speed");
   const positionFresh =
-    authorityFreshness(positionAuthority, input.freshness.chassis, input.now) === "fresh" &&
-    position !== undefined;
+    authorityFreshness(
+      positionAuthority,
+      input.freshness.chassis,
+      input.freshness.maximumFutureSkewMs,
+      input.now,
+    ) === "fresh" && position !== undefined;
   const speedKmh = snapshot.chassis.speedKmh;
   const speedFresh =
-    authorityFreshness(speedAuthority, input.freshness.chassis, input.now) === "fresh" &&
-    speedKmh !== undefined;
+    authorityFreshness(
+      speedAuthority,
+      input.freshness.chassis,
+      input.freshness.maximumFutureSkewMs,
+      input.now,
+    ) === "fresh" && speedKmh !== undefined;
   const stationary = stationaryFromSpeed(speedKmh, speedFresh, input.stationarySpeedThresholdKmh);
   const confirmed =
     correlation === "STRICT_CORRELATED" &&
@@ -412,11 +424,14 @@ function normalizeVehiclePositionObservation(
 function authorityFreshness(
   authority: PhysicalObservationAuthority | undefined,
   maximumAgeMs: number,
+  maximumFutureSkewMs = 0,
   now = Date.now(),
 ): "fresh" | "stale" | "unknown" {
   if (authority === undefined) return "unknown";
   const age = now - Date.parse(authority.observedAt);
-  return Number.isFinite(age) && age >= 0 && age <= maximumAgeMs ? "fresh" : "stale";
+  return Number.isFinite(age) && age >= -maximumFutureSkewMs && age <= maximumAgeMs
+    ? "fresh"
+    : "stale";
 }
 
 function observationAuthorityKey(authority: PhysicalObservationAuthority): string {

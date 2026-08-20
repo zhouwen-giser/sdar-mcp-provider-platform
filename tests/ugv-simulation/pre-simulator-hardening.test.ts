@@ -170,6 +170,41 @@ describe("UGV pre-simulator hardening", () => {
     });
   });
 
+  it("applies the bounded future-skew policy to physical confirmation", () => {
+    const before = snapshot("2026-08-20T12:00:00.000Z", 30, 114, 2);
+    const baseline = capturePhysicalDispatchBaseline(
+      before,
+      authorities("2026-08-20T12:00:00.000Z", 1),
+      "2026-08-20T12:00:00.100Z",
+    );
+    const after = snapshot("2026-08-20T12:00:01.500Z", 30.0001, 114.0001, 0);
+    after.chassis.mission = { id: "future-skew", state: 4, progress: 100 };
+    const futureAuthorities = authorities("2026-08-20T12:00:01.500Z", 2);
+
+    expect(
+      navigationPhysicalConfirmation({
+        snapshot: after,
+        baseline,
+        missionId: "future-skew",
+        currentAuthorities: futureAuthorities,
+        freshness: { ...freshness, maximumFutureSkewMs: 1_000 },
+        stationarySpeedThresholdKmh: 0.1,
+        now: Date.parse("2026-08-20T12:00:01.000Z"),
+      }),
+    ).toMatchObject({ confirmed: true, positionFresh: true, speedFresh: true });
+    expect(
+      navigationPhysicalConfirmation({
+        snapshot: after,
+        baseline,
+        missionId: "future-skew",
+        currentAuthorities: futureAuthorities,
+        freshness: { ...freshness, maximumFutureSkewMs: 100 },
+        stationarySpeedThresholdKmh: 0.1,
+        now: Date.parse("2026-08-20T12:00:01.000Z"),
+      }),
+    ).toMatchObject({ confirmed: false, positionFresh: false, speedFresh: false });
+  });
+
   it("computes displacement only for compatible geodetic or local authorities", () => {
     const geodetic = vehiclePositionDisplacementM(
       { type: "geodetic", latitude: 30, longitude: 114, crs: "EPSG:4326" },
@@ -572,7 +607,7 @@ function authorities(observedAt: string, sequence: number): PhysicalObservationA
     sourceSequence: String(sequence),
     ingestSequence: sequence,
     payloadHash: String(sequence).padStart(64, "0"),
-    cursor: `${observedAt}\0${String(sequence)}`,
+    cursor: `legacy-safe:${observedAt}:${String(sequence)}`,
   }));
 }
 

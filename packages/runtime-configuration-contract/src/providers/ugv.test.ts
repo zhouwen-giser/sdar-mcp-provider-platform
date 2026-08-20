@@ -31,7 +31,7 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 66 inventory fields", () => {
+  it("covers all 67 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync(
         new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
@@ -46,7 +46,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(66);
+    expect(actual).toHaveLength(67);
     expect(actual).toEqual(expected);
   });
 
@@ -111,6 +111,7 @@ describe("UGV Provider configuration contract", () => {
       UGV_EXECUTION_MODE: "simulation",
       UGV_FIRE_ENABLED: false,
       UGV_STATIONARY_MIN_SAMPLES: 2,
+      UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: 1_000,
     });
     expect(() =>
       loadUgvProviderConfiguration({
@@ -123,6 +124,21 @@ describe("UGV Provider configuration contract", () => {
       UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: false,
       UGV_ADAPTER_STORE_MODE: "postgres",
     });
+  });
+
+  it("bounds the accepted observation clock skew", () => {
+    expect(loadUgvProviderConfiguration({ UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: "0" })).toMatchObject(
+      { UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: 0 },
+    );
+    expect(
+      loadUgvProviderConfiguration({ UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: "5000" }),
+    ).toMatchObject({ UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: 5_000 });
+    expect(() =>
+      loadUgvProviderConfiguration({ UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: "-1" }),
+    ).toThrow();
+    expect(() =>
+      loadUgvProviderConfiguration({ UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: "5001" }),
+    ).toThrow();
   });
 
   it("bounds the continuous stationary sample requirement", () => {

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "executionMode": "SIMULATION",
+  "store": "PostgreSQL",
+  "ingress": "VehicleMqttIngress",
+  "device": "MockUgvDeviceMcpClient",
+  "executionSaved": true,
+  "primary": {
+    "tool": "ugv_path_follow_mission",
+    "journalState": "ACCEPTED",
+    "callCount": 1
+  },
+  "missionIdPersisted": "1",
+  "followup": {
+    "tool": "ugv_mission_control",
+    "journalState": "ACCEPTED",
+    "callCount": 1
+  },
+  "adapterInternalError": false
+}

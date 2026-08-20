@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "storeRestarted": true,
+  "executionRecovered": true,
+  "cursorRoundtripPreserved": true,
+  "primaryRedispatchCount": 0,
+  "followupRedispatchCount": 0,
+  "journalPreserved": true
+}

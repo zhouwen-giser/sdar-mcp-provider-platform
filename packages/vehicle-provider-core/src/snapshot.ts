@@ -189,7 +189,10 @@ export function freshnessState(
   const observedAt = snapshot.freshness[`${domain}ObservedAt`];
   if (observedAt === undefined) return "unknown";
   const age = now - Date.parse(observedAt);
-  return Number.isFinite(age) && age >= 0 && age <= policy[domain] ? "fresh" : "stale";
+  const maximumFutureSkewMs = policy.maximumFutureSkewMs ?? 0;
+  return Number.isFinite(age) && age >= -maximumFutureSkewMs && age <= policy[domain]
+    ? "fresh"
+    : "stale";
 }
 
 export function assertNoRefereeData(value: unknown): void {

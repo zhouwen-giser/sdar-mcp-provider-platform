@@ -233,6 +233,7 @@ export interface FreshnessPolicy {
   mission: number;
   target: number;
   payload: number;
+  maximumFutureSkewMs?: number;
 }
 
 export interface SnapshotPatch {

@@ -46,6 +46,10 @@ const RESOURCE_EVENTS = new Set([
   "vehicle.connectivity.device_mcp_restored",
   "vehicle.telemetry.stale",
   "vehicle.telemetry.recovered",
+  "vehicle.availability.healthy",
+  "vehicle.availability.degraded",
+  "vehicle.availability.open",
+  "vehicle.availability.recovering",
   "vehicle.target.detected",
   "vehicle.target.lost",
 ]);

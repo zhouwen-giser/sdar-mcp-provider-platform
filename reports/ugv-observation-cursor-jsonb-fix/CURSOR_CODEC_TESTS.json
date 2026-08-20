@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "testFile": "tests/unit/observation-cursor.test.ts",
+  "coverage": [
+    "topic encode/decode",
+    "field encode/decode",
+    "determinism",
+    "identity field changes",
+    "strict prefix/base64url/JSON/version/kind/field/key/time/sequence/hash validation",
+    "4096 character bound",
+    "no control characters"
+  ],
+  "format": "^oc1\\.[A-Za-z0-9_-]+$",
+  "newDependencies": false
+}

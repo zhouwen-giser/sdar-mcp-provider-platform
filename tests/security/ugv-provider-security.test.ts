@@ -50,4 +50,28 @@ describe("UGV security isolation", () => {
       }),
     ).rejects.toThrow("UGV_REFEREE_DATA_FORBIDDEN");
   });
+
+  it("allows every resource availability transition emitted by operation health", async () => {
+    const store = new MemoryProviderStore();
+    const hub = new UgvBusinessEventHub(store);
+    for (const state of ["healthy", "degraded", "open", "recovering"] as const) {
+      await expect(
+        hub.publish({
+          sourceId: "vehicle.health",
+          scope: "resource",
+          occurredAt: new Date().toISOString(),
+          eventType: `vehicle.availability.${state}`,
+          description: `vehicle_navigate health changed to ${state}.`,
+          reasonCode: `UGV_OPERATION_${state.toUpperCase()}`,
+          resourceRef: "vehicle:ugv1",
+          severityHint: state === "healthy" ? "info" : "warning",
+          rawPayload: {
+            operationName: "vehicle_navigate",
+            phase: "start",
+            healthState: state.toUpperCase(),
+          },
+        }),
+      ).resolves.toMatchObject({ eventType: `vehicle.availability.${state}` });
+    }
+  });
 });

@@ -160,6 +160,29 @@ describe("UGV Provider development template", () => {
     expect(evidence.failure.reasonCode).toBe("UGV_LIVE_PREVIOUS_RUN_ID_FORBIDDEN");
   });
 
+  it("accepts credentialed PostgreSQL URLs before attempting the database connection", () => {
+    const directory = mkdtempSync(join(tmpdir(), "sdar-ugv-live-db-url-"));
+    const output = resolve(directory, "evidence.json");
+    const result = spawnSync(process.execPath, [liveRunner, "--output", output], {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...withoutLiveAuthorization(process.env),
+        ALLOW_REAL_UGV_SIDE_EFFECTS: "YES",
+        LIVE_TEST_RUN_ID: "ugv-live-db-url-contract",
+        UGV_RUNTIME_MCP_URL: "http://127.0.0.1:19100/mcp",
+        UGV_TEST_RESOURCE_ID: "vehicle:ugv1",
+        UGV_LIVE_RUNTIME_DATABASE_URL: "postgresql://user:secret@127.0.0.1:1/runtime",
+        UGV_LIVE_ADAPTER_DATABASE_URL: "postgresql://user:secret@127.0.0.1:1/adapter",
+      },
+      timeout: 5_000,
+    });
+    expect(result.status).toBe(2);
+    const evidence = JSON.parse(readFileSync(output, "utf8")) as LiveEvidence;
+    expect(evidence.mutatingCallCount).toBe(0);
+    expect(evidence.failure.reasonCode).not.toContain("URL_CREDENTIALS_FORBIDDEN");
+  });
+
   it("keeps the fixed target and one explicit non-retrying dispatch boundary", () => {
     const source = readFileSync(liveRunner, "utf8");
     expect(source).toContain("longitude: 106.8134463");
@@ -169,6 +192,9 @@ describe("UGV Provider development template", () => {
     expect(source).toContain("It is deliberately not wrapped in a retry");
     expect(source).toContain("UGV_LIVE_DISPATCH_UNCERTAIN_NO_REPLAY");
     expect(source).not.toContain("ugv-nav-20260818-10681344630:retry");
+    expect(source).toContain("new Set([-1, 0, 4])");
+    expect(source).toContain("UGV_LIVE_CHASSIS_MISSION_NOT_QUIESCENT");
+    expect(source).toContain("age < -maximumFutureSkewMs");
   });
 });
 
