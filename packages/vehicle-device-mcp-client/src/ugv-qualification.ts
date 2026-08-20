@@ -1,5 +1,6 @@
 import type { CapturedToolContract } from "./fixtures.js";
 import {
+  allDeviceTools,
   UGV_OPERATION_PROFILES,
   requiredDeviceToolsForVehicleOperation,
   resolveVehicleOperationVariant,
@@ -24,7 +25,9 @@ export type UgvQualificationReasonCode =
   | "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
   | "UGV_TOOL_EXTERNAL_VERIFICATION_REQUIRED"
   | "UGV_TOOL_CIRCUIT_OPEN"
-  | "UGV_TOOL_UNAVAILABLE";
+  | "UGV_TOOL_UNAVAILABLE"
+  | "UGV_TOOL_RECOVERING"
+  | "UGV_TOOL_RESULT_POLICY_UNVERIFIED";
 
 export interface UgvToolQualificationFact {
   toolName: UgvDeviceToolName;
@@ -41,6 +44,8 @@ export interface UgvOperationQualification {
   phase: VehicleOperationPhase;
   variant?: string;
   resultPolicyId?: string;
+  deviceRequirement?: "required" | "optional";
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
   requiredTools: readonly UgvDeviceToolName[];
   tools: readonly UgvToolQualificationFact[];
   qualified: boolean;
@@ -56,6 +61,31 @@ export interface QualifyUgvOperationInput {
   externallyVerified?: boolean;
   executionMode: "simulation" | "live";
 }
+
+export interface UgvQualificationMatrixInput {
+  contracts: readonly CapturedToolContract[];
+  toolHealth?: readonly DeviceToolHealthSnapshot<UgvDeviceToolName>[];
+  externallyVerified?: boolean;
+  executionMode: "simulation" | "live";
+}
+
+export const UGV_OPERATION_QUALIFICATION_CASES = [
+  { operationName: "vehicle_get_state", arguments: {} },
+  { operationName: "vehicle_get_capabilities", arguments: {} },
+  { operationName: "vehicle_get_payload_status", arguments: {} },
+  { operationName: "vehicle_get_targets", arguments: {} },
+  { operationName: "vehicle_laser_range", arguments: {} },
+  { operationName: "vehicle_navigate", arguments: { mission: { type: "point" } } },
+  { operationName: "vehicle_navigate", arguments: { mission: { type: "route" } } },
+  { operationName: "vehicle_navigate", arguments: { mission: { type: "distance" } } },
+  { operationName: "vehicle_navigate", arguments: { mission: { type: "return_home" } } },
+  { operationName: "vehicle_area_recon", arguments: { scanMode: "area" } },
+  { operationName: "vehicle_area_recon", arguments: { scanMode: "circular" } },
+  { operationName: "vehicle_track_target", arguments: {} },
+  { operationName: "vehicle_control_gimbal", arguments: {} },
+  { operationName: "vehicle_fire_weapon", arguments: {} },
+  { operationName: "vehicle_emergency_stop", arguments: {} },
+] as const;
 
 export class UgvOperationQualificationService {
   constructor(readonly profiles: readonly VehicleOperationProfile[] = UGV_OPERATION_PROFILES) {}
@@ -103,6 +133,8 @@ export class UgvOperationQualificationService {
       phase,
       ...(variant === undefined ? {} : { variant }),
       resultPolicyId: profile.resultPolicy.policyId,
+      deviceRequirement: profile.capabilityPolicy.deviceRequirement,
+      riskLevel: profile.riskLevel,
       requiredTools,
       tools,
       qualified,
@@ -110,6 +142,22 @@ export class UgvOperationQualificationService {
         ? uniqueReasons(["UGV_OPERATION_QUALIFIED", ...tools.flatMap((tool) => tool.reasonCodes)])
         : uniqueReasons(tools.flatMap((tool) => tool.reasonCodes)),
     };
+  }
+
+  matrix(input: UgvQualificationMatrixInput): readonly UgvOperationQualification[] {
+    return UGV_OPERATION_QUALIFICATION_CASES.map((scenario) =>
+      this.qualify({
+        ...input,
+        operationName: scenario.operationName,
+        arguments: scenario.arguments,
+      }),
+    );
+  }
+
+  inventoryTools(operationName: string): readonly UgvDeviceToolName[] {
+    const profile = vehicleOperationProfile(operationName, this.profiles);
+    if (profile === undefined) return [];
+    return allDeviceTools(profile).map(requiredUgvToolName);
   }
 }
 
@@ -123,7 +171,7 @@ function qualifyTool(
   const compatibilityUsable = isUgvToolCompatibilityUsable(compatibilityStatus);
   const healthUsable = healthState !== "open" && healthState !== "unavailable";
   const reasonCodes = uniqueReasons([
-    ...compatibilityReasons(compatibilityStatus),
+    ...compatibilityReasons(compatibility),
     ...(healthState === "open" ? (["UGV_TOOL_CIRCUIT_OPEN"] as const) : []),
     ...(healthState === "unavailable" ? (["UGV_TOOL_UNAVAILABLE"] as const) : []),
   ]);
@@ -153,13 +201,18 @@ function qualifyTool(
 }
 
 function compatibilityReasons(
-  status: UgvToolCompatibilityFact["status"],
+  compatibility: UgvToolCompatibilityFact | undefined,
 ): readonly UgvQualificationReasonCode[] {
+  if (compatibility === undefined) return ["UGV_TOOL_MISSING"];
+  const status = compatibility.status;
   if (status === "PRESENT_COMPATIBLE") return [];
   if (status === "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED")
     return ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"];
   if (status === "PRESENT_INPUT_SCHEMA_MISMATCH") return ["UGV_TOOL_INPUT_SCHEMA_MISMATCH"];
-  if (status === "PRESENT_OUTPUT_SCHEMA_MISMATCH") return ["UGV_TOOL_OUTPUT_SCHEMA_MISMATCH"];
+  if (status === "PRESENT_OUTPUT_SCHEMA_MISMATCH")
+    return compatibility.outputSchemaDeclared || compatibility.runtimeResultValidation
+      ? ["UGV_TOOL_OUTPUT_SCHEMA_MISMATCH"]
+      : ["UGV_TOOL_RESULT_POLICY_UNVERIFIED"];
   if (status === "UNVERIFIED_EXTERNAL") return ["UGV_TOOL_EXTERNAL_VERIFICATION_REQUIRED"];
   return ["UGV_TOOL_MISSING"];
 }

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   jsonToProtoStruct,
+  protoStructToJson,
   type ExecutionSnapshot,
   type ProviderManifest,
 } from "../../packages/adapter-protocol/src/index.js";
@@ -13,6 +14,9 @@ import { synchronousResult } from "../../packages/task-engine/src/result-contrac
 import {
   MockUgvDeviceMcpClient,
   UncertainMutatingDeviceCallError,
+  mockUgvToolContracts,
+  type CapturedToolContract,
+  type UgvDeviceToolName,
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 import { UgvBusinessEventHub } from "../../apps/ugv-provider-adapter/src/business-events.js";
@@ -101,6 +105,87 @@ describe("UGV long-running operation integration", () => {
     }
     expect(fixture.ingress.ingestSequence()).toBe(mqttSequence);
     expect(fixture.ingress.snapshot().freshness).toEqual(mqttFreshness);
+  });
+
+  it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
+    const runtimeValidatedContracts = mockUgvToolContracts("2026-08-20T00:00:00.000Z").map(
+      withoutOutputSchema,
+    );
+    const qualifiedFixture = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {},
+      new ContractFixtureUgvDevice(runtimeValidatedContracts),
+    );
+    const argumentsValue = navigateArgs();
+    expect(
+      qualifiedFixture.runtime.operationQualification("vehicle_navigate", argumentsValue),
+    ).toMatchObject({
+      qualified: true,
+      reasonCodes: [
+        "UGV_OPERATION_QUALIFIED",
+        "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED",
+      ],
+    });
+    expect(qualifiedFixture.runtime.availability("vehicle_navigate", argumentsValue)).toMatchObject(
+      {
+        availability: "AVAILABLE",
+        reasonCode: "UGV_AVAILABLE",
+      },
+    );
+    const qualifiedCapabilities = await qualifiedFixture.runtime.start(
+      startInput("qualification-capabilities-present", "vehicle_get_capabilities", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(
+      protoStructToJson(qualifiedCapabilities.initialSnapshot.result).navigation,
+    ).toMatchObject({ point: true });
+    const qualifiedManifest = ugvManifest(
+      "isr.vehicle.ugv.ugv1",
+      "1.0.0",
+      qualifiedFixture.store,
+      "vehicle:ugv1",
+      qualifiedFixture.runtime.qualificationContext(),
+    );
+    expect(JSON.stringify(qualifiedManifest)).toContain("planningMode");
+
+    const missingPathContracts = runtimeValidatedContracts.filter(
+      ({ name }) => name !== "ugv_path_follow_mission",
+    );
+    const blockedFixture = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {},
+      new ContractFixtureUgvDevice(missingPathContracts),
+    );
+    const blockedQualification = blockedFixture.runtime.operationQualification(
+      "vehicle_navigate",
+      argumentsValue,
+    );
+    expect(blockedQualification.qualified).toBe(false);
+    expect(blockedQualification.reasonCodes).toContain("UGV_TOOL_MISSING");
+    expect(blockedFixture.runtime.availability("vehicle_navigate", argumentsValue)).toMatchObject({
+      availability: "UNKNOWN",
+      reasonCode: "UGV_TOOL_MISSING",
+      description: "UGV_TOOL_MISSING:ugv_path_follow_mission",
+    });
+    const blockedCapabilities = await blockedFixture.runtime.start(
+      startInput("qualification-capabilities-missing", "vehicle_get_capabilities", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(protoStructToJson(blockedCapabilities.initialSnapshot.result).navigation).toMatchObject({
+      point: false,
+    });
+    const blockedManifest = ugvManifest(
+      "isr.vehicle.ugv.ugv1",
+      "1.0.0",
+      blockedFixture.store,
+      "vehicle:ugv1",
+      blockedFixture.runtime.qualificationContext(),
+    );
+    expect(JSON.stringify(blockedManifest)).not.toContain("planningMode");
   });
 
   it("confirms navigate progress, pause/resume, completion and durable event replay", async () => {
@@ -926,6 +1011,7 @@ async function createFixture(
   withTarget = false,
   store = new MemoryProviderStore(),
   overrides: Partial<UgvProviderRuntime["options"]> = {},
+  device: MockUgvDeviceMcpClient = new MockUgvDeviceMcpClient(),
 ) {
   const ingress = new VehicleMqttIngress("direct_domain_json", {
     maxPayloadBytes: 65536,
@@ -952,7 +1038,6 @@ async function createFixture(
         '{"entity_id":"ugv1","objects":[{"id":101,"object_type":"3:target-vehicle","x":1,"y":2,"z":0}]}',
       ),
     );
-  const device = new MockUgvDeviceMcpClient();
   const telemetry = new UgvTelemetry({
     providerId: "isr.vehicle.ugv.ugv1",
     enabled: false,
@@ -971,6 +1056,22 @@ async function createFixture(
   active.push(runtime);
   await runtime.initialize();
   return { store, ingress, device, telemetry, events, runtime };
+}
+
+class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {
+  constructor(readonly fixtureContracts: readonly CapturedToolContract[]) {
+    super(new Set(fixtureContracts.map(({ name }) => name as UgvDeviceToolName)));
+  }
+
+  override contracts(): CapturedToolContract[] {
+    return this.fixtureContracts.map((contract) => structuredClone(contract));
+  }
+}
+
+function withoutOutputSchema(contract: CapturedToolContract): CapturedToolContract {
+  const withoutOutput = { ...contract };
+  delete withoutOutput.outputSchema;
+  return withoutOutput;
 }
 function runtimeOptions() {
   return {

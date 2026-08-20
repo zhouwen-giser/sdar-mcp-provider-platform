@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { npcTankManifest } from "../../apps/npc-tank-provider-adapter/src/manifest.js";
 import { normalizeUgvCapabilities } from "../../apps/ugv-provider-adapter/src/capabilities.js";
@@ -7,7 +8,7 @@ import {
   normalizeDeviceTargets,
 } from "../../apps/ugv-provider-adapter/src/targets.js";
 import { MemoryProviderStore } from "../../packages/provider-adapter-kit/src/index.js";
-import type { CapturedToolContract } from "../../packages/vehicle-device-mcp-client/src/index.js";
+import { mockUgvToolContracts } from "../../packages/vehicle-device-mcp-client/src/index.js";
 
 describe("Goal 10 Provider boundary", () => {
   it("keeps the shared UGV surface stable while Goal 11 brings NPC to the same eleven operations", () => {
@@ -43,19 +44,11 @@ describe("Goal 10 Provider boundary", () => {
   });
 
   it("derives capability support from reported contracts and never fabricates physical limits", () => {
-    const contracts = [
-      contract("ugv_path_follow_mission", {
-        density: { type: "string", enum: ["adaptive", "dense"] },
-        need_plan: { type: "boolean" },
-      }),
-      contract("ugv_move_distance"),
-      contract("ugv_return_home"),
-      contract("ugv_mission_control"),
-      contract("ugv_area_recon_configure", { scan_mode: { type: "integer", enum: [1, 2] } }),
-      contract("ugv_gimbal_move", {
-        mode: { type: "string", enum: ["absolute", "relative", "velocity", "reset"] },
-      }),
-    ];
+    const contracts = mockUgvToolContracts("2026-08-10T00:00:00.000Z").map((entry) => {
+      const withoutOutput = { ...entry };
+      delete withoutOutput.outputSchema;
+      return withoutOutput;
+    });
     const normalized = normalizeUgvCapabilities(
       { error_code: 0, sensors: { gnss: true }, max_speed_kmh: 25 },
       contracts,
@@ -105,14 +98,13 @@ describe("Goal 10 Provider boundary", () => {
     });
     expect(JSON.stringify(merged)).not.toContain("damage");
   });
-});
 
-function contract(name: string, properties: Record<string, unknown> = {}): CapturedToolContract {
-  return {
-    name,
-    description: name,
-    inputSchema: { type: "object", properties, additionalProperties: false },
-    capturedAt: "2026-08-10T00:00:00.000Z",
-    schemaHash: "a".repeat(64),
-  };
-}
+  it("uses the shared qualification matrix for read-only preflight evidence", () => {
+    const source = readFileSync("scripts/ugv-simulation/preflight.mjs", "utf8");
+    expect(source).toContain("UgvOperationQualificationService");
+    expect(source).toContain("operationQualifications");
+    expect(source).toContain("requiredOperationFailures");
+    expect(source).not.toContain("ESSENTIAL_DEVICE_READ_TOOLS");
+    expect(source).not.toContain("KNOWN_SIMULATOR_TOOLS =");
+  });
+});

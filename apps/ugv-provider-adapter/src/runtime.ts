@@ -14,6 +14,10 @@ import type {
 import type {
   UgvDeviceMcpClient,
   UgvDeviceToolName,
+  UgvOperationQualification,
+  UgvQualificationReasonCode,
+  UgvQualificationMatrixInput,
+  VehicleOperationPhase,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
   controlDeviceCalls,
@@ -80,12 +84,41 @@ const FIRE_LOCAL_CANCELLATION_REASONS = new Set([
   "UGV_FIRE_CANCELLED_BEFORE_DISPATCH",
 ]);
 
+const BLOCKING_QUALIFICATION_REASONS: ReadonlySet<UgvQualificationReasonCode> = new Set([
+  "UGV_TOOL_MISSING",
+  "UGV_TOOL_INPUT_SCHEMA_MISMATCH",
+  "UGV_TOOL_OUTPUT_SCHEMA_MISMATCH",
+  "UGV_TOOL_EXTERNAL_VERIFICATION_REQUIRED",
+  "UGV_TOOL_CIRCUIT_OPEN",
+  "UGV_TOOL_UNAVAILABLE",
+  "UGV_TOOL_RECOVERING",
+  "UGV_TOOL_RESULT_POLICY_UNVERIFIED",
+]);
+
 export interface StartUgvOperation {
   taskId: string;
   operationName: string;
   arguments: Record<string, unknown>;
   argumentHash: string;
   executionContext: ExecutionContextRecord;
+}
+
+function qualificationFailureReason(
+  qualification: UgvOperationQualification,
+): UgvQualificationReasonCode {
+  return (
+    qualification.reasonCodes.find((reasonCode) =>
+      BLOCKING_QUALIFICATION_REASONS.has(reasonCode),
+    ) ?? "UGV_TOOL_UNAVAILABLE"
+  );
+}
+
+function qualificationFailureDescription(
+  qualification: UgvOperationQualification,
+  reasonCode: UgvQualificationReasonCode,
+): string {
+  const tool = qualification.tools.find((fact) => fact.reasonCodes.includes(reasonCode));
+  return tool === undefined ? reasonCode : `${reasonCode}:${tool.toolName}`;
 }
 export interface CommandIdentity {
   taskId: string;
@@ -190,6 +223,25 @@ export class UgvProviderRuntime {
   }
   snapshot(): UgvSnapshot {
     return this.ingress.snapshot();
+  }
+  qualificationContext(): UgvQualificationMatrixInput {
+    return {
+      contracts: this.device.contracts(),
+      toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
+      executionMode: this.options.executionMode ?? "simulation",
+    };
+  }
+  operationQualification(
+    operationName: string,
+    argumentsValue: Readonly<Record<string, unknown>> = {},
+    phase?: VehicleOperationPhase,
+  ): UgvOperationQualification {
+    return this.qualification.qualify({
+      ...this.qualificationContext(),
+      operationName,
+      arguments: argumentsValue,
+      ...(phase === undefined ? {} : { phase }),
+    });
   }
   executionSnapshot(execution: ProviderExecution): Record<string, unknown> {
     return executionSnapshot(execution);
@@ -343,20 +395,7 @@ export class UgvProviderRuntime {
         description: "UGV_FIRE_DISABLED",
       };
     const operationHealth = this.operationHealth.snapshot(operationName);
-    if (operationHealth.state === "OPEN" || operationHealth.state === "RECOVERING")
-      return {
-        availability: "UNKNOWN",
-        riskLevel: operationName === "vehicle_emergency_stop" ? "HIGH" : "MEDIUM",
-        reasonCode: operationHealth.reasonCode,
-        description: operationHealth.reasonCode,
-      };
-    const qualification = this.qualification.qualify({
-      operationName,
-      arguments: argumentsValue,
-      contracts: this.device.contracts(),
-      toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
-      executionMode: this.options.executionMode ?? "simulation",
-    });
+    const qualification = this.operationQualification(operationName, argumentsValue);
     const decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
@@ -374,6 +413,26 @@ export class UgvProviderRuntime {
       circularScanSupported: true,
       ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
     });
+    if (decision.reasonCode === "UGV_TOOL_UNAVAILABLE") {
+      const reasonCode = qualificationFailureReason(qualification);
+      return {
+        ...decision,
+        riskLevel: qualification.riskLevel ?? decision.riskLevel,
+        reasonCode,
+        description: qualificationFailureDescription(qualification, reasonCode),
+      };
+    }
+    if (
+      operationHealth.state === "RECOVERING" &&
+      decision.reasonCode !== "UGV_MQTT_UNAVAILABLE" &&
+      decision.reasonCode !== "UGV_DEVICE_MCP_UNAVAILABLE"
+    )
+      return {
+        availability: "UNKNOWN",
+        riskLevel: qualification.riskLevel ?? decision.riskLevel,
+        reasonCode: "UGV_TOOL_RECOVERING",
+        description: "UGV_TOOL_RECOVERING",
+      };
     return operationHealth.state === "DEGRADED" && decision.availability === "AVAILABLE"
       ? {
           ...decision,
@@ -773,6 +832,10 @@ export class UgvProviderRuntime {
         this.device.contracts(),
         observedAt,
         this.options.resourceId ?? "vehicle:ugv1",
+        {
+          toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
+          executionMode: this.options.executionMode ?? "simulation",
+        },
       );
     } else if (input.operationName === "vehicle_get_payload_status") {
       const status = await this.#callDevice("ugv_area_recon_get_status", {}, input.taskId);

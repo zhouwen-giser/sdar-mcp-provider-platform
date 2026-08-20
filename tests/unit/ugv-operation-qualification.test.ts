@@ -57,6 +57,35 @@ describe("UGV operation qualification matrix", () => {
     });
   });
 
+  it("generates the bounded qualification report and broad health inventory from the same profiles", () => {
+    const service = new UgvOperationQualificationService();
+    const matrix = service.matrix({
+      contracts: contracts.map((contract) => {
+        const withoutOutput = { ...contract };
+        delete withoutOutput.outputSchema;
+        return withoutOutput;
+      }),
+      executionMode: "simulation",
+    });
+    expect(
+      matrix
+        .filter(({ operationName }) => operationName === "vehicle_navigate")
+        .map(({ variant }) => variant),
+    ).toEqual(["point", "route", "distance", "return_home"]);
+    expect(
+      matrix
+        .filter(({ operationName }) => operationName === "vehicle_area_recon")
+        .map(({ variant }) => variant),
+    ).toEqual(["area", "circular"]);
+    expect(matrix.every(({ qualified }) => qualified)).toBe(true);
+    expect(service.inventoryTools("vehicle_navigate")).toEqual([
+      "ugv_path_follow_mission",
+      "ugv_return_home",
+      "ugv_move_distance",
+      "ugv_mission_control",
+    ]);
+  });
+
   it("accepts undeclared output only with runtime validation and preserves exact diagnostics", () => {
     const outputUndeclared = withoutOutputSchema(contracts, "ugv_path_follow_mission");
     const service = new UgvOperationQualificationService();
@@ -97,7 +126,7 @@ describe("UGV operation qualification matrix", () => {
       }),
     ).toMatchObject({
       qualified: false,
-      reasonCodes: ["UGV_TOOL_OUTPUT_SCHEMA_MISMATCH"],
+      reasonCodes: ["UGV_TOOL_RESULT_POLICY_UNVERIFIED"],
     });
   });
 

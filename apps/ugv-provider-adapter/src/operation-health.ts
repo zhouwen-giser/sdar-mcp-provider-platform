@@ -2,7 +2,7 @@ import type {
   DeviceToolHealthSnapshot,
   UgvDeviceToolName,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
-import { OPERATION_REQUIRED_TOOLS } from "../../../packages/vehicle-device-mcp-client/src/index.js";
+import { UgvOperationQualificationService } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 
 export type UgvOperationHealthState = "HEALTHY" | "DEGRADED" | "OPEN" | "RECOVERING";
 
@@ -17,6 +17,7 @@ export interface UgvOperationHealthSnapshot {
 export class UgvOperationHealthTracker {
   readonly #tools = new Map<UgvDeviceToolName, DeviceToolHealthSnapshot<UgvDeviceToolName>>();
   readonly #operations = new Map<string, UgvOperationHealthSnapshot>();
+  readonly #dependencies = new Map<string, readonly UgvDeviceToolName[]>();
 
   constructor(
     readonly thresholds: {
@@ -24,9 +25,12 @@ export class UgvOperationHealthTracker {
       openThreshold: number;
       recoverySuccessThreshold: number;
     },
+    qualification = new UgvOperationQualificationService(),
   ) {
-    for (const operationName of Object.keys(OPERATION_REQUIRED_TOOLS))
+    for (const { operationName } of qualification.profiles) {
+      this.#dependencies.set(operationName, qualification.inventoryTools(operationName));
       this.#operations.set(operationName, healthy(operationName));
+    }
   }
 
   recordToolHealth(
@@ -37,7 +41,7 @@ export class UgvOperationHealthTracker {
       previous: UgvOperationHealthSnapshot;
       current: UgvOperationHealthSnapshot;
     }[] = [];
-    for (const [operationName, dependencies] of Object.entries(OPERATION_REQUIRED_TOOLS)) {
+    for (const [operationName, dependencies] of this.#dependencies) {
       if (!dependencies.includes(health.toolName)) continue;
       const previous = this.snapshot(operationName);
       const current = this.#evaluate(operationName, previous);
@@ -60,7 +64,7 @@ export class UgvOperationHealthTracker {
     operationName: string,
     previous: UgvOperationHealthSnapshot,
   ): UgvOperationHealthSnapshot {
-    const dependencies = OPERATION_REQUIRED_TOOLS[operationName] ?? [];
+    const dependencies = this.#dependencies.get(operationName) ?? [];
     const observed = dependencies.flatMap((tool) => {
       const health = this.#tools.get(tool);
       return health === undefined ? [] : [health];
