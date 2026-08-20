@@ -4,11 +4,13 @@ import {
   applySnapshotPatch,
   createNpcTankSnapshot,
   createUgvSnapshot,
+  type FieldObservationAuthority,
   type FreshnessDomain,
   type NpcTankSnapshot,
   type SnapshotPatch,
   type UgvSnapshot,
   type VehicleIdentity,
+  type VehicleObservationField,
   type VehicleSnapshot,
   type VehicleTarget,
 } from "../../vehicle-provider-core/src/index.js";
@@ -29,6 +31,17 @@ export interface IngestResult {
   retained: boolean;
   revision: string;
 }
+
+export const VEHICLE_OBSERVATION_FIELDS = [
+  "chassis.position.geodetic",
+  "chassis.position.local",
+  "chassis.speed",
+  "chassis.heading",
+  "chassis.mission",
+  "payload.recon",
+  "payload.targets",
+  "payload.gimbal",
+] as const satisfies readonly VehicleObservationField[];
 
 export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
   createSnapshot(): TSnapshot;
@@ -113,6 +126,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
   >();
   readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
+  readonly #fieldAuthorities = new Map<VehicleObservationField, FieldObservationAuthority>();
   readonly #authoritativeTaskStates = new Map<string, unknown>();
   #detectedTargets: VehicleTarget[] = [];
   #reconTargets: VehicleTarget[] = [];
@@ -221,6 +235,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       };
     observation = this.#applyTargetAuthority(topic, observation);
     this.#sequence++;
+    observation = this.#applyFieldAuthorities(topic, observation, observedAt);
     if (topic === this.profile.taskStateAuthority?.missionStateTopic)
       this.#authoritativeTaskStates.set("mission_state", observation.patch.chassis?.mission?.state);
     if (
@@ -290,6 +305,28 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           cursor: `${latest.observedAt}\0${latest.hash}`,
         };
   }
+  fieldObservationAuthority(field: VehicleObservationField): FieldObservationAuthority | undefined {
+    const authority = this.#fieldAuthorities.get(field);
+    return authority === undefined ? undefined : structuredClone(authority);
+  }
+  fieldObservationAuthorities(
+    fields: readonly VehicleObservationField[] = VEHICLE_OBSERVATION_FIELDS,
+  ): FieldObservationAuthority[] {
+    return fields.flatMap((field) => {
+      const authority = this.fieldObservationAuthority(field);
+      return authority === undefined ? [] : [authority];
+    });
+  }
+  fieldFreshnessState(
+    field: VehicleObservationField,
+    maximumAgeMs: number,
+    now = Date.now(),
+  ): "fresh" | "stale" | "unknown" {
+    const authority = this.#fieldAuthorities.get(field);
+    if (authority === undefined) return "unknown";
+    const age = now - Date.parse(authority.observedAt);
+    return Number.isFinite(age) && age >= 0 && age <= maximumAgeMs ? "fresh" : "stale";
+  }
   stateConflict(): boolean {
     return this.#stateConflict;
   }
@@ -335,6 +372,83 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
     return observation;
   }
+
+  #applyFieldAuthorities(
+    topic: string,
+    observation: NormalizedMqttObservation,
+    observedAt: string,
+  ): NormalizedMqttObservation {
+    const accepted = structuredClone(observation);
+    for (const [field] of observationFieldValues(observation)) {
+      const previous = this.#fieldAuthorities.get(field);
+      if (previous !== undefined && Date.parse(observedAt) < Date.parse(previous.observedAt))
+        removeObservationField(accepted.patch, field);
+    }
+    for (const [field, value] of observationFieldValues(accepted)) {
+      const payloadHash = createHash("sha256").update(canonical(value)).digest("hex");
+      this.#fieldAuthorities.set(field, {
+        field,
+        topic,
+        observedAt,
+        timeAuthority: observation.timeAuthority,
+        ...(observation.sourceSequence === undefined
+          ? {}
+          : { sourceSequence: observation.sourceSequence }),
+        ingestSequence: this.#sequence,
+        payloadHash,
+        cursor: `${field}\0${observedAt}\0${observation.sourceSequence ?? String(this.#sequence)}\0${payloadHash}`,
+      });
+    }
+    return accepted;
+  }
+}
+
+function observationFieldValues(
+  observation: NormalizedMqttObservation,
+): [VehicleObservationField, unknown][] {
+  const values: [VehicleObservationField, unknown][] = [];
+  const { chassis, payload } = observation.patch;
+  if (chassis?.position !== undefined) values.push(["chassis.position.geodetic", chassis.position]);
+  if (
+    chassis?.navigation !== undefined &&
+    (chassis.navigation.positionX !== undefined || chassis.navigation.positionY !== undefined)
+  )
+    values.push([
+      "chassis.position.local",
+      {
+        ...(chassis.navigation.positionX === undefined ? {} : { x: chassis.navigation.positionX }),
+        ...(chassis.navigation.positionY === undefined ? {} : { y: chassis.navigation.positionY }),
+        ...(chassis.navigation.positionZ === undefined ? {} : { z: chassis.navigation.positionZ }),
+      },
+    ]);
+  if (chassis?.speedKmh !== undefined) values.push(["chassis.speed", chassis.speedKmh]);
+  if (chassis?.compassHeadingDeg !== undefined)
+    values.push(["chassis.heading", chassis.compassHeadingDeg]);
+  if (chassis?.mission !== undefined) values.push(["chassis.mission", chassis.mission]);
+  if (payload?.reconnaissance !== undefined) values.push(["payload.recon", payload.reconnaissance]);
+  if (payload?.targets !== undefined && observation.domains.includes("target"))
+    values.push(["payload.targets", payload.targets]);
+  if (payload?.gimbal !== undefined) values.push(["payload.gimbal", payload.gimbal]);
+  return values;
+}
+
+function removeObservationField(patch: SnapshotPatch, field: VehicleObservationField): void {
+  if (field === "chassis.position.geodetic" && patch.chassis !== undefined)
+    delete patch.chassis.position;
+  else if (field === "chassis.position.local" && patch.chassis?.navigation !== undefined) {
+    delete patch.chassis.navigation.positionX;
+    delete patch.chassis.navigation.positionY;
+    delete patch.chassis.navigation.positionZ;
+  } else if (field === "chassis.speed" && patch.chassis !== undefined) {
+    delete patch.chassis.speedKmh;
+    if (patch.chassis.navigation !== undefined) delete patch.chassis.navigation.speedKmh;
+  } else if (field === "chassis.heading" && patch.chassis !== undefined)
+    delete patch.chassis.compassHeadingDeg;
+  else if (field === "chassis.mission" && patch.chassis !== undefined) delete patch.chassis.mission;
+  else if (field === "payload.recon" && patch.payload !== undefined)
+    delete patch.payload.reconnaissance;
+  else if (field === "payload.targets" && patch.payload !== undefined) delete patch.payload.targets;
+  else if (field === "payload.gimbal" && patch.payload !== undefined) delete patch.payload.gimbal;
 }
 
 function canonical(value: unknown): string {

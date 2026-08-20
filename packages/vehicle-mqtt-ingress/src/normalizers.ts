@@ -133,22 +133,25 @@ function normalizeVehicleMqttObservation(
         patch: { chassis: { mission: track(object, false) } },
         domains: ["mission"],
       };
-    case "/ugv/nav_state":
+    case "/ugv/nav_state": {
+      const navigation = optionalNumbers(object, {
+        positionX: "position_x",
+        positionY: "position_y",
+        positionZ: "position_z",
+        speedKmh: "speed_kmh",
+        batteryRangeKm: "battery_range_km",
+      });
       return {
         ...base,
         patch: {
           chassis: {
-            navigation: optionalNumbers(object, {
-              positionX: "position_x",
-              positionY: "position_y",
-              positionZ: "position_z",
-              speedKmh: "speed_kmh",
-              batteryRangeKm: "battery_range_km",
-            }),
+            navigation,
+            ...(navigation.speedKmh === undefined ? {} : { speedKmh: navigation.speedKmh }),
           },
         },
         domains: ["chassis"],
       };
+    }
     case "/ugv/eo/pose":
       return eoPose(value, base);
     case "/ugv/detected_objects":

@@ -62,6 +62,7 @@ import {
   type PhysicalDispatchBaseline,
   type PhysicalObservationAuthority,
   type UgvSnapshot,
+  type VehicleObservationField,
   type VehicleReconnaissanceState,
   type VehicleTaskTrack,
   type VehicleTrack,
@@ -1016,7 +1017,7 @@ export class UgvProviderRuntime {
       );
     } else if (execution.operationName === "vehicle_area_recon") {
       const baseline = executionPhysicalBaseline(execution);
-      const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+      const authority = this.ingress.fieldObservationAuthority("payload.recon");
       const reconMissionId = execution.downstreamMissionIds.at(-1);
       next = applyReconTrack(
         execution,
@@ -2411,31 +2412,21 @@ function operationObservationAuthorities(
   operationName: string,
   ingress: VehicleMqttIngress,
 ): PhysicalObservationAuthority[] {
-  const topics =
+  const fields: readonly VehicleObservationField[] =
     operationName === "vehicle_navigate"
       ? [
-          "/ugv/mission_state",
-          "/ugv/gnss",
-          "/ugv/speed",
-          "/ugv/nav_state",
-          "status/ugv",
-          "/ugv/status",
+          "chassis.position.geodetic",
+          "chassis.position.local",
+          "chassis.speed",
+          "chassis.heading",
+          "chassis.mission",
         ]
       : operationName === "vehicle_area_recon"
-        ? ["/ugv/area_recon/status", "/ugv/area_recon/coverage", "/ugv/area_recon/targets"]
+        ? ["payload.recon", "payload.targets", "payload.gimbal"]
         : operationName === "vehicle_emergency_stop"
-          ? [
-              "/ugv/mission_state",
-              "/ugv/speed",
-              "/ugv/area_recon/status",
-              "status/ugv",
-              "/ugv/status",
-            ]
+          ? ["chassis.speed", "chassis.mission", "payload.recon", "payload.gimbal"]
           : [];
-  return topics.flatMap((topic) => {
-    const authority = ingress.observationAuthority(topic);
-    return authority === undefined ? [] : [authority];
-  });
+  return ingress.fieldObservationAuthorities(fields);
 }
 
 function controlObservationIsNew(
@@ -2446,7 +2437,7 @@ function controlObservationIsNew(
   if (!record(baselineValue)) return false;
   const baseline = baselineValue as unknown as PhysicalDispatchBaseline;
   const current = operationObservationAuthorities(execution.operationName, ingress);
-  const newTopics = new Set(
+  const newFields = new Set(
     current
       .filter((authority) => {
         const old = baseline.observationAuthorities.find(
@@ -2454,16 +2445,11 @@ function controlObservationIsNew(
         );
         return old === undefined || isNewAuthority(baseline.observationAuthorities, authority);
       })
-      .map((authority) => authority.topic),
+      .flatMap((authority) => (authority.field === undefined ? [] : [authority.field])),
   );
-  const missionIsNew = [...newTopics].some((topic) =>
-    ["/ugv/mission_state", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(topic),
-  );
+  const missionIsNew = newFields.has("chassis.mission");
   if (execution.controlConfirmation?.command === "resume") return missionIsNew;
-  const speedIsNew = [...newTopics].some((topic) =>
-    ["/ugv/speed", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(topic),
-  );
-  return missionIsNew && speedIsNew;
+  return missionIsNew && newFields.has("chassis.speed");
 }
 
 function confirmationStabilitySatisfied(

@@ -1,4 +1,3 @@
-import { freshnessState } from "./snapshot.js";
 import type {
   FreshnessPolicy,
   VehicleReconnaissanceState,
@@ -7,12 +6,30 @@ import type {
 } from "./types.js";
 
 export interface PhysicalObservationAuthority {
+  field?: VehicleObservationField;
   topic: string;
   observedAt: string;
   timeAuthority: "source" | "ingest";
   sourceSequence?: string;
   ingestSequence?: number;
+  payloadHash?: string;
   cursor: string;
+}
+
+export type VehicleObservationField =
+  | "chassis.position.geodetic"
+  | "chassis.position.local"
+  | "chassis.speed"
+  | "chassis.heading"
+  | "chassis.mission"
+  | "payload.recon"
+  | "payload.targets"
+  | "payload.gimbal";
+
+export interface FieldObservationAuthority extends PhysicalObservationAuthority {
+  field: VehicleObservationField;
+  ingestSequence: number;
+  payloadHash: string;
 }
 
 export interface PhysicalDispatchBaseline {
@@ -51,15 +68,12 @@ export function stationaryPhysicalConfirmation(input: {
   now?: number;
 }): PhysicalConfirmation {
   const speedKmh = input.snapshot.chassis.speedKmh;
+  const speedAuthority = authorityForField(input.currentAuthorities, "chassis.speed");
   const speedFresh =
-    freshnessState(input.snapshot, "chassis", input.freshness, input.now) === "fresh" &&
+    authorityFreshness(speedAuthority, input.freshness.chassis, input.now) === "fresh" &&
     speedKmh !== undefined;
   const stationary = stationaryFromSpeed(speedKmh, speedFresh, input.stationarySpeedThresholdKmh);
-  const observationIsNew = input.currentAuthorities.some(
-    (authority) =>
-      ["/ugv/speed", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(authority.topic) &&
-      isNewAuthority(input.baseline.observationAuthorities, authority),
-  );
+  const observationIsNew = isNewAuthority(input.baseline.observationAuthorities, speedAuthority);
   const confirmed = observationIsNew && speedFresh && stationary === true;
   return {
     confirmed,
@@ -129,10 +143,15 @@ export function navigationPhysicalConfirmation(input: {
     baseline.observationAuthorities,
     authorities,
   );
-  const chassisFresh = freshnessState(snapshot, "chassis", input.freshness, input.now) === "fresh";
-  const positionFresh = chassisFresh && snapshot.chassis.position !== undefined;
+  const positionAuthority = authorityForField(authorities, "chassis.position.geodetic");
+  const speedAuthority = authorityForField(authorities, "chassis.speed");
+  const positionFresh =
+    authorityFreshness(positionAuthority, input.freshness.chassis, input.now) === "fresh" &&
+    snapshot.chassis.position !== undefined;
   const speedKmh = snapshot.chassis.speedKmh;
-  const speedFresh = chassisFresh && speedKmh !== undefined;
+  const speedFresh =
+    authorityFreshness(speedAuthority, input.freshness.chassis, input.now) === "fresh" &&
+    speedKmh !== undefined;
   const stationary = stationaryFromSpeed(speedKmh, speedFresh, input.stationarySpeedThresholdKmh);
   const confirmed =
     correlation === "STRICT_CORRELATED" &&
@@ -167,21 +186,14 @@ function requiredNavigationAuthoritiesAreNew(
   baseline: readonly PhysicalObservationAuthority[],
   current: readonly PhysicalObservationAuthority[],
 ): boolean {
-  const newTopics = new Set(
-    current
-      .filter((authority) => isNewAuthority(baseline, authority))
-      .map((authority) => authority.topic),
+  const mission = authorityForField(current, "chassis.mission");
+  const position = authorityForField(current, "chassis.position.geodetic");
+  const speed = authorityForField(current, "chassis.speed");
+  return (
+    isNewAuthority(baseline, mission) &&
+    isNewAuthority(baseline, position) &&
+    isNewAuthority(baseline, speed)
   );
-  const hasMission = [...newTopics].some((topic) =>
-    ["/ugv/mission_state", "status/ugv", "/ugv/status"].includes(topic),
-  );
-  const hasPosition = [...newTopics].some((topic) =>
-    ["/ugv/gnss", "/ugv/nav_state"].includes(topic),
-  );
-  const hasSpeed = [...newTopics].some((topic) =>
-    ["/ugv/speed", "/ugv/nav_state", "status/ugv", "/ugv/status"].includes(topic),
-  );
-  return hasMission && hasPosition && hasSpeed;
 }
 
 export function navigationTerminalFacts(input: {
@@ -250,7 +262,9 @@ export function isNewAuthority(
   current: PhysicalObservationAuthority | undefined,
 ): boolean {
   if (current === undefined) return false;
-  const baseline = baselines.find((candidate) => candidate.topic === current.topic);
+  const baseline = baselines.find(
+    (candidate) => observationAuthorityKey(candidate) === observationAuthorityKey(current),
+  );
   if (baseline === undefined) return true;
   if (current.sourceSequence !== undefined && baseline.sourceSequence !== undefined)
     return compareSequence(current.sourceSequence, baseline.sourceSequence) > 0;
@@ -258,6 +272,42 @@ export function isNewAuthority(
     current.cursor !== baseline.cursor &&
     Date.parse(current.observedAt) >= Date.parse(baseline.observedAt)
   );
+}
+
+function authorityForField(
+  authorities: readonly PhysicalObservationAuthority[],
+  field: VehicleObservationField,
+): PhysicalObservationAuthority | undefined {
+  const exact = authorities.find((authority) => authority.field === field);
+  if (exact !== undefined) return exact;
+  return authorities.find((authority) => legacyTopicFields(authority.topic).includes(field));
+}
+
+function authorityFreshness(
+  authority: PhysicalObservationAuthority | undefined,
+  maximumAgeMs: number,
+  now = Date.now(),
+): "fresh" | "stale" | "unknown" {
+  if (authority === undefined) return "unknown";
+  const age = now - Date.parse(authority.observedAt);
+  return Number.isFinite(age) && age >= 0 && age <= maximumAgeMs ? "fresh" : "stale";
+}
+
+function observationAuthorityKey(authority: PhysicalObservationAuthority): string {
+  return authority.field ?? authority.topic;
+}
+
+function legacyTopicFields(topic: string): readonly VehicleObservationField[] {
+  if (topic === "/ugv/mission_state") return ["chassis.mission"];
+  if (["status/ugv", "/ugv/status"].includes(topic))
+    return ["chassis.mission", "chassis.speed", "chassis.heading", "payload.gimbal"];
+  if (topic === "/ugv/gnss") return ["chassis.position.geodetic"];
+  if (topic === "/ugv/nav_state") return ["chassis.position.local", "chassis.speed"];
+  if (["/ugv/speed", "status/ugv", "/ugv/status"].includes(topic)) return ["chassis.speed"];
+  if (topic === "/ugv/area_recon/status") return ["payload.recon", "payload.gimbal"];
+  if (topic === "/ugv/area_recon/targets") return ["payload.targets"];
+  if (topic === "/ugv/eo/pose") return ["payload.gimbal"];
+  return [];
 }
 
 function stationaryFromSpeed(

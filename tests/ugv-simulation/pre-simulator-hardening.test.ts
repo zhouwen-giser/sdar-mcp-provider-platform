@@ -153,6 +153,63 @@ describe("UGV pre-simulator hardening", () => {
     });
   });
 
+  it("does not let a new speed observation refresh position or vice versa", () => {
+    const baselineAuthorities = authorities("2026-08-17T00:00:00.000Z", 1);
+    const baseline = capturePhysicalDispatchBaseline(
+      snapshot("2026-08-17T00:00:00.000Z", 30, 114, 1),
+      baselineAuthorities,
+      "2026-08-17T00:00:01.000Z",
+    );
+    const after = snapshot("2026-08-17T00:00:04.000Z", 30.0001, 114.0001, 0);
+    after.chassis.mission = {
+      id: "7",
+      state: 4,
+      observedAt: "2026-08-17T00:00:04.000Z",
+    };
+    const updated = authorities("2026-08-17T00:00:04.000Z", 2);
+
+    const newSpeedOldPosition = navigationPhysicalConfirmation({
+      snapshot: after,
+      baseline,
+      missionId: "7",
+      currentAuthorities: updated.map((authority) =>
+        authority.field === "chassis.position.geodetic"
+          ? requiredAuthority(baselineAuthorities, authority.field)
+          : authority,
+      ),
+      freshness,
+      stationarySpeedThresholdKmh: 0.1,
+      now: Date.parse("2026-08-17T00:00:04.000Z"),
+    });
+    expect(newSpeedOldPosition).toMatchObject({
+      confirmed: false,
+      observationIsNew: false,
+      positionFresh: false,
+      speedFresh: true,
+    });
+
+    const newPositionOldSpeed = navigationPhysicalConfirmation({
+      snapshot: after,
+      baseline,
+      missionId: "7",
+      currentAuthorities: updated.map((authority) =>
+        authority.field === "chassis.speed"
+          ? requiredAuthority(baselineAuthorities, authority.field)
+          : authority,
+      ),
+      freshness,
+      stationarySpeedThresholdKmh: 0.1,
+      now: Date.parse("2026-08-17T00:00:04.000Z"),
+    });
+    expect(newPositionOldSpeed).toMatchObject({
+      confirmed: false,
+      observationIsNew: false,
+      positionFresh: true,
+      speedFresh: false,
+      stationary: null,
+    });
+  });
+
   it("never treats missing, stale, or nonzero speed as stopped", () => {
     const now = Date.parse("2026-08-17T00:00:02.000Z");
     const baselineSnapshot = snapshot("2026-08-17T00:00:00.000Z", 30, 114, 1);
@@ -190,7 +247,7 @@ describe("UGV pre-simulator hardening", () => {
       stationaryPhysicalConfirmation({
         snapshot: stale,
         baseline,
-        currentAuthorities: authorities("2026-08-17T00:00:02.000Z", 2),
+        currentAuthorities: authorities("2026-08-16T23:59:55.000Z", 2),
         freshness,
         stationarySpeedThresholdKmh: 0.1,
         now,
@@ -375,18 +432,35 @@ function snapshot(
 }
 
 function authorities(observedAt: string, sequence: number): PhysicalObservationAuthority[] {
-  return ["/ugv/mission_state", "/ugv/gnss", "/ugv/speed"].map((topic) => ({
+  return (
+    [
+      ["/ugv/mission_state", "chassis.mission"],
+      ["/ugv/gnss", "chassis.position.geodetic"],
+      ["/ugv/speed", "chassis.speed"],
+    ] satisfies readonly [string, NonNullable<PhysicalObservationAuthority["field"]>][]
+  ).map(([topic, field]) => ({
+    field,
     topic,
     observedAt,
     timeAuthority: "source",
     sourceSequence: String(sequence),
     ingestSequence: sequence,
+    payloadHash: String(sequence).padStart(64, "0"),
     cursor: `${observedAt}\0${String(sequence)}`,
   }));
 }
 
 function firstAuthority(values: PhysicalObservationAuthority[]): PhysicalObservationAuthority {
   const value = values[0];
+  if (value === undefined) throw new Error("UGV_TEST_AUTHORITY_MISSING");
+  return value;
+}
+
+function requiredAuthority(
+  values: readonly PhysicalObservationAuthority[],
+  field: NonNullable<PhysicalObservationAuthority["field"]>,
+): PhysicalObservationAuthority {
+  const value = values.find((authority) => authority.field === field);
   if (value === undefined) throw new Error("UGV_TEST_AUTHORITY_MISSING");
   return value;
 }
