@@ -17,15 +17,14 @@ import type {
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
   controlDeviceCalls,
-  buildUgvCompatibilityProfile,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
   executeUgvStartFlow,
   fireConfirmationCalls,
-  isUgvToolCompatibilityUsable,
   missionIdFromUgvResult,
   parseUgvMissionId,
-  requiredUgvDeviceTools,
+  UGV_DEVICE_TOOL_ALLOWLIST,
+  UgvOperationQualificationService,
   UncertainMutatingDeviceCallError,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
@@ -110,6 +109,7 @@ export class UgvProviderRuntime {
   #lastObservedSnapshot: UgvSnapshot | undefined;
   readonly #freshnessStates = new Map<string, "fresh" | "stale" | "unknown">();
   readonly operationHealth: UgvOperationHealthTracker;
+  readonly qualification = new UgvOperationQualificationService();
   constructor(
     readonly options: {
       providerId: string;
@@ -350,10 +350,13 @@ export class UgvProviderRuntime {
         reasonCode: operationHealth.reasonCode,
         description: operationHealth.reasonCode,
       };
-    const requiredTools = requiredUgvDeviceTools(operationName, argumentsValue);
-    const toolFacts = buildUgvCompatibilityProfile(this.device.contracts())
-      .find((operation) => operation.operationName === operationName)
-      ?.tools.filter((fact) => requiredTools.includes(fact.toolName));
+    const qualification = this.qualification.qualify({
+      operationName,
+      arguments: argumentsValue,
+      contracts: this.device.contracts(),
+      toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
+      executionMode: this.options.executionMode ?? "simulation",
+    });
     const decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
@@ -364,10 +367,7 @@ export class UgvProviderRuntime {
           (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
         ),
       ),
-      requiredToolsPresent:
-        requiredTools.every((tool) => this.device.toolAvailable(tool)) &&
-        toolFacts?.length === requiredTools.length &&
-        toolFacts.every((fact) => isUgvToolCompatibilityUsable(fact.status)),
+      requiredToolsPresent: qualification.qualified,
       ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
       allowNavigationWithRecon: this.options.allowNavigationWithRecon,
       fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,

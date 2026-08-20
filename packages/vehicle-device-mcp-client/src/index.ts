@@ -6,5 +6,6 @@ export * from "./tool-allowlist.js";
 export * from "./tool-mapping.js";
 export * from "./ugv-result.js";
 export * from "./ugv-compatibility.js";
+export * from "./ugv-qualification.js";
 export * from "./npc-tank.js";
 export * from "./npc-tank-result.js";
