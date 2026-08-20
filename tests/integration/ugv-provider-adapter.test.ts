@@ -265,6 +265,65 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.device.calls).toHaveLength(callsBeforeRestart);
   });
 
+  it("expires control and physical confirmation deadlines without a new MQTT cursor", async () => {
+    let now = Date.now();
+    const controlFixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      controlConfirmationTimeoutMs: 100,
+    });
+    now = Date.now() + 100;
+    await controlFixture.runtime.start(
+      startInput("pause-no-observation", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(controlFixture.ingress, 1, 10, new Date(now).toISOString());
+    const running = required(await controlFixture.runtime.get("pause-no-observation"));
+    await controlFixture.runtime.command("pause", identityOf(running, "1"));
+    now += 101;
+    expect(await controlFixture.runtime.get("pause-no-observation")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_CONTROL_CONFIRMATION_TIMEOUT",
+      result: { status: "timeout", observedAt: new Date(now).toISOString() },
+    });
+
+    const physicalFixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 1_000,
+      stationaryMinimumSamples: 2,
+      physicalConfirmationTimeoutMs: 100,
+    });
+    now = Date.now() + 100;
+    await physicalFixture.runtime.start(
+      startInput("terminal-no-observation", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(physicalFixture.ingress, 1, 10, new Date(now).toISOString());
+    await physicalFixture.runtime.get("terminal-no-observation");
+    now += 10;
+    missionRaw(physicalFixture.ingress, 4, 100, new Date(now).toISOString());
+    physicalFixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.1001,"longitude":114.1001}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    physicalFixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await physicalFixture.runtime.get("terminal-no-observation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_STATIONARY_STABILITY_PENDING",
+      consecutiveStationaryObservations: 1,
+    });
+    now += 101;
+    expect(await physicalFixture.runtime.get("terminal-no-observation")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_PHYSICAL_CONFIRMATION_TIMEOUT",
+      result: { status: "timeout", observedAt: new Date(now).toISOString() },
+    });
+  });
+
   it("fails closed on execution-mode mismatch before any physical call", async () => {
     const fixture = await createFixture();
     const input = startInput("live-mismatch", "vehicle_navigate", navigateArgs());
@@ -734,6 +793,59 @@ describe("UGV long-running operation integration", () => {
     expect((await fixture.runtime.get("nav-cancel"))?.state).toBe("STOPPING");
     fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
     expect((await fixture.runtime.get("nav-cancel"))?.state).toBe("CANCELLED");
+  });
+
+  it("requires matching mission identity and a stable stop before cancellation", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 100,
+      stationaryMinimumSamples: 2,
+    });
+    now = Date.now() + 100;
+    await fixture.runtime.start(
+      startInput("nav-cancel-stable", "vehicle_navigate", navigateArgs()),
+    );
+    missionWithId(fixture.ingress, 2, 1, 10, new Date(now).toISOString());
+    expect(await fixture.runtime.get("nav-cancel-stable")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+    });
+
+    now += 10;
+    missionWithId(fixture.ingress, 1, 1, 10, new Date(now).toISOString());
+    const running = required(await fixture.runtime.get("nav-cancel-stable"));
+    expect(running.state).toBe("RUNNING");
+    await fixture.runtime.command("cancel", identityOf(running, "1"));
+    now += 10;
+    missionWithId(fixture.ingress, 1, 3, 10, new Date(now).toISOString());
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect((await fixture.runtime.get("nav-cancel-stable"))?.state).toBe("STOPPING");
+    now += 50;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect((await fixture.runtime.get("nav-cancel-stable"))?.state).toBe("STOPPING");
+    now += 60;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("nav-cancel-stable")).toMatchObject({
+      state: "CANCELLED",
+      consecutiveStationaryObservations: 3,
+    });
   });
 
   it("runs area recon and fails target tracking truthfully when lock is lost", async () => {
@@ -1962,10 +2074,27 @@ function mission(ingress: VehicleMqttIngress, state: number, progress: number) {
     );
 }
 
-function missionRaw(ingress: VehicleMqttIngress, state: number, progress: number) {
+function missionRaw(
+  ingress: VehicleMqttIngress,
+  state: number,
+  progress: number,
+  observedAt?: string,
+) {
+  missionWithId(ingress, 1, state, progress, observedAt);
+}
+
+function missionWithId(
+  ingress: VehicleMqttIngress,
+  missionId: number,
+  state: number,
+  progress: number,
+  observedAt?: string,
+) {
   ingress.handle(
     "/ugv/mission_state",
-    Buffer.from(JSON.stringify({ entity_id: "ugv1", id: 1, type: 1, state, progress })),
+    Buffer.from(JSON.stringify({ entity_id: "ugv1", id: missionId, type: 1, state, progress })),
+    false,
+    observedAt,
   );
 }
 function reconStatus(

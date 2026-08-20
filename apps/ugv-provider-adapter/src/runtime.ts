@@ -1156,7 +1156,11 @@ export class UgvProviderRuntime {
       else next = stationaryExecution;
       if (
         !isTerminal(next.state) &&
-        physicalConfirmationExpired(baseline, this.options.physicalConfirmationTimeoutMs ?? 30_000)
+        physicalConfirmationExpired(
+          baseline,
+          this.options.physicalConfirmationTimeoutMs ?? 30_000,
+          this.#now().getTime(),
+        )
       )
         next = terminal(next, "TECHNICAL_FAILED", "UGV_PHYSICAL_CONFIRMATION_TIMEOUT", {
           resourceId: execution.resourceId,
@@ -1165,7 +1169,7 @@ export class UgvProviderRuntime {
         });
     }
     next = this.#armObservationPhaseDeadlines(next, phaseObservation);
-    next = this.#expirePhaseDeadline(next, snapshot.observedAt);
+    next = this.#expirePhaseDeadline(next);
     if (next.revision !== execution.revision) {
       await this.store.putExecution(next);
       this.events.emit(execution.taskId, executionSnapshot(next));
@@ -1285,7 +1289,7 @@ export class UgvProviderRuntime {
     return next;
   }
 
-  #expirePhaseDeadline(execution: ProviderExecution, observedAt: string): ProviderExecution {
+  #expirePhaseDeadline(execution: ProviderExecution): ProviderExecution {
     if (isTerminal(execution.state)) return execution;
     const now = this.#now().getTime();
     let reasonCode: string | undefined;
@@ -1320,7 +1324,7 @@ export class UgvProviderRuntime {
     return terminal(execution, "TECHNICAL_FAILED", reasonCode, {
       resourceId: execution.resourceId,
       status: "timeout",
-      observedAt,
+      observedAt: this.#now().toISOString(),
     });
   }
 
@@ -2688,6 +2692,11 @@ function physicalConfirmationPending(reasonCode: string): boolean {
     "UGV_TERMINAL_SPEED_UNCONFIRMED",
     "UGV_TERMINAL_STATIONARY_UNCONFIRMED",
     "UGV_MISSION_CORRELATION_UNCONFIRMED",
+    "UGV_STATIONARY_STABILITY_PENDING",
+    "UGV_TASK_STATE_CONFLICT",
+    "UGV_RECON_WEAK_CORRELATION",
+    "UGV_RECON_CORRELATION_UNKNOWN",
+    "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
     "UGV_CANCEL_PHYSICAL_CONFIRMATION_PENDING",
     "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING",
     "UGV_RESUME_PHYSICAL_CONFIRMATION_PENDING",
