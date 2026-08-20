@@ -49,11 +49,13 @@ describe("Migration set isolation", () => {
       expect(runtimeTables).not.toContain("npc_tank_execution");
 
       expect(ugvTables).toContain("ugv_execution");
+      expect(ugvTables).toContain("ugv_mutation_journal");
       expect(ugvTables).not.toContain("provider_task");
       expect(ugvTables).not.toContain("runtime_schema_migration");
       expect(ugvTables).not.toContain("npc_tank_execution");
 
       expect(npcTankTables).toContain("npc_tank_execution");
+      expect(npcTankTables).toContain("npc_tank_mutation_journal");
       expect(npcTankTables).not.toContain("provider_task");
       expect(npcTankTables).not.toContain("runtime_schema_migration");
       expect(npcTankTables).not.toContain("ugv_execution");

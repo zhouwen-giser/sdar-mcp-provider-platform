@@ -42,6 +42,8 @@ describe("migration source-map provenance", () => {
     expect(
       sequenceFor(source, "migrations/providers/npc-tank/026_allow_authoritative_status_tool.sql"),
     ).toBe(30);
+    expect(sequenceFor(source, "migrations/providers/ugv/027_mutation_journal.sql")).toBe(32);
+    expect(sequenceFor(source, "migrations/providers/npc-tank/027_mutation_journal.sql")).toBe(33);
   });
 });
 

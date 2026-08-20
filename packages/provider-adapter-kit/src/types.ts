@@ -77,6 +77,31 @@ export interface CommandAckClaim {
   record: CommandAckRecord;
 }
 
+export type MutationJournalPhase =
+  "PRIMARY" | "FOLLOWUP" | "PAUSE" | "RESUME" | "CANCEL" | "EMERGENCY_STOP" | "CLEANUP";
+
+export type MutationJournalState =
+  "INTENT_PERSISTED" | "DISPATCHING" | "ACCEPTED" | "REJECTED" | "UNCERTAIN";
+
+export interface MutationJournalEntry {
+  taskId: string;
+  stepId: string;
+  phase: MutationJournalPhase;
+  toolName: string;
+  argumentHash: string;
+  state: MutationJournalState;
+  externalMissionId?: string;
+  resultHash?: string;
+  intentPersistedAt: string;
+  dispatchedAt?: string;
+  completedAt?: string;
+}
+
+export interface MutationJournalClaim {
+  claimed: boolean;
+  record: MutationJournalEntry;
+}
+
 export interface DeviceToolCallRecord {
   callId: string;
   taskId?: string;
@@ -126,6 +151,18 @@ export interface ProviderStore {
    */
   completeCommandAck(ack: CommandAckRecord, expectedReasonCode?: string): Promise<boolean>;
   putCommandAck(ack: CommandAckRecord): Promise<void>;
+  getMutationJournalEntry(
+    taskId: string,
+    stepId: string,
+  ): Promise<MutationJournalEntry | undefined>;
+  listMutationJournal(taskId: string): Promise<MutationJournalEntry[]>;
+  /** Atomically persist one immutable physical-dispatch intent. */
+  claimMutationJournal(entry: MutationJournalEntry): Promise<MutationJournalClaim>;
+  /** Advance one journal step only while its durable state matches expectedState. */
+  advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ): Promise<boolean>;
   appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void>;
   putSnapshot(record: SnapshotRecord): Promise<void>;
   appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent>;

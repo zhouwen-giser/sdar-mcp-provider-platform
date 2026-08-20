@@ -2,8 +2,8 @@
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
   "inventory": {
-    "mappedProvenanceEntries": 31,
-    "ownerDirectoryFiles": 39
+    "mappedProvenanceEntries": 33,
+    "ownerDirectoryFiles": 41
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -21,12 +21,12 @@
     "provider:ugv": {
       "owner": "provider:ugv",
       "plannedDirectory": "migrations/providers/ugv",
-      "deliveredFiles": 2
+      "deliveredFiles": 3
     },
     "provider:npc-tank": {
       "owner": "provider:npc-tank",
       "plannedDirectory": "migrations/providers/npc-tank",
-      "deliveredFiles": 2
+      "deliveredFiles": 3
     },
     "pms": {
       "owner": "pms",
@@ -346,6 +346,26 @@
       "plannedPath": "migrations/pms/010_external_runtime_deployment.sql",
       "pathState": "owner_directory",
       "sha256": "ac7245d56b365e848853262aef5462dc0ba7a7d146be74fd6098957f7e0bf6a5"
+    },
+    {
+      "sequence": 32,
+      "legacyVersion": "027",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/027_mutation_journal.sql",
+      "newPath": "migrations/providers/ugv/027_mutation_journal.sql",
+      "plannedPath": "migrations/providers/ugv/027_mutation_journal.sql",
+      "pathState": "owner_directory",
+      "sha256": "26b642cb142c13fbe6562e99d57e95423892829001d35be0783210a72ae443d5"
+    },
+    {
+      "sequence": 33,
+      "legacyVersion": "027",
+      "owner": "provider:npc-tank",
+      "oldPath": "migrations/027_mutation_journal.sql",
+      "newPath": "migrations/providers/npc-tank/027_mutation_journal.sql",
+      "plannedPath": "migrations/providers/npc-tank/027_mutation_journal.sql",
+      "pathState": "owner_directory",
+      "sha256": "8775a892407958cb0dcf457e2a6d8a8c9f367562e4b8fca298d6568dda9bdcc3"
     }
   ]
 }

@@ -6,6 +6,7 @@ import { runUgvProviderMigrations } from "../../apps/ugv-provider-adapter/src/mi
 import {
   PostgresProviderStore,
   type CommandAckRecord,
+  type MutationJournalEntry,
   type ProviderExecution,
 } from "../../packages/provider-adapter-kit/src/index.js";
 
@@ -103,6 +104,30 @@ describe("UGV Postgres execution recovery", () => {
       createdAt: observedAt,
     };
     await first.putCommandAck(commandAck);
+    const intent: MutationJournalEntry = {
+      taskId: execution.taskId,
+      stepId: "primary:1",
+      phase: "PRIMARY",
+      toolName: "ugv_path_follow_mission",
+      argumentHash: "c".repeat(64),
+      state: "INTENT_PERSISTED",
+      intentPersistedAt: observedAt,
+    };
+    expect(await first.claimMutationJournal(intent)).toMatchObject({ claimed: true });
+    const dispatching: MutationJournalEntry = {
+      ...intent,
+      state: "DISPATCHING",
+      dispatchedAt: new Date(Date.parse(observedAt) + 1).toISOString(),
+    };
+    expect(await first.advanceMutationJournal(dispatching, "INTENT_PERSISTED")).toBe(true);
+    const accepted: MutationJournalEntry = {
+      ...dispatching,
+      state: "ACCEPTED",
+      externalMissionId: "42",
+      resultHash: "d".repeat(64),
+      completedAt: new Date(Date.parse(observedAt) + 2).toISOString(),
+    };
+    expect(await first.advanceMutationJournal(accepted, "DISPATCHING")).toBe(true);
     await first.close();
 
     const restarted = new PostgresProviderStore(scopedUrl, 1, "ugv");
@@ -116,6 +141,7 @@ describe("UGV Postgres execution recovery", () => {
       state: "RUNNING",
     });
     expect(await restarted.getCommandAck(execution.taskId, "pause", "1")).toEqual(commandAck);
+    expect(await restarted.listMutationJournal(execution.taskId)).toEqual([accepted]);
     await restarted.close();
   });
 });
