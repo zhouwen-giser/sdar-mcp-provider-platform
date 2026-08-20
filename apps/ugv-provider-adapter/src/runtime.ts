@@ -1008,6 +1008,7 @@ export class UgvProviderRuntime {
           facts: navigationTerminalFacts({
             snapshot,
             baseline,
+            currentAuthorities,
             ...(missionId === undefined ? {} : { missionId }),
             ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
             confirmation,

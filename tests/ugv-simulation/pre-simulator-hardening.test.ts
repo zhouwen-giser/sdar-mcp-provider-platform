@@ -8,12 +8,14 @@ import {
   type VehicleOperationProfile,
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import {
+  authoritativeVehiclePosition,
   capturePhysicalDispatchBaseline,
   createUgvSnapshot,
   navigationPhysicalConfirmation,
   navigationTerminalFacts,
   reconTerminalFacts,
   stationaryPhysicalConfirmation,
+  vehiclePositionDisplacementM,
   type PhysicalObservationAuthority,
 } from "../../packages/vehicle-provider-core/src/index.js";
 
@@ -139,17 +141,87 @@ describe("UGV pre-simulator hardening", () => {
       navigationTerminalFacts({
         snapshot: after,
         baseline,
+        currentAuthorities: authorities("2026-08-17T00:00:02.000Z", 2),
         missionId: "7",
         requestedDistanceM: 10,
         confirmation: confirmed,
       }),
     ).toMatchObject({
       requestedDistanceM: 10,
-      startPosition: { latitude: 30, longitude: 114 },
-      endPosition: { latitude: 30.0001, longitude: 114.0001 },
+      startPosition: {
+        type: "geodetic",
+        latitude: 30,
+        longitude: 114,
+        crs: "EPSG:4326",
+      },
+      endPosition: {
+        type: "geodetic",
+        latitude: 30.0001,
+        longitude: 114.0001,
+        crs: "EPSG:4326",
+      },
+      positionAuthority: {
+        field: "chassis.position.geodetic",
+        topic: "/ugv/gnss",
+      },
       stationaryAtCompletion: true,
       correlationStrength: "STRICT_CORRELATED",
       observationAuthority: "post_dispatch",
+    });
+  });
+
+  it("computes displacement only for compatible geodetic or local authorities", () => {
+    const geodetic = vehiclePositionDisplacementM(
+      { type: "geodetic", latitude: 30, longitude: 114, crs: "EPSG:4326" },
+      { type: "geodetic", latitude: 30.0001, longitude: 114.0001, crs: "EPSG:4326" },
+    );
+    expect(geodetic).toBeGreaterThan(14);
+    expect(geodetic).toBeLessThan(15);
+
+    expect(
+      vehiclePositionDisplacementM(
+        { type: "local", x: 1, y: 2, frame: "carla_world", unit: "m" },
+        { type: "local", x: 4, y: 6, frame: "carla_world", unit: "m" },
+      ),
+    ).toBe(5);
+    expect(
+      vehiclePositionDisplacementM(
+        { type: "local", x: 1, y: 2, frame: "carla_world", unit: "m" },
+        { type: "local", x: 4, y: 6, frame: "map", unit: "m" },
+      ),
+    ).toBeUndefined();
+    expect(
+      vehiclePositionDisplacementM(
+        { type: "geodetic", latitude: 30, longitude: 114, crs: "EPSG:4326" },
+        { type: "local", x: 4, y: 6, frame: "carla_world", unit: "m" },
+      ),
+    ).toBeUndefined();
+
+    const value = snapshot("2026-08-17T00:00:02.000Z", 30, 114, 0);
+    value.chassis.navigation = { positionX: 3, positionY: 4, positionZ: 5 };
+    const selected = authoritativeVehiclePosition(value, [
+      requiredAuthority(authorities("2026-08-17T00:00:01.000Z", 1), "chassis.position.geodetic"),
+      {
+        field: "chassis.position.local",
+        topic: "/ugv/nav_state",
+        observedAt: "2026-08-17T00:00:02.000Z",
+        timeAuthority: "source",
+        sourceSequence: "2",
+        ingestSequence: 2,
+        payloadHash: "2".padStart(64, "0"),
+        cursor: "local:2",
+      },
+    ]);
+    expect(selected).toMatchObject({
+      observation: {
+        type: "local",
+        x: 3,
+        y: 4,
+        z: 5,
+        frame: "carla_world",
+        unit: "m",
+      },
+      authority: { field: "chassis.position.local", topic: "/ugv/nav_state" },
     });
   });
 

@@ -32,10 +32,32 @@ export interface FieldObservationAuthority extends PhysicalObservationAuthority 
   payloadHash: string;
 }
 
+export type VehiclePositionObservation =
+  | {
+      type: "geodetic";
+      latitude: number;
+      longitude: number;
+      altitude?: number;
+      crs: "EPSG:4326";
+    }
+  | {
+      type: "local";
+      x: number;
+      y: number;
+      z?: number;
+      frame: string;
+      unit: "m";
+    };
+
+export interface AuthoritativeVehiclePosition {
+  observation: VehiclePositionObservation;
+  authority: PhysicalObservationAuthority;
+}
+
 export interface PhysicalDispatchBaseline {
   capturedAt: string;
   snapshotRevision: string;
-  position?: VehicleSnapshot["chassis"]["position"];
+  position?: VehiclePositionObservation;
   headingDeg?: number;
   speedKmh?: number;
   mission: {
@@ -97,12 +119,11 @@ export function capturePhysicalDispatchBaseline(
   authorities: readonly PhysicalObservationAuthority[],
   capturedAt = new Date().toISOString(),
 ): PhysicalDispatchBaseline {
+  const position = authoritativeVehiclePosition(snapshot, authorities);
   return {
     capturedAt,
     snapshotRevision: snapshot.revision,
-    ...(snapshot.chassis.position === undefined
-      ? {}
-      : { position: structuredClone(snapshot.chassis.position) }),
+    ...(position === undefined ? {} : { position: structuredClone(position.observation) }),
     ...(snapshot.chassis.compassHeadingDeg === undefined
       ? {}
       : { headingDeg: snapshot.chassis.compassHeadingDeg }),
@@ -143,11 +164,12 @@ export function navigationPhysicalConfirmation(input: {
     baseline.observationAuthorities,
     authorities,
   );
-  const positionAuthority = authorityForField(authorities, "chassis.position.geodetic");
+  const position = authoritativeVehiclePosition(snapshot, authorities);
+  const positionAuthority = position?.authority;
   const speedAuthority = authorityForField(authorities, "chassis.speed");
   const positionFresh =
     authorityFreshness(positionAuthority, input.freshness.chassis, input.now) === "fresh" &&
-    snapshot.chassis.position !== undefined;
+    position !== undefined;
   const speedKmh = snapshot.chassis.speedKmh;
   const speedFresh =
     authorityFreshness(speedAuthority, input.freshness.chassis, input.now) === "fresh" &&
@@ -187,7 +209,10 @@ function requiredNavigationAuthoritiesAreNew(
   current: readonly PhysicalObservationAuthority[],
 ): boolean {
   const mission = authorityForField(current, "chassis.mission");
-  const position = authorityForField(current, "chassis.position.geodetic");
+  const position = latestAuthority(
+    authorityForField(current, "chassis.position.geodetic"),
+    authorityForField(current, "chassis.position.local"),
+  );
   const speed = authorityForField(current, "chassis.speed");
   return (
     isNewAuthority(baseline, mission) &&
@@ -199,21 +224,39 @@ function requiredNavigationAuthoritiesAreNew(
 export function navigationTerminalFacts(input: {
   snapshot: VehicleSnapshot;
   baseline: PhysicalDispatchBaseline;
+  currentAuthorities?: readonly PhysicalObservationAuthority[];
   missionId?: string;
   requestedDistanceM?: number;
   confirmation: PhysicalConfirmation;
 }): Record<string, unknown> {
   const { snapshot, baseline, confirmation } = input;
-  const endPosition = snapshot.chassis.position;
+  const startPosition = normalizeVehiclePositionObservation(baseline.position);
+  const currentPosition = authoritativeVehiclePosition(snapshot, input.currentAuthorities ?? []);
+  const endPosition = currentPosition?.observation;
+  const observedDisplacementM = vehiclePositionDisplacementM(startPosition, endPosition);
   return {
     ...(input.requestedDistanceM === undefined
       ? {}
       : { requestedDistanceM: input.requestedDistanceM }),
-    ...(baseline.position === undefined ? {} : { startPosition: baseline.position }),
+    ...(startPosition === undefined ? {} : { startPosition }),
     ...(endPosition === undefined ? {} : { endPosition }),
-    ...(baseline.position === undefined || endPosition === undefined
+    ...(observedDisplacementM === undefined ? {} : { observedDisplacementM }),
+    ...(startPosition === undefined ||
+    endPosition === undefined ||
+    observedDisplacementM !== undefined
       ? {}
-      : { observedDisplacementM: haversineDistanceM(baseline.position, endPosition) }),
+      : { displacementUnavailableReason: "POSITION_AUTHORITY_MISMATCH" }),
+    ...(currentPosition === undefined
+      ? {}
+      : {
+          positionAuthority: {
+            field: currentPosition.authority.field ?? null,
+            topic: currentPosition.authority.topic,
+            observedAt: currentPosition.authority.observedAt,
+            timeAuthority: currentPosition.authority.timeAuthority,
+            cursor: currentPosition.authority.cursor,
+          },
+        }),
     ...(snapshot.chassis.compassHeadingDeg === undefined
       ? {}
       : { finalHeadingDeg: snapshot.chassis.compassHeadingDeg }),
@@ -228,6 +271,64 @@ export function navigationTerminalFacts(input: {
     correlationStrength: confirmation.correlation,
     observationAuthority: confirmation.observationIsNew ? "post_dispatch" : "baseline_or_unknown",
   };
+}
+
+export function authoritativeVehiclePosition(
+  snapshot: VehicleSnapshot,
+  authorities: readonly PhysicalObservationAuthority[],
+): AuthoritativeVehiclePosition | undefined {
+  const geodeticAuthority = authorityForField(authorities, "chassis.position.geodetic");
+  const localAuthority = authorityForField(authorities, "chassis.position.local");
+  const geodetic =
+    geodeticAuthority === undefined || snapshot.chassis.position === undefined
+      ? undefined
+      : {
+          observation: {
+            type: "geodetic" as const,
+            latitude: snapshot.chassis.position.latitude,
+            longitude: snapshot.chassis.position.longitude,
+            ...(snapshot.chassis.position.altitude === undefined
+              ? {}
+              : { altitude: snapshot.chassis.position.altitude }),
+            crs: "EPSG:4326" as const,
+          },
+          authority: geodeticAuthority,
+        };
+  const navigation = snapshot.chassis.navigation;
+  const local =
+    localAuthority === undefined ||
+    navigation?.positionX === undefined ||
+    navigation.positionY === undefined
+      ? undefined
+      : {
+          observation: {
+            type: "local" as const,
+            x: navigation.positionX,
+            y: navigation.positionY,
+            ...(navigation.positionZ === undefined ? {} : { z: navigation.positionZ }),
+            frame: "carla_world",
+            unit: "m" as const,
+          },
+          authority: localAuthority,
+        };
+  if (geodetic === undefined) return local;
+  if (local === undefined) return geodetic;
+  return latestAuthority(geodetic.authority, local.authority) === local.authority
+    ? local
+    : geodetic;
+}
+
+export function vehiclePositionDisplacementM(
+  start: VehiclePositionObservation | undefined,
+  end: VehiclePositionObservation | undefined,
+): number | undefined {
+  if (start === undefined || start.type !== end?.type) return undefined;
+  if (start.type === "geodetic" && end.type === "geodetic") return haversineDistanceM(start, end);
+  if (start.type === "local" && end.type === "local" && start.frame === end.frame) {
+    const zDelta = (end.z ?? 0) - (start.z ?? 0);
+    return Math.hypot(end.x - start.x, end.y - start.y, zDelta);
+  }
+  return undefined;
 }
 
 export function reconTerminalFacts(input: {
@@ -281,6 +382,31 @@ function authorityForField(
   const exact = authorities.find((authority) => authority.field === field);
   if (exact !== undefined) return exact;
   return authorities.find((authority) => legacyTopicFields(authority.topic).includes(field));
+}
+
+function latestAuthority(
+  left: PhysicalObservationAuthority | undefined,
+  right: PhysicalObservationAuthority | undefined,
+): PhysicalObservationAuthority | undefined {
+  if (left === undefined) return right;
+  if (right === undefined) return left;
+  if (left.ingestSequence !== undefined && right.ingestSequence !== undefined)
+    return right.ingestSequence > left.ingestSequence ? right : left;
+  return Date.parse(right.observedAt) > Date.parse(left.observedAt) ? right : left;
+}
+
+function normalizeVehiclePositionObservation(
+  value: VehiclePositionObservation | VehicleSnapshot["chassis"]["position"] | undefined,
+): VehiclePositionObservation | undefined {
+  if (value === undefined) return undefined;
+  if ("type" in value) return structuredClone(value);
+  return {
+    type: "geodetic",
+    latitude: value.latitude,
+    longitude: value.longitude,
+    ...(value.altitude === undefined ? {} : { altitude: value.altitude }),
+    crs: "EPSG:4326",
+  };
 }
 
 function authorityFreshness(
