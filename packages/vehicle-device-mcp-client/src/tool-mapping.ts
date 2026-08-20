@@ -45,6 +45,8 @@ export interface ExecuteUgvStartFlowOptions {
   afterMutationAccepted?: (context: UgvAcceptedStartMutationCall) => void | Promise<void>;
   /** Persists an explicitly rejected or uncertain dispatched outcome. */
   afterMutationFailed?: (context: UgvFailedStartMutationCall) => void | Promise<void>;
+  /** Recovery-only: skip a durably accepted primary and continue its dependent start. */
+  resumeFromMissionId?: string | number;
   /** Injectable for deterministic bounded-velocity tests. */
   delay?: (durationMs: number) => Promise<void>;
 }
@@ -134,6 +136,17 @@ export async function executeUgvStartFlow(
 
   const initialCalls = startDeviceCalls(operationName, argumentsValue);
   if (operationName === "vehicle_navigate" || operationName === "vehicle_area_recon") {
+    if (options.resumeFromMissionId !== undefined) {
+      const missionId = parseUgvMissionId(options.resumeFromMissionId);
+      missionIds.push(missionId);
+      await run(buildUgvStartFollowupCall(operationName, missionId), false, "FOLLOWUP");
+      return {
+        calls,
+        results,
+        missionIds,
+        canonicalMissionIds: missionIds.map(canonicalUgvMissionId),
+      };
+    }
     const initial = required(initialCalls[0], "UGV_INITIAL_DEVICE_CALL_REQUIRED");
     const initialResult = await run(initial, true, "PRIMARY");
     const missionId = required(

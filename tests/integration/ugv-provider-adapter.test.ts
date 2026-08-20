@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  canonicalJson,
   jsonToProtoStruct,
   protoStructToJson,
   type ExecutionSnapshot,
@@ -9,15 +11,20 @@ import { OperationRegistry } from "../../packages/operation-registry/src/index.j
 import {
   MemoryProviderStore,
   type MutationJournalEntry,
+  type MutationJournalPhase,
   type MutationJournalState,
   type ProviderExecution,
 } from "../../packages/provider-adapter-kit/src/index.js";
 import { synchronousResult } from "../../packages/task-engine/src/result-contract.js";
 import {
+  buildUgvStartFollowupCall,
+  controlDeviceCalls,
   MockUgvDeviceMcpClient,
-  UncertainMutatingDeviceCallError,
   mockUgvToolContracts,
+  startDeviceCalls,
+  UncertainMutatingDeviceCallError,
   type CapturedToolContract,
+  type DeviceToolCall,
   type UgvDeviceToolName,
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
@@ -1266,7 +1273,237 @@ describe("UGV long-running operation integration", () => {
     });
     expect(result).toMatchObject({ status: "FOUND", reasonCode: "EXECUTION_FOUND" });
   });
+
+  it("recovers a persisted pre-primary intent by dispatching primary and follow-up once", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-before-primary");
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "INTENT_PERSISTED",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls.map(({ name }) => name)).toEqual([
+      "ugv_path_follow_mission",
+      "ugv_mission_control",
+    ]);
+    expect(await fixture.store.listMutationJournal(execution.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "ACCEPTED" }),
+    ]);
+  });
+
+  it.each([
+    { label: "before result persistence", missionIds: [] as string[] },
+    { label: "after mission ID persistence", missionIds: ["1"] },
+  ])("does not replay primary after dispatch $label", async ({ missionIds }) => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-primary-dispatching", missionIds);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "DISPATCHING",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(0);
+    expect(await fixture.store.getExecution(execution.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+      downstreamMissionIds: missionIds,
+    });
+  });
+
+  it("continues only the follow-up after durable primary acceptance and mission identity", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-before-followup", ["1"]);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "ACCEPTED",
+      "1",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(1);
+    expect(fixture.device.calls[0]).toMatchObject({
+      name: "ugv_mission_control",
+      arguments: { action: "start", mission_id: 1 },
+    });
+    expect(await fixture.store.listMutationJournal(execution.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "ACCEPTED" }),
+    ]);
+  });
+
+  it("does not replay a follow-up whose dispatch outcome was not persisted", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-followup-dispatching", ["1"]);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    const followupCall = buildUgvStartFollowupCall(execution.operationName, "1");
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "ACCEPTED",
+      "1",
+    );
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:02:followup",
+      "FOLLOWUP",
+      followupCall,
+      "DISPATCHING",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(0);
+    expect(await fixture.store.getExecution(execution.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+  });
+
+  it.each(["pause", "resume", "cancel"] as const)(
+    "does not replay a %s mutation left in dispatching state across restart or retry",
+    async (command) => {
+      const fixture = await createFixture();
+      const execution = recoveryExecution(`recover-${command}-dispatching`, ["1"], "RUNNING");
+      await fixture.store.putExecution(execution);
+      const controlCall = required(controlDeviceCalls("vehicle_navigate", command, "1")[0]);
+      await seedMutationJournal(
+        fixture.store,
+        execution,
+        `control:${command}:1:01`,
+        command === "pause" ? "PAUSE" : command === "resume" ? "RESUME" : "CANCEL",
+        controlCall,
+        "DISPATCHING",
+      );
+
+      const recovered = await restartFixture(fixture);
+      const afterRestart = required(await fixture.store.getExecution(execution.taskId));
+      expect(fixture.device.calls).toHaveLength(0);
+      expect(afterRestart.reasonCode).toBe("UNCERTAIN_EXECUTION_STATE");
+
+      await expect(
+        recovered.command(command, identityOf(afterRestart, "1")),
+      ).resolves.toMatchObject({
+        accepted: false,
+        reasonCode: "UGV_DEVICE_MUTATING_CALL_UNCERTAIN",
+      });
+      expect(fixture.device.calls).toHaveLength(0);
+    },
+  );
 });
+
+async function restartFixture(
+  fixture: Awaited<ReturnType<typeof createFixture>>,
+): Promise<UgvProviderRuntime> {
+  await fixture.runtime.close();
+  const activeIndex = active.indexOf(fixture.runtime);
+  if (activeIndex >= 0) active.splice(activeIndex, 1);
+  const recovered = new UgvProviderRuntime(
+    runtimeOptions(),
+    fixture.store,
+    fixture.ingress,
+    fixture.device,
+    fixture.events,
+    fixture.telemetry,
+  );
+  active.push(recovered);
+  await recovered.initialize();
+  return recovered;
+}
+
+function recoveryExecution(
+  taskId: string,
+  downstreamMissionIds: string[] = [],
+  state: ProviderExecution["state"] = "ACCEPTED",
+): ProviderExecution {
+  const input = startInput(taskId, "vehicle_navigate", navigateArgs());
+  const now = new Date().toISOString();
+  return {
+    taskId,
+    externalExecutionId: `vehicle:ugv1:chassis:${taskId}`,
+    operationName: input.operationName,
+    argumentHash: input.argumentHash,
+    providerId: "isr.vehicle.ugv.ugv1",
+    resourceId: "vehicle:ugv1",
+    tracks: ["chassis"],
+    arguments: structuredClone(input.arguments),
+    executionContext: structuredClone(input.executionContext),
+    downstreamMissionIds: structuredClone(downstreamMissionIds),
+    state,
+    revision: 1,
+    reasonCode: state === "RUNNING" ? "UGV_DEVICE_TASK_RUNNING" : "UGV_OPERATION_ACCEPTED",
+    createdAt: now,
+    updatedAt: now,
+    evidence: [],
+  };
+}
+
+async function seedMutationJournal(
+  store: MemoryProviderStore,
+  execution: ProviderExecution,
+  stepId: string,
+  phase: MutationJournalPhase,
+  call: DeviceToolCall,
+  state: MutationJournalState,
+  externalMissionId?: string,
+): Promise<void> {
+  const intent: MutationJournalEntry = {
+    taskId: execution.taskId,
+    stepId,
+    phase,
+    toolName: call.name,
+    argumentHash: createHash("sha256").update(canonicalJson(call.arguments), "utf8").digest("hex"),
+    state: "INTENT_PERSISTED",
+    intentPersistedAt: execution.createdAt,
+  };
+  await store.claimMutationJournal(intent);
+  if (state === "INTENT_PERSISTED") return;
+  const dispatching: MutationJournalEntry = {
+    ...intent,
+    state: "DISPATCHING",
+    dispatchedAt: new Date(Date.parse(execution.createdAt) + 1).toISOString(),
+  };
+  await store.advanceMutationJournal(dispatching, "INTENT_PERSISTED");
+  if (state === "DISPATCHING") return;
+  await store.advanceMutationJournal(
+    {
+      ...dispatching,
+      state,
+      ...(externalMissionId === undefined ? {} : { externalMissionId }),
+      resultHash: "d".repeat(64),
+      completedAt: new Date(Date.parse(execution.createdAt) + 2).toISOString(),
+    },
+    "DISPATCHING",
+  );
+}
 
 async function createFixture(
   withTarget = false,

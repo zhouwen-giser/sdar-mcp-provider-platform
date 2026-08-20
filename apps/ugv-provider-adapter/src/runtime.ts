@@ -9,6 +9,7 @@ import type {
   CommandAckRecord,
   ExecutionContextRecord,
   MutationJournalEntry,
+  MutationJournalPhase,
   ProviderExecution,
   ProviderExecutionState,
   ProviderStore,
@@ -25,6 +26,7 @@ import {
   controlDeviceCalls,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
+  type DeviceToolCall,
   executeUgvStartFlow,
   type ExecuteUgvStartFlowOptions,
   fireConfirmationCalls,
@@ -531,12 +533,14 @@ export class UgvProviderRuntime {
         this.options.controlConfirmationTimeoutMs ?? 30_000,
       );
       await this.store.putExecution(fenced);
-      for (const call of controlDeviceCalls(
-        execution.operationName,
-        command,
-        persistedMissionId ?? 0,
-      ))
-        await this.#callDevice(call.name, call.arguments, execution.taskId);
+      const calls = controlDeviceCalls(execution.operationName, command, persistedMissionId ?? 0);
+      for (const [index, call] of calls.entries())
+        await this.#callJournaledMutation(
+          execution.taskId,
+          controlStepId(command, identity.commandSequence, index),
+          controlPhase(command),
+          call,
+        );
       const targetState =
         command === "pause" ? "RUNNING" : command === "resume" ? "RESUMING" : "STOPPING";
       const reasonCode =
@@ -790,9 +794,20 @@ export class UgvProviderRuntime {
       this.arbiter.restore(execution.taskId, vehicleTracks(execution.tracks));
       if (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected) {
         execution.reasonCode = "UNCERTAIN_EXECUTION_STATE";
-        execution.updatedAt = new Date().toISOString();
+        execution.updatedAt = this.#now().toISOString();
         execution.revision++;
         await this.store.putExecution(execution);
+        continue;
+      }
+      if (await this.#recoverMultiStepExecution(execution)) continue;
+      const unsafeControl = (await this.store.listMutationJournal(execution.taskId)).find(
+        (entry) =>
+          (entry.phase === "PAUSE" || entry.phase === "RESUME" || entry.phase === "CANCEL") &&
+          (entry.state === "DISPATCHING" || entry.state === "UNCERTAIN"),
+      );
+      if (unsafeControl !== undefined) {
+        const uncertain = transition(execution, execution.state, "UNCERTAIN_EXECUTION_STATE");
+        await this.store.putExecution(uncertain);
       } else await this.#refresh(execution);
     }
   }
@@ -1480,21 +1495,34 @@ export class UgvProviderRuntime {
     }
   }
 
-  #journaledMultiStepStart(taskId: string): ExecuteUgvStartFlowOptions {
+  #journaledMultiStepStart(
+    taskId: string,
+    resumePersistedIntents = false,
+  ): ExecuteUgvStartFlowOptions {
     const activeSteps = new Map<"PRIMARY" | "FOLLOWUP", MutationJournalEntry>();
     return {
       beforeMutationDispatch: async ({ phase, call }) => {
-        const intent: MutationJournalEntry = {
-          taskId,
-          stepId: startStepId(phase),
-          phase,
-          toolName: call.name,
-          argumentHash: mutationHash(call.arguments),
-          state: "INTENT_PERSISTED",
-          intentPersistedAt: this.#now().toISOString(),
-        };
-        const claim = await this.store.claimMutationJournal(intent);
-        if (!claim.claimed) throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
+        const stepId = startStepId(phase);
+        const existing = await this.store.getMutationJournalEntry(taskId, stepId);
+        let intent: MutationJournalEntry;
+        if (existing !== undefined) {
+          assertJournalCallIdentity(existing, phase, call);
+          if (!resumePersistedIntents || existing.state !== "INTENT_PERSISTED")
+            throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
+          intent = existing;
+        } else {
+          intent = {
+            taskId,
+            stepId,
+            phase,
+            toolName: call.name,
+            argumentHash: mutationHash(call.arguments),
+            state: "INTENT_PERSISTED",
+            intentPersistedAt: this.#now().toISOString(),
+          };
+          const claim = await this.store.claimMutationJournal(intent);
+          if (!claim.claimed) throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
+        }
         const dispatching: MutationJournalEntry = {
           ...intent,
           state: "DISPATCHING",
@@ -1531,7 +1559,7 @@ export class UgvProviderRuntime {
           completedAt: this.#now().toISOString(),
         };
         if (!(await this.store.advanceMutationJournal(completed, "DISPATCHING")))
-          throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
+          throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT", { cause: error });
         activeSteps.set(phase, completed);
       },
     };
@@ -1581,6 +1609,199 @@ export class UgvProviderRuntime {
       followup.state === "INTENT_PERSISTED" ||
       followup.state === "REJECTED"
     );
+  }
+
+  async #recoverMultiStepExecution(execution: ProviderExecution): Promise<boolean> {
+    if (
+      execution.operationName !== "vehicle_navigate" &&
+      execution.operationName !== "vehicle_area_recon"
+    )
+      return false;
+    const primary = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      startStepId("PRIMARY"),
+    );
+    if (primary === undefined) {
+      if (execution.state !== "ACCEPTED") return false;
+      await this.#resumeMultiStepExecution(execution);
+      return true;
+    }
+    if (primary.state === "INTENT_PERSISTED") {
+      await this.#resumeMultiStepExecution(execution);
+      return true;
+    }
+    if (primary.state === "DISPATCHING" || primary.state === "UNCERTAIN") {
+      await this.store.putExecution(transition(execution, "STARTING", "UNCERTAIN_EXECUTION_STATE"));
+      return true;
+    }
+    if (primary.state === "REJECTED") {
+      const failed = terminal(execution, "BUSINESS_FAILED", "UGV_DEVICE_TOOL_REJECTED", {
+        resourceId: execution.resourceId,
+        status: "failed",
+        observedAt: this.#now().toISOString(),
+      });
+      await this.store.putExecution(failed);
+      this.arbiter.release(failed.taskId);
+      return true;
+    }
+    const missionId = primary.externalMissionId;
+    if (missionId === undefined || !execution.downstreamMissionIds.includes(missionId)) {
+      await this.store.putExecution(transition(execution, "STARTING", "UNCERTAIN_EXECUTION_STATE"));
+      return true;
+    }
+    const followup = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      startStepId("FOLLOWUP"),
+    );
+    if (followup === undefined || followup.state === "INTENT_PERSISTED") {
+      await this.#resumeMultiStepExecution(execution, missionId);
+      return true;
+    }
+    if (followup.state === "REJECTED") {
+      await this.store.putExecution(
+        transition(execution, "STARTING", "DOWNSTREAM_MISSION_READY_NOT_STARTED"),
+      );
+      return true;
+    }
+    if (followup.state === "DISPATCHING" || followup.state === "UNCERTAIN") {
+      const uncertain = await this.#armStartObservationDeadline(execution);
+      await this.store.putExecution(transition(uncertain, "STARTING", "UNCERTAIN_EXECUTION_STATE"));
+      return true;
+    }
+    let recovered = await this.#armStartObservationDeadline(execution);
+    if (recovered.state === "ACCEPTED")
+      recovered = transition(recovered, "STARTING", "UGV_WAITING_DEVICE_CONFIRMATION");
+    if (recovered.revision !== execution.revision) await this.store.putExecution(recovered);
+    await this.#refresh(recovered);
+    return true;
+  }
+
+  async #resumeMultiStepExecution(
+    execution: ProviderExecution,
+    resumeFromMissionId?: string,
+  ): Promise<void> {
+    let current = execution;
+    try {
+      await executeUgvStartFlow(
+        current.operationName,
+        current.arguments,
+        (name, argumentsValue) => this.#callDevice(name, argumentsValue, current.taskId),
+        {
+          ...this.#journaledMultiStepStart(current.taskId, true),
+          ...(resumeFromMissionId === undefined ? {} : { resumeFromMissionId }),
+          onMissionId: async (missionId) => {
+            if (current.downstreamMissionIds.includes(missionId)) return;
+            current = withMissionId(current, missionId);
+            await this.store.putExecution(current);
+          },
+        },
+      );
+      current = await this.#armStartObservationDeadline(current);
+      current = transition(current, "STARTING", "UGV_WAITING_DEVICE_CONFIRMATION");
+      await this.store.putExecution(current);
+      await this.#refresh(current);
+    } catch (error) {
+      if (await this.#downstreamMissionReadyNotStarted(current)) {
+        await this.store.putExecution(
+          transition(current, "STARTING", "DOWNSTREAM_MISSION_READY_NOT_STARTED"),
+        );
+        return;
+      }
+      if (error instanceof UncertainMutatingDeviceCallError) {
+        current = await this.#armStartObservationDeadline(current);
+        await this.store.putExecution(transition(current, "STARTING", "UNCERTAIN_EXECUTION_STATE"));
+        return;
+      }
+      const failed = terminal(
+        current,
+        error instanceof DeviceToolRejectedError ? "BUSINESS_FAILED" : "TECHNICAL_FAILED",
+        reason(error),
+        {
+          resourceId: current.resourceId,
+          status: "failed",
+          observedAt: this.#now().toISOString(),
+        },
+      );
+      await this.store.putExecution(failed);
+      this.arbiter.release(failed.taskId);
+    }
+  }
+
+  async #callJournaledMutation(
+    taskId: string,
+    stepId: string,
+    phase: MutationJournalPhase,
+    call: DeviceToolCall,
+  ): Promise<void> {
+    const existing = await this.store.getMutationJournalEntry(taskId, stepId);
+    let intent: MutationJournalEntry;
+    if (existing !== undefined) {
+      assertJournalCallIdentity(existing, phase, call);
+      if (existing.state === "ACCEPTED") return;
+      if (existing.state === "REJECTED") throw new DeviceToolRejectedError("UGV", call.name);
+      if (existing.state === "DISPATCHING" || existing.state === "UNCERTAIN")
+        throw new UncertainMutatingDeviceCallError("UGV", call.name);
+      intent = existing;
+    } else {
+      intent = {
+        taskId,
+        stepId,
+        phase,
+        toolName: call.name,
+        argumentHash: mutationHash(call.arguments),
+        state: "INTENT_PERSISTED",
+        intentPersistedAt: this.#now().toISOString(),
+      };
+      const claim = await this.store.claimMutationJournal(intent);
+      if (!claim.claimed) throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
+    }
+    const dispatching: MutationJournalEntry = {
+      ...intent,
+      state: "DISPATCHING",
+      dispatchedAt: this.#now().toISOString(),
+    };
+    if (!(await this.store.advanceMutationJournal(dispatching, "INTENT_PERSISTED")))
+      throw new Error("UGV_MUTATION_JOURNAL_DISPATCH_CONFLICT");
+    let result: Record<string, unknown> | undefined;
+    try {
+      result = await this.#callDevice(call.name, call.arguments, taskId);
+      const missionId = rejectedResultMissionId(call.name, result);
+      const accepted: MutationJournalEntry = {
+        ...dispatching,
+        state: "ACCEPTED",
+        ...(missionId === undefined ? {} : { externalMissionId: missionId }),
+        resultHash: mutationHash(result),
+        completedAt: this.#now().toISOString(),
+      };
+      if (!(await this.store.advanceMutationJournal(accepted, "DISPATCHING")))
+        throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
+    } catch (error) {
+      const classified =
+        error instanceof DeviceToolRejectedError ||
+        error instanceof UncertainMutatingDeviceCallError ||
+        result === undefined
+          ? error
+          : new UncertainMutatingDeviceCallError("UGV", call.name, { cause: error });
+      const returnedResult =
+        result ?? (error instanceof DeviceToolRejectedError ? error.result : undefined);
+      const missionId = rejectedResultMissionId(call.name, returnedResult);
+      const completed: MutationJournalEntry = {
+        ...dispatching,
+        state: classified instanceof UncertainMutatingDeviceCallError ? "UNCERTAIN" : "REJECTED",
+        ...(missionId === undefined ? {} : { externalMissionId: missionId }),
+        ...(returnedResult === undefined ? {} : { resultHash: mutationHash(returnedResult) }),
+        completedAt: this.#now().toISOString(),
+      };
+      try {
+        if (!(await this.store.advanceMutationJournal(completed, "DISPATCHING")))
+          throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT", { cause: error });
+      } catch (persistenceError) {
+        throw new UncertainMutatingDeviceCallError("UGV", call.name, {
+          cause: persistenceError,
+        });
+      }
+      throw classified;
+    }
   }
 
   async #ack(identity: CommandIdentity, command: string, accepted: boolean, reasonCode: string) {
@@ -2546,8 +2767,26 @@ function fireDispatchReason(recordValue: CommandAckRecord | undefined): string |
 function startStepId(phase: "PRIMARY" | "FOLLOWUP"): string {
   return phase === "PRIMARY" ? "start:01:primary" : "start:02:followup";
 }
+function controlPhase(command: "pause" | "resume" | "cancel"): MutationJournalPhase {
+  return command === "pause" ? "PAUSE" : command === "resume" ? "RESUME" : "CANCEL";
+}
+function controlStepId(command: string, commandSequence: string, index: number): string {
+  return `control:${command}:${commandSequence}:${String(index + 1).padStart(2, "0")}`;
+}
 function mutationHash(value: unknown): string {
   return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+}
+function assertJournalCallIdentity(
+  entry: MutationJournalEntry,
+  phase: MutationJournalPhase,
+  call: DeviceToolCall,
+): void {
+  if (
+    entry.phase !== phase ||
+    entry.toolName !== call.name ||
+    entry.argumentHash !== mutationHash(call.arguments)
+  )
+    throw new Error("UGV_MUTATION_JOURNAL_IDENTITY_CONFLICT");
 }
 function requiredJournalStep(
   entries: ReadonlyMap<"PRIMARY" | "FOLLOWUP", MutationJournalEntry>,
