@@ -5,6 +5,7 @@ export * from "./dto-schemas.js";
 export * from "./evidence.js";
 export * from "./fire-result-sanitizer.js";
 export * from "./manifest.js";
+export * from "./observation-cursor.js";
 export * from "./physical-evidence.js";
 export * from "./snapshot.js";
 export * from "./targets.js";
