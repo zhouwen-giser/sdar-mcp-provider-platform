@@ -139,6 +139,18 @@ export interface CommandIdentity {
   commandSequence: string;
 }
 
+export type UgvProviderReadinessState = "NOT_READY" | "READY" | "DEGRADED" | "UNKNOWN";
+
+export interface UgvProviderReadinessSnapshot {
+  state: UgvProviderReadinessState;
+  reasonCode: string;
+  deviceMcpConnected: boolean;
+  mqttConnected: boolean;
+  initialObservationReceived: boolean;
+  recoveryComplete: boolean;
+  observedAt: string;
+}
+
 export class UgvProviderRuntime {
   readonly arbiter: TrackArbiter;
   readonly events = new EventEmitter();
@@ -146,10 +158,16 @@ export class UgvProviderRuntime {
   #poller: NodeJS.Timeout | undefined;
   #deviceReconnect: Promise<void> | undefined;
   #unsubscribeToolHealth: (() => void) | undefined;
+  #unsubscribeDeviceConnection: (() => void) | undefined;
   #unsubscribeCallObservation: (() => void) | undefined;
   #mutationTail: Promise<void> = Promise.resolve();
   #pollPromise: Promise<void> | undefined;
   #lastObservedSnapshot: UgvSnapshot | undefined;
+  #localInitialization: Promise<void> | undefined;
+  #dependencyInitialization: Promise<void> | undefined;
+  #recoveryComplete = false;
+  #closed = false;
+  #readiness: UgvProviderReadinessSnapshot;
   readonly #freshnessStates = new Map<string, "fresh" | "stale" | "unknown">();
   readonly operationHealth: UgvOperationHealthTracker;
   readonly qualification = new UgvOperationQualificationService();
@@ -170,6 +188,7 @@ export class UgvProviderRuntime {
       activeObservationTimeoutMs?: number;
       terminalObservationTimeoutMs?: number;
       physicalConfirmationTimeoutMs?: number;
+      initialObservationWaitMs?: number;
       controlConfirmationTimeoutMs?: number;
       failureBudget?: {
         degradedThreshold: number;
@@ -193,6 +212,15 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: 2,
       },
     );
+    this.#readiness = {
+      state: "NOT_READY",
+      reasonCode: "UGV_PROVIDER_INITIALIZING",
+      deviceMcpConnected: false,
+      mqttConnected: false,
+      initialObservationReceived: false,
+      recoveryComplete: false,
+      observedAt: this.#now().toISOString(),
+    };
   }
 
   #now(): Date {
@@ -200,8 +228,27 @@ export class UgvProviderRuntime {
   }
 
   async initialize(): Promise<void> {
+    await this.initializeLocal();
+    await this.initializeDependencies();
+  }
+
+  initializeLocal(): Promise<void> {
+    this.#localInitialization ??= this.#initializeLocal();
+    return this.#localInitialization;
+  }
+
+  initializeDependencies(): Promise<void> {
+    this.#dependencyInitialization ??= this.#initializeDependencies();
+    return this.#dependencyInitialization;
+  }
+
+  async #initializeLocal(): Promise<void> {
+    this.#closed = false;
     await this.store.initialize();
-    await this.device.connect();
+    this.#unsubscribeDeviceConnection = this.device.onConnectionState((state) => {
+      this.ingress.setDeviceConnected(state === "connected");
+      this.#refreshReadiness();
+    });
     for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
       this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
     this.#unsubscribeToolHealth = this.device.onToolHealth((health) => {
@@ -231,20 +278,36 @@ export class UgvProviderRuntime {
     this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic) => {
       void this.#observe(snapshot, topic);
     });
-    await this.recover();
+    this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
   }
+
+  async #initializeDependencies(): Promise<void> {
+    await this.initializeLocal();
+    await this.#ensureDeviceConnection();
+    await this.#waitForInitialObservation();
+    await this.recover();
+    this.#recoveryComplete = true;
+    this.#refreshReadiness();
+  }
+
   async close(): Promise<void> {
+    this.#closed = true;
     if (this.#poller !== undefined) clearInterval(this.#poller);
     this.#unsubscribeSnapshot?.();
     this.#unsubscribeToolHealth?.();
     this.#unsubscribeCallObservation?.();
+    this.#unsubscribeDeviceConnection?.();
+    await this.#dependencyInitialization?.catch(() => undefined);
     await this.#mutationTail.catch(() => undefined);
     await this.device.close();
     await this.store.close();
   }
   snapshot(): UgvSnapshot {
     return this.ingress.snapshot();
+  }
+  readiness(): UgvProviderReadinessSnapshot {
+    return structuredClone(this.#readiness);
   }
   qualificationContext(): UgvQualificationMatrixInput {
     return {
@@ -434,6 +497,13 @@ export class UgvProviderRuntime {
     argumentsValue: Record<string, unknown>,
     ignoreOwnedByTaskId?: string,
   ): AvailabilityDecision {
+    if (this.#readiness.state === "NOT_READY")
+      return {
+        availability: "UNKNOWN",
+        riskLevel: "LOW",
+        reasonCode: "UGV_PROVIDER_NOT_READY",
+        description: "UGV_PROVIDER_NOT_READY",
+      };
     if (!OPERATIONS.has(operationName))
       return {
         availability: "DISABLED",
@@ -879,6 +949,7 @@ export class UgvProviderRuntime {
 
   async #pollActive(): Promise<void> {
     await this.#ensureDeviceConnection();
+    this.#refreshReadiness();
     await this.#emitResourceTransitions(this.ingress.snapshot());
     for (const execution of await this.store.listActiveExecutions()) await this.#refresh(execution);
   }
@@ -899,6 +970,47 @@ export class UgvProviderRuntime {
         this.#deviceReconnect = undefined;
       });
     return this.#deviceReconnect;
+  }
+
+  async #waitForInitialObservation(): Promise<void> {
+    const timeoutMs = this.options.initialObservationWaitMs ?? 5_000;
+    const deadline = Date.now() + timeoutMs;
+    while (!this.#closed && !this.#initialObservationReceived() && Date.now() < deadline)
+      await new Promise((resolve) => setTimeout(resolve, Math.min(25, timeoutMs)));
+  }
+
+  #initialObservationReceived(): boolean {
+    return this.ingress.ingestSequence() > 0;
+  }
+
+  #refreshReadiness(): void {
+    const snapshot = this.ingress.snapshot();
+    const deviceMcpConnected = this.device.connected();
+    const mqttConnected = snapshot.connectivity.mqttConnected;
+    const initialObservationReceived = this.#initialObservationReceived();
+    let state: UgvProviderReadinessState = "NOT_READY";
+    let reasonCode = "UGV_PROVIDER_INITIALIZING";
+    if (this.#recoveryComplete) {
+      if (deviceMcpConnected && mqttConnected && initialObservationReceived) {
+        state = "READY";
+        reasonCode = "UGV_PROVIDER_READY";
+      } else if (deviceMcpConnected || mqttConnected || initialObservationReceived) {
+        state = "DEGRADED";
+        reasonCode = "UGV_PROVIDER_DEPENDENCY_DEGRADED";
+      } else {
+        state = "UNKNOWN";
+        reasonCode = "UGV_PROVIDER_DEPENDENCIES_UNAVAILABLE";
+      }
+    }
+    this.#readiness = {
+      state,
+      reasonCode,
+      deviceMcpConnected,
+      mqttConnected,
+      initialObservationReceived,
+      recoveryComplete: this.#recoveryComplete,
+      observedAt: this.#now().toISOString(),
+    };
   }
 
   async #synchronous(input: StartUgvOperation) {
@@ -1371,6 +1483,7 @@ export class UgvProviderRuntime {
   }
 
   async #observe(snapshot: UgvSnapshot, topic: string): Promise<void> {
+    this.#refreshReadiness();
     await this.store.putSnapshot({
       revision: snapshot.revision,
       observedAt: snapshot.observedAt,

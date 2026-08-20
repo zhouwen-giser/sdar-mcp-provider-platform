@@ -45,7 +45,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
             options.identity?.resourceId ?? "vehicle:ugv1",
             runtime.qualificationContext(),
           ),
-        resource: (snapshot) => ugvResource(snapshot as UgvSnapshot),
+        resource: (snapshot) => ugvResource(snapshot as UgvSnapshot, runtime.readiness()),
       },
       runtime,
       store,
@@ -54,16 +54,19 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
   }
 }
 
-function ugvResource(snapshot: UgvSnapshot): Record<string, unknown> {
+function ugvResource(
+  snapshot: UgvSnapshot,
+  readiness: ReturnType<UgvProviderRuntime["readiness"]>,
+): Record<string, unknown> {
   return {
     resourceId: snapshot.identity.resourceId,
     resourceType: "isr.vehicle.ugv",
     displayName: "UGV-1",
     enabled: true,
     health:
-      !snapshot.connectivity.mqttConnected || !snapshot.connectivity.deviceMcpConnected
+      readiness.state === "NOT_READY" || readiness.state === "UNKNOWN"
         ? "unknown"
-        : snapshot.connectivity.deviceAvailable === false
+        : readiness.state === "DEGRADED" || snapshot.connectivity.deviceAvailable === false
           ? "degraded"
           : Object.values(snapshot.health.components).some((value) => value === "fault")
             ? "degraded"
@@ -77,6 +80,7 @@ function ugvResource(snapshot: UgvSnapshot): Record<string, unknown> {
       externalVideo: true,
       refereeDataAvailable: false,
       globalTruthAvailable: false,
+      providerReadiness: readiness,
     }),
     lastSeenAt: timestamp(snapshot.observedAt),
   };

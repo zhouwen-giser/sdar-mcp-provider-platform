@@ -146,15 +146,32 @@ const server = new UgvProviderServer(
   businessEvents,
 );
 
-await runtime.initialize();
-mqtt.start();
+await runtime.initializeLocal();
 const port = await server.start();
-logger.info({ providerId: config.PROVIDER_ID, port }, "UGV Provider Adapter started");
+mqtt.start();
+logger.info(
+  { providerId: config.PROVIDER_ID, port, readiness: runtime.readiness().state },
+  "UGV Provider Adapter started in NOT_READY",
+);
 const stop = async () => {
   await mqtt.stop();
   await server.close();
   telemetry.close();
   await runtime.close();
 };
+void runtime
+  .initializeDependencies()
+  .then(() =>
+    logger.info(
+      { providerId: config.PROVIDER_ID, readiness: runtime.readiness() },
+      "UGV Provider Adapter dependency initialization completed",
+    ),
+  )
+  .catch((error: unknown) => {
+    logger.error({ error }, "UGV Provider Adapter dependency initialization failed");
+    void stop().finally(() => {
+      process.exitCode = 1;
+    });
+  });
 process.once("SIGINT", () => void stop());
 process.once("SIGTERM", () => void stop());
