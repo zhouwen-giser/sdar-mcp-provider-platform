@@ -49,6 +49,6 @@ export UGV_LIVE_ADAPTER_DATABASE_URL="postgresql://..."
 bash live-point-validation.sh
 ```
 
-Before its one and only `vehicle_navigate(point)` request, the runner verifies Runtime readiness, protocol discovery, current state, stationary speed, idle mission state, zero active/uncertain Runtime tasks, the Tool catalog, and point-navigation availability. It never retries the mutating request or changes the idempotency key after an uncertain response. It polls only the returned/recovered Task identity and records the Adapter mutation journal and physical terminal evidence.
+Before its one and only `vehicle_navigate(point)` request, the runner verifies Runtime readiness, protocol discovery, current state, stationary speed, a quiescent mission state (idle, ready, or successfully completed), zero active/uncertain Runtime tasks, the Tool catalog, and point-navigation availability. It never retries the mutating request or changes the idempotency key after an uncertain response. It polls only the returned/recovered Task identity and records the Adapter mutation journal and physical terminal evidence.
 
 The previous rejected key `ugv-nav-20260818-10681344630` is forbidden. An authorization/precondition failure is recorded as blocked evidence; it is not a reason to dispatch another request.

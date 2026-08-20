@@ -1381,7 +1381,7 @@ export class UgvProviderRuntime {
     const fresh =
       authority !== undefined &&
       Number.isFinite(age) &&
-      age >= 0 &&
+      age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
       age <= this.options.freshness.chassis &&
       speedKmh !== undefined;
     if (!fresh)
@@ -2509,7 +2509,11 @@ function applyTrack(
       : transition(execution, execution.state, "UGV_DOWNSTREAM_MISSION_ID_MISMATCH");
   const mapped = mapVehicleTaskState(track.state, true);
   const armed = execution.observationCursors?.trackActive !== undefined;
-  if (!armed && isMappedTerminal(mapped.state)) {
+  const immediateCompletionProven =
+    mapped.state === "SUCCEEDED" &&
+    physical?.confirmation.confirmed === true &&
+    physical.stabilitySatisfied;
+  if (!armed && isMappedTerminal(mapped.state) && !immediateCompletionProven) {
     if (execution.reasonCode === "UGV_TASK_TERMINAL_UNCONFIRMED") return execution;
     return transition(execution, execution.state, "UGV_TASK_TERMINAL_UNCONFIRMED");
   }

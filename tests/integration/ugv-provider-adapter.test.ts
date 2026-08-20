@@ -764,6 +764,76 @@ describe("UGV long-running operation integration", () => {
     });
   });
 
+  it("applies bounded future clock skew to stationary stability observations", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      freshness: {
+        ...runtimeOptions().freshness,
+        maximumFutureSkewMs: 1_000,
+      },
+      stationaryStabilityMs: 0,
+      stationaryMinimumSamples: 2,
+    });
+    await fixture.runtime.start(
+      startInput("pause-future-skew", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(fixture.ingress, 1, 10, new Date(now).toISOString());
+    const running = required(await fixture.runtime.get("pause-future-skew"));
+    await fixture.runtime.command("pause", identityOf(running, "1"));
+    missionRaw(fixture.ingress, 2, 20, new Date(now).toISOString());
+
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now + 500).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-future-skew")).toMatchObject({
+      state: "RUNNING",
+      consecutiveStationaryObservations: 1,
+    });
+
+    now += 100;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now + 500).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-future-skew")).toMatchObject({
+      state: "PAUSED",
+      consecutiveStationaryObservations: 2,
+    });
+
+    const rejected = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      freshness: {
+        ...runtimeOptions().freshness,
+        maximumFutureSkewMs: 1_000,
+      },
+      stationaryStabilityMs: 0,
+      stationaryMinimumSamples: 1,
+    });
+    await rejected.runtime.start(
+      startInput("pause-excessive-future-skew", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(rejected.ingress, 1, 10, new Date(now).toISOString());
+    const rejectedRunning = required(await rejected.runtime.get("pause-excessive-future-skew"));
+    await rejected.runtime.command("pause", identityOf(rejectedRunning, "1"));
+    missionRaw(rejected.ingress, 2, 20, new Date(now).toISOString());
+    rejected.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now + 1_001).toISOString(),
+    );
+    expect(await rejected.runtime.get("pause-excessive-future-skew")).toMatchObject({
+      state: "RUNNING",
+      consecutiveStationaryObservations: 0,
+    });
+  });
+
   it("fails a terminal mission closed when physical confirmation times out", async () => {
     const fixture = await createFixture(false, new MemoryProviderStore(), {
       physicalConfirmationTimeoutMs: 0,
@@ -784,10 +854,61 @@ describe("UGV long-running operation integration", () => {
     await fixture.runtime.start(
       startInput("nav-terminal-first", "vehicle_navigate", navigateArgs()),
     );
-    mission(fixture.ingress, 4, 100);
+    missionRaw(fixture.ingress, 4, 100);
     expect(await fixture.runtime.get("nav-terminal-first")).toMatchObject({
       state: "STARTING",
       reasonCode: "UGV_TASK_TERMINAL_UNCONFIRMED",
+    });
+  });
+
+  it("accepts immediate completion only with correlated post-dispatch physical proof", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 0,
+      stationaryMinimumSamples: 2,
+    });
+    await fixture.runtime.start(
+      startInput("nav-immediate-completion", "vehicle_navigate", navigateArgs()),
+    );
+    now += 10;
+    missionWithId(fixture.ingress, 1, 4, 100, new Date(now).toISOString());
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.1001,"longitude":114.1001,"altitude":10}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("nav-immediate-completion")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_TASK_TERMINAL_UNCONFIRMED",
+      consecutiveStationaryObservations: 1,
+    });
+
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("nav-immediate-completion")).toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "UGV_DEVICE_TASK_COMPLETED",
+      consecutiveStationaryObservations: 2,
+      result: {
+        status: "completed",
+        missionId: "1",
+        stationaryAtCompletion: true,
+        correlationStrength: "STRICT_CORRELATED",
+        observationAuthority: "post_dispatch",
+      },
     });
   });
 

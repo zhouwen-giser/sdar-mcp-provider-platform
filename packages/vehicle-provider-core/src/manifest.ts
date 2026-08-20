@@ -178,6 +178,22 @@ export function vehicleProviderManifest(
                 startPosition: { type: "object", additionalProperties: true },
                 endPosition: { type: "object", additionalProperties: true },
                 observedDisplacementM: { type: "number", minimum: 0 },
+                displacementUnavailableReason: {
+                  type: "string",
+                  enum: ["POSITION_AUTHORITY_MISMATCH"],
+                },
+                positionAuthority: {
+                  type: "object",
+                  properties: {
+                    field: nullable({ type: "string" }),
+                    topic: { type: "string" },
+                    observedAt: { type: "string" },
+                    timeAuthority: { type: "string", enum: ["source", "ingest"] },
+                    cursor: { type: "string" },
+                  },
+                  required: ["field", "topic", "observedAt", "timeAuthority", "cursor"],
+                  additionalProperties: false,
+                },
                 finalHeadingDeg: { type: "number" },
                 finalSpeedKmh: { type: "number", minimum: 0 },
                 missionId: nullable({ type: "string" }),

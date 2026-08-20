@@ -10,13 +10,13 @@ configuration behavior.
 | Component                       | Source                                               |  Fields |
 | ------------------------------- | ---------------------------------------------------- | ------: |
 | Runtime                         | `apps/runtime/src/config.ts`                         |      99 |
-| UGV Provider                    | `apps/ugv-provider-adapter/src/config.ts`            |      66 |
+| UGV Provider                    | `apps/ugv-provider-adapter/src/config.ts`            |      67 |
 | NPC Tank Provider               | `apps/npc-tank-provider-adapter/src/config.ts`       |      53 |
 | Home Assistant Climate Provider | `apps/home-assistant-climate-provider/src/config.ts` |      28 |
-| **Total**                       | four current Zod schemas                             | **246** |
+| **Total**                       | four current Zod schemas                             | **247** |
 
-An independent AST key-set comparison verifies 246 expected, 246 inventoried,
-and 246 unique component/key pairs. Each JSON item records the source line,
+An independent AST key-set comparison verifies 247 expected, 247 inventoried,
+and 247 unique component/key pairs. Each JSON item records the source line,
 bootstrap/runtime/provider group, subgroup, exact validator expression, default
 presence and value, required status, Secret classification, and Apply Mode.
 

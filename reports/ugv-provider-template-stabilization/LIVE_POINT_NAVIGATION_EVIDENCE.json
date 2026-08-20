@@ -1,28 +1,337 @@
 {
   "schemaVersion": "1.0",
-  "authorized": false,
-  "runId": null,
-  "endpoint": null,
-  "resourceId": null,
+  "authorized": true,
+  "runId": "ugv-live-20260820T124042Z-immediate-completion-verified",
+  "endpoint": {
+    "scheme": "http",
+    "hostKind": "loopback",
+    "hostHash": "12ca17b49af22894",
+    "port": "19120",
+    "path": "/mcp",
+    "pathHash": "88fe637beab867e2"
+  },
+  "resourceId": "vehicle:ugv1",
   "target": {
     "longitude": 106.8134463,
     "latitude": 29.72034353,
     "altitude": 500
   },
   "previousRejectedIdempotencyKeyReused": false,
-  "readOnlyPreflight": {},
-  "operationQualification": {},
-  "mutatingCallCount": 0,
-  "idempotencyKey": null,
-  "downstreamMissionId": null,
-  "mutationJournal": [],
-  "taskStates": [],
-  "physicalConfirmation": {},
-  "result": "BLOCKED_BEFORE_DISPATCH",
-  "startedAt": "2026-08-20T07:42:07.839Z",
-  "completedAt": "2026-08-20T07:42:07.840Z",
-  "failure": {
-    "reasonCode": "ALLOW_REAL_UGV_SIDE_EFFECTS_REQUIRED",
-    "errorClass": "QualificationError"
-  }
+  "readOnlyPreflight": {
+    "readiness": {
+      "httpStatus": 200,
+      "status": "ready"
+    },
+    "runtimeTaskCounts": {
+      "active": 0,
+      "uncertain": 0
+    },
+    "state": {
+      "mqttConnected": true,
+      "deviceMcpConnected": true,
+      "deviceAvailable": true,
+      "speedKmh": 0,
+      "missionState": 4,
+      "missionId": "7930",
+      "chassisObservedAt": "2026-08-20T12:40:42.221Z",
+      "revision": "fd0c297d2b2b4bdb3f5688981f0c9e00916695b9f839b20579751f782e8406c2"
+    },
+    "toolsList": {
+      "toolCount": 10,
+      "toolNames": [
+        "vehicle_area_recon",
+        "vehicle_control_gimbal",
+        "vehicle_emergency_stop",
+        "vehicle_fire_weapon",
+        "vehicle_get_capabilities",
+        "vehicle_get_payload_status",
+        "vehicle_get_state",
+        "vehicle_get_targets",
+        "vehicle_navigate",
+        "vehicle_track_target"
+      ],
+      "sha256": "4f02a5d171cb390a805bc142e4713215b9b429537b2902db9485e1a9fb37b469"
+    },
+    "protocol": {
+      "version": "2026-07-28",
+      "serverDiscoverSha256": "c555662992a005981f623dc67acb779cd3438faa1f9fa902b2d533b95a3b9d0f"
+    }
+  },
+  "operationQualification": {
+    "operationName": "vehicle_navigate",
+    "variant": "point",
+    "availability": "available",
+    "reasonCode": "UGV_AVAILABLE",
+    "riskLevel": "medium",
+    "capabilitiesSha256": "e866dca075acc97c65a7acdecdb77689857f49eda646203af2ed091720352aac"
+  },
+  "mutatingCallCount": 1,
+  "idempotencyKey": "ugv-template-live:ugv-live-20260820T124042Z-immediate-completion-verified:vehicle_navigate.point",
+  "downstreamMissionId": "7931",
+  "mutationJournal": [
+    {
+      "stepId": "start:01:primary",
+      "phase": "PRIMARY",
+      "toolName": "ugv_path_follow_mission",
+      "argumentHash": "c55a21a5c4ddc70f19031a1bc95f0c3f13ff3b44b9a18a7c3ff9f98a77820f12",
+      "state": "ACCEPTED",
+      "externalMissionId": "7931",
+      "resultHash": "d6f483c764b3f4aa93edd07cc7896be345f348f236ec48f6aaf9747a4d7a0497",
+      "intentPersistedAt": "2026-08-20T12:40:42.336Z",
+      "dispatchedAt": "2026-08-20T12:40:42.340Z",
+      "completedAt": "2026-08-20T12:40:42.549Z"
+    },
+    {
+      "stepId": "start:02:followup",
+      "phase": "FOLLOWUP",
+      "toolName": "ugv_mission_control",
+      "argumentHash": "5f2248d60890c7338b6ed7260c2cc07752d15b3675d5a9d8045d417c9a298531",
+      "state": "ACCEPTED",
+      "externalMissionId": "7931",
+      "resultHash": "b820e12ab5dd337ed36f98219d6699d93b6eb1c413dd17b72a6761a1aa187913",
+      "intentPersistedAt": "2026-08-20T12:40:42.559Z",
+      "dispatchedAt": "2026-08-20T12:40:42.564Z",
+      "completedAt": "2026-08-20T12:40:42.598Z"
+    }
+  ],
+  "taskStates": [
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:42.671Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:43.680Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:44.687Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:45.693Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:46.699Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:47.705Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:48.710Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:49.715Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:50.724Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:51.730Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:52.736Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:53.741Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:54.746Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:55.752Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:56.758Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:57.764Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:58.769Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:40:59.775Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:00.782Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:01.794Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:02.800Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:03.805Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:04.810Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:05.818Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:06.824Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:07.830Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:08.846Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:09.851Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:10.857Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:11.861Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:12.867Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:13.871Z"
+    },
+    {
+      "status": "working",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:14.879Z"
+    },
+    {
+      "status": "completed",
+      "revision": null,
+      "reasonCode": null,
+      "observedAt": "2026-08-20T12:41:15.884Z"
+    }
+  ],
+  "physicalConfirmation": {
+    "stableStationaryWindow": true,
+    "first": {
+      "speedKmh": 0,
+      "missionState": 4,
+      "missionId": "7931",
+      "position": {
+        "longitude": 106.81344500985072,
+        "latitude": 29.720404852472164,
+        "altitude": 500.0100429151207
+      },
+      "distanceToTargetMeters": 6.819895296842734,
+      "observedAt": "2026-08-20T12:41:15.886Z",
+      "observationCursor": "54031c9d4f0b2eb251873866a2155cf015cc2ae4fd84d7e473a469aac6a314bc"
+    },
+    "terminal": {
+      "speedKmh": 0,
+      "missionState": 4,
+      "missionId": "7931",
+      "position": {
+        "longitude": 106.81344500985072,
+        "latitude": 29.720404852472164,
+        "altitude": 500.0100429151207
+      },
+      "distanceToTargetMeters": 6.819895296842734,
+      "observedAt": "2026-08-20T12:41:17.878Z",
+      "observationCursor": "2e01b0b3994bf4f624312cce6eb7ed8195dd3497da4916ed1e1df89b0c8c6639"
+    },
+    "targetToleranceMeters": 10
+  },
+  "result": "PASS",
+  "startedAt": "2026-08-20T12:40:42.107Z",
+  "completedAt": "2026-08-20T12:41:17.948Z",
+  "failure": null
 }

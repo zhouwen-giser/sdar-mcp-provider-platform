@@ -23,6 +23,11 @@ const TARGET = Object.freeze({
   latitude: 29.72034353,
   altitude: 500,
 });
+// The real simulator retains a successfully completed mission until the next
+// mission is accepted. These states are quiescent when the independently
+// observed chassis speed is stationary; active, paused, cancelled, and failed
+// states remain blocked by this one-shot validation runner.
+const QUIESCENT_MISSION_STATES = new Set([-1, 0, 4]);
 const FORBIDDEN_IDEMPOTENCY_KEY = "ugv-nav-20260818-10681344630";
 const argumentsValue = parseArguments(process.argv.slice(2));
 const environment = loadEnvironment(argumentsValue["env-file"]);
@@ -120,6 +125,7 @@ try {
     stateBefore,
     authorization.stationaryThresholdKmh,
     authorization.maximumStateAgeMs,
+    authorization.maximumFutureSkewMs,
   );
 
   const navigationArguments = {
@@ -240,6 +246,7 @@ try {
     secondTerminalState,
     authorization.stationaryThresholdKmh,
     authorization.maximumStateAgeMs,
+    authorization.maximumFutureSkewMs,
     authorization.targetToleranceMeters,
   );
   report.physicalConfirmation = physical;
@@ -324,6 +331,13 @@ function authorize(env) {
       1_000,
       60_000,
     ),
+    maximumFutureSkewMs: boundedInteger(
+      env.UGV_OBSERVATION_MAX_FUTURE_SKEW_MS,
+      "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS",
+      1_000,
+      0,
+      5_000,
+    ),
     stationaryStabilityMs: boundedInteger(
       env.UGV_LIVE_STATIONARY_STABILITY_MS,
       "UGV_LIVE_STATIONARY_STABILITY_MS",
@@ -350,7 +364,13 @@ function authorize(env) {
 
 function databaseUrl(env, name) {
   const raw = required(env, name);
-  const url = parseEndpoint(raw, name, ["postgres:", "postgresql:"]);
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (error) {
+    throw coded(`${name}_URL_INVALID`, error);
+  }
+  if (!["postgres:", "postgresql:"].includes(url.protocol)) throw coded(`${name}_SCHEME_INVALID`);
   if (!url.username || !url.password || url.pathname.length < 2)
     throw coded(`${name}_CREDENTIALS_REQUIRED`);
   return raw;
@@ -478,7 +498,7 @@ async function readTool(url, operation, resourceId, id, timeoutMs) {
   return result.structuredContent;
 }
 
-function assertPredispatchState(content, threshold, maximumAgeMs) {
+function assertPredispatchState(content, threshold, maximumAgeMs, maximumFutureSkewMs) {
   const connectivity = record(content.connectivity, "UGV_LIVE_CONNECTIVITY_MISSING");
   if (
     connectivity.mqttConnected !== true ||
@@ -490,9 +510,15 @@ function assertPredispatchState(content, threshold, maximumAgeMs) {
   const mission = record(chassis.mission, "UGV_LIVE_MISSION_STATE_MISSING");
   if (typeof chassis.speedKmh !== "number" || Math.abs(chassis.speedKmh) > threshold)
     throw coded("UGV_LIVE_VEHICLE_NOT_STATIONARY");
-  if (mission.state !== 0) throw coded("UGV_LIVE_CHASSIS_MISSION_NOT_IDLE");
+  if (!QUIESCENT_MISSION_STATES.has(mission.state))
+    throw coded("UGV_LIVE_CHASSIS_MISSION_NOT_QUIESCENT");
   const freshness = record(content.freshness, "UGV_LIVE_FRESHNESS_MISSING");
-  assertFresh(freshness.chassisObservedAt, maximumAgeMs, "UGV_LIVE_CHASSIS_STATE_STALE");
+  assertFresh(
+    freshness.chassisObservedAt,
+    maximumAgeMs,
+    maximumFutureSkewMs,
+    "UGV_LIVE_CHASSIS_STATE_STALE",
+  );
   return {
     mqttConnected: true,
     deviceMcpConnected: true,
@@ -505,9 +531,16 @@ function assertPredispatchState(content, threshold, maximumAgeMs) {
   };
 }
 
-function assertTerminalPhysicalEvidence(first, second, threshold, maximumAgeMs, toleranceMeters) {
-  const one = terminalFacts(first, threshold, maximumAgeMs);
-  const two = terminalFacts(second, threshold, maximumAgeMs);
+function assertTerminalPhysicalEvidence(
+  first,
+  second,
+  threshold,
+  maximumAgeMs,
+  maximumFutureSkewMs,
+  toleranceMeters,
+) {
+  const one = terminalFacts(first, threshold, maximumAgeMs, maximumFutureSkewMs);
+  const two = terminalFacts(second, threshold, maximumAgeMs, maximumFutureSkewMs);
   if (one.observationCursor === two.observationCursor)
     throw coded("UGV_LIVE_STATIONARY_OBSERVATIONS_NOT_DISTINCT");
   if (two.distanceToTargetMeters > toleranceMeters)
@@ -520,14 +553,19 @@ function assertTerminalPhysicalEvidence(first, second, threshold, maximumAgeMs, 
   };
 }
 
-function terminalFacts(content, threshold, maximumAgeMs) {
+function terminalFacts(content, threshold, maximumAgeMs, maximumFutureSkewMs) {
   const chassis = record(content.chassis, "UGV_LIVE_TERMINAL_CHASSIS_MISSING");
   const mission = record(chassis.mission, "UGV_LIVE_TERMINAL_MISSION_MISSING");
   const position = record(chassis.position, "UGV_LIVE_TERMINAL_POSITION_MISSING");
   const freshness = record(content.freshness, "UGV_LIVE_TERMINAL_FRESHNESS_MISSING");
   if (typeof chassis.speedKmh !== "number" || Math.abs(chassis.speedKmh) > threshold)
     throw coded("UGV_LIVE_TERMINAL_SPEED_NOT_STATIONARY");
-  assertFresh(freshness.chassisObservedAt, maximumAgeMs, "UGV_LIVE_TERMINAL_STATE_STALE");
+  assertFresh(
+    freshness.chassisObservedAt,
+    maximumAgeMs,
+    maximumFutureSkewMs,
+    "UGV_LIVE_TERMINAL_STATE_STALE",
+  );
   if (typeof position.longitude !== "number" || typeof position.latitude !== "number")
     throw coded("UGV_LIVE_TERMINAL_GEODETIC_POSITION_REQUIRED");
   return {
@@ -646,10 +684,10 @@ function record(value, code) {
   return value;
 }
 
-function assertFresh(value, maximumAgeMs, code) {
+function assertFresh(value, maximumAgeMs, maximumFutureSkewMs, code) {
   if (typeof value !== "string") throw coded(code);
   const age = Date.now() - Date.parse(value);
-  if (!Number.isFinite(age) || age < 0 || age > maximumAgeMs) throw coded(code);
+  if (!Number.isFinite(age) || age < -maximumFutureSkewMs || age > maximumAgeMs) throw coded(code);
 }
 
 function boundedNumber(value, name, fallback, minimum, maximum) {

@@ -491,6 +491,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_observation_max_future_skew_ms setting.",
+      "displayName": "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_OBSERVATION_MAX_FUTURE_SKEW_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_device_mcp_url setting.",
       "displayName": "UGV_DEVICE_MCP_URL",
       "overridePolicy": {

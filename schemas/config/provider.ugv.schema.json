@@ -206,6 +206,12 @@
       "enum": ["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"],
       "type": "string"
     },
+    "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS": {
+      "default": 1000,
+      "maximum": 5000,
+      "minimum": 0,
+      "type": "integer"
+    },
     "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD": {
       "default": 2,
       "maximum": 100,
@@ -290,6 +296,7 @@
     "UGV_HEALTH_FRESHNESS_MS",
     "UGV_TARGET_FRESHNESS_MS",
     "UGV_PAYLOAD_FRESHNESS_MS",
+    "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS",
     "UGV_DEVICE_MCP_URL",
     "UGV_DEVICE_MCP_TIMEOUT_MS",
     "UGV_DEVICE_MCP_TLS_MODE",

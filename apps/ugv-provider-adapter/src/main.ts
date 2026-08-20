@@ -108,6 +108,7 @@ const runtime = new UgvProviderRuntime(
       health: config.UGV_HEALTH_FRESHNESS_MS,
       target: config.UGV_TARGET_FRESHNESS_MS,
       payload: config.UGV_PAYLOAD_FRESHNESS_MS,
+      maximumFutureSkewMs: config.UGV_OBSERVATION_MAX_FUTURE_SKEW_MS,
     },
     allowNavigationWithRecon: config.UGV_ALLOW_NAVIGATION_WITH_RECON,
     fireEnabled: config.UGV_FIRE_ENABLED,
