@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "testFile": "tests/unit/observation-cursor.test.ts",
+  "coverage": [
+    "actual UGV mission/position/speed/recon ingress",
+    "topic authority uses oc1",
+    "field authority uses oc1",
+    "duplicate message is deterministic",
+    "sequence/payload change changes token",
+    "shared NPC ingress uses oc1"
+  ]
+}

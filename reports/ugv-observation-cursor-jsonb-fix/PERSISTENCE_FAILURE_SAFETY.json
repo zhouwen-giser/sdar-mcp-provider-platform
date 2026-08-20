@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "pass",
+  "failure": "initial ProviderExecution putExecution rejection",
+  "mutationJournalCount": 0,
+  "deviceMutationCallCount": 0,
+  "chassisTrackReleased": true,
+  "ghostExecutionPresent": false
+}

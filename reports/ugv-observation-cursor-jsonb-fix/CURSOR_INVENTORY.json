@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "status": "complete",
+  "entries": [
+    {
+      "path": "packages/vehicle-provider-core/src/observation-cursor.ts",
+      "symbol": "encodeObservationCursorV1/decodeObservationCursorV1",
+      "role": "single shared topic/field codec",
+      "persisted": true,
+      "resolution": "oc1 base64url canonical JSON"
+    },
+    {
+      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
+      "symbol": "observationCursor/observationAuthority",
+      "role": "topic cursor producer",
+      "persisted": true,
+      "resolution": "ObservationCursorCodecV1 topic payload"
+    },
+    {
+      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
+      "symbol": "applyFieldAuthorities",
+      "role": "field cursor producer",
+      "persisted": true,
+      "resolution": "ObservationCursorCodecV1 field payload"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/runtime.ts",
+      "symbol": "initialObservationCursors/dispatchBaseline/lastStationarySpeedCursor",
+      "role": "cursor persistence and equality consumer",
+      "persisted": true,
+      "resolution": "opaque equality only; explicit authority observedAt"
+    },
+    {
+      "path": "apps/npc-tank-provider-adapter/src/runtime.ts",
+      "symbol": "applyReconTrack",
+      "role": "shared ingress cursor consumer",
+      "persisted": true,
+      "resolution": "opaque equality only; explicit authority observedAt"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+      "symbol": "putExecution and JSONB write boundaries",
+      "role": "persistence boundary",
+      "persisted": true,
+      "resolution": "fail-closed JSONB safety diagnostic"
+    },
+    {
+      "path": "packages/vehicle-mqtt-ingress/src/ingress.ts",
+      "symbol": "latestByAuthority key",
+      "role": "process-local deduplication key",
+      "persisted": false,
+      "resolution": "JSON tuple; no NUL delimiter"
+    }
+  ],
+  "remainingCursorDelimiterParsers": 0,
+  "remainingPersistedNulCursorProducers": 0
+}
