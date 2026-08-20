@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:34:12.777Z",
+  "evidenceClass": "LIVE_PROVIDEROPS_PASS",
+  "status": "PARTIAL_LIVE_EXPORT_WITH_HISTORICAL_BACKLOG_NOT_DRAINED",
+  "configuration": {
+    "otelEnabled": true,
+    "transport": "OTLP_HTTP_DEVELOPMENT_CLEARTEXT",
+    "collectorEndpoint": "redacted-local-collector:4318",
+    "runtimeDeploymentId": "ugv-test-deployment",
+    "runtimeInstanceId": "ugv-runtime-test-1",
+    "otelServiceInstanceId": "ugv-runtime-test-1",
+    "telemetrySourceMappingInstanceId": "ugv-runtime-test-1",
+    "identityConsistent": true
+  },
+  "runtimeMetricsSnapshot": {
+    "auditEventsEmitted": 28437,
+    "auditExportAttempts": 28437,
+    "auditBacklog": 821689,
+    "auditOldestAgeSeconds": 872771.443,
+    "backlogDrained": false
+  },
+  "runtimeDatabaseSnapshot": {
+    "delivered": 41100,
+    "exhausted": 166311,
+    "pending": 141849,
+    "retryWait": 677250,
+    "note": "Database and metric snapshots were taken at nearby but non-atomic times; their totals are not asserted to be identical."
+  },
+  "collectorMetricsSnapshot": {
+    "acceptedLogRecords": 38379,
+    "failedLogRecords": 0,
+    "refusedLogRecords": 0,
+    "sentLogRecordsToProcessor": 38371,
+    "filteredNonProviderOpsLogs": 8,
+    "exporterInFlightRequests": 2
+  },
+  "queryProof": {
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "resourceId": "vehicle:ugv1",
+    "runtimeInstanceId": "ugv-runtime-test-1",
+    "deploymentId": "ugv-test-deployment",
+    "returnedRows": 5,
+    "example": {
+      "recordId": "48482ae7-4a82-5577-9143-fbdb4e2fd4b7",
+      "recordHash": "f8f3597dea4448b74f386d3e2aa3a17f95e47c13b402f19042bc2f8d0931567a",
+      "recordType": "provider.resource.metric",
+      "occurredAt": "2026-08-20T10:19:54.910Z",
+      "ingestedAt": "2026-08-20T14:34:12.777Z",
+      "observedPipelineLagSeconds": 15257.867
+    },
+    "sourceVectorUsed": false,
+    "manualInsertUsed": false,
+    "currentAdapterStartCorrelatedWithinWindow": false
+  },
+  "observedProviderOpsCategories": ["provider.resource.state", "provider.resource.metric"],
+  "notObservedForCurrentAuthorizedRun": [
+    "provider.task.lifecycle",
+    "provider.command.lifecycle",
+    "provider.recovery.lifecycle"
+  ],
+  "qualificationImpact": "Real UGV ProviderOps reached Collector, Processor, ClickHouse, and Query API, but the historical FIFO backlog remained above 800k and current-run time correlation did not converge."
+}

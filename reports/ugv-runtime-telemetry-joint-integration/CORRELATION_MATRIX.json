@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:34:12.777Z",
+  "status": "PARTIAL_RESOURCE_CHAIN_ONLY",
+  "resourceLevelLiveChain": {
+    "sourceVectorUsed": false,
+    "manualInsertUsed": false,
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "resourceId": "vehicle:ugv1",
+    "runtimeDeploymentId": "ugv-test-deployment",
+    "runtimeInstanceId": "ugv-runtime-test-1",
+    "recordId": "48482ae7-4a82-5577-9143-fbdb4e2fd4b7",
+    "recordHash": "f8f3597dea4448b74f386d3e2aa3a17f95e47c13b402f19042bc2f8d0931567a",
+    "recordType": "provider.resource.metric",
+    "eventCategory": "resource.metric",
+    "occurredAt": "2026-08-20T10:19:54.910Z",
+    "ingestedAt": "2026-08-20T14:34:12.777Z",
+    "recordIdHashParityAcrossOtlpAndBody": "VALIDATED_BY_PROCESSOR_ACCEPTANCE_AND_CONTRACT_TESTS"
+  },
+  "requiredDimensions": [
+    { "field": "providerId", "resourceChain": true, "taskChain": false },
+    { "field": "resourceId", "resourceChain": true, "taskChain": false },
+    { "field": "taskId", "resourceChain": false, "taskChain": false },
+    { "field": "externalExecutionId", "resourceChain": false, "taskChain": false },
+    { "field": "operationName", "resourceChain": false, "taskChain": false },
+    { "field": "recordId", "resourceChain": true, "taskChain": false }
+  ],
+  "taskLevelChain": {
+    "available": false,
+    "reasonCode": "NO_AUTHORIZED_TASK_CREATED",
+    "taskId": null,
+    "externalExecutionId": null,
+    "operationName": null,
+    "missionIdStored": false
+  },
+  "currentRunTimeCorrelation": {
+    "providerAdapterStartedAt": "2026-08-20T14:18:31.685Z",
+    "latestQueryableSourceOccurredAtAtCapture": "2026-08-20T10:19:54.910Z",
+    "historicalFifoBacklog": true,
+    "convergedWithinEvidenceWindow": false
+  },
+  "qualificationImpact": "Provider/resource identity is queryable end to end, but task/execution/operation correlation and current-run temporal convergence are absent."
+}

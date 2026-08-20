@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:51:23.179Z",
+  "status": "PASS",
+  "smpp": {
+    "deployedEvidenceRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "finalRevision": "ASSIGNED_AFTER_EVIDENCE_COMMIT",
+    "finalGates": [
+      { "name": "build-after-final-struct-adjustment", "status": "PASS" },
+      { "name": "typecheck-after-final-struct-adjustment", "status": "PASS" },
+      { "name": "prettier-after-final-struct-adjustment", "status": "PASS" },
+      { "name": "lint-after-final-struct-adjustment", "status": "PASS" },
+      {
+        "name": "unit-after-final-struct-adjustment",
+        "status": "PASS",
+        "files": 40,
+        "tests": 188
+      },
+      { "name": "provider-telemetry-client-unit", "status": "PASS", "tests": 14 },
+      {
+        "name": "provider-telemetry-grpc-runtime-postgresql",
+        "status": "PASS",
+        "tests": 17,
+        "coverage": [
+          "Vehicle client",
+          "shared plain-record client",
+          "NaN Struct",
+          "malformed Struct",
+          "maxBatch",
+          "rate"
+        ]
+      },
+      {
+        "name": "contract-after-final-struct-adjustment",
+        "status": "PASS",
+        "files": 5,
+        "tests": 26,
+        "execution": "sandbox-external rerun"
+      },
+      {
+        "name": "impacted-ugv-npc-after-final-struct-adjustment",
+        "status": "PASS",
+        "files": 16,
+        "tests": 214
+      }
+    ],
+    "recordedPostgresqlGate": [
+      {
+        "name": "real-postgresql-cursor-and-telemetry",
+        "status": "PASS",
+        "files": 3,
+        "tests": 25,
+        "database": "PostgreSQL 17 dedicated local test container"
+      }
+    ],
+    "cursorSafetyAssertions": [
+      "Ingress to PostgreSQL JSONB roundtrip",
+      "navigation startup primary/followup order",
+      "initial persistence failure causes zero device calls",
+      "restart causes zero redispatch"
+    ],
+    "pendingFinalRerun": []
+  },
+  "telemetryCrossRepositoryReference": {
+    "deployedEvidenceRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
+    "npmTests": { "status": "PASS", "tests": 56 },
+    "build": "PASS",
+    "composeConfigValidation": "PASS",
+    "walReliabilityTests": "PASS",
+    "fullDetails": "smpp-telemetry-platform/reports/live-ugv-smpp-integration/REGRESSION.json"
+  },
+  "notClaimed": [
+    "live point navigation",
+    "live task control",
+    "live fault recovery convergence",
+    "historical Runtime ProviderOps backlog drain"
+  ]
+}

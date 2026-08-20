@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "observationWindow": {
+    "from": "2026-08-20T14:18:31.685Z",
+    "to": "2026-08-20T14:33:36.510Z"
+  },
+  "evidenceClass": "LIVE_PROVIDEROPS_PASS",
+  "status": "PARTIAL_WITH_OBSERVABLE_STARTUP_TRANSPORT_LOSS",
+  "runtimeIngress": {
+    "service": "io.sdar.mcp.tasks.telemetry.v1.ProviderTelemetryIngress",
+    "method": "EmitProviderEvents",
+    "healthReady": true,
+    "portReachableFromProviderContainer": true,
+    "perEventResultsParsed": true,
+    "providerEventIdCompletenessValidated": true,
+    "taskIdentityValidatedForTaskEvents": true,
+    "responseMessagesPersistedOrLogged": false,
+    "stableReasonCodesUsed": true
+  },
+  "liveDatabaseAggregateSinceAdapterStart": {
+    "providerResourceState": 847,
+    "providerResourceMetric": 354,
+    "total": 1201,
+    "distinctEventKeys": 1201,
+    "duplicateEventKeys": 0,
+    "latestRecordAt": "2026-08-20T14:33:36.510Z"
+  },
+  "lastObservedDeliveryIssueSnapshot": {
+    "capturedDuringRuntimeStartupHandover": true,
+    "enqueued": 87,
+    "sentAttempts": 285,
+    "acceptedBeforeIssue": 17,
+    "duplicate": 0,
+    "rejected": 0,
+    "transportFailed": 268,
+    "retry": 203,
+    "droppedAfterRetryExhaustion": 64,
+    "queueDepth": 6,
+    "queueCapacity": 1100,
+    "visibleReasonCodes": [
+      "PROVIDER_TELEMETRY_ACCEPTED",
+      "PROVIDER_TELEMETRY_TRANSPORT_FAILED",
+      "PROVIDER_TELEMETRY_RETRY_EXHAUSTED"
+    ],
+    "interpretation": "Loss was explicit and counted during the startup transition. The exact transport cause was not isolated, so the report does not relabel it as a Runtime rate-limit rejection. Subsequent Runtime rows prove ingress resumed."
+  },
+  "boundedDelivery": {
+    "ordinaryQueueCapacity": 1000,
+    "criticalReserveCapacity": 100,
+    "maximumAttempts": 4,
+    "initialRetryDelayMs": 250,
+    "maximumRetryDelayMs": 5000,
+    "requestTimeoutMs": 5000,
+    "closeDrainDeadlineMs": 5000,
+    "terminalErrorUncertainPriorityProtected": true,
+    "taskStateAffectedByTelemetryFailure": false
+  },
+  "eventSemanticsObserved": ["RESOURCE_STATE", "RESOURCE_METRIC"],
+  "taskLevelEventSemanticsObserved": false,
+  "taskLevelReason": "No Runtime task or command was created because live mutation was not authorized.",
+  "silentDrop": false,
+  "qualificationImpact": "Ingress and observability are functional, but startup transport drops and the absent task-level chain prevent a fully qualified result.",
+  "sensitivePayloadStored": false
+}

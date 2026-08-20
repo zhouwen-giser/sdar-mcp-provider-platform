@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "completedAt": "2026-08-20T14:36:36.626Z",
+  "status": "NOT_EXECUTED_NO_TASK",
+  "reasonCode": "POINT_NAVIGATION_NOT_DISPATCHED",
+  "taskId": null,
+  "pollIntervalMs": null,
+  "polls": [],
+  "runtimeTaskRows": 0,
+  "providerExecutionRows": 0,
+  "mutationJournalRows": 0,
+  "missionId": null,
+  "terminalState": null,
+  "physicalEvidence": null,
+  "newTaskCreatedForPolling": false,
+  "deviceReadCallsAssociatedWithTask": 0,
+  "deviceMutatingCalls": 0
+}

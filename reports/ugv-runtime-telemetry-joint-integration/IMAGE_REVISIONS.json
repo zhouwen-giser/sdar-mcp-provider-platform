@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:36:36.626Z",
+  "status": "PASS",
+  "smpp": {
+    "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+    "deployedSourceRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "finalReportCommit": "ASSIGNED_AFTER_EVIDENCE_COMMIT",
+    "containers": [
+      {
+        "role": "runtime",
+        "image": "sdar-ugv-simulation-real/runtime:9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+        "imageId": "sha256:4ff4b1a3da7da783a85a6f0457b5cdd99ccfc403e578faa27a2bf0985a121753",
+        "state": "running",
+        "health": "healthy"
+      },
+      {
+        "role": "ugv-adapter",
+        "image": "sdar-ugv-simulation-real/ugv-adapter:9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+        "imageId": "sha256:6234f1869e9008298cc68cc0b6e2be2701ebd43b6cfc9a49aeccd709afd8a7e9",
+        "state": "running",
+        "health": "process-running-no-container-healthcheck"
+      }
+    ]
+  },
+  "telemetry": {
+    "branch": "codex/goal-02-live-ugv-smpp-integration",
+    "deployedSourceRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
+    "finalReportCommit": "ASSIGNED_AFTER_EVIDENCE_COMMIT",
+    "containers": [
+      {
+        "role": "collector",
+        "image": "otel/opentelemetry-collector-contrib:0.157.0",
+        "imageId": "sha256:f2f01157055a9b2aab9df7118e1f1c9abf345e99b23bc7a2bc791db374a7d0f6",
+        "health": "healthy"
+      },
+      {
+        "role": "processor",
+        "image": "smpp-telemetry-ugv-joint-telemetry-processor",
+        "imageId": "sha256:1dfc60908a42f7140fc5503ff73ca8447608acd712deefcb5394604a62f41fb2",
+        "health": "healthy"
+      },
+      {
+        "role": "clickhouse",
+        "image": "clickhouse/clickhouse-server:25.3.14.14",
+        "imageId": "sha256:b627d7a9bc0e0c1bac26cdbe9d2fc6316faa29c5d8a174f28f5abd57d0fa6ba2",
+        "health": "healthy"
+      },
+      {
+        "role": "query-api",
+        "image": "smpp-telemetry-ugv-joint-query-api",
+        "imageId": "sha256:a90d2ac680f141767756e496274a87ddf64a1dce093241f5194e7699ac601847",
+        "health": "http-health-pass"
+      },
+      {
+        "role": "grafana",
+        "image": "grafana/grafana:12.1.0",
+        "imageId": "sha256:6ac590e7cabc2fbe8d7b8fc1ce9c9f0582177b334e0df9c927ebd9670469440f",
+        "health": "process-running-no-container-healthcheck"
+      }
+    ]
+  },
+  "commandAuthority": {
+    "status": "SINGLE_RUNTIME_PROVIDER_STACK",
+    "activeRuntimeAdapterStacks": 1,
+    "developmentTemplateRuntimeAndAdapterStopped": true,
+    "developmentTemplateDatabaseContainersRemaining": true,
+    "remainingDatabaseContainersHaveCommandAuthority": false
+  },
+  "secretsRecorded": false
+}

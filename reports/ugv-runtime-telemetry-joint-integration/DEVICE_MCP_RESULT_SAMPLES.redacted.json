@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:19:32.938Z",
+  "evidenceClass": "READ_ONLY_LIVE_PASS",
+  "status": "PASS_READ_ONLY_RESULTS_ONLY",
+  "provenance": {
+    "path": "Runtime MCP -> UGV Provider -> live Device MCP",
+    "mockFallback": "NOT_PROVEN_BY_CURRENT_REDACTED_READ_ONLY_EVIDENCE",
+    "sourceEvidence": "reports/ugv-runtime-telemetry-joint-integration/READ_ONLY_SMPP.json"
+  },
+  "strictG3Qualification": {
+    "status": "PARTIAL_EXTERNAL_INTERFACE_BLOCKED",
+    "proven": [
+      "four read-only Runtime operations completed",
+      "MQTT connected",
+      "Device MCP connected",
+      "mission state observed as 4"
+    ],
+    "notProvenByRetainedEvidence": [
+      "mission state equals 0",
+      "speed equals 0",
+      "position is parseable",
+      "all required freshness domains are neither stale nor unknown",
+      "execution mode is live",
+      "mock fallback is false"
+    ]
+  },
+  "samples": [
+    {
+      "runtimeOperation": "vehicle_get_state",
+      "devicePrimitive": "get_status",
+      "resultType": "complete",
+      "structuredContentSha256": "685f491eb259c1551fff0fdd4415a00cb602cb73ddc3d5e00a1302deafe929a7",
+      "validatedFacts": {
+        "resourceId": "vehicle:ugv1",
+        "available": true,
+        "mqttConnected": true,
+        "deviceMcpConnected": true,
+        "missionState": 4,
+        "chassisObservedAt": "2026-08-20T14:19:32.815Z"
+      }
+    },
+    {
+      "runtimeOperation": "vehicle_get_capabilities",
+      "devicePrimitive": "get_capabilities",
+      "resultType": "complete",
+      "structuredContentSha256": "db9ca3c67192a12d5aa467078a0b915a1da70936a27f56cd83d840a89d02f772",
+      "validatedFacts": {
+        "resourceId": "vehicle:ugv1",
+        "capabilityEnvelopePresent": true,
+        "liveProvenancePresent": true
+      }
+    },
+    {
+      "runtimeOperation": "vehicle_get_payload_status",
+      "devicePrimitive": "ugv_area_recon_get_status",
+      "resultType": "complete",
+      "structuredContentSha256": "7b64eeecfd3befd7775aafce8e23bda8af5820e047bbb564ad03d3f92ab4a441",
+      "validatedFacts": {
+        "resourceId": "vehicle:ugv1",
+        "online": true,
+        "cameraFault": false,
+        "payloadErrorCount": 0
+      }
+    },
+    {
+      "runtimeOperation": "vehicle_get_targets",
+      "devicePrimitive": "ugv_area_recon_get_targets",
+      "resultType": "complete",
+      "structuredContentSha256": "231c5d62c401b026e7c99be17d877b68514ff514fcddca7daec3bb79cfb7365a",
+      "validatedFacts": {
+        "resourceId": "vehicle:ugv1",
+        "targetCount": 0
+      }
+    }
+  ],
+  "mutatingResultContract": {
+    "captured": false,
+    "reasonCode": "LIVE_CONTROL_NOT_AUTHORIZED",
+    "requiredFieldsWhenAuthorized": [
+      "mission_id",
+      "state",
+      "state_label",
+      "message",
+      "error_code",
+      "progress",
+      "res",
+      "cmd_res",
+      "fail_data"
+    ]
+  },
+  "redaction": {
+    "rawResultBodiesStored": false,
+    "positionsStored": false,
+    "messagesStored": false,
+    "credentialsStored": false,
+    "hashesAndBoundedFactsOnly": true
+  }
+}

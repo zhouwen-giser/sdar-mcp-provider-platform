@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "evidenceClass": "real_runtime_read_only",
   "phase": "G10_READ_ONLY_SMOKE",
-  "status": "BLOCKED_EXTERNAL_ENV",
-  "reasonCode": "UGV_STATE_CHASSIS_STALE",
+  "status": "PASS",
+  "reasonCode": "REAL_RUNTIME_READ_ONLY_READY",
   "command": "bash deploy/ugv-simulation/smoke.sh",
-  "exitCode": 2,
-  "startedAt": "2026-08-20T14:15:16.672Z",
-  "completedAt": "2026-08-20T14:15:16.810Z",
-  "gitSha": "1d1740fcf69ca0c9e75f8e6056fe6907557e1293",
+  "exitCode": 0,
+  "startedAt": "2026-08-20T14:19:32.713Z",
+  "completedAt": "2026-08-20T14:19:32.938Z",
+  "gitSha": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
   "sourceStatus": "TRACKED_SOURCE_CLEAN",
   "endpoints": {
     "runtimeMcp": {
@@ -92,9 +92,67 @@
     ],
     "catalogSha256": "4f02a5d171cb390a805bc142e4713215b9b429537b2902db9485e1a9fb37b469"
   },
-  "reads": [],
-  "failure": {
-    "reasonCode": "UGV_STATE_CHASSIS_STALE",
-    "errorClass": "QualificationError"
-  }
+  "reads": [
+    {
+      "operation": "vehicle_get_state",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "685f491eb259c1551fff0fdd4415a00cb602cb73ddc3d5e00a1302deafe929a7",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "mqttConnected": true,
+        "deviceMcpConnected": true,
+        "deviceAvailable": true,
+        "mqttIngressSequence": 4506,
+        "chassisObservedAt": "2026-08-20T14:19:32.815Z",
+        "missionState": 4,
+        "revision": "3fa8701361a5bbd2e1bb6d1a051ec22d6a45791465c6991e5be1bcb4da595106"
+      }
+    },
+    {
+      "operation": "vehicle_get_capabilities",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "db9ca3c67192a12d5aa467078a0b915a1da70936a27f56cd83d840a89d02f772",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "capabilityKeys": [
+          "available",
+          "deviceReported",
+          "engineeringProfile",
+          "navigation",
+          "observedAt",
+          "payload",
+          "provenance",
+          "resourceId",
+          "source"
+        ]
+      }
+    },
+    {
+      "operation": "vehicle_get_payload_status",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "7b64eeecfd3befd7775aafce8e23bda8af5820e047bbb564ad03d3f92ab4a441",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "online": true,
+        "cameraFault": false,
+        "reconnaissanceState": -1,
+        "payloadErrorCount": 0
+      }
+    },
+    {
+      "operation": "vehicle_get_targets",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "structuredContentSha256": "231c5d62c401b026e7c99be17d877b68514ff514fcddca7daec3bb79cfb7365a",
+      "summary": {
+        "resourceId": "vehicle:ugv1",
+        "targetCount": 0,
+        "observedAt": "2026-08-20T14:19:32.921Z"
+      }
+    }
+  ],
+  "failure": null
 }

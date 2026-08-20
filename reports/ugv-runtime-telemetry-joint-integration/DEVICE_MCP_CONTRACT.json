@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T13:01:51Z",
+  "evidenceClass": "READ_ONLY_LIVE_PASS",
+  "status": "PASS_WITH_EXTERNAL_PROTOCOL_DRIFT",
+  "initialize": {
+    "serverInfo": {
+      "name": "ugv-mcp-server",
+      "version": "1.26.0"
+    },
+    "expectedProtocolVersion": "2026-07-28",
+    "observedProtocolVersion": "2025-11-25",
+    "qualificationImpact": "EXTERNAL_INTERFACE_BLOCKED"
+  },
+  "toolsList": {
+    "toolCount": 15,
+    "requiredToolCount": 11,
+    "requiredToolsPresent": true,
+    "canonicalListSha256": "d92560d66e4580b68dfdb70ffd447c124619c55a54c7bd95dab69d0c13e7001c",
+    "outputSchemaDeclaredCount": 0,
+    "annotationsDeclaredCount": 0,
+    "tools": [
+      {
+        "name": "ugv_path_follow_mission",
+        "inputSchemaSha256": "ea01a38bae71b48f9dbe74f95f21375c169495c32e3a0fcb1a032e2b6e4fac0e",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_return_home",
+        "inputSchemaSha256": "87717ea9ce058f9e977a9b3eda37a36e2a2f6a1aca98d05c2ded70fb4c67a274",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_move_distance",
+        "inputSchemaSha256": "cfcffc33321155cf41e5c5b3e95d16a76abab98d686f0ddf801c8177dca04d68",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_mission_control",
+        "inputSchemaSha256": "ba09c93e25fb8af2e4945b850e5e2d5bc2622c7d91f91065156a147417294d63",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_motion_stop",
+        "inputSchemaSha256": "1c364e27c9664f254f65551d7354ea9815b06445290e04d7955e687e00019749",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "get_status",
+        "inputSchemaSha256": "fbac902bfaec6cda6de77d6963f23beb60d4c8442f43edf844e1eacb5b20cb27",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "get_capabilities",
+        "inputSchemaSha256": "19ca0658c1c01462df1cd686c8ac34dc86c89963e512138fc2dc50c0305d51cf",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_configure",
+        "inputSchemaSha256": "fdb48fcd2518c98be9ffd3315cb780e7fc6a85e0a78f5050b736480201e46229",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_control",
+        "inputSchemaSha256": "62cd17cb6aaed66cf48761ca5c6037ce2c740f2b07312ffaeb261b4a12367947",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_lock",
+        "inputSchemaSha256": "3462c36be42d706cb8be5053cb48342c020a23510d4d814bea84c841c166704f",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_get_status",
+        "inputSchemaSha256": "8adc3042b44a037dfbbc270c149d3fb68499368e90fe516925abbf2f418abf12",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_get_targets",
+        "inputSchemaSha256": "ab0bc98f2c9812d55ad245d8357cc510209b2962e0e1f7c2b66067e2beacd122",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_reset",
+        "inputSchemaSha256": "3cf926307fc8ec471a2b5959c2e8ce93c8a6c16b6b3d4cb888818d82084b3d4a",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_area_recon_attack_confirm",
+        "inputSchemaSha256": "f2c35f6718497e5f4b46c369bc1ae230148b2b088e0f5bc413f87dec2f79705b",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      },
+      {
+        "name": "ugv_gimbal_move",
+        "inputSchemaSha256": "5b1eee05491c47e9aa1fe19b9c8196de7f1241319b7c17690fd1a9443be5f4ff",
+        "outputSchemaDeclared": false,
+        "annotationsDeclared": false
+      }
+    ]
+  },
+  "pointNavigationPrimitives": {
+    "primary": "ugv_path_follow_mission",
+    "followup": "ugv_mission_control",
+    "primaryInputSchemaSha256": "ea01a38bae71b48f9dbe74f95f21375c169495c32e3a0fcb1a032e2b6e4fac0e",
+    "followupInputSchemaSha256": "ba09c93e25fb8af2e4945b850e5e2d5bc2622c7d91f91065156a147417294d63",
+    "runtimeResultValidatorRequired": true
+  },
+  "safety": {
+    "initializeCount": 1,
+    "toolsListCount": 1,
+    "mutatingToolCallCount": 0,
+    "rawDescriptionsOmitted": true,
+    "credentialsRecorded": false
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "completedAt": "2026-08-20T14:36:36.626Z",
+  "status": "NOT_EXECUTED",
+  "reasonCode": "LIVE_POINT_NAVIGATION_NOT_AUTHORIZED_AND_TELEMETRY_BACKLOG_NOT_ZERO",
+  "target": {
+    "longitude": 106.8134463,
+    "latitude": 29.72034353,
+    "altitude": 500
+  },
+  "preflight": {
+    "cursorFix": "PASS",
+    "runtimeReady": true,
+    "providerReady": true,
+    "mqttConnected": true,
+    "deviceMcpConnected": true,
+    "runtimeActiveTasks": 0,
+    "runtimeUncertainTasks": 0,
+    "providerExecutions": 0,
+    "providerMutationJournals": 0,
+    "runtimeCommands": 0,
+    "operationAvailability": "available",
+    "observedMissionState": 4,
+    "strictMissionStateZero": false,
+    "speedZeroProven": false,
+    "positionParseableProven": false,
+    "requiredFreshnessProven": false,
+    "executionModeLiveProven": false,
+    "mockFallbackFalseProven": false,
+    "runtimeTelemetryBacklogZero": false,
+    "externalDeviceMcpProtocolMatchesRequired": false,
+    "fireDisabled": true
+  },
+  "authorization": {
+    "liveControl": false,
+    "livePointNavigation": false,
+    "uniqueRunIdPresent": false,
+    "allRequiredSwitchesSatisfied": false
+  },
+  "idempotency": {
+    "forbiddenOldKeyReused": false,
+    "newKeyGenerated": false,
+    "reason": "No mutating dispatch was authorized."
+  },
+  "sideEffects": {
+    "runtimeToolsCallCount": 0,
+    "runtimeTasksCreated": 0,
+    "providerExecutionsCreated": 0,
+    "mutationJournalsCreated": 0,
+    "devicePrimaryMutatingCalls": 0,
+    "deviceFollowupMutatingCalls": 0,
+    "physicalMotionClaims": 0,
+    "fireCalls": 0
+  },
+  "missionId": null,
+  "physicalEvidence": null,
+  "evidenceClass": "EXTERNAL_INTERFACE_BLOCKED"
+}

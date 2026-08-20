@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:33:36.510Z",
+  "status": "PASS_STEADY_RATE_WITH_STARTUP_LOSS_DISCLOSED",
+  "measurement": {
+    "windowStart": "2026-08-20T14:18:31.685Z",
+    "windowEnd": "2026-08-20T14:33:36.510Z",
+    "durationSeconds": 904.825,
+    "resourceStateCount": 847,
+    "resourceStateRateHz": 0.9361,
+    "resourceMetricCount": 354,
+    "resourceMetricRateHz": 0.3912,
+    "combinedRateHz": 1.3273,
+    "distinctEventKeys": 1201,
+    "duplicateEventKeys": 0
+  },
+  "latestSixtySecondSample": {
+    "resourceStateCount": 59,
+    "resourceStateRateHz": 0.9833,
+    "resourceMetricCount": 24,
+    "resourceMetricRateHz": 0.4,
+    "runtimeDeliveryState": "PENDING_DUE_TO_EXISTING_FIFO_BACKLOG"
+  },
+  "policy": {
+    "resourceStateMaximumHz": 1,
+    "freshnessMetricIntervalSeconds": 10,
+    "taskLifecycleSampled": false,
+    "terminalTaskEventsProtected": true,
+    "errorAndUncertainTransitionsProtected": true
+  },
+  "upstreamMqtt": {
+    "windowSeconds": 15,
+    "messages": 1077,
+    "aggregateRateHz": 71.8,
+    "note": "High-frequency MQTT observations are intentionally reduced before Provider Telemetry emission."
+  },
+  "backpressure": {
+    "queueBounded": true,
+    "queueCapacityIncludingCriticalReserve": 1100,
+    "retryBounded": true,
+    "dropCounterVisible": true,
+    "startupDroppedEvents": 64,
+    "runtimeRateLimitRejectionsObserved": 0,
+    "transportFailuresMisclassifiedAsRateLimit": false,
+    "silentDrops": 0
+  },
+  "unmeasuredPhases": ["navigation-running-60s", "navigation-terminal-30s"],
+  "unmeasuredReason": "Point navigation was not authorized."
+}
