@@ -1464,6 +1464,69 @@ describe("UGV long-running operation integration", () => {
     ]);
   });
 
+  it("dispatches primary emergency stop when every optional cleanup tool is missing", async () => {
+    const device = new MockUgvDeviceMcpClient(new Set(["ugv_motion_stop"]));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    await expect(
+      fixture.runtime.start(
+        startInput("stop-primary-only", "vehicle_emergency_stop", {
+          resourceId: "vehicle:ugv1",
+        }),
+      ),
+    ).resolves.toMatchObject({
+      initialSnapshot: { reasonCode: "STOP_DISPATCHED_CONFIRMATION_PENDING" },
+    });
+    expect(device.calls).toEqual([
+      { name: "ugv_motion_stop", arguments: {}, taskId: "stop-primary-only" },
+    ]);
+    expect(await fixture.store.listMutationJournal("stop-primary-only")).toEqual([
+      expect.objectContaining({ phase: "EMERGENCY_STOP", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+    ]);
+  });
+
+  it("dispatches emergency stop without MQTT but keeps physical confirmation pending", async () => {
+    const fixture = await createFixture();
+    fixture.ingress.setConnected(false);
+
+    expect(fixture.runtime.availability("vehicle_emergency_stop", {})).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+    await fixture.runtime.start(
+      startInput("stop-mqtt-offline", "vehicle_emergency_stop", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(fixture.device.calls[0]).toMatchObject({ name: "ugv_motion_stop" });
+    expect(await fixture.runtime.get("stop-mqtt-offline")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_STOP_OBSERVATION_NOT_NEW",
+    });
+  });
+
+  it("records primary emergency stop rejection as a dispatch failure", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_motion_stop", () => acceptedMutationResult(0, 5));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    await expect(
+      fixture.runtime.start(
+        startInput("stop-primary-rejected", "vehicle_emergency_stop", {
+          resourceId: "vehicle:ugv1",
+        }),
+      ),
+    ).rejects.toBeInstanceOf(Error);
+    expect(await fixture.runtime.get("stop-primary-rejected")).toMatchObject({
+      state: "BUSINESS_FAILED",
+      reasonCode: "STOP_DISPATCH_FAILED",
+    });
+    expect(device.calls).toHaveLength(1);
+  });
+
   it("does not confirm emergency stop until a new stopped-speed fact exists", async () => {
     const fixture = await createFixture();
     await fixture.runtime.start(
@@ -1474,7 +1537,7 @@ describe("UGV long-running operation integration", () => {
     fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
     expect(await fixture.runtime.get("stop-proof")).toMatchObject({
       state: "SUCCEEDED",
-      reasonCode: "UGV_LOCAL_STOP_CONFIRMED",
+      reasonCode: "STOP_CONFIRMED",
     });
     expect(telemetryMetricNames(fixture.telemetry)).toContain(
       "emergency_stop_confirmation_latency_ms",

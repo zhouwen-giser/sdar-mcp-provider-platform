@@ -84,6 +84,22 @@ describe("UGV operation qualification matrix", () => {
       "ugv_move_distance",
       "ugv_mission_control",
     ]);
+    expect(
+      service.qualify({
+        operationName: "vehicle_emergency_stop",
+        contracts: contracts.filter(({ name }) => name === "ugv_motion_stop"),
+        executionMode: "live",
+      }),
+    ).toMatchObject({
+      qualified: true,
+      requiredTools: ["ugv_motion_stop"],
+    });
+    expect(service.inventoryTools("vehicle_emergency_stop")).toEqual([
+      "ugv_motion_stop",
+      "ugv_mission_control",
+      "ugv_area_recon_control",
+      "ugv_area_recon_lock",
+    ]);
   });
 
   it("accepts undeclared output only with runtime validation and preserves exact diagnostics", () => {

@@ -23,6 +23,8 @@ import type {
   VehicleOperationPhase,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
+  buildUgvEmergencyStopCleanupCalls,
+  buildUgvEmergencyStopPrimaryCall,
   controlDeviceCalls,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
@@ -336,25 +338,33 @@ export class UgvProviderRuntime {
           execution = dispatchExecution;
           await this.store.putExecution(execution);
         }
-        const deviceArguments =
-          input.operationName === "vehicle_emergency_stop"
-            ? await this.#emergencyStopArguments(input.arguments)
-            : input.arguments;
-        await executeUgvStartFlow(
-          input.operationName,
-          deviceArguments,
-          (name, argumentsValue) => this.#callDevice(name, argumentsValue, input.taskId),
-          {
-            ...this.#journaledMultiStepStart(input.taskId),
-            onMissionId: async (missionId) => {
-              if (execution.downstreamMissionIds.includes(missionId)) return;
-              execution = withMissionId(execution, missionId);
-              await this.store.putExecution(execution);
+        if (input.operationName === "vehicle_emergency_stop") {
+          await this.#dispatchEmergencyStop(
+            input.taskId,
+            await this.#emergencyStopArguments(input.arguments),
+          );
+        } else
+          await executeUgvStartFlow(
+            input.operationName,
+            input.arguments,
+            (name, argumentsValue) => this.#callDevice(name, argumentsValue, input.taskId),
+            {
+              ...this.#journaledMultiStepStart(input.taskId),
+              onMissionId: async (missionId) => {
+                if (execution.downstreamMissionIds.includes(missionId)) return;
+                execution = withMissionId(execution, missionId);
+                await this.store.putExecution(execution);
+              },
             },
-          },
-        );
+          );
         execution = await this.#armStartObservationDeadline(execution);
-        execution = transition(execution, "STARTING", "UGV_WAITING_DEVICE_CONFIRMATION");
+        execution = transition(
+          execution,
+          "STARTING",
+          input.operationName === "vehicle_emergency_stop"
+            ? "STOP_DISPATCHED_CONFIRMATION_PENDING"
+            : "UGV_WAITING_DEVICE_CONFIRMATION",
+        );
         await this.store.putExecution(execution);
         await this.#startedEvent(execution);
         await this.telemetry.metric(
@@ -396,7 +406,7 @@ export class UgvProviderRuntime {
       const failed = terminal(
         execution,
         error instanceof DeviceToolRejectedError ? "BUSINESS_FAILED" : "TECHNICAL_FAILED",
-        reason(error),
+        input.operationName === "vehicle_emergency_stop" ? "STOP_DISPATCH_FAILED" : reason(error),
         {
           resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "failed",
@@ -1116,7 +1126,7 @@ export class UgvProviderRuntime {
         snapshot.payload.weapon.state !== 1 &&
         (snapshot.payload.reconnaissance.lock?.stage ?? 1) === 1
       )
-        next = terminal(stationaryExecution, "SUCCEEDED", "UGV_LOCAL_STOP_CONFIRMED", {
+        next = terminal(stationaryExecution, "SUCCEEDED", "STOP_CONFIRMED", {
           resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "stopped",
           finalSpeedKmh: snapshot.chassis.speedKmh,
@@ -1162,7 +1172,7 @@ export class UgvProviderRuntime {
           this.#now().getTime(),
         )
       )
-        next = terminal(next, "TECHNICAL_FAILED", "UGV_PHYSICAL_CONFIRMATION_TIMEOUT", {
+        next = terminal(next, "TECHNICAL_FAILED", "STOP_CONFIRMATION_TIMEOUT", {
           resourceId: execution.resourceId,
           status: "timeout",
           observedAt: snapshot.observedAt,
@@ -1319,7 +1329,10 @@ export class UgvProviderRuntime {
       physicalConfirmationPending(execution.reasonCode) &&
       deadlineExpired(execution.physicalConfirmationDeadline, now)
     )
-      reasonCode = "UGV_PHYSICAL_CONFIRMATION_TIMEOUT";
+      reasonCode =
+        execution.operationName === "vehicle_emergency_stop"
+          ? "STOP_CONFIRMATION_TIMEOUT"
+          : "UGV_PHYSICAL_CONFIRMATION_TIMEOUT";
     if (reasonCode === undefined) return execution;
     return terminal(execution, "TECHNICAL_FAILED", reasonCode, {
       resourceId: execution.resourceId,
@@ -1568,6 +1581,39 @@ export class UgvProviderRuntime {
         ? {}
         : { reconMissionId: recon.downstreamMissionIds.at(-1) }),
     };
+  }
+
+  async #dispatchEmergencyStop(
+    taskId: string,
+    argumentsValue: Record<string, unknown>,
+  ): Promise<void> {
+    await this.#callJournaledMutation(
+      taskId,
+      "emergency-stop:01:primary",
+      "EMERGENCY_STOP",
+      buildUgvEmergencyStopPrimaryCall(),
+    );
+    const chassisMissionId = optionalEmergencyMissionId(argumentsValue.chassisMissionId);
+    const reconMissionId = optionalEmergencyMissionId(argumentsValue.reconMissionId);
+    const cleanupCalls = buildUgvEmergencyStopCleanupCalls({
+      ...(chassisMissionId === undefined ? {} : { chassisMissionId }),
+      ...(reconMissionId === undefined ? {} : { reconMissionId }),
+    });
+    for (const [index, call] of cleanupCalls.entries())
+      try {
+        await this.#callJournaledMutation(
+          taskId,
+          `emergency-stop:cleanup:${String(index + 1).padStart(2, "0")}`,
+          "CLEANUP",
+          call,
+        );
+      } catch (error) {
+        await this.telemetry.emit("PROVIDER_DIAGNOSTIC", {
+          diagnostic: "emergency_stop_cleanup_failed",
+          toolName: call.name,
+          reasonCode: reason(error),
+        });
+      }
   }
 
   async #callDevice(
@@ -3052,6 +3098,9 @@ function reason(error: unknown): string {
   return error instanceof Error && /^[A-Z0-9_]+$/.test(error.message)
     ? error.message
     : "UGV_ADAPTER_INTERNAL_ERROR";
+}
+function optionalEmergencyMissionId(value: unknown): number | string | undefined {
+  return typeof value === "number" || typeof value === "string" ? value : undefined;
 }
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);

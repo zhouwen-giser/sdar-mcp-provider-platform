@@ -155,14 +155,14 @@ export async function executeUgvStartFlow(
     );
     await run(buildUgvStartFollowupCall(operationName, missionId), false, "FOLLOWUP");
   } else if (operationName === "vehicle_emergency_stop") {
-    let firstError: Error | undefined;
-    for (const call of initialCalls)
+    const primary = required(initialCalls[0], "UGV_EMERGENCY_STOP_PRIMARY_CALL_REQUIRED");
+    await run(primary, false, "PRIMARY");
+    for (const call of initialCalls.slice(1))
       try {
         await run(call, false);
-      } catch (error) {
-        firstError ??= error instanceof Error ? error : new Error("UGV_DEVICE_CALL_FAILED");
+      } catch {
+        // Cleanup is deliberately best-effort after the primary stop is accepted.
       }
-    if (firstError !== undefined) throw firstError;
   } else {
     for (const call of initialCalls) await run(call);
   }
@@ -283,7 +283,24 @@ export function buildUgvEmergencyStopCalls(
   const chassisMissionId = optionalMissionId(input.chassisMissionId);
   const reconMissionId = optionalMissionId(input.reconMissionId);
   return [
-    { name: "ugv_motion_stop", arguments: {} },
+    buildUgvEmergencyStopPrimaryCall(),
+    ...buildUgvEmergencyStopCleanupCalls({ chassisMissionId, reconMissionId }),
+  ];
+}
+
+export function buildUgvEmergencyStopPrimaryCall(): DeviceToolCall {
+  return { name: "ugv_motion_stop", arguments: {} };
+}
+
+export function buildUgvEmergencyStopCleanupCalls(
+  input: {
+    chassisMissionId?: number | string;
+    reconMissionId?: number | string;
+  } = {},
+): DeviceToolCall[] {
+  const chassisMissionId = optionalMissionId(input.chassisMissionId);
+  const reconMissionId = optionalMissionId(input.reconMissionId);
+  return [
     {
       name: "ugv_mission_control",
       arguments: { action: "terminate", mission_id: chassisMissionId },

@@ -121,6 +121,7 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     expect(requiredUgvDeviceTools("vehicle_area_recon", {}, "cancel")).toEqual([
       "ugv_area_recon_control",
     ]);
+    expect(requiredUgvDeviceTools("vehicle_emergency_stop")).toEqual(["ugv_motion_stop"]);
     expect(OPERATION_REQUIRED_TOOLS).toEqual({
       vehicle_get_state: ["get_status"],
       vehicle_get_capabilities: ["get_capabilities"],
@@ -472,32 +473,37 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     );
   });
 
-  it("attempts every independent emergency stop primitive before surfacing rejection", async () => {
+  it("requires the primary emergency stop and treats cleanup rejection as best-effort", async () => {
     const calls: UgvDeviceToolName[] = [];
-    await expect(
-      executeUgvStartFlow(
-        "vehicle_emergency_stop",
-        { chassisMissionId: 42, reconMissionId: 43 },
-        (name) => {
-          calls.push(name);
-          if (name === "ugv_mission_control")
-            return Promise.resolve({
-              ...commonResult(42, 3),
-              error_code: 831,
-              message: "already stopped",
-            });
-          if (name === "ugv_area_recon_control" || name === "ugv_area_recon_lock")
-            return Promise.resolve({ ...commonResult(43, 3), cmd_res: 0, fail_data: "" });
-          return Promise.resolve(commonResult(42, 3));
-        },
-      ),
-    ).rejects.toBeInstanceOf(DeviceToolRejectedError);
+    const result = await executeUgvStartFlow(
+      "vehicle_emergency_stop",
+      { chassisMissionId: 42, reconMissionId: 43 },
+      (name) => {
+        calls.push(name);
+        if (name === "ugv_mission_control")
+          return Promise.resolve({
+            ...commonResult(42, 3),
+            error_code: 831,
+            message: "already stopped",
+          });
+        if (name === "ugv_area_recon_control" || name === "ugv_area_recon_lock")
+          return Promise.resolve({ ...commonResult(43, 3), cmd_res: 0, fail_data: "" });
+        return Promise.resolve(commonResult(42, 3));
+      },
+    );
+    expect(result.calls[0]).toEqual({ name: "ugv_motion_stop", arguments: {} });
     expect(calls).toEqual([
       "ugv_motion_stop",
       "ugv_mission_control",
       "ugv_area_recon_control",
       "ugv_area_recon_lock",
     ]);
+
+    await expect(
+      executeUgvStartFlow("vehicle_emergency_stop", {}, () =>
+        Promise.resolve({ ...commonResult(0, 3), error_code: 831, message: "stop rejected" }),
+      ),
+    ).rejects.toBeInstanceOf(DeviceToolRejectedError);
   });
 });
 

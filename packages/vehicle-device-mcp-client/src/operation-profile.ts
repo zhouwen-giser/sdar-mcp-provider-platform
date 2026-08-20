@@ -145,6 +145,7 @@ export const UGV_OPERATION_PROFILES = [
       "ugv_area_recon_control",
       "ugv_area_recon_lock",
     ],
+    startTools: ["ugv_motion_stop"],
     resultPolicyId: "ugv.emergency_stop.v1",
     requiredFreshnessDomains: ["chassis", "health"],
     riskLevel: "HIGH",
