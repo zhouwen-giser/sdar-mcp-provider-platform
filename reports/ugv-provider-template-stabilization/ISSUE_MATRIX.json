@@ -1,0 +1,362 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceClass": "current_source_issue_matrix",
+  "status": "PASS",
+  "capturedAt": "2026-08-20T11:46:58+08:00",
+  "branch": "codex/ugv-provider-template-stabilization",
+  "revision": "6f82256db4af7665b1cccb492669e4bcc2161edd",
+  "taskId": "G0-B02",
+  "observedLiveIncident": {
+    "facts": [
+      "MQTT online",
+      "Device MCP online",
+      "vehicle state idle",
+      "task state 0",
+      "speed 0",
+      "vehicle_navigate(point) returned UGV_TOOL_UNAVAILABLE",
+      "no physical dispatch"
+    ],
+    "forbiddenIdempotencyKey": "ugv-nav-20260818-10681344630",
+    "validationPoint": {
+      "longitude": 106.8134463,
+      "latitude": 29.72034353,
+      "altitude": 500
+    }
+  },
+  "issues": [
+    {
+      "id": "A-1",
+      "task": "A-02",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Absent Device MCP outputSchema is classified as schema mismatch.",
+      "evidence": ["packages/vehicle-device-mcp-client/src/ugv-compatibility.ts"],
+      "currentBehavior": "An absent output schema is normalized to an empty property set, so required output fields become missing.",
+      "requiredOutcome": "Permit undeclared output only when an operation-specific runtime result validator exists."
+    },
+    {
+      "id": "A-2",
+      "task": "A-03",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "UGV result validation assumes one common rigid result contract.",
+      "evidence": ["packages/vehicle-device-mcp-client/src/ugv-result.ts"],
+      "currentBehavior": "Common tools are required to expose error_code, message, mission_id, state and state_label; state 5 is treated as a protocol contradiction.",
+      "requiredOutcome": "Use tool-specific result policies and classify defined device business failures separately from transport/protocol uncertainty."
+    },
+    {
+      "id": "A-3",
+      "task": "A-01",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Operation and tool contract facts are duplicated.",
+      "evidence": [
+        "packages/vehicle-device-mcp-client/src/tool-allowlist.ts",
+        "packages/vehicle-device-mcp-client/src/ugv-compatibility.ts",
+        "apps/ugv-provider-adapter/src/manifest.ts",
+        "apps/ugv-provider-adapter/src/capabilities.ts",
+        "apps/ugv-provider-adapter/src/operation-health.ts"
+      ],
+      "currentBehavior": "Required tools, variants, schemas, capabilities and health dependencies have separate tables or hard-coded branches.",
+      "requiredOutcome": "Create a shared Vehicle Operation Profile for operation, variant and phase facts."
+    },
+    {
+      "id": "A-4",
+      "task": "A-04",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Preflight and Runtime admission do not consume one qualification verdict.",
+      "evidence": [
+        "scripts/ugv-simulation/preflight.mjs",
+        "packages/vehicle-device-mcp-client/src/ugv-compatibility.ts",
+        "packages/vehicle-provider-core/src/availability.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "currentBehavior": "Preflight validates its own required-tool subset while Runtime admission combines separate compatibility and availability checks.",
+      "requiredOutcome": "Create one Operation Qualification Service from profile, captured contract, tool health, variant and phase."
+    },
+    {
+      "id": "A-5",
+      "task": "A-05",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "UGV_TOOL_UNAVAILABLE hides the exact qualification cause.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/availability.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "currentBehavior": "Missing, unhealthy and schema-incompatible required tools converge on a generic operation denial.",
+      "requiredOutcome": "Return stable public denial plus bounded internal diagnostics naming tool, phase and qualification cause."
+    },
+    {
+      "id": "B-1",
+      "task": "B-01",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Multi-step mutating operations lack a durable step journal.",
+      "evidence": [
+        "packages/provider-adapter-kit/src/types.ts",
+        "packages/provider-adapter-kit/src/postgres-store.ts",
+        "migrations/providers/ugv/024_ugv_provider.sql",
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts"
+      ],
+      "currentBehavior": "Only coarse execution state, mission IDs and Device MCP call audits persist; intent/dispatching/accepted/rejected/uncertain phases do not.",
+      "requiredOutcome": "Persist mutation journal entries using Provider database conventions only."
+    },
+    {
+      "id": "B-2",
+      "task": "B-03",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Post-dispatch local validation and persistence failures are not uniformly uncertain.",
+      "evidence": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "currentBehavior": "Transport failures after a mutating request become uncertain, while some invalid or unpersistable responses can be classified as ordinary protocol/technical failure.",
+      "requiredOutcome": "Any ambiguity after dispatch becomes uncertain and is never automatically replayed."
+    },
+    {
+      "id": "B-3",
+      "task": "B-04",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "A primary mission accepted before dependent follow-up has no explicit orphan state.",
+      "evidence": [
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "packages/provider-adapter-kit/src/types.ts"
+      ],
+      "currentBehavior": "The mission ID can persist, but the lifecycle cannot represent a READY mission whose follow-up was never safely completed.",
+      "requiredOutcome": "Persist an explicit orphan READY mission state and recovery decision."
+    },
+    {
+      "id": "B-4",
+      "task": "B-04",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Task, control and physical deadlines are incomplete or use an indirect baseline.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "packages/provider-adapter-kit/src/types.ts",
+        "packages/runtime-configuration-contract/src/providers/ugv.ts"
+      ],
+      "currentBehavior": "One physical-confirmation timeout is derived from captured observation baselines; recon and control phases have no complete persisted deadline model.",
+      "requiredOutcome": "Persist explicit phase deadlines and drive terminal decisions with an injected clock."
+    },
+    {
+      "id": "B-5",
+      "task": "B-05",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Restart recovery cannot prove safe resume versus do-not-replay for every crash point.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "packages/provider-adapter-kit/src/postgres-store.ts"
+      ],
+      "currentBehavior": "Recovery restores executions and arbitration, then refreshes observations without a journal-backed dispatch decision.",
+      "requiredOutcome": "Recover from persisted journal state and prove mutation dispatch counts across crash points."
+    },
+    {
+      "id": "C-1",
+      "task": "C-01",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Freshness is domain-level rather than field-level.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/types.ts",
+        "packages/vehicle-provider-core/src/snapshot.ts",
+        "packages/vehicle-provider-core/src/physical-evidence.ts"
+      ],
+      "currentBehavior": "Position and speed share chassis freshness, so a fresh speed sample can mask a stale position sample.",
+      "requiredOutcome": "Record field authority and freshness without changing the frozen external schema."
+    },
+    {
+      "id": "C-2",
+      "task": "C-02",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Geodetic and local-frame positions are not a unified discriminated authority.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/types.ts",
+        "packages/vehicle-provider-core/src/physical-evidence.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "currentBehavior": "GNSS latitude/longitude and nav_state positionX/Y/Z occupy separate snapshot shapes, while navigation displacement uses Haversine only.",
+      "requiredOutcome": "Compute displacement only between compatible geodetic or local-frame authorities."
+    },
+    {
+      "id": "C-3",
+      "task": "C-03",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Stationary confirmation does not prove a continuous stable window.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/physical-evidence.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "currentBehavior": "The latest speed sample and elapsed observation time are used; stationaryCandidateSince and minimum samples are not modeled.",
+      "requiredOutcome": "Persist/reset a continuous stationary candidate and require a configured minimum sample count."
+    },
+    {
+      "id": "C-4",
+      "task": "C-04",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "UGV primary and secondary task-state conflicts are not governed.",
+      "evidence": [
+        "packages/vehicle-mqtt-ingress/src/ingress.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts"
+      ],
+      "currentBehavior": "The generic ingress supports taskStateAuthority and NPC configures it, but UGV_MQTT_PROFILE leaves it undefined while mission and composite topics can both patch mission state.",
+      "requiredOutcome": "Configure UGV source priority and stable conflict behavior."
+    },
+    {
+      "id": "C-5",
+      "task": "C-04",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Weakly correlated reconnaissance observations can drive terminal state too strongly.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "packages/vehicle-provider-core/src/physical-evidence.ts"
+      ],
+      "currentBehavior": "Missing observed recon identity is accepted for association and can still contribute to a successful terminal verdict.",
+      "requiredOutcome": "Enforce explicit correlation policy and prevent weak evidence from independently proving success."
+    },
+    {
+      "id": "C-6",
+      "task": "C-05",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Some no-observation paths can remain active indefinitely.",
+      "evidence": ["apps/ugv-provider-adapter/src/runtime.ts"],
+      "currentBehavior": "Navigation has a bounded physical-confirmation path, but recon and parts of task control lack equivalent persisted no-observation deadlines.",
+      "requiredOutcome": "Apply phase deadlines and explicit confirmation outcomes to navigate, recon, pause, resume and cancel."
+    },
+    {
+      "id": "D-1",
+      "task": "D-01",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Emergency Stop admission and execution require cleanup tools in addition to the primary stop tool.",
+      "evidence": [
+        "packages/vehicle-device-mcp-client/src/tool-allowlist.ts",
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "packages/vehicle-provider-core/src/physical-evidence.ts"
+      ],
+      "currentBehavior": "The flow issues motion stop plus chassis terminate, recon terminate and unlock, and confirmation expects all tracks cleaned up.",
+      "requiredOutcome": "Admit on ugv_motion_stop, journal it as primary, run cleanup best-effort and confirm independently."
+    },
+    {
+      "id": "D-2",
+      "task": "D-02",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Emergency Stop preemption is not a durable task relationship.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/track-arbiter.ts",
+        "packages/provider-adapter-kit/src/types.ts"
+      ],
+      "currentBehavior": "Track ownership and preemption are in-memory arbitration facts and are not reconstructible as task relationships after restart.",
+      "requiredOutcome": "Persist preemptor/preempted identities and reconcile them after restart."
+    },
+    {
+      "id": "D-3",
+      "task": "D-02",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "External device-owned active work is not part of admission.",
+      "evidence": [
+        "packages/vehicle-provider-core/src/availability.ts",
+        "packages/vehicle-provider-core/src/track-arbiter.ts"
+      ],
+      "currentBehavior": "Admission considers local track ownership but does not reserve tracks from authoritative device observations that are not owned by a local execution.",
+      "requiredOutcome": "Represent external occupancy and reject conflicting local dispatch without inventing ownership."
+    },
+    {
+      "id": "D-4",
+      "task": "D-03",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Public VehicleState and capability schemas remain broad and raw device status leaks upward.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "apps/ugv-provider-adapter/src/manifest.ts",
+        "apps/ugv-provider-adapter/src/capabilities.ts"
+      ],
+      "currentBehavior": "vehicle_get_state includes deviceStatus and output schemas use broad additionalProperties contracts.",
+      "requiredOutcome": "Freeze development DTO schemas, remove raw deviceStatus and attach bounded execution-linked evidence metadata."
+    },
+    {
+      "id": "D-5",
+      "task": "D-04",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Operation health dependencies are broad and recovery is not exact to variant and phase.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/operation-health.ts",
+        "packages/vehicle-device-mcp-client/src/tool-allowlist.ts"
+      ],
+      "currentBehavior": "Health tracking iterates broad OPERATION_REQUIRED_TOOLS and recovery success increments from any relevant healthy update rather than a bounded exact probe.",
+      "requiredOutcome": "Derive exact health dependencies from the shared profile and implement bounded half-open recovery."
+    },
+    {
+      "id": "D-6",
+      "task": "D-05",
+      "severity": "blocking",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Provider startup is dependency-connect-first rather than service-ready-first.",
+      "evidence": [
+        "apps/ugv-provider-adapter/src/main.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "currentBehavior": "main awaits runtime.initialize before MQTT and gRPC server startup; Device MCP failure can prevent the service exposing NOT_READY health.",
+      "requiredOutcome": "Start the server in NOT_READY, connect asynchronously, wait for initial observations, recover and then become READY."
+    },
+    {
+      "id": "D-7",
+      "task": "A-05",
+      "severity": "medium",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "Historical reports and qualification matrices can drift from code.",
+      "evidence": [
+        "reports/ugv-provider-v1/architecture.json",
+        "reports/ugv-provider-pre-simulator",
+        "reports/ugv-simulation"
+      ],
+      "currentBehavior": "Facts are emitted by multiple scripts and some historical reports name obsolete paths or retain superseded qualification claims.",
+      "requiredOutcome": "Generate reports from the shared operation profile and current verified source revision."
+    },
+    {
+      "id": "D-8",
+      "task": "D-06",
+      "severity": "high",
+      "status": "CONFIRMED_CURRENT_SOURCE",
+      "summary": "There is no focused development Provider-template Compose or controlled one-shot LIVE validator.",
+      "evidence": [
+        "deploy/ugv-simulation",
+        "deploy/production-bundles/ugv",
+        "scripts/ugv-simulation"
+      ],
+      "currentBehavior": "Existing deployments are qualification and production delivery stacks; deploy/development/ugv-provider-template is absent.",
+      "requiredOutcome": "Add explicit mock/external development profiles, no automatic fallback, and a one-shot guarded LIVE validator."
+    }
+  ],
+  "counts": {
+    "total": 24,
+    "blocking": 12,
+    "high": 11,
+    "medium": 1,
+    "confirmedCurrentSource": 26
+  },
+  "scopeDecision": {
+    "fixA": "required",
+    "fixB": "required",
+    "fixC": "required",
+    "fixD": "required",
+    "frozenProtocolChange": false,
+    "runtimeTaskEngineChange": false,
+    "pmsProviderDatabaseAccess": false
+  }
+}

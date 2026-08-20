@@ -1,0 +1,331 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceClass": "current_source_architecture_inventory",
+  "status": "PASS",
+  "capturedAt": "2026-08-20T11:46:58+08:00",
+  "branch": "codex/ugv-provider-template-stabilization",
+  "revision": "6f82256db4af7665b1cccb492669e4bcc2161edd",
+  "taskId": "G0-B02",
+  "scope": {
+    "productCodeChanged": false,
+    "inventoryIncludes": [
+      "UGV Provider Adapter",
+      "Device MCP client",
+      "MQTT ingress",
+      "Vehicle Provider core",
+      "Provider persistence",
+      "Runtime and Adapter protocol boundary",
+      "PMS, Database Provisioner and PM2 boundaries",
+      "configuration generation",
+      "deployment entrypoints",
+      "focused and platform tests",
+      "existing reports"
+    ],
+    "preservedUncommittedEvidence": ["reports/ugv-simulation/READ_ONLY_SMOKE.json"]
+  },
+  "identity": {
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "resourceId": "vehicle:ugv1",
+    "entityId": "ugv1",
+    "vehicleType": "ugv",
+    "providerVersion": "2.0.0-rc.1"
+  },
+  "components": [
+    {
+      "id": "pms-control-plane",
+      "paths": ["apps/pms-api", "apps/pms-worker", "packages/runtime-deployment"],
+      "responsibilities": [
+        "Provider Package, Provider and Resource metadata",
+        "Configuration and RuntimeDeployment control-plane state",
+        "Registry projection",
+        "runtime reconcile scheduling"
+      ],
+      "forbiddenDependencies": ["UGV Provider task tables", "Runtime task tables"],
+      "currentUgvIntegration": "UGV packages are synchronized by PMS images; direct_container and platform_managed Runtime authorities are modeled outside Provider operation logic."
+    },
+    {
+      "id": "database-provisioner",
+      "paths": [
+        "packages/postgres-provisioner",
+        "packages/runtime-deployment/src/ports/postgres-provisioner.ts"
+      ],
+      "responsibilities": [
+        "provision platform-managed Runtime database roles and databases",
+        "preserve separation between PMS, Provider Adapter and Runtime persistence"
+      ],
+      "currentUgvIntegration": "The real UGV qualification deployment runs three isolated PostgreSQL services; direct-container Provider and Runtime databases are not merged."
+    },
+    {
+      "id": "pm2-runtime-adapter",
+      "paths": ["packages/pm2-runtime-adapter", "apps/pms-worker/src/runtime-composition.ts"],
+      "responsibilities": [
+        "render Runtime bootstrap configuration",
+        "manage PM2 process lifecycle",
+        "observe process health and recover managed processes"
+      ],
+      "forbiddenDependencies": [
+        "UGV operation mapping",
+        "UGV task state",
+        "Device MCP qualification"
+      ],
+      "currentUgvIntegration": "Runtime process manager supports pm2 and direct_container; UGV Provider stabilization must not move business logic into PM2 integration."
+    },
+    {
+      "id": "smpp-runtime",
+      "paths": ["apps/runtime", "packages/task-engine", "packages/adapter-protocol"],
+      "responsibilities": [
+        "MCP tools/call and task authority",
+        "task get, update and cancel",
+        "idempotency identity",
+        "Provider Adapter RPC",
+        "Catalog and Registry publication integration"
+      ],
+      "frozenBoundary": "Provider stabilization must use the existing Adapter protocol and must not introduce a second Task Engine."
+    },
+    {
+      "id": "ugv-provider-adapter",
+      "paths": [
+        "apps/ugv-provider-adapter/src/main.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "apps/ugv-provider-adapter/src/server.ts",
+        "apps/ugv-provider-adapter/src/manifest.ts",
+        "apps/ugv-provider-adapter/src/capabilities.ts",
+        "apps/ugv-provider-adapter/src/operation-health.ts"
+      ],
+      "responsibilities": [
+        "vehicle_* operation implementation",
+        "local Provider Execution state",
+        "dispatch and control confirmation",
+        "physical evidence and recovery",
+        "gRPC Adapter server",
+        "Provider manifest and resource projection"
+      ],
+      "startupSequence": [
+        "construct store, MQTT ingress, Device MCP client and telemetry",
+        "await runtime.initialize()",
+        "start MQTT client",
+        "start Adapter gRPC server"
+      ],
+      "readinessFinding": "Device MCP connection and recovery occur before the server starts, so an offline dependency prevents a NOT_READY service from being observable."
+    },
+    {
+      "id": "vehicle-device-mcp-client",
+      "paths": [
+        "packages/vehicle-device-mcp-client/src/client.ts",
+        "packages/vehicle-device-mcp-client/src/tool-allowlist.ts",
+        "packages/vehicle-device-mcp-client/src/tool-mapping.ts",
+        "packages/vehicle-device-mcp-client/src/ugv-compatibility.ts",
+        "packages/vehicle-device-mcp-client/src/ugv-result.ts"
+      ],
+      "responsibilities": [
+        "Streamable HTTP MCP discovery and calls",
+        "read-only retry and reconnect",
+        "no automatic mutation retry",
+        "tool mapping, compatibility and result validation",
+        "per-tool circuit state and call audit"
+      ],
+      "currentQualificationShape": "Operation tool requirements, compatibility expectations and result contracts are distributed across several modules."
+    },
+    {
+      "id": "vehicle-mqtt-ingress",
+      "paths": [
+        "packages/vehicle-mqtt-ingress/src/client.ts",
+        "packages/vehicle-mqtt-ingress/src/ingress.ts",
+        "packages/vehicle-mqtt-ingress/src/normalizers.ts",
+        "packages/vehicle-mqtt-ingress/src/topics.ts"
+      ],
+      "responsibilities": [
+        "exact-topic subscription without wildcards",
+        "bounded payload decoding and normalization",
+        "source/ingest time ordering and duplicate rejection",
+        "snapshot patch production",
+        "target-source authority"
+      ],
+      "subscriptionCount": 18,
+      "currentTaskStateAuthority": "NPC Tank configures a primary mission-state topic and secondary composite topics; UGV_MQTT_PROFILE does not configure taskStateAuthority."
+    },
+    {
+      "id": "vehicle-provider-core",
+      "paths": [
+        "packages/vehicle-provider-core/src/availability.ts",
+        "packages/vehicle-provider-core/src/physical-evidence.ts",
+        "packages/vehicle-provider-core/src/snapshot.ts",
+        "packages/vehicle-provider-core/src/track-arbiter.ts",
+        "packages/vehicle-provider-core/src/types.ts"
+      ],
+      "responsibilities": [
+        "vehicle state and capability projections",
+        "availability gates",
+        "track arbitration",
+        "physical completion evidence",
+        "snapshot and freshness model"
+      ],
+      "currentObservationShape": "Topic observations are recorded, while public snapshot freshness remains grouped by chassis, mission, health, target and payload domains."
+    },
+    {
+      "id": "provider-adapter-kit",
+      "paths": [
+        "packages/provider-adapter-kit/src/types.ts",
+        "packages/provider-adapter-kit/src/memory-store.ts",
+        "packages/provider-adapter-kit/src/postgres-store.ts",
+        "packages/provider-adapter-kit/src/vehicle-grpc-server.ts"
+      ],
+      "responsibilities": [
+        "Provider Execution persistence",
+        "control acknowledgement fencing",
+        "Device MCP call audit",
+        "snapshot and business-event persistence",
+        "Adapter gRPC foundation"
+      ],
+      "currentMutationPersistence": "ProviderExecution stores coarse state, context, baselines, control confirmation and downstream mission IDs; it has no durable per-step mutation journal."
+    },
+    {
+      "id": "external-ugv",
+      "paths": [],
+      "responsibilities": [
+        "Device MCP server",
+        "MQTT physical observations",
+        "physical motion and mission state",
+        "device-side result semantics"
+      ],
+      "truthBoundary": "Mock and deterministic tests cannot qualify real physical behavior."
+    }
+  ],
+  "persistence": {
+    "providerMigrations": [
+      "migrations/providers/ugv/024_ugv_provider.sql",
+      "migrations/providers/ugv/026_ugv_single_active_fire.sql"
+    ],
+    "tables": [
+      "ugv_execution",
+      "ugv_execution_command_ack",
+      "ugv_device_tool_call",
+      "ugv_state_snapshot",
+      "ugv_business_event_source_state",
+      "ugv_business_event_source_log"
+    ],
+    "constraints": [
+      "unique task/operation/argument identity",
+      "unique external execution identity",
+      "single non-terminal fire execution per resource"
+    ],
+    "missingForGoal": [
+      "durable mutation journal step records",
+      "persisted phase deadlines",
+      "orphan mission state",
+      "persisted preemption relation",
+      "external device occupancy"
+    ]
+  },
+  "configuration": {
+    "authoritativeDefinition": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+    "adapterLoader": "apps/ugv-provider-adapter/src/config.ts",
+    "generatedInventory": "packages/runtime-configuration-contract/CONFIG_INVENTORY.json",
+    "ugvSpecificKeyCount": 48,
+    "existingControlKeys": [
+      "UGV_EXECUTION_MODE",
+      "UGV_ALLOW_NAVIGATION_WITH_RECON",
+      "UGV_FIRE_ENABLED",
+      "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
+      "UGV_STATIONARY_STABILITY_MS",
+      "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
+      "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
+      "UGV_OPERATION_FAILURE_OPEN_THRESHOLD",
+      "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD",
+      "UGV_EXECUTION_POLL_INTERVAL_MS"
+    ],
+    "missingForGoal": [
+      "minimum stationary sample count",
+      "persisted per-phase deadlines",
+      "explicit task-state source policy",
+      "recon correlation policy"
+    ]
+  },
+  "deployments": [
+    {
+      "path": "deploy/ugv-simulation",
+      "purpose": "real external simulator qualification with PMS and three isolated databases",
+      "persistentServices": 8,
+      "executionMode": "simulation",
+      "mockFallback": false
+    },
+    {
+      "path": "deploy/production-bundles/ugv",
+      "purpose": "independent UGV production delivery template",
+      "persistentServices": 8,
+      "executionMode": "live",
+      "mockFallback": false
+    },
+    {
+      "path": "deploy/ugv-provider",
+      "purpose": "legacy/local MQTT support material",
+      "persistentServices": null,
+      "executionMode": null,
+      "mockFallback": null
+    }
+  ],
+  "missingDeployment": "deploy/development/ugv-provider-template",
+  "testInventory": {
+    "focusedCommands": {
+      "unit": "pnpm test:ugv-provider:unit",
+      "contract": "pnpm test:ugv-provider:contract",
+      "integration": "pnpm test:ugv-provider:integration",
+      "security": "pnpm test:ugv-provider:security",
+      "grpcE2e": "pnpm test:ugv-provider:e2e",
+      "providerPlatformPostgres": "TEST_DATABASE_URL=... pnpm test:provider-platform-ugv",
+      "fullProviderGate": "pnpm verify:ugv-provider",
+      "frozenProtocol": "pnpm protocol:check",
+      "realPreflight": "pnpm test:ugv:real:preflight"
+    },
+    "primaryFiles": [
+      "tests/unit/ugv-provider-core.test.ts",
+      "tests/contract/ugv-provider-contract.test.ts",
+      "tests/integration/ugv-provider-adapter.test.ts",
+      "tests/security/ugv-provider-security.test.ts",
+      "tests/e2e/ugv-provider-grpc-e2e.test.ts",
+      "tests/provider-platform-e2e/ugv/vendor-managed.test.ts",
+      "tests/ugv-simulation/device-mcp-contract.test.ts",
+      "tests/ugv-simulation/mqtt-client-readiness.test.ts",
+      "tests/ugv-simulation/mqtt-real-contract.test.ts",
+      "tests/ugv-simulation/postgres-recovery.test.ts",
+      "tests/ugv-simulation/pre-simulator-hardening.test.ts",
+      "tests/ugv-simulation/provider-boundary.test.ts"
+    ],
+    "coverageGaps": [
+      "no crash-point mutation journal matrix",
+      "no field-level freshness matrix",
+      "no mixed-frame displacement matrix",
+      "no continuous stationary sample matrix",
+      "no UGV task-state source-conflict matrix",
+      "no device-offline startup/readiness test",
+      "no controlled one-shot LIVE validator"
+    ]
+  },
+  "reportInventory": {
+    "existingRoots": [
+      "reports/ugv-provider-v1",
+      "reports/ugv-provider-pre-simulator",
+      "reports/ugv-simulation"
+    ],
+    "existingTopLevelReportFileCount": 61,
+    "authority": "Current source and newly generated stabilization reports supersede historical claims when they disagree.",
+    "knownDriftExample": "reports/ugv-provider-v1/architecture.json names an obsolete Provider migration path and cannot serve as current architecture authority."
+  },
+  "boundaryAudit": {
+    "allowed": [
+      "Runtime -> Provider Adapter",
+      "Provider Adapter -> Device MCP and MQTT",
+      "PMS -> configuration and deployment metadata",
+      "PM2 Adapter -> process management"
+    ],
+    "forbidden": [
+      "Provider -> PMS runtime dependency",
+      "PMS -> Provider task database",
+      "Provider -> Runtime task database",
+      "PM2 Adapter -> Provider business logic",
+      "Provider -> direct SDAR dependency"
+    ],
+    "currentFinding": "No forbidden dependency was found in the inventoried UGV operation path; Fix A-D must preserve these boundaries."
+  }
+}
