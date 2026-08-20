@@ -8,6 +8,10 @@ import {
   UGV_OPERATION_TRACKS,
 } from "../../packages/vehicle-provider-core/src/index.js";
 import {
+  UGV_OPERATION_PROFILES,
+  resolveVehicleOperationVariant,
+} from "../../packages/vehicle-device-mcp-client/src/index.js";
+import {
   assertExactSubscriptions,
   decodeMqttPayload,
   exactUgvTopic,
@@ -110,6 +114,46 @@ describe("UGV MQTT exact routing and normalization", () => {
 });
 
 describe("UGV task, track, availability and fire boundaries", () => {
+  it("defines the complete UGV operation inventory, tracks, variants and risk levels", () => {
+    expect(UGV_OPERATION_PROFILES.map(({ operationName }) => operationName)).toEqual([
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets",
+      "vehicle_laser_range",
+      "vehicle_navigate",
+      "vehicle_area_recon",
+      "vehicle_track_target",
+      "vehicle_control_gimbal",
+      "vehicle_fire_weapon",
+      "vehicle_emergency_stop",
+    ]);
+    expect(
+      Object.fromEntries(
+        UGV_OPERATION_PROFILES.map(({ operationName, tracks }) => [operationName, [...tracks]]),
+      ),
+    ).toEqual(UGV_OPERATION_TRACKS);
+
+    const navigate = requiredProfile("vehicle_navigate");
+    expect(navigate).toMatchObject({ execution: "TASK_REQUIRED", riskLevel: "MEDIUM" });
+    expect(navigate.variants?.map(({ variant }) => variant).sort()).toEqual([
+      "distance",
+      "point",
+      "return_home",
+      "route",
+    ]);
+    expect(resolveVehicleOperationVariant(navigate, { mission: { type: "route" } })?.variant).toBe(
+      "route",
+    );
+    expect(resolveVehicleOperationVariant(navigate, {})?.variant).toBe("point");
+
+    const recon = requiredProfile("vehicle_area_recon");
+    expect(recon.variants?.map(({ variant }) => variant)).toEqual(["area", "circular"]);
+    expect(resolveVehicleOperationVariant(recon, { scanMode: 2 })?.variant).toBe("circular");
+    expect(requiredProfile("vehicle_fire_weapon").riskLevel).toBe("HIGH");
+    expect(requiredProfile("vehicle_emergency_stop").riskLevel).toBe("HIGH");
+  });
+
   it("never maps idle -1 to success for an active execution", () => {
     expect(mapVehicleTaskState(-1, true)).toEqual({
       state: "RECONCILE",
@@ -167,3 +211,11 @@ describe("UGV task, track, availability and fire boundaries", () => {
     });
   });
 });
+
+function requiredProfile(operationName: string) {
+  const profile = UGV_OPERATION_PROFILES.find(
+    (candidate) => candidate.operationName === operationName,
+  );
+  if (profile === undefined) throw new Error(`UGV_OPERATION_PROFILE_MISSING:${operationName}`);
+  return profile;
+}

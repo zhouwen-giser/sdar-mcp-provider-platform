@@ -12,6 +12,7 @@ import {
   DeviceToolProtocolError,
   DeviceToolRejectedError,
   NPC_TANK_DEVICE_TOOL_ALLOWLIST,
+  OPERATION_REQUIRED_TOOLS,
   StreamableHttpNpcTankDeviceMcpClient,
   StreamableHttpUgvDeviceMcpClient,
   UGV_DEVICE_TOOL_ALLOWLIST,
@@ -98,10 +99,54 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
       "ugv_path_follow_mission",
       "ugv_mission_control",
     ]);
+    expect(requiredUgvDeviceTools("vehicle_navigate", { mission: { type: "route" } })).toEqual([
+      "ugv_path_follow_mission",
+      "ugv_mission_control",
+    ]);
     expect(requiredUgvDeviceTools("vehicle_navigate", {}, "resume")).toEqual([
       "ugv_mission_control",
     ]);
     expect(requiredUgvDeviceTools("vehicle_get_capabilities")).toEqual(["get_capabilities"]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", { scanMode: "area" })).toEqual([
+      "ugv_area_recon_configure",
+      "ugv_area_recon_control",
+      "ugv_area_recon_get_status",
+    ]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", { scanMode: "circular" })).toEqual([
+      "ugv_area_recon_configure",
+      "ugv_area_recon_control",
+      "ugv_area_recon_get_status",
+    ]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", {}, "cancel")).toEqual([
+      "ugv_area_recon_control",
+    ]);
+    expect(OPERATION_REQUIRED_TOOLS).toEqual({
+      vehicle_get_state: ["get_status"],
+      vehicle_get_capabilities: ["get_capabilities"],
+      vehicle_get_payload_status: ["ugv_area_recon_get_status"],
+      vehicle_get_targets: ["ugv_area_recon_get_targets"],
+      vehicle_laser_range: ["ugv_laser_range"],
+      vehicle_navigate: [
+        "ugv_path_follow_mission",
+        "ugv_return_home",
+        "ugv_move_distance",
+        "ugv_mission_control",
+      ],
+      vehicle_area_recon: [
+        "ugv_area_recon_configure",
+        "ugv_area_recon_control",
+        "ugv_area_recon_get_status",
+      ],
+      vehicle_track_target: ["ugv_area_recon_lock", "ugv_area_recon_get_status"],
+      vehicle_control_gimbal: ["ugv_gimbal_move"],
+      vehicle_fire_weapon: ["ugv_area_recon_attack_confirm"],
+      vehicle_emergency_stop: [
+        "ugv_motion_stop",
+        "ugv_mission_control",
+        "ugv_area_recon_control",
+        "ugv_area_recon_lock",
+      ],
+    });
   });
 
   it("builds exact path, distance, recon, lifecycle, lock, gimbal and stop arguments", () => {
