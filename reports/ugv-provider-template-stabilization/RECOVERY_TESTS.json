@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "B-05",
+  "decisions": [
+    "safe primary dispatch",
+    "safe follow-up continuation",
+    "observation-only uncertainty",
+    "rejection",
+    "accepted waiting"
+  ],
+  "neverReplayed": ["primary dispatching", "follow-up dispatching", "pause", "resume", "cancel"],
+  "result": "Restart recovery derives its action from durable mutation-journal state and does not replay uncertain mutations.",
+  "evidence": ["focused recovery/device tests 61/61", "repository recovery gate 9/9"]
+}

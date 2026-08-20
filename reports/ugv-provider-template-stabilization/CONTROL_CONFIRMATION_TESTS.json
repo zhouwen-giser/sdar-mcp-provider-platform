@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "tasks": ["C-04", "C-05"],
+  "operations": ["navigate", "recon", "pause", "resume", "cancel"],
+  "requirements": [
+    "field-level authority",
+    "source-conflict gate",
+    "correlated mission identity",
+    "persisted deadline"
+  ],
+  "result": "Control success and failure are based on fresh authoritative observations and remain bounded when no new observation arrives.",
+  "evidence": ["deterministic Fix C tests 92/92"]
+}

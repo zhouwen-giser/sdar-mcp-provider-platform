@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.0",
+  "sourceHead": "a241985f652894a70d41340d88029c2be8dd8290",
+  "targetBranch": "codex/ugv-provider-template-stabilization",
+  "commits": [
+    {
+      "order": 1,
+      "sha": "6f82256db4af7665b1cccb492669e4bcc2161edd",
+      "message": "chore(ugv): capture template stabilization baseline"
+    },
+    {
+      "order": 2,
+      "sha": "b40aa1bec4b1f225fbcad0952a6ede1e3472c6ec",
+      "message": "docs(ugv): record stabilization architecture inventory"
+    },
+    {
+      "order": 3,
+      "sha": "7d3aebb0fae0aba2d26faeeb5ce315a2df75dbed",
+      "message": "refactor(vehicle): centralize operation profiles"
+    },
+    {
+      "order": 4,
+      "sha": "81fe00e7823ed01d55296345d9c7e6e04ee1c3d5",
+      "message": "fix(ugv): support undeclared output schemas"
+    },
+    {
+      "order": 5,
+      "sha": "d6a86b90cd942092fefe4ac013ca691e520c726d",
+      "message": "fix(ugv): align device result policies"
+    },
+    {
+      "order": 6,
+      "sha": "298b37708423596fe9d9d1764fc3cbcb05f188a5",
+      "message": "refactor(ugv): unify operation qualification"
+    },
+    {
+      "order": 7,
+      "sha": "3827f123ed1c402643921fee82970c8b63f847fe",
+      "message": "fix(ugv): align qualification consumers"
+    },
+    {
+      "order": 8,
+      "sha": "5173f19de6c64c4b3c7473f085681ef8a6540b6c",
+      "message": "feat(provider): persist mutation journal phases"
+    },
+    {
+      "order": 9,
+      "sha": "8342f8d4e3dc8cb416b7e25eaebcec36ccbea9b9",
+      "message": "feat(ugv): journal multi-step task dispatch"
+    },
+    {
+      "order": 10,
+      "sha": "682da909931c55579b26fb2c02238b49d1685951",
+      "message": "fix(ugv): classify ambiguous mutations as uncertain"
+    },
+    {
+      "order": 11,
+      "sha": "021509fa598ddad8cd295b86272a0aa9c83965d9",
+      "message": "feat(ugv): add task phase deadlines"
+    },
+    {
+      "order": 12,
+      "sha": "758bb1896f9bb1367d6f37aabc6bf110766b85a6",
+      "message": "fix(ugv): recover mutations without replay"
+    },
+    {
+      "order": 13,
+      "sha": "19a9519b57efa788bf01826326e94a2d19acf5a2",
+      "message": "feat(vehicle): add field observation authority"
+    },
+    {
+      "order": 14,
+      "sha": "493f40e3b5f2e67cf402aad708809abc1ac05e44",
+      "message": "feat(vehicle): model position authority"
+    },
+    {
+      "order": 15,
+      "sha": "6b5cbdf2e7288401dd956a1b1840b8b31134ba0e",
+      "message": "fix(vehicle): implement stable stationary confirmation"
+    },
+    {
+      "order": 16,
+      "sha": "aa3672588c66f5ba9885168607d4b3cd0810ce66",
+      "message": "fix(ugv): govern observation source conflicts"
+    },
+    {
+      "order": 17,
+      "sha": "e7eaa3e3ad25a125cee54a24190c6416c229ffee",
+      "message": "fix(ugv): harden physical task confirmation"
+    },
+    {
+      "order": 18,
+      "sha": "d6b8740ee85e4bac0d28fed2c9608b9100adc037",
+      "message": "refactor(ugv): split emergency stop phases"
+    },
+    {
+      "order": 19,
+      "sha": "55b8908016be6dba55e19029d336a89c0454e46e",
+      "message": "feat(provider): persist preemption and occupancy"
+    },
+    {
+      "order": 20,
+      "sha": "37b8449dfd33c2a55cdc2e318c546218e7496420",
+      "message": "feat(vehicle): stabilize provider DTO schemas"
+    },
+    {
+      "order": 21,
+      "sha": "706c5eb98c5320e4591d48d1a281cc0487ee4647",
+      "message": "fix(ugv): align variant health and capabilities"
+    },
+    {
+      "order": 22,
+      "sha": "274748665d5550503e80b4e5e996cb185ed8c5b0",
+      "message": "refactor(ugv): make startup readiness device independent"
+    },
+    {
+      "order": 23,
+      "sha": "0d5a076a82fb228de65a8263511ec4fc0ca734d7",
+      "message": "feat(dev): add UGV provider template deployment"
+    },
+    {
+      "order": 24,
+      "sha": "249956076eaac0f582e2ab082b67bb05980eb852",
+      "message": "test(ugv): complete template stabilization regression"
+    },
+    {
+      "order": 25,
+      "sha": "9d7039291cdbb1bbeae7b660a812c9e1b8f9a732",
+      "message": "test(ugv): record controlled live point validation"
+    },
+    { "order": 26, "sha": "SELF", "message": "docs(ugv): finalize provider template stabilization" }
+  ],
+  "selfReferenceNote": "A Git commit cannot embed its own SHA without changing that SHA. The concrete order-26 SHA is reported by the final handoff and Git history."
+}

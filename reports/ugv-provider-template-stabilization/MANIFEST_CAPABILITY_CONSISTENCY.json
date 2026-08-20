@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "tasks": ["A-05", "D-04"],
+  "facts": [
+    "operation profile",
+    "captured contract",
+    "variant/phase health",
+    "capability provenance"
+  ],
+  "result": "Manifest operations and advertised capabilities are generated from qualified, supported variants; unsupported variants and inputs are absent.",
+  "evidence": [
+    "focused UGV tests 92/92",
+    "shared NPC regression 56/56",
+    "provider-platform UGV 3/3",
+    "provider-platform NPC 2/2"
+  ]
+}

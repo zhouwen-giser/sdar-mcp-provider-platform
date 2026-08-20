@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "D-03",
+  "schemas": [
+    "VehicleStateV1",
+    "VehicleCapabilitiesV1",
+    "VehicleTaskResultV1",
+    "VehicleEvidenceV1"
+  ],
+  "closedTopLevelShapes": true,
+  "rawDeviceStatusExposed": false,
+  "internalEntityIdExposed": false,
+  "result": "UGV and NPC return normalized public state and bounded execution-linked evidence without leaking raw device payloads or internal entity identifiers.",
+  "evidence": ["focused response-schema tests 97/97", "final contract/deployment tests 17/17"]
+}

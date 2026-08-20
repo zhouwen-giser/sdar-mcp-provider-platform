@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "tasks": ["A-02", "A-04", "A-05"],
+  "usableContractStates": ["schema_compatible", "runtime_validated_undeclared_output"],
+  "failClosedStates": [
+    "missing_tool",
+    "input_schema_mismatch",
+    "output_schema_mismatch",
+    "unhealthy_tool"
+  ],
+  "consumers": ["preflight", "runtime admission", "capabilities", "manifest", "operation health"],
+  "result": "All qualification consumers use the same operation- and variant-specific verdict with bounded reason diagnostics.",
+  "evidence": ["focused Fix A 67/67", "real read-only preflight 15 operation facts"]
+}
