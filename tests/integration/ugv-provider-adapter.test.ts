@@ -1003,6 +1003,26 @@ describe("UGV long-running operation integration", () => {
     expect(await fixture.runtime.get("recon-stale")).toMatchObject({ state: "SUCCEEDED" });
   });
 
+  it("treats a legacy safe cursor as opaque and uses explicit Recon authority time", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("recon-legacy-cursor", "vehicle_area_recon", reconArgs()),
+    );
+    const persisted = required(await fixture.store.getExecution("recon-legacy-cursor"));
+    persisted.observationCursors = { reconnaissance: "source:41" };
+    await fixture.store.putExecution(persisted);
+
+    reconStatus(fixture.ingress, 5, 50, undefined, "1");
+    await expect(fixture.runtime.get("recon-legacy-cursor")).resolves.toMatchObject({
+      state: "RUNNING",
+    });
+    reconStatus(fixture.ingress, 11, 100, undefined, "1");
+    await expect(fixture.runtime.get("recon-legacy-cursor")).resolves.toMatchObject({
+      state: "SUCCEEDED",
+      result: expect.objectContaining({ observedAt: expect.stringMatching(/^\d{4}-/) }),
+    });
+  });
+
   it("requires fire confirmation and strips destroyed/damage from every persisted output", async () => {
     const fixture = await createFixture(true);
     fixture.device.responses.set("ugv_area_recon_attack_confirm", {
