@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T11:36:51+08:00",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "reviewedMain": "2e0626f2b2159d7c11061625c15274863479e217",
+  "sourceBranch": "codex/ugv-provider-pre-simulator-hardening",
+  "sourceHead": "a241985f652894a70d41340d88029c2be8dd8290",
+  "targetBranch": "codex/ugv-provider-template-stabilization",
+  "targetStartHead": "a241985f652894a70d41340d88029c2be8dd8290",
+  "sourceAheadOfMainBy": 1,
+  "sourceBehindMainBy": 0,
+  "worktreeAtStart": {
+    "status": "clean",
+    "changedFiles": [],
+    "untrackedFiles": []
+  },
+  "environment": {
+    "os": "Linux 6.8.0-136-generic x86_64",
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "npm": "10.9.8",
+    "git": "2.34.1",
+    "docker": "29.6.1",
+    "dockerCompose": "5.3.1"
+  },
+  "remotePushPerformed": false
+}
