@@ -478,11 +478,14 @@ export class StreamableHttpVehicleDeviceMcpClient<
       const response = await client.callTool({ name, arguments: argumentsValue }, undefined, {
         timeout: this.options.timeoutMs,
       });
-      const result = parseToolResult(
-        response,
-        this.options.maxResponseBytes,
-        this.profile.errorPrefix,
-      );
+      let result: Record<string, unknown>;
+      try {
+        result = parseToolResult(response, this.options.maxResponseBytes, this.profile.errorPrefix);
+      } catch (error) {
+        if (response.isError === true)
+          throw new DeviceToolRejectedError(this.profile.errorPrefix, name);
+        throw error;
+      }
       if (response.isError === true) {
         if (this.profile.validateResult === undefined)
           throw new DeviceToolRejectedError(this.profile.errorPrefix, name, undefined, result);
@@ -490,7 +493,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
           this.profile.validateResult(name, result, argumentsValue);
         } catch (error) {
           if (error instanceof DeviceToolRejectedError) throw error;
-          throw error;
+          throw new DeviceToolRejectedError(this.profile.errorPrefix, name, undefined, result);
         }
         throw new DeviceToolProtocolError(
           this.profile.errorPrefix,
@@ -500,8 +503,12 @@ export class StreamableHttpVehicleDeviceMcpClient<
       }
       return this.profile.validateResult?.(name, result, argumentsValue) ?? result;
     } catch (error) {
-      if (mutating && transportFailure(error)) {
-        await this.#disconnectAfterFailure();
+      if (
+        mutating &&
+        !(error instanceof DeviceToolRejectedError) &&
+        !(error instanceof UncertainMutatingDeviceCallError)
+      ) {
+        if (transportFailure(error)) await this.#disconnectAfterFailure();
         throw new UncertainMutatingDeviceCallError(
           this.profile.errorPrefix,
           name,

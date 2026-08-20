@@ -65,7 +65,7 @@ describe("UGV pre-simulator hardening", () => {
       status: "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
       outputSchemaDeclared: false,
       runtimeResultValidation: true,
-      missingOutputProperties: ["mission_id", "error_code"],
+      missingOutputProperties: ["mission_id", "state", "state_label", "message"],
     });
     expect(isUgvToolCompatibilityUsable(navigationWithUndeclaredOutput.status)).toBe(true);
 

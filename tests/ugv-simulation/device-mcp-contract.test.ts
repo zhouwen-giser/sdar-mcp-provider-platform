@@ -16,6 +16,7 @@ import {
   StreamableHttpNpcTankDeviceMcpClient,
   StreamableHttpUgvDeviceMcpClient,
   UGV_DEVICE_TOOL_ALLOWLIST,
+  UGV_DEVICE_RESULT_POLICIES,
   UncertainMutatingDeviceCallError,
   buildUgvEmergencyStopCalls,
   buildUgvGimbalStopCall,
@@ -318,7 +319,7 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         () => Promise.resolve(commonResult(0, 0)),
         { onMissionId: (missionId) => void persisted.push(missionId) },
       ),
-    ).rejects.toThrow("UGV_DEVICE_MISSION_ID_INVALID");
+    ).rejects.toThrow(UncertainMutatingDeviceCallError);
     expect(persisted).toEqual([]);
 
     const calls: UgvDeviceToolName[] = [];
@@ -332,12 +333,35 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         },
         { onMissionId: (missionId) => void persisted.push(missionId) },
       ),
-    ).rejects.toThrow("UGV_DEVICE_MISSION_ID_MISMATCH");
+    ).rejects.toThrow(UncertainMutatingDeviceCallError);
     expect(calls).toEqual(["ugv_move_distance", "ugv_mission_control"]);
     expect(persisted).toEqual(["42"]);
   });
 
   it("validates downstream business success instead of trusting MCP isError", () => {
+    expect(new Set(Object.keys(UGV_DEVICE_RESULT_POLICIES))).toEqual(
+      new Set(UGV_DEVICE_TOOL_ALLOWLIST),
+    );
+    expect(UGV_DEVICE_RESULT_POLICIES.ugv_move_distance).toMatchObject({
+      kind: "mutating",
+      responseIsError: "rejected",
+      errorCode: "optional",
+      successStates: [0, 1, 2, 3, 4],
+      rejectedStates: [5],
+      missionId: "allocates_or_controls",
+    });
+    expect(UGV_DEVICE_RESULT_POLICIES.get_status).toMatchObject({
+      kind: "read",
+      errorCode: "none",
+      missionId: "none",
+    });
+    const acceptedWithoutErrorCode = commonResult(9, 0);
+    delete acceptedWithoutErrorCode.error_code;
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", acceptedWithoutErrorCode, {
+        mission_id: 9,
+      }),
+    ).not.toThrow();
     expect(() =>
       validateUgvToolResult("ugv_move_distance", {
         ...commonResult(9, 5),
@@ -346,21 +370,27 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
       }),
     ).toThrow(DeviceToolRejectedError);
     expect(() => validateUgvToolResult("ugv_move_distance", commonResult(9, 5))).toThrow(
-      "UGV_DEVICE_RESULT_CONTRADICTORY",
+      DeviceToolRejectedError,
+    );
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", { state: 5, state_label: "failed" }),
+    ).toThrow(DeviceToolRejectedError);
+    expect(() => validateUgvToolResult("ugv_move_distance", { error_code: 831 })).toThrow(
+      DeviceToolRejectedError,
     );
     expect(() =>
       validateUgvToolResult("ugv_move_distance", {
         ...commonResult(9, 0),
         mission_id: "9",
       }),
-    ).toThrow(DeviceToolProtocolError);
+    ).toThrow(UncertainMutatingDeviceCallError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_configure", {
         ...commonResult(10, 0),
         res: false,
         fail_data: "",
       }),
-    ).toThrow("UGV_DEVICE_RECON_RESULT_CONTRADICTORY");
+    ).toThrow(DeviceToolRejectedError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_configure", {
         ...commonResult(10, 0),
@@ -371,14 +401,24 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
           coverable_label: "invalid",
         },
       }),
-    ).toThrow("UGV_DEVICE_COVERABILITY_INVALID");
+    ).toThrow(UncertainMutatingDeviceCallError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_control", {
         ...commonResult(10, 1),
         cmd_res: 1,
         fail_data: "rejected",
       }),
-    ).toThrow("UGV_DEVICE_RECON_CMD_RES_CONTRADICTORY");
+    ).toThrow(DeviceToolRejectedError);
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", {
+        mission_id: 9,
+        state_label: "accepted",
+        message: "ambiguous because state is missing",
+      }),
+    ).toThrow(UncertainMutatingDeviceCallError);
+    expect(() => validateUgvToolResult("get_status", { available: "yes" })).toThrow(
+      DeviceToolProtocolError,
+    );
     expect(() =>
       validateUgvToolResult("ugv_area_recon_get_status", {
         status: 99,
@@ -615,6 +655,34 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       await harness.stop();
     }
   });
+
+  it("uses MCP isError as rejection evidence and treats contradictory success as uncertain", async () => {
+    const harness = new UgvMcpHarness();
+    harness.errorTools.add("ugv_motion_stop");
+    harness.results.set("ugv_motion_stop", commonResult(1, 5));
+    await harness.start();
+    const client = testClient(harness, new MemoryProviderStore());
+    try {
+      await client.connect();
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        DeviceToolRejectedError,
+      );
+
+      harness.results.set("ugv_motion_stop", commonResult(1, 0));
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        UncertainMutatingDeviceCallError,
+      );
+
+      harness.results.set("ugv_motion_stop", "explicit device rejection");
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        DeviceToolRejectedError,
+      );
+      expect(harness.toolCalls.filter(({ name }) => name === "ugv_motion_stop")).toHaveLength(3);
+    } finally {
+      await client.close();
+      await harness.stop();
+    }
+  });
 });
 
 function commonResult(missionId: number, state: number): Record<string, unknown> {
@@ -692,6 +760,7 @@ class UgvMcpHarness {
   #port: number | undefined;
   dropNextToolCalls = 0;
   readonly delays = new Map<string, number>();
+  readonly errorTools = new Set<string>();
   readonly results = new Map<string, unknown>();
   readonly toolCalls: { name: string; arguments: Record<string, unknown> }[] = [];
 
@@ -757,6 +826,7 @@ class UgvMcpHarness {
               : commonResult(1, 0));
         return {
           content: [{ type: "text" as const, text: JSON.stringify(result) ?? "undefined" }],
+          ...(this.errorTools.has(name) ? { isError: true } : {}),
         };
       });
     const transport = new StreamableHTTPServerTransport();

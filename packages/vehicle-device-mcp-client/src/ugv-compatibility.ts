@@ -5,6 +5,7 @@ import {
   type VehicleOperationProfile,
 } from "./operation-profile.js";
 import { OPERATION_REQUIRED_TOOLS, type UgvDeviceToolName } from "./tool-allowlist.js";
+import { UGV_DEVICE_RESULT_POLICIES } from "./ugv-result.js";
 
 export type UgvToolCompatibilityStatus =
   | "PRESENT_COMPATIBLE"
@@ -43,7 +44,6 @@ const EXPECTATIONS: Readonly<
     {
       requirement: "required" | "optional";
       input?: readonly string[];
-      output?: readonly string[];
       readOnly?: boolean;
       taskControl?: boolean;
       missionIdSemantics?: UgvToolCompatibilityFact["missionIdSemantics"];
@@ -55,39 +55,33 @@ const EXPECTATIONS: Readonly<
   ugv_move_distance: {
     requirement: "required",
     input: ["direction", "distance", "mission_id"],
-    output: ["mission_id", "error_code"],
     missionIdSemantics: "allocates",
   },
   ugv_path_follow_mission: {
     requirement: "required",
     input: ["task_points", "mission_id"],
-    output: ["mission_id", "error_code"],
     missionIdSemantics: "allocates",
   },
   ugv_return_home: {
     requirement: "required",
     input: ["mission_id"],
-    output: ["mission_id", "error_code"],
     missionIdSemantics: "allocates",
   },
   ugv_mission_control: {
     requirement: "required",
     input: ["action", "mission_id"],
-    output: ["error_code"],
     taskControl: true,
     missionIdSemantics: "controls",
   },
-  ugv_motion_stop: { requirement: "required", output: ["error_code"], taskControl: true },
+  ugv_motion_stop: { requirement: "required", taskControl: true },
   ugv_area_recon_configure: {
     requirement: "required",
     input: ["mission_id"],
-    output: ["mission_id", "error_code"],
     missionIdSemantics: "allocates",
   },
   ugv_area_recon_control: {
     requirement: "required",
     input: ["cmd_type", "mission_id"],
-    output: ["error_code"],
     taskControl: true,
     missionIdSemantics: "controls",
   },
@@ -166,7 +160,7 @@ function toolCompatibility(
   const output = properties(contract?.outputSchema);
   const outputSchemaDeclared = contract?.outputSchema !== undefined;
   const expectedInputProperties = expectation.input ?? [];
-  const expectedOutputProperties = expectation.output ?? [];
+  const expectedOutputProperties = UGV_DEVICE_RESULT_POLICIES[toolName].requiredFields;
   const missingInputProperties = expectedInputProperties.filter((name) => !input.has(name));
   const missingOutputProperties = expectedOutputProperties.filter((name) => !output.has(name));
   let status: UgvToolCompatibilityStatus;

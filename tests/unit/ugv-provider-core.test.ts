@@ -133,6 +133,12 @@ describe("UGV task, track, availability and fire boundaries", () => {
         UGV_OPERATION_PROFILES.map(({ operationName, tracks }) => [operationName, [...tracks]]),
       ),
     ).toEqual(UGV_OPERATION_TRACKS);
+    expect(
+      UGV_OPERATION_PROFILES.every(
+        ({ resultPolicy }) =>
+          resultPolicy.runtimeValidation && resultPolicy.policyId.endsWith(".v1"),
+      ),
+    ).toBe(true);
 
     const navigate = requiredProfile("vehicle_navigate");
     expect(navigate).toMatchObject({ execution: "TASK_REQUIRED", riskLevel: "MEDIUM" });
