@@ -22,6 +22,7 @@ import {
   DeviceToolRejectedError,
   executeUgvStartFlow,
   fireConfirmationCalls,
+  isUgvToolCompatibilityUsable,
   missionIdFromUgvResult,
   parseUgvMissionId,
   requiredUgvDeviceTools,
@@ -351,8 +352,8 @@ export class UgvProviderRuntime {
       };
     const requiredTools = requiredUgvDeviceTools(operationName, argumentsValue);
     const toolFacts = buildUgvCompatibilityProfile(this.device.contracts())
-      .flatMap((operation) => operation.tools)
-      .filter((fact) => requiredTools.includes(fact.toolName));
+      .find((operation) => operation.operationName === operationName)
+      ?.tools.filter((fact) => requiredTools.includes(fact.toolName));
     const decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
@@ -365,7 +366,8 @@ export class UgvProviderRuntime {
       ),
       requiredToolsPresent:
         requiredTools.every((tool) => this.device.toolAvailable(tool)) &&
-        toolFacts.every((fact) => fact.status === "PRESENT_COMPATIBLE"),
+        toolFacts?.length === requiredTools.length &&
+        toolFacts.every((fact) => isUgvToolCompatibilityUsable(fact.status)),
       ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
       allowNavigationWithRecon: this.options.allowNavigationWithRecon,
       fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,

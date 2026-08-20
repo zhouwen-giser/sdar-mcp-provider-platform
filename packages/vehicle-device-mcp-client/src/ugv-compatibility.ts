@@ -1,9 +1,16 @@
 import type { CapturedToolContract } from "./fixtures.js";
+import {
+  UGV_OPERATION_PROFILES,
+  vehicleOperationProfile,
+  type VehicleOperationProfile,
+} from "./operation-profile.js";
 import { OPERATION_REQUIRED_TOOLS, type UgvDeviceToolName } from "./tool-allowlist.js";
 
 export type UgvToolCompatibilityStatus =
   | "PRESENT_COMPATIBLE"
-  | "PRESENT_SCHEMA_MISMATCH"
+  | "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED"
+  | "PRESENT_INPUT_SCHEMA_MISMATCH"
+  | "PRESENT_OUTPUT_SCHEMA_MISMATCH"
   | "MISSING_REQUIRED"
   | "MISSING_OPTIONAL"
   | "UNVERIFIED_EXTERNAL";
@@ -19,6 +26,8 @@ export interface UgvToolCompatibilityFact {
   expectedOutputProperties: readonly string[];
   missingInputProperties: readonly string[];
   missingOutputProperties: readonly string[];
+  outputSchemaDeclared: boolean;
+  runtimeResultValidation: boolean;
   schemaHash?: string;
 }
 
@@ -111,11 +120,19 @@ const EXPECTATIONS: Readonly<
 export function buildUgvCompatibilityProfile(
   contracts: readonly CapturedToolContract[],
   externallyVerified = true,
+  profiles: readonly VehicleOperationProfile[] = UGV_OPERATION_PROFILES,
 ): readonly UgvOperationCompatibilityFact[] {
   const byName = new Map(contracts.map((contract) => [contract.name, contract]));
   return Object.entries(OPERATION_REQUIRED_TOOLS).map(([operationName, toolNames]) => {
+    const runtimeResultValidation =
+      vehicleOperationProfile(operationName, profiles)?.resultPolicy.runtimeValidation === true;
     const tools = toolNames.map((toolName) =>
-      toolCompatibility(toolName, byName.get(toolName), externallyVerified),
+      toolCompatibility(
+        toolName,
+        byName.get(toolName),
+        externallyVerified,
+        runtimeResultValidation,
+      ),
     );
     return {
       operationName,
@@ -134,14 +151,20 @@ export function ugvOperationCompatibility(
   );
 }
 
+export function isUgvToolCompatibilityUsable(status: UgvToolCompatibilityStatus): boolean {
+  return status === "PRESENT_COMPATIBLE" || status === "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED";
+}
+
 function toolCompatibility(
   toolName: UgvDeviceToolName,
   contract: CapturedToolContract | undefined,
   externallyVerified: boolean,
+  runtimeResultValidation: boolean,
 ): UgvToolCompatibilityFact {
   const expectation = EXPECTATIONS[toolName];
   const input = properties(contract?.inputSchema);
   const output = properties(contract?.outputSchema);
+  const outputSchemaDeclared = contract?.outputSchema !== undefined;
   const expectedInputProperties = expectation.input ?? [];
   const expectedOutputProperties = expectation.output ?? [];
   const missingInputProperties = expectedInputProperties.filter((name) => !input.has(name));
@@ -150,8 +173,12 @@ function toolCompatibility(
   if (contract === undefined)
     status = expectation.requirement === "required" ? "MISSING_REQUIRED" : "MISSING_OPTIONAL";
   else if (!externallyVerified) status = "UNVERIFIED_EXTERNAL";
-  else if (missingInputProperties.length > 0 || missingOutputProperties.length > 0)
-    status = "PRESENT_SCHEMA_MISMATCH";
+  else if (missingInputProperties.length > 0) status = "PRESENT_INPUT_SCHEMA_MISMATCH";
+  else if (!outputSchemaDeclared)
+    status = runtimeResultValidation
+      ? "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED"
+      : "PRESENT_OUTPUT_SCHEMA_MISMATCH";
+  else if (missingOutputProperties.length > 0) status = "PRESENT_OUTPUT_SCHEMA_MISMATCH";
   else status = "PRESENT_COMPATIBLE";
   return {
     toolName,
@@ -164,17 +191,23 @@ function toolCompatibility(
     expectedOutputProperties,
     missingInputProperties,
     missingOutputProperties,
+    outputSchemaDeclared,
+    runtimeResultValidation,
     ...(contract?.schemaHash === undefined ? {} : { schemaHash: contract.schemaHash }),
   };
 }
 
 function aggregateStatus(tools: readonly UgvToolCompatibilityFact[]): UgvToolCompatibilityStatus {
   if (tools.some((tool) => tool.status === "MISSING_REQUIRED")) return "MISSING_REQUIRED";
-  if (tools.some((tool) => tool.status === "PRESENT_SCHEMA_MISMATCH"))
-    return "PRESENT_SCHEMA_MISMATCH";
+  if (tools.some((tool) => tool.status === "PRESENT_INPUT_SCHEMA_MISMATCH"))
+    return "PRESENT_INPUT_SCHEMA_MISMATCH";
+  if (tools.some((tool) => tool.status === "PRESENT_OUTPUT_SCHEMA_MISMATCH"))
+    return "PRESENT_OUTPUT_SCHEMA_MISMATCH";
   if (tools.some((tool) => tool.status === "UNVERIFIED_EXTERNAL")) return "UNVERIFIED_EXTERNAL";
   if (tools.length > 0 && tools.every((tool) => tool.status === "MISSING_OPTIONAL"))
     return "MISSING_OPTIONAL";
+  if (tools.some((tool) => tool.status === "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED"))
+    return "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED";
   return "PRESENT_COMPATIBLE";
 }
 

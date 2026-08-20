@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { UgvOperationHealthTracker } from "../../apps/ugv-provider-adapter/src/operation-health.js";
 import {
   buildUgvCompatibilityProfile,
+  isUgvToolCompatibilityUsable,
   mockUgvToolContracts,
+  UGV_OPERATION_PROFILES,
+  type VehicleOperationProfile,
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import {
   capturePhysicalDispatchBaseline,
@@ -17,7 +20,7 @@ import {
 const freshness = { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 };
 
 describe("UGV pre-simulator hardening", () => {
-  it("qualifies compatible, missing, mismatched, optional, and unverified contracts", () => {
+  it("qualifies compatible, missing, mismatched, undeclared-output, and unverified contracts", () => {
     const contracts = mockUgvToolContracts("2026-08-17T00:00:00.000Z");
     expect(operation(contracts, "vehicle_navigate").status).toBe("PRESENT_COMPATIBLE");
 
@@ -29,7 +32,7 @@ describe("UGV pre-simulator hardening", () => {
         ? { ...contract, outputSchema: { type: "object", properties: {} } }
         : contract,
     );
-    expect(operation(mismatched, "vehicle_navigate").status).toBe("PRESENT_SCHEMA_MISMATCH");
+    expect(operation(mismatched, "vehicle_navigate").status).toBe("PRESENT_OUTPUT_SCHEMA_MISMATCH");
 
     const inputDrift = contracts.map((contract) =>
       contract.name === "ugv_mission_control"
@@ -37,7 +40,7 @@ describe("UGV pre-simulator hardening", () => {
         : contract,
     );
     const navigationWithInputDrift = operation(inputDrift, "vehicle_navigate");
-    expect(navigationWithInputDrift.status).toBe("PRESENT_SCHEMA_MISMATCH");
+    expect(navigationWithInputDrift.status).toBe("PRESENT_INPUT_SCHEMA_MISMATCH");
     expect(
       navigationWithInputDrift.tools.find(({ toolName }) => toolName === "ugv_mission_control"),
     ).toMatchObject({
@@ -45,6 +48,39 @@ describe("UGV pre-simulator hardening", () => {
       missionIdSemantics: "controls",
       missingInputProperties: ["action", "mission_id"],
     });
+
+    const outputUndeclared = contracts.map((contract) => {
+      if (contract.name !== "ugv_move_distance") return contract;
+      const withoutOutputSchema = { ...contract };
+      delete withoutOutputSchema.outputSchema;
+      return withoutOutputSchema;
+    });
+    const navigationWithUndeclaredOutput = operation(outputUndeclared, "vehicle_navigate");
+    expect(navigationWithUndeclaredOutput.status).toBe(
+      "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+    );
+    expect(
+      navigationWithUndeclaredOutput.tools.find(({ toolName }) => toolName === "ugv_move_distance"),
+    ).toMatchObject({
+      status: "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+      outputSchemaDeclared: false,
+      runtimeResultValidation: true,
+      missingOutputProperties: ["mission_id", "error_code"],
+    });
+    expect(isUgvToolCompatibilityUsable(navigationWithUndeclaredOutput.status)).toBe(true);
+
+    const profilesWithoutRuntimeValidation = UGV_OPERATION_PROFILES.map((profile) =>
+      profile.operationName === "vehicle_navigate"
+        ? {
+            ...profile,
+            resultPolicy: { ...profile.resultPolicy, runtimeValidation: false },
+          }
+        : profile,
+    );
+    expect(
+      operation(outputUndeclared, "vehicle_navigate", true, profilesWithoutRuntimeValidation)
+        .status,
+    ).toBe("PRESENT_OUTPUT_SCHEMA_MISMATCH");
 
     const noLaser = contracts.filter(({ name }) => name !== "ugv_laser_range");
     expect(operation(noLaser, "vehicle_laser_range").status).toBe("MISSING_OPTIONAL");
@@ -315,8 +351,9 @@ function operation(
   contracts: ReturnType<typeof mockUgvToolContracts>,
   operationName: string,
   externallyVerified = true,
+  profiles: readonly VehicleOperationProfile[] = UGV_OPERATION_PROFILES,
 ) {
-  const value = buildUgvCompatibilityProfile(contracts, externallyVerified).find(
+  const value = buildUgvCompatibilityProfile(contracts, externallyVerified, profiles).find(
     (candidate) => candidate.operationName === operationName,
   );
   if (value === undefined) throw new Error("UGV_TEST_OPERATION_MISSING");
