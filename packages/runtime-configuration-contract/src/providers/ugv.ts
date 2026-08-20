@@ -82,6 +82,7 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: bool.default(true),
   UGV_STATIONARY_SPEED_THRESHOLD_KMH: z.coerce.number().min(0).max(5).default(0.1),
   UGV_STATIONARY_STABILITY_MS: z.coerce.number().int().min(0).max(60_000).default(500),
+  UGV_STATIONARY_MIN_SAMPLES: z.coerce.number().int().min(1).max(100).default(2),
   UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS: z.coerce
     .number()
     .int()

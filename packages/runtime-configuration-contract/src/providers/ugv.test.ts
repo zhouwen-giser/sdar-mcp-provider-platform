@@ -31,7 +31,7 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 65 inventory fields", () => {
+  it("covers all 66 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync(
         new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
@@ -46,7 +46,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(65);
+    expect(actual).toHaveLength(66);
     expect(actual).toEqual(expected);
   });
 
@@ -110,6 +110,7 @@ describe("UGV Provider configuration contract", () => {
       UGV_VEHICLE_TYPE: "ugv",
       UGV_EXECUTION_MODE: "simulation",
       UGV_FIRE_ENABLED: false,
+      UGV_STATIONARY_MIN_SAMPLES: 2,
     });
     expect(() =>
       loadUgvProviderConfiguration({
@@ -122,6 +123,17 @@ describe("UGV Provider configuration contract", () => {
       UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: false,
       UGV_ADAPTER_STORE_MODE: "postgres",
     });
+  });
+
+  it("bounds the continuous stationary sample requirement", () => {
+    expect(loadUgvProviderConfiguration({ UGV_STATIONARY_MIN_SAMPLES: "1" })).toMatchObject({
+      UGV_STATIONARY_MIN_SAMPLES: 1,
+    });
+    expect(loadUgvProviderConfiguration({ UGV_STATIONARY_MIN_SAMPLES: "100" })).toMatchObject({
+      UGV_STATIONARY_MIN_SAMPLES: 100,
+    });
+    expect(() => loadUgvProviderConfiguration({ UGV_STATIONARY_MIN_SAMPLES: "0" })).toThrow();
+    expect(() => loadUgvProviderConfiguration({ UGV_STATIONARY_MIN_SAMPLES: "101" })).toThrow();
   });
 
   it("accepts configured single-resource identity and rejects unsafe identity forms", () => {

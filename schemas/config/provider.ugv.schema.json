@@ -241,6 +241,7 @@
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
       "type": "string"
     },
+    "UGV_STATIONARY_MIN_SAMPLES": { "default": 2, "maximum": 100, "minimum": 1, "type": "integer" },
     "UGV_STATIONARY_SPEED_THRESHOLD_KMH": {
       "default": 0.1,
       "maximum": 5,
@@ -303,6 +304,7 @@
     "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
     "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
     "UGV_STATIONARY_STABILITY_MS",
+    "UGV_STATIONARY_MIN_SAMPLES",
     "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
     "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
     "UGV_OPERATION_FAILURE_OPEN_THRESHOLD",

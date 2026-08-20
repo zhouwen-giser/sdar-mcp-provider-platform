@@ -161,6 +161,7 @@ export class UgvProviderRuntime {
       fireRequiresChassisStopped: boolean;
       stationarySpeedThresholdKmh?: number;
       stationaryStabilityMs?: number;
+      stationaryMinimumSamples?: number;
       startObservationTimeoutMs?: number;
       activeObservationTimeoutMs?: number;
       terminalObservationTimeoutMs?: number;
@@ -292,6 +293,7 @@ export class UgvProviderRuntime {
       operationObservationAuthorities(input.operationName, this.ingress),
       now,
     );
+    const baselineSpeedCursor = this.ingress.fieldObservationAuthority("chassis.speed")?.cursor;
     let execution: ProviderExecution = {
       taskId: input.taskId,
       externalExecutionId: `${this.options.resourceId ?? "vehicle:ugv1"}:${tracks[0] ?? "query"}:${randomUUID()}`,
@@ -314,6 +316,9 @@ export class UgvProviderRuntime {
       createdAt: now,
       updatedAt: now,
       evidence: [],
+      ...(baselineSpeedCursor === undefined
+        ? {}
+        : { lastStationarySpeedCursor: baselineSpeedCursor }),
     };
     try {
       await this.store.putExecution(execution);
@@ -532,6 +537,10 @@ export class UgvProviderRuntime {
       fenced.controlConfirmationDeadline = deadlineFrom(
         commandFencedAt,
         this.options.controlConfirmationTimeoutMs ?? 30_000,
+      );
+      resetStationaryStability(
+        fenced,
+        this.ingress.fieldObservationAuthority("chassis.speed")?.cursor,
       );
       await this.store.putExecution(fenced);
       const calls = controlDeviceCalls(execution.operationName, command, persistedMissionId ?? 0);
@@ -978,6 +987,7 @@ export class UgvProviderRuntime {
     const phaseObservation = taskPhaseObservation(execution, snapshot, this.ingress);
     let next = execution;
     if (execution.operationName === "vehicle_navigate") {
+      const stationaryExecution = this.#advanceStationaryStability(execution, snapshot);
       const baseline = executionPhysicalBaseline(execution);
       const currentAuthorities = operationObservationAuthorities(
         execution.operationName,
@@ -991,19 +1001,22 @@ export class UgvProviderRuntime {
         currentAuthorities,
         freshness: this.options.freshness,
         stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
+        now: this.#now().getTime(),
       });
       const requestedDistanceM = requestedDistance(execution.arguments);
       next = applyTrack(
-        execution,
+        stationaryExecution,
         snapshot.chassis.mission,
         "completed",
         operationObservationCursor(execution.operationName, this.ingress),
         {
           confirmation,
-          stabilitySatisfied: confirmationStabilitySatisfied(
-            baseline,
-            currentAuthorities,
+          observationChanged: stationaryExecution.revision !== execution.revision,
+          stabilitySatisfied: stationaryStabilitySatisfied(
+            stationaryExecution,
+            this.ingress.fieldObservationAuthority("chassis.speed"),
             this.options.stationaryStabilityMs ?? 0,
+            this.options.stationaryMinimumSamples ?? 2,
           ),
           facts: navigationTerminalFacts({
             snapshot,
@@ -1072,6 +1085,7 @@ export class UgvProviderRuntime {
           observedAt: new Date().toISOString(),
         });
     } else if (execution.operationName === "vehicle_emergency_stop") {
+      const stationaryExecution = this.#advanceStationaryStability(execution, snapshot);
       const baseline = executionPhysicalBaseline(execution);
       const authorities = operationObservationAuthorities(execution.operationName, this.ingress);
       const stopConfirmation = stationaryPhysicalConfirmation({
@@ -1080,13 +1094,15 @@ export class UgvProviderRuntime {
         currentAuthorities: authorities,
         freshness: this.options.freshness,
         stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
+        now: this.#now().getTime(),
       });
       if (
         stopConfirmation.confirmed &&
-        confirmationStabilitySatisfied(
-          baseline,
-          authorities,
+        stationaryStabilitySatisfied(
+          stationaryExecution,
+          this.ingress.fieldObservationAuthority("chassis.speed"),
           this.options.stationaryStabilityMs ?? 0,
+          this.options.stationaryMinimumSamples ?? 2,
         ) &&
         snapshot.chassis.mission.state !== 1 &&
         !reconMotionActive(snapshot.payload.reconnaissance.motionStatus) &&
@@ -1094,7 +1110,7 @@ export class UgvProviderRuntime {
         snapshot.payload.weapon.state !== 1 &&
         (snapshot.payload.reconnaissance.lock?.stage ?? 1) === 1
       )
-        next = terminal(execution, "SUCCEEDED", "UGV_LOCAL_STOP_CONFIRMED", {
+        next = terminal(stationaryExecution, "SUCCEEDED", "UGV_LOCAL_STOP_CONFIRMED", {
           resourceId: this.options.resourceId ?? "vehicle:ugv1",
           status: "stopped",
           finalSpeedKmh: snapshot.chassis.speedKmh,
@@ -1107,8 +1123,30 @@ export class UgvProviderRuntime {
           snapshotRevision: snapshot.revision,
           observedAt: snapshot.observedAt,
         });
-      else if (!stopConfirmation.confirmed && execution.reasonCode !== stopConfirmation.reasonCode)
-        next = transition(execution, execution.state, stopConfirmation.reasonCode);
+      else if (
+        !stopConfirmation.confirmed &&
+        stationaryExecution.reasonCode !== stopConfirmation.reasonCode
+      )
+        next = transition(
+          stationaryExecution,
+          stationaryExecution.state,
+          stopConfirmation.reasonCode,
+        );
+      else if (
+        stopConfirmation.confirmed &&
+        !stationaryStabilitySatisfied(
+          stationaryExecution,
+          this.ingress.fieldObservationAuthority("chassis.speed"),
+          this.options.stationaryStabilityMs ?? 0,
+          this.options.stationaryMinimumSamples ?? 2,
+        )
+      )
+        next = transition(
+          stationaryExecution,
+          stationaryExecution.state,
+          "UGV_STATIONARY_STABILITY_PENDING",
+        );
+      else next = stationaryExecution;
       if (
         !isTerminal(next.state) &&
         physicalConfirmationExpired(baseline, this.options.physicalConfirmationTimeoutMs ?? 30_000)
@@ -1166,6 +1204,45 @@ export class UgvProviderRuntime {
       }
     }
     return next;
+  }
+
+  #advanceStationaryStability(
+    execution: ProviderExecution,
+    snapshot: UgvSnapshot,
+  ): ProviderExecution {
+    const authority = this.ingress.fieldObservationAuthority("chassis.speed");
+    const speedKmh = snapshot.chassis.speedKmh;
+    const now = this.#now();
+    const age =
+      authority === undefined ? Number.NaN : now.getTime() - Date.parse(authority.observedAt);
+    const fresh =
+      authority !== undefined &&
+      Number.isFinite(age) &&
+      age >= 0 &&
+      age <= this.options.freshness.chassis &&
+      speedKmh !== undefined;
+    if (!fresh)
+      return resetStationaryStabilityRecord(execution, authority?.cursor, now.toISOString());
+    if (authority.cursor === execution.lastStationarySpeedCursor) return execution;
+    if (speedKmh > (this.options.stationarySpeedThresholdKmh ?? 0.1))
+      return updateStationaryStabilityRecord(
+        execution,
+        {
+          lastStationarySpeedCursor: authority.cursor,
+          lastNonStationaryObservedAt: authority.observedAt,
+          consecutiveStationaryObservations: 0,
+        },
+        now.toISOString(),
+      );
+    return updateStationaryStabilityRecord(
+      execution,
+      {
+        lastStationarySpeedCursor: authority.cursor,
+        stationaryCandidateSince: execution.stationaryCandidateSince ?? authority.observedAt,
+        consecutiveStationaryObservations: (execution.consecutiveStationaryObservations ?? 0) + 1,
+      },
+      now.toISOString(),
+    );
   }
 
   #armObservationPhaseDeadlines(
@@ -2151,12 +2228,17 @@ function applyTrack(
   observationCursor?: string,
   physical?: {
     confirmation: ReturnType<typeof navigationPhysicalConfirmation>;
+    observationChanged: boolean;
     stabilitySatisfied: boolean;
     facts: Record<string, unknown>;
     controlObservationIsNew: boolean;
   },
 ): ProviderExecution {
-  if (!isNewOperationObservation(execution, observationCursor)) return execution;
+  if (
+    !isNewOperationObservation(execution, observationCursor) &&
+    physical?.observationChanged !== true
+  )
+    return execution;
   if (!trackBelongsToExecution(execution, track))
     return execution.reasonCode === "UGV_DOWNSTREAM_MISSION_ID_MISMATCH"
       ? execution
@@ -2192,11 +2274,10 @@ function applyTrack(
   )
     return transition(current, current.state, "UGV_RESUME_PHYSICAL_CONFIRMATION_PENDING");
   if (mapped.state === "SUCCEEDED") {
-    if (
-      physical !== undefined &&
-      (!physical.confirmation.confirmed || !physical.stabilitySatisfied)
-    )
+    if (physical !== undefined && !physical.confirmation.confirmed)
       return transition(current, current.state, physical.confirmation.reasonCode);
+    if (physical !== undefined && !physical.stabilitySatisfied)
+      return transition(current, current.state, "UGV_STATIONARY_STABILITY_PENDING");
     return terminal(current, "SUCCEEDED", mapped.reasonCode, {
       resourceId: execution.resourceId,
       status: successStatus,
@@ -2453,19 +2534,73 @@ function controlObservationIsNew(
   return missionIsNew && newFields.has("chassis.speed");
 }
 
-function confirmationStabilitySatisfied(
-  baseline: PhysicalDispatchBaseline,
-  current: readonly PhysicalObservationAuthority[],
+function stationaryStabilitySatisfied(
+  execution: ProviderExecution,
+  speedAuthority: PhysicalObservationAuthority | undefined,
   stabilityMs: number,
+  minimumSamples: number,
 ): boolean {
-  if (stabilityMs <= 0) return true;
-  const currentTime = current.reduce(
-    (latest, authority) => Math.max(latest, Date.parse(authority.observedAt)),
-    Number.NEGATIVE_INFINITY,
-  );
+  if (
+    speedAuthority === undefined ||
+    execution.stationaryCandidateSince === undefined ||
+    speedAuthority.cursor !== execution.lastStationarySpeedCursor ||
+    (execution.consecutiveStationaryObservations ?? 0) < minimumSamples
+  )
+    return false;
   return (
-    Number.isFinite(currentTime) && currentTime - Date.parse(baseline.capturedAt) >= stabilityMs
+    Date.parse(speedAuthority.observedAt) - Date.parse(execution.stationaryCandidateSince) >=
+    stabilityMs
   );
+}
+
+function resetStationaryStability(execution: ProviderExecution, speedCursor?: string): void {
+  delete execution.stationaryCandidateSince;
+  execution.consecutiveStationaryObservations = 0;
+  if (speedCursor === undefined) delete execution.lastStationarySpeedCursor;
+  else execution.lastStationarySpeedCursor = speedCursor;
+}
+
+function resetStationaryStabilityRecord(
+  execution: ProviderExecution,
+  speedCursor: string | undefined,
+  updatedAt: string,
+): ProviderExecution {
+  if (
+    execution.stationaryCandidateSince === undefined &&
+    (execution.consecutiveStationaryObservations ?? 0) === 0 &&
+    execution.lastStationarySpeedCursor === speedCursor
+  )
+    return execution;
+  const next = updateStationaryStabilityRecord(
+    execution,
+    {
+      ...(speedCursor === undefined ? {} : { lastStationarySpeedCursor: speedCursor }),
+      consecutiveStationaryObservations: 0,
+    },
+    updatedAt,
+  );
+  if (speedCursor === undefined) delete next.lastStationarySpeedCursor;
+  return next;
+}
+
+function updateStationaryStabilityRecord(
+  execution: ProviderExecution,
+  updates: Pick<
+    ProviderExecution,
+    | "stationaryCandidateSince"
+    | "lastNonStationaryObservedAt"
+    | "consecutiveStationaryObservations"
+    | "lastStationarySpeedCursor"
+  >,
+  updatedAt: string,
+): ProviderExecution {
+  const next = structuredClone(execution);
+  delete next.stationaryCandidateSince;
+  next.consecutiveStationaryObservations = 0;
+  Object.assign(next, updates);
+  next.revision++;
+  next.updatedAt = updatedAt;
+  return next;
 }
 
 function physicalConfirmationExpired(

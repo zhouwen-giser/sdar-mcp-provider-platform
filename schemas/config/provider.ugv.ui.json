@@ -701,6 +701,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_stationary_min_samples setting.",
+      "displayName": "UGV_STATIONARY_MIN_SAMPLES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_STATIONARY_MIN_SAMPLES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_physical_confirmation_timeout_ms setting.",
       "displayName": "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
       "overridePolicy": {

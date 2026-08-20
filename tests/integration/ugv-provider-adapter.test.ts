@@ -522,6 +522,109 @@ describe("UGV long-running operation integration", () => {
     expect((await fixture.runtime.get("pause-proof"))?.state).toBe("PAUSED");
   });
 
+  it("requires distinct continuously stationary samples and resets on movement or staleness", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 1_000,
+      stationaryMinimumSamples: 2,
+    });
+    now = Date.now() + 100;
+    await fixture.runtime.start(
+      startInput("pause-stability-window", "vehicle_navigate", navigateArgs()),
+    );
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from('{"entity_id":"ugv1","id":1,"state":1,"progress":10}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    const running = required(await fixture.runtime.get("pause-stability-window"));
+    await fixture.runtime.command("pause", identityOf(running, "1"));
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from('{"entity_id":"ugv1","id":1,"state":2,"progress":20}'),
+      false,
+      new Date(now).toISOString(),
+    );
+
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    let pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING",
+      stationaryCandidateSince: new Date(now).toISOString(),
+      consecutiveStationaryObservations: 1,
+    });
+    expect(
+      (await fixture.runtime.get("pause-stability-window"))?.consecutiveStationaryObservations,
+    ).toBe(1);
+
+    now += 3_001;
+    pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending.consecutiveStationaryObservations).toBe(0);
+    expect(pending.stationaryCandidateSince).toBeUndefined();
+
+    now += 500;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":1}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending.consecutiveStationaryObservations).toBe(0);
+    expect(pending.stationaryCandidateSince).toBeUndefined();
+    expect(pending.lastNonStationaryObservedAt).toBe(new Date(now).toISOString());
+
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    const candidateSince = new Date(now).toISOString();
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "RUNNING",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 1,
+    });
+    now += 500;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "RUNNING",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 2,
+    });
+
+    now += 600;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "PAUSED",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 3,
+    });
+  });
+
   it("fails a terminal mission closed when physical confirmation times out", async () => {
     const fixture = await createFixture(false, new MemoryProviderStore(), {
       physicalConfirmationTimeoutMs: 0,
@@ -1646,6 +1749,7 @@ function runtimeOptions() {
     fireRequiresChassisStopped: true,
     fireEnabled: true,
     stationaryStabilityMs: 0,
+    stationaryMinimumSamples: 1,
     pollIntervalMs: 60_000,
   };
 }

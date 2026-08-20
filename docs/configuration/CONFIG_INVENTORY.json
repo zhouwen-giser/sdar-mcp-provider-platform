@@ -18,7 +18,7 @@
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 146
+      "items": 147
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -32,7 +32,7 @@
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 65
+      "items": 66
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -98,12 +98,12 @@
     }
   ],
   "coverage": {
-    "expectedItems": 245,
-    "actualItems": 245,
+    "expectedItems": 246,
+    "actualItems": 246,
     "secretItems": 22,
     "byComponent": {
       "runtime": 99,
-      "ugv": 65,
+      "ugv": 66,
       "npc-tank": 53,
       "home-assistant-climate": 28
     }
@@ -2326,6 +2326,21 @@
       "defaultValue": false,
       "required": false,
       "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_STATIONARY_MIN_SAMPLES",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "confirmation",
+      "defaultDefined": true,
+      "defaultValue": 2,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(2)",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",

@@ -114,6 +114,7 @@ const runtime = new UgvProviderRuntime(
     fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
     stationarySpeedThresholdKmh: config.UGV_STATIONARY_SPEED_THRESHOLD_KMH,
     stationaryStabilityMs: config.UGV_STATIONARY_STABILITY_MS,
+    stationaryMinimumSamples: config.UGV_STATIONARY_MIN_SAMPLES,
     physicalConfirmationTimeoutMs: config.UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS,
     failureBudget: {
       degradedThreshold: config.UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD,

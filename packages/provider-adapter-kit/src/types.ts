@@ -51,6 +51,14 @@ export interface ProviderExecution {
   physicalConfirmationDeadline?: string;
   /** Deadline for post-command physical confirmation. */
   controlConfirmationDeadline?: string;
+  /** First fresh zero-speed observation in the current uninterrupted stationary window. */
+  stationaryCandidateSince?: string;
+  /** Latest fresh observation that exceeded the stationary threshold. */
+  lastNonStationaryObservedAt?: string;
+  /** Distinct fresh zero-speed observations in the current uninterrupted window. */
+  consecutiveStationaryObservations?: number;
+  /** Last processed field-level speed cursor; prevents polling from recounting one sample. */
+  lastStationarySpeedCursor?: string;
   selectedDeviceTool?: string;
   providerRevision?: string;
   state: ProviderExecutionState;
