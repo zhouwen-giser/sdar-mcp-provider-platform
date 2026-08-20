@@ -1,5 +1,10 @@
 import { ADAPTER_PROTOCOL_VERSION, jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
 import type { ProviderStore } from "../../provider-adapter-kit/src/index.js";
+import {
+  vehicleCapabilitiesV1Schema,
+  vehicleStateV1Schema,
+  vehicleTaskResultV1Schema,
+} from "./dto-schemas.js";
 
 export interface VehicleManifestProfile {
   providerId: string;
@@ -44,15 +49,7 @@ export function vehicleProviderManifest(
   const schema = (properties: Record<string, unknown>, required: string[]) =>
     jsonToProtoStruct({ type: "object", properties, required, additionalProperties: false });
   const taskOutput = (statuses: string[], optionalProperties: Record<string, unknown> = {}) =>
-    schema(
-      {
-        resourceId,
-        status: { type: "string", enum: statuses },
-        observedAt: { type: "string", format: "date-time" },
-        ...optionalProperties,
-      },
-      ["resourceId", "status", "observedAt"],
-    );
+    jsonToProtoStruct(vehicleTaskResultV1Schema(profile.resourceId, statuses, optionalProperties));
   const nullable = (value: Record<string, unknown>) => ({
     anyOf: [value, { type: "null" }],
   });
@@ -79,7 +76,7 @@ export function vehicleProviderManifest(
           },
           ["resourceId"],
         ),
-        outputSchema: jsonToProtoStruct({ type: "object", additionalProperties: true }),
+        outputSchema: jsonToProtoStruct(vehicleStateV1Schema(profile.resourceId)),
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
@@ -90,7 +87,7 @@ export function vehicleProviderManifest(
               description: `Read device-reported ${profile.displayKind} capability facts without inventing unsupported limits.`,
               execution: "SYNCHRONOUS",
               inputSchema: schema({ resourceId }, ["resourceId"]),
-              outputSchema: jsonToProtoStruct({ type: "object", additionalProperties: true }),
+              outputSchema: jsonToProtoStruct(vehicleCapabilitiesV1Schema(profile.resourceId)),
               capabilities: caps(false, false, false, false, false, false),
               resourceBinding: binding,
             },

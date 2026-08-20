@@ -713,7 +713,7 @@ export class UgvProviderRuntime {
           "vehicle.weapon.local_result",
           next.updatedAt,
           "/status",
-          `resource:${next.resourceId}`,
+          `execution:${next.externalExecutionId}`,
           [this.options.providerId, "ugv-adapter"],
         ),
       );
@@ -899,9 +899,8 @@ export class UgvProviderRuntime {
     const observedAt = new Date().toISOString();
     let result: Record<string, unknown>;
     if (input.operationName === "vehicle_get_state") {
-      let deviceStatus: Record<string, unknown> | undefined;
       if (this.device.hasTool("get_status")) {
-        deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
+        const deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
         const observation = normalizeMqttObservation("status/ugv", deviceStatus);
         this.ingress.applyDeviceObservation(
           observation.patch,
@@ -912,7 +911,6 @@ export class UgvProviderRuntime {
       result = {
         ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
         mqttIngressSequence: this.ingress.ingestSequence(),
-        ...(deviceStatus === undefined ? {} : { deviceStatus }),
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
       const capabilities = await this.#callDevice("get_capabilities", {}, input.taskId);
@@ -997,8 +995,8 @@ export class UgvProviderRuntime {
           synchronousEvidence(
             input.operationName,
             observedAt,
-            this.options.resourceId ?? "vehicle:ugv1",
             this.options.providerId,
+            externalExecutionId,
           ),
         ],
       },
@@ -3004,7 +3002,7 @@ function terminal(
         : "vehicle.mission.state",
       next.updatedAt,
       "/status",
-      `resource:${execution.resourceId}`,
+      `execution:${execution.externalExecutionId}`,
       [execution.providerId ?? "ugv-provider", "ugv-adapter"],
     ),
   );
@@ -3048,8 +3046,8 @@ function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string,
 function synchronousEvidence(
   operationName: string,
   observedAt: string,
-  resourceId: string,
   providerId: string,
+  externalExecutionId: string,
 ) {
   const evidenceType =
     operationName === "vehicle_get_targets"
@@ -3057,10 +3055,13 @@ function synchronousEvidence(
       : operationName === "vehicle_get_payload_status" || operationName === "vehicle_laser_range"
         ? "vehicle.payload.status"
         : "vehicle.state.observation";
-  return vehicleEvidence(evidenceType, observedAt, "/observedAt", `resource:${resourceId}`, [
-    providerId,
-    "ugv-adapter",
-  ]);
+  return vehicleEvidence(
+    evidenceType,
+    observedAt,
+    "/observedAt",
+    `execution:${externalExecutionId}`,
+    [providerId, "ugv-adapter"],
+  );
 }
 function fireConfirmationDecision(value: unknown): "accepted" | "declined" | "invalid" {
   if (!Array.isArray(value)) return "invalid";

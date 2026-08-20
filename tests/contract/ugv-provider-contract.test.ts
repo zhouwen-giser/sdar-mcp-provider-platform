@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Ajv2020 } from "ajv/dist/2020.js";
 import { ugvManifest } from "../../apps/ugv-provider-adapter/src/manifest.js";
 import {
   protoStructToJson,
@@ -11,6 +12,10 @@ import {
   OPERATION_REQUIRED_TOOLS,
   UGV_DEVICE_TOOL_ALLOWLIST,
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  VEHICLE_EVIDENCE_V1_SCHEMA,
+  vehicleEvidence,
+} from "../../packages/vehicle-provider-core/src/index.js";
 
 describe("UGV Provider operation and source contract", () => {
   it("publishes the eleven Goal 10 UGV operations without changing the transport profile", () => {
@@ -88,6 +93,40 @@ describe("UGV Provider operation and source contract", () => {
     expect(() =>
       new OperationRegistry().validate(manifest as unknown as ProviderManifest),
     ).not.toThrow();
+  });
+
+  it("publishes versioned closed Vehicle DTO schemas", () => {
+    const operations = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore())
+      .operations as { name: string; outputSchema: unknown }[];
+    expect(
+      protoStructToJson(operations.find(({ name }) => name === "vehicle_get_state")?.outputSchema),
+    ).toMatchObject({ title: "VehicleStateV1", additionalProperties: false });
+    expect(
+      protoStructToJson(
+        operations.find(({ name }) => name === "vehicle_get_capabilities")?.outputSchema,
+      ),
+    ).toMatchObject({ title: "VehicleCapabilitiesV1", additionalProperties: false });
+    expect(
+      protoStructToJson(operations.find(({ name }) => name === "vehicle_navigate")?.outputSchema),
+    ).toMatchObject({ title: "VehicleTaskResultV1", additionalProperties: false });
+    expect(VEHICLE_EVIDENCE_V1_SCHEMA).toMatchObject({
+      title: "VehicleEvidenceV1",
+      additionalProperties: false,
+    });
+    const validateEvidence = new Ajv2020({ strict: true, validateFormats: false }).compile(
+      VEHICLE_EVIDENCE_V1_SCHEMA,
+    );
+    expect(
+      validateEvidence(
+        vehicleEvidence(
+          "vehicle.mission.state",
+          "2026-08-20T00:00:00.000Z",
+          "/status",
+          "execution:vehicle:ugv1:chassis:test",
+          ["isr.vehicle.ugv.ugv1", "ugv-adapter"],
+        ),
+      ),
+    ).toBe(true);
   });
 
   it("declares two durable sources and one best-effort target source", () => {

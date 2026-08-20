@@ -1,6 +1,7 @@
 export * from "./availability.js";
 export * from "./business-events.js";
 export * from "./capabilities.js";
+export * from "./dto-schemas.js";
 export * from "./evidence.js";
 export * from "./fire-result-sanitizer.js";
 export * from "./manifest.js";

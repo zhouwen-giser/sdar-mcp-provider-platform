@@ -130,8 +130,10 @@ describe("NPC Tank long-running operation integration", () => {
     );
     expect(protoStructToJson(unavailable.initialSnapshot.result)).toMatchObject({
       connectivity: { deviceAvailable: false },
-      deviceStatus: { available: false },
     });
+    expect(JSON.stringify(protoStructToJson(unavailable.initialSnapshot.result))).not.toContain(
+      "deviceStatus",
+    );
     expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
       availability: "DISABLED",
       reasonCode: "NPC_TANK_DEVICE_UNAVAILABLE",

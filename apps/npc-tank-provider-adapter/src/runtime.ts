@@ -657,9 +657,8 @@ export class NpcTankProviderRuntime {
     const observedAt = new Date().toISOString();
     let result: Record<string, unknown>;
     if (input.operationName === "vehicle_get_state") {
-      let deviceStatus: Record<string, unknown> | undefined;
       if (this.device.hasTool("get_status")) {
-        deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
+        const deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
         const observation = normalizeNpcTankMqttObservation("/npc_tank1/status", deviceStatus);
         this.ingress.applyDeviceObservation(
           observation.patch,
@@ -670,7 +669,6 @@ export class NpcTankProviderRuntime {
       result = {
         ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
         mqttIngressSequence: this.ingress.ingestSequence(),
-        ...(deviceStatus === undefined ? {} : { deviceStatus }),
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
       const capabilities = await this.#callDevice("npc_tank_get_capabilities", {}, input.taskId);

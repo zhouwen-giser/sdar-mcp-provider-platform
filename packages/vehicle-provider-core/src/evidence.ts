@@ -23,7 +23,7 @@ export function vehicleEvidence(
   if (!jsonPointer.startsWith("/")) throw new Error("UGV_EVIDENCE_POINTER_INVALID");
   return {
     evidenceId: createHash("sha256")
-      .update(`${type}\0${observedAt}\0${jsonPointer}`)
+      .update(`${type}\0${observedAt}\0${subjectRef}\0${jsonPointer}\0${producer.join("\0")}`)
       .digest("base64url"),
     evidenceType: type,
     observedAt,

@@ -397,6 +397,36 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.ingress.snapshot().freshness).toEqual(mqttFreshness);
   });
 
+  it("validates stable state, capability and evidence DTOs without raw device status", async () => {
+    const fixture = await createFixture();
+    fixture.device.responses.set("get_status", { available: true, raw_internal_code: 731 });
+    const manifest = new OperationRegistry().validate(
+      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+    );
+
+    for (const operationName of ["vehicle_get_state", "vehicle_get_capabilities"]) {
+      const started = await fixture.runtime.start(
+        startInput(`stable-${operationName}`, operationName, { resourceId: "vehicle:ugv1" }),
+      );
+      const operation = required(
+        manifest.operations.find((candidate) => candidate.name === operationName),
+      );
+      expect(() =>
+        synchronousResult(operation, started.initialSnapshot as unknown as ExecutionSnapshot),
+      ).not.toThrow();
+      expect(started.initialSnapshot.evidence).toEqual([
+        expect.objectContaining({
+          subjectRef: `execution:${started.externalExecutionId}`,
+        }),
+      ]);
+      if (operationName === "vehicle_get_state") {
+        const result = protoStructToJson(started.initialSnapshot.result);
+        expect(JSON.stringify(result)).not.toContain("deviceStatus");
+        expect(JSON.stringify(result)).not.toContain("raw_internal_code");
+      }
+    }
+  });
+
   it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
     const runtimeValidatedContracts = mockUgvToolContracts("2026-08-20T00:00:00.000Z").map(
       withoutOutputSchema,
