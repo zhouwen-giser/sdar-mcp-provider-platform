@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T12:59:48.007Z",
+  "smppRepositoryPath": "/home/zhouwen/web-download/sdar-mcp-provider-platform",
+  "telemetryRepositoryPath": "/home/zhouwen/web-download/smpp-telemetry-platform",
+  "smppBranch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+  "telemetryBranch": "codex/goal-02-live-ugv-smpp-integration",
+  "hostArchitecture": "x86_64",
+  "nodeVersion": "v22.23.1",
+  "pnpmVersion": "11.13.1",
+  "simulator": {
+    "mqtt": "mqtt://192.168.2.63:1883",
+    "deviceMcp": "http://192.168.2.63:19000/mcp"
+  },
+  "safety": {
+    "liveControlEnabled": false,
+    "pointNavigationEnabled": false,
+    "taskControlEnabled": false,
+    "emergencyStopTestEnabled": false,
+    "fireEnabled": false
+  }
+}
