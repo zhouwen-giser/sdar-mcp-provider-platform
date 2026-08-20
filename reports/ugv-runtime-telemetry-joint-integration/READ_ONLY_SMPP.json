@@ -6,9 +6,9 @@
   "reasonCode": "REAL_RUNTIME_READ_ONLY_READY",
   "command": "bash deploy/ugv-simulation/smoke.sh",
   "exitCode": 0,
-  "startedAt": "2026-08-20T14:19:32.713Z",
-  "completedAt": "2026-08-20T14:19:32.938Z",
-  "gitSha": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+  "startedAt": "2026-08-20T15:04:39.142Z",
+  "completedAt": "2026-08-20T15:04:39.391Z",
+  "gitSha": "eaa36df380e7542f25f359d55c829e12d843738b",
   "sourceStatus": "TRACKED_SOURCE_CLEAN",
   "endpoints": {
     "runtimeMcp": {
@@ -97,23 +97,23 @@
       "operation": "vehicle_get_state",
       "httpStatus": 200,
       "resultType": "complete",
-      "structuredContentSha256": "685f491eb259c1551fff0fdd4415a00cb602cb73ddc3d5e00a1302deafe929a7",
+      "structuredContentSha256": "2e433e986d6faf6881b6db9f9b42efb29ae838b8d389ebc13a50a972b8df1222",
       "summary": {
         "resourceId": "vehicle:ugv1",
         "mqttConnected": true,
         "deviceMcpConnected": true,
         "deviceAvailable": true,
-        "mqttIngressSequence": 4506,
-        "chassisObservedAt": "2026-08-20T14:19:32.815Z",
+        "mqttIngressSequence": 5665,
+        "chassisObservedAt": "2026-08-20T15:04:39.251Z",
         "missionState": 4,
-        "revision": "3fa8701361a5bbd2e1bb6d1a051ec22d6a45791465c6991e5be1bcb4da595106"
+        "revision": "1b143a5761b5797c0ce843584b3e1f4234be488686871b17b078d518da6bef68"
       }
     },
     {
       "operation": "vehicle_get_capabilities",
       "httpStatus": 200,
       "resultType": "complete",
-      "structuredContentSha256": "db9ca3c67192a12d5aa467078a0b915a1da70936a27f56cd83d840a89d02f772",
+      "structuredContentSha256": "cd91f702b556bd533f1ebc1e6db9bc9fedfcad4d6c8f237323a64b4e80bbbcba",
       "summary": {
         "resourceId": "vehicle:ugv1",
         "capabilityKeys": [
@@ -133,7 +133,7 @@
       "operation": "vehicle_get_payload_status",
       "httpStatus": 200,
       "resultType": "complete",
-      "structuredContentSha256": "7b64eeecfd3befd7775aafce8e23bda8af5820e047bbb564ad03d3f92ab4a441",
+      "structuredContentSha256": "206d7f0ca50c6c3298eb3cd4a1266a43398037080ba994a8698221d7f993400b",
       "summary": {
         "resourceId": "vehicle:ugv1",
         "online": true,
@@ -146,11 +146,11 @@
       "operation": "vehicle_get_targets",
       "httpStatus": 200,
       "resultType": "complete",
-      "structuredContentSha256": "231c5d62c401b026e7c99be17d877b68514ff514fcddca7daec3bb79cfb7365a",
+      "structuredContentSha256": "ad1fb7f8f5544cca36dbf8f6e928cc0a3ecbd09c4c7a9ed0076c8ca02b0c979d",
       "summary": {
         "resourceId": "vehicle:ugv1",
         "targetCount": 0,
-        "observedAt": "2026-08-20T14:19:32.921Z"
+        "observedAt": "2026-08-20T15:04:39.374Z"
       }
     }
   ],

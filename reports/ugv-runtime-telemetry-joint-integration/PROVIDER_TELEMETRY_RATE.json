@@ -1,25 +1,39 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-08-20T14:33:36.510Z",
-  "status": "PASS_STEADY_RATE_WITH_STARTUP_LOSS_DISCLOSED",
-  "measurement": {
-    "windowStart": "2026-08-20T14:18:31.685Z",
-    "windowEnd": "2026-08-20T14:33:36.510Z",
-    "durationSeconds": 904.825,
-    "resourceStateCount": 847,
-    "resourceStateRateHz": 0.9361,
-    "resourceMetricCount": 354,
-    "resourceMetricRateHz": 0.3912,
-    "combinedRateHz": 1.3273,
-    "distinctEventKeys": 1201,
-    "duplicateEventKeys": 0
+  "capturedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+  "status": "PARTIAL_NO_NAVIGATION_RATE_PHASES_WITH_CLEAN_PROVIDER_RESTART_WINDOW",
+  "finalPreRestartAggregate": {
+    "durationSeconds": null,
+    "rateDerived": false,
+    "total": 180,
+    "distinctEventKeys": 180,
+    "resourceStateCount": 122,
+    "resourceStateCompletePayloads": 122,
+    "resourceMetricCount": 56,
+    "resourceMetricCompletePayloads": 56,
+    "otherEventCount": 2,
+    "duplicateEventKeys": 0,
+    "providerEventIdConflicts": 0
   },
-  "latestSixtySecondSample": {
-    "resourceStateCount": 59,
-    "resourceStateRateHz": 0.9833,
-    "resourceMetricCount": 24,
-    "resourceMetricRateHz": 0.4,
-    "runtimeDeliveryState": "PENDING_DUE_TO_EXISTING_FIFO_BACKLOG"
+  "isolatedProviderRestartBootstrapWindow": {
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "durationSeconds": 20,
+    "total": 61,
+    "aggregateRateHz": 3.05,
+    "resourceStateCount": 44,
+    "resourceStateRateHz": 2.2,
+    "resourceStateCompletePayloads": 44,
+    "resourceMetricCount": 17,
+    "resourceMetricRateHz": 0.85,
+    "resourceMetricCompletePayloads": 17,
+    "distinctEventKeys": 61,
+    "duplicateEventKeys": 0,
+    "providerEventIdConflicts": 0,
+    "rejected": 0,
+    "transportFailed": 0,
+    "dropped": 0,
+    "interpretation": "This is a restart/bootstrap window and is not represented as a steady-state 60-second rate qualification."
   },
   "policy": {
     "resourceStateMaximumHz": 1,
@@ -39,7 +53,8 @@
     "queueCapacityIncludingCriticalReserve": 1100,
     "retryBounded": true,
     "dropCounterVisible": true,
-    "startupDroppedEvents": 64,
+    "finalDeploymentStartupHandoverDroppedEvents": 4,
+    "isolatedProviderRestartDroppedEvents": 0,
     "runtimeRateLimitRejectionsObserved": 0,
     "transportFailuresMisclassifiedAsRateLimit": false,
     "silentDrops": 0

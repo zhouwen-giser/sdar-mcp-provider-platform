@@ -1,7 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "completedAt": "2026-08-20T14:36:36.626Z",
-  "status": "PARTIAL_CODE_GATES_ONLY_NO_LIVE_FAULT_QUALIFICATION",
+  "completedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+  "status": "PARTIAL_WITH_PROVIDER_RESTART_TELEMETRY_RECOVERY_PASS",
   "singleAuthority": {
     "activeRuntimeProviderStacks": 1,
     "developmentTemplateRuntimeAndAdapterStopped": true,
@@ -13,6 +14,37 @@
     "providerIngressResumedAfterStartupTransportFailures": true,
     "activeTaskDuringRestart": false,
     "countsAsTaskRecoveryQualification": false
+  },
+  "isolatedProviderRestart": {
+    "method": "force-recreate Adapter only",
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "runtimeRemainedHealthy": true,
+    "activeTaskDuringRestart": false,
+    "activeProviderExecutionDuringRestart": false,
+    "observationSeconds": 20,
+    "adapterLogCounts": {
+      "rejected": 0,
+      "transportFailed": 0,
+      "dropped": 0
+    },
+    "providerOps": {
+      "total": 61,
+      "distinctEventKeys": 61,
+      "duplicateEventKeys": 0,
+      "providerEventIdConflicts": 0,
+      "resourceState": 44,
+      "resourceStateCompletePayloads": 44,
+      "resourceMetric": 17,
+      "resourceMetricCompletePayloads": 17
+    },
+    "status": "PASS_PROVIDER_RESTART_TELEMETRY_RECOVERY_ONLY",
+    "doesNotProve": [
+      "active Execution or Mutation Journal recovery",
+      "no redispatch for an active device mission",
+      "Device MCP outage recovery",
+      "MQTT outage recovery",
+      "Runtime Task continuity"
+    ]
   },
   "faultMatrix": [
     {
@@ -53,9 +85,10 @@
     {
       "id": "F6",
       "fault": "provider-restart-with-same-execution",
-      "executed": false,
-      "status": "NOT_EXECUTED",
-      "reason": "No authorized Provider execution existed."
+      "executed": true,
+      "executedScope": "Provider restart without an active execution; Runtime remained healthy",
+      "status": "PARTIAL_PASS_TELEMETRY_RECOVERY_ONLY",
+      "reason": "Telemetry resumed with 61 unique, complete resource events and zero delivery issues in the 20-second window. No active execution existed, so dispatch recovery and no-redispatch are not live-qualified."
     },
     {
       "id": "F7",
@@ -91,5 +124,6 @@
   },
   "backlogConverged": false,
   "recoveryQualificationClaimed": false,
+  "providerRestartTelemetryRecoveryClaimed": true,
   "mutatingVehicleCalls": 0
 }

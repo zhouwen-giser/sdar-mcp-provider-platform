@@ -1,10 +1,11 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-08-20T14:19:32.938Z",
+  "capturedAt": "2026-08-20T15:04:39.391Z",
   "evidenceClass": "READ_ONLY_LIVE_PASS",
   "status": "PASS_READ_ONLY_RESULTS_ONLY",
   "provenance": {
     "path": "Runtime MCP -> UGV Provider -> live Device MCP",
+    "smppRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
     "mockFallback": "NOT_PROVEN_BY_CURRENT_REDACTED_READ_ONLY_EVIDENCE",
     "sourceEvidence": "reports/ugv-runtime-telemetry-joint-integration/READ_ONLY_SMPP.json"
   },
@@ -30,21 +31,21 @@
       "runtimeOperation": "vehicle_get_state",
       "devicePrimitive": "get_status",
       "resultType": "complete",
-      "structuredContentSha256": "685f491eb259c1551fff0fdd4415a00cb602cb73ddc3d5e00a1302deafe929a7",
+      "structuredContentSha256": "2e433e986d6faf6881b6db9f9b42efb29ae838b8d389ebc13a50a972b8df1222",
       "validatedFacts": {
         "resourceId": "vehicle:ugv1",
         "available": true,
         "mqttConnected": true,
         "deviceMcpConnected": true,
         "missionState": 4,
-        "chassisObservedAt": "2026-08-20T14:19:32.815Z"
+        "chassisObservedAt": "2026-08-20T15:04:39.251Z"
       }
     },
     {
       "runtimeOperation": "vehicle_get_capabilities",
       "devicePrimitive": "get_capabilities",
       "resultType": "complete",
-      "structuredContentSha256": "db9ca3c67192a12d5aa467078a0b915a1da70936a27f56cd83d840a89d02f772",
+      "structuredContentSha256": "cd91f702b556bd533f1ebc1e6db9bc9fedfcad4d6c8f237323a64b4e80bbbcba",
       "validatedFacts": {
         "resourceId": "vehicle:ugv1",
         "capabilityEnvelopePresent": true,
@@ -55,7 +56,7 @@
       "runtimeOperation": "vehicle_get_payload_status",
       "devicePrimitive": "ugv_area_recon_get_status",
       "resultType": "complete",
-      "structuredContentSha256": "7b64eeecfd3befd7775aafce8e23bda8af5820e047bbb564ad03d3f92ab4a441",
+      "structuredContentSha256": "206d7f0ca50c6c3298eb3cd4a1266a43398037080ba994a8698221d7f993400b",
       "validatedFacts": {
         "resourceId": "vehicle:ugv1",
         "online": true,
@@ -67,7 +68,7 @@
       "runtimeOperation": "vehicle_get_targets",
       "devicePrimitive": "ugv_area_recon_get_targets",
       "resultType": "complete",
-      "structuredContentSha256": "231c5d62c401b026e7c99be17d877b68514ff514fcddca7daec3bb79cfb7365a",
+      "structuredContentSha256": "ad1fb7f8f5544cca36dbf8f6e928cc0a3ecbd09c4c7a9ed0076c8ca02b0c979d",
       "validatedFacts": {
         "resourceId": "vehicle:ugv1",
         "targetCount": 0

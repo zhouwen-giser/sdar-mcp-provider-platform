@@ -1,27 +1,43 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-08-20T14:36:36.626Z",
+  "capturedAt": "2026-08-20T15:11:42.085Z",
   "status": "PASS",
   "smpp": {
     "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
-    "deployedSourceRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "deployedSourceRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "imageRevisionLabelsExact": true,
     "finalReportCommit": "ASSIGNED_AFTER_EVIDENCE_COMMIT",
     "containers": [
       {
         "role": "runtime",
-        "image": "sdar-ugv-simulation-real/runtime:9f1e4a50b2ab80813f1affd6f820990bf129b64e",
-        "imageId": "sha256:4ff4b1a3da7da783a85a6f0457b5cdd99ccfc403e578faa27a2bf0985a121753",
+        "image": "sdar-ugv-simulation-real/runtime:eaa36df380e7542f25f359d55c829e12d843738b",
+        "imageId": "sha256:ab94244eeac50d25027778ed47cec3f2ddb860a973555d425e3251351491dc43",
+        "revisionLabel": "eaa36df380e7542f25f359d55c829e12d843738b",
+        "startedAt": "2026-08-20T15:03:34.496626185Z",
         "state": "running",
         "health": "healthy"
       },
       {
         "role": "ugv-adapter",
-        "image": "sdar-ugv-simulation-real/ugv-adapter:9f1e4a50b2ab80813f1affd6f820990bf129b64e",
-        "imageId": "sha256:6234f1869e9008298cc68cc0b6e2be2701ebd43b6cfc9a49aeccd709afd8a7e9",
+        "image": "sdar-ugv-simulation-real/ugv-adapter:eaa36df380e7542f25f359d55c829e12d843738b",
+        "imageId": "sha256:1ac09aec29bf701a1f47b81b5738ae2437d36af4b54e54801d79d7d54f3f7603",
+        "revisionLabel": "eaa36df380e7542f25f359d55c829e12d843738b",
+        "startedAt": "2026-08-20T15:09:11.887079232Z",
         "state": "running",
         "health": "process-running-no-container-healthcheck"
       }
-    ]
+    ],
+    "adapterRuntimeConfiguration": {
+      "executionMode": "live",
+      "providerTelemetryEnabled": true,
+      "providerTelemetryEndpoint": "ugv-runtime:7002"
+    },
+    "runtimeTelemetryConfiguration": {
+      "otelEnabled": true,
+      "otelEndpoint": "host.docker.internal:4318",
+      "deploymentId": "ugv-test-deployment",
+      "runtimeInstanceId": "ugv-runtime-test-1"
+    }
   },
   "telemetry": {
     "branch": "codex/goal-02-live-ugv-smpp-integration",

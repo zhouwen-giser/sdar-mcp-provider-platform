@@ -1,9 +1,16 @@
 {
   "schemaVersion": "1.0",
   "capturedAt": "2026-08-20T14:34:12.777Z",
+  "updatedAt": "2026-08-20T15:17:44.996Z",
   "evidenceClass": "LIVE_PROVIDEROPS_PASS",
   "status": "PARTIAL_LIVE_EXPORT_WITH_HISTORICAL_BACKLOG_NOT_DRAINED",
-  "configuration": {
+  "revisionAttribution": {
+    "historicalSnapshotRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "currentDeployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "note": "The collector, query, and early backlog samples captured at 2026-08-20T14:34:12.777Z predate the current eaa deployment and belong to the historical 9f revision. Final deployment configuration and later cross-repository watermarks are recorded separately below."
+  },
+  "historicalSnapshotConfiguration": {
+    "snapshotRuntimeRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
     "otelEnabled": true,
     "transport": "OTLP_HTTP_DEVELOPMENT_CLEARTEXT",
     "collectorEndpoint": "redacted-local-collector:4318",
@@ -13,7 +20,20 @@
     "telemetrySourceMappingInstanceId": "ugv-runtime-test-1",
     "identityConsistent": true
   },
+  "currentDeploymentConfiguration": {
+    "currentDeployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "otelEnabled": true,
+    "transport": "OTLP_HTTP_DEVELOPMENT_CLEARTEXT",
+    "collectorEndpoint": "host.docker.internal:4318",
+    "runtimeDeploymentId": "ugv-test-deployment",
+    "runtimeInstanceId": "ugv-runtime-test-1",
+    "identityConsistent": true,
+    "configurationVerified": true,
+    "note": "This records the final live eaa configuration only; it does not reattribute the earlier collector, query, or backlog samples to eaa."
+  },
   "runtimeMetricsSnapshot": {
+    "samplingPhase": "EARLY_NON_ATOMIC_SNAPSHOT",
+    "snapshotRuntimeRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
     "auditEventsEmitted": 28437,
     "auditExportAttempts": 28437,
     "auditBacklog": 821689,
@@ -21,13 +41,33 @@
     "backlogDrained": false
   },
   "runtimeDatabaseSnapshot": {
+    "samplingPhase": "EARLY_NON_ATOMIC_SNAPSHOT",
+    "snapshotRuntimeRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
     "delivered": 41100,
     "exhausted": 166311,
     "pending": 141849,
     "retryWait": 677250,
     "note": "Database and metric snapshots were taken at nearby but non-atomic times; their totals are not asserted to be identical."
   },
+  "latestRuntimeDurableSnapshot": {
+    "samplingPhase": "FINAL_NON_ATOMIC_SNAPSHOT",
+    "snapshotRuntimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "auditBacklog": 726934,
+    "auditOldestAgeSeconds": 874895,
+    "states": {
+      "claimed": 44,
+      "pending": 127413,
+      "retryWait": 599514,
+      "delivered": 136156,
+      "exhausted": 166347
+    },
+    "backlogDrained": false,
+    "nonAtomicSnapshot": true,
+    "note": "The backlog metric and database state aggregates were sampled separately. CLAIMED + PENDING + RETRY_WAIT is therefore not required to equal the backlog gauge exactly."
+  },
   "collectorMetricsSnapshot": {
+    "samplingPhase": "EARLY_NON_ATOMIC_SNAPSHOT",
+    "snapshotRuntimeRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
     "acceptedLogRecords": 38379,
     "failedLogRecords": 0,
     "refusedLogRecords": 0,
@@ -36,6 +76,8 @@
     "exporterInFlightRequests": 2
   },
   "queryProof": {
+    "samplingPhase": "EARLY_QUERYABLE_SAMPLE",
+    "snapshotRuntimeRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
     "providerId": "isr.vehicle.ugv.ugv1",
     "resourceId": "vehicle:ugv1",
     "runtimeInstanceId": "ugv-runtime-test-1",
@@ -53,11 +95,23 @@
     "manualInsertUsed": false,
     "currentAdapterStartCorrelatedWithinWindow": false
   },
+  "latestTelemetryLandingSnapshot": {
+    "scope": "LANDING_ONLY",
+    "rows": 134864,
+    "distinctRecordIds": 134864,
+    "duplicateRecordIds": 0,
+    "maximumOccurredAt": "2026-08-20T10:45:55.689Z",
+    "maximumIngestedAt": "2026-08-20T15:07:40.656Z",
+    "finalRuntimeEpochRows": 0,
+    "normalizedCoreServingCompletionClaimed": false,
+    "currentFinalAdapterEpochCorrelated": false,
+    "note": "This latest cross-repository watermark is landing-only and must not be represented as normalized, core, serving, or query completion."
+  },
   "observedProviderOpsCategories": ["provider.resource.state", "provider.resource.metric"],
   "notObservedForCurrentAuthorizedRun": [
     "provider.task.lifecycle",
     "provider.command.lifecycle",
     "provider.recovery.lifecycle"
   ],
-  "qualificationImpact": "Real UGV ProviderOps reached Collector, Processor, ClickHouse, and Query API, but the historical FIFO backlog remained above 800k and current-run time correlation did not converge."
+  "qualificationImpact": "Earlier real UGV ProviderOps reached Collector, Processor, ClickHouse, and Query API. The latest Runtime backlog decreased from the early 821689 sample to 726934 but did not drain, oldest age increased to 874895 seconds, the latest Telemetry watermark is landing-only, and final Runtime epoch rows remained zero."
 }

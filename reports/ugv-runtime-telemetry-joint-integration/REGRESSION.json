@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-08-20T14:51:23.179Z",
+  "capturedAt": "2026-08-20T15:11:42.085Z",
   "status": "PASS",
   "smpp": {
-    "deployedEvidenceRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "deployedEvidenceRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
     "finalRevision": "ASSIGNED_AFTER_EVIDENCE_COMMIT",
     "finalGates": [
       { "name": "build-after-final-struct-adjustment", "status": "PASS" },
@@ -60,6 +60,16 @@
       "restart causes zero redispatch"
     ],
     "pendingFinalRerun": []
+  },
+  "liveDeploymentVerification": {
+    "revision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "runtimeImageLabelExact": true,
+    "adapterImageLabelExact": true,
+    "readOnlySmokeExitCode": 0,
+    "readOnlySmokeStatus": "PASS",
+    "strictG3Status": "PARTIAL_EXTERNAL_INTERFACE_BLOCKED",
+    "isolatedProviderRestartTelemetryRecovery": "PASS_LIMITED_SCOPE",
+    "overallRecoveryQualification": "PARTIAL"
   },
   "telemetryCrossRepositoryReference": {
     "deployedEvidenceRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",

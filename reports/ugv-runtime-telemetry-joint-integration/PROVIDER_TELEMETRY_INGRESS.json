@@ -1,11 +1,9 @@
 {
   "schemaVersion": "1.0",
-  "observationWindow": {
-    "from": "2026-08-20T14:18:31.685Z",
-    "to": "2026-08-20T14:33:36.510Z"
-  },
+  "capturedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
   "evidenceClass": "LIVE_PROVIDEROPS_PASS",
-  "status": "PARTIAL_WITH_OBSERVABLE_STARTUP_TRANSPORT_LOSS",
+  "status": "PARTIAL_WITH_STARTUP_TRANSPORT_LOSS_AND_CLEAN_PROVIDER_RESTART_WINDOW",
   "runtimeIngress": {
     "service": "io.sdar.mcp.tasks.telemetry.v1.ProviderTelemetryIngress",
     "method": "EmitProviderEvents",
@@ -13,36 +11,53 @@
     "portReachableFromProviderContainer": true,
     "perEventResultsParsed": true,
     "providerEventIdCompletenessValidated": true,
-    "taskIdentityValidatedForTaskEvents": true,
+    "taskIdentityValidation": "PASS_IN_CODE_AND_REAL_POSTGRESQL_CONTRACT; NO_LIVE_TASK_EVENT",
     "responseMessagesPersistedOrLogged": false,
     "stableReasonCodesUsed": true
   },
-  "liveDatabaseAggregateSinceAdapterStart": {
-    "providerResourceState": 847,
-    "providerResourceMetric": 354,
-    "total": 1201,
-    "distinctEventKeys": 1201,
+  "finalPreRestartAggregate": {
+    "total": 180,
+    "distinctEventKeys": 180,
     "duplicateEventKeys": 0,
-    "latestRecordAt": "2026-08-20T14:33:36.510Z"
+    "providerEventIdConflicts": 0,
+    "providerResourceState": 122,
+    "providerResourceStateCompletePayloads": 122,
+    "providerResourceMetric": 56,
+    "providerResourceMetricCompletePayloads": 56,
+    "otherEventCount": 2,
+    "otherEventTypesNotSpecifiedByAggregate": true
   },
-  "lastObservedDeliveryIssueSnapshot": {
-    "capturedDuringRuntimeStartupHandover": true,
-    "enqueued": 87,
-    "sentAttempts": 285,
-    "acceptedBeforeIssue": 17,
-    "duplicate": 0,
-    "rejected": 0,
-    "transportFailed": 268,
-    "retry": 203,
-    "droppedAfterRetryExhaustion": 64,
-    "queueDepth": 6,
-    "queueCapacity": 1100,
+  "finalDeploymentStartupHandover": {
+    "adapterRuntimeOrderSwitch": true,
+    "transportFailuresVisible": true,
+    "retriesVisible": true,
+    "droppedAfterRetryExhaustion": 4,
     "visibleReasonCodes": [
-      "PROVIDER_TELEMETRY_ACCEPTED",
       "PROVIDER_TELEMETRY_TRANSPORT_FAILED",
       "PROVIDER_TELEMETRY_RETRY_EXHAUSTED"
     ],
-    "interpretation": "Loss was explicit and counted during the startup transition. The exact transport cause was not isolated, so the report does not relabel it as a Runtime rate-limit rejection. Subsequent Runtime rows prove ingress resumed."
+    "interpretation": "The first final-revision Adapter/Runtime order switch exposed and counted startup transport loss. It is not hidden or relabeled as an ingress rejection."
+  },
+  "isolatedProviderRestartWindow": {
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "runtimeRemainedHealthy": true,
+    "observationSeconds": 20,
+    "logCounts": {
+      "rejected": 0,
+      "transportFailed": 0,
+      "dropped": 0
+    },
+    "runtimeProviderOps": {
+      "total": 61,
+      "distinctEventKeys": 61,
+      "duplicateEventKeys": 0,
+      "providerEventIdConflicts": 0,
+      "providerResourceState": 44,
+      "providerResourceStateCompletePayloads": 44,
+      "providerResourceMetric": 17,
+      "providerResourceMetricCompletePayloads": 17
+    },
+    "qualification": "PASS_PROVIDER_RESTART_TELEMETRY_RECOVERY_ONLY"
   },
   "boundedDelivery": {
     "ordinaryQueueCapacity": 1000,
@@ -59,6 +74,6 @@
   "taskLevelEventSemanticsObserved": false,
   "taskLevelReason": "No Runtime task or command was created because live mutation was not authorized.",
   "silentDrop": false,
-  "qualificationImpact": "Ingress and observability are functional, but startup transport drops and the absent task-level chain prevent a fully qualified result.",
+  "qualificationImpact": "Ingress and observability are functional, and an isolated Provider restart recovered cleanly while Runtime stayed healthy. Four earlier startup-handover drops and the absent live task-level chain prevent a fully qualified result.",
   "sensitivePayloadStored": false
 }
