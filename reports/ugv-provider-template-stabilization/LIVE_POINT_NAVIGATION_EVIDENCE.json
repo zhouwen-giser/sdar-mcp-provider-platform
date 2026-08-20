@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "authorized": false,
+  "runId": null,
+  "endpoint": null,
+  "resourceId": null,
+  "target": {
+    "longitude": 106.8134463,
+    "latitude": 29.72034353,
+    "altitude": 500
+  },
+  "previousRejectedIdempotencyKeyReused": false,
+  "readOnlyPreflight": {},
+  "operationQualification": {},
+  "mutatingCallCount": 0,
+  "idempotencyKey": null,
+  "downstreamMissionId": null,
+  "mutationJournal": [],
+  "taskStates": [],
+  "physicalConfirmation": {},
+  "result": "BLOCKED_BEFORE_DISPATCH",
+  "startedAt": "2026-08-20T07:42:07.839Z",
+  "completedAt": "2026-08-20T07:42:07.840Z",
+  "failure": {
+    "reasonCode": "ALLOW_REAL_UGV_SIDE_EFFECTS_REQUIRED",
+    "errorClass": "QualificationError"
+  }
+}
