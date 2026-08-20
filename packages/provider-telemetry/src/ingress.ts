@@ -9,7 +9,11 @@ import {
   captureProviderOpsDelivery,
   TaskRepository,
 } from "../../persistence-postgres/src/index.js";
-import { telemetryServiceDefinition } from "./proto.js";
+import {
+  grpcStructToRecord,
+  ProviderTelemetryStructError,
+  telemetryServiceDefinition,
+} from "./proto.js";
 import type {
   EmitProviderEventsRequest,
   EmitProviderEventsResponse,
@@ -239,12 +243,15 @@ export class ProviderTelemetryIngress {
     ) {
       return "PROVIDER_EVENT_ATTRIBUTE_KEY_TOO_LONG";
     }
+    const shapeError = jsonShapeError(
+      [event.attributes, event.payload],
+      this.options.maxDepth ?? 16,
+      this.options.maxNodes ?? 4_096,
+    );
+    if (shapeError !== null) return shapeError;
     if (Buffer.byteLength(JSON.stringify(event), "utf8") > (this.options.maxEventBytes ?? 65_536)) {
       return "PROVIDER_EVENT_TOO_LARGE";
     }
-    const shape = jsonShape([event.attributes, event.payload]);
-    if (shape.depth > (this.options.maxDepth ?? 16)) return "PROVIDER_EVENT_TOO_DEEP";
-    if (shape.nodes > (this.options.maxNodes ?? 4_096)) return "PROVIDER_EVENT_TOO_COMPLEX";
     const occurredAt = timestampToDate(event.occurredAt);
     if (Number.isNaN(occurredAt.getTime())) return "PROVIDER_EVENT_TIMESTAMP_INVALID";
     if (
@@ -291,9 +298,60 @@ export class ProviderTelemetryGrpcServer {
         callback: grpc.sendUnaryData<EmitProviderEventsResponse>,
       ) => {
         const identity = providerIdentity(call, options.tlsMode);
+        if (call.request.events.length > (ingress.options.maxBatch ?? 100)) {
+          callback(null, {
+            results: call.request.events.map((event) =>
+              rejected(event, "PROVIDER_EVENT_BATCH_TOO_LARGE"),
+            ),
+          });
+          return;
+        }
+        const decodeFailures = new Map<number, string>();
+        const request: EmitProviderEventsRequest = {
+          ...call.request,
+          events: call.request.events.map((event, index) => {
+            try {
+              return {
+                ...event,
+                attributes: grpcStructToRecord(event.attributes, {
+                  maxDepth: ingress.options.maxDepth ?? 16,
+                  maxNodes: ingress.options.maxNodes ?? 4_096,
+                }),
+                payload: grpcStructToRecord(event.payload, {
+                  maxDepth: ingress.options.maxDepth ?? 16,
+                  maxNodes: ingress.options.maxNodes ?? 4_096,
+                }),
+              };
+            } catch (error) {
+              const reasonCode =
+                error instanceof ProviderTelemetryStructError
+                  ? error.reasonCode
+                  : "PROVIDER_EVENT_PAYLOAD_INVALID";
+              decodeFailures.set(index, reasonCode);
+              return {
+                ...event,
+                eventType: "PROVIDER_TELEMETRY_EVENT_TYPE_UNSPECIFIED",
+                attributes: {},
+                payload: {},
+              };
+            }
+          }),
+        };
         void ingress
-          .emit(identity, call.request)
-          .then((response) => callback(null, response))
+          .emit(identity, request)
+          .then((response) => {
+            callback(null, {
+              results: response.results.map((result, index) => {
+                const reasonCode = decodeFailures.get(index);
+                const original = call.request.events[index];
+                return reasonCode !== undefined &&
+                  original !== undefined &&
+                  result.reasonCode === "PROVIDER_EVENT_TYPE_INVALID"
+                  ? rejected(original, reasonCode)
+                  : result;
+              }),
+            });
+          })
           .catch((error: unknown) => callback(serviceError(error)));
       },
     });
@@ -367,17 +425,42 @@ function contextFromTraceparent(
   return { traceId: match[1], spanId: match[2] };
 }
 
-function jsonShape(value: unknown, depth = 1): { depth: number; nodes: number } {
-  if (value === null || typeof value !== "object") return { depth, nodes: 1 };
-  const children = Array.isArray(value) ? value : Object.values(value);
-  let maximumDepth = depth;
-  let nodes = 1;
-  for (const child of children) {
-    const shape = jsonShape(child, depth + 1);
-    maximumDepth = Math.max(maximumDepth, shape.depth);
-    nodes += shape.nodes;
+function jsonShapeError(value: unknown, maxDepth: number, maxNodes: number): string | null {
+  const stack: { value: unknown; depth: number }[] = [{ value, depth: 1 }];
+  const seen = new WeakSet();
+  let nodes = 0;
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current === undefined) break;
+    if (current.depth > maxDepth) return "PROVIDER_EVENT_TOO_DEEP";
+    nodes += 1;
+    if (nodes > maxNodes) return "PROVIDER_EVENT_TOO_COMPLEX";
+    if (
+      current.value === null ||
+      typeof current.value === "string" ||
+      typeof current.value === "boolean"
+    ) {
+      continue;
+    }
+    if (typeof current.value === "number") {
+      if (!Number.isFinite(current.value)) return "PROVIDER_EVENT_PAYLOAD_INVALID";
+      continue;
+    }
+    if (typeof current.value !== "object") return "PROVIDER_EVENT_PAYLOAD_INVALID";
+    if (seen.has(current.value)) return "PROVIDER_EVENT_PAYLOAD_INVALID";
+    seen.add(current.value);
+    if (!Array.isArray(current.value)) {
+      const prototype = Object.getPrototypeOf(current.value) as unknown;
+      if (prototype !== Object.prototype && prototype !== null) {
+        return "PROVIDER_EVENT_PAYLOAD_INVALID";
+      }
+    }
+    const children = Array.isArray(current.value)
+      ? current.value
+      : Object.values(current.value as Record<string, unknown>);
+    for (const child of children) stack.push({ value: child, depth: current.depth + 1 });
   }
-  return { depth: maximumDepth, nodes };
+  return null;
 }
 
 async function existingRecord(

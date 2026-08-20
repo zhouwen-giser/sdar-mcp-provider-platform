@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import type { EmitProviderEventsRequest } from "../../packages/provider-telemetry/src/index.js";
+import {
+  grpcStructToRecord,
+  recordToGrpcStruct,
+  type EmitProviderEventsRequest,
+  type ProviderTelemetryStructError,
+} from "../../packages/provider-telemetry/src/index.js";
 import {
   VehicleTelemetry,
   type VehicleTelemetryOptions,
@@ -8,6 +13,64 @@ import {
 } from "../../packages/vehicle-provider-core/src/index.js";
 
 describe("Vehicle Provider telemetry delivery client", () => {
+  it("round-trips canonical values through google.protobuf.Struct", () => {
+    const value = {
+      metricName: "temperature",
+      value: 12.5,
+      quality: "good",
+      healthy: true,
+      optional: null,
+      dimensions: ["front", 2, false, { axis: "x" }],
+    };
+    expect(grpcStructToRecord(recordToGrpcStruct(value))).toEqual(value);
+  });
+
+  it("bounds Struct depth and complexity before recursive decoding", () => {
+    let deep: unknown = {
+      fields: { leaf: { kind: "stringValue", stringValue: "value" } },
+    };
+    for (let index = 0; index < 32; index += 1) {
+      deep = {
+        fields: { nested: { kind: "structValue", structValue: deep } },
+      };
+    }
+    expect(() => grpcStructToRecord(deep)).toThrow(
+      expect.objectContaining<Partial<ProviderTelemetryStructError>>({
+        reasonCode: "PROVIDER_EVENT_TOO_DEEP",
+      }),
+    );
+    expect(() =>
+      grpcStructToRecord(
+        {
+          fields: {
+            first: { kind: "numberValue", numberValue: 1 },
+            second: { kind: "numberValue", numberValue: 2 },
+          },
+        },
+        { maxNodes: 2 },
+      ),
+    ).toThrow(
+      expect.objectContaining<Partial<ProviderTelemetryStructError>>({
+        reasonCode: "PROVIDER_EVENT_TOO_COMPLEX",
+      }),
+    );
+    expect(() => recordToGrpcStruct({ value: Number.NaN })).toThrow(
+      expect.objectContaining<Partial<ProviderTelemetryStructError>>({
+        reasonCode: "PROVIDER_EVENT_PAYLOAD_INVALID",
+      }),
+    );
+    expect(() => recordToGrpcStruct({ when: new Date("2026-08-20T00:00:00Z") })).toThrow(
+      expect.objectContaining<Partial<ProviderTelemetryStructError>>({
+        reasonCode: "PROVIDER_EVENT_PAYLOAD_INVALID",
+      }),
+    );
+    expect(() => recordToGrpcStruct({ values: new Map([["x", 1]]) })).toThrow(
+      expect.objectContaining<Partial<ProviderTelemetryStructError>>({
+        reasonCode: "PROVIDER_EVENT_PAYLOAD_INVALID",
+      }),
+    );
+  });
+
   it("parses per-event accepted and duplicate results", async () => {
     const outcomes: VehicleTelemetryOutcome[] = [];
     const transport = new ScriptedTransport((request) => ({

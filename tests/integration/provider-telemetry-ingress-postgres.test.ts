@@ -5,11 +5,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   ProviderTelemetryIngress,
   ProviderTelemetryGrpcServer,
+  recordToGrpcStruct,
   telemetryClientConstructor,
+  telemetryServiceDefinition,
   type ProviderTelemetryEventInput,
   type ProviderTelemetryEventType,
 } from "../../packages/provider-telemetry/src/index.js";
 import { runMigrations } from "../../packages/persistence-postgres/src/index.js";
+import { VehicleTelemetry } from "../../packages/vehicle-provider-core/src/index.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 if (databaseUrl === undefined) {
@@ -185,6 +188,17 @@ describe("Runtime ProviderTelemetryIngress", () => {
     ).toMatchObject({ accepted: false, reasonCode: "PROVIDER_EVENT_TOO_LARGE" });
   });
 
+  it("non-finite provider payload numbers are rejected without throwing", async () => {
+    expect(
+      await emit(
+        new ProviderTelemetryIngress(pool, options),
+        event("RESOURCE_METRIC", {
+          payload: { metricName: "temperature", value: Number.NaN, unit: "c" },
+        }),
+      ),
+    ).toMatchObject({ accepted: false, reasonCode: "PROVIDER_EVENT_PAYLOAD_INVALID" });
+  });
+
   it("provider_event_rate_limit_is_enforced", async () => {
     const ingress = new ProviderTelemetryIngress(pool, { ...options, rateLimit: 1 });
     expect(await emit(ingress, event("RESOURCE_STATE"))).toMatchObject({ accepted: true });
@@ -193,31 +207,135 @@ describe("Runtime ProviderTelemetryIngress", () => {
     ).toMatchObject({ accepted: false, reasonCode: "PROVIDER_EVENT_RATE_LIMITED" });
   });
 
-  it("exposes the Runtime-hosted batch unary gRPC service", async () => {
+  it("preserves Struct payloads across the real VehicleTelemetry gRPC transport", async () => {
     const server = new ProviderTelemetryGrpcServer(new ProviderTelemetryIngress(pool, options), {
       host: "127.0.0.1",
       port: 0,
       tlsMode: "disabled",
     });
     const port = await server.start();
-    const Client = telemetryClientConstructor() as unknown as new (
-      address: string,
-      credentials: grpc.ChannelCredentials,
-    ) => TelemetryClient;
-    const client = new Client(`127.0.0.1:${String(port)}`, grpc.credentials.createInsecure());
+    const telemetry = new VehicleTelemetry({
+      providerId: "provider-1",
+      resourceId: "resource-1",
+      resourceType: "database",
+      enabled: true,
+      endpoint: `127.0.0.1:${String(port)}`,
+      tlsMode: "disabled",
+      flushIntervalMs: 10_000,
+    });
+    try {
+      await telemetry.metric("temperature", 12, "c", "good", {
+        attributes: { region: "test", nested: { healthy: true } },
+      });
+      await telemetry.flush();
+      expect(telemetry.snapshot()).toMatchObject({ sent: 1, accepted: 1, rejected: 0 });
+      const stored = await pool.query<{
+        attributes: Record<string, unknown>;
+        payload: Record<string, unknown>;
+      }>(
+        "SELECT record_body->'attributes' AS attributes,record_body->'payload' AS payload FROM provider_ops_delivery",
+      );
+      expect(stored.rows[0]).toEqual({
+        attributes: { region: "test", nested: { healthy: true } },
+        payload: { metricName: "temperature", value: 12, unit: "c", quality: "good" },
+      });
+    } finally {
+      await telemetry.closeAndDrain();
+      await server.close();
+    }
+  });
+
+  it("serializes plain records for every public telemetry gRPC client", async () => {
+    const server = new ProviderTelemetryGrpcServer(new ProviderTelemetryIngress(pool, options), {
+      host: "127.0.0.1",
+      port: 0,
+      tlsMode: "disabled",
+    });
+    const port = await server.start();
+    const Client = telemetryClientConstructor();
+    const client = new Client(
+      `127.0.0.1:${String(port)}`,
+      grpc.credentials.createInsecure(),
+    ) as unknown as TelemetryClient;
+    const input = event("RESOURCE_STATE", {
+      providerEventId: "plain-record-client",
+      attributes: { region: "west", nested: { healthy: true } },
+      payload: { state: "ready", reasonCode: "RESOURCE_READY" },
+    });
     try {
       const response = await new Promise<{ results: { accepted: boolean }[] }>(
         (resolve, reject) => {
           client.emitProviderEvents(
-            { providerId: "provider-1", events: [event("RESOURCE_STATE")] },
-            (error, value) => {
-              if (error === null) resolve(value);
-              else reject(error);
-            },
+            { providerId: "provider-1", events: [input] },
+            (error, value) => (error === null ? resolve(value) : reject(error)),
           );
         },
       );
       expect(response.results).toEqual([expect.objectContaining({ accepted: true })]);
+      const stored = await pool.query<{
+        attributes: Record<string, unknown>;
+        payload: Record<string, unknown>;
+      }>(
+        "SELECT record_body->'attributes' AS attributes,record_body->'payload' AS payload FROM provider_ops_delivery WHERE record_body->>'providerEventId'=$1",
+        [input.providerEventId],
+      );
+      expect(stored.rows[0]).toEqual({
+        attributes: { region: "west", nested: { healthy: true } },
+        payload: { state: "ready", reasonCode: "RESOURCE_READY" },
+      });
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
+
+  it("applies batch and rate limits to malformed wire Struct events", async () => {
+    const server = new ProviderTelemetryGrpcServer(
+      new ProviderTelemetryIngress(pool, { ...options, maxBatch: 1, rateLimit: 1 }),
+      { host: "127.0.0.1", port: 0, tlsMode: "disabled" },
+    );
+    const port = await server.start();
+    const RawClient = grpc.makeGenericClientConstructor(
+      telemetryServiceDefinition(),
+      "RawProviderTelemetryIngress",
+    );
+    const client = new RawClient(
+      `127.0.0.1:${String(port)}`,
+      grpc.credentials.createInsecure(),
+    ) as unknown as TelemetryClient;
+    const valid = wireEvent(event("RESOURCE_METRIC", { providerEventId: "wire-valid" }));
+    const malformed = {
+      ...wireEvent(event("RESOURCE_METRIC", { providerEventId: "wire-malformed" })),
+      attributes: {
+        fields: { invalid: { kind: "numberValue", numberValue: Number.NaN } },
+      },
+    };
+    try {
+      const oversized = await callTelemetry(client, {
+        providerId: "provider-1",
+        events: [malformed, valid],
+      });
+      expect(oversized.results).toEqual([
+        expect.objectContaining({ reasonCode: "PROVIDER_EVENT_BATCH_TOO_LARGE" }),
+        expect.objectContaining({ reasonCode: "PROVIDER_EVENT_BATCH_TOO_LARGE" }),
+      ]);
+      expect(
+        await callTelemetry(client, { providerId: "provider-1", events: [malformed] }),
+      ).toMatchObject({
+        results: [
+          expect.objectContaining({
+            accepted: false,
+            reasonCode: "PROVIDER_EVENT_PAYLOAD_INVALID",
+          }),
+        ],
+      });
+      expect(
+        await callTelemetry(client, { providerId: "provider-1", events: [valid] }),
+      ).toMatchObject({
+        results: [
+          expect.objectContaining({ accepted: false, reasonCode: "PROVIDER_EVENT_RATE_LIMITED" }),
+        ],
+      });
     } finally {
       client.close();
       await server.close();
@@ -230,10 +348,29 @@ type TelemetryClient = grpc.Client & {
     request: unknown,
     callback: (
       error: grpc.ServiceError | null,
-      response: { results: { accepted: boolean }[] },
+      response: { results: { accepted: boolean; reasonCode: string }[] },
     ) => void,
   ): grpc.ClientUnaryCall;
 };
+
+function callTelemetry(
+  client: TelemetryClient,
+  request: unknown,
+): Promise<{ results: { accepted: boolean; reasonCode: string }[] }> {
+  return new Promise((resolve, reject) => {
+    client.emitProviderEvents(request, (error, value) =>
+      error === null ? resolve(value) : reject(error),
+    );
+  });
+}
+
+function wireEvent(input: ProviderTelemetryEventInput): Record<string, unknown> {
+  return {
+    ...input,
+    attributes: recordToGrpcStruct(input.attributes),
+    payload: recordToGrpcStruct(input.payload),
+  };
+}
 
 async function emit(ingress: ProviderTelemetryIngress, input: ProviderTelemetryEventInput) {
   const response = await ingress.emit("provider-1", { providerId: "provider-1", events: [input] });
