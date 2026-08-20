@@ -1434,15 +1434,17 @@ export class UgvProviderRuntime {
           throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
         activeSteps.set(phase, accepted);
       },
-      afterMutationFailed: async ({ phase, error }) => {
+      afterMutationFailed: async ({ phase, error, result, canonicalMissionId }) => {
         const dispatching = requiredJournalStep(activeSteps, phase);
-        const rejectedResult = error instanceof DeviceToolRejectedError ? error.result : undefined;
-        const missionId = rejectedResultMissionId(dispatching.toolName, rejectedResult);
+        const returnedResult =
+          result ?? (error instanceof DeviceToolRejectedError ? error.result : undefined);
+        const missionId =
+          canonicalMissionId ?? rejectedResultMissionId(dispatching.toolName, returnedResult);
         const completed: MutationJournalEntry = {
           ...dispatching,
-          state: error instanceof DeviceToolRejectedError ? "REJECTED" : "UNCERTAIN",
+          state: error instanceof UncertainMutatingDeviceCallError ? "UNCERTAIN" : "REJECTED",
           ...(missionId === undefined ? {} : { externalMissionId: missionId }),
-          ...(rejectedResult === undefined ? {} : { resultHash: mutationHash(rejectedResult) }),
+          ...(returnedResult === undefined ? {} : { resultHash: mutationHash(returnedResult) }),
           completedAt: new Date().toISOString(),
         };
         if (!(await this.store.advanceMutationJournal(completed, "DISPATCHING")))

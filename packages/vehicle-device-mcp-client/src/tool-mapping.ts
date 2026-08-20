@@ -1,4 +1,5 @@
 import type { UgvDeviceToolName } from "./tool-allowlist.js";
+import { DeviceToolRejectedError, UncertainMutatingDeviceCallError } from "./errors.js";
 import {
   canonicalUgvMissionId,
   missionIdFromUgvResult,
@@ -31,6 +32,8 @@ export interface UgvAcceptedStartMutationCall extends UgvStartMutationCall {
 
 export interface UgvFailedStartMutationCall extends UgvStartMutationCall {
   error: unknown;
+  result?: Record<string, unknown>;
+  canonicalMissionId?: string;
 }
 
 export interface ExecuteUgvStartFlowOptions {
@@ -77,16 +80,19 @@ export async function executeUgvStartFlow(
     calls.push(callSnapshot);
     if (phase !== undefined)
       await options.beforeMutationDispatch?.({ phase, call: structuredClone(callSnapshot) });
+    let responseReturned = false;
+    let downstreamResult: Record<string, unknown> | undefined;
+    let returnedMissionId: string | undefined;
     try {
-      const result = validateUgvToolResult(
-        call.name,
-        await invoke(call.name, structuredClone(call.arguments)),
-        call.arguments,
-      );
+      const downstream = await invoke(call.name, structuredClone(call.arguments));
+      responseReturned = true;
+      downstreamResult = structuredClone(downstream);
+      const result = validateUgvToolResult(call.name, downstream, call.arguments);
       results.push(structuredClone(result));
       const missionId = missionIdFromUgvResult(call.name, result);
       const canonicalMissionId =
         missionId === undefined ? undefined : canonicalUgvMissionId(missionId);
+      returnedMissionId = canonicalMissionId;
       if (
         persistMissionId &&
         missionId !== undefined &&
@@ -105,13 +111,24 @@ export async function executeUgvStartFlow(
         });
       return result;
     } catch (error) {
+      const classified = classifyStartMutationFailure(call.name, error, responseReturned);
       if (phase !== undefined)
-        await options.afterMutationFailed?.({
-          phase,
-          call: structuredClone(callSnapshot),
-          error,
-        });
-      throw error;
+        try {
+          await options.afterMutationFailed?.({
+            phase,
+            call: structuredClone(callSnapshot),
+            error: classified,
+            ...(downstreamResult === undefined
+              ? {}
+              : { result: structuredClone(downstreamResult) }),
+            ...(returnedMissionId === undefined ? {} : { canonicalMissionId: returnedMissionId }),
+          });
+        } catch (persistenceError) {
+          throw new UncertainMutatingDeviceCallError("UGV", call.name, {
+            cause: persistenceError,
+          });
+        }
+      throw classified;
     }
   };
 
@@ -150,6 +167,20 @@ export async function executeUgvStartFlow(
     missionIds,
     canonicalMissionIds: missionIds.map(canonicalUgvMissionId),
   };
+}
+
+function classifyStartMutationFailure(
+  toolName: UgvDeviceToolName,
+  error: unknown,
+  responseReturned: boolean,
+): unknown {
+  if (
+    error instanceof DeviceToolRejectedError ||
+    error instanceof UncertainMutatingDeviceCallError ||
+    !responseReturned
+  )
+    return error;
+  return new UncertainMutatingDeviceCallError("UGV", toolName, { cause: error });
 }
 
 export function startDeviceCalls(

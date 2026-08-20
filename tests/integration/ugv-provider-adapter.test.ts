@@ -67,6 +67,79 @@ describe("UGV long-running operation integration", () => {
     ]);
   });
 
+  it("persists an ambiguous primary result as uncertain and never replays it", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => ({
+      mission_id: 1,
+      state: "ambiguous",
+      state_label: "unknown",
+      message: "unknown",
+      error_code: 0,
+    }));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-ambiguous-result", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+    expect(device.calls).toHaveLength(1);
+    expect(await fixture.store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({
+        phase: "PRIMARY",
+        state: "UNCERTAIN",
+      }),
+    ]);
+
+    await expect(fixture.runtime.start(structuredClone(input))).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(device.calls).toHaveLength(1);
+  });
+
+  it("persists mission-write failure after primary acceptance as uncertain without replay", async () => {
+    const store = new MissionPersistenceFailingStore();
+    const fixture = await createFixture(false, store);
+    const input = startInput("nav-mission-persist-failed", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(fixture.device.calls).toHaveLength(1);
+    const journal = await store.listMutationJournal(input.taskId);
+    expect(journal).toEqual([
+      expect.objectContaining({
+        phase: "PRIMARY",
+        state: "UNCERTAIN",
+        externalMissionId: "1",
+      }),
+    ]);
+    expect(journal[0]?.resultHash).toMatch(/^[a-f0-9]{64}$/);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(fixture.device.calls).toHaveLength(1);
+  });
+
+  it("converts accepted-result journal persistence failure to uncertainty without replay", async () => {
+    const store = new JournalCompletionFailingStore();
+    const fixture = await createFixture(false, store);
+    const input = startInput("nav-journal-persist-failed", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(fixture.device.calls).toHaveLength(1);
+    expect(await store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "UNCERTAIN" }),
+    ]);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(fixture.device.calls).toHaveLength(1);
+  });
+
   it("fails closed on execution-mode mismatch before any physical call", async () => {
     const fixture = await createFixture();
     const input = startInput("live-mismatch", "vehicle_navigate", navigateArgs());
@@ -1164,6 +1237,33 @@ class DispatchOrderStore extends MemoryProviderStore {
     expectedState: MutationJournalState,
   ) {
     this.events.push(`journal:${entry.phase}:${entry.state}`);
+    return super.advanceMutationJournal(entry, expectedState);
+  }
+}
+
+class MissionPersistenceFailingStore extends MemoryProviderStore {
+  #failed = false;
+
+  override putExecution(execution: ProviderExecution): Promise<void> {
+    if (!this.#failed && execution.downstreamMissionIds.length > 0) {
+      this.#failed = true;
+      return Promise.reject(new Error("TEST_MISSION_PERSISTENCE_FAILED"));
+    }
+    return super.putExecution(execution);
+  }
+}
+
+class JournalCompletionFailingStore extends MemoryProviderStore {
+  #failed = false;
+
+  override advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ) {
+    if (!this.#failed && entry.state === "ACCEPTED") {
+      this.#failed = true;
+      return Promise.reject(new Error("TEST_JOURNAL_COMPLETION_FAILED"));
+    }
     return super.advanceMutationJournal(entry, expectedState);
   }
 }

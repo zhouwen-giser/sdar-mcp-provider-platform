@@ -348,6 +348,28 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     expect(persisted).toEqual(["42"]);
   });
 
+  it("classifies local persistence failure after a returned mutation as uncertain", async () => {
+    const failures: unknown[] = [];
+    await expect(
+      executeUgvStartFlow(
+        "vehicle_navigate",
+        { mission: { type: "distance", direction: "forward", distanceM: 1 } },
+        () => Promise.resolve(commonResult(42, 0)),
+        {
+          onMissionId: () => {
+            throw new Error("TEST_MISSION_PERSISTENCE_FAILED");
+          },
+          afterMutationFailed: ({ error, result, canonicalMissionId }) => {
+            failures.push(error, result, canonicalMissionId);
+          },
+        },
+      ),
+    ).rejects.toBeInstanceOf(UncertainMutatingDeviceCallError);
+    expect(failures[0]).toBeInstanceOf(UncertainMutatingDeviceCallError);
+    expect(failures[1]).toEqual(commonResult(42, 0));
+    expect(failures[2]).toBe("42");
+  });
+
   it("validates downstream business success instead of trusting MCP isError", () => {
     expect(new Set(Object.keys(UGV_DEVICE_RESULT_POLICIES))).toEqual(
       new Set(UGV_DEVICE_TOOL_ALLOWLIST),
