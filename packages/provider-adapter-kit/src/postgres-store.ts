@@ -48,6 +48,7 @@ export class PostgresProviderStore implements ProviderStore {
     return result.rows.map((row) => row.payload);
   }
   async putExecution(execution: ProviderExecution): Promise<void> {
+    assertPostgresJsonbSafe(execution, "execution");
     const result = await this.pool.query(
       `INSERT INTO ${this.tables.execution}
        (task_id, external_execution_id, operation_name, argument_hash, resource_id, tracks,
@@ -98,6 +99,7 @@ export class PostgresProviderStore implements ProviderStore {
     return result.rows[0]?.payload;
   }
   async claimCommandAck(ack: CommandAckRecord): Promise<CommandAckClaim> {
+    assertPostgresJsonbSafe(ack, "commandAck");
     const claimed = await this.pool.query<{ payload: CommandAckRecord }>(
       `INSERT INTO ${this.tables.commandAck}(task_id, command, command_sequence, payload, created_at)
        VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING payload`,
@@ -110,6 +112,7 @@ export class PostgresProviderStore implements ProviderStore {
     return { claimed: false, record: existing };
   }
   async completeCommandAck(ack: CommandAckRecord, expectedReasonCode?: string): Promise<boolean> {
+    assertPostgresJsonbSafe(ack, "commandAck");
     const result = await this.pool.query(
       `UPDATE ${this.tables.commandAck} SET payload=$4, created_at=$5
        WHERE task_id=$1 AND command=$2 AND command_sequence=$3
@@ -128,6 +131,7 @@ export class PostgresProviderStore implements ProviderStore {
     throw new Error("COMMAND_ACK_CLAIM_REQUIRED");
   }
   async putCommandAck(ack: CommandAckRecord): Promise<void> {
+    assertPostgresJsonbSafe(ack, "commandAck");
     await this.pool.query(
       `INSERT INTO ${this.tables.commandAck}(task_id, command, command_sequence, payload, created_at)
        VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
@@ -154,6 +158,7 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async claimMutationJournal(entry: MutationJournalEntry): Promise<MutationJournalClaim> {
     assertMutationJournalEntry(entry);
+    assertPostgresJsonbSafe(entry, "mutationJournal");
     if (entry.state !== "INTENT_PERSISTED")
       throw new Error("MUTATION_JOURNAL_INTENT_STATE_REQUIRED");
     const result = await this.pool.query<{ payload: MutationJournalEntry }>(
@@ -176,6 +181,7 @@ export class PostgresProviderStore implements ProviderStore {
     entry: MutationJournalEntry,
     expectedState: MutationJournalState,
   ): Promise<boolean> {
+    assertPostgresJsonbSafe(entry, "mutationJournal");
     const existing = await this.getMutationJournalEntry(entry.taskId, entry.stepId);
     if (existing === undefined) throw new Error("MUTATION_JOURNAL_INTENT_REQUIRED");
     if (!sameMutationJournalIdentity(existing, entry))
@@ -210,6 +216,7 @@ export class PostgresProviderStore implements ProviderStore {
     );
   }
   async putSnapshot(record: SnapshotRecord): Promise<void> {
+    assertPostgresJsonbSafe(record.snapshot, "snapshot");
     await this.pool.query(
       `INSERT INTO ${this.tables.snapshot}(revision, observed_at, snapshot)
        VALUES($1,$2,$3) ON CONFLICT DO NOTHING`,
@@ -217,6 +224,7 @@ export class PostgresProviderStore implements ProviderStore {
     );
   }
   async appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent> {
+    assertPostgresJsonbSafe(draft.rawPayload, "businessEvent.rawPayload");
     const source = businessEventSourceCapabilities().find((x) => x.sourceId === draft.sourceId);
     if (source === undefined) throw new Error("SOURCE_NOT_FOUND");
     const client = await this.pool.connect();
@@ -375,4 +383,59 @@ function timestamp(value: string): { seconds: string; nanos: number } {
     seconds: String(Math.floor(milliseconds / 1000)),
     nanos: (milliseconds % 1000) * 1_000_000,
   };
+}
+
+export class ProviderStoreJsonbUnsafePayloadError extends Error {
+  readonly code = "PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD";
+
+  constructor(
+    readonly rootName: string,
+    readonly path: string,
+    readonly unsafeKind: "nul_string" | "non_finite_number" | "bigint" | "cyclic_reference",
+  ) {
+    super(`PROVIDER_STORE_JSONB_UNSAFE_PAYLOAD root=${rootName} path=${path} kind=${unsafeKind}`);
+    this.name = "ProviderStoreJsonbUnsafePayloadError";
+  }
+}
+
+export function assertPostgresJsonbSafe(value: unknown, rootName: string): void {
+  const active = new WeakSet<object>();
+  const visit = (current: unknown, path: string): void => {
+    if (typeof current === "string") {
+      if (current.includes("\0"))
+        throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "nul_string");
+      return;
+    }
+    if (typeof current === "number") {
+      if (!Number.isFinite(current))
+        throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "non_finite_number");
+      return;
+    }
+    if (typeof current === "bigint")
+      throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "bigint");
+    if (current === null || typeof current !== "object") return;
+    if (active.has(current))
+      throw new ProviderStoreJsonbUnsafePayloadError(rootName, path, "cyclic_reference");
+    active.add(current);
+    if (Array.isArray(current)) {
+      for (const [index, child] of current.entries()) visit(child, `${path}/${String(index)}`);
+    } else {
+      for (const [key, child] of Object.entries(current)) {
+        const childPath = `${path}/${diagnosticPathSegment(key)}`;
+        if (key.includes("\0"))
+          throw new ProviderStoreJsonbUnsafePayloadError(rootName, childPath, "nul_string");
+        visit(child, childPath);
+      }
+    }
+    active.delete(current);
+  };
+  visit(value, "$");
+}
+
+function diagnosticPathSegment(value: string): string {
+  return value
+    .slice(0, 128)
+    .replaceAll("~", "~0")
+    .replaceAll("/", "~1")
+    .replace(/[\u0000-\u001f\u007f]/g, "?");
 }
