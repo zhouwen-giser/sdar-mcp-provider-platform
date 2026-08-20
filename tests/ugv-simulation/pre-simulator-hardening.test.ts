@@ -572,7 +572,7 @@ function authorities(observedAt: string, sequence: number): PhysicalObservationA
     sourceSequence: String(sequence),
     ingestSequence: sequence,
     payloadHash: String(sequence).padStart(64, "0"),
-    cursor: `${observedAt}\0${String(sequence)}`,
+    cursor: `legacy-safe:${observedAt}:${String(sequence)}`,
   }));
 }
 

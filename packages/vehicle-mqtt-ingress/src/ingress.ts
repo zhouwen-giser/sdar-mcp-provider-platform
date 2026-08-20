@@ -216,7 +216,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
     const observedAt = observation.sourceObservedAt ?? receivedAt;
     const hash = createHash("sha256").update(canonical(observation.canonicalPayload)).digest("hex");
-    const authorityCursor = `${topic}\0${observation.timeAuthority}`;
+    const authorityCursor = JSON.stringify([topic, observation.timeAuthority]);
     const latestForAuthority = this.#latestByAuthority.get(authorityCursor);
     if (latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash)
       return {
