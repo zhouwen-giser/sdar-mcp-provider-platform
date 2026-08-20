@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-20T07:38:07Z",
+  "status": "PASS",
+  "boundaries": {
+    "runtimeProtocol": {
+      "status": "PASS",
+      "evidence": [
+        "pnpm protocol:check passed 74 frozen cases and verified the 44-file protocol lock",
+        "UGV Runtime gRPC E2E passed 2 tests",
+        "RuntimeDeployment gate passed 58 tests"
+      ],
+      "changed": false
+    },
+    "pms": {
+      "status": "PASS",
+      "evidence": [
+        "PMS domain/application/persistence gate passed 25 tests",
+        "PMS migration gate passed 9 tests",
+        "UGV provider-platform Catalog and Registry publication passed 3 tests"
+      ],
+      "changed": false
+    },
+    "databaseProvisioner": {
+      "status": "PASS",
+      "evidence": [
+        "DB Provisioner gate passed 21 tests",
+        "database-provisioning isolation E2E passed",
+        "migration-isolation report records separate PMS, Runtime, UGV Provider, and NPC Provider schemas"
+      ],
+      "providerAndRuntimeDatabasesSeparate": true,
+      "changed": false
+    },
+    "pm2RuntimeAdapter": {
+      "status": "PASS",
+      "evidence": [
+        "PM2 Runtime Adapter gate passed 51 tests with one Windows-only case skipped on Linux",
+        "Provider mutation state remains behind the Adapter persistence boundary"
+      ],
+      "inspectsProviderTaskInternals": false,
+      "changed": false
+    },
+    "startupIndependence": {
+      "status": "PASS",
+      "evidence": [
+        "Development mock profile started Adapter and Runtime without PMS services",
+        "Read-only Runtime smoke passed through the Adapter",
+        "Offline startup and reconnect readiness tests passed in the affected UGV suite"
+      ],
+      "synchronousPmsDependencyIntroduced": false
+    }
+  }
+}

@@ -12,9 +12,11 @@ import {
   DeviceToolProtocolError,
   DeviceToolRejectedError,
   NPC_TANK_DEVICE_TOOL_ALLOWLIST,
+  OPERATION_REQUIRED_TOOLS,
   StreamableHttpNpcTankDeviceMcpClient,
   StreamableHttpUgvDeviceMcpClient,
   UGV_DEVICE_TOOL_ALLOWLIST,
+  UGV_DEVICE_RESULT_POLICIES,
   UncertainMutatingDeviceCallError,
   buildUgvEmergencyStopCalls,
   buildUgvGimbalStopCall,
@@ -98,10 +100,55 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
       "ugv_path_follow_mission",
       "ugv_mission_control",
     ]);
+    expect(requiredUgvDeviceTools("vehicle_navigate", { mission: { type: "route" } })).toEqual([
+      "ugv_path_follow_mission",
+      "ugv_mission_control",
+    ]);
     expect(requiredUgvDeviceTools("vehicle_navigate", {}, "resume")).toEqual([
       "ugv_mission_control",
     ]);
     expect(requiredUgvDeviceTools("vehicle_get_capabilities")).toEqual(["get_capabilities"]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", { scanMode: "area" })).toEqual([
+      "ugv_area_recon_configure",
+      "ugv_area_recon_control",
+      "ugv_area_recon_get_status",
+    ]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", { scanMode: "circular" })).toEqual([
+      "ugv_area_recon_configure",
+      "ugv_area_recon_control",
+      "ugv_area_recon_get_status",
+    ]);
+    expect(requiredUgvDeviceTools("vehicle_area_recon", {}, "cancel")).toEqual([
+      "ugv_area_recon_control",
+    ]);
+    expect(requiredUgvDeviceTools("vehicle_emergency_stop")).toEqual(["ugv_motion_stop"]);
+    expect(OPERATION_REQUIRED_TOOLS).toEqual({
+      vehicle_get_state: ["get_status"],
+      vehicle_get_capabilities: ["get_capabilities"],
+      vehicle_get_payload_status: ["ugv_area_recon_get_status"],
+      vehicle_get_targets: ["ugv_area_recon_get_targets"],
+      vehicle_laser_range: ["ugv_laser_range"],
+      vehicle_navigate: [
+        "ugv_path_follow_mission",
+        "ugv_return_home",
+        "ugv_move_distance",
+        "ugv_mission_control",
+      ],
+      vehicle_area_recon: [
+        "ugv_area_recon_configure",
+        "ugv_area_recon_control",
+        "ugv_area_recon_get_status",
+      ],
+      vehicle_track_target: ["ugv_area_recon_lock", "ugv_area_recon_get_status"],
+      vehicle_control_gimbal: ["ugv_gimbal_move"],
+      vehicle_fire_weapon: ["ugv_area_recon_attack_confirm"],
+      vehicle_emergency_stop: [
+        "ugv_motion_stop",
+        "ugv_mission_control",
+        "ugv_area_recon_control",
+        "ugv_area_recon_lock",
+      ],
+    });
   });
 
   it("builds exact path, distance, recon, lifecycle, lock, gimbal and stop arguments", () => {
@@ -252,13 +299,23 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         onMissionId: (canonical) => {
           events.push(`persist:${canonical}`);
         },
+        beforeMutationDispatch: ({ phase, call }) => {
+          events.push(`journal:${phase}:dispatching:${call.name}`);
+        },
+        afterMutationAccepted: ({ phase, canonicalMissionId }) => {
+          events.push(`journal:${phase}:accepted:${String(canonicalMissionId)}`);
+        },
       },
     );
 
     expect(events).toEqual([
+      "journal:PRIMARY:dispatching:ugv_move_distance",
       "call:ugv_move_distance:0",
       "persist:42",
+      "journal:PRIMARY:accepted:42",
+      "journal:FOLLOWUP:dispatching:ugv_mission_control",
       "call:ugv_mission_control:42",
+      "journal:FOLLOWUP:accepted:42",
     ]);
     expect(result.missionIds).toEqual([42]);
     expect(result.canonicalMissionIds).toEqual(["42"]);
@@ -273,7 +330,7 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         () => Promise.resolve(commonResult(0, 0)),
         { onMissionId: (missionId) => void persisted.push(missionId) },
       ),
-    ).rejects.toThrow("UGV_DEVICE_MISSION_ID_INVALID");
+    ).rejects.toThrow(UncertainMutatingDeviceCallError);
     expect(persisted).toEqual([]);
 
     const calls: UgvDeviceToolName[] = [];
@@ -287,12 +344,57 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         },
         { onMissionId: (missionId) => void persisted.push(missionId) },
       ),
-    ).rejects.toThrow("UGV_DEVICE_MISSION_ID_MISMATCH");
+    ).rejects.toThrow(UncertainMutatingDeviceCallError);
     expect(calls).toEqual(["ugv_move_distance", "ugv_mission_control"]);
     expect(persisted).toEqual(["42"]);
   });
 
+  it("classifies local persistence failure after a returned mutation as uncertain", async () => {
+    const failures: unknown[] = [];
+    await expect(
+      executeUgvStartFlow(
+        "vehicle_navigate",
+        { mission: { type: "distance", direction: "forward", distanceM: 1 } },
+        () => Promise.resolve(commonResult(42, 0)),
+        {
+          onMissionId: () => {
+            throw new Error("TEST_MISSION_PERSISTENCE_FAILED");
+          },
+          afterMutationFailed: ({ error, result, canonicalMissionId }) => {
+            failures.push(error, result, canonicalMissionId);
+          },
+        },
+      ),
+    ).rejects.toBeInstanceOf(UncertainMutatingDeviceCallError);
+    expect(failures[0]).toBeInstanceOf(UncertainMutatingDeviceCallError);
+    expect(failures[1]).toEqual(commonResult(42, 0));
+    expect(failures[2]).toBe("42");
+  });
+
   it("validates downstream business success instead of trusting MCP isError", () => {
+    expect(new Set(Object.keys(UGV_DEVICE_RESULT_POLICIES))).toEqual(
+      new Set(UGV_DEVICE_TOOL_ALLOWLIST),
+    );
+    expect(UGV_DEVICE_RESULT_POLICIES.ugv_move_distance).toMatchObject({
+      kind: "mutating",
+      responseIsError: "rejected",
+      errorCode: "optional",
+      successStates: [0, 1, 2, 3, 4],
+      rejectedStates: [5],
+      missionId: "allocates_or_controls",
+    });
+    expect(UGV_DEVICE_RESULT_POLICIES.get_status).toMatchObject({
+      kind: "read",
+      errorCode: "none",
+      missionId: "none",
+    });
+    const acceptedWithoutErrorCode = commonResult(9, 0);
+    delete acceptedWithoutErrorCode.error_code;
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", acceptedWithoutErrorCode, {
+        mission_id: 9,
+      }),
+    ).not.toThrow();
     expect(() =>
       validateUgvToolResult("ugv_move_distance", {
         ...commonResult(9, 5),
@@ -301,21 +403,27 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
       }),
     ).toThrow(DeviceToolRejectedError);
     expect(() => validateUgvToolResult("ugv_move_distance", commonResult(9, 5))).toThrow(
-      "UGV_DEVICE_RESULT_CONTRADICTORY",
+      DeviceToolRejectedError,
+    );
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", { state: 5, state_label: "failed" }),
+    ).toThrow(DeviceToolRejectedError);
+    expect(() => validateUgvToolResult("ugv_move_distance", { error_code: 831 })).toThrow(
+      DeviceToolRejectedError,
     );
     expect(() =>
       validateUgvToolResult("ugv_move_distance", {
         ...commonResult(9, 0),
         mission_id: "9",
       }),
-    ).toThrow(DeviceToolProtocolError);
+    ).toThrow(UncertainMutatingDeviceCallError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_configure", {
         ...commonResult(10, 0),
         res: false,
         fail_data: "",
       }),
-    ).toThrow("UGV_DEVICE_RECON_RESULT_CONTRADICTORY");
+    ).toThrow(DeviceToolRejectedError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_configure", {
         ...commonResult(10, 0),
@@ -326,14 +434,24 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
           coverable_label: "invalid",
         },
       }),
-    ).toThrow("UGV_DEVICE_COVERABILITY_INVALID");
+    ).toThrow(UncertainMutatingDeviceCallError);
     expect(() =>
       validateUgvToolResult("ugv_area_recon_control", {
         ...commonResult(10, 1),
         cmd_res: 1,
         fail_data: "rejected",
       }),
-    ).toThrow("UGV_DEVICE_RECON_CMD_RES_CONTRADICTORY");
+    ).toThrow(DeviceToolRejectedError);
+    expect(() =>
+      validateUgvToolResult("ugv_move_distance", {
+        mission_id: 9,
+        state_label: "accepted",
+        message: "ambiguous because state is missing",
+      }),
+    ).toThrow(UncertainMutatingDeviceCallError);
+    expect(() => validateUgvToolResult("get_status", { available: "yes" })).toThrow(
+      DeviceToolProtocolError,
+    );
     expect(() =>
       validateUgvToolResult("ugv_area_recon_get_status", {
         status: 99,
@@ -355,32 +473,37 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     );
   });
 
-  it("attempts every independent emergency stop primitive before surfacing rejection", async () => {
+  it("requires the primary emergency stop and treats cleanup rejection as best-effort", async () => {
     const calls: UgvDeviceToolName[] = [];
-    await expect(
-      executeUgvStartFlow(
-        "vehicle_emergency_stop",
-        { chassisMissionId: 42, reconMissionId: 43 },
-        (name) => {
-          calls.push(name);
-          if (name === "ugv_mission_control")
-            return Promise.resolve({
-              ...commonResult(42, 3),
-              error_code: 831,
-              message: "already stopped",
-            });
-          if (name === "ugv_area_recon_control" || name === "ugv_area_recon_lock")
-            return Promise.resolve({ ...commonResult(43, 3), cmd_res: 0, fail_data: "" });
-          return Promise.resolve(commonResult(42, 3));
-        },
-      ),
-    ).rejects.toBeInstanceOf(DeviceToolRejectedError);
+    const result = await executeUgvStartFlow(
+      "vehicle_emergency_stop",
+      { chassisMissionId: 42, reconMissionId: 43 },
+      (name) => {
+        calls.push(name);
+        if (name === "ugv_mission_control")
+          return Promise.resolve({
+            ...commonResult(42, 3),
+            error_code: 831,
+            message: "already stopped",
+          });
+        if (name === "ugv_area_recon_control" || name === "ugv_area_recon_lock")
+          return Promise.resolve({ ...commonResult(43, 3), cmd_res: 0, fail_data: "" });
+        return Promise.resolve(commonResult(42, 3));
+      },
+    );
+    expect(result.calls[0]).toEqual({ name: "ugv_motion_stop", arguments: {} });
     expect(calls).toEqual([
       "ugv_motion_stop",
       "ugv_mission_control",
       "ugv_area_recon_control",
       "ugv_area_recon_lock",
     ]);
+
+    await expect(
+      executeUgvStartFlow("vehicle_emergency_stop", {}, () =>
+        Promise.resolve({ ...commonResult(0, 3), error_code: 831, message: "stop rejected" }),
+      ),
+    ).rejects.toBeInstanceOf(DeviceToolRejectedError);
   });
 });
 
@@ -421,7 +544,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     const store = new MemoryProviderStore();
     const client = testClient(harness, store, { readRetryAttempts: 1 });
     const states: string[] = [];
+    const calls: { retries: number; attempts: number; uncertain: boolean }[] = [];
     client.onConnectionState((state) => states.push(state));
+    client.onCallObservation((observation) => calls.push(observation));
     try {
       await client.connect();
       harness.dropNextToolCalls = 1;
@@ -431,6 +556,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       expect(states).toContain("disconnected");
       expect(states.at(-1)).toBe("connected");
       expect(store.toolCalls.at(-1)?.outcome).toBe("accepted");
+      expect(calls).toEqual([
+        expect.objectContaining({ attempts: 2, retries: 1, uncertain: false }),
+      ]);
     } finally {
       await client.close();
       await harness.stop();
@@ -443,6 +571,8 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     await harness.start();
     const store = new MemoryProviderStore();
     const client = testClient(harness, store, { timeoutMs: 30, readRetryAttempts: 4 });
+    const calls: { retries: number; attempts: number; uncertain: boolean }[] = [];
+    client.onCallObservation((observation) => calls.push(observation));
     try {
       await client.connect();
       await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
@@ -451,6 +581,9 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       expect(harness.toolCalls.filter(({ name }) => name === "ugv_motion_stop")).toHaveLength(1);
       expect(client.connected()).toBe(false);
       expect(store.toolCalls.at(-1)?.outcome).toBe("timeout");
+      expect(calls).toEqual([
+        expect.objectContaining({ attempts: 1, retries: 0, uncertain: true }),
+      ]);
     } finally {
       await client.close();
       await harness.stop();
@@ -560,6 +693,34 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
       await harness.stop();
     }
   });
+
+  it("uses MCP isError as rejection evidence and treats contradictory success as uncertain", async () => {
+    const harness = new UgvMcpHarness();
+    harness.errorTools.add("ugv_motion_stop");
+    harness.results.set("ugv_motion_stop", commonResult(1, 5));
+    await harness.start();
+    const client = testClient(harness, new MemoryProviderStore());
+    try {
+      await client.connect();
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        DeviceToolRejectedError,
+      );
+
+      harness.results.set("ugv_motion_stop", commonResult(1, 0));
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        UncertainMutatingDeviceCallError,
+      );
+
+      harness.results.set("ugv_motion_stop", "explicit device rejection");
+      await expect(client.call("ugv_motion_stop", {})).rejects.toBeInstanceOf(
+        DeviceToolRejectedError,
+      );
+      expect(harness.toolCalls.filter(({ name }) => name === "ugv_motion_stop")).toHaveLength(3);
+    } finally {
+      await client.close();
+      await harness.stop();
+    }
+  });
 });
 
 function commonResult(missionId: number, state: number): Record<string, unknown> {
@@ -637,6 +798,7 @@ class UgvMcpHarness {
   #port: number | undefined;
   dropNextToolCalls = 0;
   readonly delays = new Map<string, number>();
+  readonly errorTools = new Set<string>();
   readonly results = new Map<string, unknown>();
   readonly toolCalls: { name: string; arguments: Record<string, unknown> }[] = [];
 
@@ -702,6 +864,7 @@ class UgvMcpHarness {
               : commonResult(1, 0));
         return {
           content: [{ type: "text" as const, text: JSON.stringify(result) ?? "undefined" }],
+          ...(this.errorTools.has(name) ? { isError: true } : {}),
         };
       });
     const transport = new StreamableHTTPServerTransport();

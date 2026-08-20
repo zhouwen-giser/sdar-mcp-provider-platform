@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0",
+  "status": "COMPLETE_HANDOFF",
+  "qualificationPerformed": false,
+  "requiredTools": [
+    {
+      "name": "get_status",
+      "kind": "read",
+      "expect": ["online/status", "vehicle identity", "task state", "speed/health when supported"]
+    },
+    {
+      "name": "get_capabilities",
+      "kind": "read",
+      "expect": ["supported operations", "limits with provenance"]
+    },
+    {
+      "name": "ugv_move_distance",
+      "kind": "mutating",
+      "expect": ["accepted/rejected", "mission_id"]
+    },
+    {
+      "name": "ugv_path_follow_mission",
+      "kind": "mutating",
+      "expect": ["accepted/rejected", "mission_id"]
+    },
+    {
+      "name": "ugv_mission_control",
+      "kind": "mutating",
+      "expect": ["action", "mission_id", "accepted/rejected"]
+    },
+    { "name": "ugv_motion_stop", "kind": "mutating", "expect": ["accepted/rejected/uncertain"] },
+    {
+      "name": "ugv_area_recon_configure",
+      "kind": "mutating",
+      "expect": ["accepted/rejected", "mission_id or run_id"]
+    },
+    {
+      "name": "ugv_area_recon_control",
+      "kind": "mutating",
+      "expect": ["action", "mission_id or run_id", "accepted/rejected"]
+    },
+    {
+      "name": "ugv_area_recon_get_status",
+      "kind": "read",
+      "expect": ["mission/run id", "motion status", "progress", "coverage", "faults"]
+    },
+    {
+      "name": "ugv_area_recon_get_targets",
+      "kind": "read",
+      "expect": ["target array", "target identity/type/position/time"]
+    }
+  ],
+  "optionalTools": ["ugv_return_home", "ugv_laser_range", "ugv_target_track", "ugv_gimbal_control"],
+  "topics": [
+    {
+      "topic": "status/ugv",
+      "fields": [
+        "vehicle_id",
+        "speed_kmh",
+        "chassis_task",
+        "eo_task",
+        "weapon_task",
+        "available",
+        "source time/sequence"
+      ]
+    },
+    {
+      "topic": "/ugv/gnss",
+      "fields": [
+        "entity_id",
+        "latitude",
+        "longitude",
+        "altitude",
+        "heading",
+        "source time/sequence"
+      ]
+    },
+    { "topic": "/ugv/speed", "fields": ["entity_id", "speed_kmh", "source time/sequence"] },
+    {
+      "topic": "/ugv/mission_state",
+      "fields": ["entity_id", "mission_id", "state", "progress", "source time/sequence"]
+    },
+    {
+      "topic": "/ugv/nav_state",
+      "fields": [
+        "entity_id",
+        "mission_id",
+        "state",
+        "progress",
+        "position",
+        "speed",
+        "source time/sequence"
+      ]
+    },
+    {
+      "topic": "/ugv/system_state",
+      "fields": ["entity_id", "online/availability", "source time/sequence"]
+    },
+    {
+      "topic": "/ugv/component_status",
+      "fields": ["entity_id", "component health codes", "source time/sequence"]
+    },
+    {
+      "topic": "/ugv/battery_range_km",
+      "fields": ["entity_id", "range_km", "source time/sequence"]
+    },
+    {
+      "topic": "/ugv/area_recon/status",
+      "fields": [
+        "entity_id",
+        "mission_id/run_id",
+        "motion_status",
+        "progress",
+        "scan_mode",
+        "camera_fault",
+        "out_of_range",
+        "source time/sequence"
+      ]
+    },
+    {
+      "topic": "/ugv/area_recon/targets",
+      "fields": ["entity_id", "mission_id/run_id", "targets", "source time/sequence"]
+    },
+    {
+      "topic": "/ugv/area_recon/coverage",
+      "fields": [
+        "entity_id",
+        "mission_id/run_id",
+        "coverage",
+        "coverability",
+        "source time/sequence"
+      ]
+    },
+    {
+      "topic": "/ugv/area_recon/exception",
+      "fields": ["entity_id", "mission_id/run_id", "exception/reason", "source time/sequence"]
+    }
+  ],
+  "scenarios": [
+    "navigation point and distance with independent displacement measurement",
+    "stale duplicate and reordered terminal observations",
+    "pause resume cancel ACK/state separation",
+    "emergency stop with moving/recon/target-lock and stale-speed variants",
+    "recon success/empty/fault/out-of-range/exception/correlation variants",
+    "read retry and mutating uncertain reconciliation"
+  ],
+  "statuses": [
+    "PENDING_SIMULATOR_CONTRACT",
+    "PENDING_SIMULATOR_OBSERVATION",
+    "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"
+  ],
+  "roadmap": [
+    "component power",
+    "precise turn",
+    "payload view controls",
+    "media capture",
+    "engineering profile authority"
+  ]
+}

@@ -1,0 +1,235 @@
+name: sdar-development-ugv-provider-template
+
+services:
+  ugv-adapter-postgres:
+    profiles: ["mock", "external"]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_adapter
+      POSTGRES_PASSWORD: ${UGV_ADAPTER_DB_PASSWORD:?UGV_ADAPTER_DB_PASSWORD is required}
+      POSTGRES_DB: ugv_adapter
+    volumes:
+      - ugv-adapter-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_adapter -d ugv_adapter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    networks: [ugv-template]
+
+  ugv-runtime-postgres:
+    profiles: ["mock", "external"]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_runtime
+      POSTGRES_PASSWORD: ${UGV_RUNTIME_DB_PASSWORD:?UGV_RUNTIME_DB_PASSWORD is required}
+      POSTGRES_DB: ugv_runtime
+    volumes:
+      - ugv-runtime-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_runtime -d ugv_runtime"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    networks: [ugv-template]
+
+  mock-mqtt:
+    profiles: ["mock"]
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
+    volumes:
+      - ./mosquitto.conf:/mosquitto-no-auth.conf:ro
+    ports:
+      - "127.0.0.1:${UGV_TEMPLATE_MOCK_MQTT_PORT:-18830}:1883"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mosquitto_sub -h 127.0.0.1 -p 1883 -t '$$SYS/#' -C 1 -W 2 >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+    networks: [ugv-template]
+
+  mock-ugv-device-mcp:
+    profiles: ["mock"]
+    image: sdar/dev-ugv-mock-device:${UGV_TEMPLATE_IMAGE_TAG:-local}
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+      target: mock-ugv-device-mcp
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      MOCK_UGV_DEVICE_MCP_PORT: "19000"
+    ports:
+      - "127.0.0.1:${UGV_TEMPLATE_MOCK_DEVICE_PORT:-19020}:19000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:19000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-template]
+
+  mock-ugv-mqtt-publisher:
+    profiles: ["mock"]
+    image: sdar/dev-ugv-mock-mqtt-publisher:${UGV_TEMPLATE_IMAGE_TAG:-local}
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+      target: mock-ugv-mqtt-publisher
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      UGV_MQTT_URL: mqtt://mock-mqtt:1883
+      UGV_MQTT_WIRE_MODE: ros_bridge_json
+    depends_on:
+      mock-mqtt:
+        condition: service_healthy
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-template]
+
+  ugv-adapter:
+    profiles: ["mock", "external"]
+    image: sdar/dev-ugv-adapter:${UGV_TEMPLATE_IMAGE_TAG:-local}
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+      target: ugv-provider-adapter
+    init: true
+    read_only: true
+    restart: unless-stopped
+    command:
+      [
+        "sh",
+        "-c",
+        "node dist/apps/ugv-provider-adapter/src/migrate.js && exec node dist/apps/ugv-provider-adapter/src/main.js",
+      ]
+    environment:
+      RUNTIME_ENV: development
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      PROVIDER_VERSION: 1.0.0
+      UGV_RESOURCE_ID: vehicle:ugv1
+      UGV_ENTITY_ID: ugv1
+      UGV_VEHICLE_TYPE: ugv
+      UGV_EXECUTION_MODE: ${UGV_TEMPLATE_EXECUTION_MODE:-simulation}
+      UGV_FIRE_ENABLED: "false"
+      ADAPTER_HOST: 0.0.0.0
+      ADAPTER_PORT: "7010"
+      ADAPTER_TLS_MODE: disabled
+      UGV_ADAPTER_STORE_MODE: postgres
+      UGV_ADAPTER_DATABASE_URL: postgresql://ugv_adapter:${UGV_ADAPTER_DB_PASSWORD:?UGV_ADAPTER_DB_PASSWORD is required}@ugv-adapter-postgres:5432/ugv_adapter
+      UGV_DEVICE_MCP_URL: ${UGV_SIM_DEVICE_MCP_URL:?UGV_SIM_DEVICE_MCP_URL is required}
+      UGV_DEVICE_MCP_TIMEOUT_MS: ${UGV_SIM_DEVICE_MCP_TIMEOUT_MS:-5000}
+      UGV_DEVICE_MCP_TLS_MODE: disabled
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      UGV_DEVICE_MCP_CONTRACT_REPORT_PATH: /var/lib/sdar/contracts/MCP_CONTRACT_CAPTURE.json
+      UGV_MQTT_URL: ${UGV_SIM_MQTT_URL:?UGV_SIM_MQTT_URL is required}
+      UGV_MQTT_CLIENT_ID: ${UGV_SIM_MQTT_CLIENT_ID:-sdar-development-ugv-adapter}
+      UGV_MQTT_TLS_MODE: disabled
+      UGV_MQTT_SESSION_MODE: clean
+      UGV_MQTT_WIRE_MODE: ${UGV_MQTT_WIRE_MODE:?UGV_MQTT_WIRE_MODE is required}
+      PROVIDER_TELEMETRY_ENABLED: "false"
+      LOG_LEVEL: ${UGV_LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:${UGV_TEMPLATE_ADAPTER_PORT:-17010}:7010"
+    depends_on:
+      ugv-adapter-postgres:
+        condition: service_healthy
+    volumes:
+      - ugv-adapter-state:/var/lib/sdar
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('node:net');const s=net.connect({host:'127.0.0.1',port:7010},()=>s.end());s.setTimeout(2000,()=>s.destroy(Error('timeout')));s.on('error',()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-template]
+
+  ugv-runtime:
+    profiles: ["mock", "external"]
+    image: sdar/dev-ugv-runtime:${UGV_TEMPLATE_IMAGE_TAG:-local}
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+      target: runtime
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      RUNTIME_ENV: development
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      DATABASE_URL: postgresql://ugv_runtime:${UGV_RUNTIME_DB_PASSWORD:?UGV_RUNTIME_DB_PASSWORD is required}@ugv-runtime-postgres:5432/ugv_runtime
+      ADAPTER_ENDPOINT: ugv-adapter:7010
+      ADAPTER_TLS_MODE: disabled
+      AUTH_MODE: development
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "false"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "false"
+      OTEL_ENABLED: "false"
+      LOG_LEVEL: ${UGV_LOG_LEVEL:-info}
+      HOST: 0.0.0.0
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:${UGV_TEMPLATE_RUNTIME_PORT:-19120}:8080"
+    depends_on:
+      ugv-runtime-postgres:
+        condition: service_healthy
+      ugv-adapter:
+        condition: service_healthy
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-template]
+
+networks:
+  ugv-template:
+    driver: bridge
+
+volumes:
+  ugv-adapter-postgres-data:
+  ugv-runtime-postgres-data:
+  ugv-adapter-state:

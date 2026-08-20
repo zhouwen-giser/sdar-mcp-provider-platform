@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "status": "DETERMINISTIC_OBSERVATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+  "pause": {
+    "ackSeparated": true,
+    "proof": [
+      "same mission",
+      "new source/ingest authority",
+      "paused state",
+      "fresh speed",
+      "stationary"
+    ]
+  },
+  "resume": {
+    "ackSeparated": true,
+    "proof": [
+      "ACK alone remains RESUMING",
+      "same mission",
+      "new mission authority",
+      "active/running state"
+    ],
+    "positiveSpeedRequired": false
+  },
+  "cancel": {
+    "ackSeparated": true,
+    "proof": ["same mission", "new terminal authority", "fresh speed", "stationary"]
+  },
+  "uncertainMutation": {
+    "state": "UNCERTAIN_EXECUTION_STATE",
+    "automaticRedispatch": false,
+    "persistedAckReplayedWithoutDeviceCall": true
+  },
+  "durability": "controlConfirmation baseline is persisted with the execution"
+}

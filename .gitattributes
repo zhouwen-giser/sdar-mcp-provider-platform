@@ -10,6 +10,7 @@ protocol/protocol-baseline.json text eol=lf
 protocol/protocol-baseline.lock.json text eol=lf
 packages/adapter-protocol/generated/** text eol=lf
 reports/**/*.json text eol=lf
+reports/ugv-provider-template-stabilization/delivery/*.patch -text -diff
 
 /.codex/** export-ignore
 /.obsidian/** export-ignore

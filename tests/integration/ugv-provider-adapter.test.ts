@@ -1,16 +1,32 @@
+import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  canonicalJson,
   jsonToProtoStruct,
+  protoStructToJson,
   type ExecutionSnapshot,
   type ProviderManifest,
 } from "../../packages/adapter-protocol/src/index.js";
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
 import {
   MemoryProviderStore,
+  type MutationJournalEntry,
+  type MutationJournalPhase,
+  type MutationJournalState,
   type ProviderExecution,
 } from "../../packages/provider-adapter-kit/src/index.js";
 import { synchronousResult } from "../../packages/task-engine/src/result-contract.js";
-import { MockUgvDeviceMcpClient } from "../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  buildUgvStartFollowupCall,
+  controlDeviceCalls,
+  MockUgvDeviceMcpClient,
+  mockUgvToolContracts,
+  startDeviceCalls,
+  UncertainMutatingDeviceCallError,
+  type CapturedToolContract,
+  type DeviceToolCall,
+  type UgvDeviceToolName,
+} from "../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 import { UgvBusinessEventHub } from "../../apps/ugv-provider-adapter/src/business-events.js";
 import { ugvManifest } from "../../apps/ugv-provider-adapter/src/manifest.js";
@@ -27,12 +43,345 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("persists every navigation dispatch fence and mission ID before transport dependencies", async () => {
+    const events: string[] = [];
+    const store = new DispatchOrderStore(events);
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => {
+      events.push("transport:PRIMARY");
+      return acceptedMutationResult(1, 0);
+    });
+    device.handlers.set("ugv_mission_control", () => {
+      events.push("transport:FOLLOWUP");
+      return acceptedMutationResult(1, 1);
+    });
+    const fixture = await createFixture(false, store, {}, device);
+
+    await fixture.runtime.start(
+      startInput("nav-dispatch-order", "vehicle_navigate", navigateArgs()),
+    );
+
+    expect(events).toEqual([
+      "journal:PRIMARY:INTENT_PERSISTED",
+      "journal:PRIMARY:DISPATCHING",
+      "transport:PRIMARY",
+      "execution:mission:1",
+      "journal:PRIMARY:ACCEPTED",
+      "journal:FOLLOWUP:INTENT_PERSISTED",
+      "journal:FOLLOWUP:DISPATCHING",
+      "transport:FOLLOWUP",
+      "journal:FOLLOWUP:ACCEPTED",
+    ]);
+  });
+
+  it("persists an ambiguous primary result as uncertain and never replays it", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => ({
+      mission_id: 1,
+      state: "ambiguous",
+      state_label: "unknown",
+      message: "unknown",
+      error_code: 0,
+    }));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-ambiguous-result", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+    expect(device.calls).toHaveLength(1);
+    expect(await fixture.store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({
+        phase: "PRIMARY",
+        state: "UNCERTAIN",
+      }),
+    ]);
+
+    await expect(fixture.runtime.start(structuredClone(input))).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(device.calls).toHaveLength(1);
+  });
+
+  it("persists mission-write failure after primary acceptance as uncertain without replay", async () => {
+    const store = new MissionPersistenceFailingStore();
+    const fixture = await createFixture(false, store);
+    const input = startInput("nav-mission-persist-failed", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(fixture.device.calls).toHaveLength(1);
+    const journal = await store.listMutationJournal(input.taskId);
+    expect(journal).toEqual([
+      expect.objectContaining({
+        phase: "PRIMARY",
+        state: "UNCERTAIN",
+        externalMissionId: "1",
+      }),
+    ]);
+    expect(journal[0]?.resultHash).toMatch(/^[a-f0-9]{64}$/);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(fixture.device.calls).toHaveLength(1);
+  });
+
+  it("converts accepted-result journal persistence failure to uncertainty without replay", async () => {
+    const store = new JournalCompletionFailingStore();
+    const fixture = await createFixture(false, store);
+    const input = startInput("nav-journal-persist-failed", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    expect(fixture.device.calls).toHaveLength(1);
+    expect(await store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "UNCERTAIN" }),
+    ]);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(fixture.device.calls).toHaveLength(1);
+  });
+
+  it("keeps an accepted mission with rejected follow-up in an explicit ready-not-started state", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_mission_control", () => acceptedMutationResult(1, 5));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-ready-not-started", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: {
+        state: "ACCEPTED",
+        reasonCode: "DOWNSTREAM_MISSION_READY_NOT_STARTED",
+      },
+    });
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "DOWNSTREAM_MISSION_READY_NOT_STARTED",
+      downstreamMissionIds: ["1"],
+    });
+    expect(await fixture.store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED", externalMissionId: "1" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "REJECTED", externalMissionId: "1" }),
+    ]);
+    expect(device.calls).toHaveLength(2);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(device.calls).toHaveLength(2);
+  });
+
+  it("persists phase deadlines from their authoritative observations and command fence", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      startObservationTimeoutMs: 1_000,
+      activeObservationTimeoutMs: 2_000,
+      terminalObservationTimeoutMs: 3_000,
+      physicalConfirmationTimeoutMs: 4_000,
+      controlConfirmationTimeoutMs: 5_000,
+    });
+    await fixture.runtime.start(
+      startInput("nav-phase-deadlines", "vehicle_navigate", navigateArgs()),
+    );
+    let execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    const followup = required(
+      await fixture.store.getMutationJournalEntry("nav-phase-deadlines", "start:02:followup"),
+    );
+    expect(Date.parse(required(execution.startObservationDeadline))).toBe(
+      Date.parse(required(followup.completedAt)) + 1_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 0, 0);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.activeObservationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 2_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 1, 10);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.terminalObservationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 3_000,
+    );
+
+    now += 10;
+    const identity = identityOf(execution, "1");
+    await fixture.runtime.command("pause", identity);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    const fencedAt = execution.controlConfirmation?.fencedAt;
+    expect(typeof fencedAt).toBe("string");
+    expect(Date.parse(required(execution.controlConfirmationDeadline))).toBe(
+      Date.parse(String(fencedAt)) + 5_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 4, 100);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.physicalConfirmationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 4_000,
+    );
+  });
+
+  it("enforces a persisted start-observation deadline after restart without redispatch", async () => {
+    let now = Date.now();
+    const options = {
+      ...runtimeOptions(),
+      now: () => new Date(now),
+      startObservationTimeoutMs: 100,
+    };
+    const store = new MemoryProviderStore();
+    const fixture = await createFixture(false, store, options);
+    await fixture.runtime.start(
+      startInput("nav-restart-deadline", "vehicle_navigate", navigateArgs()),
+    );
+    const beforeRestart = required(await store.getExecution("nav-restart-deadline"));
+    expect(beforeRestart.startObservationDeadline).toBe(new Date(now + 100).toISOString());
+    const callsBeforeRestart = fixture.device.calls.length;
+    await fixture.runtime.close();
+
+    now += 101;
+    const recovered = new UgvProviderRuntime(
+      options,
+      store,
+      fixture.ingress,
+      fixture.device,
+      fixture.events,
+      fixture.telemetry,
+    );
+    active.push(recovered);
+    await recovered.initialize();
+
+    expect(await store.getExecution("nav-restart-deadline")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_START_OBSERVATION_TIMEOUT",
+      startObservationDeadline: beforeRestart.startObservationDeadline,
+      result: { status: "timeout" },
+    });
+    expect(fixture.device.calls).toHaveLength(callsBeforeRestart);
+  });
+
+  it("expires control and physical confirmation deadlines without a new MQTT cursor", async () => {
+    let now = Date.now();
+    const controlFixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      controlConfirmationTimeoutMs: 100,
+    });
+    now = Date.now() + 100;
+    await controlFixture.runtime.start(
+      startInput("pause-no-observation", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(controlFixture.ingress, 1, 10, new Date(now).toISOString());
+    const running = required(await controlFixture.runtime.get("pause-no-observation"));
+    await controlFixture.runtime.command("pause", identityOf(running, "1"));
+    now += 101;
+    expect(await controlFixture.runtime.get("pause-no-observation")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_CONTROL_CONFIRMATION_TIMEOUT",
+      result: { status: "timeout", observedAt: new Date(now).toISOString() },
+    });
+
+    const physicalFixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 1_000,
+      stationaryMinimumSamples: 2,
+      physicalConfirmationTimeoutMs: 100,
+    });
+    now = Date.now() + 100;
+    await physicalFixture.runtime.start(
+      startInput("terminal-no-observation", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(physicalFixture.ingress, 1, 10, new Date(now).toISOString());
+    await physicalFixture.runtime.get("terminal-no-observation");
+    now += 10;
+    missionRaw(physicalFixture.ingress, 4, 100, new Date(now).toISOString());
+    physicalFixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.1001,"longitude":114.1001}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    physicalFixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await physicalFixture.runtime.get("terminal-no-observation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_STATIONARY_STABILITY_PENDING",
+      consecutiveStationaryObservations: 1,
+    });
+    now += 101;
+    expect(await physicalFixture.runtime.get("terminal-no-observation")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_PHYSICAL_CONFIRMATION_TIMEOUT",
+      result: { status: "timeout", observedAt: new Date(now).toISOString() },
+    });
+  });
+
+  it("fails closed on execution-mode mismatch before any physical call", async () => {
+    const fixture = await createFixture();
+    const input = startInput("live-mismatch", "vehicle_navigate", navigateArgs());
+    await expect(
+      fixture.runtime.start({
+        ...input,
+        executionContext: {
+          authorizationContextHash: input.executionContext.authorizationContextHash,
+          executionMode: "LIVE",
+          simulationId: "not-applicable-live",
+          correlationId: input.executionContext.correlationId,
+        },
+      }),
+    ).rejects.toThrow("UGV_EXECUTION_MODE_MISMATCH");
+    expect(fixture.device.calls).toHaveLength(0);
+  });
+
+  it("allows LIVE only for an explicitly live Provider and rejects SIMULATION side effects", async () => {
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+    });
+    const live = startInput("live-allowed", "vehicle_navigate", navigateArgs());
+    live.executionContext.executionMode = "LIVE";
+    live.executionContext.simulationId = "not-applicable-live";
+    await expect(fixture.runtime.start(live)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED" },
+    });
+    expect(fixture.device.calls).toHaveLength(2);
+
+    const simulation = startInput("simulation-rejected", "vehicle_navigate", navigateArgs());
+    await expect(fixture.runtime.start(simulation)).rejects.toThrow("UGV_EXECUTION_MODE_MISMATCH");
+    expect(fixture.device.calls).toHaveLength(2);
+  });
+
+  it("keeps fire disabled in availability and direct start with zero device calls", async () => {
+    const fixture = await createFixture(true, new MemoryProviderStore(), { fireEnabled: false });
+    expect(fixture.runtime.availability("vehicle_fire_weapon", fireArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_FIRE_DISABLED",
+    });
+    await expect(
+      fixture.runtime.start(startInput("fire-disabled", "vehicle_fire_weapon", fireArgs())),
+    ).rejects.toThrow("UGV_FIRE_DISABLED");
+    expect(fixture.device.calls).toHaveLength(0);
+  });
+
   it("returns Runtime-valid evidence for every core synchronous read", async () => {
     const fixture = await createFixture();
     const mqttSequence = fixture.ingress.ingestSequence();
     const mqttFreshness = fixture.ingress.snapshot().freshness;
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     for (const operationName of [
       "vehicle_get_state",
@@ -54,6 +403,138 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.ingress.snapshot().freshness).toEqual(mqttFreshness);
   });
 
+  it("validates stable state, capability and evidence DTOs without raw device status", async () => {
+    const fixture = await createFixture();
+    fixture.device.responses.set("get_status", { available: true, raw_internal_code: 731 });
+    const manifest = new OperationRegistry().validate(
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
+    );
+
+    for (const operationName of ["vehicle_get_state", "vehicle_get_capabilities"]) {
+      const started = await fixture.runtime.start(
+        startInput(`stable-${operationName}`, operationName, { resourceId: "vehicle:ugv1" }),
+      );
+      const operation = required(
+        manifest.operations.find((candidate) => candidate.name === operationName),
+      );
+      expect(() =>
+        synchronousResult(operation, started.initialSnapshot as unknown as ExecutionSnapshot),
+      ).not.toThrow();
+      expect(started.initialSnapshot.evidence).toEqual([
+        expect.objectContaining({
+          subjectRef: `execution:${started.externalExecutionId}`,
+        }),
+      ]);
+      if (operationName === "vehicle_get_state") {
+        const result = protoStructToJson(started.initialSnapshot.result);
+        expect(JSON.stringify(result)).not.toContain("deviceStatus");
+        expect(JSON.stringify(result)).not.toContain("raw_internal_code");
+      }
+    }
+  });
+
+  it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
+    const runtimeValidatedContracts = mockUgvToolContracts("2026-08-20T00:00:00.000Z").map(
+      withoutOutputSchema,
+    );
+    const qualifiedFixture = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {},
+      new ContractFixtureUgvDevice(runtimeValidatedContracts),
+    );
+    const argumentsValue = navigateArgs();
+    expect(
+      qualifiedFixture.runtime.operationQualification("vehicle_navigate", argumentsValue),
+    ).toMatchObject({
+      qualified: true,
+      reasonCodes: [
+        "UGV_OPERATION_QUALIFIED",
+        "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED",
+      ],
+    });
+    expect(qualifiedFixture.runtime.availability("vehicle_navigate", argumentsValue)).toMatchObject(
+      {
+        availability: "AVAILABLE",
+        reasonCode: "UGV_AVAILABLE",
+      },
+    );
+    const qualifiedCapabilities = await qualifiedFixture.runtime.start(
+      startInput("qualification-capabilities-present", "vehicle_get_capabilities", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(
+      protoStructToJson(qualifiedCapabilities.initialSnapshot.result).navigation,
+    ).toMatchObject({ point: true });
+    const qualifiedManifest = ugvManifest(
+      "isr.vehicle.ugv.ugv1",
+      "1.0.0",
+      qualifiedFixture.store,
+      "vehicle:ugv1",
+      qualifiedFixture.runtime.qualificationContext(),
+    );
+    expect(JSON.stringify(qualifiedManifest)).toContain("planningMode");
+
+    const missingPathContracts = runtimeValidatedContracts.filter(
+      ({ name }) => name !== "ugv_path_follow_mission",
+    );
+    const blockedFixture = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {},
+      new ContractFixtureUgvDevice(missingPathContracts),
+    );
+    const blockedQualification = blockedFixture.runtime.operationQualification(
+      "vehicle_navigate",
+      argumentsValue,
+    );
+    expect(blockedQualification.qualified).toBe(false);
+    expect(blockedQualification.reasonCodes).toContain("UGV_TOOL_MISSING");
+    expect(blockedFixture.runtime.availability("vehicle_navigate", argumentsValue)).toMatchObject({
+      availability: "UNKNOWN",
+      reasonCode: "UGV_TOOL_MISSING",
+      description: "UGV_TOOL_MISSING:ugv_path_follow_mission",
+    });
+    const blockedCapabilities = await blockedFixture.runtime.start(
+      startInput("qualification-capabilities-missing", "vehicle_get_capabilities", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(protoStructToJson(blockedCapabilities.initialSnapshot.result).navigation).toMatchObject({
+      point: false,
+    });
+    const blockedManifest = ugvManifest(
+      "isr.vehicle.ugv.ugv1",
+      "1.0.0",
+      blockedFixture.store,
+      "vehicle:ugv1",
+      blockedFixture.runtime.qualificationContext(),
+    );
+    expect(JSON.stringify(blockedManifest)).not.toContain("planningMode");
+    const blockedNavigation = (
+      blockedManifest.operations as { name: string; inputSchema: unknown }[]
+    ).find(({ name }) => name === "vehicle_navigate");
+    const blockedNavigationSchema = protoStructToJson(required(blockedNavigation).inputSchema);
+    const navigationProperties = required(blockedNavigationSchema.properties) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    const missionVariants = navigationProperties.mission?.oneOf as {
+      properties: { type: { const: string } };
+    }[];
+    expect(missionVariants.map((variant) => variant.properties.type.const)).toEqual([
+      "distance",
+      "return_home",
+    ]);
+  });
+
   it("confirms navigate progress, pause/resume, completion and durable event replay", async () => {
     const fixture = await createFixture();
     const started = await fixture.runtime.start(
@@ -70,6 +551,27 @@ describe("UGV long-running operation integration", () => {
       },
     ]);
     expect(started.initialSnapshot).toMatchObject({ state: "ACCEPTED" });
+    const journal = await fixture.store.listMutationJournal("nav-1");
+    expect(journal).toEqual([
+      expect.objectContaining({
+        stepId: "start:01:primary",
+        phase: "PRIMARY",
+        toolName: "ugv_path_follow_mission",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+      expect.objectContaining({
+        stepId: "start:02:followup",
+        phase: "FOLLOWUP",
+        toolName: "ugv_mission_control",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+    ]);
+    for (const entry of journal) {
+      expect(entry.argumentHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(entry.resultHash).toMatch(/^[a-f0-9]{64}$/);
+    }
 
     mission(fixture.ingress, 1, 25);
     let execution = await fixture.runtime.get("nav-1");
@@ -88,6 +590,7 @@ describe("UGV long-running operation integration", () => {
     expect(
       await fixture.runtime.command("resume", identityOf(required(execution), "2")),
     ).toMatchObject({ accepted: true });
+    expect((await fixture.runtime.get("nav-1"))?.state).toBe("RESUMING");
     mission(fixture.ingress, 1, 60);
     expect((await fixture.runtime.get("nav-1"))?.state).toBe("RUNNING");
     mission(fixture.ingress, 4, 100);
@@ -103,6 +606,213 @@ describe("UGV long-running operation integration", () => {
     );
     expect(replay.map((event) => event.eventType)).toContain("vehicle.mission.started");
     expect(replay.map((event) => event.eventType)).toContain("vehicle.mission.completed");
+    expect(telemetryMetricNames(fixture.telemetry)).toEqual(
+      expect.arrayContaining([
+        "device_mcp_call_total",
+        "device_mcp_call_latency_ms",
+        "provider_task_start_latency_ms",
+        "provider_task_terminal_latency_ms",
+        "pause_confirmation_latency_ms",
+        "snapshot_freshness_seconds",
+        "navigation_terminal_results",
+      ]),
+    );
+  });
+
+  it("does not confirm pause from ACK or paused mission without a new stopped-speed fact", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("pause-proof", "vehicle_navigate", navigateArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    const running = required(await fixture.runtime.get("pause-proof"));
+    await fixture.runtime.command("pause", identityOf(running, "1"));
+    expect((await fixture.runtime.get("pause-proof"))?.state).not.toBe("PAUSED");
+
+    missionRaw(fixture.ingress, 2, 20);
+    expect(await fixture.runtime.get("pause-proof")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING",
+    });
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":1}'));
+    expect((await fixture.runtime.get("pause-proof"))?.state).not.toBe("PAUSED");
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
+    expect((await fixture.runtime.get("pause-proof"))?.state).toBe("PAUSED");
+  });
+
+  it("reconciles conflicting primary and secondary task states without terminal success", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-source-conflict", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(fixture.ingress, 1, 10);
+    expect((await fixture.runtime.get("nav-source-conflict"))?.state).toBe("RUNNING");
+
+    status(fixture.ingress, { chassis: { state: 4, progress: 100 } });
+    expect(await fixture.runtime.get("nav-source-conflict")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_TASK_STATE_CONFLICT",
+    });
+    expect(fixture.ingress.snapshot().chassis.mission).toMatchObject({ id: "1", state: 1 });
+
+    status(fixture.ingress, { chassis: { state: 1, progress: 10 } });
+    expect(fixture.ingress.stateConflict()).toBe(false);
+    expect(await fixture.runtime.get("nav-source-conflict")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_DEVICE_TASK_RUNNING",
+    });
+  });
+
+  it("requires distinct continuously stationary samples and resets on movement or staleness", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 1_000,
+      stationaryMinimumSamples: 2,
+    });
+    now = Date.now() + 100;
+    await fixture.runtime.start(
+      startInput("pause-stability-window", "vehicle_navigate", navigateArgs()),
+    );
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from('{"entity_id":"ugv1","id":1,"state":1,"progress":10}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    const running = required(await fixture.runtime.get("pause-stability-window"));
+    await fixture.runtime.command("pause", identityOf(running, "1"));
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from('{"entity_id":"ugv1","id":1,"state":2,"progress":20}'),
+      false,
+      new Date(now).toISOString(),
+    );
+
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    let pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_PAUSE_PHYSICAL_CONFIRMATION_PENDING",
+      stationaryCandidateSince: new Date(now).toISOString(),
+      consecutiveStationaryObservations: 1,
+    });
+    expect(
+      (await fixture.runtime.get("pause-stability-window"))?.consecutiveStationaryObservations,
+    ).toBe(1);
+
+    now += 3_001;
+    pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending.consecutiveStationaryObservations).toBe(0);
+    expect(pending.stationaryCandidateSince).toBeUndefined();
+
+    now += 500;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":1}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    pending = required(await fixture.runtime.get("pause-stability-window"));
+    expect(pending.consecutiveStationaryObservations).toBe(0);
+    expect(pending.stationaryCandidateSince).toBeUndefined();
+    expect(pending.lastNonStationaryObservedAt).toBe(new Date(now).toISOString());
+
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    const candidateSince = new Date(now).toISOString();
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "RUNNING",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 1,
+    });
+    now += 500;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "RUNNING",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 2,
+    });
+
+    now += 600;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("pause-stability-window")).toMatchObject({
+      state: "PAUSED",
+      stationaryCandidateSince: candidateSince,
+      consecutiveStationaryObservations: 3,
+    });
+  });
+
+  it("fails a terminal mission closed when physical confirmation times out", async () => {
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      physicalConfirmationTimeoutMs: 0,
+    });
+    await fixture.runtime.start(startInput("nav-timeout", "vehicle_navigate", navigateArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    expect((await fixture.runtime.get("nav-timeout"))?.state).toBe("RUNNING");
+    missionRaw(fixture.ingress, 4, 100);
+    expect(await fixture.runtime.get("nav-timeout")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_PHYSICAL_CONFIRMATION_TIMEOUT",
+      result: { status: "timeout" },
+    });
+  });
+
+  it("does not accept a terminal navigation observation before an active observation", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-terminal-first", "vehicle_navigate", navigateArgs()),
+    );
+    mission(fixture.ingress, 4, 100);
+    expect(await fixture.runtime.get("nav-terminal-first")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_TASK_TERMINAL_UNCONFIRMED",
+    });
+  });
+
+  it("persists an uncertain pause ACK and never replays the ambiguous mutation", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("pause-uncertain", "vehicle_navigate", navigateArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    const running = required(await fixture.runtime.get("pause-uncertain"));
+    const before = fixture.device.calls.length;
+    fixture.device.handlers.set("ugv_mission_control", () => {
+      throw new UncertainMutatingDeviceCallError("UGV", "ugv_mission_control");
+    });
+    const identity = identityOf(running, "1");
+    const first = await fixture.runtime.command("pause", identity);
+    expect(first).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_DEVICE_MUTATING_CALL_UNCERTAIN",
+    });
+    expect(await fixture.runtime.get("pause-uncertain")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+    expect(fixture.device.calls).toHaveLength(before + 1);
+    await expect(fixture.runtime.command("pause", identity)).resolves.toEqual(first);
+    expect(fixture.device.calls).toHaveLength(before + 1);
   });
 
   it("replays one task identity without another device call and rejects identity drift", async () => {
@@ -136,20 +846,97 @@ describe("UGV long-running operation integration", () => {
     const ack = await fixture.runtime.command("cancel", identityOf(required(running), "1"));
     expect(ack).toMatchObject({ accepted: true });
     expect((await fixture.runtime.get("nav-cancel"))?.state).toBe("STOPPING");
-    mission(fixture.ingress, 3, 10);
+    missionRaw(fixture.ingress, 3, 10);
+    expect((await fixture.runtime.get("nav-cancel"))?.state).toBe("STOPPING");
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
     expect((await fixture.runtime.get("nav-cancel"))?.state).toBe("CANCELLED");
+  });
+
+  it("requires matching mission identity and a stable stop before cancellation", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      stationaryStabilityMs: 100,
+      stationaryMinimumSamples: 2,
+    });
+    now = Date.now() + 100;
+    await fixture.runtime.start(
+      startInput("nav-cancel-stable", "vehicle_navigate", navigateArgs()),
+    );
+    missionWithId(fixture.ingress, 2, 1, 10, new Date(now).toISOString());
+    expect(await fixture.runtime.get("nav-cancel-stable")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+    });
+
+    now += 10;
+    missionWithId(fixture.ingress, 1, 1, 10, new Date(now).toISOString());
+    const running = required(await fixture.runtime.get("nav-cancel-stable"));
+    expect(running.state).toBe("RUNNING");
+    await fixture.runtime.command("cancel", identityOf(running, "1"));
+    now += 10;
+    missionWithId(fixture.ingress, 1, 3, 10, new Date(now).toISOString());
+    now += 10;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect((await fixture.runtime.get("nav-cancel-stable"))?.state).toBe("STOPPING");
+    now += 50;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect((await fixture.runtime.get("nav-cancel-stable"))?.state).toBe("STOPPING");
+    now += 60;
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    expect(await fixture.runtime.get("nav-cancel-stable")).toMatchObject({
+      state: "CANCELLED",
+      consecutiveStationaryObservations: 3,
+    });
   });
 
   it("runs area recon and fails target tracking truthfully when lock is lost", async () => {
     const fixture = await createFixture(true);
     await fixture.runtime.start(startInput("recon-1", "vehicle_area_recon", reconArgs()));
+    expect(await fixture.store.listMutationJournal("recon-1")).toEqual([
+      expect.objectContaining({
+        stepId: "start:01:primary",
+        phase: "PRIMARY",
+        toolName: "ugv_area_recon_configure",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+      expect.objectContaining({
+        stepId: "start:02:followup",
+        phase: "FOLLOWUP",
+        toolName: "ugv_area_recon_control",
+        state: "ACCEPTED",
+        externalMissionId: "1",
+      }),
+    ]);
     reconStatus(fixture.ingress, 5, 50);
     expect((await fixture.runtime.get("recon-1"))?.state).toBe("RUNNING");
     reconStatus(fixture.ingress, 11, 100);
     const completedRecon = await fixture.runtime.get("recon-1");
     expect(completedRecon?.state).toBe("SUCCEEDED");
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     const reconOperation = required(
       manifest.operations.find((operation) => operation.name === "vehicle_area_recon"),
@@ -171,6 +958,30 @@ describe("UGV long-running operation integration", () => {
     expect(await fixture.runtime.get("track-1")).toMatchObject({
       state: "BUSINESS_FAILED",
       reasonCode: "UGV_TARGET_LOST",
+    });
+  });
+
+  it("does not terminalize weak or mismatched Recon observations", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("recon-correlation", "vehicle_area_recon", reconArgs()));
+    reconStatus(fixture.ingress, 5, 50, undefined, null);
+    expect((await fixture.runtime.get("recon-correlation"))?.state).toBe("RUNNING");
+    reconStatus(fixture.ingress, 11, 100, undefined, null);
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_RECON_WEAK_CORRELATION",
+    });
+
+    reconStatus(fixture.ingress, 11, 100, undefined, "2");
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+    });
+
+    reconStatus(fixture.ingress, 11, 100, undefined, "1");
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "SUCCEEDED",
+      result: { correlationStrength: "STRICT_CORRELATED", missionId: "1" },
     });
   });
 
@@ -270,6 +1081,8 @@ describe("UGV long-running operation integration", () => {
             "isr.vehicle.ugv.ugv1",
             "1.0.0",
             fixture.store,
+            "vehicle:ugv1",
+            fixture.runtime.qualificationContext(),
           ) as unknown as ProviderManifest,
         )
         .operations.find((operation) => operation.name === "vehicle_fire_weapon"),
@@ -511,6 +1324,8 @@ describe("UGV long-running operation integration", () => {
             "isr.vehicle.ugv.ugv1",
             "1.0.0",
             fixture.store,
+            "vehicle:ugv1",
+            fixture.runtime.qualificationContext(),
           ) as unknown as ProviderManifest,
         )
         .operations.find((candidate) => candidate.name === "vehicle_fire_weapon"),
@@ -630,7 +1445,13 @@ describe("UGV long-running operation integration", () => {
   it("requires a post-dispatch gimbal lifecycle before terminal completion and preserves cancel IDs", async () => {
     const fixture = await createFixture();
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     const operation = required(
       manifest.operations.find((candidate) => candidate.name === "vehicle_control_gimbal"),
@@ -684,11 +1505,17 @@ describe("UGV long-running operation integration", () => {
     const fixture = await createFixture();
     await fixture.runtime.start(startInput("nav-active", "vehicle_navigate", navigateArgs()));
     await fixture.runtime.start(startInput("recon-active", "vehicle_area_recon", reconArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    reconStatus(fixture.ingress, 5, 10);
     const stopped = await fixture.runtime.start(
       startInput("stop-1", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
     );
     expect(stopped.initialSnapshot).toMatchObject({ state: "ACCEPTED" });
-    status(fixture.ingress, {});
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
+    expect((await fixture.runtime.get("stop-1"))?.state).not.toBe("SUCCEEDED");
+    missionRaw(fixture.ingress, 3, 10);
+    expect((await fixture.runtime.get("stop-1"))?.state).not.toBe("SUCCEEDED");
+    reconStatus(fixture.ingress, 11, 100);
     expect(await fixture.runtime.get("stop-1")).toMatchObject({
       state: "SUCCEEDED",
       result: { status: "stopped" },
@@ -708,6 +1535,167 @@ describe("UGV long-running operation integration", () => {
         arguments: { lock: false, target_id: 0, mission_id: 1 },
       },
     ]);
+  });
+
+  it("persists preemption ownership across restart and cancels old tasks after confirmation", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("nav-preempted", "vehicle_navigate", navigateArgs()));
+    await fixture.runtime.start(startInput("recon-preempted", "vehicle_area_recon", reconArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    reconStatus(fixture.ingress, 5, 10);
+    await fixture.runtime.start(
+      startInput("stop-owner", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+    );
+
+    expect(await fixture.store.getExecution("stop-owner")).toMatchObject({
+      preemptedTaskIds: ["nav-preempted", "recon-preempted"],
+    });
+    for (const taskId of ["nav-preempted", "recon-preempted"]) {
+      const preempted = required(await fixture.store.getExecution(taskId));
+      expect(preempted).toMatchObject({
+        state: "STOPPING",
+        preemptedByTaskId: "stop-owner",
+        preemptReason: "UGV_EMERGENCY_STOP",
+      });
+      expect(typeof preempted.preemptedAt).toBe("string");
+    }
+
+    await fixture.runtime.close();
+    active.splice(active.indexOf(fixture.runtime), 1);
+    const recovered = new UgvProviderRuntime(
+      runtimeOptions(),
+      fixture.store,
+      fixture.ingress,
+      fixture.device,
+      fixture.events,
+      fixture.telemetry,
+    );
+    active.push(recovered);
+    await recovered.initialize();
+    expect(recovered.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_CHASSIS_TRACK_BUSY",
+    });
+
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
+    missionRaw(fixture.ingress, 3, 10);
+    reconStatus(fixture.ingress, 11, 100);
+    expect(await recovered.get("stop-owner")).toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "STOP_CONFIRMED",
+    });
+    for (const taskId of ["nav-preempted", "recon-preempted"])
+      expect(await recovered.get(taskId)).toMatchObject({
+        state: "CANCELLED",
+        reasonCode: "UGV_PREEMPTED_BY_EMERGENCY_STOP",
+      });
+  });
+
+  it("blocks conflicting admission for externally observed device work", async () => {
+    const fixture = await createFixture();
+    missionWithId(fixture.ingress, 77, 1, 20);
+
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_EXTERNAL_CHASSIS_TRACK_BUSY",
+    });
+    await expect(
+      fixture.runtime.start(startInput("blocked-external", "vehicle_navigate", navigateArgs())),
+    ).rejects.toThrow("UGV_EXTERNAL_CHASSIS_TRACK_BUSY");
+    expect(fixture.runtime.availability("vehicle_emergency_stop", {})).toMatchObject({
+      availability: "AVAILABLE",
+    });
+
+    missionWithId(fixture.ingress, 77, 3, 20);
+    reconStatus(fixture.ingress, 5, 20, undefined, "88");
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_EXTERNAL_EO_TRACK_BUSY",
+    });
+    reconStatus(fixture.ingress, 11, 100, undefined, "88");
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "AVAILABLE",
+    });
+  });
+
+  it("dispatches primary emergency stop when every optional cleanup tool is missing", async () => {
+    const device = new MockUgvDeviceMcpClient(new Set(["ugv_motion_stop"]));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    await expect(
+      fixture.runtime.start(
+        startInput("stop-primary-only", "vehicle_emergency_stop", {
+          resourceId: "vehicle:ugv1",
+        }),
+      ),
+    ).resolves.toMatchObject({
+      initialSnapshot: { reasonCode: "STOP_DISPATCHED_CONFIRMATION_PENDING" },
+    });
+    expect(device.calls).toEqual([
+      { name: "ugv_motion_stop", arguments: {}, taskId: "stop-primary-only" },
+    ]);
+    expect(await fixture.store.listMutationJournal("stop-primary-only")).toEqual([
+      expect.objectContaining({ phase: "EMERGENCY_STOP", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+      expect.objectContaining({ phase: "CLEANUP", state: "REJECTED" }),
+    ]);
+  });
+
+  it("dispatches emergency stop without MQTT but keeps physical confirmation pending", async () => {
+    const fixture = await createFixture();
+    fixture.ingress.setConnected(false);
+
+    expect(fixture.runtime.availability("vehicle_emergency_stop", {})).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+    await fixture.runtime.start(
+      startInput("stop-mqtt-offline", "vehicle_emergency_stop", {
+        resourceId: "vehicle:ugv1",
+      }),
+    );
+    expect(fixture.device.calls[0]).toMatchObject({ name: "ugv_motion_stop" });
+    expect(await fixture.runtime.get("stop-mqtt-offline")).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_STOP_OBSERVATION_NOT_NEW",
+    });
+  });
+
+  it("records primary emergency stop rejection as a dispatch failure", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_motion_stop", () => acceptedMutationResult(0, 5));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    await expect(
+      fixture.runtime.start(
+        startInput("stop-primary-rejected", "vehicle_emergency_stop", {
+          resourceId: "vehicle:ugv1",
+        }),
+      ),
+    ).rejects.toBeInstanceOf(Error);
+    expect(await fixture.runtime.get("stop-primary-rejected")).toMatchObject({
+      state: "BUSINESS_FAILED",
+      reasonCode: "STOP_DISPATCH_FAILED",
+    });
+    expect(device.calls).toHaveLength(1);
+  });
+
+  it("does not confirm emergency stop until a new stopped-speed fact exists", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("stop-proof", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+    );
+    missionRaw(fixture.ingress, 3, 0);
+    expect((await fixture.runtime.get("stop-proof"))?.state).not.toBe("SUCCEEDED");
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
+    expect(await fixture.runtime.get("stop-proof")).toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "STOP_CONFIRMED",
+    });
+    expect(telemetryMetricNames(fixture.telemetry)).toContain(
+      "emergency_stop_confirmation_latency_ms",
+    );
   });
 
   it("emits persisted MQTT disconnect and restoration resource facts", async () => {
@@ -764,9 +1752,244 @@ describe("UGV long-running operation integration", () => {
     });
     expect(result).toMatchObject({ status: "FOUND", reasonCode: "EXECUTION_FOUND" });
   });
+
+  it("recovers a persisted pre-primary intent by dispatching primary and follow-up once", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-before-primary");
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "INTENT_PERSISTED",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls.map(({ name }) => name)).toEqual([
+      "ugv_path_follow_mission",
+      "ugv_mission_control",
+    ]);
+    expect(await fixture.store.listMutationJournal(execution.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "ACCEPTED" }),
+    ]);
+  });
+
+  it.each([
+    { label: "before result persistence", missionIds: [] as string[] },
+    { label: "after mission ID persistence", missionIds: ["1"] },
+  ])("does not replay primary after dispatch $label", async ({ missionIds }) => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-primary-dispatching", missionIds);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "DISPATCHING",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(0);
+    expect(await fixture.store.getExecution(execution.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+      downstreamMissionIds: missionIds,
+    });
+  });
+
+  it("continues only the follow-up after durable primary acceptance and mission identity", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-before-followup", ["1"]);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "ACCEPTED",
+      "1",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(1);
+    expect(fixture.device.calls[0]).toMatchObject({
+      name: "ugv_mission_control",
+      arguments: { action: "start", mission_id: 1 },
+    });
+    expect(await fixture.store.listMutationJournal(execution.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "ACCEPTED" }),
+    ]);
+  });
+
+  it("does not replay a follow-up whose dispatch outcome was not persisted", async () => {
+    const fixture = await createFixture();
+    const execution = recoveryExecution("recover-followup-dispatching", ["1"]);
+    await fixture.store.putExecution(execution);
+    const primaryCall = required(startDeviceCalls(execution.operationName, execution.arguments)[0]);
+    const followupCall = buildUgvStartFollowupCall(execution.operationName, "1");
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:01:primary",
+      "PRIMARY",
+      primaryCall,
+      "ACCEPTED",
+      "1",
+    );
+    await seedMutationJournal(
+      fixture.store,
+      execution,
+      "start:02:followup",
+      "FOLLOWUP",
+      followupCall,
+      "DISPATCHING",
+    );
+
+    await restartFixture(fixture);
+
+    expect(fixture.device.calls).toHaveLength(0);
+    expect(await fixture.store.getExecution(execution.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UNCERTAIN_EXECUTION_STATE",
+    });
+  });
+
+  it.each(["pause", "resume", "cancel"] as const)(
+    "does not replay a %s mutation left in dispatching state across restart or retry",
+    async (command) => {
+      const fixture = await createFixture();
+      const execution = recoveryExecution(`recover-${command}-dispatching`, ["1"], "RUNNING");
+      await fixture.store.putExecution(execution);
+      const controlCall = required(controlDeviceCalls("vehicle_navigate", command, "1")[0]);
+      await seedMutationJournal(
+        fixture.store,
+        execution,
+        `control:${command}:1:01`,
+        command === "pause" ? "PAUSE" : command === "resume" ? "RESUME" : "CANCEL",
+        controlCall,
+        "DISPATCHING",
+      );
+
+      const recovered = await restartFixture(fixture);
+      const afterRestart = required(await fixture.store.getExecution(execution.taskId));
+      expect(fixture.device.calls).toHaveLength(0);
+      expect(afterRestart.reasonCode).toBe("UNCERTAIN_EXECUTION_STATE");
+
+      await expect(
+        recovered.command(command, identityOf(afterRestart, "1")),
+      ).resolves.toMatchObject({
+        accepted: false,
+        reasonCode: "UGV_DEVICE_MUTATING_CALL_UNCERTAIN",
+      });
+      expect(fixture.device.calls).toHaveLength(0);
+    },
+  );
 });
 
-async function createFixture(withTarget = false, store = new MemoryProviderStore()) {
+async function restartFixture(
+  fixture: Awaited<ReturnType<typeof createFixture>>,
+): Promise<UgvProviderRuntime> {
+  await fixture.runtime.close();
+  const activeIndex = active.indexOf(fixture.runtime);
+  if (activeIndex >= 0) active.splice(activeIndex, 1);
+  const recovered = new UgvProviderRuntime(
+    runtimeOptions(),
+    fixture.store,
+    fixture.ingress,
+    fixture.device,
+    fixture.events,
+    fixture.telemetry,
+  );
+  active.push(recovered);
+  await recovered.initialize();
+  return recovered;
+}
+
+function recoveryExecution(
+  taskId: string,
+  downstreamMissionIds: string[] = [],
+  state: ProviderExecution["state"] = "ACCEPTED",
+): ProviderExecution {
+  const input = startInput(taskId, "vehicle_navigate", navigateArgs());
+  const now = new Date().toISOString();
+  return {
+    taskId,
+    externalExecutionId: `vehicle:ugv1:chassis:${taskId}`,
+    operationName: input.operationName,
+    argumentHash: input.argumentHash,
+    providerId: "isr.vehicle.ugv.ugv1",
+    resourceId: "vehicle:ugv1",
+    tracks: ["chassis"],
+    arguments: structuredClone(input.arguments),
+    executionContext: structuredClone(input.executionContext),
+    downstreamMissionIds: structuredClone(downstreamMissionIds),
+    state,
+    revision: 1,
+    reasonCode: state === "RUNNING" ? "UGV_DEVICE_TASK_RUNNING" : "UGV_OPERATION_ACCEPTED",
+    createdAt: now,
+    updatedAt: now,
+    evidence: [],
+  };
+}
+
+async function seedMutationJournal(
+  store: MemoryProviderStore,
+  execution: ProviderExecution,
+  stepId: string,
+  phase: MutationJournalPhase,
+  call: DeviceToolCall,
+  state: MutationJournalState,
+  externalMissionId?: string,
+): Promise<void> {
+  const intent: MutationJournalEntry = {
+    taskId: execution.taskId,
+    stepId,
+    phase,
+    toolName: call.name,
+    argumentHash: createHash("sha256").update(canonicalJson(call.arguments), "utf8").digest("hex"),
+    state: "INTENT_PERSISTED",
+    intentPersistedAt: execution.createdAt,
+  };
+  await store.claimMutationJournal(intent);
+  if (state === "INTENT_PERSISTED") return;
+  const dispatching: MutationJournalEntry = {
+    ...intent,
+    state: "DISPATCHING",
+    dispatchedAt: new Date(Date.parse(execution.createdAt) + 1).toISOString(),
+  };
+  await store.advanceMutationJournal(dispatching, "INTENT_PERSISTED");
+  if (state === "DISPATCHING") return;
+  await store.advanceMutationJournal(
+    {
+      ...dispatching,
+      state,
+      ...(externalMissionId === undefined ? {} : { externalMissionId }),
+      resultHash: "d".repeat(64),
+      completedAt: new Date(Date.parse(execution.createdAt) + 2).toISOString(),
+    },
+    "DISPATCHING",
+  );
+}
+
+async function createFixture(
+  withTarget = false,
+  store = new MemoryProviderStore(),
+  overrides: Partial<UgvProviderRuntime["options"]> = {},
+  device: MockUgvDeviceMcpClient = new MockUgvDeviceMcpClient(),
+) {
   const ingress = new VehicleMqttIngress("direct_domain_json", {
     maxPayloadBytes: 65536,
     maxDepth: 16,
@@ -792,7 +2015,6 @@ async function createFixture(withTarget = false, store = new MemoryProviderStore
         '{"entity_id":"ugv1","objects":[{"id":101,"object_type":"3:target-vehicle","x":1,"y":2,"z":0}]}',
       ),
     );
-  const device = new MockUgvDeviceMcpClient();
   const telemetry = new UgvTelemetry({
     providerId: "isr.vehicle.ugv.ugv1",
     enabled: false,
@@ -801,7 +2023,7 @@ async function createFixture(withTarget = false, store = new MemoryProviderStore
   });
   const events = new UgvBusinessEventHub(store);
   const runtime = new UgvProviderRuntime(
-    runtimeOptions(),
+    { ...runtimeOptions(), ...overrides },
     store,
     ingress,
     device,
@@ -812,12 +2034,98 @@ async function createFixture(withTarget = false, store = new MemoryProviderStore
   await runtime.initialize();
   return { store, ingress, device, telemetry, events, runtime };
 }
+
+class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {
+  constructor(readonly fixtureContracts: readonly CapturedToolContract[]) {
+    super(new Set(fixtureContracts.map(({ name }) => name as UgvDeviceToolName)));
+  }
+
+  override contracts(): CapturedToolContract[] {
+    return this.fixtureContracts.map((contract) => structuredClone(contract));
+  }
+}
+
+class DispatchOrderStore extends MemoryProviderStore {
+  #missionRecorded = false;
+
+  constructor(readonly events: string[]) {
+    super();
+  }
+
+  override putExecution(execution: ProviderExecution): Promise<void> {
+    const missionId = execution.downstreamMissionIds[0];
+    if (!this.#missionRecorded && missionId !== undefined) {
+      this.#missionRecorded = true;
+      this.events.push(`execution:mission:${missionId}`);
+    }
+    return super.putExecution(execution);
+  }
+
+  override claimMutationJournal(entry: MutationJournalEntry) {
+    this.events.push(`journal:${entry.phase}:${entry.state}`);
+    return super.claimMutationJournal(entry);
+  }
+
+  override advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ) {
+    this.events.push(`journal:${entry.phase}:${entry.state}`);
+    return super.advanceMutationJournal(entry, expectedState);
+  }
+}
+
+class MissionPersistenceFailingStore extends MemoryProviderStore {
+  #failed = false;
+
+  override putExecution(execution: ProviderExecution): Promise<void> {
+    if (!this.#failed && execution.downstreamMissionIds.length > 0) {
+      this.#failed = true;
+      return Promise.reject(new Error("TEST_MISSION_PERSISTENCE_FAILED"));
+    }
+    return super.putExecution(execution);
+  }
+}
+
+class JournalCompletionFailingStore extends MemoryProviderStore {
+  #failed = false;
+
+  override advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ) {
+    if (!this.#failed && entry.state === "ACCEPTED") {
+      this.#failed = true;
+      return Promise.reject(new Error("TEST_JOURNAL_COMPLETION_FAILED"));
+    }
+    return super.advanceMutationJournal(entry, expectedState);
+  }
+}
+
+function acceptedMutationResult(missionId: number, state: number): Record<string, unknown> {
+  return {
+    mission_id: missionId,
+    state,
+    state_label: "accepted",
+    message: "accepted",
+    error_code: 0,
+  };
+}
+
+function withoutOutputSchema(contract: CapturedToolContract): CapturedToolContract {
+  const withoutOutput = { ...contract };
+  delete withoutOutput.outputSchema;
+  return withoutOutput;
+}
 function runtimeOptions() {
   return {
     providerId: "isr.vehicle.ugv.ugv1",
     freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
     allowNavigationWithRecon: true,
     fireRequiresChassisStopped: true,
+    fireEnabled: true,
+    stationaryStabilityMs: 0,
+    stationaryMinimumSamples: 1,
     pollIntervalMs: 60_000,
   };
 }
@@ -855,6 +2163,13 @@ function identityOf(
 function required<T>(value: T | undefined): T {
   if (value === undefined) throw new Error("UGV_TEST_FIXTURE_VALUE_MISSING");
   return value;
+}
+
+function telemetryMetricNames(telemetry: UgvTelemetry): string[] {
+  return telemetry.records.flatMap((record) => {
+    const metricName = record.payload.metricName;
+    return typeof metricName === "string" ? [metricName] : [];
+  });
 }
 
 class FailNthExecutionWriteStore extends MemoryProviderStore {
@@ -966,9 +2281,37 @@ function reconArgs() {
   };
 }
 function mission(ingress: VehicleMqttIngress, state: number, progress: number) {
+  missionRaw(ingress, state, progress);
+  if (state === 2 || state === 3 || state === 4)
+    ingress.handle("/ugv/speed", Buffer.from(JSON.stringify({ entity_id: "ugv1", speed_kmh: 0 })));
+  if (state === 4)
+    ingress.handle(
+      "/ugv/gnss",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", latitude: 30.1001, longitude: 114.1001 })),
+    );
+}
+
+function missionRaw(
+  ingress: VehicleMqttIngress,
+  state: number,
+  progress: number,
+  observedAt?: string,
+) {
+  missionWithId(ingress, 1, state, progress, observedAt);
+}
+
+function missionWithId(
+  ingress: VehicleMqttIngress,
+  missionId: number,
+  state: number,
+  progress: number,
+  observedAt?: string,
+) {
   ingress.handle(
     "/ugv/mission_state",
-    Buffer.from(JSON.stringify({ entity_id: "ugv1", id: 1, type: 1, state, progress })),
+    Buffer.from(JSON.stringify({ entity_id: "ugv1", id: missionId, type: 1, state, progress })),
+    false,
+    observedAt,
   );
 }
 function reconStatus(
@@ -976,12 +2319,14 @@ function reconStatus(
   motionStatus: number,
   progress: number,
   lockedTargetId?: string,
+  missionId: string | null = "1",
 ) {
   ingress.handle(
     "/ugv/area_recon/status",
     Buffer.from(
       JSON.stringify({
         status: motionStatus,
+        ...(missionId === null ? {} : { mission_id: missionId }),
         status_label: motionStatus === 11 ? "finished" : "running",
         scan_mode: 1,
         out_of_range: false,
@@ -1022,7 +2367,7 @@ function status(
         vehicle_id: "ugv1",
         role_name: "ugv",
         speed_kmh: 0,
-        chassis_task: tracks.chassis ?? { state: -1, progress: 0 },
+        ...(tracks.chassis === undefined ? {} : { chassis_task: { id: 1, ...tracks.chassis } }),
         eo_task: tracks.eo ?? { state: -1, progress: 0 },
         weapon_task: tracks.weapon ?? { state: -1, progress: 0 },
         available: true,

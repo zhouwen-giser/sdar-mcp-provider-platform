@@ -42,25 +42,6 @@ const PROTOCOL_TOPICS = [
   "/ugv/system_state",
   "/ugv/component_status",
 ];
-const ESSENTIAL_DEVICE_READ_TOOLS = ["get_status", "get_capabilities"];
-const KNOWN_SIMULATOR_TOOLS = [
-  "ugv_path_follow_mission",
-  "ugv_return_home",
-  "ugv_move_distance",
-  "ugv_mission_control",
-  "ugv_motion_stop",
-  "get_status",
-  "get_capabilities",
-  "ugv_area_recon_configure",
-  "ugv_area_recon_control",
-  "ugv_area_recon_lock",
-  "ugv_area_recon_get_status",
-  "ugv_area_recon_get_targets",
-  "ugv_area_recon_reset",
-  "ugv_area_recon_attack_confirm",
-  "ugv_gimbal_move",
-];
-
 const argumentsValue = parseArguments(process.argv.slice(2));
 const environment = loadEnvironment(argumentsValue["env-file"]);
 const root = repositoryRoot(import.meta.url);
@@ -113,6 +94,8 @@ try {
   };
 
   report.deviceMcp = await probeDeviceMcp(config);
+  if (report.deviceMcp.status !== "PASS")
+    throw coded(report.deviceMcp.reasonCode ?? "DEVICE_MCP_OPERATION_QUALIFICATION_FAILED");
   report.mqtt = await probeMqtt(config);
   if (report.mqtt.status === "PARTIAL") {
     report.status = "BLOCKED_EXTERNAL_ENV";
@@ -295,9 +278,14 @@ function loadMqttTls(env, mode, forbidden) {
 }
 
 async function probeDeviceMcp(config) {
-  const [{ Client }, { StreamableHTTPClientTransport }] = await Promise.all([
+  const [
+    { Client },
+    { StreamableHTTPClientTransport },
+    { UGV_DEVICE_TOOL_ALLOWLIST, UgvOperationQualificationService },
+  ] = await Promise.all([
     import("@modelcontextprotocol/sdk/client/index.js"),
     import("@modelcontextprotocol/sdk/client/streamableHttp.js"),
+    import("../../dist/packages/vehicle-device-mcp-client/src/index.js"),
   ]);
   const client = new Client({ name: "sdar-ugv-real-preflight", version: "1.0.0" });
   const transport = new StreamableHTTPClientTransport(config.deviceMcpUrl, {
@@ -319,20 +307,50 @@ async function probeDeviceMcp(config) {
         tool.outputSchema === undefined ? null : sha256(canonical(tool.outputSchema)),
     }));
     const names = new Set(tools.map((tool) => tool.name));
-    const missingEssential = ESSENTIAL_DEVICE_READ_TOOLS.filter((name) => !names.has(name));
-    if (missingEssential.length > 0) throw coded("DEVICE_MCP_ESSENTIAL_READ_TOOLS_MISSING");
+    const capturedAt = new Date().toISOString();
+    const contracts = tools.map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+      ...(tool.outputSchema === undefined ? {} : { outputSchema: tool.outputSchema }),
+      capturedAt,
+      schemaHash: sha256(
+        canonical({ inputSchema: tool.inputSchema, outputSchema: tool.outputSchema ?? null }),
+      ),
+    }));
+    const operationQualifications = new UgvOperationQualificationService().matrix({
+      contracts,
+      externallyVerified: true,
+      executionMode: "simulation",
+    });
+    const requiredFailures = operationQualifications.filter(
+      (qualification) => qualification.deviceRequirement === "required" && !qualification.qualified,
+    );
     const serverInfo = client.getServerVersion() ?? null;
     if (isRecord(serverInfo) && /mock/i.test(String(serverInfo.name ?? "")))
       throw coded("DEVICE_MCP_SERVER_IDENTIFIES_AS_MOCK");
     return {
-      status: "PASS",
+      status: requiredFailures.length === 0 ? "PASS" : "BLOCKED",
+      ...(requiredFailures.length === 0
+        ? {}
+        : { reasonCode: "DEVICE_MCP_REQUIRED_OPERATION_QUALIFICATION_FAILED" }),
       connected: true,
       mockFallbackEnabled: false,
       serverInfo,
       protocolVersion: transport.protocolVersion ?? "unknown",
       toolCount: tools.length,
       contractHash: sha256(canonical(tools)),
-      missingKnownSimulatorTools: KNOWN_SIMULATOR_TOOLS.filter((name) => !names.has(name)),
+      missingKnownSimulatorTools: UGV_DEVICE_TOOL_ALLOWLIST.filter((name) => !names.has(name)),
+      requiredOperationFailures: requiredFailures.map((qualification) => ({
+        operationName: qualification.operationName,
+        phase: qualification.phase,
+        ...(qualification.variant === undefined ? {} : { variant: qualification.variant }),
+        reasonCodes: qualification.reasonCodes,
+        tools: qualification.tools
+          .filter(({ usable }) => !usable)
+          .map(({ toolName, reasonCodes }) => ({ toolName, reasonCodes })),
+      })),
+      operationQualifications,
       tools,
     };
   } catch (error) {

@@ -19,7 +19,10 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
     description: reasonCode,
   });
   if (!context.snapshot.connectivity.mqttConnected)
-    if (context.operationName !== "vehicle_get_capabilities")
+    if (
+      context.operationName !== "vehicle_get_capabilities" &&
+      context.operationName !== "vehicle_emergency_stop"
+    )
       return result("UNKNOWN", code("MQTT_UNAVAILABLE"));
   if (!context.snapshot.connectivity.deviceMcpConnected)
     return result("UNKNOWN", code("DEVICE_MCP_UNAVAILABLE"));
@@ -33,6 +36,8 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
     return result("DISABLED", code("CIRCULAR_SCAN_UNSUPPORTED"));
   if (!context.requiredToolsPresent) return result("UNKNOWN", code("TOOL_UNAVAILABLE"));
   if (context.operationName === "vehicle_get_capabilities")
+    return result("AVAILABLE", code("AVAILABLE"));
+  if (context.operationName === "vehicle_emergency_stop")
     return result("AVAILABLE", code("AVAILABLE"));
   const requiredDomains = domains(context.operationName);
   if (

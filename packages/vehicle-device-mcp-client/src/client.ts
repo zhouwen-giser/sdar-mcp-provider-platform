@@ -44,6 +44,16 @@ export interface DeviceToolCallOptions {
   readRetryAttempts?: number;
 }
 
+export interface DeviceToolCallObservation<TTool extends string = string> {
+  toolName: TTool;
+  kind: "read" | "mutating";
+  outcome: "accepted" | "rejected" | "timeout" | "protocol_error";
+  attempts: number;
+  retries: number;
+  durationMs: number;
+  uncertain: boolean;
+}
+
 export interface UgvDeviceMcpClient {
   connect(): Promise<void>;
   close(): Promise<void>;
@@ -55,6 +65,9 @@ export interface UgvDeviceMcpClient {
   toolAvailable(name: UgvDeviceToolName): boolean;
   toolHealth(name: UgvDeviceToolName): DeviceToolHealthSnapshot<UgvDeviceToolName>;
   onToolHealth(listener: (health: DeviceToolHealthSnapshot<UgvDeviceToolName>) => void): () => void;
+  onCallObservation(
+    listener: (observation: DeviceToolCallObservation<UgvDeviceToolName>) => void,
+  ): () => void;
   call(
     name: UgvDeviceToolName,
     argumentsValue: Record<string, unknown>,
@@ -94,6 +107,7 @@ export interface VehicleDeviceMcpClient<TTool extends string> {
   toolAvailable(name: TTool): boolean;
   toolHealth(name: TTool): DeviceToolHealthSnapshot<TTool>;
   onToolHealth(listener: (health: DeviceToolHealthSnapshot<TTool>) => void): () => void;
+  onCallObservation(listener: (observation: DeviceToolCallObservation<TTool>) => void): () => void;
   call(
     name: TTool,
     argumentsValue: Record<string, unknown>,
@@ -137,6 +151,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
   #reconnectDelayMs: number;
   readonly #connectionListeners = new Set<(state: DeviceMcpConnectionState) => void>();
   readonly #healthListeners = new Set<(health: DeviceToolHealthSnapshot<TTool>) => void>();
+  readonly #callListeners = new Set<(observation: DeviceToolCallObservation<TTool>) => void>();
   readonly #toolHealth = new Map<TTool, ToolHealthRecord>();
 
   constructor(
@@ -252,6 +267,11 @@ export class StreamableHttpVehicleDeviceMcpClient<
     return () => this.#healthListeners.delete(listener);
   }
 
+  onCallObservation(listener: (observation: DeviceToolCallObservation<TTool>) => void): () => void {
+    this.#callListeners.add(listener);
+    return () => this.#callListeners.delete(listener);
+  }
+
   async call(
     name: TTool,
     argumentsValue: Record<string, unknown>,
@@ -270,9 +290,9 @@ export class StreamableHttpVehicleDeviceMcpClient<
       ? 0
       : boundedInteger(callOptions.readRetryAttempts ?? this.options.readRetryAttempts, 1, 0, 10);
     const started = Date.now();
+    let attempt = 0;
     let outcome: "accepted" | "rejected" | "timeout" | "protocol_error" | undefined;
     try {
-      let attempt = 0;
       for (;;) {
         try {
           if (!this.connected()) {
@@ -324,6 +344,16 @@ export class StreamableHttpVehicleDeviceMcpClient<
       else outcome = "protocol_error";
       throw error;
     } finally {
+      const observation: DeviceToolCallObservation<TTool> = {
+        toolName: name,
+        kind: mutating ? "mutating" : "read",
+        outcome: outcome ?? "protocol_error",
+        attempts: attempt + 1,
+        retries: attempt,
+        durationMs: Date.now() - started,
+        uncertain: outcome === "timeout" && mutating,
+      };
+      for (const listener of this.#callListeners) listener(structuredClone(observation));
       // The device outcome is authoritative. A local audit-write outage must not
       // turn an accepted physical mutation into an apparent command failure.
       await this.store
@@ -448,11 +478,14 @@ export class StreamableHttpVehicleDeviceMcpClient<
       const response = await client.callTool({ name, arguments: argumentsValue }, undefined, {
         timeout: this.options.timeoutMs,
       });
-      const result = parseToolResult(
-        response,
-        this.options.maxResponseBytes,
-        this.profile.errorPrefix,
-      );
+      let result: Record<string, unknown>;
+      try {
+        result = parseToolResult(response, this.options.maxResponseBytes, this.profile.errorPrefix);
+      } catch (error) {
+        if (response.isError === true)
+          throw new DeviceToolRejectedError(this.profile.errorPrefix, name);
+        throw error;
+      }
       if (response.isError === true) {
         if (this.profile.validateResult === undefined)
           throw new DeviceToolRejectedError(this.profile.errorPrefix, name, undefined, result);
@@ -460,7 +493,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
           this.profile.validateResult(name, result, argumentsValue);
         } catch (error) {
           if (error instanceof DeviceToolRejectedError) throw error;
-          throw error;
+          throw new DeviceToolRejectedError(this.profile.errorPrefix, name, undefined, result);
         }
         throw new DeviceToolProtocolError(
           this.profile.errorPrefix,
@@ -470,8 +503,12 @@ export class StreamableHttpVehicleDeviceMcpClient<
       }
       return this.profile.validateResult?.(name, result, argumentsValue) ?? result;
     } catch (error) {
-      if (mutating && transportFailure(error)) {
-        await this.#disconnectAfterFailure();
+      if (
+        mutating &&
+        !(error instanceof DeviceToolRejectedError) &&
+        !(error instanceof UncertainMutatingDeviceCallError)
+      ) {
+        if (transportFailure(error)) await this.#disconnectAfterFailure();
         throw new UncertainMutatingDeviceCallError(
           this.profile.errorPrefix,
           name,
@@ -637,6 +674,7 @@ export class MockVehicleDeviceMcpClient<
   #connected = false;
   readonly #connectionListeners = new Set<(state: DeviceMcpConnectionState) => void>();
   readonly #healthListeners = new Set<(health: DeviceToolHealthSnapshot<TTool>) => void>();
+  readonly #callListeners = new Set<(observation: DeviceToolCallObservation<TTool>) => void>();
   readonly calls: {
     name: TTool;
     arguments: Record<string, unknown>;
@@ -695,33 +733,63 @@ export class MockVehicleDeviceMcpClient<
     this.#healthListeners.add(listener);
     return () => this.#healthListeners.delete(listener);
   }
+  onCallObservation(listener: (observation: DeviceToolCallObservation<TTool>) => void): () => void {
+    this.#callListeners.add(listener);
+    return () => this.#callListeners.delete(listener);
+  }
   async call(
     name: TTool,
     argumentsValue: Record<string, unknown>,
     taskId?: string,
   ): Promise<Record<string, unknown>> {
-    if (!this.#connected) throw new Error(`${this.profile.errorPrefix}_DEVICE_MCP_UNAVAILABLE`);
-    if (!this.available.has(name))
-      throw new Error(`${this.profile.errorPrefix}_DEVICE_TOOL_UNAVAILABLE`);
-    const failure = this.failures.get(name);
-    if (failure !== undefined) throw failure;
-    this.calls.push({
-      name,
-      arguments: structuredClone(argumentsValue),
-      ...(taskId === undefined ? {} : { taskId }),
-    });
-    const handler = this.handlers.get(name);
-    const result =
-      handler === undefined
-        ? structuredClone(
-            this.responses.get(name) ??
-              this.profile.mockResult?.(name, argumentsValue) ?? {
-                accepted: true,
-              },
-          )
-        : await handler(structuredClone(argumentsValue), taskId);
-    return this.profile.validateResult?.(name, result, argumentsValue) ?? result;
+    const started = Date.now();
+    let outcome: DeviceToolCallObservation<TTool>["outcome"] = "accepted";
+    const mutating = this.profile.isMutating?.(name) ?? true;
+    try {
+      if (!this.#connected) throw new Error(`${this.profile.errorPrefix}_DEVICE_MCP_UNAVAILABLE`);
+      if (!this.available.has(name))
+        throw new Error(`${this.profile.errorPrefix}_DEVICE_TOOL_UNAVAILABLE`);
+      const failure = this.failures.get(name);
+      if (failure !== undefined) throw failure;
+      this.calls.push({
+        name,
+        arguments: structuredClone(argumentsValue),
+        ...(taskId === undefined ? {} : { taskId }),
+      });
+      const handler = this.handlers.get(name);
+      const result =
+        handler === undefined
+          ? structuredClone(
+              this.responses.get(name) ??
+                this.profile.mockResult?.(name, argumentsValue) ?? {
+                  accepted: true,
+                },
+            )
+          : await handler(structuredClone(argumentsValue), taskId);
+      return this.profile.validateResult?.(name, result, argumentsValue) ?? result;
+    } catch (error) {
+      outcome = error instanceof DeviceToolRejectedError ? "rejected" : "protocol_error";
+      throw error;
+    } finally {
+      const observation: DeviceToolCallObservation<TTool> = {
+        toolName: name,
+        kind: mutating ? "mutating" : "read",
+        outcome,
+        attempts: 1,
+        retries: 0,
+        durationMs: Date.now() - started,
+        uncertain: errorIsUncertain(outcome, mutating),
+      };
+      for (const listener of this.#callListeners) listener(structuredClone(observation));
+    }
   }
+}
+
+function errorIsUncertain(
+  outcome: DeviceToolCallObservation["outcome"],
+  mutating: boolean,
+): boolean {
+  return mutating && outcome === "timeout";
 }
 
 export class MockUgvDeviceMcpClient

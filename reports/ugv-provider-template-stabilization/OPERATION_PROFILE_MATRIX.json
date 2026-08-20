@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "A-01",
+  "authority": "Vehicle Operation Profile",
+  "coverage": ["operation", "tool", "variant", "phase", "risk", "required contracts"],
+  "result": "UGV operation, variant and phase facts are centralized and consumed without changing the frozen Runtime protocol.",
+  "evidence": ["UGV unit 10/10", "Device MCP contract 15/15", "Provider contract 7/7"]
+}

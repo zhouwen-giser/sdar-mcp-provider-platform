@@ -287,6 +287,29 @@ for (const productId of PRODUCT_IDS) {
       );
     }
 
+    if (productId === "ugv") {
+      for (const mutation of [
+        compose.replace("UGV_EXECUTION_MODE: live", "UGV_EXECUTION_MODE: simulation"),
+        compose.replace('UGV_FIRE_ENABLED: "false"', 'UGV_FIRE_ENABLED: "true"'),
+        compose.replace(
+          'UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"',
+          'UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "true"',
+        ),
+      ])
+        assert.throws(
+          () =>
+            validateComposeDocument({
+              source: mutation,
+              product: productCatalog(productId),
+              revision,
+              postgres,
+            }),
+          (error) =>
+            error instanceof ProductionBundleError &&
+            error.code === "PRODUCTION_BUNDLE_UGV_LIVE_SAFETY_PROFILE_INVALID",
+        );
+    }
+
     const example = await readFile(join(bundleDirectory, ".env.example"), "utf8");
     assert.match(example, /ALLOW_INSECURE_INTERNAL_TRANSPORT=true/);
     assert.match(example, /DEVICE_MCP_URL=http:\/\//);

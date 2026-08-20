@@ -27,7 +27,7 @@ import {
   TaskRepository,
 } from "../../../packages/persistence-postgres/src/index.js";
 import { buildRegistrySnapshot } from "../../../packages/registry-snapshot/src/index.js";
-import { DurableCommandDispatcher, TaskEngine } from "../../../packages/task-engine/src/index.js";
+import { TaskEngine } from "../../../packages/task-engine/src/index.js";
 import { MockUgvDeviceMcpClient } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 
@@ -247,10 +247,9 @@ describe("vendor_managed UGV Provider platform integration", () => {
     ).toBe(1);
   });
 
-  it("maps an acknowledged fire decline to platform cancellation without a device fire call", async () => {
+  it("keeps fire disabled at the platform boundary without creating a Task or device call", async () => {
     if (runtime === undefined) throw new Error("RUNTIME_NOT_STARTED");
     seedUgv(adapterIngress);
-    seedFireReady(adapterIngress);
     const fireOperation = taskEngine.manifest.operations.find(
       ({ name }) => name === "vehicle_fire_weapon",
     );
@@ -267,47 +266,25 @@ describe("vendor_managed UGV Provider platform integration", () => {
       },
       authorization,
     );
-    if (created.kind !== "task") throw new Error("UGV_FIRE_TASK_NOT_CREATED");
-    const taskId = String(created.task.taskId);
-    expect(created.task).toMatchObject({ status: "input_required" });
-    expect(await adapterStore.getExecution(taskId)).toMatchObject({ state: "WAITING_INPUT" });
-
-    await taskEngine.updateTaskInputResponses(
-      taskId,
-      { fire_confirmation: { action: "decline" } },
-      authorization,
-    );
-    const dispatched = await new DurableCommandDispatcher(
-      runtime.gateway,
-      new TaskRepository(runtime.pool),
-    ).tick();
-    expect(dispatched).toMatchObject({ claimed: 1, acknowledged: 1, rejected: 0 });
-
-    const command = await runtime.pool.query<{
-      state: string;
-      adapter_ack: { accepted?: boolean; reasonCode?: string } | null;
-    }>(
-      `SELECT state,adapter_ack
-         FROM task_command
-        WHERE task_id=$1 AND command_type='UPDATE'`,
-      [taskId],
-    );
-    expect(command.rows[0]).toMatchObject({
-      state: "ACKNOWLEDGED",
-      adapter_ack: { accepted: true, reasonCode: "UGV_FIRE_CONFIRMATION_REJECTED" },
+    expect(created).toMatchObject({
+      kind: "result",
+      result: {
+        isError: true,
+        structuredContent: {
+          outcome: "admission_rejected",
+          reasonCode: "UGV_FIRE_DISABLED",
+          retryable: false,
+        },
+      },
     });
-    expect(await adapterStore.getExecution(taskId)).toMatchObject({
-      state: "CANCELLED",
-      reasonCode: "UGV_FIRE_CONFIRMATION_REJECTED",
-      result: { status: "cancelled" },
-    });
-
-    expect(await taskEngine.getTask(taskId, authorization)).toMatchObject({
-      status: "cancelled",
-    });
-    expect(await new TaskRepository(runtime.pool).getById(taskId)).toMatchObject({
-      internalState: "TERMINAL_CANCELLED",
-    });
+    expect(await adapterStore.listActiveExecutions()).toEqual([]);
+    expect(
+      (
+        await runtime.pool.query<{ count: number }>(
+          "SELECT count(*)::integer AS count FROM provider_task",
+        )
+      ).rows[0]?.count,
+    ).toBe(0);
     expect(device.calls).toEqual([]);
   });
 });
@@ -353,19 +330,6 @@ function seedUgv(ingress: VehicleMqttIngress): void {
     Buffer.from(
       '{"vehicle_id":"ugv1","role_name":"ugv","speed_kmh":0,"chassis_task":{"state":-1,"progress":0},"eo_task":{"state":-1,"progress":0},"weapon_task":{"state":-1,"progress":0},"available":true}',
     ),
-  );
-}
-
-function seedFireReady(ingress: VehicleMqttIngress): void {
-  ingress.handle(
-    "/ugv/detected_objects",
-    Buffer.from(
-      '{"entity_id":"ugv1","objects":[{"id":101,"object_type":"3:target-vehicle","x":1,"y":2,"z":0}]}',
-    ),
-  );
-  ingress.applyDeviceObservation(
-    { payload: { online: true, lockedTargetId: "101", attackReady: true } },
-    [],
   );
 }
 

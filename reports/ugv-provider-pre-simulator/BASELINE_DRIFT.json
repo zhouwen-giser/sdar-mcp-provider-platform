@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-17T01:56:09.475Z",
+  "from": "007426caf45f32bd8c77eae4ad264b8bae59df6a",
+  "to": "2e0626f2b2159d7c11061625c15274863479e217",
+  "commitCount": 21,
+  "reviewedMainMatchesExecutionMain": true,
+  "ugvScopedDrift": [],
+  "sharedScopedDrift": [
+    {
+      "path": "package.json",
+      "classification": "unrelated-home-assistant-test-gate",
+      "conflict": false,
+      "summary": "Adds the Home Assistant climate stability test to shared fault-injection and climate test commands."
+    }
+  ],
+  "decision": "PROCEED_FROM_LATEST_ORIGIN_MAIN"
+}

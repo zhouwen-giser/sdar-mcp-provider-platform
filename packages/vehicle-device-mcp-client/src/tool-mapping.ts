@@ -1,4 +1,5 @@
 import type { UgvDeviceToolName } from "./tool-allowlist.js";
+import { DeviceToolRejectedError, UncertainMutatingDeviceCallError } from "./errors.js";
 import {
   canonicalUgvMissionId,
   missionIdFromUgvResult,
@@ -17,9 +18,35 @@ export type UgvDeviceInvoker = (
   argumentsValue: Record<string, unknown>,
 ) => Promise<Record<string, unknown>>;
 
+export type UgvStartMutationPhase = "PRIMARY" | "FOLLOWUP";
+
+export interface UgvStartMutationCall {
+  phase: UgvStartMutationPhase;
+  call: DeviceToolCall;
+}
+
+export interface UgvAcceptedStartMutationCall extends UgvStartMutationCall {
+  result: Record<string, unknown>;
+  canonicalMissionId?: string;
+}
+
+export interface UgvFailedStartMutationCall extends UgvStartMutationCall {
+  error: unknown;
+  result?: Record<string, unknown>;
+  canonicalMissionId?: string;
+}
+
 export interface ExecuteUgvStartFlowOptions {
   /** Called before a dependent mutating follow-up is dispatched. */
   onMissionId?: (canonicalMissionId: string, numericMissionId: number) => void | Promise<void>;
+  /** Persists durable intent and dispatching state immediately before transport. */
+  beforeMutationDispatch?: (context: UgvStartMutationCall) => void | Promise<void>;
+  /** Persists the accepted outcome after any allocated mission ID is durable. */
+  afterMutationAccepted?: (context: UgvAcceptedStartMutationCall) => void | Promise<void>;
+  /** Persists an explicitly rejected or uncertain dispatched outcome. */
+  afterMutationFailed?: (context: UgvFailedStartMutationCall) => void | Promise<void>;
+  /** Recovery-only: skip a durably accepted primary and continue its dependent start. */
+  resumeFromMissionId?: string | number;
   /** Injectable for deterministic bounded-velocity tests. */
   delay?: (durationMs: number) => Promise<void>;
 }
@@ -49,45 +76,93 @@ export async function executeUgvStartFlow(
   const run = async (
     call: DeviceToolCall,
     persistMissionId = true,
+    phase?: UgvStartMutationPhase,
   ): Promise<Record<string, unknown>> => {
-    calls.push(structuredClone(call));
-    const result = validateUgvToolResult(
-      call.name,
-      await invoke(call.name, structuredClone(call.arguments)),
-      call.arguments,
-    );
-    results.push(structuredClone(result));
-    const missionId = missionIdFromUgvResult(call.name, result);
-    if (
-      persistMissionId &&
-      missionId !== undefined &&
-      missionId >= 0 &&
-      !missionIds.includes(missionId)
-    ) {
-      missionIds.push(missionId);
-      await options.onMissionId?.(canonicalUgvMissionId(missionId), missionId);
+    const callSnapshot = structuredClone(call);
+    calls.push(callSnapshot);
+    if (phase !== undefined)
+      await options.beforeMutationDispatch?.({ phase, call: structuredClone(callSnapshot) });
+    let responseReturned = false;
+    let downstreamResult: Record<string, unknown> | undefined;
+    let returnedMissionId: string | undefined;
+    try {
+      const downstream = await invoke(call.name, structuredClone(call.arguments));
+      responseReturned = true;
+      downstreamResult = structuredClone(downstream);
+      const result = validateUgvToolResult(call.name, downstream, call.arguments);
+      results.push(structuredClone(result));
+      const missionId = missionIdFromUgvResult(call.name, result);
+      const canonicalMissionId =
+        missionId === undefined ? undefined : canonicalUgvMissionId(missionId);
+      returnedMissionId = canonicalMissionId;
+      if (
+        persistMissionId &&
+        missionId !== undefined &&
+        missionId >= 0 &&
+        !missionIds.includes(missionId)
+      ) {
+        missionIds.push(missionId);
+        await options.onMissionId?.(canonicalUgvMissionId(missionId), missionId);
+      }
+      if (phase !== undefined)
+        await options.afterMutationAccepted?.({
+          phase,
+          call: structuredClone(callSnapshot),
+          result: structuredClone(result),
+          ...(canonicalMissionId === undefined ? {} : { canonicalMissionId }),
+        });
+      return result;
+    } catch (error) {
+      const classified = classifyStartMutationFailure(call.name, error, responseReturned);
+      if (phase !== undefined)
+        try {
+          await options.afterMutationFailed?.({
+            phase,
+            call: structuredClone(callSnapshot),
+            error: classified,
+            ...(downstreamResult === undefined
+              ? {}
+              : { result: structuredClone(downstreamResult) }),
+            ...(returnedMissionId === undefined ? {} : { canonicalMissionId: returnedMissionId }),
+          });
+        } catch (persistenceError) {
+          throw new UncertainMutatingDeviceCallError("UGV", call.name, {
+            cause: persistenceError,
+          });
+        }
+      throw classified;
     }
-    return result;
   };
 
   const initialCalls = startDeviceCalls(operationName, argumentsValue);
   if (operationName === "vehicle_navigate" || operationName === "vehicle_area_recon") {
+    if (options.resumeFromMissionId !== undefined) {
+      const missionId = parseUgvMissionId(options.resumeFromMissionId);
+      missionIds.push(missionId);
+      await run(buildUgvStartFollowupCall(operationName, missionId), false, "FOLLOWUP");
+      return {
+        calls,
+        results,
+        missionIds,
+        canonicalMissionIds: missionIds.map(canonicalUgvMissionId),
+      };
+    }
     const initial = required(initialCalls[0], "UGV_INITIAL_DEVICE_CALL_REQUIRED");
-    const initialResult = await run(initial);
+    const initialResult = await run(initial, true, "PRIMARY");
     const missionId = required(
       missionIdFromUgvResult(initial.name, initialResult),
       "UGV_DEVICE_MISSION_ID_REQUIRED",
     );
-    await run(buildUgvStartFollowupCall(operationName, missionId), false);
+    await run(buildUgvStartFollowupCall(operationName, missionId), false, "FOLLOWUP");
   } else if (operationName === "vehicle_emergency_stop") {
-    let firstError: Error | undefined;
-    for (const call of initialCalls)
+    const primary = required(initialCalls[0], "UGV_EMERGENCY_STOP_PRIMARY_CALL_REQUIRED");
+    await run(primary, false, "PRIMARY");
+    for (const call of initialCalls.slice(1))
       try {
         await run(call, false);
-      } catch (error) {
-        firstError ??= error instanceof Error ? error : new Error("UGV_DEVICE_CALL_FAILED");
+      } catch {
+        // Cleanup is deliberately best-effort after the primary stop is accepted.
       }
-    if (firstError !== undefined) throw firstError;
   } else {
     for (const call of initialCalls) await run(call);
   }
@@ -105,6 +180,20 @@ export async function executeUgvStartFlow(
     missionIds,
     canonicalMissionIds: missionIds.map(canonicalUgvMissionId),
   };
+}
+
+function classifyStartMutationFailure(
+  toolName: UgvDeviceToolName,
+  error: unknown,
+  responseReturned: boolean,
+): unknown {
+  if (
+    error instanceof DeviceToolRejectedError ||
+    error instanceof UncertainMutatingDeviceCallError ||
+    !responseReturned
+  )
+    return error;
+  return new UncertainMutatingDeviceCallError("UGV", toolName, { cause: error });
 }
 
 export function startDeviceCalls(
@@ -194,7 +283,24 @@ export function buildUgvEmergencyStopCalls(
   const chassisMissionId = optionalMissionId(input.chassisMissionId);
   const reconMissionId = optionalMissionId(input.reconMissionId);
   return [
-    { name: "ugv_motion_stop", arguments: {} },
+    buildUgvEmergencyStopPrimaryCall(),
+    ...buildUgvEmergencyStopCleanupCalls({ chassisMissionId, reconMissionId }),
+  ];
+}
+
+export function buildUgvEmergencyStopPrimaryCall(): DeviceToolCall {
+  return { name: "ugv_motion_stop", arguments: {} };
+}
+
+export function buildUgvEmergencyStopCleanupCalls(
+  input: {
+    chassisMissionId?: number | string;
+    reconMissionId?: number | string;
+  } = {},
+): DeviceToolCall[] {
+  const chassisMissionId = optionalMissionId(input.chassisMissionId);
+  const reconMissionId = optionalMissionId(input.reconMissionId);
+  return [
     {
       name: "ugv_mission_control",
       arguments: { action: "terminate", mission_id: chassisMissionId },

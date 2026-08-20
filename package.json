@@ -123,6 +123,7 @@
     "test:ugv-provider:security": "vitest run tests/security/ugv-provider-security.test.ts",
     "test:ugv-provider:e2e": "vitest run tests/e2e/ugv-provider-grpc-e2e.test.ts",
     "test:ugv-provider:conformance": "pnpm test:ugv-provider:contract && pnpm test:ugv-provider:security",
+    "test:ugv:real:preflight": "node scripts/ugv-provider-preflight.mjs",
     "proto:check:detached": "node scripts/ugv-work-checks.mjs generated-self-check",
     "work:baseline:capture": "node scripts/ugv-work-checks.mjs baseline",
     "work:protected:check": "node scripts/ugv-work-checks.mjs protected-check",

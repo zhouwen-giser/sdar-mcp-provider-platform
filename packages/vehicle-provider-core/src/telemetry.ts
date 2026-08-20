@@ -15,6 +15,7 @@ interface Client extends grpc.Client {
 const EVENT_TYPES = new Set([
   "RESOURCE_STATE",
   "RESOURCE_HEALTH",
+  "RESOURCE_METRIC",
   "EXECUTION_PROGRESS",
   "PROVIDER_DIAGNOSTIC",
 ]);
@@ -42,7 +43,12 @@ export class VehicleTelemetry {
     }
   }
   async emit(
-    eventType: "RESOURCE_STATE" | "RESOURCE_HEALTH" | "EXECUTION_PROGRESS" | "PROVIDER_DIAGNOSTIC",
+    eventType:
+      | "RESOURCE_STATE"
+      | "RESOURCE_HEALTH"
+      | "RESOURCE_METRIC"
+      | "EXECUTION_PROGRESS"
+      | "PROVIDER_DIAGNOSTIC",
     payload: Record<string, unknown>,
     context: { taskId?: string; externalExecutionId?: string; operationName?: string } = {},
   ): Promise<void> {
@@ -78,6 +84,17 @@ export class VehicleTelemetry {
     } catch {
       // Telemetry is non-authoritative and cannot change execution state.
     }
+  }
+  metric(
+    metricName: string,
+    value: number,
+    unit: string,
+    quality: string,
+    context: { taskId?: string; externalExecutionId?: string; operationName?: string } = {},
+  ): Promise<void> {
+    if (!/^[a-z][a-z0-9_]{0,127}$/.test(metricName) || !Number.isFinite(value))
+      throw new Error("VEHICLE_TELEMETRY_METRIC_INVALID");
+    return this.emit("RESOURCE_METRIC", { metricName, value, unit, quality }, context);
   }
   close(): void {
     this.#client?.close();

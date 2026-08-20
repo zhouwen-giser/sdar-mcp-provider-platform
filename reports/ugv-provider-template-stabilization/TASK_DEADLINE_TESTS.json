@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "B-04",
+  "deadlines": ["start", "active", "terminal", "physical", "control"],
+  "orphanState": "DOWNSTREAM_MISSION_READY_NOT_STARTED",
+  "result": "Phase deadlines use persisted origins and an injected Runtime clock; an accepted primary mission is never replayed to repair a follow-up failure.",
+  "evidence": ["clock-driven tests 53/53", "PostgreSQL restart round-trip 1/1"]
+}

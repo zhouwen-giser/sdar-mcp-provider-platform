@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+  "tests": [
+    {
+      "name": "runtime reconcile after restart",
+      "store": "deterministic repository",
+      "result": "no duplicate StartOperation/device call"
+    },
+    {
+      "name": "Postgres execution restart",
+      "store": "PostgreSQL 17 isolated schema",
+      "result": "provider identity, mission id, observation cursor, dispatch baseline, control confirmation and command ACK preserved"
+    },
+    {
+      "name": "uncertain mutating call",
+      "store": "deterministic repository",
+      "result": "fence retained and automatic redispatch prohibited"
+    }
+  ],
+  "migration": "provider:ugv migration set applied successfully in an isolated PostgreSQL schema"
+}

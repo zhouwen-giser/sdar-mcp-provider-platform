@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-20T07:38:07Z",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "mock": {
+    "status": "PASS",
+    "profile": "mock",
+    "persistentAndMockServiceCount": 7,
+    "runtimeEndpoint": "http://127.0.0.1:19120/mcp",
+    "result": "REAL_RUNTIME_READ_ONLY_READY",
+    "readOnlyOperationCount": 4,
+    "mutatingCallCount": 0
+  },
+  "externalPreflight": {
+    "status": "PASS_WITH_UPSTREAM_DRIFT",
+    "result": "REAL_EXTERNAL_PREREQUISITES_READY_WITH_UPSTREAM_DRIFT",
+    "deviceMcpConnected": true,
+    "deviceMcpToolCount": 15,
+    "mqttConnected": true,
+    "passiveSubscribeOnly": true,
+    "publishAttempted": false,
+    "missingOptionalTools": ["ugv_laser_range"],
+    "publisherQosDrift": [
+      {
+        "topic": "/ugv/speed",
+        "observedQos": 0,
+        "expectedProtocolQos": 1
+      }
+    ]
+  },
+  "automaticExternalToMockFallback": false,
+  "liveMutationExecuted": false
+}

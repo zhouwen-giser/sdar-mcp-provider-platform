@@ -18,6 +18,7 @@ export interface NormalizedMqttObservation {
   patch: SnapshotPatch;
   domains: FreshnessDomain[];
   sourceObservedAt?: string;
+  sourceSequence?: string;
   timeAuthority: "source" | "ingest";
   canonicalPayload: unknown;
 }
@@ -25,9 +26,13 @@ export interface NormalizedMqttObservation {
 export function normalizeMqttObservation(
   topic: UgvMqttTopic,
   value: unknown,
+  expectedIdentity: { entityId: string; vehicleType: string } = {
+    entityId: "ugv1",
+    vehicleType: "ugv",
+  },
 ): NormalizedMqttObservation {
   const object = record(value) ? value : undefined;
-  validateIdentity(object);
+  validateIdentity(object, expectedIdentity);
   return normalizeVehicleMqttObservation(topic, value, object);
 }
 
@@ -128,22 +133,25 @@ function normalizeVehicleMqttObservation(
         patch: { chassis: { mission: track(object, false) } },
         domains: ["mission"],
       };
-    case "/ugv/nav_state":
+    case "/ugv/nav_state": {
+      const navigation = optionalNumbers(object, {
+        positionX: "position_x",
+        positionY: "position_y",
+        positionZ: "position_z",
+        speedKmh: "speed_kmh",
+        batteryRangeKm: "battery_range_km",
+      });
       return {
         ...base,
         patch: {
           chassis: {
-            navigation: optionalNumbers(object, {
-              positionX: "position_x",
-              positionY: "position_y",
-              positionZ: "position_z",
-              speedKmh: "speed_kmh",
-              batteryRangeKm: "battery_range_km",
-            }),
+            navigation,
+            ...(navigation.speedKmh === undefined ? {} : { speedKmh: navigation.speedKmh }),
           },
         },
         domains: ["chassis"],
       };
+    }
     case "/ugv/eo/pose":
       return eoPose(value, base);
     case "/ugv/detected_objects":
@@ -391,6 +399,7 @@ function reconStatus(
   const reconType = optionalInteger(object.recon_type);
   const loadStatus = optionalInteger(object.load_status);
   const loadStatusLabel = scalarText(object.load_status_label);
+  const missionId = scalarText(object.mission_id ?? object.id);
   return {
     ...base,
     patch: {
@@ -399,6 +408,7 @@ function reconStatus(
         ...(gimbal === undefined ? {} : { gimbal }),
         ...(attackReady === undefined ? {} : { attackReady }),
         reconnaissance: {
+          ...(missionId === undefined ? {} : { id: missionId }),
           motionStatus,
           state: projectReconMotionStatus(motionStatus),
           ...(statusLabel === undefined ? {} : { statusLabel }),
@@ -700,20 +710,27 @@ function latestTargetObservedAt(targets: readonly VehicleTarget[]): string | und
 }
 
 function observationBase(value: unknown, object: Record<string, unknown> | undefined) {
-  const sourceObservedAt = headerTimestamp(object?.header);
+  const header = object?.header;
+  const sourceObservedAt = headerTimestamp(header);
+  const sourceSequence = scalarText(record(header) ? header.seq : object?.seq);
   return {
     ...(sourceObservedAt === undefined ? {} : { sourceObservedAt }),
+    ...(sourceSequence === undefined ? {} : { sourceSequence }),
     timeAuthority: sourceObservedAt === undefined ? ("ingest" as const) : ("source" as const),
     canonicalPayload: value,
   };
 }
 
-function validateIdentity(object: Record<string, unknown> | undefined): void {
+function validateIdentity(
+  object: Record<string, unknown> | undefined,
+  expected: { entityId: string; vehicleType: string },
+): void {
   const entity = object?.entity_id ?? object?.vehicle_id;
-  if (entity !== undefined && entity !== "ugv1" && entity !== "ugv")
+  if (entity !== undefined && entity !== expected.entityId && entity !== expected.vehicleType)
     throw new Error("UGV_MQTT_ENTITY_MISMATCH");
   const role = object?.role_name ?? object?.role;
-  if (role !== undefined && role !== "ugv") throw new Error("UGV_MQTT_ROLE_MISMATCH");
+  if (role !== undefined && role !== expected.vehicleType)
+    throw new Error("UGV_MQTT_ROLE_MISMATCH");
 }
 
 function validateNpcTankIdentity(object: Record<string, unknown> | undefined): void {

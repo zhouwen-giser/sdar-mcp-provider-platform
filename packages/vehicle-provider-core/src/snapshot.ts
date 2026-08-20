@@ -22,17 +22,17 @@ const unknownComponents = () => ({
   navigation: "unknown" as const,
 });
 
-export function createUgvSnapshot(now = new Date().toISOString()): UgvSnapshot {
-  const snapshot = createVehicleSnapshot(
-    {
-      providerId: "isr.vehicle.ugv.ugv1",
-      resourceId: "vehicle:ugv1",
-      entityId: "ugv1",
-      vehicleType: "ugv",
-      executionMode: "simulation",
-    },
-    now,
-  ) as UgvSnapshot;
+export function createUgvSnapshot(
+  identity: VehicleIdentity = {
+    providerId: "isr.vehicle.ugv.ugv1",
+    resourceId: "vehicle:ugv1",
+    entityId: "ugv1",
+    vehicleType: "ugv",
+    executionMode: "simulation",
+  },
+  now = new Date().toISOString(),
+): UgvSnapshot {
+  const snapshot = createVehicleSnapshot(identity, now) as UgvSnapshot;
   snapshot.payload.eoTask = { state: "unknown" };
   snapshot.payload.reconnaissance.motionStatus = "unknown";
   snapshot.revision = snapshotRevision(snapshot);

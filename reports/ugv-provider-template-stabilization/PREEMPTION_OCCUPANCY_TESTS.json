@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "D-02",
+  "persistedRelations": ["preemptedTaskIds", "preemptedBy", "preemptedAt", "reason"],
+  "externalOccupancy": ["chassis", "electro-optical", "weapon"],
+  "policy": "Device-observed work without a local owner blocks conflicting admission while emergency stop retains override authority.",
+  "evidence": ["focused tests 78/78"]
+}

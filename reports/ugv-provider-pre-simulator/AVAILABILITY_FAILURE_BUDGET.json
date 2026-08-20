@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_OBSERVATION",
+  "internalStates": ["HEALTHY", "DEGRADED", "OPEN", "RECOVERING"],
+  "hysteresis": {
+    "degradedThreshold": 2,
+    "openThreshold": 3,
+    "recoverySuccessThreshold": 2,
+    "flappingPrevented": true
+  },
+  "publicMapping": {
+    "HEALTHY": "AVAILABLE",
+    "DEGRADED": "AVAILABLE with UGV_OPERATION_HEALTH_DEGRADED reason",
+    "OPEN": "UNKNOWN with UGV_OPERATION_HEALTH_OPEN reason",
+    "RECOVERING": "UNKNOWN with UGV_OPERATION_HEALTH_RECOVERING reason"
+  },
+  "representationGap": "PUBLIC_AVAILABILITY_DEGRADED_REPRESENTATION_GAP",
+  "metrics": ["operation_availability_transition_total", "device_tool_health_transition_total"]
+}

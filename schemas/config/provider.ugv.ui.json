@@ -26,6 +26,50 @@
       "writeOnly": false
     },
     {
+      "applyMode": "immutable",
+      "description": "UGV Provider ugv_resource_id setting.",
+      "displayName": "UGV_RESOURCE_ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/UGV_RESOURCE_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "UGV Provider ugv_entity_id setting.",
+      "displayName": "UGV_ENTITY_ID",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/UGV_ENTITY_ID",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "UGV Provider ugv_vehicle_type setting.",
+      "displayName": "UGV_VEHICLE_TYPE",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/UGV_VEHICLE_TYPE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
+      "description": "UGV Provider ugv_execution_mode setting.",
+      "displayName": "UGV_EXECUTION_MODE",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/UGV_EXECUTION_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
       "applyMode": "restart_required",
       "description": "UGV Provider adapter_host setting.",
       "displayName": "ADAPTER_HOST",
@@ -531,6 +575,48 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_read_retry_attempts setting.",
+      "displayName": "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_circuit_breaker_threshold setting.",
+      "displayName": "UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_circuit_breaker_reset_ms setting.",
+      "displayName": "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_device_mcp_contract_report_path setting.",
       "displayName": "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
       "overridePolicy": {
@@ -559,6 +645,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_fire_enabled setting.",
+      "displayName": "UGV_FIRE_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_FIRE_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_fire_requires_chassis_stopped setting.",
       "displayName": "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
       "overridePolicy": {
@@ -566,6 +666,104 @@
         "mode": "inheritable"
       },
       "path": "/UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_stationary_speed_threshold_kmh setting.",
+      "displayName": "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_STATIONARY_SPEED_THRESHOLD_KMH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_stationary_stability_ms setting.",
+      "displayName": "UGV_STATIONARY_STABILITY_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_STATIONARY_STABILITY_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_stationary_min_samples setting.",
+      "displayName": "UGV_STATIONARY_MIN_SAMPLES",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_STATIONARY_MIN_SAMPLES",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_physical_confirmation_timeout_ms setting.",
+      "displayName": "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_operation_failure_degraded_threshold setting.",
+      "displayName": "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_operation_failure_open_threshold setting.",
+      "displayName": "UGV_OPERATION_FAILURE_OPEN_THRESHOLD",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_OPERATION_FAILURE_OPEN_THRESHOLD",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_operation_recovery_success_threshold setting.",
+      "displayName": "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD",
       "required": false,
       "secret": false,
       "secretRef": false,

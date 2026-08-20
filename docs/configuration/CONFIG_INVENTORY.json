@@ -18,7 +18,7 @@
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 130
+      "items": 147
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -32,7 +32,7 @@
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 51
+      "items": 66
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -40,7 +40,7 @@
     },
     "home-assistant-climate": {
       "source": "apps/home-assistant-climate-provider/src/config.ts",
-      "items": 26
+      "items": 28
     }
   },
   "productionConstraints": [
@@ -98,14 +98,14 @@
     }
   ],
   "coverage": {
-    "expectedItems": 229,
-    "actualItems": 229,
+    "expectedItems": 246,
+    "actualItems": 246,
     "secretItems": 22,
     "byComponent": {
       "runtime": 99,
-      "ugv": 51,
+      "ugv": 66,
       "npc-tank": 53,
-      "home-assistant-climate": 26
+      "home-assistant-climate": 28
     }
   },
   "items": [
@@ -1641,6 +1641,66 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "UGV_RESOURCE_ID",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "identity",
+      "defaultDefined": true,
+      "defaultValue": "vehicle:ugv1",
+      "required": false,
+      "validator": "z.string().min(1).default(\"vehicle:ugv1\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "immutable",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_ENTITY_ID",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "identity",
+      "defaultDefined": true,
+      "defaultValue": "ugv1",
+      "required": false,
+      "validator": "z.string().min(1).default(\"ugv1\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "immutable",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_VEHICLE_TYPE",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "identity",
+      "defaultDefined": true,
+      "defaultValue": "ugv",
+      "required": false,
+      "validator": "z.string().min(1).default(\"ugv\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "immutable",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_EXECUTION_MODE",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "safety",
+      "defaultDefined": true,
+      "defaultValue": "simulation",
+      "required": false,
+      "validator": "z.enum([\"simulation\", \"live\"]).default(\"simulation\")",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "immutable",
+      "applyModeStatus": "reviewed"
+    },
+    {
       "key": "ADAPTER_PORT",
       "component": "ugv",
       "source": "apps/ugv-provider-adapter/src/config.ts:16",
@@ -2182,6 +2242,51 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "device_mcp",
+      "defaultDefined": true,
+      "defaultValue": 1,
+      "required": false,
+      "validator": "z.coerce.number().int().min(0).max(3).default(1)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "device_mcp",
+      "defaultDefined": true,
+      "defaultValue": 3,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(3)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "device_mcp",
+      "defaultDefined": true,
+      "defaultValue": 5000,
+      "required": false,
+      "validator": "z.coerce.number().int().min(100).max(300000).default(5000)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
       "key": "UGV_ALLOW_NAVIGATION_WITH_RECON",
       "component": "ugv",
       "source": "apps/ugv-provider-adapter/src/config.ts:62",
@@ -2210,6 +2315,126 @@
       "secretKind": "none",
       "applyMode": "restart_required",
       "applyModeStatus": "pending_review"
+    },
+    {
+      "key": "UGV_FIRE_ENABLED",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "safety",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_STATIONARY_MIN_SAMPLES",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "confirmation",
+      "defaultDefined": true,
+      "defaultValue": 2,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(2)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "confirmation",
+      "defaultDefined": true,
+      "defaultValue": 0.1,
+      "required": false,
+      "validator": "z.coerce.number().min(0).max(5).default(0.1)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_STATIONARY_STABILITY_MS",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "confirmation",
+      "defaultDefined": true,
+      "defaultValue": 500,
+      "required": false,
+      "validator": "z.coerce.number().int().min(0).max(60000).default(500)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_PHYSICAL_CONFIRMATION_TIMEOUT_MS",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "confirmation",
+      "defaultDefined": true,
+      "defaultValue": 30000,
+      "required": false,
+      "validator": "z.coerce.number().int().min(100).max(300000).default(30000)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "availability",
+      "defaultDefined": true,
+      "defaultValue": 2,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(2)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_OPERATION_FAILURE_OPEN_THRESHOLD",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "availability",
+      "defaultDefined": true,
+      "defaultValue": 3,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(3)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "availability",
+      "defaultDefined": true,
+      "defaultValue": 2,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(100).default(2)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
     },
     {
       "key": "UGV_EXECUTION_POLL_INTERVAL_MS",

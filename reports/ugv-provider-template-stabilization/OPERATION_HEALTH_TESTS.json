@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "D-04",
+  "key": ["operation", "arguments variant", "lifecycle phase"],
+  "healthSource": "bounded Device MCP client health events",
+  "readSideEffect": "Read-only checks do not advance half-open recovery.",
+  "result": "Health denial identifies the exact failed dependency rather than collapsing to a broad operation failure.",
+  "evidence": ["focused UGV tests 92/92"]
+}

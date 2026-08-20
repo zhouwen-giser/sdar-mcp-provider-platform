@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "phase": "UGV_PROVIDER_PRE_SIMULATOR_PREFLIGHT",
+  "evidenceClass": "local_read_only",
+  "startedAt": "2026-08-17T03:11:39.741Z",
+  "completedAt": "2026-08-17T03:11:39.742Z",
+  "status": "BLOCKED_BY_SIMULATOR",
+  "reasonCode": "PENDING_SIMULATOR_CONTRACT_AND_OBSERVATION",
+  "localReadiness": "PASS_LOCAL",
+  "realQualification": "PENDING_SIMULATOR",
+  "safety": {
+    "fire": "DISABLED",
+    "mockContract": "DISABLED"
+  },
+  "sideEffects": {
+    "deviceMutations": 0,
+    "mqttPublishes": 0,
+    "physicalMotion": false
+  },
+  "localChecks": {
+    "providerStore": "PASS",
+    "executionMode": "PASS",
+    "mockFallback": "PASS",
+    "fireDisabled": "PASS",
+    "identity": "PASS"
+  },
+  "externalChecks": {
+    "providerStoreConnectivity": "NOT_OBSERVED",
+    "deviceMcpContract": "PENDING_SIMULATOR_CONTRACT",
+    "mqttObservation": "PENDING_SIMULATOR_OBSERVATION",
+    "resourceIdentity": "PENDING_SIMULATOR_OBSERVATION",
+    "chassisFreshness": "PENDING_SIMULATOR_OBSERVATION",
+    "missionFreshness": "PENDING_SIMULATOR_OBSERVATION",
+    "healthFreshness": "PENDING_SIMULATOR_OBSERVATION",
+    "payloadFreshness": "PENDING_SIMULATOR_OBSERVATION",
+    "navigationAvailability": "PENDING_SIMULATOR_CONTRACT",
+    "reconnaissanceAvailability": "PENDING_SIMULATOR_CONTRACT",
+    "emergencyStopAvailability": "PENDING_SIMULATOR_CONTRACT",
+    "physicalQualification": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+    "activeTasks": "NOT_OBSERVED",
+    "uncertainTasks": "NOT_OBSERVED"
+  }
+}

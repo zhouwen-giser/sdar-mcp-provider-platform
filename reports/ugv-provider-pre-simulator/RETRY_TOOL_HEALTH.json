@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_OBSERVATION",
+  "preservedClientCapabilities": [
+    "reconnect with bounded exponential backoff",
+    "read-only retry",
+    "per-tool circuit breaker",
+    "tool health events",
+    "uncertain mutating outcome"
+  ],
+  "configuration": [
+    "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
+    "UGV_DEVICE_MCP_CIRCUIT_FAILURE_THRESHOLD",
+    "UGV_DEVICE_MCP_CIRCUIT_RESET_MS",
+    "UGV_OPERATION_DEGRADED_FAILURE_THRESHOLD",
+    "UGV_OPERATION_OPEN_FAILURE_THRESHOLD",
+    "UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD"
+  ],
+  "deterministicProof": {
+    "droppedRead": "retried once and recovered",
+    "mutatingTimeout": "uncertain and never automatically replayed",
+    "toolHealth": "operation health receives circuit transitions"
+  },
+  "metrics": [
+    "device_mcp_call_total",
+    "device_mcp_call_latency_ms",
+    "device_mcp_retry_total",
+    "device_mcp_uncertain_total",
+    "device_tool_health_transition_total"
+  ]
+}

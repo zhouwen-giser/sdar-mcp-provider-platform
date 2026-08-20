@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "1.0",
+  "source": "UGV_Provider_子系统_PRD_V1.0.docx",
+  "truthBoundary": "No deterministic or mock result qualifies the simulator or physical vehicle.",
+  "requirements": [
+    {
+      "id": "R-P01",
+      "classification": "HARDEN_NOW",
+      "feature": "identity_resource",
+      "simulatorIndependent": true,
+      "baseline": "partial_hardcoded_identity",
+      "action": "configured_identity_and_resource_fence",
+      "test": "identity_and_resource_matrix",
+      "externalDependency": null,
+      "finalStatus": ["LOCAL_IMPLEMENTATION_PASS"]
+    },
+    {
+      "id": "R-P02",
+      "classification": "IMPLEMENT_NOW",
+      "feature": "execution_mode_and_safety",
+      "simulatorIndependent": true,
+      "baseline": "simulation_only_fire_exposed",
+      "action": "simulation_live_gate_live_mock_forbidden_fire_disabled",
+      "test": "mode_and_zero_fire_calls",
+      "externalDependency": "live_device_contract",
+      "finalStatus": ["LOCAL_IMPLEMENTATION_PASS", "PENDING_SIMULATOR_CONTRACT"]
+    },
+    {
+      "id": "R-P03",
+      "classification": "IMPLEMENT_NOW",
+      "feature": "device_mcp_compatibility",
+      "simulatorIndependent": true,
+      "baseline": "name_checks_only",
+      "action": "operation_compatibility_profile",
+      "test": "deterministic_contract_matrix",
+      "externalDependency": "simulator_tools_list_and_results",
+      "finalStatus": ["MOCK_CONTRACT_PASS", "PENDING_SIMULATOR_CONTRACT"]
+    },
+    {
+      "id": "R-P04",
+      "classification": "HARDEN_NOW",
+      "feature": "mqtt_freshness",
+      "simulatorIndependent": true,
+      "baseline": "freshness_without_explicit_dispatch_authority",
+      "action": "source_and_ingest_authority_fence",
+      "test": "stale_duplicate_reordered_fresh",
+      "externalDependency": "simulator_observation_ordering",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_OBSERVATION"]
+    },
+    {
+      "id": "R-P05",
+      "classification": "HARDEN_NOW",
+      "feature": "state_capability_queries",
+      "simulatorIndependent": true,
+      "baseline": "implemented",
+      "action": "identity_and_compatibility_propagation",
+      "test": "query_contract_and_unknown_facts",
+      "externalDependency": "live_device_reports",
+      "finalStatus": ["MOCK_CONTRACT_PASS", "PENDING_SIMULATOR_CONTRACT"]
+    },
+    {
+      "id": "R-P06",
+      "classification": "IMPLEMENT_NOW",
+      "feature": "navigation",
+      "simulatorIndependent": true,
+      "baseline": "mission_terminal_without_full_physical_confirmation",
+      "action": "baseline_correlation_position_speed_displacement",
+      "test": "navigation_physical_evidence_matrix",
+      "externalDependency": "simulator_physical_trajectory",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"]
+    },
+    {
+      "id": "R-P07",
+      "classification": "HARDEN_NOW",
+      "feature": "task_controls",
+      "simulatorIndependent": true,
+      "baseline": "ack_partially_coupled_to_state",
+      "action": "durable_control_fence_and_fresh_confirmation",
+      "test": "pause_resume_cancel_matrix",
+      "externalDependency": "simulator_control_behavior",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"]
+    },
+    {
+      "id": "R-P08",
+      "classification": "HARDEN_NOW",
+      "feature": "emergency_stop",
+      "simulatorIndependent": true,
+      "baseline": "missing_speed_not_strictly_rejected",
+      "action": "fresh_stationary_all_tracks_stopped",
+      "test": "emergency_stop_matrix",
+      "externalDependency": "simulator_stop_latency",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"]
+    },
+    {
+      "id": "R-P09",
+      "classification": "HARDEN_NOW",
+      "feature": "area_recon",
+      "simulatorIndependent": true,
+      "baseline": "limited_terminal_facts",
+      "action": "rich_correlated_recon_facts",
+      "test": "recon_evidence_matrix",
+      "externalDependency": "simulator_recon_stream",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_OBSERVATION"]
+    },
+    {
+      "id": "R-P10",
+      "classification": "HARDEN_NOW",
+      "feature": "targets_gimbal_laser",
+      "simulatorIndependent": true,
+      "baseline": "implemented",
+      "action": "compatibility_gated_availability",
+      "test": "optional_tool_matrix",
+      "externalDependency": "simulator_optional_tools",
+      "finalStatus": ["MOCK_CONTRACT_PASS", "PENDING_SIMULATOR_CONTRACT"]
+    },
+    {
+      "id": "R-P11",
+      "classification": "IMPLEMENT_NOW",
+      "feature": "evidence_terminal_confirmation",
+      "simulatorIndependent": true,
+      "baseline": "no_shared_physical_baseline",
+      "action": "objective_evidence_and_no_synthesis",
+      "test": "baseline_and_correlation_matrix",
+      "externalDependency": "simulator_observation_authority",
+      "finalStatus": ["DETERMINISTIC_OBSERVATION_PASS", "PENDING_SIMULATOR_OBSERVATION"]
+    },
+    {
+      "id": "R-P12",
+      "classification": "HARDEN_NOW",
+      "feature": "retry_uncertain_availability",
+      "simulatorIndependent": true,
+      "baseline": "tool_resilience_without_operation_budget",
+      "action": "operation_hysteresis_and_no_mutation_replay",
+      "test": "health_failure_budget_matrix",
+      "externalDependency": "simulator_fault_recovery",
+      "finalStatus": ["LOCAL_IMPLEMENTATION_PASS", "PENDING_SIMULATOR_OBSERVATION"]
+    },
+    {
+      "id": "R-P13",
+      "classification": "HARDEN_NOW",
+      "feature": "persistence_recovery",
+      "simulatorIndependent": true,
+      "baseline": "reconcile_without_physical_baseline",
+      "action": "durable_baseline_fence_and_no_duplicate_start",
+      "test": "restart_recovery_matrix",
+      "externalDependency": "simulator_disconnect_recovery",
+      "finalStatus": ["LOCAL_IMPLEMENTATION_PASS", "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION"]
+    },
+    {
+      "id": "R-P14",
+      "classification": "IMPLEMENT_NOW",
+      "feature": "configuration_security",
+      "simulatorIndependent": true,
+      "baseline": "new_controls_absent",
+      "action": "contract_inventory_and_production_fail_closed",
+      "test": "configuration_propagation_matrix",
+      "externalDependency": null,
+      "finalStatus": ["LOCAL_IMPLEMENTATION_PASS"]
+    },
+    {
+      "id": "R-P15",
+      "classification": "OUT_OF_SCOPE",
+      "feature": "subsequent_p0_extensions",
+      "simulatorIndependent": false,
+      "baseline": "roadmap",
+      "action": "scope_locked",
+      "test": "scope_audit",
+      "externalDependency": "future_product_contract",
+      "finalStatus": ["ROADMAP_NOT_V1_1_BLOCKER"]
+    },
+    {
+      "id": "R-P16",
+      "classification": "PENDING_ENGINEERING_PROFILE",
+      "feature": "vehicle_facts_events",
+      "simulatorIndependent": false,
+      "baseline": "roadmap",
+      "action": "preserve_objective_facts_and_document_enum_gap",
+      "test": "scope_and_event_regression",
+      "externalDependency": "future_contract_freeze",
+      "finalStatus": ["ROADMAP_NOT_V1_1_BLOCKER"]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "D-05",
+  "startupOrder": [
+    "provider store",
+    "gRPC NOT_READY",
+    "MQTT initialization",
+    "Device MCP initialization",
+    "bounded initial observation",
+    "READY or DEGRADED"
+  ],
+  "deviceIndependentProcessStartup": true,
+  "pmsStartupDependency": false,
+  "result": "Adapter process readiness and dependency qualification are explicit, reconnectable lifecycle states.",
+  "evidence": [
+    "startup/MQTT/execution tests 77/77",
+    "real gRPC lifecycle test PASS",
+    "mock Compose read-only smoke PASS"
+  ]
+}

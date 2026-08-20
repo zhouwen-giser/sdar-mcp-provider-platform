@@ -3,7 +3,10 @@ import {
   VehicleProviderGrpcServer,
   type ProviderStore,
 } from "../../../packages/provider-adapter-kit/src/index.js";
-import type { UgvSnapshot } from "../../../packages/vehicle-provider-core/src/index.js";
+import type {
+  UgvSnapshot,
+  VehicleIdentity,
+} from "../../../packages/vehicle-provider-core/src/index.js";
 import type { UgvBusinessEventHub } from "./business-events.js";
 import { ugvManifest } from "./manifest.js";
 import type { UgvProviderRuntime } from "./runtime.js";
@@ -13,6 +16,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
     options: {
       providerId: string;
       providerVersion: string;
+      identity?: VehicleIdentity;
       host: string;
       port: number;
       tlsMode: "disabled" | "required";
@@ -33,8 +37,15 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
         ...(options.tlsCertPath === undefined ? {} : { tlsCertPath: options.tlsCertPath }),
         ...(options.tlsKeyPath === undefined ? {} : { tlsKeyPath: options.tlsKeyPath }),
         internalErrorCode: "UGV_ADAPTER_INTERNAL_ERROR",
-        manifest: () => ugvManifest(options.providerId, options.providerVersion, store),
-        resource: (snapshot) => ugvResource(snapshot as UgvSnapshot),
+        manifest: () =>
+          ugvManifest(
+            options.providerId,
+            options.providerVersion,
+            store,
+            options.identity?.resourceId ?? "vehicle:ugv1",
+            runtime.qualificationContext(),
+          ),
+        resource: (snapshot) => ugvResource(snapshot as UgvSnapshot, runtime.readiness()),
       },
       runtime,
       store,
@@ -43,29 +54,33 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
   }
 }
 
-function ugvResource(snapshot: UgvSnapshot): Record<string, unknown> {
+function ugvResource(
+  snapshot: UgvSnapshot,
+  readiness: ReturnType<UgvProviderRuntime["readiness"]>,
+): Record<string, unknown> {
   return {
-    resourceId: "vehicle:ugv1",
+    resourceId: snapshot.identity.resourceId,
     resourceType: "isr.vehicle.ugv",
     displayName: "UGV-1",
     enabled: true,
     health:
-      !snapshot.connectivity.mqttConnected || !snapshot.connectivity.deviceMcpConnected
+      readiness.state === "NOT_READY" || readiness.state === "UNKNOWN"
         ? "unknown"
-        : snapshot.connectivity.deviceAvailable === false
+        : readiness.state === "DEGRADED" || snapshot.connectivity.deviceAvailable === false
           ? "degraded"
           : Object.values(snapshot.health.components).some((value) => value === "fault")
             ? "degraded"
             : "healthy",
     labels: {},
     metadata: jsonToProtoStruct({
-      entityId: "ugv1",
-      vehicleRole: "ugv",
-      executionModes: ["simulation"],
+      entityId: snapshot.identity.entityId,
+      vehicleRole: snapshot.identity.vehicleType,
+      executionModes: [snapshot.identity.executionMode],
       tracks: ["chassis", "eo", "weapon"],
       externalVideo: true,
       refereeDataAvailable: false,
       globalTruthAvailable: false,
+      providerReadiness: readiness,
     }),
     lastSeenAt: timestamp(snapshot.observedAt),
   };

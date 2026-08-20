@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "C-02",
+  "authorities": ["geodetic EPSG:4326", "local metre/frame"],
+  "distance": { "geodetic": "Haversine", "localSameFrame": "Euclidean", "mixed": "unavailable" },
+  "result": "Physical baselines and terminal facts preserve coordinate authority and never compare incompatible frames.",
+  "evidence": ["focused/shared position tests 86/86"]
+}

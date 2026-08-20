@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "tasks": ["C-01", "C-04"],
+  "fields": [
+    "mission",
+    "position",
+    "speed",
+    "recon",
+    "payload",
+    "health",
+    "targets",
+    "connectivity"
+  ],
+  "authorityFacts": ["topic", "time", "sequence", "content hash"],
+  "taskStatePolicy": "Primary mission-state observations dominate weaker composite sources; conflicts block terminal proof.",
+  "result": "Fresh data for one physical field cannot refresh or replace stale evidence from another field.",
+  "evidence": ["shared authority tests 108/108", "source-conflict tests 90/90"]
+}

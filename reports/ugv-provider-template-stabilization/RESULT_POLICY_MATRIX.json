@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "A-03",
+  "coveredToolCount": 16,
+  "classifications": ["accepted", "rejected", "uncertain"],
+  "facts": [
+    "MCP isError",
+    "optional error_code",
+    "state semantics",
+    "mission semantics",
+    "required fields"
+  ],
+  "safety": "Ambiguity after a mutating dispatch is uncertain and is never automatically retried.",
+  "evidence": ["focused and cross-provider tests 74/74"]
+}

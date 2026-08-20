@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "C-03",
+  "requirements": [
+    "distinct fresh speed cursors",
+    "configured minimum sample count",
+    "continuous configured duration"
+  ],
+  "resetConditions": ["movement", "stale observation", "control fence"],
+  "result": "Stationary success requires a continuous stable window rather than repeated polling of one sample.",
+  "evidence": ["focused tests 61/61", "PostgreSQL restart round-trip PASS"]
+}

@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-20T07:38:07Z",
+  "status": "PASS",
+  "testedBaseCommit": "0d5a076a82fb228de65a8263511ec4fc0ca734d7",
+  "database": {
+    "engine": "PostgreSQL 17",
+    "container": "ephemeral",
+    "credentialsRecorded": false
+  },
+  "commands": [
+    {
+      "command": "pnpm verify:ugv-provider",
+      "durationSeconds": 146.39,
+      "status": "PASS",
+      "results": {
+        "unit": 10,
+        "contract": 7,
+        "integration": 55,
+        "security": 3,
+        "grpcE2e": 2,
+        "format": "PASS",
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "build": "PASS",
+        "generatedArtifacts": "PASS"
+      }
+    },
+    {
+      "command": "pnpm verify:npc-tank-provider",
+      "durationSeconds": 143.65,
+      "status": "PASS",
+      "results": {
+        "unit": 16,
+        "contract": 7,
+        "integration": 23,
+        "security": 4,
+        "grpcE2e": 1,
+        "format": "PASS",
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "build": "PASS",
+        "generatedArtifacts": "PASS"
+      }
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation/*.test.ts tests/ugv-simulation/deployment-security.test.mjs tests/unit/ugv-operation-qualification.test.ts tests/unit/provider-mutation-journal.test.ts tests/unit/migration-source-map.test.ts tests/unit/provider-migration-entrypoints.test.ts tests/integration/npc-tank-provider-adapter.test.ts tests/migration-isolation/migration-isolation.test.ts",
+      "durationSeconds": 12.55,
+      "status": "PASS",
+      "testFiles": 14,
+      "tests": 106
+    },
+    {
+      "command": "node --test tests/ugv-simulation/preflight-local.test.mjs",
+      "durationSeconds": 0.25,
+      "status": "PASS",
+      "tests": 2
+    },
+    {
+      "command": "pnpm test:provider-platform-ugv",
+      "durationSeconds": 5.83,
+      "status": "PASS",
+      "tests": 3
+    },
+    {
+      "command": "pnpm test:provider-platform-npc",
+      "durationSeconds": 5.91,
+      "status": "PASS",
+      "tests": 2
+    },
+    {
+      "command": "pnpm test:config-compat",
+      "durationSeconds": 6.58,
+      "status": "PASS",
+      "testFiles": 9,
+      "tests": 52
+    },
+    {
+      "command": "pnpm config:schema:check",
+      "durationSeconds": 1.76,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm test:production-bundles",
+      "durationSeconds": 1.76,
+      "status": "PASS",
+      "tests": 33
+    },
+    {
+      "command": "pnpm test:recovery",
+      "durationSeconds": 5.92,
+      "status": "PASS",
+      "tests": 9
+    },
+    {
+      "command": "pnpm test:pm2-adapter",
+      "durationSeconds": 3.66,
+      "status": "PASS",
+      "testsPassed": 51,
+      "testsSkipped": 1
+    },
+    {
+      "command": "pnpm test:pms",
+      "durationSeconds": 5.92,
+      "status": "PASS",
+      "tests": 25
+    },
+    {
+      "command": "pnpm test:pms-migrations",
+      "durationSeconds": 3.28,
+      "status": "PASS",
+      "tests": 9
+    },
+    {
+      "command": "pnpm exec vitest run tests/database-provisioning-e2e/isolation.test.ts",
+      "durationSeconds": 5.65,
+      "status": "PASS",
+      "tests": 1
+    },
+    {
+      "command": "pnpm test:runtime-deployment",
+      "durationSeconds": 4.6,
+      "status": "PASS",
+      "tests": 58
+    },
+    {
+      "command": "pnpm test:db-provisioner",
+      "durationSeconds": 4.21,
+      "status": "PASS",
+      "tests": 21
+    },
+    {
+      "command": "pnpm test:registry",
+      "durationSeconds": 3.15,
+      "status": "PASS",
+      "tests": 17
+    },
+    {
+      "command": "pnpm protocol:check",
+      "durationSeconds": 1.36,
+      "status": "PASS",
+      "frozenCases": 74,
+      "lockedFiles": 44
+    }
+  ],
+  "observedAndResolvedFailures": [
+    {
+      "stage": "affected-suite runner selection",
+      "result": "RESOLVED",
+      "detail": "The first aggregate command incorrectly passed a node:test file to Vitest; the Node test was rerun with node --test and both runner-specific commands passed."
+    },
+    {
+      "stage": "temporary evidence formatting",
+      "result": "RESOLVED",
+      "detail": "A transient uncommitted preflight report failed format:check; it was removed and replaced by normalized summaries."
+    },
+    {
+      "stage": "UGV deployment-security Dockerfile boundary",
+      "result": "RESOLVED",
+      "detail": "The test used a stale Node base-stage marker and scanned unrelated later targets; its boundary now ends at the NPC real target."
+    },
+    {
+      "stage": "provider-platform Catalog publication",
+      "result": "RESOLVED",
+      "detail": "The stable public VehicleStateV1 DTO no longer exposes the internal entityId field, so Catalog sensitive-data checks and UGV/NPC publication pass."
+    },
+    {
+      "stage": "PM2 cross-platform test",
+      "result": "RESOLVED",
+      "detail": "The Windows-only readable-without-executable-bit case is now conditionally executed only on Windows; POSIX executable enforcement remains tested."
+    }
+  ],
+  "liveMutationExecuted": false,
+  "unrelatedFailureHidden": false
+}

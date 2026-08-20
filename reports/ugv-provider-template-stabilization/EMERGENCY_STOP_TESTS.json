@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "task": "D-01",
+  "primary": "ugv_motion_stop",
+  "cleanup": ["mission termination", "recon stop", "target unlock"],
+  "policy": "Cleanup is separately journaled and best effort; primary stop admission does not depend on cleanup tools or MQTT availability.",
+  "result": "Physical confirmation remains mandatory even after primary stop acceptance.",
+  "evidence": ["focused tests 85/85"]
+}

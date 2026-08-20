@@ -4,12 +4,16 @@ import {
   applySnapshotPatch,
   createNpcTankSnapshot,
   createUgvSnapshot,
+  type FieldObservationAuthority,
   type FreshnessDomain,
   type NpcTankSnapshot,
   type SnapshotPatch,
   type UgvSnapshot,
+  type VehicleIdentity,
+  type VehicleObservationField,
   type VehicleSnapshot,
   type VehicleTarget,
+  type VehicleTaskTrack,
 } from "../../vehicle-provider-core/src/index.js";
 import { decodeMqttPayload, type JsonLimits, type MqttWireMode } from "./guard.js";
 import {
@@ -28,6 +32,17 @@ export interface IngestResult {
   retained: boolean;
   revision: string;
 }
+
+export const VEHICLE_OBSERVATION_FIELDS = [
+  "chassis.position.geodetic",
+  "chassis.position.local",
+  "chassis.speed",
+  "chassis.heading",
+  "chassis.mission",
+  "payload.recon",
+  "payload.targets",
+  "payload.gimbal",
+] as const satisfies readonly VehicleObservationField[];
 
 export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
   createSnapshot(): TSnapshot;
@@ -61,7 +76,23 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
     detectedObjectsTopic: "/ugv/detected_objects",
     reconTargetsTopic: "/ugv/area_recon/targets",
   },
+  taskStateAuthority: {
+    missionStateTopic: "/ugv/mission_state",
+    compositeStatusTopics: ["status/ugv", "/ugv/status"],
+  },
 };
+
+export function ugvMqttProfile(identity: VehicleIdentity): VehicleMqttProfile<UgvSnapshot> {
+  return {
+    ...UGV_MQTT_PROFILE,
+    createSnapshot: () => createUgvSnapshot(identity),
+    normalize: (topic, value) =>
+      normalizeMqttObservation(topic as never, value, {
+        entityId: identity.entityId,
+        vehicleType: identity.vehicleType,
+      }),
+  };
+}
 
 export function npcTankMqttProfile(
   supportsCircularEoScan = false,
@@ -91,10 +122,17 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   readonly #events = new EventEmitter();
   readonly #latest = new Map<
     string,
-    { observedAt: string; hash: string; timeAuthority: NormalizedMqttObservation["timeAuthority"] }
+    {
+      observedAt: string;
+      hash: string;
+      timeAuthority: NormalizedMqttObservation["timeAuthority"];
+      sourceSequence?: string;
+      ingestSequence: number;
+    }
   >();
   readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
-  readonly #authoritativeTaskStates = new Map<string, unknown>();
+  readonly #fieldAuthorities = new Map<VehicleObservationField, FieldObservationAuthority>();
+  readonly #authoritativeTaskStates = new Map<"primary" | "secondary", VehicleTaskTrack>();
   #detectedTargets: VehicleTarget[] = [];
   #reconTargets: VehicleTarget[] = [];
   #reconTargetsObserved = false;
@@ -201,28 +239,24 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         revision: this.#snapshot.revision,
       };
     observation = this.#applyTargetAuthority(topic, observation);
+    observation = this.#applyTaskStateAuthority(topic, observation);
     this.#sequence++;
-    if (topic === this.profile.taskStateAuthority?.missionStateTopic)
-      this.#authoritativeTaskStates.set("mission_state", observation.patch.chassis?.mission?.state);
-    if (
-      this.profile.taskStateAuthority?.compositeStatusTopics.includes(topic) === true &&
-      observation.patch.chassis?.mission !== undefined
-    )
-      this.#authoritativeTaskStates.set(
-        "status.chassis_task",
-        observation.patch.chassis.mission.state,
-      );
-    const missionState = this.#authoritativeTaskStates.get("mission_state");
-    const statusState = this.#authoritativeTaskStates.get("status.chassis_task");
-    this.#stateConflict =
-      missionState !== undefined && statusState !== undefined && missionState !== statusState;
+    observation = this.#applyFieldAuthorities(topic, observation, observedAt);
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       observation.patch,
       observedAt,
       observation.domains,
     ) as TSnapshot;
-    this.#latest.set(topic, { observedAt, hash, timeAuthority: observation.timeAuthority });
+    this.#latest.set(topic, {
+      observedAt,
+      hash,
+      timeAuthority: observation.timeAuthority,
+      ...(observation.sourceSequence === undefined
+        ? {}
+        : { sourceSequence: observation.sourceSequence }),
+      ingestSequence: this.#sequence,
+    });
     this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
     this.#events.emit("snapshot", this.snapshot(), topic);
     return {
@@ -241,8 +275,57 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     const latest = this.#latest.get(topic);
     return latest === undefined ? undefined : `${latest.observedAt}\0${latest.hash}`;
   }
+  observationAuthority(topic: string):
+    | {
+        topic: string;
+        observedAt: string;
+        timeAuthority: "source" | "ingest";
+        sourceSequence?: string;
+        ingestSequence: number;
+        cursor: string;
+      }
+    | undefined {
+    const latest = this.#latest.get(topic);
+    return latest === undefined
+      ? undefined
+      : {
+          topic,
+          observedAt: latest.observedAt,
+          timeAuthority: latest.timeAuthority,
+          ...(latest.sourceSequence === undefined ? {} : { sourceSequence: latest.sourceSequence }),
+          ingestSequence: latest.ingestSequence,
+          cursor: `${latest.observedAt}\0${latest.hash}`,
+        };
+  }
+  fieldObservationAuthority(field: VehicleObservationField): FieldObservationAuthority | undefined {
+    const authority = this.#fieldAuthorities.get(field);
+    return authority === undefined ? undefined : structuredClone(authority);
+  }
+  fieldObservationAuthorities(
+    fields: readonly VehicleObservationField[] = VEHICLE_OBSERVATION_FIELDS,
+  ): FieldObservationAuthority[] {
+    return fields.flatMap((field) => {
+      const authority = this.fieldObservationAuthority(field);
+      return authority === undefined ? [] : [authority];
+    });
+  }
+  fieldFreshnessState(
+    field: VehicleObservationField,
+    maximumAgeMs: number,
+    now = Date.now(),
+  ): "fresh" | "stale" | "unknown" {
+    const authority = this.#fieldAuthorities.get(field);
+    if (authority === undefined) return "unknown";
+    const age = now - Date.parse(authority.observedAt);
+    return Number.isFinite(age) && age >= 0 && age <= maximumAgeMs ? "fresh" : "stale";
+  }
   stateConflict(): boolean {
     return this.#stateConflict;
+  }
+  taskStateAuthority(): "PRIMARY" | "SECONDARY" | "UNKNOWN" {
+    if (this.#authoritativeTaskStates.has("primary")) return "PRIMARY";
+    if (this.#authoritativeTaskStates.has("secondary")) return "SECONDARY";
+    return "UNKNOWN";
   }
 
   #applyTargetAuthority(
@@ -286,6 +369,108 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     }
     return observation;
   }
+
+  #applyTaskStateAuthority(
+    topic: string,
+    observation: NormalizedMqttObservation,
+  ): NormalizedMqttObservation {
+    const authority = this.profile.taskStateAuthority;
+    const mission = observation.patch.chassis?.mission;
+    if (authority === undefined || mission === undefined) return observation;
+    const primary = topic === authority.missionStateTopic;
+    const secondary = authority.compositeStatusTopics.includes(topic);
+    if (!primary && !secondary) return observation;
+    this.#authoritativeTaskStates.set(primary ? "primary" : "secondary", structuredClone(mission));
+    const primaryTrack = this.#authoritativeTaskStates.get("primary");
+    const secondaryTrack = this.#authoritativeTaskStates.get("secondary");
+    this.#stateConflict =
+      primaryTrack !== undefined &&
+      secondaryTrack !== undefined &&
+      primaryTrack.state !== secondaryTrack.state;
+    if (secondary && primaryTrack !== undefined) {
+      const accepted = structuredClone(observation);
+      if (accepted.patch.chassis !== undefined) delete accepted.patch.chassis.mission;
+      return accepted;
+    }
+    return observation;
+  }
+
+  #applyFieldAuthorities(
+    topic: string,
+    observation: NormalizedMqttObservation,
+    observedAt: string,
+  ): NormalizedMqttObservation {
+    const accepted = structuredClone(observation);
+    for (const [field] of observationFieldValues(observation)) {
+      const previous = this.#fieldAuthorities.get(field);
+      if (previous !== undefined && Date.parse(observedAt) < Date.parse(previous.observedAt))
+        removeObservationField(accepted.patch, field);
+    }
+    for (const [field, value] of observationFieldValues(accepted)) {
+      const payloadHash = createHash("sha256").update(canonical(value)).digest("hex");
+      this.#fieldAuthorities.set(field, {
+        field,
+        topic,
+        observedAt,
+        timeAuthority: observation.timeAuthority,
+        ...(observation.sourceSequence === undefined
+          ? {}
+          : { sourceSequence: observation.sourceSequence }),
+        ingestSequence: this.#sequence,
+        payloadHash,
+        cursor: `${field}\0${observedAt}\0${observation.sourceSequence ?? String(this.#sequence)}\0${payloadHash}`,
+      });
+    }
+    return accepted;
+  }
+}
+
+function observationFieldValues(
+  observation: NormalizedMqttObservation,
+): [VehicleObservationField, unknown][] {
+  const values: [VehicleObservationField, unknown][] = [];
+  const { chassis, payload } = observation.patch;
+  if (chassis?.position !== undefined) values.push(["chassis.position.geodetic", chassis.position]);
+  if (
+    chassis?.navigation !== undefined &&
+    (chassis.navigation.positionX !== undefined || chassis.navigation.positionY !== undefined)
+  )
+    values.push([
+      "chassis.position.local",
+      {
+        ...(chassis.navigation.positionX === undefined ? {} : { x: chassis.navigation.positionX }),
+        ...(chassis.navigation.positionY === undefined ? {} : { y: chassis.navigation.positionY }),
+        ...(chassis.navigation.positionZ === undefined ? {} : { z: chassis.navigation.positionZ }),
+      },
+    ]);
+  if (chassis?.speedKmh !== undefined) values.push(["chassis.speed", chassis.speedKmh]);
+  if (chassis?.compassHeadingDeg !== undefined)
+    values.push(["chassis.heading", chassis.compassHeadingDeg]);
+  if (chassis?.mission !== undefined) values.push(["chassis.mission", chassis.mission]);
+  if (payload?.reconnaissance !== undefined) values.push(["payload.recon", payload.reconnaissance]);
+  if (payload?.targets !== undefined && observation.domains.includes("target"))
+    values.push(["payload.targets", payload.targets]);
+  if (payload?.gimbal !== undefined) values.push(["payload.gimbal", payload.gimbal]);
+  return values;
+}
+
+function removeObservationField(patch: SnapshotPatch, field: VehicleObservationField): void {
+  if (field === "chassis.position.geodetic" && patch.chassis !== undefined)
+    delete patch.chassis.position;
+  else if (field === "chassis.position.local" && patch.chassis?.navigation !== undefined) {
+    delete patch.chassis.navigation.positionX;
+    delete patch.chassis.navigation.positionY;
+    delete patch.chassis.navigation.positionZ;
+  } else if (field === "chassis.speed" && patch.chassis !== undefined) {
+    delete patch.chassis.speedKmh;
+    if (patch.chassis.navigation !== undefined) delete patch.chassis.navigation.speedKmh;
+  } else if (field === "chassis.heading" && patch.chassis !== undefined)
+    delete patch.chassis.compassHeadingDeg;
+  else if (field === "chassis.mission" && patch.chassis !== undefined) delete patch.chassis.mission;
+  else if (field === "payload.recon" && patch.payload !== undefined)
+    delete patch.payload.reconnaissance;
+  else if (field === "payload.targets" && patch.payload !== undefined) delete patch.payload.targets;
+  else if (field === "payload.gimbal" && patch.payload !== undefined) delete patch.payload.gimbal;
 }
 
 function canonical(value: unknown): string {

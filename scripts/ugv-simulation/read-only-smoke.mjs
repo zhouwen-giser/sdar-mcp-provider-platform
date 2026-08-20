@@ -55,6 +55,9 @@ const maximumStateAgeMs = boundedInteger(
   1_000,
   300_000,
 );
+const executionMode = optional(environment, "UGV_SMOKE_EXECUTION_MODE") ?? "simulation";
+if (executionMode !== "simulation" && executionMode !== "live")
+  throw coded("UGV_SMOKE_EXECUTION_MODE_INVALID");
 const startedAt = new Date().toISOString();
 const report = {
   schemaVersion: 1,
@@ -139,6 +142,7 @@ try {
       id,
       requestTimeoutMs,
       `ugv-read-only-${operation}-${randomUUID()}`,
+      executionMode,
     );
     id += 1;
     const content = completeContent(response, operation);
@@ -198,7 +202,16 @@ async function readiness(mcpUrl, timeoutMs) {
   };
 }
 
-async function request(url, method, params, name, id, timeoutMs, idempotencyKey = undefined) {
+async function request(
+  url,
+  method,
+  params,
+  name,
+  id,
+  timeoutMs,
+  idempotencyKey = undefined,
+  executionModeValue = executionMode,
+) {
   const meta = {
     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
     "io.modelcontextprotocol/clientInfo": {
@@ -223,8 +236,10 @@ async function request(url, method, params, name, id, timeoutMs, idempotencyKey 
         "mcp-method": method,
         "x-sdar-subject": "ugv-real-read-only-smoke",
         "x-sdar-tenant": "ugv-qualification",
-        "x-sdar-execution-mode": "simulation",
-        "x-sdar-simulation-id": "ugv-real-interface-qualification",
+        "x-sdar-execution-mode": executionModeValue,
+        ...(executionModeValue === "simulation"
+          ? { "x-sdar-simulation-id": "ugv-real-interface-qualification" }
+          : {}),
         ...(name === undefined ? {} : { "mcp-name": name }),
       },
       body: JSON.stringify({ jsonrpc: "2.0", id, method, params: { ...params, _meta: meta } }),

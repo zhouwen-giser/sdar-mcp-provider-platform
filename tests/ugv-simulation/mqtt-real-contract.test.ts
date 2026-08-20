@@ -168,6 +168,104 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     });
   });
 
+  it("tracks freshness independently for every physical observation field", () => {
+    const ingress = directIngress();
+    ingress.handle(
+      "/ugv/gnss",
+      json({ latitude: 30.1, longitude: 114.1 }),
+      false,
+      "2026-08-20T00:00:00.000Z",
+    );
+    const geodetic = ingress.fieldObservationAuthority("chassis.position.geodetic");
+    expect(geodetic).toMatchObject({
+      field: "chassis.position.geodetic",
+      topic: "/ugv/gnss",
+      observedAt: "2026-08-20T00:00:00.000Z",
+      timeAuthority: "ingest",
+      ingestSequence: 1,
+    });
+    expect(geodetic?.payloadHash).toMatch(/^[a-f0-9]{64}$/);
+
+    ingress.handle("/ugv/speed", json({ speed_kmh: 0 }), false, "2026-08-20T00:00:04.000Z");
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")).toEqual(geodetic);
+    expect(ingress.fieldObservationAuthority("chassis.speed")).toMatchObject({
+      field: "chassis.speed",
+      topic: "/ugv/speed",
+      observedAt: "2026-08-20T00:00:04.000Z",
+      ingestSequence: 2,
+    });
+    expect(
+      ingress.fieldFreshnessState(
+        "chassis.position.geodetic",
+        3_000,
+        Date.parse("2026-08-20T00:00:04.000Z"),
+      ),
+    ).toBe("stale");
+    expect(
+      ingress.fieldFreshnessState("chassis.speed", 3_000, Date.parse("2026-08-20T00:00:04.000Z")),
+    ).toBe("fresh");
+    const latestSpeed = ingress.fieldObservationAuthority("chassis.speed");
+    ingress.handle("status/ugv", json({ veh_speed: 99 }), false, "2026-08-20T00:00:01.000Z");
+    expect(ingress.snapshot().chassis.speedKmh).toBe(0);
+    expect(ingress.fieldObservationAuthority("chassis.speed")).toEqual(latestSpeed);
+
+    ingress.handle(
+      "/ugv/nav_state",
+      json({ position_x: 1, position_y: 2, position_z: 3, speed_kmh: 4 }),
+      false,
+      "2026-08-20T00:00:05.000Z",
+    );
+    ingress.handle(
+      "status/ugv",
+      json({
+        heading: 90,
+        chassis_task: { id: 7, state: 1 },
+        gimbal: { yaw: 1, pitch: 2, zoom: 3 },
+      }),
+      false,
+      "2026-08-20T00:00:06.000Z",
+    );
+    ingress.handle(
+      "/ugv/area_recon/status",
+      json({ status: 5 }),
+      false,
+      "2026-08-20T00:00:07.000Z",
+    );
+    ingress.handle(
+      "/ugv/area_recon/targets",
+      json({
+        targets: [
+          {
+            target_id: 1,
+            target_type: 2,
+            capture_time_us: 1_777_000_000_000_000,
+            position: { longitude: 114.1, latitude: 30.1 },
+          },
+        ],
+      }),
+      false,
+      "2026-08-20T00:00:08.000Z",
+    );
+
+    expect(
+      Object.fromEntries(
+        ingress
+          .fieldObservationAuthorities()
+          .map((authority) => [authority.field, authority.topic]),
+      ),
+    ).toEqual({
+      "chassis.position.geodetic": "/ugv/gnss",
+      "chassis.position.local": "/ugv/nav_state",
+      "chassis.speed": "/ugv/nav_state",
+      "chassis.heading": "status/ugv",
+      "chassis.mission": "status/ugv",
+      "payload.recon": "/ugv/area_recon/status",
+      "payload.targets": "/ugv/area_recon/targets",
+      "payload.gimbal": "status/ugv",
+    });
+    expect(ingress.snapshot()).not.toHaveProperty("observationAuthorities");
+  });
+
   it("uses the modern shared composite shape for NPC without treating EO as recon", () => {
     const ingress = new VehicleMqttIngress("direct_domain_json", limits, npcTankMqttProfile());
     ingress.handle(
@@ -352,7 +450,40 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
         chassis_task: { id: -1, type: -1, state: -1, progress: -1 },
       }),
     );
-    expect(ingress.snapshot().chassis.mission).toEqual({ state: -1 });
+    expect(ingress.stateConflict()).toBe(true);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "6", state: 5 });
+  });
+
+  it("keeps the dedicated mission topic primary and reports composite-state conflicts", () => {
+    const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
+    ingress.handle(
+      "status/ugv",
+      json({ available: true, chassis_task: { id: 7, type: 1, state: 1, progress: 10 } }),
+    );
+    expect(ingress.taskStateAuthority()).toBe("SECONDARY");
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 1 });
+
+    ingress.handle(
+      "/ugv/mission_state",
+      json({ entity_id: "ugv1", id: 7, type: 1, state: 1, progress: 20 }),
+    );
+    expect(ingress.taskStateAuthority()).toBe("PRIMARY");
+    expect(ingress.stateConflict()).toBe(false);
+
+    ingress.handle(
+      "/ugv/status",
+      json({ available: true, chassis_task: { id: 7, type: 1, state: 4, progress: 100 } }),
+    );
+    expect(ingress.stateConflict()).toBe(true);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 1, progress: 20 });
+    expect(ingress.fieldObservationAuthority("chassis.mission")?.topic).toBe("/ugv/mission_state");
+
+    ingress.handle(
+      "/ugv/mission_state",
+      json({ entity_id: "ugv1", id: 7, type: 1, state: 4, progress: 100 }),
+    );
+    expect(ingress.stateConflict()).toBe(false);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 4 });
   });
 
   it("decodes EO pose from an explicit heterogeneous ROS bridge envelope", () => {

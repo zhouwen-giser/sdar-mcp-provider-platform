@@ -21,7 +21,24 @@ export interface VehicleCapabilityProfile {
   needPlanDefault?: boolean;
   movingWhileRecon?: boolean;
   continuousPitchSweep?: boolean;
+  engineeringProfile?: VehicleEngineeringProfile;
 }
+
+export interface VehicleEngineeringProfile {
+  provenance: {
+    authority: "device_reported" | "managed_configuration" | "unconfigured";
+    source: string;
+    observedAt?: string;
+  };
+  minimumTurningRadiusM?: number | null;
+  maximumGradePercent?: number | null;
+  obstacleCrossingHeightM?: number | null;
+  nominalDetectionRangeM?: number | null;
+  physicalDimensionsM?: { length: number; width: number; height: number } | null;
+}
+
+export type VehicleCapabilityProvenance =
+  "device_reported" | "contract_inferred" | "managed_configuration" | "unverified";
 
 /**
  * Normalize simulator-reported capabilities against the captured tool
@@ -45,6 +62,8 @@ export function normalizeVehicleCapabilities(
   const planningDensities = enumValues(pathSchema, "density");
   const reconScanModes = enumValues(reconSchema, "scan_mode");
   const gimbalModes = enumValues(gimbalSchema, "mode");
+  const managedOrUnverified = (configured: boolean): VehicleCapabilityProvenance =>
+    configured ? "managed_configuration" : "unverified";
   return {
     resourceId: profile.resourceId,
     source: "device_mcp",
@@ -95,7 +114,46 @@ export function normalizeVehicleCapabilities(
       targetTracking: tools.has(profile.targetLockTool),
       laserRange: profile.laserRangeTool !== undefined && tools.has(profile.laserRangeTool),
     },
+    provenance: {
+      available: "device_reported",
+      navigation: {
+        point: "contract_inferred",
+        route: "contract_inferred",
+        distance: "contract_inferred",
+        returnHome: "contract_inferred",
+        pauseResumeCancel: "contract_inferred",
+        planningDensities: "contract_inferred",
+        supportsRoadNetworkPlanning: "contract_inferred",
+        needPlanDefault: managedOrUnverified(profile.needPlanDefault !== undefined),
+      },
+      payload: {
+        reconnaissance: {
+          area: "contract_inferred",
+          circular: "contract_inferred",
+          scanModes: "contract_inferred",
+          movingWhileRecon: managedOrUnverified(profile.movingWhileRecon !== undefined),
+        },
+        gimbal: {
+          supported: "contract_inferred",
+          modes: "contract_inferred",
+          manualYawSweep: "contract_inferred",
+          continuousPitchSweep: managedOrUnverified(profile.continuousPitchSweep !== undefined),
+        },
+        targetTracking: "contract_inferred",
+        laserRange: "contract_inferred",
+      },
+      deviceReported: "device_reported",
+      engineeringProfile: managedOrUnverified(profile.engineeringProfile !== undefined),
+    },
     deviceReported: reported,
+    engineeringProfile: profile.engineeringProfile ?? {
+      provenance: { authority: "unconfigured", source: "not_supplied" },
+      minimumTurningRadiusM: null,
+      maximumGradePercent: null,
+      obstacleCrossingHeightM: null,
+      nominalDetectionRangeM: null,
+      physicalDimensionsM: null,
+    },
     observedAt,
   };
 }

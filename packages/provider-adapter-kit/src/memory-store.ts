@@ -2,11 +2,19 @@ import { createHash, randomUUID } from "node:crypto";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import { jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
 import { businessEventSourceCapabilities } from "./sources.js";
+import {
+  assertMutationJournalEntry,
+  assertMutationJournalTransition,
+  sameMutationJournalIdentity,
+} from "./mutation-journal.js";
 import type {
   BusinessEventDraft,
   CommandAckClaim,
   CommandAckRecord,
   DeviceToolCallRecord,
+  MutationJournalClaim,
+  MutationJournalEntry,
+  MutationJournalState,
   ProviderExecution,
   ProviderStore,
   SnapshotRecord,
@@ -16,6 +24,7 @@ import { TERMINAL_EXECUTION_STATES } from "./types.js";
 export class MemoryProviderStore implements ProviderStore {
   readonly #executions = new Map<string, ProviderExecution>();
   readonly #acks = new Map<string, CommandAckRecord>();
+  readonly #mutationJournal = new Map<string, MutationJournalEntry>();
   readonly #events = new Map<string, AdapterBusinessEvent[]>();
   readonly toolCalls: DeviceToolCallRecord[] = [];
   readonly snapshots: SnapshotRecord[] = [];
@@ -76,6 +85,58 @@ export class MemoryProviderStore implements ProviderStore {
   putCommandAck(ack: CommandAckRecord): Promise<void> {
     this.#acks.set(key(ack.taskId, ack.command, ack.commandSequence), structuredClone(ack));
     return Promise.resolve();
+  }
+  getMutationJournalEntry(
+    taskId: string,
+    stepId: string,
+  ): Promise<MutationJournalEntry | undefined> {
+    return Promise.resolve(clone(this.#mutationJournal.get(journalKey(taskId, stepId))));
+  }
+  listMutationJournal(taskId: string): Promise<MutationJournalEntry[]> {
+    return Promise.resolve(
+      [...this.#mutationJournal.values()]
+        .filter((entry) => entry.taskId === taskId)
+        .sort(
+          (left, right) =>
+            left.intentPersistedAt.localeCompare(right.intentPersistedAt) ||
+            left.stepId.localeCompare(right.stepId),
+        )
+        .map((entry) => structuredClone(entry)),
+    );
+  }
+  claimMutationJournal(entry: MutationJournalEntry): Promise<MutationJournalClaim> {
+    return Promise.resolve().then(() => {
+      assertMutationJournalEntry(entry);
+      if (entry.state !== "INTENT_PERSISTED")
+        throw new Error("MUTATION_JOURNAL_INTENT_STATE_REQUIRED");
+      if (!this.#executions.has(entry.taskId))
+        throw new Error("MUTATION_JOURNAL_EXECUTION_REQUIRED");
+      const entryKey = journalKey(entry.taskId, entry.stepId);
+      const existing = this.#mutationJournal.get(entryKey);
+      if (existing !== undefined) {
+        if (!sameMutationJournalIdentity(existing, entry))
+          throw new Error("MUTATION_JOURNAL_IDENTITY_CONFLICT");
+        return { claimed: false, record: structuredClone(existing) };
+      }
+      this.#mutationJournal.set(entryKey, structuredClone(entry));
+      return { claimed: true, record: structuredClone(entry) };
+    });
+  }
+  advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ): Promise<boolean> {
+    return Promise.resolve().then(() => {
+      const entryKey = journalKey(entry.taskId, entry.stepId);
+      const existing = this.#mutationJournal.get(entryKey);
+      if (existing === undefined) throw new Error("MUTATION_JOURNAL_INTENT_REQUIRED");
+      if (!sameMutationJournalIdentity(existing, entry))
+        throw new Error("MUTATION_JOURNAL_IDENTITY_CONFLICT");
+      if (existing.state !== expectedState) return false;
+      assertMutationJournalTransition(existing, entry, expectedState);
+      this.#mutationJournal.set(entryKey, structuredClone(entry));
+      return true;
+    });
   }
   appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void> {
     this.toolCalls.push(structuredClone(record));
@@ -139,6 +200,9 @@ export class MemoryProviderStore implements ProviderStore {
 
 function key(taskId: string, command: string, sequence: string): string {
   return `${taskId}\0${command}\0${sequence}`;
+}
+function journalKey(taskId: string, stepId: string): string {
+  return `${taskId}\0${stepId}`;
 }
 function clone<T>(value: T | undefined): T | undefined {
   return value === undefined ? undefined : structuredClone(value);

@@ -657,9 +657,8 @@ export class NpcTankProviderRuntime {
     const observedAt = new Date().toISOString();
     let result: Record<string, unknown>;
     if (input.operationName === "vehicle_get_state") {
-      let deviceStatus: Record<string, unknown> | undefined;
       if (this.device.hasTool("get_status")) {
-        deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
+        const deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
         const observation = normalizeNpcTankMqttObservation("/npc_tank1/status", deviceStatus);
         this.ingress.applyDeviceObservation(
           observation.patch,
@@ -670,7 +669,6 @@ export class NpcTankProviderRuntime {
       result = {
         ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
         mqttIngressSequence: this.ingress.ingestSequence(),
-        ...(deviceStatus === undefined ? {} : { deviceStatus }),
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
       const capabilities = await this.#callDevice("npc_tank_get_capabilities", {}, input.taskId);
@@ -1713,7 +1711,12 @@ function selectSnapshot(snapshot: NpcTankSnapshot, include: unknown): Record<str
     ? new Set(include.filter((x): x is string => typeof x === "string"))
     : new Set(["chassis", "payload", "health", "targets"]);
   const result: Record<string, unknown> = {
-    identity: snapshot.identity,
+    identity: {
+      providerId: snapshot.identity.providerId,
+      resourceId: snapshot.identity.resourceId,
+      vehicleType: snapshot.identity.vehicleType,
+      executionMode: snapshot.identity.executionMode,
+    },
     connectivity: snapshot.connectivity,
     freshness: snapshot.freshness,
     revision: snapshot.revision,

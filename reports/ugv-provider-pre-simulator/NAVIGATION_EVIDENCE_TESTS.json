@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "status": "DETERMINISTIC_OBSERVATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+  "requiredProof": [
+    "dispatch baseline persisted before mutation",
+    "matching downstream mission identity",
+    "new mission, position and speed observations",
+    "fresh position and speed",
+    "stationary terminal speed",
+    "configured stability interval"
+  ],
+  "objectiveFacts": [
+    "requestedDistanceM",
+    "dispatch position/heading/speed/observedAt/revision",
+    "terminal position/heading/speed/mission state/mission id/observedAt/revision",
+    "observedDisplacementM",
+    "stationaryAtCompletion",
+    "positionAuthority",
+    "timeAuthority",
+    "correlationStrength"
+  ],
+  "negativeCases": [
+    "pre-dispatch terminal observation",
+    "stale position",
+    "missing speed",
+    "mission id mismatch",
+    "terminal before stability",
+    "physical confirmation timeout"
+  ],
+  "businessDecisionBoundary": "Provider reports objective displacement and does not decide an SDAR tolerance criterion."
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "status": "DETERMINISTIC_OBSERVATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_OBSERVATION",
+  "facts": [
+    "reconMissionId",
+    "scanMode",
+    "progress",
+    "coverage",
+    "coverability",
+    "observedTargetCount",
+    "terminalMotionStatus",
+    "cameraFault",
+    "outOfRange",
+    "exception",
+    "observedAt",
+    "snapshotRevision",
+    "correlationStrength",
+    "observationIsNew",
+    "timeAuthority"
+  ],
+  "correlation": {
+    "matchingMission": "STRICT_CORRELATED",
+    "missingDownstreamId": "WEAK_UNCORRELATED",
+    "mismatch": "MISMATCH",
+    "inventedId": false
+  }
+}

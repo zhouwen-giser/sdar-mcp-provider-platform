@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "tasks": ["B-01", "B-02", "B-03"],
+  "phases": ["intent", "dispatching", "accepted", "rejected", "uncertain"],
+  "steps": ["PRIMARY", "FOLLOWUP", "control", "emergency_stop", "cleanup"],
+  "persistence": ["memory", "PostgreSQL"],
+  "result": "Intent and dispatch fences precede transport; mission and result evidence are persisted before dependent work.",
+  "evidence": [
+    "journal/migration tests PASS",
+    "dispatch-order tests PASS",
+    "persistence-fault tests PASS"
+  ]
+}

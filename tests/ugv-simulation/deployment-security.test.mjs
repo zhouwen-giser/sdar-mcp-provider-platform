@@ -215,7 +215,7 @@ describe("Goal 10 deployment security", () => {
     const smoke = readFileSync(join(root, "deploy", "ugv-simulation", "smoke.sh"), "utf8");
     const realTargets = dockerfile.slice(
       dockerfile.indexOf("FROM production-dependencies AS ugv-real-production-dependencies"),
-      dockerfile.indexOf("FROM node:22-bookworm-slim AS runtime"),
+      dockerfile.indexOf("FROM production-dependencies AS npc-real-production-dependencies"),
     );
 
     expect(realTargets).toContain("rm -rf node_modules/.pnpm/node_modules/@sdar");

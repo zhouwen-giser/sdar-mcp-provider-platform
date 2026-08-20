@@ -3,11 +3,19 @@ import { Pool, type PoolClient } from "pg";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import { canonicalSha256, jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
 import { businessEventSourceCapabilities } from "./sources.js";
+import {
+  assertMutationJournalEntry,
+  assertMutationJournalTransition,
+  sameMutationJournalIdentity,
+} from "./mutation-journal.js";
 import type {
   BusinessEventDraft,
   CommandAckClaim,
   CommandAckRecord,
   DeviceToolCallRecord,
+  MutationJournalClaim,
+  MutationJournalEntry,
+  MutationJournalState,
   ProviderExecution,
   ProviderStore,
   SnapshotRecord,
@@ -125,6 +133,65 @@ export class PostgresProviderStore implements ProviderStore {
        VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
       [ack.taskId, ack.command, ack.commandSequence, ack, ack.createdAt],
     );
+  }
+  async getMutationJournalEntry(
+    taskId: string,
+    stepId: string,
+  ): Promise<MutationJournalEntry | undefined> {
+    const result = await this.pool.query<{ payload: MutationJournalEntry }>(
+      `SELECT payload FROM ${this.tables.mutationJournal} WHERE task_id=$1 AND step_id=$2`,
+      [taskId, stepId],
+    );
+    return result.rows[0]?.payload;
+  }
+  async listMutationJournal(taskId: string): Promise<MutationJournalEntry[]> {
+    const result = await this.pool.query<{ payload: MutationJournalEntry }>(
+      `SELECT payload FROM ${this.tables.mutationJournal}
+       WHERE task_id=$1 ORDER BY intent_persisted_at, step_id`,
+      [taskId],
+    );
+    return result.rows.map(({ payload }) => payload);
+  }
+  async claimMutationJournal(entry: MutationJournalEntry): Promise<MutationJournalClaim> {
+    assertMutationJournalEntry(entry);
+    if (entry.state !== "INTENT_PERSISTED")
+      throw new Error("MUTATION_JOURNAL_INTENT_STATE_REQUIRED");
+    const result = await this.pool.query<{ payload: MutationJournalEntry }>(
+      `INSERT INTO ${this.tables.mutationJournal}
+       (task_id,step_id,phase,tool_name,argument_hash,state,external_mission_id,result_hash,
+        intent_persisted_at,dispatched_at,completed_at,payload)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       ON CONFLICT DO NOTHING RETURNING payload`,
+      journalValues(entry),
+    );
+    const inserted = result.rows[0]?.payload;
+    if (inserted !== undefined) return { claimed: true, record: inserted };
+    const existing = await this.getMutationJournalEntry(entry.taskId, entry.stepId);
+    if (existing === undefined) throw new Error("MUTATION_JOURNAL_CLAIM_LOST");
+    if (!sameMutationJournalIdentity(existing, entry))
+      throw new Error("MUTATION_JOURNAL_IDENTITY_CONFLICT");
+    return { claimed: false, record: existing };
+  }
+  async advanceMutationJournal(
+    entry: MutationJournalEntry,
+    expectedState: MutationJournalState,
+  ): Promise<boolean> {
+    const existing = await this.getMutationJournalEntry(entry.taskId, entry.stepId);
+    if (existing === undefined) throw new Error("MUTATION_JOURNAL_INTENT_REQUIRED");
+    if (!sameMutationJournalIdentity(existing, entry))
+      throw new Error("MUTATION_JOURNAL_IDENTITY_CONFLICT");
+    if (existing.state !== expectedState) return false;
+    assertMutationJournalTransition(existing, entry, expectedState);
+    const values = journalValues(entry);
+    const result = await this.pool.query(
+      `UPDATE ${this.tables.mutationJournal}
+       SET state=$6,external_mission_id=$7,result_hash=$8,dispatched_at=$10,
+           completed_at=$11,payload=$12
+       WHERE task_id=$1 AND step_id=$2 AND phase=$3 AND tool_name=$4 AND argument_hash=$5
+         AND state=$13 AND intent_persisted_at=$9`,
+      [...values, expectedState],
+    );
+    return result.rowCount === 1;
   }
   async appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void> {
     await this.pool.query(
@@ -259,6 +326,7 @@ async function nextSequence(
 interface ProviderStoreTables {
   execution: string;
   commandAck: string;
+  mutationJournal: string;
   deviceToolCall: string;
   snapshot: string;
   businessEventState: string;
@@ -268,6 +336,7 @@ const TABLES: Record<"ugv" | "npc_tank", ProviderStoreTables> = {
   ugv: {
     execution: "ugv_execution",
     commandAck: "ugv_execution_command_ack",
+    mutationJournal: "ugv_mutation_journal",
     deviceToolCall: "ugv_device_tool_call",
     snapshot: "ugv_state_snapshot",
     businessEventState: "ugv_business_event_source_state",
@@ -276,12 +345,30 @@ const TABLES: Record<"ugv" | "npc_tank", ProviderStoreTables> = {
   npc_tank: {
     execution: "npc_tank_execution",
     commandAck: "npc_tank_execution_command_ack",
+    mutationJournal: "npc_tank_mutation_journal",
     deviceToolCall: "npc_tank_device_tool_call",
     snapshot: "npc_tank_state_snapshot",
     businessEventState: "npc_tank_business_event_source_state",
     businessEventLog: "npc_tank_business_event_source_log",
   },
 };
+
+function journalValues(entry: MutationJournalEntry): unknown[] {
+  return [
+    entry.taskId,
+    entry.stepId,
+    entry.phase,
+    entry.toolName,
+    entry.argumentHash,
+    entry.state,
+    entry.externalMissionId ?? null,
+    entry.resultHash ?? null,
+    entry.intentPersistedAt,
+    entry.dispatchedAt ?? null,
+    entry.completedAt ?? null,
+    entry,
+  ];
+}
 function timestamp(value: string): { seconds: string; nanos: number } {
   const milliseconds = Date.parse(value);
   return {

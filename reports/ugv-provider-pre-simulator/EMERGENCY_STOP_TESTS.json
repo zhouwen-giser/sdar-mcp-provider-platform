@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "status": "DETERMINISTIC_OBSERVATION_PASS",
+  "externalStatus": "PENDING_SIMULATOR_PHYSICAL_QUALIFICATION",
+  "successProof": [
+    "new post-dispatch speed authority",
+    "fresh speed",
+    "speed at or below stationary threshold",
+    "chassis mission inactive",
+    "recon inactive",
+    "owned control tracks inactive",
+    "target lock released when observable"
+  ],
+  "failClosed": [
+    "missing speed",
+    "stale speed",
+    "nonzero speed",
+    "unknown mission",
+    "active chassis mission",
+    "active reconnaissance",
+    "pre-dispatch observation"
+  ],
+  "priority": "highest local TrackArbiter preemption",
+  "resultReason": "UGV_LOCAL_STOP_CONFIRMED"
+}
