@@ -764,13 +764,15 @@ export class NpcTankProviderRuntime {
         "completed",
         operationObservationCursor(execution.operationName, this.ingress),
       );
-    else if (execution.operationName === "vehicle_area_recon")
+    else if (execution.operationName === "vehicle_area_recon") {
+      const authority = this.ingress.observationAuthority("/npc_tank1/area_recon/status");
       next = applyReconTrack(
         execution,
         snapshot.payload.reconnaissance,
         this.ingress.observationCursor("/npc_tank1/area_recon/status"),
+        authority?.observedAt,
       );
-    else if (execution.operationName === "vehicle_control_gimbal")
+    } else if (execution.operationName === "vehicle_control_gimbal")
       next = applyTrack(
         execution,
         snapshot.payload.eoTask,
@@ -1463,10 +1465,11 @@ function applyReconTrack(
   execution: ProviderExecution,
   reconnaissance: NpcTankSnapshot["payload"]["reconnaissance"],
   observationCursor: string | undefined,
+  observedAt: string | undefined,
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
     return execution;
-  const observedAt = observationCursorTimestamp(observationCursor);
+  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt))) return execution;
   if (!trackBelongsToExecution(execution, reconnaissance, true))
     return execution.reasonCode === "NPC_TANK_DOWNSTREAM_MISSION_ID_MISMATCH"
       ? execution
@@ -1607,14 +1610,6 @@ function isNewOperationObservation(
   return (
     observationCursor !== undefined && observationCursor !== execution.observationCursors?.track
   );
-}
-
-function observationCursorTimestamp(cursor: string | undefined): string {
-  const separator = cursor?.indexOf("\0") ?? -1;
-  const observedAt = separator < 1 ? undefined : cursor?.slice(0, separator);
-  if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
-    throw new Error("NPC_TANK_RECON_OBSERVATION_CURSOR_INVALID");
-  return observedAt;
 }
 
 function reconMotionActive(status: VehicleReconnaissanceState["motionStatus"]): boolean {

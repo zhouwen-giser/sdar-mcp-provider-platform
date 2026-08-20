@@ -381,10 +381,14 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
     ingress.handle(
       "/npc_tank1/area_recon/status",
       rosString({ status: 5, out_of_range: false, camera_fault: true, progress: 99, coverage: 99 }),
+      false,
+      "2027-01-15T08:00:02.000Z",
     );
     ingress.handle(
       "/npc_tank1/area_recon/coverage",
       rosString({ run_id: 1, scan_mode: 2, coverage: 100, sectors: [] }),
+      false,
+      "2027-01-15T08:00:03.000Z",
     );
     expect(ingress.snapshot().payload.reconnaissance).toMatchObject({
       motionStatus: 5,
@@ -396,7 +400,12 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
       coverage: { coveragePercent: 45 },
     });
 
-    ingress.handle("/npc_tank1/area_recon/status", rosString({ status: 8, camera_fault: false }));
+    ingress.handle(
+      "/npc_tank1/area_recon/status",
+      rosString({ status: 8, camera_fault: false }),
+      false,
+      "2027-01-15T08:00:04.000Z",
+    );
     expect(ingress.snapshot().payload.reconnaissance).toMatchObject({
       motionStatus: 8,
       state: 2,
@@ -450,7 +459,12 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
     );
     expect(ingress.snapshot().payload.targets.map(({ targetId }) => targetId)).toEqual(["42"]);
 
-    ingress.handle("/npc_tank1/area_recon/targets", rosString({ targets: [] }));
+    ingress.handle(
+      "/npc_tank1/area_recon/targets",
+      rosString({ targets: [] }),
+      false,
+      "2027-01-15T08:00:02.000Z",
+    );
     expect(ingress.snapshot().payload.targets).toEqual([]);
     const replay = ingress.handle("/npc_tank1/area_recon/targets", rosString(richPayload));
     expect(replay).toMatchObject({
