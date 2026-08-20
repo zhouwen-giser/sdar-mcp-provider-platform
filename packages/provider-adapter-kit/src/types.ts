@@ -41,6 +41,16 @@ export interface ProviderExecution {
   dispatchBaseline?: Record<string, unknown>;
   /** Persisted post-command evidence fence used for pause/resume/cancel confirmation. */
   controlConfirmation?: Record<string, unknown>;
+  /** Deadline for the first correlated post-dispatch task observation. */
+  startObservationDeadline?: string;
+  /** Deadline for the first correlated active task observation. */
+  activeObservationDeadline?: string;
+  /** Deadline for a correlated terminal task observation after activity begins. */
+  terminalObservationDeadline?: string;
+  /** Deadline for physical facts required after the first terminal observation. */
+  physicalConfirmationDeadline?: string;
+  /** Deadline for post-command physical confirmation. */
+  controlConfirmationDeadline?: string;
   selectedDeviceTool?: string;
   providerRevision?: string;
   state: ProviderExecutionState;

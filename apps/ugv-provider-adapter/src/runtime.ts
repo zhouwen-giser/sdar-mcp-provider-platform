@@ -158,13 +158,18 @@ export class UgvProviderRuntime {
       fireRequiresChassisStopped: boolean;
       stationarySpeedThresholdKmh?: number;
       stationaryStabilityMs?: number;
+      startObservationTimeoutMs?: number;
+      activeObservationTimeoutMs?: number;
+      terminalObservationTimeoutMs?: number;
       physicalConfirmationTimeoutMs?: number;
+      controlConfirmationTimeoutMs?: number;
       failureBudget?: {
         degradedThreshold: number;
         openThreshold: number;
         recoverySuccessThreshold: number;
       };
       pollIntervalMs: number;
+      now?: () => Date;
     },
     readonly store: ProviderStore,
     readonly ingress: VehicleMqttIngress,
@@ -180,6 +185,10 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: 2,
       },
     );
+  }
+
+  #now(): Date {
+    return this.options.now?.() ?? new Date();
   }
 
   async initialize(): Promise<void> {
@@ -272,7 +281,7 @@ export class UgvProviderRuntime {
     if (decision.availability !== "AVAILABLE") throw new Error(decision.reasonCode);
     const acquired = this.arbiter.acquire(input.taskId, input.operationName);
     if (!acquired.accepted) throw new Error(acquired.reasonCode);
-    const now = new Date().toISOString();
+    const now = this.#now().toISOString();
     const tracks = UGV_OPERATION_TRACKS[input.operationName] ?? [];
     const observationCursors = initialObservationCursors(input.operationName, this.ingress);
     const dispatchBaseline = capturePhysicalDispatchBaseline(
@@ -334,6 +343,7 @@ export class UgvProviderRuntime {
             },
           },
         );
+        execution = await this.#armStartObservationDeadline(execution);
         execution = transition(execution, "STARTING", "UGV_WAITING_DEVICE_CONFIRMATION");
         await this.store.putExecution(execution);
         await this.#startedEvent(execution);
@@ -355,7 +365,16 @@ export class UgvProviderRuntime {
         initialSnapshot: executionSnapshot(execution),
       };
     } catch (error) {
+      if (await this.#downstreamMissionReadyNotStarted(execution)) {
+        execution = transition(execution, "STARTING", "DOWNSTREAM_MISSION_READY_NOT_STARTED");
+        await this.store.putExecution(execution);
+        return {
+          externalExecutionId: execution.externalExecutionId,
+          initialSnapshot: executionSnapshot(execution),
+        };
+      }
       if (error instanceof UncertainMutatingDeviceCallError) {
+        execution = await this.#armStartObservationDeadline(execution);
         execution = transition(execution, "STARTING", "UNCERTAIN_EXECUTION_STATE");
         await this.store.putExecution(execution);
         return {
@@ -501,10 +520,16 @@ export class UgvProviderRuntime {
         execution.state,
         `UGV_${command.toUpperCase()}_DISPATCH_FENCED`,
       );
+      const commandFencedAt = this.#now().toISOString();
       fenced.controlConfirmation = {
         command,
+        fencedAt: commandFencedAt,
         baseline: commandBaseline,
       };
+      fenced.controlConfirmationDeadline = deadlineFrom(
+        commandFencedAt,
+        this.options.controlConfirmationTimeoutMs ?? 30_000,
+      );
       await this.store.putExecution(fenced);
       for (const call of controlDeviceCalls(
         execution.operationName,
@@ -934,6 +959,7 @@ export class UgvProviderRuntime {
     }
     if (execution.state === "WAITING_INPUT") return execution;
     const snapshot = this.ingress.snapshot();
+    const phaseObservation = taskPhaseObservation(execution, snapshot, this.ingress);
     let next = execution;
     if (execution.operationName === "vehicle_navigate") {
       const baseline = executionPhysicalBaseline(execution);
@@ -973,23 +999,6 @@ export class UgvProviderRuntime {
           controlObservationIsNew: controlObservationIsNew(execution, this.ingress),
         },
       );
-      if (
-        !isTerminal(next.state) &&
-        physicalConfirmationPending(next.reasonCode) &&
-        physicalConfirmationExpired(baseline, this.options.physicalConfirmationTimeoutMs ?? 30_000)
-      )
-        next = terminal(next, "TECHNICAL_FAILED", "UGV_PHYSICAL_CONFIRMATION_TIMEOUT", {
-          resourceId: execution.resourceId,
-          status: "timeout",
-          observedAt: snapshot.observedAt,
-          ...navigationTerminalFacts({
-            snapshot,
-            baseline,
-            ...(missionId === undefined ? {} : { missionId }),
-            ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
-            confirmation,
-          }),
-        });
     } else if (execution.operationName === "vehicle_area_recon") {
       const baseline = executionPhysicalBaseline(execution);
       const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
@@ -1093,6 +1102,8 @@ export class UgvProviderRuntime {
           observedAt: snapshot.observedAt,
         });
     }
+    next = this.#armObservationPhaseDeadlines(next, phaseObservation);
+    next = this.#expirePhaseDeadline(next, snapshot.observedAt);
     if (next.revision !== execution.revision) {
       await this.store.putExecution(next);
       this.events.emit(execution.taskId, executionSnapshot(next));
@@ -1138,6 +1149,78 @@ export class UgvProviderRuntime {
       }
     }
     return next;
+  }
+
+  #armObservationPhaseDeadlines(
+    execution: ProviderExecution,
+    observation: TaskPhaseObservation | undefined,
+  ): ProviderExecution {
+    if (observation === undefined) return execution;
+    let next = execution;
+    if (observation.startObserved)
+      next = withPhaseDeadline(
+        next,
+        "activeObservationDeadline",
+        observation.observedAt,
+        this.options.activeObservationTimeoutMs ?? 30_000,
+        this.#now().toISOString(),
+      );
+    if (observation.activeObserved)
+      next = withPhaseDeadline(
+        next,
+        "terminalObservationDeadline",
+        observation.observedAt,
+        this.options.terminalObservationTimeoutMs ?? 30 * 60_000,
+        this.#now().toISOString(),
+      );
+    if (observation.terminalObserved && next.terminalObservationDeadline !== undefined)
+      next = withPhaseDeadline(
+        next,
+        "physicalConfirmationDeadline",
+        observation.observedAt,
+        this.options.physicalConfirmationTimeoutMs ?? 30_000,
+        this.#now().toISOString(),
+      );
+    return next;
+  }
+
+  #expirePhaseDeadline(execution: ProviderExecution, observedAt: string): ProviderExecution {
+    if (isTerminal(execution.state)) return execution;
+    const now = this.#now().getTime();
+    let reasonCode: string | undefined;
+    if (
+      controlConfirmationPending(execution) &&
+      deadlineExpired(execution.controlConfirmationDeadline, now)
+    )
+      reasonCode = "UGV_CONTROL_CONFIRMATION_TIMEOUT";
+    else if (
+      execution.activeObservationDeadline === undefined &&
+      deadlineExpired(execution.startObservationDeadline, now)
+    )
+      reasonCode = "UGV_START_OBSERVATION_TIMEOUT";
+    else if (
+      execution.activeObservationDeadline !== undefined &&
+      execution.terminalObservationDeadline === undefined &&
+      deadlineExpired(execution.activeObservationDeadline, now)
+    )
+      reasonCode = "UGV_ACTIVE_OBSERVATION_TIMEOUT";
+    else if (
+      execution.terminalObservationDeadline !== undefined &&
+      execution.physicalConfirmationDeadline === undefined &&
+      deadlineExpired(execution.terminalObservationDeadline, now)
+    )
+      reasonCode = "UGV_TERMINAL_OBSERVATION_TIMEOUT";
+    else if (
+      physicalConfirmationPending(execution.reasonCode) &&
+      deadlineExpired(execution.physicalConfirmationDeadline, now)
+    )
+      reasonCode = "UGV_PHYSICAL_CONFIRMATION_TIMEOUT";
+    if (reasonCode === undefined) return execution;
+    return terminal(execution, "TECHNICAL_FAILED", reasonCode, {
+      resourceId: execution.resourceId,
+      status: "timeout",
+      observedAt,
+    });
   }
 
   async #observe(snapshot: UgvSnapshot, topic: string): Promise<void> {
@@ -1408,14 +1491,14 @@ export class UgvProviderRuntime {
           toolName: call.name,
           argumentHash: mutationHash(call.arguments),
           state: "INTENT_PERSISTED",
-          intentPersistedAt: new Date().toISOString(),
+          intentPersistedAt: this.#now().toISOString(),
         };
         const claim = await this.store.claimMutationJournal(intent);
         if (!claim.claimed) throw new Error("UGV_MUTATION_JOURNAL_STEP_ALREADY_CLAIMED");
         const dispatching: MutationJournalEntry = {
           ...intent,
           state: "DISPATCHING",
-          dispatchedAt: new Date().toISOString(),
+          dispatchedAt: this.#now().toISOString(),
         };
         if (!(await this.store.advanceMutationJournal(dispatching, "INTENT_PERSISTED")))
           throw new Error("UGV_MUTATION_JOURNAL_DISPATCH_CONFLICT");
@@ -1428,7 +1511,7 @@ export class UgvProviderRuntime {
           state: "ACCEPTED",
           ...(canonicalMissionId === undefined ? {} : { externalMissionId: canonicalMissionId }),
           resultHash: mutationHash(result),
-          completedAt: new Date().toISOString(),
+          completedAt: this.#now().toISOString(),
         };
         if (!(await this.store.advanceMutationJournal(accepted, "DISPATCHING")))
           throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
@@ -1445,13 +1528,59 @@ export class UgvProviderRuntime {
           state: error instanceof UncertainMutatingDeviceCallError ? "UNCERTAIN" : "REJECTED",
           ...(missionId === undefined ? {} : { externalMissionId: missionId }),
           ...(returnedResult === undefined ? {} : { resultHash: mutationHash(returnedResult) }),
-          completedAt: new Date().toISOString(),
+          completedAt: this.#now().toISOString(),
         };
         if (!(await this.store.advanceMutationJournal(completed, "DISPATCHING")))
           throw new Error("UGV_MUTATION_JOURNAL_COMPLETION_CONFLICT");
         activeSteps.set(phase, completed);
       },
     };
+  }
+
+  async #armStartObservationDeadline(execution: ProviderExecution): Promise<ProviderExecution> {
+    const followup = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      startStepId("FOLLOWUP"),
+    );
+    if (
+      followup?.completedAt === undefined ||
+      (followup.state !== "ACCEPTED" && followup.state !== "UNCERTAIN")
+    )
+      return execution;
+    return withPhaseDeadline(
+      execution,
+      "startObservationDeadline",
+      followup.completedAt,
+      this.options.startObservationTimeoutMs ?? 30_000,
+      this.#now().toISOString(),
+    );
+  }
+
+  async #downstreamMissionReadyNotStarted(execution: ProviderExecution): Promise<boolean> {
+    if (
+      execution.operationName !== "vehicle_navigate" &&
+      execution.operationName !== "vehicle_area_recon"
+    )
+      return false;
+    const primary = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      startStepId("PRIMARY"),
+    );
+    if (
+      primary?.state !== "ACCEPTED" ||
+      primary.externalMissionId === undefined ||
+      !execution.downstreamMissionIds.includes(primary.externalMissionId)
+    )
+      return false;
+    const followup = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      startStepId("FOLLOWUP"),
+    );
+    return (
+      followup === undefined ||
+      followup.state === "INTENT_PERSISTED" ||
+      followup.state === "REJECTED"
+    );
   }
 
   async #ack(identity: CommandIdentity, command: string, accepted: boolean, reasonCode: string) {
@@ -1995,6 +2124,52 @@ function trackBelongsToExecution(
   }
 }
 
+interface TaskPhaseObservation {
+  observedAt: string;
+  startObserved: boolean;
+  activeObserved: boolean;
+  terminalObserved: boolean;
+}
+
+function taskPhaseObservation(
+  execution: ProviderExecution,
+  snapshot: UgvSnapshot,
+  ingress: VehicleMqttIngress,
+): TaskPhaseObservation | undefined {
+  if (execution.operationName === "vehicle_navigate") {
+    const cursor = operationObservationCursor(execution.operationName, ingress);
+    const track = snapshot.chassis.mission;
+    if (!isNewOperationObservation(execution, cursor) || !trackBelongsToExecution(execution, track))
+      return undefined;
+    const mapped = mapVehicleTaskState(track.state, true).state;
+    if (mapped === "RECONCILE") return undefined;
+    return {
+      observedAt: track.observedAt ?? snapshot.observedAt,
+      startObserved: mapped === "STARTING" || isObservedActiveState(mapped),
+      activeObserved: isObservedActiveState(mapped),
+      terminalObserved: isMappedTerminal(mapped),
+    };
+  }
+  if (execution.operationName === "vehicle_area_recon") {
+    const cursor = ingress.observationCursor("/ugv/area_recon/status");
+    const track = snapshot.payload.reconnaissance;
+    if (
+      !isNewReconObservation(execution, cursor) ||
+      !trackBelongsToExecution(execution, track, true)
+    )
+      return undefined;
+    const mapped = mapReconMotionStatus(track.motionStatus, true).state;
+    if (mapped === "RECONCILE") return undefined;
+    return {
+      observedAt: observationCursorTimestamp(cursor),
+      startObserved: mapped === "STARTING" || isObservedActiveState(mapped),
+      activeObserved: isObservedActiveState(mapped),
+      terminalObserved: isMappedTerminal(mapped),
+    };
+  }
+  return undefined;
+}
+
 function executionPhysicalBaseline(execution: ProviderExecution): PhysicalDispatchBaseline {
   const value = execution.dispatchBaseline;
   if (
@@ -2092,6 +2267,50 @@ function physicalConfirmationExpired(
 ): boolean {
   const capturedAt = Date.parse(baseline.capturedAt);
   return Number.isFinite(capturedAt) && now - capturedAt >= timeoutMs;
+}
+
+type PhaseDeadlineField =
+  | "startObservationDeadline"
+  | "activeObservationDeadline"
+  | "terminalObservationDeadline"
+  | "physicalConfirmationDeadline"
+  | "controlConfirmationDeadline";
+
+function withPhaseDeadline(
+  execution: ProviderExecution,
+  field: PhaseDeadlineField,
+  origin: string,
+  timeoutMs: number,
+  updatedAt: string,
+): ProviderExecution {
+  if (execution[field] !== undefined) return execution;
+  const next = structuredClone(execution);
+  next[field] = deadlineFrom(origin, timeoutMs);
+  next.revision++;
+  next.updatedAt = updatedAt;
+  return next;
+}
+
+function deadlineFrom(origin: string, timeoutMs: number): string {
+  const originMs = Date.parse(origin);
+  if (!Number.isFinite(originMs)) throw new Error("UGV_PHASE_DEADLINE_ORIGIN_INVALID");
+  if (!Number.isFinite(timeoutMs) || timeoutMs < 0)
+    throw new Error("UGV_PHASE_DEADLINE_TIMEOUT_INVALID");
+  return new Date(originMs + timeoutMs).toISOString();
+}
+
+function deadlineExpired(deadline: string | undefined, now: number): boolean {
+  if (deadline === undefined) return false;
+  const deadlineMs = Date.parse(deadline);
+  return Number.isFinite(deadlineMs) && now >= deadlineMs;
+}
+
+function controlConfirmationPending(execution: ProviderExecution): boolean {
+  const command = execution.controlConfirmation?.command;
+  if (command === "pause") return execution.state !== "PAUSED";
+  if (command === "resume") return execution.state !== "RUNNING";
+  if (command === "cancel") return !isTerminal(execution.state);
+  return false;
 }
 
 function physicalConfirmationPending(reasonCode: string): boolean {

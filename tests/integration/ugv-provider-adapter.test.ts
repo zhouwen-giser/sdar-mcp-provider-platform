@@ -140,6 +140,124 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.device.calls).toHaveLength(1);
   });
 
+  it("keeps an accepted mission with rejected follow-up in an explicit ready-not-started state", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_mission_control", () => acceptedMutationResult(1, 5));
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-ready-not-started", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: {
+        state: "ACCEPTED",
+        reasonCode: "DOWNSTREAM_MISSION_READY_NOT_STARTED",
+      },
+    });
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "DOWNSTREAM_MISSION_READY_NOT_STARTED",
+      downstreamMissionIds: ["1"],
+    });
+    expect(await fixture.store.listMutationJournal(input.taskId)).toEqual([
+      expect.objectContaining({ phase: "PRIMARY", state: "ACCEPTED", externalMissionId: "1" }),
+      expect.objectContaining({ phase: "FOLLOWUP", state: "REJECTED", externalMissionId: "1" }),
+    ]);
+    expect(device.calls).toHaveLength(2);
+
+    await fixture.runtime.start(structuredClone(input));
+    expect(device.calls).toHaveLength(2);
+  });
+
+  it("persists phase deadlines from their authoritative observations and command fence", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      startObservationTimeoutMs: 1_000,
+      activeObservationTimeoutMs: 2_000,
+      terminalObservationTimeoutMs: 3_000,
+      physicalConfirmationTimeoutMs: 4_000,
+      controlConfirmationTimeoutMs: 5_000,
+    });
+    await fixture.runtime.start(
+      startInput("nav-phase-deadlines", "vehicle_navigate", navigateArgs()),
+    );
+    let execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    const followup = required(
+      await fixture.store.getMutationJournalEntry("nav-phase-deadlines", "start:02:followup"),
+    );
+    expect(Date.parse(required(execution.startObservationDeadline))).toBe(
+      Date.parse(required(followup.completedAt)) + 1_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 0, 0);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.activeObservationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 2_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 1, 10);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.terminalObservationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 3_000,
+    );
+
+    now += 10;
+    const identity = identityOf(execution, "1");
+    await fixture.runtime.command("pause", identity);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    const fencedAt = execution.controlConfirmation?.fencedAt;
+    expect(typeof fencedAt).toBe("string");
+    expect(Date.parse(required(execution.controlConfirmationDeadline))).toBe(
+      Date.parse(String(fencedAt)) + 5_000,
+    );
+
+    now += 10;
+    missionRaw(fixture.ingress, 4, 100);
+    execution = required(await fixture.runtime.get("nav-phase-deadlines"));
+    expect(Date.parse(required(execution.physicalConfirmationDeadline))).toBe(
+      Date.parse(fixture.ingress.snapshot().observedAt) + 4_000,
+    );
+  });
+
+  it("enforces a persisted start-observation deadline after restart without redispatch", async () => {
+    let now = Date.now();
+    const options = {
+      ...runtimeOptions(),
+      now: () => new Date(now),
+      startObservationTimeoutMs: 100,
+    };
+    const store = new MemoryProviderStore();
+    const fixture = await createFixture(false, store, options);
+    await fixture.runtime.start(
+      startInput("nav-restart-deadline", "vehicle_navigate", navigateArgs()),
+    );
+    const beforeRestart = required(await store.getExecution("nav-restart-deadline"));
+    expect(beforeRestart.startObservationDeadline).toBe(new Date(now + 100).toISOString());
+    const callsBeforeRestart = fixture.device.calls.length;
+    await fixture.runtime.close();
+
+    now += 101;
+    const recovered = new UgvProviderRuntime(
+      options,
+      store,
+      fixture.ingress,
+      fixture.device,
+      fixture.events,
+      fixture.telemetry,
+    );
+    active.push(recovered);
+    await recovered.initialize();
+
+    expect(await store.getExecution("nav-restart-deadline")).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "UGV_START_OBSERVATION_TIMEOUT",
+      startObservationDeadline: beforeRestart.startObservationDeadline,
+      result: { status: "timeout" },
+    });
+    expect(fixture.device.calls).toHaveLength(callsBeforeRestart);
+  });
+
   it("fails closed on execution-mode mismatch before any physical call", async () => {
     const fixture = await createFixture();
     const input = startInput("live-mismatch", "vehicle_navigate", navigateArgs());
