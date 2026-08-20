@@ -51,6 +51,7 @@ import {
   capturePhysicalDispatchBaseline,
   navigationPhysicalConfirmation,
   navigationTerminalFacts,
+  reconCorrelationStrength,
   reconTerminalFacts,
   stationaryPhysicalConfirmation,
   UGV_OPERATION_TRACKS,
@@ -58,6 +59,7 @@ import {
   TrackArbiter,
   vehicleEvidence,
   type AvailabilityDecision,
+  type CorrelationStrength,
   type FreshnessPolicy,
   type PhysicalDispatchBaseline,
   type PhysicalObservationAuthority,
@@ -1004,31 +1006,33 @@ export class UgvProviderRuntime {
         now: this.#now().getTime(),
       });
       const requestedDistanceM = requestedDistance(execution.arguments);
-      next = applyTrack(
-        stationaryExecution,
-        snapshot.chassis.mission,
-        "completed",
-        operationObservationCursor(execution.operationName, this.ingress),
-        {
-          confirmation,
-          observationChanged: stationaryExecution.revision !== execution.revision,
-          stabilitySatisfied: stationaryStabilitySatisfied(
+      next = this.ingress.stateConflict()
+        ? reconcileTaskStateConflict(stationaryExecution)
+        : applyTrack(
             stationaryExecution,
-            this.ingress.fieldObservationAuthority("chassis.speed"),
-            this.options.stationaryStabilityMs ?? 0,
-            this.options.stationaryMinimumSamples ?? 2,
-          ),
-          facts: navigationTerminalFacts({
-            snapshot,
-            baseline,
-            currentAuthorities,
-            ...(missionId === undefined ? {} : { missionId }),
-            ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
-            confirmation,
-          }),
-          controlObservationIsNew: controlObservationIsNew(execution, this.ingress),
-        },
-      );
+            snapshot.chassis.mission,
+            "completed",
+            operationObservationCursor(execution.operationName, this.ingress),
+            {
+              confirmation,
+              observationChanged: stationaryExecution.revision !== execution.revision,
+              stabilitySatisfied: stationaryStabilitySatisfied(
+                stationaryExecution,
+                this.ingress.fieldObservationAuthority("chassis.speed"),
+                this.options.stationaryStabilityMs ?? 0,
+                this.options.stationaryMinimumSamples ?? 2,
+              ),
+              facts: navigationTerminalFacts({
+                snapshot,
+                baseline,
+                currentAuthorities,
+                ...(missionId === undefined ? {} : { missionId }),
+                ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
+                confirmation,
+              }),
+              controlObservationIsNew: controlObservationIsNew(execution, this.ingress),
+            },
+          );
     } else if (execution.operationName === "vehicle_area_recon") {
       const baseline = executionPhysicalBaseline(execution);
       const authority = this.ingress.fieldObservationAuthority("payload.recon");
@@ -1037,6 +1041,7 @@ export class UgvProviderRuntime {
         execution,
         snapshot.payload.reconnaissance,
         this.ingress.observationCursor("/ugv/area_recon/status"),
+        reconCorrelationStrength(snapshot.payload.reconnaissance, reconMissionId),
         reconTerminalFacts({
           snapshot,
           ...(reconMissionId === undefined ? {} : { expectedMissionId: reconMissionId }),
@@ -1097,6 +1102,7 @@ export class UgvProviderRuntime {
         now: this.#now().getTime(),
       });
       if (
+        !this.ingress.stateConflict() &&
         stopConfirmation.confirmed &&
         stationaryStabilitySatisfied(
           stationaryExecution,
@@ -1123,6 +1129,7 @@ export class UgvProviderRuntime {
           snapshotRevision: snapshot.revision,
           observedAt: snapshot.observedAt,
         });
+      else if (this.ingress.stateConflict()) next = reconcileTaskStateConflict(stationaryExecution);
       else if (
         !stopConfirmation.confirmed &&
         stationaryExecution.reasonCode !== stopConfirmation.reasonCode
@@ -2314,7 +2321,10 @@ function applyTrack(
   )
     return current;
   if (current.state === "RESUMING" && mapped.state === "PAUSED") return current;
-  if (mapped.state === current.state && progress === current.progress) return current;
+  if (mapped.state === current.state && progress === current.progress)
+    return current.reasonCode === "UGV_TASK_STATE_CONFLICT"
+      ? transition(current, current.state, mapped.reasonCode)
+      : current;
   const next = transition(current, mapped.state, mapped.reasonCode);
   if (progress !== undefined) next.progress = progress;
   return next;
@@ -2337,15 +2347,20 @@ function applyReconTrack(
   execution: ProviderExecution,
   reconnaissance: UgvSnapshot["payload"]["reconnaissance"],
   observationCursor: string | undefined,
+  correlation: CorrelationStrength,
   terminalFacts: Record<string, unknown> = {},
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
     return execution;
   const observedAt = observationCursorTimestamp(observationCursor);
-  if (!trackBelongsToExecution(execution, reconnaissance, true))
+  if (correlation === "MISMATCH")
     return execution.reasonCode === "UGV_DOWNSTREAM_MISSION_ID_MISMATCH"
       ? execution
       : transition(execution, execution.state, "UGV_DOWNSTREAM_MISSION_ID_MISMATCH");
+  if (correlation === "UNKNOWN")
+    return execution.reasonCode === "UGV_RECON_CORRELATION_UNKNOWN"
+      ? execution
+      : transition(execution, execution.state, "UGV_RECON_CORRELATION_UNKNOWN");
   if (reconnaissance.cameraFault === true) {
     if (execution.reasonCode === "UGV_RECON_CAMERA_FAULT") return execution;
     return transition(execution, execution.state, "UGV_RECON_CAMERA_FAULT");
@@ -2368,6 +2383,10 @@ function applyReconTrack(
     if (current.reasonCode === mapped.reasonCode) return current;
     return transition(current, current.state, mapped.reasonCode);
   }
+  if (correlation === "WEAK_UNCORRELATED" && isMappedTerminal(mapped.state))
+    return current.reasonCode === "UGV_RECON_WEAK_CORRELATION"
+      ? current
+      : transition(current, current.state, "UGV_RECON_WEAK_CORRELATION");
   if (mapped.state === "SUCCEEDED")
     return terminal(current, "SUCCEEDED", mapped.reasonCode, {
       resourceId: execution.resourceId,
@@ -2402,6 +2421,12 @@ function applyReconTrack(
   const next = transition(current, mapped.state, mapped.reasonCode);
   if (progress !== undefined) next.progress = progress;
   return next;
+}
+
+function reconcileTaskStateConflict(execution: ProviderExecution): ProviderExecution {
+  return execution.reasonCode === "UGV_TASK_STATE_CONFLICT"
+    ? execution
+    : transition(execution, execution.state, "UGV_TASK_STATE_CONFLICT");
 }
 
 function isReconActiveState(state: ProviderExecutionState | "RECONCILE"): boolean {

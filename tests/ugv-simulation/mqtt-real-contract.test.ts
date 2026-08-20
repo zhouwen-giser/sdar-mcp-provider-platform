@@ -450,7 +450,40 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
         chassis_task: { id: -1, type: -1, state: -1, progress: -1 },
       }),
     );
-    expect(ingress.snapshot().chassis.mission).toEqual({ state: -1 });
+    expect(ingress.stateConflict()).toBe(true);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "6", state: 5 });
+  });
+
+  it("keeps the dedicated mission topic primary and reports composite-state conflicts", () => {
+    const ingress = new VehicleMqttIngress("ros_bridge_json", limits);
+    ingress.handle(
+      "status/ugv",
+      json({ available: true, chassis_task: { id: 7, type: 1, state: 1, progress: 10 } }),
+    );
+    expect(ingress.taskStateAuthority()).toBe("SECONDARY");
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 1 });
+
+    ingress.handle(
+      "/ugv/mission_state",
+      json({ entity_id: "ugv1", id: 7, type: 1, state: 1, progress: 20 }),
+    );
+    expect(ingress.taskStateAuthority()).toBe("PRIMARY");
+    expect(ingress.stateConflict()).toBe(false);
+
+    ingress.handle(
+      "/ugv/status",
+      json({ available: true, chassis_task: { id: 7, type: 1, state: 4, progress: 100 } }),
+    );
+    expect(ingress.stateConflict()).toBe(true);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 1, progress: 20 });
+    expect(ingress.fieldObservationAuthority("chassis.mission")?.topic).toBe("/ugv/mission_state");
+
+    ingress.handle(
+      "/ugv/mission_state",
+      json({ entity_id: "ugv1", id: 7, type: 1, state: 4, progress: 100 }),
+    );
+    expect(ingress.stateConflict()).toBe(false);
+    expect(ingress.snapshot().chassis.mission).toMatchObject({ id: "7", state: 4 });
   });
 
   it("decodes EO pose from an explicit heterogeneous ROS bridge envelope", () => {

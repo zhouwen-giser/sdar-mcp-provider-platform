@@ -13,6 +13,7 @@ import {
   type VehicleObservationField,
   type VehicleSnapshot,
   type VehicleTarget,
+  type VehicleTaskTrack,
 } from "../../vehicle-provider-core/src/index.js";
 import { decodeMqttPayload, type JsonLimits, type MqttWireMode } from "./guard.js";
 import {
@@ -75,6 +76,10 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
     detectedObjectsTopic: "/ugv/detected_objects",
     reconTargetsTopic: "/ugv/area_recon/targets",
   },
+  taskStateAuthority: {
+    missionStateTopic: "/ugv/mission_state",
+    compositeStatusTopics: ["status/ugv", "/ugv/status"],
+  },
 };
 
 export function ugvMqttProfile(identity: VehicleIdentity): VehicleMqttProfile<UgvSnapshot> {
@@ -127,7 +132,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   >();
   readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
   readonly #fieldAuthorities = new Map<VehicleObservationField, FieldObservationAuthority>();
-  readonly #authoritativeTaskStates = new Map<string, unknown>();
+  readonly #authoritativeTaskStates = new Map<"primary" | "secondary", VehicleTaskTrack>();
   #detectedTargets: VehicleTarget[] = [];
   #reconTargets: VehicleTarget[] = [];
   #reconTargetsObserved = false;
@@ -234,22 +239,9 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         revision: this.#snapshot.revision,
       };
     observation = this.#applyTargetAuthority(topic, observation);
+    observation = this.#applyTaskStateAuthority(topic, observation);
     this.#sequence++;
     observation = this.#applyFieldAuthorities(topic, observation, observedAt);
-    if (topic === this.profile.taskStateAuthority?.missionStateTopic)
-      this.#authoritativeTaskStates.set("mission_state", observation.patch.chassis?.mission?.state);
-    if (
-      this.profile.taskStateAuthority?.compositeStatusTopics.includes(topic) === true &&
-      observation.patch.chassis?.mission !== undefined
-    )
-      this.#authoritativeTaskStates.set(
-        "status.chassis_task",
-        observation.patch.chassis.mission.state,
-      );
-    const missionState = this.#authoritativeTaskStates.get("mission_state");
-    const statusState = this.#authoritativeTaskStates.get("status.chassis_task");
-    this.#stateConflict =
-      missionState !== undefined && statusState !== undefined && missionState !== statusState;
     this.#snapshot = applySnapshotPatch(
       this.#snapshot,
       observation.patch,
@@ -330,6 +322,11 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   stateConflict(): boolean {
     return this.#stateConflict;
   }
+  taskStateAuthority(): "PRIMARY" | "SECONDARY" | "UNKNOWN" {
+    if (this.#authoritativeTaskStates.has("primary")) return "PRIMARY";
+    if (this.#authoritativeTaskStates.has("secondary")) return "SECONDARY";
+    return "UNKNOWN";
+  }
 
   #applyTargetAuthority(
     topic: string,
@@ -369,6 +366,31 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           },
         },
       };
+    }
+    return observation;
+  }
+
+  #applyTaskStateAuthority(
+    topic: string,
+    observation: NormalizedMqttObservation,
+  ): NormalizedMqttObservation {
+    const authority = this.profile.taskStateAuthority;
+    const mission = observation.patch.chassis?.mission;
+    if (authority === undefined || mission === undefined) return observation;
+    const primary = topic === authority.missionStateTopic;
+    const secondary = authority.compositeStatusTopics.includes(topic);
+    if (!primary && !secondary) return observation;
+    this.#authoritativeTaskStates.set(primary ? "primary" : "secondary", structuredClone(mission));
+    const primaryTrack = this.#authoritativeTaskStates.get("primary");
+    const secondaryTrack = this.#authoritativeTaskStates.get("secondary");
+    this.#stateConflict =
+      primaryTrack !== undefined &&
+      secondaryTrack !== undefined &&
+      primaryTrack.state !== secondaryTrack.state;
+    if (secondary && primaryTrack !== undefined) {
+      const accepted = structuredClone(observation);
+      if (accepted.patch.chassis !== undefined) delete accepted.patch.chassis.mission;
+      return accepted;
     }
     return observation;
   }

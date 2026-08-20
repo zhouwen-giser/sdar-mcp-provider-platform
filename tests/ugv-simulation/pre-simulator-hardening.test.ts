@@ -421,6 +421,7 @@ describe("UGV pre-simulator hardening", () => {
     ];
     const facts = reconTerminalFacts({
       snapshot: value,
+      expectedMissionId: "42",
       baseline: capturePhysicalDispatchBaseline(
         snapshot("2026-08-17T00:00:00.000Z", 30, 114, 0),
         authorities("2026-08-17T00:00:00.000Z", 1),
@@ -438,7 +439,7 @@ describe("UGV pre-simulator hardening", () => {
       cameraFault: false,
       outOfRange: true,
       exception: { kind: "equipment", reason: "fixture_exception" },
-      correlationStrength: "UNKNOWN",
+      correlationStrength: "WEAK_UNCORRELATED",
       observationIsNew: true,
     });
   });

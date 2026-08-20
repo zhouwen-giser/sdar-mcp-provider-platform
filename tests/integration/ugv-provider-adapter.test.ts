@@ -522,6 +522,29 @@ describe("UGV long-running operation integration", () => {
     expect((await fixture.runtime.get("pause-proof"))?.state).toBe("PAUSED");
   });
 
+  it("reconciles conflicting primary and secondary task states without terminal success", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-source-conflict", "vehicle_navigate", navigateArgs()),
+    );
+    missionRaw(fixture.ingress, 1, 10);
+    expect((await fixture.runtime.get("nav-source-conflict"))?.state).toBe("RUNNING");
+
+    status(fixture.ingress, { chassis: { state: 4, progress: 100 } });
+    expect(await fixture.runtime.get("nav-source-conflict")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_TASK_STATE_CONFLICT",
+    });
+    expect(fixture.ingress.snapshot().chassis.mission).toMatchObject({ id: "1", state: 1 });
+
+    status(fixture.ingress, { chassis: { state: 1, progress: 10 } });
+    expect(fixture.ingress.stateConflict()).toBe(false);
+    expect(await fixture.runtime.get("nav-source-conflict")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_DEVICE_TASK_RUNNING",
+    });
+  });
+
   it("requires distinct continuously stationary samples and resets on movement or staleness", async () => {
     let now = Date.now();
     const fixture = await createFixture(false, new MemoryProviderStore(), {
@@ -760,6 +783,30 @@ describe("UGV long-running operation integration", () => {
     expect(await fixture.runtime.get("track-1")).toMatchObject({
       state: "BUSINESS_FAILED",
       reasonCode: "UGV_TARGET_LOST",
+    });
+  });
+
+  it("does not terminalize weak or mismatched Recon observations", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("recon-correlation", "vehicle_area_recon", reconArgs()));
+    reconStatus(fixture.ingress, 5, 50, undefined, null);
+    expect((await fixture.runtime.get("recon-correlation"))?.state).toBe("RUNNING");
+    reconStatus(fixture.ingress, 11, 100, undefined, null);
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_RECON_WEAK_CORRELATION",
+    });
+
+    reconStatus(fixture.ingress, 11, 100, undefined, "2");
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+    });
+
+    reconStatus(fixture.ingress, 11, 100, undefined, "1");
+    expect(await fixture.runtime.get("recon-correlation")).toMatchObject({
+      state: "SUCCEEDED",
+      result: { correlationStrength: "STRICT_CORRELATED", missionId: "1" },
     });
   });
 
@@ -1926,12 +1973,14 @@ function reconStatus(
   motionStatus: number,
   progress: number,
   lockedTargetId?: string,
+  missionId: string | null = "1",
 ) {
   ingress.handle(
     "/ugv/area_recon/status",
     Buffer.from(
       JSON.stringify({
         status: motionStatus,
+        ...(missionId === null ? {} : { mission_id: missionId }),
         status_label: motionStatus === 11 ? "finished" : "running",
         scan_mode: 1,
         out_of_range: false,
@@ -1972,7 +2021,7 @@ function status(
         vehicle_id: "ugv1",
         role_name: "ugv",
         speed_kmh: 0,
-        chassis_task: tracks.chassis ?? { state: -1, progress: 0 },
+        ...(tracks.chassis === undefined ? {} : { chassis_task: { id: 1, ...tracks.chassis } }),
         eo_task: tracks.eo ?? { state: -1, progress: 0 },
         weapon_task: tracks.weapon ?? { state: -1, progress: 0 },
         available: true,

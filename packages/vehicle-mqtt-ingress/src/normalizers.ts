@@ -399,6 +399,7 @@ function reconStatus(
   const reconType = optionalInteger(object.recon_type);
   const loadStatus = optionalInteger(object.load_status);
   const loadStatusLabel = scalarText(object.load_status_label);
+  const missionId = scalarText(object.mission_id ?? object.id);
   return {
     ...base,
     patch: {
@@ -407,6 +408,7 @@ function reconStatus(
         ...(gimbal === undefined ? {} : { gimbal }),
         ...(attackReady === undefined ? {} : { attackReady }),
         reconnaissance: {
+          ...(missionId === undefined ? {} : { id: missionId }),
           motionStatus,
           state: projectReconMotionStatus(motionStatus),
           ...(statusLabel === undefined ? {} : { statusLabel }),

@@ -338,9 +338,9 @@ export function reconTerminalFacts(input: {
   baseline: PhysicalDispatchBaseline;
 }): Record<string, unknown> {
   const recon = input.snapshot.payload.reconnaissance;
-  const correlation = correlateRecon(recon, input.expectedMissionId);
+  const correlation = reconCorrelationStrength(recon, input.expectedMissionId);
   return {
-    missionId: recon.id ?? input.expectedMissionId ?? null,
+    missionId: recon.id ?? null,
     scanMode: recon.scanMode ?? null,
     progress: recon.progress ?? null,
     coverage: recon.coverage ?? null,
@@ -445,7 +445,7 @@ function stationaryFromSpeed(
   return speedKmh <= thresholdKmh;
 }
 
-function correlateRecon(
+export function reconCorrelationStrength(
   recon: VehicleReconnaissanceState,
   expectedMissionId: string | undefined,
 ): CorrelationStrength {
