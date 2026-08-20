@@ -19,7 +19,7 @@ import {
 
 describe("UGV Provider operation and source contract", () => {
   it("publishes the eleven Goal 10 UGV operations without changing the transport profile", () => {
-    const manifest = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore());
+    const manifest = testManifest();
     expect((manifest.operations as { name: string }[]).map((operation) => operation.name)).toEqual([
       "vehicle_get_state",
       "vehicle_get_capabilities",
@@ -42,8 +42,10 @@ describe("UGV Provider operation and source contract", () => {
   });
 
   it("freezes fire confirmation and emergency-stop capability flags", () => {
-    const operations = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore())
-      .operations as { name: string; capabilities: Record<string, boolean> }[];
+    const operations = testManifest().operations as {
+      name: string;
+      capabilities: Record<string, boolean>;
+    }[];
     expect(operations.find((x) => x.name === "vehicle_fire_weapon")?.capabilities).toMatchObject({
       cancel: true,
       pauseResume: false,
@@ -60,8 +62,7 @@ describe("UGV Provider operation and source contract", () => {
   });
 
   it("exposes a finite gimbal task and makes recon area conditional for circular scan", () => {
-    const operations = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore())
-      .operations as {
+    const operations = testManifest().operations as {
       name: string;
       execution: string;
       inputSchema: unknown;
@@ -74,6 +75,7 @@ describe("UGV Provider operation and source contract", () => {
     const gimbal = operations.find((operation) => operation.name === "vehicle_control_gimbal");
     const recon = operations.find((operation) => operation.name === "vehicle_area_recon");
     const fire = operations.find((operation) => operation.name === "vehicle_fire_weapon");
+    const track = operations.find((operation) => operation.name === "vehicle_track_target");
     expect(capabilities?.execution).toBe("SYNCHRONOUS");
     expect(gimbal?.execution).toBe("TASK_REQUIRED");
     expect(JSON.stringify(protoStructToJson(gimbal?.inputSchema))).not.toContain("velocity");
@@ -86,18 +88,27 @@ describe("UGV Provider operation and source contract", () => {
     expect(reconOutput).toHaveProperty("properties.outOfRange");
     expect(JSON.stringify(fireOutput)).toContain("fire_command_rejected");
     expect(fire?.capabilities.cancel).toBe(true);
+    const trackSchema = protoStructToJson(track?.inputSchema);
+    expect(trackSchema).toMatchObject({
+      required: ["resourceId", "targetId"],
+      additionalProperties: false,
+    });
+    expect(Object.keys(trackSchema.properties as Record<string, unknown>)).toEqual([
+      "resourceId",
+      "targetId",
+    ]);
+    expect(JSON.stringify(trackSchema)).not.toMatch(/maintainLock|timeoutMs|desiredZoom/);
   });
 
   it("passes the Runtime's strict operation-manifest validation", () => {
-    const manifest = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore());
+    const manifest = testManifest();
     expect(() =>
       new OperationRegistry().validate(manifest as unknown as ProviderManifest),
     ).not.toThrow();
   });
 
   it("publishes versioned closed Vehicle DTO schemas", () => {
-    const operations = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore())
-      .operations as { name: string; outputSchema: unknown }[];
+    const operations = testManifest().operations as { name: string; outputSchema: unknown }[];
     expect(
       protoStructToJson(operations.find(({ name }) => name === "vehicle_get_state")?.outputSchema),
     ).toMatchObject({ title: "VehicleStateV1", additionalProperties: false });
@@ -155,3 +166,10 @@ describe("UGV Provider operation and source contract", () => {
     ).toBe(true);
   });
 });
+
+function testManifest(): Record<string, unknown> {
+  return ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", new MemoryProviderStore(), "vehicle:ugv1", {
+    contracts: mockUgvToolContracts("2026-08-20T00:00:00.000Z"),
+    executionMode: "simulation",
+  });
+}

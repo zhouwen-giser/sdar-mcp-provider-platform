@@ -202,6 +202,8 @@ export class UgvProviderRuntime {
   async initialize(): Promise<void> {
     await this.store.initialize();
     await this.device.connect();
+    for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
+      this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
     this.#unsubscribeToolHealth = this.device.onToolHealth((health) => {
       for (const transition of this.operationHealth.recordToolHealth(health))
         void this.#operationHealthTransition(transition.previous, transition.current);
@@ -446,8 +448,12 @@ export class UgvProviderRuntime {
         reasonCode: "UGV_FIRE_DISABLED",
         description: "UGV_FIRE_DISABLED",
       };
-    const operationHealth = this.operationHealth.snapshot(operationName);
     const qualification = this.operationQualification(operationName, argumentsValue);
+    const operationHealth = this.operationHealth.snapshot(
+      operationName,
+      argumentsValue,
+      qualification.phase,
+    );
     const snapshot = this.ingress.snapshot();
     const locallyOccupiedTracks = new Set(
       [...this.arbiter.occupied()].filter(
@@ -1564,6 +1570,8 @@ export class UgvProviderRuntime {
     await this.telemetry.emit("PROVIDER_DIAGNOSTIC", {
       diagnostic: "operation_health_transition",
       operation: current.operationName,
+      phase: current.phase,
+      variant: current.variant ?? null,
       from: previous.state,
       to: current.state,
       reasonCode: current.reasonCode,
@@ -1574,7 +1582,13 @@ export class UgvProviderRuntime {
       `${current.operationName} health changed from ${previous.state} to ${current.state}.`,
       new Date().toISOString(),
       current.state === "HEALTHY" ? "info" : "warning",
-      { operationName: current.operationName, healthState: current.state },
+      {
+        operationName: current.operationName,
+        phase: current.phase,
+        variant: current.variant ?? null,
+        requiredTools: current.requiredTools,
+        healthState: current.state,
+      },
     );
   }
 

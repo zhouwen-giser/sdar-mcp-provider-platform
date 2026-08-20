@@ -375,7 +375,13 @@ describe("UGV long-running operation integration", () => {
     const mqttSequence = fixture.ingress.ingestSequence();
     const mqttFreshness = fixture.ingress.snapshot().freshness;
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     for (const operationName of [
       "vehicle_get_state",
@@ -401,7 +407,13 @@ describe("UGV long-running operation integration", () => {
     const fixture = await createFixture();
     fixture.device.responses.set("get_status", { available: true, raw_internal_code: 731 });
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
 
     for (const operationName of ["vehicle_get_state", "vehicle_get_capabilities"]) {
@@ -506,6 +518,21 @@ describe("UGV long-running operation integration", () => {
       blockedFixture.runtime.qualificationContext(),
     );
     expect(JSON.stringify(blockedManifest)).not.toContain("planningMode");
+    const blockedNavigation = (
+      blockedManifest.operations as { name: string; inputSchema: unknown }[]
+    ).find(({ name }) => name === "vehicle_navigate");
+    const blockedNavigationSchema = protoStructToJson(required(blockedNavigation).inputSchema);
+    const navigationProperties = required(blockedNavigationSchema.properties) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    const missionVariants = navigationProperties.mission?.oneOf as {
+      properties: { type: { const: string } };
+    }[];
+    expect(missionVariants.map((variant) => variant.properties.type.const)).toEqual([
+      "distance",
+      "return_home",
+    ]);
   });
 
   it("confirms navigate progress, pause/resume, completion and durable event replay", async () => {
@@ -903,7 +930,13 @@ describe("UGV long-running operation integration", () => {
     const completedRecon = await fixture.runtime.get("recon-1");
     expect(completedRecon?.state).toBe("SUCCEEDED");
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     const reconOperation = required(
       manifest.operations.find((operation) => operation.name === "vehicle_area_recon"),
@@ -1048,6 +1081,8 @@ describe("UGV long-running operation integration", () => {
             "isr.vehicle.ugv.ugv1",
             "1.0.0",
             fixture.store,
+            "vehicle:ugv1",
+            fixture.runtime.qualificationContext(),
           ) as unknown as ProviderManifest,
         )
         .operations.find((operation) => operation.name === "vehicle_fire_weapon"),
@@ -1289,6 +1324,8 @@ describe("UGV long-running operation integration", () => {
             "isr.vehicle.ugv.ugv1",
             "1.0.0",
             fixture.store,
+            "vehicle:ugv1",
+            fixture.runtime.qualificationContext(),
           ) as unknown as ProviderManifest,
         )
         .operations.find((candidate) => candidate.name === "vehicle_fire_weapon"),
@@ -1408,7 +1445,13 @@ describe("UGV long-running operation integration", () => {
   it("requires a post-dispatch gimbal lifecycle before terminal completion and preserves cancel IDs", async () => {
     const fixture = await createFixture();
     const manifest = new OperationRegistry().validate(
-      ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", fixture.store) as unknown as ProviderManifest,
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        fixture.store,
+        "vehicle:ugv1",
+        fixture.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
     );
     const operation = required(
       manifest.operations.find((candidate) => candidate.name === "vehicle_control_gimbal"),

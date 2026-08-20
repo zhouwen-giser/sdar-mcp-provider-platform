@@ -1,23 +1,41 @@
 import type {
   DeviceToolHealthSnapshot,
   UgvDeviceToolName,
+  VehicleOperationPhase,
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
-import { UgvOperationQualificationService } from "../../../packages/vehicle-device-mcp-client/src/index.js";
+import {
+  isAllowedUgvDeviceTool,
+  requiredDeviceToolsForVehicleOperation,
+  resolveVehicleOperationVariant,
+  UgvOperationQualificationService,
+  vehicleOperationProfile,
+} from "../../../packages/vehicle-device-mcp-client/src/index.js";
 
 export type UgvOperationHealthState = "HEALTHY" | "DEGRADED" | "OPEN" | "RECOVERING";
 
 export interface UgvOperationHealthSnapshot {
   operationName: string;
+  phase: VehicleOperationPhase;
+  variant?: string;
+  requiredTools: readonly UgvDeviceToolName[];
   state: UgvOperationHealthState;
   consecutiveFailures: number;
   recoverySuccesses: number;
   reasonCode: string;
 }
 
+interface HealthContext {
+  key: string;
+  operationName: string;
+  phase: VehicleOperationPhase;
+  variant?: string;
+  requiredTools: readonly UgvDeviceToolName[];
+}
+
 export class UgvOperationHealthTracker {
   readonly #tools = new Map<UgvDeviceToolName, DeviceToolHealthSnapshot<UgvDeviceToolName>>();
-  readonly #operations = new Map<string, UgvOperationHealthSnapshot>();
-  readonly #dependencies = new Map<string, readonly UgvDeviceToolName[]>();
+  readonly #contexts = new Map<string, HealthContext>();
+  readonly #snapshots = new Map<string, UgvOperationHealthSnapshot>();
 
   constructor(
     readonly thresholds: {
@@ -25,13 +43,8 @@ export class UgvOperationHealthTracker {
       openThreshold: number;
       recoverySuccessThreshold: number;
     },
-    qualification = new UgvOperationQualificationService(),
-  ) {
-    for (const { operationName } of qualification.profiles) {
-      this.#dependencies.set(operationName, qualification.inventoryTools(operationName));
-      this.#operations.set(operationName, healthy(operationName));
-    }
-  }
+    readonly qualification = new UgvOperationQualificationService(),
+  ) {}
 
   recordToolHealth(
     health: DeviceToolHealthSnapshot<UgvDeviceToolName>,
@@ -41,31 +54,74 @@ export class UgvOperationHealthTracker {
       previous: UgvOperationHealthSnapshot;
       current: UgvOperationHealthSnapshot;
     }[] = [];
-    for (const [operationName, dependencies] of this.#dependencies) {
-      if (!dependencies.includes(health.toolName)) continue;
-      const previous = this.snapshot(operationName);
-      const current = this.#evaluate(operationName, previous);
-      this.#operations.set(operationName, current);
+    for (const context of this.#contexts.values()) {
+      if (!context.requiredTools.includes(health.toolName)) continue;
+      const previous = this.#snapshots.get(context.key) ?? healthy(context);
+      const current = this.#evaluate(context, previous, true);
+      this.#snapshots.set(context.key, current);
       if (previous.state !== current.state || previous.reasonCode !== current.reasonCode)
-        transitions.push({ previous, current: structuredClone(current) });
+        transitions.push({
+          previous: structuredClone(previous),
+          current: structuredClone(current),
+        });
     }
     return transitions;
   }
 
-  snapshot(operationName: string): UgvOperationHealthSnapshot {
-    return structuredClone(this.#operations.get(operationName) ?? healthy(operationName));
+  snapshot(
+    operationName: string,
+    argumentsValue: Readonly<Record<string, unknown>> = {},
+    phase?: VehicleOperationPhase,
+  ): UgvOperationHealthSnapshot {
+    const context = this.#context(operationName, argumentsValue, phase);
+    const previous = this.#snapshots.get(context.key) ?? healthy(context);
+    const current = this.#evaluate(context, previous, false);
+    this.#snapshots.set(context.key, current);
+    return structuredClone(current);
   }
 
   snapshots(): readonly UgvOperationHealthSnapshot[] {
-    return [...this.#operations.values()].map((value) => structuredClone(value));
+    return [...this.#snapshots.values()].map((value) => structuredClone(value));
+  }
+
+  #context(
+    operationName: string,
+    argumentsValue: Readonly<Record<string, unknown>>,
+    requestedPhase?: VehicleOperationPhase,
+  ): HealthContext {
+    const profile = vehicleOperationProfile(operationName, this.qualification.profiles);
+    const phase =
+      requestedPhase ?? (profile?.execution === "SYNCHRONOUS" ? "read" : ("start" as const));
+    const variant =
+      profile === undefined
+        ? undefined
+        : resolveVehicleOperationVariant(profile, argumentsValue)?.variant;
+    const key = `${operationName}\0${phase}\0${variant ?? ""}`;
+    const existing = this.#contexts.get(key);
+    if (existing !== undefined) return existing;
+    const requiredTools = requiredDeviceToolsForVehicleOperation(
+      operationName,
+      argumentsValue,
+      phase,
+      this.qualification.profiles,
+    ).filter(isAllowedUgvDeviceTool);
+    const context: HealthContext = {
+      key,
+      operationName,
+      phase,
+      ...(variant === undefined ? {} : { variant }),
+      requiredTools,
+    };
+    this.#contexts.set(key, context);
+    return context;
   }
 
   #evaluate(
-    operationName: string,
+    context: HealthContext,
     previous: UgvOperationHealthSnapshot,
+    advanceRecovery: boolean,
   ): UgvOperationHealthSnapshot {
-    const dependencies = this.#dependencies.get(operationName) ?? [];
-    const observed = dependencies.flatMap((tool) => {
+    const observed = context.requiredTools.flatMap((tool) => {
       const health = this.#tools.get(tool);
       return health === undefined ? [] : [health];
     });
@@ -77,46 +133,59 @@ export class UgvOperationHealthTracker {
       (health) => health.state === "open" || health.state === "unavailable",
     );
     if (open || failures >= this.thresholds.openThreshold)
-      return {
-        operationName,
-        state: "OPEN",
-        consecutiveFailures: failures,
-        recoverySuccesses: 0,
-        reasonCode: "UGV_OPERATION_FAILURE_BUDGET_OPEN",
-      };
+      return unhealthy(context, "OPEN", failures, 0, "UGV_OPERATION_FAILURE_BUDGET_OPEN");
     if (failures >= this.thresholds.degradedThreshold)
-      return {
-        operationName,
-        state: "DEGRADED",
-        consecutiveFailures: failures,
-        recoverySuccesses: 0,
-        reasonCode: "PUBLIC_AVAILABILITY_DEGRADED_REPRESENTATION_GAP",
-      };
+      return unhealthy(
+        context,
+        "DEGRADED",
+        failures,
+        0,
+        "PUBLIC_AVAILABILITY_DEGRADED_REPRESENTATION_GAP",
+      );
     if (
       previous.state === "OPEN" ||
       previous.state === "DEGRADED" ||
       previous.state === "RECOVERING"
     ) {
-      const recoverySuccesses = previous.recoverySuccesses + 1;
+      const recoverySuccesses = previous.recoverySuccesses + (advanceRecovery ? 1 : 0);
       if (recoverySuccesses < this.thresholds.recoverySuccessThreshold)
-        return {
-          operationName,
-          state: "RECOVERING",
-          consecutiveFailures: failures,
+        return unhealthy(
+          context,
+          "RECOVERING",
+          failures,
           recoverySuccesses,
-          reasonCode: "UGV_OPERATION_RECOVERY_STABILIZING",
-        };
+          "UGV_OPERATION_RECOVERY_STABILIZING",
+        );
     }
-    return healthy(operationName);
+    return healthy(context);
   }
 }
 
-function healthy(operationName: string): UgvOperationHealthSnapshot {
+function healthy(context: HealthContext): UgvOperationHealthSnapshot {
   return {
-    operationName,
+    operationName: context.operationName,
+    phase: context.phase,
+    ...(context.variant === undefined ? {} : { variant: context.variant }),
+    requiredTools: [...context.requiredTools],
     state: "HEALTHY",
     consecutiveFailures: 0,
     recoverySuccesses: 0,
     reasonCode: "UGV_OPERATION_HEALTHY",
+  };
+}
+
+function unhealthy(
+  context: HealthContext,
+  state: UgvOperationHealthState,
+  consecutiveFailures: number,
+  recoverySuccesses: number,
+  reasonCode: string,
+): UgvOperationHealthSnapshot {
+  return {
+    ...healthy(context),
+    state,
+    consecutiveFailures,
+    recoverySuccesses,
+    reasonCode,
   };
 }

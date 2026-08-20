@@ -7,13 +7,16 @@ export function ugvManifest(
   providerId: string,
   version: string,
   store: ProviderStore,
-  resourceId = "vehicle:ugv1",
-  qualificationContext?: UgvQualificationMatrixInput,
+  resourceId: string,
+  qualificationContext: UgvQualificationMatrixInput,
 ): Record<string, unknown> {
-  const support =
-    qualificationContext === undefined
-      ? undefined
-      : qualifyUgvCapabilities(qualificationContext).support;
+  const support = qualifyUgvCapabilities({
+    contracts: qualificationContext.contracts,
+    executionMode: qualificationContext.executionMode,
+    ...(qualificationContext.externallyVerified === undefined
+      ? {}
+      : { externallyVerified: qualificationContext.externallyVerified }),
+  }).support;
   return vehicleProviderManifest(
     {
       providerId,
@@ -21,14 +24,19 @@ export function ugvManifest(
       providerVersion: version,
       resourceId,
       displayKind: "UGV",
-      supportsScanModes: support?.reconnaissance.area ?? true,
-      supportsCircularEoScan: support?.reconnaissance.circular ?? true,
-      supportsCapabilityQuery: support?.capabilityQuery ?? true,
-      supportsGimbalControl: support?.gimbal ?? true,
-      supportsNavigationPlanning: support?.navigation.point ?? true,
-      supportsFireCancellationBeforeDispatch: support?.fire ?? true,
-      supportsFireCommandRejectedOutput: support?.fire ?? true,
-      supportsReconCoverageOutput: support?.reconnaissance.area ?? true,
+      navigationSupport: support.navigation,
+      supportsScanModes: support.reconnaissance.area,
+      supportsCircularEoScan: support.reconnaissance.circular,
+      supportsCapabilityQuery: support.capabilityQuery,
+      supportsTargetTracking: support.targetTracking,
+      supportsGimbalControl: support.gimbal,
+      supportsNavigationPlanning: support.navigation.point,
+      supportsFire: support.fire,
+      supportsEmergencyStop: support.emergencyStop,
+      supportsLaserRange: support.laserRange,
+      supportsFireCancellationBeforeDispatch: support.fire,
+      supportsFireCommandRejectedOutput: support.fire,
+      supportsReconCoverageOutput: support.reconnaissance.area,
       circularScanOmitsArea: true,
     },
     store,

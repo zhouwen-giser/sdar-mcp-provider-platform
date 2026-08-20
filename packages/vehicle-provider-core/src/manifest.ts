@@ -14,9 +14,20 @@ export interface VehicleManifestProfile {
   displayKind: string;
   supportsScanModes: boolean;
   supportsCircularEoScan: boolean;
+  navigationSupport?: {
+    point: boolean;
+    route: boolean;
+    distance: boolean;
+    returnHome: boolean;
+    pauseResumeCancel: boolean;
+  };
   supportsCapabilityQuery?: boolean;
+  supportsTargetTracking?: boolean;
   supportsGimbalControl?: boolean;
   supportsNavigationPlanning?: boolean;
+  supportsFire?: boolean;
+  supportsEmergencyStop?: boolean;
+  supportsLaserRange?: boolean;
   supportsFireCancellationBeforeDispatch?: boolean;
   supportsFireCommandRejectedOutput?: boolean;
   supportsReconCoverageOutput?: boolean;
@@ -53,6 +64,17 @@ export function vehicleProviderManifest(
   const nullable = (value: Record<string, unknown>) => ({
     anyOf: [value, { type: "null" }],
   });
+  const navigationSupport = profile.navigationSupport ?? {
+    point: true,
+    route: true,
+    distance: true,
+    returnHome: true,
+    pauseResumeCancel: true,
+  };
+  const supportsNavigation = Object.entries(navigationSupport)
+    .filter(([name]) => name !== "pauseResumeCancel")
+    .some(([, supported]) => supported);
+  const supportsReconnaissance = profile.supportsScanModes || profile.supportsCircularEoScan;
   return {
     adapterProtocolVersion: ADAPTER_PROTOCOL_VERSION,
     providerId: profile.providerId,
@@ -119,105 +141,129 @@ export function vehicleProviderManifest(
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
-      {
-        name: "vehicle_laser_range",
-        description: "Perform a synchronous local laser-range query.",
-        execution: "SYNCHRONOUS",
-        inputSchema: schema({ resourceId }, ["resourceId"]),
-        outputSchema: schema(
-          {
-            resourceId,
-            distanceM: { type: "number", minimum: 0 },
-            valid: { type: "boolean" },
-            observedAt: { type: "string" },
-          },
-          ["resourceId", "distanceM", "valid", "observedAt"],
-        ),
-        capabilities: caps(false, false, false, false, false, false),
-        resourceBinding: binding,
-      },
-      {
-        name: "vehicle_navigate",
-        description: "Run a point, route, distance or return-home chassis mission.",
-        execution: "TASK_REQUIRED",
-        inputSchema: navigationSchema(resourceId, profile.supportsNavigationPlanning === true),
-        outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"], {
-          requestedDistanceM: { type: "number", minimum: 0 },
-          startPosition: { type: "object", additionalProperties: true },
-          endPosition: { type: "object", additionalProperties: true },
-          observedDisplacementM: { type: "number", minimum: 0 },
-          finalHeadingDeg: { type: "number" },
-          finalSpeedKmh: { type: "number", minimum: 0 },
-          missionId: nullable({ type: "string" }),
-          missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
-          snapshotRevision: { type: "string" },
-          stationaryAtCompletion: nullable({ type: "boolean" }),
-          correlationStrength: {
-            type: "string",
-            enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
-          },
-          observationAuthority: { type: "string" },
-        }),
-        capabilities: caps(true, true, true, true, false, true),
-        resourceBinding: binding,
-      },
-      {
-        name: "vehicle_area_recon",
-        description: "Run local electro-optical reconnaissance.",
-        execution: "TASK_REQUIRED",
-        inputSchema: reconSchema(
-          resourceId,
-          profile.supportsScanModes,
-          profile.supportsCircularEoScan,
-          profile.circularScanOmitsArea === true,
-        ),
-        outputSchema: taskOutput(
-          ["completed", "failed", "cancelled", "timeout"],
-          profile.supportsReconCoverageOutput === true
-            ? {
-                coverability: nullable({ type: "object", additionalProperties: true }),
-                outOfRange: nullable({ type: "boolean" }),
-                missionId: nullable({ type: "string" }),
-                scanMode: nullable({ type: "number" }),
-                progress: nullable({ type: "number" }),
-                coverage: nullable({ type: "object", additionalProperties: true }),
-                observedTargetCount: { type: "integer", minimum: 0 },
-                terminalMotionStatus: {
-                  anyOf: [{ type: "number" }, { type: "string" }],
+      ...(profile.supportsLaserRange !== false
+        ? [
+            {
+              name: "vehicle_laser_range",
+              description: "Perform a synchronous local laser-range query.",
+              execution: "SYNCHRONOUS",
+              inputSchema: schema({ resourceId }, ["resourceId"]),
+              outputSchema: schema(
+                {
+                  resourceId,
+                  distanceM: { type: "number", minimum: 0 },
+                  valid: { type: "boolean" },
+                  observedAt: { type: "string" },
                 },
-                cameraFault: nullable({ type: "boolean" }),
-                exception: nullable({ type: "object", additionalProperties: true }),
+                ["resourceId", "distanceM", "valid", "observedAt"],
+              ),
+              capabilities: caps(false, false, false, false, false, false),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
+      ...(supportsNavigation
+        ? [
+            {
+              name: "vehicle_navigate",
+              description: "Run a point, route, distance or return-home chassis mission.",
+              execution: "TASK_REQUIRED",
+              inputSchema: navigationSchema(
+                resourceId,
+                navigationSupport,
+                profile.supportsNavigationPlanning === true,
+              ),
+              outputSchema: taskOutput(["completed", "failed", "cancelled", "timeout"], {
+                requestedDistanceM: { type: "number", minimum: 0 },
+                startPosition: { type: "object", additionalProperties: true },
+                endPosition: { type: "object", additionalProperties: true },
+                observedDisplacementM: { type: "number", minimum: 0 },
+                finalHeadingDeg: { type: "number" },
+                finalSpeedKmh: { type: "number", minimum: 0 },
+                missionId: nullable({ type: "string" }),
+                missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
                 snapshotRevision: { type: "string" },
+                stationaryAtCompletion: nullable({ type: "boolean" }),
                 correlationStrength: {
                   type: "string",
                   enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
                 },
-                observationIsNew: { type: "boolean" },
-                timeAuthority: { type: "string" },
-              }
-            : {},
-        ),
-        capabilities: caps(true, true, true, true, false, true),
-        resourceBinding: binding,
-      },
-      {
-        name: "vehicle_track_target",
-        description: "Track a locally observed target and fail locally when lock is lost.",
-        execution: "TASK_REQUIRED",
-        inputSchema: schema(
-          {
-            resourceId,
-            targetId: { type: "string", minLength: 1, maxLength: 128 },
-            maintainLock: { type: "boolean" },
-            timeoutMs: { type: "integer", minimum: 100 },
-            desiredZoom: { type: "number", exclusiveMinimum: 0 },
-          },
-          ["resourceId", "targetId", "maintainLock", "timeoutMs"],
-        ),
-        outputSchema: taskOutput(["target_locked", "target_lost", "cancelled", "timeout"]),
-        capabilities: caps(false, true, true, false, false, true),
-        resourceBinding: binding,
-      },
+                observationAuthority: { type: "string" },
+              }),
+              capabilities: caps(
+                true,
+                true,
+                navigationSupport.pauseResumeCancel,
+                navigationSupport.pauseResumeCancel,
+                false,
+                true,
+              ),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
+      ...(supportsReconnaissance
+        ? [
+            {
+              name: "vehicle_area_recon",
+              description: "Run local electro-optical reconnaissance.",
+              execution: "TASK_REQUIRED",
+              inputSchema: reconSchema(
+                resourceId,
+                profile.supportsScanModes,
+                profile.supportsCircularEoScan,
+                profile.circularScanOmitsArea === true,
+              ),
+              outputSchema: taskOutput(
+                ["completed", "failed", "cancelled", "timeout"],
+                profile.supportsReconCoverageOutput === true
+                  ? {
+                      coverability: nullable({ type: "object", additionalProperties: true }),
+                      outOfRange: nullable({ type: "boolean" }),
+                      missionId: nullable({ type: "string" }),
+                      scanMode: nullable({ type: "number" }),
+                      progress: nullable({ type: "number" }),
+                      coverage: nullable({ type: "object", additionalProperties: true }),
+                      observedTargetCount: { type: "integer", minimum: 0 },
+                      terminalMotionStatus: {
+                        anyOf: [{ type: "number" }, { type: "string" }],
+                      },
+                      cameraFault: nullable({ type: "boolean" }),
+                      exception: nullable({ type: "object", additionalProperties: true }),
+                      snapshotRevision: { type: "string" },
+                      correlationStrength: {
+                        type: "string",
+                        enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
+                      },
+                      observationIsNew: { type: "boolean" },
+                      timeAuthority: { type: "string" },
+                    }
+                  : {},
+              ),
+              capabilities: caps(true, true, true, true, false, true),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
+      ...(profile.supportsTargetTracking !== false
+        ? [
+            {
+              name: "vehicle_track_target",
+              description: "Track a locally observed target and fail locally when lock is lost.",
+              execution: "TASK_REQUIRED",
+              inputSchema: schema(
+                {
+                  resourceId,
+                  targetId: { type: "string", minLength: 1, maxLength: 128 },
+                },
+                ["resourceId", "targetId"],
+              ),
+              outputSchema: taskOutput(["target_locked", "target_lost", "cancelled", "timeout"]),
+              capabilities: caps(false, true, true, false, false, true),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
       ...(profile.supportsGimbalControl === true
         ? [
             {
@@ -232,68 +278,82 @@ export function vehicleProviderManifest(
             },
           ]
         : []),
-      {
-        name: "vehicle_fire_weapon",
-        description:
-          "Execute one confirmed local fire-control cycle without hit, damage or destruction semantics.",
-        execution: "TASK_REQUIRED",
-        inputSchema: schema(
-          {
-            resourceId,
-            targetId: { type: "string", minLength: 1, maxLength: 128 },
-            engagementMode: { const: "single" },
-            requireConfirmation: { const: true },
-            approvalRef: { type: "string", maxLength: 256 },
-          },
-          ["resourceId", "targetId", "engagementMode", "requireConfirmation"],
-        ),
-        outputSchema: taskOutput([
-          "fire_command_accepted",
-          ...(profile.supportsFireCommandRejectedOutput === true ? ["fire_command_rejected"] : []),
-          "fire_cycle_completed",
-          "target_not_found",
-          "target_not_locked",
-          "out_of_range",
-          "out_of_fov",
-          "no_ammo_reported_by_weapon",
-          "weapon_fault",
-          "friendly_target_rejected",
-          "timeout",
-          "cancelled",
-        ]),
-        capabilities: caps(
-          false,
-          true,
-          profile.supportsFireCancellationBeforeDispatch !== false,
-          false,
-          true,
-          true,
-        ),
-        resourceBinding: binding,
-      },
-      {
-        name: "vehicle_emergency_stop",
-        description: `Preempt and stop only this ${profile.displayKind}'s local tracks.`,
-        execution: "TASK_REQUIRED",
-        inputSchema: schema({ resourceId }, ["resourceId"]),
-        outputSchema: taskOutput(["stopped", "timeout", "failed"], {
-          finalSpeedKmh: { type: "number", minimum: 0 },
-          missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
-          reconMotionStatus: { anyOf: [{ type: "integer" }, { type: "string" }] },
-          eoTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
-          weaponTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
-          targetUnlocked: { type: "boolean" },
-          observationAuthority: { type: "string" },
-          snapshotRevision: { type: "string" },
-        }),
-        capabilities: caps(false, true, false, false, false, true),
-        resourceBinding: binding,
-      },
+      ...(profile.supportsFire !== false
+        ? [
+            {
+              name: "vehicle_fire_weapon",
+              description:
+                "Execute one confirmed local fire-control cycle without hit, damage or destruction semantics.",
+              execution: "TASK_REQUIRED",
+              inputSchema: schema(
+                {
+                  resourceId,
+                  targetId: { type: "string", minLength: 1, maxLength: 128 },
+                  engagementMode: { const: "single" },
+                  requireConfirmation: { const: true },
+                  approvalRef: { type: "string", maxLength: 256 },
+                },
+                ["resourceId", "targetId", "engagementMode", "requireConfirmation"],
+              ),
+              outputSchema: taskOutput([
+                "fire_command_accepted",
+                ...(profile.supportsFireCommandRejectedOutput === true
+                  ? ["fire_command_rejected"]
+                  : []),
+                "fire_cycle_completed",
+                "target_not_found",
+                "target_not_locked",
+                "out_of_range",
+                "out_of_fov",
+                "no_ammo_reported_by_weapon",
+                "weapon_fault",
+                "friendly_target_rejected",
+                "timeout",
+                "cancelled",
+              ]),
+              capabilities: caps(
+                false,
+                true,
+                profile.supportsFireCancellationBeforeDispatch !== false,
+                false,
+                true,
+                true,
+              ),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
+      ...(profile.supportsEmergencyStop !== false
+        ? [
+            {
+              name: "vehicle_emergency_stop",
+              description: `Preempt and stop only this ${profile.displayKind}'s local tracks.`,
+              execution: "TASK_REQUIRED",
+              inputSchema: schema({ resourceId }, ["resourceId"]),
+              outputSchema: taskOutput(["stopped", "timeout", "failed"], {
+                finalSpeedKmh: { type: "number", minimum: 0 },
+                missionState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+                reconMotionStatus: { anyOf: [{ type: "integer" }, { type: "string" }] },
+                eoTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+                weaponTaskState: { anyOf: [{ type: "integer" }, { type: "string" }] },
+                targetUnlocked: { type: "boolean" },
+                observationAuthority: { type: "string" },
+                snapshotRevision: { type: "string" },
+              }),
+              capabilities: caps(false, true, false, false, false, true),
+              resourceBinding: binding,
+            },
+          ]
+        : []),
     ],
   };
 }
 
-function navigationSchema(resourceId: Record<string, unknown>, supportsPlanning: boolean) {
+function navigationSchema(
+  resourceId: Record<string, unknown>,
+  support: NonNullable<VehicleManifestProfile["navigationSupport"]>,
+  supportsPlanning: boolean,
+) {
   const point = {
     type: "object",
     properties: {
@@ -310,37 +370,53 @@ function navigationSchema(resourceId: Record<string, unknown>, supportsPlanning:
       resourceId,
       mission: {
         oneOf: [
-          {
-            type: "object",
-            properties: { type: { const: "point" }, target: point },
-            required: ["type", "target"],
-            additionalProperties: false,
-          },
-          {
-            type: "object",
-            properties: {
-              type: { const: "route" },
-              waypoints: { type: "array", minItems: 1, maxItems: 1024, items: point },
-            },
-            required: ["type", "waypoints"],
-            additionalProperties: false,
-          },
-          {
-            type: "object",
-            properties: {
-              type: { const: "distance" },
-              direction: { type: "string", enum: ["forward", "backward", "left", "right"] },
-              distanceM: { type: "number", exclusiveMinimum: 0 },
-            },
-            required: ["type", "direction", "distanceM"],
-            additionalProperties: false,
-          },
-          {
-            type: "object",
-            properties: { type: { const: "return_home" } },
-            required: ["type"],
-            additionalProperties: false,
-          },
+          ...(support.point
+            ? [
+                {
+                  type: "object",
+                  properties: { type: { const: "point" }, target: point },
+                  required: ["type", "target"],
+                  additionalProperties: false,
+                },
+              ]
+            : []),
+          ...(support.route
+            ? [
+                {
+                  type: "object",
+                  properties: {
+                    type: { const: "route" },
+                    waypoints: { type: "array", minItems: 1, maxItems: 1024, items: point },
+                  },
+                  required: ["type", "waypoints"],
+                  additionalProperties: false,
+                },
+              ]
+            : []),
+          ...(support.distance
+            ? [
+                {
+                  type: "object",
+                  properties: {
+                    type: { const: "distance" },
+                    direction: { type: "string", enum: ["forward", "backward", "left", "right"] },
+                    distanceM: { type: "number", exclusiveMinimum: 0 },
+                  },
+                  required: ["type", "direction", "distanceM"],
+                  additionalProperties: false,
+                },
+              ]
+            : []),
+          ...(support.returnHome
+            ? [
+                {
+                  type: "object",
+                  properties: { type: { const: "return_home" } },
+                  required: ["type"],
+                  additionalProperties: false,
+                },
+              ]
+            : []),
         ],
       },
       speedLimitKmh: { type: "number", exclusiveMinimum: 0 },
@@ -365,7 +441,7 @@ function navigationSchema(resourceId: Record<string, unknown>, supportsPlanning:
 
 function reconSchema(
   resourceId: Record<string, unknown>,
-  supportsScanModes: boolean,
+  supportsAreaScan: boolean,
   supportsCircularEoScan: boolean,
   circularScanOmitsArea: boolean,
 ) {
@@ -375,7 +451,7 @@ function reconSchema(
       : ["resourceId", "scanMode", "area"]
     : [
         "resourceId",
-        ...(supportsScanModes ? ["scanMode"] : []),
+        ...(supportsAreaScan || supportsCircularEoScan ? ["scanMode"] : []),
         "scanCount",
         "zoom",
         "stopOnTarget",
@@ -406,17 +482,19 @@ function reconSchema(
         required: ["polygon"],
         additionalProperties: false,
       },
-      ...(supportsScanModes
+      ...(supportsAreaScan || supportsCircularEoScan
         ? {
             scanMode: {
               type: "string",
               enum: circularScanOmitsArea
-                ? supportsCircularEoScan
-                  ? ["area", "circular"]
-                  : ["area"]
-                : supportsCircularEoScan
-                  ? ["area", "sector", "circular"]
-                  : ["area", "sector"],
+                ? [
+                    ...(supportsAreaScan ? ["area"] : []),
+                    ...(supportsCircularEoScan ? ["circular"] : []),
+                  ]
+                : [
+                    ...(supportsAreaScan ? ["area", "sector"] : []),
+                    ...(supportsCircularEoScan ? ["circular"] : []),
+                  ],
             },
             ...(circularScanOmitsArea
               ? {}

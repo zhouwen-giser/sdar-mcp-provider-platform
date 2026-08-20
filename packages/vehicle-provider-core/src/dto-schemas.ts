@@ -61,6 +61,10 @@ export function vehicleStateV1Schema(resourceId: string): Record<string, unknown
 }
 
 export function vehicleCapabilitiesV1Schema(resourceId: string): Record<string, unknown> {
+  const provenanceValue = {
+    type: "string",
+    enum: ["device_reported", "contract_inferred", "managed_configuration", "unverified"],
+  };
   return {
     title: "VehicleCapabilitiesV1",
     type: "object",
@@ -126,6 +130,71 @@ export function vehicleCapabilitiesV1Schema(resourceId: string): Record<string, 
         required: ["reconnaissance", "gimbal", "targetTracking", "laserRange"],
         additionalProperties: false,
       },
+      provenance: {
+        type: "object",
+        properties: {
+          available: provenanceValue,
+          navigation: {
+            type: "object",
+            properties: {
+              point: provenanceValue,
+              route: provenanceValue,
+              distance: provenanceValue,
+              returnHome: provenanceValue,
+              pauseResumeCancel: provenanceValue,
+              planningDensities: provenanceValue,
+              supportsRoadNetworkPlanning: provenanceValue,
+              needPlanDefault: provenanceValue,
+            },
+            required: [
+              "point",
+              "route",
+              "distance",
+              "returnHome",
+              "pauseResumeCancel",
+              "planningDensities",
+              "supportsRoadNetworkPlanning",
+              "needPlanDefault",
+            ],
+            additionalProperties: false,
+          },
+          payload: {
+            type: "object",
+            properties: {
+              reconnaissance: {
+                type: "object",
+                properties: {
+                  area: provenanceValue,
+                  circular: provenanceValue,
+                  scanModes: provenanceValue,
+                  movingWhileRecon: provenanceValue,
+                },
+                required: ["area", "circular", "scanModes", "movingWhileRecon"],
+                additionalProperties: false,
+              },
+              gimbal: {
+                type: "object",
+                properties: {
+                  supported: provenanceValue,
+                  modes: provenanceValue,
+                  manualYawSweep: provenanceValue,
+                  continuousPitchSweep: provenanceValue,
+                },
+                required: ["supported", "modes", "manualYawSweep", "continuousPitchSweep"],
+                additionalProperties: false,
+              },
+              targetTracking: provenanceValue,
+              laserRange: provenanceValue,
+            },
+            required: ["reconnaissance", "gimbal", "targetTracking", "laserRange"],
+            additionalProperties: false,
+          },
+          deviceReported: provenanceValue,
+          engineeringProfile: provenanceValue,
+        },
+        required: ["available", "navigation", "payload", "deviceReported", "engineeringProfile"],
+        additionalProperties: false,
+      },
       deviceReported: { type: "object", additionalProperties: true },
       engineeringProfile: { type: "object", additionalProperties: true },
       observedAt: dateTime,
@@ -136,6 +205,7 @@ export function vehicleCapabilitiesV1Schema(resourceId: string): Record<string, 
       "available",
       "navigation",
       "payload",
+      "provenance",
       "deviceReported",
       "engineeringProfile",
       "observedAt",

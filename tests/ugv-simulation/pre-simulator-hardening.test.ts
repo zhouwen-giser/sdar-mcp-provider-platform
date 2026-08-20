@@ -450,30 +450,83 @@ describe("UGV pre-simulator hardening", () => {
       openThreshold: 3,
       recoverySuccessThreshold: 2,
     });
+    const distanceArguments = { mission: { type: "distance" } };
+    const pointArguments = { mission: { type: "point" } };
+    tracker.snapshot("vehicle_navigate", distanceArguments);
+    tracker.snapshot("vehicle_navigate", pointArguments);
     tracker.recordToolHealth({
       toolName: "ugv_move_distance",
       state: "degraded",
       consecutiveFailures: 2,
     });
-    expect(tracker.snapshot("vehicle_navigate")).toMatchObject({ state: "DEGRADED" });
+    expect(tracker.snapshot("vehicle_navigate", distanceArguments)).toMatchObject({
+      state: "DEGRADED",
+      phase: "start",
+      variant: "distance",
+      requiredTools: ["ugv_move_distance", "ugv_mission_control"],
+    });
+    expect(tracker.snapshot("vehicle_navigate", pointArguments)).toMatchObject({
+      state: "HEALTHY",
+      variant: "point",
+      requiredTools: ["ugv_path_follow_mission", "ugv_mission_control"],
+    });
     tracker.recordToolHealth({
       toolName: "ugv_move_distance",
       state: "open",
       consecutiveFailures: 3,
     });
-    expect(tracker.snapshot("vehicle_navigate")).toMatchObject({ state: "OPEN" });
+    expect(tracker.snapshot("vehicle_navigate", distanceArguments)).toMatchObject({
+      state: "OPEN",
+    });
     tracker.recordToolHealth({
       toolName: "ugv_move_distance",
       state: "healthy",
       consecutiveFailures: 0,
     });
-    expect(tracker.snapshot("vehicle_navigate")).toMatchObject({ state: "RECOVERING" });
+    expect(tracker.snapshot("vehicle_navigate", distanceArguments)).toMatchObject({
+      state: "RECOVERING",
+      recoverySuccesses: 1,
+    });
+    expect(tracker.snapshot("vehicle_navigate", distanceArguments)).toMatchObject({
+      state: "RECOVERING",
+      recoverySuccesses: 1,
+    });
     tracker.recordToolHealth({
       toolName: "ugv_move_distance",
       state: "healthy",
       consecutiveFailures: 0,
     });
-    expect(tracker.snapshot("vehicle_navigate")).toMatchObject({ state: "HEALTHY" });
+    expect(tracker.snapshot("vehicle_navigate", distanceArguments)).toMatchObject({
+      state: "HEALTHY",
+    });
+  });
+
+  it("isolates lifecycle-phase health from the navigation start variant", () => {
+    const tracker = new UgvOperationHealthTracker({
+      degradedThreshold: 2,
+      openThreshold: 3,
+      recoverySuccessThreshold: 2,
+    });
+    const pointArguments = { mission: { type: "point" } };
+    tracker.snapshot("vehicle_navigate", pointArguments, "pause");
+    tracker.recordToolHealth({
+      toolName: "ugv_path_follow_mission",
+      state: "open",
+      consecutiveFailures: 3,
+    });
+    expect(tracker.snapshot("vehicle_navigate", pointArguments, "pause")).toMatchObject({
+      state: "HEALTHY",
+      phase: "pause",
+      requiredTools: ["ugv_mission_control"],
+    });
+    tracker.recordToolHealth({
+      toolName: "ugv_mission_control",
+      state: "open",
+      consecutiveFailures: 3,
+    });
+    expect(tracker.snapshot("vehicle_navigate", pointArguments, "pause")).toMatchObject({
+      state: "OPEN",
+    });
   });
 });
 

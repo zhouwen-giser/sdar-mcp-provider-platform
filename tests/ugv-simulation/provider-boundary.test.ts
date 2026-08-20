@@ -13,7 +13,10 @@ import { mockUgvToolContracts } from "../../packages/vehicle-device-mcp-client/s
 describe("Goal 10 Provider boundary", () => {
   it("keeps the shared UGV surface stable while Goal 11 brings NPC to the same eleven operations", () => {
     const store = new MemoryProviderStore();
-    const ugv = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", store);
+    const ugv = ugvManifest("isr.vehicle.ugv.ugv1", "1.0.0", store, "vehicle:ugv1", {
+      contracts: mockUgvToolContracts("2026-08-20T00:00:00.000Z"),
+      executionMode: "simulation",
+    });
     const npc = npcTankManifest("isr.vehicle.npc-tank.npc-tank1", "1.0.0", store, false);
     expect((ugv.operations as { name: string }[]).map(({ name }) => name)).toEqual([
       "vehicle_get_state",
@@ -59,6 +62,12 @@ describe("Goal 10 Provider boundary", () => {
       navigation: { point: true, route: true, distance: true, returnHome: true },
       payload: { reconnaissance: { area: true, circular: true }, gimbal: { supported: true } },
       deviceReported: { sensors: { gnss: true }, max_speed_kmh: 25 },
+      provenance: {
+        available: "device_reported",
+        navigation: { point: "contract_inferred" },
+        payload: { reconnaissance: { movingWhileRecon: "managed_configuration" } },
+        engineeringProfile: "unverified",
+      },
     });
     expect(JSON.stringify(normalized)).not.toContain("turningRadius");
     expect(JSON.stringify(normalized)).not.toContain("communicationRange");
