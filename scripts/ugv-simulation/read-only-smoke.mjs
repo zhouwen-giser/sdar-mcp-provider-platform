@@ -55,7 +55,10 @@ const maximumStateAgeMs = boundedInteger(
   1_000,
   300_000,
 );
-const executionMode = optional(environment, "UGV_SMOKE_EXECUTION_MODE") ?? "simulation";
+const executionMode =
+  optional(environment, "UGV_SMOKE_EXECUTION_MODE") ??
+  optional(environment, "UGV_EXECUTION_MODE") ??
+  "simulation";
 if (executionMode !== "simulation" && executionMode !== "live")
   throw coded("UGV_SMOKE_EXECUTION_MODE_INVALID");
 const startedAt = new Date().toISOString();
