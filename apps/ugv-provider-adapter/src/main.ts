@@ -94,6 +94,17 @@ const telemetry = new UgvTelemetry({
   ...(config.PROVIDER_TELEMETRY_TLS_KEY_PATH
     ? { keyPath: config.PROVIDER_TELEMETRY_TLS_KEY_PATH }
     : {}),
+  onOutcome: (outcome) => {
+    const details = {
+      outcome: outcome.kind,
+      amount: outcome.amount,
+      reasonCode: outcome.reasonCode,
+      counters: outcome.snapshot,
+    };
+    if (["rejected", "transport_failed", "dropped"].includes(outcome.kind))
+      logger.warn(details, "UGV Provider telemetry delivery issue");
+    else logger.debug(details, "UGV Provider telemetry delivery outcome");
+  },
 });
 const businessEvents = new UgvBusinessEventHub(store, config.UGV_RESOURCE_ID);
 const runtime = new UgvProviderRuntime(
@@ -157,8 +168,8 @@ logger.info(
 const stop = async () => {
   await mqtt.stop();
   await server.close();
-  telemetry.close();
   await runtime.close();
+  await telemetry.closeAndDrain();
 };
 void runtime
   .initializeDependencies()

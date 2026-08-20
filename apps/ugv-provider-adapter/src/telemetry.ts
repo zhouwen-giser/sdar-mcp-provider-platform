@@ -1,4 +1,7 @@
-import { VehicleTelemetry } from "../../../packages/vehicle-provider-core/src/index.js";
+import {
+  VehicleTelemetry,
+  type VehicleTelemetryOptions,
+} from "../../../packages/vehicle-provider-core/src/index.js";
 
 export class UgvTelemetry extends VehicleTelemetry {
   constructor(options: {
@@ -10,11 +13,14 @@ export class UgvTelemetry extends VehicleTelemetry {
     caPath?: string;
     certPath?: string;
     keyPath?: string;
+    onOutcome?: VehicleTelemetryOptions["onOutcome"];
   }) {
+    const { onOutcome, ...base } = options;
     super({
-      ...options,
+      ...base,
       resourceId: options.resourceId ?? "vehicle:ugv1",
       resourceType: "isr.vehicle.ugv",
+      ...(onOutcome === undefined ? {} : { onOutcome }),
     });
   }
 }

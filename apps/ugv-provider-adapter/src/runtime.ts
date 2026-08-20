@@ -89,6 +89,8 @@ const FIRE_DISPATCH_COMMAND = "fire_dispatch";
 const FIRE_DISPATCH_SEQUENCE = "0";
 const FIRE_DISPATCH_NOT_ARMED = "UGV_FIRE_DISPATCH_NOT_ARMED";
 const FIRE_DISPATCH_ABORTED = "UGV_FIRE_DISPATCH_ABORTED";
+const RESOURCE_TELEMETRY_INTERVAL_MS = 1_000;
+const FRESHNESS_TELEMETRY_INTERVAL_MS = 10_000;
 const FIRE_LOCAL_CANCELLATION_REASONS = new Set([
   "UGV_FIRE_CONFIRMATION_REJECTED",
   "UGV_FIRE_CANCELLED_BEFORE_DISPATCH",
@@ -167,6 +169,8 @@ export class UgvProviderRuntime {
   #dependencyInitialization: Promise<void> | undefined;
   #recoveryComplete = false;
   #closed = false;
+  #lastResourceTelemetryAtMs = Number.NEGATIVE_INFINITY;
+  #lastFreshnessTelemetryAtMs = Number.NEGATIVE_INFINITY;
   #readiness: UgvProviderReadinessSnapshot;
   readonly #freshnessStates = new Map<string, "fresh" | "stale" | "unknown">();
   readonly operationHealth: UgvOperationHealthTracker;
@@ -451,8 +455,8 @@ export class UgvProviderRuntime {
       }
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
-        { transition: execution.state, reasonCode: execution.reasonCode },
-        identityTelemetry(execution),
+        executionProgressPayload(execution),
+        identityTelemetry(execution, executionProgressAttributes(execution)),
       );
       return {
         externalExecutionId: execution.externalExecutionId,
@@ -808,13 +812,15 @@ export class UgvProviderRuntime {
         rawPayload: { taskId: next.taskId, status: "fire_command_accepted" },
       });
       if (stripped > 0)
-        await this.telemetry.emit(
-          "PROVIDER_DIAGNOSTIC",
-          {
+        await this.telemetry.metric(
+          "fire_verdict_fields_stripped_total",
+          stripped,
+          "field",
+          "sanitized",
+          identityTelemetry(next, {
             diagnostic: "fire_verdict_fields_stripped",
             countBucket: stripped > 4 ? "many" : "few",
-          },
-          identityTelemetry(next),
+          }),
         );
       return await this.#completeFireClaim(identity, true, "UGV_FIRE_CONFIRMATION_ACCEPTED");
     } catch (error) {
@@ -1327,12 +1333,8 @@ export class UgvProviderRuntime {
       this.events.emit(execution.taskId, executionSnapshot(next));
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
-        {
-          transition: next.state,
-          reasonCode: next.reasonCode,
-          progressBucket: progressBucket(next.progress),
-        },
-        identityTelemetry(next),
+        executionProgressPayload(next),
+        identityTelemetry(next, executionProgressAttributes(next)),
       );
       await this.#transitionEvent(execution, next);
       if (next.state === "PAUSED" && next.controlConfirmation?.command === "pause")
@@ -1490,24 +1492,36 @@ export class UgvProviderRuntime {
       observedAt: snapshot.observedAt,
       snapshot: snapshot as unknown as Record<string, unknown>,
     });
-    await this.telemetry.emit("RESOURCE_STATE", {
-      source: topicCategory(topic),
-      revisionChanged: true,
-    });
-    for (const [domain, observedAt] of Object.entries({
-      chassis: snapshot.freshness.chassisObservedAt,
-      mission: snapshot.freshness.missionObservedAt,
-      health: snapshot.freshness.healthObservedAt,
-      target: snapshot.freshness.targetObservedAt,
-      payload: snapshot.freshness.payloadObservedAt,
-    }))
-      if (observedAt !== undefined)
-        await this.telemetry.metric(
-          "snapshot_freshness_seconds",
-          Math.max(0, (Date.now() - Date.parse(observedAt)) / 1_000),
-          "s",
-          domain,
-        );
+    const telemetryNowMs = this.#now().getTime();
+    if (
+      intervalDue(this.#lastResourceTelemetryAtMs, telemetryNowMs, RESOURCE_TELEMETRY_INTERVAL_MS)
+    ) {
+      this.#lastResourceTelemetryAtMs = telemetryNowMs;
+      await this.telemetry.emit(
+        "RESOURCE_STATE",
+        { state: "observed", reasonCode: "UGV_RESOURCE_OBSERVATION_RECEIVED" },
+        { attributes: { source: topicCategory(topic), revisionChanged: true } },
+      );
+    }
+    if (
+      intervalDue(this.#lastFreshnessTelemetryAtMs, telemetryNowMs, FRESHNESS_TELEMETRY_INTERVAL_MS)
+    ) {
+      this.#lastFreshnessTelemetryAtMs = telemetryNowMs;
+      for (const [domain, observedAt] of Object.entries({
+        chassis: snapshot.freshness.chassisObservedAt,
+        mission: snapshot.freshness.missionObservedAt,
+        health: snapshot.freshness.healthObservedAt,
+        target: snapshot.freshness.targetObservedAt,
+        payload: snapshot.freshness.payloadObservedAt,
+      }))
+        if (observedAt !== undefined)
+          await this.telemetry.metric(
+            "snapshot_freshness_seconds",
+            Math.max(0, (telemetryNowMs - Date.parse(observedAt)) / 1_000),
+            "s",
+            domain,
+          );
+    }
     await this.pollActive();
   }
 
@@ -1681,15 +1695,20 @@ export class UgvProviderRuntime {
       "transition",
       `${current.operationName}:${previous.state}:${current.state}`,
     );
-    await this.telemetry.emit("PROVIDER_DIAGNOSTIC", {
-      diagnostic: "operation_health_transition",
-      operation: current.operationName,
-      phase: current.phase,
-      variant: current.variant ?? null,
-      from: previous.state,
-      to: current.state,
-      reasonCode: current.reasonCode,
-    });
+    await this.telemetry.emit(
+      "RESOURCE_HEALTH",
+      { health: current.state.toLowerCase(), reasonCode: current.reasonCode },
+      {
+        attributes: {
+          diagnostic: "operation_health_transition",
+          operation: current.operationName,
+          phase: current.phase,
+          variant: current.variant ?? null,
+          from: previous.state,
+          to: current.state,
+        },
+      },
+    );
     await this.#resourceEvent(
       `vehicle.availability.${current.state.toLowerCase()}`,
       current.reasonCode,
@@ -1815,11 +1834,16 @@ export class UgvProviderRuntime {
           call,
         );
       } catch (error) {
-        await this.telemetry.emit("PROVIDER_DIAGNOSTIC", {
-          diagnostic: "emergency_stop_cleanup_failed",
-          toolName: call.name,
-          reasonCode: reason(error),
-        });
+        await this.telemetry.emit(
+          "RESOURCE_HEALTH",
+          { health: "degraded", reasonCode: reason(error) },
+          {
+            attributes: {
+              diagnostic: "emergency_stop_cleanup_failed",
+              toolName: call.name,
+            },
+          },
+        );
       }
   }
 
@@ -3332,11 +3356,26 @@ function commandSupported(operationName: string, command: string): boolean {
     "vehicle_control_gimbal",
   ].includes(operationName);
 }
-function identityTelemetry(execution: ProviderExecution) {
+function identityTelemetry(execution: ProviderExecution, attributes?: Record<string, unknown>) {
   return {
     taskId: execution.taskId,
     externalExecutionId: execution.externalExecutionId,
     operationName: execution.operationName,
+    ...(attributes === undefined ? {} : { attributes }),
+  };
+}
+
+function executionProgressPayload(execution: ProviderExecution) {
+  const percentage = Math.max(0, Math.min(100, execution.progress ?? 0));
+  return { current: percentage, total: 100, percentage, unit: "percent" };
+}
+
+function executionProgressAttributes(execution: ProviderExecution) {
+  return {
+    transition: execution.state,
+    reasonCode: execution.reasonCode,
+    progressBucket: progressBucket(execution.progress),
+    progressKnown: execution.progress !== undefined,
   };
 }
 function isTerminal(state: ProviderExecutionState): boolean {
@@ -3401,6 +3440,9 @@ function progressBucket(value: number | undefined): string {
   if (value >= 50) return "50_74";
   if (value >= 25) return "25_49";
   return "0_24";
+}
+function intervalDue(previousMs: number, nowMs: number, intervalMs: number): boolean {
+  return nowMs < previousMs || nowMs - previousMs >= intervalMs;
 }
 function bucket(value: number): string {
   return value === 0 ? "zero" : value === 1 ? "one" : value <= 5 ? "few" : "many";

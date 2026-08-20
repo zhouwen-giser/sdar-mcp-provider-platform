@@ -72,6 +72,20 @@ describe("UGV long-running operation integration", () => {
       "transport:FOLLOWUP",
       "journal:FOLLOWUP:ACCEPTED",
     ]);
+    const startingProgress = fixture.telemetry.records.find(
+      (record) => record.eventType === "EXECUTION_PROGRESS",
+    );
+    expect(startingProgress?.payload).toEqual({
+      current: 0,
+      total: 100,
+      percentage: 0,
+      unit: "percent",
+    });
+    expect(startingProgress?.attributes).toMatchObject({
+      transition: "STARTING",
+      reasonCode: "UGV_WAITING_DEVICE_CONFIRMATION",
+      progressKnown: false,
+    });
   });
 
   it("persists an ambiguous primary result as uncertain and never replays it", async () => {
@@ -636,6 +650,68 @@ describe("UGV long-running operation integration", () => {
     expect((await fixture.runtime.get("pause-proof"))?.state).not.toBe("PAUSED");
     fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
     expect((await fixture.runtime.get("pause-proof"))?.state).toBe("PAUSED");
+  });
+
+  it("bounds high-rate resource telemetry while preserving lifecycle events", async () => {
+    let now = Date.now() + 1_000;
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    fixture.telemetry.records.splice(0);
+    now += 10_000;
+
+    for (let index = 0; index < 72; index++) {
+      const result = fixture.ingress.handle(
+        "/ugv/gnss",
+        Buffer.from(
+          JSON.stringify({
+            entity_id: "ugv1",
+            latitude: 30.1 + index / 100_000,
+            longitude: 114.1,
+            altitude: 10,
+          }),
+        ),
+        false,
+        new Date(now + index).toISOString(),
+      );
+      if (index === 0) {
+        expect(result).toMatchObject({ duplicate: false, olderObservation: false });
+        await settleSnapshotObservers();
+      }
+    }
+    await settleSnapshotObservers();
+
+    const resourceStates = () =>
+      fixture.telemetry.records.filter((record) => record.eventType === "RESOURCE_STATE");
+    const freshnessMetrics = () =>
+      fixture.telemetry.records.filter(
+        (record) => record.payload.metricName === "snapshot_freshness_seconds",
+      );
+    expect(resourceStates()).toHaveLength(1);
+    expect(freshnessMetrics().length).toBeGreaterThan(0);
+    expect(freshnessMetrics().length).toBeLessThanOrEqual(5);
+
+    now += 1_000;
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.2,"longitude":114.1,"altitude":10}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    await settleSnapshotObservers();
+    expect(resourceStates()).toHaveLength(2);
+    const freshnessBefore = freshnessMetrics().length;
+
+    now += 9_000;
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.3,"longitude":114.1,"altitude":10}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    await settleSnapshotObservers();
+    expect(freshnessMetrics().length).toBeGreaterThan(freshnessBefore);
+    expect(freshnessMetrics().length - freshnessBefore).toBeLessThanOrEqual(5);
   });
 
   it("reconciles conflicting primary and secondary task states without terminal success", async () => {
@@ -1233,7 +1309,10 @@ describe("UGV long-running operation integration", () => {
     expect(persisted).not.toMatch(/destroyed|damage|remaining_hp|\bhit\b/);
     expect(
       fixture.telemetry.records.some(
-        (event) => event.payload.diagnostic === "fire_verdict_fields_stripped",
+        (event) =>
+          event.eventType === "RESOURCE_METRIC" &&
+          event.payload.metricName === "fire_verdict_fields_stripped_total" &&
+          event.attributes.diagnostic === "fire_verdict_fields_stripped",
       ),
     ).toBe(true);
   });
@@ -2311,6 +2390,11 @@ function telemetryMetricNames(telemetry: UgvTelemetry): string[] {
     const metricName = record.payload.metricName;
     return typeof metricName === "string" ? [metricName] : [];
   });
+}
+
+async function settleSnapshotObservers(): Promise<void> {
+  for (let iteration = 0; iteration < 4; iteration++)
+    await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
 class FailNthExecutionWriteStore extends MemoryProviderStore {
