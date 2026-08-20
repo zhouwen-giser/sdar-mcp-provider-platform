@@ -109,9 +109,11 @@ describe("UGV Provider operation and source contract", () => {
 
   it("publishes versioned closed Vehicle DTO schemas", () => {
     const operations = testManifest().operations as { name: string; outputSchema: unknown }[];
-    expect(
-      protoStructToJson(operations.find(({ name }) => name === "vehicle_get_state")?.outputSchema),
-    ).toMatchObject({ title: "VehicleStateV1", additionalProperties: false });
+    const stateSchema = protoStructToJson(
+      operations.find(({ name }) => name === "vehicle_get_state")?.outputSchema,
+    );
+    expect(stateSchema).toMatchObject({ title: "VehicleStateV1", additionalProperties: false });
+    expect(JSON.stringify(stateSchema)).not.toContain("entityId");
     expect(
       protoStructToJson(
         operations.find(({ name }) => name === "vehicle_get_capabilities")?.outputSchema,

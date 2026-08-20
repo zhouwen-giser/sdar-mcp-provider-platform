@@ -1711,7 +1711,12 @@ function selectSnapshot(snapshot: NpcTankSnapshot, include: unknown): Record<str
     ? new Set(include.filter((x): x is string => typeof x === "string"))
     : new Set(["chassis", "payload", "health", "targets"]);
   const result: Record<string, unknown> = {
-    identity: snapshot.identity,
+    identity: {
+      providerId: snapshot.identity.providerId,
+      resourceId: snapshot.identity.resourceId,
+      vehicleType: snapshot.identity.vehicleType,
+      executionMode: snapshot.identity.executionMode,
+    },
     connectivity: snapshot.connectivity,
     freshness: snapshot.freshness,
     revision: snapshot.revision,

@@ -10,11 +10,10 @@ export function vehicleStateV1Schema(resourceId: string): Record<string, unknown
         properties: {
           providerId: { type: "string", minLength: 1 },
           resourceId: { type: "string", const: resourceId },
-          entityId: { type: "string", minLength: 1 },
           vehicleType: { type: "string", minLength: 1 },
           executionMode: { type: "string", enum: ["simulation", "live"] },
         },
-        required: ["providerId", "resourceId", "entityId", "vehicleType", "executionMode"],
+        required: ["providerId", "resourceId", "vehicleType", "executionMode"],
         additionalProperties: false,
       },
       connectivity: {

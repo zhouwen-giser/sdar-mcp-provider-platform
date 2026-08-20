@@ -85,14 +85,19 @@ describe("RuntimeReleaseResolver", () => {
     },
   );
 
-  it("accepts the fixed readable JavaScript entry on Windows", async () => {
-    const root = await releaseRoot(0o400);
-    const release = await new RuntimeReleaseResolver(
-      root,
-      CURRENT_RUNTIME_RELEASE_MANIFEST,
-    ).resolve(CURRENT_RUNTIME_VERSION);
-    expect(release.runtimeEntry).toBe(resolve(root, CURRENT_RUNTIME_VERSION, FIXED_RUNTIME_ENTRY));
-  });
+  it.runIf(process.platform === "win32")(
+    "accepts the fixed readable JavaScript entry on Windows",
+    async () => {
+      const root = await releaseRoot(0o400);
+      const release = await new RuntimeReleaseResolver(
+        root,
+        CURRENT_RUNTIME_RELEASE_MANIFEST,
+      ).resolve(CURRENT_RUNTIME_VERSION);
+      expect(release.runtimeEntry).toBe(
+        resolve(root, CURRENT_RUNTIME_VERSION, FIXED_RUNTIME_ENTRY),
+      );
+    },
+  );
 
   it("loads only the fixed contained manifest file and rejects extra fields", async () => {
     const root = await releaseRoot();
