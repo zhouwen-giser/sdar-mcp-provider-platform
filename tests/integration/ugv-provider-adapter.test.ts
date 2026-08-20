@@ -1464,6 +1464,87 @@ describe("UGV long-running operation integration", () => {
     ]);
   });
 
+  it("persists preemption ownership across restart and cancels old tasks after confirmation", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(startInput("nav-preempted", "vehicle_navigate", navigateArgs()));
+    await fixture.runtime.start(startInput("recon-preempted", "vehicle_area_recon", reconArgs()));
+    missionRaw(fixture.ingress, 1, 10);
+    reconStatus(fixture.ingress, 5, 10);
+    await fixture.runtime.start(
+      startInput("stop-owner", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+    );
+
+    expect(await fixture.store.getExecution("stop-owner")).toMatchObject({
+      preemptedTaskIds: ["nav-preempted", "recon-preempted"],
+    });
+    for (const taskId of ["nav-preempted", "recon-preempted"]) {
+      const preempted = required(await fixture.store.getExecution(taskId));
+      expect(preempted).toMatchObject({
+        state: "STOPPING",
+        preemptedByTaskId: "stop-owner",
+        preemptReason: "UGV_EMERGENCY_STOP",
+      });
+      expect(typeof preempted.preemptedAt).toBe("string");
+    }
+
+    await fixture.runtime.close();
+    active.splice(active.indexOf(fixture.runtime), 1);
+    const recovered = new UgvProviderRuntime(
+      runtimeOptions(),
+      fixture.store,
+      fixture.ingress,
+      fixture.device,
+      fixture.events,
+      fixture.telemetry,
+    );
+    active.push(recovered);
+    await recovered.initialize();
+    expect(recovered.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_CHASSIS_TRACK_BUSY",
+    });
+
+    fixture.ingress.handle("/ugv/speed", Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'));
+    missionRaw(fixture.ingress, 3, 10);
+    reconStatus(fixture.ingress, 11, 100);
+    expect(await recovered.get("stop-owner")).toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "STOP_CONFIRMED",
+    });
+    for (const taskId of ["nav-preempted", "recon-preempted"])
+      expect(await recovered.get(taskId)).toMatchObject({
+        state: "CANCELLED",
+        reasonCode: "UGV_PREEMPTED_BY_EMERGENCY_STOP",
+      });
+  });
+
+  it("blocks conflicting admission for externally observed device work", async () => {
+    const fixture = await createFixture();
+    missionWithId(fixture.ingress, 77, 1, 20);
+
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_EXTERNAL_CHASSIS_TRACK_BUSY",
+    });
+    await expect(
+      fixture.runtime.start(startInput("blocked-external", "vehicle_navigate", navigateArgs())),
+    ).rejects.toThrow("UGV_EXTERNAL_CHASSIS_TRACK_BUSY");
+    expect(fixture.runtime.availability("vehicle_emergency_stop", {})).toMatchObject({
+      availability: "AVAILABLE",
+    });
+
+    missionWithId(fixture.ingress, 77, 3, 20);
+    reconStatus(fixture.ingress, 5, 20, undefined, "88");
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_EXTERNAL_EO_TRACK_BUSY",
+    });
+    reconStatus(fixture.ingress, 11, 100, undefined, "88");
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "AVAILABLE",
+    });
+  });
+
   it("dispatches primary emergency stop when every optional cleanup tool is missing", async () => {
     const device = new MockUgvDeviceMcpClient(new Set(["ugv_motion_stop"]));
     const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);

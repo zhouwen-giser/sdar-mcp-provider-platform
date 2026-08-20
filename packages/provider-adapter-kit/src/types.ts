@@ -59,6 +59,12 @@ export interface ProviderExecution {
   consecutiveStationaryObservations?: number;
   /** Last processed field-level speed cursor; prevents polling from recounting one sample. */
   lastStationarySpeedCursor?: string;
+  /** Tasks durably preempted by this execution, populated for emergency stop. */
+  preemptedTaskIds?: string[];
+  /** Emergency-stop task that owns this execution's durable preemption fence. */
+  preemptedByTaskId?: string;
+  preemptedAt?: string;
+  preemptReason?: string;
   selectedDeviceTool?: string;
   providerRevision?: string;
   state: ProviderExecutionState;

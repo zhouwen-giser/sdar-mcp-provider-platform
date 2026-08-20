@@ -287,6 +287,10 @@ export class UgvProviderRuntime {
     }
     const decision = this.availability(input.operationName, input.arguments);
     if (decision.availability !== "AVAILABLE") throw new Error(decision.reasonCode);
+    const preemptedExecutions =
+      input.operationName === "vehicle_emergency_stop"
+        ? await this.#preemptableExecutions(input.taskId)
+        : [];
     const acquired = this.arbiter.acquire(input.taskId, input.operationName);
     if (!acquired.accepted) throw new Error(acquired.reasonCode);
     const now = this.#now().toISOString();
@@ -323,8 +327,13 @@ export class UgvProviderRuntime {
       ...(baselineSpeedCursor === undefined
         ? {}
         : { lastStationarySpeedCursor: baselineSpeedCursor }),
+      ...(preemptedExecutions.length === 0
+        ? {}
+        : { preemptedTaskIds: preemptedExecutions.map(({ taskId }) => taskId).sort() }),
     };
     try {
+      if (input.operationName === "vehicle_emergency_stop")
+        await this.#persistPreemptionRelations(input.taskId, preemptedExecutions, now);
       await this.store.putExecution(execution);
     } catch (error) {
       this.arbiter.release(input.taskId);
@@ -439,16 +448,23 @@ export class UgvProviderRuntime {
       };
     const operationHealth = this.operationHealth.snapshot(operationName);
     const qualification = this.operationQualification(operationName, argumentsValue);
+    const snapshot = this.ingress.snapshot();
+    const locallyOccupiedTracks = new Set(
+      [...this.arbiter.occupied()].filter(
+        (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
+      ),
+    );
+    const externallyOccupiedTracks = deviceObservedOccupiedTracks(snapshot, this.arbiter);
+    if (operationName !== "vehicle_emergency_stop")
+      for (const track of UGV_OPERATION_TRACKS[operationName] ?? [])
+        if (externallyOccupiedTracks.has(track))
+          return externalTrackBusyDecision(track, qualification.riskLevel ?? "MEDIUM");
     const decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
-      snapshot: this.ingress.snapshot(),
+      snapshot,
       freshness: this.options.freshness,
-      occupiedTracks: new Set(
-        [...this.arbiter.occupied()].filter(
-          (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
-        ),
-      ),
+      occupiedTracks: new Set([...locallyOccupiedTracks, ...externallyOccupiedTracks]),
       requiredToolsPresent: qualification.qualified,
       ...(typeof argumentsValue.targetId === "string" ? { targetId: argumentsValue.targetId } : {}),
       allowNavigationWithRecon: this.options.allowNavigationWithRecon,
@@ -804,7 +820,11 @@ export class UgvProviderRuntime {
   }
 
   async #recover(): Promise<void> {
-    for (const execution of await this.store.listActiveExecutions()) {
+    const active = await this.store.listActiveExecutions();
+    for (const execution of [...active].sort(recoveryOwnershipOrder))
+      if (execution.preemptedByTaskId === undefined)
+        this.arbiter.restore(execution.taskId, vehicleTracks(execution.tracks));
+    for (const execution of active) {
       if (execution.operationName === "vehicle_fire_weapon") {
         const dispatch = await this.store.getCommandAck(
           execution.taskId,
@@ -813,7 +833,10 @@ export class UgvProviderRuntime {
         );
         if (await this.#recoverPreDispatchFireFence(execution, dispatch)) continue;
       }
-      this.arbiter.restore(execution.taskId, vehicleTracks(execution.tracks));
+      if (execution.preemptedByTaskId !== undefined) {
+        await this.#refreshPreemptedExecution(execution);
+        continue;
+      }
       if (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected) {
         execution.reasonCode = "UNCERTAIN_EXECUTION_STATE";
         execution.updatedAt = this.#now().toISOString();
@@ -984,6 +1007,8 @@ export class UgvProviderRuntime {
 
   async #refresh(execution: ProviderExecution): Promise<ProviderExecution> {
     if (isTerminal(execution.state)) return execution;
+    if (execution.preemptedByTaskId !== undefined)
+      return this.#refreshPreemptedExecution(execution);
     if (execution.operationName === "vehicle_fire_weapon") {
       const dispatch = await this.store.getCommandAck(
         execution.taskId,
@@ -1581,6 +1606,62 @@ export class UgvProviderRuntime {
         ? {}
         : { reconMissionId: recon.downstreamMissionIds.at(-1) }),
     };
+  }
+
+  async #preemptableExecutions(emergencyTaskId: string): Promise<ProviderExecution[]> {
+    return (await this.store.listActiveExecutions()).filter(
+      (execution) =>
+        execution.taskId !== emergencyTaskId &&
+        vehicleTracks(execution.tracks).some((track) =>
+          UGV_OPERATION_TRACKS.vehicle_emergency_stop?.includes(track),
+        ),
+    );
+  }
+
+  async #persistPreemptionRelations(
+    emergencyTaskId: string,
+    executions: readonly ProviderExecution[],
+    preemptedAt: string,
+  ): Promise<void> {
+    for (const execution of executions) {
+      if (execution.preemptedByTaskId === emergencyTaskId) continue;
+      const preempted = transition(execution, "STOPPING", "UGV_PREEMPTED_BY_EMERGENCY_STOP");
+      preempted.preemptedByTaskId = emergencyTaskId;
+      preempted.preemptedAt = preemptedAt;
+      preempted.preemptReason = "UGV_EMERGENCY_STOP";
+      await this.store.putExecution(preempted);
+    }
+  }
+
+  async #refreshPreemptedExecution(execution: ProviderExecution): Promise<ProviderExecution> {
+    const ownerTaskId = execution.preemptedByTaskId;
+    if (ownerTaskId === undefined) return execution;
+    const owner = await this.store.getExecution(ownerTaskId);
+    let next = execution;
+    if (owner?.state === "SUCCEEDED" && owner.reasonCode === "STOP_CONFIRMED")
+      next = terminal(execution, "CANCELLED", "UGV_PREEMPTED_BY_EMERGENCY_STOP", {
+        resourceId: execution.resourceId,
+        status: "preempted",
+        preemptedByTaskId: ownerTaskId,
+        preemptedAt: execution.preemptedAt ?? this.#now().toISOString(),
+        observedAt: owner.terminalAt ?? owner.updatedAt,
+      });
+    else if (owner === undefined || isTerminal(owner.state))
+      next =
+        execution.state === "STOPPING" &&
+        execution.reasonCode === "UGV_PREEMPTION_RECONCILE_REQUIRED"
+          ? execution
+          : transition(execution, "STOPPING", "UGV_PREEMPTION_RECONCILE_REQUIRED");
+    else if (
+      execution.state !== "STOPPING" ||
+      execution.reasonCode !== "UGV_PREEMPTED_BY_EMERGENCY_STOP"
+    )
+      next = transition(execution, "STOPPING", "UGV_PREEMPTED_BY_EMERGENCY_STOP");
+    if (next.revision === execution.revision) return execution;
+    await this.store.putExecution(next);
+    if (isTerminal(next.state)) this.arbiter.release(next.taskId);
+    await this.#emitExecutionTransition(execution, next);
+    return next;
   }
 
   async #dispatchEmergencyStop(
@@ -2819,6 +2900,45 @@ function observationCursorTimestamp(cursor: string | undefined): string {
 
 function reconMotionActive(status: VehicleReconnaissanceState["motionStatus"]): boolean {
   return new Set([2, 4, 5, 6, 7, 8, 12]).has(status as number);
+}
+
+function deviceObservedOccupiedTracks(
+  snapshot: UgvSnapshot,
+  arbiter: TrackArbiter,
+): ReadonlySet<VehicleTrack> {
+  const occupied = new Set<VehicleTrack>();
+  if (arbiter.owner("chassis") === undefined && observedTaskActive(snapshot.chassis.mission))
+    occupied.add("chassis");
+  if (
+    arbiter.owner("eo") === undefined &&
+    (reconMotionActive(snapshot.payload.reconnaissance.motionStatus) ||
+      observedTaskActive(snapshot.payload.eoTask))
+  )
+    occupied.add("eo");
+  if (arbiter.owner("weapon") === undefined && observedTaskActive(snapshot.payload.weapon))
+    occupied.add("weapon");
+  return occupied;
+}
+
+function observedTaskActive(track: VehicleTaskTrack): boolean {
+  return track.state === 1 || track.state === 2 || (track.state === 0 && track.id !== undefined);
+}
+
+function externalTrackBusyDecision(
+  track: VehicleTrack,
+  riskLevel: AvailabilityDecision["riskLevel"],
+): AvailabilityDecision {
+  const reasonCode = `UGV_EXTERNAL_${track.toUpperCase()}_TRACK_BUSY`;
+  return { availability: "DISABLED", riskLevel, reasonCode, description: reasonCode };
+}
+
+function recoveryOwnershipOrder(left: ProviderExecution, right: ProviderExecution): number {
+  const priority = (execution: ProviderExecution) =>
+    execution.operationName === "vehicle_emergency_stop" &&
+    execution.preemptedByTaskId === undefined
+      ? 0
+      : 1;
+  return priority(left) - priority(right) || left.createdAt.localeCompare(right.createdAt);
 }
 
 function withMissionId(execution: ProviderExecution, missionId: string): ProviderExecution {
