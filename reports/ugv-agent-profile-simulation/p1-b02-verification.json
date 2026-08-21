@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "ugv-agent-profile.p1-b02-verification/v1",
+  "generatedAt": "2026-08-21T03:45:19.315Z",
+  "taskId": "UAP-P1-B02",
+  "status": "PASS_PROVIDER_READ_ONLY_QUALIFICATION",
+  "evidenceClass": "external_simulation",
+  "observationClass": "external_simulation_through_smpp_northbound",
+  "qualificationLayer": "smpp_northbound_provider_read_only",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "baseline": {
+    "repository": "sdar-mcp-provider-platform",
+    "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+    "selectedLatestBaselineCommit": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+    "qualificationSourceCommit": "051eae0d44b14cc772cce1f7c34079d4944ce3a8",
+    "policy": "latest relevant SMPP branch selected by user, plus Goal-scoped local checkpoint"
+  },
+  "run": {
+    "runId": "uap-p1b02-20260821t032832z",
+    "startedAt": "2026-08-21T03:42:35.619Z",
+    "completedAt": "2026-08-21T03:42:37.020Z",
+    "profileHealth": "PASS",
+    "providerQualification": "PASS",
+    "reasonCode": "EXTERNAL_SIMULATION_PROVIDER_QUALIFIED_READ_ONLY"
+  },
+  "authority": {
+    "northbound": "SMPP Runtime server/discover, tools/list, tools/call and availability",
+    "southbound": "SMPP UGV Adapter durable Device MCP audit",
+    "directDeviceMcpAccessByQualificationClient": false,
+    "registrySnapshotConsumption": "DEFERRED_TO_UAP_P2_B02",
+    "registrySnapshotId": null,
+    "nodeControlConsumption": "DEFERRED_TO_UAP_P2_B02",
+    "nodeControlBindingId": null
+  },
+  "provider": {
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "providerType": "isr.vehicle.ugv",
+    "providerVersion": "1.0.0",
+    "manifestHash": "e2b0bd3e494b40f7c8e728ab6e4c9045d44a1bcb9b15820f1263d4f05ff10625",
+    "resourceId": "vehicle:ugv1",
+    "uniqueResourceCount": 1,
+    "executionMode": "simulation"
+  },
+  "operationQualification": {
+    "vehicle_get_state": {
+      "execution": "SYNCHRONOUS",
+      "northboundCallCount": 1,
+      "freshExternalState": true
+    },
+    "vehicle_navigate": {
+      "execution": "TASK_REQUIRED",
+      "pointAvailability": "available",
+      "stopOnObstacle": true,
+      "cancelDeclared": true,
+      "pauseResumeDeclared": true,
+      "observationsDeclared": true,
+      "northboundCallCount": 0,
+      "navigationDispatched": false
+    }
+  },
+  "readCorrelation": {
+    "northboundOperation": "vehicle_get_state",
+    "northboundCallCount": 1,
+    "southboundTool": "get_status",
+    "southboundCallCount": 1,
+    "southboundAuditVerified": true,
+    "correlationMatched": true,
+    "comparison": "row_identity_set_difference",
+    "correlationHash": "5c5e6cd01858a9d9f60a563659d98690e08fe01af4e7e4e030138d242d08c867"
+  },
+  "safety": {
+    "qualificationClientDirectDeviceToolCallCount": 0,
+    "mqttPublishCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0,
+    "addedExecutionCount": 0,
+    "addedMutationJournalCount": 0,
+    "addedCommandAckCount": 0
+  },
+  "upstreamDrift": {
+    "preserved": true,
+    "preflightStatus": "PASS_WITH_UPSTREAM_DRIFT",
+    "findings": [
+      {
+        "code": "MQTT_CANONICAL_STATUS_TOPIC_NOT_OBSERVED",
+        "canonicalTopic": "status/ugv",
+        "compatibilityAliasObserved": "/ugv/status"
+      },
+      {
+        "code": "MQTT_SPEED_PUBLISHER_QOS_0_NOT_1",
+        "topic": "/ugv/speed",
+        "observedPublisherQos": 0,
+        "lockedSubscriptionQos": 1
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "reports/ugv-agent-profile-simulation/smpp-provider-qualification.redacted.json",
+      "sha256": "589a277558c8f34ef785414364ef07f5fb6b99cb32fa82244ee4e08d78004f6c",
+      "role": "canonical northbound Provider qualification"
+    },
+    {
+      "path": "reports/ugv-agent-profile-simulation/attempts/smpp-provider-qualification-uap-p1b02-20260821t032832z.redacted.json",
+      "sha256": "589a277558c8f34ef785414364ef07f5fb6b99cb32fa82244ee4e08d78004f6c",
+      "role": "immutable run-specific Provider qualification"
+    },
+    {
+      "path": "reports/ugv-agent-profile-simulation/attempts/deployment-preflight-uap-p1b02-20260821t032832z.redacted.json",
+      "sha256": "83f8045db3b748034afed47f0814b8582099d6bbb990c11242bdd9268be8fdff",
+      "role": "immutable external Device MCP and MQTT preflight"
+    },
+    {
+      "path": "reports/ugv-agent-profile-simulation/baseline-drift.json",
+      "sha256": "f55d07e5ec62cf7b80fe6cfe4d3037884625efbf80b002955011becdd5052941",
+      "role": "user-selected latest-branch baseline decision"
+    }
+  ],
+  "verification": [
+    {
+      "command": "pnpm verify:ugv-provider:work",
+      "exitCode": 0,
+      "result": "approved host rerun passed, including the two loopback gRPC E2E tests"
+    },
+    {
+      "command": "UGV_SIMULATION_RUN_ID=uap-p1b02-20260821t032832z bash deploy/ugv-agent-profile-simulation/preflight.sh",
+      "exitCode": 0,
+      "result": "PASS_WITH_UPSTREAM_DRIFT; no Device tools/call, MQTT publish, control or navigation"
+    },
+    {
+      "command": "UGV_SIMULATION_RUN_ID=uap-p1b02-20260821t032832z bash deploy/ugv-agent-profile-simulation/up.sh",
+      "exitCode": 0,
+      "result": "fixed four-service external-simulation Profile started from the checkpointed source"
+    },
+    {
+      "command": "bash deploy/ugv-agent-profile-simulation/health.sh",
+      "exitCode": 0,
+      "result": "Runtime ready; profile health PASS"
+    },
+    {
+      "command": "UGV_SIMULATION_RUN_ID=uap-p1b02-20260821t032832z bash deploy/ugv-agent-profile-simulation/qualify-provider-readonly.sh",
+      "exitCode": 0,
+      "result": "one northbound vehicle_get_state correlated to one Adapter get_status; navigation and mutation zero"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "scopeLimitations": [
+    "This report qualifies only the external-simulation SMPP Provider read path and navigation contract; it does not authorize or execute navigation.",
+    "Registry Snapshot and Node Control binding consumption remain deferred to UAP-P2-B02.",
+    "This evidence is not production eligible and does not qualify a physical vehicle."
+  ]
+}

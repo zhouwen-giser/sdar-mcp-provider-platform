@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "ugv-agent-profile.deployment-start-reservation/v1",
+  "runId": "uap-p1b02-20260821t032832z",
+  "generatedAt": "2026-08-21T03:40:47.483Z",
+  "reservedAt": "2026-08-21T03:40:47.483Z",
+  "status": "RESERVED_IMMUTABLY",
+  "evidenceClass": "external_simulation",
+  "consumedPreflightEvidence": "deployment-preflight-uap-p1b02-20260821t032832z.redacted.json",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "safety": {
+    "toolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0
+  }
+}
