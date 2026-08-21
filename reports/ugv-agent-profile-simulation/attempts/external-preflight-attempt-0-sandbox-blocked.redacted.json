@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "ugv-agent-profile.preflight-attempt/v1",
+  "generatedAt": "2026-08-21T01:22:31.043Z",
+  "status": "BLOCKED",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "attempt": 0,
+  "command": "node scripts/ugv-simulation/preflight.mjs",
+  "exitCode": 2,
+  "reasonCode": "DEVICE_MCP_PROBE_FAILED_IN_RESTRICTED_EXECUTION_SANDBOX",
+  "observed": {
+    "deviceMcpStatus": "NOT_RUN",
+    "mqttStatus": "NOT_RUN",
+    "toolsCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0
+  },
+  "diagnosis": {
+    "classification": "execution_environment_network_restriction",
+    "basis": "The identical read-only command passed immediately after network access was explicitly approved.",
+    "externalEndpointFailureClaimed": false
+  }
+}

@@ -41,6 +41,16 @@ describe("frozen Streamable HTTP routing headers", () => {
       validateFrozenHeaders(headers("subscriptions/listen", "forbidden"), request),
     );
   });
+
+  it.each(["io.sdar/taskExecution/tasks/pause", "io.sdar/taskExecution/tasks/resume"])(
+    "requires exact task identity routing for %s",
+    (method) => {
+      const request = parsed(method, { taskId: "task-1" });
+      expect(() => validateFrozenHeaders(headers(method, "task-1"), request)).not.toThrow();
+      expectHeaderMismatch(() => validateFrozenHeaders(headers(method), request));
+      expectHeaderMismatch(() => validateFrozenHeaders(headers(method, "other-task"), request));
+    },
+  );
 });
 
 function parsed(method: string, params: Record<string, unknown>) {

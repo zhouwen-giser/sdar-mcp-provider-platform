@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "ugv-agent-profile.mqtt-contract/v1",
+  "generatedAt": "2026-08-21T01:35:34.812Z",
+  "status": "FROZEN",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "contractCanonicalHash": "a374f360ae1b2008c7ca80c1aed78548c38140c311250da819d253f83e20fffa",
+  "contract": {
+    "hashContract": {
+      "algorithm": "sha256",
+      "canonicalization": "recursive_object_key_sort_json_scalars_v1",
+      "nullOutputSchemaIsSignificant": true
+    },
+    "sourceEvidence": {
+      "path": "reports/ugv-agent-profile-simulation/external-preflight.redacted.json",
+      "status": "PASS_WITH_UPSTREAM_DRIFT",
+      "capturedAt": "2026-08-21T01:35:34.812Z",
+      "lockedProfile": "vehicle-mqtt-ingress/UGV_MQTT_SUBSCRIPTIONS",
+      "lockedProfileCanonicalHash": "5ebe7992d93d813a749f96aa83faea34fe3dff09d2797d21d6f44859151c40cd"
+    },
+    "scope": {
+      "goal": "UGV Agent Profile external simulation",
+      "executionMode": "simulation",
+      "exactTopicCount": 18,
+      "wildcardSubscriptionsAllowed": false,
+      "publishAllowedByThisArtifact": false
+    },
+    "wire": {
+      "mode": "ros_bridge_json",
+      "modeSource": "external_read_only_preflight",
+      "automaticDetectionAllowed": false
+    },
+    "subscriptions": [
+      {
+        "topic": "/ugv/gnss",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/imu",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/speed",
+        "qos": 1
+      },
+      {
+        "topic": "status/ugv",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/system_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/component_status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/battery_range_km",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/mission_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/nav_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/eo/pose",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/detected_objects",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/target_detected",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/target/gnss",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/targets",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/exception",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/coverage",
+        "qos": 0
+      }
+    ],
+    "subscriptionsCanonicalHash": "5ebe7992d93d813a749f96aa83faea34fe3dff09d2797d21d6f44859151c40cd",
+    "authority": {
+      "compositeStatus": {
+        "canonicalTopic": "status/ugv",
+        "compatibilityAliasTopics": ["/ugv/status"],
+        "aliasFallbackAfterMs": 3000
+      },
+      "missionState": {
+        "primaryTopic": "/ugv/mission_state",
+        "secondaryTopics": ["status/ugv", "/ugv/status"]
+      },
+      "finalPosition": {
+        "field": "chassis.position.geodetic",
+        "topic": "/ugv/gnss",
+        "coordinateFrame": "WGS84"
+      }
+    },
+    "fieldTimeSemantics": {
+      "observedAtPrecedence": [
+        "valid_header.stamp",
+        "valid_top_level_stamp_for_/ugv/status",
+        "mqtt_receivedAt"
+      ],
+      "rosStampFields": {
+        "seconds": ["sec", "secs"],
+        "nanoseconds": ["nanosec", "nsecs"]
+      },
+      "zeroEpochAcceptedAsSourceTime": false,
+      "missingSourceTimestampAuthority": "ingest",
+      "presentSourceTimestampAuthority": "source",
+      "olderSameAuthorityObservation": "ignored",
+      "finalPositionMustBePostDispatch": true
+    },
+    "thresholds": {
+      "freshnessMs": {
+        "chassis": 3000,
+        "mission": 3000,
+        "health": 5000,
+        "target": 3000,
+        "payload": 3000
+      },
+      "maximumFutureSkewMs": 1000,
+      "stationary": {
+        "speedThresholdKmh": 0.1,
+        "stabilityMs": 500,
+        "minimumSamples": 2
+      }
+    },
+    "mockContractDecision": {
+      "configurationKey": "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "resolvedValue": false,
+      "goalPolicy": "forbidden"
+    },
+    "observedUpstreamDrift": {
+      "canonicalStatusTopicObserved": false,
+      "compatibilityStatusAliasObserved": true,
+      "publisherQos": [
+        {
+          "topic": "/ugv/speed",
+          "observedQos": 0,
+          "expectedProtocolQos": 1
+        }
+      ],
+      "acceptedAsProtocolConformance": false
+    },
+    "safety": {
+      "toolsCallCount": 0,
+      "mqttPublishCount": 0,
+      "controlInvocationCount": 0,
+      "passiveSubscribeOnly": true,
+      "authorizationGranted": false
+    }
+  }
+}

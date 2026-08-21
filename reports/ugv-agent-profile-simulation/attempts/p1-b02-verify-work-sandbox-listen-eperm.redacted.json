@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "generatedAt": "2026-08-21T03:30:08.907Z",
+  "attemptedAt": null,
+  "attemptedAtMissingReason": "THE_INITIAL_SANDBOX_OUTPUT_WAS_CAPTURED_BEFORE_THIS_MACHINE_ENVELOPE_WAS_CREATED",
+  "taskId": "UAP-P1-B02",
+  "status": "BLOCKED_EXTERNAL_ENV",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "command": "pnpm verify:ugv-provider:work",
+  "exitCode": 1,
+  "reasonCode": "SANDBOX_LOOPBACK_BIND_EPERM",
+  "rootCause": "The sandbox denied 127.0.0.1 listener creation in two gRPC E2E tests. Format, lint, typecheck, build, unit, contract, integration, security and report checks had passed in the same run.",
+  "resolution": "The approved host-context rerun exited 0 and both gRPC E2E tests passed 2/2.",
+  "safety": {
+    "northboundToolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

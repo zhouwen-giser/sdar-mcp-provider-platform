@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "generatedAt": "2026-08-21T03:29:05.932Z",
+  "taskId": "UAP-P1-B02",
+  "status": "FAIL",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "command": "pnpm exec prettier --write <P1-B02 changed paths including shell scripts>",
+  "exitCode": 2,
+  "reasonCode": "PRETTIER_SHELL_PARSER_UNAVAILABLE",
+  "rootCause": "Prettier formatted the supported source files but cannot infer a parser for the two shell lifecycle scripts.",
+  "resolution": "Validate shell scripts with bash -n and rerun Prettier only over supported file types.",
+  "safety": {
+    "northboundToolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

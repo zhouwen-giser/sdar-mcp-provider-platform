@@ -67,6 +67,35 @@ describe("frozen Task acknowledgements", () => {
       body: { error: { code: -32003 } },
     });
   });
+
+  it("routes additive frozen pause/resume controls through the Task engine", async () => {
+    const controlTask = vi.fn().mockResolvedValue({
+      resultType: "complete",
+      taskId: "task-1",
+      status: "working",
+    });
+    const handler = new Sep2663ProtocolHandler(
+      new OperationRegistry().validate(manifest()),
+      "2.0.0-rc.1",
+      { controlTask } as unknown as TaskEngine,
+    );
+
+    for (const [method, command] of [
+      ["io.sdar/taskExecution/tasks/pause", "PAUSE"],
+      ["io.sdar/taskExecution/tasks/resume", "RESUME"],
+    ] as const) {
+      const response = await handler.dispatchAsync(
+        request(method, { taskId: "task-1" }),
+        headers(method, "task-1"),
+        authorization,
+      );
+      expect(response).toEqual({
+        httpStatus: 200,
+        body: { jsonrpc: "2.0", id: "request-1", result: { resultType: "complete" } },
+      });
+      expect(controlTask).toHaveBeenCalledWith("task-1", command, authorization);
+    }
+  });
 });
 
 function request(method: string, params: Record<string, unknown>): Record<string, unknown> {

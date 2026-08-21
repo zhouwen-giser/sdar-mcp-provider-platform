@@ -8,6 +8,8 @@ const namedMethods = new Set([
   "tasks/get",
   "tasks/update",
   "tasks/cancel",
+  "io.sdar/taskExecution/tasks/pause",
+  "io.sdar/taskExecution/tasks/resume",
   "io.sdar/businessEvents/relatedTasks/list",
 ]);
 

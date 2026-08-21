@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "ugv-agent-profile.p0-verification/v1",
+  "generatedAt": "2026-08-21T01:38:21.978Z",
+  "status": "PASS",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "taskId": "UAP-P0-B01",
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "11.7.0",
+    "dockerClient": "29.6.1",
+    "dockerServer": "29.6.1"
+  },
+  "commands": [
+    {
+      "command": "python3 scripts/validate_package.py .",
+      "workingDirectory": "/tmp/ugv-agent-profile-goal.NisdIO/ugv-agent-profile-sdar-smpp-simulation-goal-v1",
+      "exitCode": 0,
+      "result": "valid; 11 tasks; first UAP-P0-B01"
+    },
+    {
+      "command": "node scripts/ugv-simulation/preflight.mjs --output reports/ugv-agent-profile-simulation/external-preflight.redacted.json",
+      "workingDirectory": "/home/zhouwen/web-download/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "result": "PASS_WITH_UPSTREAM_DRIFT; initialize=1; tools/list=1; tools/call=0; MQTT subscribe=18 exact topics; publish=0"
+    },
+    {
+      "command": "pnpm test:ugv-provider:unit",
+      "exitCode": 0,
+      "result": "11 tests passed"
+    },
+    {
+      "command": "pnpm test:ugv-provider:contract",
+      "exitCode": 0,
+      "result": "8 tests passed"
+    },
+    {
+      "command": "pnpm test:ugv-provider:security",
+      "exitCode": 0,
+      "result": "4 tests passed"
+    },
+    {
+      "command": "pnpm test:ugv-provider:integration",
+      "exitCode": 0,
+      "result": "59 tests passed"
+    },
+    {
+      "command": "pnpm exec vitest run tests/e2e/ugv-provider-grpc-e2e.test.ts tests/ugv-simulation/pre-simulator-hardening.test.ts tests/ugv-simulation/device-mcp-contract.test.ts tests/ugv-simulation/mqtt-real-contract.test.ts tests/ugv-simulation/deployment-security.test.mjs tests/unit/real-device-runner-protocol.test.ts tests/unit/ugv-operation-qualification.test.ts tests/unit/provider-telemetry-client.test.ts",
+      "exitCode": 0,
+      "result": "8 files; 89 tests passed"
+    },
+    {
+      "command": "pnpm exec vitest run tests/protocol-conformance/tools-call.test.ts tests/protocol-conformance/detailed-task.test.ts tests/protocol-conformance/task-acks.test.ts tests/protocol-conformance/legacy-isolation.test.ts tests/protocol-conformance/mrtr.test.ts tests/protocol-conformance/notifications.test.ts tests/unit/task-state.test.ts",
+      "exitCode": 0,
+      "result": "7 files; 46 tests passed"
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation/provider-boundary.test.ts",
+      "exitCode": 0,
+      "result": "1 file; 6 tests passed"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "tsc --noEmit -p tsconfig.json"
+    },
+    {
+      "command": "pnpm exec prettier --check <P0 changed paths>",
+      "exitCode": 0,
+      "result": "both repositories matched Prettier style"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "both repositories passed"
+    }
+  ],
+  "testSummary": {
+    "inheritedUgvAndMcpRegressionTestsPassed": 217,
+    "currentP0FocusedTestsPassed": 6,
+    "currentRelevantTotalPassed": 223
+  },
+  "externalPreflight": {
+    "status": "PASS_WITH_UPSTREAM_DRIFT",
+    "authoritativeStateFreshness": "UNVERIFIED_PAYLOAD_NOT_RETAINED",
+    "toolsCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0,
+    "navigationDispatchCount": 0,
+    "forbiddenOperationCallCount": 0
+  },
+  "remainingP0Findings": [
+    "MQTT_CANONICAL_STATUS_TOPIC_NOT_OBSERVED",
+    "MQTT_SPEED_PUBLISHER_QOS_0_NOT_1",
+    "AUTHORITATIVE_STATE_FRESHNESS_DEFERRED_TO_PROVIDER_READ_ONLY_QUALIFICATION"
+  ]
+}

@@ -176,13 +176,23 @@ function catalogSnapshot(): CatalogSnapshot {
       discovery: {
         resultType: "complete",
         supportedVersions: ["2026-07-28"],
-        capabilities: {},
+        capabilities: frozenCapabilities(),
         serverInfo: { name: "runtime", version: "2.0.0" },
       },
       tools: [],
     },
     discoveredAt: new Date(0),
     createdAt: new Date(0),
+  };
+}
+
+function frozenCapabilities() {
+  return {
+    tools: {},
+    extensions: {
+      "io.modelcontextprotocol/tasks": {},
+      "io.sdar/taskExecution": { profileVersion: "1.0" as const, taskNotifications: true as const },
+    },
   };
 }
 

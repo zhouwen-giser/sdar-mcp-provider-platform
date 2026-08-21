@@ -28,6 +28,8 @@ export interface TaskExecutionProfile {
   readonly availability: "dynamic" | "not_supported";
   readonly supportsScheduling: boolean;
   readonly supportsMaxElapsed: boolean;
+  readonly supportsCancellation?: boolean;
+  readonly supportsPauseResume?: boolean;
   readonly supportsObservations: boolean;
   readonly supportsInputRequired: boolean;
   readonly idempotency: "server_managed" | "none";
@@ -46,10 +48,28 @@ export interface CatalogTool {
   readonly resourceBinding?: ResourceBinding;
 }
 
+export interface ProviderCatalogIdentity {
+  readonly providerId: string;
+  readonly providerType: string;
+  readonly providerVersion: string;
+  readonly manifestHash: string;
+}
+
 export interface RuntimeDiscovery {
   readonly resultType: "complete";
   readonly supportedVersions: readonly string[];
-  readonly capabilities: Readonly<Record<string, unknown>>;
+  readonly capabilities: {
+    readonly tools: Readonly<Record<string, never>>;
+    readonly extensions: {
+      readonly "io.modelcontextprotocol/tasks": Readonly<Record<string, never>>;
+      readonly "io.sdar/taskExecution": {
+        readonly profileVersion: "1.0";
+        readonly taskNotifications: true;
+      };
+      readonly "io.sdar/providerCatalog"?: ProviderCatalogIdentity;
+      readonly "io.sdar/businessEvents"?: Readonly<Record<string, unknown>>;
+    };
+  };
   readonly serverInfo: {
     readonly name: string;
     readonly version: string;

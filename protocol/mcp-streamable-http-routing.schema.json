@@ -34,6 +34,8 @@
         "tasks/get",
         "tasks/update",
         "tasks/cancel",
+        "io.sdar/taskExecution/tasks/pause",
+        "io.sdar/taskExecution/tasks/resume",
         "subscriptions/listen",
         "io.sdar/taskExecution/tasks/observations"
       ]
@@ -53,7 +55,9 @@
               "tools/call",
               "tasks/get",
               "tasks/update",
-              "tasks/cancel"
+              "tasks/cancel",
+              "io.sdar/taskExecution/tasks/pause",
+              "io.sdar/taskExecution/tasks/resume"
             ]
           }
         },

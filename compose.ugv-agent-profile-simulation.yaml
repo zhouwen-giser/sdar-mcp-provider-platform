@@ -1,0 +1,180 @@
+services:
+  ugv-agent-profile-adapter-postgres:
+    profiles: ["ugv-agent-profile-simulation"]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_profile_adapter
+      POSTGRES_DB: ugv_profile_adapter
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_profile_adapter -d ugv_profile_adapter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    volumes:
+      - ugv-agent-profile-adapter-postgres-data:/var/lib/postgresql/data
+    networks: [ugv-agent-profile-simulation]
+    security_opt: [no-new-privileges:true]
+
+  ugv-agent-profile-runtime-postgres:
+    profiles: ["ugv-agent-profile-simulation"]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugv_profile_runtime
+      POSTGRES_DB: ugv_profile_runtime
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ugv_profile_runtime -d ugv_profile_runtime"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    volumes:
+      - ugv-agent-profile-runtime-postgres-data:/var/lib/postgresql/data
+    networks: [ugv-agent-profile-simulation]
+    security_opt: [no-new-privileges:true]
+
+  ugv-agent-profile-adapter:
+    profiles: ["ugv-agent-profile-simulation"]
+    image: sdar/ugv-agent-profile-adapter:${UGV_AGENT_PROFILE_IMAGE_TAG:-local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ugv-provider-adapter
+    init: true
+    read_only: true
+    restart: unless-stopped
+    command:
+      [
+        "sh",
+        "-c",
+        "node dist/apps/ugv-provider-adapter/src/migrate.js && exec node dist/apps/ugv-provider-adapter/src/main.js",
+      ]
+    environment:
+      RUNTIME_ENV: test
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true"
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      PROVIDER_VERSION: 1.0.0
+      UGV_RESOURCE_ID: vehicle:ugv1
+      UGV_ENTITY_ID: ugv1
+      UGV_VEHICLE_TYPE: ugv
+      UGV_EXECUTION_MODE: simulation
+      UGV_FIRE_ENABLED: "false"
+      ADAPTER_HOST: 0.0.0.0
+      ADAPTER_PORT: "7010"
+      ADAPTER_TLS_MODE: disabled
+      UGV_ADAPTER_STORE_MODE: postgres
+      UGV_ADAPTER_DATABASE_URL: postgresql://ugv_profile_adapter@ugv-agent-profile-adapter-postgres:5432/ugv_profile_adapter
+      UGV_DEVICE_MCP_URL: http://192.168.2.63:19000/mcp
+      UGV_DEVICE_MCP_TIMEOUT_MS: "10000"
+      UGV_DEVICE_MCP_TLS_MODE: disabled
+      UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false"
+      UGV_DEVICE_MCP_CONTRACT_REPORT_PATH: /var/lib/sdar/contracts/MCP_CONTRACT_CAPTURE.json
+      UGV_MQTT_URL: mqtt://192.168.2.63:1883
+      UGV_MQTT_CLIENT_ID: sdar-ugv-agent-profile-simulation-ugv1
+      UGV_MQTT_TLS_MODE: disabled
+      UGV_MQTT_SESSION_MODE: persistent
+      UGV_MQTT_WIRE_MODE: ros_bridge_json
+      UGV_CHASSIS_FRESHNESS_MS: "3000"
+      UGV_MISSION_FRESHNESS_MS: "3000"
+      UGV_HEALTH_FRESHNESS_MS: "5000"
+      UGV_TARGET_FRESHNESS_MS: "3000"
+      UGV_PAYLOAD_FRESHNESS_MS: "3000"
+      UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: "1000"
+      UGV_STATIONARY_SPEED_THRESHOLD_KMH: "0.1"
+      UGV_STATIONARY_STABILITY_MS: "500"
+      UGV_STATIONARY_MIN_SAMPLES: "2"
+      UGV_ALLOW_NAVIGATION_WITH_RECON: "false"
+      PROVIDER_TELEMETRY_ENABLED: "true"
+      PROVIDER_TELEMETRY_ENDPOINT: ugv-agent-profile-runtime:7002
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      LOG_LEVEL: ${UGV_AGENT_PROFILE_LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:${UGV_AGENT_PROFILE_ADAPTER_PORT:-17021}:7010"
+    depends_on:
+      ugv-agent-profile-adapter-postgres:
+        condition: service_healthy
+    volumes:
+      - ugv-agent-profile-adapter-state:/var/lib/sdar
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('node:net');const s=net.connect({host:'127.0.0.1',port:7010},()=>s.end());s.setTimeout(2000,()=>s.destroy(Error('timeout')));s.on('error',()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-agent-profile-simulation]
+
+  ugv-agent-profile-runtime:
+    profiles: ["ugv-agent-profile-simulation"]
+    image: sdar/ugv-agent-profile-runtime:${UGV_AGENT_PROFILE_IMAGE_TAG:-local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    init: true
+    read_only: true
+    restart: unless-stopped
+    environment:
+      RUNTIME_ENV: test
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true"
+      PROVIDER_ID: isr.vehicle.ugv.ugv1
+      DATABASE_URL: postgresql://ugv_profile_runtime@ugv-agent-profile-runtime-postgres:5432/ugv_profile_runtime
+      ADAPTER_ENDPOINT: ugv-agent-profile-adapter:7010
+      ADAPTER_TLS_MODE: disabled
+      AUTH_MODE: development
+      MCP_LEGACY_ENDPOINT_ENABLED: "false"
+      INTERNAL_ENDPOINTS_ENABLED: "false"
+      BUSINESS_EVENTS_ENABLED: "true"
+      BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: "true"
+      PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
+      PROVIDER_TELEMETRY_HOST: 0.0.0.0
+      PROVIDER_TELEMETRY_PORT: "7002"
+      PROVIDER_TELEMETRY_TLS_MODE: disabled
+      OTEL_ENABLED: "false"
+      LOG_LEVEL: ${UGV_AGENT_PROFILE_LOG_LEVEL:-info}
+      HOST: 0.0.0.0
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:${UGV_AGENT_PROFILE_RUNTIME_PORT:-19121}:8080"
+    depends_on:
+      ugv-agent-profile-runtime-postgres:
+        condition: service_healthy
+      ugv-agent-profile-adapter:
+        condition: service_healthy
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [ugv-agent-profile-simulation]
+
+networks:
+  ugv-agent-profile-simulation:
+    driver: bridge
+
+volumes:
+  ugv-agent-profile-adapter-postgres-data:
+  ugv-agent-profile-runtime-postgres-data:
+  ugv-agent-profile-adapter-state:

@@ -1556,6 +1556,212 @@
       },
       "additionalProperties": false
     },
+    "PauseTaskRequest": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "method",
+        "params"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "method": {
+          "const": "io.sdar/taskExecution/tasks/pause"
+        },
+        "params": {
+          "type": "object",
+          "required": [
+            "taskId",
+            "_meta"
+          ],
+          "properties": {
+            "taskId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "_meta": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/protocolVersion",
+                "io.modelcontextprotocol/clientInfo",
+                "io.modelcontextprotocol/clientCapabilities"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/protocolVersion": {
+                  "const": "2026-07-28"
+                },
+                "io.modelcontextprotocol/clientInfo": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "version"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "version": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/clientCapabilities": {
+                  "type": "object",
+                  "properties": {
+                    "extensions": {
+                      "type": "object",
+                      "required": [
+                        "io.modelcontextprotocol/tasks"
+                      ],
+                      "properties": {
+                        "io.modelcontextprotocol/tasks": {
+                          "type": "object"
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "additionalProperties": true,
+                  "required": [
+                    "extensions"
+                  ]
+                },
+                "io.modelcontextprotocol/logLevel": {
+                  "type": "string"
+                },
+                "io.sdar/taskExecution": {
+                  "type": "object"
+                },
+                "progressToken": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "ResumeTaskRequest": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "method",
+        "params"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "method": {
+          "const": "io.sdar/taskExecution/tasks/resume"
+        },
+        "params": {
+          "type": "object",
+          "required": [
+            "taskId",
+            "_meta"
+          ],
+          "properties": {
+            "taskId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "_meta": {
+              "type": "object",
+              "required": [
+                "io.modelcontextprotocol/protocolVersion",
+                "io.modelcontextprotocol/clientInfo",
+                "io.modelcontextprotocol/clientCapabilities"
+              ],
+              "properties": {
+                "io.modelcontextprotocol/protocolVersion": {
+                  "const": "2026-07-28"
+                },
+                "io.modelcontextprotocol/clientInfo": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "version"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "version": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "io.modelcontextprotocol/clientCapabilities": {
+                  "type": "object",
+                  "properties": {
+                    "extensions": {
+                      "type": "object",
+                      "required": [
+                        "io.modelcontextprotocol/tasks"
+                      ],
+                      "properties": {
+                        "io.modelcontextprotocol/tasks": {
+                          "type": "object"
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "additionalProperties": true,
+                  "required": [
+                    "extensions"
+                  ]
+                },
+                "io.modelcontextprotocol/logLevel": {
+                  "type": "string"
+                },
+                "io.sdar/taskExecution": {
+                  "type": "object"
+                },
+                "progressToken": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "CompleteAck": {
       "type": "object",
       "required": [
@@ -1587,6 +1793,12 @@
     },
     {
       "$ref": "#/$defs/CancelTaskRequest"
+    },
+    {
+      "$ref": "#/$defs/PauseTaskRequest"
+    },
+    {
+      "$ref": "#/$defs/ResumeTaskRequest"
     },
     {
       "$ref": "#/$defs/CompleteAck"

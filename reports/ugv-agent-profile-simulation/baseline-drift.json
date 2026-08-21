@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "ugv-agent-profile.baseline-drift/v1",
+  "generatedAt": "2026-08-21T01:23:24.088Z",
+  "status": "reviewed_use_latest_user_selected_branch",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "referenceCommit": "f8c37e6a2ecdc859e56910803197ec938b9a807a",
+  "currentCommit": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+  "mergeBase": "c3a26b45fd03f93583ed07ecd15f191f9c0b52e4",
+  "history": {
+    "referenceOnlyCommits": 2,
+    "currentOnlyCommits": 9,
+    "linearAncestor": false,
+    "referenceTreeEqualsMergeBase": true
+  },
+  "changedFileCount": 46,
+  "changedAreas": [
+    "apps/ugv-provider-adapter",
+    "packages/vehicle-mqtt-ingress",
+    "packages/vehicle-provider-core",
+    "packages/provider-telemetry",
+    "deploy/development/ugv-runtime-telemetry-joint",
+    "scripts/ugv-simulation",
+    "tests",
+    "reports/ugv-runtime-telemetry-joint-integration"
+  ],
+  "relevantBranchOnlyCommits": [
+    "8b5b2a7 fix(ugv): make provider telemetry delivery observable",
+    "9cb48fd fix(ugv): enforce canonical MQTT status authority",
+    "d3dcd71 feat(development): wire UGV Runtime telemetry joint stack",
+    "3df3f14 fix(telemetry): preserve Provider Struct payloads",
+    "ce57d3d docs(delivery): package joint integration evidence"
+  ],
+  "referenceOnlyCommits": [
+    "9b39d43 Merge pull request #16 from zhouwen-giser/codex/ugv-provider-template-stabilization",
+    "f8c37e6 Merge pull request #17 from zhouwen-giser/codex/fix-ugv-observation-cursor-jsonb"
+  ],
+  "decision": "Per explicit user instruction, keep the verified latest relevant remote branch as baseline. The two reference-only commits are merge-only and the reference tree equals the common-ancestor tree, so the latest branch does not omit package-baseline code. Do not reset."
+}

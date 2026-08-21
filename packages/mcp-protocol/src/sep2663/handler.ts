@@ -60,7 +60,16 @@ export class Sep2663ProtocolHandler {
       let result: Record<string, unknown>;
       switch (request.method) {
         case "server/discover":
-          result = frozenDiscoveryResult(this.serverVersion, this.businessEventDiscovery);
+          result = frozenDiscoveryResult(
+            this.serverVersion,
+            {
+              providerId: this.manifest.providerId,
+              providerType: this.manifest.providerType,
+              providerVersion: this.manifest.providerVersion,
+              manifestHash: this.manifest.manifestHash,
+            },
+            this.businessEventDiscovery,
+          );
           break;
         case "tools/list":
           result = {
@@ -152,6 +161,18 @@ export class Sep2663ProtocolHandler {
         case "tasks/cancel": {
           const taskId = parseTaskReference(request.params);
           await this.taskEngine.cancelTaskCooperatively(taskId, authorization);
+          result = { resultType: "complete" };
+          break;
+        }
+        case "io.sdar/taskExecution/tasks/pause": {
+          const taskId = parseTaskReference(request.params);
+          await this.taskEngine.controlTask(taskId, "PAUSE", authorization);
+          result = { resultType: "complete" };
+          break;
+        }
+        case "io.sdar/taskExecution/tasks/resume": {
+          const taskId = parseTaskReference(request.params);
+          await this.taskEngine.controlTask(taskId, "RESUME", authorization);
           result = { resultType: "complete" };
           break;
         }

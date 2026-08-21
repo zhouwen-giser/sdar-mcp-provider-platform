@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CatalogDiscoveryClient,
   CatalogDiscoveryError,
+  catalogChecksum,
+  catalogDocument,
   type CatalogDiscoveryRequest,
   type CatalogDiscoveryTransport,
 } from "../src/index.js";
@@ -19,6 +21,12 @@ describe("CatalogDiscoveryClient", () => {
     expect(first.tools[0]?.resourceBinding).toEqual({
       mode: "ARGUMENT_REFERENCE",
       resourceIdJsonPointer: "/resourceId",
+    });
+    expect(first.discovery.capabilities.extensions["io.sdar/providerCatalog"]).toEqual({
+      providerId: "isr.vehicle.ugv.ugv1",
+      providerType: "isr.vehicle.ugv",
+      providerVersion: "1.0.0",
+      manifestHash: "a".repeat(64),
     });
     expect(first.canonicalJson).toBe(second.canonicalJson);
   });
@@ -147,9 +155,94 @@ describe("CatalogDiscoveryClient", () => {
       extensions: {
         "io.modelcontextprotocol/tasks": {},
         "io.sdar/taskExecution": { profileVersion: "1.0", taskNotifications: true },
+        "io.sdar/providerCatalog": {
+          providerId: "isr.vehicle.ugv.ugv1",
+          providerType: "isr.vehicle.ugv",
+          providerVersion: "1.0.0",
+          manifestHash: "a".repeat(64),
+        },
       },
     });
     expect(catalog.canonicalJson).not.toContain("catalog-private-value");
+  });
+
+  it.each([
+    { providerId: "bad provider" },
+    { providerType: "bad provider type" },
+    { providerVersion: "" },
+    { manifestHash: "not-a-sha256" },
+    { unexpected: "metadata" },
+  ])("rejects invalid or non-exact provider catalog identity: %o", async (override) => {
+    const response = discoveryResponse();
+    const result = response.result as Record<string, unknown>;
+    const capabilities = result.capabilities as Record<string, unknown>;
+    const extensions = capabilities.extensions as Record<string, unknown>;
+    extensions["io.sdar/providerCatalog"] = {
+      ...(extensions["io.sdar/providerCatalog"] as Record<string, unknown>),
+      ...override,
+    };
+
+    await expect(
+      new CatalogDiscoveryClient(transport([response, toolsResponse([])])).discover(),
+    ).rejects.toMatchObject({ code: "CATALOG_INVALID_DISCOVERY", retryable: false });
+  });
+
+  it("keeps provider catalog additive for an older frozen Runtime", async () => {
+    const response = discoveryResponse();
+    const result = response.result as Record<string, unknown>;
+    const capabilities = result.capabilities as Record<string, unknown>;
+    const extensions = capabilities.extensions as Record<string, unknown>;
+    delete extensions["io.sdar/providerCatalog"];
+
+    const catalog = await new CatalogDiscoveryClient(
+      transport([response, toolsResponse([])]),
+    ).discover();
+    expect(catalog.discovery.capabilities.extensions["io.sdar/providerCatalog"]).toBeUndefined();
+  });
+
+  it("binds every provider identity field into the canonical catalog checksum", async () => {
+    const baseline = await new CatalogDiscoveryClient(
+      transport([discoveryResponse(), toolsResponse([tool("one")])]),
+    ).discover();
+    const baselineChecksum = catalogChecksum(catalogDocument(baseline));
+    for (const [field, value] of [
+      ["providerId", "isr.vehicle.ugv.ugv2"],
+      ["providerType", "isr.vehicle.ground"],
+      ["providerVersion", "1.0.1"],
+      ["manifestHash", "b".repeat(64)],
+    ] as const) {
+      const response = discoveryResponse();
+      const result = response.result as Record<string, unknown>;
+      const capabilities = result.capabilities as Record<string, unknown>;
+      const extensions = capabilities.extensions as Record<string, unknown>;
+      const providerCatalog = extensions["io.sdar/providerCatalog"] as Record<string, unknown>;
+      providerCatalog[field] = value;
+      const changed = await new CatalogDiscoveryClient(
+        transport([response, toolsResponse([tool("one")])]),
+      ).discover();
+      expect(changed.canonicalJson, field).not.toBe(baseline.canonicalJson);
+      expect(catalogChecksum(catalogDocument(changed)), field).not.toBe(baselineChecksum);
+    }
+  });
+
+  it("excludes readiness and private diagnostics from canonical catalog identity", async () => {
+    const baseline = await new CatalogDiscoveryClient(
+      transport([discoveryResponse(), toolsResponse([tool("one")])]),
+    ).discover();
+    const response = discoveryResponse();
+    const result = response.result as Record<string, unknown>;
+    const capabilities = result.capabilities as Record<string, unknown>;
+    const extensions = capabilities.extensions as Record<string, unknown>;
+    extensions["io.sdar/providerReadiness"] = { ready: false, checkedAt: "volatile" };
+    extensions["io.sdar/privateDiagnostics"] = { endpoint: "http://runtime.internal" };
+    const sanitized = await new CatalogDiscoveryClient(
+      transport([response, toolsResponse([tool("one")])]),
+    ).discover();
+
+    expect(sanitized.canonicalJson).toBe(baseline.canonicalJson);
+    expect(catalogChecksum(catalogDocument(sanitized))).toBe(
+      catalogChecksum(catalogDocument(baseline)),
+    );
   });
 
   it.each([
@@ -190,6 +283,12 @@ function discoveryResponse(): Record<string, unknown> {
       extensions: {
         "io.modelcontextprotocol/tasks": {},
         "io.sdar/taskExecution": { profileVersion: "1.0", taskNotifications: true },
+        "io.sdar/providerCatalog": {
+          providerId: "isr.vehicle.ugv.ugv1",
+          providerType: "isr.vehicle.ugv",
+          providerVersion: "1.0.0",
+          manifestHash: "a".repeat(64),
+        },
       },
     },
     _meta: {

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "ugv-agent-profile.deployment-profile-verification/v1",
+  "taskId": "UAP-P1-B01",
+  "generatedAt": "2026-08-21T02:18:53.339Z",
+  "status": "PASS_LOCAL_PROFILE_CONTRACT",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "baseline": {
+    "repository": "sdar-mcp-provider-platform",
+    "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+    "commit": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+    "policy": "latest relevant SMPP branch selected by user"
+  },
+  "profile": {
+    "projectName": "sdar-ugv-agent-profile-simulation",
+    "composeBase": "compose.yaml",
+    "composeOverride": "compose.ugv-agent-profile-simulation.yaml",
+    "profileName": "ugv-agent-profile-simulation",
+    "selectedServiceClosure": [
+      "ugv-agent-profile-adapter",
+      "ugv-agent-profile-adapter-postgres",
+      "ugv-agent-profile-runtime",
+      "ugv-agent-profile-runtime-postgres"
+    ],
+    "excludedRootDefaultServices": ["adapter-typescript", "postgres", "runtime"],
+    "excludedUgvMockServices": ["mqtt-ugv-test", "mock-ugv-device-mcp", "mock-ugv-mqtt-publisher"],
+    "durableInfrastructure": ["adapter_postgresql", "runtime_postgresql"],
+    "notRequiredByCurrentRuntimeTopology": ["pms", "registry", "redis"],
+    "ports": {
+      "adapter": "127.0.0.1:17021",
+      "runtimeMcp": "127.0.0.1:19121"
+    },
+    "volumesProjectScoped": true
+  },
+  "externalBoundary": {
+    "executionMode": "simulation",
+    "runtimeEnvironment": "test",
+    "mqtt": "mqtt://192.168.2.63:1883",
+    "deviceMcp": "http://192.168.2.63:19000/mcp",
+    "wireMode": "ros_bridge_json",
+    "mockContractFallback": false,
+    "fireEnabled": false,
+    "navigationWithRecon": false,
+    "credentialsConfigured": false
+  },
+  "frozenContracts": {
+    "deviceMcpCanonicalHash": "472e482c64d7f71f167cfb60461570068c7948108a46aa7614ea9bfccaea4c72",
+    "mqttCanonicalHash": "a374f360ae1b2008c7ca80c1aed78548c38140c311250da819d253f83e20fffa",
+    "mqttSubscriptionProfileHash": "5ebe7992d93d813a749f96aa83faea34fe3dff09d2797d21d6f44859151c40cd"
+  },
+  "lifecycle": {
+    "entrypoint": "UGV_SIMULATION_RUN_ID=<unique-id> bash deploy/ugv-agent-profile-simulation/up.sh",
+    "scripts": ["preflight", "up", "health", "down", "logs", "clean"],
+    "preflightBeforeStartup": true,
+    "preflightEvidencePattern": "reports/ugv-agent-profile-simulation/attempts/deployment-preflight-<run-id>.redacted.json",
+    "runIdReservedBeforeAnyLaterGate": true,
+    "failedRunIdReusable": false,
+    "repeatedUpWhileHealthy": "health_check_only",
+    "downPreservesVolumes": true,
+    "cleanScope": "fixed_compose_project_and_its_named_volumes_only"
+  },
+  "safety": {
+    "authorizationGranted": false,
+    "externalNetworkAttempted": false,
+    "containersStarted": 0,
+    "toolsCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0,
+    "forbiddenOperationCallCount": 0,
+    "remoteShellOrCommandAdministrationExposed": false,
+    "rootComposeModified": false
+  },
+  "verification": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "summary": "45 workspace projects; lockfile already current"
+    },
+    {
+      "command": "docker compose -f compose.yaml -f compose.ugv-agent-profile-simulation.yaml config",
+      "exitCode": 0,
+      "summary": "mandatory additive Compose parse"
+    },
+    {
+      "command": "docker compose --project-name sdar-ugv-agent-profile-simulation -f compose.yaml -f compose.ugv-agent-profile-simulation.yaml --profile ugv-agent-profile-simulation config --format json; node scripts/ugv-agent-profile-simulation/validate-compose-profile.mjs --compose-json <rendered>",
+      "exitCode": 0,
+      "summary": "four Goal services, zero mock/root-default services in selected dependency closure"
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-simulation/ugv-agent-profile-deployment.test.ts",
+      "exitCode": 0,
+      "summary": "8 profile tests passed; final joint replay with Provider-boundary tests passed 14/14"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "failedAttempts": [
+    "attempts/p1-b01-docker-project-inspection-sandbox-blocked.redacted.json",
+    "attempts/p1-b01-lint-attempt-0-d-mts-project-service.redacted.json",
+    "attempts/p1-b01-lint-attempt-1-strict-rules.redacted.json",
+    "attempts/p1-b01-focused-test-attempt-0-docker-spawn-eperm.redacted.json",
+    "attempts/p1-b01-focused-test-attempt-1-reservation-import.redacted.json",
+    "attempts/p1-b01-focused-test-attempt-2-stdout-assertion.redacted.json",
+    "attempts/p1-b01-focused-test-attempt-3-stderr-assertion.redacted.json"
+  ],
+  "remainingExternalGate": {
+    "task": "UAP-P1-B02",
+    "status": "NOT_RUN",
+    "minimumCondition": "operator-approved unique read-only run ID plus external endpoint reachability",
+    "navigationAuthorized": false
+  }
+}

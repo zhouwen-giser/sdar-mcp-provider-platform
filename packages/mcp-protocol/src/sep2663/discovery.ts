@@ -1,7 +1,15 @@
 import { FROZEN_PROTOCOL_VERSION } from "./request-validator.js";
 
+export interface FrozenProviderCatalog {
+  readonly providerId: string;
+  readonly providerType: string;
+  readonly providerVersion: string;
+  readonly manifestHash: string;
+}
+
 export function frozenDiscoveryResult(
   serverVersion: string,
+  providerCatalog: FrozenProviderCatalog,
   businessEvents?: Record<string, unknown>,
 ): Record<string, unknown> {
   return {
@@ -14,6 +22,12 @@ export function frozenDiscoveryResult(
         "io.sdar/taskExecution": {
           profileVersion: "1.0",
           taskNotifications: true,
+        },
+        "io.sdar/providerCatalog": {
+          providerId: providerCatalog.providerId,
+          providerType: providerCatalog.providerType,
+          providerVersion: providerCatalog.providerVersion,
+          manifestHash: providerCatalog.manifestHash,
         },
         ...(businessEvents === undefined ? {} : { "io.sdar/businessEvents": businessEvents }),
       },

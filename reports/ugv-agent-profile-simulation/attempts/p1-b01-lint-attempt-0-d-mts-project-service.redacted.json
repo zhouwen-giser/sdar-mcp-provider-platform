@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "taskId": "UAP-P1-B01",
+  "attempt": 0,
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "command": "pnpm lint",
+  "exitCode": 2,
+  "result": "FAILED_LINT_CONFIGURATION_GAP",
+  "reasonCode": "D_MTS_TYPED_LINT_PROJECT_NOT_CONFIGURED",
+  "summary": {
+    "file": "scripts/ugv-agent-profile-simulation/freeze-contracts.d.mts",
+    "rule": "@typescript-eslint/await-thenable",
+    "externalNetworkAttempted": false,
+    "containersStarted": 0,
+    "deviceToolsCalled": 0,
+    "mqttPublishes": 0
+  },
+  "rootCause": "The repository applies strict typed rules globally but its typed file pattern and TypeScript project included .ts/.tsx only, leaving the required .d.mts declaration without parser services.",
+  "resolution": "Add only scripts/**/*.d.mts to the existing typed ESLint file set and tsconfig include. Executable source retains all strict typed rules; no rule or assertion is disabled."
+}

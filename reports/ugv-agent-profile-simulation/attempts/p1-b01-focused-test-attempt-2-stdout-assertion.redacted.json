@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "taskId": "UAP-P1-B01",
+  "attempt": 2,
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "command": "pnpm exec vitest run tests/ugv-simulation/ugv-agent-profile-deployment.test.ts",
+  "exitCode": 1,
+  "result": "FAILED_TEST_ASSERTION",
+  "reasonCode": "CHILD_STDOUT_NOT_CAPTURED_UNDER_VITEST",
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "reservationProcessExitCode": 0,
+    "externalNetworkAttempted": false,
+    "containersStarted": 0,
+    "deviceToolsCalled": 0,
+    "mqttPublishes": 0
+  },
+  "resolution": "Assert the immutable marker contents and the second invocation's stable rejection instead of relying on non-authoritative child stdout capture."
+}

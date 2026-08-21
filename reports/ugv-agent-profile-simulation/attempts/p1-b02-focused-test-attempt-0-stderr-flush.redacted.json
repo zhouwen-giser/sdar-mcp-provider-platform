@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "generatedAt": "2026-08-21T03:23:20.000Z",
+  "taskId": "UAP-P1-B02",
+  "status": "FAIL",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "command": "node --test tests/ugv-simulation/ugv-provider-simulation-qualification.test.mjs",
+  "exitCode": 1,
+  "reasonCode": "TEST_CHILD_STDERR_FLUSH_ASSERTION_INVALID",
+  "rootCause": "The reservation child used process.exit(2), so its diagnostic was not guaranteed to flush before process termination; the immutable marker and exit code were correct.",
+  "resolution": "Assert the stable exit code and source-coded reason while retaining the on-disk immutable marker check.",
+  "safety": {
+    "northboundToolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

@@ -44,6 +44,8 @@ describe("Operation Registry", () => {
         profileVersion: "1.0",
         taskBehavior: "synchronous_only",
         supportsScheduling: false,
+        supportsCancellation: false,
+        supportsPauseResume: false,
         idempotency: "server_managed",
       },
     });
@@ -53,6 +55,24 @@ describe("Operation Registry", () => {
     );
     expect(first.operations[0]?.tool._meta).not.toHaveProperty(
       "io.sdar/taskExecution.supportsIdempotency",
+    );
+  });
+
+  it.each([
+    ["providerType", ""],
+    ["providerType", "https://catalog.example/provider"],
+    ["providerType", "type with spaces"],
+    ["providerType", `test\nsecret`],
+    ["providerType", "x".repeat(129)],
+    ["providerVersion", ""],
+    ["providerVersion", "user:password@example.test"],
+    ["providerVersion", "version with spaces"],
+    ["providerVersion", "x".repeat(65)],
+  ] as const)("rejects unsafe public manifest %s=%s", (field, value) => {
+    const candidate = manifest();
+    candidate[field] = value;
+    expect(() => new OperationRegistry().validate(candidate)).toThrow(
+      field === "providerType" ? "INVALID_PROVIDER_TYPE" : "INVALID_PROVIDER_VERSION",
     );
   });
 

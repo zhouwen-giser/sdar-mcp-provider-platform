@@ -9,6 +9,7 @@ import {
   type CatalogDiscoveryTransport,
   type CatalogTool,
   type DiscoveredCatalog,
+  type ProviderCatalogIdentity,
   type ResourceBinding,
   type RuntimeDiscovery,
   type TaskExecutionProfile,
@@ -19,6 +20,10 @@ const JSON_POINTER = /^(?:\/(?:[^~/]|~0|~1)*)+$/;
 const TASK_BEHAVIORS = new Set(["synchronous_only", "server_directed", "task_required"]);
 const AVAILABILITY = new Set(["dynamic", "not_supported"]);
 const IDEMPOTENCY = new Set(["server_managed", "none"]);
+const PROVIDER_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const PROVIDER_TYPE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const PROVIDER_VERSION = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/;
+const MANIFEST_HASH = /^[0-9a-f]{64}$/;
 
 const DEFAULT_OPTIONS = {
   timeoutMs: 5_000,
@@ -181,6 +186,9 @@ function validateDiscovery(value: unknown): RuntimeDiscovery {
   const extensions = record(capabilities.extensions, "CATALOG_INVALID_DISCOVERY");
   const taskExtension = extensions["io.modelcontextprotocol/tasks"];
   const taskProfile = record(extensions["io.sdar/taskExecution"], "CATALOG_INVALID_DISCOVERY");
+  const providerCatalogValue = extensions["io.sdar/providerCatalog"];
+  const providerCatalog =
+    providerCatalogValue === undefined ? undefined : validateProviderCatalog(providerCatalogValue);
   const businessEvents = extensions["io.sdar/businessEvents"];
   const metadata = record(discovery._meta, "CATALOG_INVALID_DISCOVERY");
   const serverInfo = record(
@@ -215,6 +223,7 @@ function validateDiscovery(value: unknown): RuntimeDiscovery {
           profileVersion: "1.0",
           taskNotifications: true,
         },
+        ...(providerCatalog === undefined ? {} : { "io.sdar/providerCatalog": providerCatalog }),
         ...(businessEvents === undefined
           ? {}
           : { "io.sdar/businessEvents": record(businessEvents, "CATALOG_INVALID_DISCOVERY") }),
@@ -224,6 +233,29 @@ function validateDiscovery(value: unknown): RuntimeDiscovery {
     ...(typeof discovery.instructions === "string" ? { instructions: discovery.instructions } : {}),
     ...(typeof discovery.ttlMs === "number" ? { ttlMs: discovery.ttlMs } : {}),
     ...(typeof discovery.cacheScope === "string" ? { cacheScope: discovery.cacheScope } : {}),
+  };
+}
+
+function validateProviderCatalog(value: unknown): ProviderCatalogIdentity {
+  const catalog = record(value, "CATALOG_INVALID_DISCOVERY");
+  if (
+    Object.keys(catalog).length !== 4 ||
+    typeof catalog.providerId !== "string" ||
+    !PROVIDER_ID.test(catalog.providerId) ||
+    typeof catalog.providerType !== "string" ||
+    !PROVIDER_TYPE.test(catalog.providerType) ||
+    typeof catalog.providerVersion !== "string" ||
+    !PROVIDER_VERSION.test(catalog.providerVersion) ||
+    typeof catalog.manifestHash !== "string" ||
+    !MANIFEST_HASH.test(catalog.manifestHash)
+  ) {
+    throw new CatalogDiscoveryError("CATALOG_INVALID_DISCOVERY", false);
+  }
+  return {
+    providerId: catalog.providerId,
+    providerType: catalog.providerType,
+    providerVersion: catalog.providerVersion,
+    manifestHash: catalog.manifestHash,
   };
 }
 
@@ -241,6 +273,10 @@ function validateTaskExecution(value: unknown): TaskExecutionProfile {
     !AVAILABILITY.has(profile.availability) ||
     typeof profile.supportsScheduling !== "boolean" ||
     typeof profile.supportsMaxElapsed !== "boolean" ||
+    (profile.supportsCancellation !== undefined &&
+      typeof profile.supportsCancellation !== "boolean") ||
+    (profile.supportsPauseResume !== undefined &&
+      typeof profile.supportsPauseResume !== "boolean") ||
     typeof profile.supportsObservations !== "boolean" ||
     typeof profile.supportsInputRequired !== "boolean" ||
     typeof profile.idempotency !== "string" ||
@@ -248,7 +284,22 @@ function validateTaskExecution(value: unknown): TaskExecutionProfile {
   ) {
     throw new CatalogDiscoveryError("CATALOG_INVALID_TOOL", false);
   }
-  return profile as unknown as TaskExecutionProfile;
+  return {
+    profileVersion: "1.0",
+    taskBehavior: profile.taskBehavior as TaskExecutionProfile["taskBehavior"],
+    availability: profile.availability as TaskExecutionProfile["availability"],
+    supportsScheduling: profile.supportsScheduling,
+    supportsMaxElapsed: profile.supportsMaxElapsed,
+    ...(profile.supportsCancellation === undefined
+      ? {}
+      : { supportsCancellation: profile.supportsCancellation }),
+    ...(profile.supportsPauseResume === undefined
+      ? {}
+      : { supportsPauseResume: profile.supportsPauseResume }),
+    supportsObservations: profile.supportsObservations,
+    supportsInputRequired: profile.supportsInputRequired,
+    idempotency: profile.idempotency as TaskExecutionProfile["idempotency"],
+  };
 }
 
 function validateResourceBinding(value: unknown): ResourceBinding {
