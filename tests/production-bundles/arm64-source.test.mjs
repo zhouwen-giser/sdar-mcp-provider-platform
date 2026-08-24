@@ -100,9 +100,13 @@ for (const productId of PRODUCT_IDS) {
   });
 }
 
-test("Dockerfile allows the ARM64 package to pin every Node base stage", async () => {
+test("Dockerfile freezes its default while allowing the ARM64 package to pin every Node stage", async () => {
   const dockerfile = await readFile(join(repositoryRoot, "Dockerfile"), "utf8");
-  assert.match(dockerfile, /^ARG NODE_BASE_IMAGE=node:22-bookworm-slim$/m);
+  assert.match(
+    dockerfile,
+    /^ARG NODE_BASE_IMAGE=node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436$/m,
+  );
+  assert.equal((dockerfile.match(/^ARG NODE_BASE_IMAGE=/gm) ?? []).length, 1);
   assert.equal((dockerfile.match(/^FROM \$\{NODE_BASE_IMAGE\} AS /gm) ?? []).length, 6);
   assert.equal((dockerfile.match(/^FROM node:22-bookworm-slim AS /gm) ?? []).length, 0);
   assert.match(dockerfile, /install --frozen-lockfile --ignore-scripts --prefer-offline/);

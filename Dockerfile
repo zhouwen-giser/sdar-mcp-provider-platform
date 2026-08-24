@@ -1,4 +1,4 @@
-ARG NODE_BASE_IMAGE=node:22-bookworm-slim
+ARG NODE_BASE_IMAGE=node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
 
 FROM ${NODE_BASE_IMAGE} AS build
 ARG VITE_PMS_DATA_MODE=api

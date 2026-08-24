@@ -3,7 +3,11 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "nod
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { verifyDockerWorkspaceManifests } from "../../scripts/verify-docker-workspace-manifests.mjs";
+import {
+  REQUIRED_NODE_BASE_IMAGE,
+  verifyDockerBaseImageContract,
+  verifyDockerWorkspaceManifests,
+} from "../../scripts/verify-docker-workspace-manifests.mjs";
 
 const temporaryDirectories = [];
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -22,6 +26,17 @@ describe("Docker workspace manifest verification", () => {
 
   it("stages every real workspace manifest exactly once", () => {
     const result = verifyDockerWorkspaceManifests({ rootDirectory: repositoryRoot });
+    expect(result.baseImageContract.declaration).toBe(
+      `ARG NODE_BASE_IMAGE=${REQUIRED_NODE_BASE_IMAGE}`,
+    );
+    expect(result.baseImageContract.stages).toEqual([
+      "build",
+      "ugv-real-base",
+      "npc-real-base",
+      "runtime",
+      "pms-base",
+      "pms-web",
+    ]);
     expect([...result.stagedManifests].sort()).toEqual([...result.requiredManifests].sort());
     expect(new Set(result.stagedManifests).size).toBe(result.stagedManifests.length);
   });
@@ -31,7 +46,7 @@ describe("Docker workspace manifest verification", () => {
     writeFileSync(
       join(rootDirectory, "Dockerfile"),
       [
-        "FROM node:22-bookworm-slim AS build",
+        ...validBaseImageContractLines(),
         "COPY apps/included/package.json apps/included/package.json",
         "RUN pnpm install --frozen-lockfile",
       ].join("\n"),
@@ -47,7 +62,7 @@ describe("Docker workspace manifest verification", () => {
     writeFileSync(
       join(rootDirectory, "Dockerfile"),
       [
-        "FROM node:22-bookworm-slim AS build",
+        ...validBaseImageContractLines(),
         "COPY apps/included/package.json apps/included/package.json",
         "COPY apps/omitted/package.json apps/omitted/package.json",
         "RUN pnpm install --frozen-lockfile",
@@ -65,7 +80,7 @@ describe("Docker workspace manifest verification", () => {
     writeFileSync(
       join(rootDirectory, "Dockerfile"),
       [
-        "FROM node:22-bookworm-slim AS build",
+        ...validBaseImageContractLines(),
         "COPY apps/included/package.json apps/included/package.json",
         "COPY apps/omitted/package.json apps/omitted/package.json",
         "RUN --mount=type=cache,target=/pnpm/store \\",
@@ -76,7 +91,55 @@ describe("Docker workspace manifest verification", () => {
 
     expect(verifyDockerWorkspaceManifests({ rootDirectory }).requiredManifests).toHaveLength(2);
   });
+
+  it("rejects floating and mismatched NODE_BASE_IMAGE defaults", () => {
+    const dockerfile = validBaseImageContractLines().join("\n");
+    expect(() =>
+      verifyDockerBaseImageContract(
+        dockerfile.replace(REQUIRED_NODE_BASE_IMAGE, "node:22-bookworm-slim"),
+      ),
+    ).toThrow(/default must be exactly/u);
+    expect(() =>
+      verifyDockerBaseImageContract(
+        dockerfile.replace(
+          REQUIRED_NODE_BASE_IMAGE,
+          `node:22-bookworm-slim@sha256:${"0".repeat(64)}`,
+        ),
+      ),
+    ).toThrow(/default must be exactly/u);
+  });
+
+  it("rejects duplicate declarations and any change to the six base consumers", () => {
+    const dockerfile = validBaseImageContractLines().join("\n");
+    expect(() =>
+      verifyDockerBaseImageContract(
+        `${dockerfile}\nARG NODE_BASE_IMAGE=${REQUIRED_NODE_BASE_IMAGE}`,
+      ),
+    ).toThrow(/exactly once/u);
+    expect(() =>
+      verifyDockerBaseImageContract(
+        dockerfile.replace("FROM ${NODE_BASE_IMAGE} AS pms-web", "FROM pms-base AS pms-web"),
+      ),
+    ).toThrow(/consumers must be exactly/u);
+    expect(() =>
+      verifyDockerBaseImageContract(
+        dockerfile.replace("FROM ${NODE_BASE_IMAGE} AS pms-web", "FROM ${NODE_BASE_IMAGE} AS web"),
+      ),
+    ).toThrow(/consumers must be exactly/u);
+  });
 });
+
+function validBaseImageContractLines() {
+  return [
+    `ARG NODE_BASE_IMAGE=${REQUIRED_NODE_BASE_IMAGE}`,
+    "FROM ${NODE_BASE_IMAGE} AS build",
+    "FROM ${NODE_BASE_IMAGE} AS ugv-real-base",
+    "FROM ${NODE_BASE_IMAGE} AS npc-real-base",
+    "FROM ${NODE_BASE_IMAGE} AS runtime",
+    "FROM ${NODE_BASE_IMAGE} AS pms-base",
+    "FROM ${NODE_BASE_IMAGE} AS pms-web",
+  ];
+}
 
 function fixtureRoot() {
   const rootDirectory = mkdtempSync(join(tmpdir(), "sdar-docker-workspaces-"));

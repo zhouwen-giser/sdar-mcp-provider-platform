@@ -36,6 +36,7 @@ import {
   validateComposeDocument,
 } from "./lib.mjs";
 import { arm64BuildImagesScript } from "./arm64-source-scripts.mjs";
+import { verifyDockerBaseImageContract } from "../verify-docker-workspace-manifests.mjs";
 
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REPOSITORY_ROOT = resolve(SCRIPT_DIRECTORY, "../..");
@@ -515,10 +516,11 @@ export async function validateArm64SourceStaged(bundleRoot, options = {}) {
   const dockerfile = capture("tar", ["-xOzf", sourceArchive, "Dockerfile"], {
     code: "ARM64_SOURCE_DOCKERFILE_READ_FAILED",
   });
-  if (!/^ARG NODE_BASE_IMAGE=node:22-bookworm-slim$/m.test(dockerfile))
-    throw coded("ARM64_SOURCE_DOCKERFILE_BASE_ARGUMENT_MISSING");
-  if ((dockerfile.match(/^FROM \$\{NODE_BASE_IMAGE\} AS /gm) ?? []).length !== 6)
-    throw coded("ARM64_SOURCE_DOCKERFILE_BASE_ARGUMENT_INCOMPLETE");
+  try {
+    verifyDockerBaseImageContract(dockerfile);
+  } catch (error) {
+    throw coded("ARM64_SOURCE_DOCKERFILE_BASE_CONTRACT_INVALID", undefined, error);
+  }
   if (!dockerfile.includes("install --frozen-lockfile --ignore-scripts --prefer-offline"))
     throw coded("ARM64_SOURCE_DOCKERFILE_INSTALL_SCRIPTS_NOT_ISOLATED");
   if (!dockerfile.includes("rebuild esbuild grpc-tools"))
