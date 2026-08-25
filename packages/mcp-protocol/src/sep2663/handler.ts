@@ -3,7 +3,7 @@ import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:
 import type { ValidatedManifest } from "../../../operation-registry/src/index.js";
 import type { AuthorizationContext } from "../../../domain/src/index.js";
 import { RUNTIME_VERSION } from "../../../domain/src/index.js";
-import type { TaskEngine } from "../../../task-engine/src/index.js";
+import type { ProviderLocalTaskIdentity, TaskEngine } from "../../../task-engine/src/index.js";
 import { createAuthorizationResolver, type AuthorizationResolver } from "../security.js";
 import { frozenDiscoveryResult } from "./discovery.js";
 import { FrozenErrorCode, FrozenProtocolError, frozenErrorResponse } from "./errors.js";
@@ -32,6 +32,15 @@ export interface FrozenDispatchResult {
   body: Record<string, unknown>;
 }
 
+export interface ProviderAdmissionObservation {
+  readonly rawResponse: Readonly<Record<string, unknown>>;
+  readonly localIdentity: ProviderLocalTaskIdentity;
+}
+
+export type ProviderAdmissionObserver = (
+  observation: ProviderAdmissionObservation,
+) => void | Promise<void>;
+
 export class Sep2663ProtocolHandler {
   readonly notificationStream: TaskNotificationStream | undefined;
   readonly #transportScopes = new WeakMap<object, string>();
@@ -46,6 +55,7 @@ export class Sep2663ProtocolHandler {
     readonly businessEventDiscovery?: Record<string, unknown>,
     readonly businessEventRelationManager?: BusinessEventRelationManager,
     readonly onProtocolError?: (error: unknown, requestId: string | number | null) => void,
+    readonly onProviderAdmission?: ProviderAdmissionObserver,
   ) {
     this.notificationStream =
       notificationStream ??
@@ -142,7 +152,12 @@ export class Sep2663ProtocolHandler {
           call.timing,
           call.reservationRef,
         );
-        return { httpStatus: 200, body: { jsonrpc: "2.0", id: request.id, result } };
+        const response = {
+          httpStatus: 200,
+          body: { jsonrpc: "2.0", id: request.id, result },
+        } satisfies FrozenDispatchResult;
+        await this.#observeProviderAdmission(response, request.id, result);
+        return response;
       }
       requireTasksCapability(request);
       switch (request.method) {
@@ -255,6 +270,34 @@ export class Sep2663ProtocolHandler {
     const created = randomUUID();
     this.#transportScopes.set(transport, created);
     return created;
+  }
+
+  async #observeProviderAdmission(
+    response: FrozenDispatchResult,
+    requestIdValue: string | number,
+    result: Record<string, unknown>,
+  ): Promise<void> {
+    if (
+      this.onProviderAdmission === undefined ||
+      result.resultType !== "task" ||
+      typeof result.taskId !== "string"
+    ) {
+      return;
+    }
+    try {
+      const localIdentity = await this.taskEngine?.providerLocalTaskIdentity(result.taskId);
+      if (localIdentity === null || localIdentity === undefined) {
+        throw new Error("PROVIDER_LOCAL_TASK_IDENTITY_NOT_COMMITTED");
+      }
+      await this.onProviderAdmission({
+        rawResponse: structuredClone(response.body),
+        localIdentity,
+      });
+    } catch (error) {
+      // Observation is development evidence only and can never change the
+      // already committed admission or its protocol response.
+      this.onProtocolError?.(error, requestIdValue);
+    }
   }
 }
 

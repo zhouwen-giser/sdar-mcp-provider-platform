@@ -71,6 +71,18 @@ export interface TaskTraceEvent {
   error?: string;
 }
 
+export interface ProviderLocalTaskIdentity {
+  readonly taskId: string;
+  readonly providerId: string;
+  readonly externalExecutionId: string | null;
+  readonly operationName: string;
+  readonly runtimeRevision: string;
+  readonly providerRevision: string | null;
+  readonly correlationId: string | null;
+  readonly executionMode: string;
+  readonly simulationId: string | null;
+}
+
 export class TaskEngine {
   readonly #repository: TaskRepository;
   readonly #operationSnapshots: OperationSnapshotRepository;
@@ -98,6 +110,27 @@ export class TaskEngine {
 
   async resolveTaskOperation(snapshotId: string): Promise<ResolvedTaskOperation> {
     return this.#operationSnapshots.loadOperationSnapshot(snapshotId);
+  }
+
+  /**
+   * Reads identities committed by the Provider admission transaction. This is
+   * deliberately a local observation and does not accept or promote caller
+   * supplied Provider Source, server, or other origin claims.
+   */
+  async providerLocalTaskIdentity(taskId: string): Promise<ProviderLocalTaskIdentity | null> {
+    const task = await this.#repository.getById(taskId);
+    if (task === null) return null;
+    return Object.freeze({
+      taskId: task.taskId,
+      providerId: task.providerId,
+      externalExecutionId: task.externalExecutionId,
+      operationName: task.operationName,
+      runtimeRevision: task.runtimeRevision,
+      providerRevision: task.adapterRevision > 0 ? String(task.adapterRevision) : null,
+      correlationId: task.correlationId ?? null,
+      executionMode: task.executionMode,
+      simulationId: task.simulationId,
+    });
   }
 
   async #validateTaskSnapshot(

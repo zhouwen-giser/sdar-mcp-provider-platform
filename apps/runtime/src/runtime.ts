@@ -61,6 +61,7 @@ import { BoundedRateLimiter } from "./rate-limiter.js";
 import { AdapterManifestWatcher } from "./manifest-watcher.js";
 import { AdapterBusinessEventSourceClient } from "./business-events/source-client.js";
 import { RuntimeDrainController } from "./shutdown.js";
+import { DevelopmentAdmissionObservationStore } from "./admission-observation.js";
 import {
   assertRuntimeProviderIdentity,
   pendingRuntimeProviderIdentity,
@@ -121,6 +122,10 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   }
   const app = createHttpServer(logger, config.HTTP_BODY_LIMIT_BYTES);
   const drain = new RuntimeDrainController();
+  const admissionObservations =
+    config.RUNTIME_ENV === "development" && config.AUTH_MODE === "development"
+      ? new DevelopmentAdmissionObservationStore(config.platformIdentity)
+      : null;
   let providerIdentity = pendingRuntimeProviderIdentity(config.PROVIDER_ID);
   const metrics = new RuntimeMetrics();
   const telemetrySelfGauges: Record<string, number> = {};
@@ -253,6 +258,16 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   });
 
   app.get("/health/live", () => ({ status: "live" }));
+  app.get<{ Params: { taskId: string } }>(
+    "/development/admission-observations/:taskId",
+    async (request, reply) => {
+      if (admissionObservations === null) {
+        return reply.code(404).send({ error: "development_observations_disabled" });
+      }
+      const observation = admissionObservations.get(request.params.taskId);
+      return observation ?? reply.code(404).send({ error: "admission_observation_not_found" });
+    },
+  );
   app.get("/health/ready", async (_request, reply) => {
     if (dependencies.database !== "starting") {
       try {
@@ -647,11 +662,12 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       const manifestWatcher = new AdapterManifestWatcher(gateway, validated.manifestHash);
       dependencies.adapterManifest = "ready";
       const snapshotIds = await new OperationSnapshotRepository(pool).saveManifest(validated);
+      const taskRepository = new TaskRepository(pool);
       const taskEngine = new TaskEngine(
         validated,
         snapshotIds,
         gateway,
-        new TaskRepository(pool),
+        taskRepository,
         new IdempotencyRepository(pool, () => metrics.increment("sdar_idempotency_hits_total"), {
           leaseMs: config.IDEMPOTENCY_LEASE_MS,
           waitTimeoutMs: config.IDEMPOTENCY_WAIT_TIMEOUT_MS,
@@ -702,13 +718,15 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         businessEventRelationManager,
         (error, requestId) =>
           logger.error({ err: error, requestId }, "Frozen MCP technical request failure"),
+        admissionObservations === null
+          ? undefined
+          : (observation) => admissionObservations.record(observation),
       );
       mcpRouter = new ProtocolRouter(
         frozenHandler,
         legacyHandler,
         config.MCP_LEGACY_ENDPOINT_ENABLED,
       );
-      const taskRepository = new TaskRepository(pool);
       if (
         config.PROVIDER_TELEMETRY_INGRESS_ENABLED &&
         dependencies.providerTelemetryIngress !== "ready"

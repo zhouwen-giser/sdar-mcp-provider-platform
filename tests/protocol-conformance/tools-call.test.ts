@@ -49,6 +49,54 @@ describe("frozen tools/call", () => {
     );
   });
 
+  it("observes the unmodified admission response with committed Provider-local identities", async () => {
+    const created = {
+      resultType: "task",
+      taskId: "task-observed",
+      status: "working",
+      _meta: {
+        "io.sdar/taskExecution": {
+          profileVersion: "1.0",
+          runtimeRevision: "3",
+          providerRevision: "7",
+        },
+      },
+    };
+    const localIdentity = {
+      taskId: "task-observed",
+      providerId: "test-provider",
+      externalExecutionId: "adapter-execution-1",
+      operationName: "task/run",
+      runtimeRevision: "3",
+      providerRevision: "7",
+      correlationId: "correlation-1",
+      executionMode: "simulation",
+      simulationId: "simulator-1",
+    } as const;
+    const onProviderAdmission = vi.fn();
+    const handler = new Sep2663ProtocolHandler(
+      new OperationRegistry().validate(manifest("TASK_REQUIRED")),
+      "2.0.0-rc.1",
+      {
+        callFrozenOperation: vi.fn().mockResolvedValue(created),
+        providerLocalTaskIdentity: vi.fn().mockResolvedValue(localIdentity),
+      } as unknown as TaskEngine,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      onProviderAdmission,
+    );
+    const response = await handler.dispatchAsync(request(true), headers(), authorization);
+    expect(response.body).toEqual({ jsonrpc: "2.0", id: "request-1", result: created });
+    expect(onProviderAdmission).toHaveBeenCalledWith({
+      rawResponse: response.body,
+      localIdentity,
+    });
+  });
+
   it("C-011 rejects task-producing tools before execution when Tasks capability is absent", async () => {
     const callFrozenOperation = vi.fn();
     const handler = new Sep2663ProtocolHandler(
