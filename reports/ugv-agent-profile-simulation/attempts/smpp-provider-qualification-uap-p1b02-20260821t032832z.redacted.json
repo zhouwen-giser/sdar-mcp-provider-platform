@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "ugv-agent-profile.smpp-provider-qualification/v1",
+  "generatedAt": "2026-08-21T03:42:37.020Z",
+  "startedAt": "2026-08-21T03:42:35.619Z",
+  "completedAt": "2026-08-21T03:42:37.020Z",
+  "runId": "uap-p1b02-20260821t032832z",
+  "taskId": "UAP-P1-B02",
+  "command": "UGV_SIMULATION_RUN_ID=uap-p1b02-20260821t032832z deploy/ugv-agent-profile-simulation/qualify-provider-readonly.sh",
+  "status": "PASS",
+  "reasonCode": "EXTERNAL_SIMULATION_PROVIDER_QUALIFIED_READ_ONLY",
+  "exitCode": 0,
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "baseline": {
+    "gitSha": "051eae0d44b14cc772cce1f7c34079d4944ce3a8"
+  },
+  "endpoint": {
+    "scheme": "http",
+    "hostKind": "loopback",
+    "hostHash": "12ca17b49af22894",
+    "port": "19121",
+    "path": "/mcp",
+    "pathHash": "88fe637beab867e2"
+  },
+  "lineage": {
+    "preflightEvidence": "attempts/deployment-preflight-uap-p1b02-20260821t032832z.redacted.json",
+    "registrySnapshotConsumption": "DEFERRED_TO_UAP_P2_B02",
+    "registrySnapshotId": null,
+    "registrySnapshotIdMissingReason": "DEFERRED_TO_UAP_P2_B02",
+    "nodeControlConsumption": "DEFERRED_TO_UAP_P2_B02",
+    "nodeControlBindingId": null,
+    "nodeControlBindingIdMissingReason": "DEFERRED_TO_UAP_P2_B02"
+  },
+  "safety": {
+    "readOnly": true,
+    "readinessProbeCount": 1,
+    "serverDiscoverCount": 1,
+    "toolsListCount": 1,
+    "availabilityCheckCount": 1,
+    "northboundToolsCallCount": 1,
+    "northboundNavigationAttemptCount": 0,
+    "directDeviceToolCallCount": 0,
+    "southboundAuditVerified": true,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0,
+    "mqttPublishCount": 0
+  },
+  "health": {
+    "profileHealth": "PASS",
+    "commandExitCode": 0,
+    "runtimeReadiness": {
+      "httpStatus": 200,
+      "status": "ready",
+      "dependenciesSha256": "8e9498be51f4c3c78d97671bda615674f1388afc1313aaba7b9a824f26a654e5"
+    }
+  },
+  "providerCatalog": {
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "providerType": "isr.vehicle.ugv",
+    "providerVersion": "1.0.0",
+    "manifestHash": "e2b0bd3e494b40f7c8e728ab6e4c9045d44a1bcb9b15820f1263d4f05ff10625",
+    "authority": "northbound_server_discover"
+  },
+  "manifest": {
+    "authority": "northbound_server_discover_and_tools_list",
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "providerType": "isr.vehicle.ugv",
+    "providerVersion": "1.0.0",
+    "manifestHash": "e2b0bd3e494b40f7c8e728ab6e4c9045d44a1bcb9b15820f1263d4f05ff10625",
+    "operationCount": 10,
+    "operationsCanonicalSha256": "1435344f08237a3297af4e0fc505764abfa65aa574df92dd9517a781e79f54e1"
+  },
+  "resource": {
+    "resourceId": "vehicle:ugv1",
+    "resourceType": "isr.vehicle.ugv",
+    "uniqueResourceCount": 1,
+    "authority": "northbound_catalog_resource_binding_and_provider_catalog"
+  },
+  "operations": {
+    "vehicleGetState": {
+      "execution": "SYNCHRONOUS",
+      "taskBehavior": "synchronous_only",
+      "availability": "dynamic",
+      "lifecycle": {
+        "cancel": false,
+        "pauseResume": false,
+        "observations": false,
+        "northboundObservations": false
+      },
+      "inputSchemaSha256": "fa04af3d483adbb10b242ba4593cd86eb44bddcb51246968291bc9194c084c65",
+      "outputSchemaSha256": "eb6c728ae6734452f9713fbfee7882f51ec6c8ab9fc8e8a5d633c1ce8f312244",
+      "fullSchemasObtainedFromNorthboundCatalog": true
+    },
+    "vehicleNavigate": {
+      "execution": "TASK_REQUIRED",
+      "taskBehavior": "task_required",
+      "availability": "dynamic",
+      "lifecycle": {
+        "cancel": true,
+        "pauseResume": true,
+        "observations": true,
+        "northboundObservations": true
+      },
+      "inputSchemaSha256": "ae33c7317c8689ad174ba7d685df4ebed531e1cdf76c5a63ca68d7d04b30fa32",
+      "outputSchemaSha256": "0425b242f32d5c94b1b307ac9c1cae82e3b086c7050e2d250c572555f304e090",
+      "fullSchemasObtainedFromNorthboundCatalog": true
+    }
+  },
+  "state": {
+    "identity": {
+      "providerId": "isr.vehicle.ugv.ugv1",
+      "resourceId": "vehicle:ugv1",
+      "vehicleType": "ugv",
+      "executionMode": "simulation"
+    },
+    "connectivity": {
+      "mqttConnected": true,
+      "deviceMcpConnected": true,
+      "deviceAvailable": true,
+      "packetLossRate": 0,
+      "averageRoundTripTimeMs": 20
+    },
+    "freshness": {
+      "chassisObservedAt": "2026-08-21T03:42:36.768Z",
+      "healthObservedAt": "2026-08-21T03:42:36.944Z",
+      "missionObservedAt": "2026-08-21T03:42:37.137Z"
+    },
+    "position": {
+      "coordinateReferenceSystem": "WGS84",
+      "latitude": 29.720404595375232,
+      "longitude": 106.8139804259141,
+      "altitude": 500.01023418363184
+    },
+    "mission": {
+      "state": 4,
+      "idle": true,
+      "taskIdHash": "1a07c4dd867254f5c2638fd81811db253ccfb5135c7177a1a498b6c292eb797c",
+      "taskIdMissingReason": null
+    },
+    "speedKmh": 0,
+    "revision": "c784d36a884c23a540ce17691387ff8c45ff4ee47e1a37a9db5eaacbdaf9f686",
+    "observedAt": "2026-08-21T03:42:36.765Z",
+    "mqttIngressSequence": 1907,
+    "executionCorrelationHash": "5c5e6cd01858a9d9f60a563659d98690e08fe01af4e7e4e030138d242d08c867"
+  },
+  "pointAvailability": {
+    "availability": "available",
+    "riskLevel": "medium",
+    "reasonCode": "UGV_AVAILABLE",
+    "requestedAt": "2026-08-21T03:42:36.816Z",
+    "respondedAt": "2026-08-21T03:42:36.847Z",
+    "validUntil": "2026-08-21T03:42:37.836Z",
+    "argumentSha256": "27b8977b0a4d8f040c68282706aed30a9a93383c9f0f201760778660b9729fe0",
+    "targetSource": "fresh_vehicle_get_state_position",
+    "stopOnObstacle": true,
+    "navigationDispatched": false
+  },
+  "southboundAudit": {
+    "comparison": "row_identity_set_difference",
+    "expectedTaskIdHash": "5c5e6cd01858a9d9f60a563659d98690e08fe01af4e7e4e030138d242d08c867",
+    "correlationMatched": true,
+    "addedDeviceToolCallCount": 1,
+    "addedDeviceToolCalls": [
+      {
+        "callIdHash": "567be25245ade53cfcecdff7490dd3623c0219f59b614cc51a29758fcaaf4e5a",
+        "taskIdCorrelationHash": "5c5e6cd01858a9d9f60a563659d98690e08fe01af4e7e4e030138d242d08c867",
+        "toolName": "get_status",
+        "outcome": "accepted",
+        "occurredAt": "2026-08-21T03:42:36.781+00:00"
+      }
+    ],
+    "addedExecutionCount": 0,
+    "addedMutationJournalCount": 0,
+    "addedCommandAckCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0,
+    "qualified": true
+  },
+  "failure": null
+}

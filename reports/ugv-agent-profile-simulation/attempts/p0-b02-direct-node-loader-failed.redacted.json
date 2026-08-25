@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "ugv-agent-profile.failed-attempt/v1",
+  "generatedAt": "2026-08-21T01:55:55.000Z",
+  "status": "FAILED",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "taskId": "UAP-P0-B02",
+  "command": "node scripts/ugv-agent-profile-simulation/freeze-contracts.mjs --check",
+  "exitCode": 1,
+  "reasonCode": "ERR_MODULE_NOT_FOUND",
+  "cause": "Direct Node ESM loading cannot resolve TypeScript source exports whose internal specifiers end in .js.",
+  "resolution": "Use the documented Node loader command: node --import tsx scripts/ugv-agent-profile-simulation/freeze-contracts.mjs --check.",
+  "minimumUnblockCondition": "Invoke the source-backed freezer with the repository-pinned tsx loader, or run an explicitly built dist-only implementation.",
+  "safety": {
+    "toolsCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

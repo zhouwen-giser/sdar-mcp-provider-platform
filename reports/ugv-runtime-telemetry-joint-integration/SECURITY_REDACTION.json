@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "scannedAt": "2026-08-20T15:21:54.992Z",
+  "status": "PASS",
+  "scope": "reports/ugv-runtime-telemetry-joint-integration",
+  "filesScanned": 24,
+  "scanResults": {
+    "credentialBearingAuthorizationHeaderValues": 0,
+    "bearerCredentialValues": 0,
+    "databaseUrlsWithEmbeddedCredentials": 0,
+    "privateKeyBlocks": 0,
+    "cloudAccessKeyPatterns": 0,
+    "inlineBase64DataUris": 0,
+    "namedSecretValues": 0
+  },
+  "payloadMinimization": {
+    "rawDeviceMcpBodies": 0,
+    "rawMqttPayloads": 0,
+    "rawProviderTelemetryMessages": 0,
+    "rawOtlpBodies": 0,
+    "screenshotsOrImages": 0,
+    "storedEvidence": "bounded facts, counters, schema hashes, record identities, and content hashes"
+  },
+  "endpointHandling": {
+    "fixedSimulatorEndpointInWorkspaceContract": true,
+    "runtimeReadOnlyEvidenceUsesEndpointHashes": true,
+    "networkEvidenceUsesRoleNamesAndPorts": true,
+    "credentialsStored": false
+  },
+  "sideEffectAudit": {
+    "mqttPublishCount": 0,
+    "deviceMutationCount": 0,
+    "runtimeMutationCount": 0,
+    "pointNavigationCount": 0,
+    "taskControlCount": 0,
+    "emergencyStopCount": 0,
+    "fireCount": 0
+  },
+  "scopeAudit": {
+    "externalSimulatorSourceModified": false,
+    "telemetryDirectMqttConnectionAdded": false,
+    "telemetryDirectDeviceMcpConnectionAdded": false,
+    "telemetryDirectRuntimeOrProviderDatabaseConnectionAdded": false,
+    "mtlsOrProductionSecurityScopeAdded": false,
+    "developmentOverridePathAllowed": true
+  }
+}

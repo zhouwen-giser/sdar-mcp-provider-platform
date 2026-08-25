@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.0",
+  "capturedOn": "2026-08-20",
+  "status": "PARTIAL_CURRENT_RATE_CAPTURE_WITH_PRIOR_BOUNDED_HASH_INDEX",
+  "currentCapture": {
+    "durationSeconds": 15,
+    "messageCount": 1077,
+    "observedTopicCount": 12,
+    "decodeErrors": 0,
+    "oversizeMessages": 0,
+    "retainedMessages": 0,
+    "rawPayloadRetained": false,
+    "freshPerTopicPayloadHashesRetained": false
+  },
+  "boundedHashIndex": {
+    "capturedAt": "2026-08-10T07:29:38.839Z",
+    "purpose": "Supporting shape/hash evidence from the same external simulator; it is not represented as the current rate window.",
+    "source": "reports/ugv-simulation/MQTT_PAYLOAD_EVIDENCE.json",
+    "samples": [
+      {
+        "topic": "/ugv/area_recon/status",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 755,
+        "payloadSha256": "ed74f22aac7ad840569d52a2d89a4b0948a1fedd4e4a65fbd6516c0e11bc101c",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/battery_range_km",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 28,
+        "payloadSha256": "3f7d7602322fe19d3b47e935ace6cd313ca4e553acc7e59e4bb447f728b9e4b9",
+        "decodedType": "number"
+      },
+      {
+        "topic": "/ugv/component_status",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 245,
+        "payloadSha256": "2087cefec08b87868dccbbe7df562d15cfbdf3cb4e4c9da7afff4b0c0403f472",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/eo/pose",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 96,
+        "payloadSha256": "7985aaf2e11bfdfaf22bed65d8eff308c0d98631aa5353866b99a5dcbec856f1",
+        "decodedType": "array"
+      },
+      {
+        "topic": "/ugv/gnss",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 299,
+        "payloadSha256": "5f8bbf124453e2856e7005165747b2f9f8212ca7c2f757444a229f9b486f804b",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/imu",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 87,
+        "payloadSha256": "b3849e238285ff003afc588bfea760d652d8f106ac61679562471417947fb52b",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/mission_state",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 153,
+        "payloadSha256": "691a52b5e6a381f7a705b2ad4fdb1358be1a1be943db5638366a1bab4dd0a971",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/nav_state",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 260,
+        "payloadSha256": "66d96c72aeb9c146bc7a2c9c465831354dd4c1e7396a683bac179da2a5833872",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/speed",
+        "qos": 0,
+        "retained": false,
+        "byteLength": 13,
+        "payloadSha256": "515ea7fa90be59bcfca603eac91b27a38b413d86350a0a21ba46b792cd769a7a",
+        "decodedType": "number"
+      },
+      {
+        "topic": "/ugv/status",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 1391,
+        "payloadSha256": "a62d1b832221c73a5e464fa610d8849b5596825b089b44acd9a97b0aef921a42",
+        "decodedType": "object"
+      },
+      {
+        "topic": "/ugv/system_state",
+        "qos": 1,
+        "retained": false,
+        "byteLength": 277,
+        "payloadSha256": "b60be518758f067dd8d26ec6c8938e09c416bda2c084049085bf69cae4cb7770",
+        "decodedType": "object"
+      }
+    ]
+  },
+  "dataMinimization": {
+    "payloadValuesStored": false,
+    "base64Stored": false,
+    "credentialsStored": false,
+    "hashesAndShapeMetadataOnly": true
+  }
+}

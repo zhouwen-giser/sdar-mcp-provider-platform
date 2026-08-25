@@ -62,6 +62,11 @@ export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
     missionStateTopic: string;
     compositeStatusTopics: readonly string[];
   };
+  compositeStatusAuthority?: {
+    canonicalTopic: string;
+    aliasTopics: readonly string[];
+    aliasFallbackAfterMs: number;
+  };
 }
 
 export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
@@ -80,6 +85,11 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
   taskStateAuthority: {
     missionStateTopic: "/ugv/mission_state",
     compositeStatusTopics: ["status/ugv", "/ugv/status"],
+  },
+  compositeStatusAuthority: {
+    canonicalTopic: "status/ugv",
+    aliasTopics: ["/ugv/status"],
+    aliasFallbackAfterMs: 3_000,
   },
 };
 
@@ -140,6 +150,8 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   #snapshot: TSnapshot;
   #sequence = 0;
   #stateConflict = false;
+  #canonicalCompositeStatusReceivedAt: string | undefined;
+  #activeCompositeStatusTopic: string | undefined;
   constructor(
     readonly wireMode: MqttWireMode,
     readonly limits: JsonLimits,
@@ -218,7 +230,13 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     const hash = createHash("sha256").update(canonical(observation.canonicalPayload)).digest("hex");
     const authorityCursor = JSON.stringify([topic, observation.timeAuthority]);
     const latestForAuthority = this.#latestByAuthority.get(authorityCursor);
-    if (latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash)
+    const compositeDecision = this.#compositeStatusDecision(topic, receivedAt);
+    const duplicate =
+      latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash;
+    const older =
+      latestForAuthority !== undefined &&
+      Date.parse(observedAt) < Date.parse(latestForAuthority.observedAt);
+    if (duplicate && !compositeDecision.promotesAuthority)
       return {
         accepted: true,
         reasonCode: this.profile.duplicateReasonCode,
@@ -227,10 +245,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
-    if (
-      latestForAuthority !== undefined &&
-      Date.parse(observedAt) < Date.parse(latestForAuthority.observedAt)
-    )
+    if (older && !compositeDecision.promotesAuthority)
       return {
         accepted: true,
         reasonCode: this.profile.olderReasonCode,
@@ -239,27 +254,38 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
-    observation = this.#applyTargetAuthority(topic, observation);
-    observation = this.#applyTaskStateAuthority(topic, observation);
+    const applyToSnapshot = compositeDecision.applyToSnapshot;
+    if (applyToSnapshot) {
+      observation = this.#applyTargetAuthority(topic, observation);
+      observation = this.#applyTaskStateAuthority(topic, observation);
+    }
     this.#sequence++;
-    observation = this.#applyFieldAuthorities(topic, observation, observedAt);
-    this.#snapshot = applySnapshotPatch(
-      this.#snapshot,
-      observation.patch,
-      observedAt,
-      observation.domains,
-    ) as TSnapshot;
-    this.#latest.set(topic, {
-      observedAt,
-      hash,
-      timeAuthority: observation.timeAuthority,
-      ...(observation.sourceSequence === undefined
-        ? {}
-        : { sourceSequence: observation.sourceSequence }),
-      ingestSequence: this.#sequence,
-    });
-    this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
-    this.#events.emit("snapshot", this.snapshot(), topic);
+    if (applyToSnapshot) {
+      observation = this.#applyFieldAuthorities(topic, observation, observedAt);
+      this.#snapshot = applySnapshotPatch(
+        this.#snapshot,
+        observation.patch,
+        observedAt,
+        observation.domains,
+      ) as TSnapshot;
+    }
+    if (!older || compositeDecision.promotesAuthority) {
+      if (compositeDecision.promotesAuthority) {
+        this.#latestByAuthority.delete(JSON.stringify([topic, "source"]));
+        this.#latestByAuthority.delete(JSON.stringify([topic, "ingest"]));
+      }
+      this.#latest.set(topic, {
+        observedAt,
+        hash,
+        timeAuthority: observation.timeAuthority,
+        ...(observation.sourceSequence === undefined
+          ? {}
+          : { sourceSequence: observation.sourceSequence }),
+        ingestSequence: this.#sequence,
+      });
+      this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
+    }
+    if (applyToSnapshot) this.#events.emit("snapshot", this.snapshot(), topic);
     return {
       accepted: true,
       reasonCode: this.profile.acceptedReasonCode,
@@ -351,6 +377,33 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     return "UNKNOWN";
   }
 
+  #compositeStatusDecision(
+    topic: string,
+    receivedAt: string,
+  ): { applyToSnapshot: boolean; promotesAuthority: boolean } {
+    const authority = this.profile.compositeStatusAuthority;
+    if (authority === undefined) return { applyToSnapshot: true, promotesAuthority: false };
+    if (topic === authority.canonicalTopic) {
+      this.#canonicalCompositeStatusReceivedAt = receivedAt;
+      const promotesAuthority = this.#activeCompositeStatusTopic !== topic;
+      this.#activeCompositeStatusTopic = topic;
+      return { applyToSnapshot: true, promotesAuthority };
+    }
+    if (!authority.aliasTopics.includes(topic))
+      return { applyToSnapshot: true, promotesAuthority: false };
+    let applyToSnapshot = this.#canonicalCompositeStatusReceivedAt === undefined;
+    const canonicalAgeMs =
+      this.#canonicalCompositeStatusReceivedAt === undefined
+        ? Number.POSITIVE_INFINITY
+        : Date.parse(receivedAt) - Date.parse(this.#canonicalCompositeStatusReceivedAt);
+    if (!Number.isFinite(canonicalAgeMs) || canonicalAgeMs > authority.aliasFallbackAfterMs)
+      applyToSnapshot = true;
+    if (!applyToSnapshot) return { applyToSnapshot: false, promotesAuthority: false };
+    const promotesAuthority = this.#activeCompositeStatusTopic !== topic;
+    this.#activeCompositeStatusTopic = topic;
+    return { applyToSnapshot: true, promotesAuthority };
+  }
+
   #applyTargetAuthority(
     topic: string,
     observation: NormalizedMqttObservation,
@@ -426,7 +479,11 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     const accepted = structuredClone(observation);
     for (const [field] of observationFieldValues(observation)) {
       const previous = this.#fieldAuthorities.get(field);
-      if (previous !== undefined && Date.parse(observedAt) < Date.parse(previous.observedAt))
+      if (
+        previous !== undefined &&
+        !this.#isCompositeAuthorityHandoff(topic, previous.topic) &&
+        Date.parse(observedAt) < Date.parse(previous.observedAt)
+      )
         removeObservationField(accepted.patch, field);
     }
     for (const [field, value] of observationFieldValues(accepted)) {
@@ -457,6 +514,15 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       });
     }
     return accepted;
+  }
+
+  #isCompositeAuthorityHandoff(topic: string, previousTopic: string): boolean {
+    const authority = this.profile.compositeStatusAuthority;
+    if (authority === undefined) return false;
+    return (
+      (topic === authority.canonicalTopic && authority.aliasTopics.includes(previousTopic)) ||
+      (authority.aliasTopics.includes(topic) && previousTopic === authority.canonicalTopic)
+    );
   }
 }
 

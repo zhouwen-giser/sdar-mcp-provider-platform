@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "completedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+  "status": "PARTIAL_WITH_PROVIDER_RESTART_TELEMETRY_RECOVERY_PASS",
+  "singleAuthority": {
+    "activeRuntimeProviderStacks": 1,
+    "developmentTemplateRuntimeAndAdapterStopped": true,
+    "status": "PASS"
+  },
+  "observedNonFaultStartup": {
+    "runtimeHealthyAfterRebuild": true,
+    "providerReadyAfterRebuild": true,
+    "providerIngressResumedAfterStartupTransportFailures": true,
+    "activeTaskDuringRestart": false,
+    "countsAsTaskRecoveryQualification": false
+  },
+  "isolatedProviderRestart": {
+    "method": "force-recreate Adapter only",
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "runtimeRemainedHealthy": true,
+    "activeTaskDuringRestart": false,
+    "activeProviderExecutionDuringRestart": false,
+    "observationSeconds": 20,
+    "adapterLogCounts": {
+      "rejected": 0,
+      "transportFailed": 0,
+      "dropped": 0
+    },
+    "providerOps": {
+      "total": 61,
+      "distinctEventKeys": 61,
+      "duplicateEventKeys": 0,
+      "providerEventIdConflicts": 0,
+      "resourceState": 44,
+      "resourceStateCompletePayloads": 44,
+      "resourceMetric": 17,
+      "resourceMetricCompletePayloads": 17
+    },
+    "status": "PASS_PROVIDER_RESTART_TELEMETRY_RECOVERY_ONLY",
+    "doesNotProve": [
+      "active Execution or Mutation Journal recovery",
+      "no redispatch for an active device mission",
+      "Device MCP outage recovery",
+      "MQTT outage recovery",
+      "Runtime Task continuity"
+    ]
+  },
+  "faultMatrix": [
+    {
+      "id": "F1",
+      "fault": "collector-stop",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "No authorized task chain and historical Runtime backlog was already non-zero."
+    },
+    {
+      "id": "F2",
+      "fault": "processor-stop",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "Live outage not required to prove the code fix while the end-to-end FIFO backlog had not converged."
+    },
+    {
+      "id": "F3",
+      "fault": "clickhouse-stop",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "No live projection-recovery qualification was run."
+    },
+    {
+      "id": "F4",
+      "fault": "runtime-provider-telemetry-ingress-stop",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "Startup transport failures were observed naturally, but no controlled ingress outage was injected."
+    },
+    {
+      "id": "F5",
+      "fault": "runtime-restart-with-same-task",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "No authorized Runtime task existed."
+    },
+    {
+      "id": "F6",
+      "fault": "provider-restart-with-same-execution",
+      "executed": true,
+      "executedScope": "Provider restart without an active execution; Runtime remained healthy",
+      "status": "PARTIAL_PASS_TELEMETRY_RECOVERY_ONLY",
+      "reason": "Telemetry resumed with 61 unique, complete resource events and zero delivery issues in the 20-second window. No active execution existed, so dispatch recovery and no-redispatch are not live-qualified."
+    },
+    {
+      "id": "F7",
+      "fault": "mqtt-disconnect-reconnect",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "External simulator connectivity was not disrupted."
+    },
+    {
+      "id": "F8",
+      "fault": "device-mcp-disconnect-reconnect",
+      "executed": false,
+      "status": "NOT_EXECUTED",
+      "reason": "External simulator connectivity was not disrupted."
+    },
+    {
+      "id": "F9",
+      "fault": "duplicate-providerops",
+      "executed": false,
+      "status": "CODE_TEST_PASS_ONLY",
+      "reason": "Telemetry WAL concurrent same-ID and conflict tests passed; no live duplicate injection was used."
+    }
+  ],
+  "codeLevelRecoveryEvidence": {
+    "cursorRestartNoRedispatch": "PASS",
+    "providerTelemetryBoundedRetryAndDrain": "PASS",
+    "telemetryWalConcurrentSameId": "PASS_ONE_ACCEPT_REMAINDER_DUPLICATE",
+    "telemetryWalConflictIsolation": "PASS",
+    "telemetryCheckpointSerialization": "PASS",
+    "telemetryCheckpointMonotonicity": "PASS",
+    "telemetryCheckpointBoundaryValidation": "PASS",
+    "telemetryWalPoisonAndDrain": "PASS"
+  },
+  "backlogConverged": false,
+  "recoveryQualificationClaimed": false,
+  "providerRestartTelemetryRecoveryClaimed": true,
+  "mutatingVehicleCalls": 0
+}

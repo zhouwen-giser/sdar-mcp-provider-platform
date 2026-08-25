@@ -1,0 +1,1556 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "real_external_read_only",
+  "phase": "G10_REAL_EXTERNAL_PREFLIGHT",
+  "status": "PASS_WITH_UPSTREAM_DRIFT",
+  "reasonCode": "REAL_EXTERNAL_PREREQUISITES_READY_WITH_UPSTREAM_DRIFT",
+  "command": "node scripts/ugv-simulation/preflight.mjs",
+  "exitCode": 0,
+  "startedAt": "2026-08-21T01:22:53.639Z",
+  "completedAt": "2026-08-21T01:22:55.011Z",
+  "gitSha": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+  "sourceStatus": "UNVERIFIED",
+  "endpoints": {
+    "deviceMcp": {
+      "scheme": "http",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "19000",
+      "path": "/mcp",
+      "pathHash": "88fe637beab867e2"
+    },
+    "mqtt": {
+      "scheme": "mqtt",
+      "hostKind": "lan-or-dns",
+      "hostHash": "6a321119728a4553",
+      "port": "1883",
+      "path": "[redacted-nonstandard]",
+      "pathHash": "8a5edab282632443"
+    }
+  },
+  "safety": {
+    "mockFallbackEnabled": false,
+    "controlAttempted": false,
+    "mqttPublishAttempted": false,
+    "rawPayloadStored": false
+  },
+  "configuration": {
+    "mqttWireMode": "ros_bridge_json",
+    "mqttUsernameConfigured": false,
+    "mqttPasswordFileConfigured": false,
+    "mqttTlsMode": "disabled",
+    "deviceMcpHeadersFileConfigured": false,
+    "deviceMcpTlsMode": "disabled",
+    "localDatabasePasswordsConfigured": true,
+    "safetySwitches": {
+      "realControlEnabled": false,
+      "distanceM": 1,
+      "safePointConfigured": false,
+      "safeWaypointsConfigured": false,
+      "reconEnabled": false,
+      "reconRegionConfigured": false,
+      "effectorEnabled": false
+    }
+  },
+  "deviceMcp": {
+    "status": "PASS",
+    "connected": true,
+    "mockFallbackEnabled": false,
+    "serverInfo": {
+      "name": "ugv-mcp-server",
+      "version": "1.26.0"
+    },
+    "protocolVersion": "2025-11-25",
+    "toolCount": 15,
+    "contractHash": "3725dba7b92e587ecb3fd670bc54e00633828370e9063f96809b8f7c1400935a",
+    "missingKnownSimulatorTools": ["ugv_laser_range"],
+    "requiredOperationFailures": [],
+    "operationQualifications": [
+      {
+        "operationName": "vehicle_get_state",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_get_state.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "LOW",
+        "requiredTools": ["get_status"],
+        "tools": [
+          {
+            "toolName": "get_status",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "get_status",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "d40d4867a028dbd4b5f4153b92ae833e99a9f233f92aab4e778ad06c51065c78"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_get_capabilities",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_get_capabilities.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "LOW",
+        "requiredTools": ["get_capabilities"],
+        "tools": [
+          {
+            "toolName": "get_capabilities",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "get_capabilities",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "none",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "09f109ad92a43b50b63a162d2339e4d4c818bb0c001442887364c1d1d14c1846"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_get_payload_status",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_get_payload_status.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "LOW",
+        "requiredTools": ["ugv_area_recon_get_status"],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_get_status",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_get_status",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "432edc888943971d12e7c10082899fa2c17903870fd597d8b72c60dde5c47709"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_get_targets",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_get_targets.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "LOW",
+        "requiredTools": ["ugv_area_recon_get_targets"],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_get_targets",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_get_targets",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "c4c7c0a25f356c20eb46d8ca9df9c198ce0e785d595204666ecc31a3e77fec47"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_laser_range",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_laser_range.v1",
+        "deviceRequirement": "optional",
+        "riskLevel": "LOW",
+        "requiredTools": ["ugv_laser_range"],
+        "tools": [
+          {
+            "toolName": "ugv_laser_range",
+            "compatibility": "MISSING_OPTIONAL",
+            "health": "unobserved",
+            "usable": false,
+            "reasonCodes": ["UGV_TOOL_MISSING"],
+            "contract": {
+              "toolName": "ugv_laser_range",
+              "requirement": "optional",
+              "status": "MISSING_OPTIONAL",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "none",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true
+            }
+          }
+        ],
+        "qualified": false,
+        "reasonCodes": ["UGV_TOOL_MISSING"]
+      },
+      {
+        "operationName": "vehicle_navigate",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "point",
+        "resultPolicyId": "ugv.navigation.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_path_follow_mission", "ugv_mission_control"],
+        "tools": [
+          {
+            "toolName": "ugv_path_follow_mission",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_path_follow_mission",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["task_points", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "51fd0ac8f271f4f807384a16eac7798429cf3485ce2541fd6cc8ef0a2e2432e9"
+            }
+          },
+          {
+            "toolName": "ugv_mission_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_mission_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["action", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_navigate",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "route",
+        "resultPolicyId": "ugv.navigation.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_path_follow_mission", "ugv_mission_control"],
+        "tools": [
+          {
+            "toolName": "ugv_path_follow_mission",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_path_follow_mission",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["task_points", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "51fd0ac8f271f4f807384a16eac7798429cf3485ce2541fd6cc8ef0a2e2432e9"
+            }
+          },
+          {
+            "toolName": "ugv_mission_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_mission_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["action", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_navigate",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "distance",
+        "resultPolicyId": "ugv.navigation.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_move_distance", "ugv_mission_control"],
+        "tools": [
+          {
+            "toolName": "ugv_move_distance",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_move_distance",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["direction", "distance", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "5def3b075d2e504d85f20753549ea166d52edd6eed4d86fbc3d0c83a4cf96369"
+            }
+          },
+          {
+            "toolName": "ugv_mission_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_mission_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["action", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_navigate",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "return_home",
+        "resultPolicyId": "ugv.navigation.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_return_home", "ugv_mission_control"],
+        "tools": [
+          {
+            "toolName": "ugv_return_home",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_return_home",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "594de96c2d405178363dd633abc55d476271b22377425dc4d98fa1f177681c0b"
+            }
+          },
+          {
+            "toolName": "ugv_mission_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_mission_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["action", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_area_recon",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "area",
+        "resultPolicyId": "ugv.area_recon.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": [
+          "ugv_area_recon_configure",
+          "ugv_area_recon_control",
+          "ugv_area_recon_get_status"
+        ],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_configure",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_configure",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "res",
+                "fail_data"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "res",
+                "fail_data"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "0b78539d41de5af994587b70287f2845bb1ed67e1c28caecb9952017af63ea72"
+            }
+          },
+          {
+            "toolName": "ugv_area_recon_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["cmd_type", "mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "2c439cb62de1978205c6df40f75996353a4c776a3dabd96601de13b2ea23105d"
+            }
+          },
+          {
+            "toolName": "ugv_area_recon_get_status",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_get_status",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "432edc888943971d12e7c10082899fa2c17903870fd597d8b72c60dde5c47709"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_area_recon",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "circular",
+        "resultPolicyId": "ugv.area_recon.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": [
+          "ugv_area_recon_configure",
+          "ugv_area_recon_control",
+          "ugv_area_recon_get_status"
+        ],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_configure",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_configure",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "res",
+                "fail_data"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "res",
+                "fail_data"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "0b78539d41de5af994587b70287f2845bb1ed67e1c28caecb9952017af63ea72"
+            }
+          },
+          {
+            "toolName": "ugv_area_recon_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["cmd_type", "mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "2c439cb62de1978205c6df40f75996353a4c776a3dabd96601de13b2ea23105d"
+            }
+          },
+          {
+            "toolName": "ugv_area_recon_get_status",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_get_status",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "432edc888943971d12e7c10082899fa2c17903870fd597d8b72c60dde5c47709"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_track_target",
+        "executionMode": "simulation",
+        "phase": "start",
+        "resultPolicyId": "ugv.track_target.v1",
+        "deviceRequirement": "optional",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_area_recon_lock"],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_lock",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_lock",
+              "requirement": "optional",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["lock", "target_id", "mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "62154be61fe665bc78e78a12907354562b5700e3422c270123ddc1e4c8402bc9"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_control_gimbal",
+        "executionMode": "simulation",
+        "phase": "start",
+        "resultPolicyId": "ugv.gimbal.v1",
+        "deviceRequirement": "optional",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_gimbal_move"],
+        "tools": [
+          {
+            "toolName": "ugv_gimbal_move",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_gimbal_move",
+              "requirement": "optional",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "none",
+              "expectedInputProperties": ["mode"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "f5fe1a51cf6c5fadc673e3c6c3906941c3705a42bfabec76f2d9aa9c584746d3"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_fire_weapon",
+        "executionMode": "simulation",
+        "phase": "start",
+        "resultPolicyId": "ugv.fire.v1",
+        "deviceRequirement": "optional",
+        "riskLevel": "HIGH",
+        "requiredTools": ["ugv_area_recon_attack_confirm"],
+        "tools": [
+          {
+            "toolName": "ugv_area_recon_attack_confirm",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_area_recon_attack_confirm",
+              "requirement": "optional",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["mission_id"],
+              "expectedOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "missingInputProperties": [],
+              "missingOutputProperties": [
+                "mission_id",
+                "state",
+                "state_label",
+                "message",
+                "cmd_res"
+              ],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "bd1787e83c5d5d0178551d0fc69dff94f6525b4075a79f40d630af5b0d0f8a15"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_emergency_stop",
+        "executionMode": "simulation",
+        "phase": "start",
+        "resultPolicyId": "ugv.emergency_stop.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "HIGH",
+        "requiredTools": ["ugv_motion_stop"],
+        "tools": [
+          {
+            "toolName": "ugv_motion_stop",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_motion_stop",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "none",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "b4f083b2172f68b8ed947b07fc13741b482e4267bd1ecc5ba2a1a2b4beb92d58"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "name": "ugv_path_follow_mission",
+        "description": "\n    发送路径跟随任务到 UGV 车辆（底盘机动 chassis 轨道）。\n\n    两种模式：\n      - 直行模式(need_plan=False)：给定路点逐点直线机动，不做任何规划。\n      - 规划模式(need_plan=True)：以车辆**当前位置**为起点、给定的**最后一个**路点\n        为终点，调用 /plan_route 沿现有道路网规划**最短路径**（终点自动落到路网上\n        离目标点最近的点），用规划出的稠密航点替换原路点后再机动；给多个点时，\n        前面的点作为途经点按顺序经过。\n    need_plan 缺省(None)时自动判断：**只给一个点=目标点机动，自动启用道路网规划**；\n    多个点=按给定路点直行。下发成功后规划路点即在战场图上显示(/ugv/planned_path)，\n    车辆保持不动，调用 ugv_mission_control(\"start\", mission_id) 才开始沿路点机动。\n\n    参数:\n        task_points: GPS坐标列表，如\n                     [{\"latitude\": 29.7205344, \"longitude\": 106.8147144},\n                      {\"latitude\": 29.7208012, \"longitude\": 106.8151233}]\n                     与 json_url 二选一。也接受 lat/lon 键名、[lat, lon] 坐标对、\n                     单个点 dict、JSON 字符串（多包一层的嵌套列表会自动摊平）。\n        json_url: 指向 JSON 路径文件的 HTTP URL；提供时自动下载解析为路径点，\n                  与 task_points 二选一（两者都给以 json_url 为准）。\n        need_plan: 是否需要道路网最短路径规划。缺省 None=自动（单点启用、多点直行）；\n                    显式传 True/False 可强制指定。\n        density: 规划航点密度档位 adaptive/dense/medium/sparse，默认 adaptive；\n                 仅规划模式生效。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成并在返回中给出。\n\n    返回:\n        {mission_id, state, state_label, progress, message} —— 下达成功返回\"就绪(0)\"，\n        此时车辆不会移动；需调用 ugv_mission_control(\"start\", mission_id) 才开始执行。\n        规划模式下 message 含规划里程与航点数；规划失败返回\"失败(5)\"，不会退化为直行。\n        之后可用 ugv_mission_control(\"pause\"/\"terminate\") 暂停或终止；\n        进度/完成请用 get_status() 按 mission_id 查询。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task_points": {
+              "default": null,
+              "title": "Task Points"
+            },
+            "json_url": {
+              "default": "",
+              "title": "Json Url",
+              "type": "string"
+            },
+            "need_plan": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Need Plan"
+            },
+            "density": {
+              "default": "adaptive",
+              "title": "Density",
+              "type": "string"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "title": "ugv_path_follow_missionArguments"
+        },
+        "inputSchemaHash": "ea01a38bae71b48f9dbe74f95f21375c169495c32e3a0fcb1a032e2b6e4fac0e",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_return_home",
+        "description": "\n    返航：按最近一次机动(路径跟随)任务所下发路径点的相反顺序重新下发一次路径跟随任务，\n    使 UGV 沿原路返回起始点（底盘机动 chassis 轨道）。\n\n    需先执行过一次路径跟随任务（ugv_path_follow_mission 或 ugv_path_follow_mission_by_json_url），\n    否则没有可供返航的历史路径点。返航本身也会成为新的\"最近一次机动\"，\n    再次调用返航将沿返航路径逆序返回。\n\n    参数:\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, progress, message}\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "title": "ugv_return_homeArguments"
+        },
+        "inputSchemaHash": "87717ea9ce058f9e977a9b3eda37a36e2a2f6a1aca98d05c2ded70fb4c67a274",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_move_distance",
+        "description": "\n    控制 UGV 沿指定方向移动一定距离（底盘机动 chassis 轨道）。\n\n    以车辆当前位置和航向为基准，按\"前/后/左/右\"方向偏移给定距离，生成一个目标航点\n    并作为路径跟随任务下达。与其它机动任务一致：下达后车辆不会移动，需调用\n    ugv_start_mission(mission_id) 才开始执行；期间可用 ugv_pause_mission / ugv_terminate_mission。\n\n    参数:\n        direction: 移动方向。可用 \"forward\"/\"back\"/\"left\"/\"right\"，或中文 \"前\"/\"后\"/\"左\"/\"右\"。\n        distance: 移动距离，单位米（必须 > 0）。\n        mission_id: 任务唯一标识符；填 0 则由服务端自动生成。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "title": "Direction",
+              "type": "string"
+            },
+            "distance": {
+              "title": "Distance",
+              "type": "number"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["direction", "distance"],
+          "title": "ugv_move_distanceArguments"
+        },
+        "inputSchemaHash": "cfcffc33321155cf41e5c5b3e95d16a76abab98d686f0ddf801c8177dca04d68",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_mission_control",
+        "description": "\n    控制底盘机动任务的生命周期（开始 / 暂停 / 终止）。\n\n    下发路径/返航/移动任务后车辆不动，需 action=\"start\" 才开始执行；\n    暂停后再次 action=\"start\" 即恢复。\n\n    参数:\n        action: 控制动作。\n            - \"start\"     开始执行（暂停态下调用则恢复）\n            - \"pause\"     暂停（车辆原地保持，可 start 恢复）\n            - \"terminate\" 终止并清除任务（未开始则直接作废；执行/暂停中则发取消停车）\n        mission_id: 目标任务ID（由下发任务时返回）。\n\n    返回:\n        {mission_id, state, state_label, message}\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "title": "Action",
+              "type": "string"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["action"],
+          "title": "ugv_mission_controlArguments"
+        },
+        "inputSchemaHash": "ba09c93e25fb8af2e4945b850e5e2d5bc2622c7d91f91065156a147417294d63",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_motion_stop",
+        "description": "\n    机动停止：立即停止底盘运动，无需 mission_id。\n\n    取消当前正在执行/暂停的机动任务（若有）并停车；即使没有登记中的任务也会\n    下发停止指令兜底（如任务经其它渠道下发）。已下发未开始（就绪）的任务不受\n    影响，仍可用 ugv_mission_control(\"start\") 启动。\n\n    返回:\n        {mission_id, state, state_label, message}\n        （mission_id 为被终止任务的ID，无任务被终止时为 -1）\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "ugv_motion_stopArguments"
+        },
+        "inputSchemaHash": "1c364e27c9664f254f65551d7354ea9815b06445290e04d7955e687e00019749",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "get_status",
+        "description": "\n    获取 UGV 的综合实时状态(取自 /ugv/status,CARLA 原始 + 仿真派生的合并 JSON)。\n\n    返回字段(车辆未就绪/状态未到达时返回 {\"available\": false}):\n      - vehicle_id, role_name, entity_id\n      - position {x, y, z}, speed_kmh, control {throttle, steer, brake, reverse}\n      - 能源:lvbattery_soc / hvbattery1_soc / hvbattery2_soc / fuel1 / fuel2\n      - 热:motor_temp / engine_water_temp\n      - 行驶:ready_status / gear_status / veh_speed / brake_status / emergency_stop_status\n      - 惯导:heading / roll / pitch / ins_init / gnss / location_status\n      - 模式/网络:power_supply_status / operate_mode_status / fault /\n                  ping_status / packet_loss_rate / average_round_trip_time\n      - 任务轨道:chassis_task / eo_task / weapon_task,各含 {id, type, state, progress}\n        (state: 0 未开始, 1 运行中, 2 已暂停, 3 已终止, 4 已结束, 5 已失败)\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "get_statusArguments"
+        },
+        "inputSchemaHash": "fbac902bfaec6cda6de77d6963f23beb60d4c8442f43edf844e1eacb5b20cb27",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "get_capabilities",
+        "description": "\n    获取 UGV 的静态能力/配置(取自 /ugv/capabilities,由裁判从 entities.yaml 组装)。\n\n    与 get_status(动态实时状态)相对：这些是启动后基本不变的配置值，用于判断\n    \"能否打得到/看得到/跑得了\"等，不必高频轮询，取一次即可缓存使用。\n\n    返回字段(尚未收到该话题时返回 {\"available\": false}):\n      - entity_id, type, camp, max_hp\n      - eo {fov_deg, detection_range_m}          —— 光电最大视场角/探测距离\n        (实时变焦后的当前视场另见 get_status 的 gimbal 与设备 /ugv/eo_fov)\n      - weapon {hit_range_m, damage, ammo, cooldown_s, hit_rate} —— 武器打击距离等\n      - chassis {full_range_km}                  —— 底盘满电/满油总可行驶里程\n        (当前剩余续航另见 /ugv/battery_range_km)\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "get_capabilitiesArguments"
+        },
+        "inputSchemaHash": "19ca0658c1c01462df1cd686c8ac34dc86c89963e512138fc2dc50c0305d51cf",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_configure",
+        "description": "配置侦察动作 (对应文档 mar_motion_cfg_srv / MarMotionCfg)。\n\n    两种扫描样式，都支持**边走边侦察**（底盘机动与侦察不互斥，可先/同时下达\n    机动任务，车一边走一边扫）：\n      - scan_mode=1 区域侦察：界面画点圈定区域，云台在区域内蛇形覆盖扫描，\n        只上报区域内目标；每圈按当前机位重算格点，车移动后扫描仍对准区域。\n      - scan_mode=2 周扫侦察：不圈区域，云台以车体为中心 360° 环扫，上报视场内\n        + 探测半径内的所有目标；扫描方位随车体转动，行进中即沿途搜索。\n    配置成功后用 ugv_area_recon_control(1) 启动扫描。\n\n    Args:\n        region_points: 区域顶点 GNSS 列表，每点 [longitude, latitude, altitude]\n            (altitude 可省略，默认 0)。scan_mode=1 必填；scan_mode=2 周扫忽略此项。\n        region_type: 区域类型(RegionTypeEnum)：2-点,3-线,4-圆,5-多边形(默认)。\n            圆形时 points[0]=圆心、points[1]=圆上一点。\n        target_types: ZH 目标类型列表(TargetTypeEnum)，空表示所有类型(如 [2]=坦克)。\n        scan_num: 扫描次数(周扫=圈数)，达到后停止；0 表示不以次数停止。\n        lock_duration_limit: 锁定时长上限(秒)，超时自动解锁恢复；0 表示一直保持。\n        recon_type: ZH 设备类型：1-自适应,2-可见光,3-红外,4-DC。\n        scan_speed: 云台扫描速度(度/秒)。\n        scan_mode: 扫描样式：1-区域侦察(默认)，2-周扫侦察(360° 环扫，无需区域)。\n        scan_pitch: 周扫俯仰角(度，0=水平，负值向下压)；仅 scan_mode=2 生效。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, res, fail_data}(res/fail_data 对应 MotionCfgRes)。\n        区域侦察(scan_mode=1)另返回 coverability 结构化可覆盖性判定:\n        {coverable: \"full\"完全可覆盖 / \"partial\"部分超距 / \"none\"完全超距(仍接受\n        配置，可先机动靠近边走边侦察) / \"unknown\"机位不可用未预检, coverable_label,\n        region_min_dist_m, region_max_dist_m, detection_range_m}；周扫无此字段。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "region_points": {
+              "default": null,
+              "items": {},
+              "title": "Region Points",
+              "type": "array"
+            },
+            "region_type": {
+              "default": 5,
+              "title": "Region Type",
+              "type": "integer"
+            },
+            "target_types": {
+              "default": null,
+              "items": {},
+              "title": "Target Types",
+              "type": "array"
+            },
+            "scan_num": {
+              "default": 0,
+              "title": "Scan Num",
+              "type": "integer"
+            },
+            "lock_duration_limit": {
+              "default": 0,
+              "title": "Lock Duration Limit",
+              "type": "integer"
+            },
+            "recon_type": {
+              "default": 1,
+              "title": "Recon Type",
+              "type": "integer"
+            },
+            "scan_speed": {
+              "default": 30,
+              "title": "Scan Speed",
+              "type": "number"
+            },
+            "scan_mode": {
+              "default": 1,
+              "title": "Scan Mode",
+              "type": "integer"
+            },
+            "scan_pitch": {
+              "default": 0,
+              "title": "Scan Pitch",
+              "type": "number"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "title": "ugv_area_recon_configureArguments"
+        },
+        "inputSchemaHash": "fdb48fcd2518c98be9ffd3315cb780e7fc6a85e0a78f5050b736480201e46229",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_control",
+        "description": "控制侦察动作 (对应文档 mar_motion_ctrl_srv；区域侦察与周扫共用)。\n\n    启动=开始扫描；暂停=停止扫描并解除锁定(若有)，云台保持；继续=恢复扫描；\n    停止=结束动作，云台回到初始角度。\n    扫描期间车辆可正常机动(边走边侦察)，无需先停车。\n\n    Args:\n        cmd_type: 控制指令(CtrlCmdTypeEnum)：1-启动,2-暂停,3-继续,4-停止。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "cmd_type": {
+              "title": "Cmd Type",
+              "type": "integer"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["cmd_type"],
+          "title": "ugv_area_recon_controlArguments"
+        },
+        "inputSchemaHash": "62cd17cb6aaed66cf48761ca5c6037ce2c740f2b07312ffaeb261b4a12367947",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_lock",
+        "description": "锁定 / 解除锁定并继续区域侦察（合并 mar_target_lock_srv 与 mar_unlock_and_continue_srv）。\n\n    - lock=True：对 target_id 目标锁定，光电/云台持续跟踪使其居中，扫描挂起；\n      配置 lock_duration_limit 时超时自动解锁；目标丢失时上报异常并自动恢复扫描。\n    - lock=False：解除锁定并继续侦察（此时 target_id 可省略）。\n\n    锁定前用 ugv_area_recon_get_targets 拿目标的 target_id。\n\n    Args:\n        lock: True 锁定 / False 解锁并继续。\n        target_id: 要锁定的目标编号（lock=True 时必填）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "lock": {
+              "title": "Lock",
+              "type": "boolean"
+            },
+            "target_id": {
+              "default": 0,
+              "title": "Target Id",
+              "type": "integer"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["lock"],
+          "title": "ugv_area_recon_lockArguments"
+        },
+        "inputSchemaHash": "3462c36be42d706cb8be5053cb48342c020a23510d4d814bea84c841c166704f",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_get_status",
+        "description": "获取侦察动作状态 (对应文档 mar_report_status_msg / mar_report_mode_msg)。\n\n    返回 {status, status_label, scan_mode, scan_mode_label, scan_pitch,\n    out_of_range, camera_fault, scan_num, progress, work_mode, recon_type,\n    load_status, load_status_label, lock:{stage, target_id, role_name, duration_sec},\n    attack_ready, online, gimbal}。\n    status 为 MotionStatusEnum(1-空闲,3-就绪,5-运行中,8-暂停,9-被中断,11-结束…)；\n    scan_mode: 1-区域侦察/2-周扫侦察；progress: 配置了固定圈数(scan_num>0)时=圈数进度\n    ((已完成圈数+本圈完成度)/scan_num, 如配 10 圈扫完 2 圈=20%, 结束=100)；连续侦察\n    (scan_num=0)时 区域=面积覆盖率、周扫=本圈方位覆盖率(每圈清零重计)；\n    out_of_range=true 表示区域暂时超出探测半径(边走边侦察途中的过程态，不是失败)；\n    camera_fault=true 表示光电机位不可信(位姿零变换或远离载体)，此时覆盖率与目标已\n    停止累积、progress 停在故障前的值，应按载荷失效处理而非按低进度等待；\n    work_mode: 1-自动,2-遥控；attack_ready=true 表示已锁定目标可打击确认。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "ugv_area_recon_get_statusArguments"
+        },
+        "inputSchemaHash": "8adc3042b44a037dfbbc270c149d3fb68499368e90fe516925abbf2f418abf12",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_get_targets",
+        "description": "获取当前侦察到的目标列表 (对应文档 mar_report_target_msg / MarTargetMsg)。\n\n    返回 {targets: [MarTargetInfo, ...]}，每个目标含 capture_time_us、target_id、\n    type(TargetTypeEnum)、position(PointGNSS)、velocity(VelocityENU)、distance、\n    confidence、threat、damage、lock_time、pixel_pos(PixelPosition) 及 camp。\n    锁定/打击用 target_id。\n\n    侦察动作运行时返回载荷上报的目标(字段完整)；未启动/已停止侦察时列表为\n    空——检测与上报均由区域侦察驱动(画面框与目标列表同源一致)，拿 target_id\n    锁定/打击前需先启动区域侦察。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "ugv_area_recon_get_targetsArguments"
+        },
+        "inputSchemaHash": "ab0bc98f2c9812d55ad245d8357cc510209b2962e0e1f7c2b66067e2beacd122",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_reset",
+        "description": "重置动作状态为空闲态 (对应文档 mar_reset_motion_state_srv)。\n\n    只有行动结束(被中断/失败/正常结束)后调用才返回成功；行动未结束时返回失败。\n    重置后需重新配置(ugv_area_recon_configure)才能再次启动。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}(cmd_res 为 CmdResEnum)。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "title": "ugv_area_recon_resetArguments"
+        },
+        "inputSchemaHash": "3cf926307fc8ec471a2b5959c2e8ce93c8a6c16b6b3d4cb888818d82084b3d4a",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_area_recon_attack_confirm",
+        "description": "打击确认 (对应文档\"打击确认服务\")。\n\n    锁定目标(attack_ready=true)后调用：confirm=1 对当前锁定目标发起打击(经裁判\n    判定命中/毁伤)；confirm=2 不打击，停止本次侦察动作，任务结束。\n\n    Args:\n        confirm: 打击确认指令：1-打击，2-不打击。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message, cmd_res}。confirm=1 时只负责下发\n        打击指令(接收到指令即返回)，命中结果经 /referee/event 或 get_status 武器轨道查询。\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "confirm": {
+              "title": "Confirm",
+              "type": "integer"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["confirm"],
+          "title": "ugv_area_recon_attack_confirmArguments"
+        },
+        "inputSchemaHash": "f2c35f6718497e5f4b46c369bc1ae230148b2b088e0f5bc413f87dec2f79705b",
+        "outputSchemaHash": null
+      },
+      {
+        "name": "ugv_gimbal_move",
+        "description": "\n    控制光电云台指向（自由看某方向；侦察/锁定之外的手动指向）。\n\n    侦察是自动扫描、锁定是跟踪已检测目标；本工具用于两者都不适用时的\n    手动指向——例如朝某方向观察、抬高俯仰看远处、交战后转回正前方。\n    指向后可配合 ugv_area_recon_get_targets 查看检测到的目标再决定锁定/打击。\n    注意：velocity 模式只是**手动**让云台连续转，不上报侦察目标；要\"边转边搜索\n    并上报目标\"请用侦察的周扫样式(area_recon_configure scan_mode=2 + control(1))。\n    手动 EO 与侦察互斥(二者抢同一套伺服)，侦察非空闲时本工具会被拒(824)。\n\n    Args:\n        mode: 指向模式。\n            - \"absolute\" 转到绝对角 (yaw, pitch)\n            - \"relative\" 相对位移 (yaw=Δyaw, pitch=Δpitch, delta_zoom=Δzoom)\n            - \"velocity\" 持续旋转 (yaw_speed, pitch_speed；全 0 停止)\n            - \"reset\"    回中归零\n        yaw / pitch: absolute 目标角 / relative 位移量（度）。\n        yaw_speed / pitch_speed: 运动速度（度/秒）；velocity 模式作为旋转速度。\n        delta_zoom: relative 模式的变焦增量（正放大负缩小）。\n        mission_id: 任务唯一标识符；填 0 由服务端自动生成。\n\n    Returns:\n        {mission_id, state, state_label, message}\n    ",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "title": "Mode",
+              "type": "string"
+            },
+            "yaw": {
+              "default": 0,
+              "title": "Yaw",
+              "type": "number"
+            },
+            "pitch": {
+              "default": 0,
+              "title": "Pitch",
+              "type": "number"
+            },
+            "yaw_speed": {
+              "default": 30,
+              "title": "Yaw Speed",
+              "type": "number"
+            },
+            "pitch_speed": {
+              "default": 30,
+              "title": "Pitch Speed",
+              "type": "number"
+            },
+            "delta_zoom": {
+              "default": 0,
+              "title": "Delta Zoom",
+              "type": "number"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["mode"],
+          "title": "ugv_gimbal_moveArguments"
+        },
+        "inputSchemaHash": "5b1eee05491c47e9aa1fe19b9c8196de7f1241319b7c17690fd1a9443be5f4ff",
+        "outputSchemaHash": null
+      }
+    ]
+  },
+  "mqtt": {
+    "status": "PASS",
+    "connected": true,
+    "passiveSubscribeOnly": true,
+    "publishAttempted": false,
+    "explicitWireMode": "ros_bridge_json",
+    "sessionPresent": false,
+    "elapsedMs": 892,
+    "requiredStatusTopicObserved": false,
+    "legacyStatusTopicObserved": true,
+    "compositeStatusObserved": true,
+    "subscriptionGrants": [
+      {
+        "topic": "/ugv/area_recon/coverage",
+        "qos": 0
+      },
+      {
+        "topic": "/ugv/area_recon/exception",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/area_recon/targets",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/battery_range_km",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/component_status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/detected_objects",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/eo/pose",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/gnss",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/imu",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/mission_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/nav_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/speed",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/status",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/system_state",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/target_detected",
+        "qos": 1
+      },
+      {
+        "topic": "/ugv/target/gnss",
+        "qos": 1
+      },
+      {
+        "topic": "status/ugv",
+        "qos": 1
+      }
+    ],
+    "samples": [
+      {
+        "topic": "/ugv/area_recon/status",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.860Z",
+        "byteLength": 795,
+        "payloadSha256": "25a3fc2c3c7c44ccc3470822f4ec39ee37a9ca902a1c54fde9fef40bf01740bf",
+        "decodedType": "object",
+        "decodedTopLevelKeys": [
+          "attack_ready",
+          "camera_fault",
+          "coverage",
+          "coverage_covered",
+          "coverage_incomplete",
+          "coverage_reason",
+          "coverage_total",
+          "eo_fov",
+          "last_cmd_ack",
+          "load_status",
+          "load_status_label",
+          "lock",
+          "out_of_range",
+          "progress",
+          "recon_type",
+          "region",
+          "scan_mode",
+          "scan_mode_label",
+          "scan_num",
+          "scan_pitch",
+          "status",
+          "status_label",
+          "work_mode"
+        ]
+      },
+      {
+        "topic": "/ugv/area_recon/targets",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.860Z",
+        "byteLength": 502,
+        "payloadSha256": "e3299ec6350db09d4106319917029658cc2096573ebc1bab9b4c8fd54e36cddc",
+        "decodedType": "object",
+        "decodedTopLevelKeys": ["targets"]
+      },
+      {
+        "topic": "/ugv/component_status",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.185Z",
+        "byteLength": 245,
+        "payloadSha256": "b7a09498f4aa6804e7cd7972c5d505c14120863a24b8aec92cd64ad4ba05e2d3",
+        "decodedType": "object",
+        "decodedTopLevelKeys": [
+          "comms",
+          "entity_id",
+          "fuel",
+          "gnss",
+          "header",
+          "lvbattery",
+          "motor",
+          "navigation",
+          "power_battery",
+          "sensor",
+          "water_temp",
+          "weapon"
+        ]
+      },
+      {
+        "topic": "/ugv/detected_objects",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.859Z",
+        "byteLength": 319,
+        "payloadSha256": "455cea566a37fe688cb4fd1e69e6e2a164a3f39ffc74607dc32913c6e9fe3c47",
+        "decodedType": "object",
+        "decodedTopLevelKeys": ["header", "objects"]
+      },
+      {
+        "topic": "/ugv/eo/pose",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.262Z",
+        "byteLength": 97,
+        "payloadSha256": "ca9044c356fd192a8697b42f898a220351cd06dfaea0b299516e26d655eeebe8",
+        "decodedType": "array",
+        "decodedTopLevelKeys": []
+      },
+      {
+        "topic": "/ugv/gnss",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.185Z",
+        "byteLength": 298,
+        "payloadSha256": "1492fc41356c831fcddeced4b3de7b88d28ee135ff88fb078f71de663be56cd6",
+        "decodedType": "object",
+        "decodedTopLevelKeys": [
+          "altitude",
+          "header",
+          "latitude",
+          "longitude",
+          "position_covariance",
+          "position_covariance_type",
+          "status"
+        ]
+      },
+      {
+        "topic": "/ugv/imu",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.185Z",
+        "byteLength": 91,
+        "payloadSha256": "a68efa65fc23300bf64bb4dfb8669627d965e78ad8704d8125a43c88a2903e16",
+        "decodedType": "object",
+        "decodedTopLevelKeys": ["pitch", "roll", "yaw"]
+      },
+      {
+        "topic": "/ugv/speed",
+        "qos": 0,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": false,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.203Z",
+        "byteLength": 28,
+        "payloadSha256": "0ac9cb67edad1d4adc92d32c4a63ca59e5290081af771cb4dc33a765dcc6457a",
+        "decodedType": "number",
+        "decodedTopLevelKeys": []
+      },
+      {
+        "topic": "/ugv/status",
+        "qos": 1,
+        "expectedProtocolQos": 1,
+        "publisherQosMatchesProtocol": true,
+        "retained": false,
+        "receivedAt": "2026-08-21T01:22:54.259Z",
+        "byteLength": 1407,
+        "payloadSha256": "7203dfa890b5703e976ec24a78eb5c948be88941ed502868300bfc46d99aec91",
+        "decodedType": "object",
+        "decodedTopLevelKeys": [
+          "average_round_trip_time",
+          "brake_status",
+          "chassis_task",
+          "control",
+          "emergency_stop_status",
+          "engine_water_temp",
+          "entity_id",
+          "eo_task",
+          "fault",
+          "fuel1",
+          "fuel2",
+          "gear_status",
+          "gimbal",
+          "gnss",
+          "heading",
+          "hvbattery1_soc",
+          "hvbattery2_soc",
+          "ins_init",
+          "location_status",
+          "lvbattery_soc",
+          "mobility_blocked",
+          "mobility_state_label",
+          "mobility_status",
+          "motor_temp",
+          "operate_mode_status",
+          "packet_loss_rate",
+          "ping_status",
+          "pitch",
+          "position",
+          "power_supply_status",
+          "ready_status",
+          "role_name",
+          "roll",
+          "speed_kmh",
+          "stamp",
+          "veh_speed",
+          "vehicle_id",
+          "weapon_task"
+        ]
+      }
+    ],
+    "publisherQosDrift": [
+      {
+        "topic": "/ugv/speed",
+        "observedQos": 0,
+        "expectedProtocolQos": 1
+      }
+    ],
+    "rawPayloadStored": false
+  },
+  "failure": null
+}

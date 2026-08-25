@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T14:34:12.777Z",
+  "updatedAt": "2026-08-20T15:17:44.996Z",
+  "status": "PARTIAL_RESOURCE_CHAIN_ONLY",
+  "revisionAttribution": {
+    "historicalQueryableSampleRevision": "9f1e4a50b2ab80813f1affd6f820990bf129b64e",
+    "currentDeployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+    "note": "The resource-level query sample and top-level capturedAt belong to the historical 9f revision. The later landing-only watermark and final Runtime epoch count are cross-repository updates and do not convert that historical query sample into eaa evidence."
+  },
+  "resourceLevelLiveChain": {
+    "sourceVectorUsed": false,
+    "manualInsertUsed": false,
+    "providerId": "isr.vehicle.ugv.ugv1",
+    "resourceId": "vehicle:ugv1",
+    "runtimeDeploymentId": "ugv-test-deployment",
+    "runtimeInstanceId": "ugv-runtime-test-1",
+    "recordId": "48482ae7-4a82-5577-9143-fbdb4e2fd4b7",
+    "recordHash": "f8f3597dea4448b74f386d3e2aa3a17f95e47c13b402f19042bc2f8d0931567a",
+    "recordType": "provider.resource.metric",
+    "eventCategory": "resource.metric",
+    "occurredAt": "2026-08-20T10:19:54.910Z",
+    "ingestedAt": "2026-08-20T14:34:12.777Z",
+    "recordIdHashParityAcrossOtlpAndBody": "VALIDATED_BY_PROCESSOR_ACCEPTANCE_AND_CONTRACT_TESTS"
+  },
+  "requiredDimensions": [
+    { "field": "providerId", "resourceChain": true, "taskChain": false },
+    { "field": "resourceId", "resourceChain": true, "taskChain": false },
+    { "field": "taskId", "resourceChain": false, "taskChain": false },
+    { "field": "externalExecutionId", "resourceChain": false, "taskChain": false },
+    { "field": "operationName", "resourceChain": false, "taskChain": false },
+    { "field": "recordId", "resourceChain": true, "taskChain": false }
+  ],
+  "taskLevelChain": {
+    "available": false,
+    "reasonCode": "NO_AUTHORIZED_TASK_CREATED",
+    "taskId": null,
+    "externalExecutionId": null,
+    "operationName": null,
+    "missionIdStored": false
+  },
+  "currentRunTimeCorrelation": {
+    "providerAdapterStartedAt": "2026-08-20T14:18:31.685Z",
+    "earlyQueryableSourceOccurredAt": "2026-08-20T10:19:54.910Z",
+    "latestTelemetryLanding": {
+      "rows": 134864,
+      "distinctRecordIds": 134864,
+      "maximumOccurredAt": "2026-08-20T10:45:55.689Z",
+      "maximumIngestedAt": "2026-08-20T15:07:40.656Z",
+      "scope": "LANDING_ONLY"
+    },
+    "finalDeployedAdapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "finalRuntimeEpochRows": 0,
+    "historicalFifoBacklog": true,
+    "convergedWithinEvidenceWindow": false
+  },
+  "qualificationImpact": "Provider/resource identity is queryable end to end, but task/execution/operation correlation and current-run temporal convergence are absent."
+}

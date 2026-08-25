@@ -22,6 +22,7 @@
     "apps/**/*.ts",
     "packages/**/*.ts",
     "scripts/**/*.ts",
+    "scripts/**/*.d.mts",
     "examples/mock-adapter-typescript/**/*.ts",
     "tests/**/*.ts",
     "vitest.config.ts"

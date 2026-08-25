@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "completedAt": "2026-08-20T14:36:36.626Z",
+  "status": "NOT_EXECUTED",
+  "reasonCode": "TASK_CONTROL_NOT_AUTHORIZED_AND_NO_LIVE_TASK",
+  "authorization": {
+    "taskControlTests": false,
+    "emergencyStopTest": false,
+    "areaReconTest": false,
+    "liveControl": false
+  },
+  "actions": {
+    "pause": { "attempted": false, "calls": 0 },
+    "resume": { "attempted": false, "calls": 0 },
+    "cancel": { "attempted": false, "calls": 0 },
+    "emergencyStop": { "attempted": false, "calls": 0 },
+    "areaRecon": { "attempted": false, "calls": 0 },
+    "fire": { "attempted": false, "calls": 0 }
+  },
+  "sameTaskControlEvidence": false,
+  "missionContinuityEvidence": false,
+  "physicalStopEvidence": false,
+  "sideEffectCount": 0
+}

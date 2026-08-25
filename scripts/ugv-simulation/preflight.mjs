@@ -22,26 +22,6 @@ import {
   writeEvidence,
 } from "./lib.mjs";
 
-const PROTOCOL_TOPICS = [
-  "/ugv/eo/pose",
-  "/ugv/detected_objects",
-  "/ugv/target_detected",
-  "/ugv/target/gnss",
-  "/ugv/area_recon/targets",
-  "/ugv/area_recon/status",
-  "/ugv/area_recon/exception",
-  "/ugv/area_recon/coverage",
-  "status/ugv",
-  "/ugv/status",
-  "/ugv/gnss",
-  "/ugv/imu",
-  "/ugv/speed",
-  "/ugv/battery_range_km",
-  "/ugv/mission_state",
-  "/ugv/nav_state",
-  "/ugv/system_state",
-  "/ugv/component_status",
-];
 const argumentsValue = parseArguments(process.argv.slice(2));
 const environment = loadEnvironment(argumentsValue["env-file"]);
 const root = repositoryRoot(import.meta.url);
@@ -50,15 +30,23 @@ const output =
   optional(environment, "UGV_PREFLIGHT_EVIDENCE_PATH") ??
   "/var/lib/sdar/preflight/REAL_EXTERNAL_PREFLIGHT.json";
 const startedAt = new Date().toISOString();
+const runId = optional(environment, "UGV_SIMULATION_RUN_ID");
+if (runId !== undefined && (!/^[a-z0-9][a-z0-9._-]{0,95}$/u.test(runId) || runId.includes("..")))
+  throw coded("UGV_SIMULATION_RUN_ID_INVALID");
 const report = {
   schemaVersion: 1,
-  evidenceClass: "real_external_read_only",
+  generatedAt: null,
+  evidenceClass: "external_simulation",
+  productionEligible: false,
+  physicalVehicleQualified: false,
+  authorizationGranted: false,
   phase: "G10_REAL_EXTERNAL_PREFLIGHT",
   status: "BLOCKED_EXTERNAL_ENV",
   reasonCode: "PREFLIGHT_NOT_COMPLETED",
   command: "node scripts/ugv-simulation/preflight.mjs",
   exitCode: 2,
   startedAt,
+  runId: runId ?? null,
   completedAt: null,
   gitSha: optional(environment, "UGV_QUALIFICATION_GIT_SHA") ?? gitSha(root),
   sourceStatus: optional(environment, "UGV_QUALIFICATION_SOURCE_STATUS") ?? "UNVERIFIED",
@@ -67,7 +55,31 @@ const report = {
     mockFallbackEnabled: false,
     controlAttempted: false,
     mqttPublishAttempted: false,
+    toolsCallCount: 0,
+    directDeviceToolCallCount: 0,
+    mqttPublishCount: 0,
+    controlInvocationCount: 0,
+    navigationDispatchCount: 0,
+    mutatingToolCallCount: 0,
+    forbiddenOperationCallCount: 0,
     rawPayloadStored: false,
+  },
+  qualificationLayers: {
+    networkReachability: "NOT_RUN",
+    protocolReachability: "NOT_RUN",
+    contractUsability: "NOT_RUN",
+    authoritativeStateFreshness: "NOT_RUN",
+    deviceMcp: {
+      networkReachability: "NOT_RUN",
+      protocolReachability: "NOT_RUN",
+      contractUsability: "NOT_RUN",
+    },
+    mqtt: {
+      networkReachability: "NOT_RUN",
+      protocolReachability: "NOT_RUN",
+      contractUsability: "NOT_RUN",
+      authoritativeStateFreshness: "NOT_RUN",
+    },
   },
   configuration: {},
   deviceMcp: { status: "NOT_RUN" },
@@ -94,9 +106,47 @@ try {
   };
 
   report.deviceMcp = await probeDeviceMcp(config);
+  report.qualificationLayers = {
+    ...report.qualificationLayers,
+    networkReachability:
+      report.deviceMcp.connected === true ? "PARTIAL_DEVICE_MCP_ONLY" : "BLOCKED",
+    protocolReachability:
+      report.deviceMcp.connected === true && report.deviceMcp.protocolVersion !== "unknown"
+        ? "PARTIAL_DEVICE_MCP_ONLY"
+        : "BLOCKED",
+    contractUsability: report.deviceMcp.status === "PASS" ? "PARTIAL_DEVICE_MCP_ONLY" : "BLOCKED",
+    deviceMcp: {
+      networkReachability: report.deviceMcp.connected === true ? "PASS" : "BLOCKED",
+      protocolReachability:
+        report.deviceMcp.connected === true && report.deviceMcp.protocolVersion !== "unknown"
+          ? "PASS"
+          : "BLOCKED",
+      contractUsability: report.deviceMcp.status === "PASS" ? "PASS" : "BLOCKED",
+    },
+  };
   if (report.deviceMcp.status !== "PASS")
     throw coded(report.deviceMcp.reasonCode ?? "DEVICE_MCP_OPERATION_QUALIFICATION_FAILED");
   report.mqtt = await probeMqtt(config);
+  report.qualificationLayers = {
+    networkReachability:
+      report.deviceMcp.connected === true && report.mqtt.connected === true ? "PASS" : "BLOCKED",
+    protocolReachability:
+      report.deviceMcp.connected === true &&
+      report.deviceMcp.protocolVersion !== "unknown" &&
+      report.mqtt.connected === true
+        ? "PASS"
+        : "BLOCKED",
+    contractUsability:
+      report.deviceMcp.status === "PASS" && report.mqtt.status !== "BLOCKED" ? "PASS" : "BLOCKED",
+    authoritativeStateFreshness: "UNVERIFIED_PAYLOAD_NOT_RETAINED",
+    deviceMcp: report.qualificationLayers.deviceMcp,
+    mqtt: {
+      networkReachability: report.mqtt.connected === true ? "PASS" : "BLOCKED",
+      protocolReachability: report.mqtt.connected === true ? "PASS" : "BLOCKED",
+      contractUsability: report.mqtt.status === "PASS" ? "PASS" : "PARTIAL",
+      authoritativeStateFreshness: "UNVERIFIED_PAYLOAD_NOT_RETAINED",
+    },
+  };
   if (report.mqtt.status === "PARTIAL") {
     report.status = "BLOCKED_EXTERNAL_ENV";
     report.reasonCode = report.mqtt.reasonCode;
@@ -112,8 +162,37 @@ try {
 } catch (error) {
   report.failure = safeFailure(error, "REAL_EXTERNAL_PREFLIGHT_FAILED");
   report.reasonCode = report.failure.reasonCode;
+  if (report.deviceMcp.status === "NOT_RUN") {
+    report.qualificationLayers = {
+      ...report.qualificationLayers,
+      networkReachability: "BLOCKED",
+      protocolReachability: "BLOCKED",
+      contractUsability: "BLOCKED",
+      authoritativeStateFreshness: "NOT_RUN",
+      deviceMcp: {
+        networkReachability: "BLOCKED",
+        protocolReachability: "BLOCKED",
+        contractUsability: "BLOCKED",
+      },
+    };
+  } else if (report.mqtt.status === "NOT_RUN") {
+    report.qualificationLayers = {
+      ...report.qualificationLayers,
+      networkReachability: "BLOCKED_AFTER_DEVICE_MCP",
+      protocolReachability: "BLOCKED_AFTER_DEVICE_MCP",
+      contractUsability: "BLOCKED_AFTER_DEVICE_MCP",
+      authoritativeStateFreshness: "NOT_RUN",
+      mqtt: {
+        networkReachability: "BLOCKED",
+        protocolReachability: "BLOCKED",
+        contractUsability: "BLOCKED",
+        authoritativeStateFreshness: "NOT_RUN",
+      },
+    };
+  }
 } finally {
   report.completedAt = new Date().toISOString();
+  report.generatedAt = report.completedAt;
   try {
     writeEvidence(output, report, forbiddenEvidenceValues);
   } catch (error) {
@@ -336,6 +415,10 @@ async function probeDeviceMcp(config) {
         : { reasonCode: "DEVICE_MCP_REQUIRED_OPERATION_QUALIFICATION_FAILED" }),
       connected: true,
       mockFallbackEnabled: false,
+      initializeCount: 1,
+      toolsListCount: 1,
+      toolsCallCount: 0,
+      allowedMethods: ["initialize", "notifications/initialized", "tools/list"],
       serverInfo,
       protocolVersion: transport.protocolVersion ?? "unknown",
       toolCount: tools.length,
@@ -363,7 +446,26 @@ async function probeDeviceMcp(config) {
 }
 
 async function probeMqtt(config) {
-  const { connect } = await import("mqtt");
+  const [{ connect }, { UGV_MQTT_SUBSCRIPTIONS }] = await Promise.all([
+    import("mqtt"),
+    import("../../dist/packages/vehicle-mqtt-ingress/src/index.js"),
+  ]);
+  const protocolSubscriptions = UGV_MQTT_SUBSCRIPTIONS.map(({ topic, qos }) => ({ topic, qos }));
+  const protocolSubscriptionByTopic = new Map(
+    protocolSubscriptions.map(({ topic, qos }) => [topic, qos]),
+  );
+  if (
+    protocolSubscriptions.length === 0 ||
+    protocolSubscriptionByTopic.size !== protocolSubscriptions.length ||
+    protocolSubscriptions.some(
+      ({ topic, qos }) =>
+        typeof topic !== "string" ||
+        topic.includes("#") ||
+        topic.includes("+") ||
+        (qos !== 0 && qos !== 1),
+    )
+  )
+    throw coded("UGV_MQTT_LOCKED_PROFILE_INVALID");
   const options = {
     clientId: `sdar-ugv-real-preflight-${randomUUID().slice(0, 8)}`,
     clean: true,
@@ -417,7 +519,7 @@ async function probeMqtt(config) {
         connected = true;
         sessionPresent = packet.sessionPresent === true;
         const subscriptions = Object.fromEntries(
-          PROTOCOL_TOPICS.map((topic) => [topic, { qos: topic.endsWith("/coverage") ? 0 : 1 }]),
+          protocolSubscriptions.map(({ topic, qos }) => [topic, { qos }]),
         );
         client.subscribe(subscriptions, (error, granted = []) => {
           if (error !== null && error !== undefined)
@@ -425,10 +527,7 @@ async function probeMqtt(config) {
           try {
             subscriptionGrants = validateExactMqttSubscriptionGrants(
               granted.map(({ topic, qos }) => ({ topic, qos })),
-              PROTOCOL_TOPICS.map((topic) => ({
-                topic,
-                qos: topic.endsWith("/coverage") ? 0 : 1,
-              })),
+              protocolSubscriptions,
             );
           } catch (validationError) {
             return finish(validationError);
@@ -438,9 +537,10 @@ async function probeMqtt(config) {
         });
       });
       client.on("message", (topic, payload, packet) => {
-        if (!PROTOCOL_TOPICS.includes(topic) || samples.has(topic)) return;
+        if (!protocolSubscriptionByTopic.has(topic) || samples.has(topic)) return;
         try {
-          const expectedQos = topic.endsWith("/coverage") ? 0 : 1;
+          const expectedQos = protocolSubscriptionByTopic.get(topic);
+          if (expectedQos === undefined) throw coded("UGV_MQTT_TOPIC_NOT_IN_LOCKED_PROFILE");
           const decoded = decodeWirePayload(payload, config.wireMode);
           samples.set(topic, {
             topic,
@@ -475,6 +575,9 @@ async function probeMqtt(config) {
       passiveSubscribeOnly: true,
       publishAttempted: false,
       explicitWireMode: config.wireMode,
+      lockedProfile: "vehicle-mqtt-ingress/UGV_MQTT_SUBSCRIPTIONS",
+      lockedProfileHash: sha256(canonical(protocolSubscriptions)),
+      wildcardSubscriptionCount: 0,
       sessionPresent,
       elapsedMs: Date.now() - started,
       requiredStatusTopicObserved: samples.has("status/ugv"),

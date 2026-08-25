@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "ugv-agent-profile.provider-qualification-run-reservation/v1",
+  "runId": "uap-p1b02-20260821t032832z",
+  "generatedAt": "2026-08-21T03:42:35.462Z",
+  "reservedAt": "2026-08-21T03:42:35.462Z",
+  "status": "RESERVED_IMMUTABLY",
+  "evidenceClass": "external_simulation",
+  "expectedEvidence": "smpp-provider-qualification-uap-p1b02-20260821t032832z.redacted.json",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "safety": {
+    "northboundToolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

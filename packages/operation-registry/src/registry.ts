@@ -14,6 +14,8 @@ import { AdapterContractError, InvalidParamsError } from "../../domain/src/index
 
 const OPERATION_NAME = /^[A-Za-z0-9][A-Za-z0-9_./-]{0,63}$/;
 const PROVIDER_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const PROVIDER_TYPE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const PROVIDER_VERSION = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/;
 
 export interface ValidatedOperation extends Omit<
   OperationDefinition,
@@ -117,6 +119,9 @@ export class OperationRegistry {
   validate(manifest: ProviderManifest): ValidatedManifest {
     if (manifest.adapterProtocolVersion !== "1.0") throw new Error("UNSUPPORTED_ADAPTER_PROTOCOL");
     if (!PROVIDER_ID.test(manifest.providerId)) throw new Error("INVALID_PROVIDER_ID");
+    if (!PROVIDER_TYPE.test(manifest.providerType)) throw new Error("INVALID_PROVIDER_TYPE");
+    if (!PROVIDER_VERSION.test(manifest.providerVersion))
+      throw new Error("INVALID_PROVIDER_VERSION");
     if (manifest.operations.length === 0 || manifest.operations.length > 128) {
       throw new Error("INVALID_OPERATION_COUNT");
     }
@@ -200,6 +205,8 @@ export class OperationRegistry {
                 availability: operation.capabilities.availability ? "dynamic" : "not_supported",
                 supportsScheduling: operation.capabilities.scheduling,
                 supportsMaxElapsed: operation.capabilities.maxElapsed,
+                supportsCancellation: operation.capabilities.cancel,
+                supportsPauseResume: operation.capabilities.pauseResume,
                 supportsObservations: operation.capabilities.observations,
                 supportsInputRequired: operation.capabilities.inputRequired,
                 idempotency: operation.capabilities.idempotency ? "server_managed" : "none",

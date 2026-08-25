@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "generatedAt": "2026-08-21T03:32:06.741Z",
+  "taskId": "UAP-P1-B02",
+  "status": "FAIL",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "command": "pnpm typecheck && pnpm lint && pnpm build",
+  "exitCode": 1,
+  "reasonCode": "ESLINT_NODE_TEST_GLOBAL_NOT_DECLARED",
+  "rootCause": "The focused .mjs test used structuredClone as an implicit global, which violates the repository no-undef rule.",
+  "resolution": "Use a local JSON-safe fixture clone helper; production code and assertions are unchanged.",
+  "completedGates": ["pnpm typecheck"],
+  "notRunAfterFailure": ["pnpm build"],
+  "safety": {
+    "northboundToolsCallCount": 0,
+    "directDeviceToolCallCount": 0,
+    "navigationDispatchCount": 0,
+    "mutatingToolCallCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

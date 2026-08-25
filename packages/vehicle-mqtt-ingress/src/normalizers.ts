@@ -41,7 +41,7 @@ function normalizeVehicleMqttObservation(
   value: unknown,
   object: Record<string, unknown> | undefined,
 ): NormalizedMqttObservation {
-  const base = observationBase(value, object);
+  const base = observationBase(value, object, topic === "/ugv/status");
   switch (topic) {
     case "/ugv/gnss": {
       const latitudeValue = latitude(object?.latitude);
@@ -709,9 +709,14 @@ function latestTargetObservedAt(targets: readonly VehicleTarget[]): string | und
   return latest?.observedAt;
 }
 
-function observationBase(value: unknown, object: Record<string, unknown> | undefined) {
+function observationBase(
+  value: unknown,
+  object: Record<string, unknown> | undefined,
+  allowTopLevelStamp = false,
+) {
   const header = object?.header;
-  const sourceObservedAt = headerTimestamp(header);
+  const sourceObservedAt =
+    headerTimestamp(header) ?? (allowTopLevelStamp ? stampTimestamp(object?.stamp) : undefined);
   const sourceSequence = scalarText(record(header) ? header.seq : object?.seq);
   return {
     ...(sourceObservedAt === undefined ? {} : { sourceObservedAt }),
@@ -822,10 +827,21 @@ function component(value: unknown): ComponentHealth {
 }
 
 function headerTimestamp(value: unknown): string | undefined {
-  if (!record(value) || !record(value.stamp)) return undefined;
-  const seconds = optionalNumber(value.stamp.sec ?? value.stamp.secs);
-  const nanos = optionalNumber(value.stamp.nanosec ?? value.stamp.nsecs) ?? 0;
-  if (seconds === undefined || seconds < 0 || nanos < 0 || nanos >= 1_000_000_000) return undefined;
+  return record(value) ? stampTimestamp(value.stamp) : undefined;
+}
+
+function stampTimestamp(value: unknown): string | undefined {
+  if (!record(value)) return undefined;
+  const seconds = optionalNumber(value.sec ?? value.secs);
+  const nanos = optionalNumber(value.nanosec ?? value.nsecs) ?? 0;
+  if (
+    seconds === undefined ||
+    seconds < 0 ||
+    nanos < 0 ||
+    nanos >= 1_000_000_000 ||
+    (seconds === 0 && nanos === 0)
+  )
+    return undefined;
   return new Date(seconds * 1000 + nanos / 1_000_000).toISOString();
 }
 

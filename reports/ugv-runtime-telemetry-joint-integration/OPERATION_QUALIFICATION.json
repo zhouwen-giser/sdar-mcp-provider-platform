@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.0",
+  "observedAt": "2026-08-20T14:32:57.911Z",
+  "evidenceClass": "READ_ONLY_LIVE_PASS",
+  "status": "PARTIAL_EXTERNAL_INTERFACE_BLOCKED",
+  "request": {
+    "method": "io.sdar/taskExecution/checkAvailability",
+    "operationName": "vehicle_navigate",
+    "variant": "point",
+    "resourceId": "vehicle:ugv1",
+    "target": {
+      "longitude": 106.8134463,
+      "latitude": 29.72034353,
+      "altitude": 500
+    },
+    "readOnly": true
+  },
+  "result": {
+    "availabilityCheckStatus": "PASS",
+    "resultType": "complete",
+    "availability": "available",
+    "riskLevel": "medium",
+    "reasonCode": "UGV_AVAILABLE",
+    "estimatedDelayMs": 0,
+    "reservationMode": "none",
+    "possibleEffects": []
+  },
+  "supportingState": {
+    "runtimeActiveTasks": 0,
+    "runtimeUncertainTasks": 0,
+    "providerExecutionRows": 0,
+    "providerMutationJournalRows": 0,
+    "providerDeviceReadCallRows": 60,
+    "providerDeviceReadCallBreakdown": {
+      "get_capabilities": 15,
+      "get_status": 17,
+      "ugv_area_recon_get_status": 14,
+      "ugv_area_recon_get_targets": 14
+    },
+    "providerDeviceMutatingCallRows": 0,
+    "runtimeCommandRows": 0,
+    "mqttConnected": true,
+    "deviceMcpConnected": true,
+    "deviceAvailable": true,
+    "observedMissionState": 4,
+    "missionStateInterpretation": "quiescent completed state retained by simulator; not the strict mission-state-zero prerequisite",
+    "fireEnabled": false
+  },
+  "strictG3ReadOnlyGate": {
+    "status": "PARTIAL_EXTERNAL_INTERFACE_BLOCKED",
+    "missionStateZero": {
+      "proven": false,
+      "observedValue": 4
+    },
+    "speedZero": {
+      "proven": false,
+      "reason": "The redacted current-run evidence does not retain speed."
+    },
+    "positionParseable": {
+      "proven": false,
+      "reason": "The redacted current-run evidence does not retain position."
+    },
+    "requiredFreshnessNotStaleOrUnknown": {
+      "proven": false,
+      "reason": "An observation timestamp is retained, but no complete required-domain freshness classification is retained."
+    },
+    "executionModeLive": {
+      "proven": false,
+      "reason": "The current redacted read-only result does not retain executionMode."
+    },
+    "mockFallbackFalse": {
+      "proven": false,
+      "reason": "The current redacted read-only result does not independently attest the mock-fallback setting."
+    }
+  },
+  "authorization": {
+    "liveControlEnabled": false,
+    "pointNavigationEnabled": false,
+    "runIdProvided": false,
+    "dispatchPermitted": false
+  },
+  "mutatingCalls": 0
+}

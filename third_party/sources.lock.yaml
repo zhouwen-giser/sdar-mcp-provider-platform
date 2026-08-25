@@ -14,3 +14,10 @@ sources:
     license: BSD-3-Clause
     integrity: sha512-YPOs1zD5TG2+EZt+r88LwF6mclA7TPkpwMP7ZN3TO2HiHS8TXvq7QA/17iJsV9dubcLo/f8eEYqMBruyQV21hQ==
     classification: transitive-production-dependency
+  - name: tar
+    version: 7.5.21
+    repository: https://github.com/isaacs/node-tar.git
+    commit: 0cd9cc3c5814446d3c0cbea6a31d6c00c2c8a9d9
+    license: BlueOak-1.0.0
+    integrity: sha512-XdhtCvlMywwxpCW8YEq3lOXBJpUPTR2OHHcwLPO3HwsJqOHa2Ok/oJ7ruGzp+JrKoRPVCzJwAdEjqLW/vNRPHA==
+    classification: transitive-build-dependency

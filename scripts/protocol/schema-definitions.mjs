@@ -330,6 +330,26 @@ export function protocolSchemas() {
                         taskNotifications: { const: true },
                       },
                     },
+                    "io.sdar/providerCatalog": {
+                      type: "object",
+                      required: ["providerId", "providerType", "providerVersion", "manifestHash"],
+                      properties: {
+                        providerId: {
+                          type: "string",
+                          pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+                        },
+                        providerType: {
+                          type: "string",
+                          pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+                        },
+                        providerVersion: {
+                          type: "string",
+                          pattern: "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$",
+                        },
+                        manifestHash: { type: "string", pattern: "^[0-9a-f]{64}$" },
+                      },
+                      additionalProperties: false,
+                    },
                   },
                 },
               },
@@ -371,6 +391,8 @@ export function protocolSchemas() {
             "tasks/get",
             "tasks/update",
             "tasks/cancel",
+            "io.sdar/taskExecution/tasks/pause",
+            "io.sdar/taskExecution/tasks/resume",
             "subscriptions/listen",
             "io.sdar/taskExecution/tasks/observations",
           ],
@@ -382,7 +404,16 @@ export function protocolSchemas() {
         {
           if: {
             properties: {
-              "mcp-method": { enum: ["tools/call", "tasks/get", "tasks/update", "tasks/cancel"] },
+              "mcp-method": {
+                enum: [
+                  "tools/call",
+                  "tasks/get",
+                  "tasks/update",
+                  "tasks/cancel",
+                  "io.sdar/taskExecution/tasks/pause",
+                  "io.sdar/taskExecution/tasks/resume",
+                ],
+              },
             },
             required: ["mcp-method"],
           },
@@ -446,6 +477,26 @@ export function protocolSchemas() {
           },
           true,
         ),
+        PauseTaskRequest: requestEnvelope(
+          "io.sdar/taskExecution/tasks/pause",
+          {
+            type: "object",
+            required: ["taskId"],
+            properties: { taskId: { type: "string", minLength: 1 } },
+            additionalProperties: false,
+          },
+          true,
+        ),
+        ResumeTaskRequest: requestEnvelope(
+          "io.sdar/taskExecution/tasks/resume",
+          {
+            type: "object",
+            required: ["taskId"],
+            properties: { taskId: { type: "string", minLength: 1 } },
+            additionalProperties: false,
+          },
+          true,
+        ),
         CompleteAck: completeResult,
       },
       oneOf: [
@@ -454,6 +505,8 @@ export function protocolSchemas() {
         { $ref: "#/$defs/GetTaskRequest" },
         { $ref: "#/$defs/UpdateTaskRequest" },
         { $ref: "#/$defs/CancelTaskRequest" },
+        { $ref: "#/$defs/PauseTaskRequest" },
+        { $ref: "#/$defs/ResumeTaskRequest" },
         { $ref: "#/$defs/CompleteAck" },
       ],
     },
@@ -574,6 +627,8 @@ export function protocolSchemas() {
         availability: { enum: ["not_supported", "dynamic"] },
         supportsScheduling: { type: "boolean" },
         supportsMaxElapsed: { type: "boolean" },
+        supportsCancellation: { type: "boolean" },
+        supportsPauseResume: { type: "boolean" },
         supportsObservations: { type: "boolean" },
         supportsInputRequired: { type: "boolean" },
         idempotency: { enum: ["none", "client_request_key", "server_managed", "unknown"] },

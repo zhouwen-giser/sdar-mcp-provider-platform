@@ -51,24 +51,24 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
     expect(audit.rows[0]?.metadata).toMatchObject({ environment: "production", revision: 1 });
   });
 
-  it("does not create a revision or audit for the same checksum", async () => {
+  it("publishes a fresh immutable revision for the same checksum", async () => {
     const repeated = await repository.publish(publicationInput(["provider-a"]));
 
-    expect(repeated).toMatchObject({ created: false, snapshot: { revision: 1 } });
-    expect(await repository.history("production")).toHaveLength(1);
+    expect(repeated).toMatchObject({ created: true, snapshot: { revision: 2 } });
+    expect(await repository.history("production")).toHaveLength(2);
     expect((await pool.query(`SELECT count(*)::integer AS count FROM audit`)).rows[0]).toEqual({
-      count: 1,
+      count: 2,
     });
   });
 
   it("retains immutable history and reports provider changes", async () => {
     const changed = await repository.publish(publicationInput(["provider-b"]));
 
-    expect(changed).toMatchObject({ created: true, snapshot: { revision: 2 } });
+    expect(changed).toMatchObject({ created: true, snapshot: { revision: 3 } });
     expect((await repository.history("production")).map(({ revision }) => revision)).toEqual([
-      2, 1,
+      3, 2, 1,
     ]);
-    expect(await repository.diff("production", 1, 2)).toMatchObject({
+    expect(await repository.diff("production", 2, 3)).toMatchObject({
       added: [{ providerId: "provider-b" }],
       removed: [{ providerId: "provider-a" }],
       changed: [],
@@ -82,15 +82,15 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
     ).rejects.toMatchObject({ code: "55000" });
   });
 
-  it("reactivates an immutable historical checksum without inserting a duplicate", async () => {
-    const reactivated = await repository.publish(publicationInput(["provider-a"]));
+  it("publishes a fresh revision when content returns to a historical checksum", async () => {
+    const republished = await repository.publish(publicationInput(["provider-a"]));
 
-    expect(reactivated).toMatchObject({ created: false, snapshot: { revision: 1 } });
+    expect(republished).toMatchObject({ created: true, snapshot: { revision: 4 } });
     expect(await repository.latest("production")).toMatchObject({
-      revision: 1,
+      revision: 4,
       document: { providers: [{ providerId: "provider-a" }] },
     });
-    expect(await repository.history("production")).toHaveLength(2);
+    expect(await repository.history("production")).toHaveLength(4);
     const audit = await pool.query<{ action: string; subject_id: string }>(
       `SELECT action,subject_id
          FROM audit
@@ -99,8 +99,8 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
         LIMIT 1`,
     );
     expect(audit.rows[0]).toEqual({
-      action: "registry.snapshot.reactivated",
-      subject_id: "production:1",
+      action: "registry.snapshot.published",
+      subject_id: "production:4",
     });
   });
 
@@ -115,7 +115,7 @@ describe("PostgreSQL Registry Snapshot persistence", () => {
     ).rejects.toThrow("REGISTRY_CANDIDATE_INTEGRITY_INVALID");
 
     expect(await repository.latest("production")).toEqual(before);
-    expect(await repository.history("production")).toHaveLength(2);
+    expect(await repository.history("production")).toHaveLength(4);
   });
 });
 
@@ -147,13 +147,23 @@ function catalog(providerId: string): CatalogSnapshot {
       discovery: {
         resultType: "complete",
         supportedVersions: ["2026-07-28"],
-        capabilities: {},
+        capabilities: frozenCapabilities(),
         serverInfo: { name: "runtime", version: "2.0.0" },
       },
       tools: [tool("operate")],
     },
     discoveredAt: new Date("2026-07-26T00:00:00.000Z"),
     createdAt: new Date("2026-07-26T00:00:00.000Z"),
+  };
+}
+
+function frozenCapabilities() {
+  return {
+    tools: {},
+    extensions: {
+      "io.modelcontextprotocol/tasks": {},
+      "io.sdar/taskExecution": { profileVersion: "1.0" as const, taskNotifications: true as const },
+    },
   };
 }
 

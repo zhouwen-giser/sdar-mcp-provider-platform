@@ -158,13 +158,13 @@
     },
     {
       "path": "mcp-stateless-base.schema.json",
-      "sha256": "83e92ff147f8367eef563ffa474b5d2dd1144a85f5afaaa5dd05e7860a47ff73",
-      "sizeBytes": 8968
+      "sha256": "c7a0f71075e7cba5377eae94790583876a931775eac53fd527871e54f9dcb745",
+      "sizeBytes": 10032
     },
     {
       "path": "mcp-streamable-http-routing.schema.json",
-      "sha256": "fe67f2ff51906319c27f432c350b84877b5daed10ef0888998375e0fea11b135",
-      "sizeBytes": 1791
+      "sha256": "cdbe24b30f964220ab06ceee6114499ed13cfb8d4b72ce3afdfc8e858563518d",
+      "sizeBytes": 1985
     },
     {
       "path": "mcp-task-notifications-sep2663.schema.json",
@@ -173,8 +173,8 @@
     },
     {
       "path": "mcp-tasks-sep2663.schema.json",
-      "sha256": "54e754fe1eda17a31c7c9fba4b13844a838a28c43166ec26af24eb95176a77ef",
-      "sizeBytes": 41066
+      "sha256": "87d0f0391fab0d91b4fda84bb64649e027c416dce53ea2f4754570e98688e9f8",
+      "sizeBytes": 47171
     },
     {
       "path": "pms-mismatch.schema.json",
@@ -213,8 +213,8 @@
     },
     {
       "path": "sdar-task-execution-profile-v1.schema.json",
-      "sha256": "3118db54e7eb65b26c57bbea1525fcd74caace4f330922a3f5378f73770b99e1",
-      "sizeBytes": 1141
+      "sha256": "ca94418a4571eb1112eaa946fab94fb0d149e7d313a54805e2c4f432d979dc89",
+      "sizeBytes": 1262
     },
     {
       "path": "upstream/mcp-2026-07-28/schema.json",

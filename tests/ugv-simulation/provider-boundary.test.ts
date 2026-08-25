@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { npcTankManifest } from "../../apps/npc-tank-provider-adapter/src/manifest.js";
 import { normalizeUgvCapabilities } from "../../apps/ugv-provider-adapter/src/capabilities.js";
@@ -115,5 +116,57 @@ describe("Goal 10 Provider boundary", () => {
     expect(source).toContain("requiredOperationFailures");
     expect(source).not.toContain("ESSENTIAL_DEVICE_READ_TOOLS");
     expect(source).not.toContain("KNOWN_SIMULATOR_TOOLS =");
+  });
+
+  it("binds preflight to the locked MQTT profile and emits explicit zero-side-effect simulation evidence", () => {
+    const source = readFileSync("scripts/ugv-simulation/preflight.mjs", "utf8");
+    expect(source).toContain("UGV_MQTT_SUBSCRIPTIONS");
+    expect(source).not.toContain("const PROTOCOL_TOPICS");
+    expect(source).toContain('evidenceClass: "external_simulation"');
+    expect(source).toContain("productionEligible: false");
+    expect(source).toContain("physicalVehicleQualified: false");
+    expect(source).toContain("toolsCallCount: 0");
+    expect(source).toContain("mqttPublishCount: 0");
+    expect(source).toContain("controlInvocationCount: 0");
+    expect(source).toContain('authoritativeStateFreshness: "UNVERIFIED_PAYLOAD_NOT_RETAINED"');
+    expect(source).toContain("report.generatedAt = report.completedAt");
+    expect(source).not.toContain('endsWith("/coverage")');
+    expect(source).not.toContain(".callTool(");
+    expect(source).not.toContain(".publish(");
+  });
+
+  it("writes classified zero-side-effect evidence when configuration fails before network access", () => {
+    const output = `/tmp/ugv-agent-profile-preflight-${process.pid}.json`;
+    const environment = { ...process.env };
+    for (const name of [
+      "UGV_SIM_DEVICE_MCP_URL",
+      "UGV_SIM_MQTT_URL",
+      "UGV_ADAPTER_DB_PASSWORD",
+      "UGV_RUNTIME_DB_PASSWORD",
+    ])
+      Reflect.deleteProperty(environment, name);
+    rmSync(output, { force: true });
+    const execution = spawnSync(
+      process.execPath,
+      ["scripts/ugv-simulation/preflight.mjs", "--output", output],
+      { cwd: process.cwd(), env: environment, encoding: "utf8" },
+    );
+    expect(execution.status).toBe(2);
+    const report = JSON.parse(readFileSync(output, "utf8")) as Record<string, unknown>;
+    expect(report).toMatchObject({
+      schemaVersion: 1,
+      evidenceClass: "external_simulation",
+      productionEligible: false,
+      physicalVehicleQualified: false,
+      status: "BLOCKED_EXTERNAL_ENV",
+      exitCode: 2,
+      safety: {
+        toolsCallCount: 0,
+        mqttPublishCount: 0,
+        controlInvocationCount: 0,
+      },
+    });
+    expect(report.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/u);
+    rmSync(output, { force: true });
   });
 });

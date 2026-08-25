@@ -1,0 +1,305 @@
+{
+  "schemaVersion": "ugv-agent-profile.device-mcp-contract/v1",
+  "generatedAt": "2026-08-21T01:35:34.812Z",
+  "status": "FROZEN",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "contractCanonicalHash": "472e482c64d7f71f167cfb60461570068c7948108a46aa7614ea9bfccaea4c72",
+  "contract": {
+    "hashContract": {
+      "algorithm": "sha256",
+      "canonicalization": "recursive_object_key_sort_json_scalars_v1",
+      "nullOutputSchemaIsSignificant": true
+    },
+    "sourceEvidence": {
+      "path": "reports/ugv-agent-profile-simulation/external-preflight.redacted.json",
+      "status": "PASS_WITH_UPSTREAM_DRIFT",
+      "capturedAt": "2026-08-21T01:35:34.812Z",
+      "discoveredToolCount": 15,
+      "discoveredToolsCanonicalHash": "3725dba7b92e587ecb3fd670bc54e00633828370e9063f96809b8f7c1400935a"
+    },
+    "deviceProtocol": {
+      "transport": "mcp_streamable_http",
+      "negotiatedProtocolVersion": "2025-11-25",
+      "serverInfo": {
+        "name": "ugv-mcp-server",
+        "version": "1.26.0"
+      }
+    },
+    "scope": {
+      "goal": "UGV Agent Profile external simulation",
+      "executionMode": "simulation",
+      "requiredToolNames": ["get_status", "ugv_path_follow_mission", "ugv_mission_control"],
+      "nonGoalToolSchemasFrozen": false,
+      "authorizationGrantedByThisArtifact": false
+    },
+    "allowlistVerification": {
+      "adapterAllowlistCount": 16,
+      "adapterAllowlistCanonicalHash": "e9b97335a31ed74753f463582d95f6783dc633fe843e441b89f89421087205dd",
+      "observedIntersectionCount": 15,
+      "observedIntersectionCanonicalHash": "8ba8c236b81b2619bb49dcb3ebe762292e14b1aabb921a77c7615d0e0bc925a1",
+      "unknownObservedToolNames": [],
+      "allGoalToolsAllowlisted": true,
+      "allGoalToolsObserved": true
+    },
+    "operations": [
+      {
+        "operationName": "vehicle_get_state",
+        "executionMode": "simulation",
+        "phase": "read",
+        "resultPolicyId": "ugv.vehicle_get_state.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "LOW",
+        "requiredTools": ["get_status"],
+        "tools": [
+          {
+            "toolName": "get_status",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "get_status",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": true,
+              "taskControl": false,
+              "missionIdSemantics": "observes",
+              "expectedInputProperties": [],
+              "expectedOutputProperties": [],
+              "missingInputProperties": [],
+              "missingOutputProperties": [],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "d40d4867a028dbd4b5f4153b92ae833e99a9f233f92aab4e778ad06c51065c78"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      },
+      {
+        "operationName": "vehicle_navigate",
+        "executionMode": "simulation",
+        "phase": "start",
+        "variant": "point",
+        "resultPolicyId": "ugv.navigation.v1",
+        "deviceRequirement": "required",
+        "riskLevel": "MEDIUM",
+        "requiredTools": ["ugv_path_follow_mission", "ugv_mission_control"],
+        "tools": [
+          {
+            "toolName": "ugv_path_follow_mission",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_path_follow_mission",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": false,
+              "missionIdSemantics": "allocates",
+              "expectedInputProperties": ["task_points", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "51fd0ac8f271f4f807384a16eac7798429cf3485ce2541fd6cc8ef0a2e2432e9"
+            }
+          },
+          {
+            "toolName": "ugv_mission_control",
+            "compatibility": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+            "health": "unobserved",
+            "usable": true,
+            "reasonCodes": ["UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"],
+            "contract": {
+              "toolName": "ugv_mission_control",
+              "requirement": "required",
+              "status": "PRESENT_INPUT_COMPATIBLE_OUTPUT_UNDECLARED",
+              "readOnly": false,
+              "taskControl": true,
+              "missionIdSemantics": "controls",
+              "expectedInputProperties": ["action", "mission_id"],
+              "expectedOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "missingInputProperties": [],
+              "missingOutputProperties": ["mission_id", "state", "state_label", "message"],
+              "outputSchemaDeclared": false,
+              "runtimeResultValidation": true,
+              "schemaHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38"
+            }
+          }
+        ],
+        "qualified": true,
+        "reasonCodes": [
+          "UGV_OPERATION_QUALIFIED",
+          "UGV_TOOL_OUTPUT_SCHEMA_UNDECLARED_RUNTIME_VALIDATED"
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "name": "get_status",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "title": "get_statusArguments"
+        },
+        "outputSchema": null,
+        "inputSchemaCanonicalHash": "fbac902bfaec6cda6de77d6963f23beb60d4c8442f43edf844e1eacb5b20cb27",
+        "outputSchemaCanonicalHash": null,
+        "schemaCanonicalHash": "d40d4867a028dbd4b5f4153b92ae833e99a9f233f92aab4e778ad06c51065c78",
+        "toolCanonicalHash": "19ecf8ebf714d7b82cb75e337946928b2f2bd283614ca972db098b6921422453"
+      },
+      {
+        "name": "ugv_path_follow_mission",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task_points": {
+              "default": null,
+              "title": "Task Points"
+            },
+            "json_url": {
+              "default": "",
+              "title": "Json Url",
+              "type": "string"
+            },
+            "need_plan": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Need Plan"
+            },
+            "density": {
+              "default": "adaptive",
+              "title": "Density",
+              "type": "string"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "title": "ugv_path_follow_missionArguments"
+        },
+        "outputSchema": null,
+        "inputSchemaCanonicalHash": "ea01a38bae71b48f9dbe74f95f21375c169495c32e3a0fcb1a032e2b6e4fac0e",
+        "outputSchemaCanonicalHash": null,
+        "schemaCanonicalHash": "51fd0ac8f271f4f807384a16eac7798429cf3485ce2541fd6cc8ef0a2e2432e9",
+        "toolCanonicalHash": "965dcc9de98f6ed20016b1d15015e1db990a749dc0f79036e225ec182419bf95"
+      },
+      {
+        "name": "ugv_mission_control",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "title": "Action",
+              "type": "string"
+            },
+            "mission_id": {
+              "default": 0,
+              "title": "Mission Id",
+              "type": "integer"
+            }
+          },
+          "required": ["action"],
+          "title": "ugv_mission_controlArguments"
+        },
+        "outputSchema": null,
+        "inputSchemaCanonicalHash": "ba09c93e25fb8af2e4945b850e5e2d5bc2622c7d91f91065156a147417294d63",
+        "outputSchemaCanonicalHash": null,
+        "schemaCanonicalHash": "55b1404e8273c0b33d3c1732e74ac6eb9132f6f8ea72efa2bfd4f455a9e5ab38",
+        "toolCanonicalHash": "57ca8c1471cc34abddc8b5b03f16b92a2ad28ac34d0a710fb4209dfbbd798bdf"
+      }
+    ],
+    "mockContractDecision": {
+      "configurationKey": "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+      "resolvedValue": false,
+      "goalPolicy": "forbidden",
+      "reasonCode": "UGV_EXTERNAL_SIMULATION_REAL_TOOLS_LIST_REQUIRED"
+    },
+    "profileContract": {
+      "skill": {
+        "id": "embodied.move_to",
+        "version": 1,
+        "reference": "embodied.move_to@1"
+      },
+      "taskType": "embodied.move",
+      "resource": {
+        "resourceId": "vehicle:ugv1",
+        "resourceType": "vehicle"
+      },
+      "provider": {
+        "providerId": "isr.vehicle.ugv.ugv1",
+        "providerVersion": "1.0.0"
+      },
+      "northboundOperation": {
+        "operationName": "vehicle_navigate",
+        "missionType": "point",
+        "executionMode": "simulation",
+        "taskSemantics": "remote_task",
+        "stopOnObstacle": true
+      },
+      "coordinateMapping": {
+        "acceptedFrames": ["EPSG:4326", "WGS84"],
+        "x": {
+          "mapsTo": "longitude",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "y": {
+          "mapsTo": "latitude",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "axisSwapAllowed": false,
+        "undeclaredTransformationAllowed": false
+      },
+      "southboundSequence": [
+        {
+          "toolName": "ugv_path_follow_mission",
+          "purpose": "allocate_point_mission"
+        },
+        {
+          "toolName": "ugv_mission_control",
+          "action": "start",
+          "purpose": "start_mission"
+        }
+      ],
+      "finalPositionEvidence": {
+        "field": "chassis.position.geodetic",
+        "resourceId": "vehicle:ugv1",
+        "coordinateFrame": "WGS84",
+        "postDispatchRequired": true,
+        "freshRequired": true,
+        "revisionRequired": true,
+        "cursorRequired": true,
+        "correlationMustMatch": true,
+        "providerCompletedNecessaryButNotSufficient": true
+      }
+    },
+    "safety": {
+      "toolsCallCount": 0,
+      "mqttPublishCount": 0,
+      "controlInvocationCount": 0,
+      "toolsListReadOnlyCount": 1,
+      "authorizationGranted": false
+    }
+  }
+}

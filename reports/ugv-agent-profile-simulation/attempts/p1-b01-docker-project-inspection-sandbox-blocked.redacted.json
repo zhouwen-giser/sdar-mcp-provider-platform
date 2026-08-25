@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "taskId": "UAP-P1-B01",
+  "attempt": 0,
+  "generatedAt": "2026-08-21T02:30:01.367Z",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "command": "docker ps -a --filter label=com.docker.compose.project=sdar-ugv-agent-profile-simulation",
+  "exitCode": 1,
+  "result": "BLOCKED_LOCAL_SANDBOX",
+  "reasonCode": "DOCKER_SOCKET_PERMISSION_DENIED",
+  "summary": {
+    "operation": "read_only_project_container_inspection",
+    "composeConfigGatePassedWithoutDaemon": true,
+    "lifecycleCommandExecuted": false,
+    "externalNetworkAttempted": false,
+    "deviceToolsCalled": 0,
+    "mqttPublishes": 0
+  },
+  "minimumUnblockCondition": "Run the same read-only Docker project-label query in an environment permitted to access /var/run/docker.sock. This is deferred to UAP-P1-B02 and does not block the offline deployment-profile contract."
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "observedAt": "2026-08-20T14:36:36.626Z",
+  "evidenceClass": "READ_ONLY_LIVE_PASS",
+  "status": "PASS_WITH_EXTERNAL_CONTRACT_DRIFT",
+  "providerContainerProbes": [
+    {
+      "target": "external-simulator-mqtt",
+      "port": 1883,
+      "connected": true,
+      "latencyMs": 35
+    },
+    {
+      "target": "external-simulator-device-mcp",
+      "port": 19000,
+      "connected": true,
+      "latencyMs": 35
+    },
+    {
+      "target": "runtime-provider-telemetry-ingress",
+      "port": 7002,
+      "connected": true,
+      "latencyMs": 39
+    }
+  ],
+  "runtimeContainerProbes": [
+    {
+      "target": "telemetry-collector-otlp-http",
+      "port": 4318,
+      "reachable": true,
+      "httpStatusOnBaseGet": 404,
+      "latencyMs": 20,
+      "interpretation": "The OTLP listener is reachable; GET on the base path is intentionally not an ingest request."
+    }
+  ],
+  "pipelineChecks": {
+    "runtimeHealthLive": 200,
+    "runtimeHealthReady": 200,
+    "runtimeProviderTelemetryIngress": "ready",
+    "collectorToProcessor": {
+      "proof": "collector exporter metrics",
+      "sentLogRecords": 38371,
+      "inFlightRequests": 2
+    },
+    "collectorToRuntimeMetrics": {
+      "proof": "collector Prometheus receiver metrics",
+      "acceptedMetricPoints": 575,
+      "failedMetricPoints": 0
+    },
+    "queryApiToClickHouse": {
+      "healthStatus": 200,
+      "filteredRowsReturned": 5
+    }
+  },
+  "externalContractFinding": {
+    "expectedDeviceMcpProtocol": "2026-07-28",
+    "observedDeviceMcpProtocol": "2025-11-25",
+    "reasonCode": "EXTERNAL_DEVICE_MCP_PROTOCOL_VERSION_DRIFT"
+  },
+  "safety": {
+    "readOnly": true,
+    "mqttPublishCount": 0,
+    "deviceMutationCount": 0,
+    "credentialsRecorded": false,
+    "externalEndpointsRedacted": true
+  }
+}

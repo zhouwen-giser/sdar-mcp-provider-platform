@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+  "evidenceClass": "LIVE_PROVIDEROPS_PASS",
+  "status": "PARTIAL_WITH_STARTUP_TRANSPORT_LOSS_AND_CLEAN_PROVIDER_RESTART_WINDOW",
+  "runtimeIngress": {
+    "service": "io.sdar.mcp.tasks.telemetry.v1.ProviderTelemetryIngress",
+    "method": "EmitProviderEvents",
+    "healthReady": true,
+    "portReachableFromProviderContainer": true,
+    "perEventResultsParsed": true,
+    "providerEventIdCompletenessValidated": true,
+    "taskIdentityValidation": "PASS_IN_CODE_AND_REAL_POSTGRESQL_CONTRACT; NO_LIVE_TASK_EVENT",
+    "responseMessagesPersistedOrLogged": false,
+    "stableReasonCodesUsed": true
+  },
+  "finalPreRestartAggregate": {
+    "total": 180,
+    "distinctEventKeys": 180,
+    "duplicateEventKeys": 0,
+    "providerEventIdConflicts": 0,
+    "providerResourceState": 122,
+    "providerResourceStateCompletePayloads": 122,
+    "providerResourceMetric": 56,
+    "providerResourceMetricCompletePayloads": 56,
+    "otherEventCount": 2,
+    "otherEventTypesNotSpecifiedByAggregate": true
+  },
+  "finalDeploymentStartupHandover": {
+    "adapterRuntimeOrderSwitch": true,
+    "transportFailuresVisible": true,
+    "retriesVisible": true,
+    "droppedAfterRetryExhaustion": 4,
+    "visibleReasonCodes": [
+      "PROVIDER_TELEMETRY_TRANSPORT_FAILED",
+      "PROVIDER_TELEMETRY_RETRY_EXHAUSTED"
+    ],
+    "interpretation": "The first final-revision Adapter/Runtime order switch exposed and counted startup transport loss. It is not hidden or relabeled as an ingress rejection."
+  },
+  "isolatedProviderRestartWindow": {
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "runtimeRemainedHealthy": true,
+    "observationSeconds": 20,
+    "logCounts": {
+      "rejected": 0,
+      "transportFailed": 0,
+      "dropped": 0
+    },
+    "runtimeProviderOps": {
+      "total": 61,
+      "distinctEventKeys": 61,
+      "duplicateEventKeys": 0,
+      "providerEventIdConflicts": 0,
+      "providerResourceState": 44,
+      "providerResourceStateCompletePayloads": 44,
+      "providerResourceMetric": 17,
+      "providerResourceMetricCompletePayloads": 17
+    },
+    "qualification": "PASS_PROVIDER_RESTART_TELEMETRY_RECOVERY_ONLY"
+  },
+  "boundedDelivery": {
+    "ordinaryQueueCapacity": 1000,
+    "criticalReserveCapacity": 100,
+    "maximumAttempts": 4,
+    "initialRetryDelayMs": 250,
+    "maximumRetryDelayMs": 5000,
+    "requestTimeoutMs": 5000,
+    "closeDrainDeadlineMs": 5000,
+    "terminalErrorUncertainPriorityProtected": true,
+    "taskStateAffectedByTelemetryFailure": false
+  },
+  "eventSemanticsObserved": ["RESOURCE_STATE", "RESOURCE_METRIC"],
+  "taskLevelEventSemanticsObserved": false,
+  "taskLevelReason": "No Runtime task or command was created because live mutation was not authorized.",
+  "silentDrop": false,
+  "qualificationImpact": "Ingress and observability are functional, and an isolated Provider restart recovered cleanly while Runtime stayed healthy. Four earlier startup-handover drops and the absent live task-level chain prevent a fully qualified result.",
+  "sensitivePayloadStored": false
+}

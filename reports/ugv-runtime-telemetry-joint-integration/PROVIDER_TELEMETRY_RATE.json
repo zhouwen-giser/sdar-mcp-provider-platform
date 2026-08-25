@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T15:09:31.887Z",
+  "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
+  "status": "PARTIAL_NO_NAVIGATION_RATE_PHASES_WITH_CLEAN_PROVIDER_RESTART_WINDOW",
+  "finalPreRestartAggregate": {
+    "durationSeconds": null,
+    "rateDerived": false,
+    "total": 180,
+    "distinctEventKeys": 180,
+    "resourceStateCount": 122,
+    "resourceStateCompletePayloads": 122,
+    "resourceMetricCount": 56,
+    "resourceMetricCompletePayloads": 56,
+    "otherEventCount": 2,
+    "duplicateEventKeys": 0,
+    "providerEventIdConflicts": 0
+  },
+  "isolatedProviderRestartBootstrapWindow": {
+    "adapterStartedAt": "2026-08-20T15:09:11.887079232Z",
+    "durationSeconds": 20,
+    "total": 61,
+    "aggregateRateHz": 3.05,
+    "resourceStateCount": 44,
+    "resourceStateRateHz": 2.2,
+    "resourceStateCompletePayloads": 44,
+    "resourceMetricCount": 17,
+    "resourceMetricRateHz": 0.85,
+    "resourceMetricCompletePayloads": 17,
+    "distinctEventKeys": 61,
+    "duplicateEventKeys": 0,
+    "providerEventIdConflicts": 0,
+    "rejected": 0,
+    "transportFailed": 0,
+    "dropped": 0,
+    "interpretation": "This is a restart/bootstrap window and is not represented as a steady-state 60-second rate qualification."
+  },
+  "policy": {
+    "resourceStateMaximumHz": 1,
+    "freshnessMetricIntervalSeconds": 10,
+    "taskLifecycleSampled": false,
+    "terminalTaskEventsProtected": true,
+    "errorAndUncertainTransitionsProtected": true
+  },
+  "upstreamMqtt": {
+    "windowSeconds": 15,
+    "messages": 1077,
+    "aggregateRateHz": 71.8,
+    "note": "High-frequency MQTT observations are intentionally reduced before Provider Telemetry emission."
+  },
+  "backpressure": {
+    "queueBounded": true,
+    "queueCapacityIncludingCriticalReserve": 1100,
+    "retryBounded": true,
+    "dropCounterVisible": true,
+    "finalDeploymentStartupHandoverDroppedEvents": 4,
+    "isolatedProviderRestartDroppedEvents": 0,
+    "runtimeRateLimitRejectionsObserved": 0,
+    "transportFailuresMisclassifiedAsRateLimit": false,
+    "silentDrops": 0
+  },
+  "unmeasuredPhases": ["navigation-running-60s", "navigation-terminal-30s"],
+  "unmeasuredReason": "Point navigation was not authorized."
+}

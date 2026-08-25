@@ -36,6 +36,12 @@
     "supportsMaxElapsed": {
       "type": "boolean"
     },
+    "supportsCancellation": {
+      "type": "boolean"
+    },
+    "supportsPauseResume": {
+      "type": "boolean"
+    },
     "supportsObservations": {
       "type": "boolean"
     },

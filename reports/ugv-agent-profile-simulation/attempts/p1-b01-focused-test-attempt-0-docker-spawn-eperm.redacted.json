@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "taskId": "UAP-P1-B01",
+  "attempt": 0,
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "command": "pnpm exec vitest run tests/ugv-simulation/ugv-agent-profile-deployment.test.ts",
+  "exitCode": 1,
+  "result": "FAILED_ENVIRONMENT_BOUNDARY",
+  "reasonCode": "VITEST_CHILD_DOCKER_SPAWN_EPERM",
+  "summary": {
+    "passed": 2,
+    "failed": 4,
+    "externalNetworkAttempted": false,
+    "containersStarted": 0,
+    "deviceToolsCalled": 0,
+    "mqttPublishes": 0
+  },
+  "resolution": "The focused test now parses both Compose YAML documents offline. Docker Compose rendering remains a separate mandatory command and validator input, so the contract is reproducible without granting a test process Docker-daemon control."
+}

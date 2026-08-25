@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-20T12:59:48.007Z",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "origin": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform.git",
+  "baseBranch": "origin/codex/fix-ugv-observation-cursor-jsonb",
+  "baseSha": "c3a26b45fd03f93583ed07ecd15f191f9c0b52e4",
+  "originMainSha": "9b39d430c505983a0adfd74bcd1b9e781cf3eea8",
+  "workBranch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+  "worktreeCleanBeforeBranchCreation": true,
+  "remoteFetchedAndPruned": true,
+  "taskPackage": {
+    "file": "SMPP_Codex_Goal_UGV_Runtime_Telemetry_Joint_Integration_V1.0.zip",
+    "sha256": "7efe53981f256caf72bbd050ce08686cae1169c006fc03e4f7a9a434489adf7d",
+    "manifestVerified": true,
+    "validatorResult": "JOINT_TASK_PACKAGE_VALID"
+  }
+}

@@ -162,13 +162,23 @@ function catalog(providerId: string, tools: string[]): CatalogSnapshot {
       discovery: {
         resultType: "complete",
         supportedVersions: ["2026-07-28"],
-        capabilities: {},
+        capabilities: frozenCapabilities(),
         serverInfo: { name: "runtime", version: "2.0.0" },
       },
       tools: entries,
     },
     discoveredAt: new Date("2026-07-26T00:00:00.000Z"),
     createdAt: new Date("2026-07-26T00:00:00.000Z"),
+  };
+}
+
+function frozenCapabilities() {
+  return {
+    tools: {},
+    extensions: {
+      "io.modelcontextprotocol/tasks": {},
+      "io.sdar/taskExecution": { profileVersion: "1.0" as const, taskNotifications: true as const },
+    },
   };
 }
 

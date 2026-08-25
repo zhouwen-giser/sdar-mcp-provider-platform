@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "ugv-agent-profile.verification-attempt/v1",
+  "taskId": "UAP-P1-B01",
+  "attempt": 1,
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "command": "pnpm lint",
+  "exitCode": 1,
+  "result": "FAILED_STRICT_LINT",
+  "reasonCode": "STRICT_TYPED_RULE_VIOLATIONS",
+  "summary": {
+    "errorCount": 8,
+    "p0TestErrors": 2,
+    "p1TestErrors": 6,
+    "rulesDisabled": 0,
+    "externalNetworkAttempted": false,
+    "containersStarted": 0,
+    "deviceToolsCalled": 0,
+    "mqttPublishes": 0
+  },
+  "resolution": "Apply mechanical typed-safe rewrites: Reflect.deleteProperty, dot notation, T[] arrays, checked environment access, checked network names, and checked stack pop. No lint rule or assertion was weakened."
+}

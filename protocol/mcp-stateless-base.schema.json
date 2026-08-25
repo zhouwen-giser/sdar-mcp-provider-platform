@@ -287,6 +287,34 @@
                       "const": true
                     }
                   }
+                },
+                "io.sdar/providerCatalog": {
+                  "type": "object",
+                  "required": [
+                    "providerId",
+                    "providerType",
+                    "providerVersion",
+                    "manifestHash"
+                  ],
+                  "properties": {
+                    "providerId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+                    },
+                    "providerType": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+                    },
+                    "providerVersion": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$"
+                    },
+                    "manifestHash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "additionalProperties": false
                 }
               }
             }

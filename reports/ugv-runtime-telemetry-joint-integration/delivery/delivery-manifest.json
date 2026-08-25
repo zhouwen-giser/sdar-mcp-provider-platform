@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-08-20T15:24:25.876Z",
+  "qualification": {
+    "status": "UGV_SMPP_TELEMETRY_JOINT_PARTIAL",
+    "evidenceLevel": "EXTERNAL_INTERFACE_BLOCKED",
+    "fullyQualified": false
+  },
+  "repositories": {
+    "smpp": {
+      "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+      "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+      "baseSha": "c3a26b45fd03f93583ed07ecd15f191f9c0b52e4",
+      "patchTargetSha": "5b1b67899672d03b745cc836c97ae8e3cf2f8005",
+      "deployedEvidenceRevision": "eaa36df380e7542f25f359d55c829e12d843738b"
+    },
+    "telemetry": {
+      "repository": "zhouwen-giser/smpp-telemetry-platform",
+      "branch": "codex/goal-02-live-ugv-smpp-integration",
+      "baseSha": "d713f71b4c93f981d5bce05b65ed71f5ed5814b6",
+      "patchTargetSha": "80ee4287fbf0ad19a775bd8852eb20245b1f4958",
+      "deployedCodeRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7"
+    }
+  },
+  "artifacts": {
+    "smpp.patch": {
+      "sha256": "21f918ecdd4d9c749e1387d4c9a922262726914b254b903c1916752bd9697261",
+      "bytes": 196921
+    },
+    "telemetry.patch": {
+      "sha256": "ac6f7e28d0e725cac63e677db5fc5cd935a27c96ee98fcfab6f0a1342177a9c7",
+      "bytes": 102510
+    },
+    "combined-evidence.zip": {
+      "sha256": "a41f3f48b5b056cc4658c3b678f6d6ac7c1aa6f77b8fb78e0ba4ae4ce4f0eee4",
+      "bytes": 54005,
+      "contents": {
+        "smppRequiredReports": 23,
+        "smppSupplementalReports": 1,
+        "telemetryRequiredReports": 12
+      }
+    }
+  },
+  "safety": {
+    "liveControlAuthorized": false,
+    "mutatingVehicleCalls": 0,
+    "pointNavigationSubmissions": 0,
+    "fireCalls": 0,
+    "mqttPublishes": 0,
+    "secretsRecorded": false,
+    "untrackedTelemetryEnvIncluded": false
+  },
+  "qualificationBoundaries": [
+    "Device MCP protocol and MQTT authority/QoS drift remain external blockers.",
+    "The strict read-only state gate is incomplete and the observed mission state was 4 rather than 0.",
+    "The latest Runtime durable backlog was 726934 and the final Runtime epoch had zero Telemetry landing rows.",
+    "Provider restart telemetry recovery was verified without an active task; task/dispatch recovery and the complete fault matrix were not qualified.",
+    "No live navigation, task control, physical terminal-state evidence, or fire operation was executed."
+  ],
+  "deliveryCommit": "ASSIGNED_AFTER_MANIFEST_COMMIT"
+}

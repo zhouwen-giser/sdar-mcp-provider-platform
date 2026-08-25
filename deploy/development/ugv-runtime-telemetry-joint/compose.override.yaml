@@ -1,0 +1,19 @@
+services:
+  ugv-adapter:
+    environment:
+      UGV_EXECUTION_MODE: ${UGV_EXECUTION_MODE:-live}
+      RUNTIME_ENV: development
+
+  ugv-runtime:
+    environment:
+      RUNTIME_ENV: development
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true"
+      RUNTIME_DEPLOYMENT_ID: ${UGV_RUNTIME_DEPLOYMENT_ID:-ugv-test-deployment}
+      RUNTIME_INSTANCE_ID: ${UGV_RUNTIME_INSTANCE_ID:-ugv-runtime-test-1}
+      OTEL_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${UGV_RUNTIME_OTLP_ENDPOINT:-http://host.docker.internal:4318}
+      OTEL_EXPORTER_OTLP_TLS_MODE: disabled
+      OTEL_EXPORTER_OTLP_TIMEOUT_MS: "10000"
+      OTEL_SERVICE_INSTANCE_ID: ${UGV_RUNTIME_INSTANCE_ID:-ugv-runtime-test-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

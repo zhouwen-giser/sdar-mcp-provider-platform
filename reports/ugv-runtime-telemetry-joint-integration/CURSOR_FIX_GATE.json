@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "observedAt": "2026-08-20T12:59:48.007Z",
+  "baseSha": "c3a26b45fd03f93583ed07ecd15f191f9c0b52e4",
+  "result": "PASS",
+  "requiredArtifacts": {
+    "codec": "packages/vehicle-provider-core/src/observation-cursor.ts",
+    "qualifiedReport": "reports/ugv-observation-cursor-jsonb-fix/FINAL_REPORT.md",
+    "qualifiedStatus": "UGV_OBSERVATION_CURSOR_JSONB_FIX_QUALIFIED"
+  },
+  "staticChecks": {
+    "persistentNulCursorGenerationMatches": 0,
+    "nulCursorParserMatches": 0,
+    "codecPrefix": "oc1."
+  },
+  "postgresqlGate": {
+    "database": "PostgreSQL 17 dedicated local test container",
+    "credentialsRecorded": false,
+    "testFiles": [
+      "tests/unit/observation-cursor.test.ts",
+      "tests/unit/provider-store-jsonb-safety.test.ts",
+      "tests/ugv-simulation/observation-cursor-jsonb-fix.test.ts"
+    ],
+    "testFilesPassed": 3,
+    "testsPassed": 25,
+    "testsFailed": 0,
+    "verified": [
+      "VehicleMqttIngress to PostgreSQL JSONB roundtrip",
+      "point navigation startup with one primary and one follow-up dispatch",
+      "initial execution persistence failure produces zero journals and zero device calls",
+      "restart recovery produces zero redispatch",
+      "JSONB-unsafe NUL payload is rejected before SQL execution"
+    ]
+  },
+  "sharedRegressionBaseline": {
+    "ugvAndNpcSuitesPassed": 14,
+    "testsPassed": 174,
+    "assertionFailures": 0,
+    "postgresSuiteWasRunSeparatelyWithDatabase": true
+  },
+  "physicalControlCalls": 0
+}

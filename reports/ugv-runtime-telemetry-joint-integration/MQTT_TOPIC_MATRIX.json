@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "1.0",
+  "capturedOn": "2026-08-20",
+  "captureDurationSeconds": 15,
+  "evidenceClass": "READ_ONLY_LIVE_PASS",
+  "status": "PASS_WITH_EXTERNAL_TOPIC_AND_QOS_DRIFT",
+  "wireMode": "ros_bridge_json",
+  "configuredSubscriptions": 18,
+  "observedTopics": 12,
+  "messageCount": 1077,
+  "decodeErrors": 0,
+  "oversizeMessages": 0,
+  "retainedMessages": 0,
+  "authorityPolicy": {
+    "canonical": "status/ugv",
+    "compatibilityAlias": "/ugv/status",
+    "canonicalFreshnessTimeoutMs": 3000,
+    "selection": "canonical-first-with-explicit-alias-handoff",
+    "lastArrivalWins": false
+  },
+  "topics": [
+    {
+      "topic": "status/ugv",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "EXTERNAL_MISSING_CANONICAL"
+    },
+    {
+      "topic": "/ugv/status",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 5.001,
+      "classification": "COMPATIBILITY_ALIAS"
+    },
+    {
+      "topic": "/ugv/gnss",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 20.04,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/imu",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 5.632,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/speed",
+      "expectedQos": 1,
+      "publisherQos": 0,
+      "observed": true,
+      "rateHz": 10.002,
+      "classification": "EXTERNAL_QOS_DRIFT"
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 1,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/nav_state",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 1,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/system_state",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 1,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/component_status",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 1.997,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/battery_range_km",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 1,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/area_recon/status",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 20.015,
+      "classification": "COMPATIBLE_MAPPING"
+    },
+    {
+      "topic": "/ugv/area_recon/targets",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "NOT_OBSERVED_BOUNDED_WINDOW"
+    },
+    {
+      "topic": "/ugv/area_recon/coverage",
+      "expectedQos": 0,
+      "publisherQos": 0,
+      "observed": true,
+      "rateHz": 0.191,
+      "classification": "MATCH"
+    },
+    {
+      "topic": "/ugv/area_recon/exception",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "NOT_OBSERVED_BOUNDED_WINDOW"
+    },
+    {
+      "topic": "/ugv/detected_objects",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "NOT_OBSERVED_BOUNDED_WINDOW"
+    },
+    {
+      "topic": "/ugv/target_detected",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "NOT_OBSERVED_BOUNDED_WINDOW"
+    },
+    {
+      "topic": "/ugv/target/gnss",
+      "expectedQos": 1,
+      "observed": false,
+      "rateHz": 0,
+      "classification": "NOT_OBSERVED_BOUNDED_WINDOW"
+    },
+    {
+      "topic": "/ugv/eo/pose",
+      "expectedQos": 1,
+      "publisherQos": 1,
+      "observed": true,
+      "rateHz": 5.012,
+      "classification": "COMPATIBLE_MAPPING"
+    }
+  ],
+  "correlationFacts": {
+    "sourceSequenceObserved": false,
+    "frameIdValues": [],
+    "runIdObservedValue": 0,
+    "activeMissionObserved": false
+  },
+  "externalBlockers": ["CANONICAL_STATUS_TOPIC_NOT_OBSERVED", "SPEED_PUBLISHER_QOS_MISMATCH"],
+  "safety": {
+    "passiveSubscribeOnly": true,
+    "mqttPublishCount": 0,
+    "rawPayloadStored": false,
+    "credentialsStored": false
+  }
+}

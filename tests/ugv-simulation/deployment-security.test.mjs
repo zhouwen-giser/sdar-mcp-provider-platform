@@ -254,6 +254,38 @@ describe("Goal 10 deployment security", () => {
     expect(compose).not.toContain("../../scripts/ugv-simulation:/app/scripts/ugv-simulation");
   });
 
+  it("wires the live Provider and stable Runtime OTLP identity without enabling control", () => {
+    const compose = readFileSync(join(root, "deploy", "ugv-simulation", "compose.yaml"), "utf8");
+    const override = readFileSync(
+      join(root, "deploy", "development", "ugv-runtime-telemetry-joint", "compose.override.yaml"),
+      "utf8",
+    );
+    const example = readFileSync(
+      join(root, "deploy", "development", "ugv-runtime-telemetry-joint", ".env.example"),
+      "utf8",
+    );
+    const readOnlySmoke = readFileSync(
+      join(root, "scripts", "ugv-simulation", "read-only-smoke.mjs"),
+      "utf8",
+    );
+
+    expect(override).toContain("UGV_EXECUTION_MODE: ${UGV_EXECUTION_MODE:-live}");
+    expect(override).toContain('OTEL_ENABLED: "true"');
+    expect(override).toContain(
+      "OTEL_EXPORTER_OTLP_ENDPOINT: ${UGV_RUNTIME_OTLP_ENDPOINT:-http://host.docker.internal:4318}",
+    );
+    expect(override).toContain(
+      "RUNTIME_DEPLOYMENT_ID: ${UGV_RUNTIME_DEPLOYMENT_ID:-ugv-test-deployment}",
+    );
+    expect(override.match(/UGV_RUNTIME_INSTANCE_ID:-ugv-runtime-test-1/g)).toHaveLength(2);
+    expect(override).toContain('ALLOW_INSECURE_INTERNAL_TRANSPORT: "true"');
+    expect(compose).toContain('UGV_FIRE_ENABLED: "false"');
+    expect(example).toContain("UGV_RUNTIME_OTLP_ENDPOINT=http://host.docker.internal:4318");
+    expect(readOnlySmoke).toMatch(
+      /UGV_SMOKE_EXECUTION_MODE[\s\S]*UGV_EXECUTION_MODE[\s\S]*"simulation"/,
+    );
+  });
+
   it("excludes evidence, task inputs, env files, and secrets from the Docker context", () => {
     const ignore = readFileSync(join(root, ".dockerignore"), "utf8").split(/\r?\n/);
     expect(ignore).toEqual(

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "ugv-agent-profile.baseline/v1",
+  "generatedAt": "2026-08-21T01:23:24.088Z",
+  "status": "captured_latest_user_selected_branch",
+  "evidenceClass": "external_simulation",
+  "productionEligible": false,
+  "repository": {
+    "name": "sdar-mcp-provider-platform",
+    "path": "/home/zhouwen/web-download/sdar-mcp-provider-platform",
+    "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
+    "head": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+    "remote": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform.git",
+    "remoteBranchVerifiedHead": "ce57d3d7ac2f99c0c95fa61bd9746abe862ed507",
+    "latestRelevantBranchByCommitTime": true,
+    "initialWorktreeClean": true,
+    "initialDirtyPaths": []
+  },
+  "reference": {
+    "taskPackageCommit": "f8c37e6a2ecdc859e56910803197ec938b9a807a",
+    "mergeBase": "c3a26b45fd03f93583ed07ecd15f191f9c0b52e4",
+    "referenceOnlyCommits": 2,
+    "currentOnlyCommits": 9,
+    "userOverride": "Use the latest SMPP branch as baseline",
+    "forcedCheckout": false
+  },
+  "runtime": {
+    "node": "v22.23.1",
+    "pnpm": "11.7.0",
+    "dockerClient": "29.6.1",
+    "dockerServer": "29.6.1",
+    "dockerApi": "1.55"
+  },
+  "externalSimulation": {
+    "mqtt": "mqtt://192.168.2.63:1883",
+    "deviceMcp": "http://192.168.2.63:19000/mcp",
+    "mqttWireMode": "ros_bridge_json",
+    "executionMode": "simulation",
+    "fireEnabled": false
+  }
+}

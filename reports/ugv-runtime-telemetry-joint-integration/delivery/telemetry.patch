@@ -1,0 +1,1612 @@
+diff --git a/.env.example b/.env.example
+index 887851d9..fd3bdbdf 100644
+--- a/.env.example
++++ b/.env.example
+@@ -22,6 +22,7 @@ COLLECTOR_ID=smpp-gateway-1
+ TRUST_DOMAIN=local-compose
+ SMPP_PROVIDER_ID=isr.vehicle.ugv.ugv1
+ SMPP_RUNTIME_INSTANCE_ID=production-ugv-direct-1
++SMPP_SOURCE_ID=smpp.production.ugv-direct
+ 
+ # 采集的 SMPP 实例清单。格式：名称|服务地址，多个实例用逗号分隔。
+ # 注意：OpenTelemetry 是 SMPP 主动推送模型，此地址用于登记、生成接入配置和运维识别，Collector 不会主动轮询该地址。
+diff --git a/compose.yaml b/compose.yaml
+index 0727f96f..6b7350c5 100644
+--- a/compose.yaml
++++ b/compose.yaml
+@@ -45,6 +45,8 @@ services:
+       PROCESSOR_REQUIRE_COLLECTOR_ID: "true"
+       PROCESSOR_ALLOWED_COLLECTOR_IDS: ${COLLECTOR_ID:-smpp-gateway-1}
+       WAL_DIR: /var/lib/smpp-telemetry/wal
++      WAL_MAX_PENDING_WRITES: ${WAL_MAX_PENDING_WRITES:-1024}
++      PROCESSOR_SHUTDOWN_TIMEOUT_MS: ${PROCESSOR_SHUTDOWN_TIMEOUT_MS:-10000}
+       SOURCE_MAPPINGS_FILE: /app/config/source-mappings.json
+       PROJECTION_TARGETS_FILE: /app/config/projection-targets.json
+       EXPORT_INTERVAL_MS: 500
+diff --git a/config/generated/SMPP_RUNTIME_OTEL_CONFIG.md b/config/generated/SMPP_RUNTIME_OTEL_CONFIG.md
+index ca4b1ea0..b7b4860b 100644
+--- a/config/generated/SMPP_RUNTIME_OTEL_CONFIG.md
++++ b/config/generated/SMPP_RUNTIME_OTEL_CONFIG.md
+@@ -1,23 +1,18 @@
+ # SMPP Runtime OTLP 配置（自动生成）
+ 
+-生成的精确来源身份：Provider `isr.vehicle.ugv.ugv1`，Runtime 实例 `production-ugv-direct-1`。
++生成的精确来源身份：Provider `isr.vehicle.ugv.ugv1`，Runtime 实例 `ugv-runtime-test-1`。
+ 
+ OpenTelemetry 是主动推送模型。Prometheus 指标由本平台从 Runtime `/metrics` 主动拉取。
+ 
+-## sdar-ugv-runtime
+-SMPP 服务地址：http://192.168.1.7:19100
++## ugv-runtime
++SMPP 服务地址：http://host.docker.internal:19100
+ 
+ ```env
+ OTEL_ENABLED=true
+-OTEL_EXPORTER_OTLP_ENDPOINT=https://192.168.1.20:4318
+-OTEL_EXPORTER_OTLP_TLS_MODE=required
++OTEL_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4318
++OTEL_EXPORTER_OTLP_TLS_MODE=disabled
+ OTEL_EXPORTER_OTLP_TIMEOUT_MS=10000
+-OTEL_SERVICE_INSTANCE_ID=production-ugv-direct-1
+-OTEL_EXPORTER_OTLP_CA_PATH=/run/secrets/otel/ca.pem
+-OTEL_EXPORTER_OTLP_CERT_PATH=/run/secrets/otel/tls.crt
+-OTEL_EXPORTER_OTLP_KEY_PATH=/run/secrets/otel/tls.key
+-# Optional file-backed exporter headers:
+-# OTEL_EXPORTER_OTLP_HEADERS_FILE=/run/secrets/otel/headers.json
++OTEL_SERVICE_INSTANCE_ID=ugv-runtime-test-1
+ ```
+ 
+-Prometheus scrape: `192.168.1.7:19100/metrics`, interval `15s`.
++Prometheus scrape: `host.docker.internal:19100/metrics`, interval `15s`.
+diff --git a/config/generated/source-mappings.json b/config/generated/source-mappings.json
+index ecfac893..27e4b853 100644
+--- a/config/generated/source-mappings.json
++++ b/config/generated/source-mappings.json
+@@ -2,21 +2,21 @@
+   "version": 4,
+   "serviceInventory": [
+     {
+-      "name": "sdar-ugv-runtime",
+-      "address": "http://192.168.1.7:19100"
++      "name": "ugv-runtime",
++      "address": "http://host.docker.internal:19100"
+     }
+   ],
+   "mappings": [
+     {
+-      "collectorId": "smpp-gateway-ugv-1",
+-      "trustDomain": "sdar-ugv-runtime-mtls",
+-      "deploymentId": "production-ugv-direct",
++      "collectorId": "smpp-ugv-joint-collector-1",
++      "trustDomain": "local-development",
++      "deploymentId": "ugv-test-deployment",
+       "providerId": "isr.vehicle.ugv.ugv1",
+-      "instanceId": "production-ugv-direct-1",
+-      "smppSourceId": "smpp.production.ugv-direct",
++      "instanceId": "ugv-runtime-test-1",
++      "smppSourceId": "smpp.ugv-test-deployment.ugv-runtime-test-1",
+       "tenantId": "tenant-local",
+-      "projectId": "smpp-local",
+-      "environment": "qualification",
++      "projectId": "ugv-joint-integration",
++      "environment": "development",
+       "sourceProduct": "sdar-mcp-provider-platform",
+       "mappingVersion": 4,
+       "policyVersion": 1,
+diff --git a/deploy/compose/compose.yaml b/deploy/compose/compose.yaml
+index 0727f96f..6b7350c5 100644
+--- a/deploy/compose/compose.yaml
++++ b/deploy/compose/compose.yaml
+@@ -45,6 +45,8 @@ services:
+       PROCESSOR_REQUIRE_COLLECTOR_ID: "true"
+       PROCESSOR_ALLOWED_COLLECTOR_IDS: ${COLLECTOR_ID:-smpp-gateway-1}
+       WAL_DIR: /var/lib/smpp-telemetry/wal
++      WAL_MAX_PENDING_WRITES: ${WAL_MAX_PENDING_WRITES:-1024}
++      PROCESSOR_SHUTDOWN_TIMEOUT_MS: ${PROCESSOR_SHUTDOWN_TIMEOUT_MS:-10000}
+       SOURCE_MAPPINGS_FILE: /app/config/source-mappings.json
+       PROJECTION_TARGETS_FILE: /app/config/projection-targets.json
+       EXPORT_INTERVAL_MS: 500
+diff --git a/deploy/development/README.md b/deploy/development/README.md
+new file mode 100644
+index 00000000..cc8ebe9e
+--- /dev/null
++++ b/deploy/development/README.md
+@@ -0,0 +1,65 @@
++# x86_64 development stack
++
++The release path in `compose.yaml` deliberately builds ClickHouse from the pinned
++source revision for ARM64. On an x86_64 joint-integration host, layer this
++development-only override on top of the root file:
++
++```bash
++cp .env.example .env
++```
++
++Set the exact joint-integration identities in `.env`. The active SMPP development
++Compose project currently publishes its Runtime endpoint on the host, so the
++Telemetry Collector must scrape that published port through the host gateway:
++
++```env
++TELEMETRY_PUBLIC_HOST=host.docker.internal
++SMPP_SERVICES='ugv-runtime|http://host.docker.internal:19100'
++SMPP_METRICS_TARGET=host.docker.internal:19100
++SMPP_DEPLOYMENT_ID=ugv-test-deployment
++COLLECTOR_ID=smpp-ugv-joint-collector-1
++TRUST_DOMAIN=local-development
++SMPP_PROVIDER_ID=isr.vehicle.ugv.ugv1
++SMPP_RUNTIME_INSTANCE_ID=ugv-runtime-test-1
++SMPP_SOURCE_ID=smpp.ugv-test-deployment.ugv-runtime-test-1
++TELEMETRY_TENANT_ID=tenant-local
++TELEMETRY_PROJECT_ID=ugv-joint-integration
++TELEMETRY_ENVIRONMENT=development
++TELEMETRY_TRANSPORT_MODE=development
++```
++
++Replace the Runtime port if the SMPP Compose project publishes a different one.
++The Runtime instance value must be identical to `RUNTIME_INSTANCE_ID` and
++`OTEL_SERVICE_INSTANCE_ID`. Generate the mapping and
++ensure the two local secret files exist before starting the stack:
++
++```bash
++mkdir -p secrets
++test -s secrets/clickhouse_password.txt || openssl rand -hex -out secrets/clickhouse_password.txt 24
++test -s secrets/processor_admin_key.txt || openssl rand -hex -out secrets/processor_admin_key.txt 24
++node deploy/bin/generate-config.ts "$PWD" "$PWD/.env"
++
++docker compose \
++  --env-file .env \
++  -f compose.yaml \
++  -f deploy/development/compose.x86_64.override.yaml \
++  config --quiet
++
++docker compose \
++  --env-file .env \
++  -f compose.yaml \
++  -f deploy/development/compose.x86_64.override.yaml \
++  up -d --build --remove-orphans --wait --wait-timeout 180
++```
++
++This profile replaces only the ClickHouse build with the matching official
++`25.3.14.14` Linux/amd64 image. Processor, Collector, migrations, Query API,
++Grafana, volumes, ports, and health checks continue to come from `compose.yaml`.
++It also gives the Collector a Linux host-gateway mapping so it can scrape a
++Runtime published by the separate SMPP Compose project. The SMPP Runtime must in
++turn resolve `host.docker.internal` and export OTLP to
++`http://host.docker.internal:4318`; that host mapping belongs in the SMPP
++development Compose project.
++
++This is development-only. Do not use this override for ARM64 release
++qualification; the root Compose and ARM64 source-build path remain unchanged.
+diff --git a/deploy/development/compose.x86_64.override.yaml b/deploy/development/compose.x86_64.override.yaml
+new file mode 100644
+index 00000000..78701aae
+--- /dev/null
++++ b/deploy/development/compose.x86_64.override.yaml
+@@ -0,0 +1,13 @@
++services:
++  clickhouse:
++    # Development-only shortcut for x86_64 integration hosts. The root Compose
++    # file remains the source-built ARM64 delivery path.
++    image: clickhouse/clickhouse-server:25.3.14.14
++    pull_policy: missing
++    platform: linux/amd64
++    build: !reset null
++  otel-collector:
++    # The Runtime is started by a separate Compose project and publishes its
++    # metrics endpoint on the host during joint integration.
++    extra_hosts:
++      - "host.docker.internal:host-gateway"
+diff --git a/deploy/stable-smpp-integration/.env.example b/deploy/stable-smpp-integration/.env.example
+index 9e4ee4e8..0e57b5f1 100644
+--- a/deploy/stable-smpp-integration/.env.example
++++ b/deploy/stable-smpp-integration/.env.example
+@@ -13,6 +13,7 @@ COLLECTOR_ID=smpp-gateway-ugv-1
+ TRUST_DOMAIN=sdar-ugv-runtime-mtls
+ SMPP_PROVIDER_ID=isr.vehicle.ugv.ugv1
+ SMPP_RUNTIME_INSTANCE_ID=production-ugv-direct-1
++SMPP_SOURCE_ID=smpp.production.ugv-direct
+ SMPP_SERVICES='sdar-ugv-runtime|http://192.168.1.7:19100'
+ SMPP_METRICS_TARGET=192.168.1.7:19100
+ SMPP_METRICS_PATH=/metrics
+diff --git a/reports/live-ugv-smpp-integration/BASELINE.json b/reports/live-ugv-smpp-integration/BASELINE.json
+new file mode 100644
+index 00000000..4b338327
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/BASELINE.json
+@@ -0,0 +1,65 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PASS",
++  "repository": "zhouwen-giser/smpp-telemetry-platform",
++  "origin": "https://github.com/zhouwen-giser/smpp-telemetry-platform.git",
++  "baseBranch": "origin/main",
++  "baseSha": "d713f71b4c93f981d5bce05b65ed71f5ed5814b6",
++  "workBranch": "codex/goal-02-live-ugv-smpp-integration",
++  "branchHeadShaBeforeLatestWatermarkUpdate": "96fc7eb6fc88b4f353c48a624a0f59dbc566d0ed",
++  "branchHeadCommitKind": "evidence-report-only",
++  "lastCodeChangingCommitSha": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
++  "deployedTelemetryCodeRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
++  "commits": [
++    {
++      "sha": "a0be9935",
++      "subject": "fix(processor): harden concurrent WAL recovery"
++    },
++    {
++      "sha": "8de44cf0",
++      "subject": "feat(development): add x86 joint integration profile"
++    },
++    {
++      "sha": "4de0e7e7",
++      "subject": "fix(deploy): package ProviderOps catalog with processor",
++      "kind": "code-and-deployed-image"
++    },
++    {
++      "sha": "96fc7eb6",
++      "subject": "docs(evidence): record live UGV telemetry integration",
++      "kind": "evidence-report-only",
++      "deployedAsProcessorImage": false
++    }
++  ],
++  "host": {
++    "architecture": "x86_64",
++    "rootComposeReleaseArchitecture": "arm64",
++    "developmentOverride": "deploy/development/compose.x86_64.override.yaml",
++    "developmentOverrideRequired": true
++  },
++  "deployment": {
++    "composeProject": "smpp-telemetry-ugv-joint",
++    "transportMode": "development",
++    "processorImageRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
++    "processorImageArchitecture": "amd64",
++    "queryApiImageRevision": "8de44cf0d529d2d4cd37aadd31cdf1430da32425",
++    "clickHouseImage": "clickhouse/clickhouse-server:25.3.14.14",
++    "clickHouseImageArchitecture": "amd64",
++    "localRuntimeConfiguration": "present-untracked-and-redacted"
++  },
++  "jointRuntime": {
++    "branch": "codex/goal-ugv-runtime-telemetry-joint-integration",
++    "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++    "startedAt": "2026-08-20T15:03:34.496626185Z"
++  },
++  "safety": {
++    "readOnlyEvidenceOnly": true,
++    "liveControlAttempted": false,
++    "mutatingDeviceCalls": 0,
++    "fireAttempted": false,
++    "telemetryDirectMqttOrDeviceMcpConnection": false,
++    "secretsRecorded": false
++  },
++  "priorLiveStatus": "LIVE_SMPP_READY_PARTIAL"
++}
+diff --git a/reports/live-ugv-smpp-integration/CLICKHOUSE_LAYERS.json b/reports/live-ugv-smpp-integration/CLICKHOUSE_LAYERS.json
+new file mode 100644
+index 00000000..a6652ae9
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/CLICKHOUSE_LAYERS.json
+@@ -0,0 +1,85 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "FOUR_LAYER_HISTORICAL_PROVIDEROPS_PARITY_CURRENT_RUNTIME_EPOCH_NOT_REACHED",
++  "clickHouse": {
++    "container": "smpp-telemetry-ugv-joint-clickhouse-1",
++    "image": "clickhouse/clickhouse-server:25.3.14.14",
++    "architecture": "amd64",
++    "health": "healthy"
++  },
++  "x86DevelopmentOverride": {
++    "path": "deploy/development/compose.x86_64.override.yaml",
++    "officialPrebuiltImageUsed": true,
++    "rootArm64ReleasePathChanged": false,
++    "overrideRemovesClickHouseBuildOnly": true
++  },
++  "migration": {
++    "container": "smpp-telemetry-ugv-joint-telemetry-migrate-1",
++    "status": "exited",
++    "exitCode": 0,
++    "startedAt": "2026-08-20T14:01:48.915365823Z",
++    "finishedAt": "2026-08-20T14:01:50.554342597Z",
++    "files": [
++      "001_databases.sql",
++      "002_meta.sql",
++      "003_landing.sql",
++      "004_normalized.sql",
++      "005_core.sql",
++      "006_serving.sql",
++      "007_stable_smpp_lineage.sql"
++    ]
++  },
++  "inventory": {
++    "telemetry_landing": {
++      "tables": 3,
++      "views": 1
++    },
++    "telemetry_normalized": {
++      "tables": 4,
++      "views": 0
++    },
++    "telemetry_core": {
++      "tables": 10,
++      "views": 0
++    },
++    "telemetry_serving": {
++      "tables": 0,
++      "views": 8
++    }
++  },
++  "layerCounts": {
++    "capturedAt": "2026-08-20T14:32:25.723Z",
++    "landing": 42469,
++    "normalized": 42469,
++    "core": 42469,
++    "serving": 42469,
++    "countParity": true,
++    "scope": "historical four-layer snapshot; not the latest landing watermark"
++  },
++  "landing": {
++    "capturedAt": "2026-08-20T15:07:40.656Z",
++    "physicalRows": 134864,
++    "uniqueRecordIds": 134864,
++    "duplicatePhysicalRows": 0,
++    "minOccurredAt": "2026-08-10T12:02:26.667Z",
++    "maxOccurredAt": "2026-08-20T10:45:55.689Z",
++    "minIngestedAt": "2026-08-20T14:14:31.688Z",
++    "maxIngestedAt": "2026-08-20T15:07:40.656Z",
++    "newestEventFifoLagSeconds": 15704.967,
++    "rowsOccurredAfterCurrentRuntimeStart": 0,
++    "recordTypeCountsAtPriorFourLayerSnapshot": {
++      "capturedAt": "2026-08-20T14:32:25.723Z",
++      "provider.resource.metric": 13568,
++      "provider.resource.state": 28901
++    }
++  },
++  "dataQuality": {
++    "capturedAt": "2026-08-20T14:32:25.723Z",
++    "conflicts": 0,
++    "rejected": 0,
++    "normalizationDeadLetters": 0
++  },
++  "qualificationBoundary": "The prior 14:32:25 four-layer snapshot had parity for 42,469 historical Runtime ProviderOps. The latest 15:07:40 read updates landing only to 134,864 rows; no claim is made that all four current layer counts equal 134,864. No event from the Runtime started at 15:03:34 was visible in landing."
++}
+diff --git a/reports/live-ugv-smpp-integration/COLLECTOR_LIVE.json b/reports/live-ugv-smpp-integration/COLLECTOR_LIVE.json
+new file mode 100644
+index 00000000..37256fa0
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/COLLECTOR_LIVE.json
+@@ -0,0 +1,87 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "HISTORICAL_RUNTIME_PROVIDEROPS_FLOWING_CURRENT_EPOCH_FIFO_PENDING",
++  "evidenceLevel": "READ_ONLY_LIVE_PASS",
++  "collector": {
++    "container": "smpp-telemetry-ugv-joint-otel-collector-1",
++    "image": "otel/opentelemetry-collector-contrib:0.157.0",
++    "containerHealth": "healthy",
++    "healthEndpoint": {
++      "httpStatus": 200,
++      "status": "Server available",
++      "upSince": "2026-08-20T14:01:52.841411781Z"
++    },
++    "configValidation": {
++      "command": "/otelcol-contrib validate --config=/etc/otelcol-contrib/config.yaml",
++      "exitCode": 0
++    }
++  },
++  "otlp": {
++    "httpListener": "0.0.0.0:4318",
++    "processorExporter": "otlphttp/processor_provider_ops",
++    "processorPath": "/internal/otlp/v1/logs",
++    "sampleWindowSeconds": 15.405,
++    "start": {
++      "capturedAt": "2026-08-20T14:35:09.514Z",
++      "acceptedLogRecords": 49077,
++      "refusedLogRecords": 0,
++      "sentLogRecords": 49069
++    },
++    "end": {
++      "capturedAt": "2026-08-20T14:35:24.919Z",
++      "acceptedLogRecords": 49876,
++      "refusedLogRecords": 0,
++      "sentLogRecords": 49868
++    },
++    "delta": {
++      "acceptedLogRecords": 799,
++      "sentLogRecords": 799,
++      "refusedLogRecords": 0,
++      "acceptedPerSecond": 51.866,
++      "sentPerSecond": 51.866
++    }
++  },
++  "runtimeDurableQueue": {
++    "startBacklog": 811377,
++    "endBacklog": 810691,
++    "netDrain": 686,
++    "netDrainPerSecond": 44.531,
++    "endOldestAgeSeconds": 873060.725246,
++    "backlogReachedZero": false,
++    "latestRuntimeDatabaseSnapshot": {
++      "capturedAt": "2026-08-20T15:07:40.656Z",
++      "runtimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++      "backlog": 726934,
++      "claimed": 44,
++      "pending": 127413,
++      "retryWait": 599514,
++      "delivered": 136156,
++      "exhausted": 166347,
++      "oldestBacklogAgeSeconds": 874895,
++      "backlogReachedZero": false,
++      "note": "Backlog and status counts were read while the exporter was active; they are retained as observed watermarks and are not asserted to be one atomic arithmetic total."
++    }
++  },
++  "provenance": {
++    "sourceVectorUsedForThisEvidence": false,
++    "manualInsertUsed": false,
++    "sendSampleUsed": false,
++    "flowObserved": "real Runtime durable ProviderOps backlog",
++    "currentRuntimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++    "currentRuntimeStartedAt": "2026-08-20T15:03:34.496626185Z",
++    "currentRuntimeEpochRowsObservedInClickHouse": 0,
++    "currentLiveProviderOpsVerifiedInRuntimeDatabase": true,
++    "currentLiveProviderOpsStructPayloadComplete": true,
++    "currentLiveProviderOpsVisibleInTelemetry": false,
++    "qualificationBoundary": "The live transport is proven for historical durable ProviderOps. It is not evidence that current-run UGV events have reached storage."
++  },
++  "gate": {
++    "runtimeToCollector": "PASS",
++    "collectorToProcessor": "PASS",
++    "stableIdentity": "PASS",
++    "backlogDrainToZero": "FAIL",
++    "currentRunCorrelation": "NOT_OBSERVED"
++  }
++}
+diff --git a/reports/live-ugv-smpp-integration/DUPLICATE_CONFLICT.json b/reports/live-ugv-smpp-integration/DUPLICATE_CONFLICT.json
+new file mode 100644
+index 00000000..8c1b080c
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/DUPLICATE_CONFLICT.json
+@@ -0,0 +1,41 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "IMPLEMENTATION_AND_REGRESSION_PASS_DELIBERATE_LIVE_INJECTION_NOT_RUN",
++  "liveObservedData": {
++    "landingSnapshotAt": "2026-08-20T15:07:40.656Z",
++    "landingPhysicalRowsAtSample": 134864,
++    "landingUniqueRecordIdsAtSample": 134864,
++    "duplicatePhysicalRowsAtSample": 0,
++    "qualityTablesSnapshotAt": "2026-08-20T14:32:25.723Z",
++    "conflictRowsAtPriorSample": 0,
++    "rejectedRowsAtPriorSample": 0,
++    "normalizationDeadLettersAtPriorSample": 0,
++    "canonicalOverwriteObserved": false
++  },
++  "implementation": {
++    "classificationAndAppendShareOneSerializedBoundary": true,
++    "sameRecordIdSameHash": "duplicate-without-new-canonical-fact",
++    "sameRecordIdDifferentHash": "conflict-isolated-without-overwrite",
++    "concurrentHighWaterCheckSerialized": true
++  },
++  "regression": {
++    "concurrentIdenticalRecords": {
++      "inputCount": 20,
++      "accepted": 1,
++      "duplicate": 19,
++      "status": "PASS"
++    },
++    "concurrentSameIdDifferentHash": {
++      "accepted": 1,
++      "conflict": 1,
++      "status": "PASS"
++    },
++    "checkpointMonotonicity": "PASS",
++    "duplicateAtHighWater": "PASS"
++  },
++  "liveDeliberateDuplicateTest": "NOT_EXECUTED",
++  "liveDeliberateConflictTest": "NOT_EXECUTED",
++  "sourceVectorUsedAsLiveEvidence": false
++}
+diff --git a/reports/live-ugv-smpp-integration/FAULT_RECOVERY.json b/reports/live-ugv-smpp-integration/FAULT_RECOVERY.json
+new file mode 100644
+index 00000000..91238ba9
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/FAULT_RECOVERY.json
+@@ -0,0 +1,47 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "CONTROLLED_LIVE_FAULT_MATRIX_NOT_COMPLETED",
++  "currentState": {
++    "collector": "healthy",
++    "processor": "healthy-and-ready",
++    "clickHouse": "healthy",
++    "queryApi": "healthy",
++    "grafana": "healthy",
++    "runtime": "healthy-and-ready",
++    "runtimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++    "runtimeStartedAt": "2026-08-20T15:03:34.496626185Z",
++    "processorWalWriteFailed": false,
++    "processorTargetLastError": null
++  },
++  "controlledScenarios": {
++    "collectorOutageRecovery": "NOT_EXECUTED",
++    "processorOutageRecovery": "NOT_EXECUTED",
++    "clickHouseOutageRecovery": "NOT_EXECUTED",
++    "runtimeIngressOutageRecovery": "NOT_EXECUTED",
++    "runtimeRestartSameTask": "NOT_EXECUTED_WITH_A_LIVE_TASK",
++    "providerRestartNoRedispatch": "NOT_EXECUTED_WITH_A_LIVE_TASK",
++    "mqttOutageRecovery": "NOT_EXECUTED",
++    "deviceMcpOutageRecovery": "NOT_EXECUTED",
++    "liveDuplicateReplay": "NOT_EXECUTED"
++  },
++  "ordinaryDeploymentObservation": {
++    "runtimeStartedAt": "2026-08-20T14:19:12.771047178Z",
++    "providerStartedAt": "2026-08-20T14:18:30.283501753Z",
++    "transientProviderTelemetryFailuresWereVisible": true,
++    "providerTelemetryDroppedAfterBoundedRetry": 64,
++    "laterDeliveryIssueObserved": false,
++    "qualifiesAsControlledRecoveryTest": false
++  },
++  "regressionEvidence": {
++    "walPartialTailRecovery": "PASS",
++    "checkpointCorruptionFailsStartupClosed": "PASS",
++    "checkpointOutsideFrameBoundaryFailsStartupClosed": "PASS",
++    "writeFailurePoisonsStoreAndDrainFailsClosed": "PASS",
++    "targetFailureKeepsIndependentCheckpoints": "PASS",
++    "targetRestartReplaysPendingWithoutDoubleAdvancingStandalone": "PASS",
++    "boundedShutdownDrain": "IMPLEMENTED"
++  },
++  "qualificationBoundary": "Healthy startup and unit-level recovery semantics do not replace the required controlled live outage/recovery matrix."
++}
+diff --git a/reports/live-ugv-smpp-integration/FINAL_REPORT.md b/reports/live-ugv-smpp-integration/FINAL_REPORT.md
+new file mode 100644
+index 00000000..2bfb2108
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/FINAL_REPORT.md
+@@ -0,0 +1,75 @@
++# UGV Runtime × Provider × Telemetry 联合调试 — Telemetry 侧最终报告
++
++生成时间：2026-08-20T15:11:42.679Z
++
++最终结论：`UGV_SMPP_TELEMETRY_JOINT_PARTIAL` / `EXTERNAL_INTERFACE_BLOCKED`。
++
++Telemetry 组件链已经能够接收真实 Runtime durable ProviderOps backlog，并完成 `Collector → Processor/WAL → ClickHouse landing/normalized/core/serving → Query API/Grafana` 的投影。最终 live ProviderOps 已在 Runtime 数据库中精确证明，且 `google.protobuf.Struct` payload 完整；但该记录仍被历史 FIFO 挡在 Telemetry 之外。当前证据不能升级为完整联合验收：Runtime 历史 backlog 尚未归零，当前 Runtime 启动后的新 UGV 事件尚未到达 ClickHouse；任务包要求的受控 live duplicate、故障恢复矩阵和 live point navigation 也未完成。
++
++## 版本与部署
++
++- Telemetry 基线：`d713f71b4c93f981d5bce05b65ed71f5ed5814b6`。
++- Telemetry 分支在本次水位更新前的 HEAD 为证据提交 `96fc7eb6fc88b4f353c48a624a0f59dbc566d0ed`；最后一个代码变更及实际 Processor 部署镜像 revision 均为 `4de0e7e7cf1434bc2da051542f7b21a7e88b15d7`，未把报告提交当作 live image revision。
++- Telemetry 分支：`codex/goal-02-live-ugv-smpp-integration`。
++- 联合 Runtime/Provider 最终部署修订：`eaa36df380e7542f25f359d55c829e12d843738b`，Runtime 启动时间 `2026-08-20T15:03:34.496626185Z`。
++- 主机为 `x86_64`，仅开发 override 使用官方 `clickhouse/clickhouse-server:25.3.14.14` amd64 镜像；根 Compose 的 ARM64 源码构建发布路径保持不变。
++- `telemetry-migrate` 退出码为 0，`001` 至 `007` migration 均已加载。
++
++## 已修复与验证的 Telemetry 问题
++
++- WAL 的分类与 append 共用原子串行边界，避免并发相同 ID 同时被接受。
++- WAL 写队列有界，high-water 检查在串行边界内执行，写失败会使实例 fail closed，必须重启恢复。
++- checkpoint 写入使用独占临时文件、fsync、原子替换和单调游标；损坏 JSON、非法形状或非真实 WAL frame 边界都会阻止启动。
++- Processor shutdown deadline 覆盖 HTTP、WAL 与 target drain；超时后强制关闭连接。
++- x86 开发 override 仅替换 ClickHouse build path，并为 Collector 提供跨 Compose 的 host gateway。
++- 当前测试环境 Source Mapping 已固定为 `ugv-test-deployment` / `ugv-runtime-test-1` / `smpp-ugv-joint-collector-1`，未使用旧 `192.168.1.*` 示例值，也未把 Device MCP 当作 Runtime metrics 地址。
++
++## 真实只读证据
++
++15.405 秒采样窗口内：
++
++- Runtime durable backlog：`811377 → 810691`，净下降 686，约 `44.531 records/s`。
++- Collector accepted/sent：均增加 799，约 `51.866 records/s`。
++- Collector refused：0。
++- Processor ready；WAL 写队列 `0/1024`，`writeFailed=false`。
++- `2026-08-20T14:32:25.723Z` 的历史快照中，ClickHouse 四层计数一致：landing/normalized/core/serving 均为 42,469。
++- 最新 landing-only 水位为 134,864 行、134,864 个唯一 record ID，最大 `occurredAt=2026-08-20T10:45:55.689Z`，最大 `ingestedAt=2026-08-20T15:07:40.656Z`。此处未把 134,864 误写成当前四层一致计数。
++- 先前四层快照中 conflict、rejected、normalization DLQ 均为 0。
++- 抽样 record 在 landing、normalized、core 的 record hash 完全一致。
++- Query API 可用 provider/runtime/deployment/record 四个维度返回同一记录；Grafana 数据库健康，ClickHouse 与 Runtime Prometheus datasource 已 provision。
++
++最新 Telemetry landing 事件的 `occurredAt` 最晚为 `2026-08-20T10:45:55.689Z`，而最终 Runtime 于 `2026-08-20T15:03:34.496626185Z` 启动；采样时当前 Runtime epoch 的 ClickHouse landing 行数为 0。因此这里只证明“真实历史 durable ProviderOps 正在 live 传输和投影”，不把它写成“当前运行产生的新事件已端到端落库”。最终 live ProviderOps 的完整 Struct payload 目前只在 Runtime durable 数据库内得到精确证明。
++
++## 回归
++
++- `npm test`：56/56 PASS；其中覆盖 OTLP→WAL ACK、并发 duplicate/conflict、高水位、写队列、checkpoint、WAL 故障、Query API 与 x86 override。
++- `npm run build`：PASS。
++- 开发 Compose `config --quiet`：PASS。
++- Collector 配置 validate：PASS。
++- migrations：PASS。
++- 仓库级 `npm run typecheck` 仍非绿：基线 628 个诊断，当前 500 个；按去除行列号后的唯一诊断比较，新增 0、消除 52。它是明确保留的基线债务，不能宣称 typecheck PASS。
++
++## 未完成门禁与阻塞
++
++1. 最新 Runtime 数据库水位：backlog 726,934；状态水位为 CLAIMED 44、PENDING 127,413、RETRY_WAIT 599,514、DELIVERED 136,156、EXHAUSTED 166,347，最老 backlog 约 874,895 秒。导出器在查询期间持续运行，各水位不声明为同一原子算术快照。G5 要求的 backlog/oldest-age 归零未满足，当前新事件仍排在 FIFO 后。
++2. 只到达 `provider.resource.state` 与 `provider.resource.metric` 历史记录；当前 run 的 task、command、recovery、externalExecutionId、operationName 关联尚不可查询。
++3. 未执行 deliberate live duplicate/conflict 注入。实现与 56 项回归已通过，但不能替代 live gate。
++4. 未执行 Collector、Processor、ClickHouse、Runtime ingress 等完整受控 outage/recovery 矩阵。普通部署切换期间 Provider 明确记录了 transport failure/retry/drop，证明“无静默失败”，但不构成受控恢复 PASS。
++5. 外部 Device MCP 实际协议为 `2025-11-25`，低于任务冻结要求的 `2026-07-28`，工具合同缺少 output schema/annotations；外部 MQTT 也缺少 canonical `status/ugv`，且 `/ugv/speed` QoS 与期望不一致。这些属于只读外部接口缺口，Telemetry 仓库未伪造补偿数据。
++6. live control 授权未开启，未执行 point navigation、pause/resume/cancel/emergency stop；没有 mutating Device MCP 调用，没有火控调用，也没有物理终态证据。
++
++## 分层状态
++
++| 层级 | 状态 | 说明 |
++| --- | --- | --- |
++| Source Mapping | PASS | Runtime、Collector 与映射身份一致 |
++| Collector live transport | PARTIAL | 历史真实 backlog 正在流动，当前 run 尚未到达 |
++| Processor/WAL | PASS | ready、有界、无 write failure |
++| ClickHouse layers | PARTIAL | 14:32 历史快照四层 42,469 一致；15:07 仅确认 landing 134,864，当前 run 为 0 |
++| Query/Grafana | PARTIAL | 资源历史事件可查；当前 Task 链不可查 |
++| Duplicate/conflict | PARTIAL | 实现/回归 PASS，deliberate live 未执行 |
++| Rate/backpressure | PARTIAL | backlog drain 已测，规定的 idle/nav/terminal 阶段未完成 |
++| Fault/recovery | PARTIAL | 启动健康与单测 PASS，完整 live matrix 未执行 |
++| Live control/physical evidence | NOT EXECUTED | 安全门禁未授权，外部合同也不满足 |
++
++本报告没有使用 `send:sample`、source vector 或手工 insert 冒充当前 Runtime 事件；没有记录 Authorization、token、密码、数据库凭据、私钥或原始设备 payload。
+diff --git a/reports/live-ugv-smpp-integration/PROCESSOR_WAL.json b/reports/live-ugv-smpp-integration/PROCESSOR_WAL.json
+new file mode 100644
+index 00000000..1805f848
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/PROCESSOR_WAL.json
+@@ -0,0 +1,69 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T14:31:03.300Z",
++  "status": "PASS",
++  "processor": {
++    "container": "smpp-telemetry-ugv-joint-telemetry-processor-1",
++    "containerHealth": "healthy",
++    "imageRevision": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
++    "healthReady": {
++      "httpStatus": 200,
++      "status": "ready",
++      "requiredTargets": true
++    }
++  },
++  "wal": {
++    "segments": 1,
++    "entries": 39469,
++    "totalBytes": 52721268,
++    "currentBytes": 52721268,
++    "pendingWrites": 0,
++    "maxPendingWrites": 1024,
++    "writeFailed": false,
++    "checkpoint": {
++      "id": "target:standalone-smpp",
++      "segment": 1,
++      "offsetEnd": 52683888,
++      "updatedAt": "2026-08-20T14:31:03.215Z"
++    },
++    "pendingByCheckpoint": 28
++  },
++  "target": {
++    "targetId": "standalone-smpp",
++    "targetType": "standalone_smpp_clickhouse",
++    "projectionId": "core-smpp-v1",
++    "projectionVersion": 1,
++    "enabled": true,
++    "runningAtInstant": false,
++    "lastError": null,
++    "pending": 28
++  },
++  "metrics": {
++    "processorReceivedRecordsTotal": 39469,
++    "processorAcceptedRecordsTotal": 39469,
++    "processorWalWriteFailed": 0,
++    "processorWalWriteQueueDepth": 0,
++    "projectionTargetBatchesTotal": 1211
++  },
++  "configuration": {
++    "walMaxPendingWrites": 1024,
++    "shutdownTimeoutMs": 10000,
++    "exportIntervalMs": 500,
++    "requireCollectorId": true,
++    "allowedCollectorIds": [
++      "smpp-ugv-joint-collector-1"
++    ],
++    "shadowTargetEnabled": false
++  },
++  "durabilityImplementation": {
++    "atomicClassifyAndAppend": true,
++    "serializedWrites": true,
++    "boundedWriteQueue": true,
++    "checkpointFsyncAndAtomicRename": true,
++    "checkpointBoundaryValidation": true,
++    "writeFailurePoisonsUntilRestart": true,
++    "boundedShutdownDrain": true
++  },
++  "liveFaultInjection": "NOT_EXECUTED",
++  "note": "Counts are an instantaneous read while the durable Runtime backlog was actively draining."
++}
+diff --git a/reports/live-ugv-smpp-integration/PROVIDEROPS_IDENTITY.json b/reports/live-ugv-smpp-integration/PROVIDEROPS_IDENTITY.json
+new file mode 100644
+index 00000000..9dba6282
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/PROVIDEROPS_IDENTITY.json
+@@ -0,0 +1,65 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "CANONICAL_IDENTITY_PARITY_PASS_ON_HISTORICAL_BACKLOG_CURRENT_RUN_PENDING",
++  "sourceIdentity": {
++    "tenantId": "tenant-local",
++    "projectId": "ugv-joint-integration",
++    "environment": "development",
++    "providerId": "isr.vehicle.ugv.ugv1",
++    "runtimeInstanceId": "ugv-runtime-test-1",
++    "deploymentId": "ugv-test-deployment",
++    "collectorId": "smpp-ugv-joint-collector-1",
++    "rowsWithExactIdentityAtPriorTelemetryCapture": 42469
++  },
++  "canonicalSample": {
++    "recordId": "7cfdc860-c498-59ea-b639-17433532f3b7",
++    "landingRecordHash": "38265e4e5db641f756fb8dd039af1f2759893c28c595561eca42d78789cbfa10",
++    "normalizedRecordHash": "38265e4e5db641f756fb8dd039af1f2759893c28c595561eca42d78789cbfa10",
++    "coreRecordHash": "38265e4e5db641f756fb8dd039af1f2759893c28c595561eca42d78789cbfa10",
++    "hashParity": true,
++    "landingType": "provider.resource.metric",
++    "normalizedType": "provider.resource.metric",
++    "coreType": "provider.resource.metric",
++    "typeParity": true,
++    "providerId": "isr.vehicle.ugv.ugv1",
++    "runtimeInstanceId": "ugv-runtime-test-1",
++    "deploymentId": "ugv-test-deployment",
++    "occurredAt": "2026-08-20T10:18:53.357Z",
++    "ingestedAt": "2026-08-20T14:32:25.723Z"
++  },
++  "processorContract": {
++    "schemaName": "sdar.provider.ops.event",
++    "schemaVersion": "1.1.0",
++    "otlpAttributeBodyIdentityMismatchFailsClosed": true,
++    "collectorIdentityAllowlistEnabled": true,
++    "acceptedLiveFlowImpliesIngressIdentityValidationPassed": true
++  },
++  "timeSemantics": {
++    "occurredAtPreserved": true,
++    "ingestTimeDoesNotOverwriteOccurredAt": true,
++    "observedFifoDelaySeconds": 15212
++  },
++  "taskCorrelation": {
++    "taskLevelRecordObservedForCurrentRun": false,
++    "externalExecutionIdObservedForCurrentRun": false,
++    "operationNameObservedForCurrentRun": false,
++    "reason": "Only historical provider.resource.state and provider.resource.metric records had reached ClickHouse at capture time."
++  },
++  "currentLiveRuntimeProviderOps": {
++    "runtimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++    "runtimeStartedAt": "2026-08-20T15:03:34.496626185Z",
++    "evidenceSource": "read-only Runtime PostgreSQL durable ProviderOps row inspection",
++    "verifiedInRuntimeDatabase": true,
++    "providerOpsEnvelopeVerified": true,
++    "payloadEncoding": "google.protobuf.Struct",
++    "structPayloadComplete": true,
++    "providerResourceIdentityPresent": true,
++    "rawPayloadRecordedInThisReport": false,
++    "visibleInTelemetryLanding": false,
++    "telemetryLandingCurrentRuntimeEpochRows": 0,
++    "blockedByHistoricalDurableFifo": true,
++    "qualificationBoundary": "This is exact Runtime-database evidence for the final live ProviderOps payload, not evidence that the record has crossed Collector/Processor/ClickHouse."
++  }
++}
+diff --git a/reports/live-ugv-smpp-integration/QUERY_RESULTS.json b/reports/live-ugv-smpp-integration/QUERY_RESULTS.json
+new file mode 100644
+index 00000000..dec75995
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/QUERY_RESULTS.json
+@@ -0,0 +1,74 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T14:32:46.733Z",
++  "status": "PARTIAL",
++  "reasonCode": "RESOURCE_PROVIDEROPS_QUERY_PASS_CURRENT_TASK_CHAIN_NOT_AVAILABLE",
++  "queryApi": {
++    "container": "smpp-telemetry-ugv-joint-query-api-1",
++    "health": {
++      "httpStatus": 200,
++      "status": "ok"
++    },
++    "filtersExercised": [
++      "providerId",
++      "runtimeInstanceId",
++      "deploymentId",
++      "recordId"
++    ],
++    "filtersSupportedByContract": [
++      "providerId",
++      "resourceId",
++      "taskId",
++      "externalExecutionId",
++      "operationName",
++      "recordId",
++      "traceId",
++      "runtimeInstanceId",
++      "deploymentId",
++      "from",
++      "to",
++      "recordType",
++      "eventCategory",
++      "deliveryClass"
++    ],
++    "sample": {
++      "dataCount": 1,
++      "sourceProvenance": true,
++      "dataWatermark": "2026-08-20T14:32:25.723Z",
++      "recordId": "7cfdc860-c498-59ea-b639-17433532f3b7",
++      "recordHash": "38265e4e5db641f756fb8dd039af1f2759893c28c595561eca42d78789cbfa10",
++      "recordType": "provider.resource.metric",
++      "providerId": "isr.vehicle.ugv.ugv1",
++      "runtimeInstanceId": "ugv-runtime-test-1",
++      "deploymentId": "ugv-test-deployment",
++      "resourceId": "vehicle:ugv1",
++      "operationName": null,
++      "occurredAt": "2026-08-20T10:18:53.357Z",
++      "ingestedAt": "2026-08-20T14:32:25.723Z"
++    },
++    "projectionWatermark": {
++      "projectionId": "core-smpp-v1",
++      "projectionVersion": 1,
++      "dataWatermark": "2026-08-20T14:32:46.733Z",
++      "projectedFacts": 43165
++    },
++    "dataQualitySummaryCount": 0
++  },
++  "grafana": {
++    "healthHttpStatus": 200,
++    "database": "ok",
++    "version": "12.1.0",
++    "dashboardProvisioned": "overview.json",
++    "clickHouseDatasourceProvisioned": true,
++    "runtimePrometheusDatasourceProvisioned": true,
++    "clickHousePluginVersion": "4.20.0",
++    "dashboardProvisioningFinished": true,
++    "sanityOnly": true
++  },
++  "notDemonstrated": [
++    "current-run taskId query",
++    "current-run externalExecutionId query",
++    "current-run operationName query",
++    "live point-navigation correlation"
++  ]
++}
+diff --git a/reports/live-ugv-smpp-integration/RATE_BACKPRESSURE.json b/reports/live-ugv-smpp-integration/RATE_BACKPRESSURE.json
+new file mode 100644
+index 00000000..c4129493
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/RATE_BACKPRESSURE.json
+@@ -0,0 +1,72 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PARTIAL",
++  "reasonCode": "BACKLOG_DRAIN_MEASURED_PRESCRIBED_IDLE_NAV_TERMINAL_PHASES_NOT_RUN",
++  "sampleWindow": {
++    "durationSeconds": 15.405,
++    "startAt": "2026-08-20T14:35:09.514Z",
++    "endAt": "2026-08-20T14:35:24.919Z",
++    "runtimeBacklogStart": 811377,
++    "runtimeBacklogEnd": 810691,
++    "runtimeBacklogNetDrain": 686,
++    "runtimeBacklogNetDrainPerSecond": 44.531,
++    "collectorAcceptedDelta": 799,
++    "collectorSentDelta": 799,
++    "collectorRefusedDelta": 0,
++    "collectorAcceptedPerSecond": 51.866,
++    "processorRefusalObserved": false
++  },
++  "runtime": {
++    "backlogReachedZero": false,
++    "oldestAgeSecondsAtEnd": 873060.725246,
++    "auditExportAttemptsStart": 39100,
++    "auditExportAttemptsEnd": 39900,
++    "currentRunEventsLikelyQueuedBehindHistoricalFifo": true,
++    "latestDatabaseSnapshot": {
++      "capturedAt": "2026-08-20T15:07:40.656Z",
++      "runtimeRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++      "runtimeStartedAt": "2026-08-20T15:03:34.496626185Z",
++      "backlog": 726934,
++      "claimed": 44,
++      "pending": 127413,
++      "retryWait": 599514,
++      "delivered": 136156,
++      "exhausted": 166347,
++      "oldestBacklogAgeSeconds": 874895,
++      "currentLiveProviderOpsStructVerifiedInRuntimeDatabase": true,
++      "currentRuntimeEpochRowsInTelemetryLanding": 0,
++      "note": "The exporter was active during the read-only queries, so backlog and per-state watermarks are not asserted to be one atomic arithmetic snapshot."
++    }
++  },
++  "processor": {
++    "writeQueueDepthAtSnapshot": 0,
++    "writeQueueCapacity": 1024,
++    "walWriteFailed": false,
++    "standaloneTargetPendingAtSnapshot": 28,
++    "unboundedQueue": false
++  },
++  "providerRatePolicy": {
++    "resourceStateMaximumHz": 1,
++    "freshnessMetricIntervalSeconds": 10,
++    "taskLifecycleSampled": false,
++    "terminalErrorAndUncertainReservedPriority": true,
++    "implementationRegression": "PASS"
++  },
++  "providerRestartWindowObservation": {
++    "windowEndedAt": "2026-08-20T14:19:32.229Z",
++    "accepted": 17,
++    "transportFailed": 268,
++    "retry": 203,
++    "droppedAfterRetryExhaustion": 64,
++    "queueDepth": 6,
++    "queueCapacity": 1100,
++    "reasonCodesVisible": true,
++    "interpretation": "These counters were emitted while Runtime was being replaced. They prove failures were observable, but this was not a controlled rate or recovery test. No later delivery-issue log was observed."
++  },
++  "requiredPhases": {
++    "idle60Seconds": "NOT_EXECUTED_AS_CONTROLLED_PHASE",
++    "navigation60Seconds": "NOT_EXECUTED_LIVE_CONTROL_DISABLED",
++    "terminal30Seconds": "NOT_EXECUTED_LIVE_CONTROL_DISABLED"
++  }
++}
+diff --git a/reports/live-ugv-smpp-integration/REGRESSION.json b/reports/live-ugv-smpp-integration/REGRESSION.json
+new file mode 100644
+index 00000000..bab989f6
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/REGRESSION.json
+@@ -0,0 +1,64 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T14:39:12.937Z",
++  "status": "PARTIAL",
++  "reasonCode": "AFFECTED_TESTS_PASS_REPOSITORY_TYPECHECK_BASELINE_DEBT_REMAINS",
++  "repositoryHead": "4de0e7e7cf1434bc2da051542f7b21a7e88b15d7",
++  "commands": [
++    {
++      "command": "npm test",
++      "executionContext": "local loopback binding permitted",
++      "exitCode": 0,
++      "tests": 56,
++      "passed": 56,
++      "failed": 0,
++      "status": "PASS"
++    },
++    {
++      "command": "npm run build",
++      "exitCode": 0,
++      "status": "PASS",
++      "note": "Executed by npm test before the test suite."
++    },
++    {
++      "command": "docker compose --env-file .env -p smpp-telemetry-ugv-joint -f compose.yaml -f deploy/development/compose.x86_64.override.yaml config --quiet",
++      "exitCode": 0,
++      "status": "PASS"
++    },
++    {
++      "command": "/otelcol-contrib validate --config=/etc/otelcol-contrib/config.yaml",
++      "exitCode": 0,
++      "status": "PASS"
++    },
++    {
++      "command": "telemetry-migrate container",
++      "exitCode": 0,
++      "status": "PASS"
++    },
++    {
++      "command": "npm run typecheck",
++      "exitCode": 2,
++      "status": "BASELINE_DEBT",
++      "baselineErrorCount": 628,
++      "currentErrorCount": 500,
++      "baselineNormalizedUniqueErrors": 332,
++      "currentNormalizedUniqueErrors": 280,
++      "newNormalizedUniqueErrors": 0,
++      "resolvedNormalizedUniqueErrors": 52,
++      "note": "The repository was not type-clean at the pinned base. The change adds no normalized unique TypeScript diagnostic and reduces the existing set, but a green repository-wide typecheck is not claimed."
++    }
++  ],
++  "criticalRegressionCoverage": [
++    "Collector ProviderOps selection and strict Processor ACK path",
++    "Query API bounded stable filters",
++    "OTLP JSON reaches WAL before success",
++    "atomic concurrent duplicate and conflict classification",
++    "concurrent WAL high-water enforcement",
++    "bounded WAL write queue",
++    "checkpoint monotonicity and startup fail-closed validation",
++    "WAL write failure poisoning",
++    "x86_64 development override preserves ARM64 release path",
++    "warehouse layer creation"
++  ],
++  "sandboxNote": "An initial sandboxed run could not bind two loopback HTTP test files. The identical npm test command was rerun with local loopback binding permitted and passed 56/56."
++}
+diff --git a/reports/live-ugv-smpp-integration/SOURCE_MAPPING.json b/reports/live-ugv-smpp-integration/SOURCE_MAPPING.json
+new file mode 100644
+index 00000000..0b9ec7be
+--- /dev/null
++++ b/reports/live-ugv-smpp-integration/SOURCE_MAPPING.json
+@@ -0,0 +1,56 @@
++{
++  "schemaVersion": "1.0",
++  "capturedAt": "2026-08-20T15:07:40.656Z",
++  "status": "PASS",
++  "mappingVersion": 4,
++  "sourceMapping": {
++    "collectorId": "smpp-ugv-joint-collector-1",
++    "trustDomain": "local-development",
++    "deploymentId": "ugv-test-deployment",
++    "providerId": "isr.vehicle.ugv.ugv1",
++    "runtimeInstanceId": "ugv-runtime-test-1",
++    "smppSourceId": "smpp.ugv-test-deployment.ugv-runtime-test-1",
++    "tenantId": "tenant-local",
++    "projectId": "ugv-joint-integration",
++    "environment": "development",
++    "sourceProduct": "sdar-mcp-provider-platform",
++    "status": "active",
++    "validFrom": "2026-01-01T00:00:00Z",
++    "validTo": null
++  },
++  "runtimeConfiguration": {
++    "deployedRevision": "eaa36df380e7542f25f359d55c829e12d843738b",
++    "startedAt": "2026-08-20T15:03:34.496626185Z",
++    "otelEnabled": true,
++    "otelEndpoint": "http://host.docker.internal:4318",
++    "otelTlsMode": "disabled",
++    "otelTimeoutMs": 10000,
++    "runtimeInstanceId": "ugv-runtime-test-1",
++    "otelServiceInstanceId": "ugv-runtime-test-1",
++    "runtimeDeploymentId": "ugv-test-deployment"
++  },
++  "collectorConfiguration": {
++    "collectorId": "smpp-ugv-joint-collector-1",
++    "trustDomain": "local-development",
++    "deploymentId": "ugv-test-deployment",
++    "providerId": "isr.vehicle.ugv.ugv1",
++    "runtimeInstanceId": "ugv-runtime-test-1",
++    "runtimeMetricsTarget": "host.docker.internal:19100",
++    "runtimeMetricsPath": "/metrics",
++    "runtimeMetricsScrapeInterval": "15s"
++  },
++  "identityParity": {
++    "runtimeInstanceId": true,
++    "deploymentId": true,
++    "providerId": true,
++    "collectorId": true
++  },
++  "boundary": {
++    "telemetryConsumesOnlyRuntimeOtlpAndMetrics": true,
++    "directMqttConnection": false,
++    "directDeviceMcpConnection": false,
++    "legacy1921681ExampleUsedAsEvidence": false,
++    "simulatorDeviceMcpUsedAsRuntimeMetricsTarget": false
++  },
++  "source": "config/generated/source-mappings.json plus a whitelist-only live container environment inspection"
++}
+diff --git a/telemetry-processor/Dockerfile b/telemetry-processor/Dockerfile
+index eec7c60c..00614c6d 100644
+--- a/telemetry-processor/Dockerfile
++++ b/telemetry-processor/Dockerfile
+@@ -17,7 +17,7 @@ WORKDIR /app
+ ENV NODE_ENV=production
+ COPY --from=builder /app/dist ./dist
+ COPY telemetry-schema ./telemetry-schema
+-COPY contracts ./contracts
++COPY contracts ./dist/contracts
+ RUN mkdir -p /var/lib/smpp-telemetry/wal && chown -R node:node /var/lib/smpp-telemetry
+ USER node
+ CMD ["node", "dist/telemetry-processor/src/apps/index.js"]
+diff --git a/telemetry-processor/src/apps/index.ts b/telemetry-processor/src/apps/index.ts
+index d21086cf..3d3c1330 100644
+--- a/telemetry-processor/src/apps/index.ts
++++ b/telemetry-processor/src/apps/index.ts
+@@ -1,2 +1,42 @@
+-import {loadConfig,loadTls} from '../packages/config/config.js';import {WalStore} from '../packages/wal/wal.js';import {SourceMappings} from '../packages/source-mapping/source-mapping.js';import {Metrics} from '../packages/metrics/metrics.js';import {loadProjectionTargets,TargetManager} from '../packages/exporters/target-manager.js';import {TelemetryProcessor} from './processor.js';import {createServer} from './server.js';
+-const config=await loadConfig(),tlsOptions=await loadTls(config.tls),metrics=new Metrics(),wal=new WalStore({directory:config.walDir,segmentMaxBytes:config.walSegmentMaxBytes});await wal.initialize();const mappings=new SourceMappings(config.sourceMappingsFile);await mappings.load();const targetConfigs=await loadProjectionTargets(config.projectionTargetsFile),targets=new TargetManager({targets:targetConfigs,wal,metrics,batchSize:config.exportBatchSize});await targets.initialize();targets.start(config.exportIntervalMs);const processor=new TelemetryProcessor({wal,mappings,metrics,requireCollectorId:config.requireCollectorId,allowedCollectorIds:config.allowedCollectorIds,walMaxBytes:config.walMaxBytes,walRejectThreshold:config.walRejectThreshold});const server=createServer({config,tlsOptions,processor,wal,targets,metrics});server.listen(config.port,config.host,()=>console.log(JSON.stringify({level:'info',message:'telemetry_processor_started',host:config.host,port:config.port,targets:targets.statuses().map(x=>x.targetId)})));for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>server.close(()=>process.exit(0)));
++import {loadConfig,loadTls} from '../packages/config/config.js';
++import {WalStore} from '../packages/wal/wal.js';
++import {SourceMappings} from '../packages/source-mapping/source-mapping.js';
++import {Metrics} from '../packages/metrics/metrics.js';
++import {loadProjectionTargets,TargetManager} from '../packages/exporters/target-manager.js';
++import {TelemetryProcessor} from './processor.js';
++import {createServer} from './server.js';
++
++const config=await loadConfig(),tlsOptions=await loadTls(config.tls),metrics=new Metrics();
++const wal=new WalStore({directory:config.walDir,segmentMaxBytes:config.walSegmentMaxBytes,maxPendingWrites:config.walMaxPendingWrites});
++await wal.initialize();
++const mappings=new SourceMappings(config.sourceMappingsFile);await mappings.load();
++const targetConfigs=await loadProjectionTargets(config.projectionTargetsFile);
++const targets=new (TargetManager as any)({targets:targetConfigs,wal,metrics,batchSize:config.exportBatchSize});
++await targets.initialize();targets.start(config.exportIntervalMs);
++const processor=new TelemetryProcessor({wal,mappings,metrics,requireCollectorId:config.requireCollectorId,allowedCollectorIds:config.allowedCollectorIds,walMaxBytes:config.walMaxBytes,walRejectThreshold:config.walRejectThreshold});
++const server=createServer({config,tlsOptions,processor,wal,targets,metrics});
++server.listen(config.port,config.host,()=>console.log(JSON.stringify({level:'info',message:'telemetry_processor_started',host:config.host,port:config.port,targets:targets.statuses().map((x:any)=>x.targetId)})));
++
++let shuttingDown=false;
++async function shutdown(){
++  if(shuttingDown)return;
++  shuttingDown=true;
++  targets.pause();
++  const deadline=Date.now()+config.shutdownTimeoutMs;
++  let timer;
++  const timeout=new Promise((_,reject)=>{
++    timer=setTimeout(()=>{
++      server.closeAllConnections?.();
++      reject(new Error('PROCESSOR_SHUTDOWN_TIMEOUT'));
++    },config.shutdownTimeoutMs);
++  });
++  const drain=(async()=>{
++    await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
++    await wal.drain();
++    await targets.stop(Math.max(1,deadline-Date.now()));
++  })();
++  try{await Promise.race([drain,timeout]);process.exit(0);}
++  catch(error){console.error(JSON.stringify({level:'error',message:'telemetry_processor_shutdown_failed',code:error instanceof Error?error.message:'UNKNOWN'}));process.exit(1);}
++  finally{clearTimeout(timer);}
++}
++for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>void shutdown());
+diff --git a/telemetry-processor/src/apps/processor.ts b/telemetry-processor/src/apps/processor.ts
+index 9ce7a468..493611fe 100644
+--- a/telemetry-processor/src/apps/processor.ts
++++ b/telemetry-processor/src/apps/processor.ts
+@@ -1,9 +1,9 @@
+ import { randomUUID } from 'node:crypto';
+ import { validateEnvelope, validateTrustedIngress } from '../packages/validation/validation.js';
+ 
+-function safeSourceHint(envelope) {
++function safeSourceHint(envelope:any):Record<string,string> {
+   if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope)) return {};
+-  const safe = {};
++  const safe:Record<string,string> = {};
+   for (const key of ['schemaName','schemaVersion','recordId','recordHash','recordType','providerId','instanceId']) {
+     const value = envelope[key];
+     if (typeof value === 'string' && /^[A-Za-z0-9._:-]{1,256}$/.test(value)) safe[key] = value;
+@@ -12,7 +12,15 @@ function safeSourceHint(envelope) {
+ }
+ 
+ export class TelemetryProcessor {
+-  constructor({wal,mappings,metrics,requireCollectorId=true,allowedCollectorIds=[],walMaxBytes=10*1024*1024*1024,walRejectThreshold=0.98}) {
++  wal:any;
++  mappings:any;
++  metrics:any;
++  requireCollectorId:boolean;
++  allowedCollectorIds:string[];
++  walMaxBytes:number;
++  walRejectThreshold:number;
++
++  constructor({wal,mappings,metrics,requireCollectorId=true,allowedCollectorIds=[],walMaxBytes=10*1024*1024*1024,walRejectThreshold=0.98}:{wal:any;mappings:any;metrics:any;requireCollectorId?:boolean;allowedCollectorIds?:string[];walMaxBytes?:number;walRejectThreshold?:number}) {
+     this.wal=wal;
+     this.mappings=mappings;
+     this.metrics=metrics;
+@@ -22,53 +30,67 @@ export class TelemetryProcessor {
+     this.walRejectThreshold=walRejectThreshold;
+   }
+ 
+-  async #quarantine({code,message=code,receivedAt,trustedContext,envelope,mapping=null}) {
++  async #quarantine({code,message=code,receivedAt,trustedContext,envelope,mapping=null}:{code:string;message?:string;receivedAt:string;trustedContext:any;envelope:any;mapping?:any}) {
+     const entry=await this.wal.append({
+       kind:'rejected',sourceSystem:'smpp',rejectionId:randomUUID(),receivedAt,trustedContext,
+       mapping,errorCode:code,errorSummary:String(message).slice(0,256),sourceHint:safeSourceHint(envelope)
+-    });
++    },{maxTotalBytes:this.walMaxBytes*this.walRejectThreshold});
+     this.metrics.inc('processor_quarantined_total',{reason:code});
+     return entry.record.rejectionId;
+   }
+ 
+-  async collect(logRecord) {
++  #retryableWal(error:unknown) {
++    const code=error instanceof Error?error.message:undefined;
++    if(!code||!['WAL_HIGH_WATER','WAL_WRITE_QUEUE_FULL','WAL_WRITE_FAILED_RESTART_REQUIRED'].includes(code)) return null;
++    this.metrics.inc('processor_retryable_total',{reason:code});
++    return{status:'rejected_retryable',errorCode:code};
++  }
++
++  async collect(logRecord:any) {
+     this.metrics.inc('processor_received_records_total');
+-    if(this.wal.stats().totalBytes>=this.walMaxBytes*this.walRejectThreshold){
+-      this.metrics.inc('processor_retryable_total',{reason:'WAL_HIGH_WATER'});
+-      return{status:'rejected_retryable',errorCode:'WAL_HIGH_WATER'};
+-    }
+-    const ingress=validateTrustedIngress(logRecord,{requireCollectorId:this.requireCollectorId,allowedCollectorIds:this.allowedCollectorIds});
++    const ingress:any=(validateTrustedIngress as any)(logRecord,{requireCollectorId:this.requireCollectorId,allowedCollectorIds:this.allowedCollectorIds});
+     if(!ingress.ok){
+       this.metrics.inc('processor_permanent_reject_total',{reason:ingress.code});
+       return{status:'rejected_permanent',errorCode:ingress.code};
+     }
+     const envelope=logRecord.body;
+     const receivedAt=new Date().toISOString();
+-    const validation=validateEnvelope(envelope,logRecord.attributes);
++    const validation:any=validateEnvelope(envelope,logRecord.attributes);
+     if(!validation.ok){
+       const mapping=this.mappings.resolve({...ingress.context,providerId:typeof envelope?.providerId==='string'?envelope.providerId:'',instanceId:typeof envelope?.instanceId==='string'?envelope.instanceId:'',receivedAt:new Date(receivedAt)});
+-      const rejectionId=await this.#quarantine({code:validation.code,message:validation.message,receivedAt,trustedContext:ingress.context,envelope,mapping});
++      let rejectionId;
++      try{rejectionId=await this.#quarantine({code:validation.code,message:validation.message,receivedAt,trustedContext:ingress.context,envelope,mapping});}
++      catch(error){const retryable=this.#retryableWal(error);if(retryable)return retryable;throw error;}
+       this.metrics.inc('processor_permanent_reject_total',{reason:validation.code});
+       return{status:'rejected_permanent',errorCode:validation.code,message:validation.message,rejectionId};
+     }
+     const mapping=this.mappings.resolve({...ingress.context,providerId:envelope.providerId,instanceId:envelope.instanceId,receivedAt:new Date(receivedAt)});
+     if(!mapping){
+-      const rejectionId=await this.#quarantine({code:'SOURCE_UNMAPPED',receivedAt,trustedContext:ingress.context,envelope});
++      let rejectionId;
++      try{rejectionId=await this.#quarantine({code:'SOURCE_UNMAPPED',receivedAt,trustedContext:ingress.context,envelope});}
++      catch(error){const retryable=this.#retryableWal(error);if(retryable)return retryable;throw error;}
+       this.metrics.inc('processor_permanent_reject_total',{reason:'SOURCE_UNMAPPED'});
+       return{status:'rejected_permanent',errorCode:'SOURCE_UNMAPPED',rejectionId};
+     }
+     const sourceSystem='smpp';
+-    const classification=this.wal.classify(sourceSystem,envelope.recordId,envelope.recordHash);
+-    if(classification==='duplicate'){
++    let outcome;
++    try{
++      outcome=await this.wal.appendClassified({
++        sourceSystem,recordId:envelope.recordId,recordHash:envelope.recordHash,
++        acceptedRecord:{kind:'accepted',sourceSystem,receiptId:randomUUID(),receivedAt,trustedContext:ingress.context,mapping,envelope},
++        conflictRecord:(acceptedRecordHash:string|undefined)=>({kind:'conflict',sourceSystem,receiptId:randomUUID(),receivedAt,trustedContext:ingress.context,mapping,envelope,acceptedRecordHash,summary:'sourceRecordId already exists with a different sourceRecordHash'}),
++        maxTotalBytes:this.walMaxBytes*this.walRejectThreshold
++      });
++    }catch(error){const retryable=this.#retryableWal(error);if(retryable)return retryable;throw error;}
++    if(outcome.classification==='duplicate'){
+       this.metrics.inc('processor_duplicate_total');
+       return{status:'duplicate',recordId:envelope.recordId};
+     }
+-    if(classification==='conflict'){
+-      await this.wal.append({kind:'conflict',sourceSystem,receiptId:randomUUID(),receivedAt,trustedContext:ingress.context,mapping,envelope,acceptedRecordHash:this.wal.acceptedHash(sourceSystem,envelope.recordId),summary:'sourceRecordId already exists with a different sourceRecordHash'});
++    if(outcome.classification==='conflict'){
+       this.metrics.inc('processor_conflict_total');
+       return{status:'conflict',recordId:envelope.recordId,errorCode:'RECORD_HASH_CONFLICT'};
+     }
+-    const entry=await this.wal.append({kind:'accepted',sourceSystem,receiptId:randomUUID(),receivedAt,trustedContext:ingress.context,mapping,envelope});
++    const entry=outcome.entry;
+     this.metrics.inc('processor_accepted_records_total');
+     return{status:'accepted',recordId:envelope.recordId,receiptId:entry.record.receiptId,wal:{segment:entry.segment,offset:entry.offset}};
+   }
+diff --git a/telemetry-processor/src/apps/server.ts b/telemetry-processor/src/apps/server.ts
+index a0088705..25c174e8 100644
+--- a/telemetry-processor/src/apps/server.ts
++++ b/telemetry-processor/src/apps/server.ts
+@@ -1,4 +1,4 @@
+ import http from 'node:http';import https from 'node:https';import {gunzipSync} from 'node:zlib';import {decodeOtlpJson} from '../packages/otlp/otlp-json.js';import {decodeOtlpProtobuf} from '../packages/otlp/otlp-protobuf.js';
+ async function readBody(req,maxBytes){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>maxBytes)throw Object.assign(new Error('REQUEST_TOO_LARGE'),{statusCode:413});chunks.push(chunk);}const body=Buffer.concat(chunks),decoded=req.headers['content-encoding']==='gzip'?gunzipSync(body):body;if(decoded.length>maxBytes)throw Object.assign(new Error('REQUEST_TOO_LARGE'),{statusCode:413});return decoded;}
+ function json(res,status,value){const body=Buffer.from(JSON.stringify(value));res.writeHead(status,{'content-type':'application/json','content-length':body.length});res.end(body);}function authorized(req,key){return!key||req.headers.authorization===`Bearer ${key}`;}
+-export function createServer({config,tlsOptions,processor,wal,targets,metrics}){const handler=async(req,res)=>{try{const url=new URL(req.url,'http://internal');if(req.method==='GET'&&url.pathname==='/health/live')return json(res,200,{status:'live'});if(req.method==='GET'&&url.pathname==='/health/ready'){let required=true;try{await targets.pingRequired();}catch{required=false;}const high=wal.stats().totalBytes>=config.walMaxBytes*0.85,ready=required&&!high;return json(res,ready?200:503,{status:ready?'ready':'degraded',requiredTargets:required,wal:wal.stats(),targets:targets.statuses()});}if(req.method==='GET'&&url.pathname==='/metrics'){metrics.set('processor_wal_bytes',wal.stats().totalBytes);for(const s of targets.statuses())metrics.set('projection_target_pending',s.pending,{target:s.targetId});res.writeHead(200,{'content-type':'text/plain; version=0.0.4'});return res.end(metrics.render());}if(req.method==='GET'&&url.pathname==='/debug/wal'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,wal.stats());}if(req.method==='GET'&&url.pathname==='/debug/checkpoints'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,wal.stats().checkpoints);}if(req.method==='GET'&&url.pathname==='/debug/targets'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,targets.statuses());}if(req.method==='POST'&&url.pathname==='/admin/flush'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});await targets.flush();return json(res,200,{targets:targets.statuses()});}if(req.method==='POST'&&url.pathname==='/internal/otlp/v1/logs'){const body=await readBody(req,config.maxRequestBytes),type=String(req.headers['content-type']??'').split(';')[0];let records,protobuf=false;if(type==='application/x-protobuf'||type==='application/protobuf'){records=decodeOtlpProtobuf(body);protobuf=true;}else if(type==='application/json')records=decodeOtlpJson(JSON.parse(body.toString('utf8')));else return json(res,415,{error:'UNSUPPORTED_CONTENT_TYPE'});if(!records.length)return json(res,400,{error:'NO_LOG_RECORDS'});const results=[];for(const record of records)results.push(await processor.collect(record));const retryable=results.find(r=>r.status==='rejected_retryable'),conflict=results.find(r=>r.status==='conflict'),permanent=results.find(r=>r.status==='rejected_permanent');if(retryable)return json(res,503,{results});if(conflict)return json(res,409,{results});if(permanent)return json(res,400,{results});if(protobuf){res.writeHead(200,{'content-type':'application/x-protobuf'});return res.end(Buffer.alloc(0));}return json(res,200,{accepted:results.length});}return json(res,404,{error:'NOT_FOUND'});}catch(error){metrics.inc('processor_http_errors_total');return json(res,error.statusCode??500,{error:error.message});}};return tlsOptions?https.createServer(tlsOptions,handler):http.createServer(handler);}
++export function createServer({config,tlsOptions,processor,wal,targets,metrics}){const handler=async(req,res)=>{try{const url=new URL(req.url,'http://internal');if(req.method==='GET'&&url.pathname==='/health/live')return json(res,200,{status:'live'});if(req.method==='GET'&&url.pathname==='/health/ready'){let required=true;try{await targets.pingRequired();}catch{required=false;}const walStats=wal.stats(),high=walStats.totalBytes>=config.walMaxBytes*0.85,ready=required&&!high&&!walStats.writeFailed&&walStats.pendingWrites<walStats.maxPendingWrites;return json(res,ready?200:503,{status:ready?'ready':'degraded',requiredTargets:required,wal:walStats,targets:targets.statuses()});}if(req.method==='GET'&&url.pathname==='/metrics'){const walStats=wal.stats();metrics.set('processor_wal_bytes',walStats.totalBytes);metrics.set('processor_wal_write_queue_depth',walStats.pendingWrites);metrics.set('processor_wal_write_failed',walStats.writeFailed?1:0);for(const s of targets.statuses())metrics.set('projection_target_pending',s.pending,{target:s.targetId});res.writeHead(200,{'content-type':'text/plain; version=0.0.4'});return res.end(metrics.render());}if(req.method==='GET'&&url.pathname==='/debug/wal'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,wal.stats());}if(req.method==='GET'&&url.pathname==='/debug/checkpoints'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,wal.stats().checkpoints);}if(req.method==='GET'&&url.pathname==='/debug/targets'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});return json(res,200,targets.statuses());}if(req.method==='POST'&&url.pathname==='/admin/flush'){if(!authorized(req,config.adminApiKey))return json(res,401,{error:'UNAUTHORIZED'});await targets.flush();return json(res,200,{targets:targets.statuses()});}if(req.method==='POST'&&url.pathname==='/internal/otlp/v1/logs'){const body=await readBody(req,config.maxRequestBytes),type=String(req.headers['content-type']??'').split(';')[0];let records,protobuf=false;if(type==='application/x-protobuf'||type==='application/protobuf'){records=decodeOtlpProtobuf(body);protobuf=true;}else if(type==='application/json')records=decodeOtlpJson(JSON.parse(body.toString('utf8')));else return json(res,415,{error:'UNSUPPORTED_CONTENT_TYPE'});if(!records.length)return json(res,400,{error:'NO_LOG_RECORDS'});const results=[];for(const record of records)results.push(await processor.collect(record));const retryable=results.find(r=>r.status==='rejected_retryable'),conflict=results.find(r=>r.status==='conflict'),permanent=results.find(r=>r.status==='rejected_permanent');if(retryable)return json(res,503,{results});if(conflict)return json(res,409,{results});if(permanent)return json(res,400,{results});if(protobuf){res.writeHead(200,{'content-type':'application/x-protobuf'});return res.end(Buffer.alloc(0));}return json(res,200,{accepted:results.length});}return json(res,404,{error:'NOT_FOUND'});}catch(error){metrics.inc('processor_http_errors_total');return json(res,error.statusCode??500,{error:error.message});}};return tlsOptions?https.createServer(tlsOptions,handler):http.createServer(handler);}
+diff --git a/telemetry-processor/src/packages/config/config.ts b/telemetry-processor/src/packages/config/config.ts
+index bc143667..c7e2c731 100644
+--- a/telemetry-processor/src/packages/config/config.ts
++++ b/telemetry-processor/src/packages/config/config.ts
+@@ -1,6 +1,7 @@
+ import { readFile } from 'node:fs/promises';
+-const int=(name,fallback)=>{const v=Number(process.env[name]??fallback);if(!Number.isFinite(v))throw new Error(`${name}_INVALID`);return v;};
+-const bool=(name,fallback=false)=>String(process.env[name]??fallback).toLowerCase()==='true';
+-async function secretValue(name,fallback=''){const file=process.env[`${name}_FILE`];if(file)return(await readFile(file,'utf8')).trim();return process.env[name]??fallback;}
+-export async function loadConfig(){return {host:process.env.PROCESSOR_HOST??'0.0.0.0',port:int('PROCESSOR_PORT',8443),maxRequestBytes:int('MAX_REQUEST_BYTES',4*1024*1024),walDir:process.env.WAL_DIR??'./var/wal',walSegmentMaxBytes:int('WAL_SEGMENT_MAX_BYTES',64*1024*1024),walMaxBytes:int('WAL_MAX_BYTES',10*1024*1024*1024),walRejectThreshold:Number(process.env.WAL_REJECT_THRESHOLD??0.98),exportBatchSize:int('EXPORT_BATCH_SIZE',200),exportIntervalMs:int('EXPORT_INTERVAL_MS',1000),sourceMappingsFile:process.env.SOURCE_MAPPINGS_FILE??'./config/source-mappings.json',projectionTargetsFile:process.env.PROJECTION_TARGETS_FILE??'./config/projection-targets.json',requireCollectorId:bool('PROCESSOR_REQUIRE_COLLECTOR_ID',true),allowedCollectorIds:String(process.env.PROCESSOR_ALLOWED_COLLECTOR_IDS??'smpp-gateway-1').split(',').map(x=>x.trim()).filter(Boolean),adminApiKey:await secretValue('PROCESSOR_ADMIN_API_KEY',''),tls:{mode:process.env.PROCESSOR_TLS_MODE??'disabled',caFile:process.env.PROCESSOR_TLS_CA_FILE??'',certFile:process.env.PROCESSOR_TLS_CERT_FILE??'',keyFile:process.env.PROCESSOR_TLS_KEY_FILE??''}};}
+-export async function loadTls(config){if(config.mode!=='required')return null;if(!config.caFile||!config.certFile||!config.keyFile)throw new Error('TLS_FILES_REQUIRED');return{ca:await readFile(config.caFile),cert:await readFile(config.certFile),key:await readFile(config.keyFile),requestCert:true,rejectUnauthorized:true};}
++const int=(name:string,fallback:number)=>{const v=Number(process.env[name]??fallback);if(!Number.isFinite(v))throw new Error(`${name}_INVALID`);return v;};
++const positiveInt=(name:string,fallback:number)=>{const v=int(name,fallback);if(!Number.isSafeInteger(v)||v<1)throw new Error(`${name}_INVALID`);return v;};
++const bool=(name:string,fallback=false)=>String(process.env[name]??fallback).toLowerCase()==='true';
++async function secretValue(name:string,fallback=''){const file=process.env[`${name}_FILE`];if(file)return(await readFile(file,'utf8')).trim();return process.env[name]??fallback;}
++export async function loadConfig(){return {host:process.env.PROCESSOR_HOST??'0.0.0.0',port:int('PROCESSOR_PORT',8443),maxRequestBytes:int('MAX_REQUEST_BYTES',4*1024*1024),walDir:process.env.WAL_DIR??'./var/wal',walSegmentMaxBytes:int('WAL_SEGMENT_MAX_BYTES',64*1024*1024),walMaxBytes:int('WAL_MAX_BYTES',10*1024*1024*1024),walMaxPendingWrites:positiveInt('WAL_MAX_PENDING_WRITES',1024),walRejectThreshold:Number(process.env.WAL_REJECT_THRESHOLD??0.98),exportBatchSize:int('EXPORT_BATCH_SIZE',200),exportIntervalMs:int('EXPORT_INTERVAL_MS',1000),shutdownTimeoutMs:positiveInt('PROCESSOR_SHUTDOWN_TIMEOUT_MS',10000),sourceMappingsFile:process.env.SOURCE_MAPPINGS_FILE??'./config/source-mappings.json',projectionTargetsFile:process.env.PROJECTION_TARGETS_FILE??'./config/projection-targets.json',requireCollectorId:bool('PROCESSOR_REQUIRE_COLLECTOR_ID',true),allowedCollectorIds:String(process.env.PROCESSOR_ALLOWED_COLLECTOR_IDS??'smpp-gateway-1').split(',').map(x=>x.trim()).filter(Boolean),adminApiKey:await secretValue('PROCESSOR_ADMIN_API_KEY',''),tls:{mode:process.env.PROCESSOR_TLS_MODE??'disabled',caFile:process.env.PROCESSOR_TLS_CA_FILE??'',certFile:process.env.PROCESSOR_TLS_CERT_FILE??'',keyFile:process.env.PROCESSOR_TLS_KEY_FILE??''}};}
++export async function loadTls(config:{mode:string;caFile:string;certFile:string;keyFile:string}){if(config.mode!=='required')return null;if(!config.caFile||!config.certFile||!config.keyFile)throw new Error('TLS_FILES_REQUIRED');return{ca:await readFile(config.caFile),cert:await readFile(config.certFile),key:await readFile(config.keyFile),requestCert:true,rejectUnauthorized:true};}
+diff --git a/telemetry-processor/src/packages/exporters/target-manager.ts b/telemetry-processor/src/packages/exporters/target-manager.ts
+index 60764e2b..4eabacf8 100644
+--- a/telemetry-processor/src/packages/exporters/target-manager.ts
++++ b/telemetry-processor/src/packages/exporters/target-manager.ts
+@@ -81,6 +81,7 @@ export class TargetWorker {
+   }
+ 
+   status(){return {targetId:this.target.targetId,targetType:this.target.targetType,projectionId:this.projection.projectionId,projectionVersion:this.projection.projectionVersion,enabled:this.target.enabled,running:this.running,lastError:this.lastError?.message??null,checkpoint:this.wal.checkpoint(this.checkpointId),pending:this.wal.pending(this.checkpointId,Number.MAX_SAFE_INTEGER).length};}
++  async waitForIdle(){while(this.running)await new Promise(resolve=>setTimeout(resolve,10));}
+ }
+ 
+ export class TargetManager {
+@@ -91,6 +92,14 @@ export class TargetManager {
+   async initialize(){for(const target of this.targets){try{await target.initialize();}catch(error){target.lastError=error;target.metrics.inc('projection_target_failures_total',{target:target.target.targetId});if(target.target.required)throw error;}}}
+   start(intervalMs=1000){this.timer=setInterval(()=>void this.flush(),intervalMs);this.timer.unref();void this.flush();}
+   async flush(){await Promise.all(this.targets.map(target=>target.flush()));}
++  pause(){if(this.timer){clearInterval(this.timer);this.timer=null;}}
++  async stop(timeoutMs=10000){
++    this.pause();
++    const drain=async()=>{await Promise.all(this.targets.map(target=>target.waitForIdle()));await this.flush();};
++    let timeout;
++    try{await Promise.race([drain(),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('TARGET_DRAIN_TIMEOUT')),timeoutMs);timeout.unref();})]);}
++    finally{clearTimeout(timeout);}
++  }
+   statuses(){return this.targets.map(target=>target.status());}
+   async pingRequired(){for(const target of this.targets.filter(value=>value.target.required))await target.client.ping();return true;}
+ }
+diff --git a/telemetry-processor/src/packages/wal/wal.ts b/telemetry-processor/src/packages/wal/wal.ts
+index 76eb1e5f..7f8160e3 100644
+--- a/telemetry-processor/src/packages/wal/wal.ts
++++ b/telemetry-processor/src/packages/wal/wal.ts
+@@ -1,19 +1,104 @@
+-import { mkdir, open, readdir, readFile, rename, stat, truncate } from 'node:fs/promises';
++import { mkdir, open, readdir, readFile, rename, stat, truncate, unlink } from 'node:fs/promises';
++import { randomUUID } from 'node:crypto';
+ import { join } from 'node:path';
+ import { crc32c } from './crc32c.js';
+-const HEADER=4, TRAILER=4; const segmentName=id=>`segment-${String(id).padStart(12,'0')}.wal`;
+-async function fsyncDirectory(path){ const dir=await open(path,'r'); try{await dir.sync();}finally{await dir.close();} }
++type WalRecord = Record<string, any>;
++export interface WalEntry { segment:number; offset:number; offsetEnd:number; record:WalRecord }
++export interface WalCheckpoint { segment:number; offsetEnd:number; updatedAt?:string }
++type WalError = Error & { statusCode?:number; cause?:unknown };
++type Classification = 'new'|'duplicate'|'conflict';
++
++const HEADER=4, TRAILER=4; const segmentName=(id:number)=>`segment-${String(id).padStart(12,'0')}.wal`;
++async function fsyncDirectory(path:string){ const dir=await open(path,'r'); try{await dir.sync();}finally{await dir.close();} }
+ export class WalStore {
+-  constructor({directory,segmentMaxBytes=64*1024*1024}){ this.directory=directory; this.segmentMaxBytes=segmentMaxBytes; this.entries=[]; this.dedup=new Map(); this.currentSegment=1; this.currentSize=0; this.totalBytes=0; this.checkpoints={}; }
+-  async initialize(){ await mkdir(this.directory,{recursive:true}); await this.#loadCheckpoints(); const names=(await readdir(this.directory)).filter(n=>/^segment-\d+\.wal$/.test(n)).sort(); if(!names.length){await this.#createSegment(1);return;} for(const name of names) await this.#scanSegment(name); this.currentSegment=Number(names.at(-1).match(/\d+/)[0]); this.currentSize=(await stat(join(this.directory,names.at(-1)))).size; this.totalBytes=0; for(const n of names)this.totalBytes+=(await stat(join(this.directory,n))).size; }
+-  async #loadCheckpoints(){ try{this.checkpoints=JSON.parse(await readFile(join(this.directory,'checkpoints.json'),'utf8'));}catch{this.checkpoints={};} }
+-  async #createSegment(id){ const path=join(this.directory,segmentName(id)); const file=await open(path,'a'); await file.sync(); await file.close(); await fsyncDirectory(this.directory); this.currentSegment=id; this.currentSize=0; }
+-  async #scanSegment(name){ const id=Number(name.match(/\d+/)[0]), path=join(this.directory,name), data=await readFile(path); let offset=0; while(offset<data.length){ if(offset+HEADER>data.length){await truncate(path,offset);break;} const length=data.readUInt32BE(offset), end=offset+HEADER+length+TRAILER; if(length>16*1024*1024||end>data.length){await truncate(path,offset);break;} const payload=data.subarray(offset+HEADER,offset+HEADER+length), expected=data.readUInt32BE(offset+HEADER+length); if(crc32c(payload)!==expected){if(end===data.length){await truncate(path,offset);break;} throw new Error(`WAL_CRC_MISMATCH:${name}:${offset}`);} const record=JSON.parse(payload.toString('utf8')); const entry={segment:id,offset,offsetEnd:end,record}; this.entries.push(entry); if(record.kind==='accepted') this.dedup.set(`${record.sourceSystem}:${record.envelope.recordId}`,record.envelope.recordHash); offset=end; } }
+-  classify(sourceSystem,recordId,recordHash){ const existing=this.dedup.get(`${sourceSystem}:${recordId}`); if(existing===undefined)return'new'; return existing===recordHash?'duplicate':'conflict'; }
+-  acceptedHash(sourceSystem,recordId){ return this.dedup.get(`${sourceSystem}:${recordId}`); }
+-  async append(record){ const payload=Buffer.from(JSON.stringify(record),'utf8'), frame=Buffer.allocUnsafe(HEADER+payload.length+TRAILER); frame.writeUInt32BE(payload.length,0); payload.copy(frame,HEADER); frame.writeUInt32BE(crc32c(payload),HEADER+payload.length); if(this.currentSize>0&&this.currentSize+frame.length>this.segmentMaxBytes)await this.#createSegment(this.currentSegment+1); const path=join(this.directory,segmentName(this.currentSegment)), offset=this.currentSize; const file=await open(path,'a'); try{await file.write(frame);await file.sync();}finally{await file.close();} this.currentSize+=frame.length; this.totalBytes+=frame.length; const entry={segment:this.currentSegment,offset,offsetEnd:this.currentSize,record}; this.entries.push(entry); if(record.kind==='accepted')this.dedup.set(`${record.sourceSystem}:${record.envelope.recordId}`,record.envelope.recordHash); return entry; }
+-  checkpoint(id){ return this.checkpoints[id]??{segment:0,offsetEnd:0}; }
+-  pending(id,limit=200){ const cp=this.checkpoint(id); return this.entries.filter(e=>e.segment>cp.segment||(e.segment===cp.segment&&e.offsetEnd>cp.offsetEnd)).slice(0,limit); }
+-  async commit(id,entry){ const next={segment:entry.segment,offsetEnd:entry.offsetEnd,updatedAt:new Date().toISOString()}; const all={...this.checkpoints,[id]:next}, temp=join(this.directory,`checkpoints.${process.pid}.tmp`), target=join(this.directory,'checkpoints.json'); const file=await open(temp,'w',0o600); try{await file.writeFile(JSON.stringify(all,null,2));await file.sync();}finally{await file.close();} await rename(temp,target); await fsyncDirectory(this.directory); this.checkpoints=all; }
+-  stats(){ return {segments:new Set(this.entries.map(e=>e.segment)).size||1,entries:this.entries.length,totalBytes:this.totalBytes,currentBytes:this.currentSize,checkpoints:this.checkpoints,pendingByCheckpoint:Object.fromEntries(Object.keys(this.checkpoints).map(id=>[id,this.pending(id,Number.MAX_SAFE_INTEGER).length]))}; }
++  directory:string;
++  segmentMaxBytes:number;
++  maxPendingWrites:number;
++  pendingWrites:number;
++  writeError:WalError|null;
++  entries:any[];
++  dedup:Map<string,string>;
++  currentSegment:number;
++  currentSize:number;
++  totalBytes:number;
++  checkpoints:Record<string,WalCheckpoint>;
++  writeTail:Promise<void>;
++  checkpointTail:Promise<void>;
++
++  constructor({directory,segmentMaxBytes=64*1024*1024,maxPendingWrites=1024}:{directory:string;segmentMaxBytes?:number;maxPendingWrites?:number}){ if(!Number.isInteger(maxPendingWrites)||maxPendingWrites<1)throw new Error('WAL_MAX_PENDING_WRITES_INVALID'); this.directory=directory; this.segmentMaxBytes=segmentMaxBytes; this.maxPendingWrites=maxPendingWrites; this.pendingWrites=0; this.writeError=null; this.entries=[]; this.dedup=new Map(); this.currentSegment=1; this.currentSize=0; this.totalBytes=0; this.checkpoints={}; this.writeTail=Promise.resolve(); this.checkpointTail=Promise.resolve(); }
++  async initialize(){ await mkdir(this.directory,{recursive:true}); await this.#loadCheckpoints(); const names=(await readdir(this.directory)).filter(n=>/^segment-\d+\.wal$/.test(n)).sort(); if(!names.length){await this.#createSegment(1);this.#validateCheckpoints();return;} for(const name of names) await this.#scanSegment(name); const currentName=names.at(-1)!; this.currentSegment=Number(currentName.match(/\d+/)![0]); this.currentSize=(await stat(join(this.directory,currentName))).size; this.totalBytes=0; for(const n of names)this.totalBytes+=(await stat(join(this.directory,n))).size; this.#validateCheckpoints(); }
++  async #loadCheckpoints(){
++    let parsed:any;
++    try{parsed=JSON.parse(await readFile(join(this.directory,'checkpoints.json'),'utf8'));}
++    catch(error){if(error&&typeof error==='object'&&'code' in error&&error.code==='ENOENT'){this.checkpoints={};return;}throw Object.assign(new Error('WAL_CHECKPOINT_INVALID'),{cause:error});}
++    const valid=parsed&&typeof parsed==='object'&&!Array.isArray(parsed)&&Object.values(parsed).every((value:any)=>value&&typeof value==='object'&&Number.isInteger(value.segment)&&value.segment>=0&&Number.isInteger(value.offsetEnd)&&value.offsetEnd>=0);
++    if(!valid)throw new Error('WAL_CHECKPOINT_INVALID');
++    this.checkpoints=parsed;
++  }
++  #validateCheckpoints(){
++    const boundaries=new Set(this.entries.map(entry=>`${entry.segment}:${entry.offsetEnd}`));
++    for(const checkpoint of Object.values(this.checkpoints))
++      if((checkpoint.segment!==0||checkpoint.offsetEnd!==0)&&!boundaries.has(`${checkpoint.segment}:${checkpoint.offsetEnd}`))throw new Error('WAL_CHECKPOINT_INVALID');
++  }
++  async #createSegment(id:number){ const path=join(this.directory,segmentName(id)); const file=await open(path,'a'); await file.sync(); await file.close(); await fsyncDirectory(this.directory); this.currentSegment=id; this.currentSize=0; }
++  async #scanSegment(name:string){ const id=Number(name.match(/\d+/)![0]), path=join(this.directory,name), data=await readFile(path); let offset=0; while(offset<data.length){ if(offset+HEADER>data.length){await truncate(path,offset);break;} const length=data.readUInt32BE(offset), end=offset+HEADER+length+TRAILER; if(length>16*1024*1024||end>data.length){await truncate(path,offset);break;} const payload=data.subarray(offset+HEADER,offset+HEADER+length), expected=data.readUInt32BE(offset+HEADER+length); if(crc32c(payload)!==expected){if(end===data.length){await truncate(path,offset);break;} throw new Error(`WAL_CRC_MISMATCH:${name}:${offset}`);} const record=JSON.parse(payload.toString('utf8')) as WalRecord; const entry={segment:id,offset,offsetEnd:end,record}; this.entries.push(entry); if(record.kind==='accepted') this.dedup.set(`${record.sourceSystem}:${record.envelope.recordId}`,record.envelope.recordHash); offset=end; } }
++  classify(sourceSystem:string,recordId:string,recordHash:string):Classification{ const existing=this.dedup.get(`${sourceSystem}:${recordId}`); if(existing===undefined)return'new'; return existing===recordHash?'duplicate':'conflict'; }
++  acceptedHash(sourceSystem:string,recordId:string){ return this.dedup.get(`${sourceSystem}:${recordId}`); }
++  // Keep deduplication state, physical frames, and in-memory WAL offsets linearizable.
++  #serializeWrite<T>(operation:()=>Promise<T>):Promise<T>{
++    if(this.pendingWrites>=this.maxPendingWrites)return Promise.reject(Object.assign(new Error('WAL_WRITE_QUEUE_FULL'),{statusCode:503}));
++    this.pendingWrites+=1;
++    const result=this.writeTail.then(()=>{if(this.writeError)throw this.writeError;return operation();});
++    this.writeTail=result.then(()=>undefined,()=>undefined);
++    return result.finally(()=>{this.pendingWrites-=1;});
++  }
++  async #appendUnlocked(record:WalRecord,maxTotalBytes=Number.POSITIVE_INFINITY):Promise<WalEntry>{
++    const payload=Buffer.from(JSON.stringify(record),'utf8'), frame=Buffer.allocUnsafe(HEADER+payload.length+TRAILER);
++    frame.writeUInt32BE(payload.length,0);payload.copy(frame,HEADER);frame.writeUInt32BE(crc32c(payload),HEADER+payload.length);
++    if(this.totalBytes+frame.length>maxTotalBytes)throw Object.assign(new Error('WAL_HIGH_WATER'),{statusCode:503});
++    try{
++      if(this.currentSize>0&&this.currentSize+frame.length>this.segmentMaxBytes)await this.#createSegment(this.currentSegment+1);
++      const path=join(this.directory,segmentName(this.currentSegment)), offset=this.currentSize, file=await open(path,'a');
++      try{await file.writeFile(frame);await file.sync();}finally{await file.close();}
++      this.currentSize+=frame.length;this.totalBytes+=frame.length;
++      const entry={segment:this.currentSegment,offset,offsetEnd:this.currentSize,record};this.entries.push(entry);
++      if(record.kind==='accepted')this.dedup.set(`${record.sourceSystem}:${record.envelope.recordId}`,record.envelope.recordHash);
++      return entry;
++    }catch(error){
++      this.writeError=Object.assign(new Error('WAL_WRITE_FAILED_RESTART_REQUIRED'),{statusCode:503,cause:error});
++      throw this.writeError;
++    }
++  }
++  async append(record:WalRecord,{maxTotalBytes=Number.POSITIVE_INFINITY}:{maxTotalBytes?:number}={}):Promise<WalEntry>{ return this.#serializeWrite(()=>this.#appendUnlocked(record,maxTotalBytes)); }
++  async appendClassified({sourceSystem,recordId,recordHash,acceptedRecord,conflictRecord,maxTotalBytes=Number.POSITIVE_INFINITY}:{sourceSystem:string;recordId:string;recordHash:string;acceptedRecord:WalRecord;conflictRecord:(acceptedRecordHash:string|undefined)=>WalRecord;maxTotalBytes?:number}){
++    return this.#serializeWrite(async()=>{
++      const classification=this.classify(sourceSystem,recordId,recordHash);
++      const acceptedRecordHash=this.acceptedHash(sourceSystem,recordId);
++      if(classification==='duplicate')return{classification,acceptedRecordHash,entry:null};
++      const record=classification==='new'?acceptedRecord:conflictRecord(acceptedRecordHash);
++      const entry=await this.#appendUnlocked(record,maxTotalBytes);
++      return{classification,acceptedRecordHash,entry};
++    });
++  }
++  checkpoint(id:string):WalCheckpoint{ return this.checkpoints[id]??{segment:0,offsetEnd:0}; }
++  pending(id:string,limit=200){ const cp=this.checkpoint(id); return this.entries.filter(e=>e.segment>cp.segment||(e.segment===cp.segment&&e.offsetEnd>cp.offsetEnd)).slice(0,limit); }
++  // Target workers flush concurrently, so merge and replace their checkpoint file in order.
++  #serializeCheckpoint<T>(operation:()=>Promise<T>):Promise<T>{ const result=this.checkpointTail.then(operation); this.checkpointTail=result.then(()=>undefined,()=>undefined); return result; }
++  async commit(id:string,entry:WalEntry):Promise<WalCheckpoint>{
++    return this.#serializeCheckpoint(async()=>{
++      const current=this.checkpoint(id);
++      if(entry.segment<current.segment||(entry.segment===current.segment&&entry.offsetEnd<=current.offsetEnd))return current;
++      const next={segment:entry.segment,offsetEnd:entry.offsetEnd,updatedAt:new Date().toISOString()};
++      const all={...this.checkpoints,[id]:next}, temp=join(this.directory,`checkpoints.${process.pid}.${randomUUID()}.tmp`), target=join(this.directory,'checkpoints.json');
++      try{
++        const file=await open(temp,'wx',0o600);
++        try{await file.writeFile(JSON.stringify(all,null,2));await file.sync();}finally{await file.close();}
++        await rename(temp,target);
++        await fsyncDirectory(this.directory);
++        this.checkpoints=all;return next;
++      }catch(error){await unlink(temp).catch(()=>{});throw error;}
++    });
++  }
++  async drain(){await this.writeTail;await this.checkpointTail;if(this.writeError)throw this.writeError;}
++  stats(){ return {segments:new Set(this.entries.map(e=>e.segment)).size||1,entries:this.entries.length,totalBytes:this.totalBytes,currentBytes:this.currentSize,pendingWrites:this.pendingWrites,maxPendingWrites:this.maxPendingWrites,writeFailed:this.writeError!==null,checkpoints:this.checkpoints,pendingByCheckpoint:Object.fromEntries(Object.keys(this.checkpoints).map(id=>[id,this.pending(id,Number.MAX_SAFE_INTEGER).length]))}; }
+ }
+diff --git a/telemetry-processor/test/processor.test.ts b/telemetry-processor/test/processor.test.ts
+index 81fa414a..b5ec2cc7 100644
+--- a/telemetry-processor/test/processor.test.ts
++++ b/telemetry-processor/test/processor.test.ts
+@@ -1 +1,37 @@
+-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {WalStore} from '../src/packages/wal/wal.js';import {TelemetryProcessor} from '../src/apps/processor.js';import {Metrics} from '../src/packages/metrics/metrics.js';import {envelope,logRecord,mapping} from './helpers.js';async function setup(){const wal=new WalStore({directory:await mkdtemp(join(tmpdir(),'proc-'))});await wal.initialize();const mappings={resolve:()=>mapping};return{wal,p:new TelemetryProcessor({wal,mappings,metrics:new Metrics(),allowedCollectorIds:['smpp-gateway-1']})};}test('accept, duplicate and conflict',async()=>{const {p}=await setup(),e=envelope();assert.equal((await p.collect(logRecord(e))).status,'accepted');assert.equal((await p.collect(logRecord(e))).status,'duplicate');const c=envelope({payload:{currentState:'failed'}});assert.equal((await p.collect(logRecord(c))).status,'conflict');});test('rejects forged collector identity',async()=>{const {p}=await setup();assert.equal((await p.collect(logRecord(envelope(),{resource:{'telemetry.source.collector_id':'evil'}}))).errorCode,'COLLECTOR_ID_NOT_ALLOWED');});test('stores only a safe rejection summary for secret-bearing input',async()=>{const {p,wal}=await setup(),e=envelope({payload:{password:'secret-do-not-store'}});e.recordHash=(await import('../src/packages/canonical/canonical.js')).calculateProviderOpsRecordHash(e);assert.equal((await p.collect(logRecord(e))).errorCode,'SENSITIVE_KEY_DETECTED');assert.equal(wal.entries.length,1);assert.equal(wal.entries[0].record.kind,'rejected');assert.doesNotMatch(JSON.stringify(wal.entries[0].record),/secret-do-not-store/);});
++import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {WalStore} from '../src/packages/wal/wal.js';import {TelemetryProcessor} from '../src/apps/processor.js';import {Metrics} from '../src/packages/metrics/metrics.js';import {envelope,logRecord,mapping} from './helpers.js';async function setup({walOptions={},processorOptions={}}={}){const wal=new WalStore({directory:await mkdtemp(join(tmpdir(),'proc-')),...walOptions});await wal.initialize();const mappings={resolve:()=>mapping};return{wal,p:new TelemetryProcessor({wal,mappings,metrics:new Metrics(),allowedCollectorIds:['smpp-gateway-1'],...processorOptions})};}test('accept, duplicate and conflict',async()=>{const {p}=await setup(),e=envelope();assert.equal((await p.collect(logRecord(e))).status,'accepted');assert.equal((await p.collect(logRecord(e))).status,'duplicate');const c=envelope({payload:{currentState:'failed'}});assert.equal((await p.collect(logRecord(c))).status,'conflict');});test('rejects forged collector identity',async()=>{const {p}=await setup();assert.equal((await p.collect(logRecord(envelope(),{resource:{'telemetry.source.collector_id':'evil'}}))).errorCode,'COLLECTOR_ID_NOT_ALLOWED');});test('stores only a safe rejection summary for secret-bearing input',async()=>{const {p,wal}=await setup(),e=envelope({payload:{password:'secret-do-not-store'}});e.recordHash=(await import('../src/packages/canonical/canonical.js')).calculateProviderOpsRecordHash(e);assert.equal((await p.collect(logRecord(e))).errorCode,'SENSITIVE_KEY_DETECTED');assert.equal(wal.entries.length,1);assert.equal(wal.entries[0].record.kind,'rejected');assert.doesNotMatch(JSON.stringify(wal.entries[0].record),/secret-do-not-store/);});
++
++test('concurrent identical records cross one atomic deduplication boundary',async()=>{
++  const {p,wal}=await setup(),e=envelope();
++  const results=await Promise.all(Array.from({length:20},()=>p.collect(logRecord(e))));
++  assert.equal(results.filter(result=>result.status==='accepted').length,1);
++  assert.equal(results.filter(result=>result.status==='duplicate').length,19);
++  assert.equal(wal.entries.length,1);
++  assert.equal(wal.entries[0].record.kind,'accepted');
++});
++
++test('concurrent same-ID different-hash records isolate one conflict',async()=>{
++  const {p,wal}=await setup(),accepted=envelope(),different=envelope({payload:{currentState:'failed'}});
++  const results=await Promise.all([p.collect(logRecord(accepted)),p.collect(logRecord(different))]);
++  assert.deepEqual(results.map(result=>result.status),['accepted','conflict']);
++  assert.deepEqual(wal.entries.map(entry=>entry.record.kind),['accepted','conflict']);
++  assert.equal(wal.entries[1].record.acceptedRecordHash,accepted.recordHash);
++  assert.equal(wal.entries[1].offset,wal.entries[0].offsetEnd);
++});
++
++test('concurrent records cannot bypass the WAL high-water limit',async()=>{
++  const walMaxBytes=4096,{p,wal}=await setup({processorOptions:{walMaxBytes,walRejectThreshold:1}});
++  const records=Array.from({length:20},(_,index)=>envelope({recordId:`d56fda7f-f41a-5f54-96c8-${String(index).padStart(12,'0')}`}));
++  const results=await Promise.all(records.map(record=>p.collect(logRecord(record))));
++  assert.ok(results.some(result=>result.status==='accepted'));
++  assert.ok(results.some(result=>result.status==='rejected_retryable'&&result.errorCode==='WAL_HIGH_WATER'));
++  assert.ok(wal.stats().totalBytes<=walMaxBytes);
++  assert.equal(wal.entries.length,results.filter(result=>result.status==='accepted').length);
++});
++
++test('duplicates remain idempotent when the WAL is at high water',async()=>{
++  const {p,wal}=await setup({processorOptions:{walMaxBytes:2048,walRejectThreshold:1}}),record=envelope();
++  assert.equal((await p.collect(logRecord(record))).status,'accepted');
++  const before=wal.stats().totalBytes;
++  assert.equal((await p.collect(logRecord(record))).status,'duplicate');
++  assert.equal(wal.stats().totalBytes,before);
++});
+diff --git a/telemetry-processor/test/wal.test.ts b/telemetry-processor/test/wal.test.ts
+index 89bd7d5f..e47b86e1 100644
+--- a/telemetry-processor/test/wal.test.ts
++++ b/telemetry-processor/test/wal.test.ts
+@@ -1 +1,92 @@
+-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,appendFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {WalStore} from '../src/packages/wal/wal.js';test('WAL has independent checkpoints',async()=>{const d=await mkdtemp(join(tmpdir(),'wal-'));const w=new WalStore({directory:d,segmentMaxBytes:1024});await w.initialize();const e=await w.append({kind:'accepted',sourceSystem:'smpp',envelope:{recordId:'r1',recordHash:'h1'}});assert.equal(w.pending('a').length,1);assert.equal(w.pending('b').length,1);await w.commit('a',e);assert.equal(w.pending('a').length,0);assert.equal(w.pending('b').length,1);});test('WAL recovers and truncates partial tail',async()=>{const d=await mkdtemp(join(tmpdir(),'wal-'));let w=new WalStore({directory:d});await w.initialize();await w.append({kind:'accepted',sourceSystem:'smpp',envelope:{recordId:'r1',recordHash:'h1'}});await appendFile(join(d,'segment-000000000001.wal'),Buffer.from([0,0,0]));w=new WalStore({directory:d});await w.initialize();assert.equal(w.classify('smpp','r1','h1'),'duplicate');assert.equal(w.entries.length,1);});
++import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,appendFile,mkdir,readdir,rename,rmdir,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {WalStore} from '../src/packages/wal/wal.js';test('WAL has independent checkpoints',async()=>{const d=await mkdtemp(join(tmpdir(),'wal-'));const w=new WalStore({directory:d,segmentMaxBytes:1024});await w.initialize();const e=await w.append({kind:'accepted',sourceSystem:'smpp',envelope:{recordId:'r1',recordHash:'h1'}});assert.equal(w.pending('a').length,1);assert.equal(w.pending('b').length,1);await w.commit('a',e);assert.equal(w.pending('a').length,0);assert.equal(w.pending('b').length,1);});test('WAL recovers and truncates partial tail',async()=>{const d=await mkdtemp(join(tmpdir(),'wal-'));let w=new WalStore({directory:d});await w.initialize();await w.append({kind:'accepted',sourceSystem:'smpp',envelope:{recordId:'r1',recordHash:'h1'}});await appendFile(join(d,'segment-000000000001.wal'),Buffer.from([0,0,0]));w=new WalStore({directory:d});await w.initialize();assert.equal(w.classify('smpp','r1','h1'),'duplicate');assert.equal(w.entries.length,1);});
++
++test('concurrent appends retain call order and monotonic WAL offsets',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-concurrent-'));
++  let wal=new WalStore({directory});
++  await wal.initialize();
++  const entries=await Promise.all(Array.from({length:32},(_,sequence)=>wal.append({kind:'test',sequence})));
++  assert.deepEqual(entries.map(entry=>entry.record.sequence),Array.from({length:32},(_,sequence)=>sequence));
++  for(let index=1;index<entries.length;index++){
++    assert.equal(entries[index]!.segment,entries[index-1]!.segment);
++    assert.equal(entries[index]!.offset,entries[index-1]!.offsetEnd);
++  }
++  wal=new WalStore({directory});
++  await wal.initialize();
++  assert.deepEqual(wal.entries.map(entry=>entry.record.sequence),Array.from({length:32},(_,sequence)=>sequence));
++});
++
++test('concurrent target commits merge checkpoints and survive reopen',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-checkpoints-'));
++  let wal=new WalStore({directory});
++  await wal.initialize();
++  const first=await wal.append({kind:'test',sequence:1});
++  const second=await wal.append({kind:'test',sequence:2});
++  await Promise.all([wal.commit('target:a',first),wal.commit('target:b',second)]);
++  assert.deepEqual(Object.keys(wal.checkpoints).sort(),['target:a','target:b']);
++  assert.equal(wal.pending('target:a').length,1);
++  assert.equal(wal.pending('target:b').length,0);
++  assert.equal((await readdir(directory)).filter(name=>name.startsWith('checkpoints.')&&name.endsWith('.tmp')).length,0);
++  wal=new WalStore({directory});
++  await wal.initialize();
++  assert.deepEqual(Object.keys(wal.checkpoints).sort(),['target:a','target:b']);
++  assert.equal(wal.pending('target:a').length,1);
++  assert.equal(wal.pending('target:b').length,0);
++});
++
++test('a target checkpoint never moves backward when commits arrive out of order',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-monotonic-checkpoint-'));
++  let wal=new WalStore({directory});
++  await wal.initialize();
++  const first=await wal.append({kind:'test',sequence:1});
++  const second=await wal.append({kind:'test',sequence:2});
++  await Promise.all([wal.commit('target:a',second),wal.commit('target:a',first)]);
++  assert.deepEqual(wal.checkpoint('target:a'),{segment:second.segment,offsetEnd:second.offsetEnd,updatedAt:wal.checkpoint('target:a').updatedAt});
++  assert.equal(wal.pending('target:a').length,0);
++  wal=new WalStore({directory});
++  await wal.initialize();
++  assert.equal(wal.checkpoint('target:a').offsetEnd,second.offsetEnd);
++  assert.equal(wal.pending('target:a').length,0);
++});
++
++test('the WAL write queue rejects above its configured capacity',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-bounded-queue-'));
++  const wal=new WalStore({directory,maxPendingWrites:1});
++  await wal.initialize();
++  const first=wal.append({kind:'test',sequence:1});
++  await assert.rejects(wal.append({kind:'test',sequence:2}),{message:'WAL_WRITE_QUEUE_FULL'});
++  await first;
++  assert.equal(wal.stats().pendingWrites,0);
++  assert.equal(wal.entries.length,1);
++});
++
++test('checkpoint corruption fails startup closed',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-invalid-checkpoint-'));
++  let wal=new WalStore({directory});
++  await wal.initialize();
++  await writeFile(join(directory,'checkpoints.json'),'{not-json','utf8');
++  wal=new WalStore({directory});
++  await assert.rejects(wal.initialize(),{message:'WAL_CHECKPOINT_INVALID'});
++});
++
++test('a checkpoint outside a real WAL frame boundary fails startup closed',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-checkpoint-boundary-'));
++  let wal=new WalStore({directory});
++  await wal.initialize();
++  await wal.append({kind:'test',sequence:1});
++  await writeFile(join(directory,'checkpoints.json'),JSON.stringify({'target:a':{segment:999,offsetEnd:1}}),'utf8');
++  wal=new WalStore({directory});
++  await assert.rejects(wal.initialize(),{message:'WAL_CHECKPOINT_INVALID'});
++});
++
++test('a failed append poisons the store and drain fails closed',async()=>{
++  const directory=await mkdtemp(join(tmpdir(),'wal-poison-')),segment=join(directory,'segment-000000000001.wal'),backup=join(directory,'segment.backup');
++  const wal=new WalStore({directory});
++  await wal.initialize();
++  await rename(segment,backup);await mkdir(segment);
++  try{
++    await assert.rejects(wal.append({kind:'test',sequence:1}),{message:'WAL_WRITE_FAILED_RESTART_REQUIRED'});
++    assert.equal(wal.stats().writeFailed,true);
++    await assert.rejects(wal.drain(),{message:'WAL_WRITE_FAILED_RESTART_REQUIRED'});
++    await assert.rejects(wal.append({kind:'test',sequence:2}),{message:'WAL_WRITE_FAILED_RESTART_REQUIRED'});
++  }finally{await rmdir(segment);await rename(backup,segment);}
++});
+diff --git a/telemetry-schema/tools/deployment.test.ts b/telemetry-schema/tools/deployment.test.ts
+index 309be539..72a64f73 100644
+--- a/telemetry-schema/tools/deployment.test.ts
++++ b/telemetry-schema/tools/deployment.test.ts
+@@ -17,6 +17,10 @@ test('one-click deployment assets exist and include all containers',async()=>{
+   assert.doesNotMatch(compose,/ports: \["\$\{OTLP_GRPC_PORT/);
+   const packagedCompose=await readFile(new URL('deploy/compose/compose.yaml',root),'utf8');
+   assert.equal(packagedCompose,compose,'deployment compose copy must match the root compose exactly');
++  assert.match(compose,/WAL_MAX_PENDING_WRITES/);
++  assert.match(compose,/PROCESSOR_SHUTDOWN_TIMEOUT_MS/);
++  const processorDockerfile=await readFile(new URL('telemetry-processor/Dockerfile',root),'utf8');
++  assert.match(processorDockerfile,/COPY contracts \.\/dist\/contracts/);
+   const clickhouseDockerfile=await readFile(new URL('clickhouse-arm64/Dockerfile',root),'utf8');
+   assert.match(clickhouseDockerfile,/CLICKHOUSE_SOURCE_REF=v25\.3\.14\.14-lts/);
+   assert.match(clickhouseDockerfile,/CLICKHOUSE_SOURCE_COMMIT=84d6b30ad528e77d787ab7a2437406c1e2a5887a/);
+@@ -58,3 +62,16 @@ test('projection target output includes standalone and SDAR shadow targets',asyn
+   assert.equal(cfg.targets.find(x=>x.targetId==='standalone-smpp')?.enabled,true);
+   assert.equal(cfg.targets.find(x=>x.targetId==='sdar-warehouse-shadow')?.enabled,false);
+ });
++test('x86_64 development override replaces only the ClickHouse build path',async()=>{
++  const example=await readFile(new URL('.env.example',root),'utf8');
++  const override=await readFile(new URL('deploy/development/compose.x86_64.override.yaml',root),'utf8');
++  assert.match(example,/^SMPP_SOURCE_ID=[A-Za-z0-9][A-Za-z0-9._:-]+$/m);
++  const qualificationExample=await readFile(new URL('deploy/stable-smpp-integration/.env.example',root),'utf8');
++  assert.match(qualificationExample,/^SMPP_SOURCE_ID=smpp\.production\.ugv-direct$/m);
++  assert.match(override,/image: clickhouse\/clickhouse-server:25\.3\.14\.14/);
++  assert.match(override,/platform: linux\/amd64/);
++  assert.match(override,/build: !reset null/);
++  assert.match(override,/pull_policy: missing/);
++  assert.match(override,/otel-collector:[\s\S]*host\.docker\.internal:host-gateway/);
++  assert.doesNotMatch(override,/telemetry-processor:|query-api:|grafana:/);
++});
