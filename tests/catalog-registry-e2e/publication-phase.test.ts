@@ -105,17 +105,17 @@ describe("Ready to Catalog to Registry publication", () => {
     });
   });
 
-  it("handles unchanged and changed Catalog drift with stable revisions", async () => {
+  it("reuses unchanged Catalog authority while publishing immutable Registry revisions", async () => {
     const state = statePort([]);
     const phase = publicationPhase(state);
     const unchanged = await phase.close(deployment("provider-a", "production"), input().context);
     expect(unchanged.catalog).toMatchObject({ created: false, snapshot: { revision: 1 } });
-    expect(unchanged.registry).toMatchObject({ created: false, snapshot: { revision: 1 } });
+    expect(unchanged.registry).toMatchObject({ created: true, snapshot: { revision: 2 } });
 
     toolsResult = completeTools(["inspect", "operate"]);
     const changed = await phase.close(deployment("provider-a", "production"), input().context);
     expect(changed.catalog).toMatchObject({ created: true, snapshot: { revision: 2 } });
-    expect(changed.registry).toMatchObject({ created: true, snapshot: { revision: 2 } });
+    expect(changed.registry).toMatchObject({ created: true, snapshot: { revision: 3 } });
     expect(
       (await registries.latest("production"))?.document.providers[0]?.tools.map(({ name }) => name),
     ).toEqual(["inspect", "operate"]);
@@ -166,7 +166,7 @@ describe("Ready to Catalog to Registry publication", () => {
     });
     expect(await catalogs.active("provider-c")).toMatchObject({ revision: 1 });
     expect(await registries.latest("production")).toMatchObject({
-      revision: 2,
+      revision: 3,
       document: { providers: [{ providerId: "provider-a" }] },
     });
     expect(fail).toHaveBeenCalledOnce();

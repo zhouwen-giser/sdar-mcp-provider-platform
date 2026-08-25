@@ -76,22 +76,22 @@ describe("SDAR Registry Snapshot API", () => {
     await app.close();
   });
 
-  it("returns 304 for a matching ETag and keeps no-op publication stable", async () => {
-    const noOp = await repository.publish(publication(["provider-a"]));
+  it("returns 304 for a matching ETag after immutable same-content republication", async () => {
+    const republished = await repository.publish(publication(["provider-a"]));
     const app = api();
     const response = await app.inject({
       method: "GET",
       url: "/api/v1/registry/production/latest",
       headers: {
         ...authorization(),
-        "if-none-match": `W/"${noOp.snapshot.checksum}"`,
+        "if-none-match": `W/"${republished.snapshot.checksum}"`,
       },
     });
 
-    expect(noOp).toMatchObject({ created: false, snapshot: { revision: 1 } });
+    expect(republished).toMatchObject({ created: true, snapshot: { revision: 2 } });
     expect(response.statusCode).toBe(304);
     expect(response.body).toBe("");
-    expect(response.headers.etag).toBe(`"${noOp.snapshot.checksum}"`);
+    expect(response.headers.etag).toBe(`"${republished.snapshot.checksum}"`);
     await app.close();
   });
 
@@ -153,7 +153,7 @@ describe("SDAR Registry Snapshot API", () => {
       }),
       app.inject({
         method: "GET",
-        url: "/api/v1/registry/production/diff?fromRevision=1&toRevision=2",
+        url: "/api/v1/registry/production/diff?fromRevision=2&toRevision=3",
         headers: authorization(),
       }),
       app.inject({
@@ -168,14 +168,16 @@ describe("SDAR Registry Snapshot API", () => {
       }),
     ]);
 
-    expect(history.json()).toMatchObject({ items: [{ revision: 2 }, { revision: 1 }] });
+    expect(history.json()).toMatchObject({
+      items: [{ revision: 3 }, { revision: 2 }, { revision: 1 }],
+    });
     expect(diff.json()).toMatchObject({
       added: [{ providerId: "provider-b" }],
       removed: [{ providerId: "provider-a" }],
     });
     expect(bootstrap.json()).toMatchObject({
       source: "registry_lkg",
-      snapshot: { revision: 2 },
+      snapshot: { revision: 3 },
     });
     expect(empty.json()).toMatchObject({
       source: "empty_safe_default",
@@ -200,11 +202,11 @@ describe("SDAR Registry Snapshot API", () => {
     expect(response.headers.get("content-type")).toContain("text/event-stream");
     const reader = response.body?.getReader();
     if (reader === undefined) throw new Error("REGISTRY_WATCH_BODY_MISSING");
-    const first = await readUntil(reader, '"revision":2');
+    const first = await readUntil(reader, '"revision":3');
     expect(first).not.toContain("effectiveEndpoint");
 
     await repository.publish(publication(["provider-c"]));
-    const second = await readUntil(reader, '"revision":3');
+    const second = await readUntil(reader, '"revision":4');
     expect(second).toContain('"checksum"');
     expect(second).not.toContain("provider-c");
     controller.abort();
