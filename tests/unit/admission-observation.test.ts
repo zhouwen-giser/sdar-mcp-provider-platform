@@ -11,6 +11,11 @@ const rawResponse = {
     taskId: "provider-task-1",
     status: "working",
     _meta: {
+      "io.sdar/providerIdentity": {
+        profileVersion: "1.0",
+        providerId: "provider-1",
+        providerInstanceId: "provider-instance-1",
+      },
       "io.sdar/taskExecution": {
         profileVersion: "1.0",
         runtimeRevision: "4",
@@ -52,7 +57,7 @@ describe("development admission observation", () => {
 
   it("keeps the raw response and exposes only Provider-local committed/configured identities", () => {
     const store = new DevelopmentAdmissionObservationStore(
-      { deploymentId: "provider-deployment-1", instanceId: "provider-instance-1" },
+      { deploymentId: "provider-deployment-1", instanceId: "replacement-process-instance" },
       2,
       () => new Date("2026-08-26T00:00:00.000Z"),
     );
@@ -61,6 +66,7 @@ describe("development admission observation", () => {
       localIdentity: {
         taskId: "provider-task-1",
         providerId: "provider-1",
+        providerInstanceId: "provider-instance-1",
         externalExecutionId: "execution-1",
         operationName: "vehicle_navigate",
         runtimeRevision: "4",
@@ -89,6 +95,7 @@ describe("development admission observation", () => {
       },
       authority: {
         taskAndExecution: "provider_committed_postgres",
+        instance: "provider_committed_postgres",
         originClaims: "non_authoritative",
       },
       unresolvedContractIdentities: ["providerSource", "server"],
@@ -105,6 +112,7 @@ describe("development admission observation", () => {
         localIdentity: {
           taskId: "different-task",
           providerId: "provider-1",
+          providerInstanceId: "provider-instance-1",
           externalExecutionId: null,
           operationName: "vehicle_navigate",
           runtimeRevision: "4",

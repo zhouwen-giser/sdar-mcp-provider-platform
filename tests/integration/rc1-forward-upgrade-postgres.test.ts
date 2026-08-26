@@ -144,6 +144,7 @@ beforeAll(async () => {
     new Map([["durable_task", snapshotId]]),
     gateway,
     new TaskRepository(pool),
+    "test-provider-instance",
     new IdempotencyRepository(pool),
   );
 });

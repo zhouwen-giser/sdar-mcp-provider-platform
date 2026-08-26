@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "WI-080",
+  "owner": "smpp-provider-wi080",
+  "attemptId": "WI-080-0bcaa08f-885e-478f-84a1-227379751f57",
+  "observedAt": "2026-08-26T07:50:01Z",
+  "status": "IMPLEMENTED_CANDIDATE_AWAITING_POSTGRES_AND_INDEPENDENT_VERIFICATION",
+  "developmentOnly": true,
+  "productionEligible": false,
+  "releaseGateEligible": false,
+  "gatePassClaim": false,
+  "source": {
+    "repository": "sdar-mcp-provider-platform",
+    "baseCommit": "0eacbcd52fbea9162aae9a6f197b1a0f91814ade",
+    "branch": "codex/live-dev-evaluation-chain-wi080-provider-identity",
+    "controlContractCommit": "d2bbec38674815683052a8e5eb1cb271f3fe5261",
+    "contract": "contracts/runtime-provider-binding.v1.json",
+    "contractSha256": "9861742fa0480bd07a851741715f8c9e5d8401885c19ec3a6e89c341ac710edb",
+    "decision": "decisions/ADR-G03-binding-authority.md",
+    "decisionSha256": "2b9b424d1522ea90bf29a9f1b2774c6628a98adc977cc3ddbb29b964b3c3afbb"
+  },
+  "implementation": {
+    "providerIdSource": "Existing bootstrap-provider/adapter-manifest verification; no provider ID translation. The saved WI-050 registry externalProviderId and Provider local providerId both equal isr.vehicle.ugv.ugv1.",
+    "providerInstanceIdSourcePriority": [
+      "Configured Runtime platformIdentity.instanceId, when present",
+      "Existing process-local telemetryInstanceId: configured OTEL_SERVICE_INSTANCE_ID or the existing UUID generated once at startup"
+    ],
+    "providerInstanceIdCapture": "TaskEngine requires an explicit valid local instance. New admission captures it in admission_intent and provider_task. Configured empty/invalid values are not replaced. No historical backfill/default/server-derived identity.",
+    "recovery": "An observed durable admission must still exist; recoverAdmission cannot create a replacement intent. Existing admission owner and original correlation context are reused. Mismatched stored task/admission owners conflict.",
+    "response": "One _meta[io.sdar/providerIdentity] sibling with exactly profileVersion=1.0, providerId and providerInstanceId, generated from Task storage for create/get/notification projections.",
+    "protocolPreserved": "Existing status, TTL, timestamps, result projection and strict io.sdar/taskExecution metadata/revision semantics are unchanged.",
+    "providerOps": "Committed Task lifecycle/command/operational records and Task-linked ProviderTelemetryIngress records use the stored Task owner. Audit export no longer overwrites instanceId with the exporting process. Correlation/trace claims are emitted under attributes.correlation, not top-level aliases.",
+    "originClaims": "Explicit canonical Provider origin claims are retained as non-authoritative reconciliation material; they never supply or override local task/provider/instance/execution identity.",
+    "notProviderObligations": [
+      "Runtime providerSource",
+      "Runtime server",
+      "Runtime Episode/scope/invocation",
+      "Episode closure authority"
+    ],
+    "otelDistinction": "The OTEL resource may describe the current emitting process; a Task-linked ProviderOps body instanceId describes the admitted Task owner.",
+    "recordHashAlgorithmChanged": false,
+    "localTaskExecutionCommandAllocationChanged": false,
+    "authOrExecutionModeConfigurationChanged": false,
+    "newSimulatorContainers": 0
+  },
+  "migration": {
+    "path": "migrations/runtime/025_task_provider_identity.sql",
+    "sha256": "021b68bcb8e54ce5dc3465de04d42001593121d2d7de4ef8b580f04362e19e61",
+    "scope": "Provider Runtime migration set only; admission_intent/provider_task provider_instance_id NOT NULL with nonempty bounded value.",
+    "precondition": "Clean development bootstrap. Existing populated task/admission databases are not upgraded by guessing an owner; legacy-data compatibility is intentionally unsupported."
+  },
+  "localValidation": [
+    {
+      "command": "./node_modules/.bin/tsc --noEmit -p tsconfig.json",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "./node_modules/.bin/eslint apps/runtime/src/admission-observation.ts apps/runtime/src/runtime.ts packages/domain/src/task.ts packages/persistence-postgres/src/tasks.ts packages/provider-telemetry/src/ingress.ts packages/task-engine/src/detailed-task.ts packages/task-engine/src/engine.ts tests/integration/provider-task-identity-postgres.test.ts tests/protocol-conformance/detailed-task.test.ts tests/unit/admission-observation.test.ts",
+      "exitCode": 0,
+      "result": "PASS",
+      "note": "Final engine/test edit additionally rechecked as an exact two-file subset."
+    },
+    {
+      "command": "./node_modules/.bin/vitest run tests/protocol-conformance/detailed-task.test.ts tests/unit/admission-observation.test.ts tests/unit/event-envelope.test.ts --reporter=default --reporter=json --outputFile=reports/wi080-provider-identity-unit-results.json",
+      "exitCode": 0,
+      "files": 3,
+      "passedTests": 22,
+      "failedTests": 0,
+      "artifact": "reports/wi080-provider-identity-unit-results.json",
+      "artifactSha256": "b492b833d6fc3adbd305f82a9b208823f9d0624e4b4a1b8402179abb8b147e83"
+    },
+    { "command": "git diff --check", "exitCode": 0, "result": "PASS" }
+  ],
+  "dependencyPreparation": {
+    "install": "pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir /home/zhouwen/snap/code/248/.local/share/pnpm/store/v11",
+    "downloadedPackages": 0,
+    "lockfileChanged": false,
+    "protoInputsChanged": false,
+    "generatedProtocolCommand": "node scripts/generate-proto.mjs",
+    "generatedProtocolExitCode": 0,
+    "toolReuse": "Ignore-scripts installation omitted grpc-tools native binaries. Reused the two already-present binaries from the same pinned grpc-tools@1.13.1 in the baseline Provider worktree; generation then succeeded without network.",
+    "protocSha256": "8aafd4723ad44d3495e05ad30dc8be3b4a1f890b9a28fe8f06d471ca10717a8f",
+    "grpcNodePluginSha256": "0bd3891f4961f4ac7624902ecf3afdd838d6965c1a3063ab8ecc168a91997b8f"
+  },
+  "pendingIndependentPostgresValidation": {
+    "status": "NOT_RUN_BY_IMPLEMENTER",
+    "command": "./node_modules/.bin/vitest run tests/integration/provider-task-identity-postgres.test.ts",
+    "requiredEnvironment": ["TEST_DATABASE_URL: leased disposable development PostgreSQL database"],
+    "testFileSha256": "1283868ef52e0807473b57a468ba840f5c12a16cd8147cfb1b0a307e864ff404",
+    "testCount": 3,
+    "coverage": [
+      "No-auth frozen HTTP handler admission, committed owner, idempotent retry, get and notification projection after replacement process",
+      "Interrupted admission recovery preserves stored owner, missing admission is not fabricated, existing mock Adapter dispatch count remains one",
+      "Stable duplicate command sequence, Task-linked ProviderOps instance completeness, canonical non-authoritative claims and replay deduplication"
+    ],
+    "resources": "Creates only random wi080_identity_<uuid> schema in supplied database and existing mock-adapter-typescript on loopback ephemeral gRPC port. No device simulator containers or external device access.",
+    "cleanup": "afterAll closes gateway/Adapter/pools and drops the exact test-owned random schema. Run Controller owns container/database lifecycle."
+  },
+  "limitations": [
+    "No shared database, Docker or external UGV operation was executed by this implementation Agent.",
+    "No actual PostgreSQL acceptance, independently captured ProviderOps export wire or live Task-bearing SSE notification is claimed by local unit results.",
+    "Fixture-only explicit instance additions do not claim that broad legacy/full suites were executed.",
+    "Provider terminal status remains separate from Runtime Goal success and physical arrival.",
+    "No control-repository Handoff was written because this role may write only the Provider repository; root assembles that artifact from these actual results and the candidate commit."
+  ]
+}

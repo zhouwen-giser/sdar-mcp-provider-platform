@@ -11,7 +11,7 @@ export interface DevelopmentAdmissionObservation {
     readonly externalExecutionId: string | null;
     readonly operationName: string;
     readonly deploymentId: string | null;
-    readonly instanceId: string | null;
+    readonly instanceId: string;
   };
   readonly revisions: {
     readonly runtimeRevision: string;
@@ -25,7 +25,8 @@ export interface DevelopmentAdmissionObservation {
   readonly authority: {
     readonly rawResponse: "transport_observation";
     readonly taskAndExecution: "provider_committed_postgres";
-    readonly deploymentAndInstance: "provider_bootstrap_config" | "not_configured";
+    readonly deployment: "provider_bootstrap_config" | "not_configured";
+    readonly instance: "provider_committed_postgres";
     readonly originClaims: "non_authoritative";
   };
   readonly unresolvedContractIdentities: readonly ["providerSource", "server"];
@@ -49,8 +50,12 @@ export class DevelopmentAdmissionObservationStore {
     const result = record(input.rawResponse.result);
     const execution = record(result?._meta);
     const profile = record(execution?.["io.sdar/taskExecution"]);
+    const providerIdentity = record(execution?.["io.sdar/providerIdentity"]);
     if (
       result?.taskId !== input.localIdentity.taskId ||
+      providerIdentity?.profileVersion !== "1.0" ||
+      providerIdentity.providerId !== input.localIdentity.providerId ||
+      providerIdentity.providerInstanceId !== input.localIdentity.providerInstanceId ||
       profile?.runtimeRevision !== input.localIdentity.runtimeRevision ||
       (profile.providerRevision ?? null) !== input.localIdentity.providerRevision
     ) {
@@ -67,7 +72,7 @@ export class DevelopmentAdmissionObservationStore {
         externalExecutionId: input.localIdentity.externalExecutionId,
         operationName: input.localIdentity.operationName,
         deploymentId: this.platformIdentity?.deploymentId ?? null,
-        instanceId: this.platformIdentity?.instanceId ?? null,
+        instanceId: input.localIdentity.providerInstanceId,
       },
       revisions: {
         runtimeRevision: input.localIdentity.runtimeRevision,
@@ -81,8 +86,8 @@ export class DevelopmentAdmissionObservationStore {
       authority: {
         rawResponse: "transport_observation",
         taskAndExecution: "provider_committed_postgres",
-        deploymentAndInstance:
-          this.platformIdentity === null ? "not_configured" : "provider_bootstrap_config",
+        deployment: this.platformIdentity === null ? "not_configured" : "provider_bootstrap_config",
+        instance: "provider_committed_postgres",
         originClaims: "non_authoritative",
       },
       unresolvedContractIdentities: ["providerSource", "server"],

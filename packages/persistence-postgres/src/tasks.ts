@@ -11,6 +11,7 @@ import {
   TaskExpiredError,
   TaskNotFoundOrUnauthorizedError,
   RUNTIME_VERSION,
+  taskProviderIdentity,
 } from "../../domain/src/index.js";
 import { createProviderOpsEnvelope } from "../../observability/src/index.js";
 import { captureProviderOpsDelivery } from "./provider-ops-delivery.js";
@@ -18,6 +19,7 @@ import { captureProviderOpsDelivery } from "./provider-ops-delivery.js";
 export interface AdmissionIntentInput {
   taskId: string;
   providerId: string;
+  providerInstanceId: string;
   operationName: string;
   operationSnapshotId: string;
   authorization: AuthorizationContext;
@@ -260,6 +262,7 @@ interface TaskTransitionRequest {
 interface TaskRow {
   task_id: string;
   provider_id: string;
+  provider_instance_id: string;
   operation_name: string;
   operation_snapshot_id: string;
   authorization_context_hash: string;
@@ -346,7 +349,7 @@ export async function captureTaskOperationalEvent(
     deliveryClass: "operational",
     providerId: task.provider_id,
     runtimeVersion: RUNTIME_VERSION,
-    instanceId: "",
+    instanceId: task.provider_instance_id,
     taskId,
     resourceId: taskId,
     resourceType: "task",
@@ -363,7 +366,11 @@ export async function captureTaskOperationalEvent(
     stableAggregateIdentity: taskId,
     eventIdentity: input.eventIdentity,
     occurredAt: input.occurredAt,
-    attributes: { source: "committed_postgres", eventType: input.eventType },
+    attributes: {
+      source: "committed_postgres",
+      eventType: input.eventType,
+      correlation: taskCorrelation(task),
+    },
     payload: input.payload,
   });
   await captureProviderOpsDelivery(client, {
@@ -388,15 +395,16 @@ export class TaskRepository {
   constructor(readonly pool: Pool) {}
 
   async createAdmissionIntent(input: AdmissionIntentInput): Promise<boolean> {
+    taskProviderIdentity(input);
     const result = await this.pool.query(
       `INSERT INTO admission_intent
         (task_id, provider_id, operation_name, operation_snapshot_id,
          authorization_context_hash, execution_mode, simulation_id, arguments,
          argument_hash, state, accepted_at, not_before, latest_start_at,
          deadline_at, ttl_ms, timing, trace_id, root_traceparent, root_tracestate, correlation_id,
-         reservation_ref)
+         reservation_ref, provider_instance_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,'PENDING',$10,$11,$12,$13,$14,$15::jsonb,
-               $16,$17,$18,$19,$20)
+               $16,$17,$18,$19,$20,$21)
        ON CONFLICT (task_id) DO NOTHING`,
       [
         input.taskId,
@@ -419,6 +427,7 @@ export class TaskRepository {
         input.authorization.rootTracestate ?? null,
         input.authorization.correlationId ?? null,
         input.reservationRef,
+        input.providerInstanceId,
       ],
     );
     return result.rowCount === 1;
@@ -428,6 +437,7 @@ export class TaskRepository {
     const result = await this.pool.query<{
       task_id: string;
       provider_id: string;
+      provider_instance_id: string;
       operation_name: string;
       operation_snapshot_id: string;
       authorization_context_hash: string;
@@ -453,6 +463,7 @@ export class TaskRepository {
     return {
       taskId: row.task_id,
       providerId: row.provider_id,
+      providerInstanceId: row.provider_instance_id,
       operationName: row.operation_name,
       operationSnapshotId: row.operation_snapshot_id,
       authorization: {
@@ -505,14 +516,22 @@ export class TaskRepository {
   }
 
   async publishAccepted(input: PublishTaskInput): Promise<TaskRecord> {
+    taskProviderIdentity(input);
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
-      await client.query(
+      const admitted = await client.query(
         `UPDATE admission_intent SET state='ACCEPTED', adapter_response=$2::jsonb,
-           updated_at=clock_timestamp() WHERE task_id=$1`,
-        [input.taskId, JSON.stringify(input.adapterResponse)],
+           updated_at=clock_timestamp()
+         WHERE task_id=$1 AND provider_id=$3 AND provider_instance_id=$4`,
+        [
+          input.taskId,
+          JSON.stringify(input.adapterResponse),
+          input.providerId,
+          input.providerInstanceId,
+        ],
       );
+      if (admitted.rowCount !== 1) throw new Error("ADMISSION_PROVIDER_IDENTITY_CONFLICT");
       await client.query(
         `INSERT INTO provider_task
           (task_id, provider_id, operation_name, operation_snapshot_id,
@@ -522,7 +541,7 @@ export class TaskRepository {
            timing, not_before, latest_start_at, deadline_at, actual_started_at,
            invocation_attempt, observation_revision, terminal_at, handle_expires_at,
            last_confirmed_at, trace_id, root_traceparent, root_tracestate, correlation_id,
-           reservation_ref)
+           reservation_ref, provider_instance_id)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13,$14,$15::jsonb,
                  $16::jsonb,$17,$18,$19,$20::jsonb,$21,$22,$23,
                  $24,$25,1,
@@ -531,7 +550,7 @@ export class TaskRepository {
                    WHEN $19::bigint IS NULL AND $11 NOT LIKE 'TERMINAL_%' THEN NULL
                    ELSE clock_timestamp() + (COALESCE($19::bigint,86400000) * interval '1 millisecond')
                  END,
-                 clock_timestamp(),$26,$27,$28,$29,$30)`,
+                 clock_timestamp(),$26,$27,$28,$29,$30,$31)`,
         [
           input.taskId,
           input.providerId,
@@ -563,6 +582,7 @@ export class TaskRepository {
           input.authorization.rootTracestate ?? null,
           input.authorization.correlationId ?? null,
           input.reservationRef,
+          input.providerInstanceId,
         ],
       );
       await materializeTaskResourceBinding(client, input);
@@ -581,10 +601,12 @@ export class TaskRepository {
         `${input.taskId}:created`,
       );
       await upsertInputRequests(client, input.taskId, input.inputRequests ?? []);
-      await client.query(
-        "UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE task_id=$1",
-        [input.taskId],
+      const published = await client.query(
+        `UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp()
+         WHERE task_id=$1 AND provider_id=$2 AND provider_instance_id=$3`,
+        [input.taskId, input.providerId, input.providerInstanceId],
       );
+      if (published.rowCount !== 1) throw new Error("ADMISSION_PROVIDER_IDENTITY_CONFLICT");
       await client.query("COMMIT");
       const task = await selectTaskById(client, input.taskId);
       if (task === null) throw new Error("TASK_NOT_VISIBLE_AFTER_COMMIT");
@@ -610,6 +632,7 @@ export class TaskRepository {
   }
 
   async publishScheduled(input: PublishScheduledInput): Promise<TaskRecord> {
+    taskProviderIdentity(input);
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -621,10 +644,10 @@ export class TaskRepository {
            substate, status_message, adapter_revision, accepted_at, ttl_ms,
            timing, not_before, latest_start_at, deadline_at, invocation_attempt,
            next_start_attempt_at, observation_revision, trace_id, root_traceparent,
-           root_tracestate, correlation_id, reservation_ref)
+           root_tracestate, correlation_id, reservation_ref, provider_instance_id)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,NULL,'SCHEDULED','working',
                  'scheduled','Waiting for scheduled start.',0,$10,$11,$12::jsonb,$13,$14,$15,0,$13,1,
-                 $16,$17,$18,$19,$20)`,
+                 $16,$17,$18,$19,$20,$21)`,
         [
           input.taskId,
           input.providerId,
@@ -646,6 +669,7 @@ export class TaskRepository {
           input.authorization.rootTracestate ?? null,
           input.authorization.correlationId ?? null,
           input.reservationRef,
+          input.providerInstanceId,
         ],
       );
       await materializeTaskResourceBinding(client, input);
@@ -673,10 +697,12 @@ export class TaskRepository {
         },
         `${input.taskId}:created`,
       );
-      await client.query(
-        "UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE task_id=$1",
-        [input.taskId],
+      const published = await client.query(
+        `UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp()
+         WHERE task_id=$1 AND provider_id=$2 AND provider_instance_id=$3`,
+        [input.taskId, input.providerId, input.providerInstanceId],
       );
+      if (published.rowCount !== 1) throw new Error("ADMISSION_PROVIDER_IDENTITY_CONFLICT");
       await client.query("COMMIT");
       const task = await selectTaskById(client, input.taskId);
       if (task === null) throw new Error("SCHEDULED_TASK_NOT_VISIBLE_AFTER_COMMIT");
@@ -3802,6 +3828,7 @@ export class TaskRepository {
 function assertAcceptedPublicationIdentity(existing: TaskRecord, input: PublishTaskInput): void {
   if (
     existing.providerId !== input.providerId ||
+    existing.providerInstanceId !== input.providerInstanceId ||
     existing.operationName !== input.operationName ||
     existing.operationSnapshotId !== input.operationSnapshotId ||
     existing.authorizationContextHash !== input.authorization.hash ||
@@ -4386,7 +4413,7 @@ async function captureTaskProviderOpsDelivery(
     deliveryClass: "audit",
     providerId: task.provider_id,
     runtimeVersion: RUNTIME_VERSION,
-    instanceId: "",
+    instanceId: task.provider_instance_id,
     taskId: task.task_id,
     resourceId: task.task_id,
     resourceType: "task",
@@ -4406,7 +4433,7 @@ async function captureTaskProviderOpsDelivery(
     eventIdentity: eventKey,
     ...(revision === undefined ? {} : { revision }),
     occurredAt,
-    attributes: { source: "committed_postgres", eventType },
+    attributes: { source: "committed_postgres", eventType, correlation: taskCorrelation(task) },
     payload: providerOpsPayload(payload),
   });
   await captureProviderOpsDelivery(client, {
@@ -4415,6 +4442,14 @@ async function captureTaskProviderOpsDelivery(
     aggregateType: isCommand ? "command" : "task",
     aggregateId: task.task_id,
   });
+}
+
+function taskCorrelation(task: TaskRow): Record<string, string> {
+  // These are source-declared reconciliation claims, never binding authority.
+  return {
+    ...(task.correlation_id === null ? {} : { correlationId: task.correlation_id }),
+    ...(task.trace_id === null ? {} : { traceId: task.trace_id }),
+  };
 }
 
 function providerOpsPayload(
@@ -4612,6 +4647,7 @@ function fromRow(row: TaskRow): TaskRecord {
   return {
     taskId: row.task_id,
     providerId: row.provider_id,
+    providerInstanceId: row.provider_instance_id,
     operationName: row.operation_name,
     operationSnapshotId: row.operation_snapshot_id,
     authorizationContextHash: row.authorization_context_hash,

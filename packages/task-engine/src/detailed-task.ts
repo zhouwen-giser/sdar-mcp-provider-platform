@@ -1,4 +1,4 @@
-import type { TaskRecord } from "../../domain/src/index.js";
+import { taskProviderIdentity, type TaskRecord } from "../../domain/src/index.js";
 import type { InputRequestRecord } from "../../persistence-postgres/src/index.js";
 
 export type DetailedTaskProjection = "create" | "get" | "notification";
@@ -37,6 +37,7 @@ export function mapTaskToDetailedTask(
       ? { pollIntervalMs: task.pollIntervalMs }
       : {}),
     _meta: {
+      "io.sdar/providerIdentity": taskProviderIdentity(task),
       "io.sdar/taskExecution": {
         profileVersion: "1.0",
         runtimeRevision: task.runtimeRevision,

@@ -130,6 +130,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   const metrics = new RuntimeMetrics();
   const telemetrySelfGauges: Record<string, number> = {};
   const telemetryInstanceId = config.OTEL_SERVICE_INSTANCE_ID ?? randomUUID();
+  const providerInstanceId = config.platformIdentity?.instanceId ?? telemetryInstanceId;
   let otelEnabled = config.OTEL_ENABLED;
   let telemetry: ProviderTelemetry | undefined;
   const dynamicBusinessEventTelemetry: BusinessEventMetricOtlpSink = {
@@ -668,6 +669,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         snapshotIds,
         gateway,
         taskRepository,
+        providerInstanceId,
         new IdempotencyRepository(pool, () => metrics.increment("sdar_idempotency_hits_total"), {
           leaseMs: config.IDEMPOTENCY_LEASE_MS,
           waitTimeoutMs: config.IDEMPOTENCY_WAIT_TIMEOUT_MS,
@@ -735,7 +737,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
           new ProviderTelemetryIngress(pool, {
             providerId: validated.providerId,
             runtimeVersion: RUNTIME_VERSION,
-            instanceId: telemetryInstanceId,
+            instanceId: providerInstanceId,
             maxBatch: config.PROVIDER_TELEMETRY_MAX_BATCH,
             maxEventBytes: config.PROVIDER_TELEMETRY_MAX_EVENT_BYTES,
             maxDepth: config.PROVIDER_TELEMETRY_MAX_DEPTH,
@@ -830,7 +832,6 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
             telemetry?.exportAudit(
               records.map((record) => ({
                 ...record.recordBody,
-                instanceId: telemetryInstanceId,
                 emittedAt: new Date().toISOString(),
               })),
             ) ?? Promise.reject(new Error("TELEMETRY_AUDIT_EXPORT_UNAVAILABLE")),

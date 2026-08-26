@@ -27,6 +27,7 @@ export interface AuthorizationContext {
 export interface TaskRecord {
   taskId: string;
   providerId: string;
+  providerInstanceId: string;
   operationName: string;
   operationSnapshotId: string;
   authorizationContextHash: string;
@@ -79,6 +80,28 @@ export interface TaskRecord {
   nextRecoveryAt: Date;
   recoveryFailureCount: number;
   lastReconciledAt: Date | null;
+}
+
+export interface TaskProviderIdentity {
+  profileVersion: "1.0";
+  providerId: string;
+  providerInstanceId: string;
+}
+
+/** Identity belongs to the admitted Task, not the process reading or exporting it. */
+export function taskProviderIdentity(
+  task: Pick<TaskRecord, "providerId" | "providerInstanceId">,
+): TaskProviderIdentity {
+  for (const value of [task.providerId, task.providerInstanceId]) {
+    if (typeof value !== "string" || value.length < 1 || value.length > 256) {
+      throw new Error("TASK_PROVIDER_IDENTITY_INVALID");
+    }
+  }
+  return {
+    profileVersion: "1.0",
+    providerId: task.providerId,
+    providerInstanceId: task.providerInstanceId,
+  };
 }
 
 export const RESERVED_RESULT_FIELDS = [

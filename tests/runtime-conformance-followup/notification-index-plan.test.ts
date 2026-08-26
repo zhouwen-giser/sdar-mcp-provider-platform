@@ -16,12 +16,12 @@ describe("notification UUID batch plans", () => {
         (task_id, provider_id, operation_name, operation_snapshot_id,
          authorization_context_hash, execution_mode, simulation_id, arguments, argument_hash,
          external_execution_id, internal_state, mcp_status, substate, status_message,
-         accepted_at, actual_started_at, latest_start_at)
+         accepted_at, actual_started_at, latest_start_at, provider_instance_id)
        SELECT ('00000000-0000-4000-8000-' || lpad(series::text, 12, '0'))::uuid,
               $1, 'durable_task', (SELECT snapshot_id FROM operation_snapshot LIMIT 1),
               $2, 'live', NULL, '{}'::jsonb, repeat('b',64), 'index-' || series::text,
               'RUNNING', 'working', 'running', 'Working.', clock_timestamp(),
-              clock_timestamp(), clock_timestamp()
+              clock_timestamp(), clock_timestamp(), 'test-provider-instance'
        FROM generate_series(1,5000) AS series`,
       [harness.providerId, authorization.hash],
     );

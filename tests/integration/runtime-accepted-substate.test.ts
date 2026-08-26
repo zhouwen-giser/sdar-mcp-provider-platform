@@ -43,11 +43,11 @@ describe("Runtime accepted Task substate", () => {
          (task_id,provider_id,operation_name,operation_snapshot_id,authorization_context_hash,
           execution_mode,simulation_id,arguments,argument_hash,external_execution_id,
           internal_state,mcp_status,substate,accepted_at,timing,adapter_revision,observation_revision,
-          trace_id,root_traceparent,root_tracestate,correlation_id)
+          trace_id,root_traceparent,root_tracestate,correlation_id,provider_instance_id)
        VALUES ($1,'accepted-substate-provider','accepted_task',$2,repeat('b',64),'simulation','sim-accepted',
           '{}'::jsonb,repeat('c',64),'accepted-execution','QUEUED','working','accepted',clock_timestamp(),
           '{}'::jsonb,0,0,repeat('d',32),
-          '00-dddddddddddddddddddddddddddddddd-eeeeeeeeeeeeeeee-01','vendor=accepted','accepted-correlation')`,
+          '00-dddddddddddddddddddddddddddddddd-eeeeeeeeeeeeeeee-01','vendor=accepted','accepted-correlation','test-provider-instance')`,
       [taskId, snapshotId],
     );
     const result = await pool.query<{ substate: string; internal_state: string }>(
@@ -83,6 +83,7 @@ describe("Runtime accepted Task substate", () => {
     const input = {
       taskId,
       providerId: "accepted-concurrency-provider",
+      providerInstanceId: "test-provider-instance",
       operationName: "accepted_task",
       operationSnapshotId: snapshotId,
       authorization: {
@@ -106,6 +107,7 @@ describe("Runtime accepted Task substate", () => {
       reservationRef: null,
     };
     const repository = new TaskRepository(pool);
+    await repository.createAdmissionIntent(input);
     const tasks = await Promise.all([
       repository.publishAccepted(input),
       repository.publishAccepted(input),
@@ -144,6 +146,7 @@ describe("Runtime accepted Task substate", () => {
     const baseInput = {
       taskId,
       providerId: "accepted-conflict-provider",
+      providerInstanceId: "test-provider-instance",
       operationName: "accepted_task",
       operationSnapshotId: snapshotId,
       authorization: {
@@ -167,6 +170,7 @@ describe("Runtime accepted Task substate", () => {
       reservationRef: null,
     };
     const repository = new TaskRepository(pool);
+    await repository.createAdmissionIntent(baseInput);
     const outcomes = await Promise.allSettled([
       repository.publishAccepted(baseInput),
       repository.publishAccepted({

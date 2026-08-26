@@ -28,6 +28,7 @@ import {
   CommandInProgressError,
   isTerminalState,
   systemClock,
+  taskProviderIdentity,
   TechnicalExecutionError,
   unknownAvailability,
   validateAvailabilityResponse,
@@ -35,6 +36,7 @@ import {
 } from "../../domain/src/index.js";
 import type { ValidatedManifest, ValidatedOperation } from "../../operation-registry/src/index.js";
 import type {
+  AdmissionIntentInput,
   AdmissionIntentRecord,
   IdempotencyRepository,
   ObservationPage,
@@ -74,6 +76,7 @@ export interface TaskTraceEvent {
 export interface ProviderLocalTaskIdentity {
   readonly taskId: string;
   readonly providerId: string;
+  readonly providerInstanceId: string;
   readonly externalExecutionId: string | null;
   readonly operationName: string;
   readonly runtimeRevision: string;
@@ -92,6 +95,7 @@ export class TaskEngine {
     readonly operationSnapshotIds: Map<string, string>,
     readonly gateway: GrpcAdapterGateway,
     repository: TaskRepository,
+    readonly providerInstanceId: string,
     readonly idempotency?: IdempotencyRepository,
     readonly clock: Clock = systemClock,
     readonly metrics?: TaskEngineMetrics,
@@ -100,6 +104,7 @@ export class TaskEngine {
       repository.pool,
     ),
   ) {
+    taskProviderIdentity({ providerId: manifest.providerId, providerInstanceId });
     this.#repository = repository;
     this.#operationSnapshots = operationSnapshots;
   }
@@ -123,6 +128,7 @@ export class TaskEngine {
     return Object.freeze({
       taskId: task.taskId,
       providerId: task.providerId,
+      providerInstanceId: task.providerInstanceId,
       externalExecutionId: task.externalExecutionId,
       operationName: task.operationName,
       runtimeRevision: task.runtimeRevision,
@@ -310,7 +316,7 @@ export class TaskEngine {
     timing: TaskExecutionTiming,
     anchors: TimingAnchors,
     reservationRef?: string,
-    persistedOperationSnapshotId?: string,
+    persistedAdmission?: AdmissionIntentRecord,
   ): Promise<ToolInvocationResult> {
     this.onTrace?.({
       event: "operation.admission",
@@ -341,11 +347,12 @@ export class TaskEngine {
     }
 
     const operationSnapshotId =
-      persistedOperationSnapshotId ?? this.operationSnapshotIds.get(operation.name);
+      persistedAdmission?.operationSnapshotId ?? this.operationSnapshotIds.get(operation.name);
     if (operationSnapshotId === undefined) throw new Error("OPERATION_SNAPSHOT_NOT_FOUND");
-    const intent = {
+    let intent: AdmissionIntentInput = {
       taskId,
       providerId: this.manifest.providerId,
+      providerInstanceId: this.providerInstanceId,
       operationName: operation.name,
       operationSnapshotId,
       authorization,
@@ -359,10 +366,41 @@ export class TaskEngine {
       timing,
       reservationRef: reservationRef ?? null,
     };
-    const inserted = await this.#repository.createAdmissionIntent(intent);
+    // Recovery of an observed durable intent must not recreate a missing row
+    // using the replacement process's identity.
+    const inserted =
+      persistedAdmission === undefined
+        ? await this.#repository.createAdmissionIntent(intent)
+        : false;
     if (!inserted || recovering) {
+      const admitted = await this.#repository.getAdmission(taskId);
+      if (admitted === null) throw new Error("ADMISSION_INTENT_MISSING");
+      if (
+        admitted.providerId !== intent.providerId ||
+        admitted.operationName !== intent.operationName ||
+        admitted.operationSnapshotId !== intent.operationSnapshotId ||
+        admitted.argumentHash !== intent.argumentHash ||
+        admitted.authorization.hash !== intent.authorization.hash ||
+        admitted.authorization.executionMode !== intent.authorization.executionMode ||
+        admitted.authorization.simulationId !== intent.authorization.simulationId ||
+        (persistedAdmission !== undefined &&
+          admitted.providerInstanceId !== persistedAdmission.providerInstanceId)
+      ) {
+        throw new Error("ADMISSION_IDENTITY_CONFLICT");
+      }
+      // A retry or replacement process resumes the committed admission owner
+      // and original correlation context, not values from the replacement call.
+      intent = admitted;
       const existing = await this.#repository.getById(taskId);
-      if (existing !== null) return { kind: "task", task: detailedTask(existing) };
+      if (existing !== null) {
+        if (
+          existing.providerId !== admitted.providerId ||
+          existing.providerInstanceId !== admitted.providerInstanceId
+        ) {
+          throw new Error("TASK_ADMISSION_IDENTITY_CONFLICT");
+        }
+        return { kind: "task", task: detailedTask(existing) };
+      }
       const reconciliation = await this.gateway.reconcileExecution(
         taskId,
         operation.name,
@@ -485,22 +523,7 @@ export class TaskEngine {
 
   async #publishReconciled(
     operation: ValidatedOperation,
-    intent: {
-      taskId: string;
-      providerId: string;
-      operationName: string;
-      operationSnapshotId: string;
-      authorization: AuthorizationContext;
-      arguments: Record<string, unknown>;
-      argumentHash: string;
-      acceptedAt: Date;
-      notBefore: Date;
-      latestStartAt: Date;
-      deadlineAt: Date | null;
-      ttlMs: number | null;
-      timing: TaskExecutionTiming;
-      reservationRef: string | null;
-    },
+    intent: AdmissionIntentInput,
     externalExecutionId: string,
     snapshotValue: ExecutionSnapshot,
     ttlMs: number | undefined,
@@ -717,7 +740,7 @@ export class TaskEngine {
         deadlineAt: admission.deadlineAt,
       },
       admission.reservationRef ?? undefined,
-      admission.operationSnapshotId,
+      admission,
     );
   }
 

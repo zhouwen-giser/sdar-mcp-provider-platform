@@ -95,6 +95,7 @@ beforeAll(async () => {
     snapshots,
     gateway,
     new TaskRepository(pool),
+    "test-provider-instance",
     new IdempotencyRepository(pool),
   );
 });
@@ -159,6 +160,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
     );
     const completed = await restarted.getTask(taskId, authorization);
     expect(completed).toMatchObject({ taskId, status: "completed" });
@@ -199,6 +201,7 @@ describe("durable task lifecycle", () => {
         snapshots,
         gateway,
         new TaskRepository(singleConnectionPool),
+        "test-provider-instance",
       );
       const created = await Promise.race([
         singleConnectionEngine.callOperation(
@@ -608,6 +611,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       unavailableGateway,
       new TaskRepository(pool),
+      "test-provider-instance",
     );
     try {
       await expect(
@@ -635,6 +639,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       new IdempotencyRepository(pool),
     );
     const [first, duplicate] = await Promise.all([
@@ -755,6 +760,7 @@ describe("durable task lifecycle", () => {
         engine.operationSnapshotIds,
         unavailable,
         new TaskRepository(pool),
+        "test-provider-instance",
       );
       const fallback = await fallbackEngine.checkAvailability(
         [
@@ -782,6 +788,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       new IdempotencyRepository(pool),
       clock,
     );
@@ -862,6 +869,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -925,6 +933,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -970,6 +979,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1023,6 +1033,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       lateGateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1047,6 +1058,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1064,6 +1076,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1101,6 +1114,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1151,6 +1165,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1198,6 +1213,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -1252,6 +1268,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -2945,6 +2962,7 @@ describe("durable task lifecycle", () => {
           engine.operationSnapshotIds,
           gateway,
           new TaskRepository(pool),
+          "test-provider-instance",
           new IdempotencyRepository(pool),
         ),
         new TaskEngine(
@@ -2952,6 +2970,7 @@ describe("durable task lifecycle", () => {
           engine.operationSnapshotIds,
           gateway,
           new TaskRepository(pool),
+          "test-provider-instance",
           new IdempotencyRepository(pool),
         ),
       ];
@@ -3011,6 +3030,7 @@ describe("durable task lifecycle", () => {
           engine.operationSnapshotIds,
           gateway,
           new TaskRepository(pool),
+          "test-provider-instance",
           new IdempotencyRepository(pool),
         ),
         new TaskEngine(
@@ -3018,6 +3038,7 @@ describe("durable task lifecycle", () => {
           engine.operationSnapshotIds,
           gateway,
           new TaskRepository(pool),
+          "test-provider-instance",
           new IdempotencyRepository(pool),
         ),
       ];
@@ -3156,6 +3177,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       undefined,
       deadlineClock,
     );
@@ -3424,6 +3446,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       new TaskRepository(pool),
+      "test-provider-instance",
       undefined,
       clock,
     );
@@ -3752,6 +3775,7 @@ describe("durable task lifecycle", () => {
       engine.operationSnapshotIds,
       gateway,
       repository,
+      "test-provider-instance",
       undefined,
       clock,
     );

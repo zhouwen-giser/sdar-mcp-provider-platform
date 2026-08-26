@@ -91,6 +91,7 @@ export async function runConformance(options: ConformanceOptions): Promise<Confo
       snapshots,
       gateway,
       repository,
+      "test-provider-instance",
       new IdempotencyRepository(pool),
     );
 
@@ -162,6 +163,7 @@ export async function runConformance(options: ConformanceOptions): Promise<Confo
         snapshots,
         gateway,
         repository,
+        "test-provider-instance",
         new IdempotencyRepository(pool),
         clock,
       );

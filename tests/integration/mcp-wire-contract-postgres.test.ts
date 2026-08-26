@@ -76,6 +76,7 @@ beforeAll(async () => {
     snapshots,
     gateway,
     new TaskRepository(pool),
+    "test-provider-instance",
     new IdempotencyRepository(pool),
   );
   const handler = new McpProtocolHandler(manifest, gateway, engine, {

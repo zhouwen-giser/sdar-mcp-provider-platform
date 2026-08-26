@@ -67,6 +67,7 @@ beforeAll(async () => {
     snapshots,
     gateway,
     new TaskRepository(pool),
+    "test-provider-instance",
     new IdempotencyRepository(pool),
   );
 });
@@ -221,6 +222,7 @@ describe("Runtime startup and fault recovery", () => {
       engine.operationSnapshotIds,
       restartedGateway,
       new TaskRepository(pool),
+      "test-provider-instance",
     );
     try {
       const scan = await new RecoveryManager(restartedEngine, new TaskRepository(pool)).scan();
@@ -286,7 +288,13 @@ describe("Runtime startup and fault recovery", () => {
     });
     const snapshotIdsV2 = await new OperationSnapshotRepository(pool).saveManifest(manifestV2);
     const repository = new TaskRepository(pool);
-    const restarted = new TaskEngine(manifestV2, snapshotIdsV2, gateway, repository);
+    const restarted = new TaskEngine(
+      manifestV2,
+      snapshotIdsV2,
+      gateway,
+      repository,
+      "test-provider-instance",
+    );
     expect((await new RecoveryManager(restarted, repository).scan()).admissionsRecovered).toBe(1);
     await new DurableScheduler(manifestV2, gateway, repository).tick();
     expect(await repository.getById(taskId)).toMatchObject({
@@ -332,7 +340,13 @@ describe("Runtime startup and fault recovery", () => {
       ),
     });
     const snapshotsV2 = await new OperationSnapshotRepository(pool).saveManifest(manifestV2);
-    const restarted = new TaskEngine(manifestV2, snapshotsV2, gateway, new TaskRepository(pool));
+    const restarted = new TaskEngine(
+      manifestV2,
+      snapshotsV2,
+      gateway,
+      new TaskRepository(pool),
+      "test-provider-instance",
+    );
     await restarted.updateTask(taskId, { approval: true }, authorization);
     await new DurableCommandDispatcher(gateway, new TaskRepository(pool)).tick();
     expect(await restarted.getTask(taskId, authorization)).toMatchObject({ status: "completed" });

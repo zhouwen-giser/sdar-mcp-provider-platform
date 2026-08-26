@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { TaskRepository } from "../../../packages/persistence-postgres/src/index.js";
+import {
+  TaskRepository,
+  type AdmissionIntentInput,
+} from "../../../packages/persistence-postgres/src/index.js";
 import { TtlCleaner } from "../../../packages/task-engine/src/index.js";
 import { BusinessEventsPostgresHarness } from "../postgres-harness.js";
 
@@ -33,9 +36,10 @@ afterAll(() => harness.stop());
 describe("Task resource binding and visibility retention", () => {
   it("materializes a normalized binding during scheduled admission", async () => {
     const acceptedAt = new Date("2026-07-22T01:00:00Z");
-    await repository.publishScheduled({
+    const admission: AdmissionIntentInput = {
       taskId,
       providerId,
+      providerInstanceId: "test-provider-instance",
       operationName: "bound_task",
       operationSnapshotId: snapshotId,
       authorization: { hash: "a".repeat(64), executionMode: "live", simulationId: null },
@@ -55,7 +59,9 @@ describe("Task resource binding and visibility retention", () => {
         maxElapsedMs: null,
       },
       reservationRef: null,
-    });
+    };
+    await repository.createAdmissionIntent(admission);
+    await repository.publishScheduled(admission);
     const binding = await harness.pool.query<{
       resource_ref: string;
       authorization_context_hash: string;

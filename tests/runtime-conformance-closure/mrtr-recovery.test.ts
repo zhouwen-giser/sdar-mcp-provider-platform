@@ -43,7 +43,13 @@ beforeAll(async () => {
   });
   const manifest = new OperationRegistry().validate(await gateway.describeProvider());
   const snapshots = await new OperationSnapshotRepository(pool).saveManifest(manifest);
-  engine = new TaskEngine(manifest, snapshots, gateway, new TaskRepository(pool));
+  engine = new TaskEngine(
+    manifest,
+    snapshots,
+    gateway,
+    new TaskRepository(pool),
+    "test-provider-instance",
+  );
 });
 
 beforeEach(async () => {

@@ -2,7 +2,7 @@ import * as grpc from "@grpc/grpc-js";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { Pool, PoolClient } from "pg";
-import { RUNTIME_VERSION } from "../../domain/src/index.js";
+import { RUNTIME_VERSION, taskProviderIdentity } from "../../domain/src/index.js";
 import { createProviderOpsEnvelope, TelemetrySanitizer } from "../../observability/src/index.js";
 import type { CanonicalJsonValue } from "../../observability/src/index.js";
 import {
@@ -103,6 +103,7 @@ export class ProviderTelemetryIngress {
       return rejected(event, "PROVIDER_EVENT_TASK_NOT_FOUND");
     }
     if (task !== null) {
+      taskProviderIdentity(task);
       if (task.providerId !== this.options.providerId) {
         return rejected(event, "PROVIDER_IDENTITY_MISMATCH");
       }
@@ -130,7 +131,7 @@ export class ProviderTelemetryIngress {
       deliveryClass: "audit",
       providerId: this.options.providerId,
       runtimeVersion: this.options.runtimeVersion ?? RUNTIME_VERSION,
-      instanceId: this.options.instanceId,
+      instanceId: task === null ? this.options.instanceId : task.providerInstanceId,
       ...(event.taskId.length === 0 ? {} : { taskId: event.taskId }),
       resourceId: event.resourceId,
       resourceType: event.resourceType,
@@ -150,14 +151,24 @@ export class ProviderTelemetryIngress {
       providerEventId: event.providerEventId,
       providerEventSequence: Number(event.providerEventSequence),
       eventType: eventCategory,
-      ...(traceId === undefined ? {} : { traceId }),
-      ...(providerTrace === undefined ? {} : { spanId: providerTrace.spanId }),
       stableAggregateIdentity: task?.taskId ?? event.resourceId,
       eventIdentity: `${this.options.providerId}:${event.providerEventId}`,
       revision: event.providerEventSequence,
       occurredAt,
       attributes: {
         ...(sanitizedAttributes as Record<string, CanonicalJsonValue>),
+        correlation: {
+          ...(task?.correlationId === undefined || task.correlationId === null
+            ? {}
+            : { correlationId: task.correlationId }),
+          ...(traceId === undefined ? {} : { traceId }),
+          ...(providerTrace === undefined ? {} : { spanId: providerTrace.spanId }),
+          // Preserve explicit canonical Provider claims; none select facts or
+          // override the committed local Task/instance/execution identity above.
+          ...(isRecord(sanitizedAttributes) && isRecord(sanitizedAttributes.correlation)
+            ? sanitizedAttributes.correlation
+            : {}),
+        },
         ...(event.traceparent.length === 0 ? {} : { traceparent: event.traceparent }),
         ...(event.tracestate.length === 0 ? {} : { tracestate: event.tracestate }),
         ...(task?.traceId === undefined || task.traceId === null

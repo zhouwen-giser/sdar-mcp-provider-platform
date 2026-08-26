@@ -114,6 +114,7 @@ function testEngine(
     new Map(),
     {} as never,
     repository as never,
+    "test-provider-instance",
     undefined,
     undefined,
     undefined,

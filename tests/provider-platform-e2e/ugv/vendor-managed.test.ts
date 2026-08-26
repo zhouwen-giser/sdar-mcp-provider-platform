@@ -151,6 +151,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
       operationSnapshots,
       runtime.gateway,
       new TaskRepository(runtime.pool),
+      "test-provider-instance",
     );
     runtimeAddress = await runtime.app.listen({ host: "127.0.0.1", port: 0 });
   });

@@ -46,7 +46,13 @@ export class PostgresHarness {
     });
     const manifest = new OperationRegistry().validate(await this.gateway.describeProvider());
     const snapshots = await new OperationSnapshotRepository(this.pool).saveManifest(manifest);
-    this.engine = new TaskEngine(manifest, snapshots, this.gateway, new TaskRepository(this.pool));
+    this.engine = new TaskEngine(
+      manifest,
+      snapshots,
+      this.gateway,
+      new TaskRepository(this.pool),
+      "test-provider-instance",
+    );
   }
 
   async reset(): Promise<void> {

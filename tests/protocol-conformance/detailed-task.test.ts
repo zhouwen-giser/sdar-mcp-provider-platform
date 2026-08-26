@@ -3,6 +3,32 @@ import type { TaskRecord } from "../../packages/domain/src/index.js";
 import { mapTaskToDetailedTask } from "../../packages/task-engine/src/index.js";
 
 describe("frozen DetailedTask projection", () => {
+  it.each(["create", "get", "notification"] as const)(
+    "WI080 emits the stored Provider identity as one strict sibling for %s",
+    (projection) => {
+      const projected = mapTaskToDetailedTask(fixture(), [], projection);
+      expect(projected._meta).toEqual({
+        "io.sdar/providerIdentity": {
+          profileVersion: "1.0",
+          providerId: "task-provider",
+          providerInstanceId: "owning-instance",
+        },
+        "io.sdar/taskExecution": {
+          profileVersion: "1.0",
+          runtimeRevision: "42",
+          providerRevision: "7",
+          substate: "running",
+        },
+      });
+    },
+  );
+
+  it.each(["", "x".repeat(257)])("WI080 rejects invalid stored instance identity", (instance) => {
+    expect(() => mapTaskToDetailedTask(fixture({ providerInstanceId: instance }))).toThrow(
+      "TASK_PROVIDER_IDENTITY_INVALID",
+    );
+  });
+
   it("C-013 C-016 C-027 C-029 C-070 uses flat results, true TTL and one Runtime revision", () => {
     const task = fixture({
       mcpStatus: "completed",
@@ -138,6 +164,8 @@ describe("frozen DetailedTask projection", () => {
 function fixture(overrides: Partial<TaskRecord> = {}): TaskRecord {
   return {
     taskId: "00000000-0000-4000-8000-000000000001",
+    providerId: "task-provider",
+    providerInstanceId: "owning-instance",
     mcpStatus: "working",
     statusMessage: "Working",
     createdAt: new Date("2026-07-18T03:00:00.000Z"),

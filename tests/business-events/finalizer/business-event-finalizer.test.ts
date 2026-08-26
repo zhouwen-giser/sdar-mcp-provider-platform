@@ -128,9 +128,9 @@ describe("Business Event mapping and publication", () => {
       `INSERT INTO provider_task
          (task_id,provider_id,operation_name,operation_snapshot_id,authorization_context_hash,
           execution_mode,simulation_id,arguments,argument_hash,external_execution_id,
-          internal_state,mcp_status,substate,status_message,timing,accepted_at)
+          internal_state,mcp_status,substate,status_message,timing,accepted_at,provider_instance_id)
        VALUES ($1,$2,'task_operation',$3,$4,'live',NULL,'{}'::jsonb,$5,'external-42',
-               'RUNNING','working','running','Running.','{}'::jsonb,clock_timestamp())`,
+               'RUNNING','working','running','Running.','{}'::jsonb,clock_timestamp(),'test-provider-instance')`,
       [taskId, providerId, snapshotId, "c".repeat(64), "d".repeat(64)],
     );
     const lease = await requireLease(repository, providerId, sourceId, sourceStreamId, "replica-a");
