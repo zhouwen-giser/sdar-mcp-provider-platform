@@ -76,7 +76,7 @@ FROM build AS production-dependencies
 RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked \
     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked \
     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules \
-    && CI=true pnpm install --prod --offline --frozen-lockfile \
+    && CI=true pnpm install --prod --prefer-offline --frozen-lockfile \
       --filter='!@sdar/pms-web' --store-dir=/pnpm/store \
     && find node_modules -type f -name '*.map' -delete \
     && find node_modules -type f -iname '*.md' \
