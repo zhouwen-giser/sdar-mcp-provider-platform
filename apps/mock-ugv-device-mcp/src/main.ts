@@ -13,7 +13,8 @@ const port = Number(process.env.MOCK_UGV_DEVICE_MCP_PORT ?? 19000);
 const missingTool = process.env.MOCK_UGV_MISSING_TOOL ?? "";
 const failureMode = process.env.MOCK_UGV_FAILURE_MODE ?? "none";
 const state = {
-  mission: { id: 1001, state: 0, progress: 0 },
+  // Reserve the fallback ID without advertising a mission before a command is accepted.
+  mission: { id: 1001, state: -1, progress: 0 },
   reconnaissance: { id: 2001, status: 1, progress: 0 },
   weapon: { id: 4001, state: 0, progress: 0 },
   gimbal: { id: 3001, state: 0, progress: 0 },
@@ -159,7 +160,8 @@ function call(name: string, args: Record<string, unknown>): Record<string, unkno
       available: true,
       heading: 0,
       veh_speed: 0,
-      chassis_task: state.mission,
+      chassis_task:
+        state.mission.state === -1 ? { id: -1, type: -1, state: 0, progress: -1 } : state.mission,
       eo_task: state.gimbal,
       weapon_task: state.weapon,
       gimbal: { yaw: 0, pitch: 0, zoom: 1 },

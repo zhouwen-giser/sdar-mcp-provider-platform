@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "scope": "actual mock call -> actual composite normalizer -> actual snapshot patch -> source-extracted unchanged occupancy functions; no MCP transport or live admission",
+  "node": "v22.23.1",
+  "typescript": "5.9.3",
+  "checks": [
+    "cold repeated get_status normalizes to idle and clears a prior mission ID",
+    "ugv_path_follow_mission: fallback 1001, accepted/start/pause remain occupied, terminate remains terminal",
+    "ugv_return_home: fallback 1001, accepted/start/pause remain occupied, terminate remains terminal",
+    "ugv_move_distance: fallback 1001, accepted/start/pause remain occupied, terminate remains terminal",
+    "explicit ID, subsequent fallback and motion-stop transitions are preserved"
+  ],
+  "sources": {
+    "packages/vehicle-provider-core/src/task-state-mapper.ts": "c0cf3059523d60a82b473fc8043be24a6293091173eb025441fe33043890f79b",
+    "packages/vehicle-mqtt-ingress/src/guard.ts": "623b0f2ba7a2b928ed799afea917ac1c44ce6feb4ccf565f9b93dcd0292cd5f4",
+    "packages/vehicle-mqtt-ingress/src/normalizers.ts": "f356dfc4031eca23bea4ddf67b4ec922aee193293a1925e83d585d2fa4daf191",
+    "packages/vehicle-provider-core/src/snapshot.ts": "095185065d269007bb2e20fbae874031add2309cdf6bddd20d2e348f8debed67",
+    "apps/ugv-provider-adapter/src/runtime.ts": "49069c5a4143155f30aa6065be4584f9100a6da7c71063853bd30ce497228f76",
+    "apps/mock-ugv-device-mcp/src/main.ts": "56f4813b850d48e0a4af27861fa5ee02022bf79c7dc47089e604f626e3c0822a"
+  }
+}
