@@ -40,6 +40,27 @@ export class PostgresCatalogSnapshotRepository implements CatalogSnapshotReposit
         await client.query("COMMIT");
         return { created: false, snapshot: active };
       }
+      // Catalog documents are content-addressed. A -> B -> A reactivates the
+      // immutable A snapshot instead of inserting a duplicate checksum.
+      const historical = await client.query<CatalogSnapshotRow>(
+        `SELECT provider_id,revision,checksum,catalog_document,discovered_at,created_at
+           FROM catalog_snapshot WHERE provider_id=$1 AND checksum=$2`,
+        [input.providerId, checksum],
+      );
+      const prior = historical.rows[0];
+      if (prior !== undefined) {
+        const snapshot = snapshotFromRow(prior);
+        await activateSnapshot(client, snapshot);
+        await appendAudit(
+          client,
+          input,
+          snapshot.revision,
+          checksum,
+          "catalog.snapshot.reactivated",
+        );
+        await client.query("COMMIT");
+        return { created: false, snapshot };
+      }
       const revisionResult = await client.query<{ revision: string }>(
         `SELECT COALESCE(MAX(revision),0)+1 AS revision
            FROM catalog_snapshot
@@ -57,18 +78,11 @@ export class PostgresCatalogSnapshotRepository implements CatalogSnapshotReposit
          RETURNING provider_id,revision,checksum,catalog_document,discovered_at,created_at`,
         [input.providerId, revision, checksum, json(document), input.discoveredAt],
       );
-      await client.query(
-        `INSERT INTO active_catalog_snapshot(provider_id,revision,checksum)
-         VALUES ($1,$2,$3)
-         ON CONFLICT (provider_id) DO UPDATE
-           SET revision=EXCLUDED.revision,checksum=EXCLUDED.checksum,
-               updated_at=clock_timestamp()`,
-        [input.providerId, revision, checksum],
-      );
-      await appendAudit(client, input, revision, checksum);
-      await client.query("COMMIT");
       const row = inserted.rows[0];
       if (row === undefined) throw new Error("CATALOG_SNAPSHOT_INSERT_FAILED");
+      await activateSnapshot(client, snapshotFromRow(row));
+      await appendAudit(client, input, revision, checksum);
+      await client.query("COMMIT");
       return { created: true, snapshot: snapshotFromRow(row) };
     } catch (error) {
       await client.query("ROLLBACK");
@@ -141,18 +155,32 @@ async function appendAudit(
   input: PublishCatalogSnapshot,
   revision: number,
   checksum: string,
+  action:
+    "catalog.snapshot.published" | "catalog.snapshot.reactivated" = "catalog.snapshot.published",
 ): Promise<void> {
   await client.query(
     `INSERT INTO audit(
        audit_event_id,action,actor_id,correlation_id,subject_type,subject_id,metadata
-     ) VALUES ($1,'catalog.snapshot.published',$2,$3,'catalog_snapshot',$4,$5::jsonb)`,
+     ) VALUES ($1,$6,$2,$3,'catalog_snapshot',$4,$5::jsonb)`,
     [
       randomUUID(),
       input.actorId,
       input.correlationId,
       `${input.providerId}:${String(revision)}`,
       json({ providerId: input.providerId, revision, checksum }),
+      action,
     ],
+  );
+}
+
+async function activateSnapshot(client: PoolClient, snapshot: CatalogSnapshot): Promise<void> {
+  await client.query(
+    `INSERT INTO active_catalog_snapshot(provider_id,revision,checksum)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (provider_id) DO UPDATE
+       SET revision=EXCLUDED.revision,checksum=EXCLUDED.checksum,
+           updated_at=clock_timestamp()`,
+    [snapshot.providerId, snapshot.revision, snapshot.checksum],
   );
 }
 
