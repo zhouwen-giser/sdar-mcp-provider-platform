@@ -318,16 +318,21 @@ export class TaskEngine {
     reservationRef?: string,
     persistedAdmission?: AdmissionIntentRecord,
   ): Promise<ToolInvocationResult> {
-    this.onTrace?.({
-      event: "operation.admission",
-      providerId: this.manifest.providerId,
-      taskId,
-      operationName: operation.name,
-      resourceRef: resourceReference(operation, argumentsValue),
-      executionMode: authorization.executionMode,
-      correlationId: authorization.correlationId ?? null,
-    });
+    const traceAdmission = (
+      context: AuthorizationContext,
+      admittedArguments: Record<string, unknown>,
+    ) =>
+      this.onTrace?.({
+        event: "operation.admission",
+        providerId: this.manifest.providerId,
+        taskId,
+        operationName: operation.name,
+        resourceRef: resourceReference(operation, admittedArguments),
+        executionMode: context.executionMode,
+        correlationId: context.correlationId ?? null,
+      });
     if (operation.execution === "SYNCHRONOUS") {
+      traceAdmission(authorization, argumentsValue);
       const response = await this.gateway.startOperation(operation.name, argumentsValue, {
         ...executionOptions(authorization),
         taskId,
@@ -366,13 +371,13 @@ export class TaskEngine {
       timing,
       reservationRef: reservationRef ?? null,
     };
-    // Recovery of an observed durable intent must not recreate a missing row
-    // using the replacement process's identity.
+    // Both public PENDING-idempotency retries and explicit recovery require the
+    // original durable intent; neither may invent a replacement process owner.
     const inserted =
-      persistedAdmission === undefined
+      !recovering && persistedAdmission === undefined
         ? await this.#repository.createAdmissionIntent(intent)
         : false;
-    if (!inserted || recovering) {
+    if (!inserted) {
       const admitted = await this.#repository.getAdmission(taskId);
       if (admitted === null) throw new Error("ADMISSION_INTENT_MISSING");
       if (
@@ -391,11 +396,14 @@ export class TaskEngine {
       // A retry or replacement process resumes the committed admission owner
       // and original correlation context, not values from the replacement call.
       intent = admitted;
+    }
+    traceAdmission(intent.authorization, intent.arguments);
+    if (!inserted) {
       const existing = await this.#repository.getById(taskId);
       if (existing !== null) {
         if (
-          existing.providerId !== admitted.providerId ||
-          existing.providerInstanceId !== admitted.providerInstanceId
+          existing.providerId !== intent.providerId ||
+          existing.providerInstanceId !== intent.providerInstanceId
         ) {
           throw new Error("TASK_ADMISSION_IDENTITY_CONFLICT");
         }
@@ -404,8 +412,8 @@ export class TaskEngine {
       const reconciliation = await this.gateway.reconcileExecution(
         taskId,
         operation.name,
-        argumentHash,
-        executionOptions(authorization),
+        intent.argumentHash,
+        executionOptions(intent.authorization),
       );
       if (reconciliation.status === "CONFLICT") throw new Error("ADAPTER_RECONCILE_CONFLICT");
       if (reconciliation.status === "FOUND" && reconciliation.snapshot !== undefined) {
@@ -414,10 +422,7 @@ export class TaskEngine {
           intent,
           reconciliation.externalExecutionId || reconciliation.snapshot.externalExecutionId,
           reconciliation.snapshot,
-          ttlMs,
           reconciliation as unknown as Record<string, unknown>,
-          timing,
-          anchors,
         );
       }
       if (reconciliation.status !== "NOT_FOUND") {
@@ -425,28 +430,20 @@ export class TaskEngine {
       }
     }
 
-    if (timing.start.mode === "scheduled") {
-      const task = await this.#repository.publishScheduled({
-        ...intent,
-        acceptedAt: anchors.acceptedAt,
-        notBefore: anchors.notBefore,
-        latestStartAt: anchors.latestStartAt,
-        deadlineAt: anchors.deadlineAt,
-        ttlMs: ttlMs ?? 259_200_000,
-        timing,
-      });
+    if (intent.timing.start.mode === "scheduled") {
+      const task = await this.#repository.publishScheduled(intent);
       return { kind: "task", task: detailedTask(task) };
     }
 
     let response;
     try {
-      response = await this.gateway.startOperation(operation.name, argumentsValue, {
+      response = await this.gateway.startOperation(operation.name, intent.arguments, {
         taskId,
-        argumentHash,
-        ...executionOptions(authorization),
+        argumentHash: intent.argumentHash,
+        ...executionOptions(intent.authorization),
         invocationAttempt: 1,
-        timing: toAdapterTiming(timing),
-        ...(reservationRef === undefined ? {} : { reservationRef }),
+        timing: toAdapterTiming(intent.timing),
+        ...(intent.reservationRef === null ? {} : { reservationRef: intent.reservationRef }),
       });
     } catch (error) {
       await this.#repository.markAdmissionUncertain(taskId);
@@ -454,7 +451,7 @@ export class TaskEngine {
     }
     if (response.result === "rejected" || response.rejected !== undefined) {
       const rejected =
-        this.clock.now() > anchors.latestStartAt
+        this.clock.now() > intent.latestStartAt
           ? startWindowMissed(this.clock.now(), "Start response arrived after the start window.")
           : rejectionResult(response.rejected);
       await this.#repository.recordRejection(taskId, rejected);
@@ -469,10 +466,10 @@ export class TaskEngine {
       validateStartResponseIdentity(response, {
         taskId,
         operationName: operation.name,
-        argumentHash,
-        authorizationContextHash: authorization.hash,
-        executionMode: authorization.executionMode,
-        simulationId: authorization.simulationId,
+        argumentHash: intent.argumentHash,
+        authorizationContextHash: intent.authorization.hash,
+        executionMode: intent.authorization.executionMode,
+        simulationId: intent.authorization.simulationId,
       });
     } catch (error) {
       await this.#repository.markAdmissionUncertain(taskId);
@@ -483,7 +480,7 @@ export class TaskEngine {
     const respondedAt = this.clock.now();
     const actualStartedAt = snapshotHasStarted(accepted.initialSnapshot.state) ? respondedAt : null;
     const startWindowMissedAt =
-      (actualStartedAt ?? respondedAt) > anchors.latestStartAt ? respondedAt : undefined;
+      (actualStartedAt ?? respondedAt) > intent.latestStartAt ? respondedAt : undefined;
     if (operation.execution === "TASK_CAPABLE" && transition.terminal) {
       if (transition.mcpStatus === "failed") {
         await this.#repository.markAdmissionUncertain(taskId);
@@ -503,13 +500,7 @@ export class TaskEngine {
         externalExecutionId: accepted.externalExecutionId,
         transition,
         adapterRevision: Number(accepted.initialSnapshot.revision),
-        ttlMs: ttlMs ?? 259_200_000,
         adapterResponse: response as unknown as Record<string, unknown>,
-        acceptedAt: anchors.acceptedAt,
-        notBefore: anchors.notBefore,
-        latestStartAt: anchors.latestStartAt,
-        deadlineAt: anchors.deadlineAt,
-        timing,
         inputRequests,
         actualStartedAt,
         ...(startWindowMissedAt === undefined ? {} : { startWindowMissedAt }),
@@ -526,10 +517,7 @@ export class TaskEngine {
     intent: AdmissionIntentInput,
     externalExecutionId: string,
     snapshotValue: ExecutionSnapshot,
-    ttlMs: number | undefined,
     adapterResponse: Record<string, unknown>,
-    timing: TaskExecutionTiming,
-    anchors: TimingAnchors,
   ): Promise<ToolInvocationResult> {
     validateAdapterSnapshotIdentity(snapshotValue, {
       taskId: intent.taskId,
@@ -557,16 +545,10 @@ export class TaskEngine {
       externalExecutionId,
       transition,
       adapterRevision: Number(snapshotValue.revision),
-      ttlMs: ttlMs ?? 259_200_000,
       adapterResponse,
-      acceptedAt: anchors.acceptedAt,
-      notBefore: anchors.notBefore,
-      latestStartAt: anchors.latestStartAt,
-      deadlineAt: anchors.deadlineAt,
-      timing,
       inputRequests,
       actualStartedAt,
-      ...((actualStartedAt ?? respondedAt) > anchors.latestStartAt
+      ...((actualStartedAt ?? respondedAt) > intent.latestStartAt
         ? { startWindowMissedAt: respondedAt }
         : {}),
     });

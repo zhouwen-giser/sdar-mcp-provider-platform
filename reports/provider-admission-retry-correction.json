@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "WI-080",
+  "owner": "smpp-provider-wi080",
+  "attemptId": "WI-080-0bcaa08f-885e-478f-84a1-227379751f57",
+  "observedAt": "2026-08-26T08:05:50Z",
+  "status": "CORRECTED_CANDIDATE_AWAITING_LEASED_POSTGRES_AND_INDEPENDENT_REVIEW",
+  "developmentOnly": true,
+  "gatePassClaim": false,
+  "releaseGateEligible": false,
+  "source": {
+    "repository": "sdar-mcp-provider-platform",
+    "branch": "codex/live-dev-evaluation-chain-wi080-provider-identity",
+    "parentCandidateCommit": "c452defd0b192662dc283b99576ff4e7e4e1fc06",
+    "controlContractCommit": "d2bbec38674815683052a8e5eb1cb271f3fe5261",
+    "contractChanged": false
+  },
+  "findingsAndCorrections": [
+    {
+      "finding": "P1: public PENDING-idempotency retry could recreate a missing admission with the replacement process owner, then reconcile the original execution",
+      "originalEvidence": "Independent static trace through IdempotencyRepository.execute/claim/abandon and TaskEngine.callOperation/#executeOperation; not reproduced in a live database by this agent",
+      "correction": "Both recovering=true and explicit persisted-admission recovery skip createAdmissionIntent. Missing storage throws ADMISSION_INTENT_MISSING before any Adapter reconcile/start. A genuinely new admission still captures its current owner."
+    },
+    {
+      "finding": "P2: after reloading intent, retry-local timing/anchors/context could still replace original scheduled admission or reset its deadline",
+      "originalEvidence": "Independent static trace and failing scheduled public-engine retry unit test using repository/Adapter doubles",
+      "correction": "Branch selection, Adapter reconciliation/start, identity validation and publication use the complete durable intent: owner, arguments, authorization/correlation, reservation, timing, accepted/notBefore/latestStart/deadline and TTL. No auth policy, idempotency lease or TTL algorithm redesign."
+    },
+    {
+      "finding": "P2: unconditional empty attributes.correlation changed unrelated resource-event attributes and record bodies",
+      "originalEvidence": "Static comparison with existing exact-attribute Provider telemetry transport tests",
+      "correction": "Ingress and committed Task event producers add canonical correlation only when correlation/trace/explicit claims supply actual entries. Existing explicit claims remain non-authoritative; no top-level alias or recordHash algorithm change."
+    }
+  ],
+  "observationTime": "Admission timing anchors remain original. Adapter response/observation handling still uses the current engine clock. Newly committed task.scheduled observations use PostgreSQL clock_timestamp(), not the old admission acceptedAt. Existing retention calculation remains unchanged.",
+  "actualValidation": {
+    "red": {
+      "command": "./node_modules/.bin/vitest run tests/unit/task-admission-retry.test.ts --reporter=default --reporter=json --outputFile=reports/wi080-provider-retry-red-results.json",
+      "sourceState": "Unmodified c452def product code plus the new unit regression file",
+      "exitCode": 1,
+      "files": 1,
+      "passedTests": 1,
+      "failedTests": 2,
+      "failures": "Missing durable intent and omitted scheduled timing both reached the Adapter dispatch double; the genuinely new admission case passed",
+      "artifactSha256": "3b5d3177cf2539bbc53de2354f02abe4f2a225c9f02fcba9c42376d4ea788a0f"
+    },
+    "green": {
+      "command": "./node_modules/.bin/vitest run tests/unit/task-admission-retry.test.ts tests/protocol-conformance/detailed-task.test.ts tests/unit/admission-observation.test.ts tests/unit/event-envelope.test.ts --reporter=default --reporter=json --outputFile=reports/wi080-provider-retry-green-results.json",
+      "exitCode": 0,
+      "files": 4,
+      "passedTests": 25,
+      "failedTests": 0,
+      "artifactSha256": "a494515d63c0b5ed395705eca9d87ad924b806f493888a05de6878357f547212"
+    },
+    "typecheck": { "command": "./node_modules/.bin/tsc --noEmit -p tsconfig.json", "exitCode": 0 },
+    "lint": {
+      "command": "./node_modules/.bin/eslint packages/task-engine/src/engine.ts packages/persistence-postgres/src/tasks.ts packages/provider-telemetry/src/ingress.ts tests/unit/task-admission-retry.test.ts tests/integration/provider-task-identity-postgres.test.ts",
+      "exitCode": 0
+    },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 },
+    "boundary": "Unit doubles exercise the real public engine retry callback; they do not prove PostgreSQL durability, real Adapter RPC or a live-device reproduction."
+  },
+  "pendingPostgres": {
+    "status": "NOT_EXECUTED_BY_IMPLEMENTER",
+    "command": "./node_modules/.bin/vitest run tests/integration/provider-task-identity-postgres.test.ts",
+    "environment": "TEST_DATABASE_URL must identify the Run Controller's leased disposable PostgreSQL database",
+    "testFileSha256": "75a54466ccc5df22799944ceb1e0c078d8cdd5f08b9eb587da2862a0a56c12ba",
+    "testCount": 5,
+    "cases": [
+      "Frozen no-auth HTTP admission and committed identity across successful idempotent replay/get/notification projection",
+      "Public interrupted-admission retry through actual IdempotencyRepository, unchanged owner/accepted/deadline/TTL/reservation/correlation, current observation time and one Adapter side effect",
+      "Delete only the test-owned admission after Adapter acceptance/publication failure; public retry keeps the PENDING key and rejects before reconcile/start without inventing a replacement owner",
+      "Scheduled publication failure followed by default-timing public retry stays SCHEDULED, retains original timing/context, emits current-time observation, and dispatches zero Adapter starts",
+      "Stable command IDs and canonical non-authoritative Task-linked ProviderOps, plus exact unlinked resource attributes without an invented empty correlation object"
+    ],
+    "resources": "Unchanged: one random wi080_identity_<uuid> schema in the supplied DB and the existing TypeScript mock Adapter on a loopback ephemeral gRPC port. No external UGV connection or simulator containers.",
+    "cleanup": "Closes test gateway/Adapter/pools and drops only the exact test-owned random schema. Container/database lifecycle belongs to Run Controller.",
+    "optionalExistingTransportSelector": "./node_modules/.bin/vitest run tests/integration/provider-telemetry-ingress-postgres.test.ts -t 'preserves Struct payloads across the real VehicleTelemetry gRPC transport|serializes plain records for every public telemetry gRPC client'"
+  },
+  "preservedEvidence": {
+    "reports/provider-admission-implementation.json": "abd0a78c9bf9d2dfb204f3e9fb43916e99476ba540e7bfc1917678a9e26557f1",
+    "reports/wi080-provider-identity-unit-results.json": "b492b833d6fc3adbd305f82a9b208823f9d0624e4b4a1b8402179abb8b147e83",
+    "note": "Original candidate, report and 22-test result are preserved unchanged as historical evidence, not proof that the rejected candidate satisfies the uncovered public-retry cases."
+  },
+  "limitations": [
+    "No shared PostgreSQL, Docker, external network/device or live navigation was used by this implementation agent.",
+    "Clean development bootstrap remains required; no old populated database owner backfill or compatibility work.",
+    "No independent ProviderOps export wire, live Task-bearing SSE, physical arrival or Gate PASS is claimed.",
+    "No push or integration adoption; root owns the control-repository Handoff and independent review."
+  ]
+}

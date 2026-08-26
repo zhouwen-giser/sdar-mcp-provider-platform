@@ -369,7 +369,7 @@ export async function captureTaskOperationalEvent(
     attributes: {
       source: "committed_postgres",
       eventType: input.eventType,
-      correlation: taskCorrelation(task),
+      ...taskCorrelationAttributes(task),
     },
     payload: input.payload,
   });
@@ -683,9 +683,9 @@ export class TaskRepository {
       await client.query(
         `INSERT INTO task_observation
           (task_id, revision, type, occurred_at, message, substate, source, payload)
-         VALUES ($1,1,'task.scheduled',$2,'Waiting for scheduled start.','scheduled',
+         VALUES ($1,1,'task.scheduled',clock_timestamp(),'Waiting for scheduled start.','scheduled',
                  'runtime','{}'::jsonb)`,
-        [input.taskId, input.acceptedAt],
+        [input.taskId],
       );
       await insertOutbox(
         client,
@@ -4433,7 +4433,7 @@ async function captureTaskProviderOpsDelivery(
     eventIdentity: eventKey,
     ...(revision === undefined ? {} : { revision }),
     occurredAt,
-    attributes: { source: "committed_postgres", eventType, correlation: taskCorrelation(task) },
+    attributes: { source: "committed_postgres", eventType, ...taskCorrelationAttributes(task) },
     payload: providerOpsPayload(payload),
   });
   await captureProviderOpsDelivery(client, {
@@ -4444,12 +4444,13 @@ async function captureTaskProviderOpsDelivery(
   });
 }
 
-function taskCorrelation(task: TaskRow): Record<string, string> {
+function taskCorrelationAttributes(task: TaskRow): { correlation?: Record<string, string> } {
   // These are source-declared reconciliation claims, never binding authority.
-  return {
+  const correlation = {
     ...(task.correlation_id === null ? {} : { correlationId: task.correlation_id }),
     ...(task.trace_id === null ? {} : { traceId: task.trace_id }),
   };
+  return Object.keys(correlation).length === 0 ? {} : { correlation };
 }
 
 function providerOpsPayload(

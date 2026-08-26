@@ -8,6 +8,7 @@ import {
   createMockAdapterServer,
 } from "../../examples/mock-adapter-typescript/src/server.js";
 import { GrpcAdapterGateway } from "../../packages/adapter-protocol/src/index.js";
+import type { Clock, TaskExecutionTiming } from "../../packages/domain/src/index.js";
 import { Sep2663ProtocolHandler } from "../../packages/mcp-protocol/src/index.js";
 import { createAuthorizationResolver } from "../../packages/mcp-protocol/src/security.js";
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
@@ -83,7 +84,7 @@ afterAll(async () => {
   await admin.end();
 });
 
-function replacement(repository = new TaskRepository(pool)): TaskEngine {
+function replacement(repository = new TaskRepository(pool), clock?: Clock): TaskEngine {
   return new TaskEngine(
     first.manifest,
     first.operationSnapshotIds,
@@ -91,6 +92,7 @@ function replacement(repository = new TaskRepository(pool)): TaskEngine {
     repository,
     instanceB,
     new IdempotencyRepository(pool),
+    clock,
   );
 }
 
@@ -186,25 +188,44 @@ describe("WI080 committed Provider task identity", () => {
     expect(sideEffects - before).toBe(1);
   });
 
-  it("recovers an interrupted admission using its durable owner without redispatching", async () => {
+  it("publicly retries an interrupted admission with the original owner, deadline and context", async () => {
     const repository = new TaskRepository(pool);
+    const acceptedAt = new Date();
+    let now = acceptedAt;
+    const clock = { now: () => now };
     const original = new TaskEngine(
       first.manifest,
       first.operationSnapshotIds,
       gateway,
       repository,
       instanceA,
+      new IdempotencyRepository(pool),
+      clock,
     );
     const operation = required(
       first.manifest.operations.find((value) => value.name === "durable_task"),
     );
     const before = sideEffects;
+    const args = { resourceId: "wi080-interrupted" };
+    const key = "wi080-interrupted-key";
+    const timing: TaskExecutionTiming = {
+      start: { mode: "immediate", startToleranceMs: 30_000 },
+      maxElapsedMs: 60_000,
+    };
     const failure = vi
       .spyOn(repository, "publishAccepted")
       .mockRejectedValueOnce(new Error("WI080_PUBLISH_INTERRUPTED"));
     try {
       await expect(
-        original.callFrozenOperation(operation, { resourceId: "wi080-interrupted" }, authorization),
+        original.callOperation(
+          operation,
+          args,
+          authorization,
+          600_000,
+          key,
+          timing,
+          "wi080-original-reservation",
+        ),
       ).rejects.toThrow("WI080_PUBLISH_INTERRUPTED");
     } finally {
       failure.mockRestore();
@@ -215,20 +236,212 @@ describe("WI080 committed Provider task identity", () => {
     const taskId = required(pending.rows[0]).task_id;
     const admission = await repository.getAdmission(taskId);
     expect(admission).toMatchObject({ providerInstanceId: instanceA, state: "UNCERTAIN" });
-    const restarted = replacement(repository);
+    now = new Date(acceptedAt.getTime() + 5_000);
+    const restarted = replacement(repository, clock);
     const missingTaskId = randomUUID();
     await expect(
       restarted.recoverAdmission({ ...required(admission), taskId: missingTaskId }),
     ).rejects.toThrow("ADMISSION_INTENT_MISSING");
     expect(await repository.getAdmission(missingTaskId)).toBeNull();
-    await restarted.recoverAdmission(required(admission));
-    const recovered = await restarted.getFrozenTask(taskId, authorization);
+    const reconciliation = vi.spyOn(gateway, "reconcileExecution");
+    let recovered;
+    try {
+      recovered = await restarted.callFrozenOperation(
+        operation,
+        args,
+        { ...authorization, correlationId: "wi080-retry-correlation" },
+        key,
+      );
+      expect(reconciliation).toHaveBeenCalledWith(
+        taskId,
+        operation.name,
+        required(admission).argumentHash,
+        {
+          authorizationContextHash: authorization.hash,
+          executionMode: authorization.executionMode,
+          simulationId: authorization.simulationId,
+          correlationId: authorization.correlationId,
+        },
+      );
+    } finally {
+      reconciliation.mockRestore();
+    }
+    expect(recovered.taskId).toBe(taskId);
     expect(identity(recovered)).toEqual({
       profileVersion: "1.0",
       providerId,
       providerInstanceId: instanceA,
     });
+    expect(await repository.getById(taskId)).toMatchObject({
+      providerInstanceId: instanceA,
+      acceptedAt,
+      notBefore: acceptedAt,
+      latestStartAt: new Date(acceptedAt.getTime() + 30_000),
+      deadlineAt: new Date(acceptedAt.getTime() + 60_000),
+      // The new observation stays at its actual controlled test-clock time.
+      actualStartedAt: now,
+      ttlMs: 600_000,
+      reservationRef: "wi080-original-reservation",
+      correlationId: "wi080-correlation",
+      timing,
+    });
     expect(sideEffects - before).toBe(1);
+  });
+
+  it("rejects public pending-idempotency retry when its durable intent is missing", async () => {
+    const repository = new TaskRepository(pool);
+    const original = new TaskEngine(
+      first.manifest,
+      first.operationSnapshotIds,
+      gateway,
+      repository,
+      instanceA,
+      new IdempotencyRepository(pool),
+    );
+    const operation = required(
+      first.manifest.operations.find((value) => value.name === "durable_task"),
+    );
+    const args = { resourceId: "wi080-missing-intent" };
+    const key = "wi080-missing-intent-key";
+    const before = sideEffects;
+    const failure = vi
+      .spyOn(repository, "publishAccepted")
+      .mockRejectedValueOnce(new Error("WI080_PUBLISH_INTERRUPTED"));
+    try {
+      await expect(
+        original.callFrozenOperation(operation, args, authorization, key),
+      ).rejects.toThrow("WI080_PUBLISH_INTERRUPTED");
+    } finally {
+      failure.mockRestore();
+    }
+    const pending = await pool.query<{ stable_task_id: string; state: string }>(
+      "SELECT stable_task_id,state FROM idempotency_record WHERE idempotency_key=$1",
+      [key],
+    );
+    const taskId = required(pending.rows[0]).stable_task_id;
+    expect(required(pending.rows[0]).state).toBe("PENDING");
+    expect(await repository.getAdmission(taskId)).toMatchObject({
+      providerInstanceId: instanceA,
+      state: "UNCERTAIN",
+    });
+    // Exact test-owned corruption: retain the PENDING key and Adapter execution.
+    await pool.query("DELETE FROM admission_intent WHERE task_id=$1", [taskId]);
+    const reconciliation = vi.spyOn(gateway, "reconcileExecution");
+    const dispatch = vi.spyOn(gateway, "startOperation");
+    try {
+      await expect(
+        replacement(repository).callFrozenOperation(operation, args, authorization, key),
+      ).rejects.toThrow("ADMISSION_INTENT_MISSING");
+      expect(reconciliation).not.toHaveBeenCalled();
+      expect(dispatch).not.toHaveBeenCalled();
+    } finally {
+      reconciliation.mockRestore();
+      dispatch.mockRestore();
+    }
+    expect(await repository.getAdmission(taskId)).toBeNull();
+    expect(await repository.getById(taskId)).toBeNull();
+    expect(
+      (await pool.query("SELECT state FROM idempotency_record WHERE stable_task_id=$1", [taskId]))
+        .rows[0],
+    ).toEqual({ state: "PENDING" });
+    expect(sideEffects - before).toBe(1);
+  });
+
+  it("keeps scheduled admission timing and correlation when public retry omits timing", async () => {
+    const repository = new TaskRepository(pool);
+    const acceptedAt = new Date();
+    let now = acceptedAt;
+    const clock = { now: () => now };
+    const original = new TaskEngine(
+      first.manifest,
+      first.operationSnapshotIds,
+      gateway,
+      repository,
+      instanceA,
+      new IdempotencyRepository(pool),
+      clock,
+    );
+    const operation = required(
+      first.manifest.operations.find((value) => value.name === "durable_task"),
+    );
+    const args = { resourceId: "wi080-scheduled-retry" };
+    const key = "wi080-scheduled-key";
+    const notBefore = new Date(acceptedAt.getTime() + 60_000);
+    const timing: TaskExecutionTiming = {
+      start: { mode: "scheduled", scheduledAt: notBefore.toISOString(), startToleranceMs: 30_000 },
+      maxElapsedMs: 120_000,
+    };
+    const before = sideEffects;
+    const failure = vi
+      .spyOn(repository, "publishScheduled")
+      .mockRejectedValueOnce(new Error("WI080_SCHEDULED_PUBLISH_INTERRUPTED"));
+    try {
+      await expect(
+        original.callFrozenOperation(
+          operation,
+          args,
+          authorization,
+          key,
+          timing,
+          "wi080-scheduled-reservation",
+        ),
+      ).rejects.toThrow("WI080_SCHEDULED_PUBLISH_INTERRUPTED");
+    } finally {
+      failure.mockRestore();
+    }
+    now = new Date(acceptedAt.getTime() + 10_000);
+    const publicationFloor = required(
+      (await pool.query<{ observed_at: Date }>("SELECT clock_timestamp() AS observed_at")).rows[0],
+    ).observed_at;
+    const created = await replacement(repository, clock).callFrozenOperation(
+      operation,
+      args,
+      { ...authorization, correlationId: "wi080-scheduled-retry-correlation" },
+      key,
+    );
+    const taskId = String(created.taskId);
+    expect(identity(created)).toEqual({
+      profileVersion: "1.0",
+      providerId,
+      providerInstanceId: instanceA,
+    });
+    expect(await repository.getById(taskId)).toMatchObject({
+      providerInstanceId: instanceA,
+      internalState: "SCHEDULED",
+      externalExecutionId: null,
+      actualStartedAt: null,
+      acceptedAt,
+      notBefore,
+      latestStartAt: new Date(notBefore.getTime() + 30_000),
+      deadlineAt: new Date(notBefore.getTime() + 120_000),
+      correlationId: "wi080-correlation",
+      reservationRef: "wi080-scheduled-reservation",
+      timing,
+    });
+    expect(await repository.getAdmission(taskId)).toMatchObject({
+      providerInstanceId: instanceA,
+      authorization,
+      timing,
+      state: "PUBLISHED",
+    });
+    const observation = required(
+      (
+        await pool.query<{ occurred_at: Date }>(
+          "SELECT occurred_at FROM task_observation WHERE task_id=$1 AND type='task.scheduled'",
+          [taskId],
+        )
+      ).rows[0],
+    );
+    expect(observation.occurred_at.getTime()).toBeGreaterThanOrEqual(publicationFloor.getTime());
+    const facts = await pool.query<{ correlation: Record<string, unknown> }>(
+      "SELECT record_body->'attributes'->'correlation' AS correlation FROM provider_ops_delivery WHERE record_body->>'taskId'=$1",
+      [taskId],
+    );
+    expect(facts.rows.length).toBeGreaterThan(0);
+    expect(
+      facts.rows.every(({ correlation }) => correlation.correlationId === "wi080-correlation"),
+    ).toBe(true);
+    expect(sideEffects - before).toBe(0);
   });
 
   it("keeps command IDs and task-linked ProviderOps owner/canonical claims after process replacement", async () => {
@@ -292,6 +505,24 @@ describe("WI080 committed Provider task identity", () => {
     expect(providerEvent).toMatchObject({
       attributes: { correlation: { originTaskIds: ["deliberately-unrelated-claim"] } },
     });
+    const resourceEvent = {
+      ...event,
+      providerEventId: "wi080-resource-without-correlation",
+      eventType: "RESOURCE_STATE" as const,
+      taskId: "",
+      externalExecutionId: "",
+      operationName: "",
+      attributes: { region: "test", nested: { healthy: true } },
+      payload: { state: "ready", reasonCode: "RESOURCE_READY" },
+    };
+    expect(
+      (await ingress.emit(providerId, { providerId, events: [resourceEvent] })).results[0],
+    ).toMatchObject({ accepted: true });
+    const resource = await pool.query<{ attributes: Record<string, unknown> }>(
+      "SELECT record_body->'attributes' AS attributes FROM provider_ops_delivery WHERE record_body->>'providerEventId'=$1",
+      [resourceEvent.providerEventId],
+    );
+    expect(required(resource.rows[0]).attributes).toEqual(resourceEvent.attributes);
     expect((await replacement().providerLocalTaskIdentity(taskId))?.providerInstanceId).toBe(
       instanceA,
     );

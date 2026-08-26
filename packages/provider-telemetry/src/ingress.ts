@@ -125,6 +125,18 @@ export class ProviderTelemetryIngress {
     const authoritativeSimulationId = task?.simulationId;
     const providerTrace = contextFromTraceparent(event.traceparent);
     const traceId = providerTrace?.traceId ?? task?.traceId ?? undefined;
+    const correlation = {
+      ...(task?.correlationId === undefined || task.correlationId === null
+        ? {}
+        : { correlationId: task.correlationId }),
+      ...(traceId === undefined ? {} : { traceId }),
+      ...(providerTrace === undefined ? {} : { spanId: providerTrace.spanId }),
+      // Preserve explicit canonical Provider claims; none select facts or
+      // override the committed local Task/instance/execution identity below.
+      ...(isRecord(sanitizedAttributes) && isRecord(sanitizedAttributes.correlation)
+        ? sanitizedAttributes.correlation
+        : {}),
+    };
     const envelope = createProviderOpsEnvelope({
       recordType: `provider.${eventCategory}`,
       eventCategory,
@@ -157,18 +169,7 @@ export class ProviderTelemetryIngress {
       occurredAt,
       attributes: {
         ...(sanitizedAttributes as Record<string, CanonicalJsonValue>),
-        correlation: {
-          ...(task?.correlationId === undefined || task.correlationId === null
-            ? {}
-            : { correlationId: task.correlationId }),
-          ...(traceId === undefined ? {} : { traceId }),
-          ...(providerTrace === undefined ? {} : { spanId: providerTrace.spanId }),
-          // Preserve explicit canonical Provider claims; none select facts or
-          // override the committed local Task/instance/execution identity above.
-          ...(isRecord(sanitizedAttributes) && isRecord(sanitizedAttributes.correlation)
-            ? sanitizedAttributes.correlation
-            : {}),
-        },
+        ...(Object.keys(correlation).length === 0 ? {} : { correlation }),
         ...(event.traceparent.length === 0 ? {} : { traceparent: event.traceparent }),
         ...(event.tracestate.length === 0 ? {} : { tracestate: event.tracestate }),
         ...(task?.traceId === undefined || task.traceId === null
