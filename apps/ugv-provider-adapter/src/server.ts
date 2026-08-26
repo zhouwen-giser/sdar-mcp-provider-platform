@@ -2,6 +2,7 @@ import { jsonToProtoStruct } from "../../../packages/adapter-protocol/src/index.
 import {
   VehicleProviderGrpcServer,
   type ProviderStore,
+  type VehicleStartFailureDiagnostic,
 } from "../../../packages/provider-adapter-kit/src/index.js";
 import type {
   UgvSnapshot,
@@ -23,6 +24,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
       tlsCaPath?: string;
       tlsCertPath?: string;
       tlsKeyPath?: string;
+      onStartFailure?(diagnostic: VehicleStartFailureDiagnostic): void | Promise<void>;
     },
     runtime: UgvProviderRuntime,
     store: ProviderStore,
@@ -37,6 +39,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
         ...(options.tlsCertPath === undefined ? {} : { tlsCertPath: options.tlsCertPath }),
         ...(options.tlsKeyPath === undefined ? {} : { tlsKeyPath: options.tlsKeyPath }),
         internalErrorCode: "UGV_ADAPTER_INTERNAL_ERROR",
+        ...(options.onStartFailure === undefined ? {} : { onStartFailure: options.onStartFailure }),
         manifest: () =>
           ugvManifest(
             options.providerId,

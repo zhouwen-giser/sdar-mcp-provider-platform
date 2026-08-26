@@ -1,4 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import {
   adapterServiceDefinition,
@@ -35,6 +36,20 @@ export interface StartVehicleOperation {
   arguments: Record<string, unknown>;
   argumentHash: string;
   executionContext: ExecutionContextRecord;
+}
+
+export interface VehicleStartFailureDiagnostic {
+  operationName: string | undefined;
+  taskId: string | undefined;
+  resourceId: string | undefined;
+  executionMode: string | undefined;
+  simulationId: string | undefined;
+  correlationId: string | undefined;
+  toolName: string | undefined;
+  errorName: string | undefined;
+  errorCode: string | undefined;
+  messageHash: string | undefined;
+  frames: { file: string; function?: string; line: number; column: number }[];
 }
 
 export interface VehicleCommandIdentity {
@@ -84,6 +99,7 @@ export class VehicleProviderGrpcServer {
       tlsCertPath?: string;
       tlsKeyPath?: string;
       internalErrorCode: string;
+      onStartFailure?(diagnostic: VehicleStartFailureDiagnostic): void | Promise<void>;
       manifest(): Record<string, unknown>;
       resource(snapshot: VehicleSnapshot): Record<string, unknown>;
     },
@@ -149,10 +165,19 @@ export class VehicleProviderGrpcServer {
         callback(null, { profileVersion: "1.0", checkedAt: timestamp(checkedAt), checks });
       },
       startOperation: (call: Unary<StartRequest>, callback: grpc.sendUnaryData<unknown>) => {
+        const input = startInput(call.request);
         void this.runtime
-          .start(startInput(call.request))
+          .start(input)
           .then((accepted) => callback(null, { result: "accepted", accepted }))
-          .catch((error: unknown) =>
+          .catch((error: unknown) => {
+            try {
+              if (this.options.onStartFailure !== undefined)
+                void Promise.resolve(
+                  this.options.onStartFailure(startFailureDiagnostic(error, input)),
+                ).catch(() => undefined);
+            } catch {
+              // Diagnostics must never change the public admission result.
+            }
             callback(null, {
               result: "rejected",
               rejected: {
@@ -160,8 +185,8 @@ export class VehicleProviderGrpcServer {
                 message: reason(error, this.options.internalErrorCode),
                 retryable: retryable(error),
               },
-            }),
-          );
+            });
+          });
       },
       getExecution: (call: Unary<{ taskId?: string }>, callback: grpc.sendUnaryData<unknown>) => {
         void this.runtime
@@ -381,6 +406,65 @@ function streamError(code: grpc.status, reasonCode: string): grpc.ServiceError {
 }
 function retryable(error: unknown): boolean {
   return /UNAVAILABLE|TIMEOUT|STALE|INTERNAL/.test(error instanceof Error ? error.message : "");
+}
+function startFailureDiagnostic(
+  error: unknown,
+  input: StartVehicleOperation,
+): VehicleStartFailureDiagnostic {
+  const details = record(error) ? error : undefined;
+  const message =
+    error instanceof Error ? error.message : typeof error === "string" ? error : undefined;
+  return {
+    operationName: diagnosticId(input.operationName),
+    taskId: diagnosticId(input.taskId),
+    resourceId: diagnosticId(input.arguments.resourceId),
+    executionMode: diagnosticId(input.executionContext.executionMode),
+    simulationId: diagnosticId(input.executionContext.simulationId),
+    correlationId: diagnosticId(input.executionContext.correlationId),
+    toolName: diagnosticToken(details?.toolName),
+    errorName: error instanceof Error ? diagnosticToken(error.name) : undefined,
+    errorCode: diagnosticToken(details?.code),
+    messageHash:
+      message === undefined
+        ? undefined
+        : `sha256:${createHash("sha256").update(message).digest("hex")}`,
+    frames: error instanceof Error ? diagnosticFrames(error.stack) : [],
+  };
+}
+function diagnosticId(value: unknown): string | undefined {
+  return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$/.test(value)
+    ? value
+    : undefined;
+}
+function diagnosticToken(value: unknown): string | undefined {
+  return typeof value === "string" && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(value)
+    ? value
+    : undefined;
+}
+function diagnosticFrames(stack: string | undefined): VehicleStartFailureDiagnostic["frames"] {
+  const frames: VehicleStartFailureDiagnostic["frames"] = [];
+  // Never retain the first line (the exception message), absolute paths, or dependency frames.
+  for (const frame of (stack ?? "").slice(0, 16_384).split("\n").slice(1, 33)) {
+    if (!/^\s*at /.test(frame) || frame.includes("/node_modules/")) continue;
+    const location = frame.match(
+      /((?:apps|packages)\/[A-Za-z0-9_./-]+\.[cm]?[jt]sx?):([1-9]\d{0,6}):([1-9]\d{0,6})\)?$/,
+    );
+    if (location === null) continue;
+    const [, file = "", line, column] = location;
+    if (file.length > 240 || file.split("/").some((part) => part === "." || part === ".."))
+      continue;
+    const functionName = frame
+      .trim()
+      .match(/^at (?:async )?([A-Za-z_$#][A-Za-z0-9_$#.<>]{0,159}) \(/)?.[1];
+    frames.push({
+      file,
+      ...(functionName === undefined ? {} : { function: functionName }),
+      line: Number(line),
+      column: Number(column),
+    });
+    if (frames.length === 12) break;
+  }
+  return frames;
 }
 function reason(error: unknown, internalErrorCode: string): string {
   return error instanceof Error && /^[A-Z0-9_]+$/.test(error.message)

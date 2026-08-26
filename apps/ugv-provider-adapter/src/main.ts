@@ -2,6 +2,7 @@ import pino from "pino";
 import {
   MemoryProviderStore,
   PostgresProviderStore,
+  type VehicleStartFailureDiagnostic,
 } from "../../../packages/provider-adapter-kit/src/index.js";
 import { StreamableHttpUgvDeviceMcpClient } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
@@ -149,6 +150,16 @@ const server = new UgvProviderServer(
     host: config.ADAPTER_HOST,
     port: config.ADAPTER_PORT,
     tlsMode: config.ADAPTER_TLS_MODE,
+    ...(config.RUNTIME_ENV === "production"
+      ? {}
+      : {
+          onStartFailure: (diagnostic: VehicleStartFailureDiagnostic) => {
+            logger.error(
+              { providerId: config.PROVIDER_ID, diagnostic },
+              "UGV Provider operation start failed",
+            );
+          },
+        }),
     ...(config.ADAPTER_TLS_CA_PATH ? { tlsCaPath: config.ADAPTER_TLS_CA_PATH } : {}),
     ...(config.ADAPTER_TLS_CERT_PATH ? { tlsCertPath: config.ADAPTER_TLS_CERT_PATH } : {}),
     ...(config.ADAPTER_TLS_KEY_PATH ? { tlsKeyPath: config.ADAPTER_TLS_KEY_PATH } : {}),

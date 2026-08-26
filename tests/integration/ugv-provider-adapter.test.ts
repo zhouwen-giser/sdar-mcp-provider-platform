@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import * as grpc from "@grpc/grpc-js";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   canonicalJson,
   jsonToProtoStruct,
@@ -14,6 +15,7 @@ import {
   type MutationJournalPhase,
   type MutationJournalState,
   type ProviderExecution,
+  type VehicleStartFailureDiagnostic,
 } from "../../packages/provider-adapter-kit/src/index.js";
 import { synchronousResult } from "../../packages/task-engine/src/result-contract.js";
 import {
@@ -35,6 +37,7 @@ import {
   type CommandIdentity,
 } from "../../apps/ugv-provider-adapter/src/runtime.js";
 import { UgvTelemetry } from "../../apps/ugv-provider-adapter/src/telemetry.js";
+import { UgvProviderServer } from "../../apps/ugv-provider-adapter/src/server.js";
 
 const active: UgvProviderRuntime[] = [];
 let lastReconObservationMs = 0;
@@ -383,6 +386,189 @@ describe("UGV long-running operation integration", () => {
     ).rejects.toThrow("UGV_FIRE_DISABLED");
     expect(fixture.device.calls).toHaveLength(0);
   });
+
+  it("completes WI050 get-state with source-derived simulator fixtures locally", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    // Source-derived fixture, not a captured wire response: mock-ugv-device-mcp
+    // initial state and get_status at 9603527c60841681d68366abb0f3c75393bb4c89.
+    device.responses.set("get_status", {
+      available: true,
+      heading: 0,
+      veh_speed: 0,
+      chassis_task: { id: 1001, state: 0, progress: 0 },
+      eo_task: { id: 3001, state: 0, progress: 0 },
+      weapon_task: { id: 4001, state: 0, progress: 0 },
+      gimbal: { yaw: 0, pitch: 0, zoom: 1 },
+    });
+    const fixture = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {
+        allowNavigationWithRecon: false,
+        fireEnabled: false,
+        executionMode: "simulation",
+      },
+      device,
+    );
+    // The publisher's deterministic chassis/health frames, once progress reaches
+    // 100; these topics have the same envelope in direct and ros_bridge modes.
+    const frames: Record<string, unknown> = {
+      "/ugv/gnss": { entity_id: "ugv1", latitude: 30.123, longitude: 114.456, altitude: 42 },
+      "/ugv/imu": { entity_id: "ugv1", yaw: 0, pitch: 0, roll: 0 },
+      "/ugv/speed": { speed_kmh: 0 },
+      "status/ugv": {
+        vehicle_id: "ugv1",
+        role_name: "ugv",
+        veh_speed: 0,
+        heading: 0,
+        chassis_task: { id: 1001, state: 4, progress: 100 },
+        eo_task: { id: 3001, state: 4, progress: 100 },
+        weapon_task: { id: 4001, state: 0, progress: 0 },
+        gimbal: { yaw: 0, pitch: 0, zoom: 1 },
+        available: true,
+      },
+      "/ugv/system_state": {
+        entity_id: "ugv1",
+        run_state: 1,
+        mode: 1,
+        speed_limit: 20,
+        err_list: [],
+      },
+      "/ugv/component_status": {
+        entity_id: "ugv1",
+        power_battery: 0,
+        lvbattery: 0,
+        fuel: 0,
+        water_temp: 0,
+        motor: 0,
+        sensor: 0,
+        gnss: 0,
+        comms: 0,
+        weapon: 0,
+        navigation: 0,
+      },
+      "/ugv/battery_range_km": { range_km: 35.2 },
+      "/ugv/mission_state": { entity_id: "ugv1", id: 1001, type: 1, state: -1, progress: 0 },
+      "/ugv/nav_state": {
+        entity_id: "ugv1",
+        position_x: 0,
+        position_y: 0,
+        position_z: 0,
+        speed_kmh: 0,
+        battery_range_km: 35.2,
+      },
+    };
+    for (const [topic, payload] of Object.entries(frames)) {
+      // VehicleMqttClient isolates rejected frames at its message boundary.
+      if (topic === "/ugv/mission_state")
+        expect(() => fixture.ingress.handle(topic, Buffer.from(JSON.stringify(payload)))).toThrow(
+          "UGV_MQTT_TASK_STATE_INVALID",
+        );
+      else fixture.ingress.handle(topic, Buffer.from(JSON.stringify(payload)));
+    }
+    const input = startInput("wi050-local-reproduction", "vehicle_get_state", {
+      include: ["chassis", "health"],
+      resourceId: "vehicle:ugv1",
+    });
+    input.executionContext.simulationId = "uap-p3-b02-wi050-20260826t012850z";
+    input.argumentHash = createHash("sha256").update(canonicalJson(input.arguments)).digest("hex");
+    const started = await fixture.runtime.start(input);
+    expect(started.initialSnapshot.state).toBe("SUCCEEDED");
+    expect(protoStructToJson(started.initialSnapshot.result)).toMatchObject({
+      identity: { resourceId: "vehicle:ugv1", executionMode: "simulation" },
+      chassis: { speedKmh: 0 },
+      health: { chassisErrorCodes: [] },
+    });
+  });
+
+  it("records a correlated start failure diagnostic without secret text or changing rejection", async () => {
+    const message =
+      "connection postgresql://dev:secret-password@db/test failed; Bearer secret-token";
+    const error = Object.assign(new TypeError(message), {
+      code: "ECONNREFUSED",
+      toolName: "get_status",
+      authorization: "secret-token",
+    });
+    error.stack = `TypeError: ${message}\n    at UgvProviderRuntime.#callDevice (/app/dist/apps/ugv-provider-adapter/src/runtime.js:1856:40)\n    at normalizeMqttObservation (/app/dist/packages/vehicle-mqtt-ingress/src/normalizers.js:36:10)\n    at secret-token (/app/node_modules/client.js:1:1)`;
+    const diagnostics: VehicleStartFailureDiagnostic[] = [];
+    const response = await invokeStartFailure(error, (value) => {
+      diagnostics.push(value);
+    });
+
+    expect(response).toEqual({
+      result: "rejected",
+      rejected: {
+        reasonCode: "UGV_ADAPTER_INTERNAL_ERROR",
+        message: "UGV_ADAPTER_INTERNAL_ERROR",
+        retryable: false,
+      },
+    });
+    expect(diagnostics).toEqual([
+      {
+        taskId: "wi050-local-diagnostic",
+        operationName: "vehicle_get_state",
+        resourceId: "vehicle:ugv1",
+        executionMode: "SIMULATION",
+        simulationId: "uap-p3-b02-wi050-20260826t012850z",
+        correlationId: "correlation-wi050-local-diagnostic",
+        toolName: "get_status",
+        errorName: "TypeError",
+        errorCode: "ECONNREFUSED",
+        messageHash: `sha256:${createHash("sha256").update(message).digest("hex")}`,
+        frames: [
+          {
+            file: "apps/ugv-provider-adapter/src/runtime.js",
+            function: "UgvProviderRuntime.#callDevice",
+            line: 1856,
+            column: 40,
+          },
+          {
+            file: "packages/vehicle-mqtt-ingress/src/normalizers.js",
+            function: "normalizeMqttObservation",
+            line: 36,
+            column: 10,
+          },
+        ],
+      },
+    ]);
+    const serialized = JSON.stringify(diagnostics);
+    for (const secret of [
+      "secret-password",
+      "secret-token",
+      "postgresql://",
+      "Bearer",
+      "authorizationContextHash",
+      "private-argument",
+      "/app/dist/",
+      "node_modules",
+    ])
+      expect(serialized).not.toContain(secret);
+  });
+
+  it.each(["throws", "rejects", "serializer throws"])(
+    "isolates a start failure diagnostic when the logger %s",
+    async (failure) => {
+      const error = new Error("non-token internal failure");
+      if (failure === "serializer throws")
+        Object.defineProperty(error, "stack", {
+          get() {
+            throw new Error("diagnostic serialization failed");
+          },
+        });
+      const response = await invokeStartFailure(error, () => {
+        if (failure === "rejects") return Promise.reject(new Error("diagnostic sink failed"));
+        throw new Error("diagnostic sink failed");
+      });
+      expect(response).toEqual({
+        result: "rejected",
+        rejected: {
+          reasonCode: "UGV_ADAPTER_INTERNAL_ERROR",
+          message: "UGV_ADAPTER_INTERNAL_ERROR",
+          retryable: false,
+        },
+      });
+    },
+  );
 
   it("returns Runtime-valid evidence for every core synchronous read", async () => {
     const fixture = await createFixture();
@@ -2202,6 +2388,53 @@ async function seedMutationJournal(
     },
     "DISPATCHING",
   );
+}
+
+async function invokeStartFailure(
+  error: Error,
+  onStartFailure: (diagnostic: VehicleStartFailureDiagnostic) => void | Promise<void>,
+): Promise<unknown> {
+  const fixture = await createFixture();
+  vi.spyOn(fixture.runtime, "start").mockRejectedValueOnce(error);
+  const registration = vi.spyOn(grpc.Server.prototype, "addService");
+  const server = new UgvProviderServer(
+    {
+      providerId: "isr.vehicle.ugv.ugv1",
+      providerVersion: "1.0.0",
+      host: "127.0.0.1",
+      port: 0,
+      tlsMode: "disabled",
+      onStartFailure,
+    },
+    fixture.runtime,
+    fixture.store,
+    fixture.events,
+  );
+  // Invoke the actual registered handler without starting a gRPC server or socket.
+  const handler = registration.mock.calls[0]?.[1].startOperation as
+    grpc.handleUnaryCall<unknown, unknown> | undefined;
+  if (handler === undefined) throw new Error("START_OPERATION_HANDLER_MISSING");
+  const input = startInput("wi050-local-diagnostic", "vehicle_get_state", {
+    resourceId: "vehicle:ugv1",
+    include: ["chassis", "health"],
+    secret: "private-argument",
+  });
+  input.executionContext.simulationId = "uap-p3-b02-wi050-20260826t012850z";
+  try {
+    return await new Promise((resolve, reject) => {
+      handler(
+        {
+          request: { ...input, arguments: jsonToProtoStruct(input.arguments) },
+        } as grpc.ServerUnaryCall<unknown, unknown>,
+        (rpcError, response) => {
+          if (rpcError !== null) reject(rpcError);
+          else resolve(response);
+        },
+      );
+    });
+  } finally {
+    await server.close();
+  }
 }
 
 async function createFixture(
