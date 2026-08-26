@@ -87,6 +87,26 @@ describe("immutable PostgreSQL CatalogSnapshot persistence", () => {
     });
   });
 
+  it("reactivates a historical checksum once under concurrent rediscovery without rewriting history", async () => {
+    const first = await repository.get(providerId, 1);
+    const restored = await catalog(["alpha"]);
+    const publications = await Promise.all(
+      Array.from({ length: 8 }, () => repository.publish(input(restored))),
+    );
+    expect(publications).toEqual(
+      Array.from({ length: 8 }, () => ({ created: false, snapshot: first })),
+    );
+    expect(await repository.active(providerId)).toEqual(first);
+    expect((await repository.history(providerId)).map(({ revision }) => revision)).toEqual([2, 1]);
+    const audit = await pool.query<{ count: number }>(
+      `SELECT count(*)::integer AS count FROM audit WHERE action='catalog.snapshot.reactivated'`,
+    );
+    expect(audit.rows).toEqual([{ count: 1 }]);
+    const next = await repository.publish(input(await catalog(["delta"])));
+    expect(next).toMatchObject({ created: true, snapshot: { revision: 3 } });
+    expect(await repository.get(providerId, 1)).toEqual(first);
+  });
+
   it("rejects administrator mutation or deletion of discovered schemas", async () => {
     await expect(
       pool.query(
