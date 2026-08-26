@@ -483,7 +483,7 @@ describe("UGV long-running operation integration", () => {
 
   it("records a correlated start failure diagnostic without secret text or changing rejection", async () => {
     const message =
-      "connection postgresql://dev:secret-password@db/test failed; Bearer secret-token";
+      "connection postgresql://dev:secret-password@db/test failed; Bearer secret-token\n    at leak (/app/apps/secret_token.js:1:1)";
     const error = Object.assign(new TypeError(message), {
       code: "ECONNREFUSED",
       toolName: "get_status",
@@ -535,6 +535,7 @@ describe("UGV long-running operation integration", () => {
     for (const secret of [
       "secret-password",
       "secret-token",
+      "secret_token",
       "postgresql://",
       "Bearer",
       "authorizationContextHash",
@@ -543,6 +544,29 @@ describe("UGV long-running operation integration", () => {
       "node_modules",
     ])
       expect(serialized).not.toContain(secret);
+  });
+
+  it("omits unbound stack frames from a start failure diagnostic", async () => {
+    const error = new Error("non-token internal failure");
+    error.stack = "Error: unrelated header\n    at leak (/app/apps/secret_token.js:1:1)";
+    const diagnostics: VehicleStartFailureDiagnostic[] = [];
+    const response = await invokeStartFailure(error, (value) => {
+      diagnostics.push(value);
+    });
+    expect(response).toEqual({
+      result: "rejected",
+      rejected: {
+        reasonCode: "UGV_ADAPTER_INTERNAL_ERROR",
+        message: "UGV_ADAPTER_INTERNAL_ERROR",
+        retryable: false,
+      },
+    });
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]?.frames).toEqual([]);
+    expect(diagnostics[0]?.messageHash).toBe(
+      `sha256:${createHash("sha256").update(error.message).digest("hex")}`,
+    );
+    expect(JSON.stringify(diagnostics)).not.toContain("secret_token");
   });
 
   it.each(["throws", "rejects", "serializer throws"])(

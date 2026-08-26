@@ -428,7 +428,7 @@ function startFailureDiagnostic(
       message === undefined
         ? undefined
         : `sha256:${createHash("sha256").update(message).digest("hex")}`,
-    frames: error instanceof Error ? diagnosticFrames(error.stack) : [],
+    frames: error instanceof Error ? diagnosticFrames(error) : [],
   };
 }
 function diagnosticId(value: unknown): string | undefined {
@@ -441,10 +441,17 @@ function diagnosticToken(value: unknown): string | undefined {
     ? value
     : undefined;
 }
-function diagnosticFrames(stack: string | undefined): VehicleStartFailureDiagnostic["frames"] {
+function diagnosticFrames(error: Error): VehicleStartFailureDiagnostic["frames"] {
   const frames: VehicleStartFailureDiagnostic["frames"] = [];
-  // Never retain the first line (the exception message), absolute paths, or dependency frames.
-  for (const frame of (stack ?? "").slice(0, 16_384).split("\n").slice(1, 33)) {
+  const stack = error.stack;
+  const header = `${Error.prototype.toString.call(error)}\n`;
+  // A multiline message can resemble frames. Strip its entire verified header,
+  // or omit frames when the stack cannot be bound to the current error.
+  if (typeof stack !== "string" || !stack.startsWith(header)) return frames;
+  for (const frame of stack
+    .slice(header.length, header.length + 16_384)
+    .split("\n")
+    .slice(0, 32)) {
     if (!/^\s*at /.test(frame) || frame.includes("/node_modules/")) continue;
     const location = frame.match(
       /((?:apps|packages)\/[A-Za-z0-9_./-]+\.[cm]?[jt]sx?):([1-9]\d{0,6}):([1-9]\d{0,6})\)?$/,
