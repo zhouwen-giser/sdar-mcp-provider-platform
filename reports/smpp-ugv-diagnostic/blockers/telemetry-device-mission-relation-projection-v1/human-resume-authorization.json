@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "sdar.smpp.human-resume-authorization/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "blockerId": "telemetry-device-mission-relation-projection-v1",
+  "targetRepository": "zhouwen-giser/smpp-telemetry-platform",
+  "implementationBranch": "codex/smpp-mcp-tasks-telemetry-sync-v0.1",
+  "implementationCommit": "b3bd0e7fe480eca13069c0e39bcff3117e336c0a",
+  "humanDecision": "resume",
+  "approvedBy": "zhouwen",
+  "approvedAt": "2026-08-31T14:25:52+08:00"
+}

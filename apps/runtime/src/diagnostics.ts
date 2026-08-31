@@ -61,12 +61,7 @@ const definitions: Readonly<
   ),
   "SMPP-MISSION-RELATION": capability(
     "ProviderTelemetryIngress+SmppDiagnosticRepository",
-    "reports/smpp-ugv-diagnostic/phase-s10/report.md",
-    {
-      status: "degraded",
-      qualificationStatus: "partial",
-      reasonCodes: ["TELEMETRY_CANONICAL_MISSION_RELATION_PROJECTION_UNAVAILABLE"],
-    },
+    "reports/smpp-ugv-diagnostic/phase-s13/report.md",
   ),
 });
 

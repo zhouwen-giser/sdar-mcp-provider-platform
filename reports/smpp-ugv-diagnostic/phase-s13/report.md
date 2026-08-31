@@ -1,33 +1,36 @@
-# Phase S13 Report — Telemetry compatibility and handoff
+# Phase S13 Report — Telemetry compatibility and Benchmark handoff
 
 ## Source
 
 - Branch: `codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1`
-- Parent phase: S12 `6fe65ac`
-- Frozen Telemetry target: `main@a5e3dea00f825c4400523c8a957e539c901ee0c6`
+- Producer implementation: `1e67e6e421d70a3cbce2d41bf5007e99463712fe`
+- Telemetry implementation: `zhouwen-giser/smpp-telemetry-platform` `codex/smpp-mcp-tasks-telemetry-sync-v0.1@b3bd0e7fe480eca13069c0e39bcff3117e336c0a`
+- Downstream read-only target: `zhouwen-giser/sdar-telemetry-platform` `main@3e43350dd0d0e37fe65ec318d0d9881820a88f5a`
 
-## Changes
+## Resume and compatibility decision
 
-- Completed a read-only frozen-consumer source audit.
-- Generated the single-owner blocker packet and exact acceptance probe under `blockers/telemetry-device-mission-relation-projection-v1/`.
-- Confirmed no active diagnostic fault lease remains.
+- The historical blocker remains preserved under `blockers/telemetry-device-mission-relation-projection-v1/`.
+- The human resume authorization names the exact Telemetry branch and immutable implementation commit.
+- All nine frozen Telemetry evidence hashes passed.
+- The focused Telemetry build and 18 semantic/WAL/catalog/schema tests passed.
+- The exact Producer chain passed Collector → Processor WAL → Normalizer → ClickHouse → serving qualification.
+- The downstream static verifier passed in read-only mode with no foreign facts, unresolved bindings, truncation or hint-derived authority.
 
-## Evidence
+## Authority rules frozen by the consumer
 
-- Legal ProviderOps records are accepted and preserved by the frozen validator/normalizer.
-- Recovery, task, resource and execution facts have existing specialized core families.
-- No frozen normalizer rule creates a DeviceMission entity or canonical Task→ExternalExecution→DeviceMission relation.
+- Task → Execution is authoritative only for a committed dispatch or an identity-validated `reconcile-found` result.
+- Execution → DeviceMission is authoritative only for exact Provider Mission identity.
+- `unresolved` and `conflict` Mission facts remain visible but never synthesize an exact relation.
+- Provider Evidence preserves its physical `observedAt`; receipt and processing times remain separate.
+- Uncertainty, reconciliation, MCP completion and business success remain separate facts and no Goal/evaluation verdict is projected.
 
-## Handoff state
+## Benchmark handoff
 
-- Immutable Benchmark handoff was not generated because compatibility is not complete.
-- `sdar-benchmark-server` was not modified.
-- `humanDecision=pending_human_confirmation`.
-
-## Remaining risks/blockers
-
-- `zhouwen-giser/smpp-telemetry-platform` must implement and qualify the canonical Mission relation projection.
+- Generated `integrations/sdar-benchmark-server/ugv-diagnostic-smpp/v1/benchmark-handoff.json`.
+- The handoff supersedes the five historical Provider-direct `PV-*` capability assumptions with the seven SMPP capabilities.
+- `providerDirectAccessRequired=false`, `telemetryAuthorityRequired=true` and `humanDecision=pending_human_confirmation` are frozen.
+- No file in `sdar-benchmark-server` was modified.
 
 ## Exit gate
 
-BLOCKED — external contract owner action and explicit human resume required
+PASS — G61 through G64 satisfied; proceed to S14 full qualification

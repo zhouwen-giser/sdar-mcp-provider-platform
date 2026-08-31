@@ -37,7 +37,7 @@ describe("SMPP Runtime diagnostic capabilities", () => {
     }
   });
 
-  it("gets one capability and reports the external Mission projection degradation", async () => {
+  it("gets the qualified external Mission relation capability", async () => {
     runtime = createRuntime(loadRuntimeConfig({}));
     const response = await runtime.app.inject({
       method: "GET",
@@ -46,9 +46,12 @@ describe("SMPP Runtime diagnostic capabilities", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       capabilityId: "SMPP-MISSION-RELATION",
-      status: "degraded",
-      qualification: { status: "partial" },
-      reasonCodes: ["TELEMETRY_CANONICAL_MISSION_RELATION_PROJECTION_UNAVAILABLE"],
+      status: "available",
+      qualification: {
+        status: "passed",
+        evidenceRefs: ["reports/smpp-ugv-diagnostic/phase-s13/report.md"],
+      },
+      reasonCodes: [],
     });
   });
 
