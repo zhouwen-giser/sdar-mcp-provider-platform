@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "sdar.smpp.pause-checkpoint/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "blockerId": "telemetry-device-mission-relation-projection-v1",
+  "pausedPhase": "S13",
+  "sourceBranch": "codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "sourceCommit": "6fe65ac80173b1bec9246009a509570ea5ffd531",
+  "completedSafePhases": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "S10",
+    "S11",
+    "S12"
+  ],
+  "diagnosticFaultLeaseState": "disabled_no_active_leases",
+  "targetRepository": "zhouwen-giser/smpp-telemetry-platform",
+  "observedTargetCommit": "a5e3dea00f825c4400523c8a957e539c901ee0c6",
+  "resumeRequires": [
+    "human-approved Telemetry implementation branch and commit",
+    "sdar.smpp.human-resume-authorization/v1 with humanDecision=resume",
+    "read-only acceptance probe pass"
+  ],
+  "resumeAt": "S13 compatibility rerun before Benchmark handoff generation",
+  "humanDecision": "pending_human_confirmation"
+}

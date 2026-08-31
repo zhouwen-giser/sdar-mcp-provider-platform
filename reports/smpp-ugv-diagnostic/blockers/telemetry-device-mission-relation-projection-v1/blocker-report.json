@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "sdar.smpp.external-blocker/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "blockerId": "telemetry-device-mission-relation-projection-v1",
+  "status": "blocked",
+  "phase": "S13",
+  "targetRepository": "zhouwen-giser/smpp-telemetry-platform",
+  "observedBranch": "main",
+  "observedCommit": "a5e3dea00f825c4400523c8a957e539c901ee0c6",
+  "sourceRepository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "sourceBranch": "codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "sourceCommit": "6fe65ac80173b1bec9246009a509570ea5ffd531",
+  "missingCapability": "Canonical Task -> ExternalExecution -> DeviceMission relation projection from accepted ProviderOps mission-relation facts",
+  "observedBehavior": {
+    "providerOpsAccepted": true,
+    "payloadPreserved": true,
+    "taskEntityProjected": true,
+    "externalExecutionEntityProjected": true,
+    "deviceMissionEntityProjected": false,
+    "canonicalMissionRelationsProjected": false
+  },
+  "authorityBoundary": "SMPP owns the committed relation fact; Telemetry owns canonical entity/relation normalization and projection.",
+  "forbiddenWorkarounds": [
+    "direct ClickHouse writes from SMPP",
+    "time-proximity Mission inference",
+    "new unapproved ProviderOps record type",
+    "Benchmark-specific Provider or Adapter API",
+    "claiming Goal success from Provider terminal state"
+  ],
+  "acceptanceProbe": "Normalize a legal provider.execution.progress fact with attributes.sdar.fact.kind=mission_relation and an exact sdar.device.mission_id; assert a device_mission entity plus exact Task-to-Execution and Execution-to-DeviceMission canonical relations are projected. Unresolved/conflict inputs must not produce an exact device Mission relation.",
+  "safeResumePoint": "Re-run read-only compatibility at the human-approved Telemetry commit, then complete S13 immutable Benchmark handoff and S14 full qualification/Draft PR.",
+  "humanDecision": "pending_human_confirmation"
+}
