@@ -21,13 +21,24 @@ import {
 } from "../../../packages/pms-persistence-postgres/src/index.js";
 import { MemoryProviderStore } from "../../../packages/provider-adapter-kit/src/index.js";
 import { loadProviderPackageRegistry } from "../../../packages/provider-package-registry/src/index.js";
+import {
+  ProviderTelemetryGrpcServer,
+  ProviderTelemetryIngress,
+} from "../../../packages/provider-telemetry/src/index.js";
 import { OperationRegistry } from "../../../packages/operation-registry/src/index.js";
 import {
+  IdempotencyRepository,
   OperationSnapshotRepository,
+  runMigrations,
+  SmppDiagnosticRepository,
   TaskRepository,
 } from "../../../packages/persistence-postgres/src/index.js";
 import { buildRegistrySnapshot } from "../../../packages/registry-snapshot/src/index.js";
-import { TaskEngine } from "../../../packages/task-engine/src/index.js";
+import {
+  DiagnosticAdapterGateway,
+  DiagnosticFaultController,
+  TaskEngine,
+} from "../../../packages/task-engine/src/index.js";
 import { MockUgvDeviceMcpClient } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 
@@ -49,6 +60,8 @@ describe("vendor_managed UGV Provider platform integration", () => {
   let pmsPool: Pool | undefined;
   let adapterRuntime: UgvProviderRuntime | undefined;
   let adapterServer: UgvProviderServer | undefined;
+  let adapterTelemetry: UgvTelemetry;
+  let providerTelemetryServer: ProviderTelemetryGrpcServer | undefined;
   let adapterStore: MemoryProviderStore;
   let adapterIngress: VehicleMqttIngress;
   let device: MockUgvDeviceMcpClient;
@@ -75,6 +88,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
     runtimePool = new Pool({
       connectionString: scopedDatabaseUrl(connectionString, runtimeSchema),
     });
+    await runMigrations(runtimePool);
     pmsPool = new Pool({
       connectionString,
       options: `-c search_path=${pmsSchema}`,
@@ -91,24 +105,35 @@ describe("vendor_managed UGV Provider platform integration", () => {
     });
     seedUgv(adapterIngress);
     device = new MockUgvDeviceMcpClient();
+    providerTelemetryServer = new ProviderTelemetryGrpcServer(
+      new ProviderTelemetryIngress(runtimePool, {
+        providerId,
+        instanceId: "ugv-controlled-qualification",
+      }),
+      { host: "127.0.0.1", port: 0, tlsMode: "disabled" },
+    );
+    const providerTelemetryPort = await providerTelemetryServer.start();
+    adapterTelemetry = new UgvTelemetry({
+      providerId,
+      enabled: true,
+      endpoint: `127.0.0.1:${String(providerTelemetryPort)}`,
+      tlsMode: "disabled",
+    });
     adapterRuntime = new UgvProviderRuntime(
       {
         providerId,
         freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
+        stationaryStabilityMs: 0,
+        stationaryMinimumSamples: 1,
         pollIntervalMs: 60_000,
       },
       adapterStore,
       adapterIngress,
       device,
       new UgvBusinessEventHub(adapterStore),
-      new UgvTelemetry({
-        providerId,
-        enabled: false,
-        endpoint: "127.0.0.1:7002",
-        tlsMode: "disabled",
-      }),
+      adapterTelemetry,
     );
     await adapterRuntime.initialize();
     adapterServer = new UgvProviderServer(
@@ -151,6 +176,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
       operationSnapshots,
       runtime.gateway,
       new TaskRepository(runtime.pool),
+      new IdempotencyRepository(runtime.pool),
     );
     runtimeAddress = await runtime.app.listen({ host: "127.0.0.1", port: 0 });
   });
@@ -159,6 +185,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
     await runtime?.app.close();
     await adapterServer?.close();
     await adapterRuntime?.close();
+    await providerTelemetryServer?.close();
     await runtimePool?.end();
     await pmsPool?.end();
     await admin.query(`DROP SCHEMA IF EXISTS ${runtimeSchema} CASCADE`);
@@ -287,6 +314,164 @@ describe("vendor_managed UGV Provider platform integration", () => {
     ).toBe(0);
     expect(device.calls).toEqual([]);
   });
+
+  it("qualifies one UGV task/execution with idempotency, terminal, evidence and Mission closure", async () => {
+    if (runtime === undefined || adapterRuntime === undefined)
+      throw new Error("RUNTIME_NOT_STARTED");
+    seedUgv(adapterIngress);
+    const operation = requiredOperation(taskEngine, "vehicle_navigate");
+    const argumentsValue = {
+      resourceId: "vehicle:ugv1",
+      mission: { type: "point", target: { latitude: 30.1001, longitude: 114.1001 } },
+      speedLimitKmh: 20,
+      stopOnObstacle: true,
+    };
+    const callsBefore = device.calls.length;
+    const first = await taskEngine.callOperation(
+      operation,
+      argumentsValue,
+      authorization,
+      undefined,
+      "ugv-normal-navigation",
+    );
+    const replay = await taskEngine.callOperation(
+      operation,
+      structuredClone(argumentsValue),
+      authorization,
+      undefined,
+      "ugv-normal-navigation",
+    );
+    if (first.kind !== "task" || replay.kind !== "task") throw new Error("UGV_TASK_REQUIRED");
+    const taskId = String(first.task.taskId);
+    expect(replay.task.taskId).toBe(taskId);
+    expect(device.calls.length - callsBefore).toBe(2);
+    expect((await adapterStore.getExecution(taskId))?.externalExecutionId).toBeTruthy();
+
+    const runningObservedAt = new Date().toISOString();
+    observeMission(adapterIngress, 1, 30, runningObservedAt);
+    await adapterRuntime.pollActive();
+    await taskEngine.getTask(taskId, authorization);
+    adapterIngress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date().toISOString(),
+    );
+    observeMission(adapterIngress, 4, 100, new Date().toISOString());
+    adapterIngress.handle(
+      "/ugv/speed",
+      Buffer.from('{"entity_id":"ugv1","speed_kmh":0}'),
+      false,
+      new Date().toISOString(),
+    );
+    adapterIngress.handle(
+      "/ugv/gnss",
+      Buffer.from('{"entity_id":"ugv1","latitude":30.1001,"longitude":114.1001}'),
+      false,
+      new Date().toISOString(),
+    );
+    await adapterRuntime.pollActive();
+    expect(await adapterStore.getExecution(taskId)).toMatchObject({ state: "SUCCEEDED" });
+    expect(await taskEngine.getTask(taskId, authorization)).toMatchObject({ status: "completed" });
+    expect(
+      adapterTelemetry.records
+        .filter((record) => typeof record.attributes["sdar.evidence.kind"] === "string")
+        .map((record) => record.attributes["sdar.evidence.kind"]),
+    ).toEqual(expect.arrayContaining(["position", "speed", "mission"]));
+    await adapterTelemetry.drain(5_000);
+    expect(adapterTelemetry.snapshot()).toMatchObject({
+      rejected: 0,
+      transportFailed: 0,
+      queueDepth: 0,
+    });
+
+    const diagnostics = new SmppDiagnosticRepository(runtime.pool);
+    const binding = await diagnostics.getTaskExecutionBinding(taskId);
+    const providerExecution = await adapterStore.getExecution(taskId);
+    expect(binding).toMatchObject({
+      taskId,
+      bindingStatus: "terminal",
+      externalExecutionId: providerExecution?.externalExecutionId,
+    });
+    const evidence = await diagnostics.listProviderEvidence(taskId);
+    expect(evidence.map(({ kind }) => kind)).toEqual(
+      expect.arrayContaining(["position", "speed", "mission"]),
+    );
+    expect(evidence.some((item) => item.observedAt === runningObservedAt)).toBe(true);
+    expect(await diagnostics.getMissionRelation(taskId)).toMatchObject({
+      relationStatus: "exact",
+      deviceMissionId: "1",
+      externalExecutionId: binding?.externalExecutionId,
+    });
+    const terminal = await diagnostics.getBusinessTerminal(taskId);
+    expect(terminal).toMatchObject({
+      mcpTaskStatus: "completed",
+      businessStatus: "succeeded",
+      providerExecutionStatus: "completed",
+    });
+    expect(terminal).not.toHaveProperty("goalAchieved");
+  });
+
+  it("recovers an after-commit response loss by reconciling the original UGV execution", async () => {
+    if (runtime === undefined) throw new Error("RUNTIME_NOT_STARTED");
+    seedUgv(adapterIngress);
+    const operation = requiredOperation(taskEngine, "vehicle_navigate");
+    const responseLossAuthorization: AuthorizationContext = {
+      ...authorization,
+      correlationId: "ugv-response-loss-e2e",
+    };
+    const faults = new DiagnosticFaultController({ enabled: true, runtimeProfile: "test" });
+    faults.arm({
+      operationName: "vehicle_navigate",
+      correlationId: "ugv-response-loss-e2e",
+      executionMode: "simulation",
+      ttlMs: 5_000,
+    });
+    const repository = new TaskRepository(runtime.pool);
+    const engine = new TaskEngine(
+      taskEngine.manifest,
+      taskEngine.operationSnapshotIds,
+      new DiagnosticAdapterGateway(runtime.gateway, faults),
+      repository,
+      new IdempotencyRepository(runtime.pool),
+    );
+    const callsBefore = device.calls.length;
+    await expect(
+      engine.callOperation(
+        operation,
+        {
+          resourceId: "vehicle:ugv1",
+          mission: { type: "point", target: { latitude: 30.1002, longitude: 114.1002 } },
+          speedLimitKmh: 20,
+          stopOnObstacle: true,
+        },
+        responseLossAuthorization,
+      ),
+    ).rejects.toThrow("DIAGNOSTIC_ADAPTER_RESPONSE_LOST_AFTER_SUCCESS");
+    const admissionResult = await runtime.pool.query<{ task_id: string }>(
+      `SELECT task_id FROM admission_intent
+       WHERE correlation_id='ugv-response-loss-e2e' ORDER BY created_at DESC LIMIT 1`,
+    );
+    const taskId = admissionResult.rows[0]?.task_id;
+    if (taskId === undefined) throw new Error("UGV_UNCERTAIN_ADMISSION_MISSING");
+    expect(
+      await new SmppDiagnosticRepository(runtime.pool).getDispatchUncertainty(taskId),
+    ).toMatchObject({
+      uncertaintyClass: "response_lost_after_adapter_success",
+      redispatchAllowed: false,
+    });
+    const admission = await repository.getAdmission(taskId);
+    if (admission === null) throw new Error("UGV_UNCERTAIN_ADMISSION_MISSING");
+    await engine.recoverAdmission(admission, operation);
+    expect(device.calls.length - callsBefore).toBe(2);
+    expect(faults.activeLeases()).toEqual([]);
+    expect((await adapterStore.getExecution(taskId))?.externalExecutionId).toBe(
+      (await repository.getById(taskId))?.externalExecutionId,
+    );
+    expect(
+      (await new SmppDiagnosticRepository(runtime.pool).listReconciliationResults(taskId)).at(-1),
+    ).toMatchObject({ status: "found", identityValidated: true });
+  });
 });
 
 async function seedProviderBinding(pool: Pool): Promise<void> {
@@ -333,6 +518,36 @@ function seedUgv(ingress: VehicleMqttIngress): void {
   );
 }
 
+function observeMission(
+  ingress: VehicleMqttIngress,
+  state: number,
+  progress: number,
+  observedAt: string,
+): void {
+  ingress.handle(
+    "/ugv/mission_state",
+    Buffer.from(JSON.stringify({ entity_id: "ugv1", id: 1, type: 1, state, progress })),
+    false,
+    observedAt,
+  );
+  ingress.handle(
+    "status/ugv",
+    Buffer.from(
+      JSON.stringify({
+        vehicle_id: "ugv1",
+        role_name: "ugv",
+        speed_kmh: 0,
+        chassis_task: { id: 1, state, progress },
+        eo_task: { state: -1, progress: 0 },
+        weapon_task: { state: -1, progress: 0 },
+        available: true,
+      }),
+    ),
+    false,
+    observedAt,
+  );
+}
+
 function scopedDatabaseUrl(connectionString: string, schema: string): string {
   const url = new URL(connectionString);
   url.searchParams.set("options", `-c search_path=${schema}`);
@@ -343,6 +558,12 @@ function requiredDatabaseUrl(): string {
   const value = process.env.TEST_DATABASE_URL;
   if (value === undefined) throw new Error("TEST_DATABASE_URL is required");
   return value;
+}
+
+function requiredOperation(engine: TaskEngine, operationName: string) {
+  const operation = engine.manifest.operations.find(({ name }) => name === operationName);
+  if (operation === undefined) throw new Error(`UGV_OPERATION_MISSING:${operationName}`);
+  return operation;
 }
 
 function freePort(): Promise<number> {

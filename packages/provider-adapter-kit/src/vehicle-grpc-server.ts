@@ -180,7 +180,8 @@ export class VehicleProviderGrpcServer {
         void this.runtime
           .reconcile({
             ...startInput(call.request),
-            ...(call.request.externalExecutionId === undefined
+            ...(call.request.externalExecutionId === undefined ||
+            call.request.externalExecutionId.length === 0
               ? {}
               : { externalExecutionId: call.request.externalExecutionId }),
           })
