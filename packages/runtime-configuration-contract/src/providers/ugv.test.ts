@@ -31,7 +31,7 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 67 inventory fields", () => {
+  it("covers all 68 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync(
         new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
@@ -46,7 +46,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(67);
+    expect(actual).toHaveLength(68);
     expect(actual).toEqual(expected);
   });
 
@@ -122,6 +122,7 @@ describe("UGV Provider configuration contract", () => {
     expect(loadUgvProviderConfiguration({ UGV_EXECUTION_MODE: "live" })).toMatchObject({
       UGV_EXECUTION_MODE: "live",
       UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: false,
+      UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: false,
       UGV_ADAPTER_STORE_MODE: "postgres",
     });
   });

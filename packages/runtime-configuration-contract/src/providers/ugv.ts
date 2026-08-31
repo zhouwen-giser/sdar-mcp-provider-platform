@@ -66,6 +66,7 @@ const UgvProviderInputBaseSchema = z.object({
     .max(1_048_576)
     .default(65_536),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: bool.default(false),
+  UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: bool.default(false),
   UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS: z.coerce.number().int().min(0).max(3).default(1),
   UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().int().min(1).max(100).default(3),
   UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS: z.coerce
@@ -165,6 +166,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_MQTT_TLS_KEY_PATH: z.string().optional(),
   UGV_DEVICE_MCP_HEADERS_FILE: z.string().optional(),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: z.boolean(),
+  UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: z.boolean(),
   UGV_ALLOW_NAVIGATION_WITH_RECON: z.boolean(),
   UGV_FIRE_ENABLED: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),

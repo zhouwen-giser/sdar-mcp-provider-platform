@@ -73,6 +73,7 @@ const device = new StreamableHttpUgvDeviceMcpClient(
     maxResponseBytes: config.UGV_DEVICE_MCP_MAX_RESPONSE_BYTES,
     contractReportPath: config.UGV_DEVICE_MCP_CONTRACT_REPORT_PATH,
     useMockContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT,
+    useCapturedContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT,
     readRetryAttempts: config.UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS,
     circuitBreakerThreshold: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD,
     circuitBreakerResetMs: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS,

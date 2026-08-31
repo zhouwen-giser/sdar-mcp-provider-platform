@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -85,6 +85,55 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
         ...(contract.annotations === undefined ? {} : { annotations: contract.annotations }),
       }),
     ).not.toBe(contract.schemaHash);
+  });
+
+  it("publishes a validated real capture during an outage without enabling offline mutations", async () => {
+    const harness = new UgvMcpHarness();
+    const reportPath = join(mkdtempSync(join(tmpdir(), "ugv-captured-contract-")), "contract.json");
+    await harness.start();
+    const remoteUrl = harness.url;
+    const capturing = testClient(harness, new MemoryProviderStore(), { reportPath });
+    await capturing.connect();
+    await capturing.close();
+    await harness.stop();
+
+    const fallback = testClient(harness, new MemoryProviderStore(), {
+      timeoutMs: 100,
+      url: remoteUrl,
+      reportPath,
+      useCapturedContractWhenUnavailable: true,
+    });
+    try {
+      await fallback.connect();
+      expect(fallback.connected()).toBe(false);
+      expect(fallback.contracts()).toHaveLength(UGV_DEVICE_TOOL_ALLOWLIST.length);
+      expect(fallback.hasTool("ugv_path_follow_mission")).toBe(true);
+      await expect(
+        fallback.call("ugv_path_follow_mission", {
+          task_points: [{ longitude: 106.81389697, latitude: 29.72041184 }],
+          mission_id: 0,
+        }),
+      ).rejects.toThrow("UGV_DEVICE_MCP_UNAVAILABLE");
+      expect(harness.toolCalls).toEqual([]);
+    } finally {
+      await fallback.close();
+    }
+
+    const tampered = JSON.parse(readFileSync(reportPath, "utf8")) as {
+      mode: string;
+      tools: { schemaHash: string }[];
+    };
+    required(tampered.tools[0]).schemaHash = "0".repeat(64);
+    writeFileSync(reportPath, `${JSON.stringify(tampered)}\n`, "utf8");
+    const rejected = testClient(harness, new MemoryProviderStore(), {
+      timeoutMs: 100,
+      url: remoteUrl,
+      reportPath,
+      useCapturedContractWhenUnavailable: true,
+    });
+    await expect(rejected.connect()).rejects.toBeDefined();
+    expect(rejected.contracts()).toEqual([]);
+    await rejected.close();
   });
 
   it("selects only tools required by the requested operation branch", () => {
@@ -752,18 +801,21 @@ function testClient(
     readRetryAttempts: number;
     circuitBreakerThreshold: number;
     circuitBreakerResetMs: number;
+    url: string;
+    reportPath: string;
+    useCapturedContractWhenUnavailable: boolean;
   }> = {},
 ): StreamableHttpUgvDeviceMcpClient {
   return new StreamableHttpUgvDeviceMcpClient(
     {
-      url: harness.url,
+      url: overrides.url ?? harness.url,
       timeoutMs: overrides.timeoutMs ?? 500,
       maxResponseBytes: 65_536,
-      contractReportPath: join(
-        mkdtempSync(join(tmpdir(), "ugv-device-contract-")),
-        "contract.json",
-      ),
+      contractReportPath:
+        overrides.reportPath ??
+        join(mkdtempSync(join(tmpdir(), "ugv-device-contract-")), "contract.json"),
       useMockContractWhenUnavailable: false,
+      useCapturedContractWhenUnavailable: overrides.useCapturedContractWhenUnavailable ?? false,
       reconnectMinMs: 50,
       reconnectMaxMs: 100,
       readRetryAttempts: overrides.readRetryAttempts ?? 1,

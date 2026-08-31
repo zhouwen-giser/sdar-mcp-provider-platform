@@ -162,6 +162,12 @@ export class StreamableHttpVehicleDeviceMcpClient<
       maxResponseBytes: number;
       contractReportPath: string;
       useMockContractWhenUnavailable: boolean;
+      /**
+       * Preserve a catalog captured from the real southbound server while its
+       * transport is temporarily unavailable. This never enables mock calls:
+       * mutations still require a connected live MCP transport.
+       */
+      useCapturedContractWhenUnavailable?: boolean;
       reconnectMinMs?: number;
       reconnectMaxMs?: number;
       readRetryAttempts?: number;
@@ -193,6 +199,13 @@ export class StreamableHttpVehicleDeviceMcpClient<
     try {
       await this.#connect(false);
     } catch (error) {
+      if (
+        this.options.useCapturedContractWhenUnavailable === true &&
+        this.#loadCapturedContract()
+      ) {
+        this.#scheduleReconnect();
+        return;
+      }
       if (!this.options.useMockContractWhenUnavailable) throw error;
       this.#contracts = this.profile.mockContracts();
       this.#writeContract(
@@ -651,6 +664,65 @@ export class StreamableHttpVehicleDeviceMcpClient<
       encoding: "utf8",
       mode: 0o600,
     });
+  }
+
+  #loadCapturedContract(): boolean {
+    try {
+      const raw = readFileSync(this.options.contractReportPath, "utf8");
+      if (Buffer.byteLength(raw, "utf8") > 1_048_576) return false;
+      const report: unknown = JSON.parse(raw);
+      if (!record(report) || report.mode !== "captured" || !Array.isArray(report.tools))
+        return false;
+      const contracts: CapturedToolContract[] = [];
+      const names = new Set<string>();
+      for (const value of report.tools) {
+        if (!record(value)) return false;
+        const {
+          name,
+          description,
+          inputSchema,
+          outputSchema,
+          annotations,
+          capturedAt,
+          schemaHash,
+        } = value;
+        if (
+          typeof name !== "string" ||
+          !this.profile.isAllowed(name) ||
+          names.has(name) ||
+          typeof description !== "string" ||
+          !record(inputSchema) ||
+          inputSchema.type !== "object" ||
+          (outputSchema !== undefined && !record(outputSchema)) ||
+          (annotations !== undefined && !record(annotations)) ||
+          typeof capturedAt !== "string" ||
+          !Number.isFinite(Date.parse(capturedAt)) ||
+          typeof schemaHash !== "string" ||
+          !/^[0-9a-f]{64}$/.test(schemaHash)
+        )
+          return false;
+        const contract: CapturedToolContract = {
+          name,
+          description,
+          inputSchema,
+          ...(outputSchema === undefined ? {} : { outputSchema }),
+          ...(annotations === undefined ? {} : { annotations }),
+          capturedAt,
+          schemaHash,
+        };
+        const expectedHash =
+          this.profile.contractSchemaHash?.(contract) ??
+          createHash("sha256").update(canonical(contract.inputSchema)).digest("hex");
+        if (expectedHash !== schemaHash) return false;
+        names.add(name);
+        contracts.push(contract);
+      }
+      if (contracts.length === 0) return false;
+      this.#contracts = contracts;
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

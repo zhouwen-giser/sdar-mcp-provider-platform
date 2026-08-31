@@ -21,7 +21,9 @@ granted credentials for the other database.
   file, and an explicit wire mode (`ros_message_json` or `direct_domain_json`).
 - Set the Device MCP URL to the UGV server only. Put fixed request headers in a mode-0600 JSON file;
   never use environment variables for bearer tokens.
-- Disable `UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT`; startup must capture real `tools/list`.
+- Disable `UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT`; live execution never falls back to fixture calls.
+- Keep `UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT=false` unless an operator has reviewed the existing
+  `mode=captured` report and intentionally needs catalog continuity during a southbound outage.
 - Keep Provider telemetry ingress protected by mTLS and retain bounded label enumerations.
 
 ## Contract capture
@@ -32,12 +34,18 @@ protocol version, schemas and schema hashes. Only tools in both the capture and 
 callable. A missing or changed required schema causes availability `UNKNOWN`; it never triggers a
 guessed request mapping.
 
+When `UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT=true`, a failed live handshake may reuse only a prior
+`mode=captured` report whose tool names, object schemas, timestamps and schema hashes all validate.
+This preserves catalog discovery, not execution availability: every mutation still requires a
+connected live MCP transport and otherwise fails before dispatch with `UGV_DEVICE_MCP_UNAVAILABLE`.
+The client continues reconnecting and replaces the cached catalog only after a fresh live capture.
+
 ## Failure handling
 
 | Symptom                             | Adapter behavior                              | Operator action                             |
 | ----------------------------------- | --------------------------------------------- | ------------------------------------------- |
 | MQTT disconnected or stale          | availability `UNKNOWN`; last state retained   | restore broker path and verify exact topics |
-| Device MCP unavailable              | availability `UNKNOWN`; no control calls      | restore server and recapture `tools/list`   |
+| Device MCP unavailable              | no control calls; optional captured catalog   | restore server and recapture `tools/list`   |
 | task state becomes `-1`             | reconcile; never infer success                | query both MQTT and Device MCP state        |
 | source-state conflict               | retain nonterminal task and report conflict   | inspect capture and per-source timestamps   |
 | fire result contains verdict fields | strip recursively and emit bounded diagnostic | inspect downstream contract drift           |

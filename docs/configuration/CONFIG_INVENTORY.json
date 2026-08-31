@@ -2242,6 +2242,21 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "device_mcp",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "pending_review"
+    },
+    {
       "key": "UGV_DEVICE_MCP_CONTRACT_REPORT_PATH",
       "component": "ugv",
       "source": "apps/ugv-provider-adapter/src/config.ts:58",
