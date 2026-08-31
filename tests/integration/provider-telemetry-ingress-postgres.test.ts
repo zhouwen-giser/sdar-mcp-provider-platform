@@ -224,6 +224,59 @@ describe("Runtime ProviderTelemetryIngress", () => {
     );
   });
 
+  it("lets a newer mission observation without identity supersede a historical exact identity", async () => {
+    const ingress = new ProviderTelemetryIngress(pool, options);
+    const historicalObservedAt = Date.now() - 1_000;
+    const identity = {
+      taskId: "00000000-0000-4000-8000-000000000402",
+      externalExecutionId: "execution-1",
+      operationName: "durable_task",
+    };
+    await emit(
+      ingress,
+      event("RESOURCE_STATE", {
+        ...identity,
+        providerEventId: "evidence-mission-historical-exact",
+        providerEventSequence: 21,
+        occurredAt: {
+          seconds: Math.floor(historicalObservedAt / 1_000),
+          nanos: (historicalObservedAt % 1_000) * 1_000_000,
+        },
+        attributes: {
+          "sdar.evidence.kind": "mission",
+          "sdar.device.mission_id": "mission-7",
+        },
+        payload: { state: "completed", reasonCode: "MISSION_OBSERVED" },
+      }),
+    );
+    const unresolved = event("RESOURCE_STATE", {
+      ...identity,
+      providerEventId: "evidence-mission-current-unresolved",
+      providerEventSequence: 22,
+      attributes: { "sdar.evidence.kind": "mission" },
+      payload: { state: "unknown", reasonCode: "MISSION_ID_UNAVAILABLE" },
+    });
+    await emit(ingress, unresolved);
+
+    expect(await new SmppDiagnosticRepository(pool).getMissionRelation(identity.taskId)).toEqual(
+      expect.objectContaining({
+        relationStatus: "unresolved",
+        deviceMissionId: null,
+      }),
+    );
+    const latestRelation = await pool.query<{ body: Record<string, unknown> }>(
+      `SELECT record_body AS body FROM provider_ops_delivery
+       WHERE record_body->>'eventType'='smpp.mission.relation'
+       ORDER BY created_at DESC LIMIT 1`,
+    );
+    expect(latestRelation.rows[0]?.body).toMatchObject({
+      payload: {
+        relationStatus: "unresolved",
+        deviceMissionId: null,
+      },
+    });
+  });
+
   it("execution_progress_requires_task", async () => {
     expect(
       await emit(new ProviderTelemetryIngress(pool, options), event("EXECUTION_PROGRESS")),

@@ -318,10 +318,20 @@ async function captureMissionRelationFact(
       evidence.rows.map((row) => row.mission_id).filter((value): value is string => value !== null),
     ),
   ].sort();
+  const latestEvidence = evidence.rows.at(-1);
   const relationStatus =
-    missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+    latestEvidence?.mission_id === null
+      ? "unresolved"
+      : missionIds.length === 0
+        ? "unresolved"
+        : missionIds.length === 1
+          ? "exact"
+          : "conflict";
   const deviceMissionId = relationStatus === "exact" ? (missionIds[0] ?? null) : null;
-  const sourceRecordRefs = evidence.rows.map((row) => row.record_id).sort();
+  const sourceRecordRefs =
+    relationStatus === "unresolved" && latestEvidence !== undefined
+      ? [latestEvidence.record_id]
+      : evidence.rows.map((row) => row.record_id).sort();
   const relation = createProviderOpsEnvelope({
     recordType: "provider.execution.progress",
     eventCategory: "execution.progress",
