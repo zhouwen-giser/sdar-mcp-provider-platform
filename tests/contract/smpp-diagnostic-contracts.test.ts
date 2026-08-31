@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { Ajv2020 } from "ajv/dist/2020.js";
-import addFormats from "ajv-formats";
+import Ajv2020Import from "ajv/dist/2020.js";
+import addFormatsImport from "ajv-formats";
 import { describe, expect, it } from "vitest";
 
 const contractDir = fileURLToPath(new URL("../../protocol/smpp-diagnostics/", import.meta.url));
+const Ajv2020 = Ajv2020Import.default;
+const addFormats = addFormatsImport.default;
 
 const files = [
   "external-capability.schema.json",
