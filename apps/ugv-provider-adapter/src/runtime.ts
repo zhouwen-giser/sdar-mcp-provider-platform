@@ -1413,7 +1413,17 @@ export class UgvProviderRuntime {
     }
     const missionAuthority = this.ingress.fieldObservationAuthority("chassis.mission");
     if (missionAuthority !== undefined) {
-      const missionId = snapshot.chassis.mission.id;
+      const observedMissionId = snapshot.chassis.mission.id;
+      const missionId =
+        observedMissionId === undefined
+          ? undefined
+          : execution.downstreamMissionIds.find((candidate) => {
+              try {
+                return candidate === String(parseUgvMissionId(observedMissionId));
+              } catch {
+                return false;
+              }
+            });
       await this.telemetry.emit(
         "RESOURCE_STATE",
         { state: String(snapshot.chassis.mission.state), reasonCode: "UGV_MISSION_OBSERVED" },
@@ -2792,7 +2802,7 @@ function trackBelongsToExecution(
   track: Pick<VehicleTaskTrack, "id">,
   allowMissingObservedId = false,
 ): boolean {
-  if (execution.downstreamMissionIds.length === 0) return true;
+  if (execution.downstreamMissionIds.length === 0) return false;
   if (track.id === undefined) return allowMissingObservedId;
   try {
     return execution.downstreamMissionIds.includes(String(parseUgvMissionId(track.id)));

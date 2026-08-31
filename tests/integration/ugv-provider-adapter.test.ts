@@ -121,6 +121,39 @@ describe("UGV long-running operation integration", () => {
     expect(device.calls).toHaveLength(1);
   });
 
+  it("does not correlate a stale observed mission without a persisted downstream identity", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => {
+      throw new UncertainMutatingDeviceCallError("UGV", "ugv_path_follow_mission");
+    });
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-uncertain-stale-mission", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    missionWithId(fixture.ingress, 64209, 4, 100);
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", speed_kmh: 0 })),
+    );
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", latitude: 30.1001, longitude: 114.1001 })),
+    );
+
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+      downstreamMissionIds: [],
+    });
+    expect(
+      fixture.telemetry.records.filter(
+        (record) => record.attributes["sdar.device.mission_id"] === "64209",
+      ),
+    ).toEqual([]);
+  });
+
   it("persists mission-write failure after primary acceptance as uncertain without replay", async () => {
     const store = new MissionPersistenceFailingStore();
     const fixture = await createFixture(false, store);
