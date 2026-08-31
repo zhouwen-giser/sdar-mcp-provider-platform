@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-business-terminal/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "mcpTaskStatus",
+    "businessStatus",
+    "providerExecutionStatus",
+    "transportStatus"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-business-terminal/v1" },
+    "taskId": { "type": "string" },
+    "mcpTaskStatus": { "enum": ["completed", "failed", "cancelled"] },
+    "businessStatus": { "enum": ["succeeded", "failed", "unknown", "not_applicable"] },
+    "providerExecutionStatus": { "type": "string" },
+    "transportStatus": {
+      "enum": ["completed", "response_lost_after_commit", "unavailable", "unknown"]
+    },
+    "isError": { "type": "boolean" },
+    "reasonCode": { "type": ["string", "null"] }
+  }
+}

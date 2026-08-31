@@ -217,6 +217,46 @@
       "sizeBytes": 1262
     },
     {
+      "path": "smpp-diagnostics/business-terminal.schema.json",
+      "sha256": "06d781dbd9011814ab6c83618443c4832138a63759769e8d093a4e86b06bd1fe",
+      "sizeBytes": 854
+    },
+    {
+      "path": "smpp-diagnostics/dispatch-uncertainty.schema.json",
+      "sha256": "fd3c6a200653cba90573d5700fee321db632bd177ce0f4f543a2249e979cab74",
+      "sizeBytes": 911
+    },
+    {
+      "path": "smpp-diagnostics/external-capability.schema.json",
+      "sha256": "25082e7806152ecaba025c58326eb85ce8643631b75813bf781bc870877d6010",
+      "sizeBytes": 1444
+    },
+    {
+      "path": "smpp-diagnostics/mission-relation.schema.json",
+      "sha256": "45088f3bf58bb319e31dea8f5d3fcbc41f00b987c112c38745fc58595c7048a8",
+      "sizeBytes": 746
+    },
+    {
+      "path": "smpp-diagnostics/provider-evidence-ref.schema.json",
+      "sha256": "c264c8c578aa56efbfb4ebb052653c8355f467b83904f36f05523aa322ad1fe1",
+      "sizeBytes": 997
+    },
+    {
+      "path": "smpp-diagnostics/README.md",
+      "sha256": "b12b13c447915ed211f517a24b7b446d3e24857faf0407609ad4ed9ddb9a0430",
+      "sizeBytes": 625
+    },
+    {
+      "path": "smpp-diagnostics/reconciliation-result.schema.json",
+      "sha256": "7a520162d8f857c13d9d7acbcf3e4a50c15496100d74cb0322a9cf302a2520bf",
+      "sizeBytes": 693
+    },
+    {
+      "path": "smpp-diagnostics/task-execution-binding.schema.json",
+      "sha256": "58a6ea51a1b122b765439a61537394fb965e9cbaab9d30c02bb4077b262d2e5a",
+      "sizeBytes": 1091
+    },
+    {
       "path": "upstream/mcp-2026-07-28/schema.json",
       "sha256": "9281c4890630e2d1e61792fa23b4084c4ea360cd58519610cd050545ab7b8708",
       "sizeBytes": 180695

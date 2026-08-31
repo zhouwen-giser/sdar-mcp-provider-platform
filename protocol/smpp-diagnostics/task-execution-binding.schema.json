@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-task-execution-binding/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "providerId",
+    "operationName",
+    "argumentHash",
+    "executionMode",
+    "bindingStatus",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-task-execution-binding/v1" },
+    "taskId": { "type": "string", "minLength": 1 },
+    "providerId": { "type": "string", "minLength": 1 },
+    "operationName": { "type": "string", "minLength": 1 },
+    "argumentHash": { "type": "string", "minLength": 1 },
+    "executionMode": { "type": "string" },
+    "simulationId": { "type": ["string", "null"] },
+    "externalExecutionId": { "type": ["string", "null"] },
+    "resourceRef": { "type": ["string", "null"] },
+    "adapterRevision": { "type": ["integer", "null"] },
+    "bindingStatus": { "enum": ["unbound", "bound", "unresolved", "conflict", "terminal"] },
+    "contentHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

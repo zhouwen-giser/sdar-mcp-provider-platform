@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-mission-relation/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "taskId", "externalExecutionId", "relationStatus", "observedAt"],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-mission-relation/v1" },
+    "taskId": { "type": "string" },
+    "externalExecutionId": { "type": "string" },
+    "deviceMissionId": { "type": ["string", "null"] },
+    "resourceId": { "type": ["string", "null"] },
+    "relationStatus": { "enum": ["exact", "unresolved", "conflict"] },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "sourceRecordRefs": { "type": "array", "items": { "type": "string" } }
+  }
+}
