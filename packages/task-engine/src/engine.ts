@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import * as grpc from "@grpc/grpc-js";
-import type { GrpcAdapterGateway } from "../../adapter-protocol/src/index.js";
 import {
   protoStructToJson,
   validateAdapterSnapshotIdentity,
@@ -51,6 +50,7 @@ import {
   validatedSnapshotTransition,
 } from "./result-contract.js";
 import { mapTaskToDetailedTask, type DetailedTaskProjection } from "./detailed-task.js";
+import { DiagnosticResponseLossError, type TaskAdapterGateway } from "./diagnostic-gateway.js";
 
 export type ToolInvocationResult =
   | { kind: "result"; result: Record<string, unknown> }
@@ -78,7 +78,7 @@ export class TaskEngine {
   constructor(
     readonly manifest: ValidatedManifest,
     readonly operationSnapshotIds: Map<string, string>,
-    readonly gateway: GrpcAdapterGateway,
+    readonly gateway: TaskAdapterGateway,
     repository: TaskRepository,
     readonly idempotency?: IdempotencyRepository,
     readonly clock: Clock = systemClock,
@@ -378,9 +378,18 @@ export class TaskEngine {
         ...(reservationRef === undefined ? {} : { reservationRef }),
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId, "adapter_transport_ambiguous", [
-        "adapter.startOperation",
-      ]);
+      await this.#repository.markAdmissionUncertain(
+        taskId,
+        error instanceof DiagnosticResponseLossError
+          ? "response_lost_after_adapter_success"
+          : "adapter_transport_ambiguous",
+        [
+          "adapter.startOperation",
+          ...(error instanceof DiagnosticResponseLossError
+            ? [`diagnosticFaultLease:${error.leaseId}`]
+            : []),
+        ],
+      );
       throw error;
     }
     if (response.result === "rejected" || response.rejected !== undefined) {
@@ -1164,7 +1173,7 @@ function normalizeInputRequests(snapshot: ExecutionSnapshot) {
 
 function resultFromStart(
   operation: ValidatedOperation,
-  response: Awaited<ReturnType<GrpcAdapterGateway["startOperation"]>>,
+  response: Awaited<ReturnType<TaskAdapterGateway["startOperation"]>>,
 ): Record<string, unknown> {
   if (response.rejected !== undefined) return rejectionResult(response.rejected);
   const snapshot = response.accepted?.initialSnapshot;

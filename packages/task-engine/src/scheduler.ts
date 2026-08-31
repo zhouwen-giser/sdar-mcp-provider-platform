@@ -3,7 +3,7 @@ import {
   protoStructToJson,
   validateAdapterSnapshotIdentity,
 } from "../../adapter-protocol/src/index.js";
-import type { ExecutionSnapshot, GrpcAdapterGateway } from "../../adapter-protocol/src/index.js";
+import type { ExecutionSnapshot } from "../../adapter-protocol/src/index.js";
 import type { Clock, TaskExecutionTiming, TaskRecord } from "../../domain/src/index.js";
 import { systemClock } from "../../domain/src/index.js";
 import type { ValidatedManifest, ValidatedOperation } from "../../operation-registry/src/index.js";
@@ -12,6 +12,7 @@ import type { TaskRepository } from "../../persistence-postgres/src/index.js";
 import { validatedSnapshotTransition } from "./result-contract.js";
 import { withLeaseHeartbeat } from "./lease-heartbeat.js";
 import { BoundExecutionWatchdog } from "./bound-execution-watchdog.js";
+import type { TaskAdapterGateway } from "./diagnostic-gateway.js";
 
 export interface SchedulerOptions {
   concurrency?: number;
@@ -36,7 +37,7 @@ export class DurableScheduler {
 
   constructor(
     readonly manifest: ValidatedManifest,
-    readonly gateway: GrpcAdapterGateway,
+    readonly gateway: TaskAdapterGateway,
     readonly repository: TaskRepository,
     readonly clock: Clock = systemClock,
     workerId: string = randomUUID(),
