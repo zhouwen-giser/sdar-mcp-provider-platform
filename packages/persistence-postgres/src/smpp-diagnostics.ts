@@ -5,6 +5,23 @@ import { sha256CanonicalJson } from "../../observability/src/index.js";
 export type SmppTaskExecutionBindingStatus =
   "unbound" | "bound" | "unresolved" | "conflict" | "terminal";
 
+export type SmppDispatchUncertaintyClass =
+  | "response_lost_after_adapter_success"
+  | "adapter_transport_ambiguous"
+  | "runtime_crash_window"
+  | "unknown";
+
+export interface SmppDispatchUncertaintyV1 {
+  schemaVersion: "sdar.smpp-dispatch-uncertainty/v1";
+  taskId: string;
+  operationName: string;
+  argumentHash: string;
+  uncertaintyClass: SmppDispatchUncertaintyClass;
+  redispatchAllowed: false;
+  occurredAt: string;
+  causalRefs: string[];
+}
+
 export interface SmppTaskExecutionBindingV1 {
   schemaVersion: "sdar.smpp-task-execution-binding/v1";
   taskId: string;
@@ -85,6 +102,29 @@ export class SmppDiagnosticRepository {
     return {
       ...projectionWithoutHash,
       contentHash: `sha256:${sha256CanonicalJson(projectionWithoutHash as CanonicalJsonValue)}`,
+    };
+  }
+
+  async getDispatchUncertainty(taskId: string): Promise<SmppDispatchUncertaintyV1 | null> {
+    const result = await this.pool.query<{
+      task_id: string;
+      operation_name: string;
+      argument_hash: string;
+      uncertainty_class: SmppDispatchUncertaintyClass;
+      occurred_at: Date;
+      causal_refs: string[];
+    }>("SELECT * FROM smpp_dispatch_uncertainty WHERE task_id=$1", [taskId]);
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return {
+      schemaVersion: "sdar.smpp-dispatch-uncertainty/v1",
+      taskId: row.task_id,
+      operationName: row.operation_name,
+      argumentHash: row.argument_hash,
+      uncertaintyClass: row.uncertainty_class,
+      redispatchAllowed: false,
+      occurredAt: row.occurred_at.toISOString(),
+      causalRefs: row.causal_refs,
     };
   }
 }

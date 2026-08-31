@@ -378,7 +378,9 @@ export class TaskEngine {
         ...(reservationRef === undefined ? {} : { reservationRef }),
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(taskId, "adapter_transport_ambiguous", [
+        "adapter.startOperation",
+      ]);
       throw error;
     }
     if (response.result === "rejected" || response.rejected !== undefined) {
@@ -404,7 +406,10 @@ export class TaskEngine {
         simulationId: authorization.simulationId,
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(taskId, "adapter_transport_ambiguous", [
+        "adapter.startOperation:response",
+        "runtime.validateStartResponseIdentity",
+      ]);
       throw error;
     }
     const transition = validatedSnapshotTransition(operation, accepted.initialSnapshot);
@@ -444,7 +449,10 @@ export class TaskEngine {
         ...(startWindowMissedAt === undefined ? {} : { startWindowMissedAt }),
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(taskId, "runtime_crash_window", [
+        "adapter.startOperation:accepted",
+        "runtime.publishAccepted",
+      ]);
       throw error;
     }
     return { kind: "task", task: detailedTask(task, inputRequests) };

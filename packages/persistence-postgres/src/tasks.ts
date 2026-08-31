@@ -14,6 +14,7 @@ import {
 } from "../../domain/src/index.js";
 import { createProviderOpsEnvelope } from "../../observability/src/index.js";
 import { captureProviderOpsDelivery } from "./provider-ops-delivery.js";
+import type { SmppDispatchUncertaintyClass } from "./smpp-diagnostics.js";
 
 export interface AdmissionIntentInput {
   taskId: string;
@@ -477,11 +478,97 @@ export class TaskRepository {
     };
   }
 
-  async markAdmissionUncertain(taskId: string): Promise<void> {
-    await this.pool.query(
-      "UPDATE admission_intent SET state='UNCERTAIN', updated_at=clock_timestamp() WHERE task_id=$1 AND state='PENDING'",
-      [taskId],
-    );
+  async markAdmissionUncertain(
+    taskId: string,
+    uncertaintyClass: SmppDispatchUncertaintyClass = "unknown",
+    causalRefs: readonly string[] = [],
+    occurredAt = new Date(),
+  ): Promise<void> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const admission = await client.query<{
+        provider_id: string;
+        operation_name: string;
+        argument_hash: string;
+        authorization_context_hash: string;
+        execution_mode: string;
+        simulation_id: string | null;
+        state: AdmissionIntentRecord["state"];
+      }>("SELECT * FROM admission_intent WHERE task_id=$1 FOR UPDATE", [taskId]);
+      const row = admission.rows[0];
+      if (row === undefined) throw new Error("ADMISSION_INTENT_NOT_FOUND");
+      if (row.state !== "PENDING" && row.state !== "UNCERTAIN") {
+        await client.query("COMMIT");
+        return;
+      }
+      await client.query(
+        "UPDATE admission_intent SET state='UNCERTAIN', updated_at=clock_timestamp() WHERE task_id=$1",
+        [taskId],
+      );
+      const inserted = await client.query(
+        `INSERT INTO smpp_dispatch_uncertainty
+           (task_id,operation_name,argument_hash,uncertainty_class,occurred_at,causal_refs)
+         VALUES ($1,$2,$3,$4,$5,$6::jsonb)
+         ON CONFLICT (task_id) DO NOTHING
+         RETURNING task_id`,
+        [
+          taskId,
+          row.operation_name,
+          row.argument_hash,
+          uncertaintyClass,
+          occurredAt,
+          JSON.stringify(causalRefs),
+        ],
+      );
+      if (inserted.rowCount === 1) {
+        const eventKey = `${taskId}:smpp:dispatch-uncertainty`;
+        const envelope = createProviderOpsEnvelope({
+          recordType: "provider.recovery.lifecycle",
+          eventCategory: "recovery.lifecycle",
+          deliveryClass: "operational",
+          providerId: row.provider_id,
+          runtimeVersion: RUNTIME_VERSION,
+          instanceId: "",
+          taskId,
+          operationName: row.operation_name,
+          executionMode: row.execution_mode,
+          ...(row.simulation_id === null ? {} : { simulationId: row.simulation_id }),
+          argumentHash: row.argument_hash,
+          authorizationContextHash: row.authorization_context_hash,
+          eventType: "dispatch.uncertainty",
+          stableAggregateIdentity: taskId,
+          eventIdentity: eventKey,
+          occurredAt,
+          attributes: {
+            source: "committed_postgres",
+            semantic: "dispatch.uncertainty",
+          },
+          payload: {
+            schemaVersion: "sdar.smpp-dispatch-uncertainty/v1",
+            taskId,
+            operationName: row.operation_name,
+            argumentHash: row.argument_hash,
+            uncertaintyClass,
+            redispatchAllowed: false,
+            occurredAt: occurredAt.toISOString(),
+            causalRefs: [...causalRefs],
+          },
+        });
+        await captureProviderOpsDelivery(client, {
+          envelope,
+          eventKey,
+          aggregateType: "recovery",
+          aggregateId: taskId,
+        });
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async recordRejection(taskId: string, response: Record<string, unknown>): Promise<void> {
