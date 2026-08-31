@@ -1329,6 +1329,7 @@ export class UgvProviderRuntime {
     next = this.#armObservationPhaseDeadlines(next, phaseObservation);
     next = this.#expirePhaseDeadline(next);
     if (next.revision !== execution.revision) {
+      await this.#emitPhysicalEvidence(next, snapshot);
       await this.store.putExecution(next);
       this.events.emit(execution.taskId, executionSnapshot(next));
       await this.telemetry.emit(
@@ -1369,6 +1370,64 @@ export class UgvProviderRuntime {
       }
     }
     return next;
+  }
+
+  async #emitPhysicalEvidence(execution: ProviderExecution, snapshot: UgvSnapshot): Promise<void> {
+    const base = identityTelemetry(execution);
+    const positionAuthority =
+      this.ingress.fieldObservationAuthority("chassis.position.geodetic") ??
+      this.ingress.fieldObservationAuthority("chassis.position.local");
+    if (positionAuthority !== undefined && snapshot.chassis.position !== undefined) {
+      await this.telemetry.emit(
+        "RESOURCE_STATE",
+        { state: "observed", reasonCode: "UGV_POSITION_OBSERVED" },
+        {
+          ...base,
+          observedAt: positionAuthority.observedAt,
+          attributes: {
+            "sdar.evidence.kind": "position",
+            "sdar.evidence.position": snapshot.chassis.position,
+          },
+        },
+      );
+    }
+    const speedAuthority = this.ingress.fieldObservationAuthority("chassis.speed");
+    if (speedAuthority !== undefined && snapshot.chassis.speedKmh !== undefined) {
+      await this.telemetry.emit(
+        "RESOURCE_METRIC",
+        {
+          metricName: "vehicle_speed_kmh",
+          value: snapshot.chassis.speedKmh,
+          unit: "km/h",
+          quality: "provider_observed",
+        },
+        {
+          ...base,
+          observedAt: speedAuthority.observedAt,
+          attributes: {
+            "sdar.evidence.kind": "speed",
+            "sdar.evidence.speed_kmh": snapshot.chassis.speedKmh,
+          },
+        },
+      );
+    }
+    const missionAuthority = this.ingress.fieldObservationAuthority("chassis.mission");
+    if (missionAuthority !== undefined) {
+      const missionId = snapshot.chassis.mission.id;
+      await this.telemetry.emit(
+        "RESOURCE_STATE",
+        { state: String(snapshot.chassis.mission.state), reasonCode: "UGV_MISSION_OBSERVED" },
+        {
+          ...base,
+          observedAt: missionAuthority.observedAt,
+          attributes: {
+            "sdar.evidence.kind": "mission",
+            "sdar.evidence.mission_state": String(snapshot.chassis.mission.state),
+            ...(missionId === undefined ? {} : { "sdar.device.mission_id": String(missionId) }),
+          },
+        },
+      );
+    }
   }
 
   #advanceStationaryStability(

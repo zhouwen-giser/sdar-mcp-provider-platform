@@ -33,12 +33,12 @@
 
 Isolated PostgreSQL: `postgres:17-alpine`, loopback port `55432`, temporary in-memory data volume.
 
-| Check | Result |
-|---|---:|
-| `pnpm protocol:check` | PASS — 11 schemas, 74 frozen cases, 44 lock files |
-| `pnpm test:runtime:closure` | PASS — 7 files, 29 tests |
-| `pnpm test:runtime:followup` | PASS — 9 files, 29 tests |
-| focused task/ProviderTelemetry/ProviderOps integration | PASS — 4 files, 145 tests |
+| Check                                                  |                                            Result |
+| ------------------------------------------------------ | ------------------------------------------------: |
+| `pnpm protocol:check`                                  | PASS — 11 schemas, 74 frozen cases, 44 lock files |
+| `pnpm test:runtime:closure`                            |                          PASS — 7 files, 29 tests |
+| `pnpm test:runtime:followup`                           |                          PASS — 9 files, 29 tests |
+| focused task/ProviderTelemetry/ProviderOps integration |                         PASS — 4 files, 145 tests |
 
 Focused integration command covered `task-lifecycle-postgres`, `provider-telemetry-ingress-postgres`, `telemetry-commit-boundary-postgres`, and `telemetry-committed-lifecycle`.
 

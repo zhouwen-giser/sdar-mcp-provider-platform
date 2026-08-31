@@ -24,6 +24,8 @@ export interface VehicleTelemetryContext {
   taskId?: string;
   externalExecutionId?: string;
   operationName?: string;
+  /** Provider-authoritative observation time; defaults to emission time. */
+  observedAt?: string;
   attributes?: Record<string, unknown>;
 }
 
@@ -154,7 +156,9 @@ export class VehicleTelemetry {
   ): Promise<void> {
     if (!EVENT_TYPES.has(eventType)) throw new Error("VEHICLE_TELEMETRY_EVENT_TYPE_INVALID");
     const normalized = normalizeTelemetryEvent(eventType, payload);
-    const occurredAt = (this.options.now?.() ?? new Date()).toISOString();
+    const occurredAt = context.observedAt ?? (this.options.now?.() ?? new Date()).toISOString();
+    if (Number.isNaN(Date.parse(occurredAt)))
+      throw new Error("VEHICLE_TELEMETRY_OBSERVED_AT_INVALID");
     const sequence = this.#sequence++;
     const event: ProviderTelemetryEventInput = {
       providerEventId: createHash("sha256")

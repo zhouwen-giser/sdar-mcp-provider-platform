@@ -590,6 +590,20 @@ describe("UGV long-running operation integration", () => {
     mission(fixture.ingress, 1, 25);
     let execution = await fixture.runtime.get("nav-1");
     expect(execution).toMatchObject({ state: "RUNNING", progress: 25 });
+    const physicalEvidence = fixture.telemetry.records.filter(
+      (record) => typeof record.attributes["sdar.evidence.kind"] === "string",
+    );
+    expect(physicalEvidence.map((record) => record.attributes["sdar.evidence.kind"])).toEqual(
+      expect.arrayContaining(["position", "mission"]),
+    );
+    expect(
+      physicalEvidence.find((record) => record.attributes["sdar.evidence.kind"] === "mission"),
+    ).toMatchObject({
+      taskId: "nav-1",
+      externalExecutionId: execution?.externalExecutionId,
+      operationName: "vehicle_navigate",
+      attributes: { "sdar.device.mission_id": "1" },
+    });
 
     const identity = identityOf(required(execution), "1");
     expect(await fixture.runtime.command("pause", identity)).toMatchObject({ accepted: true });

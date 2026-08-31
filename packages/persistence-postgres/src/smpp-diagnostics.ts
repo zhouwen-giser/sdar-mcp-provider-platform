@@ -52,10 +52,7 @@ export interface SmppTaskExecutionBindingV1 {
 
 export type SmppBusinessStatus = "succeeded" | "failed" | "unknown" | "not_applicable";
 export type SmppTransportStatus =
-  | "completed"
-  | "response_lost_after_commit"
-  | "unavailable"
-  | "unknown";
+  "completed" | "response_lost_after_commit" | "unavailable" | "unknown";
 
 export interface SmppBusinessTerminalV1 {
   schemaVersion: "sdar.smpp-business-terminal/v1";
@@ -67,6 +64,44 @@ export interface SmppBusinessTerminalV1 {
   isError: boolean;
   reasonCode: string | null;
 }
+
+export type SmppProviderEvidenceKind =
+  "position" | "speed" | "mission" | "state" | "health" | "other";
+
+export interface SmppProviderEvidenceRefV1 {
+  schemaVersion: "sdar.smpp-provider-evidence-ref/v1";
+  taskId: string;
+  providerId: string;
+  externalExecutionId: string;
+  resourceId: string;
+  deviceMissionId: string | null;
+  kind: SmppProviderEvidenceKind;
+  observedAt: string;
+  sourceRecordId: string;
+  sourceSequence: number | null;
+  contentHash: string | null;
+  payloadRef: { providerOpsRecordId: string };
+}
+
+export interface SmppMissionRelationV1 {
+  schemaVersion: "sdar.smpp-mission-relation/v1";
+  taskId: string;
+  externalExecutionId: string;
+  deviceMissionId: string | null;
+  resourceId: string | null;
+  relationStatus: "exact" | "unresolved" | "conflict";
+  observedAt: string;
+  sourceRecordRefs: string[];
+}
+
+const providerEvidenceKinds = new Set<SmppProviderEvidenceKind>([
+  "position",
+  "speed",
+  "mission",
+  "state",
+  "health",
+  "other",
+]);
 
 interface BindingRow {
   task_id: string;
@@ -206,6 +241,53 @@ export class SmppDiagnosticRepository {
       uncertaintyClass: row.uncertainty_class,
     });
   }
+
+  async listProviderEvidence(taskId: string): Promise<SmppProviderEvidenceRefV1[]> {
+    const result = await this.pool.query<{ record_body: Record<string, unknown> }>(
+      `SELECT record_body
+       FROM provider_ops_delivery
+       WHERE aggregate_id=$1
+         AND record_body ? 'providerEventId'
+         AND record_body->'attributes' ? 'sdar.evidence.kind'
+       ORDER BY record_body->>'occurredAt', record_id`,
+      [taskId],
+    );
+    return result.rows
+      .map((row) => providerEvidenceRef(row.record_body))
+      .filter((value): value is SmppProviderEvidenceRefV1 => value !== null);
+  }
+
+  async getMissionRelation(taskId: string): Promise<SmppMissionRelationV1 | null> {
+    const task = await this.pool.query<{
+      external_execution_id: string;
+    }>("SELECT external_execution_id FROM provider_task WHERE task_id=$1", [taskId]);
+    const externalExecutionId = task.rows[0]?.external_execution_id;
+    if (externalExecutionId === undefined) return null;
+    const missionEvidence = (await this.listProviderEvidence(taskId)).filter(
+      (item) => item.kind === "mission" && item.externalExecutionId === externalExecutionId,
+    );
+    if (missionEvidence.length === 0) return null;
+    const missionIds = [
+      ...new Set(
+        missionEvidence
+          .map((item) => item.deviceMissionId)
+          .filter((value): value is string => value !== null),
+      ),
+    ].sort();
+    const resources = [...new Set(missionEvidence.map((item) => item.resourceId))].sort();
+    const relationStatus =
+      missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+    return {
+      schemaVersion: "sdar.smpp-mission-relation/v1",
+      taskId,
+      externalExecutionId,
+      deviceMissionId: relationStatus === "exact" ? (missionIds[0] ?? null) : null,
+      resourceId: resources.length === 1 ? (resources[0] ?? null) : null,
+      relationStatus,
+      observedAt: missionEvidence.at(-1)?.observedAt ?? new Date(0).toISOString(),
+      sourceRecordRefs: missionEvidence.map((item) => item.sourceRecordId).sort(),
+    };
+  }
 }
 
 export function normalizeBusinessTerminal(input: {
@@ -311,4 +393,53 @@ function reasonCode(
     }
   }
   return null;
+}
+
+function providerEvidenceRef(body: Record<string, unknown>): SmppProviderEvidenceRefV1 | null {
+  const attributes = record(body.attributes);
+  const kind = attributes?.["sdar.evidence.kind"];
+  if (typeof kind !== "string" || !providerEvidenceKinds.has(kind as SmppProviderEvidenceKind)) {
+    return null;
+  }
+  const taskId = body.taskId;
+  const providerId = body.providerId;
+  const externalExecutionId = body.externalExecutionId;
+  const resourceId = body.resourceId;
+  const observedAt = body.occurredAt;
+  const sourceRecordId = body.recordId;
+  if (
+    typeof taskId !== "string" ||
+    typeof providerId !== "string" ||
+    typeof externalExecutionId !== "string" ||
+    typeof resourceId !== "string" ||
+    typeof observedAt !== "string" ||
+    Number.isNaN(Date.parse(observedAt)) ||
+    typeof sourceRecordId !== "string"
+  ) {
+    return null;
+  }
+  const missionId = attributes?.["sdar.device.mission_id"];
+  const sequence = body.providerEventSequence;
+  const recordHash = body.recordHash;
+  return {
+    schemaVersion: "sdar.smpp-provider-evidence-ref/v1",
+    taskId,
+    providerId,
+    externalExecutionId,
+    resourceId,
+    deviceMissionId: typeof missionId === "string" && missionId.length > 0 ? missionId : null,
+    kind: kind as SmppProviderEvidenceKind,
+    observedAt: new Date(observedAt).toISOString(),
+    sourceRecordId,
+    sourceSequence:
+      typeof sequence === "number" && Number.isSafeInteger(sequence) ? sequence : null,
+    contentHash: typeof recordHash === "string" ? recordHash : null,
+    payloadRef: { providerOpsRecordId: sourceRecordId },
+  };
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }

@@ -11,7 +11,10 @@ import {
   type ProviderTelemetryEventInput,
   type ProviderTelemetryEventType,
 } from "../../packages/provider-telemetry/src/index.js";
-import { runMigrations } from "../../packages/persistence-postgres/src/index.js";
+import {
+  runMigrations,
+  SmppDiagnosticRepository,
+} from "../../packages/persistence-postgres/src/index.js";
 import { VehicleTelemetry } from "../../packages/vehicle-provider-core/src/index.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -95,6 +98,101 @@ describe("Runtime ProviderTelemetryIngress", () => {
       observationRevision: 9,
       attributes: { linkedTaskTraceId: "d".repeat(32) },
     });
+  });
+
+  it("normalizes Provider-authoritative evidence and exact/conflicting mission identity", async () => {
+    const ingress = new ProviderTelemetryIngress(pool, options);
+    const identity = {
+      taskId: "00000000-0000-4000-8000-000000000402",
+      externalExecutionId: "execution-1",
+      operationName: "durable_task",
+    };
+    expect(
+      await emit(
+        ingress,
+        event("RESOURCE_STATE", {
+          ...identity,
+          providerEventId: "evidence-position-1",
+          providerEventSequence: 10,
+          attributes: {
+            "sdar.evidence.kind": "position",
+            "sdar.evidence.position": { latitude: 31.2, longitude: 121.5 },
+          },
+          payload: { state: "observed", reasonCode: "POSITION_OBSERVED" },
+        }),
+      ),
+    ).toMatchObject({ accepted: true });
+    expect(
+      await emit(
+        ingress,
+        event("RESOURCE_STATE", {
+          ...identity,
+          providerEventId: "evidence-mission-1",
+          providerEventSequence: 11,
+          attributes: {
+            "sdar.evidence.kind": "mission",
+            "sdar.device.mission_id": "mission-7",
+          },
+          payload: { state: "running", reasonCode: "MISSION_OBSERVED" },
+        }),
+      ),
+    ).toMatchObject({ accepted: true });
+
+    const diagnostics = new SmppDiagnosticRepository(pool);
+    expect(await diagnostics.listProviderEvidence(identity.taskId)).toEqual([
+      expect.objectContaining({
+        taskId: identity.taskId,
+        externalExecutionId: "execution-1",
+        resourceId: "resource-1",
+        kind: "position",
+        sourceSequence: 10,
+      }),
+      expect.objectContaining({
+        kind: "mission",
+        deviceMissionId: "mission-7",
+        sourceSequence: 11,
+      }),
+    ]);
+    expect(await diagnostics.getMissionRelation(identity.taskId)).toMatchObject({
+      externalExecutionId: "execution-1",
+      deviceMissionId: "mission-7",
+      relationStatus: "exact",
+    });
+
+    await emit(
+      ingress,
+      event("RESOURCE_STATE", {
+        ...identity,
+        providerEventId: "evidence-mission-contradiction",
+        providerEventSequence: 12,
+        attributes: {
+          "sdar.evidence.kind": "mission",
+          "sdar.device.mission_id": "mission-8",
+        },
+        payload: { state: "running", reasonCode: "MISSION_OBSERVED" },
+      }),
+    );
+    expect(await diagnostics.getMissionRelation(identity.taskId)).toMatchObject({
+      deviceMissionId: null,
+      relationStatus: "conflict",
+    });
+  });
+
+  it("keeps a mission observation without identity unresolved", async () => {
+    const input = event("RESOURCE_STATE", {
+      taskId: "00000000-0000-4000-8000-000000000402",
+      externalExecutionId: "execution-1",
+      operationName: "durable_task",
+      providerEventId: "evidence-mission-unresolved",
+      attributes: { "sdar.evidence.kind": "mission" },
+      payload: { state: "unknown", reasonCode: "MISSION_ID_UNAVAILABLE" },
+    });
+    expect(await emit(new ProviderTelemetryIngress(pool, options), input)).toMatchObject({
+      accepted: true,
+    });
+    expect(await new SmppDiagnosticRepository(pool).getMissionRelation(input.taskId)).toMatchObject(
+      { relationStatus: "unresolved", deviceMissionId: null },
+    );
   });
 
   it("execution_progress_requires_task", async () => {
