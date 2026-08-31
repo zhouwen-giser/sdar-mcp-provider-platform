@@ -14,10 +14,11 @@ describe("Business Events migration 023", () => {
     const applied = await harness.pool.query<{ version: string }>(
       "SELECT version FROM runtime_schema_migration ORDER BY version",
     );
-    expect(applied.rows).toHaveLength(26);
-    expect(applied.rows.at(-3)?.version).toBe("023_business_events_profile_v1.sql");
-    expect(applied.rows.at(-2)?.version).toBe("024_accepted_task_substate.sql");
-    expect(applied.rows.at(-1)?.version).toBe("025_smpp_dispatch_uncertainty.sql");
+    expect(applied.rows).toHaveLength(27);
+    expect(applied.rows.at(-4)?.version).toBe("023_business_events_profile_v1.sql");
+    expect(applied.rows.at(-3)?.version).toBe("024_accepted_task_substate.sql");
+    expect(applied.rows.at(-2)?.version).toBe("025_smpp_dispatch_uncertainty.sql");
+    expect(applied.rows.at(-1)?.version).toBe("026_smpp_reconciliation_audit.sql");
     expect(
       readdirSync(resolve("migrations/runtime")).filter((name) => name.startsWith("023_")),
     ).toEqual(["023_business_events_profile_v1.sql"]);

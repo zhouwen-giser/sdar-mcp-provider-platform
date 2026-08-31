@@ -14,7 +14,11 @@ import {
 } from "../../domain/src/index.js";
 import { createProviderOpsEnvelope } from "../../observability/src/index.js";
 import { captureProviderOpsDelivery } from "./provider-ops-delivery.js";
-import type { SmppDispatchUncertaintyClass } from "./smpp-diagnostics.js";
+import type {
+  SmppDispatchUncertaintyClass,
+  SmppReconciliationResultV1,
+  SmppReconciliationStatus,
+} from "./smpp-diagnostics.js";
 
 export interface AdmissionIntentInput {
   taskId: string;
@@ -563,6 +567,111 @@ export class TaskRepository {
         });
       }
       await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async recordReconciliationResult(
+    taskId: string,
+    status: SmppReconciliationStatus,
+    externalExecutionId: string | null,
+    identityValidated: boolean,
+    occurredAt = new Date(),
+  ): Promise<SmppReconciliationResultV1> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const admission = await client.query<{
+        provider_id: string;
+        operation_name: string;
+        argument_hash: string;
+        authorization_context_hash: string;
+        execution_mode: string;
+        simulation_id: string | null;
+      }>("SELECT * FROM admission_intent WHERE task_id=$1 FOR UPDATE", [taskId]);
+      const row = admission.rows[0];
+      if (row === undefined) throw new Error("ADMISSION_INTENT_NOT_FOUND");
+      const attemptResult = await client.query<{ attempt: number }>(
+        "SELECT COALESCE(max(attempt),0)::integer + 1 AS attempt FROM smpp_reconciliation_audit WHERE task_id=$1",
+        [taskId],
+      );
+      const attempt = attemptResult.rows[0]?.attempt;
+      if (attempt === undefined) throw new Error("RECONCILIATION_ATTEMPT_NOT_ALLOCATED");
+      await client.query(
+        `INSERT INTO smpp_reconciliation_audit
+           (task_id,attempt,operation_name,argument_hash,authorization_context_hash,
+            execution_mode,simulation_id,status,external_execution_id,identity_validated,occurred_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [
+          taskId,
+          attempt,
+          row.operation_name,
+          row.argument_hash,
+          row.authorization_context_hash,
+          row.execution_mode,
+          row.simulation_id,
+          status,
+          externalExecutionId,
+          identityValidated,
+          occurredAt,
+        ],
+      );
+      const eventKey = `${taskId}:smpp:reconciliation:${String(attempt)}`;
+      const envelope = createProviderOpsEnvelope({
+        recordType: "provider.recovery.lifecycle",
+        eventCategory: "recovery.lifecycle",
+        deliveryClass: "operational",
+        providerId: row.provider_id,
+        runtimeVersion: RUNTIME_VERSION,
+        instanceId: "",
+        taskId,
+        ...(externalExecutionId === null ? {} : { externalExecutionId }),
+        operationName: row.operation_name,
+        executionMode: row.execution_mode,
+        ...(row.simulation_id === null ? {} : { simulationId: row.simulation_id }),
+        argumentHash: row.argument_hash,
+        authorizationContextHash: row.authorization_context_hash,
+        eventType: "task.reconciliation",
+        stableAggregateIdentity: taskId,
+        eventIdentity: eventKey,
+        revision: attempt,
+        occurredAt,
+        attributes: { source: "committed_postgres", semantic: "task.reconciliation" },
+        payload: {
+          schemaVersion: "sdar.smpp-reconciliation-result/v1",
+          taskId,
+          attempt,
+          status,
+          externalExecutionId,
+          occurredAt: occurredAt.toISOString(),
+          identityValidated,
+          operationName: row.operation_name,
+          argumentHash: row.argument_hash,
+          authorizationContextHash: row.authorization_context_hash,
+          executionMode: row.execution_mode,
+          simulationId: row.simulation_id,
+        },
+      });
+      await captureProviderOpsDelivery(client, {
+        envelope,
+        eventKey,
+        aggregateType: "recovery",
+        aggregateId: taskId,
+      });
+      await client.query("COMMIT");
+      return {
+        schemaVersion: "sdar.smpp-reconciliation-result/v1",
+        taskId,
+        attempt,
+        status,
+        externalExecutionId,
+        occurredAt: occurredAt.toISOString(),
+        identityValidated,
+      };
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
       throw error;

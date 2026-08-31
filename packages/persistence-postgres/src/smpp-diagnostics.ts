@@ -22,6 +22,19 @@ export interface SmppDispatchUncertaintyV1 {
   causalRefs: string[];
 }
 
+export type SmppReconciliationStatus =
+  "found" | "not_found" | "conflict" | "transient_unavailable" | "deferred";
+
+export interface SmppReconciliationResultV1 {
+  schemaVersion: "sdar.smpp-reconciliation-result/v1";
+  taskId: string;
+  attempt: number;
+  status: SmppReconciliationStatus;
+  externalExecutionId: string | null;
+  occurredAt: string;
+  identityValidated: boolean;
+}
+
 export interface SmppTaskExecutionBindingV1 {
   schemaVersion: "sdar.smpp-task-execution-binding/v1";
   taskId: string;
@@ -126,6 +139,26 @@ export class SmppDiagnosticRepository {
       occurredAt: row.occurred_at.toISOString(),
       causalRefs: row.causal_refs,
     };
+  }
+
+  async listReconciliationResults(taskId: string): Promise<SmppReconciliationResultV1[]> {
+    const result = await this.pool.query<{
+      task_id: string;
+      attempt: number;
+      status: SmppReconciliationStatus;
+      external_execution_id: string | null;
+      occurred_at: Date;
+      identity_validated: boolean;
+    }>("SELECT * FROM smpp_reconciliation_audit WHERE task_id=$1 ORDER BY attempt", [taskId]);
+    return result.rows.map((row) => ({
+      schemaVersion: "sdar.smpp-reconciliation-result/v1",
+      taskId: row.task_id,
+      attempt: row.attempt,
+      status: row.status,
+      externalExecutionId: row.external_execution_id,
+      occurredAt: row.occurred_at.toISOString(),
+      identityValidated: row.identity_validated,
+    }));
   }
 }
 

@@ -63,7 +63,7 @@ describe("Migration set isolation", () => {
       const runtimeMigrationCount = await runtime.query<{ count: string }>(
         "SELECT count(*) FROM runtime_schema_migration",
       );
-      expect(runtimeMigrationCount.rows[0]?.count).toBe("26");
+      expect(runtimeMigrationCount.rows[0]?.count).toBe("27");
 
       await writeEvidence({
         runtime: runtimeTables,
@@ -118,7 +118,7 @@ async function writeEvidence(tables: {
     repeatedRunsPerSet: 2,
     sets: {
       runtime: {
-        migrationCount: 26,
+        migrationCount: 27,
         representativePresent: ["provider_task", "runtime_schema_migration"],
         representativeAbsent: ["ugv_execution", "npc_tank_execution"],
         tableCount: tables.runtime.length,
