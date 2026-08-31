@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "sdar.smpp-ugv-diagnostic-qualification/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "qualifiedAt": "2026-08-31T15:10:23+08:00",
+  "candidateCommit": "ba33031891bafc59d7caf12a167a65eb989699b6",
+  "status": "pass",
+  "database": {
+    "kind": "isolated_test_postgresql",
+    "liveRuntimeDatabaseUsed": false,
+    "runtimeMigrationCount": 27
+  },
+  "commands": [
+    {
+      "command": "pnpm verify:platform",
+      "status": "pass"
+    },
+    {
+      "command": "pnpm verify:v2",
+      "status": "pass"
+    },
+    {
+      "command": "Telemetry npm run build plus focused node:test suites",
+      "status": "pass",
+      "tests": "18/18"
+    },
+    {
+      "command": "Telemetry SHA256SUMS verification",
+      "status": "pass",
+      "assets": 9
+    }
+  ],
+  "selectedResults": {
+    "frozenConformance": "74/74",
+    "runtimeClosure": "29/29",
+    "runtimeFollowup": "29/29",
+    "unit": "204/204",
+    "contract": "36/36",
+    "integration": "326/326",
+    "recovery": "9/9",
+    "security": "53/53",
+    "e2e": "9/9",
+    "businessEventsConformance": "9/9",
+    "platformE2e": "16/16",
+    "faultInjection": "49/49",
+    "rc2RedRegression": "6/6",
+    "duplicateAdapterSideEffectsInCapacityRun": 0
+  },
+  "acceptanceGates": {
+    "G61TelemetryCompatibility": "pass",
+    "G62BenchmarkHandoffWithoutBenchmarkMutation": "pass",
+    "G63ProviderDirectSupersession": "pass",
+    "G64PendingHumanConfirmation": "pass",
+    "G65RepositoryChecks": "pass_with_declared_non_code_interop_blocker"
+  },
+  "declaredNonCodeBlockers": [
+    {
+      "id": "real-sdar-business-events-interop-unavailable",
+      "scope": "optional real external SDAR interop probe",
+      "impact": "none on SMPP Telemetry compatibility or qualified repository gates",
+      "evidence": "reports/business-events/interop-blocker.json"
+    }
+  ],
+  "liveSouthboundObservation": {
+    "deviceMcp": "http://192.168.2.63:19000/mcp",
+    "mqtt": "mqtt://192.168.2.63:1883",
+    "readOnlySmoke": "pass",
+    "controlAttempt": "rejected_by_provider_execution_mode",
+    "reasonCode": "UGV_EXECUTION_MODE_UNSUPPORTED",
+    "remoteTaskCreated": false,
+    "physicalMovementObserved": false,
+    "deviceMissionCreated": false,
+    "telemetrySyntheticRelationCreated": false,
+    "followupNavigationRequest": "superseded_in_sdar_session"
+  }
+}
