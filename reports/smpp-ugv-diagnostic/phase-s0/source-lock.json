@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "sdar.smpp-source-lock-evidence/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "baseBranch": "main",
+  "baseCommit": "76b1a8a5307554e11038b0548717aa7fea5c4488",
+  "workBranch": "codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "mergeBase": "76b1a8a5307554e11038b0548717aa7fea5c4488",
+  "taskPackage": {
+    "name": "SDAR_SMPP_MCP_Tasks_UGV_Diagnostic_Support_Codex_Goal_Package_V1.0",
+    "verification": "PACKAGE_OK"
+  },
+  "baseline": {
+    "protocolCases": 74,
+    "runtimeClosureTests": 29,
+    "runtimeFollowupTests": 29,
+    "focusedIntegrationTests": 145,
+    "status": "passed"
+  }
+}
