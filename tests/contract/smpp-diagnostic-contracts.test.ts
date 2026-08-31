@@ -23,7 +23,7 @@ describe("frozen SMPP diagnostic contracts", () => {
   addFormats(ajv);
 
   it.each(files)("compiles %s as JSON Schema 2020-12", (file) => {
-    const schema = JSON.parse(readFileSync(`${contractDir}/${file}`, "utf8"));
+    const schema = JSON.parse(readFileSync(`${contractDir}/${file}`, "utf8")) as object;
     expect(() => ajv.compile(schema)).not.toThrow();
   });
 
@@ -52,7 +52,7 @@ describe("frozen SMPP diagnostic contracts", () => {
   it("forbids redispatch for a durable uncertainty document", () => {
     const schema = JSON.parse(
       readFileSync(`${contractDir}/dispatch-uncertainty.schema.json`, "utf8"),
-    );
+    ) as object;
     const validate = ajv.getSchema("sdar.smpp-dispatch-uncertainty/v1") ?? ajv.compile(schema);
     expect(
       validate({

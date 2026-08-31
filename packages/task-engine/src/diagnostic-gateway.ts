@@ -13,7 +13,7 @@ export interface DiagnosticResponseLossScope {
   operationName: string;
   taskId?: string;
   correlationId?: string;
-  executionMode: "simulation";
+  executionMode: string;
   ttlMs: number;
 }
 

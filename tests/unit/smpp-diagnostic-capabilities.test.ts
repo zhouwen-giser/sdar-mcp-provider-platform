@@ -22,7 +22,8 @@ describe("SMPP Runtime diagnostic capabilities", () => {
       url: "/v1/diagnostics/capabilities",
     });
     expect(response.statusCode).toBe(200);
-    const capabilities = response.json().capabilities as Record<string, unknown>[];
+    const body = response.json<{ capabilities: Record<string, unknown>[] }>();
+    const capabilities = body.capabilities;
     expect(capabilities.map((value) => value.capabilityId)).toEqual(SMPP_CAPABILITY_IDS);
     for (const capability of capabilities) {
       expect(capability).toMatchObject({

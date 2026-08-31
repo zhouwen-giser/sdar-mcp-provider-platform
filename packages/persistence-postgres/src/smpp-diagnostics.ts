@@ -1,5 +1,4 @@
 import type { Pool } from "pg";
-import type { CanonicalJsonValue } from "../../observability/src/index.js";
 import { sha256CanonicalJson } from "../../observability/src/index.js";
 
 export type SmppTaskExecutionBindingStatus =
@@ -167,7 +166,7 @@ export class SmppDiagnosticRepository {
     };
     return {
       ...projectionWithoutHash,
-      contentHash: `sha256:${sha256CanonicalJson(projectionWithoutHash as CanonicalJsonValue)}`,
+      contentHash: `sha256:${sha256CanonicalJson(projectionWithoutHash)}`,
     };
   }
 

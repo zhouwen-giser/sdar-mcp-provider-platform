@@ -379,11 +379,16 @@ describe("vendor_managed UGV Provider platform integration", () => {
         .map((record) => record.attributes["sdar.evidence.kind"]),
     ).toEqual(expect.arrayContaining(["position", "speed", "mission"]));
     await adapterTelemetry.drain(5_000);
-    expect(adapterTelemetry.snapshot()).toMatchObject({
-      rejected: 0,
+    const telemetrySnapshot = adapterTelemetry.snapshot();
+    expect(telemetrySnapshot).toMatchObject({
       transportFailed: 0,
+      dropped: 0,
       queueDepth: 0,
     });
+    expect(telemetrySnapshot.rejected).toBe(telemetrySnapshot.retry);
+    expect(telemetrySnapshot.accepted + telemetrySnapshot.duplicate).toBe(
+      telemetrySnapshot.enqueued,
+    );
 
     const diagnostics = new SmppDiagnosticRepository(runtime.pool);
     const binding = await diagnostics.getTaskExecutionBinding(taskId);

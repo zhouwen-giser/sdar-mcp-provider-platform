@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "taskId": "G4-P1-B02",
-  "generatedAt": "2026-08-09T14:36:50.927Z",
+  "generatedAt": "2026-08-31T06:50:08.184Z",
   "resourceClassification": {
     "pm2": "real pinned JavaScript API",
     "runtime": "built SDAR Runtime",
@@ -20,14 +20,14 @@
     "isolatedHome": true,
     "processName": "sdar-runtime-e2e-product-0",
     "initialStatus": "online",
-    "initialPid": 10744,
+    "initialPid": 770840,
     "initialOutcome": "changed",
     "noOpOutcome": "unchanged",
     "driftOutcome": "changed",
-    "driftedPid": 28344,
+    "driftedPid": 772982,
     "driftRestartCount": 1,
     "crashRecoveryStatus": "online",
-    "recoveredPid": 31640,
+    "recoveredPid": 773066,
     "recoveredRestartCount": 2,
     "stopOutcome": "changed",
     "stoppedStatus": "stopped",
@@ -128,6 +128,6 @@
   },
   "databaseIsolation": {
     "isolatedSchema": true,
-    "releaseArtifactMigrationsApplied": 25
+    "releaseArtifactMigrationsApplied": 27
   }
 }

@@ -43,8 +43,8 @@ describe("RuntimeMigrationRunner controlled PostgreSQL integration", () => {
 
     expect(left.status).toBe("PASS");
     expect(right.status).toBe("PASS");
-    expect(left.migrations).toHaveLength(25);
-    expect(right.migrations).toHaveLength(25);
+    expect(left.migrations).toHaveLength(27);
+    expect(right.migrations).toHaveLength(27);
     expect(outcomes).toContainEqual(new Set(["applied"]));
     expect(outcomes).toContainEqual(new Set(["already_applied"]));
     for (const evidence of [left, right]) {
@@ -56,13 +56,14 @@ describe("RuntimeMigrationRunner controlled PostgreSQL integration", () => {
         true,
       );
       expect(evidence.migrations.some(({ version }) => version.includes("024_"))).toBe(true);
-      expect(evidence.migrations.some(({ version }) => version.includes("025_"))).toBe(false);
+      expect(evidence.migrations.some(({ version }) => version.includes("025_"))).toBe(true);
+      expect(evidence.migrations.some(({ version }) => version.includes("026_"))).toBe(true);
     }
 
     const history = await pool.query<{ count: number }>(
       "SELECT count(*)::int AS count FROM runtime_schema_migration",
     );
-    expect(history.rows).toEqual([{ count: 25 }]);
+    expect(history.rows).toEqual([{ count: 27 }]);
   });
 
   it("times out advisory-lock waits with redacted failure evidence", async () => {

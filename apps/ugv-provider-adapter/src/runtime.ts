@@ -1423,7 +1423,7 @@ export class UgvProviderRuntime {
           attributes: {
             "sdar.evidence.kind": "mission",
             "sdar.evidence.mission_state": String(snapshot.chassis.mission.state),
-            ...(missionId === undefined ? {} : { "sdar.device.mission_id": String(missionId) }),
+            ...(missionId === undefined ? {} : { "sdar.device.mission_id": missionId }),
           },
         },
       );
