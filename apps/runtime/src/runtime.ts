@@ -26,6 +26,7 @@ import {
 } from "../../../packages/observability/src/index.js";
 import type {
   BusinessEventMetricOtlpSink,
+  ProviderOpsEnvelope,
   RuntimeLogger,
 } from "../../../packages/observability/src/index.js";
 import { OperationRegistry } from "../../../packages/operation-registry/src/index.js";
@@ -821,11 +822,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         {
           export: async (records) =>
             telemetry?.exportAudit(
-              records.map((record) => ({
-                ...record.recordBody,
-                instanceId: telemetryInstanceId,
-                emittedAt: new Date().toISOString(),
-              })),
+              records.map((record) => providerOpsEnvelopeForExport(record.recordBody)),
             ) ?? Promise.reject(new Error("TELEMETRY_AUDIT_EXPORT_UNAVAILABLE")),
         },
         telemetryInstanceId,
@@ -1122,6 +1119,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     applyOtelEnabled,
     telemetryEnabled: () => otelEnabled,
   };
+}
+
+export function providerOpsEnvelopeForExport(
+  recordBody: ProviderOpsEnvelope,
+  emittedAt = new Date().toISOString(),
+): ProviderOpsEnvelope {
+  return { ...recordBody, emittedAt };
 }
 
 function runtimeDependenciesReady(
