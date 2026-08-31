@@ -61,6 +61,7 @@ import { BoundedRateLimiter } from "./rate-limiter.js";
 import { AdapterManifestWatcher } from "./manifest-watcher.js";
 import { AdapterBusinessEventSourceClient } from "./business-events/source-client.js";
 import { RuntimeDrainController } from "./shutdown.js";
+import { getSmppCapability, isSmppCapabilityId, listSmppCapabilities } from "./diagnostics.js";
 import {
   assertRuntimeProviderIdentity,
   pendingRuntimeProviderIdentity,
@@ -253,6 +254,16 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   });
 
   app.get("/health/live", () => ({ status: "live" }));
+  app.get("/v1/diagnostics/capabilities", () => ({ capabilities: listSmppCapabilities() }));
+  app.get<{ Params: { capabilityId: string } }>(
+    "/v1/diagnostics/capabilities/:capabilityId",
+    (request, reply) => {
+      if (!isSmppCapabilityId(request.params.capabilityId)) {
+        return reply.code(404).send({ error: "capability_not_found" });
+      }
+      return getSmppCapability(request.params.capabilityId);
+    },
+  );
   app.get("/health/ready", async (_request, reply) => {
     if (dependencies.database !== "starting") {
       try {
