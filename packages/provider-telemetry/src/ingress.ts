@@ -350,6 +350,10 @@ async function captureMissionRelationFact(
     authorizationContextHash: task.authorizationContextHash,
     adapterRevision: String(task.adapterRevision),
     observationRevision: task.observationRevision,
+    ...(source.providerEventId === undefined ? {} : { providerEventId: source.providerEventId }),
+    ...(source.providerEventSequence === undefined
+      ? {}
+      : { providerEventSequence: source.providerEventSequence }),
     eventType: "smpp.mission.relation",
     stableAggregateIdentity: `${task.taskId}:${externalExecutionId}:mission`,
     eventIdentity: `${source.recordId}:mission-relation`,

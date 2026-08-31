@@ -270,6 +270,8 @@ describe("Runtime ProviderTelemetryIngress", () => {
        ORDER BY created_at DESC LIMIT 1`,
     );
     expect(latestRelation.rows[0]?.body).toMatchObject({
+      providerEventId: unresolved.providerEventId,
+      providerEventSequence: Number(unresolved.providerEventSequence),
       payload: {
         relationStatus: "unresolved",
         deviceMissionId: null,
