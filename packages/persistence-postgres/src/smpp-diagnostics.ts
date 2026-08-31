@@ -50,6 +50,24 @@ export interface SmppTaskExecutionBindingV1 {
   contentHash: string;
 }
 
+export type SmppBusinessStatus = "succeeded" | "failed" | "unknown" | "not_applicable";
+export type SmppTransportStatus =
+  | "completed"
+  | "response_lost_after_commit"
+  | "unavailable"
+  | "unknown";
+
+export interface SmppBusinessTerminalV1 {
+  schemaVersion: "sdar.smpp-business-terminal/v1";
+  taskId: string;
+  mcpTaskStatus: "completed" | "failed" | "cancelled";
+  businessStatus: SmppBusinessStatus;
+  providerExecutionStatus: string;
+  transportStatus: SmppTransportStatus;
+  isError: boolean;
+  reasonCode: string | null;
+}
+
 interface BindingRow {
   task_id: string;
   provider_id: string;
@@ -160,6 +178,56 @@ export class SmppDiagnosticRepository {
       identityValidated: row.identity_validated,
     }));
   }
+
+  async getBusinessTerminal(taskId: string): Promise<SmppBusinessTerminalV1 | null> {
+    const result = await this.pool.query<{
+      task_id: string;
+      internal_state: string;
+      mcp_status: string;
+      result: Record<string, unknown> | null;
+      error: Record<string, unknown> | null;
+      uncertainty_class: SmppDispatchUncertaintyClass | null;
+    }>(
+      `SELECT task.task_id, task.internal_state, task.mcp_status, task.result, task.error,
+              uncertainty.uncertainty_class
+       FROM provider_task task
+       LEFT JOIN smpp_dispatch_uncertainty uncertainty ON uncertainty.task_id=task.task_id
+       WHERE task.task_id=$1 AND task.internal_state LIKE 'TERMINAL_%'`,
+      [taskId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return normalizeBusinessTerminal({
+      taskId: row.task_id,
+      internalState: row.internal_state,
+      mcpTaskStatus: row.mcp_status,
+      result: row.result,
+      error: row.error,
+      uncertaintyClass: row.uncertainty_class,
+    });
+  }
+}
+
+export function normalizeBusinessTerminal(input: {
+  taskId: string;
+  internalState: string;
+  mcpTaskStatus: string;
+  result: Record<string, unknown> | null;
+  error: Record<string, unknown> | null;
+  uncertaintyClass: SmppDispatchUncertaintyClass | null;
+}): SmppBusinessTerminalV1 {
+  if (!isTerminalMcpStatus(input.mcpTaskStatus)) throw new Error("SMPP_TASK_NOT_TERMINAL");
+  const businessStatus = classifyBusinessStatus(input.mcpTaskStatus, input.result);
+  return {
+    schemaVersion: "sdar.smpp-business-terminal/v1",
+    taskId: input.taskId,
+    mcpTaskStatus: input.mcpTaskStatus,
+    businessStatus,
+    providerExecutionStatus: providerExecutionStatus(input.internalState),
+    transportStatus: transportStatus(input.uncertaintyClass),
+    isError: businessStatus === "failed",
+    reasonCode: reasonCode(input.result, input.error),
+  };
 }
 
 function bindingStatus(row: BindingRow): SmppTaskExecutionBindingStatus {
@@ -193,4 +261,54 @@ function resourceReference(
     current = (current as Record<string, unknown>)[key];
   }
   return typeof current === "string" || typeof current === "number" ? String(current) : null;
+}
+
+function isTerminalMcpStatus(value: string): value is "completed" | "failed" | "cancelled" {
+  return value === "completed" || value === "failed" || value === "cancelled";
+}
+
+function classifyBusinessStatus(
+  status: "completed" | "failed" | "cancelled",
+  result: Record<string, unknown> | null,
+): SmppBusinessStatus {
+  if (status === "cancelled") return "not_applicable";
+  if (status === "failed") return "failed";
+  if (result === null) return "unknown";
+  return result.isError === true ? "failed" : "succeeded";
+}
+
+function providerExecutionStatus(internalState: string): string {
+  if (internalState === "TERMINAL_COMPLETED") return "completed";
+  if (internalState === "TERMINAL_FAILED") return "failed";
+  if (internalState === "TERMINAL_CANCELLED") return "cancelled";
+  return "unknown";
+}
+
+function transportStatus(
+  uncertaintyClass: SmppDispatchUncertaintyClass | null,
+): SmppTransportStatus {
+  if (
+    uncertaintyClass === "response_lost_after_adapter_success" ||
+    uncertaintyClass === "runtime_crash_window"
+  ) {
+    return "response_lost_after_commit";
+  }
+  if (uncertaintyClass === "adapter_transport_ambiguous") return "unavailable";
+  if (uncertaintyClass === "unknown") return "unknown";
+  return "completed";
+}
+
+function reasonCode(
+  result: Record<string, unknown> | null,
+  error: Record<string, unknown> | null,
+): string | null {
+  for (const body of [result, error]) {
+    if (body === null) continue;
+    for (const container of [body.structuredContent, body.data]) {
+      if (typeof container !== "object" || container === null || Array.isArray(container)) continue;
+      const value = (container as Record<string, unknown>).reasonCode;
+      if (typeof value === "string") return value;
+    }
+  }
+  return null;
 }
