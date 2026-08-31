@@ -19,6 +19,11 @@ import type {
   SmppReconciliationResultV1,
   SmppReconciliationStatus,
 } from "./smpp-diagnostics.js";
+import { normalizeBusinessTerminal } from "./smpp-diagnostics.js";
+
+// Durable facts are replica-independent; identify the PostgreSQL Runtime authority rather than
+// whichever ephemeral worker happened to commit or recover the transition.
+const DURABLE_RUNTIME_AUTHORITY_INSTANCE_ID = "smpp-runtime-postgres-authority";
 
 export interface AdmissionIntentInput {
   taskId: string;
@@ -351,7 +356,7 @@ export async function captureTaskOperationalEvent(
     deliveryClass: "operational",
     providerId: task.provider_id,
     runtimeVersion: RUNTIME_VERSION,
-    instanceId: "",
+    instanceId: DURABLE_RUNTIME_AUTHORITY_INSTANCE_ID,
     taskId,
     resourceId: taskId,
     resourceType: "task",
@@ -533,7 +538,7 @@ export class TaskRepository {
           deliveryClass: "operational",
           providerId: row.provider_id,
           runtimeVersion: RUNTIME_VERSION,
-          instanceId: "",
+          instanceId: DURABLE_RUNTIME_AUTHORITY_INSTANCE_ID,
           taskId,
           operationName: row.operation_name,
           executionMode: row.execution_mode,
@@ -627,7 +632,7 @@ export class TaskRepository {
         deliveryClass: "operational",
         providerId: row.provider_id,
         runtimeVersion: RUNTIME_VERSION,
-        instanceId: "",
+        instanceId: DURABLE_RUNTIME_AUTHORITY_INSTANCE_ID,
         taskId,
         ...(externalExecutionId === null ? {} : { externalExecutionId }),
         operationName: row.operation_name,
@@ -4526,6 +4531,10 @@ async function insertOutbox(
     taskId,
   ]);
   const task = snapshot.rows[0];
+  const terminalProjection =
+    task === undefined || !isTerminalState(task.internal_state)
+      ? null
+      : await committedBusinessTerminal(client, task);
   const completePayload =
     task === undefined
       ? payload
@@ -4538,6 +4547,15 @@ async function insertOutbox(
           reasonCode: null,
           terminal: isTerminalState(task.internal_state),
           resultClass: taskResultClass(task),
+          ...(terminalProjection === null
+            ? {}
+            : {
+                transportStatus: terminalProjection.transportStatus,
+                mcpTaskStatus: terminalProjection.mcpTaskStatus,
+                businessStatus: terminalProjection.businessStatus,
+                providerExecutionStatus: terminalProjection.providerExecutionStatus,
+                isError: terminalProjection.isError,
+              }),
           internalState: task.internal_state,
           status: task.mcp_status,
           substate: task.substate,
@@ -4582,7 +4600,7 @@ async function captureTaskProviderOpsDelivery(
     deliveryClass: "audit",
     providerId: task.provider_id,
     runtimeVersion: RUNTIME_VERSION,
-    instanceId: "",
+    instanceId: DURABLE_RUNTIME_AUTHORITY_INSTANCE_ID,
     taskId: task.task_id,
     resourceId: task.task_id,
     resourceType: "task",
@@ -4633,6 +4651,11 @@ function providerOpsPayload(
     "attempt",
     "retryAfterMs",
     "adapterRpcStatus",
+    "transportStatus",
+    "mcpTaskStatus",
+    "businessStatus",
+    "providerExecutionStatus",
+    "isError",
   ];
   const result: Record<string, string | number | boolean | null> = {};
   for (const key of allowed) {
@@ -4642,6 +4665,20 @@ function providerOpsPayload(
     else if (typeof value === "number" && Number.isFinite(value)) result[key] = value;
   }
   return result;
+}
+
+async function committedBusinessTerminal(client: PoolClient, task: TaskRow) {
+  const uncertainty = await client.query<{
+    uncertainty_class: SmppDispatchUncertaintyClass;
+  }>("SELECT uncertainty_class FROM smpp_dispatch_uncertainty WHERE task_id=$1", [task.task_id]);
+  return normalizeBusinessTerminal({
+    taskId: task.task_id,
+    internalState: task.internal_state,
+    mcpTaskStatus: task.mcp_status,
+    result: task.result,
+    error: task.error,
+    uncertaintyClass: uncertainty.rows[0]?.uncertainty_class ?? null,
+  });
 }
 
 function finiteNumber(value: unknown): number | undefined {

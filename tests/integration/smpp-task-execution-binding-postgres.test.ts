@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
+  insertCommittedTaskEvent,
   runMigrations,
   SmppDiagnosticRepository,
   TaskRepository,
@@ -109,6 +110,36 @@ describe("SmppTaskExecutionBindingV1", () => {
     const binding = await new SmppDiagnosticRepository(pool).getTaskExecutionBinding(taskId);
     expect(binding).toMatchObject({ bindingStatus: "terminal" });
     expect(binding).not.toHaveProperty("goalAchieved");
+  });
+
+  it("emits the four committed terminal axes through legal task ProviderOps", async () => {
+    const taskId = await insertAdmission("PUBLISHED");
+    await insertTask(taskId, "TERMINAL_COMPLETED", "external-terminal");
+    await pool.query(`UPDATE provider_task SET result=$2::jsonb WHERE task_id=$1`, [
+      taskId,
+      JSON.stringify({ isError: true, structuredContent: { reasonCode: "NO_ROUTE" } }),
+    ]);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await insertCommittedTaskEvent(client, taskId, "task.completed", {}, `${taskId}:terminal`);
+      await client.query("COMMIT");
+    } finally {
+      client.release();
+    }
+    const delivery = await pool.query<{ payload: Record<string, unknown> }>(
+      `SELECT record_body->'payload' AS payload FROM provider_ops_delivery
+       WHERE aggregate_id=$1 AND record_type='provider.task.lifecycle'`,
+      [taskId],
+    );
+    expect(delivery.rows[0]?.payload).toMatchObject({
+      transportStatus: "completed",
+      mcpTaskStatus: "completed",
+      businessStatus: "failed",
+      providerExecutionStatus: "completed",
+      isError: true,
+    });
+    expect(delivery.rows[0]?.payload).not.toHaveProperty("goalAchieved");
   });
 });
 

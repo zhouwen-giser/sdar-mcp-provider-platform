@@ -156,6 +156,7 @@ export class ProviderTelemetryIngress {
       eventIdentity: `${this.options.providerId}:${event.providerEventId}`,
       revision: event.providerEventSequence,
       occurredAt,
+      emittedAt: new Date(Math.max(Date.now(), occurredAt.getTime())),
       attributes: {
         ...(sanitizedAttributes as Record<string, CanonicalJsonValue>),
         ...(event.traceparent.length === 0 ? {} : { traceparent: event.traceparent }),
@@ -192,6 +193,15 @@ export class ProviderTelemetryIngress {
             return rejected(event, "PROVIDER_EVENT_ID_CONFLICT");
           }
           return accepted(event, concurrent.recordId, true);
+        }
+        if (
+          task !== null &&
+          sanitizedAttributes !== null &&
+          typeof sanitizedAttributes === "object" &&
+          !Array.isArray(sanitizedAttributes) &&
+          sanitizedAttributes["sdar.evidence.kind"] === "mission"
+        ) {
+          await captureMissionRelationFact(client, task, envelope, eventKey);
         }
         await client.query("COMMIT");
         return accepted(event, envelope.recordId, false);
@@ -273,6 +283,91 @@ export class ProviderTelemetryIngress {
     window.count += amount;
     return window.count <= (this.options.rateLimit ?? 600);
   }
+}
+
+async function captureMissionRelationFact(
+  client: PoolClient,
+  task: NonNullable<Awaited<ReturnType<TaskRepository["getById"]>>>,
+  source: ReturnType<typeof createProviderOpsEnvelope>,
+  sourceEventKey: string,
+): Promise<void> {
+  const externalExecutionId = task.externalExecutionId;
+  if (externalExecutionId === null) throw new Error("PROVIDER_EVENT_EXECUTION_ID_MISSING");
+  const resourceId = source.resourceId;
+  if (resourceId === undefined) throw new Error("PROVIDER_EVENT_RESOURCE_REQUIRED");
+  await client.query("SELECT 1 FROM provider_task WHERE task_id=$1 FOR UPDATE", [task.taskId]);
+  const evidence = await client.query<{
+    record_id: string;
+    mission_id: string | null;
+    occurred_at: string;
+    resource_id: string | null;
+  }>(
+    `SELECT record_id,
+            NULLIF(record_body->'attributes'->>'sdar.device.mission_id','') AS mission_id,
+            record_body->>'occurredAt' AS occurred_at,
+            record_body->>'resourceId' AS resource_id
+     FROM provider_ops_delivery
+     WHERE aggregate_id=$1
+       AND record_body->>'externalExecutionId'=$2
+       AND record_body->'attributes'->>'sdar.evidence.kind'='mission'
+     ORDER BY record_body->>'occurredAt', record_id`,
+    [task.taskId, externalExecutionId],
+  );
+  const missionIds = [
+    ...new Set(
+      evidence.rows.map((row) => row.mission_id).filter((value): value is string => value !== null),
+    ),
+  ].sort();
+  const relationStatus =
+    missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+  const deviceMissionId = relationStatus === "exact" ? (missionIds[0] ?? null) : null;
+  const sourceRecordRefs = evidence.rows.map((row) => row.record_id).sort();
+  const relation = createProviderOpsEnvelope({
+    recordType: "provider.execution.progress",
+    eventCategory: "execution.progress",
+    deliveryClass: "audit",
+    providerId: task.providerId,
+    runtimeVersion: source.runtimeVersion,
+    instanceId: source.instanceId,
+    taskId: task.taskId,
+    resourceId,
+    ...(source.resourceType === undefined ? {} : { resourceType: source.resourceType }),
+    externalExecutionId,
+    operationName: task.operationName,
+    executionMode: task.executionMode,
+    ...(task.simulationId === null ? {} : { simulationId: task.simulationId }),
+    argumentHash: task.argumentHash,
+    authorizationContextHash: task.authorizationContextHash,
+    adapterRevision: String(task.adapterRevision),
+    observationRevision: task.observationRevision,
+    eventType: "smpp.mission.relation",
+    stableAggregateIdentity: `${task.taskId}:${externalExecutionId}:mission`,
+    eventIdentity: `${source.recordId}:mission-relation`,
+    ...(source.providerEventSequence === undefined
+      ? {}
+      : { revision: source.providerEventSequence }),
+    occurredAt: source.occurredAt,
+    attributes: {
+      "sdar.fact.kind": "mission_relation",
+      "sdar.mission.relation_status": relationStatus,
+      ...(deviceMissionId === null ? {} : { "sdar.device.mission_id": deviceMissionId }),
+      "sdar.mission.source_record_refs": sourceRecordRefs,
+    },
+    payload: {
+      providerSubstate: `mission_relation_${relationStatus}`,
+      reasonCode: `SMPP_MISSION_RELATION_${relationStatus.toUpperCase()}`,
+      observedAt: source.occurredAt,
+      relationStatus,
+      deviceMissionId,
+      sourceRecordRefs,
+    },
+  });
+  await captureProviderOpsDelivery(client, {
+    envelope: relation,
+    eventKey: `${sourceEventKey}:mission-relation`,
+    aggregateType: "task",
+    aggregateId: task.taskId,
+  });
 }
 
 export interface ProviderTelemetryGrpcServerOptions {

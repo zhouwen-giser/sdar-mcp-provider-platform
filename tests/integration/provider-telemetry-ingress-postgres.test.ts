@@ -158,6 +158,23 @@ describe("Runtime ProviderTelemetryIngress", () => {
       deviceMissionId: "mission-7",
       relationStatus: "exact",
     });
+    const exactRelationFact = await pool.query<{ body: Record<string, unknown> }>(
+      `SELECT record_body AS body FROM provider_ops_delivery
+       WHERE record_body->>'eventType'='smpp.mission.relation'
+       ORDER BY created_at DESC LIMIT 1`,
+    );
+    expect(exactRelationFact.rows[0]?.body).toMatchObject({
+      recordType: "provider.execution.progress",
+      eventCategory: "execution.progress",
+      taskId: identity.taskId,
+      externalExecutionId: "execution-1",
+      attributes: {
+        "sdar.fact.kind": "mission_relation",
+        "sdar.mission.relation_status": "exact",
+        "sdar.device.mission_id": "mission-7",
+      },
+      payload: { relationStatus: "exact", deviceMissionId: "mission-7" },
+    });
 
     await emit(
       ingress,
@@ -175,6 +192,18 @@ describe("Runtime ProviderTelemetryIngress", () => {
     expect(await diagnostics.getMissionRelation(identity.taskId)).toMatchObject({
       deviceMissionId: null,
       relationStatus: "conflict",
+    });
+    const conflictRelationFact = await pool.query<{ body: Record<string, unknown> }>(
+      `SELECT record_body AS body FROM provider_ops_delivery
+       WHERE record_body->>'eventType'='smpp.mission.relation'
+         AND record_body->'payload'->>'relationStatus'='conflict'`,
+    );
+    expect(conflictRelationFact.rows[0]?.body).toMatchObject({
+      recordType: "provider.execution.progress",
+      payload: {
+        relationStatus: "conflict",
+        deviceMissionId: null,
+      },
     });
   });
 
