@@ -44,6 +44,8 @@ describe("migration source-map provenance", () => {
     ).toBe(30);
     expect(sequenceFor(source, "migrations/providers/ugv/027_mutation_journal.sql")).toBe(32);
     expect(sequenceFor(source, "migrations/providers/npc-tank/027_mutation_journal.sql")).toBe(33);
+    expect(sequenceFor(source, "migrations/runtime/025_smpp_dispatch_uncertainty.sql")).toBe(34);
+    expect(sequenceFor(source, "migrations/runtime/026_smpp_reconciliation_audit.sql")).toBe(35);
   });
 });
 

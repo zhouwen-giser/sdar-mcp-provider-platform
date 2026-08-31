@@ -2,8 +2,8 @@
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
   "inventory": {
-    "mappedProvenanceEntries": 33,
-    "ownerDirectoryFiles": 41
+    "mappedProvenanceEntries": 35,
+    "ownerDirectoryFiles": 43
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -16,7 +16,7 @@
     "runtime": {
       "owner": "runtime",
       "plannedDirectory": "migrations/runtime",
-      "deliveredFiles": 25
+      "deliveredFiles": 27
     },
     "provider:ugv": {
       "owner": "provider:ugv",
@@ -366,6 +366,26 @@
       "plannedPath": "migrations/providers/npc-tank/027_mutation_journal.sql",
       "pathState": "owner_directory",
       "sha256": "8775a892407958cb0dcf457e2a6d8a8c9f367562e4b8fca298d6568dda9bdcc3"
+    },
+    {
+      "sequence": 34,
+      "legacyVersion": "025",
+      "owner": "runtime",
+      "oldPath": "migrations/runtime/025_smpp_dispatch_uncertainty.sql",
+      "newPath": "migrations/runtime/025_smpp_dispatch_uncertainty.sql",
+      "plannedPath": "migrations/runtime/025_smpp_dispatch_uncertainty.sql",
+      "pathState": "owner_directory",
+      "sha256": "fc52fb5eff0e05d57b9b134d142ea2e313aca2a49f5ba44e0798809e6083188a"
+    },
+    {
+      "sequence": 35,
+      "legacyVersion": "026",
+      "owner": "runtime",
+      "oldPath": "migrations/runtime/026_smpp_reconciliation_audit.sql",
+      "newPath": "migrations/runtime/026_smpp_reconciliation_audit.sql",
+      "plannedPath": "migrations/runtime/026_smpp_reconciliation_audit.sql",
+      "pathState": "owner_directory",
+      "sha256": "2daad14ff8ae4102d71e0912ea86c3747cebf8b43ac70662fad9358f6f7dfb0f"
     }
   ]
 }

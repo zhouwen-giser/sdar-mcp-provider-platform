@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-provider-evidence-ref/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "providerId",
+    "externalExecutionId",
+    "resourceId",
+    "kind",
+    "observedAt",
+    "sourceRecordId"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-provider-evidence-ref/v1" },
+    "taskId": { "type": "string" },
+    "providerId": { "type": "string" },
+    "externalExecutionId": { "type": "string" },
+    "resourceId": { "type": "string" },
+    "deviceMissionId": { "type": ["string", "null"] },
+    "kind": { "enum": ["position", "speed", "mission", "state", "health", "other"] },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "sourceRecordId": { "type": "string" },
+    "sourceSequence": { "type": ["integer", "null"] },
+    "contentHash": { "type": ["string", "null"] },
+    "payloadRef": { "type": ["object", "null"] }
+  }
+}

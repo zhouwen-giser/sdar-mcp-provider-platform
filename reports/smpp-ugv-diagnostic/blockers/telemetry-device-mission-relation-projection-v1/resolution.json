@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "sdar.smpp.external-blocker-resolution/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "blockerId": "telemetry-device-mission-relation-projection-v1",
+  "status": "resolved",
+  "resolvedAt": "2026-08-31T14:25:52+08:00",
+  "implementation": {
+    "repository": "zhouwen-giser/smpp-telemetry-platform",
+    "branch": "codex/smpp-mcp-tasks-telemetry-sync-v0.1",
+    "commit": "b3bd0e7fe480eca13069c0e39bcff3117e336c0a",
+    "draftPullRequest": "https://github.com/zhouwen-giser/smpp-telemetry-platform/pull/5"
+  },
+  "producer": {
+    "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+    "commit": "1e67e6e421d70a3cbce2d41bf5007e99463712fe"
+  },
+  "compatibility": {
+    "providerOpsSchemaVersion": "1.1.0",
+    "taskExecutionAuthority": ["dispatch_committed", "reconcile_found_identity_validated"],
+    "executionMissionAuthority": "provider_exact_mission_identity",
+    "unresolvedOrConflictCreatesExactRelation": false,
+    "physicalObservedAtPreserved": true,
+    "downstreamReadOnlyQualification": "pass",
+    "frozenEvidenceHashes": "pass",
+    "focusedTests": "18/18 pass"
+  },
+  "evidenceRefs": [
+    "reports/smpp-runtime-sync/source-lock.json",
+    "reports/smpp-runtime-sync/compatibility-manifest.json",
+    "reports/smpp-runtime-sync/live-e2e.json",
+    "reports/smpp-runtime-sync/downstream-qualification.json",
+    "reports/smpp-runtime-sync/final-acceptance.md"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-20T07:26:46.118Z",
+  "generatedAt": "2026-08-31T06:47:14.480Z",
   "status": "PASS",
   "database": {
     "implementation": "PostgreSQL",
@@ -10,10 +10,10 @@
   "repeatedRunsPerSet": 2,
   "sets": {
     "runtime": {
-      "migrationCount": 25,
+      "migrationCount": 27,
       "representativePresent": ["provider_task", "runtime_schema_migration"],
       "representativeAbsent": ["ugv_execution", "npc_tank_execution"],
-      "tableCount": 24
+      "tableCount": 26
     },
     "provider:ugv": {
       "representativePresent": ["ugv_execution"],

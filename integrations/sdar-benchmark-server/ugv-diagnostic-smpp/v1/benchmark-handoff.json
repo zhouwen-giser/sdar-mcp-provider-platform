@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "sdar.smpp-benchmark-handoff/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "sourceRepository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "sourceCommit": "1e67e6e421d70a3cbce2d41bf5007e99463712fe",
+  "capabilityIds": [
+    "SMPP-TASK-IDENTITY-CLOSURE",
+    "SMPP-TASK-IDEMPOTENCY",
+    "SMPP-DISPATCH-UNCERTAINTY",
+    "SMPP-TASK-RECONCILIATION",
+    "SMPP-PROVIDER-EVIDENCE",
+    "SMPP-BUSINESS-TERMINAL",
+    "SMPP-MISSION-RELATION"
+  ],
+  "supersedesProviderDirectCapabilities": [
+    "PV-IDENTITY-CLOSURE",
+    "PV-IDEMPOTENCY-QUERY",
+    "PV-DROP-AFTER-COMMIT",
+    "PV-POSITION-SPEED",
+    "PV-BUSINESS-TERMINAL"
+  ],
+  "providerDirectAccessRequired": false,
+  "telemetryAuthorityRequired": true,
+  "humanDecision": "pending_human_confirmation",
+  "qualificationRefs": [
+    "reports/smpp-ugv-diagnostic/phase-s12/report.md",
+    "reports/smpp-ugv-diagnostic/phase-s13/report.md",
+    "reports/smpp-ugv-diagnostic/blockers/telemetry-device-mission-relation-projection-v1/resolution.json",
+    "zhouwen-giser/smpp-telemetry-platform@b3bd0e7fe480eca13069c0e39bcff3117e336c0a/reports/smpp-runtime-sync/final-acceptance.md"
+  ]
+}

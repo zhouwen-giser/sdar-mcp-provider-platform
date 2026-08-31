@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-dispatch-uncertainty/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "operationName",
+    "argumentHash",
+    "uncertaintyClass",
+    "redispatchAllowed",
+    "occurredAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-dispatch-uncertainty/v1" },
+    "taskId": { "type": "string" },
+    "operationName": { "type": "string" },
+    "argumentHash": { "type": "string" },
+    "uncertaintyClass": {
+      "enum": [
+        "response_lost_after_adapter_success",
+        "adapter_transport_ambiguous",
+        "runtime_crash_window",
+        "unknown"
+      ]
+    },
+    "redispatchAllowed": { "const": false },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "causalRefs": { "type": "array", "items": { "type": "string" } }
+  }
+}

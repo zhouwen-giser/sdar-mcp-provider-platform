@@ -129,7 +129,7 @@ describe("Runtime database credential isolation E2E", () => {
           migrationSet: "runtime",
         });
         expect(evidence).toMatchObject({ status: "PASS", migrationSet: "runtime" });
-        expect(evidence.migrations).toHaveLength(25);
+        expect(evidence.migrations).toHaveLength(27);
       } finally {
         await runtime.end();
       }

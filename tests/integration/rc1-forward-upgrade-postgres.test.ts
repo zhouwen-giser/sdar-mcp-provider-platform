@@ -217,7 +217,7 @@ describe("T-047 rc.1 full-state database forward migration", () => {
     expect(
       (await pool.query<{ count: string }>("SELECT count(*) FROM runtime_schema_migration")).rows[0]
         ?.count,
-    ).toBe("25");
+    ).toBe("27");
     expect(
       await pool.query(
         `SELECT 1 FROM provider_task WHERE task_id=$1
@@ -232,7 +232,7 @@ describe("T-047 rc.1 full-state database forward migration", () => {
     const repository = new TaskRepository(pool);
     const recovery = await new RecoveryManager(engine, repository).scan();
     expect(recovery.admissionsRecovered).toBe(2);
-    expect(recovery.tasksReconciled).toBeGreaterThanOrEqual(3);
+    expect(recovery.tasksReconciled).toBe(2);
 
     const dispatcher = await new DurableCommandDispatcher(gateway, repository).tick();
     expect(dispatcher.acknowledged).toBe(1);

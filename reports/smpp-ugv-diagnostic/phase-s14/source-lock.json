@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "sdar.smpp-final-source-lock/v1",
+  "goalId": "sdar-smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "repository": "zhouwen-giser/sdar-mcp-provider-platform",
+  "base": {
+    "branch": "main",
+    "commit": "76b1a8a5307554e11038b0548717aa7fea5c4488"
+  },
+  "workBranch": "codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+  "producerImplementationCommit": "1e67e6e421d70a3cbce2d41bf5007e99463712fe",
+  "telemetryHandoffCommit": "0d51c4807fe3d4d00a76d1be7458a954bcdf0180",
+  "qualificationCandidateCommit": "ba33031891bafc59d7caf12a167a65eb989699b6",
+  "telemetryConsumer": {
+    "repository": "zhouwen-giser/smpp-telemetry-platform",
+    "branch": "codex/smpp-mcp-tasks-telemetry-sync-v0.1",
+    "commit": "b3bd0e7fe480eca13069c0e39bcff3117e336c0a",
+    "draftPullRequest": "https://github.com/zhouwen-giser/smpp-telemetry-platform/pull/5"
+  },
+  "downstreamReadOnlyConsumer": {
+    "repository": "zhouwen-giser/sdar-telemetry-platform",
+    "branch": "main",
+    "commit": "3e43350dd0d0e37fe65ec318d0d9881820a88f5a"
+  },
+  "draftPullRequest": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/20"
+}

@@ -54,16 +54,18 @@ describe("MigrationSet resolver", () => {
       resolveMigrationSet(workspaceRoot, "provider:npc-tank"),
     ]);
 
-    expect(runtime).toHaveLength(25);
+    expect(runtime).toHaveLength(27);
     expect(runtime.map(({ filename }) => filename)).not.toContain("024_ugv_provider.sql");
     expect(runtime.map(({ filename }) => filename)).not.toContain("025_npc_tank_provider.sql");
     expect(ugv.map(({ filename }) => filename)).toEqual([
       "024_ugv_provider.sql",
       "026_ugv_single_active_fire.sql",
+      "027_mutation_journal.sql",
     ]);
     expect(npcTank.map(({ filename }) => filename)).toEqual([
       "025_npc_tank_provider.sql",
       "026_allow_authoritative_status_tool.sql",
+      "027_mutation_journal.sql",
     ]);
   });
 

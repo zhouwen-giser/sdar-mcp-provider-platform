@@ -9,10 +9,12 @@ describe("Runtime Migration source", () => {
     const migrations = await listRuntimeMigrations(workspaceRoot);
     const filenames = migrations.map(({ filename }) => filename);
 
-    expect(migrations).toHaveLength(25);
+    expect(migrations).toHaveLength(27);
     expect(filenames).toEqual([...filenames].sort());
     expect(filenames).toContain("001_operation_snapshot.sql");
     expect(filenames).toContain("023_business_events_profile_v1.sql");
+    expect(filenames).toContain("025_smpp_dispatch_uncertainty.sql");
+    expect(filenames).toContain("026_smpp_reconciliation_audit.sql");
     expect(filenames).not.toContain("024_ugv_provider.sql");
     expect(filenames).not.toContain("025_npc_tank_provider.sql");
     expect(

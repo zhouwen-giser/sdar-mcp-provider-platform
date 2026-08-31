@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.external-capability/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "capabilityId",
+    "status",
+    "readOnlyProbe",
+    "implementationKind",
+    "component",
+    "sourceCommit",
+    "qualification"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sdar.external-capability/v1" },
+    "capabilityId": {
+      "enum": [
+        "SMPP-TASK-IDENTITY-CLOSURE",
+        "SMPP-TASK-IDEMPOTENCY",
+        "SMPP-DISPATCH-UNCERTAINTY",
+        "SMPP-TASK-RECONCILIATION",
+        "SMPP-PROVIDER-EVIDENCE",
+        "SMPP-BUSINESS-TERMINAL",
+        "SMPP-MISSION-RELATION"
+      ]
+    },
+    "status": { "enum": ["available", "degraded", "unavailable", "conflict"] },
+    "readOnlyProbe": { "const": true },
+    "implementationKind": { "const": "production" },
+    "component": { "const": "smpp-mcp-tasks-runtime" },
+    "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "qualification": {
+      "type": "object",
+      "required": ["status", "evidenceRefs"],
+      "properties": {
+        "status": { "enum": ["passed", "partial", "failed", "not_run"] },
+        "evidenceRefs": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "reasonCodes": { "type": "array", "items": { "type": "string" } },
+    "details": { "type": "object" }
+  }
+}

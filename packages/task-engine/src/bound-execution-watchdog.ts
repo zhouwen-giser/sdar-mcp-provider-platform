@@ -1,8 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {
-  validateAdapterSnapshotIdentity,
-  type GrpcAdapterGateway,
-} from "../../adapter-protocol/src/index.js";
+import { validateAdapterSnapshotIdentity } from "../../adapter-protocol/src/index.js";
 import { systemClock, type Clock, type TaskRecord } from "../../domain/src/index.js";
 import {
   OperationSnapshotRepository,
@@ -10,6 +7,7 @@ import {
 } from "../../persistence-postgres/src/index.js";
 import { withLeaseHeartbeat } from "./lease-heartbeat.js";
 import { validatedSnapshotTransition } from "./result-contract.js";
+import type { TaskAdapterGateway } from "./diagnostic-gateway.js";
 
 export interface BoundExecutionWatchdogResult {
   claimed: number;
@@ -27,7 +25,7 @@ export class BoundExecutionWatchdog {
   readonly workerId: string;
 
   constructor(
-    readonly gateway: GrpcAdapterGateway,
+    readonly gateway: TaskAdapterGateway,
     readonly repository: TaskRepository,
     readonly clock: Clock = systemClock,
     workerId: string = randomUUID(),

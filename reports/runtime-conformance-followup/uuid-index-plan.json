@@ -8,14 +8,14 @@
   "providerTask": {
     "planNode": "Index Scan",
     "indexName": "provider_task_pkey",
-    "executionTimeMs": 0.173,
+    "executionTimeMs": 0.144,
     "sharedHitBlocks": 16,
     "sharedReadBlocks": 0
   },
   "taskInputRequest": {
     "planNode": "Bitmap Heap Scan",
     "indexName": "task_input_request_pkey",
-    "executionTimeMs": 0.261,
+    "executionTimeMs": 0.257,
     "sharedHitBlocks": 9,
     "sharedReadBlocks": 0
   }

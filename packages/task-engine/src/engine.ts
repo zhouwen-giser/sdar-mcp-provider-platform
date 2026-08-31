@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import * as grpc from "@grpc/grpc-js";
-import type { GrpcAdapterGateway } from "../../adapter-protocol/src/index.js";
 import {
   protoStructToJson,
   validateAdapterSnapshotIdentity,
@@ -51,6 +50,7 @@ import {
   validatedSnapshotTransition,
 } from "./result-contract.js";
 import { mapTaskToDetailedTask, type DetailedTaskProjection } from "./detailed-task.js";
+import { DiagnosticResponseLossError, type TaskAdapterGateway } from "./diagnostic-gateway.js";
 
 export type ToolInvocationResult =
   | { kind: "result"; result: Record<string, unknown> }
@@ -78,7 +78,7 @@ export class TaskEngine {
   constructor(
     readonly manifest: ValidatedManifest,
     readonly operationSnapshotIds: Map<string, string>,
-    readonly gateway: GrpcAdapterGateway,
+    readonly gateway: TaskAdapterGateway,
     repository: TaskRepository,
     readonly idempotency?: IdempotencyRepository,
     readonly clock: Clock = systemClock,
@@ -330,18 +330,69 @@ export class TaskEngine {
     if (!inserted || recovering) {
       const existing = await this.#repository.getById(taskId);
       if (existing !== null) return { kind: "task", task: detailedTask(existing) };
-      const reconciliation = await this.gateway.reconcileExecution(
-        taskId,
-        operation.name,
-        argumentHash,
-        executionOptions(authorization),
-      );
-      if (reconciliation.status === "CONFLICT") throw new Error("ADAPTER_RECONCILE_CONFLICT");
+      const existingAdmission = await this.#repository.getAdmission(taskId);
+      let reconciliation;
+      try {
+        reconciliation = await this.gateway.reconcileExecution(
+          taskId,
+          operation.name,
+          argumentHash,
+          executionOptions(authorization),
+        );
+      } catch (error) {
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "transient_unavailable",
+          null,
+          false,
+          this.clock.now(),
+        );
+        throw error;
+      }
+      if (reconciliation.status === "CONFLICT") {
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "conflict",
+          reconciliation.externalExecutionId || null,
+          false,
+          this.clock.now(),
+        );
+        throw new Error("ADAPTER_RECONCILE_CONFLICT");
+      }
       if (reconciliation.status === "FOUND" && reconciliation.snapshot !== undefined) {
+        const externalExecutionId =
+          reconciliation.externalExecutionId || reconciliation.snapshot.externalExecutionId;
+        try {
+          validateAdapterSnapshotIdentity(reconciliation.snapshot, {
+            taskId,
+            externalExecutionId,
+            operationName: operation.name,
+            argumentHash,
+            authorizationContextHash: authorization.hash,
+            executionMode: authorization.executionMode,
+            simulationId: authorization.simulationId,
+          });
+        } catch (error) {
+          await this.#repository.recordReconciliationResult(
+            taskId,
+            "conflict",
+            externalExecutionId,
+            false,
+            this.clock.now(),
+          );
+          throw error;
+        }
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "found",
+          externalExecutionId,
+          true,
+          this.clock.now(),
+        );
         return this.#publishReconciled(
           operation,
           intent,
-          reconciliation.externalExecutionId || reconciliation.snapshot.externalExecutionId,
+          externalExecutionId,
           reconciliation.snapshot,
           ttlMs,
           reconciliation as unknown as Record<string, unknown>,
@@ -349,7 +400,25 @@ export class TaskEngine {
           anchors,
         );
       }
-      if (reconciliation.status !== "NOT_FOUND") {
+      if (reconciliation.status === "NOT_FOUND") {
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "not_found",
+          null,
+          false,
+          this.clock.now(),
+        );
+        if (existingAdmission?.state === "UNCERTAIN") {
+          throw new Error("ADAPTER_RECONCILE_NOT_FOUND_UNCERTAIN");
+        }
+      } else {
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "transient_unavailable",
+          null,
+          false,
+          this.clock.now(),
+        );
         throw new Error("ADAPTER_RECONCILE_UNAVAILABLE");
       }
     }
@@ -378,7 +447,18 @@ export class TaskEngine {
         ...(reservationRef === undefined ? {} : { reservationRef }),
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(
+        taskId,
+        error instanceof DiagnosticResponseLossError
+          ? "response_lost_after_adapter_success"
+          : "adapter_transport_ambiguous",
+        [
+          "adapter.startOperation",
+          ...(error instanceof DiagnosticResponseLossError
+            ? [`diagnosticFaultLease:${error.leaseId}`]
+            : []),
+        ],
+      );
       throw error;
     }
     if (response.result === "rejected" || response.rejected !== undefined) {
@@ -404,7 +484,10 @@ export class TaskEngine {
         simulationId: authorization.simulationId,
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(taskId, "adapter_transport_ambiguous", [
+        "adapter.startOperation:response",
+        "runtime.validateStartResponseIdentity",
+      ]);
       throw error;
     }
     const transition = validatedSnapshotTransition(operation, accepted.initialSnapshot);
@@ -444,7 +527,10 @@ export class TaskEngine {
         ...(startWindowMissedAt === undefined ? {} : { startWindowMissedAt }),
       });
     } catch (error) {
-      await this.#repository.markAdmissionUncertain(taskId);
+      await this.#repository.markAdmissionUncertain(taskId, "runtime_crash_window", [
+        "adapter.startOperation:accepted",
+        "runtime.publishAccepted",
+      ]);
       throw error;
     }
     return { kind: "task", task: detailedTask(task, inputRequests) };
@@ -692,30 +778,67 @@ export class TaskEngine {
     task: TaskRecord,
     resolvedOperation?: ValidatedOperation,
   ): Promise<"found" | "not_found" | "deferred"> {
-    if (task.internalState === "STARTING" && task.externalExecutionId === null) return "deferred";
+    if (task.internalState === "STARTING" && task.externalExecutionId === null) {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "deferred",
+        null,
+        false,
+        this.clock.now(),
+      );
+      return "deferred";
+    }
     const operation =
       resolvedOperation ?? (await this.loadOperationSnapshot(task.operationSnapshotId));
-    const response = await this.gateway.reconcileExecution(
-      task.taskId,
-      operation.name,
-      task.argumentHash,
-      {
-        ...executionOptions({
-          hash: task.authorizationContextHash,
-          executionMode: task.executionMode,
-          simulationId: task.simulationId,
-          ...(task.rootTraceparent === undefined || task.rootTraceparent === null
-            ? {}
-            : { rootTraceparent: task.rootTraceparent }),
-          ...(task.rootTracestate === undefined || task.rootTracestate === null
-            ? {}
-            : { rootTracestate: task.rootTracestate }),
-        }),
-        externalExecutionId: task.externalExecutionId,
-      },
-    );
-    if (response.status === "TRANSIENT_UNAVAILABLE") return "deferred";
+    let response;
+    try {
+      response = await this.gateway.reconcileExecution(
+        task.taskId,
+        operation.name,
+        task.argumentHash,
+        {
+          ...executionOptions({
+            hash: task.authorizationContextHash,
+            executionMode: task.executionMode,
+            simulationId: task.simulationId,
+            ...(task.rootTraceparent === undefined || task.rootTraceparent === null
+              ? {}
+              : { rootTraceparent: task.rootTraceparent }),
+            ...(task.rootTracestate === undefined || task.rootTracestate === null
+              ? {}
+              : { rootTracestate: task.rootTracestate }),
+          }),
+          externalExecutionId: task.externalExecutionId,
+        },
+      );
+    } catch (error) {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "transient_unavailable",
+        task.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
+      throw error;
+    }
+    if (response.status === "TRANSIENT_UNAVAILABLE") {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "transient_unavailable",
+        task.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
+      return "deferred";
+    }
     if (response.status === "CONFLICT") {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "conflict",
+        response.externalExecutionId || task.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
       await this.#repository.failRecoveryNotFound(
         task.taskId,
         "Adapter reported a conflicting execution identity during recovery.",
@@ -723,6 +846,13 @@ export class TaskEngine {
       return "not_found";
     }
     if (response.status === "NOT_FOUND" || response.snapshot === undefined) {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "not_found",
+        task.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
       await this.#repository.failRecoveryNotFound(
         task.taskId,
         "Adapter execution was not found during recovery.",
@@ -731,13 +861,38 @@ export class TaskEngine {
     }
     const snapshot = response.snapshot;
     if (response.externalExecutionId !== snapshot.externalExecutionId) {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "conflict",
+        response.externalExecutionId || snapshot.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
       await this.#repository.recordIdentityConflict(
         task.taskId,
         "ADAPTER_RECONCILE_IDENTITY_MISMATCH",
       );
       throw new Error("ADAPTER_RECONCILE_IDENTITY_MISMATCH");
     }
-    await this.#validateTaskSnapshot(task, operation.name, snapshot);
+    try {
+      await this.#validateTaskSnapshot(task, operation.name, snapshot);
+    } catch (error) {
+      await this.#repository.recordReconciliationResult(
+        task.taskId,
+        "conflict",
+        snapshot.externalExecutionId,
+        false,
+        this.clock.now(),
+      );
+      throw error;
+    }
+    await this.#repository.recordReconciliationResult(
+      task.taskId,
+      "found",
+      snapshot.externalExecutionId,
+      true,
+      this.clock.now(),
+    );
     await this.#repository.applySnapshot(
       task.taskId,
       Number(snapshot.revision),
@@ -1156,7 +1311,7 @@ function normalizeInputRequests(snapshot: ExecutionSnapshot) {
 
 function resultFromStart(
   operation: ValidatedOperation,
-  response: Awaited<ReturnType<GrpcAdapterGateway["startOperation"]>>,
+  response: Awaited<ReturnType<TaskAdapterGateway["startOperation"]>>,
 ): Record<string, unknown> {
   if (response.rejected !== undefined) return rejectionResult(response.rejected);
   const snapshot = response.accepted?.initialSnapshot;

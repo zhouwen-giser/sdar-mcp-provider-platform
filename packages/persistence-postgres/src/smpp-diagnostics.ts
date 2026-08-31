@@ -1,0 +1,444 @@
+import type { Pool } from "pg";
+import { sha256CanonicalJson } from "../../observability/src/index.js";
+
+export type SmppTaskExecutionBindingStatus =
+  "unbound" | "bound" | "unresolved" | "conflict" | "terminal";
+
+export type SmppDispatchUncertaintyClass =
+  | "response_lost_after_adapter_success"
+  | "adapter_transport_ambiguous"
+  | "runtime_crash_window"
+  | "unknown";
+
+export interface SmppDispatchUncertaintyV1 {
+  schemaVersion: "sdar.smpp-dispatch-uncertainty/v1";
+  taskId: string;
+  operationName: string;
+  argumentHash: string;
+  uncertaintyClass: SmppDispatchUncertaintyClass;
+  redispatchAllowed: false;
+  occurredAt: string;
+  causalRefs: string[];
+}
+
+export type SmppReconciliationStatus =
+  "found" | "not_found" | "conflict" | "transient_unavailable" | "deferred";
+
+export interface SmppReconciliationResultV1 {
+  schemaVersion: "sdar.smpp-reconciliation-result/v1";
+  taskId: string;
+  attempt: number;
+  status: SmppReconciliationStatus;
+  externalExecutionId: string | null;
+  occurredAt: string;
+  identityValidated: boolean;
+}
+
+export interface SmppTaskExecutionBindingV1 {
+  schemaVersion: "sdar.smpp-task-execution-binding/v1";
+  taskId: string;
+  providerId: string;
+  operationName: string;
+  argumentHash: string;
+  executionMode: string;
+  simulationId: string | null;
+  externalExecutionId: string | null;
+  resourceRef: string | null;
+  adapterRevision: number | null;
+  bindingStatus: SmppTaskExecutionBindingStatus;
+  contentHash: string;
+}
+
+export type SmppBusinessStatus = "succeeded" | "failed" | "unknown" | "not_applicable";
+export type SmppTransportStatus =
+  "completed" | "response_lost_after_commit" | "unavailable" | "unknown";
+
+export interface SmppBusinessTerminalV1 {
+  schemaVersion: "sdar.smpp-business-terminal/v1";
+  taskId: string;
+  mcpTaskStatus: "completed" | "failed" | "cancelled";
+  businessStatus: SmppBusinessStatus;
+  providerExecutionStatus: string;
+  transportStatus: SmppTransportStatus;
+  isError: boolean;
+  reasonCode: string | null;
+}
+
+export type SmppProviderEvidenceKind =
+  "position" | "speed" | "mission" | "state" | "health" | "other";
+
+export interface SmppProviderEvidenceRefV1 {
+  schemaVersion: "sdar.smpp-provider-evidence-ref/v1";
+  taskId: string;
+  providerId: string;
+  externalExecutionId: string;
+  resourceId: string;
+  deviceMissionId: string | null;
+  kind: SmppProviderEvidenceKind;
+  observedAt: string;
+  sourceRecordId: string;
+  sourceSequence: number | null;
+  contentHash: string | null;
+  payloadRef: { providerOpsRecordId: string };
+}
+
+export interface SmppMissionRelationV1 {
+  schemaVersion: "sdar.smpp-mission-relation/v1";
+  taskId: string;
+  externalExecutionId: string;
+  deviceMissionId: string | null;
+  resourceId: string | null;
+  relationStatus: "exact" | "unresolved" | "conflict";
+  observedAt: string;
+  sourceRecordRefs: string[];
+}
+
+const providerEvidenceKinds = new Set<SmppProviderEvidenceKind>([
+  "position",
+  "speed",
+  "mission",
+  "state",
+  "health",
+  "other",
+]);
+
+interface BindingRow {
+  task_id: string;
+  provider_id: string;
+  operation_name: string;
+  argument_hash: string;
+  execution_mode: string;
+  simulation_id: string | null;
+  arguments: Record<string, unknown>;
+  admission_state: string;
+  external_execution_id: string | null;
+  adapter_revision: string | null;
+  internal_state: string | null;
+  operation_definition: Record<string, unknown>;
+  identity_conflict: boolean;
+}
+
+/** Read-only projection over the existing Runtime task/admission authority. */
+export class SmppDiagnosticRepository {
+  constructor(readonly pool: Pool) {}
+
+  async getTaskExecutionBinding(taskId: string): Promise<SmppTaskExecutionBindingV1 | null> {
+    const result = await this.pool.query<BindingRow>(
+      `SELECT admission.task_id,
+              admission.provider_id,
+              admission.operation_name,
+              admission.argument_hash,
+              admission.execution_mode,
+              admission.simulation_id,
+              admission.arguments,
+              admission.state AS admission_state,
+              task.external_execution_id,
+              task.adapter_revision,
+              task.internal_state,
+              snapshot.definition AS operation_definition,
+              EXISTS (
+                SELECT 1 FROM outbox_event event
+                WHERE event.aggregate_id=admission.task_id
+                  AND event.event_type='task.identity_conflict'
+              ) AS identity_conflict
+       FROM admission_intent admission
+       JOIN operation_snapshot snapshot
+         ON snapshot.snapshot_id=admission.operation_snapshot_id
+       LEFT JOIN provider_task task ON task.task_id=admission.task_id
+       WHERE admission.task_id=$1`,
+      [taskId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+
+    const projectionWithoutHash = {
+      schemaVersion: "sdar.smpp-task-execution-binding/v1" as const,
+      taskId: row.task_id,
+      providerId: row.provider_id,
+      operationName: row.operation_name,
+      argumentHash: row.argument_hash,
+      executionMode: row.execution_mode,
+      simulationId: row.simulation_id,
+      externalExecutionId: row.external_execution_id,
+      resourceRef: resourceReference(row.operation_definition, row.arguments),
+      adapterRevision: row.adapter_revision === null ? null : Number(row.adapter_revision),
+      bindingStatus: bindingStatus(row),
+    };
+    return {
+      ...projectionWithoutHash,
+      contentHash: `sha256:${sha256CanonicalJson(projectionWithoutHash)}`,
+    };
+  }
+
+  async getDispatchUncertainty(taskId: string): Promise<SmppDispatchUncertaintyV1 | null> {
+    const result = await this.pool.query<{
+      task_id: string;
+      operation_name: string;
+      argument_hash: string;
+      uncertainty_class: SmppDispatchUncertaintyClass;
+      occurred_at: Date;
+      causal_refs: string[];
+    }>("SELECT * FROM smpp_dispatch_uncertainty WHERE task_id=$1", [taskId]);
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return {
+      schemaVersion: "sdar.smpp-dispatch-uncertainty/v1",
+      taskId: row.task_id,
+      operationName: row.operation_name,
+      argumentHash: row.argument_hash,
+      uncertaintyClass: row.uncertainty_class,
+      redispatchAllowed: false,
+      occurredAt: row.occurred_at.toISOString(),
+      causalRefs: row.causal_refs,
+    };
+  }
+
+  async listReconciliationResults(taskId: string): Promise<SmppReconciliationResultV1[]> {
+    const result = await this.pool.query<{
+      task_id: string;
+      attempt: number;
+      status: SmppReconciliationStatus;
+      external_execution_id: string | null;
+      occurred_at: Date;
+      identity_validated: boolean;
+    }>("SELECT * FROM smpp_reconciliation_audit WHERE task_id=$1 ORDER BY attempt", [taskId]);
+    return result.rows.map((row) => ({
+      schemaVersion: "sdar.smpp-reconciliation-result/v1",
+      taskId: row.task_id,
+      attempt: row.attempt,
+      status: row.status,
+      externalExecutionId: row.external_execution_id,
+      occurredAt: row.occurred_at.toISOString(),
+      identityValidated: row.identity_validated,
+    }));
+  }
+
+  async getBusinessTerminal(taskId: string): Promise<SmppBusinessTerminalV1 | null> {
+    const result = await this.pool.query<{
+      task_id: string;
+      internal_state: string;
+      mcp_status: string;
+      result: Record<string, unknown> | null;
+      error: Record<string, unknown> | null;
+      uncertainty_class: SmppDispatchUncertaintyClass | null;
+    }>(
+      `SELECT task.task_id, task.internal_state, task.mcp_status, task.result, task.error,
+              uncertainty.uncertainty_class
+       FROM provider_task task
+       LEFT JOIN smpp_dispatch_uncertainty uncertainty ON uncertainty.task_id=task.task_id
+       WHERE task.task_id=$1 AND task.internal_state LIKE 'TERMINAL_%'`,
+      [taskId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    return normalizeBusinessTerminal({
+      taskId: row.task_id,
+      internalState: row.internal_state,
+      mcpTaskStatus: row.mcp_status,
+      result: row.result,
+      error: row.error,
+      uncertaintyClass: row.uncertainty_class,
+    });
+  }
+
+  async listProviderEvidence(taskId: string): Promise<SmppProviderEvidenceRefV1[]> {
+    const result = await this.pool.query<{ record_body: Record<string, unknown> }>(
+      `SELECT record_body
+       FROM provider_ops_delivery
+       WHERE aggregate_id=$1
+         AND record_body ? 'providerEventId'
+         AND record_body->'attributes' ? 'sdar.evidence.kind'
+       ORDER BY record_body->>'occurredAt', record_id`,
+      [taskId],
+    );
+    return result.rows
+      .map((row) => providerEvidenceRef(row.record_body))
+      .filter((value): value is SmppProviderEvidenceRefV1 => value !== null);
+  }
+
+  async getMissionRelation(taskId: string): Promise<SmppMissionRelationV1 | null> {
+    const task = await this.pool.query<{
+      external_execution_id: string;
+    }>("SELECT external_execution_id FROM provider_task WHERE task_id=$1", [taskId]);
+    const externalExecutionId = task.rows[0]?.external_execution_id;
+    if (externalExecutionId === undefined) return null;
+    const missionEvidence = (await this.listProviderEvidence(taskId)).filter(
+      (item) => item.kind === "mission" && item.externalExecutionId === externalExecutionId,
+    );
+    if (missionEvidence.length === 0) return null;
+    const missionIds = [
+      ...new Set(
+        missionEvidence
+          .map((item) => item.deviceMissionId)
+          .filter((value): value is string => value !== null),
+      ),
+    ].sort();
+    const resources = [...new Set(missionEvidence.map((item) => item.resourceId))].sort();
+    const relationStatus =
+      missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+    return {
+      schemaVersion: "sdar.smpp-mission-relation/v1",
+      taskId,
+      externalExecutionId,
+      deviceMissionId: relationStatus === "exact" ? (missionIds[0] ?? null) : null,
+      resourceId: resources.length === 1 ? (resources[0] ?? null) : null,
+      relationStatus,
+      observedAt: missionEvidence.at(-1)?.observedAt ?? new Date(0).toISOString(),
+      sourceRecordRefs: missionEvidence.map((item) => item.sourceRecordId).sort(),
+    };
+  }
+}
+
+export function normalizeBusinessTerminal(input: {
+  taskId: string;
+  internalState: string;
+  mcpTaskStatus: string;
+  result: Record<string, unknown> | null;
+  error: Record<string, unknown> | null;
+  uncertaintyClass: SmppDispatchUncertaintyClass | null;
+}): SmppBusinessTerminalV1 {
+  if (!isTerminalMcpStatus(input.mcpTaskStatus)) throw new Error("SMPP_TASK_NOT_TERMINAL");
+  const businessStatus = classifyBusinessStatus(input.mcpTaskStatus, input.result);
+  return {
+    schemaVersion: "sdar.smpp-business-terminal/v1",
+    taskId: input.taskId,
+    mcpTaskStatus: input.mcpTaskStatus,
+    businessStatus,
+    providerExecutionStatus: providerExecutionStatus(input.internalState),
+    transportStatus: transportStatus(input.uncertaintyClass),
+    isError: businessStatus === "failed",
+    reasonCode: reasonCode(input.result, input.error),
+  };
+}
+
+function bindingStatus(row: BindingRow): SmppTaskExecutionBindingStatus {
+  if (row.identity_conflict) return "conflict";
+  if (row.internal_state?.startsWith("TERMINAL_")) return "terminal";
+  if (row.external_execution_id !== null) return "bound";
+  if (row.admission_state === "UNCERTAIN") return "unresolved";
+  return "unbound";
+}
+
+function resourceReference(
+  definition: Record<string, unknown>,
+  argumentsValue: Record<string, unknown>,
+): string | null {
+  const resourceBinding = definition.resourceBinding;
+  if (
+    typeof resourceBinding !== "object" ||
+    resourceBinding === null ||
+    Array.isArray(resourceBinding)
+  ) {
+    return null;
+  }
+  const binding = resourceBinding as Record<string, unknown>;
+  const pointer = binding.resourceIdJsonPointer;
+  if (binding.mode !== "ARGUMENT_REFERENCE" || typeof pointer !== "string") return null;
+  if (!pointer.startsWith("/")) return null;
+  let current: unknown = argumentsValue;
+  for (const encoded of pointer.slice(1).split("/")) {
+    if (typeof current !== "object" || current === null || Array.isArray(current)) return null;
+    const key = encoded.replaceAll("~1", "/").replaceAll("~0", "~");
+    current = (current as Record<string, unknown>)[key];
+  }
+  return typeof current === "string" || typeof current === "number" ? String(current) : null;
+}
+
+function isTerminalMcpStatus(value: string): value is "completed" | "failed" | "cancelled" {
+  return value === "completed" || value === "failed" || value === "cancelled";
+}
+
+function classifyBusinessStatus(
+  status: "completed" | "failed" | "cancelled",
+  result: Record<string, unknown> | null,
+): SmppBusinessStatus {
+  if (status === "cancelled") return "not_applicable";
+  if (status === "failed") return "failed";
+  if (result === null) return "unknown";
+  return result.isError === true ? "failed" : "succeeded";
+}
+
+function providerExecutionStatus(internalState: string): string {
+  if (internalState === "TERMINAL_COMPLETED") return "completed";
+  if (internalState === "TERMINAL_FAILED") return "failed";
+  if (internalState === "TERMINAL_CANCELLED") return "cancelled";
+  return "unknown";
+}
+
+function transportStatus(
+  uncertaintyClass: SmppDispatchUncertaintyClass | null,
+): SmppTransportStatus {
+  if (
+    uncertaintyClass === "response_lost_after_adapter_success" ||
+    uncertaintyClass === "runtime_crash_window"
+  ) {
+    return "response_lost_after_commit";
+  }
+  if (uncertaintyClass === "adapter_transport_ambiguous") return "unavailable";
+  if (uncertaintyClass === "unknown") return "unknown";
+  return "completed";
+}
+
+function reasonCode(
+  result: Record<string, unknown> | null,
+  error: Record<string, unknown> | null,
+): string | null {
+  for (const body of [result, error]) {
+    if (body === null) continue;
+    for (const container of [body.structuredContent, body.data]) {
+      if (typeof container !== "object" || container === null || Array.isArray(container)) continue;
+      const value = (container as Record<string, unknown>).reasonCode;
+      if (typeof value === "string") return value;
+    }
+  }
+  return null;
+}
+
+function providerEvidenceRef(body: Record<string, unknown>): SmppProviderEvidenceRefV1 | null {
+  const attributes = record(body.attributes);
+  const kind = attributes?.["sdar.evidence.kind"];
+  if (typeof kind !== "string" || !providerEvidenceKinds.has(kind as SmppProviderEvidenceKind)) {
+    return null;
+  }
+  const taskId = body.taskId;
+  const providerId = body.providerId;
+  const externalExecutionId = body.externalExecutionId;
+  const resourceId = body.resourceId;
+  const observedAt = body.occurredAt;
+  const sourceRecordId = body.recordId;
+  if (
+    typeof taskId !== "string" ||
+    typeof providerId !== "string" ||
+    typeof externalExecutionId !== "string" ||
+    typeof resourceId !== "string" ||
+    typeof observedAt !== "string" ||
+    Number.isNaN(Date.parse(observedAt)) ||
+    typeof sourceRecordId !== "string"
+  ) {
+    return null;
+  }
+  const missionId = attributes?.["sdar.device.mission_id"];
+  const sequence = body.providerEventSequence;
+  const recordHash = body.recordHash;
+  return {
+    schemaVersion: "sdar.smpp-provider-evidence-ref/v1",
+    taskId,
+    providerId,
+    externalExecutionId,
+    resourceId,
+    deviceMissionId: typeof missionId === "string" && missionId.length > 0 ? missionId : null,
+    kind: kind as SmppProviderEvidenceKind,
+    observedAt: new Date(observedAt).toISOString(),
+    sourceRecordId,
+    sourceSequence:
+      typeof sequence === "number" && Number.isSafeInteger(sequence) ? sequence : null,
+    contentHash: typeof recordHash === "string" ? recordHash : null,
+    payloadRef: { providerOpsRecordId: sourceRecordId },
+  };
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}

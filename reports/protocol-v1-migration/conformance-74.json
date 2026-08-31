@@ -57,7 +57,7 @@
       "evidence": [
         {
           "file": "tests/protocol-conformance/discovery.test.ts",
-          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and mandatory notifications",
+          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and provider catalog",
           "status": "passed"
         }
       ]
@@ -70,7 +70,7 @@
       "evidence": [
         {
           "file": "tests/protocol-conformance/discovery.test.ts",
-          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and mandatory notifications",
+          "title": "frozen server discovery C-004 C-005 publishes the fixed version, Tasks Extension and provider catalog",
           "status": "passed"
         }
       ]

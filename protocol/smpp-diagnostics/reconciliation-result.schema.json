@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdar.smpp-reconciliation-result/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "taskId", "attempt", "status", "occurredAt"],
+  "properties": {
+    "schemaVersion": { "const": "sdar.smpp-reconciliation-result/v1" },
+    "taskId": { "type": "string" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["found", "not_found", "conflict", "transient_unavailable", "deferred"] },
+    "externalExecutionId": { "type": ["string", "null"] },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "identityValidated": { "type": "boolean" }
+  }
+}

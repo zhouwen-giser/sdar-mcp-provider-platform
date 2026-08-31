@@ -68,7 +68,7 @@ class FakeClock implements Clock {
 
 beforeAll(async () => {
   await pool.query(`DROP TABLE IF EXISTS
-    task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
+    smpp_reconciliation_audit, smpp_dispatch_uncertainty, task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
     task_command, task_input_request,
     task_observation, provider_task, admission_intent, operation_snapshot,
     runtime_schema_migration CASCADE`);
@@ -102,7 +102,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   lastReservationRef = undefined;
   await pool.query(`TRUNCATE TABLE
-    task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
+    smpp_reconciliation_audit, smpp_dispatch_uncertainty, task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
     task_command, task_input_request,
     task_observation, provider_task, admission_intent
     RESTART IDENTITY CASCADE`);
