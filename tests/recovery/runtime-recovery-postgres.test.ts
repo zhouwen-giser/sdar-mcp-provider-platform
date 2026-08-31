@@ -43,7 +43,7 @@ let adapterEndpoint: string;
 
 beforeAll(async () => {
   await pool.query(`DROP TABLE IF EXISTS
-    task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
+    smpp_reconciliation_audit, smpp_dispatch_uncertainty, task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
     task_command, task_input_request,
     task_observation, provider_task, admission_intent, operation_snapshot,
     runtime_schema_migration CASCADE`);
@@ -73,7 +73,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await pool.query(`TRUNCATE TABLE
-    task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
+    smpp_reconciliation_audit, smpp_dispatch_uncertainty, task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
     task_command, task_input_request,
     task_observation, provider_task, admission_intent
     RESTART IDENTITY CASCADE`);
@@ -110,7 +110,8 @@ describe("Runtime startup and fault recovery", () => {
     });
     const events = await pool.query<{ record_type: string; payload: Record<string, unknown> }>(
       `SELECT record_type,record_body->'payload' AS payload FROM provider_ops_delivery
-       WHERE aggregate_id=$1 AND record_type='provider.recovery.lifecycle'`,
+       WHERE aggregate_id=$1 AND record_type='provider.recovery.lifecycle'
+         AND record_body->'payload'->>'event'='reconcile'`,
       [String(recovered.rows[0]?.task_id)],
     );
     expect(events.rows[0]).toMatchObject({
