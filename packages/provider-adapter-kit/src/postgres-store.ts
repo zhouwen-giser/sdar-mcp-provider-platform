@@ -20,6 +20,12 @@ import type {
   ProviderStore,
   SnapshotRecord,
 } from "./types.js";
+import type {
+  SmppDiagnosticBinding,
+  SmppDiagnosticControlResult,
+  SmppDiagnosticLease,
+  SmppDiagnosticReceipt,
+} from "./diagnostics.js";
 
 export class PostgresProviderStore implements ProviderStore {
   readonly pool: Pool;
@@ -223,6 +229,258 @@ export class PostgresProviderStore implements ProviderStore {
       [record.revision, record.observedAt, record.snapshot],
     );
   }
+  async armDiagnosticLease(
+    lease: Omit<SmppDiagnosticLease, "fence">,
+    receipt: Omit<SmppDiagnosticReceipt, "state">,
+  ): Promise<SmppDiagnosticControlResult> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+        `ugv-diagnostic:${lease.stableOperationKey}`,
+      ]);
+      const existing = await client.query<{ payload: SmppDiagnosticLease }>(
+        "SELECT payload FROM ugv_diagnostic_lease WHERE stable_operation_key=$1 FOR UPDATE",
+        [lease.stableOperationKey],
+      );
+      const prior = existing.rows[0]?.payload;
+      if (prior !== undefined) {
+        if (prior.canonicalRequestHash !== lease.canonicalRequestHash)
+          throw new Error("SMPP_DIAGNOSTIC_OPERATION_CONFLICT");
+        const result = await diagnosticResult(client, prior, "armed");
+        await client.query("COMMIT");
+        return result;
+      }
+      const allocated = await client.query<{ fence: string }>(
+        "SELECT nextval('ugv_diagnostic_fence_seq')::text AS fence",
+      );
+      const fence = allocated.rows[0]?.fence;
+      if (fence === undefined) throw new Error("SMPP_DIAGNOSTIC_FENCE_ALLOCATION_FAILED");
+      const stored: SmppDiagnosticLease = { ...lease, fence };
+      const storedReceipt: SmppDiagnosticReceipt = { ...receipt, state: stored.state };
+      await client.query(
+        `INSERT INTO ugv_diagnostic_lease(
+           lease_id,capability_id,stable_operation_key,canonical_request_hash,idempotency_key,
+           fence,state,logical_invocation_id,scoped_task_id,expires_at,payload,created_at,updated_at
+         ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12)`,
+        [
+          stored.leaseId,
+          stored.capabilityId,
+          stored.stableOperationKey,
+          stored.canonicalRequestHash,
+          stored.idempotencyKey,
+          stored.fence,
+          stored.state,
+          stored.scope.logicalInvocationId,
+          stored.scope.taskId ?? null,
+          stored.expiresAt,
+          stored,
+          stored.armedAt,
+        ],
+      );
+      await insertDiagnosticReceipt(client, storedReceipt);
+      await client.query("COMMIT");
+      return { lease: stored, receipt: storedReceipt };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async getDiagnosticLease(leaseId: string): Promise<SmppDiagnosticLease | undefined> {
+    const result = await this.pool.query<{ payload: SmppDiagnosticLease }>(
+      "SELECT payload FROM ugv_diagnostic_lease WHERE lease_id=$1",
+      [leaseId],
+    );
+    return result.rows[0]?.payload;
+  }
+  async getDiagnosticStatus(leaseId: string): Promise<SmppDiagnosticControlResult | undefined> {
+    const result = await this.pool.query<{
+      lease: SmppDiagnosticLease;
+      receipt: SmppDiagnosticReceipt;
+    }>(
+      `SELECT lease.payload AS lease, receipt.payload AS receipt
+       FROM ugv_diagnostic_lease lease
+       JOIN LATERAL (
+         SELECT payload FROM ugv_diagnostic_receipt
+         WHERE lease_id=lease.lease_id ORDER BY occurred_at DESC, receipt_id DESC LIMIT 1
+       ) receipt ON true
+       WHERE lease.lease_id=$1`,
+      [leaseId],
+    );
+    const row = result.rows[0];
+    return row === undefined ? undefined : { lease: row.lease, receipt: row.receipt };
+  }
+  async disarmDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const lease = await lockedDiagnosticLease(client, leaseId);
+      const prior = await optionalDiagnosticReceipt(client, leaseId, "disarmed");
+      if (prior !== undefined) {
+        if (prior.requestHash !== requestHash)
+          throw new Error("SMPP_DIAGNOSTIC_OPERATION_CONFLICT");
+        await client.query("COMMIT");
+        return { lease, receipt: prior };
+      }
+      const next: SmppDiagnosticLease = {
+        ...lease,
+        state: "DISARMED",
+        cleanupAt: occurredAt,
+      };
+      const receipt: SmppDiagnosticReceipt = {
+        contract: lease.contract,
+        receiptId,
+        leaseId,
+        action: "disarmed",
+        requestHash,
+        occurredAt,
+        state: next.state,
+        reasonCode: "SMPP_DIAGNOSTIC_DISARMED",
+      };
+      await updateDiagnosticLease(client, next, occurredAt);
+      await insertDiagnosticReceipt(client, receipt);
+      await client.query("COMMIT");
+      return { lease: next, receipt };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async bindDiagnosticLease(
+    binding: SmppDiagnosticBinding,
+  ): Promise<SmppDiagnosticControlResult | undefined> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await client.query<{ payload: SmppDiagnosticLease }>(
+        `SELECT payload FROM ugv_diagnostic_lease
+         WHERE capability_id=$1 AND logical_invocation_id=$2 AND state='ARMED'
+           AND (scoped_task_id IS NULL OR scoped_task_id=$3) AND expires_at>$4
+         ORDER BY fence FOR UPDATE SKIP LOCKED LIMIT 1`,
+        [binding.capabilityId, binding.logicalInvocationId, binding.taskId, binding.observedAt],
+      );
+      const lease = result.rows[0]?.payload;
+      if (lease === undefined) {
+        await client.query("COMMIT");
+        return undefined;
+      }
+      const next: SmppDiagnosticLease = {
+        ...lease,
+        state: "BOUND",
+        boundAt: binding.observedAt,
+        taskId: binding.taskId,
+        externalExecutionId: binding.externalExecutionId,
+        deviceMissionId: binding.deviceMissionId,
+      };
+      const receipt: SmppDiagnosticReceipt = {
+        contract: lease.contract,
+        receiptId: randomUUID(),
+        leaseId: lease.leaseId,
+        action: "bound",
+        requestHash: lease.canonicalRequestHash,
+        occurredAt: binding.observedAt,
+        state: next.state,
+        reasonCode: "SMPP_DIAGNOSTIC_BOUND",
+      };
+      await updateDiagnosticLease(client, next, binding.observedAt);
+      await insertDiagnosticReceipt(client, receipt);
+      await client.query("COMMIT");
+      return { lease: next, receipt };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async consumeDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const lease = await lockedDiagnosticLease(client, leaseId);
+      const prior = await optionalDiagnosticReceipt(client, leaseId, "consumed");
+      if (prior !== undefined) {
+        await client.query("COMMIT");
+        return { lease, receipt: prior };
+      }
+      if (lease.state !== "BOUND") throw new Error("SMPP_DIAGNOSTIC_NOT_BOUND");
+      const next: SmppDiagnosticLease = {
+        ...lease,
+        state: "CONSUMED",
+        consumedAt: occurredAt,
+      };
+      const receipt: SmppDiagnosticReceipt = {
+        contract: lease.contract,
+        receiptId,
+        leaseId,
+        action: "consumed",
+        requestHash,
+        occurredAt,
+        state: next.state,
+        reasonCode: "SMPP_DIAGNOSTIC_CONSUMED",
+      };
+      await updateDiagnosticLease(client, next, occurredAt);
+      await insertDiagnosticReceipt(client, receipt);
+      await client.query("COMMIT");
+      return { lease: next, receipt };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async expireDiagnosticLeases(
+    occurredAt: string,
+  ): Promise<readonly SmppDiagnosticControlResult[]> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const expired = await client.query<{ payload: SmppDiagnosticLease }>(
+        `SELECT payload FROM ugv_diagnostic_lease
+         WHERE state IN ('ARMED','BOUND') AND expires_at<=$1 ORDER BY fence FOR UPDATE`,
+        [occurredAt],
+      );
+      const results: SmppDiagnosticControlResult[] = [];
+      for (const { payload: lease } of expired.rows) {
+        const next: SmppDiagnosticLease = { ...lease, state: "EXPIRED", cleanupAt: occurredAt };
+        const receipt: SmppDiagnosticReceipt = {
+          contract: lease.contract,
+          receiptId: randomUUID(),
+          leaseId: lease.leaseId,
+          action: "expired",
+          requestHash: lease.canonicalRequestHash,
+          occurredAt,
+          state: next.state,
+          reasonCode: "SMPP_DIAGNOSTIC_EXPIRED",
+        };
+        await updateDiagnosticLease(client, next, occurredAt);
+        await insertDiagnosticReceipt(client, receipt);
+        results.push({ lease: next, receipt });
+      }
+      await client.query("COMMIT");
+      return results;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent> {
     assertPostgresJsonbSafe(draft.rawPayload, "businessEvent.rawPayload");
     const source = businessEventSourceCapabilities().find((x) => x.sourceId === draft.sourceId);
@@ -376,6 +634,78 @@ function journalValues(entry: MutationJournalEntry): unknown[] {
     entry.completedAt ?? null,
     entry,
   ];
+}
+async function lockedDiagnosticLease(
+  client: PoolClient,
+  leaseId: string,
+): Promise<SmppDiagnosticLease> {
+  const result = await client.query<{ payload: SmppDiagnosticLease }>(
+    "SELECT payload FROM ugv_diagnostic_lease WHERE lease_id=$1 FOR UPDATE",
+    [leaseId],
+  );
+  const lease = result.rows[0]?.payload;
+  if (lease === undefined) throw new Error("SMPP_DIAGNOSTIC_LEASE_NOT_FOUND");
+  return lease;
+}
+async function optionalDiagnosticReceipt(
+  client: PoolClient,
+  leaseId: string,
+  action: SmppDiagnosticReceipt["action"],
+): Promise<SmppDiagnosticReceipt | undefined> {
+  const result = await client.query<{ payload: SmppDiagnosticReceipt }>(
+    "SELECT payload FROM ugv_diagnostic_receipt WHERE lease_id=$1 AND action=$2",
+    [leaseId, action],
+  );
+  return result.rows[0]?.payload;
+}
+async function diagnosticResult(
+  client: PoolClient,
+  lease: SmppDiagnosticLease,
+  action: SmppDiagnosticReceipt["action"],
+): Promise<SmppDiagnosticControlResult> {
+  const receipt = await optionalDiagnosticReceipt(client, lease.leaseId, action);
+  if (receipt === undefined) throw new Error("SMPP_DIAGNOSTIC_RECEIPT_NOT_FOUND");
+  return { lease, receipt };
+}
+async function insertDiagnosticReceipt(
+  client: PoolClient,
+  receipt: SmppDiagnosticReceipt,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO ugv_diagnostic_receipt(
+       receipt_id,lease_id,action,request_hash,occurred_at,payload
+     ) VALUES($1,$2,$3,$4,$5,$6)`,
+    [
+      receipt.receiptId,
+      receipt.leaseId,
+      receipt.action,
+      receipt.requestHash,
+      receipt.occurredAt,
+      receipt,
+    ],
+  );
+}
+async function updateDiagnosticLease(
+  client: PoolClient,
+  lease: SmppDiagnosticLease,
+  updatedAt: string,
+): Promise<void> {
+  const result = await client.query(
+    `UPDATE ugv_diagnostic_lease
+     SET state=$2,bound_task_id=$3,external_execution_id=$4,device_mission_id=$5,
+         payload=$6,updated_at=$7
+     WHERE lease_id=$1`,
+    [
+      lease.leaseId,
+      lease.state,
+      lease.taskId ?? null,
+      lease.externalExecutionId ?? null,
+      lease.deviceMissionId ?? null,
+      lease,
+      updatedAt,
+    ],
+  );
+  if (result.rowCount !== 1) throw new Error("SMPP_DIAGNOSTIC_LEASE_NOT_FOUND");
 }
 function timestamp(value: string): { seconds: string; nanos: number } {
   const milliseconds = Date.parse(value);

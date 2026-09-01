@@ -21,7 +21,7 @@
     "provider:ugv": {
       "owner": "provider:ugv",
       "plannedDirectory": "migrations/providers/ugv",
-      "deliveredFiles": 3
+      "deliveredFiles": 4
     },
     "provider:npc-tank": {
       "owner": "provider:npc-tank",
@@ -386,6 +386,16 @@
       "plannedPath": "migrations/runtime/026_smpp_reconciliation_audit.sql",
       "pathState": "owner_directory",
       "sha256": "2daad14ff8ae4102d71e0912ea86c3747cebf8b43ac70662fad9358f6f7dfb0f"
+    },
+    {
+      "sequence": 36,
+      "legacyVersion": "028",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "newPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "plannedPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "pathState": "owner_directory",
+      "sha256": "995c7c01773c97c4ba09330415d85988e1879bd80ad14203d5d9d95b99664b6a"
     }
   ]
 }

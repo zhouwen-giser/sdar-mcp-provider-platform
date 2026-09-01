@@ -9,7 +9,15 @@ import {
 } from "../../packages/adapter-protocol/src/index.js";
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
 import {
+  diagnosticControlSignature,
   MemoryProviderStore,
+  SMPP_DIAGNOSTIC_CONTRACT,
+  SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+  SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+  SMPP_RESPONSE_LOSS_CAPABILITY,
+  SmppDiagnosticResponseLossError,
+  type SmppDiagnosticCapabilityId,
+  type SmppDiagnosticControlRequest,
   type MutationJournalEntry,
   type MutationJournalPhase,
   type MutationJournalState,
@@ -43,6 +51,201 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("drops exactly one response only after the original mission is durable and never redispatches", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const request: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "response-loss-arm-1",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-p10",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-execution-1",
+        repetitionId: "repetition-1",
+        logicalInvocationId: "correlation-nav-response-loss",
+      },
+    };
+    const armed = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      request,
+    );
+    const leaseId = stringProperty(armed.lease, "leaseId");
+    const navigation = startInput("nav-response-loss", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
+
+    await expect(fixture.runtime.start(navigation)).rejects.toBeInstanceOf(
+      SmppDiagnosticResponseLossError,
+    );
+    expect(await fixture.store.getExecution(navigation.taskId)).toMatchObject({
+      state: "STARTING",
+      downstreamMissionIds: ["1"],
+    });
+    expect(fixture.device.calls).toHaveLength(2);
+    const replayed = await fixture.runtime.start(structuredClone(navigation));
+    expect(replayed.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(fixture.device.calls).toHaveLength(2);
+    expect(await fixture.store.getDiagnosticStatus(leaseId)).toMatchObject({
+      lease: {
+        state: "CONSUMED",
+        taskId: navigation.taskId,
+        deviceMissionId: "1",
+        injectionCount: 1,
+      },
+    });
+    const evidence = fixture.telemetry.records.find(
+      (record) => record.attributes["sdar.diagnostic.leaseId"] === leaseId,
+    );
+    expect(evidence?.eventType).toBe("RESOURCE_HEALTH");
+    expect(evidence?.taskId).toBe(navigation.taskId);
+    expect(evidence?.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(evidence?.attributes.redispatchAllowed).toBe(false);
+    expect(evidence?.attributes["sdar.diagnostic.deviceMissionId"]).toBe("1");
+  });
+
+  it("scopes Provider business success to one exact mission without asserting physical arrival", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const request: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "business-success-arm-1",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-p10",
+        caseId: "UGV-XCHAIN-003",
+        caseExecutionId: "case-execution-2",
+        repetitionId: "repetition-1",
+        logicalInvocationId: "correlation-nav-business-success",
+      },
+    };
+    await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+      request,
+    );
+    const navigation = startInput("nav-business-success", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
+    await fixture.runtime.start(navigation);
+    missionWithId(fixture.ingress, 1, 4, 100, new Date().toISOString());
+
+    await expect(fixture.runtime.get(navigation.taskId)).resolves.toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "SMPP_DIAGNOSTIC_PROVIDER_BUSINESS_SUCCESS",
+      result: {
+        status: "succeeded",
+        businessStatus: "succeeded",
+        claimsPhysicalArrival: false,
+      },
+    });
+    const evidence = fixture.telemetry.records.find(
+      (record) =>
+        record.taskId === navigation.taskId &&
+        record.attributes.providerBusinessStatus === "succeeded",
+    );
+    expect(evidence?.eventType).toBe("RESOURCE_HEALTH");
+    expect(evidence?.attributes.claimsPhysicalArrival).toBe(false);
+    expect(evidence?.attributes.claimsGoalSuccess).toBe(false);
+    expect(evidence?.attributes["sdar.diagnostic.deviceMissionId"]).toBe("1");
+  });
+
+  it("makes arm/disarm idempotent and expires unused leases with durable cleanup receipts", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    let nowMs = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(nowMs),
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const arm: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "cleanup-arm-1",
+      ttlMs: 10_000,
+      scope: {
+        runId: "run-cleanup",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-cleanup-1",
+        repetitionId: "repetition-1",
+        logicalInvocationId: "logical-cleanup-1",
+      },
+    };
+    const first = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      arm,
+    );
+    const replay = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      arm,
+    );
+    expect(replay).toEqual(first);
+    const leaseId = stringProperty(first.lease, "leaseId");
+    const disarm: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "disarm",
+      idempotencyKey: "cleanup-disarm-1",
+      leaseId,
+    };
+    const cleaned = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      disarm,
+    );
+    const cleanedReplay = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      disarm,
+    );
+    expect(cleanedReplay).toEqual(cleaned);
+    expect(cleaned).toMatchObject({
+      lease: { state: "DISARMED", cleanupAt: new Date(nowMs).toISOString() },
+      receipt: { action: "disarmed", state: "DISARMED" },
+    });
+
+    const expiring = {
+      ...arm,
+      idempotencyKey: "cleanup-arm-expiring",
+      ttlMs: 1_000,
+      scope: {
+        ...arm.scope,
+        caseExecutionId: "case-cleanup-expiring",
+        logicalInvocationId: "logical-cleanup-expiring",
+      },
+    } satisfies SmppDiagnosticControlRequest;
+    const expiringResult = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      expiring,
+    );
+    const expiringLeaseId = stringProperty(expiringResult.lease, "leaseId");
+    nowMs += 1_001;
+    const status = await diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "status",
+      leaseId: expiringLeaseId,
+    });
+    expect(status).toMatchObject({
+      lease: { state: "EXPIRED", cleanupAt: new Date(nowMs).toISOString() },
+      receipt: { action: "expired", state: "EXPIRED" },
+    });
+  });
+
   it("persists every navigation dispatch fence and mission ID before transport dependencies", async () => {
     const events: string[] = [];
     const store = new DispatchOrderStore(events);
@@ -2462,6 +2665,26 @@ function startInput(
     },
   };
 }
+
+async function diagnosticControl(
+  runtime: UgvProviderRuntime,
+  token: string,
+  capabilityId: SmppDiagnosticCapabilityId,
+  request: SmppDiagnosticControlRequest,
+): Promise<Record<string, unknown>> {
+  const input = startInput(
+    `diagnostic-${request.action}-${createHash("sha256").update(JSON.stringify(request)).digest("hex").slice(0, 16)}`,
+    SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+    { capabilityId, request },
+  );
+  input.executionContext.authorizationContextHash = diagnosticControlSignature(
+    token,
+    capabilityId,
+    request,
+  );
+  const response = await runtime.start(input);
+  return protoStructToJson(response.initialSnapshot.result);
+}
 function identityOf(
   execution: NonNullable<Awaited<ReturnType<UgvProviderRuntime["get"]>>>,
   sequence: string,
@@ -2478,6 +2701,15 @@ function identityOf(
 function required<T>(value: T | undefined): T {
   if (value === undefined) throw new Error("UGV_TEST_FIXTURE_VALUE_MISSING");
   return value;
+}
+
+function stringProperty(value: unknown, key: string): string {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("UGV_TEST_DIAGNOSTIC_RESULT_INVALID");
+  }
+  const property = (value as Record<string, unknown>)[key];
+  if (typeof property !== "string") throw new Error("UGV_TEST_DIAGNOSTIC_RESULT_INVALID");
+  return property;
 }
 
 function telemetryMetricNames(telemetry: UgvTelemetry): string[] {

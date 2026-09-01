@@ -4,7 +4,10 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { Pool } from "pg";
-import { GrpcAdapterGateway } from "../../../packages/adapter-protocol/src/index.js";
+import {
+  GrpcAdapterGateway,
+  protoStructToJson,
+} from "../../../packages/adapter-protocol/src/index.js";
 import type { ProviderManifest } from "../../../packages/adapter-protocol/src/index.js";
 import { RUNTIME_VERSION } from "../../../packages/domain/src/index.js";
 import {
@@ -57,6 +60,18 @@ import {
   TtlCleaner,
   WebhookOutboxSink,
 } from "../../../packages/task-engine/src/index.js";
+import {
+  diagnosticControlSignature,
+  diagnosticRequestHash,
+  parseSmppDiagnosticControlRequest,
+  SMPP_DIAGNOSTIC_API_CONTRACT,
+  SMPP_DIAGNOSTIC_API_CONTRACT_HASH,
+  SMPP_DIAGNOSTIC_CONTRACT,
+  SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+  SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+  SMPP_RESPONSE_LOSS_CAPABILITY,
+  type SmppDiagnosticCapabilityId,
+} from "../../../packages/provider-adapter-kit/src/index.js";
 import type { RuntimeConfig } from "./config.js";
 import { BoundedRateLimiter } from "./rate-limiter.js";
 import { AdapterManifestWatcher } from "./manifest-watcher.js";
@@ -228,6 +243,110 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     config.RATE_LIMIT_WINDOW_MS,
     config.RATE_LIMIT_MAX_KEYS,
   );
+  let diagnosticOperatorToken = "";
+  if (config.SMPP_DIAGNOSTICS_ENABLED) {
+    const tokenFile = config.SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE;
+    if (tokenFile === undefined) throw new Error("SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE_REQUIRED");
+    diagnosticOperatorToken = readFileSync(tokenFile, "utf8").trim();
+  }
+
+  async function diagnosticControl(
+    capabilityId: SmppDiagnosticCapabilityId,
+    body: unknown,
+  ): Promise<Record<string, unknown>> {
+    const request = parseSmppDiagnosticControlRequest(
+      body,
+      capabilityId,
+      config.SMPP_DIAGNOSTICS_MAX_TTL_MS,
+    );
+    const requestHash = diagnosticRequestHash(capabilityId, request);
+    const response = await gateway.startOperation(
+      SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+      { capabilityId, request },
+      {
+        taskId: `diagnostic-control:${requestHash}`,
+        argumentHash: requestHash,
+        authorizationContextHash: diagnosticControlSignature(
+          diagnosticOperatorToken,
+          capabilityId,
+          request,
+        ),
+        executionMode: "live",
+        correlationId: `diagnostic:${requestHash}`,
+        invocationAttempt: 1,
+      },
+    );
+    if (response.result !== "accepted" || response.accepted === undefined) {
+      throw new Error(response.rejected?.reasonCode ?? "SMPP_DIAGNOSTIC_CONTROL_REJECTED");
+    }
+    const result = protoStructToJson(response.accepted.initialSnapshot.result);
+    return {
+      ...result,
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      capabilityId,
+      contractHash: SMPP_DIAGNOSTIC_API_CONTRACT_HASH,
+    };
+  }
+
+  function diagnosticAuthorized(request: FastifyRequest): boolean {
+    if (!config.SMPP_DIAGNOSTICS_ENABLED || diagnosticOperatorToken.length === 0) return false;
+    const supplied = request.headers["x-sdar-diagnostic-token"];
+    if (typeof supplied !== "string") return false;
+    const expectedBuffer = Buffer.from(diagnosticOperatorToken);
+    const suppliedBuffer = Buffer.from(supplied);
+    return (
+      suppliedBuffer.length === expectedBuffer.length &&
+      timingSafeEqual(suppliedBuffer, expectedBuffer)
+    );
+  }
+
+  function registerDiagnosticControlRoutes(
+    route: "response-loss" | "provider-business-success",
+    capabilityId: SmppDiagnosticCapabilityId,
+  ): void {
+    app.post(`/v1/diagnostics/${route}`, async (request, reply) => {
+      if (!config.SMPP_DIAGNOSTICS_ENABLED) return reply.code(404).send({ error: "not_found" });
+      if (!diagnosticAuthorized(request))
+        return reply.code(401).send({ error: "diagnostic_authentication_required" });
+      try {
+        return await diagnosticControl(capabilityId, request.body);
+      } catch (error) {
+        const reasonCode =
+          error instanceof Error ? error.message : "SMPP_DIAGNOSTIC_CONTROL_FAILED";
+        const status = /INVALID|SCOPE|TTL|CONTRACT/.test(reasonCode)
+          ? 400
+          : reasonCode.includes("CONFLICT")
+            ? 409
+            : reasonCode.includes("NOT_FOUND")
+              ? 404
+              : 503;
+        return reply.code(status).send({ error: reasonCode });
+      }
+    });
+    app.get<{ Params: { leaseId: string } }>(
+      `/v1/diagnostics/${route}/:leaseId`,
+      async (request, reply) => {
+        if (!config.SMPP_DIAGNOSTICS_ENABLED) return reply.code(404).send({ error: "not_found" });
+        if (!diagnosticAuthorized(request))
+          return reply.code(401).send({ error: "diagnostic_authentication_required" });
+        try {
+          return await diagnosticControl(capabilityId, {
+            contract: SMPP_DIAGNOSTIC_CONTRACT,
+            action: "status",
+            leaseId: request.params.leaseId,
+          });
+        } catch (error) {
+          const reasonCode =
+            error instanceof Error ? error.message : "SMPP_DIAGNOSTIC_CONTROL_FAILED";
+          return reply
+            .code(
+              reasonCode.includes("NOT_FOUND") ? 404 : reasonCode.includes("INVALID") ? 400 : 503,
+            )
+            .send({ error: reasonCode });
+        }
+      },
+    );
+  }
 
   async function waitForBackgroundWorkers(): Promise<void> {
     while (
@@ -256,6 +375,10 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
 
   app.get("/health/live", () => ({ status: "live" }));
   app.get("/v1/diagnostics/capabilities", () => ({ capabilities: listSmppCapabilities() }));
+  app.get("/v1/diagnostics/contract", () => ({
+    ...SMPP_DIAGNOSTIC_API_CONTRACT,
+    contractHash: SMPP_DIAGNOSTIC_API_CONTRACT_HASH,
+  }));
   app.get<{ Params: { capabilityId: string } }>(
     "/v1/diagnostics/capabilities/:capabilityId",
     (request, reply) => {
@@ -264,6 +387,11 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }
       return getSmppCapability(request.params.capabilityId);
     },
+  );
+  registerDiagnosticControlRoutes("response-loss", SMPP_RESPONSE_LOSS_CAPABILITY);
+  registerDiagnosticControlRoutes(
+    "provider-business-success",
+    SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
   );
   app.get("/health/ready", async (_request, reply) => {
     if (dependencies.database !== "starting") {

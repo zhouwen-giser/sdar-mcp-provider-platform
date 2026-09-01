@@ -14,11 +14,11 @@
     },
     "runtime": {
       "description": "Runtime workers, limits, telemetry, events, notifications, and outbox inputs.",
-      "items": 83
+      "items": 86
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 148
+      "items": 152
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -28,11 +28,11 @@
   "components": {
     "runtime": {
       "source": "apps/runtime/src/config.ts",
-      "items": 99
+      "items": 102
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 67
+      "items": 71
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -60,6 +60,7 @@
         "webhook Outbox requires OUTBOX_WEBHOOK_URL",
         "production Outbox webhook requires HTTPS unless internal plaintext transport is explicitly enabled",
         "enabled internal endpoints require INTERNAL_ADMIN_TOKEN",
+        "enabled SMPP diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
         "claim lease durations must cover Adapter RPC, database publication budget, and safety margin"
       ]
     },
@@ -71,7 +72,8 @@
         "production requires Adapter mTLS unless internal plaintext transport is explicitly enabled",
         "production requires MQTT TLS unless internal plaintext transport is explicitly enabled",
         "production MQTT wire mode must be explicit",
-        "production requires PostgreSQL store"
+        "production requires PostgreSQL store",
+        "enabled UGV diagnostics require UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE"
       ]
     },
     {
@@ -98,12 +100,12 @@
     }
   ],
   "coverage": {
-    "expectedItems": 247,
-    "actualItems": 247,
-    "secretItems": 22,
+    "expectedItems": 254,
+    "actualItems": 254,
+    "secretItems": 24,
     "byComponent": {
-      "runtime": 99,
-      "ugv": 67,
+      "runtime": 102,
+      "ugv": 71,
       "npc-tank": 53,
       "home-assistant-climate": 28
     }
@@ -1341,6 +1343,51 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "SMPP_DIAGNOSTICS_ENABLED",
+      "component": "runtime",
+      "source": "packages/runtime-configuration-contract/src/runtime/worker-events.ts",
+      "group": "runtime",
+      "subgroup": "diagnostics",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "BooleanEnvironmentSchema.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
+      "component": "runtime",
+      "source": "packages/runtime-configuration-contract/src/runtime/worker-events.ts",
+      "group": "runtime",
+      "subgroup": "diagnostics",
+      "defaultDefined": false,
+      "defaultValue": null,
+      "required": false,
+      "validator": "z.string().min(1).optional()",
+      "secret": true,
+      "secretKind": "secret_file_reference",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "SMPP_DIAGNOSTICS_MAX_TTL_MS",
+      "component": "runtime",
+      "source": "packages/runtime-configuration-contract/src/runtime/worker-events.ts",
+      "group": "runtime",
+      "subgroup": "diagnostics",
+      "defaultDefined": true,
+      "defaultValue": 300000,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1000).max(3600000).default(300000)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
       "key": "ADAPTER_HEALTH_POLL_MS",
       "component": "runtime",
       "source": "apps/runtime/src/config.ts:150",
@@ -2356,6 +2403,51 @@
       "defaultValue": false,
       "required": false,
       "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_DIAGNOSTICS_ENABLED",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "diagnostics",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "diagnostics",
+      "defaultDefined": false,
+      "defaultValue": null,
+      "required": false,
+      "validator": "optionalPath",
+      "secret": true,
+      "secretKind": "secret_file_reference",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_DIAGNOSTICS_MAX_TTL_MS",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "diagnostics",
+      "defaultDefined": true,
+      "defaultValue": 300000,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1000).max(3600000).default(300000)",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",

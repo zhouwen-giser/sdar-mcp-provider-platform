@@ -1,4 +1,5 @@
-export const SMPP_DIAGNOSTIC_SOURCE_COMMIT = "acc65fe13f8aa61caacc6bd18cca08eed98ece40";
+export const SMPP_DIAGNOSTIC_SOURCE_COMMIT =
+  process.env.SDAR_BUILD_REVISION ?? "acc65fe13f8aa61caacc6bd18cca08eed98ece40";
 
 export const SMPP_CAPABILITY_IDS = [
   "SMPP-TASK-IDENTITY-CLOSURE",

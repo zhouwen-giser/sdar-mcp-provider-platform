@@ -50,7 +50,7 @@ import {
   validatedSnapshotTransition,
 } from "./result-contract.js";
 import { mapTaskToDetailedTask, type DetailedTaskProjection } from "./detailed-task.js";
-import { DiagnosticResponseLossError, type TaskAdapterGateway } from "./diagnostic-gateway.js";
+import { diagnosticResponseLossLeaseId, type TaskAdapterGateway } from "./diagnostic-gateway.js";
 
 export type ToolInvocationResult =
   | { kind: "result"; result: Record<string, unknown> }
@@ -447,16 +447,15 @@ export class TaskEngine {
         ...(reservationRef === undefined ? {} : { reservationRef }),
       });
     } catch (error) {
+      const diagnosticLeaseId = diagnosticResponseLossLeaseId(error);
       await this.#repository.markAdmissionUncertain(
         taskId,
-        error instanceof DiagnosticResponseLossError
+        diagnosticLeaseId !== undefined
           ? "response_lost_after_adapter_success"
           : "adapter_transport_ambiguous",
         [
           "adapter.startOperation",
-          ...(error instanceof DiagnosticResponseLossError
-            ? [`diagnosticFaultLease:${error.leaseId}`]
-            : []),
+          ...(diagnosticLeaseId !== undefined ? [`diagnosticFaultLease:${diagnosticLeaseId}`] : []),
         ],
       );
       throw error;

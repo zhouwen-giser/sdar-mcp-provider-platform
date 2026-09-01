@@ -20,12 +20,21 @@ import type {
   SnapshotRecord,
 } from "./types.js";
 import { TERMINAL_EXECUTION_STATES } from "./types.js";
+import type {
+  SmppDiagnosticBinding,
+  SmppDiagnosticControlResult,
+  SmppDiagnosticLease,
+  SmppDiagnosticReceipt,
+} from "./diagnostics.js";
 
 export class MemoryProviderStore implements ProviderStore {
   readonly #executions = new Map<string, ProviderExecution>();
   readonly #acks = new Map<string, CommandAckRecord>();
   readonly #mutationJournal = new Map<string, MutationJournalEntry>();
   readonly #events = new Map<string, AdapterBusinessEvent[]>();
+  readonly #diagnosticLeases = new Map<string, SmppDiagnosticLease>();
+  readonly #diagnosticReceipts = new Map<string, SmppDiagnosticReceipt>();
+  #diagnosticFence = 0;
   readonly toolCalls: DeviceToolCallRecord[] = [];
   readonly snapshots: SnapshotRecord[] = [];
 
@@ -147,6 +156,154 @@ export class MemoryProviderStore implements ProviderStore {
       this.snapshots.push(structuredClone(record));
     return Promise.resolve();
   }
+  armDiagnosticLease(
+    lease: Omit<SmppDiagnosticLease, "fence">,
+    receipt: Omit<SmppDiagnosticReceipt, "state">,
+  ): Promise<SmppDiagnosticControlResult> {
+    const existing = [...this.#diagnosticLeases.values()].find(
+      (candidate) => candidate.stableOperationKey === lease.stableOperationKey,
+    );
+    if (existing !== undefined) {
+      if (existing.canonicalRequestHash !== lease.canonicalRequestHash)
+        return Promise.reject(new Error("SMPP_DIAGNOSTIC_OPERATION_CONFLICT"));
+      return Promise.resolve(this.#diagnosticResult(existing, "armed"));
+    }
+    const stored: SmppDiagnosticLease = structuredClone({
+      ...lease,
+      fence: String(++this.#diagnosticFence),
+    });
+    const storedReceipt: SmppDiagnosticReceipt = structuredClone({
+      ...receipt,
+      state: stored.state,
+    });
+    this.#diagnosticLeases.set(stored.leaseId, stored);
+    this.#diagnosticReceipts.set(receiptKey(stored.leaseId, "armed"), storedReceipt);
+    return Promise.resolve({ lease: structuredClone(stored), receipt: storedReceipt });
+  }
+  getDiagnosticLease(leaseId: string): Promise<SmppDiagnosticLease | undefined> {
+    return Promise.resolve(clone(this.#diagnosticLeases.get(leaseId)));
+  }
+  getDiagnosticStatus(leaseId: string): Promise<SmppDiagnosticControlResult | undefined> {
+    const lease = this.#diagnosticLeases.get(leaseId);
+    if (lease === undefined) return Promise.resolve(undefined);
+    const receipt = [...this.#diagnosticReceipts.values()]
+      .filter((candidate) => candidate.leaseId === leaseId)
+      .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))[0];
+    if (receipt === undefined)
+      return Promise.reject(new Error("SMPP_DIAGNOSTIC_RECEIPT_NOT_FOUND"));
+    return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
+  }
+  disarmDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult> {
+    const lease = this.#requiredDiagnosticLease(leaseId);
+    const existing = this.#diagnosticReceipts.get(receiptKey(leaseId, "disarmed"));
+    if (existing !== undefined) {
+      if (existing.requestHash !== requestHash)
+        return Promise.reject(new Error("SMPP_DIAGNOSTIC_OPERATION_CONFLICT"));
+      return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(existing) });
+    }
+    lease.state = "DISARMED";
+    lease.cleanupAt = occurredAt;
+    const receipt: SmppDiagnosticReceipt = {
+      contract: lease.contract,
+      receiptId,
+      leaseId,
+      action: "disarmed",
+      requestHash,
+      occurredAt,
+      state: lease.state,
+      reasonCode: "SMPP_DIAGNOSTIC_DISARMED",
+    };
+    this.#diagnosticReceipts.set(receiptKey(leaseId, "disarmed"), receipt);
+    return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
+  }
+  bindDiagnosticLease(
+    binding: SmppDiagnosticBinding,
+  ): Promise<SmppDiagnosticControlResult | undefined> {
+    const lease = [...this.#diagnosticLeases.values()]
+      .filter(
+        (candidate) =>
+          candidate.state === "ARMED" &&
+          candidate.capabilityId === binding.capabilityId &&
+          candidate.scope.logicalInvocationId === binding.logicalInvocationId &&
+          (candidate.scope.taskId === undefined || candidate.scope.taskId === binding.taskId) &&
+          Date.parse(candidate.expiresAt) > Date.parse(binding.observedAt),
+      )
+      .sort((left, right) => Number(left.fence) - Number(right.fence))[0];
+    if (lease === undefined) return Promise.resolve(undefined);
+    lease.state = "BOUND";
+    lease.boundAt = binding.observedAt;
+    lease.taskId = binding.taskId;
+    lease.externalExecutionId = binding.externalExecutionId;
+    lease.deviceMissionId = binding.deviceMissionId;
+    const receipt: SmppDiagnosticReceipt = {
+      contract: lease.contract,
+      receiptId: randomUUID(),
+      leaseId: lease.leaseId,
+      action: "bound",
+      requestHash: lease.canonicalRequestHash,
+      occurredAt: binding.observedAt,
+      state: lease.state,
+      reasonCode: "SMPP_DIAGNOSTIC_BOUND",
+    };
+    this.#diagnosticReceipts.set(receiptKey(lease.leaseId, "bound"), receipt);
+    return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
+  }
+  consumeDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult> {
+    const lease = this.#requiredDiagnosticLease(leaseId);
+    const existing = this.#diagnosticReceipts.get(receiptKey(leaseId, "consumed"));
+    if (existing !== undefined)
+      return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(existing) });
+    if (lease.state !== "BOUND") return Promise.reject(new Error("SMPP_DIAGNOSTIC_NOT_BOUND"));
+    lease.state = "CONSUMED";
+    lease.consumedAt = occurredAt;
+    const receipt: SmppDiagnosticReceipt = {
+      contract: lease.contract,
+      receiptId,
+      leaseId,
+      action: "consumed",
+      requestHash,
+      occurredAt,
+      state: lease.state,
+      reasonCode: "SMPP_DIAGNOSTIC_CONSUMED",
+    };
+    this.#diagnosticReceipts.set(receiptKey(leaseId, "consumed"), receipt);
+    return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
+  }
+  expireDiagnosticLeases(occurredAt: string): Promise<readonly SmppDiagnosticControlResult[]> {
+    const results: SmppDiagnosticControlResult[] = [];
+    for (const lease of this.#diagnosticLeases.values()) {
+      if (
+        !["ARMED", "BOUND"].includes(lease.state) ||
+        Date.parse(lease.expiresAt) > Date.parse(occurredAt)
+      )
+        continue;
+      lease.state = "EXPIRED";
+      lease.cleanupAt = occurredAt;
+      const receipt: SmppDiagnosticReceipt = {
+        contract: lease.contract,
+        receiptId: randomUUID(),
+        leaseId: lease.leaseId,
+        action: "expired",
+        requestHash: lease.canonicalRequestHash,
+        occurredAt,
+        state: lease.state,
+        reasonCode: "SMPP_DIAGNOSTIC_EXPIRED",
+      };
+      this.#diagnosticReceipts.set(receiptKey(lease.leaseId, "expired"), receipt);
+      results.push({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
+    }
+    return Promise.resolve(results);
+  }
   appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent> {
     const source = businessEventSourceCapabilities().find((x) => x.sourceId === draft.sourceId);
     if (source === undefined) return Promise.reject(new Error("SOURCE_NOT_FOUND"));
@@ -196,6 +353,19 @@ export class MemoryProviderStore implements ProviderStore {
   businessEventSources() {
     return businessEventSourceCapabilities();
   }
+  #requiredDiagnosticLease(leaseId: string): SmppDiagnosticLease {
+    const lease = this.#diagnosticLeases.get(leaseId);
+    if (lease === undefined) throw new Error("SMPP_DIAGNOSTIC_LEASE_NOT_FOUND");
+    return lease;
+  }
+  #diagnosticResult(
+    lease: SmppDiagnosticLease,
+    action: SmppDiagnosticReceipt["action"],
+  ): SmppDiagnosticControlResult {
+    const receipt = this.#diagnosticReceipts.get(receiptKey(lease.leaseId, action));
+    if (receipt === undefined) throw new Error("SMPP_DIAGNOSTIC_RECEIPT_NOT_FOUND");
+    return { lease: structuredClone(lease), receipt: structuredClone(receipt) };
+  }
 }
 
 function key(taskId: string, command: string, sequence: string): string {
@@ -203,6 +373,9 @@ function key(taskId: string, command: string, sequence: string): string {
 }
 function journalKey(taskId: string, stepId: string): string {
   return `${taskId}\0${stepId}`;
+}
+function receiptKey(leaseId: string, action: SmppDiagnosticReceipt["action"]): string {
+  return `${leaseId}\0${action}`;
 }
 function clone<T>(value: T | undefined): T | undefined {
   return value === undefined ? undefined : structuredClone(value);

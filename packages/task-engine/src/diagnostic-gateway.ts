@@ -48,6 +48,29 @@ export class DiagnosticResponseLossError extends Error {
   }
 }
 
+export function diagnosticResponseLossLeaseId(error: unknown): string | undefined {
+  if (error instanceof DiagnosticResponseLossError) return error.leaseId;
+  if (
+    error === null ||
+    typeof error !== "object" ||
+    !("details" in error) ||
+    error.details !== "DIAGNOSTIC_ADAPTER_RESPONSE_LOST_AFTER_SUCCESS"
+  ) {
+    return undefined;
+  }
+  const metadata = "metadata" in error ? error.metadata : undefined;
+  if (
+    metadata === null ||
+    typeof metadata !== "object" ||
+    !("get" in metadata) ||
+    typeof metadata.get !== "function"
+  ) {
+    return undefined;
+  }
+  const values = (metadata.get as (key: string) => unknown[])("sdar-diagnostic-lease-id");
+  return typeof values[0] === "string" ? values[0] : undefined;
+}
+
 /** Test-only lease controller; disabled unless explicitly constructed for a test profile. */
 export class DiagnosticFaultController {
   readonly #enabled: boolean;

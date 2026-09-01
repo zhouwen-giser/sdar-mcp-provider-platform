@@ -311,6 +311,9 @@ services:
       UGV_VEHICLE_TYPE: ugv
       UGV_EXECUTION_MODE: simulation
       UGV_FIRE_ENABLED: "false"
+      UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-false}
+      UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:+/run/secrets/smpp_diagnostic_operator_token}
+      UGV_DIAGNOSTICS_MAX_TTL_MS: ${SMPP_DIAGNOSTICS_MAX_TTL_MS:-300000}
       PROVIDER_VERSION: 1.0.0
       ADAPTER_HOST: 0.0.0.0
       ADAPTER_PORT: 7010
@@ -365,6 +368,7 @@ services:
       - ugv_mqtt_tls_ca
       - ugv_mqtt_tls_cert
       - ugv_mqtt_tls_key
+      - smpp_diagnostic_operator_token
     tmpfs:
       - /tmp:size=64m,mode=1777
     networks:
@@ -389,6 +393,7 @@ services:
     environment:
       RUNTIME_ENV: test
       PROVIDER_ID: isr.vehicle.ugv.ugv1
+      SDAR_BUILD_REVISION: ${UGV_QUALIFICATION_GIT_SHA:-unknown}
       DATABASE_URL: postgresql://ugv_runtime:${UGV_RUNTIME_DB_PASSWORD:-}@ugv-runtime-postgres:5432/ugv_runtime
       ADAPTER_ENDPOINT: ugv-adapter:7010
       ADAPTER_TLS_MODE: disabled
@@ -399,6 +404,9 @@ services:
       PROVIDER_TELEMETRY_INGRESS_ENABLED: "true"
       PROVIDER_TELEMETRY_HOST: 0.0.0.0
       PROVIDER_TELEMETRY_PORT: 7002
+      SMPP_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-false}
+      SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:+/run/secrets/smpp_diagnostic_operator_token}
+      SMPP_DIAGNOSTICS_MAX_TTL_MS: ${SMPP_DIAGNOSTICS_MAX_TTL_MS:-300000}
       OTEL_ENABLED: "false"
       LOG_LEVEL: ${UGV_LOG_LEVEL:-info}
       PORT: 8080
@@ -421,6 +429,8 @@ services:
         condition: service_healthy
       ugv-adapter:
         condition: service_started
+    secrets:
+      - smpp_diagnostic_operator_token
     tmpfs:
       - /tmp:size=64m,mode=1777
     networks:
@@ -453,5 +463,7 @@ secrets:
     file: ${UGV_SIM_MQTT_TLS_CA_FILE:-/dev/null}
   ugv_mqtt_tls_cert:
     file: ${UGV_SIM_MQTT_TLS_CERT_FILE:-/dev/null}
+  smpp_diagnostic_operator_token:
+    file: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:-/dev/null}
   ugv_mqtt_tls_key:
     file: ${UGV_SIM_MQTT_TLS_KEY_FILE:-/dev/null}

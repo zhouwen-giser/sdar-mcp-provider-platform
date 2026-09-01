@@ -1,4 +1,5 @@
 import pino from "pino";
+import { readFileSync } from "node:fs";
 import {
   MemoryProviderStore,
   PostgresProviderStore,
@@ -125,6 +126,14 @@ const runtime = new UgvProviderRuntime(
     allowNavigationWithRecon: config.UGV_ALLOW_NAVIGATION_WITH_RECON,
     fireEnabled: config.UGV_FIRE_ENABLED,
     fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
+    diagnostics: {
+      enabled: config.UGV_DIAGNOSTICS_ENABLED,
+      controlToken:
+        config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined
+          ? ""
+          : readFileSync(config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE, "utf8").trim(),
+      maximumTtlMs: config.UGV_DIAGNOSTICS_MAX_TTL_MS,
+    },
     stationarySpeedThresholdKmh: config.UGV_STATIONARY_SPEED_THRESHOLD_KMH,
     stationaryStabilityMs: config.UGV_STATIONARY_STABILITY_MS,
     stationaryMinimumSamples: config.UGV_STATIONARY_MIN_SAMPLES,
