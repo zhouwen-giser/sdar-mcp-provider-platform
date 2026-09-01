@@ -33,6 +33,7 @@ The existing Provider operation remains `vehicle_navigate`. Point input is deter
 - [x] 2026-08-21 02:19Z finished `UAP-P1-B01`: added the isolated four-service external-simulation Profile and fixed-project lifecycle, immutable preflight run-ID reservation, profile closure validator, 8/8 focused contract tests, and all mandatory install/Compose/typecheck/lint/build/format/diff gates without starting containers or contacting the simulator.
 - [x] 2026-08-21 03:30Z completed the `UAP-P1-B02` static gate: added deterministic public Provider catalog lineage, strict additive lifecycle metadata, ACK-only frozen pause/resume control contracts, an immutable read-only qualifier with exact synchronous-task audit correlation, and offline regression coverage. External execution remained gated until the source was fixed by the shared checkpoint.
 - [x] 2026-08-21 03:42Z completed the uniquely identified external qualification `uap-p1b02-20260821t032832z` from checkpoint `051eae0d`: preflight, Profile startup, health and northbound read-only qualification passed. One `vehicle_get_state` correlated exactly to one Adapter-audited `get_status`; navigation, mutation, forbidden operations, direct qualification-client Device Tool calls and MQTT publishes were all zero.
+- [x] 2026-09-01 fixed the GNSS-loss freshness boundary: `vehicle_navigate` now requires fresh field-level geodetic position authority, and `vehicle_get_state` exposes its independent `positionObservedAt` without changing the compatible domain-level `chassisObservedAt`.
 - [ ] Support the SDAR Task Binding/continuation E2E, one authorized navigation, terminal/final-position evidence, negative/recovery scenarios, and full verification.
 
 ## Discoveries and Surprises
@@ -47,6 +48,7 @@ The existing Provider operation remains `vehicle_navigate`. Point input is deter
 - Registry Snapshot and Node Control do not yet project the new Provider identity lineage. `UAP-P1-B02` therefore qualifies the direct Runtime northbound discovery/Catalog authority only and records both downstream IDs as `null` with `DEFERRED_TO_UAP_P2_B02`; it does not claim current SDAR consumption.
 - The real read-only run returned fresh external-simulation state for `vehicle:ugv1`: MQTT and Device MCP connectivity were true, the vehicle was idle and stationary, and the Runtime evidence correlation UUID matched the sole newly appended Adapter `get_status` audit row. The audit window had zero new executions, mutation-journal rows or command acknowledgements.
 - The external qualification did not erase upstream drift: canonical `status/ugv` remained unobserved while `/ugv/status` supplied the explicit compatibility path, and `/ugv/speed` was still published at QoS 0 against locked QoS 1.
+- A real Referee `gnss_lost` window proved that composite status and speed can keep domain-level chassis freshness current after `/ugv/gnss` stops. Navigation admission therefore must use the existing field observation authority for geodetic position rather than infer position freshness from the broader chassis domain.
 
 ## Decision Log
 
@@ -64,6 +66,7 @@ The existing Provider operation remains `vehicle_navigate`. Point input is deter
 - 2026-08-21: Qualify `vehicle_get_state` only through Runtime `tools/call`. Correlate its northbound evidence `subjectRef` UUID to the sole newly appended Adapter `get_status` audit row; open the database audit window before health/readiness and reject any existing-row modification, execution, mutation journal row, command acknowledgement, navigation or forbidden operation.
 - 2026-08-21: Expose cancellation/pause-resume/observation support as optional strict northbound metadata. For UGV navigation all three must be true and backed by real frozen protocol handlers; the qualifier verifies the contract but never invokes a lifecycle control or navigation.
 - 2026-08-21: Publish the first passing canonical qualification report with exclusive create and retain every run-specific attempt. Until the Adapter post-audit succeeds, observed mutation/navigation counts are `null`, never fabricated zero.
+- 2026-09-01: Preserve `chassisObservedAt` for compatibility, add the field-derived `positionObservedAt` read projection, and require the same geodetic field authority to be fresh before `vehicle_navigate` can be available. Status-only updates cannot refresh or substitute for GNSS position authority.
 
 ## Implementation Steps
 
@@ -85,6 +88,11 @@ Run focused UGV configuration, MQTT, Device MCP, Provider core, adapter, Runtime
 `UAP-P1-B02` static evidence: the first sandboxed `pnpm verify:ugv-provider:work` passed every non-network gate but exited 1 when two gRPC E2E tests were denied loopback bind with `listen EPERM`; the approved host rerun exited 0, including both E2E tests. `pnpm protocol:generate`, `pnpm protocol:lock`, and `pnpm protocol:check` exited 0 and validate 11 schemas, 74 frozen cases, and the 44-file lock. The focused protocol/Catalog/Registry suite passed 49/49, the read-only qualifier suite passed 11/11, the deployment suite passed 9/9, and `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm format:check`, and `git diff --check` exited 0. At the static checkpoint, external `preflight/up/health/qualify` was deliberately `NOT_RUN`; the later, separately recorded run below supplies the Provider qualification claim.
 
 `UAP-P1-B02` external evidence: with immutable run ID `uap-p1b02-20260821t032832z`, `preflight.sh`, `up.sh`, `health.sh`, and `qualify-provider-readonly.sh` all exited 0. The preflight remained `PASS_WITH_UPSTREAM_DRIFT`; its direct Device MCP `tools/call`, MQTT publish, control and navigation counts were zero. Runtime northbound discovery/list/availability passed and exactly one `tools/call vehicle_get_state` produced fresh external-simulation state. The Adapter durable audit verified exactly one new `get_status` row with the same correlation hash and zero new execution, mutation-journal or command-ack rows. `vehicle_navigate` remained `TASK_REQUIRED`, point availability was current with `stopOnObstacle=true`, and navigation/mutation/forbidden counts were zero. Canonical evidence is `reports/ugv-agent-profile-simulation/smpp-provider-qualification.redacted.json`; the compact verification index is `reports/ugv-agent-profile-simulation/p1-b02-verification.json`. Registry Snapshot and Node Control IDs are truthfully `null` and deferred to `UAP-P2-B02`.
+
+The 2026-09-01 position-freshness regression gate passed 4 files / 90 tests covering Provider core,
+Adapter integration, the public UGV contract and pre-simulator hardening. Full Prettier, ESLint,
+TypeScript typecheck, production build, generated-protocol self-check and UGV security passed. The two
+gRPC E2E cases first hit the expected sandbox `listen EPERM`; their approved-host rerun passed 2/2.
 
 ## Idempotence and Recovery
 

@@ -539,7 +539,7 @@ export class UgvProviderRuntime {
       for (const track of UGV_OPERATION_TRACKS[operationName] ?? [])
         if (externallyOccupiedTracks.has(track))
           return externalTrackBusyDecision(track, qualification.riskLevel ?? "MEDIUM");
-    const decision = checkVehicleAvailability({
+    let decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
       snapshot,
@@ -551,7 +551,23 @@ export class UgvProviderRuntime {
       fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,
       circularScanSupported: true,
       ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
+      now: this.#now().getTime(),
     });
+    if (
+      operationName === "vehicle_navigate" &&
+      decision.availability === "AVAILABLE" &&
+      this.ingress.fieldFreshnessState(
+        "chassis.position.geodetic",
+        this.options.freshness.chassis,
+        this.#now().getTime(),
+      ) !== "fresh"
+    )
+      decision = {
+        availability: "UNKNOWN",
+        riskLevel: qualification.riskLevel ?? "MEDIUM",
+        reasonCode: "UGV_STATE_STALE",
+        description: "UGV_STATE_STALE",
+      };
     if (decision.reasonCode === "UGV_TOOL_UNAVAILABLE") {
       const reasonCode = qualificationFailureReason(qualification);
       return {
@@ -1032,8 +1048,13 @@ export class UgvProviderRuntime {
           observation.sourceObservedAt ?? observedAt,
         );
       }
+      const snapshot = this.ingress.snapshot();
       result = {
-        ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
+        ...selectSnapshot(
+          snapshot,
+          input.arguments.include,
+          this.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt,
+        ),
         mqttIngressSequence: this.ingress.ingestSequence(),
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
@@ -3249,7 +3270,11 @@ function taskEvent(execution: ProviderExecution, eventType: string, reasonCode: 
     },
   };
 }
-function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string, unknown> {
+function selectSnapshot(
+  snapshot: UgvSnapshot,
+  include: unknown,
+  positionObservedAt?: string,
+): Record<string, unknown> {
   const requested = Array.isArray(include)
     ? new Set(include.filter((x): x is string => typeof x === "string"))
     : new Set(["chassis", "payload", "health", "targets"]);
@@ -3261,7 +3286,10 @@ function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string,
       executionMode: snapshot.identity.executionMode,
     },
     connectivity: snapshot.connectivity,
-    freshness: snapshot.freshness,
+    freshness: {
+      ...snapshot.freshness,
+      ...(positionObservedAt === undefined ? {} : { positionObservedAt }),
+    },
     revision: snapshot.revision,
     observedAt: snapshot.observedAt,
   };

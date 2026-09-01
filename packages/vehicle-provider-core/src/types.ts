@@ -195,6 +195,7 @@ export interface VehicleSnapshot {
   };
   freshness: {
     chassisObservedAt?: string;
+    positionObservedAt?: string;
     healthObservedAt?: string;
     missionObservedAt?: string;
     targetObservedAt?: string;

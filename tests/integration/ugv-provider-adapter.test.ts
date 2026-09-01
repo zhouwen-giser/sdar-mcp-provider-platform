@@ -338,7 +338,7 @@ describe("UGV long-running operation integration", () => {
       stationaryMinimumSamples: 2,
       physicalConfirmationTimeoutMs: 100,
     });
-    now = Date.now() + 100;
+    now += 100;
     await physicalFixture.runtime.start(
       startInput("terminal-no-observation", "vehicle_navigate", navigateArgs()),
     );
@@ -484,6 +484,49 @@ describe("UGV long-running operation integration", () => {
         expect(JSON.stringify(result)).not.toContain("raw_internal_code");
       }
     }
+  });
+
+  it("keeps GNSS position freshness separate from fresh chassis status", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    const positionObservedAt = required(
+      fixture.ingress.fieldObservationAuthority("chassis.position.geodetic"),
+    ).observedAt;
+    now = Date.parse(positionObservedAt);
+
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+
+    now += 3_001;
+    status(fixture.ingress, {}, new Date(now).toISOString());
+    expect(fixture.ingress.snapshot().freshness.chassisObservedAt).toBe(
+      new Date(now).toISOString(),
+    );
+    expect(fixture.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      positionObservedAt,
+    );
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "UNKNOWN",
+      riskLevel: "MEDIUM",
+      reasonCode: "UGV_STATE_STALE",
+    });
+
+    const state = await fixture.runtime.start(
+      startInput("position-freshness-state", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(state.initialSnapshot.result)).toMatchObject({
+      freshness: {
+        chassisObservedAt: new Date(now).toISOString(),
+        positionObservedAt,
+      },
+    });
   });
 
   it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
@@ -2257,6 +2300,7 @@ async function createFixture(
   overrides: Partial<UgvProviderRuntime["options"]> = {},
   device: MockUgvDeviceMcpClient = new MockUgvDeviceMcpClient(),
 ) {
+  const observedAt = overrides.now?.().toISOString() ?? new Date().toISOString();
   const ingress = new VehicleMqttIngress("direct_domain_json", {
     maxPayloadBytes: 65536,
     maxDepth: 16,
@@ -2267,14 +2311,18 @@ async function createFixture(
   ingress.handle(
     "/ugv/gnss",
     Buffer.from('{"entity_id":"ugv1","latitude":30.1,"longitude":114.1,"altitude":10}'),
+    false,
+    observedAt,
   );
   ingress.handle(
     "/ugv/component_status",
     Buffer.from(
       '{"entity_id":"ugv1","power_battery":0,"lvbattery":0,"fuel":0,"water_temp":0,"motor":0,"sensor":0,"gnss":0,"comms":0,"weapon":0,"navigation":0}',
     ),
+    false,
+    observedAt,
   );
-  status(ingress, {});
+  status(ingress, {}, observedAt);
   if (withTarget)
     ingress.handle(
       "/ugv/detected_objects",
@@ -2631,6 +2679,7 @@ function status(
     eo?: { id?: number; state: number; progress: number };
     weapon?: { id?: number; state: number; progress: number };
   },
+  observedAt?: string,
 ) {
   ingress.handle(
     "status/ugv",
@@ -2645,5 +2694,7 @@ function status(
         available: true,
       }),
     ),
+    false,
+    observedAt,
   );
 }
