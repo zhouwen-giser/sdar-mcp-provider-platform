@@ -173,6 +173,12 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
   it("uses live status/ugv1 geodetic samples as exact position freshness authority", () => {
     const ingress = directIngress();
     ingress.handle(
+      "/ugv/component_status",
+      json({ entity_id: "ugv", gnss: 0 }),
+      false,
+      "2026-09-02T02:51:19.500Z",
+    );
+    ingress.handle(
       "status/ugv1",
       json({
         device_id: "ugv1",
@@ -204,6 +210,77 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
       timeAuthority: "ingest",
     });
     expect(ingress.fieldObservationAuthority("chassis.speed")?.topic).toBe("status/ugv1");
+  });
+
+  it("fails closed when aggregate position lacks fresh healthy GNSS authority", () => {
+    const ingress = directIngress();
+    const aggregate = (speed: number) =>
+      json({
+        device_id: "ugv1",
+        mode: "manual",
+        status: "idle",
+        speed,
+        position: { lon: 106.811794, lat: 29.72049 },
+        remainder_range: 50,
+      });
+
+    ingress.handle("status/ugv1", aggregate(1), false, "2026-09-02T02:51:20.000Z");
+    expect(ingress.snapshot().chassis.position).toBeUndefined();
+    expect(ingress.snapshot().chassis.speedKmh).toBe(1);
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")).toBeUndefined();
+
+    ingress.handle(
+      "/ugv/status",
+      json({ gnss: 1, ins_init: 3, location_status: 4, fault: 0 }),
+      false,
+      "2026-09-02T02:51:20.100Z",
+    );
+    ingress.handle(
+      "/ugv/component_status",
+      json({ entity_id: "ugv", gnss: 0 }),
+      false,
+      "2026-09-02T02:51:20.500Z",
+    );
+    ingress.handle("status/ugv1", aggregate(2), false, "2026-09-02T02:51:21.000Z");
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      "2026-09-02T02:51:21.000Z",
+    );
+
+    ingress.handle(
+      "/ugv/component_status",
+      json({ entity_id: "ugv", gnss: 1 }),
+      false,
+      "2026-09-02T02:51:21.500Z",
+    );
+    ingress.handle("status/ugv1", aggregate(3), false, "2026-09-02T02:51:22.000Z");
+    expect(ingress.snapshot().chassis.speedKmh).toBe(3);
+    expect(ingress.snapshot().health.components.gnss).toBe("fault");
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      "2026-09-02T02:51:21.000Z",
+    );
+
+    ingress.handle(
+      "/ugv/component_status",
+      json({ entity_id: "ugv", gnss: 0 }),
+      false,
+      "2026-09-02T02:51:22.500Z",
+    );
+    ingress.handle("status/ugv1", aggregate(4), false, "2026-09-02T02:51:26.000Z");
+    expect(ingress.snapshot().chassis.speedKmh).toBe(4);
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      "2026-09-02T02:51:21.000Z",
+    );
+
+    ingress.handle(
+      "/ugv/component_status",
+      json({ entity_id: "ugv", gnss: 0 }),
+      false,
+      "2026-09-02T02:51:26.500Z",
+    );
+    ingress.handle("status/ugv1", aggregate(5), false, "2026-09-02T02:51:27.000Z");
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      "2026-09-02T02:51:27.000Z",
+    );
   });
 
   it("does not let a lagging ROS source clock regress aggregate domain freshness", () => {

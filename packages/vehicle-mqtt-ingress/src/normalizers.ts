@@ -231,6 +231,7 @@ function composite(
   const packetLossRate = optionalNumber(object.packet_loss_rate);
   const averageRoundTripTimeMs = optionalNumber(object.average_round_trip_time);
   const gimbal = gimbalObservation(object.gimbal);
+  const gnssHealth = compositeGnssHealth(object);
   return {
     ...base,
     patch: {
@@ -255,6 +256,7 @@ function composite(
         ...(eoTask === undefined ? {} : { eoTask }),
         ...(weaponTask === undefined ? {} : { weapon: weaponTask }),
       },
+      ...(gnssHealth === undefined ? {} : { health: { components: { gnss: gnssHealth } } }),
       connectivity: {
         ...(object.available === true ||
         (chassisTask !== undefined && eoTask !== undefined && weaponTask !== undefined)
@@ -264,7 +266,12 @@ function composite(
         ...(averageRoundTripTimeMs === undefined ? {} : { averageRoundTripTimeMs }),
       },
     },
-    domains: ["chassis", "mission", "payload"],
+    domains: [
+      "chassis",
+      "mission",
+      "payload",
+      ...(gnssHealth === undefined ? [] : (["health"] as const)),
+    ],
   };
 }
 
@@ -909,6 +916,23 @@ function scanMode(value: unknown): 1 | 2 | undefined {
 
 function component(value: unknown): ComponentHealth {
   return value === 0 ? "normal" : value === 1 ? "fault" : "unknown";
+}
+
+function compositeGnssHealth(object: Record<string, unknown>): ComponentHealth | undefined {
+  const gnss = optionalInteger(object.gnss);
+  const insInit = optionalInteger(object.ins_init);
+  const locationStatus = optionalInteger(object.location_status);
+  const fault = optionalInteger(object.fault);
+  if (
+    gnss === undefined &&
+    insInit === undefined &&
+    locationStatus === undefined &&
+    fault === undefined
+  )
+    return undefined;
+  if (gnss === 1 && insInit === 3 && locationStatus === 4 && fault === 0) return "normal";
+  if (gnss === 2 || insInit === 0 || locationStatus === 0 || fault === 2) return "fault";
+  return "unknown";
 }
 
 function headerTimestamp(value: unknown): string | undefined {

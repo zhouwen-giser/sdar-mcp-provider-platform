@@ -808,6 +808,12 @@ describe("UGV long-running operation integration", () => {
 
     now += 1;
     fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    fixture.ingress.handle(
       "status/ugv1",
       Buffer.from(
         JSON.stringify({
@@ -835,6 +841,75 @@ describe("UGV long-running operation integration", () => {
         positionObservedAt: new Date(now).toISOString(),
       },
     });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+  });
+
+  it("freezes aggregate position authority during a GNSS fault and restores it after recovery", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    const aggregate = (speed: number) =>
+      Buffer.from(
+        JSON.stringify({
+          device_id: "ugv1",
+          mode: "manual",
+          status: "idle",
+          speed,
+          position: { lon: 106.811794, lat: 29.72049 },
+          remainder_range: 50,
+        }),
+      );
+
+    now += 1;
+    fixture.ingress.handle("status/ugv1", aggregate(0), false, new Date(now).toISOString());
+    const healthyPositionObservedAt = required(
+      fixture.ingress.fieldObservationAuthority("chassis.position.geodetic"),
+    ).observedAt;
+
+    now += 100;
+    fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":1}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    fixture.ingress.handle("status/ugv1", aggregate(2), false, new Date(now).toISOString());
+    now += 3_001;
+
+    const faulted = await fixture.runtime.start(
+      startInput("gnss-faulted-state", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(faulted.initialSnapshot.result)).toMatchObject({
+      chassis: {
+        position: { longitude: 106.811794, latitude: 29.72049 },
+        speedKmh: 2,
+      },
+      health: { components: { gnss: "fault" } },
+      freshness: { positionObservedAt: healthyPositionObservedAt },
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "UNKNOWN",
+      reasonCode: "UGV_STATE_STALE",
+    });
+
+    fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    now += 1;
+    fixture.ingress.handle("status/ugv1", aggregate(0), false, new Date(now).toISOString());
+    expect(fixture.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      new Date(now).toISOString(),
+    );
     expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
       availability: "AVAILABLE",
       reasonCode: "UGV_AVAILABLE",
