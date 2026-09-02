@@ -337,7 +337,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
             throw error;
           }
           outcome = isTimeout(error) ? "timeout" : "protocol_error";
-          await this.#disconnectAfterFailure();
+          this.#disconnectAfterFailure();
           this.#recordToolFailure(name);
           if (mutating)
             throw new UncertainMutatingDeviceCallError(
@@ -521,7 +521,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
         !(error instanceof DeviceToolRejectedError) &&
         !(error instanceof UncertainMutatingDeviceCallError)
       ) {
-        if (transportFailure(error)) await this.#disconnectAfterFailure();
+        if (transportFailure(error)) this.#disconnectAfterFailure();
         throw new UncertainMutatingDeviceCallError(
           this.profile.errorPrefix,
           name,
@@ -541,12 +541,16 @@ export class StreamableHttpVehicleDeviceMcpClient<
     this.#scheduleReconnect();
   }
 
-  async #disconnectAfterFailure(): Promise<void> {
+  #disconnectAfterFailure(): void {
     const transport = this.#transport;
     this.#client = undefined;
     this.#transport = undefined;
     if (!this.#closing) this.#setConnectionState("disconnected");
-    if (transport !== undefined) await transport.close().catch(() => undefined);
+    // A stale remote session can also leave the SDK's best-effort DELETE
+    // cleanup waiting on the dead session. The new transport must not inherit
+    // that delay, especially when the northbound Adapter RPC has a shorter
+    // deadline than the southbound timeout.
+    if (transport !== undefined) void transport.close().catch(() => undefined);
     this.#scheduleReconnect();
   }
 
@@ -960,9 +964,19 @@ function loadHeaders(path: string): Record<string, string> {
 function transportFailure(error: unknown): boolean {
   if (error instanceof McpError) return error.code === -32_000 || error.code === -32_001;
   if (!(error instanceof Error)) return false;
+  if (staleStreamableHttpSession(error)) return true;
   if (error.name === "AbortError" || error.name === "TimeoutError") return true;
   return /(?:timeout|timed out|connection (?:closed|lost|reset)|socket hang up|ECONNRESET|ECONNREFUSED|EPIPE|fetch failed)/iu.test(
     error.message,
+  );
+}
+
+function staleStreamableHttpSession(error: Error): boolean {
+  const statusCode = (error as Error & { code?: unknown }).code;
+  return (
+    statusCode === 404 &&
+    error.message.startsWith("Streamable HTTP error: Error POSTing to endpoint:") &&
+    /(?:"message"\s*:\s*"Session not found"|\bSession not found\b)/u.test(error.message)
   );
 }
 

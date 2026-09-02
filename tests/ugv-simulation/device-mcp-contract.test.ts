@@ -642,6 +642,29 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     }
   });
 
+  it("reconnects a read after the remote server expires its Streamable HTTP session", async () => {
+    const harness = new UgvMcpHarness();
+    await harness.start();
+    const store = new MemoryProviderStore();
+    const client = testClient(harness, store, { readRetryAttempts: 1 });
+    const states: string[] = [];
+    client.onConnectionState((state) => states.push(state));
+    try {
+      await client.connect();
+      harness.expireNextToolCallSessions = 1;
+      harness.hangNextSessionDeletes = 1;
+      await expect(client.call("get_status", {})).resolves.toEqual({ available: true });
+      expect(harness.toolCalls.filter(({ name }) => name === "get_status")).toHaveLength(2);
+      expect(client.connected()).toBe(true);
+      expect(states).toContain("disconnected");
+      expect(states.at(-1)).toBe("connected");
+      expect(store.toolCalls.at(-1)?.outcome).toBe("accepted");
+    } finally {
+      await client.close();
+      await harness.stop();
+    }
+  });
+
   it("classifies a lost mutating response as uncertain and never retries it", async () => {
     const harness = new UgvMcpHarness();
     harness.delays.set("ugv_motion_stop", 200);
@@ -877,6 +900,8 @@ class UgvMcpHarness {
   #server: Server | undefined;
   #port: number | undefined;
   dropNextToolCalls = 0;
+  expireNextToolCallSessions = 0;
+  hangNextSessionDeletes = 0;
   readonly delays = new Map<string, number>();
   readonly errorTools = new Set<string>();
   readonly results = new Map<string, unknown>();
@@ -912,6 +937,10 @@ class UgvMcpHarness {
   }
 
   async #handle(request: IncomingMessage, response: ServerResponse) {
+    if (request.method === "DELETE" && this.hangNextSessionDeletes > 0) {
+      this.hangNextSessionDeletes--;
+      return;
+    }
     if (request.method !== "POST") {
       response.writeHead(204).end();
       return;
@@ -923,6 +952,17 @@ class UgvMcpHarness {
       const name = params.name;
       const argumentsValue = record(params.arguments) ? params.arguments : {};
       this.toolCalls.push({ name, arguments: structuredClone(argumentsValue) });
+      if (this.expireNextToolCallSessions > 0) {
+        this.expireNextToolCallSessions--;
+        response.writeHead(404, { "content-type": "application/json" }).end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: "server-error",
+            error: { code: -32_600, message: "Session not found" },
+          }),
+        );
+        return;
+      }
       if (this.dropNextToolCalls > 0) {
         this.dropNextToolCalls--;
         request.socket.destroy();
