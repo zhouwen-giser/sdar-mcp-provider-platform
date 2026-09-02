@@ -168,6 +168,13 @@ export class MemoryProviderStore implements ProviderStore {
         return Promise.reject(new Error("SMPP_DIAGNOSTIC_OPERATION_CONFLICT"));
       return Promise.resolve(this.#diagnosticResult(existing, "armed"));
     }
+    const selectorConflict = [...this.#diagnosticLeases.values()].some(
+      (candidate) =>
+        candidate.scope.selector.argumentHash === lease.scope.selector.argumentHash &&
+        ["ARMED", "BOUND"].includes(candidate.state) &&
+        Date.parse(candidate.expiresAt) > Date.parse(lease.armedAt),
+    );
+    if (selectorConflict) return Promise.reject(new Error("SMPP_DIAGNOSTIC_SELECTOR_CONFLICT"));
     const stored: SmppDiagnosticLease = structuredClone({
       ...lease,
       fence: String(++this.#diagnosticFence),
@@ -224,19 +231,22 @@ export class MemoryProviderStore implements ProviderStore {
   bindDiagnosticLease(
     binding: SmppDiagnosticBinding,
   ): Promise<SmppDiagnosticControlResult | undefined> {
-    const lease = [...this.#diagnosticLeases.values()]
+    const matches = [...this.#diagnosticLeases.values()]
       .filter(
         (candidate) =>
           candidate.state === "ARMED" &&
           candidate.capabilityId === binding.capabilityId &&
-          candidate.scope.logicalInvocationId === binding.logicalInvocationId &&
+          candidate.scope.selector.argumentHash === binding.argumentHash &&
           (candidate.scope.taskId === undefined || candidate.scope.taskId === binding.taskId) &&
           Date.parse(candidate.expiresAt) > Date.parse(binding.observedAt),
       )
-      .sort((left, right) => Number(left.fence) - Number(right.fence))[0];
+      .sort((left, right) => Number(left.fence) - Number(right.fence));
+    if (matches.length > 1) return Promise.reject(new Error("SMPP_DIAGNOSTIC_SELECTOR_AMBIGUOUS"));
+    const lease = matches[0];
     if (lease === undefined) return Promise.resolve(undefined);
     lease.state = "BOUND";
     lease.boundAt = binding.observedAt;
+    lease.logicalInvocationId = binding.logicalInvocationId;
     lease.taskId = binding.taskId;
     lease.externalExecutionId = binding.externalExecutionId;
     lease.deviceMissionId = binding.deviceMissionId;
@@ -249,6 +259,7 @@ export class MemoryProviderStore implements ProviderStore {
       occurredAt: binding.observedAt,
       state: lease.state,
       reasonCode: "SMPP_DIAGNOSTIC_BOUND",
+      binding: diagnosticReceiptBinding(binding),
     };
     this.#diagnosticReceipts.set(receiptKey(lease.leaseId, "bound"), receipt);
     return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
@@ -275,6 +286,21 @@ export class MemoryProviderStore implements ProviderStore {
       occurredAt,
       state: lease.state,
       reasonCode: "SMPP_DIAGNOSTIC_CONSUMED",
+      ...(lease.logicalInvocationId === undefined ||
+      lease.taskId === undefined ||
+      lease.externalExecutionId === undefined ||
+      lease.deviceMissionId === undefined
+        ? {}
+        : {
+            binding: {
+              operationName: lease.operationName,
+              argumentHash: lease.scope.selector.argumentHash,
+              logicalInvocationId: lease.logicalInvocationId,
+              taskId: lease.taskId,
+              externalExecutionId: lease.externalExecutionId,
+              deviceMissionId: lease.deviceMissionId,
+            },
+          }),
     };
     this.#diagnosticReceipts.set(receiptKey(leaseId, "consumed"), receipt);
     return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
@@ -376,6 +402,16 @@ function journalKey(taskId: string, stepId: string): string {
 }
 function receiptKey(leaseId: string, action: SmppDiagnosticReceipt["action"]): string {
   return `${leaseId}\0${action}`;
+}
+function diagnosticReceiptBinding(binding: SmppDiagnosticBinding) {
+  return {
+    operationName: binding.operationName,
+    argumentHash: binding.argumentHash,
+    logicalInvocationId: binding.logicalInvocationId,
+    taskId: binding.taskId,
+    externalExecutionId: binding.externalExecutionId,
+    deviceMissionId: binding.deviceMissionId,
+  };
 }
 function clone<T>(value: T | undefined): T | undefined {
   return value === undefined ? undefined : structuredClone(value);

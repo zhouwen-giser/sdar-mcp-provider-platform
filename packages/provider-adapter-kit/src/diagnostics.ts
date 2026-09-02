@@ -6,6 +6,8 @@ export const SMPP_DIAGNOSTIC_CONTROL_OPERATION = "__sdar_diagnostic_control_v1" 
 export const SMPP_RESPONSE_LOSS_CAPABILITY = "SMPP-DIAGNOSTIC-RESPONSE-LOSS-V1" as const;
 export const SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY =
   "SMPP-DIAGNOSTIC-PROVIDER-BUSINESS-SUCCESS-V1" as const;
+export const SMPP_DIAGNOSTIC_ARGUMENT_HASH_ALGORITHM =
+  "sha256-json-recursive-object-key-sort-v1" as const;
 export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
   schemaVersion: "sdar.smpp-diagnostics.contract/v1",
   contract: SMPP_DIAGNOSTIC_CONTRACT,
@@ -23,6 +25,11 @@ export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
     }),
   }),
   actions: Object.freeze(["arm", "disarm", "status"]),
+  selector: Object.freeze({
+    operationName: "vehicle_navigate",
+    argumentHashAlgorithm: SMPP_DIAGNOSTIC_ARGUMENT_HASH_ALGORITHM,
+    input: "exact vehicle_navigate arguments after deterministic materialization",
+  }),
   requestSchema: Object.freeze({
     type: "object",
     oneOf: Object.freeze([
@@ -39,7 +46,15 @@ export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
               caseId: Object.freeze({ enum: Object.freeze(["UGV-MCP-003", "UGV-XCHAIN-003"]) }),
               caseExecutionId: Object.freeze({ type: "string" }),
               repetitionId: Object.freeze({ type: "string" }),
-              logicalInvocationId: Object.freeze({ type: "string" }),
+              selector: Object.freeze({
+                type: "object",
+                properties: Object.freeze({
+                  operationName: Object.freeze({ const: "vehicle_navigate" }),
+                  argumentHash: Object.freeze({ type: "string", pattern: "^[a-f0-9]{64}$" }),
+                }),
+                required: Object.freeze(["operationName", "argumentHash"]),
+                additionalProperties: false,
+              }),
               taskId: Object.freeze({ type: "string" }),
             }),
             required: Object.freeze([
@@ -47,7 +62,7 @@ export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
               "caseId",
               "caseExecutionId",
               "repetitionId",
-              "logicalInvocationId",
+              "selector",
             ]),
             additionalProperties: false,
           }),
@@ -116,6 +131,7 @@ export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
           boundAt: Object.freeze({ type: "string", format: "date-time" }),
           consumedAt: Object.freeze({ type: "string", format: "date-time" }),
           cleanupAt: Object.freeze({ type: "string", format: "date-time" }),
+          logicalInvocationId: Object.freeze({ type: "string" }),
           taskId: Object.freeze({ type: "string" }),
           externalExecutionId: Object.freeze({ type: "string" }),
           deviceMissionId: Object.freeze({ type: "string" }),
@@ -154,6 +170,26 @@ export const SMPP_DIAGNOSTIC_API_CONTRACT = Object.freeze({
             enum: Object.freeze(["ARMED", "BOUND", "CONSUMED", "DISARMED", "EXPIRED"]),
           }),
           reasonCode: Object.freeze({ type: "string" }),
+          binding: Object.freeze({
+            type: "object",
+            properties: Object.freeze({
+              operationName: Object.freeze({ const: "vehicle_navigate" }),
+              argumentHash: Object.freeze({ type: "string", pattern: "^[a-f0-9]{64}$" }),
+              logicalInvocationId: Object.freeze({ type: "string" }),
+              taskId: Object.freeze({ type: "string" }),
+              externalExecutionId: Object.freeze({ type: "string" }),
+              deviceMissionId: Object.freeze({ type: "string" }),
+            }),
+            required: Object.freeze([
+              "operationName",
+              "argumentHash",
+              "logicalInvocationId",
+              "taskId",
+              "externalExecutionId",
+              "deviceMissionId",
+            ]),
+            additionalProperties: false,
+          }),
         }),
         required: Object.freeze([
           "contract",
@@ -186,7 +222,10 @@ export interface SmppDiagnosticScope {
   caseId: "UGV-MCP-003" | "UGV-XCHAIN-003";
   caseExecutionId: string;
   repetitionId: string;
-  logicalInvocationId: string;
+  selector: {
+    operationName: "vehicle_navigate";
+    argumentHash: string;
+  };
   taskId?: string;
 }
 
@@ -209,6 +248,7 @@ export interface SmppDiagnosticLease {
   boundAt?: string;
   consumedAt?: string;
   cleanupAt?: string;
+  logicalInvocationId?: string;
   taskId?: string;
   externalExecutionId?: string;
   deviceMissionId?: string;
@@ -223,6 +263,14 @@ export interface SmppDiagnosticReceipt {
   occurredAt: string;
   state: SmppDiagnosticLeaseState;
   reasonCode: string;
+  binding?: {
+    operationName: "vehicle_navigate";
+    argumentHash: string;
+    logicalInvocationId: string;
+    taskId: string;
+    externalExecutionId: string;
+    deviceMissionId: string;
+  };
 }
 
 export interface SmppDiagnosticControlResult {
@@ -253,6 +301,7 @@ export type SmppDiagnosticControlRequest =
 export interface SmppDiagnosticBinding {
   capabilityId: SmppDiagnosticCapabilityId;
   operationName: "vehicle_navigate";
+  argumentHash: string;
   logicalInvocationId: string;
   taskId: string;
   externalExecutionId: string;
@@ -339,7 +388,7 @@ export function diagnosticStableOperationKey(
         caseId: scope.caseId,
         caseExecutionId: scope.caseExecutionId,
         repetitionId: scope.repetitionId,
-        logicalInvocationId: scope.logicalInvocationId,
+        selector: scope.selector,
         taskId: scope.taskId ?? null,
       }),
     )
@@ -397,18 +446,19 @@ export function diagnosticCapabilityContract(capabilityId: SmppDiagnosticCapabil
 
 function parseScope(value: unknown, capabilityId: SmppDiagnosticCapabilityId): SmppDiagnosticScope {
   if (!record(value)) throw new Error("SMPP_DIAGNOSTIC_SCOPE_INVALID");
-  assertKeys(value, [
-    "runId",
-    "caseId",
-    "caseExecutionId",
-    "repetitionId",
-    "logicalInvocationId",
-    "taskId",
-  ]);
+  assertKeys(value, ["runId", "caseId", "caseExecutionId", "repetitionId", "selector", "taskId"]);
   const contract = diagnosticCapabilityContract(capabilityId);
   if (value.caseId !== contract.caseId) throw new Error("SMPP_DIAGNOSTIC_CASE_SCOPE_INVALID");
-  for (const key of ["runId", "caseExecutionId", "repetitionId", "logicalInvocationId"] as const)
+  for (const key of ["runId", "caseExecutionId", "repetitionId"] as const)
     if (!identifier(value[key])) throw new Error("SMPP_DIAGNOSTIC_SCOPE_INVALID");
+  if (!record(value.selector)) throw new Error("SMPP_DIAGNOSTIC_SELECTOR_INVALID");
+  assertKeys(value.selector, ["operationName", "argumentHash"]);
+  if (
+    value.selector.operationName !== "vehicle_navigate" ||
+    typeof value.selector.argumentHash !== "string" ||
+    !HASH.test(value.selector.argumentHash)
+  )
+    throw new Error("SMPP_DIAGNOSTIC_SELECTOR_INVALID");
   if (value.taskId !== undefined && !identifier(value.taskId))
     throw new Error("SMPP_DIAGNOSTIC_SCOPE_INVALID");
   return {
@@ -416,7 +466,10 @@ function parseScope(value: unknown, capabilityId: SmppDiagnosticCapabilityId): S
     caseId: value.caseId as SmppDiagnosticScope["caseId"],
     caseExecutionId: String(value.caseExecutionId),
     repetitionId: String(value.repetitionId),
-    logicalInvocationId: String(value.logicalInvocationId),
+    selector: {
+      operationName: "vehicle_navigate",
+      argumentHash: value.selector.argumentHash,
+    },
     ...(value.taskId === undefined ? {} : { taskId: value.taskId }),
   };
 }

@@ -690,6 +690,7 @@ export class UgvProviderRuntime {
     return this.store.bindDiagnosticLease({
       capabilityId,
       operationName: "vehicle_navigate",
+      argumentHash: execution.argumentHash,
       logicalInvocationId: execution.executionContext.correlationId,
       taskId: execution.taskId,
       externalExecutionId: execution.externalExecutionId,
@@ -3765,7 +3766,8 @@ function diagnosticTelemetryAttributes(
     "sdar.diagnostic.caseId": diagnostic.lease.scope.caseId,
     "sdar.diagnostic.caseExecutionId": diagnostic.lease.scope.caseExecutionId,
     "sdar.diagnostic.repetitionId": diagnostic.lease.scope.repetitionId,
-    "sdar.diagnostic.logicalInvocationId": diagnostic.lease.scope.logicalInvocationId,
+    "sdar.diagnostic.logicalInvocationId": diagnostic.lease.logicalInvocationId ?? "",
+    "sdar.diagnostic.argumentHash": diagnostic.lease.scope.selector.argumentHash,
     "sdar.diagnostic.taskId": execution.taskId,
     "sdar.diagnostic.externalExecutionId": execution.externalExecutionId,
     "sdar.diagnostic.deviceMissionId": diagnostic.lease.deviceMissionId ?? "",

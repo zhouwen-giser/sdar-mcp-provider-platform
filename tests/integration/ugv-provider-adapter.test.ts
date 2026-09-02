@@ -57,6 +57,8 @@ describe("UGV long-running operation integration", () => {
       executionMode: "live",
       diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
     });
+    const navigation = startInput("nav-response-loss", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
     const request: SmppDiagnosticControlRequest = {
       contract: SMPP_DIAGNOSTIC_CONTRACT,
       action: "arm",
@@ -67,7 +69,10 @@ describe("UGV long-running operation integration", () => {
         caseId: "UGV-MCP-003",
         caseExecutionId: "case-execution-1",
         repetitionId: "repetition-1",
-        logicalInvocationId: "correlation-nav-response-loss",
+        selector: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+        },
       },
     };
     const armed = await diagnosticControl(
@@ -77,9 +82,6 @@ describe("UGV long-running operation integration", () => {
       request,
     );
     const leaseId = stringProperty(armed.lease, "leaseId");
-    const navigation = startInput("nav-response-loss", "vehicle_navigate", navigateArgs());
-    navigation.executionContext.executionMode = "LIVE";
-
     await expect(fixture.runtime.start(navigation)).rejects.toBeInstanceOf(
       SmppDiagnosticResponseLossError,
     );
@@ -91,14 +93,35 @@ describe("UGV long-running operation integration", () => {
     const replayed = await fixture.runtime.start(structuredClone(navigation));
     expect(replayed.externalExecutionId).toContain("vehicle:ugv1:chassis:");
     expect(fixture.device.calls).toHaveLength(2);
-    expect(await fixture.store.getDiagnosticStatus(leaseId)).toMatchObject({
+    const diagnosticStatus = await fixture.store.getDiagnosticStatus(leaseId);
+    expect(diagnosticStatus).toMatchObject({
       lease: {
         state: "CONSUMED",
+        logicalInvocationId: navigation.executionContext.correlationId,
         taskId: navigation.taskId,
         deviceMissionId: "1",
         injectionCount: 1,
+        scope: {
+          selector: {
+            operationName: "vehicle_navigate",
+            argumentHash: navigation.argumentHash,
+          },
+        },
+      },
+      receipt: {
+        action: "consumed",
+        binding: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+          logicalInvocationId: navigation.executionContext.correlationId,
+          taskId: navigation.taskId,
+          deviceMissionId: "1",
+        },
       },
     });
+    expect(diagnosticStatus?.receipt.binding?.externalExecutionId).toContain(
+      "vehicle:ugv1:chassis:",
+    );
     const evidence = fixture.telemetry.records.find(
       (record) => record.attributes["sdar.diagnostic.leaseId"] === leaseId,
     );
@@ -115,6 +138,8 @@ describe("UGV long-running operation integration", () => {
       executionMode: "live",
       diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
     });
+    const navigation = startInput("nav-business-success", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
     const request: SmppDiagnosticControlRequest = {
       contract: SMPP_DIAGNOSTIC_CONTRACT,
       action: "arm",
@@ -125,7 +150,10 @@ describe("UGV long-running operation integration", () => {
         caseId: "UGV-XCHAIN-003",
         caseExecutionId: "case-execution-2",
         repetitionId: "repetition-1",
-        logicalInvocationId: "correlation-nav-business-success",
+        selector: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+        },
       },
     };
     await diagnosticControl(
@@ -134,8 +162,6 @@ describe("UGV long-running operation integration", () => {
       SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
       request,
     );
-    const navigation = startInput("nav-business-success", "vehicle_navigate", navigateArgs());
-    navigation.executionContext.executionMode = "LIVE";
     await fixture.runtime.start(navigation);
     missionWithId(fixture.ingress, 1, 4, 100, new Date().toISOString());
 
@@ -176,7 +202,7 @@ describe("UGV long-running operation integration", () => {
         caseId: "UGV-MCP-003",
         caseExecutionId: "case-cleanup-1",
         repetitionId: "repetition-1",
-        logicalInvocationId: "logical-cleanup-1",
+        selector: { operationName: "vehicle_navigate", argumentHash: "d".repeat(64) },
       },
     };
     const first = await diagnosticControl(
@@ -192,6 +218,24 @@ describe("UGV long-running operation integration", () => {
       arm,
     );
     expect(replay).toEqual(first);
+    await expect(
+      diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+        ...arm,
+        idempotencyKey: "cleanup-arm-conflicting-selector",
+        scope: { ...arm.scope, caseExecutionId: "case-cleanup-conflicting-selector" },
+      }),
+    ).rejects.toThrow("SMPP_DIAGNOSTIC_SELECTOR_CONFLICT");
+    await expect(
+      diagnosticControl(fixture.runtime, token, SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY, {
+        ...arm,
+        idempotencyKey: "cleanup-arm-cross-capability-conflict",
+        scope: {
+          ...arm.scope,
+          caseId: "UGV-XCHAIN-003",
+          caseExecutionId: "case-cleanup-cross-capability-conflict",
+        },
+      }),
+    ).rejects.toThrow("SMPP_DIAGNOSTIC_SELECTOR_CONFLICT");
     const leaseId = stringProperty(first.lease, "leaseId");
     const disarm: SmppDiagnosticControlRequest = {
       contract: SMPP_DIAGNOSTIC_CONTRACT,
@@ -224,7 +268,6 @@ describe("UGV long-running operation integration", () => {
       scope: {
         ...arm.scope,
         caseExecutionId: "case-cleanup-expiring",
-        logicalInvocationId: "logical-cleanup-expiring",
       },
     } satisfies SmppDiagnosticControlRequest;
     const expiringResult = await diagnosticControl(
@@ -244,6 +287,38 @@ describe("UGV long-running operation integration", () => {
       lease: { state: "EXPIRED", cleanupAt: new Date(nowMs).toISOString() },
       receipt: { action: "expired", state: "EXPIRED" },
     });
+  });
+
+  it("does not bind a nonmatching navigation argument hash", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const expectedHash = "a".repeat(64);
+    const armed = await diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "nonmatching-selector-arm",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-nonmatching",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-nonmatching",
+        repetitionId: "repetition-1",
+        selector: { operationName: "vehicle_navigate", argumentHash: expectedHash },
+      },
+    });
+    const navigation = startInput("nav-nonmatching", "vehicle_navigate", navigateArgs());
+    navigation.argumentHash = "b".repeat(64);
+    navigation.executionContext.executionMode = "LIVE";
+
+    const started = await fixture.runtime.start(navigation);
+    expect(started.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(fixture.device.calls).toHaveLength(2);
+    const status = await fixture.store.getDiagnosticStatus(stringProperty(armed.lease, "leaseId"));
+    expect(status).toMatchObject({ lease: { state: "ARMED" } });
+    expect(status?.lease).not.toHaveProperty("logicalInvocationId");
   });
 
   it("persists every navigation dispatch fence and mission ID before transport dependencies", async () => {

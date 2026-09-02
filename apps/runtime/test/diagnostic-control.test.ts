@@ -70,7 +70,7 @@ describe("SMPP Benchmark diagnostic control API", () => {
         caseId: "UGV-MCP-003",
         caseExecutionId: "case-execution-1",
         repetitionId: "repetition-1",
-        logicalInvocationId: "logical-invocation-1",
+        selector: { operationName: "vehicle_navigate", argumentHash: "b".repeat(64) },
       },
     };
 
@@ -101,7 +101,27 @@ describe("SMPP Benchmark diagnostic control API", () => {
       },
       requestSchema: { type: "object" },
       responseSchema: { type: "object" },
+      selector: {
+        operationName: "vehicle_navigate",
+        argumentHashAlgorithm: "sha256-json-recursive-object-key-sort-v1",
+      },
     });
+    const armScopeSchema = contract.json<{
+      requestSchema: {
+        oneOf: {
+          properties: { scope: { required: string[]; properties: Record<string, unknown> } };
+        }[];
+      };
+    }>().requestSchema.oneOf[0]?.properties.scope;
+    expect(armScopeSchema).toBeDefined();
+    expect(armScopeSchema?.required).toEqual([
+      "runId",
+      "caseId",
+      "caseExecutionId",
+      "repetitionId",
+      "selector",
+    ]);
+    expect(armScopeSchema?.properties).not.toHaveProperty("logicalInvocationId");
     expect(armed.json()).toMatchObject({
       contract: SMPP_DIAGNOSTIC_CONTRACT,
       contractHash: SMPP_DIAGNOSTIC_API_CONTRACT_HASH,
