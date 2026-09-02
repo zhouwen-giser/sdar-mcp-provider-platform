@@ -20,10 +20,10 @@ The deployed Provider remains in `live` execution mode against the remote simula
 
 ## Exact running instance
 
-| Component | Image | Image ID / digest | OCI revision | Started at | Restart count | State |
-|---|---|---|---|---|---:|---|
-| Runtime | `sdar-ugv-simulation-real/runtime:c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `sha256:9fad02fb9858e014cc8858435da082c7ecf478fa427c1e4d7e8764b1acc7e0ca` | `c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `2026-09-02T08:41:25.322909149Z` | 0 | running / healthy |
-| Adapter | `sdar-ugv-simulation-real/ugv-adapter:c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `sha256:5a3d40519a9d2b08e6d4604da6aa85ace137e1749b1ae89fee4736adf61a082c` | `c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `2026-09-02T08:41:05.660680228Z` | 0 | running |
+| Component | Image                                                                           | Image ID / digest                                                         | OCI revision                               | Started at                       | Restart count | State             |
+| --------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------- | ------------: | ----------------- |
+| Runtime   | `sdar-ugv-simulation-real/runtime:c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52`     | `sha256:9fad02fb9858e014cc8858435da082c7ecf478fa427c1e4d7e8764b1acc7e0ca` | `c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `2026-09-02T08:41:25.322909149Z` |             0 | running / healthy |
+| Adapter   | `sdar-ugv-simulation-real/ugv-adapter:c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `sha256:5a3d40519a9d2b08e6d4604da6aa85ace137e1749b1ae89fee4736adf61a082c` | `c9ebc2a9b5c43525059ae2a68211d14e3c7e9f52` | `2026-09-02T08:41:05.660680228Z` |             0 | running           |
 
 Runtime `GET /health/ready` returned HTTP 200 with every declared dependency ready. Adapter authoritative initialization returned:
 
@@ -55,19 +55,19 @@ A fresh `initialize` returned HTTP 200, protocol `2025-11-25`, server `ugv-mcp-s
 
 A clean read-only subscriber received all three exact authority topics without publishing:
 
-| Topic | Evidence |
-|---|---|
-| `status/ugv1` | device `ugv1`, status `idle`, speed `0`, position `lon=106.811794`, `lat=29.72049` |
-| `/ugv/status` | authoritative stamp present; GNSS `1`, location status `4`, speed `0`, chassis task ID `-1`, state `0` |
-| `/ugv/component_status` | authoritative stamp present; GNSS/navigation/comms status `0` |
+| Topic                   | Evidence                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `status/ugv1`           | device `ugv1`, status `idle`, speed `0`, position `lon=106.811794`, `lat=29.72049`                     |
+| `/ugv/status`           | authoritative stamp present; GNSS `1`, location status `4`, speed `0`, chassis task ID `-1`, state `0` |
+| `/ugv/component_status` | authoritative stamp present; GNSS/navigation/comms status `0`                                          |
 
 ## Provider read-only deadline qualification
 
 Both calls used `vehicle_get_state(resourceId=vehicle:ugv1)` through the deployed Runtime and completed inside the 5-second deadline:
 
-| Probe | HTTP / duration | Provider result | Fresh evidence |
-|---|---|---|---|
-| Immediate | `200 / 0.073024 s` | `resultType=complete`, `isError=false` | observedAt `2026-09-02T08:42:00.515Z`; positionObservedAt `2026-09-02T08:42:00.501Z` |
+| Probe                   | HTTP / duration    | Provider result                        | Fresh evidence                                                                       |
+| ----------------------- | ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| Immediate               | `200 / 0.073024 s` | `resultType=complete`, `isError=false` | observedAt `2026-09-02T08:42:00.515Z`; positionObservedAt `2026-09-02T08:42:00.501Z` |
 | After >75 s idle window | `200 / 0.031271 s` | `resultType=complete`, `isError=false` | observedAt `2026-09-02T08:44:25.133Z`; positionObservedAt `2026-09-02T08:44:25.134Z` |
 
 The post-idle snapshot reported Device MCP, MQTT, and Device available; position `lat=29.72049/lon=106.811794`; speed `0`; mission state `0`; and `mqttIngressSequence=21093`. Mission, payload, chassis, health, and position observed timestamps all advanced to the second probe window.
