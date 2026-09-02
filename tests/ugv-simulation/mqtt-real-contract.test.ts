@@ -206,6 +206,39 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
     expect(ingress.fieldObservationAuthority("chassis.speed")?.topic).toBe("status/ugv1");
   });
 
+  it("does not let a lagging ROS source clock regress aggregate domain freshness", () => {
+    const ingress = directIngress();
+    ingress.handle(
+      "status/ugv1",
+      json({
+        device_id: "ugv1",
+        mode: "manual",
+        status: "idle",
+        speed: 0,
+        position: { lon: 106.811794, lat: 29.72049 },
+      }),
+      false,
+      "2026-09-02T03:18:21.196Z",
+    );
+    ingress.handle(
+      "/ugv/status",
+      json({
+        stamp: { sec: Date.parse("2026-09-02T03:17:36.185Z") / 1_000, nanosec: 0 },
+        heading: 90,
+        veh_speed: 0,
+      }),
+      false,
+      "2026-09-02T03:18:21.300Z",
+    );
+
+    expect(ingress.snapshot()).toMatchObject({
+      freshness: {
+        chassisObservedAt: "2026-09-02T03:18:21.196Z",
+        healthObservedAt: "2026-09-02T03:18:21.196Z",
+      },
+    });
+  });
+
   it("tracks freshness independently for every physical observation field", () => {
     const ingress = directIngress();
     ingress.handle(
