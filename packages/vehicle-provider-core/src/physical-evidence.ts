@@ -440,6 +440,7 @@ function observationAuthorityKey(authority: PhysicalObservationAuthority): strin
 
 function legacyTopicFields(topic: string): readonly VehicleObservationField[] {
   if (topic === "/ugv/mission_state") return ["chassis.mission"];
+  if (topic === "status/ugv1") return ["chassis.position.geodetic", "chassis.speed"];
   if (["status/ugv", "/ugv/status"].includes(topic))
     return ["chassis.mission", "chassis.speed", "chassis.heading", "payload.gimbal"];
   if (topic === "/ugv/gnss") return ["chassis.position.geodetic"];

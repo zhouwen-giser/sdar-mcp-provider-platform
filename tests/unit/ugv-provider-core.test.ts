@@ -25,7 +25,7 @@ const freshness = { chassis: 3000, mission: 3000, health: 5000, target: 3000, pa
 
 describe("UGV MQTT exact routing and normalization", () => {
   it("contains the 18 real-boundary UGV topics and rejects wildcard or referee topics", () => {
-    expect(UGV_MQTT_TOPICS).toHaveLength(18);
+    expect(UGV_MQTT_TOPICS).toHaveLength(19);
     expect(() => assertExactSubscriptions(UGV_MQTT_TOPICS)).not.toThrow();
     expect(exactUgvTopic("/ugv/referee/status")).toBe(false);
     expect(exactUgvTopic("/ugv/status")).toBe(true);

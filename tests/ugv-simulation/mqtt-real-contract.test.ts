@@ -32,6 +32,7 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
       "/ugv/imu",
       "/ugv/speed",
       "status/ugv",
+      "status/ugv1",
       "/ugv/status",
       "/ugv/system_state",
       "/ugv/component_status",
@@ -53,6 +54,7 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
 
     expect(exactUgvTopic("/ugv/status")).toBe(true);
     expect(ugvMqttQos("status/ugv")).toBe(1);
+    expect(ugvMqttQos("status/ugv1")).toBe(1);
     expect(ugvMqttQos("/ugv/status")).toBe(1);
     expect(exactUgvTopic("/ugv/target/base64")).toBe(false);
     expect(NPC_TANK_MQTT_TOPICS).toHaveLength(18);
@@ -166,6 +168,42 @@ describe("Goal 10 UGV MQTT protocol-derived contract", () => {
         reconnaissance: { motionStatus: 5, cameraFault: false, progress: 40 },
       },
     });
+  });
+
+  it("uses live status/ugv1 geodetic samples as exact position freshness authority", () => {
+    const ingress = directIngress();
+    ingress.handle(
+      "status/ugv1",
+      json({
+        device_id: "ugv1",
+        mode: "manual",
+        status: "idle",
+        speed: 0,
+        position: { lon: 106.811794, lat: 29.72049 },
+        remainder_range: 50,
+      }),
+      false,
+      "2026-09-02T02:51:20.000Z",
+    );
+
+    expect(ingress.snapshot()).toMatchObject({
+      chassis: {
+        position: { longitude: 106.811794, latitude: 29.72049 },
+        speedKmh: 0,
+        energy: { rangeKm: 50 },
+      },
+      health: { mode: 0, runState: 0 },
+      freshness: {
+        chassisObservedAt: "2026-09-02T02:51:20.000Z",
+        healthObservedAt: "2026-09-02T02:51:20.000Z",
+      },
+    });
+    expect(ingress.fieldObservationAuthority("chassis.position.geodetic")).toMatchObject({
+      topic: "status/ugv1",
+      observedAt: "2026-09-02T02:51:20.000Z",
+      timeAuthority: "ingest",
+    });
+    expect(ingress.fieldObservationAuthority("chassis.speed")?.topic).toBe("status/ugv1");
   });
 
   it("tracks freshness independently for every physical observation field", () => {

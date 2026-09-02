@@ -84,6 +84,8 @@ function normalizeVehicleMqttObservation(
     case "status/ugv":
     case "/ugv/status":
       return composite(object, base);
+    case "status/ugv1":
+      return ugvAggregateStatus(object, base);
     case "/ugv/system_state":
       return {
         ...base,
@@ -287,6 +289,67 @@ function npcAggregateStatus(
   const rangeKm = rangeKmValue;
   const mode = aggregateMode(object.mode);
   const status = aggregateStatus(object.status);
+  const positionObserved = latitudeValue !== undefined && longitudeValue !== undefined;
+  const chassisObserved = positionObserved || speedKmh !== undefined || rangeKm !== undefined;
+  const healthObserved = mode !== undefined || status !== undefined;
+  return {
+    ...base,
+    patch: {
+      ...(chassisObserved
+        ? {
+            chassis: {
+              ...(!positionObserved
+                ? {}
+                : {
+                    position: {
+                      latitude: latitudeValue,
+                      longitude: longitudeValue,
+                      ...(altitude === undefined ? {} : { altitude }),
+                    },
+                  }),
+              ...(speedKmh === undefined ? {} : { speedKmh }),
+              ...(rangeKm === undefined ? {} : { energy: { rangeKm } }),
+            },
+          }
+        : {}),
+      ...(healthObserved
+        ? {
+            health: {
+              ...(status === undefined ? {} : { runState: status === "moving" ? 1 : 0 }),
+              ...(mode === undefined ? {} : { mode: mode === "autonomous" ? 1 : 0 }),
+            },
+          }
+        : {}),
+      connectivity: { mqttConnected: true, deviceAvailable: true },
+    },
+    domains: [
+      ...(chassisObserved ? (["chassis"] as const) : []),
+      ...(healthObserved ? (["health"] as const) : []),
+    ],
+  };
+}
+
+function ugvAggregateStatus(
+  object: Record<string, unknown> | undefined,
+  base: Omit<NormalizedMqttObservation, "patch" | "domains">,
+): NormalizedMqttObservation {
+  if (object === undefined) throw new Error("UGV_MQTT_STATUS_INVALID");
+  const positionValue = record(object.position) ? object.position : undefined;
+  if (object.position !== undefined && positionValue === undefined)
+    throw new Error("UGV_MQTT_STATUS_POSITION_INVALID");
+  const latitudeValue = optionalCoordinate(positionValue?.lat ?? positionValue?.latitude, latitude);
+  const longitudeValue = optionalCoordinate(
+    positionValue?.lon ?? positionValue?.longitude,
+    longitude,
+  );
+  if ((latitudeValue === undefined) !== (longitudeValue === undefined))
+    throw new Error("UGV_MQTT_STATUS_POSITION_INVALID");
+  const altitude = optionalStrictNumber(positionValue?.alt ?? positionValue?.altitude);
+  const speedKmh = optionalStrictNumber(object.speed);
+  const rangeKm = optionalStrictNumber(object.remainder_range);
+  if (rangeKm !== undefined && rangeKm < 0) throw new Error("UGV_MQTT_BATTERY_RANGE_INVALID");
+  const mode = ugvAggregateMode(object.mode);
+  const status = ugvAggregateRunStatus(object.status);
   const positionObserved = latitudeValue !== undefined && longitudeValue !== undefined;
   const chassisObserved = positionObserved || speedKmh !== undefined || rangeKm !== undefined;
   const healthObserved = mode !== undefined || status !== undefined;
@@ -730,7 +793,7 @@ function validateIdentity(
   object: Record<string, unknown> | undefined,
   expected: { entityId: string; vehicleType: string },
 ): void {
-  const entity = object?.entity_id ?? object?.vehicle_id;
+  const entity = object?.entity_id ?? object?.device_id ?? object?.vehicle_id;
   if (entity !== undefined && entity !== expected.entityId && entity !== expected.vehicleType)
     throw new Error("UGV_MQTT_ENTITY_MISMATCH");
   const role = object?.role_name ?? object?.role;
@@ -770,6 +833,28 @@ function aggregateStatus(value: unknown): "idle" | "moving" | "stopped" | "error
   if (value === "idle" || value === "moving" || value === "stopped" || value === "error")
     return value;
   throw new Error("NPC_TANK_MQTT_STATUS_STATE_INVALID");
+}
+
+function ugvAggregateMode(value: unknown): "manual" | "autonomous" | undefined {
+  try {
+    return aggregateMode(value);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("NPC_TANK_"))
+      throw new Error(error.message.replace(/^NPC_TANK_/, "UGV_"), { cause: error });
+    throw error;
+  }
+}
+
+function ugvAggregateRunStatus(
+  value: unknown,
+): "idle" | "moving" | "stopped" | "error" | undefined {
+  try {
+    return aggregateStatus(value);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("NPC_TANK_"))
+      throw new Error(error.message.replace(/^NPC_TANK_/, "UGV_"), { cause: error });
+    throw error;
+  }
 }
 
 function optionalCoordinate(

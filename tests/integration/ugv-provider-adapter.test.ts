@@ -805,6 +805,40 @@ describe("UGV long-running operation integration", () => {
         positionObservedAt,
       },
     });
+
+    now += 1;
+    fixture.ingress.handle(
+      "status/ugv1",
+      Buffer.from(
+        JSON.stringify({
+          device_id: "ugv1",
+          mode: "manual",
+          status: "idle",
+          speed: 0,
+          position: { lon: 106.811794, lat: 29.72049 },
+          remainder_range: 50,
+        }),
+      ),
+      false,
+      new Date(now).toISOString(),
+    );
+    const refreshed = await fixture.runtime.start(
+      startInput("position-freshness-refreshed", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(refreshed.initialSnapshot.result)).toMatchObject({
+      chassis: { position: { longitude: 106.811794, latitude: 29.72049 } },
+      freshness: {
+        chassisObservedAt: new Date(now).toISOString(),
+        positionObservedAt: new Date(now).toISOString(),
+      },
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
   });
 
   it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
