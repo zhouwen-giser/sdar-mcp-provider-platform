@@ -432,6 +432,31 @@ describe("UGV long-running operation integration", () => {
     ).toEqual([]);
   });
 
+  it("does not misclassify a post-dispatch idle sentinel as a different mission", async () => {
+    const fixture = await createFixture();
+    const input = startInput("nav-idle-sentinel", "vehicle_navigate", navigateArgs());
+    await fixture.runtime.start(input);
+
+    fixture.ingress.handle(
+      "/ugv/status",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "ugv1",
+          chassis_task: { id: -1, type: -1, state: 0, progress: -1 },
+          eo_task: { id: -1, type: -1, state: 0, progress: -1 },
+          weapon_task: { id: -1, type: -1, state: 0, progress: -1 },
+          speed_kmh: 0,
+        }),
+      ),
+    );
+
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_MISSION_CORRELATION_UNCONFIRMED",
+      downstreamMissionIds: ["1"],
+    });
+  });
+
   it("persists mission-write failure after primary acceptance as uncertain without replay", async () => {
     const store = new MissionPersistenceFailingStore();
     const fixture = await createFixture(false, store);

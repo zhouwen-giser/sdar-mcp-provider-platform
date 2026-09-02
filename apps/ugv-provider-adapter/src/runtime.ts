@@ -2878,10 +2878,15 @@ function applyTrack(
     physical?.observationChanged !== true
   )
     return execution;
-  if (!trackBelongsToExecution(execution, track))
-    return execution.reasonCode === "UGV_DOWNSTREAM_MISSION_ID_MISMATCH"
+  if (!trackBelongsToExecution(execution, track)) {
+    const reasonCode =
+      track.id === undefined
+        ? "UGV_MISSION_CORRELATION_UNCONFIRMED"
+        : "UGV_DOWNSTREAM_MISSION_ID_MISMATCH";
+    return execution.reasonCode === reasonCode
       ? execution
-      : transition(execution, execution.state, "UGV_DOWNSTREAM_MISSION_ID_MISMATCH");
+      : transition(execution, execution.state, reasonCode);
+  }
   const mapped = mapVehicleTaskState(track.state, true);
   const armed = execution.observationCursors?.trackActive !== undefined;
   const current =

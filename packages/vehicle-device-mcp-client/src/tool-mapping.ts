@@ -392,7 +392,11 @@ function navigate(argumentsValue: Record<string, unknown>): DeviceToolCall {
     arguments: {
       task_points: taskPoints,
       json_url: stringValue(argumentsValue.jsonUrl, ""),
-      need_plan: planning(argumentsValue.needPlan ?? argumentsValue.planningMode),
+      // Preserve the caller's exact nearby target unless road-network planning
+      // is explicitly selected. Device-side `None` enables automatic planning,
+      // which can snap a short point mission to the current road node and make
+      // the mission disappear before an identity-bearing observation is emitted.
+      need_plan: navigationPlanning(argumentsValue),
       density: enumValue(argumentsValue.density ?? "adaptive", [
         "adaptive",
         "dense",
@@ -466,6 +470,12 @@ function planning(value: unknown): boolean | null {
   if (value === true || value === "road_network" || value === "planned") return true;
   if (value === false || value === "direct") return false;
   throw new Error("UGV_NAVIGATION_PLANNING_MODE_INVALID");
+}
+
+function navigationPlanning(argumentsValue: Record<string, unknown>): boolean | null {
+  if (argumentsValue.needPlan !== undefined) return planning(argumentsValue.needPlan);
+  if (argumentsValue.planningMode !== undefined) return planning(argumentsValue.planningMode);
+  return false;
 }
 
 function reconType(value: unknown): number {

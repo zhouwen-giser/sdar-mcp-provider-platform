@@ -207,6 +207,34 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
           type: "point",
           target: { latitude: 30.2, longitude: 114.2 },
         },
+      }),
+    ).toEqual([
+      {
+        name: "ugv_path_follow_mission",
+        arguments: {
+          task_points: [{ longitude: 114.2, latitude: 30.2, altitude: 0 }],
+          json_url: "",
+          need_plan: false,
+          density: "adaptive",
+          mission_id: 0,
+        },
+      },
+    ]);
+    expect(
+      startDeviceCalls("vehicle_navigate", {
+        mission: {
+          type: "point",
+          target: { latitude: 30.2, longitude: 114.2 },
+        },
+        planningMode: "auto",
+      })[0]?.arguments,
+    ).toMatchObject({ need_plan: null });
+    expect(
+      startDeviceCalls("vehicle_navigate", {
+        mission: {
+          type: "point",
+          target: { latitude: 30.2, longitude: 114.2 },
+        },
         planningMode: "road_network",
         density: "dense",
       }),
