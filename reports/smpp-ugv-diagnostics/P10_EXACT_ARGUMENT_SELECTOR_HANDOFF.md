@@ -111,3 +111,19 @@ Configuration remains real and live:
 - `UGV_EXECUTION_MODE=live`; no mock fallback or mutation-blocking simulation execution mode
 
 At handoff time, the remote Device MCP accepted TCP but closed or timed out on read-only MCP requests. The deployed 19100 control plane and frozen catalog remain ready using the captured real catalog, but an attempted read-only `vehicle_get_state` returned HTTP 500 because the remote southbound was unavailable. This is a separate external availability condition: Benchmark may validate the diagnostic control preflight now, but must not start a physical/simulator navigation case until its southbound readiness probe succeeds.
+
+## Southbound recovery qualification
+
+The preceding external availability condition cleared without a service or container restart. At `2026-09-02T02:20:43.437Z`, a new read-only qualification through the exact 19100 Runtime produced:
+
+- `GET /health/ready`: HTTP 200, `status=ready`, all dependencies ready.
+- MCP `tools/list`: HTTP 200, 10 tools, `vehicle_navigate` present.
+- MCP `vehicle_get_state`: HTTP 200, `resultType=complete`, `isError=false`.
+- Connectivity: `deviceMcpConnected=true`, `mqttConnected=true`, `deviceAvailable=true`.
+- Chassis: mission state `0`, speed `0 km/h`, position `29.720490138598283 / 106.81179412346586`.
+- Direct southbound identity: `ugv-mcp-server` version `1.26.0`, 15 tools.
+- Direct read-only status: speed `0`, brake `1`, chassis task `{id:-1,type:-1,state:0,progress:-1}`.
+- Active diagnostic leases `0`, active Provider executions `0`, active Runtime tasks `0`.
+- Mutating Device tool calls since deployment `0`; the fresh Adapter `get_status` audit outcome was `accepted`.
+
+The exact Runtime and Adapter identities, images, startedAt values, restartCount values, OCI revision, contract hash, and credential paths above are unchanged. The external southbound blocker is therefore resolved for read-only preflight; no Task, navigation, Referee operation, MQTT publish, or Device mutation was used to recover or qualify it.
