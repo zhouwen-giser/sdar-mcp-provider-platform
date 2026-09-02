@@ -4,7 +4,7 @@ Status: **PASS**
 
 Qualification date: 2026-09-02  
 Branch: `codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1`  
-Implementation commit: `5bb17c87694a3d858d567f05fbc4fac182fdf255`
+Implementation commit: `5bb17c82b666e944bb301a6f28ae2eb5679a7e16`
 
 ## Finding
 
@@ -64,20 +64,20 @@ Provider MCP endpoint: `http://127.0.0.1:19100/mcp`
 
 | Component | Image                                                                           | Image ID / digest                                                         | OCI revision                               | Started at                       | Restart count | State             |
 | --------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------- | ------------: | ----------------- |
-| Runtime   | `sdar-ugv-simulation-real/runtime:5bb17c87694a3d858d567f05fbc4fac182fdf255`     | `sha256:27a749eaf48be631227464df91b596c6d889d97d1c70891a01b364ef08f40a47` | `5bb17c87694a3d858d567f05fbc4fac182fdf255` | `2026-09-02T10:09:56.621642020Z` |             0 | running / healthy |
-| Adapter   | `sdar-ugv-simulation-real/ugv-adapter:5bb17c87694a3d858d567f05fbc4fac182fdf255` | `sha256:7b12feb02f6a7316633c99bbb65cfb0c7f4f0587cc0ef5aa3c179367701004cc` | `5bb17c87694a3d858d567f05fbc4fac182fdf255` | `2026-09-02T10:09:33.786730290Z` |             0 | running           |
+| Runtime   | `sdar-ugv-simulation-real/runtime:5bb17c82b666e944bb301a6f28ae2eb5679a7e16`     | `sha256:68362c786d6a79a81031b86b88500edef87c7b9505da20ea9c75f862aa63abd4` | `5bb17c82b666e944bb301a6f28ae2eb5679a7e16` | `2026-09-02T10:34:14.201258322Z` |             0 | running / healthy |
+| Adapter   | `sdar-ugv-simulation-real/ugv-adapter:5bb17c82b666e944bb301a6f28ae2eb5679a7e16` | `sha256:2d9f2fd8a75ba6a2fd61cdab622dd0eb738c13390270f6487c30f3913252e0f0` | `5bb17c82b666e944bb301a6f28ae2eb5679a7e16` | `2026-09-02T10:33:52.987927968Z` |             0 | running           |
 
 Runtime readiness returned HTTP 200 with every dependency ready. Adapter authoritative readiness
 was `READY / UGV_PROVIDER_READY`, with `deviceMcpConnected=true`, `mqttConnected=true`,
 `initialObservationReceived=true`, and `recoveryComplete=true` at
-`2026-09-02T10:09:37.212Z`.
+`2026-09-02T10:33:56.566Z`.
 
 The instance remains in `live` execution mode with the unchanged real southbound endpoints:
 
 - Device MCP: `http://192.168.2.63:19000/mcp`
 - MQTT: `mqtt://192.168.2.63:1883`
 
-The post-deploy read-only smoke passed at `2026-09-02T10:11:02.857Z`–`10:11:03.206Z`.
+The post-deploy read-only smoke passed at `2026-09-02T10:34:36.402Z`–`10:34:36.907Z`.
 `vehicle_get_state` returned HTTP 200/complete, all three connectivity fields true, and fresh
 chassis evidence. `tools/list` returned 10 tools including `vehicle_navigate`. A separate
 read-only availability probe returned `AVAILABLE / UGV_AVAILABLE` under recovered healthy GNSS.
@@ -94,8 +94,8 @@ read-only availability probe returned `AVAILABLE / UGV_AVAILABLE` under recovere
 - Latest execution update remained `2026-09-02T09:10:39.285Z`, before this deployment.
 - All southbound calls added by qualification were read-only: `get_status`,
   `get_capabilities`, `ugv_area_recon_get_status`, and `ugv_area_recon_get_targets`.
-- The current Device mission snapshot was `missionId=42365, state=3, speed=0`; frozen mapping
-  defines state 3 as terminal `CANCELLED`, not active.
+- The final read-only Device mission snapshot was `missionId=42372, state=4, speed=0`; frozen
+  mapping defines state 4 as terminal `SUCCEEDED`, not active.
 
 No Task, Execution, active lease, command, navigation, Device mutation, Referee mutation,
 diagnostic arm, MQTT publish, or weapon call was created by qualification.
