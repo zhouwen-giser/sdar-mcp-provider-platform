@@ -779,15 +779,16 @@ export class UgvProviderRuntime {
     });
     if (
       operationName === "vehicle_navigate" &&
-      decision.availability === "AVAILABLE" &&
-      this.ingress.fieldFreshnessState(
-        "chassis.position.geodetic",
-        this.options.freshness.chassis,
-        this.#now().getTime(),
-      ) !== "fresh"
+      (decision.reasonCode === "UGV_STATE_STALE" ||
+        (decision.availability === "AVAILABLE" &&
+          this.ingress.fieldFreshnessState(
+            "chassis.position.geodetic",
+            this.options.freshness.chassis,
+            this.#now().getTime(),
+          ) !== "fresh"))
     )
       decision = {
-        availability: "UNKNOWN",
+        availability: "DISABLED",
         riskLevel: qualification.riskLevel ?? "MEDIUM",
         reasonCode: "UGV_STATE_STALE",
         description: "UGV_STATE_STALE",

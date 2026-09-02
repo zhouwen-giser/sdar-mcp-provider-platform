@@ -813,7 +813,7 @@ describe("UGV long-running operation integration", () => {
       positionObservedAt,
     );
     expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
-      availability: "UNKNOWN",
+      availability: "DISABLED",
       riskLevel: "MEDIUM",
       reasonCode: "UGV_STATE_STALE",
     });
@@ -920,7 +920,7 @@ describe("UGV long-running operation integration", () => {
       freshness: { positionObservedAt: healthyPositionObservedAt },
     });
     expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
-      availability: "UNKNOWN",
+      availability: "DISABLED",
       reasonCode: "UGV_STATE_STALE",
     });
 
