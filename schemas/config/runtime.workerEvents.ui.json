@@ -831,6 +831,48 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "Runtime smpp_diagnostics_enabled setting.",
+      "displayName": "Smpp Diagnostics Enabled",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SMPP_DIAGNOSTICS_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime smpp_diagnostics_operator_token_file setting.",
+      "displayName": "Smpp Diagnostics Operator Token File",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "Runtime smpp_diagnostics_max_ttl_ms setting.",
+      "displayName": "Smpp Diagnostics Max Ttl Ms",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SMPP_DIAGNOSTICS_MAX_TTL_MS",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "Runtime adapter_health_poll_ms setting.",
       "displayName": "Adapter Health Poll Ms",
       "overridePolicy": {

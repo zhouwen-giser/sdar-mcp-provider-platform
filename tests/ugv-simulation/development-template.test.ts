@@ -9,6 +9,7 @@ const deploy = resolve(root, "deploy/development/ugv-provider-template");
 const validator = resolve(root, "scripts/ugv-provider-template/validate-development-config.mjs");
 const liveRunner = resolve(root, "scripts/ugv-provider-template/live-point-validation.mjs");
 const example = resolve(deploy, ".env.example");
+const mockExample = resolve(deploy, ".env.mock.example");
 
 interface ComposeService {
   environment: Record<string, string>;
@@ -32,6 +33,7 @@ describe("UGV Provider development template", () => {
     for (const name of [
       "compose.yaml",
       ".env.example",
+      ".env.mock.example",
       "README.md",
       "up.sh",
       "down.sh",
@@ -64,6 +66,7 @@ describe("UGV Provider development template", () => {
       "ugv-runtime-postgres",
     ]);
     expect(service(document, "ugv-adapter").environment).toMatchObject({
+      UGV_DELIVERY_STAGE: "development_debug",
       UGV_EXECUTION_MODE: "simulation",
       UGV_DEVICE_MCP_URL: "http://mock-ugv-device-mcp:19000/mcp",
       UGV_MQTT_URL: "mqtt://mock-mqtt:1883",
@@ -83,11 +86,7 @@ describe("UGV Provider development template", () => {
   });
 
   it("renders an external profile without any mock service or fallback", () => {
-    const document = compose("external", {
-      UGV_TEMPLATE_EXECUTION_MODE: "live",
-      UGV_SIM_DEVICE_MCP_URL: "http://192.0.2.10:19000/mcp",
-      UGV_SIM_MQTT_URL: "mqtt://192.0.2.10:1883",
-    });
+    const document = compose("external");
     expect(Object.keys(document.services).sort()).toEqual([
       "ugv-adapter",
       "ugv-adapter-postgres",
@@ -95,9 +94,12 @@ describe("UGV Provider development template", () => {
       "ugv-runtime-postgres",
     ]);
     expect(service(document, "ugv-adapter").environment).toMatchObject({
+      UGV_DELIVERY_STAGE: "development_debug",
       UGV_EXECUTION_MODE: "live",
+      UGV_DEVICE_MCP_URL: "http://192.168.2.63:19000/mcp",
+      UGV_MQTT_URL: "mqtt://192.168.2.63:1883",
       UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "false",
-      UGV_FIRE_ENABLED: "false",
+      UGV_FIRE_ENABLED: "true",
     });
     validate("external", document);
 
@@ -205,7 +207,7 @@ function compose(profile: "mock" | "external", overrides: NodeJS.ProcessEnv = {}
       [
         "compose",
         "--env-file",
-        example,
+        profile === "mock" ? mockExample : example,
         "-f",
         resolve(deploy, "compose.yaml"),
         "--profile",

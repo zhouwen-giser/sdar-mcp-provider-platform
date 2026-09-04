@@ -172,7 +172,14 @@ await runtime.initializeLocal();
 const port = await server.start();
 mqtt.start();
 logger.info(
-  { providerId: config.PROVIDER_ID, port, readiness: runtime.readiness().state },
+  {
+    providerId: config.PROVIDER_ID,
+    deliveryStage: config.UGV_DELIVERY_STAGE,
+    executionMode: config.UGV_EXECUTION_MODE,
+    allToolSideEffectsEnabled: config.UGV_EXECUTION_MODE === "live" && config.UGV_FIRE_ENABLED,
+    port,
+    readiness: runtime.readiness().state,
+  },
   "UGV Provider Adapter started in NOT_READY",
 );
 const stop = async () => {

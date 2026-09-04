@@ -25,8 +25,7 @@ if [[ "$profile" != "external" ]]; then
   exit 2
 fi
 if [[ ! -f "$env_file" ]]; then
-  echo "UGV_TEMPLATE_EXTERNAL_ENV_REQUIRED" >&2
-  exit 2
+  env_file="$deploy_dir/.env.example"
 fi
 mkdir -p "$repo_root/reports/ugv-provider-template-stabilization"
 node "$repo_root/scripts/ugv-provider-preflight.mjs" \

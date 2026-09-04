@@ -8,6 +8,7 @@ describe("UGV Provider configuration contract", () => {
       loadUgvProviderConfiguration({
         PROVIDER_ID: "isr.vehicle.ugv.custom",
         ADAPTER_PORT: "7110",
+        UGV_EXECUTION_MODE: "simulation",
         UGV_MQTT_WIRE_MODE: "direct_domain_json",
         UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: "1",
         UGV_ALLOW_NAVIGATION_WITH_RECON: "false",
@@ -15,6 +16,7 @@ describe("UGV Provider configuration contract", () => {
     ).toMatchObject({
       PROVIDER_ID: "isr.vehicle.ugv.custom",
       ADAPTER_PORT: 7110,
+      UGV_EXECUTION_MODE: "simulation",
       UGV_MQTT_WIRE_MODE: "direct_domain_json",
       UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: true,
       UGV_ALLOW_NAVIGATION_WITH_RECON: false,
@@ -31,7 +33,7 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 71 inventory fields", () => {
+  it("covers all 72 inventory fields", () => {
     const inventory = JSON.parse(
       readFileSync(
         new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
@@ -46,7 +48,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(71);
+    expect(actual).toHaveLength(72);
     expect(actual).toEqual(expected);
   });
 
@@ -76,11 +78,15 @@ describe("UGV Provider configuration contract", () => {
   });
 
   it("keeps production fail-closed by default and permits explicit internal plaintext", () => {
-    expect(() => loadUgvProviderConfiguration({ RUNTIME_ENV: "production" })).toThrow(
-      "PRODUCTION_ADAPTER_MTLS_REQUIRED",
-    );
+    expect(() =>
+      loadUgvProviderConfiguration({
+        UGV_DELIVERY_STAGE: "qualification",
+        RUNTIME_ENV: "production",
+      }),
+    ).toThrow("PRODUCTION_ADAPTER_MTLS_REQUIRED");
     expect(
       loadUgvProviderConfiguration({
+        UGV_DELIVERY_STAGE: "qualification",
         RUNTIME_ENV: "production",
         ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
         UGV_MQTT_WIRE_MODE: "direct_domain_json",
@@ -103,13 +109,17 @@ describe("UGV Provider configuration contract", () => {
     ).toThrow("UGV_MQTT_MTLS_FILES_REQUIRED");
   });
 
-  it("defaults to simulation, disables fire, and rejects live mock execution", () => {
+  it("defaults to unrestricted Development Debug against the remote simulator", () => {
     expect(loadUgvProviderConfiguration({})).toMatchObject({
       UGV_RESOURCE_ID: "vehicle:ugv1",
       UGV_ENTITY_ID: "ugv1",
       UGV_VEHICLE_TYPE: "ugv",
-      UGV_EXECUTION_MODE: "simulation",
-      UGV_FIRE_ENABLED: false,
+      UGV_DELIVERY_STAGE: "development_debug",
+      UGV_EXECUTION_MODE: "live",
+      UGV_DEVICE_MCP_URL: "http://192.168.2.63:19000/mcp",
+      UGV_MQTT_URL: "mqtt://192.168.2.63:1883",
+      UGV_ALLOW_NAVIGATION_WITH_RECON: true,
+      UGV_FIRE_ENABLED: true,
       UGV_STATIONARY_MIN_SAMPLES: 2,
       UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: 1_000,
     });
@@ -125,6 +135,28 @@ describe("UGV Provider configuration contract", () => {
       UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: false,
       UGV_ADAPTER_STORE_MODE: "postgres",
     });
+  });
+
+  it("requires an explicit stage change for candidate or qualification operation", () => {
+    expect(loadUgvProviderConfiguration({})).toMatchObject({
+      UGV_DELIVERY_STAGE: "development_debug",
+    });
+    expect(
+      loadUgvProviderConfiguration({
+        UGV_DELIVERY_STAGE: "integration_candidate",
+        RUNTIME_ENV: "test",
+      }),
+    ).toMatchObject({ UGV_DELIVERY_STAGE: "integration_candidate" });
+    expect(
+      loadUgvProviderConfiguration({ UGV_DELIVERY_STAGE: "qualification", RUNTIME_ENV: "test" }),
+    ).toMatchObject({ UGV_DELIVERY_STAGE: "qualification" });
+    expect(() =>
+      loadUgvProviderConfiguration({ UGV_DELIVERY_STAGE: "integration_candidate" }),
+    ).toThrow("UGV_DELIVERY_STAGE_RUNTIME_ENV_MISMATCH");
+    expect(() => loadUgvProviderConfiguration({ RUNTIME_ENV: "test" })).toThrow(
+      "UGV_DELIVERY_STAGE_RUNTIME_ENV_MISMATCH",
+    );
+    expect(() => loadUgvProviderConfiguration({ UGV_DELIVERY_STAGE: "candidate" })).toThrow();
   });
 
   it("bounds the accepted observation clock skew", () => {

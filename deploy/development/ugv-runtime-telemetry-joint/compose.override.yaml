@@ -1,7 +1,12 @@
 services:
   ugv-adapter:
     environment:
+      UGV_DELIVERY_STAGE: ${UGV_DELIVERY_STAGE:-development_debug}
       UGV_EXECUTION_MODE: ${UGV_EXECUTION_MODE:-live}
+      UGV_DEVICE_MCP_URL: ${UGV_SIM_DEVICE_MCP_URL:-http://192.168.2.63:19000/mcp}
+      UGV_MQTT_URL: ${UGV_SIM_MQTT_URL:-mqtt://192.168.2.63:1883}
+      UGV_MQTT_WIRE_MODE: ${UGV_MQTT_WIRE_MODE:-ros_bridge_json}
+      UGV_FIRE_ENABLED: ${UGV_FIRE_ENABLED:-true}
       RUNTIME_ENV: development
 
   ugv-runtime:

@@ -309,6 +309,7 @@ services:
       UGV_RESOURCE_ID: vehicle:ugv1
       UGV_ENTITY_ID: ugv1
       UGV_VEHICLE_TYPE: ugv
+      UGV_DELIVERY_STAGE: qualification
       UGV_EXECUTION_MODE: simulation
       UGV_FIRE_ENABLED: "false"
       UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-false}

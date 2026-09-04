@@ -1,5 +1,23 @@
 # UGV Provider operations runbook
 
+## Default Development Debug stage
+
+UGV Provider configuration defaults to `UGV_DELIVERY_STAGE=development_debug`, `live` execution,
+Device MCP `http://192.168.2.63:19000/mcp`, MQTT `mqtt://192.168.2.63:1883`, navigation with
+reconnaissance, and all registered tool side effects. The remote endpoint is a simulator, but `live`
+is required to dispatch southbound commands; Provider `simulation` mode intentionally does not do
+so.
+
+The stage is explicit and immutable for a running Adapter instance. Promotion is never inferred:
+
+- Integration Candidate requires `UGV_DELIVERY_STAGE=integration_candidate` together with
+  `RUNTIME_ENV=test`.
+- Qualification requires `UGV_DELIVERY_STAGE=qualification` together with `RUNTIME_ENV=test` or
+  `production` and its separate qualification procedure.
+
+Changing only `RUNTIME_ENV` fails configuration loading. Development Debug testing does not claim
+candidate or qualification evidence.
+
 ## Start the mock stack
 
 Prerequisites are Node.js 22, pnpm 11 and Docker Compose. The profile starts two PostgreSQL
