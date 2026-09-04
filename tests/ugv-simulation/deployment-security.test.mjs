@@ -254,7 +254,7 @@ describe("Goal 10 deployment security", () => {
     expect(compose).not.toContain("../../scripts/ugv-simulation:/app/scripts/ugv-simulation");
   });
 
-  it("wires the live Provider and stable Runtime OTLP identity without enabling control", () => {
+  it("wires the live Provider, scoped diagnostics, and stable Runtime OTLP identity", () => {
     const compose = readFileSync(join(root, "deploy", "ugv-simulation", "compose.yaml"), "utf8");
     const override = readFileSync(
       join(root, "deploy", "development", "ugv-runtime-telemetry-joint", "compose.override.yaml"),
@@ -270,6 +270,15 @@ describe("Goal 10 deployment security", () => {
     );
 
     expect(override).toContain("UGV_EXECUTION_MODE: ${UGV_EXECUTION_MODE:-live}");
+    expect(override).toContain(
+      "UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}",
+    );
+    expect(override).toContain(
+      "SMPP_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}",
+    );
+    expect(override).toContain(
+      "file: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:?Development Debug diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE}",
+    );
     expect(override).toContain('OTEL_ENABLED: "true"');
     expect(override).toContain(
       "OTEL_EXPORTER_OTLP_ENDPOINT: ${UGV_RUNTIME_OTLP_ENDPOINT:-http://host.docker.internal:4318}",
@@ -281,6 +290,10 @@ describe("Goal 10 deployment security", () => {
     expect(override).toContain('ALLOW_INSECURE_INTERNAL_TRANSPORT: "true"');
     expect(compose).toContain('UGV_FIRE_ENABLED: "false"');
     expect(example).toContain("UGV_RUNTIME_OTLP_ENDPOINT=http://host.docker.internal:4318");
+    expect(example).toContain("SMPP_DIAGNOSTICS_ENABLED=true");
+    expect(example).toContain(
+      "SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE=/absolute/path/to/smpp-diagnostic-operator.token",
+    );
     expect(readOnlySmoke).toMatch(
       /UGV_SMOKE_EXECUTION_MODE[\s\S]*UGV_EXECUTION_MODE[\s\S]*"simulation"/,
     );

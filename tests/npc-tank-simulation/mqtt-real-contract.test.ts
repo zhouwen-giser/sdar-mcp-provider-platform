@@ -531,7 +531,7 @@ describe("Goal 11 NPC Tank real MQTT contract", () => {
 
 describe("Goal 11 shared MQTT changes preserve UGV behavior", () => {
   it("keeps the Goal 10 UGV topic/QoS contract and modern normalization", () => {
-    expect(UGV_MQTT_TOPICS).toHaveLength(18);
+    expect(UGV_MQTT_TOPICS).toHaveLength(19);
     expect(() => assertExactSubscriptions(UGV_MQTT_TOPICS)).not.toThrow();
     for (const topic of UGV_MQTT_TOPICS)
       expect(ugvMqttQos(topic), topic).toBe(topic === "/ugv/area_recon/coverage" ? 0 : 1);

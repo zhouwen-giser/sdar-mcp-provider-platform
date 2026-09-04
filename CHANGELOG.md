@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased - 2026-09-01
+
+- Made UGV point-navigation availability require a fresh field-level geodetic position authority,
+  preventing fresh composite chassis status from masking a stale GNSS position.
+- Added `freshness.positionObservedAt` to the stable `vehicle_get_state` projection while retaining
+  the existing domain-level `chassisObservedAt` for compatibility.
+
 ## 0.1.0 - 2026-07-27 - SDAR MCP Provider Platform
 
 - Completed the additive upgrade from the locked SDAR MCP Tasks Provider

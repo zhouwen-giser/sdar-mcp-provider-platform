@@ -72,6 +72,12 @@
       "maximum": 9007199254740991,
       "type": "integer"
     },
+    "UGV_DELIVERY_STAGE": {
+      "default": "development_debug",
+      "enum": ["development_debug", "integration_candidate", "qualification"],
+      "type": "string"
+    },
+    "UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT": { "type": "boolean" },
     "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT": { "type": "boolean" },
     "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS": {
       "default": 5000,
@@ -119,20 +125,28 @@
       "type": "string"
     },
     "UGV_DEVICE_MCP_URL": {
-      "default": "http://127.0.0.1:19000/mcp",
+      "default": "http://192.168.2.63:19000/mcp",
       "format": "uri",
       "type": "string"
+    },
+    "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE": {
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
+    "UGV_DIAGNOSTICS_ENABLED": { "type": "boolean" },
+    "UGV_DIAGNOSTICS_MAX_TTL_MS": {
+      "default": 300000,
+      "maximum": 3600000,
+      "minimum": 1000,
+      "type": "integer"
     },
     "UGV_ENTITY_ID": {
       "default": "ugv1",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
       "type": "string"
     },
-    "UGV_EXECUTION_MODE": {
-      "default": "simulation",
-      "enum": ["simulation", "live"],
-      "type": "string"
-    },
+    "UGV_EXECUTION_MODE": { "default": "live", "enum": ["simulation", "live"], "type": "string" },
     "UGV_EXECUTION_POLL_INTERVAL_MS": {
       "default": 250,
       "maximum": 9007199254740991,
@@ -199,7 +213,7 @@
       "enum": ["disabled", "required"],
       "type": "string"
     },
-    "UGV_MQTT_URL": { "default": "mqtt://127.0.0.1:1883", "minLength": 1, "type": "string" },
+    "UGV_MQTT_URL": { "default": "mqtt://192.168.2.63:1883", "minLength": 1, "type": "string" },
     "UGV_MQTT_USERNAME": { "type": "string" },
     "UGV_MQTT_WIRE_MODE": {
       "default": "auto",
@@ -274,6 +288,7 @@
     "UGV_RESOURCE_ID",
     "UGV_ENTITY_ID",
     "UGV_VEHICLE_TYPE",
+    "UGV_DELIVERY_STAGE",
     "UGV_EXECUTION_MODE",
     "ADAPTER_HOST",
     "ADAPTER_PORT",
@@ -302,6 +317,7 @@
     "UGV_DEVICE_MCP_TLS_MODE",
     "UGV_DEVICE_MCP_MAX_RESPONSE_BYTES",
     "UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT",
+    "UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT",
     "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
     "UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD",
     "UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS",
@@ -309,6 +325,8 @@
     "UGV_ALLOW_NAVIGATION_WITH_RECON",
     "UGV_FIRE_ENABLED",
     "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+    "UGV_DIAGNOSTICS_ENABLED",
+    "UGV_DIAGNOSTICS_MAX_TTL_MS",
     "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
     "UGV_STATIONARY_STABILITY_MS",
     "UGV_STATIONARY_MIN_SAMPLES",

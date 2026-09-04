@@ -1,4 +1,5 @@
 import pino from "pino";
+import { readFileSync } from "node:fs";
 import {
   MemoryProviderStore,
   PostgresProviderStore,
@@ -73,6 +74,7 @@ const device = new StreamableHttpUgvDeviceMcpClient(
     maxResponseBytes: config.UGV_DEVICE_MCP_MAX_RESPONSE_BYTES,
     contractReportPath: config.UGV_DEVICE_MCP_CONTRACT_REPORT_PATH,
     useMockContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT,
+    useCapturedContractWhenUnavailable: config.UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT,
     readRetryAttempts: config.UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS,
     circuitBreakerThreshold: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD,
     circuitBreakerResetMs: config.UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS,
@@ -124,6 +126,14 @@ const runtime = new UgvProviderRuntime(
     allowNavigationWithRecon: config.UGV_ALLOW_NAVIGATION_WITH_RECON,
     fireEnabled: config.UGV_FIRE_ENABLED,
     fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
+    diagnostics: {
+      enabled: config.UGV_DIAGNOSTICS_ENABLED,
+      controlToken:
+        config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined
+          ? ""
+          : readFileSync(config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE, "utf8").trim(),
+      maximumTtlMs: config.UGV_DIAGNOSTICS_MAX_TTL_MS,
+    },
     stationarySpeedThresholdKmh: config.UGV_STATIONARY_SPEED_THRESHOLD_KMH,
     stationaryStabilityMs: config.UGV_STATIONARY_STABILITY_MS,
     stationaryMinimumSamples: config.UGV_STATIONARY_MIN_SAMPLES,
@@ -162,7 +172,14 @@ await runtime.initializeLocal();
 const port = await server.start();
 mqtt.start();
 logger.info(
-  { providerId: config.PROVIDER_ID, port, readiness: runtime.readiness().state },
+  {
+    providerId: config.PROVIDER_ID,
+    deliveryStage: config.UGV_DELIVERY_STAGE,
+    executionMode: config.UGV_EXECUTION_MODE,
+    allToolSideEffectsEnabled: config.UGV_EXECUTION_MODE === "live" && config.UGV_FIRE_ENABLED,
+    port,
+    readiness: runtime.readiness().state,
+  },
   "UGV Provider Adapter started in NOT_READY",
 );
 const stop = async () => {

@@ -306,6 +306,19 @@
     },
     "SCHEDULER_CONCURRENCY": { "default": 8, "maximum": 128, "minimum": 1, "type": "integer" },
     "SCHEDULER_POLL_MS": { "default": 1000, "maximum": 60000, "minimum": 100, "type": "integer" },
+    "SMPP_DIAGNOSTICS_ENABLED": { "type": "boolean" },
+    "SMPP_DIAGNOSTICS_MAX_TTL_MS": {
+      "default": 300000,
+      "maximum": 3600000,
+      "minimum": 1000,
+      "type": "integer"
+    },
+    "SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE": {
+      "minLength": 1,
+      "type": "string",
+      "writeOnly": true,
+      "x-sdar-secretRef": true
+    },
     "TASK_NOTIFICATION_BATCH_SIZE": {
       "default": 256,
       "maximum": 1000,
@@ -415,6 +428,8 @@
     "DB_PUBLICATION_BUDGET_MS",
     "ALLOW_WEAK_LEASE_CONFIGURATION",
     "INTERNAL_ENDPOINTS_ENABLED",
+    "SMPP_DIAGNOSTICS_ENABLED",
+    "SMPP_DIAGNOSTICS_MAX_TTL_MS",
     "ADAPTER_HEALTH_POLL_MS",
     "ADAPTER_HEALTH_FAILURE_THRESHOLD",
     "ADAPTER_MANIFEST_POLL_MS",

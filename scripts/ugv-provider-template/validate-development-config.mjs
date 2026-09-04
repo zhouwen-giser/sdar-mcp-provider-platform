@@ -42,9 +42,10 @@ if (!new Set(["http:", "https:"]).has(deviceUrl.protocol))
 if (!new Set(["mqtt:", "mqtts:", "ws:", "wss:"]).has(mqttUrl.protocol))
   fail("UGV_TEMPLATE_MQTT_SCHEME_INVALID");
 
+if (adapterEnv.UGV_DELIVERY_STAGE !== "development_debug")
+  fail("UGV_TEMPLATE_DEVELOPMENT_DEBUG_STAGE_REQUIRED");
 if (adapterEnv.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT !== "false")
   fail("UGV_TEMPLATE_MOCK_FALLBACK_FORBIDDEN");
-if (adapterEnv.UGV_FIRE_ENABLED !== "false") fail("UGV_TEMPLATE_FIRE_MUST_BE_DISABLED");
 if (adapterEnv.UGV_ADAPTER_STORE_MODE !== "postgres") fail("UGV_TEMPLATE_POSTGRES_STORE_REQUIRED");
 if (adapterEnv.ADAPTER_TLS_MODE !== "disabled" || runtimeEnv.ADAPTER_TLS_MODE !== "disabled")
   fail("UGV_TEMPLATE_DEVELOPMENT_TLS_MODE_INVALID");
@@ -62,8 +63,10 @@ if (profile === "mock") {
     fail("UGV_TEMPLATE_MOCK_EXECUTION_MODE_INVALID");
   if (deviceUrl.hostname !== "mock-ugv-device-mcp" || mqttUrl.hostname !== "mock-mqtt")
     fail("UGV_TEMPLATE_MOCK_ENDPOINTS_INVALID");
+  if (adapterEnv.UGV_FIRE_ENABLED !== "false") fail("UGV_TEMPLATE_MOCK_FIRE_MUST_BE_DISABLED");
 } else {
   if (adapterEnv.UGV_EXECUTION_MODE !== "live") fail("UGV_TEMPLATE_EXTERNAL_LIVE_MODE_REQUIRED");
+  if (adapterEnv.UGV_FIRE_ENABLED !== "true") fail("UGV_TEMPLATE_EXTERNAL_ALL_TOOLS_REQUIRED");
   if (
     deviceUrl.hostname === "mock-ugv-device-mcp" ||
     mqttUrl.hostname === "mock-mqtt" ||

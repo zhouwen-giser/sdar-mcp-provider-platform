@@ -1,11 +1,19 @@
 # UGV Provider development template
 
-This source-built development stack exercises the UGV Adapter and Runtime without PMS. It has two explicit, mutually exclusive profiles:
+This source-built stack defaults to Development Debug against the shared remote simulator. Running
+`bash up.sh` with no profile selects `external`, Device MCP `http://192.168.2.63:19000/mcp`, MQTT
+`mqtt://192.168.2.63:1883`, live execution, and all registered tool side effects. Startup preflight
+and smoke remain read-only; later Runtime calls may invoke mutations.
+
+It has two explicit, mutually exclusive connectivity profiles:
 
 - `mock`: starts the repository mock Device MCP, an anonymous development MQTT broker, a mock publisher, the Adapter, Runtime and their separate PostgreSQL databases.
 - `external`: starts no mock service. It first runs the real Device MCP and passive MQTT read-only preflight, then starts the Adapter and Runtime only if that preflight passes.
 
-There is no automatic external-to-mock fallback. Both profiles keep `UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT=false` and `UGV_FIRE_ENABLED=false`. This is a development template, not a production security profile; mTLS is intentionally out of scope.
+There is no automatic external-to-mock fallback. Both profiles keep
+`UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT=false`. The default external profile enables the effector tool;
+the explicitly selected mock profile disables it. This is a development template, not a production
+security profile; mTLS is intentionally out of scope.
 
 ## Mock profile
 
@@ -18,20 +26,29 @@ bash smoke.sh mock
 bash down.sh mock
 ```
 
-If `.env` is absent, the mock profile uses `.env.example`. It publishes only loopback ports by default: Runtime `19120`, Adapter `17010`, mock Device MCP `19020`, and mock MQTT `18830`.
+If `.env` is absent, the mock profile uses `.env.mock.example`. It publishes only loopback ports by
+default: Runtime `19120`, Adapter `17010`, mock Device MCP `19020`, and mock MQTT `18830`.
 
 ## External profile
 
-Copy `.env.example` to `.env`, set `UGV_TEMPLATE_EXECUTION_MODE=live`, replace both `UGV_SIM_*_URL` values with routable real endpoints, set explicit `UGV_MQTT_WIRE_MODE`, and replace the two development database passwords. Then run:
+The checked-in `.env.example` already carries the Development Debug defaults for `192.168.2.63`.
+Copy it to `.env` only to override endpoints or replace the development database passwords. Then
+run:
 
 ```bash
 bash contract-check.sh external  # read-only; no control or MQTT publish
-bash up.sh external              # repeats the preflight before Adapter startup
-bash smoke.sh external           # Runtime read-only calls only
-bash down.sh external
+bash up.sh                        # defaults to external Development Debug
+bash smoke.sh                     # Runtime read-only calls only
+bash down.sh
 ```
 
-An external configuration that still resolves to `mock-ugv-device-mcp` or `mock-mqtt`, enables mock-contract fallback, enables fire, or uses simulation execution mode is rejected. A failed external preflight stops startup and never selects `mock`.
+To enter Integration Candidate or Qualification, explicitly change `UGV_DELIVERY_STAGE` and use the
+corresponding stage procedure. The development lifecycle scripts never promote the stage based on
+health or source revision.
+
+An external configuration that still resolves to `mock-ugv-device-mcp` or `mock-mqtt`, enables
+mock-contract fallback, disables the full tool set, or uses simulation execution mode is rejected.
+A failed external preflight stops startup and never selects `mock`.
 
 Evidence is written under `reports/ugv-provider-template-stabilization/`. Endpoint credentials and raw MQTT payloads are not written.
 

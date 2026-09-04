@@ -2,8 +2,8 @@
   "schemaVersion": "1.0",
   "mappingState": "owner_directories",
   "inventory": {
-    "mappedProvenanceEntries": 35,
-    "ownerDirectoryFiles": 43
+    "mappedProvenanceEntries": 37,
+    "ownerDirectoryFiles": 46
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -21,7 +21,7 @@
     "provider:ugv": {
       "owner": "provider:ugv",
       "plannedDirectory": "migrations/providers/ugv",
-      "deliveredFiles": 3
+      "deliveredFiles": 5
     },
     "provider:npc-tank": {
       "owner": "provider:npc-tank",
@@ -31,7 +31,7 @@
     "pms": {
       "owner": "pms",
       "plannedDirectory": "migrations/pms",
-      "deliveredFiles": 10,
+      "deliveredFiles": 11,
       "namingRule": "NNN_lower_snake_case_description.sql",
       "versionScope": "Unique and append-only within the pms set, starting at 001."
     }
@@ -386,6 +386,26 @@
       "plannedPath": "migrations/runtime/026_smpp_reconciliation_audit.sql",
       "pathState": "owner_directory",
       "sha256": "2daad14ff8ae4102d71e0912ea86c3747cebf8b43ac70662fad9358f6f7dfb0f"
+    },
+    {
+      "sequence": 36,
+      "legacyVersion": "028",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "newPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "plannedPath": "migrations/providers/ugv/028_smpp_diagnostic_leases.sql",
+      "pathState": "owner_directory",
+      "sha256": "995c7c01773c97c4ba09330415d85988e1879bd80ad14203d5d9d95b99664b6a"
+    },
+    {
+      "sequence": 37,
+      "legacyVersion": "029",
+      "owner": "provider:ugv",
+      "oldPath": "migrations/providers/ugv/029_smpp_diagnostic_exact_argument_selector.sql",
+      "newPath": "migrations/providers/ugv/029_smpp_diagnostic_exact_argument_selector.sql",
+      "plannedPath": "migrations/providers/ugv/029_smpp_diagnostic_exact_argument_selector.sql",
+      "pathState": "owner_directory",
+      "sha256": "713c738a55258954a5807a3f477335ee1e460d22b0ef49a6467ab22097876499"
     }
   ]
 }

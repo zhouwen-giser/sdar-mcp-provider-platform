@@ -117,6 +117,9 @@ const RuntimeWorkerEventsInputBaseSchema = z.object({
   ALLOW_WEAK_LEASE_CONFIGURATION: BooleanEnvironmentSchema.default(false),
   INTERNAL_ENDPOINTS_ENABLED: BooleanEnvironmentSchema.default(false),
   INTERNAL_ADMIN_TOKEN: z.string().min(32).optional(),
+  SMPP_DIAGNOSTICS_ENABLED: BooleanEnvironmentSchema.default(false),
+  SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE: z.string().min(1).optional(),
+  SMPP_DIAGNOSTICS_MAX_TTL_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(300_000),
   ADAPTER_HEALTH_POLL_MS: z.coerce.number().int().min(100).max(300_000).default(5_000),
   ADAPTER_HEALTH_FAILURE_THRESHOLD: z.coerce.number().int().min(1).max(10).default(2),
   ADAPTER_MANIFEST_POLL_MS: z.coerce.number().int().min(100).max(3_600_000).default(60_000),
@@ -148,6 +151,7 @@ export const RuntimeWorkerEventsResolvedSchema = RuntimeWorkerEventsInputBaseSch
   BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: z.boolean(),
   ALLOW_WEAK_LEASE_CONFIGURATION: z.boolean(),
   INTERNAL_ENDPOINTS_ENABLED: z.boolean(),
+  SMPP_DIAGNOSTICS_ENABLED: z.boolean(),
 });
 
 const RuntimeWorkerEventsInputSchema = z
@@ -216,6 +220,15 @@ const RuntimeWorkerEventsInputSchema = z
         message: "INTERNAL_ENDPOINTS_ENABLED requires INTERNAL_ADMIN_TOKEN",
       });
     }
+    if (
+      value.SMPP_DIAGNOSTICS_ENABLED &&
+      value.SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE === undefined
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "SMPP_DIAGNOSTICS_ENABLED requires SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
+      });
+    }
   });
 
 export type RuntimeWorkerEventsEnvironment = z.infer<typeof RuntimeWorkerEventsResolvedSchema>;
@@ -232,6 +245,7 @@ const secretKeys = new Set([
   "PROVIDER_TELEMETRY_TLS_KEY_PATH",
   "JWT_HS256_SECRET",
   "INTERNAL_ADMIN_TOKEN",
+  "SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
 ]);
 
 const configurationKeys = Object.keys(RuntimeWorkerEventsResolvedSchema.shape);

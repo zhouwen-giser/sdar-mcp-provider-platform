@@ -20,10 +20,12 @@ describe("Provider Migration entrypoints", () => {
 
     await runUgvProviderMigrations(executor, workspaceRoot);
 
-    expect(executor.statements).toHaveLength(3);
+    expect(executor.statements).toHaveLength(5);
     const statements = executor.statements.join("\n");
     expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_execution");
     expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_mutation_journal");
+    expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_diagnostic_lease");
+    expect(statements).toContain("ADD COLUMN IF NOT EXISTS selector_argument_hash");
     expect(statements).not.toContain("npc_tank_");
     expect(statements).not.toContain("runtime_schema_migration");
   });

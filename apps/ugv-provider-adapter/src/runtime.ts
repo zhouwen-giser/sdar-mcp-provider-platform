@@ -14,6 +14,20 @@ import type {
   ProviderExecutionState,
   ProviderStore,
 } from "../../../packages/provider-adapter-kit/src/index.js";
+import {
+  assertDiagnosticControlSignature,
+  diagnosticCapabilityContract,
+  diagnosticRequestHash,
+  diagnosticStableOperationKey,
+  parseSmppDiagnosticControlRequest,
+  SMPP_DIAGNOSTIC_CONTRACT,
+  SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+  SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+  SMPP_RESPONSE_LOSS_CAPABILITY,
+  SmppDiagnosticResponseLossError,
+  type SmppDiagnosticCapabilityId,
+  type SmppDiagnosticControlResult,
+} from "../../../packages/provider-adapter-kit/src/index.js";
 import type {
   UgvDeviceMcpClient,
   UgvDeviceToolName,
@@ -200,6 +214,11 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: number;
       };
       pollIntervalMs: number;
+      diagnostics?: {
+        enabled: boolean;
+        controlToken: string;
+        maximumTtlMs: number;
+      };
       now?: () => Date;
     },
     readonly store: ProviderStore,
@@ -251,10 +270,10 @@ export class UgvProviderRuntime {
     await this.store.initialize();
     this.#unsubscribeDeviceConnection = this.device.onConnectionState((state) => {
       this.ingress.setDeviceConnected(state === "connected");
+      if (state === "connected") this.#synchronizeDeviceToolHealth();
       this.#refreshReadiness();
     });
-    for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
-      this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
+    this.#synchronizeDeviceToolHealth();
     this.#unsubscribeToolHealth = this.device.onToolHealth((health) => {
       for (const transition of this.operationHealth.recordToolHealth(health))
         void this.#operationHealthTransition(transition.previous, transition.current);
@@ -284,6 +303,11 @@ export class UgvProviderRuntime {
     });
     this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
+  }
+
+  #synchronizeDeviceToolHealth(): void {
+    for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
+      this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
   }
 
   async #initializeDependencies(): Promise<void> {
@@ -344,6 +368,9 @@ export class UgvProviderRuntime {
   async #start(
     input: StartUgvOperation,
   ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
+    if (input.operationName === SMPP_DIAGNOSTIC_CONTROL_OPERATION) {
+      return this.#diagnosticControl(input);
+    }
     validateStart(input, this.options);
     if (SYNC_OPERATIONS.has(input.operationName)) return this.#synchronous(input);
     const existing = await this.store.getExecution(input.taskId);
@@ -435,6 +462,27 @@ export class UgvProviderRuntime {
               },
             },
           );
+        const responseLoss = await this.#bindDiagnostic(execution, SMPP_RESPONSE_LOSS_CAPABILITY);
+        const businessSuccess = await this.#bindDiagnostic(
+          execution,
+          SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+        );
+        if (businessSuccess !== undefined) {
+          execution = {
+            ...execution,
+            diagnosticBehavior: {
+              capabilityId: businessSuccess.lease.capabilityId,
+              leaseId: businessSuccess.lease.leaseId,
+              fence: businessSuccess.lease.fence,
+              expiresAt: businessSuccess.lease.expiresAt,
+              caseExecutionId: businessSuccess.lease.scope.caseExecutionId,
+              repetitionId: businessSuccess.lease.scope.repetitionId,
+            },
+            revision: execution.revision + 1,
+            updatedAt: this.#now().toISOString(),
+          };
+          await this.store.putExecution(execution);
+        }
         execution = await this.#armStartObservationDeadline(execution);
         execution = transition(
           execution,
@@ -445,6 +493,40 @@ export class UgvProviderRuntime {
         );
         await this.store.putExecution(execution);
         await this.#startedEvent(execution);
+        if (responseLoss !== undefined) {
+          const missionId = responseLoss.lease.deviceMissionId;
+          if (missionId === undefined) throw new Error("SMPP_DIAGNOSTIC_MISSION_ID_REQUIRED");
+          const observedAt = this.#now().toISOString();
+          await this.telemetry.emit(
+            "PROVIDER_DIAGNOSTIC",
+            {
+              state: "STARTING",
+              reasonCode: "response_lost_after_adapter_success",
+            },
+            {
+              taskId: execution.taskId,
+              externalExecutionId: execution.externalExecutionId,
+              operationName: execution.operationName,
+              observedAt,
+              attributes: diagnosticTelemetryAttributes(responseLoss, execution, {
+                redispatchAllowed: false,
+                continuationPolicy: "reconcile-original-once",
+              }),
+            },
+          );
+          await this.store.consumeDiagnosticLease(
+            responseLoss.lease.leaseId,
+            responseLoss.lease.canonicalRequestHash,
+            randomUUID(),
+            observedAt,
+          );
+          throw new SmppDiagnosticResponseLossError(
+            responseLoss.lease.leaseId,
+            execution.taskId,
+            execution.externalExecutionId,
+            missionId,
+          );
+        }
         await this.telemetry.metric(
           "provider_task_start_latency_ms",
           Math.max(0, Date.now() - Date.parse(execution.createdAt)),
@@ -463,6 +545,7 @@ export class UgvProviderRuntime {
         initialSnapshot: executionSnapshot(execution),
       };
     } catch (error) {
+      if (error instanceof SmppDiagnosticResponseLossError) throw error;
       if (await this.#downstreamMissionReadyNotStarted(execution)) {
         execution = transition(execution, "STARTING", "DOWNSTREAM_MISSION_READY_NOT_STARTED");
         await this.store.putExecution(execution);
@@ -494,6 +577,152 @@ export class UgvProviderRuntime {
       await this.store.putExecution(failed);
       throw error;
     }
+  }
+
+  async #diagnosticControl(
+    input: StartUgvOperation,
+  ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
+    const diagnostics = this.options.diagnostics;
+    if (diagnostics?.enabled !== true || diagnostics.controlToken.length === 0) {
+      throw new Error("SMPP_DIAGNOSTICS_DISABLED");
+    }
+    const capabilityId = input.arguments.capabilityId;
+    if (
+      capabilityId !== SMPP_RESPONSE_LOSS_CAPABILITY &&
+      capabilityId !== SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY
+    ) {
+      throw new Error("SMPP_DIAGNOSTIC_CAPABILITY_INVALID");
+    }
+    const request = parseSmppDiagnosticControlRequest(
+      input.arguments.request,
+      capabilityId,
+      diagnostics.maximumTtlMs,
+    );
+    assertDiagnosticControlSignature(
+      diagnostics.controlToken,
+      input.executionContext.authorizationContextHash,
+      capabilityId,
+      request,
+    );
+    await this.#expireDiagnosticLeases();
+    const now = this.#now();
+    let result: SmppDiagnosticControlResult | undefined;
+    if (request.action === "arm") {
+      const contract = diagnosticCapabilityContract(capabilityId);
+      const requestHash = diagnosticRequestHash(capabilityId, request);
+      const stableOperationKey = diagnosticStableOperationKey(capabilityId, request.scope);
+      const leaseId = randomUUID();
+      result = await this.store.armDiagnosticLease(
+        {
+          contract: SMPP_DIAGNOSTIC_CONTRACT,
+          leaseId,
+          capabilityId,
+          faultType: contract.faultType,
+          boundary: contract.boundary,
+          injectionCount: 1,
+          operationName: "vehicle_navigate",
+          stableOperationKey,
+          canonicalRequestHash: requestHash,
+          idempotencyKey: request.idempotencyKey,
+          state: "ARMED",
+          scope: request.scope,
+          armedAt: now.toISOString(),
+          expiresAt: new Date(now.getTime() + request.ttlMs).toISOString(),
+        },
+        {
+          contract: SMPP_DIAGNOSTIC_CONTRACT,
+          receiptId: randomUUID(),
+          leaseId,
+          action: "armed",
+          requestHash,
+          occurredAt: now.toISOString(),
+          reasonCode: "SMPP_DIAGNOSTIC_ARMED",
+        },
+      );
+    } else if (request.action === "status") {
+      result = await this.store.getDiagnosticStatus(request.leaseId);
+      if (result?.lease.capabilityId !== capabilityId) {
+        throw new Error("SMPP_DIAGNOSTIC_LEASE_NOT_FOUND");
+      }
+    } else {
+      const existing = await this.store.getDiagnosticLease(request.leaseId);
+      if (existing?.capabilityId !== capabilityId) {
+        throw new Error("SMPP_DIAGNOSTIC_LEASE_NOT_FOUND");
+      }
+      result = await this.store.disarmDiagnosticLease(
+        request.leaseId,
+        diagnosticRequestHash(capabilityId, request),
+        randomUUID(),
+        now.toISOString(),
+      );
+      await this.#removeDiagnosticBehavior(result.lease.leaseId, result.lease.taskId);
+    }
+    return {
+      externalExecutionId: `diagnostic:${result.lease.leaseId}`,
+      initialSnapshot: {
+        taskId: input.taskId,
+        externalExecutionId: `diagnostic:${result.lease.leaseId}`,
+        operationName: input.operationName,
+        argumentHash: input.argumentHash,
+        executionContext: input.executionContext,
+        state: "SUCCEEDED",
+        revision: 1,
+        reasonCode: result.receipt.reasonCode,
+        message: result.receipt.reasonCode,
+        retryable: false,
+        observedAt: timestamp(result.receipt.occurredAt),
+        result: jsonToProtoStruct({
+          contract: SMPP_DIAGNOSTIC_CONTRACT,
+          capabilityId,
+          ...result,
+        }),
+        evidence: [],
+      },
+    };
+  }
+
+  async #bindDiagnostic(
+    execution: ProviderExecution,
+    capabilityId: SmppDiagnosticCapabilityId,
+  ): Promise<SmppDiagnosticControlResult | undefined> {
+    if (
+      this.options.diagnostics?.enabled !== true ||
+      execution.operationName !== "vehicle_navigate"
+    )
+      return undefined;
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (missionId === undefined) return undefined;
+    return this.store.bindDiagnosticLease({
+      capabilityId,
+      operationName: "vehicle_navigate",
+      argumentHash: execution.argumentHash,
+      logicalInvocationId: execution.executionContext.correlationId,
+      taskId: execution.taskId,
+      externalExecutionId: execution.externalExecutionId,
+      deviceMissionId: missionId,
+      observedAt: this.#now().toISOString(),
+    });
+  }
+
+  async #expireDiagnosticLeases(): Promise<void> {
+    if (this.options.diagnostics?.enabled !== true) return;
+    for (const expired of await this.store.expireDiagnosticLeases(this.#now().toISOString())) {
+      await this.#removeDiagnosticBehavior(expired.lease.leaseId, expired.lease.taskId);
+    }
+  }
+
+  async #removeDiagnosticBehavior(leaseId: string, taskId?: string): Promise<void> {
+    if (taskId === undefined) return;
+    const execution = await this.store.getExecution(taskId);
+    if (execution?.diagnosticBehavior?.leaseId !== leaseId || isTerminal(execution.state)) return;
+    const withoutDiagnostic = { ...execution };
+    delete withoutDiagnostic.diagnosticBehavior;
+    const next = {
+      ...withoutDiagnostic,
+      revision: execution.revision + 1,
+      updatedAt: this.#now().toISOString(),
+    };
+    await this.store.putExecution(next);
   }
 
   availability(
@@ -539,7 +768,7 @@ export class UgvProviderRuntime {
       for (const track of UGV_OPERATION_TRACKS[operationName] ?? [])
         if (externallyOccupiedTracks.has(track))
           return externalTrackBusyDecision(track, qualification.riskLevel ?? "MEDIUM");
-    const decision = checkVehicleAvailability({
+    let decision = checkVehicleAvailability({
       operationName,
       operationTracks: UGV_OPERATION_TRACKS,
       snapshot,
@@ -551,7 +780,24 @@ export class UgvProviderRuntime {
       fireRequiresChassisStopped: this.options.fireRequiresChassisStopped,
       circularScanSupported: true,
       ...(typeof argumentsValue.scanMode === "string" ? { scanMode: argumentsValue.scanMode } : {}),
+      now: this.#now().getTime(),
     });
+    if (
+      operationName === "vehicle_navigate" &&
+      (decision.reasonCode === "UGV_STATE_STALE" ||
+        (decision.availability === "AVAILABLE" &&
+          this.ingress.fieldFreshnessState(
+            "chassis.position.geodetic",
+            this.options.freshness.chassis,
+            this.#now().getTime(),
+          ) !== "fresh"))
+    )
+      decision = {
+        availability: "DISABLED",
+        riskLevel: qualification.riskLevel ?? "MEDIUM",
+        reasonCode: "UGV_STATE_STALE",
+        description: "UGV_STATE_STALE",
+      };
     if (decision.reasonCode === "UGV_TOOL_UNAVAILABLE") {
       const reasonCode = qualificationFailureReason(qualification);
       return {
@@ -954,6 +1200,7 @@ export class UgvProviderRuntime {
   }
 
   async #pollActive(): Promise<void> {
+    await this.#expireDiagnosticLeases();
     await this.#ensureDeviceConnection();
     this.#refreshReadiness();
     await this.#emitResourceTransitions(this.ingress.snapshot());
@@ -1032,8 +1279,13 @@ export class UgvProviderRuntime {
           observation.sourceObservedAt ?? observedAt,
         );
       }
+      const snapshot = this.ingress.snapshot();
       result = {
-        ...selectSnapshot(this.ingress.snapshot(), input.arguments.include),
+        ...selectSnapshot(
+          snapshot,
+          input.arguments.include,
+          this.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt,
+        ),
         mqttIngressSequence: this.ingress.ingestSequence(),
       };
     } else if (input.operationName === "vehicle_get_capabilities") {
@@ -1341,6 +1593,42 @@ export class UgvProviderRuntime {
       if (next.state === "PAUSED" && next.controlConfirmation?.command === "pause")
         await this.#confirmationLatencyMetric("pause_confirmation_latency_ms", next);
       if (isTerminal(next.state)) {
+        if (
+          next.diagnosticBehavior?.capabilityId === SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY &&
+          next.reasonCode === "SMPP_DIAGNOSTIC_PROVIDER_BUSINESS_SUCCESS"
+        ) {
+          const diagnostic = await this.store.getDiagnosticStatus(next.diagnosticBehavior.leaseId);
+          if (diagnostic !== undefined) {
+            const observedAt =
+              typeof next.result?.observedAt === "string"
+                ? next.result.observedAt
+                : this.#now().toISOString();
+            await this.telemetry.emit(
+              "PROVIDER_DIAGNOSTIC",
+              {
+                state: "SUCCEEDED",
+                reasonCode: "SMPP_DIAGNOSTIC_PROVIDER_BUSINESS_SUCCESS",
+              },
+              {
+                taskId: next.taskId,
+                externalExecutionId: next.externalExecutionId,
+                operationName: next.operationName,
+                observedAt,
+                attributes: diagnosticTelemetryAttributes(diagnostic, next, {
+                  providerBusinessStatus: "succeeded",
+                  claimsPhysicalArrival: false,
+                  claimsGoalSuccess: false,
+                }),
+              },
+            );
+            await this.store.consumeDiagnosticLease(
+              diagnostic.lease.leaseId,
+              diagnostic.lease.canonicalRequestHash,
+              randomUUID(),
+              observedAt,
+            );
+          }
+        }
         await this.telemetry.metric(
           "provider_task_terminal_latency_ms",
           Math.max(0, Date.now() - Date.parse(next.createdAt)),
@@ -1413,7 +1701,17 @@ export class UgvProviderRuntime {
     }
     const missionAuthority = this.ingress.fieldObservationAuthority("chassis.mission");
     if (missionAuthority !== undefined) {
-      const missionId = snapshot.chassis.mission.id;
+      const observedMissionId = snapshot.chassis.mission.id;
+      const missionId =
+        observedMissionId === undefined
+          ? undefined
+          : execution.downstreamMissionIds.find((candidate) => {
+              try {
+                return candidate === String(parseUgvMissionId(observedMissionId));
+              } catch {
+                return false;
+              }
+            });
       await this.telemetry.emit(
         "RESOURCE_STATE",
         { state: String(snapshot.chassis.mission.state), reasonCode: "UGV_MISSION_OBSERVED" },
@@ -2586,12 +2884,33 @@ function applyTrack(
     physical?.observationChanged !== true
   )
     return execution;
-  if (!trackBelongsToExecution(execution, track))
-    return execution.reasonCode === "UGV_DOWNSTREAM_MISSION_ID_MISMATCH"
+  if (!trackBelongsToExecution(execution, track)) {
+    const reasonCode =
+      track.id === undefined
+        ? "UGV_MISSION_CORRELATION_UNCONFIRMED"
+        : "UGV_DOWNSTREAM_MISSION_ID_MISMATCH";
+    return execution.reasonCode === reasonCode
       ? execution
-      : transition(execution, execution.state, "UGV_DOWNSTREAM_MISSION_ID_MISMATCH");
+      : transition(execution, execution.state, reasonCode);
+  }
   const mapped = mapVehicleTaskState(track.state, true);
   const armed = execution.observationCursors?.trackActive !== undefined;
+  const current =
+    armed || !isObservedActiveState(mapped.state)
+      ? execution
+      : withObservationCursor(execution, "trackActive", observationCursor);
+  const diagnosticBusinessSuccess =
+    execution.diagnosticBehavior?.capabilityId === SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY &&
+    Date.parse(execution.diagnosticBehavior.expiresAt) > Date.now();
+  if (diagnosticBusinessSuccess && isMappedTerminal(mapped.state)) {
+    return terminal(current, "SUCCEEDED", "SMPP_DIAGNOSTIC_PROVIDER_BUSINESS_SUCCESS", {
+      resourceId: execution.resourceId,
+      status: "succeeded",
+      businessStatus: "succeeded",
+      claimsPhysicalArrival: false,
+      observedAt: track.observedAt ?? new Date().toISOString(),
+    });
+  }
   const immediateCompletionProven =
     mapped.state === "SUCCEEDED" &&
     physical?.confirmation.confirmed === true &&
@@ -2600,10 +2919,6 @@ function applyTrack(
     if (execution.reasonCode === "UGV_TASK_TERMINAL_UNCONFIRMED") return execution;
     return transition(execution, execution.state, "UGV_TASK_TERMINAL_UNCONFIRMED");
   }
-  const current =
-    armed || !isObservedActiveState(mapped.state)
-      ? execution
-      : withObservationCursor(execution, "trackActive", observationCursor);
   if (mapped.state === "RECONCILE") {
     if (current.reasonCode === mapped.reasonCode) return current;
     return transition(current, current.state, mapped.reasonCode);
@@ -2792,7 +3107,7 @@ function trackBelongsToExecution(
   track: Pick<VehicleTaskTrack, "id">,
   allowMissingObservedId = false,
 ): boolean {
-  if (execution.downstreamMissionIds.length === 0) return true;
+  if (execution.downstreamMissionIds.length === 0) return false;
   if (track.id === undefined) return allowMissingObservedId;
   try {
     return execution.downstreamMissionIds.includes(String(parseUgvMissionId(track.id)));
@@ -3239,7 +3554,11 @@ function taskEvent(execution: ProviderExecution, eventType: string, reasonCode: 
     },
   };
 }
-function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string, unknown> {
+function selectSnapshot(
+  snapshot: UgvSnapshot,
+  include: unknown,
+  positionObservedAt?: string,
+): Record<string, unknown> {
   const requested = Array.isArray(include)
     ? new Set(include.filter((x): x is string => typeof x === "string"))
     : new Set(["chassis", "payload", "health", "targets"]);
@@ -3251,7 +3570,10 @@ function selectSnapshot(snapshot: UgvSnapshot, include: unknown): Record<string,
       executionMode: snapshot.identity.executionMode,
     },
     connectivity: snapshot.connectivity,
-    freshness: snapshot.freshness,
+    freshness: {
+      ...snapshot.freshness,
+      ...(positionObservedAt === undefined ? {} : { positionObservedAt }),
+    },
     revision: snapshot.revision,
     observedAt: snapshot.observedAt,
   };
@@ -3435,6 +3757,37 @@ function executionProgressAttributes(execution: ProviderExecution) {
     reasonCode: execution.reasonCode,
     progressBucket: progressBucket(execution.progress),
     progressKnown: execution.progress !== undefined,
+  };
+}
+
+function diagnosticTelemetryAttributes(
+  diagnostic: SmppDiagnosticControlResult,
+  execution: ProviderExecution,
+  attributes: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    "sdar.diagnostic.contract": SMPP_DIAGNOSTIC_CONTRACT,
+    "sdar.diagnostic.capabilityId": diagnostic.lease.capabilityId,
+    "sdar.diagnostic.faultType": diagnostic.lease.faultType,
+    "sdar.diagnostic.boundary": diagnostic.lease.boundary,
+    "sdar.diagnostic.injectionCount": diagnostic.lease.injectionCount,
+    "sdar.diagnostic.leaseId": diagnostic.lease.leaseId,
+    "sdar.diagnostic.fence": diagnostic.lease.fence,
+    "sdar.diagnostic.runId": diagnostic.lease.scope.runId,
+    "sdar.diagnostic.caseId": diagnostic.lease.scope.caseId,
+    "sdar.diagnostic.caseExecutionId": diagnostic.lease.scope.caseExecutionId,
+    "sdar.diagnostic.repetitionId": diagnostic.lease.scope.repetitionId,
+    "sdar.diagnostic.logicalInvocationId": diagnostic.lease.logicalInvocationId ?? "",
+    "sdar.diagnostic.argumentHash": diagnostic.lease.scope.selector.argumentHash,
+    "sdar.diagnostic.taskId": execution.taskId,
+    "sdar.diagnostic.externalExecutionId": execution.externalExecutionId,
+    "sdar.diagnostic.deviceMissionId": diagnostic.lease.deviceMissionId ?? "",
+    "sdar.device.mission_id": diagnostic.lease.deviceMissionId ?? "",
+    "sdar.diagnostic.event":
+      diagnostic.lease.capabilityId === SMPP_RESPONSE_LOSS_CAPABILITY
+        ? "response_lost_after_adapter_success"
+        : "provider_business_success",
+    ...attributes,
   };
 }
 function isTerminal(state: ProviderExecutionState): boolean {

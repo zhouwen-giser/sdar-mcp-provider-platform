@@ -2,6 +2,13 @@ import type {
   AdapterBusinessEvent,
   BusinessEventSourceCapability,
 } from "../../adapter-protocol/src/index.js";
+import type {
+  SmppDiagnosticBinding,
+  SmppDiagnosticCapabilityId,
+  SmppDiagnosticControlResult,
+  SmppDiagnosticLease,
+  SmppDiagnosticReceipt,
+} from "./diagnostics.js";
 
 export type ProviderExecutionState =
   | "ACCEPTED"
@@ -35,6 +42,14 @@ export interface ProviderExecution {
   arguments: Record<string, unknown>;
   executionContext: ExecutionContextRecord;
   downstreamMissionIds: string[];
+  diagnosticBehavior?: {
+    capabilityId: SmppDiagnosticCapabilityId;
+    leaseId: string;
+    fence: string;
+    expiresAt: string;
+    caseExecutionId: string;
+    repetitionId: string;
+  };
   /** Source-observation cursors captured before dispatch, used to reject stale task telemetry. */
   observationCursors?: Record<string, string>;
   /** Objective vehicle facts and observation authority captured before physical dispatch. */
@@ -189,6 +204,28 @@ export interface ProviderStore {
   ): Promise<boolean>;
   appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void>;
   putSnapshot(record: SnapshotRecord): Promise<void>;
+  armDiagnosticLease(
+    lease: Omit<SmppDiagnosticLease, "fence">,
+    receipt: Omit<SmppDiagnosticReceipt, "state">,
+  ): Promise<SmppDiagnosticControlResult>;
+  getDiagnosticLease(leaseId: string): Promise<SmppDiagnosticLease | undefined>;
+  getDiagnosticStatus(leaseId: string): Promise<SmppDiagnosticControlResult | undefined>;
+  disarmDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult>;
+  bindDiagnosticLease(
+    binding: SmppDiagnosticBinding,
+  ): Promise<SmppDiagnosticControlResult | undefined>;
+  consumeDiagnosticLease(
+    leaseId: string,
+    requestHash: string,
+    receiptId: string,
+    occurredAt: string,
+  ): Promise<SmppDiagnosticControlResult>;
+  expireDiagnosticLeases(occurredAt: string): Promise<readonly SmppDiagnosticControlResult[]>;
   appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent>;
   replayBusinessEvents(
     sourceId: string,

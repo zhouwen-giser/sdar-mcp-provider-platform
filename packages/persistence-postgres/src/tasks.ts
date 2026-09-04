@@ -2363,7 +2363,11 @@ export class TaskRepository {
         observation: {
           type: "task.started",
           occurredAt: confirmedAt,
-          reasonCode: "START_CONFIRMED",
+          // A start-confirmation reconciliation may observe that the Adapter has
+          // already reached a terminal state. Preserve that authoritative Adapter
+          // reason in the immutable lifecycle fact instead of masking it with the
+          // scheduler action that discovered the snapshot.
+          reasonCode: transition.statusMessage,
           message: transition.statusMessage,
           substate: transition.substate,
           source: "adapter",

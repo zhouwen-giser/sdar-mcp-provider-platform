@@ -12,6 +12,7 @@ import type {
   VehicleSnapshot,
 } from "../../vehicle-provider-core/src/index.js";
 import type { ExecutionContextRecord, ProviderExecution, ProviderStore } from "./types.js";
+import { SmppDiagnosticResponseLossError } from "./diagnostics.js";
 
 type Unary<T> = grpc.ServerUnaryCall<T, unknown>;
 interface StartRequest {
@@ -152,7 +153,11 @@ export class VehicleProviderGrpcServer {
         void this.runtime
           .start(startInput(call.request))
           .then((accepted) => callback(null, { result: "accepted", accepted }))
-          .catch((error: unknown) =>
+          .catch((error: unknown) => {
+            if (error instanceof SmppDiagnosticResponseLossError) {
+              callback(responseLossServiceError(error));
+              return;
+            }
             callback(null, {
               result: "rejected",
               rejected: {
@@ -160,8 +165,8 @@ export class VehicleProviderGrpcServer {
                 message: reason(error, this.options.internalErrorCode),
                 retryable: retryable(error),
               },
-            }),
-          );
+            });
+          });
       },
       getExecution: (call: Unary<{ taskId?: string }>, callback: grpc.sendUnaryData<unknown>) => {
         void this.runtime
@@ -373,6 +378,18 @@ function serviceError(error: unknown, internalErrorCode: string): grpc.ServiceEr
     code: grpc.status.INTERNAL,
     details: reason(error, internalErrorCode),
     metadata: new grpc.Metadata(),
+  });
+}
+function responseLossServiceError(error: SmppDiagnosticResponseLossError): grpc.ServiceError {
+  const metadata = new grpc.Metadata();
+  metadata.set("sdar-diagnostic-lease-id", error.leaseId);
+  metadata.set("sdar-task-id", error.taskId);
+  metadata.set("sdar-external-execution-id", error.externalExecutionId);
+  metadata.set("sdar-device-mission-id", error.deviceMissionId);
+  return Object.assign(new Error(error.code), {
+    code: grpc.status.UNAVAILABLE,
+    details: error.code,
+    metadata,
   });
 }
 function streamError(code: grpc.status, reasonCode: string): grpc.ServiceError {

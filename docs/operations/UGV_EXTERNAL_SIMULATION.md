@@ -36,7 +36,7 @@ pnpm exec vitest run tests/ugv-simulation/external-contract-freeze.test.ts
 
 `device-mcp-contract.redacted.json` records the negotiated Device MCP protocol separately from the northbound SMPP Runtime protocol. Each of the three Goal tools retains its complete input schema and an explicit `null` output schema when the simulator does not declare one. The artifact records input, output, combined-schema, and tool canonical hashes. Existing runtime result validation remains mandatory for undeclared output schemas.
 
-The current external decision is `UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT=false`. This Goal is simulation-only, but its external acceptance still requires the real `tools/list`; there is no automatic mock fallback. The artifact grants no authorization and records zero `tools/call`, publish, and control counts.
+The current external decision is `UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT=false`. This Goal is simulation-only, but its external acceptance still requires the real `tools/list`; there is no automatic mock fallback. A separately reviewed `UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT=true` may preserve a previously captured real catalog during a transport outage, but it cannot execute offline or turn captured schemas into authorization. The artifact grants no authorization and records zero `tools/call`, publish, and control counts.
 
 ## MQTT contract
 

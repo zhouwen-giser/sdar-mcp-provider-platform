@@ -60,6 +60,17 @@
     },
     {
       "applyMode": "immutable",
+      "description": "UGV Provider ugv_delivery_stage setting.",
+      "displayName": "UGV_DELIVERY_STAGE",
+      "overridePolicy": { "mode": "forbidden" },
+      "path": "/UGV_DELIVERY_STAGE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "immutable",
       "description": "UGV Provider ugv_execution_mode setting.",
       "displayName": "UGV_EXECUTION_MODE",
       "overridePolicy": { "mode": "forbidden" },
@@ -589,6 +600,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_device_mcp_allow_captured_contract setting.",
+      "displayName": "UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_device_mcp_read_retry_attempts setting.",
       "displayName": "UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS",
       "overridePolicy": {
@@ -680,6 +705,48 @@
         "mode": "inheritable"
       },
       "path": "/UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_diagnostics_enabled setting.",
+      "displayName": "UGV_DIAGNOSTICS_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DIAGNOSTICS_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_diagnostics_control_token_file setting.",
+      "displayName": "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_diagnostics_max_ttl_ms setting.",
+      "displayName": "UGV_DIAGNOSTICS_MAX_TTL_MS",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_DIAGNOSTICS_MAX_TTL_MS",
       "required": false,
       "secret": false,
       "secretRef": false,

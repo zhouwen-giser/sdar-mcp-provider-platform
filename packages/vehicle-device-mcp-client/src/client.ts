@@ -162,6 +162,12 @@ export class StreamableHttpVehicleDeviceMcpClient<
       maxResponseBytes: number;
       contractReportPath: string;
       useMockContractWhenUnavailable: boolean;
+      /**
+       * Preserve a catalog captured from the real southbound server while its
+       * transport is temporarily unavailable. This never enables mock calls:
+       * mutations still require a connected live MCP transport.
+       */
+      useCapturedContractWhenUnavailable?: boolean;
       reconnectMinMs?: number;
       reconnectMaxMs?: number;
       readRetryAttempts?: number;
@@ -193,6 +199,13 @@ export class StreamableHttpVehicleDeviceMcpClient<
     try {
       await this.#connect(false);
     } catch (error) {
+      if (
+        this.options.useCapturedContractWhenUnavailable === true &&
+        this.#loadCapturedContract()
+      ) {
+        this.#scheduleReconnect();
+        return;
+      }
       if (!this.options.useMockContractWhenUnavailable) throw error;
       this.#contracts = this.profile.mockContracts();
       this.#writeContract(
@@ -324,7 +337,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
             throw error;
           }
           outcome = isTimeout(error) ? "timeout" : "protocol_error";
-          await this.#disconnectAfterFailure();
+          this.#disconnectAfterFailure();
           this.#recordToolFailure(name);
           if (mutating)
             throw new UncertainMutatingDeviceCallError(
@@ -508,7 +521,7 @@ export class StreamableHttpVehicleDeviceMcpClient<
         !(error instanceof DeviceToolRejectedError) &&
         !(error instanceof UncertainMutatingDeviceCallError)
       ) {
-        if (transportFailure(error)) await this.#disconnectAfterFailure();
+        if (transportFailure(error)) this.#disconnectAfterFailure();
         throw new UncertainMutatingDeviceCallError(
           this.profile.errorPrefix,
           name,
@@ -528,12 +541,16 @@ export class StreamableHttpVehicleDeviceMcpClient<
     this.#scheduleReconnect();
   }
 
-  async #disconnectAfterFailure(): Promise<void> {
+  #disconnectAfterFailure(): void {
     const transport = this.#transport;
     this.#client = undefined;
     this.#transport = undefined;
     if (!this.#closing) this.#setConnectionState("disconnected");
-    if (transport !== undefined) await transport.close().catch(() => undefined);
+    // A stale remote session can also leave the SDK's best-effort DELETE
+    // cleanup waiting on the dead session. The new transport must not inherit
+    // that delay, especially when the northbound Adapter RPC has a shorter
+    // deadline than the southbound timeout.
+    if (transport !== undefined) void transport.close().catch(() => undefined);
     this.#scheduleReconnect();
   }
 
@@ -651,6 +668,65 @@ export class StreamableHttpVehicleDeviceMcpClient<
       encoding: "utf8",
       mode: 0o600,
     });
+  }
+
+  #loadCapturedContract(): boolean {
+    try {
+      const raw = readFileSync(this.options.contractReportPath, "utf8");
+      if (Buffer.byteLength(raw, "utf8") > 1_048_576) return false;
+      const report: unknown = JSON.parse(raw);
+      if (!record(report) || report.mode !== "captured" || !Array.isArray(report.tools))
+        return false;
+      const contracts: CapturedToolContract[] = [];
+      const names = new Set<string>();
+      for (const value of report.tools) {
+        if (!record(value)) return false;
+        const {
+          name,
+          description,
+          inputSchema,
+          outputSchema,
+          annotations,
+          capturedAt,
+          schemaHash,
+        } = value;
+        if (
+          typeof name !== "string" ||
+          !this.profile.isAllowed(name) ||
+          names.has(name) ||
+          typeof description !== "string" ||
+          !record(inputSchema) ||
+          inputSchema.type !== "object" ||
+          (outputSchema !== undefined && !record(outputSchema)) ||
+          (annotations !== undefined && !record(annotations)) ||
+          typeof capturedAt !== "string" ||
+          !Number.isFinite(Date.parse(capturedAt)) ||
+          typeof schemaHash !== "string" ||
+          !/^[0-9a-f]{64}$/.test(schemaHash)
+        )
+          return false;
+        const contract: CapturedToolContract = {
+          name,
+          description,
+          inputSchema,
+          ...(outputSchema === undefined ? {} : { outputSchema }),
+          ...(annotations === undefined ? {} : { annotations }),
+          capturedAt,
+          schemaHash,
+        };
+        const expectedHash =
+          this.profile.contractSchemaHash?.(contract) ??
+          createHash("sha256").update(canonical(contract.inputSchema)).digest("hex");
+        if (expectedHash !== schemaHash) return false;
+        names.add(name);
+        contracts.push(contract);
+      }
+      if (contracts.length === 0) return false;
+      this.#contracts = contracts;
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -888,9 +964,19 @@ function loadHeaders(path: string): Record<string, string> {
 function transportFailure(error: unknown): boolean {
   if (error instanceof McpError) return error.code === -32_000 || error.code === -32_001;
   if (!(error instanceof Error)) return false;
+  if (staleStreamableHttpSession(error)) return true;
   if (error.name === "AbortError" || error.name === "TimeoutError") return true;
   return /(?:timeout|timed out|connection (?:closed|lost|reset)|socket hang up|ECONNRESET|ECONNREFUSED|EPIPE|fetch failed)/iu.test(
     error.message,
+  );
+}
+
+function staleStreamableHttpSession(error: Error): boolean {
+  const statusCode = (error as Error & { code?: unknown }).code;
+  return (
+    statusCode === 404 &&
+    error.message.startsWith("Streamable HTTP error: Error POSTing to endpoint:") &&
+    /(?:"message"\s*:\s*"Session not found"|\bSession not found\b)/u.test(error.message)
   );
 }
 

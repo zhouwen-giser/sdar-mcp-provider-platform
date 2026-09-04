@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applySnapshotPatch,
   checkVehicleAvailability,
   createUgvSnapshot,
   freshnessState,
@@ -24,8 +25,8 @@ const limits = { maxPayloadBytes: 4096, maxDepth: 8, maxNodes: 128, maxStringByt
 const freshness = { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 };
 
 describe("UGV MQTT exact routing and normalization", () => {
-  it("contains the 18 real-boundary UGV topics and rejects wildcard or referee topics", () => {
-    expect(UGV_MQTT_TOPICS).toHaveLength(18);
+  it("contains the 19 real-boundary UGV topics and rejects wildcard or referee topics", () => {
+    expect(UGV_MQTT_TOPICS).toHaveLength(19);
     expect(() => assertExactSubscriptions(UGV_MQTT_TOPICS)).not.toThrow();
     expect(exactUgvTopic("/ugv/referee/status")).toBe(false);
     expect(exactUgvTopic("/ugv/status")).toBe(true);
@@ -229,6 +230,32 @@ describe("UGV task, track, availability and fire boundaries", () => {
     expect(
       freshnessState(snapshot, "chassis", { ...freshness, maximumFutureSkewMs: 1_000 }, now),
     ).toBe("stale");
+  });
+
+  it("never regresses coarse freshness when a different source clock lags", () => {
+    const aggregateObservedAt = "2026-09-02T03:18:21.196Z";
+    const laggingSourceObservedAt = "2026-09-02T03:17:36.185Z";
+    const aggregate = applySnapshotPatch(
+      createUgvSnapshot(undefined, "2026-09-02T03:18:00.000Z"),
+      { chassis: { speedKmh: 0 }, health: { runState: 0 } },
+      aggregateObservedAt,
+      ["chassis", "health"],
+    );
+    const afterLaggingSource = applySnapshotPatch(
+      aggregate,
+      { chassis: { compassHeadingDeg: 90 }, health: { mode: 1 } },
+      laggingSourceObservedAt,
+      ["chassis", "health"],
+    );
+
+    expect(afterLaggingSource).toMatchObject({
+      freshness: {
+        chassisObservedAt: aggregateObservedAt,
+        healthObservedAt: aggregateObservedAt,
+      },
+      chassis: { compassHeadingDeg: 90 },
+      health: { mode: 1 },
+    });
   });
 
   it("strips every nested referee verdict field from fire responses", () => {

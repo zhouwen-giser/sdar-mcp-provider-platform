@@ -25,7 +25,7 @@ describe("Runtime worker and event configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(definitionKeys).toHaveLength(100);
+    expect(definitionKeys).toHaveLength(103);
     expect(new Set(definitionKeys).size).toBe(definitionKeys.length);
     expect(definitionKeys).toEqual(inventoryKeys);
   });
@@ -112,6 +112,7 @@ describe("Runtime worker and event configuration contract", () => {
       "/PROVIDER_TELEMETRY_TLS_KEY_PATH",
       "/JWT_HS256_SECRET",
       "/INTERNAL_ADMIN_TOKEN",
+      "/SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
     ]);
   });
 });

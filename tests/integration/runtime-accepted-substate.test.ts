@@ -29,6 +29,77 @@ afterAll(async () => {
 });
 
 describe("Runtime accepted Task substate", () => {
+  it("keeps a terminal start-confirmation fact aligned with the authoritative Task reason", async () => {
+    const snapshotId = randomUUID();
+    const taskId = randomUUID();
+    const claimOwner = randomUUID();
+    await pool.query(
+      `INSERT INTO operation_snapshot
+         (snapshot_id,provider_id,provider_version,operation_name,manifest_hash,definition)
+       VALUES ($1,'terminal-confirmation-provider','1.0.0','vehicle_navigate',repeat('9',64),'{}'::jsonb)`,
+      [snapshotId],
+    );
+    await pool.query(
+      `INSERT INTO provider_task
+         (task_id,provider_id,operation_name,operation_snapshot_id,authorization_context_hash,
+          execution_mode,simulation_id,arguments,argument_hash,external_execution_id,
+          internal_state,mcp_status,substate,status_message,accepted_at,timing,adapter_revision,
+          observation_revision,schedule_claim_owner,schedule_claim_until,trace_id,root_traceparent,
+          root_tracestate,correlation_id)
+       VALUES ($1,'terminal-confirmation-provider','vehicle_navigate',$2,repeat('8',64),'live',NULL,
+          '{}'::jsonb,repeat('7',64),'terminal-confirmation-execution','WAITING_START_CONFIRMATION',
+          'working','accepted','accepted',clock_timestamp(),'{}'::jsonb,0,0,$3,
+          clock_timestamp() + interval '30 seconds',repeat('6',32),
+          '00-66666666666666666666666666666666-5555555555555555-01',
+          'vendor=terminal-confirmation','terminal-confirmation-correlation')`,
+      [taskId, snapshotId, claimOwner],
+    );
+
+    const repository = new TaskRepository(pool);
+    const reasonCode = "UGV_START_OBSERVATION_TIMEOUT";
+    const task = await repository.confirmBoundExecutionStarted(
+      taskId,
+      claimOwner,
+      17,
+      {
+        internalState: "TERMINAL_FAILED",
+        mcpStatus: "failed",
+        substate: null,
+        statusMessage: reasonCode,
+        result: null,
+        error: {
+          code: -32603,
+          message: "Task execution failed.",
+          data: { reasonCode, retryable: true },
+        },
+        terminal: true,
+        observationType: "task.progress",
+      },
+      new Date(),
+    );
+
+    expect(task).toMatchObject({
+      internalState: "TERMINAL_FAILED",
+      mcpStatus: "failed",
+      statusMessage: reasonCode,
+    });
+    const immutableFact = await pool.query<{
+      reason_code: string;
+      provider_ops_reason: string;
+    }>(
+      `SELECT o.reason_code,
+              d.record_body #>> '{payload,reasonCode}' AS provider_ops_reason
+       FROM task_observation o
+       JOIN provider_ops_delivery d
+         ON d.event_key=$2
+       WHERE o.task_id=$1 AND o.type='task.started'`,
+      [taskId, `${taskId}:start-confirmed:17`],
+    );
+    expect(immutableFact.rows).toEqual([
+      { reason_code: reasonCode, provider_ops_reason: reasonCode },
+    ]);
+  });
+
   it("persists the Adapter ACCEPTED snapshot without violating the lifecycle constraint", async () => {
     const snapshotId = randomUUID();
     const taskId = randomUUID();

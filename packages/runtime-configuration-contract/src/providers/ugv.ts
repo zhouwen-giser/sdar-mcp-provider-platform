@@ -12,6 +12,7 @@ const tls = z.enum(["disabled", "required"]);
 const publicIdentity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$/);
 const privateEntityIdentity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/);
 const vehicleType = z.string().regex(/^[a-z][a-z0-9_-]{0,63}$/);
+const deliveryStage = z.enum(["development_debug", "integration_candidate", "qualification"]);
 
 const UgvProviderInputBaseSchema = z.object({
   PROVIDER_ID: publicIdentity.default("isr.vehicle.ugv.ugv1"),
@@ -19,7 +20,8 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_RESOURCE_ID: publicIdentity.default("vehicle:ugv1"),
   UGV_ENTITY_ID: privateEntityIdentity.default("ugv1"),
   UGV_VEHICLE_TYPE: vehicleType.default("ugv"),
-  UGV_EXECUTION_MODE: z.enum(["simulation", "live"]).default("simulation"),
+  UGV_DELIVERY_STAGE: deliveryStage.default("development_debug"),
+  UGV_EXECUTION_MODE: z.enum(["simulation", "live"]).default("live"),
   ADAPTER_HOST: z.string().min(1).default("0.0.0.0"),
   ADAPTER_PORT: z.coerce.number().int().min(1).max(65_535).default(7010),
   ADAPTER_TLS_MODE: tls.default("disabled"),
@@ -31,7 +33,7 @@ const UgvProviderInputBaseSchema = z.object({
     .url()
     .default("postgresql://ugv_adapter:ugv_adapter@127.0.0.1:5433/ugv_adapter"),
   UGV_ADAPTER_DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(32).default(8),
-  UGV_MQTT_URL: z.string().min(1).default("mqtt://127.0.0.1:1883"),
+  UGV_MQTT_URL: z.string().min(1).default("mqtt://192.168.2.63:1883"),
   UGV_MQTT_CLIENT_ID: z.string().min(1).default("sdar-ugv-adapter-ugv1"),
   UGV_MQTT_USERNAME: optionalPath,
   UGV_MQTT_PASSWORD_FILE: optionalPath,
@@ -55,7 +57,7 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_TARGET_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   UGV_PAYLOAD_FRESHNESS_MS: z.coerce.number().int().positive().default(3_000),
   UGV_OBSERVATION_MAX_FUTURE_SKEW_MS: z.coerce.number().int().min(0).max(5_000).default(1_000),
-  UGV_DEVICE_MCP_URL: z.url().default("http://127.0.0.1:19000/mcp"),
+  UGV_DEVICE_MCP_URL: z.url().default("http://192.168.2.63:19000/mcp"),
   UGV_DEVICE_MCP_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
   UGV_DEVICE_MCP_TLS_MODE: tls.default("disabled"),
   UGV_DEVICE_MCP_HEADERS_FILE: optionalPath,
@@ -66,6 +68,7 @@ const UgvProviderInputBaseSchema = z.object({
     .max(1_048_576)
     .default(65_536),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: bool.default(false),
+  UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: bool.default(false),
   UGV_DEVICE_MCP_READ_RETRY_ATTEMPTS: z.coerce.number().int().min(0).max(3).default(1),
   UGV_DEVICE_MCP_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().int().min(1).max(100).default(3),
   UGV_DEVICE_MCP_CIRCUIT_BREAKER_RESET_MS: z.coerce
@@ -79,8 +82,11 @@ const UgvProviderInputBaseSchema = z.object({
     .min(1)
     .default("reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json"),
   UGV_ALLOW_NAVIGATION_WITH_RECON: bool.default(true),
-  UGV_FIRE_ENABLED: bool.default(false),
+  UGV_FIRE_ENABLED: bool.default(true),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: bool.default(true),
+  UGV_DIAGNOSTICS_ENABLED: bool.default(false),
+  UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: optionalPath,
+  UGV_DIAGNOSTICS_MAX_TTL_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(300_000),
   UGV_STATIONARY_SPEED_THRESHOLD_KMH: z.coerce.number().min(0).max(5).default(0.1),
   UGV_STATIONARY_STABILITY_MS: z.coerce.number().int().min(0).max(60_000).default(500),
   UGV_STATIONARY_MIN_SAMPLES: z.coerce.number().int().min(1).max(100).default(2),
@@ -106,6 +112,28 @@ const UgvProviderInputBaseSchema = z.object({
 });
 
 const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, context) => {
+  const expectedRuntimeEnvironment =
+    value.UGV_DELIVERY_STAGE === "development_debug"
+      ? "development"
+      : value.UGV_DELIVERY_STAGE === "integration_candidate"
+        ? "test"
+        : undefined;
+  if (expectedRuntimeEnvironment !== undefined && value.RUNTIME_ENV !== expectedRuntimeEnvironment)
+    context.addIssue({
+      code: "custom",
+      message: "UGV_DELIVERY_STAGE_RUNTIME_ENV_MISMATCH",
+      path: ["UGV_DELIVERY_STAGE"],
+    });
+  if (
+    value.UGV_DELIVERY_STAGE === "qualification" &&
+    value.RUNTIME_ENV !== "test" &&
+    value.RUNTIME_ENV !== "production"
+  )
+    context.addIssue({
+      code: "custom",
+      message: "UGV_DELIVERY_STAGE_RUNTIME_ENV_MISMATCH",
+      path: ["UGV_DELIVERY_STAGE"],
+    });
   for (const [mode, ca, cert, key, name] of [
     [
       value.ADAPTER_TLS_MODE,
@@ -147,6 +175,8 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
     if (value.UGV_ADAPTER_STORE_MODE !== "postgres")
       context.addIssue({ code: "custom", message: "UGV_LIVE_POSTGRES_STORE_REQUIRED" });
   }
+  if (value.UGV_DIAGNOSTICS_ENABLED && value.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined)
+    context.addIssue({ code: "custom", message: "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE_REQUIRED" });
   if (value.UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD >= value.UGV_OPERATION_FAILURE_OPEN_THRESHOLD)
     context.addIssue({
       code: "custom",
@@ -165,9 +195,12 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_MQTT_TLS_KEY_PATH: z.string().optional(),
   UGV_DEVICE_MCP_HEADERS_FILE: z.string().optional(),
   UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT: z.boolean(),
+  UGV_DEVICE_MCP_ALLOW_CAPTURED_CONTRACT: z.boolean(),
   UGV_ALLOW_NAVIGATION_WITH_RECON: z.boolean(),
   UGV_FIRE_ENABLED: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),
+  UGV_DIAGNOSTICS_ENABLED: z.boolean(),
+  UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: z.string().optional(),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
   ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),
   PROVIDER_TELEMETRY_TLS_CA_PATH: z.string().optional(),
@@ -189,6 +222,7 @@ const secretKeys = new Set([
   "UGV_MQTT_PASSWORD_FILE",
   "UGV_MQTT_TLS_KEY_PATH",
   "UGV_DEVICE_MCP_HEADERS_FILE",
+  "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
   "PROVIDER_TELEMETRY_TLS_KEY_PATH",
 ]);
 const configurationKeys = Object.keys(UgvProviderResolvedSchema.shape);
@@ -224,6 +258,7 @@ export const UgvProviderConfigurationDefinition = parseConfigurationDefinition({
       key === "UGV_RESOURCE_ID" ||
       key === "UGV_ENTITY_ID" ||
       key === "UGV_VEHICLE_TYPE" ||
+      key === "UGV_DELIVERY_STAGE" ||
       key === "UGV_EXECUTION_MODE";
     return {
       path: `/${key}`,
