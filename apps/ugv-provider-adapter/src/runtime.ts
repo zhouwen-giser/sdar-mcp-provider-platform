@@ -270,10 +270,10 @@ export class UgvProviderRuntime {
     await this.store.initialize();
     this.#unsubscribeDeviceConnection = this.device.onConnectionState((state) => {
       this.ingress.setDeviceConnected(state === "connected");
+      if (state === "connected") this.#synchronizeDeviceToolHealth();
       this.#refreshReadiness();
     });
-    for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
-      this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
+    this.#synchronizeDeviceToolHealth();
     this.#unsubscribeToolHealth = this.device.onToolHealth((health) => {
       for (const transition of this.operationHealth.recordToolHealth(health))
         void this.#operationHealthTransition(transition.previous, transition.current);
@@ -303,6 +303,11 @@ export class UgvProviderRuntime {
     });
     this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
+  }
+
+  #synchronizeDeviceToolHealth(): void {
+    for (const toolName of UGV_DEVICE_TOOL_ALLOWLIST)
+      this.operationHealth.recordToolHealth(this.device.toolHealth(toolName));
   }
 
   async #initializeDependencies(): Promise<void> {

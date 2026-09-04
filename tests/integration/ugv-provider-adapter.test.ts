@@ -51,6 +51,24 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("refreshes operation health after Device MCP contract discovery without a tool call", async () => {
+    const device = new ConnectPopulatesContractUgvDevice();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    expect(device.calls).toHaveLength(0);
+    expect(
+      fixture.runtime.operationHealth.snapshot("vehicle_navigate", navigateArgs()),
+    ).toMatchObject({
+      state: "HEALTHY",
+      requiredTools: ["ugv_path_follow_mission", "ugv_mission_control"],
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+    expect(device.calls).toHaveLength(0);
+  });
+
   it("drops exactly one response only after the original mission is durable and never redispatches", async () => {
     const token = "diagnostic-control-token-for-tests";
     const fixture = await createFixture(false, new MemoryProviderStore(), {
@@ -2769,6 +2787,18 @@ class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {
 
   override contracts(): CapturedToolContract[] {
     return this.fixtureContracts.map((contract) => structuredClone(contract));
+  }
+}
+
+class ConnectPopulatesContractUgvDevice extends MockUgvDeviceMcpClient {
+  constructor() {
+    super(new Set());
+  }
+
+  override connect(): Promise<void> {
+    for (const contract of mockUgvToolContracts())
+      this.available.add(contract.name as UgvDeviceToolName);
+    return super.connect();
   }
 }
 
