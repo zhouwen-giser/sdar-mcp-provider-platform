@@ -7,6 +7,8 @@ services:
       UGV_MQTT_URL: ${UGV_SIM_MQTT_URL:-mqtt://192.168.2.63:1883}
       UGV_MQTT_WIRE_MODE: ${UGV_MQTT_WIRE_MODE:-ros_bridge_json}
       UGV_FIRE_ENABLED: ${UGV_FIRE_ENABLED:-true}
+      UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}
+      UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: /run/secrets/smpp_diagnostic_operator_token
       RUNTIME_ENV: development
 
   ugv-runtime:
@@ -20,5 +22,11 @@ services:
       OTEL_EXPORTER_OTLP_TLS_MODE: disabled
       OTEL_EXPORTER_OTLP_TIMEOUT_MS: "10000"
       OTEL_SERVICE_INSTANCE_ID: ${UGV_RUNTIME_INSTANCE_ID:-ugv-runtime-test-1}
+      SMPP_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}
+      SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE: /run/secrets/smpp_diagnostic_operator_token
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+secrets:
+  smpp_diagnostic_operator_token:
+    file: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:?Development Debug diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE}
