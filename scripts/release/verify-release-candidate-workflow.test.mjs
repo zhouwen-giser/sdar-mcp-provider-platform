@@ -10,6 +10,42 @@ test("accepts the exact release candidate workflow", () => {
   assert.doesNotThrow(() => assertReleaseCandidateWorkflow(source));
 });
 
+test("candidate qualification cannot automatically run on development PRs or pushes", () => {
+  for (const trigger of ["pull_request", "push"]) {
+    assert.throws(
+      () => assertReleaseCandidateWorkflow(source.replace("on:\n", `on:\n  ${trigger}:\n`)),
+      /RELEASE_WORKFLOW_CANDIDATE_TRIGGER_INVALID/,
+    );
+  }
+});
+
+test("development CI retains quality gates and makes production suites opt-in", () => {
+  const ci = readFileSync(".github/workflows/ci.yml", "utf8").replace(/\r\n?/g, "\n");
+  assert.match(ci, /  pull_request:/);
+  assert.match(ci, /  workflow_dispatch:/);
+  for (const name of ["static", "development-tests"]) {
+    assert.match(ci, new RegExp(`  ${name}:\\n    name: ${name}\\n`));
+  }
+  for (const name of [
+    "runtime-ci",
+    "pms-api-production",
+    "worker-pm2-production",
+    "worker-lease-safety",
+    "release-artifacts",
+    "provider-regression",
+    "platform-e2e",
+    "runtime-compose",
+  ]) {
+    assert.ok(
+      ci.includes(
+        `  ${name}:\n    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')`,
+      ),
+    );
+  }
+  assert.match(ci, /run: pnpm test:unit/);
+  assert.match(ci, /run: pnpm --filter @sdar\/runtime-configuration-contract test/);
+});
+
 test("accepts a CRLF workflow without changing its semantics", () => {
   assert.doesNotThrow(() => assertReleaseCandidateWorkflow(rawSource));
 });
