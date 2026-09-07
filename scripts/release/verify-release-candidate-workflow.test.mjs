@@ -21,8 +21,8 @@ test("candidate qualification cannot automatically run on development PRs or pus
 
 test("development CI retains quality gates and makes production suites opt-in", () => {
   const ci = readFileSync(".github/workflows/ci.yml", "utf8").replace(/\r\n?/g, "\n");
-  assert.match(ci, /  pull_request:/);
-  assert.match(ci, /  workflow_dispatch:/);
+  assert.match(ci, / {2}pull_request:/);
+  assert.match(ci, / {2}workflow_dispatch:/);
   for (const name of ["static", "development-tests"]) {
     assert.match(ci, new RegExp(`  ${name}:\\n    name: ${name}\\n`));
   }

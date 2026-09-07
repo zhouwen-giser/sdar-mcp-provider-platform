@@ -17,7 +17,7 @@ export function assertReleaseCandidateWorkflow(source) {
     throw new Error("RELEASE_WORKFLOW_JOBS_INVALID");
   }
   if (
-    /^  (?:pull_request|push):/m.test(normalizedSource) ||
+    /^ {2}(?:pull_request|push):/m.test(normalizedSource) ||
     !normalizedSource.includes("workflow_dispatch:") ||
     !normalizedSource.includes("CANDIDATE_SHA: ${{ inputs.candidate }}")
   ) {
