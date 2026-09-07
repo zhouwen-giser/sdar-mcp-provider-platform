@@ -25,7 +25,7 @@ describe("Runtime worker and event configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(definitionKeys).toHaveLength(103);
+    expect(definitionKeys).toHaveLength(104);
     expect(new Set(definitionKeys).size).toBe(definitionKeys.length);
     expect(definitionKeys).toEqual(inventoryKeys);
   });

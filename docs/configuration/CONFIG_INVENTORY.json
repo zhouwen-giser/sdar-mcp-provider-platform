@@ -14,11 +14,11 @@
     },
     "runtime": {
       "description": "Runtime workers, limits, telemetry, events, notifications, and outbox inputs.",
-      "items": 86
+      "items": 87
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 152
+      "items": 154
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -28,11 +28,11 @@
   "components": {
     "runtime": {
       "source": "apps/runtime/src/config.ts",
-      "items": 102
+      "items": 103
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 71
+      "items": 73
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -59,8 +59,8 @@
         "required OTLP mTLS requires CA, certificate, and key paths",
         "webhook Outbox requires OUTBOX_WEBHOOK_URL",
         "production Outbox webhook requires HTTPS unless internal plaintext transport is explicitly enabled",
-        "enabled internal endpoints require INTERNAL_ADMIN_TOKEN",
-        "enabled SMPP diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE",
+        "enabled internal endpoints require INTERNAL_ADMIN_TOKEN unless SIMULATOR_CREDENTIAL_FREE is explicitly enabled",
+        "enabled SMPP diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE unless SIMULATOR_CREDENTIAL_FREE is explicitly enabled",
         "claim lease durations must cover Adapter RPC, database publication budget, and safety margin"
       ]
     },
@@ -73,7 +73,7 @@
         "production requires MQTT TLS unless internal plaintext transport is explicitly enabled",
         "production MQTT wire mode must be explicit",
         "production requires PostgreSQL store",
-        "enabled UGV diagnostics require UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE"
+        "enabled UGV diagnostics require UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE unless SIMULATOR_CREDENTIAL_FREE is explicitly enabled"
       ]
     },
     {
@@ -100,12 +100,12 @@
     }
   ],
   "coverage": {
-    "expectedItems": 254,
-    "actualItems": 254,
+    "expectedItems": 257,
+    "actualItems": 257,
     "secretItems": 24,
     "byComponent": {
-      "runtime": 102,
-      "ugv": 71,
+      "runtime": 103,
+      "ugv": 73,
       "npc-tank": 53,
       "home-assistant-climate": 28
     }
@@ -1328,6 +1328,21 @@
       "applyModeStatus": "pending_review"
     },
     {
+      "key": "SIMULATOR_CREDENTIAL_FREE",
+      "component": "runtime",
+      "source": "packages/runtime-configuration-contract/src/runtime/worker-events.ts",
+      "group": "runtime",
+      "subgroup": "security",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "BooleanEnvironmentSchema.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
       "key": "INTERNAL_ADMIN_TOKEN",
       "component": "runtime",
       "source": "apps/runtime/src/config.ts:149",
@@ -2429,6 +2444,21 @@
       "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
       "group": "provider",
       "subgroup": "diagnostics",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "SIMULATOR_CREDENTIAL_FREE",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "security",
       "defaultDefined": true,
       "defaultValue": false,
       "required": false,
