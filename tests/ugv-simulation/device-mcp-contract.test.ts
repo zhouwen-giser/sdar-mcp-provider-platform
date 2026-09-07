@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -87,6 +87,55 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     ).not.toBe(contract.schemaHash);
   });
 
+  it("publishes a validated real capture during an outage without enabling offline mutations", async () => {
+    const harness = new UgvMcpHarness();
+    const reportPath = join(mkdtempSync(join(tmpdir(), "ugv-captured-contract-")), "contract.json");
+    await harness.start();
+    const remoteUrl = harness.url;
+    const capturing = testClient(harness, new MemoryProviderStore(), { reportPath });
+    await capturing.connect();
+    await capturing.close();
+    await harness.stop();
+
+    const fallback = testClient(harness, new MemoryProviderStore(), {
+      timeoutMs: 100,
+      url: remoteUrl,
+      reportPath,
+      useCapturedContractWhenUnavailable: true,
+    });
+    try {
+      await fallback.connect();
+      expect(fallback.connected()).toBe(false);
+      expect(fallback.contracts()).toHaveLength(UGV_DEVICE_TOOL_ALLOWLIST.length);
+      expect(fallback.hasTool("ugv_path_follow_mission")).toBe(true);
+      await expect(
+        fallback.call("ugv_path_follow_mission", {
+          task_points: [{ longitude: 106.81389697, latitude: 29.72041184 }],
+          mission_id: 0,
+        }),
+      ).rejects.toThrow("UGV_DEVICE_MCP_UNAVAILABLE");
+      expect(harness.toolCalls).toEqual([]);
+    } finally {
+      await fallback.close();
+    }
+
+    const tampered = JSON.parse(readFileSync(reportPath, "utf8")) as {
+      mode: string;
+      tools: { schemaHash: string }[];
+    };
+    required(tampered.tools[0]).schemaHash = "0".repeat(64);
+    writeFileSync(reportPath, `${JSON.stringify(tampered)}\n`, "utf8");
+    const rejected = testClient(harness, new MemoryProviderStore(), {
+      timeoutMs: 100,
+      url: remoteUrl,
+      reportPath,
+      useCapturedContractWhenUnavailable: true,
+    });
+    await expect(rejected.connect()).rejects.toBeDefined();
+    expect(rejected.contracts()).toEqual([]);
+    await rejected.close();
+  });
+
   it("selects only tools required by the requested operation branch", () => {
     expect(
       requiredUgvDeviceTools("vehicle_navigate", {
@@ -152,6 +201,34 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
   });
 
   it("builds exact path, distance, recon, lifecycle, lock, gimbal and stop arguments", () => {
+    expect(
+      startDeviceCalls("vehicle_navigate", {
+        mission: {
+          type: "point",
+          target: { latitude: 30.2, longitude: 114.2 },
+        },
+      }),
+    ).toEqual([
+      {
+        name: "ugv_path_follow_mission",
+        arguments: {
+          task_points: [{ longitude: 114.2, latitude: 30.2, altitude: 0 }],
+          json_url: "",
+          need_plan: false,
+          density: "adaptive",
+          mission_id: 0,
+        },
+      },
+    ]);
+    expect(
+      startDeviceCalls("vehicle_navigate", {
+        mission: {
+          type: "point",
+          target: { latitude: 30.2, longitude: 114.2 },
+        },
+        planningMode: "auto",
+      })[0]?.arguments,
+    ).toMatchObject({ need_plan: null });
     expect(
       startDeviceCalls("vehicle_navigate", {
         mission: {
@@ -565,6 +642,29 @@ describe("Goal 10 UGV Device MCP transport safety", () => {
     }
   });
 
+  it("reconnects a read after the remote server expires its Streamable HTTP session", async () => {
+    const harness = new UgvMcpHarness();
+    await harness.start();
+    const store = new MemoryProviderStore();
+    const client = testClient(harness, store, { readRetryAttempts: 1 });
+    const states: string[] = [];
+    client.onConnectionState((state) => states.push(state));
+    try {
+      await client.connect();
+      harness.expireNextToolCallSessions = 1;
+      harness.hangNextSessionDeletes = 1;
+      await expect(client.call("get_status", {})).resolves.toEqual({ available: true });
+      expect(harness.toolCalls.filter(({ name }) => name === "get_status")).toHaveLength(2);
+      expect(client.connected()).toBe(true);
+      expect(states).toContain("disconnected");
+      expect(states.at(-1)).toBe("connected");
+      expect(store.toolCalls.at(-1)?.outcome).toBe("accepted");
+    } finally {
+      await client.close();
+      await harness.stop();
+    }
+  });
+
   it("classifies a lost mutating response as uncertain and never retries it", async () => {
     const harness = new UgvMcpHarness();
     harness.delays.set("ugv_motion_stop", 200);
@@ -752,18 +852,21 @@ function testClient(
     readRetryAttempts: number;
     circuitBreakerThreshold: number;
     circuitBreakerResetMs: number;
+    url: string;
+    reportPath: string;
+    useCapturedContractWhenUnavailable: boolean;
   }> = {},
 ): StreamableHttpUgvDeviceMcpClient {
   return new StreamableHttpUgvDeviceMcpClient(
     {
-      url: harness.url,
+      url: overrides.url ?? harness.url,
       timeoutMs: overrides.timeoutMs ?? 500,
       maxResponseBytes: 65_536,
-      contractReportPath: join(
-        mkdtempSync(join(tmpdir(), "ugv-device-contract-")),
-        "contract.json",
-      ),
+      contractReportPath:
+        overrides.reportPath ??
+        join(mkdtempSync(join(tmpdir(), "ugv-device-contract-")), "contract.json"),
       useMockContractWhenUnavailable: false,
+      useCapturedContractWhenUnavailable: overrides.useCapturedContractWhenUnavailable ?? false,
       reconnectMinMs: 50,
       reconnectMaxMs: 100,
       readRetryAttempts: overrides.readRetryAttempts ?? 1,
@@ -797,6 +900,8 @@ class UgvMcpHarness {
   #server: Server | undefined;
   #port: number | undefined;
   dropNextToolCalls = 0;
+  expireNextToolCallSessions = 0;
+  hangNextSessionDeletes = 0;
   readonly delays = new Map<string, number>();
   readonly errorTools = new Set<string>();
   readonly results = new Map<string, unknown>();
@@ -832,6 +937,10 @@ class UgvMcpHarness {
   }
 
   async #handle(request: IncomingMessage, response: ServerResponse) {
+    if (request.method === "DELETE" && this.hangNextSessionDeletes > 0) {
+      this.hangNextSessionDeletes--;
+      return;
+    }
     if (request.method !== "POST") {
       response.writeHead(204).end();
       return;
@@ -843,6 +952,17 @@ class UgvMcpHarness {
       const name = params.name;
       const argumentsValue = record(params.arguments) ? params.arguments : {};
       this.toolCalls.push({ name, arguments: structuredClone(argumentsValue) });
+      if (this.expireNextToolCallSessions > 0) {
+        this.expireNextToolCallSessions--;
+        response.writeHead(404, { "content-type": "application/json" }).end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: "server-error",
+            error: { code: -32_600, message: "Session not found" },
+          }),
+        );
+        return;
+      }
       if (this.dropNextToolCalls > 0) {
         this.dropNextToolCalls--;
         request.socket.destroy();

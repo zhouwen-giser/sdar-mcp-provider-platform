@@ -285,6 +285,7 @@ services:
       UGV_RESOURCE_ID: ${UGV_RESOURCE_ID:-vehicle:ugv1}
       UGV_ENTITY_ID: ${UGV_ENTITY_ID:-ugv1}
       UGV_VEHICLE_TYPE: ${UGV_VEHICLE_TYPE:-ugv}
+      UGV_DELIVERY_STAGE: qualification
       UGV_EXECUTION_MODE: live
       UGV_FIRE_ENABLED: "false"
       ADAPTER_HOST: 0.0.0.0

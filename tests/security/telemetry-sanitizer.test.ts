@@ -4,6 +4,23 @@ import { describe, expect, it } from "vitest";
 import { ProviderTelemetry, TelemetrySanitizer } from "../../packages/observability/src/index.js";
 
 describe("TelemetrySanitizer", () => {
+  it("retains the bounded public fencing counter while removing credentials and invalid counters", () => {
+    const sanitizer = new TelemetrySanitizer();
+    expect(sanitizer.sanitize({ fencingToken: "9223372036854775807", token: "secret" })).toEqual({
+      fencingToken: "9223372036854775807",
+    });
+    expect(sanitizer.sanitize({ fencingToken: 3 })).toEqual({ fencingToken: 3 });
+    for (const value of [
+      "Bearer secret",
+      "9223372036854775808",
+      "01",
+      -1,
+      0.5,
+      Number.MAX_SAFE_INTEGER + 1,
+    ])
+      expect(sanitizer.sanitize({ fencingToken: value })).toEqual({});
+  });
+
   it("api_key_in_free_text_is_redacted", () => {
     const output = String(
       new TelemetrySanitizer().sanitize("url=https://host/?api_key=classified&mode=read"),

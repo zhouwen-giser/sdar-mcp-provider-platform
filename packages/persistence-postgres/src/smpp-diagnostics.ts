@@ -275,7 +275,17 @@ export class SmppDiagnosticRepository {
     ].sort();
     const resources = [...new Set(missionEvidence.map((item) => item.resourceId))].sort();
     const relationStatus =
-      missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+      missionEvidence.at(-1)?.deviceMissionId === null
+        ? "unresolved"
+        : missionIds.length === 0
+          ? "unresolved"
+          : missionIds.length === 1
+            ? "exact"
+            : "conflict";
+    const sourceRecordRefs =
+      relationStatus === "unresolved"
+        ? missionEvidence.slice(-1).map((item) => item.sourceRecordId)
+        : missionEvidence.map((item) => item.sourceRecordId).sort();
     return {
       schemaVersion: "sdar.smpp-mission-relation/v1",
       taskId,
@@ -284,7 +294,7 @@ export class SmppDiagnosticRepository {
       resourceId: resources.length === 1 ? (resources[0] ?? null) : null,
       relationStatus,
       observedAt: missionEvidence.at(-1)?.observedAt ?? new Date(0).toISOString(),
-      sourceRecordRefs: missionEvidence.map((item) => item.sourceRecordId).sort(),
+      sourceRecordRefs,
     };
   }
 }

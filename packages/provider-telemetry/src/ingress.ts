@@ -318,10 +318,20 @@ async function captureMissionRelationFact(
       evidence.rows.map((row) => row.mission_id).filter((value): value is string => value !== null),
     ),
   ].sort();
+  const latestEvidence = evidence.rows.at(-1);
   const relationStatus =
-    missionIds.length === 0 ? "unresolved" : missionIds.length === 1 ? "exact" : "conflict";
+    latestEvidence?.mission_id === null
+      ? "unresolved"
+      : missionIds.length === 0
+        ? "unresolved"
+        : missionIds.length === 1
+          ? "exact"
+          : "conflict";
   const deviceMissionId = relationStatus === "exact" ? (missionIds[0] ?? null) : null;
-  const sourceRecordRefs = evidence.rows.map((row) => row.record_id).sort();
+  const sourceRecordRefs =
+    relationStatus === "unresolved" && latestEvidence !== undefined
+      ? [latestEvidence.record_id]
+      : evidence.rows.map((row) => row.record_id).sort();
   const relation = createProviderOpsEnvelope({
     recordType: "provider.execution.progress",
     eventCategory: "execution.progress",
@@ -340,6 +350,10 @@ async function captureMissionRelationFact(
     authorizationContextHash: task.authorizationContextHash,
     adapterRevision: String(task.adapterRevision),
     observationRevision: task.observationRevision,
+    ...(source.providerEventId === undefined ? {} : { providerEventId: source.providerEventId }),
+    ...(source.providerEventSequence === undefined
+      ? {}
+      : { providerEventSequence: source.providerEventSequence }),
     eventType: "smpp.mission.relation",
     stableAggregateIdentity: `${task.taskId}:${externalExecutionId}:mission`,
     eventIdentity: `${source.recordId}:mission-relation`,

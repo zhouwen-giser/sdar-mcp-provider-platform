@@ -17,11 +17,9 @@ export function assertReleaseCandidateWorkflow(source) {
     throw new Error("RELEASE_WORKFLOW_JOBS_INVALID");
   }
   if (
-    !normalizedSource.includes("pull_request:\n    branches: [main]") ||
+    /^ {2}(?:pull_request|push):/m.test(normalizedSource) ||
     !normalizedSource.includes("workflow_dispatch:") ||
-    !normalizedSource.includes(
-      "CANDIDATE_SHA: ${{ inputs.candidate || github.event.pull_request.head.sha }}",
-    )
+    !normalizedSource.includes("CANDIDATE_SHA: ${{ inputs.candidate }}")
   ) {
     throw new Error("RELEASE_WORKFLOW_CANDIDATE_TRIGGER_INVALID");
   }

@@ -62,11 +62,17 @@ try {
       ],
       { env: environment },
     );
-  } catch {
+  } catch (error) {
     const diagnostics = redact(
-      compose("logs", "--no-color", "--tail", "20", "pms-api", "pms-worker", "pms-web"),
+      [error.stdout ?? "", error.stderr ?? "", compose("logs", "--no-color", "--tail", "20")].join(
+        "\n",
+      ),
     );
-    throw new Error(`RELEASE_ARTIFACT_COMPOSE_START_FAILED\n${diagnostics}`);
+    throw new Error(`RELEASE_ARTIFACT_COMPOSE_START_FAILED\n${diagnostics}`, {
+      // exec errors include raw command output; never expose fixture credentials through cause.
+      // eslint-disable-next-line preserve-caught-error
+      cause: new Error(redact(error.message)),
+    });
   }
   composeExec("pms-web", [
     "node",
@@ -445,6 +451,7 @@ function redact(value) {
   return value
     .replaceAll(/postgres(?:ql)?:\/\/[^\s]+/gi, "<redacted-database-url>")
     .replaceAll(/(?:management|runtime)-ci-token/gi, "<redacted-token>")
+    .replaceAll("release-ci-only", "<redacted-password>")
     .slice(-8_192);
 }
 

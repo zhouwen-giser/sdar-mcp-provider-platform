@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, "release/**"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,6 +14,24 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  development-tests:
+    name: development-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:unit
+      - run: pnpm --filter @sdar/runtime-configuration-contract test
+      - run: pnpm release:candidate:check
+
   static:
     name: static
     runs-on: ubuntu-24.04
@@ -35,6 +54,7 @@ jobs:
       - run: pnpm sbom:check
 
   runtime-ci:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: runtime-ci
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -98,6 +118,7 @@ jobs:
           if-no-files-found: warn
 
   pms-api-production:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: pms-api-production
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -133,6 +154,7 @@ jobs:
       - run: pnpm test:pms-migrations
 
   worker-pm2-production:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: worker-pm2-production
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -178,6 +200,7 @@ jobs:
           if-no-files-found: warn
 
   worker-lease-safety:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: worker-lease-safety
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -217,6 +240,7 @@ jobs:
           if-no-files-found: error
 
   release-artifacts:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: release-artifacts
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -246,6 +270,7 @@ jobs:
         run: node scripts/cleanup-release-artifact-ci.mjs
 
   provider-regression:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: provider-regression
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -280,6 +305,7 @@ jobs:
       - run: pnpm test:provider-platform-ha
 
   platform-e2e:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: platform-e2e
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -316,6 +342,7 @@ jobs:
       - run: pnpm test:platform-e2e
 
   runtime-compose:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/')
     name: runtime-compose
     runs-on: ubuntu-24.04
     timeout-minutes: 20

@@ -3,6 +3,9 @@ export const UGV_MQTT_SUBSCRIPTIONS = [
   { topic: "/ugv/imu", qos: 1 },
   { topic: "/ugv/speed", qos: 1 },
   { topic: "status/ugv", qos: 1 },
+  // Live simulator aggregate status. This is the continuously refreshed
+  // geodetic authority when the ROS /ugv/gnss publisher is quiescent.
+  { topic: "status/ugv1", qos: 1 },
   // Live ROS bridge compatibility alias. Keep this exact; wildcards remain forbidden.
   { topic: "/ugv/status", qos: 1 },
   { topic: "/ugv/system_state", qos: 1 },

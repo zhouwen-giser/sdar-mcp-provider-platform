@@ -167,11 +167,22 @@ export function applySnapshotPatch(
   }
   if (patch.connectivity !== undefined)
     next.connectivity = { ...next.connectivity, ...patch.connectivity };
-  for (const domain of domains) next.freshness[`${domain}ObservedAt`] = observedAt;
+  for (const domain of domains) {
+    const key = `${domain}ObservedAt` as const;
+    next.freshness[key] = latestObservedAt(next.freshness[key], observedAt);
+  }
   next.observedAt = observedAt;
   next.revision = snapshotRevision(next);
   assertNoRefereeData(next);
   return next;
+}
+
+function latestObservedAt(current: string | undefined, candidate: string): string {
+  if (current === undefined) return candidate;
+  const currentTime = Date.parse(current);
+  const candidateTime = Date.parse(candidate);
+  if (!Number.isFinite(candidateTime)) return current;
+  return !Number.isFinite(currentTime) || candidateTime >= currentTime ? candidate : current;
 }
 
 export function snapshotRevision(snapshot: VehicleSnapshot): string {

@@ -9,7 +9,15 @@ import {
 } from "../../packages/adapter-protocol/src/index.js";
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
 import {
+  diagnosticControlSignature,
   MemoryProviderStore,
+  SMPP_DIAGNOSTIC_CONTRACT,
+  SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+  SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+  SMPP_RESPONSE_LOSS_CAPABILITY,
+  SmppDiagnosticResponseLossError,
+  type SmppDiagnosticCapabilityId,
+  type SmppDiagnosticControlRequest,
   type MutationJournalEntry,
   type MutationJournalPhase,
   type MutationJournalState,
@@ -43,6 +51,294 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("refreshes operation health after Device MCP contract discovery without a tool call", async () => {
+    const device = new ConnectPopulatesContractUgvDevice();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+
+    expect(device.calls).toHaveLength(0);
+    expect(
+      fixture.runtime.operationHealth.snapshot("vehicle_navigate", navigateArgs()),
+    ).toMatchObject({
+      state: "HEALTHY",
+      requiredTools: ["ugv_path_follow_mission", "ugv_mission_control"],
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+    expect(device.calls).toHaveLength(0);
+  });
+
+  it("drops exactly one response only after the original mission is durable and never redispatches", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const navigation = startInput("nav-response-loss", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
+    const request: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "response-loss-arm-1",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-p10",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-execution-1",
+        repetitionId: "repetition-1",
+        selector: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+        },
+      },
+    };
+    const armed = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      request,
+    );
+    const leaseId = stringProperty(armed.lease, "leaseId");
+    await expect(fixture.runtime.start(navigation)).rejects.toBeInstanceOf(
+      SmppDiagnosticResponseLossError,
+    );
+    expect(await fixture.store.getExecution(navigation.taskId)).toMatchObject({
+      state: "STARTING",
+      downstreamMissionIds: ["1"],
+    });
+    expect(fixture.device.calls).toHaveLength(2);
+    const replayed = await fixture.runtime.start(structuredClone(navigation));
+    expect(replayed.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(fixture.device.calls).toHaveLength(2);
+    const diagnosticStatus = await fixture.store.getDiagnosticStatus(leaseId);
+    expect(diagnosticStatus).toMatchObject({
+      lease: {
+        state: "CONSUMED",
+        logicalInvocationId: navigation.executionContext.correlationId,
+        taskId: navigation.taskId,
+        deviceMissionId: "1",
+        injectionCount: 1,
+        scope: {
+          selector: {
+            operationName: "vehicle_navigate",
+            argumentHash: navigation.argumentHash,
+          },
+        },
+      },
+      receipt: {
+        action: "consumed",
+        binding: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+          logicalInvocationId: navigation.executionContext.correlationId,
+          taskId: navigation.taskId,
+          deviceMissionId: "1",
+        },
+      },
+    });
+    expect(diagnosticStatus?.receipt.binding?.externalExecutionId).toContain(
+      "vehicle:ugv1:chassis:",
+    );
+    const evidence = fixture.telemetry.records.find(
+      (record) => record.attributes["sdar.diagnostic.leaseId"] === leaseId,
+    );
+    expect(evidence?.eventType).toBe("RESOURCE_HEALTH");
+    expect(evidence?.taskId).toBe(navigation.taskId);
+    expect(evidence?.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(evidence?.attributes.redispatchAllowed).toBe(false);
+    expect(evidence?.attributes["sdar.diagnostic.deviceMissionId"]).toBe("1");
+  });
+
+  it("scopes Provider business success to one exact mission without asserting physical arrival", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const navigation = startInput("nav-business-success", "vehicle_navigate", navigateArgs());
+    navigation.executionContext.executionMode = "LIVE";
+    const request: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "business-success-arm-1",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-p10",
+        caseId: "UGV-XCHAIN-003",
+        caseExecutionId: "case-execution-2",
+        repetitionId: "repetition-1",
+        selector: {
+          operationName: "vehicle_navigate",
+          argumentHash: navigation.argumentHash,
+        },
+      },
+    };
+    await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
+      request,
+    );
+    await fixture.runtime.start(navigation);
+    missionWithId(fixture.ingress, 1, 4, 100, new Date().toISOString());
+
+    await expect(fixture.runtime.get(navigation.taskId)).resolves.toMatchObject({
+      state: "SUCCEEDED",
+      reasonCode: "SMPP_DIAGNOSTIC_PROVIDER_BUSINESS_SUCCESS",
+      result: {
+        status: "succeeded",
+        businessStatus: "succeeded",
+        claimsPhysicalArrival: false,
+      },
+    });
+    const evidence = fixture.telemetry.records.find(
+      (record) =>
+        record.taskId === navigation.taskId &&
+        record.attributes.providerBusinessStatus === "succeeded",
+    );
+    expect(evidence?.eventType).toBe("RESOURCE_HEALTH");
+    expect(evidence?.attributes.claimsPhysicalArrival).toBe(false);
+    expect(evidence?.attributes.claimsGoalSuccess).toBe(false);
+    expect(evidence?.attributes["sdar.diagnostic.deviceMissionId"]).toBe("1");
+  });
+
+  it("makes arm/disarm idempotent and expires unused leases with durable cleanup receipts", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    let nowMs = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(nowMs),
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const arm: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "cleanup-arm-1",
+      ttlMs: 10_000,
+      scope: {
+        runId: "run-cleanup",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-cleanup-1",
+        repetitionId: "repetition-1",
+        selector: { operationName: "vehicle_navigate", argumentHash: "d".repeat(64) },
+      },
+    };
+    const first = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      arm,
+    );
+    const replay = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      arm,
+    );
+    expect(replay).toEqual(first);
+    await expect(
+      diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+        ...arm,
+        idempotencyKey: "cleanup-arm-conflicting-selector",
+        scope: { ...arm.scope, caseExecutionId: "case-cleanup-conflicting-selector" },
+      }),
+    ).rejects.toThrow("SMPP_DIAGNOSTIC_SELECTOR_CONFLICT");
+    await expect(
+      diagnosticControl(fixture.runtime, token, SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY, {
+        ...arm,
+        idempotencyKey: "cleanup-arm-cross-capability-conflict",
+        scope: {
+          ...arm.scope,
+          caseId: "UGV-XCHAIN-003",
+          caseExecutionId: "case-cleanup-cross-capability-conflict",
+        },
+      }),
+    ).rejects.toThrow("SMPP_DIAGNOSTIC_SELECTOR_CONFLICT");
+    const leaseId = stringProperty(first.lease, "leaseId");
+    const disarm: SmppDiagnosticControlRequest = {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "disarm",
+      idempotencyKey: "cleanup-disarm-1",
+      leaseId,
+    };
+    const cleaned = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      disarm,
+    );
+    const cleanedReplay = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      disarm,
+    );
+    expect(cleanedReplay).toEqual(cleaned);
+    expect(cleaned).toMatchObject({
+      lease: { state: "DISARMED", cleanupAt: new Date(nowMs).toISOString() },
+      receipt: { action: "disarmed", state: "DISARMED" },
+    });
+
+    const expiring = {
+      ...arm,
+      idempotencyKey: "cleanup-arm-expiring",
+      ttlMs: 1_000,
+      scope: {
+        ...arm.scope,
+        caseExecutionId: "case-cleanup-expiring",
+      },
+    } satisfies SmppDiagnosticControlRequest;
+    const expiringResult = await diagnosticControl(
+      fixture.runtime,
+      token,
+      SMPP_RESPONSE_LOSS_CAPABILITY,
+      expiring,
+    );
+    const expiringLeaseId = stringProperty(expiringResult.lease, "leaseId");
+    nowMs += 1_001;
+    const status = await diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "status",
+      leaseId: expiringLeaseId,
+    });
+    expect(status).toMatchObject({
+      lease: { state: "EXPIRED", cleanupAt: new Date(nowMs).toISOString() },
+      receipt: { action: "expired", state: "EXPIRED" },
+    });
+  });
+
+  it("does not bind a nonmatching navigation argument hash", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const expectedHash = "a".repeat(64);
+    const armed = await diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "nonmatching-selector-arm",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-nonmatching",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-nonmatching",
+        repetitionId: "repetition-1",
+        selector: { operationName: "vehicle_navigate", argumentHash: expectedHash },
+      },
+    });
+    const navigation = startInput("nav-nonmatching", "vehicle_navigate", navigateArgs());
+    navigation.argumentHash = "b".repeat(64);
+    navigation.executionContext.executionMode = "LIVE";
+
+    const started = await fixture.runtime.start(navigation);
+    expect(started.externalExecutionId).toContain("vehicle:ugv1:chassis:");
+    expect(fixture.device.calls).toHaveLength(2);
+    const status = await fixture.store.getDiagnosticStatus(stringProperty(armed.lease, "leaseId"));
+    expect(status).toMatchObject({ lease: { state: "ARMED" } });
+    expect(status?.lease).not.toHaveProperty("logicalInvocationId");
+  });
+
   it("persists every navigation dispatch fence and mission ID before transport dependencies", async () => {
     const events: string[] = [];
     const store = new DispatchOrderStore(events);
@@ -119,6 +415,64 @@ describe("UGV long-running operation integration", () => {
       initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
     });
     expect(device.calls).toHaveLength(1);
+  });
+
+  it("does not correlate a stale observed mission without a persisted downstream identity", async () => {
+    const device = new MockUgvDeviceMcpClient();
+    device.handlers.set("ugv_path_follow_mission", () => {
+      throw new UncertainMutatingDeviceCallError("UGV", "ugv_path_follow_mission");
+    });
+    const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
+    const input = startInput("nav-uncertain-stale-mission", "vehicle_navigate", navigateArgs());
+
+    await expect(fixture.runtime.start(input)).resolves.toMatchObject({
+      initialSnapshot: { state: "ACCEPTED", reasonCode: "UNCERTAIN_EXECUTION_STATE" },
+    });
+    missionWithId(fixture.ingress, 64209, 4, 100);
+    fixture.ingress.handle(
+      "/ugv/speed",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", speed_kmh: 0 })),
+    );
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", latitude: 30.1001, longitude: 114.1001 })),
+    );
+
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_DOWNSTREAM_MISSION_ID_MISMATCH",
+      downstreamMissionIds: [],
+    });
+    expect(
+      fixture.telemetry.records.filter(
+        (record) => record.attributes["sdar.device.mission_id"] === "64209",
+      ),
+    ).toEqual([]);
+  });
+
+  it("does not misclassify a post-dispatch idle sentinel as a different mission", async () => {
+    const fixture = await createFixture();
+    const input = startInput("nav-idle-sentinel", "vehicle_navigate", navigateArgs());
+    await fixture.runtime.start(input);
+
+    fixture.ingress.handle(
+      "/ugv/status",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "ugv1",
+          chassis_task: { id: -1, type: -1, state: 0, progress: -1 },
+          eo_task: { id: -1, type: -1, state: 0, progress: -1 },
+          weapon_task: { id: -1, type: -1, state: 0, progress: -1 },
+          speed_kmh: 0,
+        }),
+      ),
+    );
+
+    expect(await fixture.runtime.get(input.taskId)).toMatchObject({
+      state: "STARTING",
+      reasonCode: "UGV_MISSION_CORRELATION_UNCONFIRMED",
+      downstreamMissionIds: ["1"],
+    });
   });
 
   it("persists mission-write failure after primary acceptance as uncertain without replay", async () => {
@@ -305,7 +659,7 @@ describe("UGV long-running operation integration", () => {
       stationaryMinimumSamples: 2,
       physicalConfirmationTimeoutMs: 100,
     });
-    now = Date.now() + 100;
+    now += 100;
     await physicalFixture.runtime.start(
       startInput("terminal-no-observation", "vehicle_navigate", navigateArgs()),
     );
@@ -451,6 +805,158 @@ describe("UGV long-running operation integration", () => {
         expect(JSON.stringify(result)).not.toContain("raw_internal_code");
       }
     }
+  });
+
+  it("keeps GNSS position freshness separate from fresh chassis status", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    const positionObservedAt = required(
+      fixture.ingress.fieldObservationAuthority("chassis.position.geodetic"),
+    ).observedAt;
+    now = Date.parse(positionObservedAt);
+
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+
+    now += 3_001;
+    status(fixture.ingress, {}, new Date(now).toISOString());
+    expect(fixture.ingress.snapshot().freshness.chassisObservedAt).toBe(
+      new Date(now).toISOString(),
+    );
+    expect(fixture.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      positionObservedAt,
+    );
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      riskLevel: "MEDIUM",
+      reasonCode: "UGV_STATE_STALE",
+    });
+
+    const state = await fixture.runtime.start(
+      startInput("position-freshness-state", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(state.initialSnapshot.result)).toMatchObject({
+      freshness: {
+        chassisObservedAt: new Date(now).toISOString(),
+        positionObservedAt,
+      },
+    });
+
+    now += 1;
+    fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    fixture.ingress.handle(
+      "status/ugv1",
+      Buffer.from(
+        JSON.stringify({
+          device_id: "ugv1",
+          mode: "manual",
+          status: "idle",
+          speed: 0,
+          position: { lon: 106.811794, lat: 29.72049 },
+          remainder_range: 50,
+        }),
+      ),
+      false,
+      new Date(now).toISOString(),
+    );
+    const refreshed = await fixture.runtime.start(
+      startInput("position-freshness-refreshed", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(refreshed.initialSnapshot.result)).toMatchObject({
+      chassis: { position: { longitude: 106.811794, latitude: 29.72049 } },
+      freshness: {
+        chassisObservedAt: new Date(now).toISOString(),
+        positionObservedAt: new Date(now).toISOString(),
+      },
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
+  });
+
+  it("freezes aggregate position authority during a GNSS fault and restores it after recovery", async () => {
+    let now = Date.now();
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    const aggregate = (speed: number) =>
+      Buffer.from(
+        JSON.stringify({
+          device_id: "ugv1",
+          mode: "manual",
+          status: "idle",
+          speed,
+          position: { lon: 106.811794, lat: 29.72049 },
+          remainder_range: 50,
+        }),
+      );
+
+    now += 1;
+    fixture.ingress.handle("status/ugv1", aggregate(0), false, new Date(now).toISOString());
+    const healthyPositionObservedAt = required(
+      fixture.ingress.fieldObservationAuthority("chassis.position.geodetic"),
+    ).observedAt;
+
+    now += 100;
+    fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":1}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    fixture.ingress.handle("status/ugv1", aggregate(2), false, new Date(now).toISOString());
+    now += 3_001;
+
+    const faulted = await fixture.runtime.start(
+      startInput("gnss-faulted-state", "vehicle_get_state", {
+        resourceId: "vehicle:ugv1",
+        include: ["chassis", "health"],
+      }),
+    );
+    expect(protoStructToJson(faulted.initialSnapshot.result)).toMatchObject({
+      chassis: {
+        position: { longitude: 106.811794, latitude: 29.72049 },
+        speedKmh: 2,
+      },
+      health: { components: { gnss: "fault" } },
+      freshness: { positionObservedAt: healthyPositionObservedAt },
+    });
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_STATE_STALE",
+    });
+
+    fixture.ingress.handle(
+      "/ugv/component_status",
+      Buffer.from('{"entity_id":"ugv1","gnss":0}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    now += 1;
+    fixture.ingress.handle("status/ugv1", aggregate(0), false, new Date(now).toISOString());
+    expect(fixture.ingress.fieldObservationAuthority("chassis.position.geodetic")?.observedAt).toBe(
+      new Date(now).toISOString(),
+    );
+    expect(fixture.runtime.availability("vehicle_navigate", navigateArgs())).toMatchObject({
+      availability: "AVAILABLE",
+      reasonCode: "UGV_AVAILABLE",
+    });
   });
 
   it("keeps Runtime availability, capability output and manifest flags on one qualification verdict", async () => {
@@ -2224,6 +2730,7 @@ async function createFixture(
   overrides: Partial<UgvProviderRuntime["options"]> = {},
   device: MockUgvDeviceMcpClient = new MockUgvDeviceMcpClient(),
 ) {
+  const observedAt = overrides.now?.().toISOString() ?? new Date().toISOString();
   const ingress = new VehicleMqttIngress("direct_domain_json", {
     maxPayloadBytes: 65536,
     maxDepth: 16,
@@ -2234,14 +2741,18 @@ async function createFixture(
   ingress.handle(
     "/ugv/gnss",
     Buffer.from('{"entity_id":"ugv1","latitude":30.1,"longitude":114.1,"altitude":10}'),
+    false,
+    observedAt,
   );
   ingress.handle(
     "/ugv/component_status",
     Buffer.from(
       '{"entity_id":"ugv1","power_battery":0,"lvbattery":0,"fuel":0,"water_temp":0,"motor":0,"sensor":0,"gnss":0,"comms":0,"weapon":0,"navigation":0}',
     ),
+    false,
+    observedAt,
   );
-  status(ingress, {});
+  status(ingress, {}, observedAt);
   if (withTarget)
     ingress.handle(
       "/ugv/detected_objects",
@@ -2276,6 +2787,18 @@ class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {
 
   override contracts(): CapturedToolContract[] {
     return this.fixtureContracts.map((contract) => structuredClone(contract));
+  }
+}
+
+class ConnectPopulatesContractUgvDevice extends MockUgvDeviceMcpClient {
+  constructor() {
+    super(new Set());
+  }
+
+  override connect(): Promise<void> {
+    for (const contract of mockUgvToolContracts())
+      this.available.add(contract.name as UgvDeviceToolName);
+    return super.connect();
   }
 }
 
@@ -2381,6 +2904,26 @@ function startInput(
     },
   };
 }
+
+async function diagnosticControl(
+  runtime: UgvProviderRuntime,
+  token: string,
+  capabilityId: SmppDiagnosticCapabilityId,
+  request: SmppDiagnosticControlRequest,
+): Promise<Record<string, unknown>> {
+  const input = startInput(
+    `diagnostic-${request.action}-${createHash("sha256").update(JSON.stringify(request)).digest("hex").slice(0, 16)}`,
+    SMPP_DIAGNOSTIC_CONTROL_OPERATION,
+    { capabilityId, request },
+  );
+  input.executionContext.authorizationContextHash = diagnosticControlSignature(
+    token,
+    capabilityId,
+    request,
+  );
+  const response = await runtime.start(input);
+  return protoStructToJson(response.initialSnapshot.result);
+}
 function identityOf(
   execution: NonNullable<Awaited<ReturnType<UgvProviderRuntime["get"]>>>,
   sequence: string,
@@ -2397,6 +2940,15 @@ function identityOf(
 function required<T>(value: T | undefined): T {
   if (value === undefined) throw new Error("UGV_TEST_FIXTURE_VALUE_MISSING");
   return value;
+}
+
+function stringProperty(value: unknown, key: string): string {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("UGV_TEST_DIAGNOSTIC_RESULT_INVALID");
+  }
+  const property = (value as Record<string, unknown>)[key];
+  if (typeof property !== "string") throw new Error("UGV_TEST_DIAGNOSTIC_RESULT_INVALID");
+  return property;
 }
 
 function telemetryMetricNames(telemetry: UgvTelemetry): string[] {
@@ -2598,6 +3150,7 @@ function status(
     eo?: { id?: number; state: number; progress: number };
     weapon?: { id?: number; state: number; progress: number };
   },
+  observedAt?: string,
 ) {
   ingress.handle(
     "status/ugv",
@@ -2612,5 +3165,7 @@ function status(
         available: true,
       }),
     ),
+    false,
+    observedAt,
   );
 }

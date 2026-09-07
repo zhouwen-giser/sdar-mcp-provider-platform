@@ -25,3 +25,6 @@ generated-python
 deploy/ugv-simulation/secrets
 deploy/pms-console/secrets
 examples/mock-adapter-python/.venv
+deploy/development/server/config
+deploy/development/server/state
+artifacts

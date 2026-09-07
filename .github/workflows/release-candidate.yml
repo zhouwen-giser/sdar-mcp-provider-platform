@@ -1,8 +1,6 @@
 name: release-candidate
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       candidate:
@@ -14,11 +12,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-candidate-${{ inputs.candidate || github.event.pull_request.head.sha }}
+  group: release-candidate-${{ inputs.candidate }}
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: ${{ inputs.candidate || github.event.pull_request.head.sha }}
+  CANDIDATE_SHA: ${{ inputs.candidate }}
 
 jobs:
   static:

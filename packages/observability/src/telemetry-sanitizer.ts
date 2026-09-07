@@ -92,7 +92,7 @@ function sanitizeValue(value: unknown, depth: number, state: SanitizeState): unk
       const result: Record<string, unknown> = {};
       for (const [key, child] of value.entries()) {
         const safeKey = String(key);
-        if (forbiddenKey(safeKey)) continue;
+        if (forbiddenKey(safeKey, child)) continue;
         result[safeKey] = sanitizeValue(child, depth + 1, state);
       }
       return result;
@@ -108,7 +108,7 @@ function sanitizeValue(value: unknown, depth: number, state: SanitizeState): unk
         result.__truncated__ = "[TRUNCATED]";
         break;
       }
-      if (forbiddenKey(key)) continue;
+      if (forbiddenKey(key, child)) continue;
       result[key] = sanitizeValue(child, depth + 1, state);
     }
     return result;
@@ -127,7 +127,17 @@ function boundedString(value: string, state: SanitizeState): string {
   return `${bytes.subarray(0, maximum - 13).toString("utf8")}[TRUNCATED]`;
 }
 
-function forbiddenKey(key: string): boolean {
+function forbiddenKey(key: string, value: unknown): boolean {
+  // This protocol field is a public monotonic lease counter, not a credential.
+  // Preserve only its bounded integer form so audit record hashes remain stable.
+  if (
+    key === "fencingToken" &&
+    ((typeof value === "number" && Number.isSafeInteger(value) && value >= 0) ||
+      (typeof value === "string" &&
+        /^(0|[1-9][0-9]{0,18})$/.test(value) &&
+        BigInt(value) <= 9223372036854775807n))
+  )
+    return false;
   const normalized = key.replaceAll(/[^a-z0-9]/gi, "").toLowerCase();
   if (ALLOWED_SENSITIVE_HASH_KEYS.has(normalized)) return false;
   return (

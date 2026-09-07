@@ -1,4 +1,10 @@
-import { ROOT_CONTEXT, SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
+import {
+  createContextKey,
+  ROOT_CONTEXT,
+  SpanKind,
+  SpanStatusCode,
+  trace,
+} from "@opentelemetry/api";
 import type {
   Attributes,
   Context,
@@ -17,9 +23,13 @@ import {
   BatchLogRecordProcessor,
   InMemoryLogRecordExporter,
   LoggerProvider,
-  SimpleLogRecordProcessor,
 } from "@opentelemetry/sdk-logs";
-import type { LogRecordExporter } from "@opentelemetry/sdk-logs";
+import type {
+  LogRecordExporter,
+  LogRecordProcessor,
+  ReadableLogRecord,
+  SdkLogRecord,
+} from "@opentelemetry/sdk-logs";
 import {
   AggregationTemporality,
   InMemoryMetricExporter,
@@ -39,6 +49,7 @@ import type { ProviderResourceInput } from "./provider-resource.js";
 import type { ProviderOpsEnvelope } from "./event-envelope.js";
 import { TelemetrySanitizer } from "./telemetry-sanitizer.js";
 import { sanitizeBusinessEventTraceAttributes } from "./business-event-sanitizer.js";
+import { AcknowledgedAuditHttpExporter } from "./acknowledged-audit-exporter.js";
 
 const INSTRUMENTATION_NAME = "@sdar/provider-ops-telemetry";
 const INSTRUMENTATION_VERSION = RUNTIME_VERSION;
@@ -223,6 +234,7 @@ export class ProviderTelemetry {
   #tracerProvider?: NodeTracerProvider;
   #loggerProvider?: LoggerProvider;
   #auditLoggerProvider?: LoggerProvider;
+  #auditProcessor?: AcknowledgedAuditLogProcessor;
   #meterProvider?: MeterProvider;
   #started = false;
   #shutdown = false;
@@ -288,9 +300,13 @@ export class ProviderTelemetry {
       this.#options.auditExporter ??
       (usesInjectedSignals
         ? new InMemoryLogRecordExporter()
-        : new OTLPLogExporter({
+        : new AcknowledgedAuditHttpExporter({
             url: signalEndpoint(this.#options.otlpEndpoint, "logs"),
-            ...exporterOptions,
+            timeoutMillis: this.#options.otlpTimeoutMillis ?? 10_000,
+            ...(this.#options.otlpHeaders === undefined
+              ? {}
+              : { headers: this.#options.otlpHeaders }),
+            ...(this.#options.otlpTls === undefined ? {} : { tls: this.#options.otlpTls }),
           }));
     const exportTimeoutMillis = this.#options.batch?.exportTimeoutMillis ?? 10_000;
     const spanExporter = observedSpanExporter(
@@ -305,7 +321,7 @@ export class ProviderTelemetry {
       (reason) => this.#recordExportFailure("log", reason),
       () => this.#recordExportAttempt("log"),
     );
-    const auditExporter = observedLogExporter(
+    this.#auditProcessor = new AcknowledgedAuditLogProcessor(
       rawAuditExporter,
       exportTimeoutMillis,
       (reason) => this.#recordExportFailure("audit", reason),
@@ -340,7 +356,7 @@ export class ProviderTelemetry {
     this.#auditLoggerProvider = new LoggerProvider({
       resource,
       forceFlushTimeoutMillis: this.#options.batch?.exportTimeoutMillis ?? 10_000,
-      processors: [new SimpleLogRecordProcessor({ exporter: auditExporter })],
+      processors: [this.#auditProcessor],
     });
     this.#meterProvider = new MeterProvider({ resource, readers: [metricReader] });
     this.#started = true;
@@ -690,13 +706,20 @@ export class ProviderTelemetry {
   }
 
   async exportAudit(envelopes: ProviderOpsEnvelope[]): Promise<void> {
-    if (!this.#started || this.#auditLoggerProvider === undefined) {
+    if (
+      !this.#started ||
+      this.#shutdown ||
+      this.#auditLoggerProvider === undefined ||
+      this.#auditProcessor === undefined
+    ) {
       throw new Error("TELEMETRY_AUDIT_EXPORT_UNAVAILABLE");
     }
     const logger = this.#auditLoggerProvider.getLogger(
       `${INSTRUMENTATION_NAME}/audit`,
       INSTRUMENTATION_VERSION,
     );
+    const batch = new AuditLogBatch();
+    const exportContext = this.#contextManager.active().setValue(AUDIT_LOG_BATCH, batch);
     try {
       for (const envelope of envelopes) {
         logger.emit({
@@ -710,10 +733,12 @@ export class ProviderTelemetry {
             "sdar.delivery.class": envelope.deliveryClass,
           },
           timestamp: new Date(envelope.occurredAt),
+          context: exportContext,
         });
         this.metric("telemetry_events_emitted_total", 1, { signal: "audit" });
       }
-      await this.#auditLoggerProvider.forceFlush();
+      if (batch.records.length !== envelopes.length)
+        throw new Error("TELEMETRY_AUDIT_RECORDS_MISSING");
     } catch (error) {
       this.metric("telemetry_export_failed_total", 1, {
         signal: "audit",
@@ -721,6 +746,7 @@ export class ProviderTelemetry {
       });
       throw error;
     }
+    await this.#auditProcessor.exportBatch(batch);
   }
 
   metric(
@@ -787,6 +813,93 @@ export class ProviderTelemetry {
     reason: "timeout" | "exporter_error",
   ): void {
     this.metric("telemetry_export_failed_total", 1, { signal, reason });
+  }
+}
+
+const AUDIT_LOG_BATCH = createContextKey("sdar.audit.log.batch");
+class AuditLogBatch {
+  readonly records: ReadableLogRecord[] = [];
+}
+
+/** The outbox needs the exporter callback, not the SDK's best-effort flush signal. */
+class AcknowledgedAuditLogProcessor implements LogRecordProcessor {
+  readonly #pending = new Set<Promise<void>>();
+  #closed = false;
+  constructor(
+    readonly exporter: LogRecordExporter,
+    readonly timeoutMs: number,
+    readonly onFailure: (reason: "timeout" | "exporter_error") => void,
+    readonly onAttempt: () => void,
+  ) {}
+
+  onEmit(record: SdkLogRecord, context?: Context): void {
+    const batch = context?.getValue(AUDIT_LOG_BATCH);
+    if (this.#closed || !(batch instanceof AuditLogBatch))
+      throw new Error("TELEMETRY_AUDIT_EXPORT_UNAVAILABLE");
+    batch.records.push(record);
+  }
+
+  exportBatch(batch: AuditLogBatch): Promise<void> {
+    if (this.#closed) return Promise.reject(new Error("TELEMETRY_AUDIT_EXPORT_UNAVAILABLE"));
+    if (batch.records.length === 0) return Promise.resolve();
+    const pending = new Promise<void>((resolve, reject) => {
+      this.onAttempt();
+      let settled = false;
+      const complete = (error?: Error, reason: "timeout" | "exporter_error" = "exporter_error") => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (error === undefined) resolve();
+        else {
+          this.onFailure(reason);
+          reject(error);
+        }
+      };
+      const timer = setTimeout(
+        () => complete(new Error("TELEMETRY_AUDIT_EXPORT_TIMEOUT"), "timeout"),
+        this.timeoutMs,
+      );
+      const send = () => {
+        if (settled) return;
+        try {
+          this.exporter.export(batch.records, (result) =>
+            complete(
+              result.code === ExportResultCode.SUCCESS
+                ? undefined
+                : new Error("TELEMETRY_AUDIT_EXPORT_FAILED", { cause: result.error }),
+            ),
+          );
+        } catch (cause) {
+          complete(new Error("TELEMETRY_AUDIT_EXPORT_FAILED", { cause }));
+        }
+      };
+      const resources = [...new Set(batch.records.map((record) => record.resource))];
+      if (resources.some((resource) => resource.asyncAttributesPending)) {
+        void Promise.all(
+          resources.map((resource) => resource.waitForAsyncAttributes?.() ?? Promise.resolve()),
+        ).then(send, (cause: unknown) =>
+          complete(new Error("TELEMETRY_AUDIT_EXPORT_FAILED", { cause })),
+        );
+      } else send();
+    });
+    this.#pending.add(pending);
+    void pending.then(
+      () => this.#pending.delete(pending),
+      () => this.#pending.delete(pending),
+    );
+    return pending;
+  }
+
+  async forceFlush(): Promise<void> {
+    await Promise.all([...this.#pending]);
+  }
+  async shutdown(): Promise<void> {
+    this.#closed = true;
+    try {
+      await this.forceFlush();
+    } finally {
+      await this.exporter.shutdown();
+    }
   }
 }
 

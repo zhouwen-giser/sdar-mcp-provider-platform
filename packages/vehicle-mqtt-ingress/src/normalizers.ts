@@ -84,6 +84,8 @@ function normalizeVehicleMqttObservation(
     case "status/ugv":
     case "/ugv/status":
       return composite(object, base);
+    case "status/ugv1":
+      return ugvAggregateStatus(object, base);
     case "/ugv/system_state":
       return {
         ...base,
@@ -229,6 +231,7 @@ function composite(
   const packetLossRate = optionalNumber(object.packet_loss_rate);
   const averageRoundTripTimeMs = optionalNumber(object.average_round_trip_time);
   const gimbal = gimbalObservation(object.gimbal);
+  const gnssHealth = compositeGnssHealth(object);
   return {
     ...base,
     patch: {
@@ -253,6 +256,7 @@ function composite(
         ...(eoTask === undefined ? {} : { eoTask }),
         ...(weaponTask === undefined ? {} : { weapon: weaponTask }),
       },
+      ...(gnssHealth === undefined ? {} : { health: { components: { gnss: gnssHealth } } }),
       connectivity: {
         ...(object.available === true ||
         (chassisTask !== undefined && eoTask !== undefined && weaponTask !== undefined)
@@ -262,7 +266,12 @@ function composite(
         ...(averageRoundTripTimeMs === undefined ? {} : { averageRoundTripTimeMs }),
       },
     },
-    domains: ["chassis", "mission", "payload"],
+    domains: [
+      "chassis",
+      "mission",
+      "payload",
+      ...(gnssHealth === undefined ? [] : (["health"] as const)),
+    ],
   };
 }
 
@@ -287,6 +296,67 @@ function npcAggregateStatus(
   const rangeKm = rangeKmValue;
   const mode = aggregateMode(object.mode);
   const status = aggregateStatus(object.status);
+  const positionObserved = latitudeValue !== undefined && longitudeValue !== undefined;
+  const chassisObserved = positionObserved || speedKmh !== undefined || rangeKm !== undefined;
+  const healthObserved = mode !== undefined || status !== undefined;
+  return {
+    ...base,
+    patch: {
+      ...(chassisObserved
+        ? {
+            chassis: {
+              ...(!positionObserved
+                ? {}
+                : {
+                    position: {
+                      latitude: latitudeValue,
+                      longitude: longitudeValue,
+                      ...(altitude === undefined ? {} : { altitude }),
+                    },
+                  }),
+              ...(speedKmh === undefined ? {} : { speedKmh }),
+              ...(rangeKm === undefined ? {} : { energy: { rangeKm } }),
+            },
+          }
+        : {}),
+      ...(healthObserved
+        ? {
+            health: {
+              ...(status === undefined ? {} : { runState: status === "moving" ? 1 : 0 }),
+              ...(mode === undefined ? {} : { mode: mode === "autonomous" ? 1 : 0 }),
+            },
+          }
+        : {}),
+      connectivity: { mqttConnected: true, deviceAvailable: true },
+    },
+    domains: [
+      ...(chassisObserved ? (["chassis"] as const) : []),
+      ...(healthObserved ? (["health"] as const) : []),
+    ],
+  };
+}
+
+function ugvAggregateStatus(
+  object: Record<string, unknown> | undefined,
+  base: Omit<NormalizedMqttObservation, "patch" | "domains">,
+): NormalizedMqttObservation {
+  if (object === undefined) throw new Error("UGV_MQTT_STATUS_INVALID");
+  const positionValue = record(object.position) ? object.position : undefined;
+  if (object.position !== undefined && positionValue === undefined)
+    throw new Error("UGV_MQTT_STATUS_POSITION_INVALID");
+  const latitudeValue = optionalCoordinate(positionValue?.lat ?? positionValue?.latitude, latitude);
+  const longitudeValue = optionalCoordinate(
+    positionValue?.lon ?? positionValue?.longitude,
+    longitude,
+  );
+  if ((latitudeValue === undefined) !== (longitudeValue === undefined))
+    throw new Error("UGV_MQTT_STATUS_POSITION_INVALID");
+  const altitude = optionalStrictNumber(positionValue?.alt ?? positionValue?.altitude);
+  const speedKmh = optionalStrictNumber(object.speed);
+  const rangeKm = optionalStrictNumber(object.remainder_range);
+  if (rangeKm !== undefined && rangeKm < 0) throw new Error("UGV_MQTT_BATTERY_RANGE_INVALID");
+  const mode = ugvAggregateMode(object.mode);
+  const status = ugvAggregateRunStatus(object.status);
   const positionObserved = latitudeValue !== undefined && longitudeValue !== undefined;
   const chassisObserved = positionObserved || speedKmh !== undefined || rangeKm !== undefined;
   const healthObserved = mode !== undefined || status !== undefined;
@@ -730,7 +800,7 @@ function validateIdentity(
   object: Record<string, unknown> | undefined,
   expected: { entityId: string; vehicleType: string },
 ): void {
-  const entity = object?.entity_id ?? object?.vehicle_id;
+  const entity = object?.entity_id ?? object?.device_id ?? object?.vehicle_id;
   if (entity !== undefined && entity !== expected.entityId && entity !== expected.vehicleType)
     throw new Error("UGV_MQTT_ENTITY_MISMATCH");
   const role = object?.role_name ?? object?.role;
@@ -770,6 +840,28 @@ function aggregateStatus(value: unknown): "idle" | "moving" | "stopped" | "error
   if (value === "idle" || value === "moving" || value === "stopped" || value === "error")
     return value;
   throw new Error("NPC_TANK_MQTT_STATUS_STATE_INVALID");
+}
+
+function ugvAggregateMode(value: unknown): "manual" | "autonomous" | undefined {
+  try {
+    return aggregateMode(value);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("NPC_TANK_"))
+      throw new Error(error.message.replace(/^NPC_TANK_/, "UGV_"), { cause: error });
+    throw error;
+  }
+}
+
+function ugvAggregateRunStatus(
+  value: unknown,
+): "idle" | "moving" | "stopped" | "error" | undefined {
+  try {
+    return aggregateStatus(value);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("NPC_TANK_"))
+      throw new Error(error.message.replace(/^NPC_TANK_/, "UGV_"), { cause: error });
+    throw error;
+  }
 }
 
 function optionalCoordinate(
@@ -824,6 +916,23 @@ function scanMode(value: unknown): 1 | 2 | undefined {
 
 function component(value: unknown): ComponentHealth {
   return value === 0 ? "normal" : value === 1 ? "fault" : "unknown";
+}
+
+function compositeGnssHealth(object: Record<string, unknown>): ComponentHealth | undefined {
+  const gnss = optionalInteger(object.gnss);
+  const insInit = optionalInteger(object.ins_init);
+  const locationStatus = optionalInteger(object.location_status);
+  const fault = optionalInteger(object.fault);
+  if (
+    gnss === undefined &&
+    insInit === undefined &&
+    locationStatus === undefined &&
+    fault === undefined
+  )
+    return undefined;
+  if (gnss === 1 && insInit === 3 && locationStatus === 4 && fault === 0) return "normal";
+  if (gnss === 2 || insInit === 0 || locationStatus === 0 || fault === 2) return "fault";
+  return "unknown";
 }
 
 function headerTimestamp(value: unknown): string | undefined {

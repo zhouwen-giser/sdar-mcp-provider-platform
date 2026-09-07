@@ -3,7 +3,7 @@ set -euo pipefail
 
 deploy_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 repo_root="$(CDPATH= cd -- "$deploy_dir/../../.." && pwd)"
-profile="${1:-mock}"
+profile="${1:-external}"
 env_file="${UGV_TEMPLATE_ENV_FILE:-$deploy_dir/.env}"
 project_name="${UGV_TEMPLATE_PROJECT_NAME:-sdar-development-ugv-provider-template}"
 
@@ -13,10 +13,9 @@ if [[ "$profile" != "mock" && "$profile" != "external" ]]; then
 fi
 if [[ ! -f "$env_file" ]]; then
   if [[ "$profile" == "mock" ]]; then
-    env_file="$deploy_dir/.env.example"
+    env_file="$deploy_dir/.env.mock.example"
   else
-    echo "UGV_TEMPLATE_EXTERNAL_ENV_REQUIRED: copy .env.example to .env and configure real endpoints" >&2
-    exit 2
+    env_file="$deploy_dir/.env.example"
   fi
 fi
 if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then

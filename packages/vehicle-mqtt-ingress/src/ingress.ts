@@ -67,6 +67,14 @@ export interface VehicleMqttProfile<TSnapshot extends VehicleSnapshot> {
     aliasTopics: readonly string[];
     aliasFallbackAfterMs: number;
   };
+  fieldAuthorityGates?: readonly {
+    field: VehicleObservationField;
+    observationTopic: string;
+    healthTopics: readonly string[];
+    requiredHealthyTopics: readonly string[];
+    healthComponent: keyof VehicleSnapshot["health"]["components"];
+    maximumHealthAgeMs: number;
+  }[];
 }
 
 export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
@@ -91,6 +99,16 @@ export const UGV_MQTT_PROFILE: VehicleMqttProfile<UgvSnapshot> = {
     aliasTopics: ["/ugv/status"],
     aliasFallbackAfterMs: 3_000,
   },
+  fieldAuthorityGates: [
+    {
+      field: "chassis.position.geodetic",
+      observationTopic: "status/ugv1",
+      healthTopics: ["/ugv/component_status", "/ugv/status", "status/ugv"],
+      requiredHealthyTopics: ["/ugv/component_status"],
+      healthComponent: "gnss",
+      maximumHealthAgeMs: 3_000,
+    },
+  ],
 };
 
 export function ugvMqttProfile(identity: VehicleIdentity): VehicleMqttProfile<UgvSnapshot> {
@@ -143,6 +161,10 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   >();
   readonly #latestByAuthority = new Map<string, { observedAt: string; hash: string }>();
   readonly #fieldAuthorities = new Map<VehicleObservationField, FieldObservationAuthority>();
+  readonly #fieldGateHealth = new Map<
+    VehicleObservationField,
+    Map<string, { state: "normal" | "fault" | "unknown"; receivedAt: string }>
+  >();
   readonly #authoritativeTaskStates = new Map<"primary" | "secondary", VehicleTaskTrack>();
   #detectedTargets: VehicleTarget[] = [];
   #reconTargets: VehicleTarget[] = [];
@@ -254,10 +276,12 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         retained,
         revision: this.#snapshot.revision,
       };
+    this.#recordFieldGateHealth(topic, observation, receivedAt);
     const applyToSnapshot = compositeDecision.applyToSnapshot;
     if (applyToSnapshot) {
       observation = this.#applyTargetAuthority(topic, observation);
       observation = this.#applyTaskStateAuthority(topic, observation);
+      observation = this.#applyFieldAuthorityGates(topic, observation, receivedAt);
     }
     this.#sequence++;
     if (applyToSnapshot) {
@@ -512,6 +536,50 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
           payloadHash,
         }),
       });
+    }
+    return accepted;
+  }
+
+  #recordFieldGateHealth(
+    topic: string,
+    observation: NormalizedMqttObservation,
+    receivedAt: string,
+  ): void {
+    for (const gate of this.profile.fieldAuthorityGates ?? []) {
+      if (!gate.healthTopics.includes(topic)) continue;
+      const state = observation.patch.health?.components?.[gate.healthComponent];
+      if (state === undefined) continue;
+      const byTopic =
+        this.#fieldGateHealth.get(gate.field) ??
+        new Map<string, { state: "normal" | "fault" | "unknown"; receivedAt: string }>();
+      byTopic.set(topic, { state, receivedAt });
+      this.#fieldGateHealth.set(gate.field, byTopic);
+    }
+  }
+
+  #applyFieldAuthorityGates(
+    topic: string,
+    observation: NormalizedMqttObservation,
+    receivedAt: string,
+  ): NormalizedMqttObservation {
+    const accepted = structuredClone(observation);
+    for (const gate of this.profile.fieldAuthorityGates ?? []) {
+      if (topic !== gate.observationTopic) continue;
+      const byTopic = this.#fieldGateHealth.get(gate.field);
+      const freshHealth = new Map(
+        [...(byTopic?.entries() ?? [])].filter(([, health]) => {
+          const ageMs = Date.parse(receivedAt) - Date.parse(health.receivedAt);
+          return Number.isFinite(ageMs) && ageMs >= 0 && ageMs <= gate.maximumHealthAgeMs;
+        }),
+      );
+      const requiredHealthy = gate.requiredHealthyTopics.every(
+        (healthTopic) => freshHealth.get(healthTopic)?.state === "normal",
+      );
+      const noFreshConflict = [...freshHealth.values()].every(
+        (health) => health.state === "normal",
+      );
+      const healthy = requiredHealthy && noFreshConflict;
+      if (!healthy) removeObservationField(accepted.patch, gate.field);
     }
     return accepted;
   }

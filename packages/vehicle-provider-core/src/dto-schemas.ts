@@ -32,6 +32,7 @@ export function vehicleStateV1Schema(resourceId: string): Record<string, unknown
         type: "object",
         properties: {
           chassisObservedAt: dateTime,
+          positionObservedAt: dateTime,
           healthObservedAt: dateTime,
           missionObservedAt: dateTime,
           targetObservedAt: dateTime,

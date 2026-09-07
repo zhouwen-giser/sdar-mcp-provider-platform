@@ -1,4 +1,7 @@
 node_modules
+artifacts/
+deploy/development/server/state/
+deploy/development/server/config/
 dist
 coverage
 references/**/*.docx

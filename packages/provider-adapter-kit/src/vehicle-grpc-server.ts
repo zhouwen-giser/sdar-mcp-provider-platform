@@ -12,6 +12,7 @@ import type {
   VehicleSnapshot,
 } from "../../vehicle-provider-core/src/index.js";
 import type { ExecutionContextRecord, ProviderExecution, ProviderStore } from "./types.js";
+import { SmppDiagnosticResponseLossError } from "./diagnostics.js";
 
 type Unary<T> = grpc.ServerUnaryCall<T, unknown>;
 interface StartRequest {
@@ -152,7 +153,11 @@ export class VehicleProviderGrpcServer {
         void this.runtime
           .start(startInput(call.request))
           .then((accepted) => callback(null, { result: "accepted", accepted }))
-          .catch((error: unknown) =>
+          .catch((error: unknown) => {
+            if (error instanceof SmppDiagnosticResponseLossError) {
+              callback(responseLossServiceError(error));
+              return;
+            }
             callback(null, {
               result: "rejected",
               rejected: {
@@ -160,8 +165,8 @@ export class VehicleProviderGrpcServer {
                 message: reason(error, this.options.internalErrorCode),
                 retryable: retryable(error),
               },
-            }),
-          );
+            });
+          });
       },
       getExecution: (call: Unary<{ taskId?: string }>, callback: grpc.sendUnaryData<unknown>) => {
         void this.runtime
@@ -207,23 +212,30 @@ export class VehicleProviderGrpcServer {
         >,
       ) => {
         const taskId = call.request.execution?.taskId ?? "";
-        let unsubscribe: () => void = () => undefined;
-        void this.runtime.get(taskId).then((execution) => {
-          if (execution === undefined) {
-            call.emit("error", notFound());
-            return;
-          }
-          if (execution.revision > Number(call.request.afterRevision ?? 0))
-            call.write(
-              executionEvent(this.runtime.executionSnapshot(execution), execution.revision),
-            );
-          const listener = (snapshot: Record<string, unknown>) =>
-            call.write(executionEvent(snapshot, Number(snapshot.revision ?? 0)));
-          this.runtime.events.on(taskId, listener);
-          unsubscribe = () => this.runtime.events.off(taskId, listener);
-        });
-        call.on("cancelled", unsubscribe);
-        call.on("close", unsubscribe);
+        const subscription = streamSubscription(call);
+        void this.runtime
+          .get(taskId)
+          .then((execution) => {
+            if (subscription.isClosed()) return;
+            if (execution === undefined) {
+              call.emit("error", notFound());
+              return;
+            }
+            if (execution.revision > Number(call.request.afterRevision ?? 0))
+              call.write(
+                executionEvent(this.runtime.executionSnapshot(execution), execution.revision),
+              );
+            const listener = (snapshot: Record<string, unknown>) =>
+              !subscription.isClosed() &&
+              call.write(executionEvent(snapshot, Number(snapshot.revision ?? 0)));
+            if (subscription.isClosed()) return;
+            this.runtime.events.on(taskId, listener);
+            subscription.attach(() => this.runtime.events.off(taskId, listener));
+          })
+          .catch((error: unknown) => {
+            if (!subscription.isClosed())
+              call.emit("error", serviceError(error, this.options.internalErrorCode));
+          });
       },
       streamBusinessEvents: (
         call: grpc.ServerWritableStream<
@@ -259,6 +271,7 @@ export class VehicleProviderGrpcServer {
       AdapterBusinessEvent
     >,
   ): void {
+    const subscription = streamSubscription(call);
     const sourceId = call.request.sourceId ?? "";
     const streamId = call.request.sourceStreamId ?? "";
     const source = this.store
@@ -277,17 +290,20 @@ export class VehicleProviderGrpcServer {
       call.emit("error", streamError(grpc.status.OUT_OF_RANGE, "SOURCE_CURSOR_AHEAD"));
       return;
     }
-    let unsubscribe: () => void = () => undefined;
-    const live = (event: AdapterBusinessEvent) => call.write(event);
+    const live = (event: AdapterBusinessEvent) => !subscription.isClosed() && call.write(event);
     const begin = async () => {
       if (source.deliverySemantics === "durable_at_least_once") {
         const after = parseBusinessEventSequence(call.request.afterSourceSequence ?? "0", true);
-        for (const event of await this.store.replayBusinessEvents(sourceId, streamId, after))
+        for (const event of await this.store.replayBusinessEvents(sourceId, streamId, after)) {
+          if (subscription.isClosed()) return;
           call.write(event);
+        }
       }
-      unsubscribe = this.businessEvents.subscribe(sourceId, live);
+      if (subscription.isClosed()) return;
+      subscription.attach(this.businessEvents.subscribe(sourceId, live));
     };
-    void begin().catch((error: unknown) =>
+    void begin().catch((error: unknown) => {
+      if (subscription.isClosed()) return;
       call.emit(
         "error",
         streamError(
@@ -297,11 +313,35 @@ export class VehicleProviderGrpcServer {
             : grpc.status.FAILED_PRECONDITION,
           reason(error, this.options.internalErrorCode),
         ),
-      ),
-    );
-    call.on("cancelled", unsubscribe);
-    call.on("close", unsubscribe);
+      );
+    });
   }
+}
+
+function streamSubscription(call: NodeJS.EventEmitter) {
+  let closed = false;
+  let unsubscribe: (() => void) | undefined;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    unsubscribe?.();
+    unsubscribe = undefined;
+    call.removeListener("cancelled", close);
+    call.removeListener("close", close);
+    call.removeListener("error", close);
+  };
+  call.once("cancelled", close);
+  call.once("close", close);
+  call.once("error", close);
+  return {
+    isClosed() {
+      return closed;
+    },
+    attach(cleanup: () => void) {
+      if (closed) cleanup();
+      else unsubscribe = cleanup;
+    },
+  };
 }
 
 function startInput(request: StartRequest): StartVehicleOperation {
@@ -373,6 +413,18 @@ function serviceError(error: unknown, internalErrorCode: string): grpc.ServiceEr
     code: grpc.status.INTERNAL,
     details: reason(error, internalErrorCode),
     metadata: new grpc.Metadata(),
+  });
+}
+function responseLossServiceError(error: SmppDiagnosticResponseLossError): grpc.ServiceError {
+  const metadata = new grpc.Metadata();
+  metadata.set("sdar-diagnostic-lease-id", error.leaseId);
+  metadata.set("sdar-task-id", error.taskId);
+  metadata.set("sdar-external-execution-id", error.externalExecutionId);
+  metadata.set("sdar-device-mission-id", error.deviceMissionId);
+  return Object.assign(new Error(error.code), {
+    code: grpc.status.UNAVAILABLE,
+    details: error.code,
+    metadata,
   });
 }
 function streamError(code: grpc.status, reasonCode: string): grpc.ServiceError {
