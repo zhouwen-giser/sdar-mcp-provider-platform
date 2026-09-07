@@ -85,6 +85,7 @@ const UgvProviderInputBaseSchema = z.object({
   UGV_FIRE_ENABLED: bool.default(true),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: bool.default(true),
   UGV_DIAGNOSTICS_ENABLED: bool.default(false),
+  SIMULATOR_CREDENTIAL_FREE: bool.default(false),
   UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: optionalPath,
   UGV_DIAGNOSTICS_MAX_TTL_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(300_000),
   UGV_STATIONARY_SPEED_THRESHOLD_KMH: z.coerce.number().min(0).max(5).default(0.1),
@@ -118,13 +119,18 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
       : value.UGV_DELIVERY_STAGE === "integration_candidate"
         ? "test"
         : undefined;
-  if (expectedRuntimeEnvironment !== undefined && value.RUNTIME_ENV !== expectedRuntimeEnvironment)
+  if (
+    !value.SIMULATOR_CREDENTIAL_FREE &&
+    expectedRuntimeEnvironment !== undefined &&
+    value.RUNTIME_ENV !== expectedRuntimeEnvironment
+  )
     context.addIssue({
       code: "custom",
       message: "UGV_DELIVERY_STAGE_RUNTIME_ENV_MISMATCH",
       path: ["UGV_DELIVERY_STAGE"],
     });
   if (
+    !value.SIMULATOR_CREDENTIAL_FREE &&
     value.UGV_DELIVERY_STAGE === "qualification" &&
     value.RUNTIME_ENV !== "test" &&
     value.RUNTIME_ENV !== "production"
@@ -175,7 +181,11 @@ const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, co
     if (value.UGV_ADAPTER_STORE_MODE !== "postgres")
       context.addIssue({ code: "custom", message: "UGV_LIVE_POSTGRES_STORE_REQUIRED" });
   }
-  if (value.UGV_DIAGNOSTICS_ENABLED && value.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined)
+  if (
+    value.UGV_DIAGNOSTICS_ENABLED &&
+    !value.SIMULATOR_CREDENTIAL_FREE &&
+    value.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined
+  )
     context.addIssue({ code: "custom", message: "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE_REQUIRED" });
   if (value.UGV_OPERATION_FAILURE_DEGRADED_THRESHOLD >= value.UGV_OPERATION_FAILURE_OPEN_THRESHOLD)
     context.addIssue({
@@ -200,6 +210,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_FIRE_ENABLED: z.boolean(),
   UGV_FIRE_REQUIRES_CHASSIS_STOPPED: z.boolean(),
   UGV_DIAGNOSTICS_ENABLED: z.boolean(),
+  SIMULATOR_CREDENTIAL_FREE: z.boolean(),
   UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE: z.string().optional(),
   PROVIDER_TELEMETRY_ENABLED: z.boolean(),
   ALLOW_INSECURE_INTERNAL_TRANSPORT: z.boolean(),

@@ -212,23 +212,30 @@ export class VehicleProviderGrpcServer {
         >,
       ) => {
         const taskId = call.request.execution?.taskId ?? "";
-        let unsubscribe: () => void = () => undefined;
-        void this.runtime.get(taskId).then((execution) => {
-          if (execution === undefined) {
-            call.emit("error", notFound());
-            return;
-          }
-          if (execution.revision > Number(call.request.afterRevision ?? 0))
-            call.write(
-              executionEvent(this.runtime.executionSnapshot(execution), execution.revision),
-            );
-          const listener = (snapshot: Record<string, unknown>) =>
-            call.write(executionEvent(snapshot, Number(snapshot.revision ?? 0)));
-          this.runtime.events.on(taskId, listener);
-          unsubscribe = () => this.runtime.events.off(taskId, listener);
-        });
-        call.on("cancelled", unsubscribe);
-        call.on("close", unsubscribe);
+        const subscription = streamSubscription(call);
+        void this.runtime
+          .get(taskId)
+          .then((execution) => {
+            if (subscription.isClosed()) return;
+            if (execution === undefined) {
+              call.emit("error", notFound());
+              return;
+            }
+            if (execution.revision > Number(call.request.afterRevision ?? 0))
+              call.write(
+                executionEvent(this.runtime.executionSnapshot(execution), execution.revision),
+              );
+            const listener = (snapshot: Record<string, unknown>) =>
+              !subscription.isClosed() &&
+              call.write(executionEvent(snapshot, Number(snapshot.revision ?? 0)));
+            if (subscription.isClosed()) return;
+            this.runtime.events.on(taskId, listener);
+            subscription.attach(() => this.runtime.events.off(taskId, listener));
+          })
+          .catch((error: unknown) => {
+            if (!subscription.isClosed())
+              call.emit("error", serviceError(error, this.options.internalErrorCode));
+          });
       },
       streamBusinessEvents: (
         call: grpc.ServerWritableStream<
@@ -264,6 +271,7 @@ export class VehicleProviderGrpcServer {
       AdapterBusinessEvent
     >,
   ): void {
+    const subscription = streamSubscription(call);
     const sourceId = call.request.sourceId ?? "";
     const streamId = call.request.sourceStreamId ?? "";
     const source = this.store
@@ -282,17 +290,20 @@ export class VehicleProviderGrpcServer {
       call.emit("error", streamError(grpc.status.OUT_OF_RANGE, "SOURCE_CURSOR_AHEAD"));
       return;
     }
-    let unsubscribe: () => void = () => undefined;
-    const live = (event: AdapterBusinessEvent) => call.write(event);
+    const live = (event: AdapterBusinessEvent) => !subscription.isClosed() && call.write(event);
     const begin = async () => {
       if (source.deliverySemantics === "durable_at_least_once") {
         const after = parseBusinessEventSequence(call.request.afterSourceSequence ?? "0", true);
-        for (const event of await this.store.replayBusinessEvents(sourceId, streamId, after))
+        for (const event of await this.store.replayBusinessEvents(sourceId, streamId, after)) {
+          if (subscription.isClosed()) return;
           call.write(event);
+        }
       }
-      unsubscribe = this.businessEvents.subscribe(sourceId, live);
+      if (subscription.isClosed()) return;
+      subscription.attach(this.businessEvents.subscribe(sourceId, live));
     };
-    void begin().catch((error: unknown) =>
+    void begin().catch((error: unknown) => {
+      if (subscription.isClosed()) return;
       call.emit(
         "error",
         streamError(
@@ -302,11 +313,35 @@ export class VehicleProviderGrpcServer {
             : grpc.status.FAILED_PRECONDITION,
           reason(error, this.options.internalErrorCode),
         ),
-      ),
-    );
-    call.on("cancelled", unsubscribe);
-    call.on("close", unsubscribe);
+      );
+    });
   }
+}
+
+function streamSubscription(call: NodeJS.EventEmitter) {
+  let closed = false;
+  let unsubscribe: (() => void) | undefined;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    unsubscribe?.();
+    unsubscribe = undefined;
+    call.removeListener("cancelled", close);
+    call.removeListener("close", close);
+    call.removeListener("error", close);
+  };
+  call.once("cancelled", close);
+  call.once("close", close);
+  call.once("error", close);
+  return {
+    isClosed() {
+      return closed;
+    },
+    attach(cleanup: () => void) {
+      if (closed) cleanup();
+      else unsubscribe = cleanup;
+    },
+  };
 }
 
 function startInput(request: StartRequest): StartVehicleOperation {

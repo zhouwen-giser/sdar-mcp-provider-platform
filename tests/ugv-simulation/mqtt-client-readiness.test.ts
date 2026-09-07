@@ -113,6 +113,52 @@ describe("UGV MQTT readiness", () => {
     expect(fake.end).toHaveBeenCalledTimes(1);
     expect(ingress.snapshot().connectivity.mqttConnected).toBe(false);
   });
+
+  it("lets I/O callbacks run during a buffered MQTT burst without losing or reordering messages", async () => {
+    const fake = fakeMqttClient();
+    connectMock.mockReturnValue(fake);
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits());
+    const client = new UgvMqttClient(options(), ingress);
+    client.start();
+    const handle = vi.spyOn(ingress, "handle");
+    const acknowledged: number[] = [];
+    let acknowledgedAtIo = -1;
+    const io = new Promise<void>((resolve) => {
+      setImmediate(() => {
+        acknowledgedAtIo = acknowledged.length;
+        resolve();
+      });
+    });
+    // Match MQTT.js: message first, then its serial handleMessage callback,
+    // then nextTick(work). Include a malformed packet between valid observations.
+    await new Promise<void>((resolve) => {
+      const pump = (index: number): void => {
+        if (index === 128) return resolve();
+        const payload =
+          index === 64
+            ? "not-json"
+            : JSON.stringify({
+                entity_id: "ugv1",
+                latitude: 30,
+                longitude: 114 + index / 1_000,
+              });
+        const packet = { retain: false, qos: index % 2 };
+        fake.emit("message", "/ugv/gnss", Buffer.from(payload), packet);
+        fake.handleMessage(packet, () => {
+          acknowledged.push(index);
+          process.nextTick(() => pump(index + 1));
+        });
+      };
+      process.nextTick(() => pump(0));
+    });
+    await io;
+    expect(acknowledgedAtIo).toBeGreaterThanOrEqual(0);
+    expect(acknowledgedAtIo).toBeLessThan(128);
+    expect(acknowledged).toEqual(Array.from({ length: 128 }, (_, index) => index));
+    expect(handle).toHaveBeenCalledTimes(128);
+    expect(ingress.snapshot().chassis.position?.longitude).toBe(114.127);
+    await client.stop();
+  });
 });
 
 function fakeMqttClient() {
@@ -132,6 +178,9 @@ function fakeMqttClient() {
   const emitter = Object.assign(new EventEmitter(), {
     subscribe,
     end,
+    handleMessage(_packet: unknown, callback: () => void): void {
+      callback();
+    },
     subscriptionCallback(index = 0): SubscriptionCallback {
       const callback = callbacks[index];
       if (callback === undefined) throw new Error("TEST_SUBSCRIPTION_CALLBACK_MISSING");

@@ -306,6 +306,7 @@
     },
     "SCHEDULER_CONCURRENCY": { "default": 8, "maximum": 128, "minimum": 1, "type": "integer" },
     "SCHEDULER_POLL_MS": { "default": 1000, "maximum": 60000, "minimum": 100, "type": "integer" },
+    "SIMULATOR_CREDENTIAL_FREE": { "type": "boolean" },
     "SMPP_DIAGNOSTICS_ENABLED": { "type": "boolean" },
     "SMPP_DIAGNOSTICS_MAX_TTL_MS": {
       "default": 300000,
@@ -428,6 +429,7 @@
     "DB_PUBLICATION_BUDGET_MS",
     "ALLOW_WEAK_LEASE_CONFIGURATION",
     "INTERNAL_ENDPOINTS_ENABLED",
+    "SIMULATOR_CREDENTIAL_FREE",
     "SMPP_DIAGNOSTICS_ENABLED",
     "SMPP_DIAGNOSTICS_MAX_TTL_MS",
     "ADAPTER_HEALTH_POLL_MS",

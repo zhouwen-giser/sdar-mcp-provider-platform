@@ -116,6 +116,7 @@ const RuntimeWorkerEventsInputBaseSchema = z.object({
   DB_PUBLICATION_BUDGET_MS: z.coerce.number().int().min(100).max(60_000).default(1_000),
   ALLOW_WEAK_LEASE_CONFIGURATION: BooleanEnvironmentSchema.default(false),
   INTERNAL_ENDPOINTS_ENABLED: BooleanEnvironmentSchema.default(false),
+  SIMULATOR_CREDENTIAL_FREE: BooleanEnvironmentSchema.default(false),
   INTERNAL_ADMIN_TOKEN: z.string().min(32).optional(),
   SMPP_DIAGNOSTICS_ENABLED: BooleanEnvironmentSchema.default(false),
   SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE: z.string().min(1).optional(),
@@ -151,6 +152,7 @@ export const RuntimeWorkerEventsResolvedSchema = RuntimeWorkerEventsInputBaseSch
   BUSINESS_EVENTS_REQUIRED_FOR_RUNTIME_READY: z.boolean(),
   ALLOW_WEAK_LEASE_CONFIGURATION: z.boolean(),
   INTERNAL_ENDPOINTS_ENABLED: z.boolean(),
+  SIMULATOR_CREDENTIAL_FREE: z.boolean(),
   SMPP_DIAGNOSTICS_ENABLED: z.boolean(),
 });
 
@@ -214,7 +216,11 @@ const RuntimeWorkerEventsInputSchema = z
     ) {
       context.addIssue({ code: "custom", message: "production Outbox webhook requires HTTPS" });
     }
-    if (value.INTERNAL_ENDPOINTS_ENABLED && value.INTERNAL_ADMIN_TOKEN === undefined) {
+    if (
+      value.INTERNAL_ENDPOINTS_ENABLED &&
+      !value.SIMULATOR_CREDENTIAL_FREE &&
+      value.INTERNAL_ADMIN_TOKEN === undefined
+    ) {
       context.addIssue({
         code: "custom",
         message: "INTERNAL_ENDPOINTS_ENABLED requires INTERNAL_ADMIN_TOKEN",
@@ -222,6 +228,7 @@ const RuntimeWorkerEventsInputSchema = z
     }
     if (
       value.SMPP_DIAGNOSTICS_ENABLED &&
+      !value.SIMULATOR_CREDENTIAL_FREE &&
       value.SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE === undefined
     ) {
       context.addIssue({

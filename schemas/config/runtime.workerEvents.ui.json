@@ -817,6 +817,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "Runtime simulator_credential_free setting.",
+      "displayName": "Simulator Credential Free",
+      "overridePolicy": {
+        "allowedTargetTypes": ["runtime_deployment", "runtime_instance"],
+        "mode": "inheritable"
+      },
+      "path": "/SIMULATOR_CREDENTIAL_FREE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "Runtime internal_admin_token setting.",
       "displayName": "Internal Admin Token",
       "overridePolicy": {

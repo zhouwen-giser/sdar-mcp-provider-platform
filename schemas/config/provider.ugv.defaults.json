@@ -14,6 +14,7 @@
     "PROVIDER_TELEMETRY_TLS_MODE": "disabled",
     "PROVIDER_VERSION": "1.0.0",
     "RUNTIME_ENV": "development",
+    "SIMULATOR_CREDENTIAL_FREE": false,
     "UGV_ADAPTER_DATABASE_POOL_MAX": 8,
     "UGV_ADAPTER_STORE_MODE": "postgres",
     "UGV_ALLOW_NAVIGATION_WITH_RECON": true,

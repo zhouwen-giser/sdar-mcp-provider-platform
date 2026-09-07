@@ -48,6 +48,7 @@
       "enum": ["development", "test", "production"],
       "type": "string"
     },
+    "SIMULATOR_CREDENTIAL_FREE": { "type": "boolean" },
     "UGV_ADAPTER_DATABASE_POOL_MAX": {
       "default": 8,
       "maximum": 32,
@@ -326,6 +327,7 @@
     "UGV_FIRE_ENABLED",
     "UGV_FIRE_REQUIRES_CHASSIS_STOPPED",
     "UGV_DIAGNOSTICS_ENABLED",
+    "SIMULATOR_CREDENTIAL_FREE",
     "UGV_DIAGNOSTICS_MAX_TTL_MS",
     "UGV_STATIONARY_SPEED_THRESHOLD_KMH",
     "UGV_STATIONARY_STABILITY_MS",

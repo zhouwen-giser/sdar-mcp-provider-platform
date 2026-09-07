@@ -726,6 +726,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider simulator_credential_free setting.",
+      "displayName": "SIMULATOR_CREDENTIAL_FREE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/SIMULATOR_CREDENTIAL_FREE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_diagnostics_control_token_file setting.",
       "displayName": "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
       "overridePolicy": {

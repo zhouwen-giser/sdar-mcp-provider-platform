@@ -128,8 +128,9 @@ const runtime = new UgvProviderRuntime(
     fireRequiresChassisStopped: config.UGV_FIRE_REQUIRES_CHASSIS_STOPPED,
     diagnostics: {
       enabled: config.UGV_DIAGNOSTICS_ENABLED,
+      credentialFree: config.SIMULATOR_CREDENTIAL_FREE,
       controlToken:
-        config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined
+        config.SIMULATOR_CREDENTIAL_FREE || config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE === undefined
           ? ""
           : readFileSync(config.UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE, "utf8").trim(),
       maximumTtlMs: config.UGV_DIAGNOSTICS_MAX_TTL_MS,

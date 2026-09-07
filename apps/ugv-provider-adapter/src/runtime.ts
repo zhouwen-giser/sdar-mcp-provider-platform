@@ -217,6 +217,7 @@ export class UgvProviderRuntime {
       diagnostics?: {
         enabled: boolean;
         controlToken: string;
+        credentialFree?: boolean;
         maximumTtlMs: number;
       };
       now?: () => Date;
@@ -583,7 +584,10 @@ export class UgvProviderRuntime {
     input: StartUgvOperation,
   ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
     const diagnostics = this.options.diagnostics;
-    if (diagnostics?.enabled !== true || diagnostics.controlToken.length === 0) {
+    if (
+      diagnostics?.enabled !== true ||
+      (!diagnostics.credentialFree && diagnostics.controlToken.length === 0)
+    ) {
       throw new Error("SMPP_DIAGNOSTICS_DISABLED");
     }
     const capabilityId = input.arguments.capabilityId;
@@ -598,12 +602,13 @@ export class UgvProviderRuntime {
       capabilityId,
       diagnostics.maximumTtlMs,
     );
-    assertDiagnosticControlSignature(
-      diagnostics.controlToken,
-      input.executionContext.authorizationContextHash,
-      capabilityId,
-      request,
-    );
+    if (!diagnostics.credentialFree)
+      assertDiagnosticControlSignature(
+        diagnostics.controlToken,
+        input.executionContext.authorizationContextHash,
+        capabilityId,
+        request,
+      );
     await this.#expireDiagnosticLeases();
     const now = this.#now();
     let result: SmppDiagnosticControlResult | undefined;

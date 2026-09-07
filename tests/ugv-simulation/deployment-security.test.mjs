@@ -270,12 +270,8 @@ describe("Goal 10 deployment security", () => {
     );
 
     expect(override).toContain("UGV_EXECUTION_MODE: ${UGV_EXECUTION_MODE:-live}");
-    expect(override).toContain(
-      "UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}",
-    );
-    expect(override).toContain(
-      "SMPP_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}",
-    );
+    expect(override).toContain("UGV_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}");
+    expect(override).toContain("SMPP_DIAGNOSTICS_ENABLED: ${SMPP_DIAGNOSTICS_ENABLED:-true}");
     expect(override).toContain(
       "file: ${SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE:?Development Debug diagnostics require SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE}",
     );

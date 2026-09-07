@@ -244,7 +244,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     config.RATE_LIMIT_MAX_KEYS,
   );
   let diagnosticOperatorToken = "";
-  if (config.SMPP_DIAGNOSTICS_ENABLED) {
+  if (config.SMPP_DIAGNOSTICS_ENABLED && !config.SIMULATOR_CREDENTIAL_FREE) {
     const tokenFile = config.SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE;
     if (tokenFile === undefined) throw new Error("SMPP_DIAGNOSTICS_OPERATOR_TOKEN_FILE_REQUIRED");
     diagnosticOperatorToken = readFileSync(tokenFile, "utf8").trim();
@@ -289,6 +289,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   }
 
   function diagnosticAuthorized(request: FastifyRequest): boolean {
+    if (config.SMPP_DIAGNOSTICS_ENABLED && config.SIMULATOR_CREDENTIAL_FREE) return true;
     if (!config.SMPP_DIAGNOSTICS_ENABLED || diagnosticOperatorToken.length === 0) return false;
     const supplied = request.headers["x-sdar-diagnostic-token"];
     if (typeof supplied !== "string") return false;
@@ -497,10 +498,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       typeof _request.headers["x-sdar-admin-token"] === "string"
         ? _request.headers["x-sdar-admin-token"]
         : "";
-    if (header.length === 0) {
+    if (!config.SIMULATOR_CREDENTIAL_FREE && header.length === 0) {
       return reply.code(401).send({ error: "admin_token_required" });
     }
-    if (!isValidInternalAdminToken(header, config.INTERNAL_ADMIN_TOKEN ?? "")) {
+    if (
+      !config.SIMULATOR_CREDENTIAL_FREE &&
+      !isValidInternalAdminToken(header, config.INTERNAL_ADMIN_TOKEN ?? "")
+    ) {
       return reply.code(403).send({ error: "invalid_admin_token" });
     }
     if (manifest === undefined) return reply.code(503).send({ error: "manifest_not_loaded" });
@@ -514,10 +518,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       typeof request.headers["x-sdar-admin-token"] === "string"
         ? request.headers["x-sdar-admin-token"]
         : "";
-    if (header.length === 0) {
+    if (!config.SIMULATOR_CREDENTIAL_FREE && header.length === 0) {
       return reply.code(401).send({ error: "admin_token_required" });
     }
-    if (!isValidInternalAdminToken(header, config.INTERNAL_ADMIN_TOKEN ?? "")) {
+    if (
+      !config.SIMULATOR_CREDENTIAL_FREE &&
+      !isValidInternalAdminToken(header, config.INTERNAL_ADMIN_TOKEN ?? "")
+    ) {
       return reply.code(403).send({ error: "invalid_admin_token" });
     }
     return providerIdentity;

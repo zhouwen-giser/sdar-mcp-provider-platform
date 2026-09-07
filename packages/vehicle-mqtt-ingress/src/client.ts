@@ -43,6 +43,12 @@ export class VehicleMqttClient {
     if (this.#client !== undefined) return;
     this.validateSubscriptions(this.topics);
     const client = connect(this.options.url, mqttOptions(this.options));
+    // MQTT.js drains buffered packets via nextTick. Yield between packets so a
+    // continuous simulator feed cannot starve database, gRPC, or timer callbacks.
+    // Keep its serial completion/acknowledgement path; do not drop lifecycle events.
+    client.handleMessage = (_packet, callback) => {
+      setImmediate(callback);
+    };
     this.#client = client;
     client.on("connect", () => {
       const generation = ++this.#connectionGeneration;
