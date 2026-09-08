@@ -4,18 +4,18 @@
 
 **10/10 工具均已发起 tools/call，6类得到成功结果，不能宣称10项全部通过。** HTTP 200 不代表业务成功；本报告依据 isError、任务终态及设备观测分别判断。
 
-| 工具 | 判定 | 结果 |
-| --- | --- | --- |
-| vehicle_get_state | PASS | 真实状态读取成功，MQTT/设备 MCP 在线 |
-| vehicle_get_capabilities | PASS | 设备能力成功返回；laserRange=false |
-| vehicle_get_payload_status | PASS | 返回载荷、覆盖及云台状态 |
-| vehicle_get_targets | PASS | 连续采样实际发现目标 ID 47；后续样本可能为空 |
-| vehicle_navigate | PASS_POINT_WITH_DISTANCE_ANOMALY | 用户指定点位完成，误差0.621米；另一次1米距离导航回报完成但位移0米 |
-| vehicle_area_recon | PARTIAL | 显式targetTypes=[]后设备扫描424/424格、100%；SMPP关联弱，最终确认超时 |
-| vehicle_track_target | REJECTED | 实际发现目标47在后续调用时返回UGV_TARGET_NOT_FOUND |
-| vehicle_control_gimbal | FAILED | 初次EO占用；重试受理后出现UGV_DOWNSTREAM_MISSION_ID_MISMATCH，已取消并急停清理 |
-| vehicle_fire_weapon | BLOCKED_AFTER_ENABLE | 原UGV_FIRE_DISABLED已解除并持久化；目标47调用被UGV_STATE_STALE拒绝，未实际仿真发射 |
-| vehicle_emergency_stop | PASS | 收到STOP_CONFIRMED，末次速度0、目标解锁 |
+| 工具                       | 判定                             | 结果                                                                               |
+| -------------------------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| vehicle_get_state          | PASS                             | 真实状态读取成功，MQTT/设备 MCP 在线                                               |
+| vehicle_get_capabilities   | PASS                             | 设备能力成功返回；laserRange=false                                                 |
+| vehicle_get_payload_status | PASS                             | 返回载荷、覆盖及云台状态                                                           |
+| vehicle_get_targets        | PASS                             | 连续采样实际发现目标 ID 47；后续样本可能为空                                       |
+| vehicle_navigate           | PASS_POINT_WITH_DISTANCE_ANOMALY | 用户指定点位完成，误差0.621米；另一次1米距离导航回报完成但位移0米                  |
+| vehicle_area_recon         | PARTIAL                          | 显式targetTypes=[]后设备扫描424/424格、100%；SMPP关联弱，最终确认超时              |
+| vehicle_track_target       | REJECTED                         | 实际发现目标47在后续调用时返回UGV_TARGET_NOT_FOUND                                 |
+| vehicle_control_gimbal     | FAILED                           | 初次EO占用；重试受理后出现UGV_DOWNSTREAM_MISSION_ID_MISMATCH，已取消并急停清理     |
+| vehicle_fire_weapon        | BLOCKED_AFTER_ENABLE             | 原UGV_FIRE_DISABLED已解除并持久化；目标47调用被UGV_STATE_STALE拒绝，未实际仿真发射 |
+| vehicle_emergency_stop     | PASS                             | 收到STOP_CONFIRMED，末次速度0、目标解锁                                            |
 
 ## 指定导航与区域
 

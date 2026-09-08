@@ -22,19 +22,19 @@
 
 ## 本次新增验证
 
-| 检查 | 结果 |
-|---|---|
-| 部署模板与共享配置回归 | 5 PASS |
-| GOWM 现场只读合同/设备预检 | PASS |
-| Runtime / Adapter 本地 Docker 构建 | PASS |
-| 非 root Runtime 镜像合同读取与共享配置加载 | PASS |
-| 隔离库调用真实 GOWM 安装器/设备 API/角色 bootstrap | PASS |
-| bootstrap 重放保持同 binding 和密码 | PASS |
-| 专用普通登录 PostgreSQL Repository | 16 PASS |
-| 专用普通登录双设备源码 Runtime E2E | 1 PASS |
-| 变更文件 ESLint、typecheck、diff whitespace | PASS |
-| 解压后默认配置/归档排除秘密与运行数据 | PASS，1596 文件 |
-| 两次生成的归档 SHA256 | 一致 |
+| 检查                                               | 结果            |
+| -------------------------------------------------- | --------------- |
+| 部署模板与共享配置回归                             | 5 PASS          |
+| GOWM 现场只读合同/设备预检                         | PASS            |
+| Runtime / Adapter 本地 Docker 构建                 | PASS            |
+| 非 root Runtime 镜像合同读取与共享配置加载         | PASS            |
+| 隔离库调用真实 GOWM 安装器/设备 API/角色 bootstrap | PASS            |
+| bootstrap 重放保持同 binding 和密码                | PASS            |
+| 专用普通登录 PostgreSQL Repository                 | 16 PASS         |
+| 专用普通登录双设备源码 Runtime E2E                 | 1 PASS          |
+| 变更文件 ESLint、typecheck、diff whitespace        | PASS            |
+| 解压后默认配置/归档排除秘密与运行数据              | PASS，1596 文件 |
+| 两次生成的归档 SHA256                              | 一致            |
 
 数据库测试只使用本任务专用隔离数据库；未复用历史管理员测试作为普通登录验证。完整结果在 `role-integration.json`。现场尚未执行 `--apply` 和 `up`，未验证设备 MCP 的在线合同；未声称现场业务流已切换。
 

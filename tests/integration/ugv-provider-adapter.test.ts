@@ -726,7 +726,6 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.device.calls).toHaveLength(2);
   });
 
-
   it("returns Runtime-valid evidence for every core synchronous read", async () => {
     const fixture = await createFixture();
     const mqttSequence = fixture.ingress.ingestSequence();

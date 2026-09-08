@@ -1,1 +1,11 @@
-{"phase": "PRIMARY", "state": "REJECTED", "stepId": "start:01:primary", "taskId": "6e054901-5b1a-43a8-8bc4-99e8143c06bc", "toolName": "ugv_area_recon_configure", "completedAt": "2026-09-08T09:03:59.732Z", "argumentHash": "27a3694c70eb680459ce1affec26c4af85303d8951ad20a2e4dd6a14fcb521bb", "dispatchedAt": "2026-09-08T09:03:59.711Z", "intentPersistedAt": "2026-09-08T09:03:59.710Z"}
+{
+  "phase": "PRIMARY",
+  "state": "REJECTED",
+  "stepId": "start:01:primary",
+  "taskId": "6e054901-5b1a-43a8-8bc4-99e8143c06bc",
+  "toolName": "ugv_area_recon_configure",
+  "completedAt": "2026-09-08T09:03:59.732Z",
+  "argumentHash": "27a3694c70eb680459ce1affec26c4af85303d8951ad20a2e4dd6a14fcb521bb",
+  "dispatchedAt": "2026-09-08T09:03:59.711Z",
+  "intentPersistedAt": "2026-09-08T09:03:59.710Z"
+}

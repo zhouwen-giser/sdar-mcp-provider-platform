@@ -4,15 +4,15 @@
 
 **链路仍未通过。本轮所有请求HTTP200，侦察实际发现目标63，但跟踪及仿真发射均业务拒绝。**
 
-| 阶段 | 实际结果 |
-| --- | --- |
-| 预检 | 四个只读工具成功，MQTT/设备MCP在线，区域完全可覆盖 |
-| 侦察 | scanCount=0、targetTypes=[]，正常受理为任务4d813bf5-d6ed-4045-9c80-1ef0bb72b7f4，Mission41924 |
-| 发现目标 | 半秒采样，真实返回目标63 |
-| 侦察取消 | tasks/cancel应答200；随后六次、每次间隔约一秒查询仍为working/UGV_RECON_RUNNING |
-| 跟踪目标63 | isError=true，UGV_EO_TRACK_BUSY，未产生跟踪任务 |
-| 仿真发射目标63 | requireConfirmation=true，isError=true，UGV_STATE_STALE；未产生发射任务，无仿真发射 |
-| 清理 | 侦察最终cancelled / UGV_CANCEL_DISPATCH_FENCED；急停任务b5e76957-7e5e-467e-9a4e-df8863774ac4 completed / STOP_CONFIRMED，速度0、目标解锁 |
+| 阶段           | 实际结果                                                                                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 预检           | 四个只读工具成功，MQTT/设备MCP在线，区域完全可覆盖                                                                                       |
+| 侦察           | scanCount=0、targetTypes=[]，正常受理为任务4d813bf5-d6ed-4045-9c80-1ef0bb72b7f4，Mission41924                                            |
+| 发现目标       | 半秒采样，真实返回目标63                                                                                                                 |
+| 侦察取消       | tasks/cancel应答200；随后六次、每次间隔约一秒查询仍为working/UGV_RECON_RUNNING                                                           |
+| 跟踪目标63     | isError=true，UGV_EO_TRACK_BUSY，未产生跟踪任务                                                                                          |
+| 仿真发射目标63 | requireConfirmation=true，isError=true，UGV_STATE_STALE；未产生发射任务，无仿真发射                                                      |
+| 清理           | 侦察最终cancelled / UGV_CANCEL_DISPATCH_FENCED；急停任务b5e76957-7e5e-467e-9a4e-df8863774ac4 completed / STOP_CONFIRMED，速度0、目标解锁 |
 
 本轮故障定位为取消侦察后的通道交接和发射前状态新鲜度。六次轮询只证明本测试观察窗口内取消未完成，不能据此断言永久无法取消。没有绕过通道仲裁、状态检查或发射确认。
 

@@ -1,1 +1,219 @@
-{"numTotalTestSuites":3,"numPassedTestSuites":3,"numFailedTestSuites":0,"numPendingTestSuites":0,"numTotalTests":17,"numPassedTests":17,"numFailedTests":0,"numPendingTests":0,"numTodoTests":0,"snapshot":{"added":0,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0,"didUpdate":false},"startTime":1788851851806,"success":true,"testResults":[{"assertionResults":[{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories verifies the consumed SMPP contract","status":"passed","title":"verifies the consumed SMPP contract","duration":64.50436400000012,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories rejects a mismatched core contract without changing installed history","status":"passed","title":"rejects a mismatched core contract without changing installed history","duration":6.5273380000001,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories isolates the same device and idempotency text across services","status":"passed","title":"isolates the same device and idempotency text across services","duration":25.604921999999988,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories isolates equal idempotency text and preserves argument conflicts","status":"passed","title":"isolates equal idempotency text and preserves argument conflicts","duration":22.80098399999997,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories writes A/B same snapshot revision and rejects conflicting payloads","status":"passed","title":"writes A/B same snapshot revision and rejects conflicting payloads","duration":35.48563399999989,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories publishes late MCP parents and keeps equal native Mission 7 separate","status":"passed","title":"publishes late MCP parents and keeps equal native Mission 7 separate","duration":118.78193099999999,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories same-device workers claim once while B claims its own commands","status":"passed","title":"same-device workers claim once while B claims its own commands","duration":134.13219299999992,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories scope lease keys fence concurrent workers independently per device","status":"passed","title":"scope lease keys fence concurrent workers independently per device","duration":11.899814000000106,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails","status":"passed","title":"receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails","duration":45.87351699999999,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories source sequences and duplicate event IDs are isolated; foreign leases are rejected","status":"passed","title":"source sequences and duplicate event IDs are isolated; foreign leases are rejected","duration":40.394209000000046,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories cross-device journal writes fail the actual composite parent FK","status":"passed","title":"cross-device journal writes fail the actual composite parent FK","duration":9.684172999999873,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories known targets normalize and unknown local frames retain native coordinates","status":"passed","title":"known targets normalize and unknown local frames retain native coordinates","duration":80.91465500000004,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories handle expiry never physically purges retained native history","status":"passed","title":"handle expiry never physically purges retained native history","duration":73.06730599999992,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories same outbox key can coexist on A/B and B cannot publish A's row","status":"passed","title":"same outbox key can coexist on A/B and B cannot publish A's row","duration":58.96702899999991,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories uncertain dispatch remains durable and cannot be claimed as a new send","status":"passed","title":"uncertain dispatch remains durable and cannot be claimed as a new send","duration":22.023999999999887,"failureMessages":[],"meta":{},"tags":[]},{"ancestorTitles":["actual GOWM-installed SMPP repositories"],"fullName":"actual GOWM-installed SMPP repositories replacing a binding cannot mutate old task ownership or admit through the retired route","status":"passed","title":"replacing a binding cannot mutate old task ownership or admit through the retired route","duration":55.58838199999991,"failureMessages":[],"meta":{},"tags":[]}],"startTime":1788851863499,"endTime":1788851864306.5884,"status":"passed","message":"","name":"/home/zhouwen/web-download/sdar-mcp-provider-platform/tests/gowm-storage/postgres.test.ts"},{"assertionResults":[{"ancestorTitles":[],"fullName":"two real source Runtime/UGV instances write the MCP → Execution → Dispatch → Mission chain","status":"passed","title":"two real source Runtime/UGV instances write the MCP → Execution → Dispatch → Mission chain","duration":6585.562432999999,"failureMessages":[],"meta":{},"tags":[]}],"startTime":1788851855530,"endTime":1788851862115.5625,"status":"passed","message":"","name":"/home/zhouwen/web-download/sdar-mcp-provider-platform/tests/gowm-storage/source-smoke.test.ts"}]}
+{
+  "numTotalTestSuites": 3,
+  "numPassedTestSuites": 3,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 17,
+  "numPassedTests": 17,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1788851851806,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories verifies the consumed SMPP contract",
+          "status": "passed",
+          "title": "verifies the consumed SMPP contract",
+          "duration": 64.50436400000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories rejects a mismatched core contract without changing installed history",
+          "status": "passed",
+          "title": "rejects a mismatched core contract without changing installed history",
+          "duration": 6.5273380000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories isolates the same device and idempotency text across services",
+          "status": "passed",
+          "title": "isolates the same device and idempotency text across services",
+          "duration": 25.604921999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories isolates equal idempotency text and preserves argument conflicts",
+          "status": "passed",
+          "title": "isolates equal idempotency text and preserves argument conflicts",
+          "duration": 22.80098399999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories writes A/B same snapshot revision and rejects conflicting payloads",
+          "status": "passed",
+          "title": "writes A/B same snapshot revision and rejects conflicting payloads",
+          "duration": 35.48563399999989,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories publishes late MCP parents and keeps equal native Mission 7 separate",
+          "status": "passed",
+          "title": "publishes late MCP parents and keeps equal native Mission 7 separate",
+          "duration": 118.78193099999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories same-device workers claim once while B claims its own commands",
+          "status": "passed",
+          "title": "same-device workers claim once while B claims its own commands",
+          "duration": 134.13219299999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories scope lease keys fence concurrent workers independently per device",
+          "status": "passed",
+          "title": "scope lease keys fence concurrent workers independently per device",
+          "duration": 11.899814000000106,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails",
+          "status": "passed",
+          "title": "receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails",
+          "duration": 45.87351699999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories source sequences and duplicate event IDs are isolated; foreign leases are rejected",
+          "status": "passed",
+          "title": "source sequences and duplicate event IDs are isolated; foreign leases are rejected",
+          "duration": 40.394209000000046,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories cross-device journal writes fail the actual composite parent FK",
+          "status": "passed",
+          "title": "cross-device journal writes fail the actual composite parent FK",
+          "duration": 9.684172999999873,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories known targets normalize and unknown local frames retain native coordinates",
+          "status": "passed",
+          "title": "known targets normalize and unknown local frames retain native coordinates",
+          "duration": 80.91465500000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories handle expiry never physically purges retained native history",
+          "status": "passed",
+          "title": "handle expiry never physically purges retained native history",
+          "duration": 73.06730599999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories same outbox key can coexist on A/B and B cannot publish A's row",
+          "status": "passed",
+          "title": "same outbox key can coexist on A/B and B cannot publish A's row",
+          "duration": 58.96702899999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories uncertain dispatch remains durable and cannot be claimed as a new send",
+          "status": "passed",
+          "title": "uncertain dispatch remains durable and cannot be claimed as a new send",
+          "duration": 22.023999999999887,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories replacing a binding cannot mutate old task ownership or admit through the retired route",
+          "status": "passed",
+          "title": "replacing a binding cannot mutate old task ownership or admit through the retired route",
+          "duration": 55.58838199999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1788851863499,
+      "endTime": 1788851864306.5884,
+      "status": "passed",
+      "message": "",
+      "name": "/home/zhouwen/web-download/sdar-mcp-provider-platform/tests/gowm-storage/postgres.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "two real source Runtime/UGV instances write the MCP → Execution → Dispatch → Mission chain",
+          "status": "passed",
+          "title": "two real source Runtime/UGV instances write the MCP → Execution → Dispatch → Mission chain",
+          "duration": 6585.562432999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1788851855530,
+      "endTime": 1788851862115.5625,
+      "status": "passed",
+      "message": "",
+      "name": "/home/zhouwen/web-download/sdar-mcp-provider-platform/tests/gowm-storage/source-smoke.test.ts"
+    }
+  ]
+}
