@@ -11,7 +11,7 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "package:development-server": "node scripts/package-development-server.mjs",
+    "package:development-server": "python3 scripts/package-united-deployment.py",
     "clean": "rm -rf dist coverage packages/adapter-protocol/generated",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -196,7 +196,13 @@
     "pms-console-contract:freeze": "node scripts/pms-console-contract/generate-lock.mjs",
     "pms-console-contract:deliver-frozen": "node scripts/pms-console-contract/create-frozen-delivery.mjs",
     "pms-console-conformance:check": "node scripts/pms-console-conformance/validate-all.mjs",
-    "pms-console-conformance:deliver": "node scripts/pms-console-conformance/create-delivery.mjs"
+    "pms-console-conformance:deliver": "node scripts/pms-console-conformance/create-delivery.mjs",
+    "gowm-storage:check": "node scripts/gowm-storage/check.mjs",
+    "gowm-storage:test:unit": "vitest run tests/gowm-storage/config.test.ts",
+    "gowm-storage:test:postgres": "node scripts/gowm-storage/run.mjs postgres",
+    "gowm-storage:smoke": "node scripts/gowm-storage/run.mjs smoke",
+    "package:united-server": "python3 scripts/package-united-deployment.py",
+    "package:smpp-server": "node scripts/package-development-server.mjs"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.4",

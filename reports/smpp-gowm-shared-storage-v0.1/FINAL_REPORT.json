@@ -1,0 +1,30 @@
+{
+  "status": "INTEGRATION_DEV_READY",
+  "source": "PASS",
+  "postgres": "PASS",
+  "sourceRuntimeE2E": "PASS",
+  "remotePR": "NOT_RUN",
+  "baseline": {
+    "consumerBase": "b974471dd62665721a5edcc63b7651d2f476160d",
+    "consumerBranch": "codex/smpp-gowm-shared-storage-integration-v0.1",
+    "upstreamCommit": "48cebb862e992579b801590385b4373b10422d52",
+    "upstreamBranch": "codex/gowm-device-shared-business-storage-v0.2",
+    "contract": "contracts/gowm-shared-storage/current/source.json",
+    "note": "Consumed files are pinned by captured hashes; upstream working tree has ongoing unrelated changes and was never modified by this task."
+  },
+  "testCounts": {
+    "unit": 252,
+    "contract": 36,
+    "config": 11,
+    "sharedPostgres": 16,
+    "sourceSmoke": 1,
+    "affectedRegression": 157
+  },
+  "limitations": [
+    "One explicitly bound device per UGV source instance; A/B run as two instances sharing the database.",
+    "Physical vehicles, live deployment cutover and SDAR workflow integration not run.",
+    "Additional catalog fault injection and per-method cases marked NOT_RUN in test-results.json.",
+    "Shared-read-model test installation requires upstream SDAR structure/vector; no SDAR process/business fixtures used.",
+    "Old business databases and data preserved; no copy/sync/dual write."
+  ]
+}

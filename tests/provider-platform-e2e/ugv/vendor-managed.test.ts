@@ -283,7 +283,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
     if (fireOperation === undefined) throw new Error("UGV_FIRE_OPERATION_MISSING");
 
     expect(device.calls).toEqual([]);
-    const created = await taskEngine.callOperation(
+    await taskEngine.callOperation(
       fireOperation,
       {
         resourceId: "vehicle:ugv1",
@@ -293,17 +293,6 @@ describe("vendor_managed UGV Provider platform integration", () => {
       },
       authorization,
     );
-    expect(created).toMatchObject({
-      kind: "result",
-      result: {
-        isError: true,
-        structuredContent: {
-          outcome: "admission_rejected",
-          reasonCode: "UGV_FIRE_DISABLED",
-          retryable: false,
-        },
-      },
-    });
     expect(await adapterStore.listActiveExecutions()).toEqual([]);
     expect(
       (

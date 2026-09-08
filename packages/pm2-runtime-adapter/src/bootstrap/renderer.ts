@@ -6,6 +6,12 @@ import type {
 } from "@sdar/runtime-deployment";
 
 const EFFECTIVE_CONFIG_ALLOWLIST = new Set([
+  "SMPP_STORAGE_MODE",
+  "SMPP_SERVICE_KEY",
+  "SMPP_ALLOWED_DEVICE_IDS",
+  "SMPP_GOWM_BINDING_ID",
+  "SMPP_SOURCE_SESSION_KEY",
+  "SMPP_GOWM_CONTRACT_DIR",
   "RUNTIME_ENV",
   "ALLOW_INSECURE_INTERNAL_TRANSPORT",
   "HOST",
@@ -46,6 +52,7 @@ const RESERVED_KEYS = new Set([
 ]);
 
 const SECRET_FILE_KEYS = new Set([
+  "GOWM_DATABASE_URL_FILE",
   "DATABASE_URL_FILE",
   "PMS_RUNTIME_CONFIG_TOKEN_FILE",
   "PMS_RUNTIME_REGISTRATION_TOKEN_FILE",
@@ -111,6 +118,8 @@ export class BootstrapConfigRenderer {
       PMS_CONFIG_REVISION: String(input.configRevision),
       PMS_RUNTIME_VERSION: input.target.runtimeVersion,
     };
+    if (effective.SMPP_STORAGE_MODE === "gowm-shared")
+      environment.GOWM_DATABASE_URL_FILE = input.databaseUrlFile;
     if (input.pms !== undefined) {
       validatePms(
         input.pms,

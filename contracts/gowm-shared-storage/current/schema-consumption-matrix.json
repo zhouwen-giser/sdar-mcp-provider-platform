@@ -1,0 +1,3854 @@
+[
+  {
+    "table": "adapter_business_event_inbox",
+    "columns": [
+      "inbox_id",
+      "provider_id",
+      "source_id",
+      "source_stream_id",
+      "status",
+      "raw_envelope_json",
+      "raw_envelope_hash",
+      "transport_payload_hash",
+      "decode_status",
+      "reject_reason",
+      "normalized_source_event_id",
+      "normalized_source_sequence",
+      "normalized_scope",
+      "normalized_occurred_at",
+      "normalized_event_type",
+      "source_canonical_hash",
+      "source_payload",
+      "mapping_deadline",
+      "attempt_count",
+      "last_attempt_at",
+      "last_error",
+      "retain_until",
+      "received_at",
+      "finalized_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((attempt_count >= 0))",
+      "CHECK (((decode_status <> 'decoded'::text) OR (status = 'rejected'::text) OR ((normalized_source_event_id ~ '^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,255}$'::text) AND (normalized_source_sequence IS NOT NULL) AND (normalized_scope = ANY (ARRAY['task'::text, 'resource'::text])) AND (normalized_occurred_at IS NOT NULL) AND (normalized_event_type ~ '^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$'::text) AND (source_canonical_hash IS NOT NULL) AND (source_payload IS NOT NULL))))",
+      "CHECK ((decode_status = ANY (ARRAY['decoded'::text, 'partially_decoded'::text, 'undecodable'::text])))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK (((normalized_source_sequence IS NULL) OR (normalized_source_sequence > 0)))",
+      "PRIMARY KEY (device_id, inbox_id)",
+      "FOREIGN KEY (device_id, provider_id, source_id) REFERENCES ugv_smpp.adapter_business_event_source_state(device_id, provider_id, source_id) ON DELETE RESTRICT",
+      "CHECK ((raw_envelope_hash ~ '^sha256:[0-9a-f]{64}$'::text))",
+      "CHECK ((source_canonical_hash ~ '^sha256:[0-9a-f]{64}$'::text))",
+      "CHECK ((status = ANY (ARRAY['received'::text, 'pending_mapping'::text, 'ready'::text, 'continuity_loss_pending'::text, 'rejected'::text, 'mapping_failed'::text, 'published'::text, 'terminal_skipped'::text])))",
+      "CHECK ((transport_payload_hash ~ '^sha256:[0-9a-f]{64}$'::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 440
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 441
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 490
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 491
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 496
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 574
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 575
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 577
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 628
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 629
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 664
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 666
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 674
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 675
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 711
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 714
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 731
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 735
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 782
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 783
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 862
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 863
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 987
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 988
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1102
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1107
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "adapter_business_event_source_state",
+    "columns": [
+      "provider_id",
+      "source_id",
+      "source_stream_id",
+      "delivery_semantics",
+      "status",
+      "last_persisted_source_sequence",
+      "last_finalized_source_sequence",
+      "lease_owner",
+      "lease_until",
+      "fencing_token",
+      "last_seen_at",
+      "last_error",
+      "updated_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((last_finalized_source_sequence >= 0))",
+      "CHECK ((last_persisted_source_sequence >= 0))",
+      "CHECK ((last_finalized_source_sequence <= last_persisted_source_sequence))",
+      "CHECK (((lease_owner IS NULL) = (lease_until IS NULL)))",
+      "CHECK ((delivery_semantics = ANY (ARRAY['durable_at_least_once'::text, 'best_effort_live'::text])))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((fencing_token >= 0))",
+      "PRIMARY KEY (device_id, provider_id, source_id)",
+      "CHECK ((source_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'::text))",
+      "CHECK ((status = ANY (ARRAY['active'::text, 'degraded'::text, 'unavailable'::text, 'blocked_contract_violation'::text, 'blocked_identity_conflict'::text, 'continuity_loss_pending'::text, 'disabled'::text])))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 192
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 193
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 194
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 294
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 295
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 311
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 316
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 365
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 367
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 519
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 527
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 621
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 622
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 679
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 680
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 775
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 776
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 867
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 869
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 981
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 982
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1033
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1035
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1055
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1056
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1057
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1058
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1064
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1065
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1067
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1068
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1069
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1283
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1285
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1734
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1735
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1757
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1759
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "admission_intent",
+    "columns": [
+      "task_id",
+      "provider_id",
+      "operation_name",
+      "operation_snapshot_id",
+      "authorization_context_hash",
+      "execution_mode",
+      "simulation_id",
+      "arguments",
+      "argument_hash",
+      "state",
+      "invocation_attempt",
+      "adapter_response",
+      "created_at",
+      "updated_at",
+      "accepted_at",
+      "ttl_ms",
+      "timing",
+      "not_before",
+      "latest_start_at",
+      "deadline_at",
+      "trace_id",
+      "root_traceparent",
+      "root_tracestate",
+      "correlation_id",
+      "reservation_ref",
+      "device_id",
+      "gowm_binding_id",
+      "smpp_service_key"
+    ],
+    "keys": [
+      "CHECK ((jsonb_typeof(arguments) = 'object'::text))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "FOREIGN KEY (device_id, gowm_binding_id) REFERENCES gowm_device.device_service_binding(device_id, binding_id)",
+      "UNIQUE (device_id, task_id)",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "CHECK ((invocation_attempt > 0))",
+      "FOREIGN KEY (operation_snapshot_id) REFERENCES ugv_smpp.operation_snapshot(snapshot_id)",
+      "PRIMARY KEY (task_id)",
+      "CHECK (((reservation_ref IS NULL) OR ((length(reservation_ref) >= 1) AND (length(reservation_ref) <= 256))))",
+      "CHECK ((state = ANY (ARRAY['PENDING'::text, 'ACCEPTED'::text, 'REJECTED'::text, 'PUBLISHED'::text, 'UNCERTAIN'::text])))",
+      "CHECK ((jsonb_typeof(timing) = 'object'::text))",
+      "CHECK (((trace_id IS NULL) OR (trace_id ~ '^[0-9a-f]{32}$'::text)))",
+      "CHECK (((root_traceparent IS NULL) OR (root_traceparent ~ '^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$'::text)))",
+      "CHECK (((ttl_ms IS NULL) OR (ttl_ms > 0)))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/mission-links.ts",
+        "line": 93
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 21
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 145
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 149
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 183
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 419
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 420
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 425
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 478
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 528
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 539
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 626
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 719
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 721
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 731
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 732
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 742
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 743
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 815
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 909
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 973
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 974
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2012
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2013
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 183
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 184
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 261
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Immutable device_id + gowm_binding_id + smpp_service_key; roots filtered on all three"
+  },
+  {
+    "table": "gowm_install_history",
+    "columns": ["family", "file", "checksum", "applied_at"],
+    "keys": ["PRIMARY KEY (family, file)"],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/contract-check.ts",
+        "line": 43
+      }
+    ],
+    "adaptationStatus": "READ_ONLY_CONTRACT",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "GOWM-owned installation evidence; SMPP only reads"
+  },
+  {
+    "table": "idempotency_record",
+    "columns": [
+      "authorization_context_hash",
+      "operation_name",
+      "idempotency_key",
+      "argument_hash",
+      "execution_mode",
+      "task_id",
+      "synchronous_result",
+      "created_at",
+      "expires_at",
+      "simulation_key",
+      "stable_task_id",
+      "state",
+      "updated_at",
+      "lease_owner",
+      "lease_expires_at",
+      "claim_attempt",
+      "device_id",
+      "smpp_service_key"
+    ],
+    "keys": [
+      "CHECK ((claim_attempt >= 0))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((((state = 'PENDING'::text) AND (stable_task_id IS NOT NULL) AND (task_id IS NULL) AND (synchronous_result IS NULL) AND (lease_owner IS NOT NULL) AND (lease_expires_at IS NOT NULL)) OR ((state = 'COMPLETE'::text) AND ((task_id IS NULL) <> (synchronous_result IS NULL)) AND (lease_owner IS NULL) AND (lease_expires_at IS NULL))))",
+      "PRIMARY KEY (device_id, smpp_service_key, authorization_context_hash, operation_name, idempotency_key, execution_mode, simulation_key)",
+      "CHECK ((state = ANY (ARRAY['PENDING'::text, 'COMPLETE'::text])))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.provider_task(task_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 22
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 47
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 59
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 65
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 95
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 96
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 99
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 127
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 132
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 169
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 172
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 186
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 188
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 204
+      },
+      {
+        "path": "packages/persistence-postgres/src/idempotency.ts",
+        "line": 205
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 253
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "device_id + smpp_service_key plus original authorization/operation/key/mode/simulation identity"
+  },
+  {
+    "table": "operation_snapshot",
+    "columns": [
+      "snapshot_id",
+      "provider_id",
+      "provider_version",
+      "operation_name",
+      "manifest_hash",
+      "definition",
+      "created_at"
+    ],
+    "keys": [
+      "CHECK ((jsonb_typeof(definition) = 'object'::text))",
+      "CHECK ((manifest_hash ~ '^[0-9a-f]{64}$'::text))",
+      "CHECK ((operation_name ~ '^[a-z][a-z0-9_]{0,63}$'::text))",
+      "PRIMARY KEY (snapshot_id)",
+      "CHECK ((provider_id <> ''::text))",
+      "UNIQUE (provider_id, provider_version, operation_name, manifest_hash)",
+      "CHECK ((provider_version <> ''::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/operation-snapshots.ts",
+        "line": 27
+      },
+      {
+        "path": "packages/persistence-postgres/src/operation-snapshots.ts",
+        "line": 31
+      },
+      {
+        "path": "packages/persistence-postgres/src/operation-snapshots.ts",
+        "line": 64
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 146
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5037
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Immutable content-addressed provider manifest; intentionally shared across devices"
+  },
+  {
+    "table": "outbox_event",
+    "columns": [
+      "event_id",
+      "aggregate_id",
+      "event_type",
+      "payload",
+      "created_at",
+      "published_at",
+      "delivery_attempts",
+      "event_key",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((delivery_attempts >= 0))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "UNIQUE (event_key)",
+      "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "PRIMARY KEY (event_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 26
+      },
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 43
+      },
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 45
+      },
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 53
+      },
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 61
+      },
+      {
+        "path": "packages/persistence-postgres/src/outbox.ts",
+        "line": 62
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 141
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 142
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4136
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4286
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4287
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4665
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4666
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4824
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4825
+      },
+      {
+        "path": "packages/task-engine/src/outbox-cleaner.ts",
+        "line": 42
+      },
+      {
+        "path": "packages/task-engine/src/outbox-cleaner.ts",
+        "line": 43
+      },
+      {
+        "path": "packages/task-engine/src/outbox-cleaner.ts",
+        "line": 56
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 171
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 172
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event",
+    "columns": [
+      "provider_id",
+      "stream_id",
+      "sequence",
+      "event_id",
+      "source_id",
+      "source_stream_id",
+      "source_event_id",
+      "source_sequence",
+      "source_canonical_hash",
+      "stored_event_hash",
+      "event_type",
+      "occurred_at",
+      "scope",
+      "description",
+      "task_id",
+      "resource_ref",
+      "candidate_related_task_count",
+      "severity_hint",
+      "reason_code",
+      "raw_payload",
+      "created_at",
+      "expires_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((candidate_related_task_count >= 0))",
+      "CHECK ((((scope = 'task'::text) AND (task_id IS NOT NULL) AND (resource_ref IS NULL) AND (candidate_related_task_count = 0)) OR ((scope = 'resource'::text) AND (task_id IS NULL) AND (resource_ref IS NOT NULL))))",
+      "CHECK ((expires_at > created_at))",
+      "CHECK (((char_length(description) >= 1) AND (char_length(description) <= 4096)))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((event_id ~ '^[A-Za-z0-9_-]{43}$'::text))",
+      "CHECK ((event_type ~ '^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$'::text))",
+      "PRIMARY KEY (device_id, provider_id, stream_id, sequence)",
+      "UNIQUE (device_id, provider_id, event_id)",
+      "UNIQUE (device_id, provider_id, source_id, source_stream_id, source_sequence)",
+      "UNIQUE (device_id, provider_id, source_id, source_stream_id, source_event_id)",
+      "UNIQUE (device_id, provider_id, stream_id, event_id)",
+      "FOREIGN KEY (device_id, provider_id, stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id) ON DELETE RESTRICT",
+      "CHECK ((reason_code ~ '^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$'::text))",
+      "CHECK ((scope = ANY (ARRAY['task'::text, 'resource'::text])))",
+      "CHECK ((sequence > 0))",
+      "CHECK ((severity_hint = ANY (ARRAY['info'::text, 'warning'::text, 'critical'::text])))",
+      "CHECK ((source_canonical_hash ~ '^sha256:[0-9a-f]{64}$'::text))",
+      "CHECK ((source_event_id ~ '^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,255}$'::text))",
+      "CHECK ((source_sequence > 0))",
+      "CHECK ((stored_event_hash ~ '^sha256:[0-9a-f]{64}$'::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 24
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 818
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 819
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 823
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 876
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 877
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1172
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1173
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1187
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1188
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1460
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1463
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 278
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 282
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 299
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 303
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_continuity_record",
+    "columns": [
+      "continuity_record_id",
+      "provider_id",
+      "previous_stream_id",
+      "new_stream_id",
+      "reason_code",
+      "affected_source_ids",
+      "gap_detected_at",
+      "last_replayable_sequence",
+      "last_continuous_sequence",
+      "continuity_reason_identity",
+      "created_at",
+      "retain_until",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, provider_id, previous_stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id) ON DELETE RESTRICT",
+      "UNIQUE (device_id, provider_id, previous_stream_id, continuity_reason_identity)",
+      "CHECK ((last_continuous_sequence >= 0))",
+      "CHECK ((last_replayable_sequence >= 0))",
+      "FOREIGN KEY (device_id, provider_id, new_stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id) ON DELETE RESTRICT",
+      "CHECK ((cardinality(affected_source_ids) > 0))",
+      "CHECK (((last_continuous_sequence IS NULL) OR (last_continuous_sequence <= last_replayable_sequence)))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (device_id, continuity_record_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 926
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 927
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 942
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 943
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1081
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1082
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1085
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1269
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1270
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_generation_source",
+    "columns": [
+      "provider_id",
+      "runtime_stream_id",
+      "source_id",
+      "source_stream_id",
+      "delivery_semantics",
+      "joined_at_runtime_sequence",
+      "left_at_runtime_sequence",
+      "created_at",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, provider_id, runtime_stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id) ON DELETE RESTRICT",
+      "CHECK ((joined_at_runtime_sequence >= 0))",
+      "CHECK ((delivery_semantics = ANY (ARRAY['durable_at_least_once'::text, 'best_effort_live'::text])))",
+      "CHECK ((left_at_runtime_sequence >= joined_at_runtime_sequence))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (device_id, provider_id, runtime_stream_id, source_id)",
+      "CHECK ((source_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 185
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 186
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 188
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 266
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 267
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1004
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1006
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1042
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1043
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1045
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1322
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1323
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_relation",
+    "columns": ["provider_id", "stream_id", "event_id", "task_id", "ordinal", "device_id"],
+    "keys": [
+      "FOREIGN KEY (device_id, provider_id, stream_id, event_id) REFERENCES ugv_smpp.provider_business_event(device_id, provider_id, stream_id, event_id) ON DELETE CASCADE",
+      "UNIQUE (device_id, provider_id, stream_id, event_id, ordinal)",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((ordinal >= 0))",
+      "PRIMARY KEY (device_id, provider_id, stream_id, event_id, task_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 851
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 852
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1201
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1202
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1486
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1487
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 277
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 282
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 298
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 303
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_relation_projection",
+    "columns": [
+      "token_hash",
+      "provider_id",
+      "stream_id",
+      "event_id",
+      "authorization_scope_hash",
+      "execution_mode",
+      "simulation_id",
+      "candidate_relation_hash",
+      "projection_relation_hash",
+      "created_at",
+      "expires_at",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, provider_id, stream_id, event_id) REFERENCES ugv_smpp.provider_business_event(device_id, provider_id, stream_id, event_id) ON DELETE CASCADE",
+      "CHECK ((candidate_relation_hash ~ '^sha256:[0-9a-f]{64}$'::text))",
+      "CHECK ((authorization_scope_hash ~ '^[0-9a-f]{64}$'::text))",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "CHECK ((expires_at > created_at))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (device_id, token_hash)",
+      "CHECK ((projection_relation_hash ~ '^sha256:[0-9a-f]{64}$'::text))",
+      "CHECK ((token_hash ~ '^[0-9a-f]{64}$'::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1377
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1378
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1381
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1416
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1417
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1421
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1423
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1459
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1463
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 288
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 290
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 309
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 311
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_relation_projection_item",
+    "columns": ["token_hash", "task_id", "ordinal", "device_id"],
+    "keys": [
+      "UNIQUE (device_id, token_hash, ordinal)",
+      "FOREIGN KEY (device_id, token_hash) REFERENCES ugv_smpp.provider_business_event_relation_projection(device_id, token_hash) ON DELETE CASCADE",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((ordinal >= 0))",
+      "PRIMARY KEY (device_id, token_hash, task_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1397
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1398
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1462
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1491
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1492
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1503
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1504
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1510
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1511
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1521
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1522
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 287
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 290
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 308
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 311
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_runtime_state",
+    "columns": [
+      "provider_id",
+      "current_stream_id",
+      "generation_version",
+      "updated_at",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, provider_id, current_stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id) DEFERRABLE INITIALLY DEFERRED",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((generation_version > 0))",
+      "PRIMARY KEY (device_id, provider_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 157
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 160
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 177
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 178
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 236
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 239
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 758
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 759
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 935
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 936
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1074
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1076
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1802
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_business_event_stream_generation",
+    "columns": [
+      "provider_id",
+      "stream_id",
+      "status",
+      "created_at",
+      "closed_at",
+      "rotated_to_stream_id",
+      "reset_reason",
+      "affected_source_ids",
+      "last_replayable_sequence",
+      "last_continuous_sequence",
+      "current_sequence",
+      "earliest_available_sequence",
+      "last_deleted_sequence",
+      "continuity_class",
+      "retain_until",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((earliest_available_sequence > 0))",
+      "FOREIGN KEY (device_id, provider_id, rotated_to_stream_id) REFERENCES ugv_smpp.provider_business_event_stream_generation(device_id, provider_id, stream_id)",
+      "CHECK ((last_continuous_sequence >= 0))",
+      "CHECK ((last_replayable_sequence >= 0))",
+      "CHECK ((last_deleted_sequence >= 0))",
+      "CHECK ((continuity_class = ANY (ARRAY['all_durable'::text, 'mixed'::text, 'best_effort_only'::text])))",
+      "CHECK ((current_sequence >= 0))",
+      "CHECK ((((status = 'current'::text) AND (closed_at IS NULL)) OR (status <> 'current'::text)))",
+      "CHECK ((last_deleted_sequence < earliest_available_sequence))",
+      "CHECK ((earliest_available_sequence <= (current_sequence + 1)))",
+      "CHECK ((last_replayable_sequence <= current_sequence))",
+      "CHECK (((last_continuous_sequence IS NULL) OR (continuity_class = 'all_durable'::text)))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (device_id, provider_id, stream_id)",
+      "CHECK ((status = ANY (ARRAY['current'::text, 'rotating'::text, 'replayable_closed'::text, 'retired'::text])))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 158
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 160
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 171
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 172
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 173
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 237
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 239
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 250
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 765
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 766
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 857
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 858
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 951
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 952
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 995
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 996
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 997
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1010
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1015
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1027
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1028
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1807
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1808
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_ops_delivery",
+    "columns": [
+      "record_id",
+      "event_key",
+      "record_type",
+      "event_category",
+      "delivery_class",
+      "aggregate_type",
+      "aggregate_id",
+      "occurred_at",
+      "record_body",
+      "state",
+      "attempt_count",
+      "next_attempt_at",
+      "claim_owner",
+      "claim_until",
+      "last_error_code",
+      "last_error_message",
+      "delivered_at",
+      "created_at",
+      "updated_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((aggregate_type = ANY (ARRAY['task'::text, 'command'::text, 'provider'::text, 'scheduler'::text, 'recovery'::text, 'ttl'::text])))",
+      "CHECK ((attempt_count >= 0))",
+      "CHECK ((((state = 'CLAIMED'::text) AND (claim_owner IS NOT NULL) AND (claim_until IS NOT NULL)) OR ((state <> 'CLAIMED'::text) AND (claim_owner IS NULL) AND (claim_until IS NULL))))",
+      "CHECK ((delivery_class = ANY (ARRAY['audit'::text, 'operational'::text])))",
+      "UNIQUE (device_id, event_key)",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (record_id)",
+      "CHECK ((jsonb_typeof(record_body) = 'object'::text))",
+      "CHECK ((state = ANY (ARRAY['PENDING'::text, 'CLAIMED'::text, 'RETRY_WAIT'::text, 'DELIVERED'::text, 'EXHAUSTED'::text])))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 64
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 42
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 43
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 45
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 46
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 79
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 80
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 87
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 92
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 101
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 104
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 119
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 128
+      },
+      {
+        "path": "packages/persistence-postgres/src/provider-ops-delivery.ts",
+        "line": 138
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 254
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 255
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_task",
+    "columns": [
+      "task_id",
+      "provider_id",
+      "operation_name",
+      "operation_snapshot_id",
+      "authorization_context_hash",
+      "execution_mode",
+      "simulation_id",
+      "arguments",
+      "argument_hash",
+      "external_execution_id",
+      "internal_state",
+      "mcp_status",
+      "substate",
+      "status_message",
+      "result",
+      "error",
+      "adapter_revision",
+      "timing",
+      "accepted_at",
+      "actual_started_at",
+      "latest_start_at",
+      "deadline_at",
+      "cancel_requested",
+      "stop_reason",
+      "ttl_ms",
+      "poll_interval_ms",
+      "created_at",
+      "updated_at",
+      "version",
+      "not_before",
+      "schedule_claim_owner",
+      "schedule_claim_until",
+      "next_command_sequence",
+      "recovery_attempts",
+      "last_reconciled_at",
+      "start_stop_requested_at",
+      "invocation_attempt",
+      "next_start_attempt_at",
+      "observation_revision",
+      "handle_expires_at",
+      "terminal_at",
+      "expired_at",
+      "purge_after",
+      "last_confirmed_at",
+      "start_confirmation_deadline",
+      "start_confirmation_attempts",
+      "next_recovery_at",
+      "recovery_failure_count",
+      "trace_id",
+      "root_traceparent",
+      "root_tracestate",
+      "correlation_id",
+      "runtime_revision",
+      "runtime_updated_at",
+      "reservation_ref",
+      "device_id",
+      "gowm_binding_id",
+      "smpp_service_key"
+    ],
+    "keys": [
+      "CHECK ((adapter_revision >= 0))",
+      "CHECK ((jsonb_typeof(arguments) = 'object'::text))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "FOREIGN KEY (device_id, gowm_binding_id) REFERENCES gowm_device.device_service_binding(device_id, binding_id)",
+      "UNIQUE (device_id, task_id)",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "CHECK ((internal_state = ANY (ARRAY['SCHEDULED'::text, 'STARTING'::text, 'WAITING_START_CONFIRMATION'::text, 'QUEUED'::text, 'RUNNING'::text, 'PAUSED'::text, 'RESUMING'::text, 'INPUT_REQUIRED'::text, 'STOPPING'::text, 'TERMINAL_COMPLETED'::text, 'TERMINAL_FAILED'::text, 'TERMINAL_CANCELLED'::text])))",
+      "CHECK ((invocation_attempt >= 0))",
+      "CHECK ((mcp_status = ANY (ARRAY['working'::text, 'input_required'::text, 'completed'::text, 'failed'::text, 'cancelled'::text])))",
+      "CHECK ((next_command_sequence >= 0))",
+      "CHECK ((observation_revision >= 0))",
+      "FOREIGN KEY (operation_snapshot_id) REFERENCES ugv_smpp.operation_snapshot(snapshot_id)",
+      "PRIMARY KEY (task_id)",
+      "CHECK ((poll_interval_ms >= 250))",
+      "CHECK ((recovery_attempts >= 0))",
+      "CHECK ((recovery_failure_count >= 0))",
+      "CHECK (((reservation_ref IS NULL) OR ((length(reservation_ref) >= 1) AND (length(reservation_ref) <= 256))))",
+      "CHECK ((((terminal_at IS NOT NULL) = (internal_state ~~ 'TERMINAL_%'::text)) AND ((terminal_at IS NULL) OR (handle_expires_at IS NOT NULL)) AND ((expired_at IS NULL) OR (terminal_at IS NOT NULL)) AND ((purge_after IS NULL) OR (expired_at IS NOT NULL)) AND ((purge_after IS NULL) OR (purge_after >= expired_at))))",
+      "CHECK ((runtime_revision > 0))",
+      "CHECK ((start_confirmation_attempts >= 0))",
+      "CHECK ((substate = ANY (ARRAY['accepted'::text, 'scheduled'::text, 'queued'::text, 'running'::text, 'paused'::text, 'resuming'::text, 'stopping'::text])))",
+      "CHECK ((jsonb_typeof(timing) = 'object'::text))",
+      "CHECK (((trace_id IS NULL) OR (trace_id ~ '^[0-9a-f]{32}$'::text)))",
+      "CHECK (((root_traceparent IS NULL) OR (root_traceparent ~ '^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$'::text)))",
+      "CHECK (((ttl_ms IS NULL) OR (ttl_ms > 0)))",
+      "CHECK ((version >= 0))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/mission-links.ts",
+        "line": 93
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 21
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/target-links.ts",
+        "line": 59
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 655
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 656
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1216
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1244
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 148
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 234
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 236
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 270
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 357
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 747
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 748
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 756
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 849
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 850
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 857
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 932
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 933
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 957
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 958
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 984
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 985
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1040
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1041
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1042
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1086
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1087
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1088
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1092
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1096
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1360
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1494
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1603
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1650
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1657
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1693
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1732
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1792
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1793
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1845
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1846
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1900
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1901
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1948
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1951
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1972
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2039
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2092
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2149
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2215
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2263
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2300
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2301
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2358
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2361
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2375
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2379
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2397
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2454
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2478
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2479
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2499
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2500
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2672
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2673
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2803
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2847
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2848
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2972
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3031
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3032
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3163
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3242
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3243
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3583
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3778
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3888
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3999
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4013
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4014
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4130
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4217
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4361
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4380
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4381
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4620
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4936
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5018
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5022
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5060
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 69
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 70
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 76
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 78
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 98
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 99
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 106
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 109
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 165
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 166
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 172
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 178
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 184
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 224
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 227
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 265
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Immutable device_id + gowm_binding_id + smpp_service_key; roots filtered on all three"
+  },
+  {
+    "table": "provider_task_resource_binding",
+    "columns": [
+      "provider_id",
+      "task_id",
+      "resource_ref",
+      "operation_snapshot_id",
+      "authorization_context_hash",
+      "execution_mode",
+      "simulation_id",
+      "bound_at",
+      "terminal_at",
+      "retain_until",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((authorization_context_hash ~ '^[0-9a-f]{64}$'::text))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "CHECK (((terminal_at IS NULL) OR (terminal_at >= bound_at)))",
+      "CHECK ((retain_until >= COALESCE(terminal_at, bound_at)))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "PRIMARY KEY (provider_id, task_id)",
+      "CHECK ((((char_length(resource_ref) >= 1) AND (char_length(resource_ref) <= 512)) AND (resource_ref ~ '^[!-~]+$'::text)))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 723
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 724
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 874
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 877
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1300
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1301
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4224
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4230
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5052
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5053
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5056
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 5062
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 225
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 227
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 274
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 275
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "provider_task_visibility_tombstone",
+    "columns": [
+      "provider_id",
+      "task_id",
+      "authorization_context_hash",
+      "execution_mode",
+      "simulation_id",
+      "resource_ref",
+      "terminal_at",
+      "retain_until",
+      "created_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((authorization_context_hash ~ '^[0-9a-f]{64}$'::text))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "CHECK ((retain_until >= terminal_at))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "PRIMARY KEY (provider_id, task_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1219
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1220
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1246
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1247
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1305
+      },
+      {
+        "path": "packages/persistence-postgres/src/business-events.ts",
+        "line": 1306
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 213
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 214
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 216
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 230
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 231
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 295
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 296
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "runtime_lease",
+    "columns": [
+      "lease_key",
+      "owner_id",
+      "fencing_token",
+      "expires_at",
+      "updated_at",
+      "device_id",
+      "service_key",
+      "scope_key"
+    ],
+    "keys": [
+      "CHECK (((device_id IS NULL) <> (service_key IS NULL)))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "CHECK ((fencing_token > 0))",
+      "PRIMARY KEY (scope_key, lease_key)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 33
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 66
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1001
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1002
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1003
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1005
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1008
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1017
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 353
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 354
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 355
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 357
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 360
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 369
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "DEVICE lease inserts device_id; generated scope_key + lease_key conflict identity; no SERVICE job added"
+  },
+  {
+    "table": "smpp_dispatch_uncertainty",
+    "columns": [
+      "task_id",
+      "operation_name",
+      "argument_hash",
+      "uncertainty_class",
+      "redispatch_allowed",
+      "occurred_at",
+      "causal_refs",
+      "created_at"
+    ],
+    "keys": [
+      "CHECK ((jsonb_typeof(causal_refs) = 'array'::text))",
+      "PRIMARY KEY (task_id)",
+      "CHECK ((redispatch_allowed = false))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.admission_intent(task_id) ON DELETE CASCADE",
+      "CHECK ((uncertainty_class = ANY (ARRAY['response_lost_after_adapter_success'::text, 'adapter_transport_ambiguous'::text, 'runtime_crash_window'::text, 'unknown'::text])))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 183
+      },
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 235
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 543
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4763
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Inherits device identity from scoped parent Admission/diagnostic lease; no invented device column"
+  },
+  {
+    "table": "smpp_reconciliation_audit",
+    "columns": [
+      "task_id",
+      "attempt",
+      "operation_name",
+      "argument_hash",
+      "authorization_context_hash",
+      "execution_mode",
+      "simulation_id",
+      "status",
+      "external_execution_id",
+      "identity_validated",
+      "occurred_at",
+      "created_at",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((attempt > 0))",
+      "CHECK ((((execution_mode = 'live'::text) AND (simulation_id IS NULL)) OR ((execution_mode <> 'live'::text) AND (simulation_id IS NOT NULL))))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((execution_mode = ANY (ARRAY['live'::text, 'simulation'::text, 'historical-replay'::text])))",
+      "PRIMARY KEY (task_id, attempt)",
+      "CHECK ((status = ANY (ARRAY['found'::text, 'not_found'::text, 'conflict'::text, 'transient_unavailable'::text, 'deferred'::text])))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.admission_intent(task_id) ON DELETE CASCADE"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/smpp-diagnostics.ts",
+        "line": 209
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 632
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 638
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 639
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 641
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "task_command",
+    "columns": [
+      "task_id",
+      "command_sequence",
+      "command_type",
+      "request_hash",
+      "state",
+      "payload",
+      "adapter_ack",
+      "created_at",
+      "updated_at",
+      "attempt_count",
+      "next_attempt_at",
+      "claim_owner",
+      "claim_until",
+      "last_error_code",
+      "last_error_message",
+      "priority",
+      "stop_reason",
+      "previous_internal_state",
+      "previous_mcp_status",
+      "previous_substate",
+      "previous_status_message",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((attempt_count >= 0))",
+      "CHECK ((((state = 'CLAIMED'::text) AND (claim_owner IS NOT NULL) AND (claim_until IS NOT NULL)) OR ((state <> 'CLAIMED'::text) AND (claim_owner IS NULL) AND (claim_until IS NULL))))",
+      "CHECK ((command_sequence > 0))",
+      "CHECK ((command_type = ANY (ARRAY['CANCEL'::text, 'UPDATE'::text, 'PAUSE'::text, 'RESUME'::text])))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "PRIMARY KEY (task_id, command_sequence)",
+      "CHECK ((state = ANY (ARRAY['PENDING'::text, 'CLAIMED'::text, 'RETRY_WAIT'::text, 'ACKNOWLEDGED'::text, 'REJECTED'::text, 'EXHAUSTED'::text])))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.provider_task(task_id) ON DELETE CASCADE"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1035
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1041
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1079
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1081
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1082
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1083
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1085
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1087
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1088
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1090
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1091
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1092
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1094
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1095
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1096
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1100
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1101
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1104
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1115
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1116
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1117
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1119
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1120
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1121
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1122
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1124
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1125
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1127
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1129
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1132
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1194
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1213
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1216
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1259
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1260
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1292
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1295
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1310
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1312
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1366
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1367
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1390
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1393
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1508
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1512
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2488
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2489
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2508
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2509
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2512
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2527
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2529
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2864
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2865
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2866
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2981
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2982
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3005
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3010
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3038
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3039
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3042
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3173
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3174
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3201
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3202
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3224
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3225
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3249
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3250
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3251
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3322
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3323
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3350
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3355
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3394
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3399
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3445
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3450
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3503
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3504
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3540
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3543
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3592
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3593
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3606
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3610
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3737
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3741
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3785
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3787
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3839
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3842
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3895
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3898
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3955
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3958
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4058
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4060
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4370
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4371
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4388
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4389
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4392
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4410
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4411
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 177
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 178
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 257
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "task_input_request",
+    "columns": [
+      "task_id",
+      "request_key",
+      "schema",
+      "status",
+      "answer_hash",
+      "answer",
+      "created_at",
+      "answered_at",
+      "description",
+      "required",
+      "request_json",
+      "response_hash",
+      "response_json",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "PRIMARY KEY (task_id, request_key)",
+      "CHECK ((jsonb_typeof(request_json) = 'object'::text))",
+      "CHECK (((response_json IS NULL) OR (jsonb_typeof(response_json) = 'object'::text)))",
+      "CHECK (((response_hash IS NULL) = (response_json IS NULL)))",
+      "CHECK ((jsonb_typeof(schema) = 'object'::text))",
+      "CHECK ((status = ANY (ARRAY['OPEN'::text, 'ANSWERED'::text, 'SUPERSEDED'::text])))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.provider_task(task_id) ON DELETE CASCADE"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1408
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1409
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1521
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1522
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2598
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2635
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2636
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2696
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2697
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3622
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3623
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3693
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3697
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4561
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4562
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4563
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4566
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4567
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4568
+      },
+      {
+        "path": "packages/task-engine/src/ttl-cleaner.ts",
+        "line": 249
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "task_input_response_inbox",
+    "columns": [
+      "task_id",
+      "request_key",
+      "response_hash",
+      "response_json",
+      "state",
+      "command_sequence",
+      "accepted_at",
+      "assigned_at",
+      "acknowledged_at",
+      "failed_at",
+      "last_error_code",
+      "last_error_message",
+      "updated_at",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "PRIMARY KEY (task_id, request_key)",
+      "CHECK ((state = ANY (ARRAY['PENDING'::text, 'ASSIGNED'::text, 'ACKNOWLEDGED'::text, 'IGNORED'::text, 'FAILED'::text])))",
+      "FOREIGN KEY (task_id, request_key) REFERENCES ugv_smpp.task_input_request(task_id, request_key)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1318
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1321
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1415
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1418
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1527
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 1530
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2738
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2739
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2740
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2790
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2791
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2815
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2816
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2835
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2839
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2870
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2873
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3628
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3631
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3710
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 3713
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4603
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4607
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "task_observation",
+    "columns": [
+      "task_id",
+      "revision",
+      "type",
+      "reason_code",
+      "occurred_at",
+      "payload",
+      "message",
+      "substate",
+      "progress",
+      "source",
+      "adapter_revision",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK (((adapter_revision IS NULL) OR (adapter_revision >= 0)))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "PRIMARY KEY (task_id, revision)",
+      "CHECK ((revision >= 0))",
+      "CHECK ((source = ANY (ARRAY['runtime'::text, 'adapter'::text])))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.provider_task(task_id) ON DELETE CASCADE"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 892
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 893
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 894
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2941
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 2942
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4236
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4237
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4239
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4526
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4527
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "line": 4529
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_business_event_source_log",
+    "columns": [
+      "source_id",
+      "source_sequence",
+      "source_event_id",
+      "source_stream_id",
+      "payload_hash",
+      "occurred_at",
+      "retain_until",
+      "payload",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id, source_id) REFERENCES ugv_smpp.ugv_business_event_source_state(device_id, source_id)",
+      "UNIQUE (device_id, source_id, source_event_id)",
+      "PRIMARY KEY (device_id, source_id, source_sequence)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 617
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 618
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 649
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 659
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 726
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_business_event_source_state",
+    "columns": ["source_id", "source_stream_id", "next_sequence", "updated_at", "device_id"],
+    "keys": [
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "UNIQUE (device_id, source_stream_id)",
+      "CHECK ((next_sequence > 0))",
+      "PRIMARY KEY (device_id, source_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 695
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 696
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 701
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 725
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_device_tool_call",
+    "columns": [
+      "call_id",
+      "task_id",
+      "tool_name",
+      "argument_hash",
+      "outcome",
+      "duration_ms",
+      "occurred_at",
+      "device_id"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.ugv_execution(device_id, task_id)",
+      "PRIMARY KEY (call_id)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 253
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 254
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 723
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_diagnostic_lease",
+    "columns": [
+      "lease_id",
+      "capability_id",
+      "stable_operation_key",
+      "canonical_request_hash",
+      "idempotency_key",
+      "fence",
+      "state",
+      "logical_invocation_id",
+      "scoped_task_id",
+      "bound_task_id",
+      "external_execution_id",
+      "device_mission_id",
+      "expires_at",
+      "payload",
+      "created_at",
+      "updated_at",
+      "selector_argument_hash",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((canonical_request_hash ~ '^[0-9a-f]{64}$'::text))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "UNIQUE (device_id, stable_operation_key)",
+      "UNIQUE (fence)",
+      "PRIMARY KEY (lease_id)",
+      "CHECK ((stable_operation_key ~ '^[0-9a-f]{64}$'::text))",
+      "CHECK ((state = ANY (ARRAY['ARMED'::text, 'BOUND'::text, 'CONSUMED'::text, 'DISARMED'::text, 'EXPIRED'::text])))",
+      "CHECK (((selector_argument_hash IS NULL) OR (selector_argument_hash ~ '^[0-9a-f]{64}$'::text)))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 308
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 323
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 324
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 339
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 343
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 371
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 382
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 387
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 446
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 447
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 553
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 554
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 760
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 811
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 814
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_diagnostic_receipt",
+    "columns": ["receipt_id", "lease_id", "action", "request_hash", "occurred_at", "payload"],
+    "keys": [
+      "CHECK ((action = ANY (ARRAY['armed'::text, 'bound'::text, 'consumed'::text, 'disarmed'::text, 'expired'::text])))",
+      "UNIQUE (lease_id, action)",
+      "FOREIGN KEY (lease_id) REFERENCES ugv_smpp.ugv_diagnostic_lease(lease_id)",
+      "PRIMARY KEY (receipt_id)",
+      "CHECK ((request_hash ~ '^[0-9a-f]{64}$'::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 384
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 773
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 792
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Inherits device identity from scoped parent Admission/diagnostic lease; no invented device column"
+  },
+  {
+    "table": "ugv_execution",
+    "columns": [
+      "task_id",
+      "external_execution_id",
+      "operation_name",
+      "argument_hash",
+      "resource_id",
+      "tracks",
+      "execution_context",
+      "downstream_mission_ids",
+      "state",
+      "revision",
+      "reason_code",
+      "progress",
+      "result",
+      "latest_snapshot_revision",
+      "payload",
+      "created_at",
+      "updated_at",
+      "terminal_at",
+      "device_id",
+      "gowm_binding_id",
+      "smpp_service_key",
+      "mcp_task_id",
+      "source_session_key"
+    ],
+    "keys": [
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "FOREIGN KEY (device_id, gowm_binding_id) REFERENCES gowm_device.device_service_binding(device_id, binding_id)",
+      "FOREIGN KEY (device_id, mcp_task_id) REFERENCES ugv_smpp.provider_task(device_id, task_id)",
+      "UNIQUE (device_id, smpp_service_key, external_execution_id)",
+      "UNIQUE (device_id, task_id, external_execution_id)",
+      "UNIQUE (device_id, task_id)",
+      "PRIMARY KEY (task_id)",
+      "UNIQUE (task_id, operation_name, argument_hash)"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/mission-links.ts",
+        "line": 22
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/mission-links.ts",
+        "line": 95
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/mission-links.ts",
+        "line": 105
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 21
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 44
+      },
+      {
+        "path": "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "line": 57
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 68
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 75
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 99
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 102
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 109
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 720
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Immutable device_id + gowm_binding_id + smpp_service_key; roots filtered on all three"
+  },
+  {
+    "table": "ugv_execution_command_ack",
+    "columns": ["task_id", "command", "command_sequence", "payload", "created_at", "device_id"],
+    "keys": [
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.ugv_execution(device_id, task_id)",
+      "PRIMARY KEY (task_id, command, command_sequence)",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.ugv_execution(task_id) ON DELETE CASCADE"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 141
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 149
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 150
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 163
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 181
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 182
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 721
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_mutation_journal",
+    "columns": [
+      "task_id",
+      "step_id",
+      "phase",
+      "tool_name",
+      "argument_hash",
+      "state",
+      "external_mission_id",
+      "result_hash",
+      "intent_persisted_at",
+      "dispatched_at",
+      "completed_at",
+      "payload",
+      "device_id"
+    ],
+    "keys": [
+      "CHECK ((argument_hash ~ '^[a-f0-9]{64}$'::text))",
+      "CHECK (((dispatched_at IS NULL) OR (dispatched_at >= intent_persisted_at)))",
+      "CHECK (((completed_at IS NULL) OR ((dispatched_at IS NOT NULL) AND (completed_at >= dispatched_at))))",
+      "CHECK ((((state = 'INTENT_PERSISTED'::text) AND (dispatched_at IS NULL) AND (completed_at IS NULL)) OR ((state = 'DISPATCHING'::text) AND (dispatched_at IS NOT NULL) AND (completed_at IS NULL)) OR ((state = ANY (ARRAY['ACCEPTED'::text, 'REJECTED'::text, 'UNCERTAIN'::text])) AND (dispatched_at IS NOT NULL) AND (completed_at IS NOT NULL))))",
+      "FOREIGN KEY (device_id, task_id) REFERENCES ugv_smpp.ugv_execution(device_id, task_id)",
+      "UNIQUE (device_id, task_id, step_id)",
+      "CHECK (((external_mission_id IS NULL) OR ((length(external_mission_id) >= 1) AND (length(external_mission_id) <= 256))))",
+      "CHECK ((phase = ANY (ARRAY['PRIMARY'::text, 'FOLLOWUP'::text, 'PAUSE'::text, 'RESUME'::text, 'CANCEL'::text, 'EMERGENCY_STOP'::text, 'CLEANUP'::text])))",
+      "PRIMARY KEY (task_id, step_id)",
+      "CHECK (((result_hash IS NULL) OR (result_hash ~ '^[a-f0-9]{64}$'::text)))",
+      "CHECK ((state = ANY (ARRAY['INTENT_PERSISTED'::text, 'DISPATCHING'::text, 'ACCEPTED'::text, 'REJECTED'::text, 'UNCERTAIN'::text])))",
+      "CHECK (((length(step_id) >= 1) AND (length(step_id) <= 256)))",
+      "FOREIGN KEY (task_id) REFERENCES ugv_smpp.ugv_execution(task_id) ON DELETE CASCADE",
+      "CHECK (((length(tool_name) >= 1) AND (length(tool_name) <= 256)))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 191
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 199
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 211
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 213
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 242
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 722
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "Explicit device_id predicates/inserts and GOWM final composite keys; scoped parent checks where applicable"
+  },
+  {
+    "table": "ugv_state_snapshot",
+    "columns": [
+      "revision",
+      "observed_at",
+      "snapshot",
+      "device_id",
+      "source_session_key",
+      "channel"
+    ],
+    "keys": [
+      "CHECK ((channel <> ''::text))",
+      "FOREIGN KEY (device_id) REFERENCES gowm_device.device(device_id)",
+      "PRIMARY KEY (device_id, source_session_key, channel, revision)",
+      "CHECK ((source_session_key <> ''::text))"
+    ],
+    "sourceLocations": [
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 273
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 277
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 278
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 292
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 293
+      },
+      {
+        "path": "packages/provider-adapter-kit/src/postgres-store.ts",
+        "line": 724
+      }
+    ],
+    "adaptationStatus": "ADAPTED",
+    "tests": ["tests/gowm-storage/postgres.test.ts", "tests/gowm-storage/source-smoke.test.ts"],
+    "verification": {
+      "schema": "PASS: startup catalog verification",
+      "behavior": "See test-results.json; table coverage is not a claim that every method was exercised"
+    },
+    "scopePolicy": "device_id + source_session_key + channel + revision; conflicting payload rejected"
+  }
+]

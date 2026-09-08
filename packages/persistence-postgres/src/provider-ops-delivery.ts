@@ -1,3 +1,9 @@
+import {
+  scopeColumns,
+  scopeConflict,
+  scopePredicate,
+  scopeValues,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import type { Pool, PoolClient } from "pg";
 import type { ProviderOpsEnvelope } from "../../observability/src/index.js";
 
@@ -34,10 +40,10 @@ export async function captureProviderOpsDelivery(
 ): Promise<boolean> {
   const result = await client.query(
     `INSERT INTO provider_ops_delivery
-      (record_id,event_key,record_type,event_category,delivery_class,
+      (${scopeColumns(client, "provider_ops_delivery")}record_id,event_key,record_type,event_category,delivery_class,
        aggregate_type,aggregate_id,occurred_at,record_body)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
-     ON CONFLICT (event_key) DO NOTHING`,
+     VALUES (${scopeValues(client, "provider_ops_delivery")}$1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
+     ON CONFLICT (${scopeConflict(client, "provider_ops_delivery")}event_key) DO NOTHING`,
     [
       input.envelope.recordId,
       input.eventKey,
@@ -71,11 +77,11 @@ export class ProviderOpsDeliveryRepository {
     const result = await this.pool.query<ProviderOpsDeliveryRow>(
       `WITH candidates AS (
          SELECT record_id FROM provider_ops_delivery
-         WHERE (state IN ('PENDING','RETRY_WAIT')
+         WHERE (${scopePredicate(this.pool, "provider_ops_delivery", "provider_ops_delivery")}) AND ( (state IN ('PENDING','RETRY_WAIT')
                 AND next_attempt_at <= COALESCE($1::timestamptz,clock_timestamp()))
             OR (state='CLAIMED'
                 AND claim_until <= COALESCE($1::timestamptz,clock_timestamp()))
-         ORDER BY COALESCE(claim_until,next_attempt_at),created_at,record_id
+         ) ORDER BY COALESCE(claim_until,next_attempt_at),created_at,record_id
          FOR UPDATE SKIP LOCKED LIMIT $2
        )
        UPDATE provider_ops_delivery delivery
@@ -83,8 +89,8 @@ export class ProviderOpsDeliveryRepository {
            claim_until=COALESCE($1::timestamptz,clock_timestamp())
              + ($4::text || ' milliseconds')::interval,
            attempt_count=attempt_count+1, updated_at=clock_timestamp()
-       FROM candidates WHERE delivery.record_id=candidates.record_id
-       RETURNING delivery.*`,
+       FROM candidates WHERE (${scopePredicate(this.pool, "delivery", "provider_ops_delivery")}) AND ( delivery.record_id=candidates.record_id
+       ) RETURNING delivery.*`,
       [now ?? null, limit, ownerId, leaseMilliseconds],
     );
     return result.rows.map(fromRow);
@@ -95,7 +101,7 @@ export class ProviderOpsDeliveryRepository {
       `UPDATE provider_ops_delivery
        SET state='DELIVERED', delivered_at=clock_timestamp(),
            claim_owner=NULL, claim_until=NULL, updated_at=clock_timestamp()
-       WHERE record_id=$1 AND state='CLAIMED' AND claim_owner=$2`,
+       WHERE (${scopePredicate(this.pool, "provider_ops_delivery", "provider_ops_delivery")}) AND ( record_id=$1 AND state='CLAIMED' AND claim_owner=$2) `,
       [recordId, ownerId],
     );
     return result.rowCount === 1;
@@ -119,8 +125,8 @@ export class ProviderOpsDeliveryRepository {
            claim_owner=NULL, claim_until=NULL,
            last_error_code=$4, last_error_message=$5,
            updated_at=clock_timestamp()
-       WHERE record_id=$1 AND state='CLAIMED' AND claim_owner=$2
-       RETURNING state`,
+       WHERE (${scopePredicate(this.pool, "provider_ops_delivery", "provider_ops_delivery")}) AND ( record_id=$1 AND state='CLAIMED' AND claim_owner=$2
+       ) RETURNING state`,
       [recordId, ownerId, failedAt, errorCode, boundedError(errorMessage), maximumAttempts],
     );
     return result.rows[0]?.state ?? null;
@@ -129,7 +135,7 @@ export class ProviderOpsDeliveryRepository {
   async backlog(now = new Date()): Promise<{ count: number; oldestAgeSeconds: number }> {
     const result = await this.pool.query<{ count: string; oldest_at: Date | null }>(
       `SELECT count(*)::text AS count,min(created_at) AS oldest_at
-       FROM provider_ops_delivery WHERE state <> 'DELIVERED'`,
+       FROM provider_ops_delivery WHERE (${scopePredicate(this.pool, "provider_ops_delivery", "provider_ops_delivery")}) AND ( state <> 'DELIVERED') `,
     );
     const row = result.rows[0];
     return {

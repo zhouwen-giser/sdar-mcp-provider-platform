@@ -59,7 +59,7 @@ export interface RuntimeDatabaseMigrationPort {
     readonly deploymentId: string;
     readonly providerId: string;
     readonly runtimeVersion: string;
-    readonly migrationSet: "runtime";
+    readonly migrationSet: "runtime" | "gowm-shared-verify";
   }): Promise<unknown>;
 }
 
@@ -120,6 +120,9 @@ export class RuntimeDatabasePreparationJob {
         ...input,
       });
       const profile = await this.requireProfile(deployment.snapshot);
+      const shared = profile.clusterRef.startsWith("gowm-shared:");
+      if (shared && profile.databaseMode !== "preexisting")
+        throw new RuntimeDatabasePreparationError("RUNTIME_DATABASE_PROFILE_MISMATCH", false);
       const spec = provisioningSpec(profile);
       let checkpoint =
         (await this.store.getCheckpoint(input.deploymentId)) ??
@@ -136,18 +139,20 @@ export class RuntimeDatabasePreparationJob {
           throw new RuntimeDatabasePreparationError("RUNTIME_DATABASE_PROFILE_MISMATCH", false);
         }
       });
-      checkpoint = await this.runStep(checkpoint, "role", () =>
-        this.provisioner.createRole(spec, context(input.operationId, "role")),
-      );
-      checkpoint = await this.runStep(checkpoint, "database", () =>
-        this.provisioner.createDatabase(spec, context(input.operationId, "database")),
-      );
-      checkpoint = await this.runStep(checkpoint, "grant", () =>
-        this.provisioner.grantRuntimeAccess(spec, context(input.operationId, "grant")),
-      );
-      checkpoint = await this.runStep(checkpoint, "verify", () =>
-        this.provisioner.verify(spec, context(input.operationId, "verify")),
-      );
+      if (!shared) {
+        checkpoint = await this.runStep(checkpoint, "role", () =>
+          this.provisioner.createRole(spec, context(input.operationId, "role")),
+        );
+        checkpoint = await this.runStep(checkpoint, "database", () =>
+          this.provisioner.createDatabase(spec, context(input.operationId, "database")),
+        );
+        checkpoint = await this.runStep(checkpoint, "grant", () =>
+          this.provisioner.grantRuntimeAccess(spec, context(input.operationId, "grant")),
+        );
+        checkpoint = await this.runStep(checkpoint, "verify", () =>
+          this.provisioner.verify(spec, context(input.operationId, "verify")),
+        );
+      }
 
       deployment = await this.transition(deployment, "MIGRATING");
       await this.runStep(checkpoint, "migration", () =>
@@ -155,7 +160,7 @@ export class RuntimeDatabasePreparationJob {
           deploymentId: input.deploymentId,
           providerId: input.providerId,
           runtimeVersion: deployment.snapshot.runtimeVersion,
-          migrationSet: "runtime",
+          migrationSet: shared ? "gowm-shared-verify" : "runtime",
         }),
       );
       deployment = await this.transition(deployment, "CONFIG_PREPARING");

@@ -243,6 +243,23 @@ class RuntimeCredentialService implements RuntimeDatabaseSecretPort {
       String(deployment.snapshot.environment),
     );
     if (profile === null) throw new Error("RUNTIME_DATABASE_PROFILE_NOT_FOUND");
+    if (profile.profile.clusterRef.startsWith("gowm-shared:")) {
+      if (profile.profile.databaseMode !== "preexisting")
+        throw new Error("GOWM_SHARED_DATABASE_MISMATCH");
+      const existing = await this.secrets.read({ secretRef: input.secretRef });
+      try {
+        const url = new URL(Buffer.from(existing).toString("utf8").trim());
+        if (
+          url.hostname !== profile.profile.host ||
+          (Number(url.port) || 5432) !== profile.profile.port ||
+          decodeURIComponent(url.pathname.slice(1)) !== profile.profile.databaseName
+        )
+          throw new Error("GOWM_SHARED_DATABASE_MISMATCH");
+      } finally {
+        existing.fill(0);
+      }
+      return { secretRef: input.secretRef };
+    }
     assertCredentialAuthority(profile.profile, this.credentials);
     const expectedSecretRef = `file/v1/${input.deploymentId}/${input.instanceId}/runtime`;
     if (input.secretRef !== expectedSecretRef) {
@@ -338,7 +355,7 @@ class PerDeploymentRuntimeMigration {
     readonly deploymentId: string;
     readonly providerId: string;
     readonly runtimeVersion: string;
-    readonly migrationSet: "runtime";
+    readonly migrationSet: "runtime" | "gowm-shared-verify";
   }): Promise<unknown> {
     const deployment = await this.#deployments.get(input.providerId, input.deploymentId);
     if (deployment === null) throw new Error("RUNTIME_DATABASE_DEPLOYMENT_NOT_FOUND");

@@ -113,7 +113,7 @@ function rejectExplicitBusinessResult(
       name === "ugv_area_recon_attack_confirm") &&
     typeof result.cmd_res === "number" &&
     Number.isSafeInteger(result.cmd_res) &&
-    result.cmd_res !== 0
+    result.cmd_res !== 1
   )
     throw new DeviceToolRejectedError("UGV", name, result.cmd_res, result);
 }
@@ -194,7 +194,7 @@ function validateReconConfigure(name: UgvDeviceToolName, result: Record<string, 
 
 function validateReconCommand(name: UgvDeviceToolName, result: Record<string, unknown>): void {
   const commandResult = safeInteger(result.cmd_res, name, "DEVICE_RECON_CMD_RES_INVALID");
-  if (commandResult !== 0) throw new DeviceToolRejectedError("UGV", name, commandResult, result);
+  if (commandResult !== 1) throw new DeviceToolRejectedError("UGV", name, commandResult, result);
   if (result.fail_data !== undefined)
     requireString(result.fail_data, name, "DEVICE_RECON_FAIL_DATA_INVALID");
   if (result.res !== undefined && typeof result.res !== "boolean")

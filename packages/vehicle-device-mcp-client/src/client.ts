@@ -948,7 +948,7 @@ function mockUgvResult(
     name === "ugv_area_recon_reset" ||
     name === "ugv_area_recon_attack_confirm"
   )
-    return { ...common, cmd_res: 0, fail_data: "" };
+    return { ...common, cmd_res: 1, fail_data: "" };
   return common;
 }
 

@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "deployedAt": "2026-09-08T08:34:25.338Z",
+  "baseRoot": "/mnt/data/gowm-analysis-releases/9f19951ac4ad691e/gowm-gdps-analysis-dev-server-0.1.0",
+  "baseSha256": "9f19951ac4ad691e4896c2f578fd4f0351a45d458f12c5f6eb299bc52521adf2",
+  "gowmSha256": "1ad2edcc2cbe0859e4481401e8cbc82548d35aa89ab9b688cc30caf3c1147e05",
+  "smppRevision": "877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-d5106be7fe47",
+  "databaseId": "7683072503094931499",
+  "account": "ugv_smpp_app",
+  "upstreamContainersPreserved": 33,
+  "credentialSource": "/mnt/data/gowm-analysis-releases/9f19951ac4ad691e/gowm-gdps-analysis-dev-server-0.1.0/.runtime/gdps-gowm-dev-server-0.2.2-gowm-0.7.1/.runtime/gowm/gowm-dev-server-0.7.1/.runtime/dev-deploy/business-connections.env",
+  "runtimeReady": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "dependencies": {
+        "database": "ready",
+        "adapter": "ready",
+        "adapterManifest": "ready",
+        "recovery": "ready",
+        "scheduler": "ready",
+        "commandDispatcher": "ready",
+        "ttlCleaner": "ready",
+        "outboxPublisher": "ready",
+        "outboxCleaner": "ready",
+        "providerTelemetryIngress": "ready",
+        "businessEventPersistence": "ready",
+        "businessEventReplay": "ready",
+        "businessEventIngest": "ready",
+        "businessEventFinalizer": "ready",
+        "businessEventAdapterSources": {
+          "vehicle.execution": "ready",
+          "vehicle.health": "ready",
+          "vehicle.target": "ready"
+        },
+        "businessEventRetention": "ready",
+        "businessEventProjection": "ready"
+      }
+    }
+  },
+  "smppContainers": [
+    {
+      "name": "/smpp-gowm-runtime-1",
+      "id": "e3e504ed8dade31cfeda657c1582f01d4fa6f418270fe171346487a68c5625d5",
+      "image": "sha256:fa44ecd2212664120bfdd355cf27c1fb9288787d5bfc65de9df886369a30b112",
+      "running": true,
+      "restartCount": 0,
+      "startedAt": "2026-09-08T08:34:22.689632725Z"
+    },
+    {
+      "name": "/smpp-gowm-adapter-1",
+      "id": "db80669cc005b846bfa3f3401002412abec39cf981a2eaec64cfe064b0229852",
+      "image": "sha256:55ebd27b9923477bfd06b34b4e5e017c2e4db361a42d83e9ac3530100371f18d",
+      "running": true,
+      "restartCount": 0,
+      "startedAt": "2026-09-08T08:34:22.268859972Z"
+    }
+  ],
+  "secretMode": "0o600",
+  "backupBytes": 111728022
+}

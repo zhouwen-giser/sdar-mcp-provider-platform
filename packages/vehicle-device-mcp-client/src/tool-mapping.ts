@@ -459,8 +459,8 @@ function reconRegionPoints(value: unknown): Record<string, number>[] {
   });
 }
 
-function targetTypes(value: unknown): number[] | null {
-  if (value === undefined || value === null) return null;
+function targetTypes(value: unknown): number[] {
+  if (value === undefined || value === null) return [];
   if (!Array.isArray(value)) throw new Error("UGV_TARGET_TYPES_INVALID");
   return value.map((item) => parseUgvTargetId(item, true));
 }

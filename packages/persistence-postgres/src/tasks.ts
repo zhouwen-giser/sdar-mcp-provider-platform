@@ -1,3 +1,14 @@
+import { storedEventKey } from "../../gowm-shared-storage-adapter/src/scope.js";
+import { requireValue } from "../../gowm-shared-storage-adapter/src/value.js";
+import { storageScope, assertCurrentRoute } from "../../gowm-shared-storage-adapter/src/scope.js";
+import { attachTaskTarget } from "../../gowm-shared-storage-adapter/src/target-links.js";
+import { reconcileMcpExecutionLinks } from "../../gowm-shared-storage-adapter/src/mission-links.js";
+import {
+  scopeColumns,
+  scopeConflict,
+  scopePredicate,
+  scopeValues,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import type {
@@ -268,6 +279,9 @@ interface TaskTransitionRequest {
 }
 
 interface TaskRow {
+  device_id?: string;
+  gowm_binding_id?: string;
+  smpp_service_key?: string;
   task_id: string;
   provider_id: string;
   operation_name: string;
@@ -339,9 +353,10 @@ export async function captureTaskOperationalEvent(
   taskId: string,
   input: TaskOperationalEventInput,
 ): Promise<void> {
-  const result = await client.query<TaskRow>("SELECT * FROM provider_task WHERE task_id=$1", [
-    taskId,
-  ]);
+  const result = await client.query<TaskRow>(
+    `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1) `,
+    [taskId],
+  );
   const task = result.rows[0];
   if (task === undefined) throw new Error("TASK_NOT_FOUND");
   const aggregateType = input.recordType.startsWith("provider.scheduler")
@@ -398,14 +413,16 @@ export class TaskRepository {
   constructor(readonly pool: Pool) {}
 
   async createAdmissionIntent(input: AdmissionIntentInput): Promise<boolean> {
+    const shared = storageScope(this.pool);
+    if (shared) await assertCurrentRoute(this.pool, shared);
     const result = await this.pool.query(
       `INSERT INTO admission_intent
-        (task_id, provider_id, operation_name, operation_snapshot_id,
+        (${scopeColumns(this.pool, "admission_intent")}task_id, provider_id, operation_name, operation_snapshot_id,
          authorization_context_hash, execution_mode, simulation_id, arguments,
          argument_hash, state, accepted_at, not_before, latest_start_at,
          deadline_at, ttl_ms, timing, trace_id, root_traceparent, root_tracestate, correlation_id,
          reservation_ref)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,'PENDING',$10,$11,$12,$13,$14,$15::jsonb,
+       VALUES (${scopeValues(this.pool, "admission_intent")}$1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,'PENDING',$10,$11,$12,$13,$14,$15::jsonb,
                $16,$17,$18,$19,$20)
        ON CONFLICT (task_id) DO NOTHING`,
       [
@@ -457,7 +474,10 @@ export class TaskRepository {
       root_tracestate: string | null;
       correlation_id: string | null;
       reservation_ref: string | null;
-    }>("SELECT * FROM admission_intent WHERE task_id=$1", [taskId]);
+    }>(
+      `SELECT * FROM admission_intent WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
+      [taskId],
+    );
     const row = result.rows[0];
     if (row === undefined) return null;
     return {
@@ -504,15 +524,19 @@ export class TaskRepository {
         execution_mode: string;
         simulation_id: string | null;
         state: AdmissionIntentRecord["state"];
-      }>("SELECT * FROM admission_intent WHERE task_id=$1 FOR UPDATE", [taskId]);
+      }>(
+        `SELECT * FROM admission_intent WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1 ) FOR UPDATE`,
+        [taskId],
+      );
       const row = admission.rows[0];
       if (row === undefined) throw new Error("ADMISSION_INTENT_NOT_FOUND");
       if (row.state !== "PENDING" && row.state !== "UNCERTAIN") {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return;
       }
       await client.query(
-        "UPDATE admission_intent SET state='UNCERTAIN', updated_at=clock_timestamp() WHERE task_id=$1",
+        `UPDATE admission_intent SET state='UNCERTAIN', updated_at=clock_timestamp() WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
         [taskId],
       );
       const inserted = await client.query(
@@ -571,6 +595,7 @@ export class TaskRepository {
           aggregateId: taskId,
         });
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -597,20 +622,23 @@ export class TaskRepository {
         authorization_context_hash: string;
         execution_mode: string;
         simulation_id: string | null;
-      }>("SELECT * FROM admission_intent WHERE task_id=$1 FOR UPDATE", [taskId]);
+      }>(
+        `SELECT * FROM admission_intent WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1 ) FOR UPDATE`,
+        [taskId],
+      );
       const row = admission.rows[0];
       if (row === undefined) throw new Error("ADMISSION_INTENT_NOT_FOUND");
       const attemptResult = await client.query<{ attempt: number }>(
-        "SELECT COALESCE(max(attempt),0)::integer + 1 AS attempt FROM smpp_reconciliation_audit WHERE task_id=$1",
+        `SELECT COALESCE(max(attempt),0)::integer + 1 AS attempt FROM smpp_reconciliation_audit WHERE (${scopePredicate(client, "smpp_reconciliation_audit", "smpp_reconciliation_audit")}) AND ( task_id=$1) `,
         [taskId],
       );
       const attempt = attemptResult.rows[0]?.attempt;
       if (attempt === undefined) throw new Error("RECONCILIATION_ATTEMPT_NOT_ALLOCATED");
       await client.query(
         `INSERT INTO smpp_reconciliation_audit
-           (task_id,attempt,operation_name,argument_hash,authorization_context_hash,
+           (${scopeColumns(client, "smpp_reconciliation_audit")}task_id,attempt,operation_name,argument_hash,authorization_context_hash,
             execution_mode,simulation_id,status,external_execution_id,identity_validated,occurred_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+         VALUES (${scopeValues(client, "smpp_reconciliation_audit")}$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
         [
           taskId,
           attempt,
@@ -667,6 +695,7 @@ export class TaskRepository {
         aggregateType: "recovery",
         aggregateId: taskId,
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return {
         schemaVersion: "sdar.smpp-reconciliation-result/v1",
@@ -689,7 +718,7 @@ export class TaskRepository {
     await this.pool.query(
       `UPDATE admission_intent
        SET state='REJECTED', adapter_response=$2::jsonb, updated_at=clock_timestamp()
-       WHERE task_id=$1`,
+       WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
       [taskId, JSON.stringify(response)],
     );
   }
@@ -700,7 +729,7 @@ export class TaskRepository {
   ): Promise<void> {
     await this.pool.query(
       `UPDATE admission_intent SET state='PUBLISHED', adapter_response=$2::jsonb,
-       updated_at=clock_timestamp() WHERE task_id=$1`,
+       updated_at=clock_timestamp() WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
       [taskId, JSON.stringify(response)],
     );
   }
@@ -711,12 +740,12 @@ export class TaskRepository {
       await client.query("BEGIN");
       await client.query(
         `UPDATE admission_intent SET state='ACCEPTED', adapter_response=$2::jsonb,
-           updated_at=clock_timestamp() WHERE task_id=$1`,
+           updated_at=clock_timestamp() WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
         [input.taskId, JSON.stringify(input.adapterResponse)],
       );
       await client.query(
         `INSERT INTO provider_task
-          (task_id, provider_id, operation_name, operation_snapshot_id,
+          (${scopeColumns(client, "provider_task")}task_id, provider_id, operation_name, operation_snapshot_id,
            authorization_context_hash, execution_mode, simulation_id, arguments,
            argument_hash, external_execution_id, internal_state, mcp_status,
            substate, status_message, result, error, adapter_revision, accepted_at, ttl_ms,
@@ -724,7 +753,7 @@ export class TaskRepository {
            invocation_attempt, observation_revision, terminal_at, handle_expires_at,
            last_confirmed_at, trace_id, root_traceparent, root_tracestate, correlation_id,
            reservation_ref)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13,$14,$15::jsonb,
+         VALUES (${scopeValues(client, "provider_task")}$1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13,$14,$15::jsonb,
                  $16::jsonb,$17,$18,$19,$20::jsonb,$21,$22,$23,
                  $24,$25,1,
                  CASE WHEN $11 LIKE 'TERMINAL_%' THEN clock_timestamp() ELSE NULL END,
@@ -783,9 +812,11 @@ export class TaskRepository {
       );
       await upsertInputRequests(client, input.taskId, input.inputRequests ?? []);
       await client.query(
-        "UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE task_id=$1",
+        `UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
         [input.taskId],
       );
+      await attachTaskTarget(client, input.taskId, input.arguments);
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       const task = await selectTaskById(client, input.taskId);
       if (task === null) throw new Error("TASK_NOT_VISIBLE_AFTER_COMMIT");
@@ -816,14 +847,14 @@ export class TaskRepository {
       await client.query("BEGIN");
       await client.query(
         `INSERT INTO provider_task
-          (task_id, provider_id, operation_name, operation_snapshot_id,
+          (${scopeColumns(client, "provider_task")}task_id, provider_id, operation_name, operation_snapshot_id,
            authorization_context_hash, execution_mode, simulation_id, arguments,
            argument_hash, external_execution_id, internal_state, mcp_status,
            substate, status_message, adapter_revision, accepted_at, ttl_ms,
            timing, not_before, latest_start_at, deadline_at, invocation_attempt,
            next_start_attempt_at, observation_revision, trace_id, root_traceparent,
            root_tracestate, correlation_id, reservation_ref)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,NULL,'SCHEDULED','working',
+         VALUES (${scopeValues(client, "provider_task")}$1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,NULL,'SCHEDULED','working',
                  'scheduled','Waiting for scheduled start.',0,$10,$11,$12::jsonb,$13,$14,$15,0,$13,1,
                  $16,$17,$18,$19,$20)`,
         [
@@ -859,8 +890,8 @@ export class TaskRepository {
       );
       await client.query(
         `INSERT INTO task_observation
-          (task_id, revision, type, occurred_at, message, substate, source, payload)
-         VALUES ($1,1,'task.scheduled',$2,'Waiting for scheduled start.','scheduled',
+          (${scopeColumns(client, "task_observation")}task_id, revision, type, occurred_at, message, substate, source, payload)
+         VALUES (${scopeValues(client, "task_observation")}$1,1,'task.scheduled',$2,'Waiting for scheduled start.','scheduled',
                  'runtime','{}'::jsonb)`,
         [input.taskId, input.acceptedAt],
       );
@@ -875,9 +906,11 @@ export class TaskRepository {
         `${input.taskId}:created`,
       );
       await client.query(
-        "UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE task_id=$1",
+        `UPDATE admission_intent SET state='PUBLISHED', updated_at=clock_timestamp() WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
         [input.taskId],
       );
+      await attachTaskTarget(client, input.taskId, input.arguments);
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       const task = await selectTaskById(client, input.taskId);
       if (task === null) throw new Error("SCHEDULED_TASK_NOT_VISIBLE_AFTER_COMMIT");
@@ -897,8 +930,8 @@ export class TaskRepository {
                AND handle_expires_at IS NOT NULL
                AND handle_expires_at <= clock_timestamp()) AS handle_expired
        FROM provider_task
-       WHERE task_id=$1 AND authorization_context_hash=$2 AND execution_mode=$3
-         AND simulation_id IS NOT DISTINCT FROM $4`,
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id=$1 AND authorization_context_hash=$2 AND execution_mode=$3
+         AND simulation_id IS NOT DISTINCT FROM $4) `,
       [taskId, authorization.hash, authorization.executionMode, authorization.simulationId],
     );
     const row = result.rows[0];
@@ -922,10 +955,10 @@ export class TaskRepository {
                AND handle_expires_at IS NOT NULL
                AND handle_expires_at <= clock_timestamp()) AS handle_expired
        FROM provider_task
-       WHERE task_id = ANY($1::uuid[])
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id = ANY($1::uuid[])
          AND authorization_context_hash=$2 AND execution_mode=$3
          AND simulation_id IS NOT DISTINCT FROM $4
-       ORDER BY task_id`,
+       ) ORDER BY task_id`,
       [taskIds, authorization.hash, authorization.executionMode, authorization.simulationId],
     );
     return result.rows.filter((row) => row.expired_at === null && !row.handle_expired).map(fromRow);
@@ -938,8 +971,8 @@ export class TaskRepository {
   async listAdmissionsForRecovery(limit = 128): Promise<AdmissionIntentRecord[]> {
     const result = await this.pool.query<{ task_id: string }>(
       `SELECT task_id FROM admission_intent
-       WHERE state IN ('PENDING','UNCERTAIN')
-       ORDER BY updated_at, task_id LIMIT $1`,
+       WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")}) AND ( state IN ('PENDING','UNCERTAIN')
+       ) ORDER BY updated_at, task_id LIMIT $1`,
       [limit],
     );
     const records = await Promise.all(result.rows.map((row) => this.getAdmission(row.task_id)));
@@ -949,9 +982,9 @@ export class TaskRepository {
   async listTasksForRecovery(limit = 256): Promise<TaskRecord[]> {
     const result = await this.pool.query<TaskRow>(
       `SELECT * FROM provider_task
-       WHERE internal_state NOT LIKE 'TERMINAL_%' AND internal_state <> 'SCHEDULED'
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( internal_state NOT LIKE 'TERMINAL_%' AND internal_state <> 'SCHEDULED'
          AND next_recovery_at <= clock_timestamp()
-       ORDER BY next_recovery_at, last_reconciled_at NULLS FIRST, task_id LIMIT $1`,
+       ) ORDER BY next_recovery_at, last_reconciled_at NULLS FIRST, task_id LIMIT $1`,
       [limit],
     );
     return result.rows.map(fromRow);
@@ -965,25 +998,25 @@ export class TaskRepository {
     const leaseKey = `sdar-recovery:${taskId}`;
     const ownerId = randomUUID();
     const claimed = await this.pool.query(
-      `INSERT INTO runtime_lease(lease_key, owner_id, fencing_token, expires_at)
-       VALUES ($1,$2,1,clock_timestamp() + ($3::text || ' milliseconds')::interval)
-       ON CONFLICT (lease_key) DO UPDATE SET
+      `INSERT INTO runtime_lease(${scopeColumns(this.pool, "runtime_lease")}lease_key, owner_id, fencing_token, expires_at)
+       VALUES (${scopeValues(this.pool, "runtime_lease")}$1,$2,1,clock_timestamp() + ($3::text || ' milliseconds')::interval)
+       ON CONFLICT (${scopeConflict(this.pool, "runtime_lease")}lease_key) DO UPDATE SET
          owner_id=EXCLUDED.owner_id,
          fencing_token=runtime_lease.fencing_token+1,
          expires_at=EXCLUDED.expires_at,
          updated_at=clock_timestamp()
-       WHERE runtime_lease.expires_at <= clock_timestamp()
-       RETURNING lease_key`,
+       WHERE (${scopePredicate(this.pool, "runtime_lease", "runtime_lease")}) AND ( runtime_lease.expires_at <= clock_timestamp()
+       ) RETURNING lease_key`,
       [leaseKey, ownerId, leaseMilliseconds],
     );
     if (claimed.rowCount !== 1) return null;
     try {
       return await recover();
     } finally {
-      await this.pool.query("DELETE FROM runtime_lease WHERE lease_key=$1 AND owner_id=$2", [
-        leaseKey,
-        ownerId,
-      ]);
+      await this.pool.query(
+        `DELETE FROM runtime_lease WHERE (${scopePredicate(this.pool, "runtime_lease", "runtime_lease")}) AND ( lease_key=$1 AND owner_id=$2) `,
+        [leaseKey, ownerId],
+      );
     }
   }
 
@@ -1005,12 +1038,12 @@ export class TaskRepository {
                 last_error_message='Safe stop superseded the pending command.',
                 updated_at=clock_timestamp()
            FROM provider_task
-          WHERE provider_task.task_id=command.task_id
+          WHERE (${scopePredicate(client, "command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( provider_task.task_id=command.task_id
             AND provider_task.cancel_requested IS TRUE
             AND command.command_type IN ('UPDATE','PAUSE','RESUME')
             AND command.state='CLAIMED'
             AND command.claim_until <= GREATEST($1,clock_timestamp())
-         RETURNING command.task_id, command.command_sequence, command.command_type,
+         ) RETURNING command.task_id, command.command_sequence, command.command_type,
            command.payload, command.state, command.attempt_count, command.claim_owner,
            command.stop_reason, command.adapter_ack, command.next_attempt_at,
            command.last_error_code, command.last_error_message, command.claim_until`,
@@ -1052,7 +1085,7 @@ export class TaskRepository {
          FROM task_command
          JOIN provider_task
            ON provider_task.task_id = task_command.task_id
-         WHERE task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME')
+         WHERE (${scopePredicate(client, "task_command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME')
            AND (
              (task_command.state IN ('PENDING','RETRY_WAIT')
               AND task_command.next_attempt_at <= GREATEST($1,clock_timestamp())
@@ -1065,12 +1098,12 @@ export class TaskRepository {
            )
            AND NOT EXISTS (
              SELECT 1 FROM task_command in_flight
-             WHERE in_flight.task_id = task_command.task_id
+             WHERE (${scopePredicate(client, "in_flight", "task_command")}) AND ( in_flight.task_id = task_command.task_id
                AND in_flight.state = 'CLAIMED'
                AND in_flight.claim_until > GREATEST($1,clock_timestamp())
                AND in_flight.command_sequence <> task_command.command_sequence
-           )
-       ),
+           ) )
+       ) ),
        candidates AS (
          SELECT task_id, command_sequence
          FROM ranked
@@ -1085,20 +1118,20 @@ export class TaskRepository {
          INNER JOIN candidates
            ON candidates.task_id = task_command.task_id
           AND candidates.command_sequence = task_command.command_sequence
-         WHERE (task_command.state IN ('PENDING','RETRY_WAIT')
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( (task_command.state IN ('PENDING','RETRY_WAIT')
                 AND task_command.next_attempt_at <= GREATEST($1,clock_timestamp()))
             OR (
               task_command.state = 'CLAIMED'
               AND task_command.claim_until <= GREATEST($1,clock_timestamp())
             )
-         FOR UPDATE OF task_command SKIP LOCKED
+         ) FOR UPDATE OF task_command SKIP LOCKED
        )
        UPDATE task_command command SET state='CLAIMED', claim_owner=$2,
          claim_until=GREATEST($1,clock_timestamp()) + ($3::text || ' milliseconds')::interval,
          attempt_count=attempt_count+1, updated_at=clock_timestamp()
-       FROM due WHERE command.task_id=due.task_id
+       FROM due WHERE (${scopePredicate(client, "command", "task_command")}) AND ( command.task_id=due.task_id
          AND command.command_sequence=due.command_sequence
-       RETURNING command.task_id, command.command_sequence, command.command_type,
+       ) RETURNING command.task_id, command.command_sequence, command.command_type,
          command.payload, command.state, command.attempt_count, command.claim_owner,
          command.stop_reason, command.adapter_ack, command.next_attempt_at,
          command.last_error_code, command.last_error_message, command.claim_until,
@@ -1126,6 +1159,7 @@ export class TaskRepository {
           },
         );
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return commands;
     } catch (error) {
@@ -1157,8 +1191,8 @@ export class TaskRepository {
     const result = await this.pool.query<PendingCommandRecordRow>(
       `SELECT task_id, command_sequence, command_type, payload, state, attempt_count,
               claim_owner, stop_reason, adapter_ack, claim_until
-       FROM task_command WHERE task_id=$1 AND state IN ('PENDING','CLAIMED','RETRY_WAIT')
-       ORDER BY command_sequence`,
+       FROM task_command WHERE (${scopePredicate(this.pool, "task_command", "task_command")}) AND ( task_id=$1 AND state IN ('PENDING','CLAIMED','RETRY_WAIT')
+       ) ORDER BY command_sequence`,
       [taskId],
     );
     return result.rows.map((row) => ({
@@ -1179,7 +1213,7 @@ export class TaskRepository {
         `UPDATE task_command SET state='RETRY_WAIT', next_attempt_at=$4,
          claim_owner=NULL, claim_until=NULL, last_error_code=$5,
          last_error_message=$6, updated_at=clock_timestamp()
-       WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [
           command.taskId,
           command.commandSequence,
@@ -1207,6 +1241,7 @@ export class TaskRepository {
           adapterRpcStatus: "error",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1222,8 +1257,8 @@ export class TaskRepository {
       await client.query("BEGIN");
       const claimed = await client.query(
         `SELECT 1 FROM task_command
-         WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3
-         FOR UPDATE`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3
+         ) FOR UPDATE`,
         [command.taskId, command.commandSequence, command.claimOwner],
       );
       if (claimed.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -1239,6 +1274,7 @@ export class TaskRepository {
         "task.command.started",
         { previousState: "CLAIMED", adapterRpcStatus: "started" },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1256,7 +1292,7 @@ export class TaskRepository {
       `UPDATE task_command
        SET claim_until=clock_timestamp() + ($4::text || ' milliseconds')::interval,
            updated_at=clock_timestamp()
-       WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+       WHERE (${scopePredicate(this.pool, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
       [command.taskId, command.commandSequence, command.claimOwner, leaseMilliseconds],
     );
     if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -1273,7 +1309,7 @@ export class TaskRepository {
       const result = await client.query(
         `UPDATE task_command SET state='REJECTED', claim_owner=NULL, claim_until=NULL,
          last_error_code=$4, last_error_message=$5, updated_at=clock_timestamp()
-       WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner, errorCode, errorMessage],
       );
       if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -1282,7 +1318,7 @@ export class TaskRepository {
           `UPDATE task_input_response_inbox
            SET state='FAILED', failed_at=clock_timestamp(), updated_at=clock_timestamp(),
                last_error_code='INPUT_RESPONSE_REJECTED', last_error_message=$3
-           WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+           WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
           [command.taskId, command.commandSequence, errorMessage],
         );
       }
@@ -1302,6 +1338,7 @@ export class TaskRepository {
           adapterRpcStatus: "rejected",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1320,16 +1357,16 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const lockedTask = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [command.taskId],
       );
       const task = lockedTask.rows[0];
       if (task === undefined) throw new Error("TASK_NOT_FOUND");
       const claimed = await client.query(
         `SELECT 1 FROM task_command
-         WHERE task_id=$1 AND command_sequence=$2 AND command_type='UPDATE'
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND command_type='UPDATE'
            AND state='CLAIMED' AND claim_owner=$3
-         FOR UPDATE`,
+         ) FOR UPDATE`,
         [command.taskId, command.commandSequence, command.claimOwner],
       );
       if (claimed.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -1353,7 +1390,7 @@ export class TaskRepository {
         `UPDATE task_command
          SET state=$4, claim_owner=NULL, claim_until=NULL, last_error_code=$5,
              last_error_message=$6, updated_at=clock_timestamp()
-         WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [
           command.taskId,
           command.commandSequence,
@@ -1369,7 +1406,7 @@ export class TaskRepository {
       if (responseKeys.length > 0 && !terminal) {
         await client.query(
           `UPDATE task_input_request SET status='SUPERSEDED'
-           WHERE task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN'`,
+           WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
           [command.taskId, responseKeys],
         );
       }
@@ -1378,7 +1415,7 @@ export class TaskRepository {
         `UPDATE task_input_response_inbox
          SET state=$3, failed_at=CASE WHEN $3='FAILED' THEN clock_timestamp() ELSE failed_at END,
              updated_at=clock_timestamp(), last_error_code=$4, last_error_message=$5
-         WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+         WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
         [
           command.taskId,
           command.commandSequence,
@@ -1438,6 +1475,7 @@ export class TaskRepository {
           adapterRpcStatus: disposition === "failed" ? "rejected" : "not_dispatched",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return disposition;
     } catch (error) {
@@ -1453,7 +1491,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const lockedTask = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [command.taskId],
       );
       const task = lockedTask.rows[0];
@@ -1471,7 +1509,7 @@ export class TaskRepository {
          SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
              last_error_code=$4, last_error_message=$5,
              updated_at=clock_timestamp()
-         WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner, commandCode, message],
       );
       if (exhausted.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -1481,7 +1519,7 @@ export class TaskRepository {
       if (responseKeys.length > 0 && !terminal) {
         await client.query(
           `UPDATE task_input_request SET status='SUPERSEDED'
-           WHERE task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN'`,
+           WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
           [command.taskId, responseKeys],
         );
       }
@@ -1489,7 +1527,7 @@ export class TaskRepository {
         `UPDATE task_input_response_inbox
          SET state=$3, failed_at=CASE WHEN $3='FAILED' THEN clock_timestamp() ELSE failed_at END,
              updated_at=clock_timestamp(), last_error_code=$4, last_error_message=$5
-         WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+         WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
         [
           command.taskId,
           command.commandSequence,
@@ -1547,6 +1585,7 @@ export class TaskRepository {
           adapterRpcStatus: "error",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1561,7 +1600,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const row = locked.rows[0];
@@ -1589,6 +1628,7 @@ export class TaskRepository {
         outboxType: "task.recovery",
         eventKey: `${taskId}:recovery:${String(attempt)}`,
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1614,8 +1654,8 @@ export class TaskRepository {
              mod(hashtext(task_id::text)::bigint + 2147483648, 251)
            ) * interval '1 millisecond',
            updated_at=clock_timestamp()
-       WHERE task_id=$1 AND internal_state NOT LIKE 'TERMINAL_%'
-       RETURNING recovery_failure_count,recovery_attempts,next_recovery_at`,
+       WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state NOT LIKE 'TERMINAL_%'
+       ) RETURNING recovery_failure_count,recovery_attempts,next_recovery_at`,
         [taskId, failedAt],
       );
       const row = result.rows[0];
@@ -1635,6 +1675,7 @@ export class TaskRepository {
           },
         });
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1649,7 +1690,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const task = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const row = task.rows[0];
@@ -1673,6 +1714,7 @@ export class TaskRepository {
         },
         eventKey,
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1687,12 +1729,13 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const row = locked.rows[0];
       if (row === undefined) throw new Error("TASK_NOT_FOUND");
       if (isTerminalState(row.internal_state)) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return fromRow(row);
       }
@@ -1725,6 +1768,7 @@ export class TaskRepository {
         eventKey: `${taskId}:recovery-failed:${String(attempt)}`,
         outboxPayload: { reasonCode: "EXECUTION_NOT_FOUND" },
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -1746,10 +1790,10 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE external_execution_id IS NULL AND internal_state='SCHEDULED'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( external_execution_id IS NULL AND internal_state='SCHEDULED'
            AND not_before <= $1 AND COALESCE(next_start_attempt_at,not_before) <= $1
            AND latest_start_at > $1
-         ORDER BY COALESCE(next_start_attempt_at,not_before), task_id
+         ) ORDER BY COALESCE(next_start_attempt_at,not_before), task_id
          FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
       );
@@ -1782,6 +1826,7 @@ export class TaskRepository {
         });
         claimed.push(fromRow(applied.row));
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return claimed;
     } catch (error) {
@@ -1798,9 +1843,9 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<{ task_id: string }>(
         `SELECT task_id FROM provider_task
-         WHERE internal_state='SCHEDULED' AND external_execution_id IS NULL
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state='SCHEDULED' AND external_execution_id IS NULL
            AND latest_start_at <= $1
-         ORDER BY latest_start_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
+         ) ORDER BY latest_start_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
       );
       for (const row of due.rows) {
@@ -1831,6 +1876,7 @@ export class TaskRepository {
           outboxPayload: { reasonCode: "START_WINDOW_MISSED", safeStopRequired: false },
         });
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return due.rowCount ?? 0;
     } catch (error) {
@@ -1852,9 +1898,9 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE external_execution_id IS NULL AND internal_state='STARTING'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( external_execution_id IS NULL AND internal_state='STARTING'
            AND schedule_claim_until <= $1
-         ORDER BY schedule_claim_until, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
+         ) ORDER BY schedule_claim_until, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
       );
       const claimed: TaskRecord[] = [];
@@ -1882,6 +1928,7 @@ export class TaskRepository {
         });
         claimed.push(fromRow(applied.row));
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return claimed;
     } catch (error) {
@@ -1901,7 +1948,7 @@ export class TaskRepository {
       `UPDATE provider_task
        SET schedule_claim_until=clock_timestamp() + ($3::text || ' milliseconds')::interval,
            updated_at=clock_timestamp()
-       WHERE task_id=$1 AND internal_state='STARTING' AND schedule_claim_owner=$2`,
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='STARTING' AND schedule_claim_owner=$2) `,
       [taskId, claimOwner, leaseMilliseconds],
     );
     if (result.rowCount !== 1) throw new Error("SCHEDULED_TASK_CLAIM_LOST");
@@ -1922,8 +1969,8 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1 AND internal_state='STARTING'
-         AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='STARTING'
+         AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -1963,9 +2010,10 @@ export class TaskRepository {
       await upsertInputRequests(client, taskId, inputRequests);
       await client.query(
         `UPDATE admission_intent SET state='PUBLISHED', adapter_response=$2::jsonb,
-         updated_at=clock_timestamp() WHERE task_id=$1`,
+         updated_at=clock_timestamp() WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
         [taskId, JSON.stringify(adapterResponse)],
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       const visible = await selectTaskById(client, taskId);
       if (visible === null) throw new Error("SCHEDULED_TASK_NOT_VISIBLE_AFTER_COMMIT");
@@ -1988,8 +2036,8 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1 AND internal_state='STARTING'
-         AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='STARTING'
+         AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -2021,6 +2069,7 @@ export class TaskRepository {
         eventKey: `${taskId}:start-retry:${String(row.invocation_attempt)}`,
         outboxPayload: { nextStartAttemptAt: nextAttemptAt.toISOString() },
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -2040,8 +2089,8 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1 AND internal_state='STARTING'
-         AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='STARTING'
+         AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -2069,6 +2118,7 @@ export class TaskRepository {
         outboxType: "task.start_uncertain",
         eventKey: `${taskId}:start-uncertain:${String(row.invocation_attempt)}:${reconcileAt.toISOString()}`,
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -2096,8 +2146,8 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1 AND external_execution_id IS NULL
-         AND internal_state='STARTING' AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND external_execution_id IS NULL
+         AND internal_state='STARTING' AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -2129,6 +2179,7 @@ export class TaskRepository {
         eventKey: `${taskId}:start-window-missed`,
         outboxPayload: { reasonCode: "START_WINDOW_MISSED", safeStopRequired: false },
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -2161,8 +2212,8 @@ export class TaskRepository {
         observationType: "task.admission_rejected",
       };
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1 AND internal_state='STARTING'
-         AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='STARTING'
+         AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -2193,6 +2244,7 @@ export class TaskRepository {
         eventKey: `${taskId}:admission-rejected:${String(row.invocation_attempt)}`,
         outboxPayload: { reasonCode, retryable, outcome: "admission_rejected" },
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -2208,12 +2260,13 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const row = locked.rows[0];
       if (row === undefined) throw new Error("TASK_NOT_FOUND");
       if (isTerminalState(row.internal_state)) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return fromRow(row);
       }
@@ -2221,6 +2274,7 @@ export class TaskRepository {
         throw new Error("START_WINDOW_STOP_WITHOUT_EXECUTION");
       }
       await persistStartWindowStop(client, taskId, requestedAt);
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       const updated = await selectTaskById(client, taskId);
       if (updated === null) throw new Error("TASK_NOT_FOUND");
@@ -2244,13 +2298,13 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE internal_state NOT LIKE 'TERMINAL_%'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state NOT LIKE 'TERMINAL_%'
            AND actual_started_at IS NULL
            AND COALESCE(start_confirmation_deadline,latest_start_at) <= $1
            AND external_execution_id IS NOT NULL
            AND stop_reason IS NULL
            AND (schedule_claim_owner IS NULL OR schedule_claim_until <= $1)
-         ORDER BY COALESCE(start_confirmation_deadline,latest_start_at), task_id
+         ) ORDER BY COALESCE(start_confirmation_deadline,latest_start_at), task_id
          FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
       );
@@ -2284,6 +2338,7 @@ export class TaskRepository {
         });
         claimed.push(fromRow(applied.row));
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return claimed;
     } catch (error) {
@@ -2303,8 +2358,8 @@ export class TaskRepository {
       `UPDATE provider_task
        SET schedule_claim_until=clock_timestamp() + ($3::text || ' milliseconds')::interval,
            updated_at=clock_timestamp()
-       WHERE task_id=$1 AND internal_state='WAITING_START_CONFIRMATION'
-         AND schedule_claim_owner=$2`,
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='WAITING_START_CONFIRMATION'
+         AND schedule_claim_owner=$2) `,
       [taskId, claimOwner, leaseMilliseconds],
     );
     if (result.rowCount !== 1) throw new Error("START_CONFIRMATION_CLAIM_LOST");
@@ -2321,8 +2376,8 @@ export class TaskRepository {
        SET schedule_claim_owner=NULL, schedule_claim_until=$3, status_message=$4,
            updated_at=clock_timestamp(), runtime_updated_at=clock_timestamp(),
            runtime_revision=runtime_revision+1
-       WHERE task_id=$1 AND internal_state='WAITING_START_CONFIRMATION'
-         AND schedule_claim_owner=$2`,
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id=$1 AND internal_state='WAITING_START_CONFIRMATION'
+         AND schedule_claim_owner=$2) `,
       [taskId, claimOwner, retryAt, message],
     );
     if (result.rowCount !== 1) throw new Error("START_CONFIRMATION_CLAIM_LOST");
@@ -2339,8 +2394,8 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1
-         AND internal_state='WAITING_START_CONFIRMATION' AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1
+         AND internal_state='WAITING_START_CONFIRMATION' AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       const row = locked.rows[0];
@@ -2376,6 +2431,7 @@ export class TaskRepository {
         outboxType: "task.started",
         eventKey: `${taskId}:start-confirmed:${String(adapterRevision)}`,
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -2395,12 +2451,13 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        `SELECT * FROM provider_task WHERE task_id=$1
-         AND internal_state='WAITING_START_CONFIRMATION' AND schedule_claim_owner=$2 FOR UPDATE`,
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1
+         AND internal_state='WAITING_START_CONFIRMATION' AND schedule_claim_owner=$2 ) FOR UPDATE`,
         [taskId, claimOwner],
       );
       if (locked.rows[0] === undefined) throw new Error("START_CONFIRMATION_CLAIM_LOST");
       await persistStartWindowStop(client, taskId, requestedAt);
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       const updated = await selectTaskById(client, taskId);
       if (updated === null) throw new Error("TASK_NOT_FOUND");
@@ -2419,19 +2476,19 @@ export class TaskRepository {
       await client.query("BEGIN");
       const expired = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE deadline_at <= $1 AND stop_reason IS DISTINCT FROM 'DEADLINE_REACHED'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( deadline_at <= $1 AND stop_reason IS DISTINCT FROM 'DEADLINE_REACHED'
            AND external_execution_id IS NOT NULL
            AND internal_state NOT LIKE 'TERMINAL_%'
-         ORDER BY deadline_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
+         ) ORDER BY deadline_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
       );
       const claimed: DeadlineStopRecord[] = [];
       for (const row of expired.rows) {
         const active = await client.query<{ command_sequence: string }>(
           `SELECT command_sequence FROM task_command
-           WHERE task_id=$1 AND command_type='CANCEL'
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_type='CANCEL'
              AND state IN ('PENDING','CLAIMED','RETRY_WAIT','ACKNOWLEDGED')
-           ORDER BY command_sequence DESC LIMIT 1`,
+           ) ORDER BY command_sequence DESC LIMIT 1`,
           [row.task_id],
         );
         const activeSequence = active.rows[0]?.command_sequence;
@@ -2440,7 +2497,7 @@ export class TaskRepository {
         if (activeSequence === undefined) {
           const sequence = await client.query<{ next_command_sequence: string }>(
             `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-             WHERE task_id=$1 RETURNING next_command_sequence`,
+             WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
             [row.task_id],
           );
           commandSequence = Number(sequence.rows[0]?.next_command_sequence);
@@ -2449,10 +2506,10 @@ export class TaskRepository {
         if (activeSequence === undefined) {
           await client.query(
             `INSERT INTO task_command
-              (task_id, command_sequence, command_type, request_hash, state, payload,
+              (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload,
                stop_reason, priority, previous_internal_state, previous_mcp_status,
                previous_substate, previous_status_message, next_attempt_at)
-             VALUES ($1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'DEADLINE_REACHED',100,$5,$6,$7,$8,$9)`,
+             VALUES (${scopeValues(client, "task_command")}$1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'DEADLINE_REACHED',100,$5,$6,$7,$8,$9)`,
             [
               row.task_id,
               commandSequence,
@@ -2469,7 +2526,7 @@ export class TaskRepository {
           await client.query(
             `UPDATE task_command SET stop_reason='DEADLINE_REACHED', priority=100,
                payload=$3::jsonb, updated_at=clock_timestamp()
-             WHERE task_id=$1 AND command_sequence=$2`,
+             WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2) `,
             [row.task_id, commandSequence, JSON.stringify({ reason: "DEADLINE_REACHED" })],
           );
         }
@@ -2513,6 +2570,7 @@ export class TaskRepository {
         }
         claimed.push({ task: fromRow(applied.row), commandSequence });
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return claimed;
     } catch (error) {
@@ -2537,7 +2595,7 @@ export class TaskRepository {
     }>(
       `SELECT request_key, description, schema, required, status, answer_hash,
               request_json, response_hash, response_json
-       FROM task_input_request WHERE task_id=$1 ORDER BY created_at, request_key`,
+       FROM task_input_request WHERE (${scopePredicate(this.pool, "task_input_request", "task_input_request")}) AND ( task_id=$1 ) ORDER BY created_at, request_key`,
       [taskId],
     );
     return result.rows.map((row) => ({
@@ -2575,8 +2633,8 @@ export class TaskRepository {
       `SELECT task_id, request_key, description, schema, required, status,
               answer_hash, request_json, response_hash, response_json
        FROM task_input_request
-       WHERE task_id = ANY($1::uuid[])
-       ORDER BY task_id, created_at, request_key`,
+       WHERE (${scopePredicate(this.pool, "task_input_request", "task_input_request")}) AND ( task_id = ANY($1::uuid[])
+       ) ORDER BY task_id, created_at, request_key`,
       [taskIds],
     );
     for (const row of result.rows) {
@@ -2612,9 +2670,9 @@ export class TaskRepository {
                  AND handle_expires_at IS NOT NULL
                  AND handle_expires_at <= clock_timestamp()) AS handle_expired
          FROM provider_task
-         WHERE task_id=$1 AND authorization_context_hash=$2 AND execution_mode=$3
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 AND authorization_context_hash=$2 AND execution_mode=$3
            AND simulation_id IS NOT DISTINCT FROM $4
-         FOR UPDATE`,
+         ) FOR UPDATE`,
         [taskId, authorization.hash, authorization.executionMode, authorization.simulationId],
       );
       const task = lockedTask.rows[0];
@@ -2636,8 +2694,8 @@ export class TaskRepository {
                 request_json: InputRequestRecord["requestJson"];
               }>(
                 `SELECT request_key, status, schema, request_json FROM task_input_request
-                 WHERE task_id=$1 AND request_key=ANY($2::text[])
-                 ORDER BY request_key FOR UPDATE`,
+                 WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[])
+                 ) ORDER BY request_key FOR UPDATE`,
                 [taskId, keys],
               )
             ).rows;
@@ -2678,8 +2736,8 @@ export class TaskRepository {
           .digest("hex");
         const inserted = await client.query<{ request_key: string }>(
           `INSERT INTO task_input_response_inbox
-            (task_id, request_key, response_hash, response_json, state)
-           VALUES ($1,$2,$3,$4::jsonb,'PENDING')
+            (${scopeColumns(client, "task_input_response_inbox")}task_id, request_key, response_hash, response_json, state)
+           VALUES (${scopeValues(client, "task_input_response_inbox")}$1,$2,$3,$4::jsonb,'PENDING')
            ON CONFLICT (task_id, request_key) DO NOTHING
            RETURNING request_key`,
           [taskId, key, responseHash, JSON.stringify(response)],
@@ -2712,6 +2770,7 @@ export class TaskRepository {
           outboxPayload: { keys: result.acceptedKeys },
         });
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return result;
     } catch (error) {
@@ -2729,8 +2788,8 @@ export class TaskRepository {
     const candidates = await this.pool.query<{ task_id: string }>(
       `SELECT task_id
        FROM task_input_response_inbox
-       WHERE state='PENDING'
-       GROUP BY task_id
+       WHERE (${scopePredicate(this.pool, "task_input_response_inbox", "task_input_response_inbox")}) AND ( state='PENDING'
+       ) GROUP BY task_id
        ORDER BY min(accepted_at), task_id
        LIMIT $1`,
       [limit],
@@ -2741,7 +2800,7 @@ export class TaskRepository {
       try {
         await client.query("BEGIN");
         const lockedTask = await client.query<TaskRow>(
-          "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+          `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
           [taskId],
         );
         const task = lockedTask.rows[0];
@@ -2754,13 +2813,14 @@ export class TaskRepository {
           }>(
             `SELECT request_key, response_hash, response_json
              FROM task_input_response_inbox
-             WHERE task_id=$1 AND state='PENDING'
-             ORDER BY accepted_at, request_key
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND state='PENDING'
+             ) ORDER BY accepted_at, request_key
              FOR UPDATE SKIP LOCKED`,
             [taskId],
           )
         ).rows;
         if (responses.length === 0) {
+          await reconcileMcpExecutionLinks(client);
           await client.query("COMMIT");
           continue;
         }
@@ -2776,15 +2836,16 @@ export class TaskRepository {
              SET state='IGNORED', updated_at=clock_timestamp(),
                  last_error_code='TASK_NOT_ACCEPTING_INPUT',
                  last_error_message='Task is stopping or terminal.'
-             WHERE task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING'`,
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
             [taskId, keys],
           );
+          await reconcileMcpExecutionLinks(client);
           await client.query("COMMIT");
           continue;
         }
         const updated = await client.query<{ next_command_sequence: string }>(
           `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-           WHERE task_id=$1 RETURNING next_command_sequence`,
+           WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
           [taskId],
         );
         const sequence = updated.rows[0]?.next_command_sequence;
@@ -2801,15 +2862,15 @@ export class TaskRepository {
           .digest("hex");
         await client.query(
           `INSERT INTO task_command
-            (task_id, command_sequence, command_type, request_hash, state, payload)
-           VALUES ($1,$2,'UPDATE',$3,'PENDING',$4::jsonb)`,
+            (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload)
+           VALUES (${scopeValues(client, "task_command")}$1,$2,'UPDATE',$3,'PENDING',$4::jsonb)`,
           [taskId, sequence, requestHash, JSON.stringify({ inputResponses: normalized })],
         );
         const assigned = await client.query(
           `UPDATE task_input_response_inbox
            SET state='ASSIGNED', command_sequence=$3, assigned_at=clock_timestamp(),
                updated_at=clock_timestamp()
-           WHERE task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING'`,
+           WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
           [taskId, keys, sequence],
         );
         if (assigned.rowCount !== responses.length)
@@ -2827,6 +2888,7 @@ export class TaskRepository {
           { reasonCode: "INPUT_RESPONSE_ACCEPTED", adapterRpcStatus: "not_started" },
         );
         promoted += 1;
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
       } catch (error) {
         await client.query("ROLLBACK").catch(() => undefined);
@@ -2877,8 +2939,8 @@ export class TaskRepository {
       `SELECT revision, type, occurred_at, reason_code, message, substate, progress,
               source, adapter_revision, payload
         FROM task_observation
-        WHERE task_id=$1 AND ($2::bigint IS NULL OR revision < $2)
-        ORDER BY revision DESC LIMIT $3`,
+        WHERE (${scopePredicate(this.pool, "task_observation", "task_observation")}) AND ( task_id=$1 AND ($2::bigint IS NULL OR revision < $2)
+        ) ORDER BY revision DESC LIMIT $3`,
       [taskId, beforeRevision ?? null, limit + 1],
     );
     const hasMore = result.rows.length > limit;
@@ -2907,7 +2969,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const previous = locked.rows[0];
@@ -2917,12 +2979,13 @@ export class TaskRepository {
                 claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
                 last_error_message, claim_until
          FROM task_command
-         WHERE task_id=$1 AND command_type='CANCEL'
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_type='CANCEL'
            AND state IN ('PENDING','CLAIMED','RETRY_WAIT','ACKNOWLEDGED')
-         ORDER BY command_sequence DESC LIMIT 1`,
+         ) ORDER BY command_sequence DESC LIMIT 1`,
         [taskId],
       );
       if (existing.rows[0] !== undefined) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         const duplicate = {
           ...mapCommandResolution(existing.rows[0]),
@@ -2944,10 +3007,10 @@ export class TaskRepository {
                last_error_code='SUPERSEDED_BY_SAFE_STOP',
                last_error_message='Safe stop superseded the pending command.',
                updated_at=clock_timestamp()
-         WHERE task_id=$1
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
            AND command_type IN ('UPDATE','PAUSE','RESUME')
            AND state IN ('PENDING','RETRY_WAIT')
-         RETURNING command_sequence, command_type, attempt_count`,
+         ) RETURNING command_sequence, command_type, attempt_count`,
         [taskId],
       );
       for (const row of superseded.rows) {
@@ -2966,17 +3029,17 @@ export class TaskRepository {
       }
       const updated = await client.query<{ next_command_sequence: string }>(
         `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-         WHERE task_id=$1 RETURNING next_command_sequence`,
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
         [taskId],
       );
       const sequence = updated.rows[0]?.next_command_sequence;
       if (sequence === undefined) throw new Error("TASK_ALREADY_TERMINAL");
       await client.query(
         `INSERT INTO task_command
-          (task_id, command_sequence, command_type, request_hash, state, payload,
+          (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload,
            stop_reason, priority, previous_internal_state, previous_mcp_status,
            previous_substate, previous_status_message)
-         VALUES ($1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'USER_REQUESTED',100,$5,$6,$7,$8)`,
+         VALUES (${scopeValues(client, "task_command")}$1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'USER_REQUESTED',100,$5,$6,$7,$8)`,
         [
           taskId,
           sequence,
@@ -3034,6 +3097,7 @@ export class TaskRepository {
           adapterRpcStatus: "not_started",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return {
         sequence: Number(sequence),
@@ -3075,6 +3139,7 @@ export class TaskRepository {
         eventKey: `${taskId}:cancel-intent:user-requested`,
         outboxPayload: { adapterDispatch: false },
       });
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -3095,7 +3160,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const task = locked.rows[0];
@@ -3106,11 +3171,12 @@ export class TaskRepository {
                 claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
                 last_error_message, claim_until
          FROM task_command
-         WHERE task_id=$1 AND command_type=$2 AND request_hash=$3
-         ORDER BY command_sequence DESC LIMIT 1`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_type=$2 AND request_hash=$3
+         ) ORDER BY command_sequence DESC LIMIT 1`,
         [taskId, commandType, requestHash],
       );
       if (existing.rows[0] !== undefined) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         const duplicate = {
           ...mapCommandResolution(existing.rows[0]),
@@ -3133,13 +3199,14 @@ export class TaskRepository {
                   claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
                   last_error_message, claim_until
            FROM task_command
-           WHERE task_id=$1
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
              AND command_type='CANCEL'
              AND state IN ('PENDING','CLAIMED','RETRY_WAIT','ACKNOWLEDGED')
-           ORDER BY command_sequence DESC LIMIT 1`,
+           ) ORDER BY command_sequence DESC LIMIT 1`,
           [taskId],
         );
         if (stopping.rows[0] !== undefined) {
+          await reconcileMcpExecutionLinks(client);
           await client.query("COMMIT");
           return {
             ...mapCommandResolution(stopping.rows[0]),
@@ -3155,13 +3222,14 @@ export class TaskRepository {
                 claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
                 last_error_message, claim_until
          FROM task_command
-         WHERE task_id=$1
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
            AND state IN ('PENDING','CLAIMED','RETRY_WAIT')
-         ORDER BY command_sequence
+         ) ORDER BY command_sequence
          LIMIT 1`,
         [taskId],
       );
       if (active.rows[0] !== undefined) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return {
           ...mapCommandResolution(active.rows[0]),
@@ -3172,15 +3240,15 @@ export class TaskRepository {
 
       const updated = await client.query<{ next_command_sequence: string }>(
         `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-         WHERE task_id=$1 RETURNING next_command_sequence`,
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
         [taskId],
       );
       const sequence = updated.rows[0]?.next_command_sequence;
       if (sequence === undefined) throw new Error("TASK_ALREADY_TERMINAL");
       await client.query(
         `INSERT INTO task_command
-          (task_id, command_sequence, command_type, request_hash, state, payload)
-         VALUES ($1,$2,$3,$4,'PENDING',$5::jsonb)`,
+          (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload)
+         VALUES (${scopeValues(client, "task_command")}$1,$2,$3,$4,'PENDING',$5::jsonb)`,
         [taskId, sequence, commandType, requestHash, JSON.stringify(payload)],
       );
       await transitionTask(client, {
@@ -3219,6 +3287,7 @@ export class TaskRepository {
         "task.command.created",
         { adapterRpcStatus: "not_started" },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return {
         sequence: Number(sequence),
@@ -3251,8 +3320,8 @@ export class TaskRepository {
               claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
               last_error_message, claim_until
        FROM task_command
-       WHERE task_id=$1 AND command_type=$2 AND request_hash=$3
-       ORDER BY command_sequence DESC LIMIT 1`,
+       WHERE (${scopePredicate(this.pool, "task_command", "task_command")}) AND ( task_id=$1 AND command_type=$2 AND request_hash=$3
+       ) ORDER BY command_sequence DESC LIMIT 1`,
       [taskId, commandType, requestHash],
     );
     if (result.rows[0] === undefined) return null;
@@ -3283,10 +3352,10 @@ export class TaskRepository {
              last_error_code='SUPERSEDED_BY_SAFE_STOP',
              last_error_message='Safe stop superseded the pending command.',
              updated_at=clock_timestamp()
-       WHERE task_id=$1
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
          AND command_type IN ('UPDATE','PAUSE','RESUME')
          AND state IN ${states}
-       RETURNING command_sequence, command_type, attempt_count`,
+       ) RETURNING command_sequence, command_type, attempt_count`,
         [taskId],
       );
       for (const row of result.rows) {
@@ -3306,6 +3375,7 @@ export class TaskRepository {
           { reasonCode: "SUPERSEDED_BY_SAFE_STOP", adapterRpcStatus: "not_dispatched" },
         );
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return result.rowCount ?? 0;
     } catch (error) {
@@ -3326,11 +3396,11 @@ export class TaskRepository {
              next_attempt_at=clock_timestamp(), last_error_code='SUPERSEDED_BY_SAFE_STOP',
              last_error_message='Safe stop superseded the claimed command.',
              updated_at=clock_timestamp()
-       WHERE task_id=$1
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
          AND command_sequence=$2
          AND command_type IN ('UPDATE','PAUSE','RESUME')
          AND state='CLAIMED'
-         AND claim_owner=$3`,
+         AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner],
       );
       if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -3353,6 +3423,7 @@ export class TaskRepository {
           adapterRpcStatus: "not_dispatched",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -3376,11 +3447,11 @@ export class TaskRepository {
              last_error_code='SUPERSEDED_BY_SAFE_STOP',
              last_error_message='Safe stop superseded the pending command.',
              updated_at=clock_timestamp()
-       WHERE task_id=$1
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
          AND command_type IN ('UPDATE','PAUSE','RESUME')
          AND state='CLAIMED'
          AND claim_until <= clock_timestamp()
-       RETURNING command_sequence, command_type, attempt_count`,
+       ) RETURNING command_sequence, command_type, attempt_count`,
         [taskId],
       );
       for (const row of result.rows) {
@@ -3404,6 +3475,7 @@ export class TaskRepository {
           },
         );
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return result.rowCount ?? 0;
     } catch (error) {
@@ -3429,8 +3501,8 @@ export class TaskRepository {
         previous_state: PendingCommandRecord["state"];
       }>(
         `UPDATE task_command SET state=$3, adapter_ack=$4::jsonb,
-       updated_at=clock_timestamp() WHERE task_id=$1 AND command_sequence=$2
-       RETURNING command_type, attempt_count, state AS previous_state`,
+       updated_at=clock_timestamp() WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2
+       ) RETURNING command_type, attempt_count, state AS previous_state`,
         [taskId, sequence, accepted ? "ACKNOWLEDGED" : "REJECTED", JSON.stringify(ack)],
       );
       const row = result.rows[0];
@@ -3447,6 +3519,7 @@ export class TaskRepository {
         accepted ? "task.command.acknowledged" : "task.command.rejected",
         { adapterRpcStatus: accepted ? "success" : "rejected" },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -3467,7 +3540,7 @@ export class TaskRepository {
         `UPDATE task_command SET state='ACKNOWLEDGED', adapter_ack=$4::jsonb,
          claim_owner=NULL, claim_until=NULL, last_error_code=NULL,
          last_error_message=NULL, updated_at=clock_timestamp()
-       WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+       WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner, JSON.stringify(ack)],
       );
       if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -3483,6 +3556,7 @@ export class TaskRepository {
         "task.command.acknowledged",
         { previousState: "CLAIMED", adapterRpcStatus: "success" },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -3506,7 +3580,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const lockedTask = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [command.taskId],
       );
       const task = lockedTask.rows[0];
@@ -3516,9 +3590,9 @@ export class TaskRepository {
                 claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
                 last_error_message, claim_until
          FROM task_command
-         WHERE task_id=$1 AND command_sequence=$2 AND command_type='UPDATE'
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND command_type='UPDATE'
            AND state='CLAIMED' AND claim_owner=$3
-         FOR UPDATE`,
+         ) FOR UPDATE`,
         [command.taskId, command.commandSequence, command.claimOwner],
       );
       if (claimed.rows[0] === undefined) throw new Error("COMMAND_CLAIM_LOST");
@@ -3533,7 +3607,7 @@ export class TaskRepository {
              SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
                  next_attempt_at=clock_timestamp(), last_error_code=$4,
                  last_error_message=$5, updated_at=clock_timestamp()
-           WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
           [command.taskId, command.commandSequence, command.claimOwner, code, message],
         );
         if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -3546,7 +3620,7 @@ export class TaskRepository {
         if (keys.length > 0) {
           await client.query(
             `UPDATE task_input_request SET status='SUPERSEDED'
-             WHERE task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN'`,
+             WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
             [command.taskId, keys],
           );
         }
@@ -3554,7 +3628,7 @@ export class TaskRepository {
           `UPDATE task_input_response_inbox
            SET state='IGNORED', updated_at=clock_timestamp(), last_error_code=$3,
                last_error_message='Input response was superseded by task state.'
-           WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+           WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
           [
             command.taskId,
             command.commandSequence,
@@ -3582,6 +3656,7 @@ export class TaskRepository {
             adapterRpcStatus: "not_dispatched",
           },
         );
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return "task_terminal";
       }
@@ -3608,6 +3683,7 @@ export class TaskRepository {
             adapterRpcStatus: "not_dispatched",
           },
         );
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return "superseded_by_safe_stop";
       }
@@ -3618,7 +3694,7 @@ export class TaskRepository {
              SET status='ANSWERED', answer_hash=$3, answer=$4::jsonb,
                  response_hash=$3, response_json=$5::jsonb,
                  answered_at=clock_timestamp()
-           WHERE task_id=$1 AND request_key=$2 AND status='OPEN'`,
+           WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=$2 AND status='OPEN') `,
           [
             command.taskId,
             answer.key,
@@ -3634,7 +3710,7 @@ export class TaskRepository {
         `UPDATE task_input_response_inbox
          SET state='ACKNOWLEDGED', acknowledged_at=clock_timestamp(),
              updated_at=clock_timestamp(), last_error_code=NULL, last_error_message=NULL
-         WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+         WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
         [command.taskId, command.commandSequence],
       );
 
@@ -3662,7 +3738,7 @@ export class TaskRepository {
            SET state='ACKNOWLEDGED', adapter_ack=$4::jsonb, claim_owner=NULL,
                claim_until=NULL, last_error_code=NULL, last_error_message=NULL,
                updated_at=clock_timestamp()
-         WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner, JSON.stringify(ack)],
       );
       if (acknowledged.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -3678,6 +3754,7 @@ export class TaskRepository {
         "task.command.acknowledged",
         { previousState: "CLAIMED", adapterRpcStatus: "success" },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return "acknowledged";
     } catch (error) {
@@ -3698,7 +3775,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [command.taskId],
       );
       const row = locked.rows[0];
@@ -3707,7 +3784,7 @@ export class TaskRepository {
         await client.query(
           `UPDATE task_command SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
              last_error_code='TASK_TERMINAL', updated_at=clock_timestamp()
-           WHERE task_id=$1 AND command_sequence=$2`,
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2) `,
           [command.taskId, command.commandSequence],
         );
         await insertCommandFact(
@@ -3726,6 +3803,7 @@ export class TaskRepository {
             adapterRpcStatus: "not_dispatched",
           },
         );
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return fromRow(row);
       }
@@ -3761,7 +3839,7 @@ export class TaskRepository {
         `UPDATE task_command SET state='REJECTED', adapter_ack=$4::jsonb,
            claim_owner=NULL, claim_until=NULL, last_error_code=$5,
            last_error_message=$6, updated_at=clock_timestamp()
-         WHERE task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
         [
           command.taskId,
           command.commandSequence,
@@ -3788,6 +3866,7 @@ export class TaskRepository {
           adapterRpcStatus: "rejected",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -3806,7 +3885,7 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [command.taskId],
       );
       const row = locked.rows[0];
@@ -3816,7 +3895,7 @@ export class TaskRepository {
           `UPDATE task_command SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
              last_error_code='TASK_TERMINAL', last_error_message=$4,
              updated_at=clock_timestamp()
-           WHERE task_id=$1 AND command_sequence=$2 AND claim_owner=$3`,
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND claim_owner=$3) `,
           [command.taskId, command.commandSequence, command.claimOwner, message],
         );
         await insertCommandFact(
@@ -3835,6 +3914,7 @@ export class TaskRepository {
             adapterRpcStatus: "not_dispatched",
           },
         );
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return fromRow(row);
       }
@@ -3875,7 +3955,7 @@ export class TaskRepository {
         `UPDATE task_command SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
            last_error_code='SAFE_STOP_UNCONFIRMED', last_error_message=$4,
            updated_at=clock_timestamp()
-         WHERE task_id=$1 AND command_sequence=$2 AND claim_owner=$3`,
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner, message],
       );
       if (exhausted.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
@@ -3895,6 +3975,7 @@ export class TaskRepository {
           adapterRpcStatus: "rejected",
         },
       );
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -3915,13 +3996,14 @@ export class TaskRepository {
     try {
       await client.query("BEGIN");
       const locked = await client.query<TaskRow>(
-        "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
         [taskId],
       );
       const existingRow = locked.rows[0];
       if (existingRow === undefined) throw new Error("TASK_NOT_FOUND");
       const existing = fromRow(existingRow);
       if (isTerminalState(existing.internalState) || adapterRevision < existing.adapterRevision) {
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return existing;
       }
@@ -3929,9 +4011,10 @@ export class TaskRepository {
         const confirmedAt = new Date();
         const confirmed = await client.query<TaskRow>(
           `UPDATE provider_task SET last_confirmed_at=$2
-           WHERE task_id=$1 RETURNING *`,
+           WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING *`,
           [taskId, confirmedAt],
         );
+        await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         const row = confirmed.rows[0];
         if (row === undefined) throw new Error("TASK_CONFIRMATION_NOT_RETURNED");
@@ -3974,8 +4057,8 @@ export class TaskRepository {
         }>(
           `UPDATE task_command SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
              last_error_code='TASK_TERMINAL', updated_at=clock_timestamp()
-           WHERE task_id=$1 AND state IN ('PENDING','CLAIMED','RETRY_WAIT')
-           RETURNING command_sequence, command_type, attempt_count`,
+           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND state IN ('PENDING','CLAIMED','RETRY_WAIT')
+           ) RETURNING command_sequence, command_type, attempt_count`,
           [taskId],
         );
         for (const row of exhausted.rows) {
@@ -3993,6 +4076,7 @@ export class TaskRepository {
           );
         }
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
     } catch (error) {
@@ -4043,14 +4127,15 @@ async function transitionTask(
 ): Promise<{ row: TaskRow; applied: boolean }> {
   const transitionStartedAt = performance.now();
   const locked = await client.query<TaskRow>(
-    "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+    `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
     [request.taskId],
   );
   const existing = locked.rows[0];
   if (existing === undefined) throw new Error("TASK_NOT_FOUND");
-  const duplicate = await client.query("SELECT event_id FROM outbox_event WHERE event_key=$1", [
-    request.eventKey,
-  ]);
+  const duplicate = await client.query(
+    `SELECT event_id FROM outbox_event WHERE (${scopePredicate(client, "outbox_event", "outbox_event")}) AND ( event_key=$1) `,
+    [storedEventKey(client, request.eventKey)],
+  );
   if ((duplicate.rowCount ?? 0) > 0) return { row: existing, applied: false };
   if (isTerminalState(existing.internal_state)) return { row: existing, applied: false };
   if (
@@ -4129,7 +4214,7 @@ async function transitionTask(
   }
 
   const updated = await client.query<TaskRow>(
-    `UPDATE provider_task SET ${assignments.join(", ")} WHERE task_id=$1 RETURNING *`,
+    `UPDATE provider_task SET ${assignments.join(", ")} WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING *`,
     values,
   );
   const row = updated.rows[0];
@@ -4142,16 +4227,16 @@ async function transitionTask(
              retain_until,
              $2::timestamptz + (1209960000 * interval '1 millisecond')
            )
-       WHERE provider_id=$3 AND task_id=$1`,
+       WHERE (${scopePredicate(client, "provider_task_resource_binding", "provider_task_resource_binding")}) AND ( provider_id=$3 AND task_id=$1) `,
       [request.taskId, request.observation.occurredAt, row.provider_id],
     );
   }
   const revision = Number(row.observation_revision);
   await client.query(
     `INSERT INTO task_observation
-      (task_id, revision, type, reason_code, occurred_at, message, substate,
+      (${scopeColumns(client, "task_observation")}task_id, revision, type, reason_code, occurred_at, message, substate,
        progress, source, adapter_revision, payload)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11::jsonb)`,
+     VALUES (${scopeValues(client, "task_observation")}$1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11::jsonb)`,
     [
       request.taskId,
       revision,
@@ -4198,11 +4283,11 @@ async function transitionTask(
     taskTransitionDurationMs: performance.now() - transitionStartedAt,
   };
   await client.query(
-    `INSERT INTO outbox_event(event_id, event_key, aggregate_id, event_type, payload)
-     VALUES ($1,$2,$3,$4,$5::jsonb)`,
+    `INSERT INTO outbox_event(${scopeColumns(client, "outbox_event")}event_id, event_key, aggregate_id, event_type, payload)
+     VALUES (${scopeValues(client, "outbox_event")}$1,$2,$3,$4,$5::jsonb)`,
     [
       randomUUID(),
-      request.eventKey,
+      storedEventKey(client, request.eventKey),
       request.taskId,
       request.outboxType,
       JSON.stringify(outboxPayload),
@@ -4273,7 +4358,7 @@ async function persistStartWindowStop(
   requestedAt: Date,
 ): Promise<void> {
   const locked = await client.query<TaskRow>(
-    "SELECT * FROM provider_task WHERE task_id=$1 FOR UPDATE",
+    `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
     [taskId],
   );
   const previous = locked.rows[0];
@@ -4283,9 +4368,9 @@ async function persistStartWindowStop(
     throw new Error("START_WINDOW_STOP_WITHOUT_EXECUTION");
   const active = await client.query<{ command_sequence: string; stop_reason: string | null }>(
     `SELECT command_sequence, stop_reason FROM task_command
-     WHERE task_id=$1 AND command_type='CANCEL'
+     WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_type='CANCEL'
        AND state IN ('PENDING','CLAIMED','RETRY_WAIT','ACKNOWLEDGED')
-     ORDER BY command_sequence DESC LIMIT 1`,
+     ) ORDER BY command_sequence DESC LIMIT 1`,
     [taskId],
   );
   const existing = active.rows[0];
@@ -4293,7 +4378,7 @@ async function persistStartWindowStop(
   if (existing === undefined) {
     const updated = await client.query<{ next_command_sequence: string }>(
       `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-       WHERE task_id=$1 RETURNING next_command_sequence`,
+       WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
       [taskId],
     );
     commandSequence = Number(updated.rows[0]?.next_command_sequence);
@@ -4301,10 +4386,10 @@ async function persistStartWindowStop(
       throw new Error("START_WINDOW_STOP_SEQUENCE_FAILED");
     await client.query(
       `INSERT INTO task_command
-        (task_id, command_sequence, command_type, request_hash, state, payload,
+        (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload,
          stop_reason, priority, previous_internal_state, previous_mcp_status,
          previous_substate, previous_status_message, next_attempt_at)
-       VALUES ($1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'START_WINDOW_MISSED',200,
+       VALUES (${scopeValues(client, "task_command")}$1,$2,'CANCEL',$3,'PENDING',$4::jsonb,'START_WINDOW_MISSED',200,
                $5,$6,$7,$8,$9)`,
       [
         taskId,
@@ -4323,7 +4408,7 @@ async function persistStartWindowStop(
     if (existing.stop_reason === "USER_REQUESTED") {
       await client.query(
         `UPDATE task_command SET stop_reason='START_WINDOW_MISSED', priority=200,
-         payload=$3::jsonb, updated_at=$4 WHERE task_id=$1 AND command_sequence=$2`,
+         payload=$3::jsonb, updated_at=$4 WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2) `,
         [taskId, commandSequence, JSON.stringify({ reason: "START_WINDOW_MISSED" }), requestedAt],
       );
     }
@@ -4439,9 +4524,9 @@ async function insertObservation(
 ): Promise<void> {
   await client.query(
     `INSERT INTO task_observation
-      (task_id, revision, type, reason_code, occurred_at, message, substate,
+      (${scopeColumns(client, "task_observation")}task_id, revision, type, reason_code, occurred_at, message, substate,
        progress, source, adapter_revision, payload)
-     VALUES ($1,$2,$3,$4,clock_timestamp(),$5,$6,$7::jsonb,$8,$9,$10::jsonb)
+     VALUES (${scopeValues(client, "task_observation")}$1,$2,$3,$4,clock_timestamp(),$5,$6,$7::jsonb,$8,$9,$10::jsonb)
      ON CONFLICT DO NOTHING`,
     [
       taskId,
@@ -4474,14 +4559,14 @@ async function upsertInputRequests(
     };
     const result = await client.query(
       `INSERT INTO task_input_request
-        (task_id, request_key, description, schema, required, status, request_json)
-       VALUES ($1,$2,$3,$4::jsonb,$5,'OPEN',$6::jsonb)
+        (${scopeColumns(client, "task_input_request")}task_id, request_key, description, schema, required, status, request_json)
+       VALUES (${scopeValues(client, "task_input_request")}$1,$2,$3,$4::jsonb,$5,'OPEN',$6::jsonb)
        ON CONFLICT (task_id, request_key) DO UPDATE SET
          description=EXCLUDED.description
-       WHERE task_input_request.schema=EXCLUDED.schema
+       WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_input_request.schema=EXCLUDED.schema
          AND task_input_request.required=EXCLUDED.required
          AND task_input_request.request_json=EXCLUDED.request_json
-       RETURNING request_key`,
+       ) RETURNING request_key`,
       [
         taskId,
         input.key,
@@ -4519,7 +4604,7 @@ async function markAssignedInputResponsesIgnored(
      SET state='IGNORED', updated_at=clock_timestamp(),
          last_error_code='SUPERSEDED_BY_SAFE_STOP',
          last_error_message='Safe stop superseded input response delivery.'
-     WHERE task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+     WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
     [taskId, commandSequence],
   );
 }
@@ -4531,9 +4616,10 @@ async function insertOutbox(
   payload: Record<string, unknown>,
   eventKey = `${taskId}:${type}:${randomUUID()}`,
 ): Promise<void> {
-  const snapshot = await client.query<TaskRow>("SELECT * FROM provider_task WHERE task_id=$1", [
-    taskId,
-  ]);
+  const snapshot = await client.query<TaskRow>(
+    `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1) `,
+    [taskId],
+  );
   const task = snapshot.rows[0];
   const terminalProjection =
     task === undefined || !isTerminalState(task.internal_state)
@@ -4576,9 +4662,9 @@ async function insertOutbox(
           ...payload,
         };
   const inserted = await client.query(
-    `INSERT INTO outbox_event(event_id, event_key, aggregate_id, event_type, payload)
-     VALUES ($1,$2,$3,$4,$5::jsonb) ON CONFLICT (event_key) DO NOTHING RETURNING event_id`,
-    [randomUUID(), eventKey, taskId, type, JSON.stringify(completePayload)],
+    `INSERT INTO outbox_event(${scopeColumns(client, "outbox_event")}event_id, event_key, aggregate_id, event_type, payload)
+     VALUES (${scopeValues(client, "outbox_event")}$1,$2,$3,$4,$5::jsonb) ON CONFLICT (event_key) DO NOTHING RETURNING event_id`,
+    [randomUUID(), storedEventKey(client, eventKey), taskId, type, JSON.stringify(completePayload)],
   );
   if (inserted.rowCount === 1 && task !== undefined) {
     const occurredAt = timestampFromPayload(completePayload);
@@ -4735,13 +4821,20 @@ async function recordCommandResolutionFact(
       if (eventType === "task.command.duplicate") {
         const { eventKey, payload } = commandFact(taskId, command, eventType, extra);
         await client.query(
-          `INSERT INTO outbox_event(event_id,event_key,aggregate_id,event_type,payload)
-           VALUES ($1,$2,$3,$4,$5::jsonb) ON CONFLICT (event_key) DO NOTHING`,
-          [randomUUID(), eventKey, taskId, eventType, JSON.stringify(payload)],
+          `INSERT INTO outbox_event(${scopeColumns(client, "outbox_event")}event_id,event_key,aggregate_id,event_type,payload)
+           VALUES (${scopeValues(client, "outbox_event")}$1,$2,$3,$4,$5::jsonb) ON CONFLICT (event_key) DO NOTHING`,
+          [
+            randomUUID(),
+            storedEventKey(client, eventKey),
+            taskId,
+            eventType,
+            JSON.stringify(payload),
+          ],
         );
       } else {
         await insertCommandFact(client, taskId, command, eventType, extra);
       }
+      await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -4839,14 +4932,22 @@ async function selectTaskById(
   queryable: Pool | PoolClient,
   taskId: string,
 ): Promise<TaskRecord | null> {
-  const result = await queryable.query<TaskRow>("SELECT * FROM provider_task WHERE task_id=$1", [
-    taskId,
-  ]);
+  const result = await queryable.query<TaskRow>(
+    `SELECT * FROM provider_task WHERE (${scopePredicate(queryable, "provider_task", "provider_task")}) AND ( task_id=$1) `,
+    [taskId],
+  );
   return result.rows[0] === undefined ? null : fromRow(result.rows[0]);
 }
 
 function fromRow(row: TaskRow): TaskRecord {
   return {
+    ...(row.device_id
+      ? {
+          deviceId: row.device_id,
+          gowmBindingId: requireValue(row.gowm_binding_id),
+          smppServiceKey: requireValue(row.smpp_service_key),
+        }
+      : {}),
     taskId: row.task_id,
     providerId: row.provider_id,
     operationName: row.operation_name,
@@ -4918,7 +5019,7 @@ async function initializeTaskRetention(
      SET terminal_at=$2,
          handle_expires_at=$3,
          last_confirmed_at=$4
-     WHERE task_id=$1`,
+     WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1) `,
     [
       taskId,
       terminal ? acceptedAt : null,
@@ -4949,16 +5050,16 @@ async function materializeTaskResourceBinding(
   }
   await client.query(
     `INSERT INTO provider_task_resource_binding
-       (provider_id, task_id, resource_ref, operation_snapshot_id,
+       (${scopeColumns(client, "provider_task_resource_binding")}provider_id, task_id, resource_ref, operation_snapshot_id,
         authorization_context_hash, execution_mode, simulation_id,
         bound_at, terminal_at, retain_until)
-     SELECT provider_id, task_id, $2, operation_snapshot_id,
+     SELECT ${scopeValues(client, "provider_task_resource_binding")} provider_id, task_id, $2, operation_snapshot_id,
             authorization_context_hash, execution_mode, simulation_id,
             accepted_at, terminal_at,
             COALESCE(terminal_at, accepted_at) + (1209960000 * interval '1 millisecond')
-     FROM provider_task WHERE task_id=$1
-     ON CONFLICT (provider_id, task_id) DO UPDATE
-       SET retain_until=GREATEST(provider_task_resource_binding.retain_until, EXCLUDED.retain_until)`,
+     FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1
+     ) ON CONFLICT (provider_id, task_id) DO UPDATE
+       SET retain_until=GREATEST(provider_task_resource_binding.retain_until, EXCLUDED.retain_until) WHERE ${scopePredicate(client, "provider_task_resource_binding", "provider_task_resource_binding")} `,
     [input.taskId, resourceRef],
   );
 }

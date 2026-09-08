@@ -1,0 +1,200 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 16,
+  "numPassedTests": 16,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1788849209076,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories verifies the consumed SMPP contract",
+          "status": "passed",
+          "title": "verifies the consumed SMPP contract",
+          "duration": 90.12831499999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories rejects a mismatched core contract without changing installed history",
+          "status": "passed",
+          "title": "rejects a mismatched core contract without changing installed history",
+          "duration": 9.874186000000009,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories isolates the same device and idempotency text across services",
+          "status": "passed",
+          "title": "isolates the same device and idempotency text across services",
+          "duration": 29.697760000000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories isolates equal idempotency text and preserves argument conflicts",
+          "status": "passed",
+          "title": "isolates equal idempotency text and preserves argument conflicts",
+          "duration": 27.12077900000031,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories writes A/B same snapshot revision and rejects conflicting payloads",
+          "status": "passed",
+          "title": "writes A/B same snapshot revision and rejects conflicting payloads",
+          "duration": 38.0629570000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories publishes late MCP parents and keeps equal native Mission 7 separate",
+          "status": "passed",
+          "title": "publishes late MCP parents and keeps equal native Mission 7 separate",
+          "duration": 122.6748590000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories same-device workers claim once while B claims its own commands",
+          "status": "passed",
+          "title": "same-device workers claim once while B claims its own commands",
+          "duration": 109.9115240000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories scope lease keys fence concurrent workers independently per device",
+          "status": "passed",
+          "title": "scope lease keys fence concurrent workers independently per device",
+          "duration": 10.297480000000178,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails",
+          "status": "passed",
+          "title": "receipt and Mission rollback together, then replay is idempotent and conflicting evidence fails",
+          "duration": 40.817059999999856,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories source sequences and duplicate event IDs are isolated; foreign leases are rejected",
+          "status": "passed",
+          "title": "source sequences and duplicate event IDs are isolated; foreign leases are rejected",
+          "duration": 40.32529400000021,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories cross-device journal writes fail the actual composite parent FK",
+          "status": "passed",
+          "title": "cross-device journal writes fail the actual composite parent FK",
+          "duration": 9.414531999999781,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories known targets normalize and unknown local frames retain native coordinates",
+          "status": "passed",
+          "title": "known targets normalize and unknown local frames retain native coordinates",
+          "duration": 70.19207600000027,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories handle expiry never physically purges retained native history",
+          "status": "passed",
+          "title": "handle expiry never physically purges retained native history",
+          "duration": 46.12667999999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories same outbox key can coexist on A/B and B cannot publish A's row",
+          "status": "passed",
+          "title": "same outbox key can coexist on A/B and B cannot publish A's row",
+          "duration": 56.65215399999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories uncertain dispatch remains durable and cannot be claimed as a new send",
+          "status": "passed",
+          "title": "uncertain dispatch remains durable and cannot be claimed as a new send",
+          "duration": 28.67802900000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["actual GOWM-installed SMPP repositories"],
+          "fullName": "actual GOWM-installed SMPP repositories replacing a binding cannot mutate old task ownership or admit through the retired route",
+          "status": "passed",
+          "title": "replacing a binding cannot mutate old task ownership or admit through the retired route",
+          "duration": 60.5499090000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1788849211395,
+      "endTime": 1788849212186.5498,
+      "status": "passed",
+      "message": "",
+      "name": "/home/zhouwen/web-download/sdar-mcp-provider-platform/tests/gowm-storage/postgres.test.ts"
+    }
+  ]
+}

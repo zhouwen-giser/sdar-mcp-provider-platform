@@ -10,7 +10,7 @@ import {
 import Fastify from "fastify";
 import type * as grpc from "@grpc/grpc-js";
 import { Pool } from "pg";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
   bindMockAdapter,
@@ -4168,6 +4168,7 @@ describe("durable task lifecycle", () => {
   });
 
   it("T-027 returns persisted state with stale metadata during a transient Adapter outage", async () => {
+    const reconcile = vi.spyOn(engine, "reconcileTask");
     const created = await engine.callOperation(
       requiredOperation("durable_task"),
       { resourceId: "rc2-stale-read", scenario: "get_transient_failure" },
@@ -4187,6 +4188,9 @@ describe("durable task lifecycle", () => {
     });
     expect(typeof profile.lastConfirmedAt).toBe("string");
     await new Promise<void>((resolve) => setImmediate(resolve));
+    // Drain the real background transaction before the next test truncates its tables.
+    expect(reconcile).toHaveBeenCalledOnce();
+    await reconcile.mock.results[0]?.value;
     expect(await repository.getById(taskId)).toEqual(before);
   });
 

@@ -1,3 +1,4 @@
+import { scoped } from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -42,6 +43,7 @@ export async function runMigrations(
     compatibilityDirectory === undefined
       ? await listRuntimeMigrations(options.workspaceRoot)
       : await listCompatibilityDirectory(compatibilityDirectory);
+  if (scoped(pool)) throw new Error("GOWM_STORAGE_MIGRATION_FORBIDDEN");
   const client = await pool.connect();
   const results: RuntimeMigrationEngineEntry[] = [];
   try {

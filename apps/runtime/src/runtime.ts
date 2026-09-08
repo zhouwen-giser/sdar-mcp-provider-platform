@@ -1,3 +1,10 @@
+import {
+  createGowmPool,
+  verifyGowmStorage,
+  resolveDeviceContext,
+  inTransaction,
+} from "../../../packages/gowm-shared-storage-adapter/src/index.js";
+import { reconcileMcpExecutionLinks } from "../../../packages/gowm-shared-storage-adapter/src/mission-links.js";
 import * as grpc from "@grpc/grpc-js";
 import Fastify from "fastify";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -153,7 +160,9 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   let businessEventTelemetry: BusinessEventTelemetryBridge | undefined;
   let businessEventSourceIds: string[] = [];
   let providerTelemetryServer: ProviderTelemetryGrpcServer | undefined;
-  const pool = new Pool({ connectionString: config.DATABASE_URL, max: config.DATABASE_POOL_MAX });
+  const pool = config.gowmStorage
+    ? createGowmPool(config.gowmStorage, config.DATABASE_POOL_MAX)
+    : new Pool({ connectionString: config.DATABASE_URL, max: config.DATABASE_POOL_MAX });
   const resolveAuthorization = createAuthorizationResolver(authenticationOptions(config));
   const gateway = new GrpcAdapterGateway({
     endpoint: config.ADAPTER_ENDPOINT,
@@ -644,7 +653,16 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
 
   async function initialize(): Promise<ProviderManifest> {
     try {
-      await runMigrations(pool);
+      if (config.gowmStorage) {
+        await verifyGowmStorage(pool, config.gowmStorage);
+        await resolveDeviceContext(
+          pool,
+          config.gowmStorage,
+          { providerId: config.PROVIDER_ID },
+          false,
+        );
+        await inTransaction(pool, reconcileMcpExecutionLinks);
+      } else await runMigrations(pool);
       await pool.query("SELECT 1 AS runtime_database_ready");
       dependencies.database = "ready";
     } catch (error) {

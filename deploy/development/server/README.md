@@ -3,8 +3,8 @@
 ## 生成部署包
 
 ```bash
-pnpm package:development-server
-pnpm package:development-server --output-dir /absolute/path/to/output
+pnpm package:smpp-server
+pnpm package:smpp-server --output-dir /absolute/path/to/output
 ```
 
 也可从任意目录执行 `node /仓库路径/scripts/package-development-server.mjs`。
@@ -53,3 +53,12 @@ state/identity.json仅记录非secret镜像身份和启动时间。
 
 启动先实际加载两侧配置，再启动并等待readiness；不调用导航、车辆状态、diagnostic或fire。
 可用工具受远端注册目录和实时可用性影响，开放权限不伪造健康/业务成功。
+
+## sz-gowm 共享业务存储包
+
+`pnpm package:smpp-server --site sz-gowm` 生成默认启用 GOWM 的现场包。
+使用已有 GOWM 网络和数据库，仅部署 Runtime/Adapter。现场身份、一次性域安装、
+专用角色与 secret 生成步骤见 [GOWM_SZ_DEPLOYMENT.md](GOWM_SZ_DEPLOYMENT.md)。
+密码不进入源码归档；现场准备入口默认只读，`--apply` 才初始化所需业务域和绑定。
+
+默认 `pnpm package:development-server` 现生成 GOWM/GDPS/GSAP/SMPP 联合包；独立 SMPP 源码包使用上述 `package:smpp-server`。

@@ -1,0 +1,26 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "resultType": "complete",
+      "profileVersion": "1.0",
+      "results": [
+        {
+          "requestId": "fire-enabled-verification",
+          "operationName": "vehicle_fire_weapon",
+          "availability": "unknown",
+          "riskLevel": "high",
+          "reasonCode": "UGV_STATE_STALE",
+          "description": "UGV_STATE_STALE",
+          "validUntil": "2026-09-08T09:07:08.624Z",
+          "nextAvailableWindows": [],
+          "estimatedDelayMs": 0,
+          "reservationMode": "none",
+          "possibleEffects": []
+        }
+      ]
+    }
+  }
+}

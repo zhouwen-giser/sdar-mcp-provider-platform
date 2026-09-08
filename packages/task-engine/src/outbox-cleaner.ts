@@ -1,3 +1,4 @@
+import { scoped, scopePredicate } from "../../gowm-shared-storage-adapter/src/scope.js";
 import type { TaskRepository } from "../../persistence-postgres/src/index.js";
 
 export interface OutboxCleanerTickResult {
@@ -31,6 +32,7 @@ export class OutboxCleaner {
   }
 
   async tick(now = new Date()): Promise<OutboxCleanerTickResult> {
+    if (scoped(this.repository.pool)) return { removed: 0 };
     const client = await this.repository.pool.connect();
     try {
       await client.query("BEGIN");
@@ -38,9 +40,9 @@ export class OutboxCleaner {
       const pending = await client.query<{ event_id: string }>(
         `SELECT event_id
          FROM outbox_event
-         WHERE published_at IS NOT NULL
+         WHERE (${scopePredicate(client, "outbox_event", "outbox_event")}) AND ( published_at IS NOT NULL
            AND published_at <= $1
-         ORDER BY published_at, event_id
+         ) ORDER BY published_at, event_id
          FOR UPDATE SKIP LOCKED
          LIMIT $2`,
         [cutoff, this.#batchSize],
@@ -51,7 +53,7 @@ export class OutboxCleaner {
         return { removed: 0 };
       }
       const deleted = await client.query(
-        "DELETE FROM outbox_event WHERE event_id = ANY($1::uuid[])",
+        `DELETE FROM outbox_event WHERE (${scopePredicate(client, "outbox_event", "outbox_event")}) AND ( event_id = ANY($1::uuid[])) `,
         [eventIds],
       );
       await client.query("COMMIT");

@@ -1,0 +1,47 @@
+{
+  "database": "gowm",
+  "tasks": [
+    {
+      "task_id": "1572a416-4859-4ce4-aca8-aea19ecd4877",
+      "operation_name": "vehicle_emergency_stop",
+      "device_id": "ugv:ugv"
+    },
+    {
+      "task_id": "3465a904-6425-417f-8fb4-d71adcab682f",
+      "operation_name": "vehicle_navigate",
+      "device_id": "ugv:ugv"
+    },
+    {
+      "task_id": "b53d1885-05c1-4b4b-8abf-34a8fb071bd2",
+      "operation_name": "vehicle_navigate",
+      "device_id": "ugv:ugv"
+    }
+  ],
+  "missionLinks": [
+    {
+      "mcp_task_id": "1572a416-4859-4ce4-aca8-aea19ecd4877",
+      "mission_instance_id": null,
+      "link_state": "PENDING"
+    },
+    {
+      "mcp_task_id": "3465a904-6425-417f-8fb4-d71adcab682f",
+      "mission_instance_id": "880e3a54-fc8c-47c0-bb00-0bf62afd73ac",
+      "link_state": "LINKED"
+    },
+    {
+      "mcp_task_id": "3465a904-6425-417f-8fb4-d71adcab682f",
+      "mission_instance_id": "880e3a54-fc8c-47c0-bb00-0bf62afd73ac",
+      "link_state": "LINKED"
+    },
+    {
+      "mcp_task_id": "b53d1885-05c1-4b4b-8abf-34a8fb071bd2",
+      "mission_instance_id": "2a8f61f6-083f-4ce2-a5cf-e24058533346",
+      "link_state": "LINKED"
+    },
+    {
+      "mcp_task_id": "b53d1885-05c1-4b4b-8abf-34a8fb071bd2",
+      "mission_instance_id": "2a8f61f6-083f-4ce2-a5cf-e24058533346",
+      "link_state": "LINKED"
+    }
+  ]
+}

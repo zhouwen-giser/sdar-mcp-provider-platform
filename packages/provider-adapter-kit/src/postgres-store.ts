@@ -1,3 +1,18 @@
+import {
+  createGowmPool,
+  verifyGowmStorage,
+  resolveDeviceContext,
+  inTransaction,
+  assertCurrentRoute,
+  storageScope,
+  type GowmStorageConfig,
+} from "../../gowm-shared-storage-adapter/src/index.js";
+import { recordMissionReceipt } from "../../gowm-shared-storage-adapter/src/mission-links.js";
+import {
+  scopeColumns,
+  scopePredicate,
+  scopeValues,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
@@ -30,11 +45,19 @@ import type {
 export class PostgresProviderStore implements ProviderStore {
   readonly pool: Pool;
   readonly tables: ProviderStoreTables;
-  constructor(connectionString: string, maximum = 8, scope: "ugv" | "npc_tank" = "ugv") {
-    this.pool = new Pool({ connectionString, max: maximum });
+  constructor(
+    connectionString: string,
+    maximum = 8,
+    scope: "ugv" | "npc_tank" = "ugv",
+    readonly gowm?: GowmStorageConfig,
+  ) {
+    if (gowm && (scope !== "ugv" || connectionString !== gowm.databaseUrl))
+      throw new Error("GOWM_SHARED_DATABASE_MISMATCH");
+    this.pool = gowm ? createGowmPool(gowm, maximum) : new Pool({ connectionString, max: maximum });
     this.tables = TABLES[scope];
   }
   async initialize(): Promise<void> {
+    if (this.gowm) await verifyGowmStorage(this.pool, this.gowm);
     await this.pool.query("SELECT 1");
   }
   async close(): Promise<void> {
@@ -42,34 +65,50 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async getExecution(taskId: string): Promise<ProviderExecution | undefined> {
     const result = await this.pool.query<{ payload: ProviderExecution }>(
-      `SELECT payload FROM ${this.tables.execution} WHERE task_id = $1`,
+      `SELECT payload FROM ${this.tables.execution} WHERE (${scopePredicate(this.pool, "ugv_execution", "ugv_execution")}) AND ( task_id = $1) `,
       [taskId],
     );
     return result.rows[0]?.payload;
   }
   async listActiveExecutions(): Promise<ProviderExecution[]> {
     const result = await this.pool.query<{ payload: ProviderExecution }>(
-      `SELECT payload FROM ${this.tables.execution} WHERE state NOT IN ('SUCCEEDED','BUSINESS_FAILED','CANCELLED','TECHNICAL_FAILED') ORDER BY created_at`,
+      `SELECT payload FROM ${this.tables.execution} WHERE (${scopePredicate(this.pool, "ugv_execution", "ugv_execution")}) AND ( state NOT IN ('SUCCEEDED','BUSINESS_FAILED','CANCELLED','TECHNICAL_FAILED') ) ORDER BY created_at`,
     );
     return result.rows.map((row) => row.payload);
   }
   async putExecution(execution: ProviderExecution): Promise<void> {
+    if (this.gowm) {
+      if (!(await this.getExecution(execution.taskId)))
+        await assertCurrentRoute(this.pool, this.gowm);
+      const deviceContext = await resolveDeviceContext(
+        this.pool,
+        this.gowm,
+        { providerId: execution.providerId ?? "", resourceId: execution.resourceId },
+        false,
+      );
+      if (
+        execution.deviceContext &&
+        canonicalSha256(execution.deviceContext) !== canonicalSha256(deviceContext)
+      )
+        throw new Error("DEVICE_SCOPE_MISMATCH");
+      execution = { ...execution, deviceContext };
+    }
     assertPostgresJsonbSafe(execution, "execution");
     const result = await this.pool.query(
       `INSERT INTO ${this.tables.execution}
-       (task_id, external_execution_id, operation_name, argument_hash, resource_id, tracks,
+       (${scopeColumns(this.pool, "ugv_execution")}task_id, external_execution_id, operation_name, argument_hash, resource_id, tracks,
         execution_context, downstream_mission_ids, state, revision, reason_code, progress, result,
         latest_snapshot_revision, payload, created_at, updated_at, terminal_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+       VALUES (${scopeValues(this.pool, "ugv_execution")}$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (task_id) DO UPDATE SET
          tracks=EXCLUDED.tracks, downstream_mission_ids=EXCLUDED.downstream_mission_ids,
          state=EXCLUDED.state, revision=EXCLUDED.revision, reason_code=EXCLUDED.reason_code,
          progress=EXCLUDED.progress, result=EXCLUDED.result,
          latest_snapshot_revision=EXCLUDED.latest_snapshot_revision, payload=EXCLUDED.payload,
          updated_at=EXCLUDED.updated_at, terminal_at=EXCLUDED.terminal_at
-       WHERE ${this.tables.execution}.external_execution_id=EXCLUDED.external_execution_id
+       WHERE (${scopePredicate(this.pool, "ugv_execution", "ugv_execution")}) AND ( ${this.tables.execution}.external_execution_id=EXCLUDED.external_execution_id
          AND ${this.tables.execution}.operation_name=EXCLUDED.operation_name
-         AND ${this.tables.execution}.argument_hash=EXCLUDED.argument_hash`,
+         AND ${this.tables.execution}.argument_hash=EXCLUDED.argument_hash) `,
       [
         execution.taskId,
         execution.externalExecutionId,
@@ -99,7 +138,7 @@ export class PostgresProviderStore implements ProviderStore {
     commandSequence: string,
   ): Promise<CommandAckRecord | undefined> {
     const result = await this.pool.query<{ payload: CommandAckRecord }>(
-      `SELECT payload FROM ${this.tables.commandAck} WHERE task_id=$1 AND command=$2 AND command_sequence=$3`,
+      `SELECT payload FROM ${this.tables.commandAck} WHERE (${scopePredicate(this.pool, "ugv_execution_command_ack", "ugv_execution_command_ack")}) AND ( task_id=$1 AND command=$2 AND command_sequence=$3) `,
       [taskId, command, commandSequence],
     );
     return result.rows[0]?.payload;
@@ -107,8 +146,8 @@ export class PostgresProviderStore implements ProviderStore {
   async claimCommandAck(ack: CommandAckRecord): Promise<CommandAckClaim> {
     assertPostgresJsonbSafe(ack, "commandAck");
     const claimed = await this.pool.query<{ payload: CommandAckRecord }>(
-      `INSERT INTO ${this.tables.commandAck}(task_id, command, command_sequence, payload, created_at)
-       VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING payload`,
+      `INSERT INTO ${this.tables.commandAck}(${scopeColumns(this.pool, "ugv_execution_command_ack")}task_id, command, command_sequence, payload, created_at)
+       VALUES(${scopeValues(this.pool, "ugv_execution_command_ack")}$1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING payload`,
       [ack.taskId, ack.command, ack.commandSequence, ack, ack.createdAt],
     );
     const inserted = claimed.rows[0]?.payload;
@@ -121,8 +160,8 @@ export class PostgresProviderStore implements ProviderStore {
     assertPostgresJsonbSafe(ack, "commandAck");
     const result = await this.pool.query(
       `UPDATE ${this.tables.commandAck} SET payload=$4, created_at=$5
-       WHERE task_id=$1 AND command=$2 AND command_sequence=$3
-         AND ($6::text IS NULL OR payload->'response'->>'reasonCode'=$6)`,
+       WHERE (${scopePredicate(this.pool, "ugv_execution_command_ack", "ugv_execution_command_ack")}) AND ( task_id=$1 AND command=$2 AND command_sequence=$3
+         AND ($6::text IS NULL OR payload->'response'->>'reasonCode'=$6)) `,
       [
         ack.taskId,
         ack.command,
@@ -139,8 +178,8 @@ export class PostgresProviderStore implements ProviderStore {
   async putCommandAck(ack: CommandAckRecord): Promise<void> {
     assertPostgresJsonbSafe(ack, "commandAck");
     await this.pool.query(
-      `INSERT INTO ${this.tables.commandAck}(task_id, command, command_sequence, payload, created_at)
-       VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
+      `INSERT INTO ${this.tables.commandAck}(${scopeColumns(this.pool, "ugv_execution_command_ack")}task_id, command, command_sequence, payload, created_at)
+       VALUES(${scopeValues(this.pool, "ugv_execution_command_ack")}$1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
       [ack.taskId, ack.command, ack.commandSequence, ack, ack.createdAt],
     );
   }
@@ -149,7 +188,7 @@ export class PostgresProviderStore implements ProviderStore {
     stepId: string,
   ): Promise<MutationJournalEntry | undefined> {
     const result = await this.pool.query<{ payload: MutationJournalEntry }>(
-      `SELECT payload FROM ${this.tables.mutationJournal} WHERE task_id=$1 AND step_id=$2`,
+      `SELECT payload FROM ${this.tables.mutationJournal} WHERE (${scopePredicate(this.pool, "ugv_mutation_journal", "ugv_mutation_journal")}) AND ( task_id=$1 AND step_id=$2) `,
       [taskId, stepId],
     );
     return result.rows[0]?.payload;
@@ -157,7 +196,7 @@ export class PostgresProviderStore implements ProviderStore {
   async listMutationJournal(taskId: string): Promise<MutationJournalEntry[]> {
     const result = await this.pool.query<{ payload: MutationJournalEntry }>(
       `SELECT payload FROM ${this.tables.mutationJournal}
-       WHERE task_id=$1 ORDER BY intent_persisted_at, step_id`,
+       WHERE (${scopePredicate(this.pool, "ugv_mutation_journal", "ugv_mutation_journal")}) AND ( task_id=$1 ) ORDER BY intent_persisted_at, step_id`,
       [taskId],
     );
     return result.rows.map(({ payload }) => payload);
@@ -169,9 +208,9 @@ export class PostgresProviderStore implements ProviderStore {
       throw new Error("MUTATION_JOURNAL_INTENT_STATE_REQUIRED");
     const result = await this.pool.query<{ payload: MutationJournalEntry }>(
       `INSERT INTO ${this.tables.mutationJournal}
-       (task_id,step_id,phase,tool_name,argument_hash,state,external_mission_id,result_hash,
+       (${scopeColumns(this.pool, "ugv_mutation_journal")}task_id,step_id,phase,tool_name,argument_hash,state,external_mission_id,result_hash,
         intent_persisted_at,dispatched_at,completed_at,payload)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       VALUES(${scopeValues(this.pool, "ugv_mutation_journal")}$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        ON CONFLICT DO NOTHING RETURNING payload`,
       journalValues(entry),
     );
@@ -195,21 +234,24 @@ export class PostgresProviderStore implements ProviderStore {
     if (existing.state !== expectedState) return false;
     assertMutationJournalTransition(existing, entry, expectedState);
     const values = journalValues(entry);
-    const result = await this.pool.query(
-      `UPDATE ${this.tables.mutationJournal}
+    return inTransaction(this.pool, async (client) => {
+      const result = await client.query(
+        `UPDATE ${this.tables.mutationJournal}
        SET state=$6,external_mission_id=$7,result_hash=$8,dispatched_at=$10,
            completed_at=$11,payload=$12
-       WHERE task_id=$1 AND step_id=$2 AND phase=$3 AND tool_name=$4 AND argument_hash=$5
-         AND state=$13 AND intent_persisted_at=$9`,
-      [...values, expectedState],
-    );
-    return result.rowCount === 1;
+       WHERE (${scopePredicate(client, "ugv_mutation_journal", "ugv_mutation_journal")}) AND ( task_id=$1 AND step_id=$2 AND phase=$3 AND tool_name=$4 AND argument_hash=$5
+         AND state=$13 AND intent_persisted_at=$9) `,
+        [...values, expectedState],
+      );
+      if (result.rowCount === 1) await recordMissionReceipt(client, entry);
+      return result.rowCount === 1;
+    });
   }
   async appendDeviceToolCall(record: DeviceToolCallRecord): Promise<void> {
     await this.pool.query(
       `INSERT INTO ${this.tables.deviceToolCall}
-       (call_id,task_id,tool_name,argument_hash,outcome,duration_ms,occurred_at)
-       VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING`,
+       (${scopeColumns(this.pool, "ugv_device_tool_call")}call_id,task_id,tool_name,argument_hash,outcome,duration_ms,occurred_at)
+       VALUES(${scopeValues(this.pool, "ugv_device_tool_call")}$1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING`,
       [
         record.callId,
         record.taskId ?? null,
@@ -223,9 +265,32 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async putSnapshot(record: SnapshotRecord): Promise<void> {
     assertPostgresJsonbSafe(record.snapshot, "snapshot");
+    const config = storageScope(this.pool);
+    if (config) {
+      if (!record.channel) throw new Error("SNAPSHOT_CHANNEL_REQUIRED");
+      const source = record.sourceSessionKey ?? config.sourceSessionKey;
+      const result = await this.pool.query(
+        `INSERT INTO ugv_smpp.ugv_state_snapshot
+        (device_id,source_session_key,channel,revision,observed_at,snapshot)
+        VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(device_id,source_session_key,channel,revision)
+        DO UPDATE SET revision=EXCLUDED.revision
+        WHERE ugv_state_snapshot.snapshot=EXCLUDED.snapshot
+          AND ugv_state_snapshot.observed_at=EXCLUDED.observed_at RETURNING revision`,
+        [
+          config.allowedDeviceIds[0],
+          source,
+          record.channel,
+          record.revision,
+          record.observedAt,
+          record.snapshot,
+        ],
+      );
+      if (result.rowCount !== 1) throw new Error("SNAPSHOT_IDENTITY_CONFLICT");
+      return;
+    }
     await this.pool.query(
-      `INSERT INTO ${this.tables.snapshot}(revision, observed_at, snapshot)
-       VALUES($1,$2,$3) ON CONFLICT DO NOTHING`,
+      `INSERT INTO ${this.tables.snapshot}(${scopeColumns(this.pool, "ugv_state_snapshot")}revision, observed_at, snapshot)
+       VALUES(${scopeValues(this.pool, "ugv_state_snapshot")}$1,$2,$3) ON CONFLICT DO NOTHING`,
       [record.revision, record.observedAt, record.snapshot],
     );
   }
@@ -240,7 +305,7 @@ export class PostgresProviderStore implements ProviderStore {
         `ugv-diagnostic:${lease.stableOperationKey}`,
       ]);
       const existing = await client.query<{ payload: SmppDiagnosticLease }>(
-        "SELECT payload FROM ugv_diagnostic_lease WHERE stable_operation_key=$1 FOR UPDATE",
+        `SELECT payload FROM ugv_diagnostic_lease WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( stable_operation_key=$1 ) FOR UPDATE`,
         [lease.stableOperationKey],
       );
       const prior = existing.rows[0]?.payload;
@@ -256,9 +321,9 @@ export class PostgresProviderStore implements ProviderStore {
       ]);
       const selectorConflict = await client.query(
         `SELECT lease_id FROM ugv_diagnostic_lease
-         WHERE selector_argument_hash=$1
+         WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( selector_argument_hash=$1
            AND state IN ('ARMED','BOUND') AND expires_at>$2
-         FOR UPDATE`,
+         ) FOR UPDATE`,
         [lease.scope.selector.argumentHash, lease.armedAt],
       );
       if ((selectorConflict.rowCount ?? 0) > 0)
@@ -271,11 +336,11 @@ export class PostgresProviderStore implements ProviderStore {
       const stored: SmppDiagnosticLease = { ...lease, fence };
       const storedReceipt: SmppDiagnosticReceipt = { ...receipt, state: stored.state };
       await client.query(
-        `INSERT INTO ugv_diagnostic_lease(
+        `INSERT INTO ugv_diagnostic_lease(${scopeColumns(client, "ugv_diagnostic_lease")}
            lease_id,capability_id,stable_operation_key,canonical_request_hash,idempotency_key,
            fence,state,selector_argument_hash,logical_invocation_id,scoped_task_id,
            expires_at,payload,created_at,updated_at
-         ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,NULL,$9,$10,$11,$12,$12)`,
+         ) VALUES(${scopeValues(client, "ugv_diagnostic_lease")}$1,$2,$3,$4,$5,$6,$7,$8,NULL,$9,$10,$11,$12,$12)`,
         [
           stored.leaseId,
           stored.capabilityId,
@@ -303,7 +368,7 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async getDiagnosticLease(leaseId: string): Promise<SmppDiagnosticLease | undefined> {
     const result = await this.pool.query<{ payload: SmppDiagnosticLease }>(
-      "SELECT payload FROM ugv_diagnostic_lease WHERE lease_id=$1",
+      `SELECT payload FROM ugv_diagnostic_lease WHERE (${scopePredicate(this.pool, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( lease_id=$1) `,
       [leaseId],
     );
     return result.rows[0]?.payload;
@@ -319,7 +384,7 @@ export class PostgresProviderStore implements ProviderStore {
          SELECT payload FROM ugv_diagnostic_receipt
          WHERE lease_id=lease.lease_id ORDER BY occurred_at DESC, receipt_id DESC LIMIT 1
        ) receipt ON true
-       WHERE lease.lease_id=$1`,
+       WHERE (${scopePredicate(this.pool, "lease", "ugv_diagnostic_lease")}) AND ( lease.lease_id=$1) `,
       [leaseId],
     );
     const row = result.rows[0];
@@ -379,9 +444,9 @@ export class PostgresProviderStore implements ProviderStore {
       ]);
       const result = await client.query<{ payload: SmppDiagnosticLease }>(
         `SELECT payload FROM ugv_diagnostic_lease
-         WHERE capability_id=$1 AND selector_argument_hash=$2 AND state='ARMED'
+         WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( capability_id=$1 AND selector_argument_hash=$2 AND state='ARMED'
            AND (scoped_task_id IS NULL OR scoped_task_id=$3) AND expires_at>$4
-         ORDER BY fence FOR UPDATE`,
+         ) ORDER BY fence FOR UPDATE`,
         [binding.capabilityId, binding.argumentHash, binding.taskId, binding.observedAt],
       );
       if (result.rows.length > 1) throw new Error("SMPP_DIAGNOSTIC_SELECTOR_AMBIGUOUS");
@@ -486,7 +551,7 @@ export class PostgresProviderStore implements ProviderStore {
       await client.query("BEGIN");
       const expired = await client.query<{ payload: SmppDiagnosticLease }>(
         `SELECT payload FROM ugv_diagnostic_lease
-         WHERE state IN ('ARMED','BOUND') AND expires_at<=$1 ORDER BY fence FOR UPDATE`,
+         WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( state IN ('ARMED','BOUND') AND expires_at<=$1 ) ORDER BY fence FOR UPDATE`,
         [occurredAt],
       );
       const results: SmppDiagnosticControlResult[] = [];
@@ -517,7 +582,7 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent> {
     assertPostgresJsonbSafe(draft.rawPayload, "businessEvent.rawPayload");
-    const source = businessEventSourceCapabilities().find((x) => x.sourceId === draft.sourceId);
+    const source = this.businessEventSources().find((x) => x.sourceId === draft.sourceId);
     if (source === undefined) throw new Error("SOURCE_NOT_FOUND");
     const client = await this.pool.connect();
     try {
@@ -549,8 +614,8 @@ export class PostgresProviderStore implements ProviderStore {
       };
       await client.query(
         `INSERT INTO ${this.tables.businessEventLog}
-         (source_id,source_sequence,source_event_id,source_stream_id,payload_hash,occurred_at,retain_until,payload)
-         VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,
+         (${scopeColumns(client, "ugv_business_event_source_log")}source_id,source_sequence,source_event_id,source_stream_id,payload_hash,occurred_at,retain_until,payload)
+         VALUES(${scopeValues(client, "ugv_business_event_source_log")}$1,$2,$3,$4,$5,$6,$7,$8)`,
         [
           draft.sourceId,
           sequence,
@@ -576,12 +641,12 @@ export class PostgresProviderStore implements ProviderStore {
     sourceStreamId: string,
     afterSourceSequence: bigint,
   ): Promise<AdapterBusinessEvent[]> {
-    const source = businessEventSourceCapabilities().find((x) => x.sourceId === sourceId);
+    const source = this.businessEventSources().find((x) => x.sourceId === sourceId);
     if (source === undefined) throw new Error("SOURCE_NOT_FOUND");
     if (source.sourceStreamId !== sourceStreamId) throw new Error("SOURCE_STREAM_RESET");
     const range = await this.pool.query<{ minimum: string | null; maximum: string | null }>(
       `SELECT min(source_sequence)::text AS minimum, max(source_sequence)::text AS maximum
-       FROM ${this.tables.businessEventLog} WHERE source_id=$1 AND retain_until > now()`,
+       FROM ${this.tables.businessEventLog} WHERE (${scopePredicate(this.pool, "ugv_business_event_source_log", "ugv_business_event_source_log")}) AND ( source_id=$1 AND retain_until > now()) `,
       [sourceId],
     );
     const maximum = BigInt(range.rows[0]?.maximum ?? "0");
@@ -591,14 +656,32 @@ export class PostgresProviderStore implements ProviderStore {
       throw new Error("SOURCE_CURSOR_EXPIRED");
     const result = await this.pool.query<{ payload: AdapterBusinessEvent }>(
       `SELECT payload FROM ${this.tables.businessEventLog}
-       WHERE source_id=$1 AND source_sequence>$2 AND retain_until > now()
-       ORDER BY source_sequence LIMIT 1000`,
+       WHERE (${scopePredicate(this.pool, "ugv_business_event_source_log", "ugv_business_event_source_log")}) AND ( source_id=$1 AND source_sequence>$2 AND retain_until > now()
+       ) ORDER BY source_sequence LIMIT 1000`,
       [sourceId, afterSourceSequence.toString()],
     );
     return result.rows.map((row) => row.payload);
   }
   businessEventSources() {
-    return businessEventSourceCapabilities();
+    const config = storageScope(this.pool);
+    return businessEventSourceCapabilities().map((source) =>
+      config
+        ? {
+            ...source,
+            sourceStreamId: createHash("sha256")
+              .update(
+                JSON.stringify([
+                  source.sourceStreamId,
+                  config.allowedDeviceIds[0],
+                  config.sourceSessionKey,
+                ]),
+              )
+              .digest("hex")
+              .slice(0, 32)
+              .replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5"),
+          }
+        : source,
+    );
   }
 }
 
@@ -609,13 +692,13 @@ async function nextSequence(
   streamId: string,
 ): Promise<string> {
   await client.query(
-    `INSERT INTO ${tables.businessEventState}(source_id,source_stream_id,next_sequence)
-     VALUES($1,$2,1) ON CONFLICT DO NOTHING`,
+    `INSERT INTO ${tables.businessEventState}(${scopeColumns(client, "ugv_business_event_source_state")}source_id,source_stream_id,next_sequence)
+     VALUES(${scopeValues(client, "ugv_business_event_source_state")}$1,$2,1) ON CONFLICT DO NOTHING`,
     [sourceId, streamId],
   );
   const result = await client.query<{ next_sequence: string }>(
     `UPDATE ${tables.businessEventState} SET next_sequence=next_sequence+1,updated_at=now()
-     WHERE source_id=$1 AND source_stream_id=$2 RETURNING (next_sequence-1)::text AS next_sequence`,
+     WHERE (${scopePredicate(client, "ugv_business_event_source_state", "ugv_business_event_source_state")}) AND ( source_id=$1 AND source_stream_id=$2 ) RETURNING (next_sequence-1)::text AS next_sequence`,
     [sourceId, streamId],
   );
   const value = result.rows[0]?.next_sequence;
@@ -674,7 +757,7 @@ async function lockedDiagnosticLease(
   leaseId: string,
 ): Promise<SmppDiagnosticLease> {
   const result = await client.query<{ payload: SmppDiagnosticLease }>(
-    "SELECT payload FROM ugv_diagnostic_lease WHERE lease_id=$1 FOR UPDATE",
+    `SELECT payload FROM ugv_diagnostic_lease WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( lease_id=$1 ) FOR UPDATE`,
     [leaseId],
   );
   const lease = result.rows[0]?.payload;
@@ -728,7 +811,7 @@ async function updateDiagnosticLease(
     `UPDATE ugv_diagnostic_lease
      SET state=$2,logical_invocation_id=$3,bound_task_id=$4,external_execution_id=$5,
          device_mission_id=$6,payload=$7,updated_at=$8
-     WHERE lease_id=$1`,
+     WHERE (${scopePredicate(client, "ugv_diagnostic_lease", "ugv_diagnostic_lease")}) AND ( lease_id=$1) `,
     [
       lease.leaseId,
       lease.state,

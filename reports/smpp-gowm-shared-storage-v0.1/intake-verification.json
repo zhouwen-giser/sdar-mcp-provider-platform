@@ -1,0 +1,130 @@
+{
+  "archive": "SMPP_GOWM_Shared_Storage_Integration_v0.1_Codex_Goal.zip",
+  "archiveSha256": "713a0b49a2e339976a00a9159b1daf05f2d02471ecbae1e3c9fb7e37d437abad",
+  "entries": [
+    {
+      "file": "00_GOAL_AND_BOUNDARIES.md",
+      "match": true
+    },
+    {
+      "file": "01_BASELINE_AND_CONTRACT_INTAKE.md",
+      "match": true
+    },
+    {
+      "file": "02_CONNECTION_STARTUP_AND_MODE.md",
+      "match": true
+    },
+    {
+      "file": "03_DEVICE_CONTEXT_AND_ROUTING.md",
+      "match": true
+    },
+    {
+      "file": "04_RUNTIME_PERSISTENCE.md",
+      "match": true
+    },
+    {
+      "file": "05_PROVIDER_PERSISTENCE_AND_STATE.md",
+      "match": true
+    },
+    {
+      "file": "06_BACKGROUND_JOBS_EVENTS_RETENTION.md",
+      "match": true
+    },
+    {
+      "file": "07_MCP_EXECUTION_MISSION_LINKING.md",
+      "match": true
+    },
+    {
+      "file": "08_TARGET_GEOMETRY_AND_PUBLIC_READS.md",
+      "match": true
+    },
+    {
+      "file": "09_STARTUP_WIRING_AND_DEVELOPMENT.md",
+      "match": true
+    },
+    {
+      "file": "10_TESTING_AND_ACCEPTANCE_POLICY.md",
+      "match": true
+    },
+    {
+      "file": "11_PHASES_AND_DELIVERABLES.md",
+      "match": true
+    },
+    {
+      "file": "12_FAILURES_AND_FINAL_REPORT.md",
+      "match": true
+    },
+    {
+      "file": "CODEX_MASTER_PROMPT.md",
+      "match": true
+    },
+    {
+      "file": "FULL_CN.md",
+      "match": true
+    },
+    {
+      "file": "PACKAGE_MANIFEST.json",
+      "match": true
+    },
+    {
+      "file": "README.md",
+      "match": true
+    },
+    {
+      "file": "SOURCE_OBSERVATIONS.md",
+      "match": true
+    },
+    {
+      "file": "acceptance.json",
+      "match": true
+    },
+    {
+      "file": "examples/device-routes.example.json",
+      "match": true
+    },
+    {
+      "file": "examples/gowm-shared-storage.env.example",
+      "match": true
+    },
+    {
+      "file": "scripts/verify_package.py",
+      "match": true
+    },
+    {
+      "file": "source-observations.json",
+      "match": true
+    },
+    {
+      "file": "task.json",
+      "match": true
+    },
+    {
+      "file": "task.schema.json",
+      "match": true
+    },
+    {
+      "file": "templates/DRAFT_PR.md",
+      "match": true
+    },
+    {
+      "file": "templates/FINAL_REPORT.json",
+      "match": true
+    },
+    {
+      "file": "templates/FINAL_REPORT.md",
+      "match": true
+    },
+    {
+      "file": "templates/QUERY_ADAPTATION_MATRIX.md",
+      "match": true
+    },
+    {
+      "file": "templates/upstream-gaps.json",
+      "match": true
+    },
+    {
+      "file": "test-scenarios.json",
+      "match": true
+    }
+  ]
+}

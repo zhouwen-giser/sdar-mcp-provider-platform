@@ -1,3 +1,8 @@
+import {
+  scopeColumns,
+  scopeValues,
+  scopePredicate,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import type { AuthorizationContext } from "../../domain/src/index.js";
@@ -88,10 +93,10 @@ export class IdempotencyRepository {
       const stableTaskId = randomUUID();
       const inserted = await client.query(
         `INSERT INTO idempotency_record
-          (authorization_context_hash, operation_name, idempotency_key,
+          (${scopeColumns(client, "idempotency_record")}authorization_context_hash, operation_name, idempotency_key,
            argument_hash, execution_mode, simulation_key, stable_task_id, state,
            lease_owner, lease_expires_at, claim_attempt)
-         VALUES ($1,$2,$3,$6,$4,$5,$7,'PENDING',$8,
+         VALUES (${scopeValues(client, "idempotency_record")}$1,$2,$3,$6,$4,$5,$7,'PENDING',$8,
                  clock_timestamp() + ($9::bigint * interval '1 millisecond'),1)
          ON CONFLICT DO NOTHING`,
         [...keyValues(input), input.argumentHash, stableTaskId, owner, this.#leaseMs],
@@ -124,7 +129,7 @@ export class IdempotencyRepository {
              lease_expires_at=clock_timestamp() + ($8::bigint * interval '1 millisecond'),
              claim_attempt=claim_attempt + 1,
              updated_at=clock_timestamp()
-         WHERE authorization_context_hash=$1 AND operation_name=$2
+         WHERE ${scopePredicate(client, "idempotency_record", "idempotency_record")} AND authorization_context_hash=$1 AND operation_name=$2
            AND idempotency_key=$3 AND execution_mode=$4 AND simulation_key=$5
            AND state='PENDING' AND lease_expires_at <= clock_timestamp()
            AND argument_hash=$6
@@ -164,7 +169,7 @@ export class IdempotencyRepository {
       `UPDATE idempotency_record
        SET state='COMPLETE', task_id=$7, synchronous_result=$8::jsonb,
            lease_owner=NULL, lease_expires_at=NULL, updated_at=clock_timestamp()
-       WHERE authorization_context_hash=$1 AND operation_name=$2
+       WHERE ${scopePredicate(this.pool, "idempotency_record", "idempotency_record")} AND authorization_context_hash=$1 AND operation_name=$2
          AND idempotency_key=$3 AND execution_mode=$4 AND simulation_key=$5
          AND state='PENDING' AND lease_owner=$6`,
       values,
@@ -180,7 +185,7 @@ export class IdempotencyRepository {
     await this.pool.query(
       `UPDATE idempotency_record
        SET lease_expires_at=clock_timestamp(), updated_at=clock_timestamp()
-       WHERE authorization_context_hash=$1 AND operation_name=$2
+       WHERE ${scopePredicate(this.pool, "idempotency_record", "idempotency_record")} AND authorization_context_hash=$1 AND operation_name=$2
          AND idempotency_key=$3 AND execution_mode=$4 AND simulation_key=$5
          AND state='PENDING' AND lease_owner=$6`,
       [...keyValues(input), owner],
@@ -197,7 +202,7 @@ export class IdempotencyRepository {
               lease_owner,
               COALESCE(lease_expires_at <= clock_timestamp(), false) AS lease_expired
        FROM idempotency_record
-       WHERE authorization_context_hash=$1 AND operation_name=$2
+       WHERE ${scopePredicate(queryable, "idempotency_record", "idempotency_record")} AND authorization_context_hash=$1 AND operation_name=$2
          AND idempotency_key=$3 AND execution_mode=$4 AND simulation_key=$5
        ${forUpdate ? "FOR UPDATE" : ""}`,
       keyValues(input),

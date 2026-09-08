@@ -228,7 +228,12 @@ export class UgvProviderRuntime {
     readonly businessEvents: UgvBusinessEventHub,
     readonly telemetry: UgvTelemetry,
   ) {
-    this.arbiter = new TrackArbiter(options.allowNavigationWithRecon, "UGV", UGV_OPERATION_TRACKS);
+    this.arbiter = new TrackArbiter(
+      options.allowNavigationWithRecon,
+      "UGV",
+      UGV_OPERATION_TRACKS,
+      true,
+    );
     this.operationHealth = new UgvOperationHealthTracker(
       options.failureBudget ?? {
         degradedThreshold: 2,
@@ -388,7 +393,11 @@ export class UgvProviderRuntime {
       input.operationName === "vehicle_emergency_stop"
         ? await this.#preemptableExecutions(input.taskId)
         : [];
-    const acquired = this.arbiter.acquire(input.taskId, input.operationName);
+    const acquired = this.arbiter.acquire(
+      input.taskId,
+      input.operationName,
+      typeof input.arguments.targetId === "string" ? input.arguments.targetId : undefined,
+    );
     if (!acquired.accepted) throw new Error(acquired.reasonCode);
     const now = this.#now().toISOString();
     const tracks = UGV_OPERATION_TRACKS[input.operationName] ?? [];
@@ -749,13 +758,6 @@ export class UgvProviderRuntime {
         reasonCode: "UGV_OPERATION_UNSUPPORTED",
         description: "UGV_OPERATION_UNSUPPORTED",
       };
-    if (operationName === "vehicle_fire_weapon" && this.options.fireEnabled !== true)
-      return {
-        availability: "DISABLED",
-        riskLevel: "HIGH",
-        reasonCode: "UGV_FIRE_DISABLED",
-        description: "UGV_FIRE_DISABLED",
-      };
     const qualification = this.operationQualification(operationName, argumentsValue);
     const operationHealth = this.operationHealth.snapshot(
       operationName,
@@ -763,10 +765,10 @@ export class UgvProviderRuntime {
       qualification.phase,
     );
     const snapshot = this.ingress.snapshot();
-    const locallyOccupiedTracks = new Set(
-      [...this.arbiter.occupied()].filter(
-        (track) => this.arbiter.owner(track) !== ignoreOwnedByTaskId,
-      ),
+    const locallyOccupiedTracks = this.arbiter.occupiedFor(
+      operationName,
+      typeof argumentsValue.targetId === "string" ? argumentsValue.targetId : undefined,
+      ignoreOwnedByTaskId,
     );
     const externallyOccupiedTracks = deviceObservedOccupiedTracks(snapshot, this.arbiter);
     if (operationName !== "vehicle_emergency_stop")
@@ -1156,7 +1158,14 @@ export class UgvProviderRuntime {
     const active = await this.store.listActiveExecutions();
     for (const execution of [...active].sort(recoveryOwnershipOrder))
       if (execution.preemptedByTaskId === undefined)
-        this.arbiter.restore(execution.taskId, vehicleTracks(execution.tracks));
+        this.arbiter.restore(
+          execution.taskId,
+          vehicleTracks(execution.tracks),
+          execution.operationName,
+          typeof execution.arguments.targetId === "string"
+            ? execution.arguments.targetId
+            : undefined,
+        );
     for (const execution of active) {
       if (execution.operationName === "vehicle_fire_weapon") {
         const dispatch = await this.store.getCommandAck(
@@ -1850,6 +1859,7 @@ export class UgvProviderRuntime {
   async #observe(snapshot: UgvSnapshot, topic: string): Promise<void> {
     this.#refreshReadiness();
     await this.store.putSnapshot({
+      channel: topic,
       revision: snapshot.revision,
       observedAt: snapshot.observedAt,
       snapshot: snapshot as unknown as Record<string, unknown>,
@@ -3686,8 +3696,6 @@ function validateStart(
   if (!input.taskId || !input.argumentHash) throw new Error("UGV_START_IDENTITY_INVALID");
   if (input.arguments.resourceId !== (options.resourceId ?? "vehicle:ugv1"))
     throw new Error("UGV_RESOURCE_NOT_FOUND");
-  if (input.operationName === "vehicle_fire_weapon" && options.fireEnabled !== true)
-    throw new Error("UGV_FIRE_DISABLED");
   const requestedMode = normalizeExecutionMode(input.executionContext.executionMode);
   if (requestedMode !== (options.executionMode ?? "simulation"))
     throw new Error("UGV_EXECUTION_MODE_MISMATCH");

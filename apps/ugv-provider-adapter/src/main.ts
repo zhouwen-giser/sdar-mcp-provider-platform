@@ -1,3 +1,4 @@
+import { resolveDeviceContext } from "../../../packages/gowm-shared-storage-adapter/src/index.js";
 import pino from "pino";
 import { readFileSync } from "node:fs";
 import {
@@ -29,8 +30,19 @@ const store =
     ? new PostgresProviderStore(
         config.UGV_ADAPTER_DATABASE_URL,
         config.UGV_ADAPTER_DATABASE_POOL_MAX,
+        "ugv",
+        config.gowmStorage,
       )
     : new MemoryProviderStore();
+if (config.gowmStorage && store instanceof PostgresProviderStore) {
+  await store.initialize();
+  await resolveDeviceContext(
+    store.pool,
+    config.gowmStorage,
+    { providerId: config.PROVIDER_ID, resourceId: config.UGV_RESOURCE_ID },
+    false,
+  );
+}
 const identity = {
   providerId: config.PROVIDER_ID,
   resourceId: config.UGV_RESOURCE_ID,

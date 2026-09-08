@@ -1,0 +1,26 @@
+{
+  "level": 40,
+  "time": 1788858219872,
+  "pid": 7,
+  "hostname": "cfcacca9ff2a",
+  "outcome": "transport_failed",
+  "amount": 1,
+  "reasonCode": "PROVIDER_TELEMETRY_TRANSPORT_FAILED",
+  "counters": {
+    "enqueued": 2246,
+    "sent": 8983,
+    "accepted": 0,
+    "duplicate": 0,
+    "rejected": 0,
+    "transportFailed": 8983,
+    "retry": 6737,
+    "dropped": 2245,
+    "queueDepth": 1,
+    "queueCapacity": 1100,
+    "reasonCodes": {
+      "PROVIDER_TELEMETRY_RETRY_EXHAUSTED": 2245,
+      "PROVIDER_TELEMETRY_TRANSPORT_FAILED": 15720
+    }
+  },
+  "msg": "UGV Provider telemetry delivery issue"
+}

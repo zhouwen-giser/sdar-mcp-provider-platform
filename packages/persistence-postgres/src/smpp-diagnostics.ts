@@ -1,3 +1,4 @@
+import { scopePredicate } from "../../gowm-shared-storage-adapter/src/scope.js";
 import type { Pool } from "pg";
 import { sha256CanonicalJson } from "../../observability/src/index.js";
 
@@ -138,14 +139,14 @@ export class SmppDiagnosticRepository {
               snapshot.definition AS operation_definition,
               EXISTS (
                 SELECT 1 FROM outbox_event event
-                WHERE event.aggregate_id=admission.task_id
+                WHERE (${scopePredicate(this.pool, "event", "outbox_event")}) AND ( event.aggregate_id=admission.task_id
                   AND event.event_type='task.identity_conflict'
-              ) AS identity_conflict
+              ) ) AS identity_conflict
        FROM admission_intent admission
        JOIN operation_snapshot snapshot
          ON snapshot.snapshot_id=admission.operation_snapshot_id
-       LEFT JOIN provider_task task ON task.task_id=admission.task_id
-       WHERE admission.task_id=$1`,
+       LEFT JOIN provider_task task ON task.task_id=admission.task_id AND ${scopePredicate(this.pool, "task", "provider_task")}
+       WHERE (${scopePredicate(this.pool, "admission", "admission_intent")}) AND ( admission.task_id=$1) `,
       [taskId],
     );
     const row = result.rows[0];
@@ -178,7 +179,10 @@ export class SmppDiagnosticRepository {
       uncertainty_class: SmppDispatchUncertaintyClass;
       occurred_at: Date;
       causal_refs: string[];
-    }>("SELECT * FROM smpp_dispatch_uncertainty WHERE task_id=$1", [taskId]);
+    }>(
+      `SELECT * FROM smpp_dispatch_uncertainty uncertainty WHERE task_id=$1 AND EXISTS (SELECT 1 FROM admission_intent admission WHERE admission.task_id=uncertainty.task_id AND ${scopePredicate(this.pool, "admission", "admission_intent")})`,
+      [taskId],
+    );
     const row = result.rows[0];
     if (row === undefined) return null;
     return {
@@ -201,7 +205,10 @@ export class SmppDiagnosticRepository {
       external_execution_id: string | null;
       occurred_at: Date;
       identity_validated: boolean;
-    }>("SELECT * FROM smpp_reconciliation_audit WHERE task_id=$1 ORDER BY attempt", [taskId]);
+    }>(
+      `SELECT * FROM smpp_reconciliation_audit WHERE (${scopePredicate(this.pool, "smpp_reconciliation_audit", "smpp_reconciliation_audit")}) AND ( task_id=$1 ) ORDER BY attempt`,
+      [taskId],
+    );
     return result.rows.map((row) => ({
       schemaVersion: "sdar.smpp-reconciliation-result/v1",
       taskId: row.task_id,
@@ -226,7 +233,7 @@ export class SmppDiagnosticRepository {
               uncertainty.uncertainty_class
        FROM provider_task task
        LEFT JOIN smpp_dispatch_uncertainty uncertainty ON uncertainty.task_id=task.task_id
-       WHERE task.task_id=$1 AND task.internal_state LIKE 'TERMINAL_%'`,
+       WHERE (${scopePredicate(this.pool, "task", "provider_task")}) AND ( task.task_id=$1 AND task.internal_state LIKE 'TERMINAL_%') `,
       [taskId],
     );
     const row = result.rows[0];
@@ -245,10 +252,10 @@ export class SmppDiagnosticRepository {
     const result = await this.pool.query<{ record_body: Record<string, unknown> }>(
       `SELECT record_body
        FROM provider_ops_delivery
-       WHERE aggregate_id=$1
+       WHERE (${scopePredicate(this.pool, "provider_ops_delivery", "provider_ops_delivery")}) AND ( aggregate_id=$1
          AND record_body ? 'providerEventId'
          AND record_body->'attributes' ? 'sdar.evidence.kind'
-       ORDER BY record_body->>'occurredAt', record_id`,
+       ) ORDER BY record_body->>'occurredAt', record_id`,
       [taskId],
     );
     return result.rows
@@ -259,7 +266,10 @@ export class SmppDiagnosticRepository {
   async getMissionRelation(taskId: string): Promise<SmppMissionRelationV1 | null> {
     const task = await this.pool.query<{
       external_execution_id: string;
-    }>("SELECT external_execution_id FROM provider_task WHERE task_id=$1", [taskId]);
+    }>(
+      `SELECT external_execution_id FROM provider_task WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( task_id=$1) `,
+      [taskId],
+    );
     const externalExecutionId = task.rows[0]?.external_execution_id;
     if (externalExecutionId === undefined) return null;
     const missionEvidence = (await this.listProviderEvidence(taskId)).filter(

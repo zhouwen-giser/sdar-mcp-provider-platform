@@ -97,6 +97,7 @@ export interface StartOperationOptions {
 }
 
 export class GrpcAdapterGateway {
+  readonly #businessStreams = new Set<grpc.ClientReadableStream<AdapterBusinessEvent>>();
   readonly #client: AdapterClient;
   readonly #providerId: string;
   readonly #timeoutMs: number;
@@ -139,10 +140,12 @@ export class GrpcAdapterGateway {
         metadata,
         {},
       );
-    return (
+    const stream =
       this.#traceStreamRpc?.("streamBusinessEvents", { sourceId: request.sourceId }, open) ??
-      open(new grpc.Metadata())
-    );
+      open(new grpc.Metadata());
+    this.#businessStreams.add(stream);
+    stream.once("close", () => this.#businessStreams.delete(stream));
+    return stream;
   }
 
   getExecution(
@@ -392,6 +395,8 @@ export class GrpcAdapterGateway {
   }
 
   close(): void {
+    for (const stream of this.#businessStreams) stream.cancel();
+    this.#businessStreams.clear();
     this.#client.close();
   }
 

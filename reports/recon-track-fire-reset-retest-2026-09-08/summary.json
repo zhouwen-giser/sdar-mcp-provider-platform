@@ -1,0 +1,31 @@
+{
+  "result": "CHAIN_NOT_PASSED",
+  "simulationResetReportedByUser": true,
+  "allHttpResponses200": true,
+  "discoveredTargetId": "63",
+  "reconTaskId": "4d813bf5-d6ed-4045-9c80-1ef0bb72b7f4",
+  "reconMission": "41924",
+  "gowmMissionLink": "LINKED",
+  "reconFinalStatus": "cancelled",
+  "reconFinalReason": "UGV_CANCEL_DISPATCH_FENCED",
+  "track": "UGV_EO_TRACK_BUSY",
+  "simulatedFire": "UGV_STATE_STALE",
+  "shotExecuted": false,
+  "cleanupTaskId": "b5e76957-7e5e-467e-9a4e-df8863774ac4",
+  "cleanupStatus": "completed",
+  "cleanupReason": "STOP_CONFIRMED",
+  "limitation": "Cancellation was polled six times at one-second intervals before track admission; this does not prove permanent inability to cancel. Emergency stop then cleaned up.",
+  "cancelAudit": {
+    "tool": "ugv_area_recon_control",
+    "arguments": {
+      "cmd_type": 4,
+      "mission_id": 41924
+    },
+    "argumentHashMatched": true,
+    "accepted": false,
+    "reason": "UGV_DEVICE_TOOL_REJECTED",
+    "attempts": 2,
+    "misroutedToNavigationCancel": false,
+    "startupFollowupAlsoRejected": true
+  }
+}

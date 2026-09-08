@@ -1,0 +1,56 @@
+[
+  {
+    "taskId": "1572a416-4859-4ce4-aca8-aea19ecd4877",
+    "operation": "vehicle_emergency_stop",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "3465a904-6425-417f-8fb4-d71adcab682f",
+    "operation": "vehicle_navigate",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "b53d1885-05c1-4b4b-8abf-34a8fb071bd2",
+    "operation": "vehicle_navigate",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "9bacf412-615b-44f1-a011-3321b8b0f28e",
+    "operation": "vehicle_navigate",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "85fb3c8f-ba82-4300-8317-ac68a01bae31",
+    "operation": "vehicle_emergency_stop",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "9cbda503-af0d-4545-819d-d7458ed253ad",
+    "operation": "vehicle_area_recon",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "352fe2e9-b612-42ae-97aa-a32cdc6621f2",
+    "operation": "vehicle_control_gimbal",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "cd2576a0-193a-44eb-8e1a-cfd4f57901c6",
+    "operation": "vehicle_area_recon",
+    "status": null,
+    "device": "ugv:ugv"
+  },
+  {
+    "taskId": "5356c813-2924-4400-b031-9ee52efad5e8",
+    "operation": "vehicle_area_recon",
+    "status": null,
+    "device": "ugv:ugv"
+  }
+]
