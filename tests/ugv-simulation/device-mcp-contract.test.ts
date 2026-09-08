@@ -515,7 +515,7 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     expect(() =>
       validateUgvToolResult("ugv_area_recon_control", {
         ...commonResult(10, 1),
-        cmd_res: 1,
+        cmd_res: 2,
         fail_data: "rejected",
       }),
     ).toThrow(DeviceToolRejectedError);
@@ -564,7 +564,7 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
             message: "already stopped",
           });
         if (name === "ugv_area_recon_control" || name === "ugv_area_recon_lock")
-          return Promise.resolve({ ...commonResult(43, 3), cmd_res: 0, fail_data: "" });
+          return Promise.resolve({ ...commonResult(43, 3), cmd_res: 1, fail_data: "" });
         return Promise.resolve(commonResult(42, 3));
       },
     );

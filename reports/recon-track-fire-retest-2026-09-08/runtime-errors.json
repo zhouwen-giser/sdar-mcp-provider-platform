@@ -1,0 +1,91 @@
+[
+  {
+    "time": 1788858779662,
+    "message": "Frozen MCP technical request failure",
+    "error": "4 DEADLINE_EXCEEDED: Deadline exceeded after 5.000s,LB pick: 0.001s,remote_addr=172.21.0.2:7010",
+    "code": 4
+  },
+  {
+    "time": 1788858780394,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858784874,
+    "message": "Frozen MCP technical request failure",
+    "error": "4 DEADLINE_EXCEEDED: Deadline exceeded after 5.000s,remote_addr=172.21.0.2:7010",
+    "code": 4
+  },
+  {
+    "time": 1788858789514,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858793464,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, a50c9618-fb17-4f06-b752-7649d0435404) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858793594,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858793643,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, a50c9618-fb17-4f06-b752-7649d0435404) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858798777,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858798814,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, a50c9618-fb17-4f06-b752-7649d0435404) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858803680,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858803733,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, a50c9618-fb17-4f06-b752-7649d0435404) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858808752,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, b25ed469-8384-4cea-ae55-5af78e9b906d) is not present in table \"provider_task\"."
+  },
+  {
+    "time": 1788858809117,
+    "message": "task recovery deferred",
+    "error": "insert or update on table \"smpp_reconciliation_audit\" violates foreign key constraint \"smpp_reconciliation_audit_device_id_task_id_fkey\"",
+    "code": "23503",
+    "detail": "Key (device_id, task_id)=(ugv:ugv, a50c9618-fb17-4f06-b752-7649d0435404) is not present in table \"provider_task\"."
+  }
+]

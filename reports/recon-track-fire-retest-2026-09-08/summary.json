@@ -1,0 +1,27 @@
+{
+  "result": "FAILED_BEFORE_CHAIN",
+  "simulationConfirmedByUser": true,
+  "recon": {
+    "httpStatus": 500,
+    "rpcError": -32603,
+    "providerTaskId": "b25ed469-8384-4cea-ae55-5af78e9b906d",
+    "missionId": "41923",
+    "actualDownstreamExecution": true,
+    "finalState": "CANCELLED",
+    "reason": "UGV_PREEMPTED_BY_EMERGENCY_STOP"
+  },
+  "cleanup": {
+    "httpStatus": 500,
+    "providerTaskId": "a50c9618-fb17-4f06-b752-7649d0435404",
+    "actualDownstreamState": "SUCCEEDED",
+    "reason": "STOP_CONFIRMED"
+  },
+  "tracking": "NOT_ATTEMPTED_THIS_RETEST",
+  "simulatedFire": "NOT_ATTEMPTED_THIS_RETEST",
+  "issues": [
+    "Adapter RPC DEADLINE_EXCEEDED after 5 seconds",
+    "smpp_reconciliation_audit_device_id_task_id_fkey violation; missing provider_task rows",
+    "Downstream actions occurred despite HTTP500; mcp_task_id remains null"
+  ],
+  "priorFireConfiguration": "UGV_FIRE_ENABLED=true persisted in preceding test; no further configuration changes in this retest"
+}

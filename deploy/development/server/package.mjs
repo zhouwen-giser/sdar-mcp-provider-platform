@@ -45,6 +45,16 @@ Object.assign(schemas.RUNTIME, {
   RUNTIME_INSTANCE_ID: { type: "string", minLength: 1 },
   SDAR_BUILD_REVISION: { type: "string", minLength: 1 },
 });
+// Deployment identity is intentionally outside public operation/config-center schemas.
+for (const side of Object.keys(schemas))
+  Object.assign(schemas[side], {
+    SMPP_STORAGE_MODE: { type: "string", enum: ["standalone", "gowm-shared"] },
+    SMPP_SERVICE_KEY: { type: "string", minLength: 1 },
+    SMPP_ALLOWED_DEVICE_IDS: { type: "string", minLength: 1 },
+    SMPP_GOWM_BINDING_ID: { type: "string", minLength: 1 },
+    SMPP_SOURCE_SESSION_KEY: { type: "string", minLength: 1 },
+    GOWM_DATABASE_URL_FILE: { type: "string", minLength: 1, writeOnly: true },
+  });
 const overrides = {
   RUNTIME: {
     PROVIDER_ID: "isr.vehicle.ugv.ugv1",
@@ -72,6 +82,8 @@ const overrides = {
 };
 const settings = {
   DEPLOY_PROJECT: "smpp-development",
+  DEPLOY_BUILD_IMAGES: "true",
+  GOWM_EXTERNAL_NETWORK: "",
   DEPLOY_BIND_ADDRESS: "0.0.0.0",
   DEPLOY_PORT: "19100",
   DEPLOY_STAGE: "development_debug",
@@ -113,9 +125,16 @@ if (action === "check-template") {
 }
 if (!["up", "status", "logs", "down", "config"].includes(action))
   throw Error("Usage: node package.mjs up|status|logs|down|config [env-file]");
+const siteProfile =
+  existsSync(resolve(root, "DEPLOYMENT_PROFILE")) &&
+  readFileSync(resolve(root, "DEPLOYMENT_PROFILE"), "utf8").trim() === "sz-gowm";
 const envPath = resolve(process.argv[3] ?? resolve(dir, ".env"));
 if (!existsSync(envPath))
-  writeFileSync(envPath, readFileSync(resolve(dir, ".env.example")), { mode: 0o600, flag: "wx" });
+  writeFileSync(
+    envPath,
+    readFileSync(resolve(dir, siteProfile ? ".env.gowm.example" : ".env.example")),
+    { mode: 0o600, flag: "wx" },
+  );
 const env = parseEnv(readFileSync(envPath, "utf8"));
 for (const key of Object.keys(env))
   if (
@@ -162,6 +181,53 @@ for (const side of Object.keys(schemas)) {
       throw Error(`INVALID_NUMBER:${key}`);
   }
 }
+const shared = values.RUNTIME.SMPP_STORAGE_MODE === "gowm-shared";
+if (siteProfile && !shared) throw Error("SZ_GOWM_PROFILE_REQUIRES_SHARED_STORAGE");
+if (shared !== (values.ADAPTER.SMPP_STORAGE_MODE === "gowm-shared"))
+  throw Error("GOWM_MODE_MISMATCH");
+if (shared) {
+  const bindingFile = resolve(configDirectory, "gowm-binding.json");
+  const binding = existsSync(bindingFile)
+    ? JSON.parse(readFileSync(bindingFile, "utf8"))
+    : undefined;
+  const ids = JSON.parse(values.RUNTIME.SMPP_ALLOWED_DEVICE_IDS ?? "null");
+  if (!Array.isArray(ids) || ids.length !== 1 || typeof ids[0] !== "string" || !ids[0].trim())
+    throw Error("GOWM_DEVICE_SCOPE_REQUIRED");
+  for (const side of Object.keys(values)) {
+    if (binding) {
+      if (
+        binding.smppServiceKey !== values[side].SMPP_SERVICE_KEY ||
+        JSON.stringify([binding.deviceId]) !== values[side].SMPP_ALLOWED_DEVICE_IDS ||
+        binding.providerId !== values.RUNTIME.PROVIDER_ID ||
+        binding.resourceId !== values.ADAPTER.UGV_RESOURCE_ID
+      )
+        throw Error("GOWM_SITE_BINDING_MISMATCH");
+      values[side].SMPP_GOWM_BINDING_ID ??= binding.bindingId;
+    }
+    if (
+      values[side].DATABASE_URL ||
+      values[side].UGV_ADAPTER_DATABASE_URL ||
+      values[side].DATABASE_URL_FILE
+    )
+      throw Error("GOWM_LEGACY_CONNECTION_FORBIDDEN");
+    if (
+      !values[side].GOWM_DATABASE_URL_FILE ||
+      !values[side].SMPP_ALLOWED_DEVICE_IDS ||
+      !values[side].SMPP_SERVICE_KEY
+    )
+      throw Error("GOWM_CONFIGURATION_REQUIRED");
+    if (action === "up" && !values[side].SMPP_GOWM_BINDING_ID)
+      throw Error("Run prepare-gowm.mjs before up");
+  }
+  for (const key of [
+    "GOWM_DATABASE_URL_FILE",
+    "SMPP_SERVICE_KEY",
+    "SMPP_ALLOWED_DEVICE_IDS",
+    "SMPP_GOWM_BINDING_ID",
+    "SMPP_SOURCE_SESSION_KEY",
+  ])
+    if (values.RUNTIME[key] !== values.ADAPTER[key]) throw Error(`GOWM_IDENTITY_MISMATCH:${key}`);
+}
 values.ADAPTER.UGV_DELIVERY_STAGE = cfg.DEPLOY_STAGE;
 // The deployment stage is deliberately independent of runtime auth/environment.
 const revision = existsSync(resolve(root, "SOURCE_REVISION"))
@@ -207,8 +273,7 @@ const db = (side) => {
 const compose = {
   name: cfg.DEPLOY_PROJECT,
   services: {
-    "runtime-db": db("RUNTIME"),
-    "adapter-db": db("ADAPTER"),
+    ...(!shared ? { "runtime-db": db("RUNTIME"), "adapter-db": db("ADAPTER") } : {}),
     adapter: {
       ...service("ADAPTER", "ugv-real-adapter"),
       command: [
@@ -229,6 +294,17 @@ const compose = {
   },
   volumes: { "runtime-db": {}, "adapter-db": {}, "runtime-state": {}, "adapter-state": {} },
 };
+if (shared) {
+  delete compose.services["runtime-db"];
+  delete compose.services["adapter-db"];
+  delete compose.volumes["runtime-db"];
+  delete compose.volumes["adapter-db"];
+  delete compose.services.adapter.depends_on;
+  delete compose.services.runtime.depends_on["runtime-db"];
+  if (!cfg.GOWM_EXTERNAL_NETWORK) throw Error("GOWM_EXTERNAL_NETWORK_REQUIRED");
+  compose.networks = { default: {}, gowm: { external: true, name: cfg.GOWM_EXTERNAL_NETWORK } };
+  for (const side of ["runtime", "adapter"]) compose.services[side].networks = ["default", "gowm"];
+}
 const file = resolve(state, "compose.json");
 // Compose interpolates dollar signs even in JSON. Preserve literal env values.
 for (const svc of Object.values(compose.services)) {
@@ -251,7 +327,18 @@ if (action === "config") {
   process.exit(0);
 }
 if (action === "up") {
-  run([...base, "build"]);
+  if (cfg.DEPLOY_BUILD_IMAGES === "true") run([...base, "build"]);
+  else if (cfg.DEPLOY_BUILD_IMAGES === "false") {
+    for (const svc of Object.values(compose.services)) {
+      if (!svc.build) continue;
+      const r = spawnSync("docker", ["image", "inspect", svc.image], { encoding: "utf8" });
+      if (
+        r.status !== 0 ||
+        JSON.parse(r.stdout)[0].Config.Labels["org.opencontainers.image.revision"] !== revision
+      )
+        throw Error("PREBUILT_IMAGE_REVISION_MISMATCH");
+    }
+  } else throw Error("INVALID_DEPLOY_BUILD_IMAGES");
   // Load the real application configuration before starting services; these commands have no southbound clients.
   run([
     ...base,

@@ -19,25 +19,62 @@ export const UGV_OPERATION_TRACKS: Record<string, VehicleTrack[]> = {
   ...OPERATION_TRACKS,
 };
 
+interface TrackHolder {
+  taskId: string;
+  operationName: string;
+  targetId?: string;
+}
+
 export class TrackArbiter {
-  readonly #owners = new Map<VehicleTrack, string>();
+  readonly #owners = new Map<VehicleTrack, Map<string, TrackHolder>>();
   constructor(
     readonly allowNavigationWithRecon = true,
     readonly reasonPrefix = "UGV",
     readonly operationTracks: Readonly<Record<string, readonly VehicleTrack[]>> = OPERATION_TRACKS,
+    readonly allowReconChain = false,
   ) {}
   occupied(): ReadonlySet<VehicleTrack> {
     return new Set(this.#owners.keys());
   }
   owner(track: VehicleTrack): string | undefined {
-    return this.#owners.get(track);
+    return this.#owners.get(track)?.keys().next().value;
   }
-  acquire(taskId: string, operationName: string): { accepted: boolean; reasonCode: string } {
+  /** Only the UGV's running recon -> lock -> same-target fire chain may share EO. */
+  occupiedFor(
+    operationName: string,
+    targetId?: string,
+    ignoreTaskId?: string,
+  ): ReadonlySet<VehicleTrack> {
+    const blocked = new Set<VehicleTrack>();
+    for (const [track, holders] of this.#owners)
+      for (const holder of holders.values()) {
+        if (holder.taskId === ignoreTaskId) continue;
+        const reconChain =
+          this.allowReconChain &&
+          track === "eo" &&
+          targetId !== undefined &&
+          ((holder.operationName === "vehicle_area_recon" &&
+            (operationName === "vehicle_track_target" ||
+              operationName === "vehicle_fire_weapon")) ||
+            (holder.operationName === "vehicle_track_target" &&
+              operationName === "vehicle_fire_weapon" &&
+              holder.targetId === targetId));
+        if (!reconChain) blocked.add(track);
+      }
+    return blocked;
+  }
+  acquire(
+    taskId: string,
+    operationName: string,
+    targetId?: string,
+  ): { accepted: boolean; reasonCode: string } {
     const tracks = this.operationTracks[operationName] ?? [];
     if (operationName === "vehicle_emergency_stop") {
-      for (const track of tracks) this.#owners.set(track, taskId);
+      for (const track of tracks)
+        this.#owners.set(track, new Map([[taskId, { taskId, operationName }]]));
       return { accepted: true, reasonCode: `${this.reasonPrefix}_EMERGENCY_PREEMPTED_TRACKS` };
     }
+    const occupied = this.occupiedFor(operationName, targetId, taskId);
     if (!this.allowNavigationWithRecon) {
       const conflictingTrack =
         operationName === "vehicle_navigate"
@@ -45,38 +82,44 @@ export class TrackArbiter {
           : operationName === "vehicle_area_recon"
             ? "chassis"
             : undefined;
-      if (conflictingTrack !== undefined) {
-        const owner = this.#owners.get(conflictingTrack);
-        if (owner !== undefined && owner !== taskId)
-          return {
-            accepted: false,
-            reasonCode:
-              conflictingTrack === "chassis"
-                ? `${this.reasonPrefix}_CHASSIS_TRACK_BUSY`
-                : `${this.reasonPrefix}_EO_TRACK_BUSY`,
-          };
-      }
+      if (conflictingTrack !== undefined && occupied.has(conflictingTrack))
+        return { accepted: false, reasonCode: this.#busy(conflictingTrack) };
     }
-    for (const track of tracks) {
-      const owner = this.#owners.get(track);
-      if (owner !== undefined && owner !== taskId)
-        return {
-          accepted: false,
-          reasonCode:
-            track === "chassis"
-              ? `${this.reasonPrefix}_CHASSIS_TRACK_BUSY`
-              : track === "eo"
-                ? `${this.reasonPrefix}_EO_TRACK_BUSY`
-                : `${this.reasonPrefix}_WEAPON_TRACK_BUSY`,
-        };
-    }
-    for (const track of tracks) this.#owners.set(track, taskId);
+    for (const track of tracks)
+      if (occupied.has(track)) return { accepted: false, reasonCode: this.#busy(track) };
+    for (const track of tracks)
+      this.#add(track, { taskId, operationName, ...(targetId === undefined ? {} : { targetId }) });
     return { accepted: true, reasonCode: `${this.reasonPrefix}_TRACKS_ACQUIRED` };
   }
-  release(taskId: string): void {
-    for (const [track, owner] of this.#owners) if (owner === taskId) this.#owners.delete(track);
+  #busy(track: VehicleTrack): string {
+    return `${this.reasonPrefix}_${track === "chassis" ? "CHASSIS" : track === "eo" ? "EO" : "WEAPON"}_TRACK_BUSY`;
   }
-  restore(taskId: string, tracks: VehicleTrack[]): void {
-    for (const track of tracks) if (!this.#owners.has(track)) this.#owners.set(track, taskId);
+  #add(track: VehicleTrack, holder: TrackHolder): void {
+    let holders = this.#owners.get(track);
+    if (holders === undefined) {
+      holders = new Map();
+      this.#owners.set(track, holders);
+    }
+    holders.set(holder.taskId, holder);
+  }
+  release(taskId: string): void {
+    for (const [track, holders] of this.#owners) {
+      holders.delete(taskId);
+      if (holders.size === 0) this.#owners.delete(track);
+    }
+  }
+  restore(
+    taskId: string,
+    tracks: VehicleTrack[],
+    operationName = "unknown",
+    targetId?: string,
+  ): void {
+    for (const track of tracks)
+      if (this.allowReconChain || !this.#owners.has(track))
+        this.#add(track, {
+          taskId,
+          operationName,
+          ...(targetId === undefined ? {} : { targetId }),
+        });
   }
 }

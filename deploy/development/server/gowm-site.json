@@ -1,0 +1,20 @@
+{
+  "host": "sz-gowm",
+  "databaseContainer": "gowm-analysis-dev-d2bf0ea98e-postgres-1",
+  "applicationContainer": "gowm-analysis-dev-d2bf0ea98e-ugv-mqtt-ingest-1",
+  "network": "gowm-analysis-dev-d2bf0ea98e_default",
+  "database": "gowm",
+  "databaseHost": "postgres",
+  "databasePort": 5432,
+  "loginRole": "ugv_smpp_app",
+  "deviceId": "ugv:ugv",
+  "dataScopeKey": "default",
+  "serviceKey": "smpp.sz-gowm.ugv",
+  "providerId": "isr.vehicle.ugv.ugv",
+  "resourceId": "vehicle:ugv",
+  "sourceSessionKey": "smpp-sz-gowm-ugv-mqtt",
+  "mqttUrl": "mqtt://192.168.2.63:1883",
+  "entityId": "ugv",
+  "deviceMcpUrl": "http://192.168.2.63:19000/mcp",
+  "observedGowmPackageSha256": "1ad2edcc2cbe0859e4481401e8cbc82548d35aa89ab9b688cc30caf3c1147e05"
+}

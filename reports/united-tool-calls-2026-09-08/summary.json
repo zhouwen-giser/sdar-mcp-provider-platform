@@ -1,0 +1,62 @@
+{
+  "environment": "User confirmed pure software simulation; interruption and approach authorized",
+  "endpoint": "http://17.26.1.20:19100/mcp",
+  "uniqueToolsActuallyCalled": 10,
+  "allToolsPassed": false,
+  "successfulToolCategories": 6,
+  "tools": [
+    {
+      "tool": "vehicle_get_state",
+      "status": "PASS",
+      "result": "真实状态读取成功，MQTT/设备 MCP 在线"
+    },
+    {
+      "tool": "vehicle_get_capabilities",
+      "status": "PASS",
+      "result": "设备能力成功返回；laserRange=false"
+    },
+    {
+      "tool": "vehicle_get_payload_status",
+      "status": "PASS",
+      "result": "返回载荷、覆盖及云台状态"
+    },
+    {
+      "tool": "vehicle_get_targets",
+      "status": "PASS",
+      "result": "连续采样实际发现目标 ID 47；后续样本可能为空"
+    },
+    {
+      "tool": "vehicle_navigate",
+      "status": "PASS_POINT_WITH_DISTANCE_ANOMALY",
+      "result": "用户指定点位完成，误差0.621米；另一次1米距离导航回报完成但位移0米"
+    },
+    {
+      "tool": "vehicle_area_recon",
+      "status": "PARTIAL",
+      "result": "显式targetTypes=[]后设备扫描424/424格、100%；SMPP关联弱，最终确认超时"
+    },
+    {
+      "tool": "vehicle_track_target",
+      "status": "REJECTED",
+      "result": "实际发现目标47在后续调用时返回UGV_TARGET_NOT_FOUND"
+    },
+    {
+      "tool": "vehicle_control_gimbal",
+      "status": "FAILED",
+      "result": "初次EO占用；重试受理后出现UGV_DOWNSTREAM_MISSION_ID_MISMATCH，已取消并急停清理"
+    },
+    {
+      "tool": "vehicle_fire_weapon",
+      "status": "BLOCKED_AFTER_ENABLE",
+      "result": "原UGV_FIRE_DISABLED已解除并持久化；目标47调用被UGV_STATE_STALE拒绝，未实际仿真发射"
+    },
+    {
+      "tool": "vehicle_emergency_stop",
+      "status": "PASS",
+      "result": "收到STOP_CONFIRMED，末次速度0、目标解锁"
+    }
+  ],
+  "fireEnabled": true,
+  "simulatedShotExecuted": false,
+  "finalStopConfirmed": true
+}

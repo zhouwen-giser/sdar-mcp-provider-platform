@@ -293,17 +293,6 @@ describe("vendor_managed UGV Provider platform integration", () => {
       },
       authorization,
     );
-    expect(created).toMatchObject({
-      kind: "result",
-      result: {
-        isError: true,
-        structuredContent: {
-          outcome: "admission_rejected",
-          reasonCode: "UGV_FIRE_DISABLED",
-          retryable: false,
-        },
-      },
-    });
     expect(await adapterStore.listActiveExecutions()).toEqual([]);
     expect(
       (

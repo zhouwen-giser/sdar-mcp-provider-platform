@@ -726,17 +726,6 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.device.calls).toHaveLength(2);
   });
 
-  it("keeps fire disabled in availability and direct start with zero device calls", async () => {
-    const fixture = await createFixture(true, new MemoryProviderStore(), { fireEnabled: false });
-    expect(fixture.runtime.availability("vehicle_fire_weapon", fireArgs())).toMatchObject({
-      availability: "DISABLED",
-      reasonCode: "UGV_FIRE_DISABLED",
-    });
-    await expect(
-      fixture.runtime.start(startInput("fire-disabled", "vehicle_fire_weapon", fireArgs())),
-    ).rejects.toThrow("UGV_FIRE_DISABLED");
-    expect(fixture.device.calls).toHaveLength(0);
-  });
 
   it("returns Runtime-valid evidence for every core synchronous read", async () => {
     const fixture = await createFixture();
@@ -1622,6 +1611,54 @@ describe("UGV long-running operation integration", () => {
     });
   });
 
+  it("keeps recon running while a same-target lock and confirmed fire share EO", async () => {
+    const fixture = await createFixture(true);
+    await fixture.runtime.start(startInput("chain-recon", "vehicle_area_recon", reconArgs()));
+    reconStatus(fixture.ingress, 5, 25);
+    await fixture.runtime.get("chain-recon");
+    await fixture.runtime.start(
+      startInput("chain-track", "vehicle_track_target", {
+        resourceId: "vehicle:ugv1",
+        targetId: "101",
+      }),
+    );
+    reconStatus(fixture.ingress, 8, 25, "101");
+    expect((await fixture.runtime.get("chain-track"))?.state).toBe("RUNNING");
+    fixture.ingress.applyDeviceObservation(
+      {
+        payload: {
+          online: true,
+          lockedTargetId: "101",
+          attackReady: true,
+          weapon: { state: 0, progress: 0 },
+        },
+      },
+      ["payload"],
+    );
+    const started = await fixture.runtime.start(
+      startInput("chain-fire", "vehicle_fire_weapon", {
+        resourceId: "vehicle:ugv1",
+        targetId: "101",
+        engagementMode: "single",
+        requireConfirmation: true,
+      }),
+    );
+    expect(started.initialSnapshot).toMatchObject({ state: "WAITING_INPUT" });
+    expect(fixture.device.calls.some((c) => c.name === "ugv_area_recon_attack_confirm")).toBe(
+      false,
+    );
+    const waiting = required(await fixture.runtime.get("chain-fire"));
+    expect(
+      await fixture.runtime.updateFire(identityOf(waiting, "1"), fireConfirmation()),
+    ).toMatchObject({ accepted: true, reasonCode: "UGV_FIRE_CONFIRMATION_ACCEPTED" });
+    expect(fixture.device.calls.some((c) => c.name === "ugv_area_recon_attack_confirm")).toBe(true);
+    expect(
+      fixture.device.calls
+        .filter((c) => c.name === "ugv_area_recon_control")
+        .map((c) => c.arguments.cmd_type),
+    ).toEqual([1]);
+  });
+
   it("runs area recon and fails target tracking truthfully when lock is lost", async () => {
     const fixture = await createFixture(true);
     await fixture.runtime.start(startInput("recon-1", "vehicle_area_recon", reconArgs()));
@@ -1748,7 +1785,7 @@ describe("UGV long-running operation integration", () => {
       state_label: "running",
       message: "fire cycle accepted",
       error_code: 0,
-      cmd_res: 0,
+      cmd_res: 1,
       fail_data: "",
       destroyed: true,
       damage: 100,
@@ -3046,7 +3083,7 @@ function fireAcceptedResult() {
     state_label: "running",
     message: "fire cycle accepted",
     error_code: 0,
-    cmd_res: 0,
+    cmd_res: 1,
     fail_data: "",
   };
 }

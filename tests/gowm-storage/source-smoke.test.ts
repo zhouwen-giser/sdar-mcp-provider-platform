@@ -18,6 +18,14 @@ import { loadGowmStorageConfig } from "../../packages/gowm-shared-storage-adapte
 const url = process.env.SMPP_GOWM_TEST_DATABASE_URL;
 if (process.env.SMPP_GOWM_TEST_ENABLE !== "true" || !url || !new URL(url).pathname.includes("test"))
   throw Error("NOT_RUN: explicit isolated test database required");
+const appUrl = process.env.SMPP_GOWM_TEST_APP_DATABASE_URL ?? url;
+const applicationTarget = new URL(requireValue(appUrl));
+const fixtureTarget = new URL(requireValue(url));
+if (
+  applicationTarget.host !== fixtureTarget.host ||
+  applicationTarget.pathname !== fixtureTarget.pathname
+)
+  throw Error("APP_AND_FIXTURE_DATABASE_MISMATCH");
 const admin = new Pool({ connectionString: url });
 const cleanup: (() => Promise<unknown>)[] = [() => admin.end()];
 afterAll(async () => {
@@ -93,14 +101,14 @@ it("two real source Runtime/UGV instances write the MCP → Execution → Dispat
     );
     const env = {
       SMPP_STORAGE_MODE: "gowm-shared",
-      GOWM_DATABASE_URL: url,
+      GOWM_DATABASE_URL: appUrl,
       SMPP_SERVICE_KEY: "source-test-smpp",
       SMPP_ALLOWED_DEVICE_IDS: JSON.stringify([id]),
       SMPP_GOWM_BINDING_ID: binding,
       SMPP_SOURCE_SESSION_KEY: `test-connection-${letter}`,
     };
     const store = new PostgresProviderStore(
-      requireValue(url),
+      requireValue(appUrl),
       8,
       "ugv",
       loadGowmStorageConfig(env),

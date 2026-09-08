@@ -1,0 +1,2 @@
+
+[{"taskId" : "b25ed469-8384-4cea-ae55-5af78e9b906d", "operation" : "vehicle_area_recon", "state" : "CANCELLED", "reason" : "UGV_PREEMPTED_BY_EMERGENCY_STOP", "missions" : ["41923"]}, {"taskId" : "a50c9618-fb17-4f06-b752-7649d0435404", "operation" : "vehicle_emergency_stop", "state" : "SUCCEEDED", "reason" : "STOP_CONFIRMED", "missions" : []}]

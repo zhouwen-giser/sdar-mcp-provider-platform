@@ -99,6 +99,7 @@ LABEL org.opencontainers.image.version="0.1.0" \
 COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
 COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
 COPY --from=build --chown=root:root /workspace/proto /app/proto
+COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
 COPY --from=build --chown=root:root /workspace/migrations /app/migrations
 RUN mkdir -p /var/lib/sdar \
     && chown node:node /var/lib/sdar \
@@ -135,6 +136,7 @@ LABEL org.opencontainers.image.version="0.1.0" \
 COPY --from=npc-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
 COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
 COPY --from=build --chown=root:root /workspace/proto /app/proto
+COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
 COPY --from=build --chown=root:root /workspace/migrations /app/migrations
 RUN mkdir -p /var/lib/sdar \
     && chown node:node /var/lib/sdar \
@@ -274,6 +276,7 @@ LABEL org.opencontainers.image.title="SDAR Provider Management Worker" \
       org.opencontainers.image.revision="${VCS_REF}"
 COPY --from=build --chown=root:root /workspace/provider-packages /app/provider-packages
 COPY --from=build --chown=root:root /workspace/proto /app/proto
+COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
 USER root
 RUN runtime_release=/app/runtime-releases/2.0.0-rc.1 \
     && mkdir -p "$runtime_release" \

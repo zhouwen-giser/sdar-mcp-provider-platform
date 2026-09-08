@@ -41,6 +41,14 @@ if (process.env.SMPP_GOWM_TEST_ENABLE !== "true" || !url || !new URL(url).pathna
   throw Error(
     "NOT_RUN: explicit isolated SMPP_GOWM_TEST_DATABASE_URL and SMPP_GOWM_TEST_ENABLE=true required",
   );
+const appUrl = process.env.SMPP_GOWM_TEST_APP_DATABASE_URL ?? url;
+const applicationTarget = new URL(requireValue(appUrl));
+const fixtureTarget = new URL(requireValue(url));
+if (
+  applicationTarget.host !== fixtureTarget.host ||
+  applicationTarget.pathname !== fixtureTarget.pathname
+)
+  throw Error("APP_AND_FIXTURE_DATABASE_MISMATCH");
 const admin = new Pool({ connectionString: url });
 const run = randomUUID();
 const devices: {
@@ -85,7 +93,7 @@ beforeAll(async () => {
     const config = requireValue(
       loadGowmStorageConfig({
         SMPP_STORAGE_MODE: "gowm-shared",
-        GOWM_DATABASE_URL: url,
+        GOWM_DATABASE_URL: appUrl,
         SMPP_SERVICE_KEY: "test-smpp",
         SMPP_ALLOWED_DEVICE_IDS: JSON.stringify([id]),
         SMPP_GOWM_BINDING_ID: binding,
@@ -93,7 +101,7 @@ beforeAll(async () => {
       }),
     );
     const pool = createGowmPool(config);
-    const store = new PostgresProviderStore(requireValue(url), 8, "ugv", config);
+    const store = new PostgresProviderStore(requireValue(appUrl), 8, "ugv", config);
     const manifest = new OperationRegistry().validate(
       ugvManifest("test-ugv", "test", store, resource, {
         contracts: mockUgvToolContracts(new Date().toISOString()),
