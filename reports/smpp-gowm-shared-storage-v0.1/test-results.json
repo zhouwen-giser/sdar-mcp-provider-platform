@@ -1,0 +1,503 @@
+{
+  "schemaVersion": "1.0",
+  "commands": [
+    {
+      "command": "pnpm lint",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "command": "pnpm build",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "command": "pnpm protocol:check",
+      "status": "PASS",
+      "evidence": "11 schemas / 74 frozen cases / 52 locked files"
+    },
+    {
+      "command": "pnpm gowm-storage:check",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "command": "pnpm test:unit",
+      "status": "PASS",
+      "evidence": 252
+    },
+    {
+      "command": "pnpm test:contract",
+      "status": "PASS",
+      "evidence": 36
+    },
+    {
+      "command": "pnpm gowm-storage:test:unit",
+      "status": "PASS",
+      "evidence": 11
+    },
+    {
+      "command": "pnpm gowm-storage:test:postgres",
+      "status": "PASS",
+      "evidence": 16
+    },
+    {
+      "command": "pnpm gowm-storage:smoke",
+      "status": "PASS",
+      "evidence": 1
+    },
+    {
+      "command": "Affected standalone PostgreSQL + PMS/PM2 source regression",
+      "status": "PASS",
+      "evidence": 157
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "T01",
+      "category": "CONFIG",
+      "title": "启动gowm-shared只verify，不调用原生迁移和DB provision",
+      "expected": "Schema checksum/对象匹配；spy证明0 DDL与0旧库连接",
+      "requiresRealPostgres": false,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/config.test.ts + packages/pms-application/test/runtime-database-preparation.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T02",
+      "category": "CONFIG",
+      "title": "缺少device scope或绑定时拒绝创建",
+      "expected": "不使用ugv1或allow-all默认值；0设备请求",
+      "requiresRealPostgres": false,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/config.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T03",
+      "category": "CONFIG",
+      "title": "数据库/Schema版本错误",
+      "expected": "清晰错误；无public fallback；不改约束",
+      "requiresRealPostgres": false,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T04",
+      "category": "CONFIG",
+      "title": "新UGV profile与现有非UGV配置隔离",
+      "expected": "NPC/PMS/已有standalone入口不受影响",
+      "requiresRealPostgres": false,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "252 unit + 157 standalone/PMS/PM2 regression tests",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T05",
+      "category": "DB",
+      "title": "双设备Admission→provider_task真实写入",
+      "expected": "device/binding/service与源请求一致；父子FK正确",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/source-smoke.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T06",
+      "category": "DB",
+      "title": "同步设备查询无远端Task",
+      "expected": "返回同步结果；不伪造MCP Task/Mission",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Synchronous idempotency repository result is tested; a separate synchronous MCP call is not in shared smoke.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T07",
+      "category": "DB",
+      "title": "跨设备父子关系",
+      "expected": "错误设备的observation/command/input/journal被拒绝",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Actual cross-device journal FK and Task/Execution reads tested; exhaustive observation/command/input FK mutation cases not run.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T08",
+      "category": "DB",
+      "title": "同设备同幂等键重发",
+      "expected": "同一个稳定Task/result；0额外派发",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/source-smoke.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T09",
+      "category": "DB",
+      "title": "不同设备相同幂等文本",
+      "expected": "各自独立结果与任务，不相互命中",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T10",
+      "category": "DB",
+      "title": "同设备不同服务相同幂等文本",
+      "expected": "按smpp_service_key分离",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T11",
+      "category": "DB",
+      "title": "幂等请求参数改变",
+      "expected": "保留原argument_hash冲突语义",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T12",
+      "category": "DB",
+      "title": "两设备相同Snapshot revision/source/channel",
+      "expected": "两条记录共存；读取仅本设备",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T13",
+      "category": "DB",
+      "title": "同设备同完整Snapshot身份但Payload不同",
+      "expected": "显式冲突；不被DO NOTHING吞掉",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T14",
+      "category": "DB",
+      "title": "事件source/eventId/sequence相同的两设备",
+      "expected": "源序列、Inbox去重与游标独立",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T15",
+      "category": "DB",
+      "title": "跨设备cursor或任务查询",
+      "expected": "不泄漏/不更新另一设备记录",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T16",
+      "category": "DB",
+      "title": "Outbox/provider_ops同event_key",
+      "expected": "设备隔离；完成/失败重试不串车",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Same outbox event key and cross-device completion tested; separate shared provider_ops retry scenario not run.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T17",
+      "category": "DB",
+      "title": "DEVICE与SERVICE租约",
+      "expected": "最终scope_key正确；不写生成列；无假设备",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Actual DEVICE lease concurrency tested. This UGV source instance has no SERVICE-wide jobs; SERVICE lease scenario not applicable to current callers.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T18",
+      "category": "DB",
+      "title": "同设备两Worker争抢同租约/命令",
+      "expected": "仅一个有效拥有者；保留fencing",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T19",
+      "category": "DB",
+      "title": "不同设备Worker并行claim",
+      "expected": "各自可运行；不会争抢错误范围",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T20",
+      "category": "DB",
+      "title": "空allowedDeviceIds",
+      "expected": "不领取任何设备任务",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/config.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T21",
+      "category": "DB",
+      "title": "schedule/recovery/watchdog/deadline各循环",
+      "expected": "每个循环的SQL与回写都带相同设备范围",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "All affected loop SQL adapted; shared smoke exercises recovery and command dispatch, not each schedule/watchdog/deadline loop individually.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T22",
+      "category": "DB",
+      "title": "绑定更换后恢复旧任务",
+      "expected": "旧device/binding/service不可变；缺旧路由不改派",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T23",
+      "category": "DB",
+      "title": "Provider早于Runtime父Task发布",
+      "expected": "mcp_task_id先NULL，发布后依据回执补齐",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T24",
+      "category": "DB",
+      "title": "MCP父Task发布后进程崩溃",
+      "expected": "重启补关联；不重新设备派发",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Restart preserves published chain and dispatch count; process kill precisely between publication and commit not injected. Publication plus linking is atomic.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T25",
+      "category": "DB",
+      "title": "Mission原生ID=7在两设备重复",
+      "expected": "两个Mission实例，不跨设备合并",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T26",
+      "category": "DB",
+      "title": "同设备原生ID在不同真实session复用",
+      "expected": "独立Mission身份；不混同epoch",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "This adapter uses EXECUTION_SCOPED_ID; native device-session receipt reuse is not an exposed input contract.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T27",
+      "category": "DB",
+      "title": "无设备session但有真实Execution范围",
+      "expected": "EXECUTION_SCOPED_ID明确，不用unknown/default",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T28",
+      "category": "DB",
+      "title": "派发结果不确定",
+      "expected": "保留UNCERTAIN并调和，不自动重发",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T29",
+      "category": "DB",
+      "title": "同回执重放",
+      "expected": "相同Mission与关联结果；不同Payload同key冲突",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T30",
+      "category": "DB",
+      "title": "PENDING到LINKED或迟到MCP确认",
+      "expected": "按合同阶段化记录/显式CAS；不错误调用通用UPSERT",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T31",
+      "category": "DB",
+      "title": "回执+Mission Link事务中途失败",
+      "expected": "同Client整体回滚；不出现半条已确认关系",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T32",
+      "category": "DB",
+      "title": "暂停恢复取消指向已有Mission",
+      "expected": "CONTROLLED；不创建新Mission",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "Cancel CONTROLLED link verified; separate pause/resume scenarios not run.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T33",
+      "category": "DB",
+      "title": "明确目标图形与本地未知坐标",
+      "expected": "已知目标绑定准确；未知frame不伪装WGS84",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T34",
+      "category": "DB",
+      "title": "Task句柄过期",
+      "expected": "协议不可见性仍正确；Task/Dispatch/Mission历史保留",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/postgres.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T35",
+      "category": "DB",
+      "title": "数据库断开后恢复",
+      "expected": "有退避；无旧库fallback、无重派发",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": false,
+      "status": "NOT_RUN",
+      "evidence": "No test forcibly stops PostgreSQL during active dispatch. Existing reconnect/recovery behavior retained.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T36",
+      "category": "E2E",
+      "title": "两组Runtime/Adapter源码共用一个GOWM库",
+      "expected": "MCP入口创建→Provider→模拟回执→GOWM回读全部真实执行",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": true,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/source-smoke.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T37",
+      "category": "E2E",
+      "title": "A任务取消时B继续执行",
+      "expected": "只有A模拟客户端接到取消；B状态与Mission不变",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": true,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/source-smoke.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T38",
+      "category": "E2E",
+      "title": "接受/派发后异常重启",
+      "expected": "根据持久化恢复，模拟器派发计数不重复",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": true,
+      "status": "NOT_RUN",
+      "evidence": "Runtime restart after accepted publication verified without duplicate simulator navigation. Hard process crash while acceptance is in flight not injected.",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T39",
+      "category": "E2E",
+      "title": "统一只读视图回读下半链",
+      "expected": "MCP Task→Execution→Dispatch→Mission及反向查询正确",
+      "requiresRealPostgres": true,
+      "requiresSourceRuntime": true,
+      "status": "PASS",
+      "evidence": "tests/gowm-storage/source-smoke.test.ts",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    },
+    {
+      "id": "T40",
+      "category": "REGRESSION",
+      "title": "现有公开协议和受影响UGV行为",
+      "expected": "schema/manifest/Task lifecycle未被储存适配破坏",
+      "requiresRealPostgres": false,
+      "requiresSourceRuntime": false,
+      "status": "PASS",
+      "evidence": "protocol:check + unit/contract/standalone regression",
+      "note": "PASS refers only to the named executable assertion; narrower coverage is explicitly NOT_RUN."
+    }
+  ],
+  "policy": "Executed suites pass. NOT_RUN catalog entries identify broader fault-injection/per-method coverage, not missing shared-storage wiring."
+}

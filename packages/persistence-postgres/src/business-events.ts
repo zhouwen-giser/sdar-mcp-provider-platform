@@ -1,3 +1,11 @@
+import { requireValue } from "../../gowm-shared-storage-adapter/src/value.js";
+import { scoped, storageScope } from "../../gowm-shared-storage-adapter/src/scope.js";
+import {
+  scopeColumns,
+  scopeConflict,
+  scopePredicate,
+  scopeValues,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import {
@@ -29,6 +37,7 @@ export interface BusinessEventGeneration {
 }
 
 export interface BusinessEventLease {
+  deviceId?: string;
   providerId: string;
   sourceId: string;
   sourceStreamId: string;
@@ -148,7 +157,7 @@ export class BusinessEventRepository {
         `SELECT g.* FROM provider_business_event_runtime_state r
          JOIN provider_business_event_stream_generation g
            ON g.provider_id=r.provider_id AND g.stream_id=r.current_stream_id
-         WHERE r.provider_id=$1 FOR UPDATE OF r, g`,
+         WHERE (${scopePredicate(client, "r", "provider_business_event_runtime_state")} AND ${scopePredicate(client, "g", "provider_business_event_stream_generation")}) AND ( r.provider_id=$1 ) FOR UPDATE OF r, g`,
         [providerId],
       );
       if (existing.rows[0] !== undefined) {
@@ -160,13 +169,13 @@ export class BusinessEventRepository {
       const continuityClass = classifyContinuity(sources);
       await client.query(
         `INSERT INTO provider_business_event_stream_generation
-           (provider_id, stream_id, status, continuity_class, retain_until)
-         VALUES ($1,$2,'current',$3,clock_timestamp() + ($4 * interval '1 millisecond'))`,
+           (${scopeColumns(client, "provider_business_event_stream_generation")}provider_id, stream_id, status, continuity_class, retain_until)
+         VALUES (${scopeValues(client, "provider_business_event_stream_generation")}$1,$2,'current',$3,clock_timestamp() + ($4 * interval '1 millisecond'))`,
         [providerId, streamId, continuityClass, generationRetentionMs],
       );
       await client.query(
         `INSERT INTO provider_business_event_runtime_state
-           (provider_id, current_stream_id, generation_version) VALUES ($1,$2,1)`,
+           (${scopeColumns(client, "provider_business_event_runtime_state")}provider_id, current_stream_id, generation_version) VALUES (${scopeValues(client, "provider_business_event_runtime_state")}$1,$2,1)`,
         [providerId, streamId],
       );
       for (const source of [...sources].sort((left, right) =>
@@ -174,15 +183,15 @@ export class BusinessEventRepository {
       )) {
         await client.query(
           `INSERT INTO provider_business_event_generation_source
-             (provider_id, runtime_stream_id, source_id, source_stream_id,
+             (${scopeColumns(client, "provider_business_event_generation_source")}provider_id, runtime_stream_id, source_id, source_stream_id,
               delivery_semantics, joined_at_runtime_sequence)
-           VALUES ($1,$2,$3,$4,$5,0)`,
+           VALUES (${scopeValues(client, "provider_business_event_generation_source")}$1,$2,$3,$4,$5,0)`,
           [providerId, streamId, source.sourceId, source.sourceStreamId, source.deliverySemantics],
         );
         await client.query(
           `INSERT INTO adapter_business_event_source_state
-             (provider_id, source_id, source_stream_id, delivery_semantics, status)
-           VALUES ($1,$2,$3,$4,'active')`,
+             (${scopeColumns(client, "adapter_business_event_source_state")}provider_id, source_id, source_stream_id, delivery_semantics, status)
+           VALUES (${scopeValues(client, "adapter_business_event_source_state")}$1,$2,$3,$4,'active')`,
           [providerId, source.sourceId, source.sourceStreamId, source.deliverySemantics],
         );
       }
@@ -227,7 +236,7 @@ export class BusinessEventRepository {
       `SELECT g.* FROM provider_business_event_runtime_state r
        JOIN provider_business_event_stream_generation g
          ON g.provider_id=r.provider_id AND g.stream_id=r.current_stream_id
-       WHERE r.provider_id=$1`,
+       WHERE (${scopePredicate(this.pool, "r", "provider_business_event_runtime_state")} AND ${scopePredicate(this.pool, "g", "provider_business_event_stream_generation")}) AND ( r.provider_id=$1) `,
       [providerId],
     );
     return result.rows[0] === undefined ? undefined : mapGeneration(result.rows[0]);
@@ -238,7 +247,7 @@ export class BusinessEventRepository {
     streamId: string,
   ): Promise<BusinessEventGeneration | undefined> {
     const result = await this.pool.query<GenerationRow>(
-      `SELECT * FROM provider_business_event_stream_generation WHERE provider_id=$1 AND stream_id=$2`,
+      `SELECT * FROM provider_business_event_stream_generation WHERE (${scopePredicate(this.pool, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2) `,
       [providerId, streamId],
     );
     return result.rows[0] === undefined ? undefined : mapGeneration(result.rows[0]);
@@ -255,7 +264,7 @@ export class BusinessEventRepository {
     }>(
       `SELECT source_id, source_stream_id, delivery_semantics
        FROM provider_business_event_generation_source
-       WHERE provider_id=$1 AND runtime_stream_id=$2 ORDER BY source_id`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event_generation_source", "provider_business_event_generation_source")}) AND ( provider_id=$1 AND runtime_stream_id=$2 ) ORDER BY source_id`,
       [providerId, streamId],
     );
     return result.rows.map((row) => ({
@@ -283,7 +292,7 @@ export class BusinessEventRepository {
       }>(
         `SELECT lease_owner,lease_until,fencing_token,status
          FROM adapter_business_event_source_state
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3 ) FOR UPDATE`,
         [providerId, sourceId, sourceStreamId],
       );
       const previous = before.rows[0];
@@ -304,8 +313,8 @@ export class BusinessEventRepository {
              lease_until=clock_timestamp() + ($5 * interval '1 millisecond'),
              fencing_token=fencing_token + 1,
              updated_at=clock_timestamp()
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
-         RETURNING *`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         ) RETURNING *`,
         [providerId, sourceId, sourceStreamId, owner, leaseMs],
       );
       const row = result.rows[0];
@@ -347,12 +356,17 @@ export class BusinessEventRepository {
   }
 
   async renewSourceLease(lease: BusinessEventLease, leaseMs: number): Promise<BusinessEventLease> {
+    if (
+      storageScope(this.pool) &&
+      lease.deviceId !== requireValue(storageScope(this.pool)).allowedDeviceIds[0]
+    )
+      throw new Error("DEVICE_SCOPE_MISMATCH");
     const result = await this.pool.query<SourceStateRow>(
       `UPDATE adapter_business_event_source_state
        SET lease_until=clock_timestamp() + ($6 * interval '1 millisecond'), updated_at=clock_timestamp()
-       WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+       WHERE (${scopePredicate(this.pool, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
          AND lease_owner=$4 AND fencing_token=$5 AND lease_until > clock_timestamp()
-       RETURNING *`,
+       ) RETURNING *`,
       [
         lease.providerId,
         lease.sourceId,
@@ -373,6 +387,11 @@ export class BusinessEventRepository {
     retainMs: number,
     mappingDeadlineMs: number,
   ): Promise<IntakeResult> {
+    if (
+      storageScope(this.pool) &&
+      lease.deviceId !== requireValue(storageScope(this.pool)).allowedDeviceIds[0]
+    )
+      throw new Error("DEVICE_SCOPE_MISMATCH");
     const sequence = parseBusinessEventSequence(fact.sourceSequence);
     const occurredAt = normalizeRfc3339Nano(fact.occurredAt);
     const sourceCanonicalInput = {
@@ -419,9 +438,9 @@ export class BusinessEventRepository {
       }>(
         `SELECT normalized_source_event_id, normalized_source_sequence, source_canonical_hash
          FROM adapter_business_event_inbox
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND (normalized_source_event_id=$4 OR normalized_source_sequence=$5)
-         FOR UPDATE`,
+         ) FOR UPDATE`,
         [
           lease.providerId,
           lease.sourceId,
@@ -469,12 +488,12 @@ export class BusinessEventRepository {
       const rejected = validationError !== undefined;
       await client.query(
         `INSERT INTO adapter_business_event_inbox
-           (provider_id, source_id, source_stream_id, status, raw_envelope_json,
+           (${scopeColumns(client, "adapter_business_event_inbox")}provider_id, source_id, source_stream_id, status, raw_envelope_json,
             raw_envelope_hash, decode_status, reject_reason,
             normalized_source_event_id, normalized_source_sequence, normalized_scope,
             normalized_occurred_at, normalized_event_type, source_canonical_hash,
             source_payload, mapping_deadline, retain_until)
-         VALUES ($1,$2,$3,$4,$5::jsonb,$6,'decoded',$7,$8,$9,$10,$11,$12,$13,$14::jsonb,
+         VALUES (${scopeValues(client, "adapter_business_event_inbox")}$1,$2,$3,$4,$5::jsonb,$6,'decoded',$7,$8,$9,$10,$11,$12,$13,$14::jsonb,
                  clock_timestamp() + ($15 * interval '1 millisecond'),
                  clock_timestamp() + ($16 * interval '1 millisecond'))`,
         [
@@ -505,8 +524,8 @@ export class BusinessEventRepository {
                ELSE 'active'
              END,
              updated_at=clock_timestamp()
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
-           AND lease_owner=$4 AND fencing_token=$5 AND lease_until > clock_timestamp()`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+           AND lease_owner=$4 AND fencing_token=$5 AND lease_until > clock_timestamp()) `,
         [
           lease.providerId,
           lease.sourceId,
@@ -542,15 +561,20 @@ export class BusinessEventRepository {
     transportPayloadHash: string,
     retainMs: number,
   ): Promise<void> {
+    if (
+      storageScope(this.pool) &&
+      lease.deviceId !== requireValue(storageScope(this.pool)).allowedDeviceIds[0]
+    )
+      throw new Error("DEVICE_SCOPE_MISMATCH");
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
       await lockAndValidateLease(client, lease);
       await client.query(
         `INSERT INTO adapter_business_event_inbox
-           (provider_id, source_id, source_stream_id, status, raw_envelope_hash,
+           (${scopeColumns(client, "adapter_business_event_inbox")}provider_id, source_id, source_stream_id, status, raw_envelope_hash,
             transport_payload_hash, decode_status, reject_reason, retain_until)
-         VALUES ($1,$2,$3,'rejected',$4,$4,'undecodable','BUSINESS_EVENT_PAYLOAD_INVALID',
+         VALUES (${scopeValues(client, "adapter_business_event_inbox")}$1,$2,$3,'rejected',$4,$4,'undecodable','BUSINESS_EVENT_PAYLOAD_INVALID',
                  clock_timestamp() + ($5 * interval '1 millisecond'))`,
         [lease.providerId, lease.sourceId, lease.sourceStreamId, transportPayloadHash, retainMs],
       );
@@ -595,16 +619,16 @@ export class BusinessEventRepository {
         delivery_semantics: BusinessEventDeliverySemantics;
       }>(
         `SELECT source_stream_id, delivery_semantics FROM adapter_business_event_source_state
-         WHERE provider_id=$1 AND source_id=$2 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 ) FOR UPDATE`,
         [providerId, sourceId],
       );
       const state = source.rows[0];
       if (state === undefined) throw new Error("BUSINESS_EVENT_SOURCE_NOT_FOUND");
       const inbox = await client.query<InboxRow>(
         `SELECT * FROM adapter_business_event_inbox
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
-         ORDER BY normalized_source_sequence NULLS FIRST, inbox_id
+         ) ORDER BY normalized_source_sequence NULLS FIRST, inbox_id
          LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, state.source_stream_id],
       );
@@ -629,7 +653,7 @@ export class BusinessEventRepository {
           typeof externalExecutionId === "string"
             ? await client.query<{ task_id: string }>(
                 `SELECT task_id FROM provider_task
-                 WHERE provider_id=$1 AND external_execution_id=$2`,
+                 WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( provider_id=$1 AND external_execution_id=$2) `,
                 [providerId, externalExecutionId],
               )
             : undefined;
@@ -639,7 +663,7 @@ export class BusinessEventRepository {
             await client.query(
               `UPDATE adapter_business_event_inbox SET status='pending_mapping',
                  attempt_count=attempt_count+1,last_attempt_at=clock_timestamp()
-               WHERE inbox_id=$1`,
+               WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( inbox_id=$1) `,
               [row.inbox_id],
             );
             await client.query("COMMIT");
@@ -648,12 +672,12 @@ export class BusinessEventRepository {
           const durable = state.delivery_semantics === "durable_at_least_once";
           await client.query(
             `UPDATE adapter_business_event_inbox SET status=$2,last_error='TASK_MAPPING_FAILED',
-               last_attempt_at=clock_timestamp() WHERE inbox_id=$1`,
+               last_attempt_at=clock_timestamp() WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( inbox_id=$1) `,
             [row.inbox_id, durable ? "continuity_loss_pending" : "terminal_skipped"],
           );
           await client.query(
             `UPDATE adapter_business_event_source_state SET status=$3,last_error='TASK_MAPPING_FAILED'
-             WHERE provider_id=$1 AND source_id=$2`,
+             WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2) `,
             [providerId, sourceId, durable ? "continuity_loss_pending" : "degraded"],
           );
           await this.providerOpsRecorder?.capture({
@@ -687,7 +711,7 @@ export class BusinessEventRepository {
           `UPDATE adapter_business_event_inbox
            SET status='ready',source_payload=source_payload || jsonb_build_object('taskId',$2::text),
                attempt_count=attempt_count+1,last_attempt_at=clock_timestamp()
-           WHERE inbox_id=$1`,
+           WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( inbox_id=$1) `,
           [row.inbox_id, taskId],
         );
       } else {
@@ -697,9 +721,9 @@ export class BusinessEventRepository {
         }
         const related = await client.query<{ task_id: string }>(
           `SELECT task_id::text FROM provider_task_resource_binding
-           WHERE provider_id=$1 AND resource_ref=$2 AND bound_at <= $3
+           WHERE (${scopePredicate(client, "provider_task_resource_binding", "provider_task_resource_binding")}) AND ( provider_id=$1 AND resource_ref=$2 AND bound_at <= $3
              AND (terminal_at IS NULL OR terminal_at >= $3)
-           ORDER BY task_id`,
+           ) ORDER BY task_id`,
           [providerId, resourceRef, row.normalized_occurred_at],
         );
         const taskIds = related.rows.map((item) => item.task_id);
@@ -708,7 +732,7 @@ export class BusinessEventRepository {
            SET status='ready',source_payload=source_payload ||
                  jsonb_build_object('candidateRelatedTaskIds',$2::jsonb,'candidateRelatedTaskCount',$3::int),
                attempt_count=attempt_count+1,last_attempt_at=clock_timestamp()
-           WHERE inbox_id=$1`,
+           WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( inbox_id=$1) `,
           [row.inbox_id, JSON.stringify(taskIds), taskIds.length],
         );
       }
@@ -732,14 +756,14 @@ export class BusinessEventRepository {
       await client.query("BEGIN");
       const runtime = await client.query<{ current_stream_id: string }>(
         `SELECT current_stream_id FROM provider_business_event_runtime_state
-         WHERE provider_id=$1 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "provider_business_event_runtime_state", "provider_business_event_runtime_state")}) AND ( provider_id=$1 ) FOR UPDATE`,
         [providerId],
       );
       const streamId = runtime.rows[0]?.current_stream_id;
       if (streamId === undefined) throw new Error("BUSINESS_EVENT_NOT_FOUND");
       const generation = await client.query<{ current_sequence: string; status: string }>(
         `SELECT current_sequence,status FROM provider_business_event_stream_generation
-         WHERE provider_id=$1 AND stream_id=$2 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2 ) FOR UPDATE`,
         [providerId, streamId],
       );
       if (generation.rows[0]?.status !== "current") throw new Error("BUSINESS_EVENT_STREAM_RESET");
@@ -749,16 +773,16 @@ export class BusinessEventRepository {
       }>(
         `SELECT source_stream_id,last_finalized_source_sequence
          FROM adapter_business_event_source_state
-         WHERE provider_id=$1 AND source_id=$2 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 ) FOR UPDATE`,
         [providerId, sourceId],
       );
       const sourceState = source.rows[0];
       if (sourceState === undefined) throw new Error("BUSINESS_EVENT_SOURCE_NOT_FOUND");
       const inbox = await client.query<InboxRow>(
         `SELECT * FROM adapter_business_event_inbox
-         WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
-         ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1 FOR UPDATE`,
+         ) ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, sourceState.source_stream_id],
       );
       const row = inbox.rows[0];
@@ -792,11 +816,11 @@ export class BusinessEventRepository {
       const runtimeSequence = (BigInt(generation.rows[0].current_sequence) + 1n).toString();
       const inserted = await client.query<StoredEventRow>(
         `INSERT INTO provider_business_event
-           (provider_id,stream_id,sequence,event_id,source_id,source_stream_id,
+           (${scopeColumns(client, "provider_business_event")}provider_id,stream_id,sequence,event_id,source_id,source_stream_id,
             source_event_id,source_sequence,source_canonical_hash,stored_event_hash,
             event_type,occurred_at,scope,description,task_id,resource_ref,
             candidate_related_task_count,severity_hint,reason_code,raw_payload,expires_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20::jsonb,
+         VALUES (${scopeValues(client, "provider_business_event")}$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20::jsonb,
                  clock_timestamp() + ($21 * interval '1 millisecond')) RETURNING *`,
         [
           providerId,
@@ -825,24 +849,24 @@ export class BusinessEventRepository {
       for (const [ordinal, taskId] of candidateIds.entries()) {
         await client.query(
           `INSERT INTO provider_business_event_relation
-             (provider_id,stream_id,event_id,task_id,ordinal) VALUES ($1,$2,$3,$4,$5)`,
+             (${scopeColumns(client, "provider_business_event_relation")}provider_id,stream_id,event_id,task_id,ordinal) VALUES (${scopeValues(client, "provider_business_event_relation")}$1,$2,$3,$4,$5)`,
           [providerId, streamId, eventId, taskId, ordinal],
         );
       }
       await client.query(
         `UPDATE provider_business_event_stream_generation SET current_sequence=$3
-         WHERE provider_id=$1 AND stream_id=$2`,
+         WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2) `,
         [providerId, streamId, runtimeSequence],
       );
       await client.query(
         `UPDATE adapter_business_event_inbox SET status='published',finalized_at=clock_timestamp()
-         WHERE inbox_id=$1`,
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( inbox_id=$1) `,
         [row.inbox_id],
       );
       await client.query(
         `UPDATE adapter_business_event_source_state
          SET last_finalized_source_sequence=$3,updated_at=clock_timestamp()
-         WHERE provider_id=$1 AND source_id=$2`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2) `,
         [providerId, sourceId, sourceSequence],
       );
       if (candidateIds.length > 0) {
@@ -850,8 +874,8 @@ export class BusinessEventRepository {
           `UPDATE provider_task_resource_binding binding
            SET retain_until=GREATEST(retain_until,event.expires_at)
            FROM provider_business_event event
-           WHERE event.provider_id=$1 AND event.event_id=$2
-             AND binding.provider_id=$1 AND binding.task_id=ANY($3::uuid[])`,
+           WHERE (${scopePredicate(client, "binding", "provider_task_resource_binding")} AND ${scopePredicate(client, "event", "provider_business_event")}) AND ( event.provider_id=$1 AND event.event_id=$2
+             AND binding.provider_id=$1 AND binding.task_id=ANY($3::uuid[])) `,
           [providerId, eventId, candidateIds],
         );
       }
@@ -900,7 +924,7 @@ export class BusinessEventRepository {
       await client.query("BEGIN");
       const retry = await client.query<ContinuityRow>(
         `SELECT * FROM provider_business_event_continuity_record
-         WHERE provider_id=$1 AND continuity_reason_identity=$2 ORDER BY created_at LIMIT 1`,
+         WHERE (${scopePredicate(client, "provider_business_event_continuity_record", "provider_business_event_continuity_record")}) AND ( provider_id=$1 AND continuity_reason_identity=$2 ) ORDER BY created_at LIMIT 1`,
         [providerId, continuityReasonIdentity],
       );
       if (retry.rows[0] !== undefined) {
@@ -909,14 +933,14 @@ export class BusinessEventRepository {
       }
       const runtime = await client.query<{ current_stream_id: string; generation_version: string }>(
         `SELECT current_stream_id,generation_version FROM provider_business_event_runtime_state
-         WHERE provider_id=$1 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "provider_business_event_runtime_state", "provider_business_event_runtime_state")}) AND ( provider_id=$1 ) FOR UPDATE`,
         [providerId],
       );
       const current = runtime.rows[0];
       if (current === undefined) throw new Error("BUSINESS_EVENT_NOT_FOUND");
       const serializedRetry = await client.query<ContinuityRow>(
         `SELECT * FROM provider_business_event_continuity_record
-         WHERE provider_id=$1 AND continuity_reason_identity=$2 ORDER BY created_at LIMIT 1`,
+         WHERE (${scopePredicate(client, "provider_business_event_continuity_record", "provider_business_event_continuity_record")}) AND ( provider_id=$1 AND continuity_reason_identity=$2 ) ORDER BY created_at LIMIT 1`,
         [providerId, continuityReasonIdentity],
       );
       if (serializedRetry.rows[0] !== undefined) {
@@ -925,7 +949,7 @@ export class BusinessEventRepository {
       }
       const generation = await client.query<GenerationRow>(
         `SELECT * FROM provider_business_event_stream_generation
-         WHERE provider_id=$1 AND stream_id=$2 FOR UPDATE`,
+         WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2 ) FOR UPDATE`,
         [providerId, current.current_stream_id],
       );
       const previous = generation.rows[0];
@@ -955,22 +979,22 @@ export class BusinessEventRepository {
       }
       await client.query(
         `SELECT source_id FROM adapter_business_event_source_state
-         WHERE provider_id=$1 AND source_id=ANY($2::text[])
-         ORDER BY source_id FOR UPDATE`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
+         ) ORDER BY source_id FOR UPDATE`,
         [providerId, normalizedAffectedSourceIds],
       );
       await client.query(
         `SELECT inbox_id FROM adapter_business_event_inbox
-         WHERE provider_id=$1 AND source_id=ANY($2::text[])
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
            AND status IN ('continuity_loss_pending','rejected','mapping_failed')
-         ORDER BY source_id,normalized_source_sequence NULLS FIRST,inbox_id FOR UPDATE`,
+         ) ORDER BY source_id,normalized_source_sequence NULLS FIRST,inbox_id FOR UPDATE`,
         [providerId, normalizedAffectedSourceIds],
       );
       const newStreamId = randomUUID();
       await client.query(
         `INSERT INTO provider_business_event_stream_generation
-           (provider_id,stream_id,status,continuity_class,retain_until)
-         VALUES ($1,$2,'rotating',$3,clock_timestamp() + ($4 * interval '1 millisecond'))`,
+           (${scopeColumns(client, "provider_business_event_stream_generation")}provider_id,stream_id,status,continuity_class,retain_until)
+         VALUES (${scopeValues(client, "provider_business_event_stream_generation")}$1,$2,'rotating',$3,clock_timestamp() + ($4 * interval '1 millisecond'))`,
         [providerId, newStreamId, classifyContinuity(roster), generationRetentionMs],
       );
       const lastReplayable = previous.current_sequence;
@@ -979,7 +1003,7 @@ export class BusinessEventRepository {
       await client.query(
         `UPDATE provider_business_event_generation_source
          SET left_at_runtime_sequence=$3
-         WHERE provider_id=$1 AND runtime_stream_id=$2 AND left_at_runtime_sequence IS NULL`,
+         WHERE (${scopePredicate(client, "provider_business_event_generation_source", "provider_business_event_generation_source")}) AND ( provider_id=$1 AND runtime_stream_id=$2 AND left_at_runtime_sequence IS NULL) `,
         [providerId, previous.stream_id, lastReplayable],
       );
       await client.query(
@@ -988,7 +1012,7 @@ export class BusinessEventRepository {
              reset_reason=$4,affected_source_ids=$5,last_replayable_sequence=current_sequence,
              last_continuous_sequence=$6,
              retain_until=GREATEST(retain_until,clock_timestamp() + ($7 * interval '1 millisecond'))
-         WHERE provider_id=$1 AND stream_id=$2`,
+         WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2) `,
         [
           providerId,
           previous.stream_id,
@@ -1001,14 +1025,14 @@ export class BusinessEventRepository {
       );
       await client.query(
         `UPDATE provider_business_event_stream_generation SET status='current'
-         WHERE provider_id=$1 AND stream_id=$2`,
+         WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2) `,
         [providerId, newStreamId],
       );
       const rosterSourceIds = roster.map((source) => source.sourceId);
       await client.query(
         `UPDATE adapter_business_event_source_state
          SET status='disabled',lease_owner=NULL,lease_until=NULL,updated_at=clock_timestamp()
-         WHERE provider_id=$1 AND NOT (source_id=ANY($2::text[]))`,
+         WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND NOT (source_id=ANY($2::text[]))) `,
         [providerId, rosterSourceIds],
       );
       for (const source of [...roster].sort((left, right) =>
@@ -1016,9 +1040,9 @@ export class BusinessEventRepository {
       )) {
         await client.query(
           `INSERT INTO provider_business_event_generation_source
-             (provider_id,runtime_stream_id,source_id,source_stream_id,delivery_semantics,
+             (${scopeColumns(client, "provider_business_event_generation_source")}provider_id,runtime_stream_id,source_id,source_stream_id,delivery_semantics,
               joined_at_runtime_sequence)
-           VALUES ($1,$2,$3,$4,$5,0)`,
+           VALUES (${scopeValues(client, "provider_business_event_generation_source")}$1,$2,$3,$4,$5,0)`,
           [
             providerId,
             newStreamId,
@@ -1029,9 +1053,9 @@ export class BusinessEventRepository {
         );
         await client.query(
           `INSERT INTO adapter_business_event_source_state
-             (provider_id,source_id,source_stream_id,delivery_semantics,status)
-           VALUES ($1,$2,$3,$4,'active')
-           ON CONFLICT (provider_id,source_id) DO UPDATE
+             (${scopeColumns(client, "adapter_business_event_source_state")}provider_id,source_id,source_stream_id,delivery_semantics,status)
+           VALUES (${scopeValues(client, "adapter_business_event_source_state")}$1,$2,$3,$4,'active')
+           ON CONFLICT (${scopeConflict(client, "adapter_business_event_source_state")}provider_id,source_id) DO UPDATE
              SET source_stream_id=EXCLUDED.source_stream_id,
                  delivery_semantics=EXCLUDED.delivery_semantics,
                  status='active',
@@ -1042,23 +1066,23 @@ export class BusinessEventRepository {
                  last_finalized_source_sequence=CASE
                    WHEN adapter_business_event_source_state.source_stream_id=EXCLUDED.source_stream_id
                    THEN adapter_business_event_source_state.last_finalized_source_sequence ELSE 0 END,
-                 updated_at=clock_timestamp()`,
+                 updated_at=clock_timestamp() WHERE ${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")} `,
           [providerId, source.sourceId, source.sourceStreamId, source.deliverySemantics],
         );
       }
       await client.query(
         `UPDATE provider_business_event_runtime_state
          SET current_stream_id=$2,generation_version=generation_version+1,updated_at=clock_timestamp()
-         WHERE provider_id=$1`,
+         WHERE (${scopePredicate(client, "provider_business_event_runtime_state", "provider_business_event_runtime_state")}) AND ( provider_id=$1) `,
         [providerId, newStreamId],
       );
       const continuityId = randomUUID();
       const continuity = await client.query<ContinuityRow>(
         `INSERT INTO provider_business_event_continuity_record
-           (continuity_record_id,provider_id,previous_stream_id,new_stream_id,reason_code,
+           (${scopeColumns(client, "provider_business_event_continuity_record")}continuity_record_id,provider_id,previous_stream_id,new_stream_id,reason_code,
             affected_source_ids,gap_detected_at,last_replayable_sequence,
             last_continuous_sequence,continuity_reason_identity,retain_until)
-         VALUES ($1,$2,$3,$4,$5,$6,clock_timestamp(),$7,$8,$9,
+         VALUES (${scopeValues(client, "provider_business_event_continuity_record")}$1,$2,$3,$4,$5,$6,clock_timestamp(),$7,$8,$9,
                  clock_timestamp() + ($10 * interval '1 millisecond'))
          RETURNING *`,
         [
@@ -1080,7 +1104,7 @@ export class BusinessEventRepository {
                          THEN 'terminal_skipped' ELSE status END,
              finalized_at=CASE WHEN status IN ('continuity_loss_pending','rejected','mapping_failed')
                                THEN clock_timestamp() ELSE finalized_at END
-         WHERE provider_id=$1 AND source_id=ANY($2::text[])`,
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])) `,
         [providerId, normalizedAffectedSourceIds],
       );
       const generationVersion = (BigInt(current.generation_version) + 1n).toString();
@@ -1146,8 +1170,8 @@ export class BusinessEventRepository {
   ): Promise<FinalizedBusinessEvent[]> {
     const result = await this.pool.query<StoredEventRow>(
       `SELECT * FROM provider_business_event
-       WHERE provider_id=$1 AND stream_id=$2 AND sequence>$3 AND sequence<=$4
-       ORDER BY sequence LIMIT $5`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event", "provider_business_event")}) AND ( provider_id=$1 AND stream_id=$2 AND sequence>$3 AND sequence<=$4
+       ) ORDER BY sequence LIMIT $5`,
       [providerId, streamId, afterSequence, throughSequence, limit],
     );
     return result.rows.map(mapStoredEvent);
@@ -1161,7 +1185,7 @@ export class BusinessEventRepository {
   ): Promise<AuthorizedBusinessEventProjection | undefined> {
     const eventResult = await this.pool.query<StoredEventRow>(
       `SELECT * FROM provider_business_event
-       WHERE provider_id=$1 AND stream_id=$2 AND event_id=$3`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event", "provider_business_event")}) AND ( provider_id=$1 AND stream_id=$2 AND event_id=$3) `,
       [providerId, streamId, eventId],
     );
     const event = eventResult.rows[0];
@@ -1175,7 +1199,7 @@ export class BusinessEventRepository {
         : (
             await this.pool.query<{ task_id: string }>(
               `SELECT task_id::text FROM provider_business_event_relation
-               WHERE provider_id=$1 AND stream_id=$2 AND event_id=$3 ORDER BY task_id`,
+               WHERE (${scopePredicate(this.pool, "provider_business_event_relation", "provider_business_event_relation")}) AND ( provider_id=$1 AND stream_id=$2 AND event_id=$3 ) ORDER BY task_id`,
               [providerId, streamId, eventId],
             )
           ).rows.map((row) => row.task_id);
@@ -1189,12 +1213,12 @@ export class BusinessEventRepository {
             await this.pool.query<{ task_id: string }>(
               `WITH authority AS (
                SELECT task_id,authorization_context_hash,execution_mode,simulation_id
-               FROM provider_task WHERE provider_id=$1 AND task_id=ANY($2::uuid[])
-               UNION ALL
+               FROM provider_task WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( provider_id=$1 AND task_id=ANY($2::uuid[])
+               ) UNION ALL
                SELECT task_id,authorization_context_hash,execution_mode,simulation_id
                FROM provider_task_visibility_tombstone
-               WHERE provider_id=$1 AND task_id=ANY($2::uuid[])
-             ), resolved AS (
+               WHERE (${scopePredicate(this.pool, "provider_task_visibility_tombstone", "provider_task_visibility_tombstone")}) AND ( provider_id=$1 AND task_id=ANY($2::uuid[])
+             ) ), resolved AS (
                SELECT task_id,
                       count(*)::text AS authority_count,
                       bool_or(authorization_context_hash=$3 AND execution_mode=$4 AND
@@ -1217,11 +1241,11 @@ export class BusinessEventRepository {
           ).rows;
     const authorityCount = await this.pool.query<{ count: string }>(
       `SELECT count(DISTINCT task_id)::text AS count FROM (
-         SELECT task_id FROM provider_task WHERE provider_id=$1 AND task_id=ANY($2::uuid[])
-         UNION ALL
+         SELECT task_id FROM provider_task WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( provider_id=$1 AND task_id=ANY($2::uuid[])
+         ) UNION ALL
          SELECT task_id FROM provider_task_visibility_tombstone
-         WHERE provider_id=$1 AND task_id=ANY($2::uuid[])
-       ) authority`,
+         WHERE (${scopePredicate(this.pool, "provider_task_visibility_tombstone", "provider_task_visibility_tombstone")}) AND ( provider_id=$1 AND task_id=ANY($2::uuid[])
+       ) ) authority`,
       [providerId, candidateIds],
     );
     if (Number(authorityCount.rows[0]?.count ?? "0") !== candidateIds.length) {
@@ -1243,18 +1267,23 @@ export class BusinessEventRepository {
   ): Promise<RotationResult | undefined> {
     const result = await this.pool.query<ContinuityRow>(
       `SELECT * FROM provider_business_event_continuity_record
-       WHERE provider_id=$1 AND previous_stream_id=$2 ORDER BY created_at DESC LIMIT 1`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event_continuity_record", "provider_business_event_continuity_record")}) AND ( provider_id=$1 AND previous_stream_id=$2 ) ORDER BY created_at DESC LIMIT 1`,
       [providerId, previousStreamId],
     );
     return result.rows[0] === undefined ? undefined : mapRotation(result.rows[0]);
   }
 
   async markSourceUnavailable(lease: BusinessEventLease, errorCode: string): Promise<void> {
+    if (
+      storageScope(this.pool) &&
+      lease.deviceId !== requireValue(storageScope(this.pool)).allowedDeviceIds[0]
+    )
+      throw new Error("DEVICE_SCOPE_MISMATCH");
     await this.pool.query(
       `UPDATE adapter_business_event_source_state
        SET status='unavailable',last_error=$6,updated_at=clock_timestamp()
-       WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
-         AND lease_owner=$4 AND fencing_token=$5`,
+       WHERE (${scopePredicate(this.pool, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         AND lease_owner=$4 AND fencing_token=$5) `,
       [
         lease.providerId,
         lease.sourceId,
@@ -1269,12 +1298,12 @@ export class BusinessEventRepository {
   async extendVisibilityRetention(historyHorizonMs: number): Promise<void> {
     await this.pool.query(
       `UPDATE provider_task_resource_binding
-       SET retain_until=GREATEST(retain_until,COALESCE(terminal_at,bound_at) + ($1 * interval '1 millisecond'))`,
+       SET retain_until=GREATEST(retain_until,COALESCE(terminal_at,bound_at) + ($1 * interval '1 millisecond')) WHERE ${scopePredicate(this.pool, "provider_task_resource_binding", "provider_task_resource_binding")} `,
       [historyHorizonMs],
     );
     await this.pool.query(
       `UPDATE provider_task_visibility_tombstone
-       SET retain_until=GREATEST(retain_until,terminal_at + ($1 * interval '1 millisecond'))`,
+       SET retain_until=GREATEST(retain_until,terminal_at + ($1 * interval '1 millisecond')) WHERE ${scopePredicate(this.pool, "provider_task_visibility_tombstone", "provider_task_visibility_tombstone")} `,
       [historyHorizonMs],
     );
   }
@@ -1291,7 +1320,7 @@ export class BusinessEventRepository {
     }>(
       `SELECT source_id,source_stream_id,delivery_semantics
        FROM provider_business_event_generation_source
-       WHERE provider_id=$1 AND runtime_stream_id=$2 ORDER BY source_id`,
+       WHERE (${scopePredicate(client, "provider_business_event_generation_source", "provider_business_event_generation_source")}) AND ( provider_id=$1 AND runtime_stream_id=$2 ) ORDER BY source_id`,
       [providerId, streamId],
     );
     return result.rows.map((row) => ({
@@ -1346,10 +1375,10 @@ export class BusinessEventRepository {
       await lockRuntimeAndGeneration(client, identity.providerId, identity.streamId);
       await client.query(
         `INSERT INTO provider_business_event_relation_projection
-           (token_hash, provider_id, stream_id, event_id, authorization_scope_hash,
+           (${scopeColumns(client, "provider_business_event_relation_projection")}token_hash, provider_id, stream_id, event_id, authorization_scope_hash,
             execution_mode, simulation_id, candidate_relation_hash,
             projection_relation_hash, expires_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,clock_timestamp() + ($10 * interval '1 millisecond'))`,
+         VALUES (${scopeValues(client, "provider_business_event_relation_projection")}$1,$2,$3,$4,$5,$6,$7,$8,$9,clock_timestamp() + ($10 * interval '1 millisecond'))`,
         [
           tokenHash,
           identity.providerId,
@@ -1365,8 +1394,8 @@ export class BusinessEventRepository {
       );
       for (const [ordinal, taskId] of sorted.entries()) {
         await client.query(
-          `INSERT INTO provider_business_event_relation_projection_item(token_hash, task_id, ordinal)
-           VALUES ($1,$2,$3)`,
+          `INSERT INTO provider_business_event_relation_projection_item(${scopeColumns(client, "provider_business_event_relation_projection_item")}token_hash, task_id, ordinal)
+           VALUES (${scopeValues(client, "provider_business_event_relation_projection_item")}$1,$2,$3)`,
           [tokenHash, taskId, ordinal],
         );
       }
@@ -1385,14 +1414,14 @@ export class BusinessEventRepository {
     const result = await this.pool.query(
       `WITH expired AS (
          SELECT token_hash FROM provider_business_event_relation_projection
-         WHERE expires_at <= clock_timestamp()
-         ORDER BY expires_at,token_hash
+         WHERE (${scopePredicate(this.pool, "provider_business_event_relation_projection", "provider_business_event_relation_projection")}) AND ( expires_at <= clock_timestamp()
+         ) ORDER BY expires_at,token_hash
          LIMIT $1 FOR UPDATE SKIP LOCKED
        )
        DELETE FROM provider_business_event_relation_projection projection
        USING expired
-       WHERE projection.token_hash=expired.token_hash
-       RETURNING projection.token_hash`,
+       WHERE (${scopePredicate(this.pool, "projection", "provider_business_event_relation_projection")}) AND ( projection.token_hash=expired.token_hash
+       ) RETURNING projection.token_hash`,
       [limit],
     );
     return result.rowCount ?? 0;
@@ -1430,9 +1459,9 @@ export class BusinessEventRepository {
        FROM provider_business_event_relation_projection p
        JOIN provider_business_event event
          ON event.provider_id=p.provider_id AND event.stream_id=p.stream_id AND event.event_id=p.event_id
-       LEFT JOIN provider_business_event_relation_projection_item i ON i.token_hash=p.token_hash
-       WHERE p.token_hash=$1
-       GROUP BY p.token_hash,event.expires_at`,
+       LEFT JOIN provider_business_event_relation_projection_item i ON i.token_hash=p.token_hash AND ${scopePredicate(this.pool, "i", "provider_business_event_relation_projection_item")}
+       WHERE (${scopePredicate(this.pool, "p", "provider_business_event_relation_projection")} AND ${scopePredicate(this.pool, "event", "provider_business_event")}) AND ( p.token_hash=$1
+       ) GROUP BY ${scoped(this.pool) ? "p.device_id," : ""}p.token_hash,event.expires_at`,
       [tokenHash],
     );
     const row = projection.rows[0];
@@ -1455,12 +1484,12 @@ export class BusinessEventRepository {
     }
     const candidate = await this.pool.query<{ task_id: string }>(
       `SELECT task_id::text FROM provider_business_event_relation
-       WHERE provider_id=$1 AND stream_id=$2 AND event_id=$3 ORDER BY task_id`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event_relation", "provider_business_event_relation")}) AND ( provider_id=$1 AND stream_id=$2 AND event_id=$3 ) ORDER BY task_id`,
       [expected.providerId, expected.streamId, expected.eventId],
     );
     const projected = await this.pool.query<{ task_id: string }>(
       `SELECT task_id::text FROM provider_business_event_relation_projection_item
-       WHERE token_hash=$1 ORDER BY task_id`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event_relation_projection_item", "provider_business_event_relation_projection_item")}) AND ( token_hash=$1 ) ORDER BY task_id`,
       [tokenHash],
     );
     if (
@@ -1472,15 +1501,15 @@ export class BusinessEventRepository {
     if (afterTaskId !== undefined) {
       const anchor = await this.pool.query(
         `SELECT 1 FROM provider_business_event_relation_projection_item
-         WHERE token_hash=$1 AND task_id=$2`,
+         WHERE (${scopePredicate(this.pool, "provider_business_event_relation_projection_item", "provider_business_event_relation_projection_item")}) AND ( token_hash=$1 AND task_id=$2) `,
         [tokenHash, afterTaskId],
       );
       if (anchor.rowCount !== 1) throw new Error("BUSINESS_EVENT_RELATION_CURSOR_INVALID");
     }
     const items = await this.pool.query<{ task_id: string }>(
       `SELECT task_id::text FROM provider_business_event_relation_projection_item
-       WHERE token_hash=$1 AND ($2::uuid IS NULL OR task_id > $2::uuid)
-       ORDER BY task_id LIMIT $3`,
+       WHERE (${scopePredicate(this.pool, "provider_business_event_relation_projection_item", "provider_business_event_relation_projection_item")}) AND ( token_hash=$1 AND ($2::uuid IS NULL OR task_id > $2::uuid)
+       ) ORDER BY task_id LIMIT $3`,
       [tokenHash, afterTaskId ?? null, limit],
     );
     const taskIds = items.rows.map((item) => item.task_id);
@@ -1490,7 +1519,7 @@ export class BusinessEventRepository {
       (
         await this.pool.query(
           `SELECT 1 FROM provider_business_event_relation_projection_item
-           WHERE token_hash=$1 AND task_id>$2::uuid LIMIT 1`,
+           WHERE (${scopePredicate(this.pool, "provider_business_event_relation_projection_item", "provider_business_event_relation_projection_item")}) AND ( token_hash=$1 AND task_id>$2::uuid ) LIMIT 1`,
           [tokenHash, lastTaskId],
         )
       ).rowCount === 1;
@@ -1514,6 +1543,7 @@ interface GenerationRow {
 }
 
 interface SourceStateRow {
+  device_id?: string;
   provider_id: string;
   source_id: string;
   source_stream_id: string;
@@ -1589,6 +1619,7 @@ function mapGeneration(row: GenerationRow): BusinessEventGeneration {
 
 function mapLease(row: SourceStateRow): BusinessEventLease {
   return {
+    ...(row.device_id ? { deviceId: row.device_id } : {}),
     providerId: row.provider_id,
     sourceId: row.source_id,
     sourceStreamId: row.source_stream_id,
@@ -1701,7 +1732,7 @@ async function lockAndValidateLease(
   const result = await client.query<LockedSourceStateRow>(
     `SELECT *,lease_until > clock_timestamp() AS lease_valid
      FROM adapter_business_event_source_state
-     WHERE provider_id=$1 AND source_id=$2 FOR UPDATE`,
+     WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 ) FOR UPDATE`,
     [lease.providerId, lease.sourceId],
   );
   const row = result.rows[0];
@@ -1725,8 +1756,8 @@ async function blockSource(
   await client.query(
     `UPDATE adapter_business_event_source_state
      SET status=$6,last_error=$7,updated_at=clock_timestamp()
-     WHERE provider_id=$1 AND source_id=$2 AND source_stream_id=$3
-       AND lease_owner=$4 AND fencing_token=$5`,
+     WHERE (${scopePredicate(client, "adapter_business_event_source_state", "adapter_business_event_source_state")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+       AND lease_owner=$4 AND fencing_token=$5) `,
     [
       lease.providerId,
       lease.sourceId,
@@ -1768,13 +1799,13 @@ async function lockRuntimeAndGeneration(
   streamId: string,
 ): Promise<void> {
   const runtime = await client.query(
-    `SELECT 1 FROM provider_business_event_runtime_state WHERE provider_id=$1 FOR UPDATE`,
+    `SELECT 1 FROM provider_business_event_runtime_state WHERE (${scopePredicate(client, "provider_business_event_runtime_state", "provider_business_event_runtime_state")}) AND ( provider_id=$1 ) FOR UPDATE`,
     [providerId],
   );
   if (runtime.rowCount !== 1) throw new Error("BUSINESS_EVENT_NOT_FOUND");
   const generation = await client.query(
     `SELECT 1 FROM provider_business_event_stream_generation
-     WHERE provider_id=$1 AND stream_id=$2 FOR UPDATE`,
+     WHERE (${scopePredicate(client, "provider_business_event_stream_generation", "provider_business_event_stream_generation")}) AND ( provider_id=$1 AND stream_id=$2 ) FOR UPDATE`,
     [providerId, streamId],
   );
   if (generation.rowCount !== 1) throw new Error("BUSINESS_EVENT_STREAM_RESET");

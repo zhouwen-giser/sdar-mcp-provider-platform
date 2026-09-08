@@ -25,6 +25,9 @@ export interface AuthorizationContext {
 }
 
 export interface TaskRecord {
+  deviceId?: string;
+  gowmBindingId?: string;
+  smppServiceKey?: string;
   taskId: string;
   providerId: string;
   operationName: string;

@@ -138,3 +138,7 @@ formatting, lint, types, build/Proto drift, audit/SBOM, deployment/container,
 unit/contract/integration/recovery/security/E2E/conformance, the six rc.1 red-regression guards,
 and the rc.3 capacity checks. CI additionally runs Buf lint/breaking against the immutable rc.1
 tag and builds the Runtime plus both Adapter images with Compose.
+
+## GOWM 共享业务存储
+
+UGV Runtime/Adapter 的新开发实例可共用固定 `ugv_smpp`，按显式设备与服务绑定隔离，启动只验证、不重放原生迁移。配置、验证及旧库回退边界见 [接入说明](docs/GOWM_SHARED_STORAGE.md)。

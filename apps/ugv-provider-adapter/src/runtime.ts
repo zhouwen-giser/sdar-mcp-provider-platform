@@ -1850,6 +1850,7 @@ export class UgvProviderRuntime {
   async #observe(snapshot: UgvSnapshot, topic: string): Promise<void> {
     this.#refreshReadiness();
     await this.store.putSnapshot({
+      channel: topic,
       revision: snapshot.revision,
       observedAt: snapshot.observedAt,
       snapshot: snapshot as unknown as Record<string, unknown>,

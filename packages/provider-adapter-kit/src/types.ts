@@ -1,3 +1,4 @@
+import type { DeviceExecutionContext } from "../../gowm-shared-storage-adapter/src/device-context.js";
 import type {
   AdapterBusinessEvent,
   BusinessEventSourceCapability,
@@ -31,6 +32,7 @@ export interface ExecutionContextRecord {
 }
 
 export interface ProviderExecution {
+  deviceContext?: DeviceExecutionContext;
   taskId: string;
   externalExecutionId: string;
   operationName: string;
@@ -152,6 +154,8 @@ export interface DeviceToolCallRecord {
 }
 
 export interface SnapshotRecord {
+  sourceSessionKey?: string;
+  channel?: string;
   revision: string;
   observedAt: string;
   snapshot: Record<string, unknown>;

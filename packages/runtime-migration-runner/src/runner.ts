@@ -1,3 +1,5 @@
+import { join } from "node:path";
+import { verifyGowmStorage } from "../../gowm-shared-storage-adapter/src/contract-check.js";
 import type { Pool } from "pg";
 import {
   runMigrations,
@@ -17,7 +19,7 @@ export interface RuntimeMigrationEvidence {
   readonly deploymentId: string;
   readonly providerId: string;
   readonly runtimeVersion: string;
-  readonly migrationSet: "runtime";
+  readonly migrationSet: "runtime" | "gowm-shared-verify";
   readonly startedAt: string;
   readonly completedAt: string;
   readonly durationMs: number;
@@ -95,6 +97,22 @@ export class RuntimeMigrationRunner {
   async run(request: RuntimeMigrationRequest): Promise<RuntimeMigrationEvidence> {
     validateRequest(request);
     const started = this.#now();
+    if (request.migrationSet === "gowm-shared-verify") {
+      await verifyGowmStorage(this.pool, {
+        contractDir: join(this.#workspaceRoot, "contracts/gowm-shared-storage/current"),
+      });
+      return freezeEvidence({
+        status: "PASS",
+        deploymentId: request.deploymentId,
+        providerId: request.providerId,
+        runtimeVersion: request.runtimeVersion,
+        migrationSet: "gowm-shared-verify",
+        startedAt: started.toISOString(),
+        completedAt: this.#now().toISOString(),
+        durationMs: Math.max(0, this.#now().getTime() - started.getTime()),
+        migrations: [],
+      });
+    }
     if (request.migrationSet !== "runtime") {
       throw await this.#failure(request, started, "RUNTIME_MIGRATION_SET_INVALID");
     }

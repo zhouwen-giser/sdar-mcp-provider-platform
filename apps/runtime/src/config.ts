@@ -1,3 +1,7 @@
+import {
+  loadGowmStorageConfig,
+  type GowmStorageConfig,
+} from "../../../packages/gowm-shared-storage-adapter/src/config.js";
 import { z } from "zod";
 import {
   loadRuntimeBootstrapEnvironment,
@@ -56,9 +60,12 @@ export type RuntimeConfig = z.infer<typeof EnvironmentSchema> & {
   leaseValidationMode: "strict" | "degraded";
   leaseValidationMessage: string | null;
   platformIdentity: RuntimePlatformIdentity | null;
+  gowmStorage?: GowmStorageConfig;
 };
 
 export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
+  const gowmStorage = loadGowmStorageConfig(environment);
+  if (gowmStorage) environment = { ...environment, DATABASE_URL: gowmStorage.databaseUrl };
   const platformIdentity = resolveRuntimePlatformIdentity(environment);
   const bootstrap = loadRuntimeBootstrapEnvironment(environment);
   const observability = loadRuntimeObservabilityEnvironment(environment);
@@ -115,6 +122,7 @@ export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env):
     }
     return {
       ...value,
+      ...(gowmStorage ? { gowmStorage } : {}),
       leaseValidationMode: "degraded",
       leaseValidationMessage: violations.join("; "),
       platformIdentity,
@@ -122,6 +130,7 @@ export function loadRuntimeConfig(environment: NodeJS.ProcessEnv = process.env):
   }
   return {
     ...value,
+    ...(gowmStorage ? { gowmStorage } : {}),
     leaseValidationMode: "strict",
     leaseValidationMessage: null,
     platformIdentity,

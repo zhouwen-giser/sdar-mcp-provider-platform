@@ -1,3 +1,4 @@
+import { scopePredicate } from "../../gowm-shared-storage-adapter/src/scope.js";
 import type { Pool } from "pg";
 
 export interface OutboxRecord {
@@ -22,8 +23,8 @@ export class OutboxRepository {
       created_at: Date;
     }>(
       `SELECT event_id, event_key, aggregate_id, event_type, payload, created_at
-       FROM outbox_event WHERE published_at IS NULL
-       ORDER BY created_at, event_id LIMIT $1`,
+       FROM outbox_event WHERE (${scopePredicate(this.pool, "outbox_event", "outbox_event")}) AND ( published_at IS NULL
+       ) ORDER BY created_at, event_id LIMIT $1`,
       [limit],
     );
     return result.rows.map((row) => ({
@@ -41,7 +42,7 @@ export class OutboxRepository {
     const result = await this.pool.query(
       `UPDATE outbox_event SET published_at=clock_timestamp(),
        delivery_attempts=delivery_attempts+1
-       WHERE event_id = ANY($1::uuid[]) AND published_at IS NULL`,
+       WHERE (${scopePredicate(this.pool, "outbox_event", "outbox_event")}) AND ( event_id = ANY($1::uuid[]) AND published_at IS NULL) `,
       [eventIds],
     );
     return result.rowCount ?? 0;
@@ -49,7 +50,7 @@ export class OutboxRepository {
 
   async recordAttempt(eventId: string): Promise<void> {
     await this.pool.query(
-      "UPDATE outbox_event SET delivery_attempts=delivery_attempts+1 WHERE event_id=$1",
+      `UPDATE outbox_event SET delivery_attempts=delivery_attempts+1 WHERE (${scopePredicate(this.pool, "outbox_event", "outbox_event")}) AND ( event_id=$1) `,
       [eventId],
     );
   }
@@ -58,7 +59,7 @@ export class OutboxRepository {
     if (eventIds.length === 0) return;
     await this.pool.query(
       `UPDATE outbox_event SET delivery_attempts=delivery_attempts+1
-       WHERE event_id = ANY($1::uuid[]) AND published_at IS NULL`,
+       WHERE (${scopePredicate(this.pool, "outbox_event", "outbox_event")}) AND ( event_id = ANY($1::uuid[]) AND published_at IS NULL) `,
       [eventIds],
     );
   }

@@ -1,3 +1,10 @@
+import {
+  scoped,
+  scopeColumns,
+  scopeConflict,
+  scopePredicate,
+  scopeValues,
+} from "../../gowm-shared-storage-adapter/src/scope.js";
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import {
@@ -60,16 +67,16 @@ export class TtlCleaner {
       const renewed = await client.query<{ task_id: string }>(
         `WITH due AS (
            SELECT task_id FROM provider_task
-           WHERE internal_state NOT LIKE 'TERMINAL_%'
+           WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state NOT LIKE 'TERMINAL_%'
              AND ttl_ms IS NOT NULL
              AND (handle_expires_at IS NULL OR handle_expires_at <= $1)
-           ORDER BY handle_expires_at NULLS FIRST, task_id
+           ) ORDER BY handle_expires_at NULLS FIRST, task_id
            FOR UPDATE SKIP LOCKED LIMIT $2
          )
          UPDATE provider_task task
          SET handle_expires_at=$1 + (task.ttl_ms * interval '1 millisecond')
-         FROM due WHERE task.task_id=due.task_id
-         RETURNING task.task_id`,
+         FROM due WHERE (${scopePredicate(client, "task", "provider_task")}) AND ( task.task_id=due.task_id
+         ) RETURNING task.task_id`,
         [now, this.#batchSize],
       );
       const expired = await client.query<{
@@ -89,18 +96,18 @@ export class TtlCleaner {
       }>(
         `WITH due AS (
            SELECT task_id FROM provider_task
-           WHERE internal_state LIKE 'TERMINAL_%'
+           WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state LIKE 'TERMINAL_%'
              AND expired_at IS NULL
              AND handle_expires_at IS NOT NULL
              AND handle_expires_at <= $1
-           ORDER BY handle_expires_at, task_id
+           ) ORDER BY handle_expires_at, task_id
            FOR UPDATE SKIP LOCKED LIMIT $2
          )
          UPDATE provider_task task
          SET expired_at=$1,
              purge_after=$1 + ($3 * interval '1 millisecond')
-         FROM due WHERE task.task_id=due.task_id
-         RETURNING task.task_id, task.internal_state, task.substate,
+         FROM due WHERE (${scopePredicate(client, "task", "provider_task")}) AND ( task.task_id=due.task_id
+         ) RETURNING task.task_id, task.internal_state, task.substate,
            task.observation_revision, task.adapter_revision, task.external_execution_id,
            task.operation_name, task.execution_mode, task.simulation_id,
            task.argument_hash, task.authorization_context_hash,
@@ -156,28 +163,28 @@ export class TtlCleaner {
       }>(
         `SELECT task_id,handle_expires_at,purge_after
          FROM provider_task
-         WHERE internal_state LIKE 'TERMINAL_%'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state LIKE 'TERMINAL_%'
            AND expired_at IS NOT NULL
-           AND purge_after <= $1
+           AND purge_after <= $1 AND ${!scoped(client)}
            AND NOT EXISTS (
              SELECT 1
              FROM outbox_event outbox
-             WHERE outbox.aggregate_id = provider_task.task_id
+             WHERE (${scopePredicate(client, "outbox", "outbox_event")}) AND ( outbox.aggregate_id = provider_task.task_id
                AND outbox.published_at IS NULL
-           )
+           ) )
            AND NOT EXISTS (
              SELECT 1
              FROM task_command command
-             WHERE command.task_id = provider_task.task_id
+             WHERE (${scopePredicate(client, "command", "task_command")}) AND ( command.task_id = provider_task.task_id
                AND command.state IN ('PENDING', 'CLAIMED', 'RETRY_WAIT')
-           )
+           ) )
            AND NOT EXISTS (
              SELECT 1
              FROM admission_intent admission
-              WHERE admission.task_id = provider_task.task_id
+              WHERE (${scopePredicate(client, "admission", "admission_intent")}) AND ( admission.task_id = provider_task.task_id
                 AND admission.state IN ('PENDING', 'ACCEPTED', 'UNCERTAIN')
-             )
-         ORDER BY purge_after, task_id
+             ) )
+         ) ORDER BY purge_after, task_id
          FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, this.#batchSize],
       );
@@ -204,9 +211,9 @@ export class TtlCleaner {
         try {
           await client.query(
             `INSERT INTO provider_task_visibility_tombstone
-               (provider_id, task_id, authorization_context_hash, execution_mode,
+               (${scopeColumns(client, "provider_task_visibility_tombstone")}provider_id, task_id, authorization_context_hash, execution_mode,
                 simulation_id, resource_ref, terminal_at, retain_until)
-             SELECT task.provider_id, task.task_id, task.authorization_context_hash,
+             SELECT ${scopeValues(client, "provider_task_visibility_tombstone")} task.provider_id, task.task_id, task.authorization_context_hash,
                     task.execution_mode, task.simulation_id, binding.resource_ref,
                     task.terminal_at,
                     GREATEST(
@@ -217,11 +224,11 @@ export class TtlCleaner {
              FROM provider_task task
              LEFT JOIN provider_task_resource_binding binding
                ON binding.provider_id=task.provider_id AND binding.task_id=task.task_id
-             WHERE task.task_id=$1 AND task.terminal_at IS NOT NULL
-             ON CONFLICT (provider_id, task_id) DO UPDATE
+             WHERE (${scopePredicate(client, "task", "provider_task")} AND ${scopePredicate(client, "binding", "provider_task_resource_binding")}) AND ( task.task_id=$1 AND task.terminal_at IS NOT NULL
+             ) ON CONFLICT (provider_id, task_id) DO UPDATE
                SET retain_until=GREATEST(
                  provider_task_visibility_tombstone.retain_until, EXCLUDED.retain_until
-               )`,
+               ) WHERE ${scopePredicate(client, "provider_task_visibility_tombstone", "provider_task_visibility_tombstone")} `,
             [row.task_id, now],
           );
           await captureTaskOperationalEvent(client, row.task_id, {
@@ -238,11 +245,26 @@ export class TtlCleaner {
               blockedReason: null,
             },
           });
-          await client.query("DELETE FROM task_input_request WHERE task_id=$1", [row.task_id]);
-          await client.query("DELETE FROM idempotency_record WHERE task_id=$1", [row.task_id]);
-          await client.query("DELETE FROM task_command WHERE task_id=$1", [row.task_id]);
-          await client.query("DELETE FROM admission_intent WHERE task_id=$1", [row.task_id]);
-          await client.query("DELETE FROM provider_task WHERE task_id=$1", [row.task_id]);
+          await client.query(
+            `DELETE FROM task_input_request WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1) `,
+            [row.task_id],
+          );
+          await client.query(
+            `DELETE FROM idempotency_record WHERE (${scopePredicate(client, "idempotency_record", "idempotency_record")}) AND ( task_id=$1) `,
+            [row.task_id],
+          );
+          await client.query(
+            `DELETE FROM task_command WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1) `,
+            [row.task_id],
+          );
+          await client.query(
+            `DELETE FROM admission_intent WHERE (${scopePredicate(client, "admission_intent", "admission_intent")}) AND ( task_id=$1) `,
+            [row.task_id],
+          );
+          await client.query(
+            `DELETE FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1) `,
+            [row.task_id],
+          );
           purged += 1;
         } finally {
           await this.#releaseRecoveryLease(client, row.task_id, lockOwner);
@@ -250,44 +272,44 @@ export class TtlCleaner {
       }
       await client.query(
         `DELETE FROM provider_task_resource_binding binding
-         WHERE binding.retain_until <= $1
+         WHERE (${scopePredicate(client, "binding", "provider_task_resource_binding")}) AND ( ${!scoped(client)} AND binding.retain_until <= $1
            AND NOT EXISTS (
              SELECT 1 FROM provider_business_event_relation relation
              JOIN provider_business_event event
                ON event.provider_id=relation.provider_id
               AND event.stream_id=relation.stream_id
               AND event.event_id=relation.event_id
-             WHERE relation.provider_id=binding.provider_id
+             WHERE (${scopePredicate(client, "relation", "provider_business_event_relation")} AND ${scopePredicate(client, "event", "provider_business_event")}) AND ( relation.provider_id=binding.provider_id
                AND relation.task_id=binding.task_id
                AND event.expires_at > $1
-           )
+           ) )
            AND NOT EXISTS (
              SELECT 1 FROM provider_business_event_relation_projection_item item
              JOIN provider_business_event_relation_projection projection
                ON projection.token_hash=item.token_hash
-             WHERE item.task_id=binding.task_id AND projection.expires_at > $1
-           )`,
+             WHERE (${scopePredicate(client, "item", "provider_business_event_relation_projection_item")} AND ${scopePredicate(client, "projection", "provider_business_event_relation_projection")}) AND ( item.task_id=binding.task_id AND projection.expires_at > $1
+           ) )) `,
         [now],
       );
       await client.query(
         `DELETE FROM provider_task_visibility_tombstone tombstone
-         WHERE tombstone.retain_until <= $1
+         WHERE (${scopePredicate(client, "tombstone", "provider_task_visibility_tombstone")}) AND ( tombstone.retain_until <= $1
            AND NOT EXISTS (
              SELECT 1 FROM provider_business_event_relation relation
              JOIN provider_business_event event
                ON event.provider_id=relation.provider_id
               AND event.stream_id=relation.stream_id
               AND event.event_id=relation.event_id
-             WHERE relation.provider_id=tombstone.provider_id
+             WHERE (${scopePredicate(client, "relation", "provider_business_event_relation")} AND ${scopePredicate(client, "event", "provider_business_event")}) AND ( relation.provider_id=tombstone.provider_id
                AND relation.task_id=tombstone.task_id
                AND event.expires_at > $1
-           )
+           ) )
            AND NOT EXISTS (
              SELECT 1 FROM provider_business_event_relation_projection_item item
              JOIN provider_business_event_relation_projection projection
                ON projection.token_hash=item.token_hash
-             WHERE item.task_id=tombstone.task_id AND projection.expires_at > $1
-           )`,
+             WHERE (${scopePredicate(client, "item", "provider_business_event_relation_projection_item")} AND ${scopePredicate(client, "projection", "provider_business_event_relation_projection")}) AND ( item.task_id=tombstone.task_id AND projection.expires_at > $1
+           ) )) `,
         [now],
       );
       await client.query("COMMIT");
@@ -328,24 +350,24 @@ export class TtlCleaner {
     const leaseKey = `sdar-recovery:${taskId}`;
     const ownerId = randomUUID();
     const claimed = await client.query<{ owner_id: string }>(
-      `INSERT INTO runtime_lease(lease_key, owner_id, fencing_token, expires_at)
-       VALUES ($1,$2,1,clock_timestamp() + ($3::text || ' milliseconds')::interval)
-       ON CONFLICT (lease_key) DO UPDATE SET
+      `INSERT INTO runtime_lease(${scopeColumns(client, "runtime_lease")}lease_key, owner_id, fencing_token, expires_at)
+       VALUES (${scopeValues(client, "runtime_lease")}$1,$2,1,clock_timestamp() + ($3::text || ' milliseconds')::interval)
+       ON CONFLICT (${scopeConflict(client, "runtime_lease")}lease_key) DO UPDATE SET
          owner_id=EXCLUDED.owner_id,
          fencing_token=runtime_lease.fencing_token+1,
          expires_at=EXCLUDED.expires_at,
          updated_at=clock_timestamp()
-       WHERE runtime_lease.expires_at <= clock_timestamp()
-       RETURNING owner_id`,
+       WHERE (${scopePredicate(client, "runtime_lease", "runtime_lease")}) AND ( runtime_lease.expires_at <= clock_timestamp()
+       ) RETURNING owner_id`,
       [leaseKey, ownerId, this.#recoveryLeaseMs],
     );
     return claimed.rowCount === 1 ? (claimed.rows[0]?.owner_id ?? null) : null;
   }
 
   async #releaseRecoveryLease(client: PoolClient, taskId: string, ownerId: string): Promise<void> {
-    await client.query("DELETE FROM runtime_lease WHERE lease_key=$1 AND owner_id=$2", [
-      `sdar-recovery:${taskId}`,
-      ownerId,
-    ]);
+    await client.query(
+      `DELETE FROM runtime_lease WHERE (${scopePredicate(client, "runtime_lease", "runtime_lease")}) AND ( lease_key=$1 AND owner_id=$2) `,
+      [`sdar-recovery:${taskId}`, ownerId],
+    );
   }
 }

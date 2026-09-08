@@ -29,6 +29,23 @@ import {
 } from "../src/index.js";
 
 describe("RuntimeDatabasePreparationJob", () => {
+  it("shared GOWM profiles verify existing storage without role/database/grant provisioning", async () => {
+    const profile = createDatabaseProfile({
+      profileId: "database-profile-1",
+      providerId: providerId("provider-a"),
+      environment: environmentId("production"),
+      clusterRef: "gowm-shared:development",
+      host: "postgres.internal",
+      databaseMode: "preexisting",
+      databaseName: "gowm",
+      adminSecretRef: secretRef("vault/admin-a"),
+      runtimeSecretRef: secretRef("file/v1/deployment-1/database/runtime"),
+    });
+    const fixture = createFixture({ profile });
+    expect((await fixture.job.execute(input())).status).toBe("CONFIG_PREPARING");
+    expect(fixture.operations).toEqual(["secret", "migration"]);
+    expect(fixture.checkpoint?.completedSteps).toEqual(["runtime_secret", "migration"]);
+  });
   it("checkpoints each external step and advances to CONFIG_PREPARING", async () => {
     const fixture = createFixture();
 
@@ -131,6 +148,7 @@ describe("RuntimeDatabasePreparationJob", () => {
 });
 
 interface FixtureOverrides {
+  readonly profile?: DatabaseProfile;
   readonly createRole?: PostgresProvisionerPort["createRole"];
   readonly migration?: () => Promise<void>;
 }
@@ -141,7 +159,7 @@ function createFixture(overrides: FixtureOverrides = {}) {
   const operations: string[] = [];
   const statuses: string[] = [];
   const audits: RuntimeDatabasePreparationAuditEvent[] = [];
-  const profile = databaseProfile();
+  const profile = overrides.profile ?? databaseProfile();
   const store: RuntimeDatabasePreparationStore = {
     getDeployment: () => Promise.resolve(rehydrateRuntimeDeployment(deployment)),
     saveDeployment: (value, precondition) => {

@@ -1,0 +1,8 @@
+{
+  "consumerBase": "b974471dd62665721a5edcc63b7651d2f476160d",
+  "consumerBranch": "codex/smpp-gowm-shared-storage-integration-v0.1",
+  "upstreamCommit": "48cebb862e992579b801590385b4373b10422d52",
+  "upstreamBranch": "codex/gowm-device-shared-business-storage-v0.2",
+  "contract": "contracts/gowm-shared-storage/current/source.json",
+  "note": "Consumed files are pinned by captured hashes; upstream working tree has ongoing unrelated changes and was never modified by this task."
+}

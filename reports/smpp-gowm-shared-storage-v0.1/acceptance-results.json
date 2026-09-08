@@ -1,0 +1,347 @@
+{
+  "schemaVersion": "1.0",
+  "count": 42,
+  "items": [
+    {
+      "id": "A01",
+      "tier": "SOURCE",
+      "requirement": "仅修改SMPP；GOWM/SDAR等只读；无多仓联改",
+      "chapters": "00",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A02",
+      "tier": "SOURCE",
+      "requirement": "读取完成的GOWM开发分支/继任合并分支并保存实际消费来源",
+      "chapters": "01",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A03",
+      "tier": "SOURCE",
+      "requirement": "固定ugv_smpp共享主存储，无实例级库/business_store/双写",
+      "chapters": "00,02",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A04",
+      "tier": "SOURCE",
+      "requirement": "当前所用表/列/键/trigger和所有Repository用途有适配矩阵",
+      "chapters": "01,04",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A05",
+      "tier": "SOURCE",
+      "requirement": "GOWM模式启动只验证，不执行原生迁移/provision/修复DDL",
+      "chapters": "02",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A06",
+      "tier": "SOURCE",
+      "requirement": "GOWM模式无旧库/public自动fallback，连接身份明确",
+      "chapters": "02",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A07",
+      "tier": "SOURCE",
+      "requirement": "DeviceContext显式传递；无全局可变currentDeviceId",
+      "chapters": "03",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A08",
+      "tier": "SOURCE",
+      "requirement": "新请求与历史恢复分别采用当前绑定/固化绑定",
+      "chapters": "03",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A09",
+      "tier": "SOURCE",
+      "requirement": "Admission与Task根字段device/binding/service完整",
+      "chapters": "04",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A10",
+      "tier": "SOURCE",
+      "requirement": "所有独立子表写入满足最终设备FK及归属",
+      "chapters": "04",
+      "status": "NOT_RUN",
+      "evidence": "All child SQL adapted; exhaustive child-FK mutation tests not run."
+    },
+    {
+      "id": "A11",
+      "tier": "SOURCE",
+      "requirement": "幂等最终键含device/service与原授权操作mode/simulation维度",
+      "chapters": "04",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A12",
+      "tier": "SOURCE",
+      "requirement": "Runtime和Provider持久化JSON与列身份一致",
+      "chapters": "04,05",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A13",
+      "tier": "SOURCE",
+      "requirement": "Provider Snapshot及事件source/cursor使用完整设备/会话/通道键",
+      "chapters": "05,06",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A14",
+      "tier": "SOURCE",
+      "requirement": "Runtime Lease使用最终(scope_key,lease_key)，owner不是scope",
+      "chapters": "06",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A15",
+      "tier": "SOURCE",
+      "requirement": "所有claim/recovery/notification/cleanup循环被明确限定",
+      "chapters": "06",
+      "status": "NOT_RUN",
+      "evidence": "Source scope audit complete; not every background loop separately fault-injected."
+    },
+    {
+      "id": "A16",
+      "tier": "SOURCE",
+      "requirement": "Provider运行对象/路由只使用本设备Client、Ingress和Arbiter",
+      "chapters": "03,05",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A17",
+      "tier": "SOURCE",
+      "requirement": "MCP Task和Provider Task身份区分，支持迟到发布关联",
+      "chapters": "07",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A18",
+      "tier": "SOURCE",
+      "requirement": "Mission回执与关联使用同一个事务Client",
+      "chapters": "07",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A19",
+      "tier": "SOURCE",
+      "requirement": "不把GOWM insert-once helper当任意更新API",
+      "chapters": "07",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A20",
+      "tier": "SOURCE",
+      "requirement": "控制操作使用CONTROLLED、Mission源会话不猜测",
+      "chapters": "07",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A21",
+      "tier": "SOURCE",
+      "requirement": "实际arguments与目标引用保存；未知CRS不伪装",
+      "chapters": "08",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A22",
+      "tier": "SOURCE",
+      "requirement": "句柄过期与历史DELETE分离，必要派发/幂等数据保留",
+      "chapters": "06",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A23",
+      "tier": "SOURCE",
+      "requirement": "真正Runtime/Adapter启动Factory使用新持久化，不是孤立demo",
+      "chapters": "09",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A24",
+      "tier": "SOURCE",
+      "requirement": "GOWM只读验证不要求运行SDAR/WSGS或新增设备控制能力",
+      "chapters": "08,09",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A25",
+      "tier": "SOURCE",
+      "requirement": "pnpm lint/typecheck/build及现有受影响单元/合同回归通过",
+      "chapters": "10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A26",
+      "tier": "SOURCE",
+      "requirement": "新增源码检查、配置及设备范围单元测试通过",
+      "chapters": "10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A27",
+      "tier": "POSTGRES",
+      "requirement": "在实际GOWM安装的共享库中执行SMPP真实Repository测试",
+      "chapters": "10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A28",
+      "tier": "POSTGRES",
+      "requirement": "A/B重复幂等key、Snapshot revision、事件ID、Mission编号均独立",
+      "chapters": "04,05,07,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A29",
+      "tier": "POSTGRES",
+      "requirement": "跨设备错误父子引用/明细/取消/游标不被接受",
+      "chapters": "03,04,10",
+      "status": "NOT_RUN",
+      "evidence": "Journal FK, task/execution read, lease and outbox isolation tested; exhaustive input/cursor mutation catalog not run."
+    },
+    {
+      "id": "A30",
+      "tier": "POSTGRES",
+      "requirement": "设备租约、服务租约、同设备多Worker领取与fencing正确",
+      "chapters": "06,10",
+      "status": "NOT_RUN",
+      "evidence": "Actual DEVICE lease concurrency tested. This UGV source instance has no SERVICE-wide jobs; SERVICE lease scenario not applicable to current callers."
+    },
+    {
+      "id": "A31",
+      "tier": "POSTGRES",
+      "requirement": "Provider先接受、Runtime后发布及发布后崩溃均正确补关联",
+      "chapters": "07,10",
+      "status": "NOT_RUN",
+      "evidence": "Restart preserves published chain and dispatch count; process kill precisely between publication and commit not injected. Publication plus linking is atomic."
+    },
+    {
+      "id": "A32",
+      "tier": "POSTGRES",
+      "requirement": "Mission回执事务失败回滚、重放幂等和内容冲突被验证",
+      "chapters": "07,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A33",
+      "tier": "POSTGRES",
+      "requirement": "关闭业务历史物理purge且保持句柄过期语义已验证",
+      "chapters": "06,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A34",
+      "tier": "POSTGRES",
+      "requirement": "明确目标owner/device/scope及未知CRS测试通过",
+      "chapters": "08,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A35",
+      "tier": "POSTGRES",
+      "requirement": "断库与绑定变化不导致热循环、旧库fallback或跨设备派发",
+      "chapters": "03,06,10",
+      "status": "NOT_RUN",
+      "evidence": "No test forcibly stops PostgreSQL during active dispatch. Existing reconnect/recovery behavior retained."
+    },
+    {
+      "id": "A36",
+      "tier": "E2E",
+      "requirement": "两个源码Runtime/Adapter实例共享同一个ugv_smpp且无每设备DDL",
+      "chapters": "09,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A37",
+      "tier": "E2E",
+      "requirement": "通过真实MCP入口产生Task/Execution/Dispatch/Mission记录",
+      "chapters": "07,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A38",
+      "tier": "E2E",
+      "requirement": "取消A不影响B；异常恢复不重复调用模拟器",
+      "chapters": "10",
+      "status": "NOT_RUN",
+      "evidence": "Runtime restart after accepted publication verified without duplicate simulator navigation. Hard process crash while acceptance is in flight not injected."
+    },
+    {
+      "id": "A39",
+      "tier": "E2E",
+      "requirement": "从GOWM既有读取面确认同device的完整执行下半链",
+      "chapters": "08,10",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A40",
+      "tier": "DELIVERY",
+      "requirement": "报告逐项区分SOURCE/PG/E2E与NOT_RUN，未复用旧PASS",
+      "chapters": "12",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A41",
+      "tier": "DELIVERY",
+      "requirement": "文档列新实例启动步骤、旧库不迁移及活跃任务回滚限制",
+      "chapters": "11",
+      "status": "PASS",
+      "evidence": "See FINAL_REPORT.md, QUERY_ADAPTATION_MATRIX.md and test-results.json; SOURCE items include source inspection, not implied scenario execution."
+    },
+    {
+      "id": "A42",
+      "tier": "DELIVERY",
+      "requirement": "仅SMPP分支提交/Draft PR或如实说明权限，不自动合并发布",
+      "chapters": "11",
+      "status": "NOT_RUN",
+      "evidence": "Local branch delivery; remote PR publication not requested separately. PR_BODY.md provided."
+    }
+  ],
+  "markerPolicy": {
+    "source": "SOURCE implemented and source tests pass; unavailable PG/E2E remain NOT_RUN",
+    "devReady": "SOURCE + POSTGRES + E2E pass; report delivery truthfully",
+    "incomplete": "required implementation missing or an executed required test fails"
+  }
+}
