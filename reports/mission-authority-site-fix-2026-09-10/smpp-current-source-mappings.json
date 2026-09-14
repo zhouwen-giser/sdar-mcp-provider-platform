@@ -1,0 +1,47 @@
+{
+  "version": 4,
+  "mappings": [
+    {
+      "collectorId": "joint-development-collector",
+      "trustDomain": "joint-development",
+      "deploymentId": "smpp-sz-gowm",
+      "providerId": "isr.vehicle.ugv.ugv",
+      "instanceId": "smpp-sz-gowm-runtime",
+      "smppSourceId": "smpp.sz-gowm.ugv",
+      "tenantId": "tenant-local",
+      "projectId": "smpp-development",
+      "environment": "development",
+      "sourceProduct": "sdar-mcp-provider-platform",
+      "mappingVersion": 4,
+      "policyVersion": 2,
+      "projectionRouteIds": [
+        "standalone-smpp",
+        "sdar-warehouse-shadow"
+      ],
+      "status": "active",
+      "validFrom": "2026-01-01T00:00:00Z",
+      "validTo": null
+    },
+    {
+      "collectorId": "joint-development-collector",
+      "trustDomain": "joint-development",
+      "deploymentId": "smpp-sz-gowm",
+      "providerId": "isr.vehicle.ugv.ugv",
+      "instanceId": "smpp-runtime-postgres-authority",
+      "smppSourceId": "smpp.sz-gowm.ugv",
+      "tenantId": "tenant-local",
+      "projectId": "smpp-development",
+      "environment": "development",
+      "sourceProduct": "sdar-mcp-provider-platform",
+      "mappingVersion": 4,
+      "policyVersion": 2,
+      "projectionRouteIds": [
+        "standalone-smpp",
+        "sdar-warehouse-shadow"
+      ],
+      "status": "active",
+      "validFrom": "2026-01-01T00:00:00Z",
+      "validTo": null
+    }
+  ]
+}

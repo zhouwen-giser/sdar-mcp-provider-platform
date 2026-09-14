@@ -24,4 +24,8 @@ SMPP 从基础包 `.runtime/.../business-connections.env` 读取 `SMPP_DATABASE_
 
 `bash deploy.sh` 会复用 sz-gowm 已安装的 Node 22（含 nvm 路径）；使用 docker 组内的 sz 用户即可，不需要 sudo。
 
-本 sz-gowm 配置面向已确认的纯软件仿真：默认 UGV_FIRE_ENABLED=true，仍要求有效锁定目标和单次发射确认。侦察、同目标跟踪与发射共享光电任务上下文，不先取消侦察。设备侦察CmdResEnum成功值为1，失败值为2。默认设备MCP超时15秒、Runtime到Adapter超时60秒；遥测经runtime:7002接收。
+默认禁用发射：实际配置为 `ADAPTER__UGV_FIRE_ENABLED=false`，适配器返回 `UGV_FIRE_DISABLED`。`UGV_FIRE_DISABLED` 是禁用原因码，不是环境变量。本部署不执行设备控制或发射验证。默认设备 MCP 超时15秒、Runtime 到 Adapter 超时60秒；遥测经 runtime:7002 接收。
+
+共享部署启用 Runtime 的 Provider 遥测接收器。生成配置时检查 Adapter 与 Runtime 的开关、监听地址、端口及 TLS 模式一致；关闭的接收器在健康接口中显示 disabled，不再显示 ready。
+
+新建导航使用 missionAuthorityVersion=1：执行终态与已提交回执作为持久发布依据，服务通过受设备、绑定和服务范围约束的事务，将来源事实与最终 Mission 关系写入已有 provider_ops_delivery。只有回执 hash 与原生链接一致才发布 exact；缺失、响应不确定和身份冲突继续阻断。重启重放使用稳定 record ID/hash，无需新增数据库或表；未标记的旧执行不会回填。实时观测不覆盖此版本导航的最终回执关系。此机制限定导航，不改变发射功能。

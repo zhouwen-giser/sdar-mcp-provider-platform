@@ -1,0 +1,276 @@
+{
+  "at": "2026-09-09T16:20:01.155994+00:00",
+  "execution": {
+    "taskId": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+    "executionId": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+    "state": "SUCCEEDED",
+    "terminalAt": "2026-09-09T16:17:20.14+00:00"
+  },
+  "authority": {
+    "taskExecution": [
+      {
+        "relation_id": "eff15c32-d4f4-5859-9a3a-91a29489ed69",
+        "tenant_id": "tenant-local",
+        "project_id": "smpp-development",
+        "environment": "development",
+        "smpp_source_id": "smpp.sz-gowm.ugv",
+        "source_system": "smpp",
+        "target_system": "smpp",
+        "relation_type": "task_execution_binding",
+        "source_entity_urn": "urn:telemetry:tenant-local:smpp:smpp-sz-gowm:task:72d2d5c4-0512-43f2-89e3-6581a048689f",
+        "target_entity_urn": "urn:telemetry:tenant-local:smpp:smpp-sz-gowm:execution:vehicle%3Augv%3Achassis%3A8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "source_entity_type": "task",
+        "target_entity_type": "execution",
+        "source_entity_id": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+        "target_entity_id": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "binding_source": "smpp_runtime_reconciliation_found",
+        "confidence_class": "authoritative",
+        "source_record_id": "03d6ea0b-70c8-5f7a-8a46-3ccf23d6662f",
+        "valid_from": "2026-09-09 16:17:24.617",
+        "projected_at": "2026-09-09 16:18:47.357"
+      }
+    ],
+    "missionAuthorityState": {
+      "record_id": "d53fe562-74cf-5a3a-a1b2-2f160b827669",
+      "source_record_hash": "ece6770fcc8771204b99c22c4d91559e9ae8c4f1905aa122c5caaccc37c94bdf",
+      "fact_id": "fb4f4bd7-f0b4-5908-a122-8617373d682f",
+      "tenant_id": "tenant-local",
+      "project_id": "smpp-development",
+      "environment": "development",
+      "smpp_source_id": "smpp.sz-gowm.ugv",
+      "source_deployment_id": "smpp-sz-gowm",
+      "source_system": "smpp",
+      "task_id": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+      "external_execution_id": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+      "entity_refs_json": "[{\"entityType\":\"runtime\",\"localId\":\"smpp-runtime-postgres-authority\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:runtime:smpp-runtime-postgres-authority\"},{\"entityType\":\"provider\",\"localId\":\"isr.vehicle.ugv.ugv\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:provider:isr.vehicle.ugv.ugv\"},{\"entityType\":\"task\",\"localId\":\"72d2d5c4-0512-43f2-89e3-6581a048689f\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:task:72d2d5c4-0512-43f2-89e3-6581a048689f\"},{\"entityType\":\"resource\",\"localId\":\"vehicle:ugv\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:resource:vehicle%3Augv\"},{\"entityType\":\"execution\",\"localId\":\"vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:execution:vehicle%3Augv%3Achassis%3A8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae\"},{\"entityType\":\"device_mission\",\"localId\":\"41992\",\"urn\":\"urn:telemetry:tenant-local:smpp:smpp-sz-gowm:device_mission:41992\"}]",
+      "correlation_id": "25d4df28-d23d-4dce-81d6-6a3aef42ec96",
+      "trace_id": "",
+      "occurred_at": "2026-09-09 16:17:20.140",
+      "observed_at": "2026-09-09 16:17:20.140",
+      "relation_status": "exact",
+      "device_mission_id": "41992",
+      "projected_at": "2026-09-09 16:17:23.403"
+    },
+    "executionMission": [
+      {
+        "relation_id": "06612c4b-4cae-5962-b08b-142d8135a075",
+        "relation_type": "execution_mission_binding",
+        "source_entity_urn": "urn:telemetry:tenant-local:smpp:smpp-sz-gowm:execution:vehicle%3Augv%3Achassis%3A8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "source_entity_type": "execution",
+        "source_entity_id": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "target_entity_urn": "urn:telemetry:tenant-local:smpp:smpp-sz-gowm:device_mission:41992",
+        "target_entity_type": "device_mission",
+        "target_entity_id": "41992",
+        "binding_source": "provider_authoritative_mission_identity",
+        "confidence_class": "authoritative",
+        "source_record_id": "d53fe562-74cf-5a3a-a1b2-2f160b827669",
+        "source_record_hash": "ece6770fcc8771204b99c22c4d91559e9ae8c4f1905aa122c5caaccc37c94bdf",
+        "causation_fact_id": "fb4f4bd7-f0b4-5908-a122-8617373d682f",
+        "evidence_fact_ids": [
+          "fb4f4bd7-f0b4-5908-a122-8617373d682f"
+        ],
+        "valid_from": "2026-09-09 16:17:20.140",
+        "projected_at": "2026-09-09 16:18:47.357",
+        "projection_id": "smpp_current_authority_read_model",
+        "projection_version": 2
+      }
+    ],
+    "currentTaskExecutionCount": 1,
+    "currentExecutionMissionCount": 1,
+    "resolvedScope": {
+      "tenantId": "tenant-local",
+      "projectId": "smpp-development",
+      "environment": "development",
+      "smppSourceId": "smpp.sz-gowm.ugv",
+      "deploymentId": "smpp-sz-gowm"
+    },
+    "scopeResolution": "explicit_or_configured",
+    "selection": "provider_observed_at_then_source_record_id_scoped_v2",
+    "convergence": "selected_fact_dependency_join_scoped_v3",
+    "auditHistoryPreserved": true
+  },
+  "negativeScope": {
+    "taskExecution": [],
+    "missionAuthorityState": null,
+    "executionMission": [],
+    "currentTaskExecutionCount": 0,
+    "currentExecutionMissionCount": 0,
+    "resolvedScope": {
+      "tenantId": "tenant-local",
+      "projectId": "wrong-project-negative-check",
+      "environment": "development",
+      "smppSourceId": "smpp.sz-gowm.ugv",
+      "deploymentId": "smpp-sz-gowm"
+    },
+    "scopeResolution": "explicit_or_configured",
+    "selection": "provider_observed_at_then_source_record_id_scoped_v2",
+    "convergence": "selected_fact_dependency_join_scoped_v3",
+    "auditHistoryPreserved": true
+  },
+  "records": [
+    {
+      "record": {
+        "taskId": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+        "payload": {
+          "state": "ACCEPTED",
+          "reasonCode": "SMPP_NAVIGATION_RECEIPT_COMMITTED"
+        },
+        "recordId": "6330ada3-94e2-5f34-a367-6666e8c5a072",
+        "emittedAt": "2026-09-09T16:16:25.685Z",
+        "eventType": "resource.state",
+        "attributes": {
+          "sdar.evidence.kind": "mission",
+          "sdar.device.mission_id": "41992",
+          "sdar.evidence.authority": "navigation_dispatch_receipt_v1",
+          "sdar.evidence.receipt_hash": "22ea9cd2e43d9c257c75f13ef64aaa8ee022adb6da7b40a0a07b9ea606cfffbc",
+          "sdar.evidence.dispatch_step": "start:01:primary",
+          "sdar.evidence.mission_instance_id": "340117df-193d-4daf-b91e-06625e62e986"
+        },
+        "instanceId": "smpp-runtime-postgres-authority",
+        "occurredAt": "2026-09-09T16:16:25.685Z",
+        "providerId": "isr.vehicle.ugv.ugv",
+        "recordHash": "787ccb37547516319e833a4b8ba33a05e0782ca466e17d259e3ce8a95db3a0ca",
+        "recordType": "provider.resource.state",
+        "resourceId": "vehicle:ugv",
+        "schemaName": "sdar.provider.ops.event",
+        "argumentHash": "34e5b603d01a7bf1ba142493a92e110a7a372e046dc5afbaad62667b27e29ec2",
+        "resourceType": "isr.vehicle.ugv",
+        "correlationId": "25d4df28-d23d-4dce-81d6-6a3aef42ec96",
+        "deliveryClass": "audit",
+        "eventCategory": "resource.state",
+        "executionMode": "live",
+        "operationName": "vehicle_navigate",
+        "schemaVersion": "1.1.0",
+        "runtimeVersion": "2.0.0-rc.1",
+        "providerEventId": "1d5cf99750077dee1408e44bfe0958891825d9511219f3fc38809c698b76270a",
+        "externalExecutionId": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "providerEventSequence": 1,
+        "authorizationContextHash": "873a11a9d7ffbca83c3a5686ee5984b168599792b9e7d2ee01b484d835a6100b"
+      },
+      "state": "DELIVERED",
+      "deliveredAt": "2026-09-09T16:17:22.667718+00:00",
+      "attempts": 1
+    },
+    {
+      "record": {
+        "taskId": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+        "payload": {
+          "state": "ACCEPTED",
+          "reasonCode": "SMPP_NAVIGATION_RECEIPT_COMMITTED"
+        },
+        "recordId": "f1e737fe-853a-508c-bc0f-e992dfe4d269",
+        "emittedAt": "2026-09-09T16:16:25.711Z",
+        "eventType": "resource.state",
+        "attributes": {
+          "sdar.evidence.kind": "mission",
+          "sdar.device.mission_id": "41992",
+          "sdar.evidence.authority": "navigation_dispatch_receipt_v1",
+          "sdar.evidence.receipt_hash": "07478ca96240f1a1bc5ca0da34f89febe074e935acb41a896ebda95081173d93",
+          "sdar.evidence.dispatch_step": "start:02:followup",
+          "sdar.evidence.mission_instance_id": "340117df-193d-4daf-b91e-06625e62e986"
+        },
+        "instanceId": "smpp-runtime-postgres-authority",
+        "occurredAt": "2026-09-09T16:16:25.711Z",
+        "providerId": "isr.vehicle.ugv.ugv",
+        "recordHash": "48eddd8f30a0595f08f2ba71271ae25cfcf94474d2970807d7f4c4d9c97cf7c1",
+        "recordType": "provider.resource.state",
+        "resourceId": "vehicle:ugv",
+        "schemaName": "sdar.provider.ops.event",
+        "argumentHash": "34e5b603d01a7bf1ba142493a92e110a7a372e046dc5afbaad62667b27e29ec2",
+        "resourceType": "isr.vehicle.ugv",
+        "correlationId": "25d4df28-d23d-4dce-81d6-6a3aef42ec96",
+        "deliveryClass": "audit",
+        "eventCategory": "resource.state",
+        "executionMode": "live",
+        "operationName": "vehicle_navigate",
+        "schemaVersion": "1.1.0",
+        "runtimeVersion": "2.0.0-rc.1",
+        "providerEventId": "7ba068d3810e6ca49380deef6dce9d94da6ad681ebb2be0826d73dfc4ca942f3",
+        "externalExecutionId": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "providerEventSequence": 2,
+        "authorizationContextHash": "873a11a9d7ffbca83c3a5686ee5984b168599792b9e7d2ee01b484d835a6100b"
+      },
+      "state": "DELIVERED",
+      "deliveredAt": "2026-09-09T16:17:22.668718+00:00",
+      "attempts": 1
+    },
+    {
+      "record": {
+        "taskId": "72d2d5c4-0512-43f2-89e3-6581a048689f",
+        "payload": {
+          "observedAt": "2026-09-09T16:17:20.140Z",
+          "reasonCode": "SMPP_MISSION_RELATION_EXACT",
+          "relationStatus": "exact",
+          "deviceMissionId": "41992",
+          "providerSubstate": "mission_relation_exact",
+          "sourceRecordRefs": [
+            "6330ada3-94e2-5f34-a367-6666e8c5a072",
+            "f1e737fe-853a-508c-bc0f-e992dfe4d269"
+          ]
+        },
+        "recordId": "d53fe562-74cf-5a3a-a1b2-2f160b827669",
+        "emittedAt": "2026-09-09T16:17:20.140Z",
+        "eventType": "smpp.mission.relation",
+        "attributes": {
+          "sdar.fact.kind": "mission_relation",
+          "sdar.device.mission_id": "41992",
+          "sdar.mission.authority": "navigation_dispatch_receipt_v1",
+          "sdar.mission.relation_status": "exact",
+          "sdar.mission.source_record_refs": [
+            "6330ada3-94e2-5f34-a367-6666e8c5a072",
+            "f1e737fe-853a-508c-bc0f-e992dfe4d269"
+          ],
+          "sdar.mission.source_record_hashes": {
+            "6330ada3-94e2-5f34-a367-6666e8c5a072": "787ccb37547516319e833a4b8ba33a05e0782ca466e17d259e3ce8a95db3a0ca",
+            "f1e737fe-853a-508c-bc0f-e992dfe4d269": "48eddd8f30a0595f08f2ba71271ae25cfcf94474d2970807d7f4c4d9c97cf7c1"
+          }
+        },
+        "instanceId": "smpp-runtime-postgres-authority",
+        "occurredAt": "2026-09-09T16:17:20.140Z",
+        "providerId": "isr.vehicle.ugv.ugv",
+        "recordHash": "ece6770fcc8771204b99c22c4d91559e9ae8c4f1905aa122c5caaccc37c94bdf",
+        "recordType": "provider.execution.progress",
+        "resourceId": "vehicle:ugv",
+        "schemaName": "sdar.provider.ops.event",
+        "argumentHash": "34e5b603d01a7bf1ba142493a92e110a7a372e046dc5afbaad62667b27e29ec2",
+        "resourceType": "isr.vehicle.ugv",
+        "correlationId": "25d4df28-d23d-4dce-81d6-6a3aef42ec96",
+        "deliveryClass": "audit",
+        "eventCategory": "execution.progress",
+        "executionMode": "live",
+        "operationName": "vehicle_navigate",
+        "schemaVersion": "1.1.0",
+        "runtimeVersion": "2.0.0-rc.1",
+        "externalExecutionId": "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae",
+        "authorizationContextHash": "873a11a9d7ffbca83c3a5686ee5984b168599792b9e7d2ee01b484d835a6100b"
+      },
+      "state": "DELIVERED",
+      "deliveredAt": "2026-09-09T16:17:22.669477+00:00",
+      "attempts": 1
+    }
+  ],
+  "warehouseFacts": [
+    {
+      "source_record_id": "f1e737fe-853a-508c-bc0f-e992dfe4d269",
+      "source_record_hash": "48eddd8f30a0595f08f2ba71271ae25cfcf94474d2970807d7f4c4d9c97cf7c1"
+    },
+    {
+      "source_record_id": "d53fe562-74cf-5a3a-a1b2-2f160b827669",
+      "source_record_hash": "ece6770fcc8771204b99c22c4d91559e9ae8c4f1905aa122c5caaccc37c94bdf"
+    },
+    {
+      "source_record_id": "6330ada3-94e2-5f34-a367-6666e8c5a072",
+      "source_record_hash": "787ccb37547516319e833a4b8ba33a05e0782ca466e17d259e3ce8a95db3a0ca"
+    }
+  ],
+  "checks": {
+    "executionSucceeded": true,
+    "uniqueTaskExecution": true,
+    "exactMission": true,
+    "uniqueExecutionMission": true,
+    "threeRecordsDelivered": true,
+    "warehouseHashesMatch": true,
+    "wrongScopeBlocked": true
+  },
+  "status": "PASS"
+}

@@ -1,3 +1,4 @@
+import { capturePendingNavigationMissions } from "../../gowm-shared-storage-adapter/src/navigation-mission-outbox.js";
 import {
   scopeColumns,
   scopeConflict,
@@ -74,6 +75,7 @@ export class ProviderOpsDeliveryRepository {
     if (!Number.isInteger(limit) || limit < 1 || limit > 10_000) {
       throw new RangeError("PROVIDER_OPS_BATCH_INVALID");
     }
+    await capturePendingNavigationMissions(this.pool);
     const result = await this.pool.query<ProviderOpsDeliveryRow>(
       `WITH candidates AS (
          SELECT record_id FROM provider_ops_delivery
@@ -81,7 +83,11 @@ export class ProviderOpsDeliveryRepository {
                 AND next_attempt_at <= COALESCE($1::timestamptz,clock_timestamp()))
             OR (state='CLAIMED'
                 AND claim_until <= COALESCE($1::timestamptz,clock_timestamp()))
-         ) ORDER BY COALESCE(claim_until,next_attempt_at),created_at,record_id
+         ) ORDER BY CASE WHEN
+           record_body->'attributes'->>'sdar.evidence.authority'='navigation_dispatch_receipt_v1'
+           OR record_body->'attributes'->>'sdar.mission.authority'='navigation_dispatch_receipt_v1'
+           THEN 0 ELSE 1 END,
+           COALESCE(claim_until,next_attempt_at),created_at,record_id
          FOR UPDATE SKIP LOCKED LIMIT $2
        )
        UPDATE provider_ops_delivery delivery

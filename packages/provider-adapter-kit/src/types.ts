@@ -32,6 +32,8 @@ export interface ExecutionContextRecord {
 }
 
 export interface ProviderExecution {
+  /** New navigation executions opt into committed receipt publication; never backfill legacy tasks. */
+  missionAuthorityVersion?: 1;
   deviceContext?: DeviceExecutionContext;
   taskId: string;
   externalExecutionId: string;
