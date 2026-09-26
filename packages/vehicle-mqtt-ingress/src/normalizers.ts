@@ -1,4 +1,5 @@
 import {
+  isoTimestampFromEpochMicroseconds,
   projectReconMotionStatus,
   type ComponentHealth,
   type FreshnessDomain,
@@ -611,11 +612,12 @@ function richTarget(value: unknown, fallbackObservedAt: string): VehicleTarget {
   if (value.capture_time_us !== undefined && captureTimeUs === undefined)
     throw new Error("UGV_MQTT_RECON_TARGET_TIME_INVALID");
   const positionValue = record(value.position) ? value.position : undefined;
-  if (positionValue === undefined) throw new Error("UGV_MQTT_RECON_TARGET_POSITION_INVALID");
+  if (value.position !== undefined && positionValue === undefined)
+    throw new Error("UGV_MQTT_RECON_TARGET_POSITION_INVALID");
   const velocityValue = record(value.velocity) ? value.velocity : undefined;
   const pixelValue = record(value.pixel_pos) ? value.pixel_pos : undefined;
   const targetType = optionalInteger(value.type);
-  const altitude = optionalNumber(positionValue.altitude);
+  const altitude = optionalNumber(positionValue?.altitude);
   const distanceM = optionalNonnegativeNumber(value.distance);
   const confidence = optionalNumber(value.confidence);
   const threat = boundedInteger(value.threat, 0, 10);
@@ -628,11 +630,15 @@ function richTarget(value: unknown, fallbackObservedAt: string): VehicleTarget {
     targetId: id(value.target_id),
     ...(targetType === undefined ? {} : { targetType, objectType: String(targetType) }),
     ...(captureTimeUs === undefined ? {} : { captureTimeUs }),
-    position: {
-      longitude: longitude(positionValue.longitude),
-      latitude: latitude(positionValue.latitude),
-      ...(altitude === undefined ? {} : { altitude }),
-    },
+    ...(positionValue === undefined
+      ? {}
+      : {
+          position: {
+            longitude: longitude(positionValue.longitude),
+            latitude: latitude(positionValue.latitude),
+            ...(altitude === undefined ? {} : { altitude }),
+          },
+        }),
     ...(velocityValue === undefined
       ? {}
       : {
@@ -659,7 +665,7 @@ function richTarget(value: unknown, fallbackObservedAt: string): VehicleTarget {
           }),
         }),
     ...(roleName === undefined ? {} : { roleName }),
-    coordinateFrame: "WGS84",
+    ...(positionValue === undefined ? {} : { coordinateFrame: "WGS84" as const }),
     source: "mqtt_area_recon",
     observedAt,
   };
@@ -945,20 +951,25 @@ function stampTimestamp(value: unknown): string | undefined {
   const nanos = optionalNumber(value.nanosec ?? value.nsecs) ?? 0;
   if (
     seconds === undefined ||
+    !Number.isSafeInteger(seconds) ||
     seconds < 0 ||
+    !Number.isSafeInteger(nanos) ||
     nanos < 0 ||
     nanos >= 1_000_000_000 ||
     (seconds === 0 && nanos === 0)
   )
     return undefined;
-  return new Date(seconds * 1000 + nanos / 1_000_000).toISOString();
+  const date = new Date(seconds * 1000);
+  if (!Number.isFinite(date.valueOf())) return undefined;
+  const iso = date.toISOString();
+  const fraction = String(nanos).padStart(9, "0");
+  return `${iso.slice(0, iso.indexOf("."))}.${fraction.slice(0, 3)}${fraction.slice(3).replace(/0+$/, "")}Z`;
 }
 
 function microsecondsTimestamp(value: number): string {
-  const milliseconds = value / 1000;
-  const date = new Date(milliseconds);
-  if (!Number.isFinite(date.valueOf())) throw new Error("UGV_MQTT_TIMESTAMP_INVALID");
-  return date.toISOString();
+  const timestamp = isoTimestampFromEpochMicroseconds(value);
+  if (timestamp === undefined) throw new Error("UGV_MQTT_TIMESTAMP_INVALID");
+  return timestamp;
 }
 
 function coordinatePairs(value: unknown): { x: number; y: number }[] | undefined {

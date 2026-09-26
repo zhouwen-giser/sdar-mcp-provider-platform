@@ -3,6 +3,7 @@ import { Ajv2020 } from "ajv/dist/2020.js";
 import {
   jsonToProtoStruct,
   protoStructToJson,
+  TaskBusinessOperationProfileSchema,
   validateBusinessEventSourceCapability,
 } from "../../adapter-protocol/src/index.js";
 import type {
@@ -117,6 +118,10 @@ export class OperationRegistry {
   }
 
   validate(manifest: ProviderManifest): ValidatedManifest {
+    return this.#validate(manifest, true);
+  }
+
+  #validate(manifest: ProviderManifest, verifyBusinessSource: boolean): ValidatedManifest {
     if (manifest.adapterProtocolVersion !== "1.0") throw new Error("UNSUPPORTED_ADAPTER_PROTOCOL");
     if (!PROVIDER_ID.test(manifest.providerId)) throw new Error("INVALID_PROVIDER_ID");
     if (!PROVIDER_TYPE.test(manifest.providerType)) throw new Error("INVALID_PROVIDER_TYPE");
@@ -146,6 +151,27 @@ export class OperationRegistry {
       if (operation.execution === "SYNCHRONOUS" && operation.capabilities.scheduling) {
         throw new Error("SYNCHRONOUS_SCHEDULING_CONFLICT");
       }
+      const businessFeedbackProfile =
+        operation.businessFeedbackProfile === undefined ||
+        operation.businessFeedbackProfile === null
+          ? undefined
+          : TaskBusinessOperationProfileSchema.parse(
+              protoStructToJson(operation.businessFeedbackProfile),
+            );
+      if (businessFeedbackProfile) {
+        if (operation.execution === "SYNCHRONOUS") {
+          throw new Error("SYNCHRONOUS_BUSINESS_FEEDBACK_CONFLICT");
+        }
+        const source = businessEventSources.find(
+          (candidate) => candidate.sourceId === businessFeedbackProfile.source.sourceId,
+        );
+        if (
+          verifyBusinessSource &&
+          (source?.deliverySemantics !== "durable_at_least_once" || !source.replaySupported)
+        ) {
+          throw new Error("TASK_BUSINESS_SOURCE_NOT_DURABLE");
+        }
+      }
       const inputSchema = protoStructToJson(operation.inputSchema);
       const outputSchema = protoStructToJson(operation.outputSchema);
       for (const schema of [inputSchema, outputSchema]) {
@@ -155,7 +181,16 @@ export class OperationRegistry {
       }
       const validateInput = this.#ajv.compile(inputSchema);
       const validateOutput = this.#ajv.compile(outputSchema);
-      return { ...operation, inputSchema, outputSchema, validateInput, validateOutput };
+      const operationWithoutProfile = { ...operation };
+      delete operationWithoutProfile.businessFeedbackProfile;
+      return {
+        ...operationWithoutProfile,
+        inputSchema,
+        outputSchema,
+        ...(businessFeedbackProfile === undefined ? {} : { businessFeedbackProfile }),
+        validateInput,
+        validateOutput,
+      };
     });
 
     const manifestDefinition = {
@@ -219,6 +254,9 @@ export class OperationRegistry {
                         ? { mode: "NONE" }
                         : operation.resourceBinding,
                   }),
+              ...(operation.businessFeedbackProfile === undefined
+                ? {}
+                : { "io.sdar/taskBusiness": operation.businessFeedbackProfile }),
             },
           },
         };
@@ -254,15 +292,26 @@ export class OperationRegistry {
       ...definition,
       inputSchema: jsonToProtoStruct(inputSchema as Record<string, unknown>),
       outputSchema: jsonToProtoStruct(outputSchema as Record<string, unknown>),
+      ...(definition.businessFeedbackProfile === undefined ||
+      definition.businessFeedbackProfile === null
+        ? {}
+        : {
+            businessFeedbackProfile: jsonToProtoStruct(
+              definition.businessFeedbackProfile as Record<string, unknown>,
+            ),
+          }),
     } as unknown as OperationDefinition;
-    const resolved = this.validate({
-      adapterProtocolVersion: "1.0",
-      providerId: metadata.providerId,
-      providerType: "operation-snapshot",
-      providerVersion: metadata.providerVersion,
-      inventoryMode: "OPAQUE",
-      operations: [operation],
-    }).operations[0];
+    const resolved = this.#validate(
+      {
+        adapterProtocolVersion: "1.0",
+        providerId: metadata.providerId,
+        providerType: "operation-snapshot",
+        providerVersion: metadata.providerVersion,
+        inventoryMode: "OPAQUE",
+        operations: [operation],
+      },
+      false,
+    ).operations[0];
     if (resolved === undefined) throw new Error("INVALID_OPERATION_SNAPSHOT");
     return { ...resolved, manifestHash: metadata.manifestHash, definition };
   }

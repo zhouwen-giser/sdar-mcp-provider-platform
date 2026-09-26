@@ -2,10 +2,12 @@ import * as grpc from "@grpc/grpc-js";
 import { readFileSync } from "node:fs";
 import {
   adapterServiceDefinition,
+  jsonToProtoStruct,
   parseBusinessEventSequence,
   protoStructToJson,
 } from "../../adapter-protocol/src/index.js";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
+import type { BusinessSnapshotPartSelector } from "../../adapter-protocol/src/index.js";
 import type {
   AvailabilityDecision,
   VehicleBusinessEventHub,
@@ -25,6 +27,28 @@ interface StartRequest {
 interface CommandRequest {
   identity?: Record<string, unknown>;
   inputResponses?: unknown[];
+  inputs?: unknown[];
+  businessInputCommand?: unknown;
+  command?: unknown;
+}
+interface BusinessReadRequest {
+  taskId?: string;
+  externalExecutionId?: string;
+  executionContext?: Record<string, unknown>;
+  maxPageBytes?: number;
+  pageCursor?: string;
+  contextRevision?: string | number;
+  objectKind?: string;
+  objectId?: string;
+  objectRevision?: string | number;
+  offset?: string | number;
+  maxBytes?: number;
+  artifactId?: string;
+  revision?: string | number;
+  representationName?: string;
+  includeContent?: boolean;
+  contentOffset?: string | number;
+  maxContentBytes?: number;
 }
 interface ReconcileRequest extends StartRequest {
   externalExecutionId?: string;
@@ -45,6 +69,12 @@ export interface VehicleCommandIdentity {
   argumentHash: string;
   executionContext: ExecutionContextRecord;
   commandSequence: string;
+}
+
+export interface VehicleBusinessReadIdentity {
+  taskId: string;
+  externalExecutionId: string;
+  executionContext: ExecutionContextRecord;
 }
 
 export interface VehicleAdapterRuntime {
@@ -70,7 +100,51 @@ export interface VehicleAdapterRuntime {
     identity: VehicleCommandIdentity,
     responses: unknown,
   ): Promise<Record<string, unknown>>;
-  executionSnapshot(execution: ProviderExecution): Record<string, unknown>;
+  /** Operation-bound reply routing; older adapters retain the updateFire fallback. */
+  updateInput?(
+    identity: VehicleCommandIdentity,
+    update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+  ): Promise<Record<string, unknown>>;
+  getBusinessContext?(
+    identity: VehicleBusinessReadIdentity,
+    maxPageBytes: number,
+    pageCursor: string,
+  ): Promise<Record<string, unknown> | undefined>;
+  getBusinessSnapshotPart?(
+    identity: VehicleBusinessReadIdentity,
+    selector: BusinessSnapshotPartSelector,
+  ): Promise<{
+    jsonBytes: Uint8Array;
+    totalBytes: number;
+    sha256: string;
+    nextOffset?: number;
+  }>;
+  getBusinessArtifact?(
+    identity: VehicleBusinessReadIdentity,
+    artifactId: string,
+    revision: number | undefined,
+    representationName: string,
+    includeContent: boolean,
+  ): Promise<
+    | {
+        artifact: Record<string, unknown>;
+        contentBytes?: Uint8Array;
+        mediaType?: string;
+        sha256?: string;
+      }
+    | undefined
+  >;
+  updateTaskBusinessInput?(
+    identity: VehicleCommandIdentity,
+    command: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
+  applyIntervention?(
+    identity: VehicleCommandIdentity,
+    command: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
+  executionSnapshot(
+    execution: ProviderExecution,
+  ): Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
 export class VehicleProviderGrpcServer {
@@ -171,12 +245,163 @@ export class VehicleProviderGrpcServer {
       getExecution: (call: Unary<{ taskId?: string }>, callback: grpc.sendUnaryData<unknown>) => {
         void this.runtime
           .get(call.request.taskId ?? "")
-          .then((execution) =>
-            execution === undefined
-              ? callback(notFound())
-              : callback(null, this.runtime.executionSnapshot(execution)),
-          )
+          .then(async (execution) => {
+            if (execution === undefined) callback(notFound());
+            else callback(null, await this.runtime.executionSnapshot(execution));
+          })
           .catch((error: unknown) => callback(serviceError(error, this.options.internalErrorCode)));
+      },
+      getBusinessContext: (
+        call: Unary<BusinessReadRequest>,
+        callback: grpc.sendUnaryData<unknown>,
+      ) => {
+        if (!this.runtime.getBusinessContext) {
+          callback(businessMethodUnavailable());
+          return;
+        }
+        void this.runtime
+          .getBusinessContext(
+            businessReadIdentity(call.request),
+            call.request.maxPageBytes ?? 1_048_576,
+            call.request.pageCursor ?? "",
+          )
+          .then((page) =>
+            page === undefined
+              ? callback(businessNotFound())
+              : callback(null, { page: jsonToProtoStruct(page) }),
+          )
+          .catch((error: unknown) =>
+            callback(businessServiceError(error, this.options.internalErrorCode)),
+          );
+      },
+      getBusinessSnapshotPart: (
+        call: Unary<BusinessReadRequest>,
+        callback: grpc.sendUnaryData<unknown>,
+      ) => {
+        if (!this.runtime.getBusinessSnapshotPart) {
+          callback(businessMethodUnavailable());
+          return;
+        }
+        const contextRevision = Number(call.request.contextRevision ?? -1);
+        const offset = Number(call.request.offset ?? 0);
+        const requestedMax = call.request.maxBytes ?? 0;
+        const maxBytes = requestedMax === 0 ? 1_048_576 : requestedMax;
+        const objectKind = call.request.objectKind ?? "";
+        const objectId = call.request.objectId ?? "";
+        const objectRevision = call.request.objectRevision;
+        const isObject = objectKind !== "" || objectId !== "" || objectRevision !== undefined;
+        const validKind = ["artifact", "action", "input_request", "intervention"].includes(
+          objectKind,
+        );
+        const parsedObjectRevision = Number(objectRevision);
+        if (
+          !Number.isSafeInteger(contextRevision) ||
+          contextRevision < 0 ||
+          !Number.isSafeInteger(offset) ||
+          offset < 0 ||
+          !Number.isInteger(maxBytes) ||
+          maxBytes < 1 ||
+          maxBytes > 1_048_576 ||
+          (isObject &&
+            (!validKind ||
+              objectId.length < 1 ||
+              objectId.length > 256 ||
+              !Number.isSafeInteger(parsedObjectRevision) ||
+              parsedObjectRevision < 1))
+        ) {
+          callback(businessInvalidArgument("BUSINESS_SNAPSHOT_PART_INVALID"));
+          return;
+        }
+        const selector: BusinessSnapshotPartSelector = {
+          contextRevision,
+          offset,
+          maxBytes,
+          ...(isObject
+            ? {
+                objectRef: {
+                  kind: objectKind as NonNullable<
+                    BusinessSnapshotPartSelector["objectRef"]
+                  >["kind"],
+                  id: objectId,
+                  revision: parsedObjectRevision,
+                },
+              }
+            : {}),
+        };
+        void this.runtime
+          .getBusinessSnapshotPart(businessReadIdentity(call.request), selector)
+          .then((part) =>
+            callback(null, {
+              jsonBytes: Buffer.from(part.jsonBytes),
+              totalBytes: String(part.totalBytes),
+              sha256: part.sha256,
+              ...(part.nextOffset === undefined ? {} : { nextOffset: String(part.nextOffset) }),
+            }),
+          )
+          .catch((error: unknown) =>
+            callback(businessServiceError(error, this.options.internalErrorCode)),
+          );
+      },
+      getBusinessArtifact: (
+        call: Unary<BusinessReadRequest>,
+        callback: grpc.sendUnaryData<unknown>,
+      ) => {
+        if (!this.runtime.getBusinessArtifact) {
+          callback(businessMethodUnavailable());
+          return;
+        }
+        const revision =
+          call.request.revision === undefined ? undefined : Number(call.request.revision);
+        if (revision !== undefined && (!Number.isSafeInteger(revision) || revision < 1)) {
+          callback(businessInvalidArgument("ARTIFACT_REVISION_INVALID"));
+          return;
+        }
+        const offset = Number(call.request.contentOffset ?? 0);
+        const requestedMax = call.request.maxContentBytes ?? 0;
+        const maxBytes = requestedMax === 0 ? 1_048_576 : requestedMax;
+        if (
+          !Number.isSafeInteger(offset) ||
+          offset < 0 ||
+          !Number.isInteger(maxBytes) ||
+          maxBytes < 1 ||
+          maxBytes > 1_048_576
+        ) {
+          callback(businessInvalidArgument("ARTIFACT_CONTENT_RANGE_INVALID"));
+          return;
+        }
+        void this.runtime
+          .getBusinessArtifact(
+            businessReadIdentity(call.request),
+            call.request.artifactId ?? "",
+            revision,
+            call.request.representationName ?? "",
+            call.request.includeContent ?? false,
+          )
+          .then((result) => {
+            if (result === undefined) {
+              callback(businessNotFound());
+              return;
+            }
+            const bytes = call.request.includeContent ? result.contentBytes : undefined;
+            if (bytes && offset > bytes.length) {
+              callback(businessError(grpc.status.OUT_OF_RANGE, "ARTIFACT_CONTENT_OFFSET_AHEAD"));
+              return;
+            }
+            const end = bytes ? Math.min(offset + maxBytes, bytes.length) : 0;
+            callback(null, {
+              artifact: jsonToProtoStruct(result.artifact),
+              ...(bytes === undefined
+                ? {}
+                : { contentBytes: Buffer.from(bytes.subarray(offset, end)) }),
+              mediaType: result.mediaType ?? "",
+              sha256: result.sha256 ?? "",
+              contentTotalBytes: String(bytes?.length ?? 0),
+              ...(bytes && end < bytes.length ? { nextContentOffset: String(end) } : {}),
+            });
+          })
+          .catch((error: unknown) =>
+            callback(businessServiceError(error, this.options.internalErrorCode)),
+          );
       },
       reconcileExecution: (
         call: Unary<ReconcileRequest>,
@@ -200,8 +425,53 @@ export class VehicleProviderGrpcServer {
       resumeExecution: (call: Unary<CommandRequest>, callback: grpc.sendUnaryData<unknown>) =>
         this.#command(call, callback, "resume"),
       updateExecution: (call: Unary<CommandRequest>, callback: grpc.sendUnaryData<unknown>) => {
+        const inputs = call.request.inputs ?? [];
+        const inputResponses = call.request.inputResponses ?? [];
+        if (
+          call.request.businessInputCommand !== undefined &&
+          call.request.businessInputCommand !== null
+        ) {
+          if (inputResponses.length > 0 || inputs.length > 0) {
+            callback(businessInvalidArgument("BUSINESS_INPUT_AMBIGUOUS"));
+            return;
+          }
+          if (!this.runtime.updateTaskBusinessInput) {
+            callback(businessMethodUnavailable());
+            return;
+          }
+          void this.runtime
+            .updateTaskBusinessInput(
+              commandIdentity(call.request.identity),
+              protoStructToJson(call.request.businessInputCommand),
+            )
+            .then((result) => callback(null, result))
+            .catch((error: unknown) =>
+              callback(serviceError(error, this.options.internalErrorCode)),
+            );
+          return;
+        }
+        if (inputResponses.length > 0 && inputs.length > 0) {
+          callback(businessInvalidArgument("INPUT_RESPONSE_WIRE_AMBIGUOUS"));
+          return;
+        }
+        const identity = commandIdentity(call.request.identity);
+        const update = this.runtime.updateInput
+          ? this.runtime.updateInput(identity, { inputs, inputResponses })
+          : this.runtime.updateFire(identity, inputResponses);
+        void update
+          .then((result) => callback(null, result))
+          .catch((error: unknown) => callback(serviceError(error, this.options.internalErrorCode)));
+      },
+      applyIntervention: (call: Unary<CommandRequest>, callback: grpc.sendUnaryData<unknown>) => {
+        if (!this.runtime.applyIntervention) {
+          callback(businessMethodUnavailable());
+          return;
+        }
         void this.runtime
-          .updateFire(commandIdentity(call.request.identity), call.request.inputResponses ?? [])
+          .applyIntervention(
+            commandIdentity(call.request.identity),
+            protoStructToJson(call.request.command),
+          )
           .then((result) => callback(null, result))
           .catch((error: unknown) => callback(serviceError(error, this.options.internalErrorCode)));
       },
@@ -213,28 +483,48 @@ export class VehicleProviderGrpcServer {
       ) => {
         const taskId = call.request.execution?.taskId ?? "";
         const subscription = streamSubscription(call);
+        const afterRevision = Number(call.request.afterRevision ?? 0);
+        let deliveredRevision = afterRevision;
+        let initializing = true;
+        const queued: Record<string, unknown>[] = [];
+        const listener = (snapshot: Record<string, unknown>) => {
+          if (subscription.isClosed()) return;
+          if (initializing) {
+            queued.push(snapshot);
+            return;
+          }
+          const revision = Number(snapshot.revision ?? 0);
+          if (revision <= deliveredRevision) return;
+          call.write(executionEvent(snapshot, revision));
+          deliveredRevision = revision;
+        };
+        this.runtime.events.on(taskId, listener);
+        subscription.attach(() => this.runtime.events.off(taskId, listener));
         void this.runtime
           .get(taskId)
-          .then((execution) => {
+          .then(async (execution) => {
             if (subscription.isClosed()) return;
             if (execution === undefined) {
               call.emit("error", notFound());
               return;
             }
-            if (execution.revision > Number(call.request.afterRevision ?? 0))
-              call.write(
-                executionEvent(this.runtime.executionSnapshot(execution), execution.revision),
-              );
-            const listener = (snapshot: Record<string, unknown>) =>
-              !subscription.isClosed() &&
-              call.write(executionEvent(snapshot, Number(snapshot.revision ?? 0)));
-            if (subscription.isClosed()) return;
-            this.runtime.events.on(taskId, listener);
-            subscription.attach(() => this.runtime.events.off(taskId, listener));
+            if (execution.revision > afterRevision) {
+              const snapshot = await this.runtime.executionSnapshot(execution);
+              if (subscription.isClosed()) return;
+              call.write(executionEvent(snapshot, execution.revision));
+              deliveredRevision = execution.revision;
+            }
+            queued.sort((left, right) => Number(left.revision ?? 0) - Number(right.revision ?? 0));
+            initializing = false;
+            for (const snapshot of queued) {
+              if (subscription.isClosed()) break;
+              listener(snapshot);
+            }
           })
           .catch((error: unknown) => {
-            if (!subscription.isClosed())
+            if (!subscription.isClosed()) {
               call.emit("error", serviceError(error, this.options.internalErrorCode));
+            }
           });
       },
       streamBusinessEvents: (
@@ -363,6 +653,13 @@ function commandIdentity(value: Record<string, unknown> | undefined): VehicleCom
     commandSequence: scalarString(value?.commandSequence, "0"),
   };
 }
+function businessReadIdentity(request: BusinessReadRequest): VehicleBusinessReadIdentity {
+  return {
+    taskId: request.taskId ?? "",
+    externalExecutionId: request.externalExecutionId ?? "",
+    executionContext: context(request.executionContext),
+  };
+}
 function context(value: Record<string, unknown> | undefined): ExecutionContextRecord {
   return {
     authorizationContextHash: string(value?.authorizationContextHash),
@@ -407,6 +704,62 @@ function notFound(): grpc.ServiceError {
     details: "EXECUTION_NOT_FOUND",
     metadata: new grpc.Metadata(),
   });
+}
+function businessNotFound(): grpc.ServiceError {
+  return businessError(grpc.status.NOT_FOUND, "BUSINESS_OBJECT_NOT_FOUND");
+}
+function businessMethodUnavailable(): grpc.ServiceError {
+  return businessError(grpc.status.UNIMPLEMENTED, "BUSINESS_METHOD_NOT_ENABLED");
+}
+function businessInvalidArgument(reasonCode: string): grpc.ServiceError {
+  return businessError(grpc.status.INVALID_ARGUMENT, reasonCode);
+}
+function businessError(code: grpc.status, reasonCode: string): grpc.ServiceError {
+  const metadata = new grpc.Metadata();
+  metadata.set("io.sdar.task-business.reason-code", reasonCode);
+  return Object.assign(new Error(reasonCode), { code, details: reasonCode, metadata });
+}
+function businessServiceError(error: unknown, internalErrorCode: string): grpc.ServiceError {
+  const code = reason(error, internalErrorCode);
+  if (code === "BUSINESS_METHOD_NOT_ENABLED") return businessMethodUnavailable();
+  if (
+    [
+      "BUSINESS_EXECUTION_NOT_FOUND",
+      "ARTIFACT_REVISION_NOT_FOUND",
+      "BUSINESS_SNAPSHOT_REF_NOT_FOUND",
+      "BUSINESS_READ_SCOPE_MISMATCH",
+      "BUSINESS_READ_PROVIDER_MISMATCH",
+    ].includes(code)
+  ) {
+    return businessError(grpc.status.NOT_FOUND, code);
+  }
+  if (
+    [
+      "BUSINESS_CONTEXT_NOT_AVAILABLE",
+      "BUSINESS_SNAPSHOT_REF_NOT_ACTIVE",
+      "ARTIFACT_CONTENT_EXPIRED",
+      "ARTIFACT_NOT_AVAILABLE",
+    ].includes(code)
+  ) {
+    return businessError(grpc.status.FAILED_PRECONDITION, code);
+  }
+  if (
+    [
+      "BUSINESS_EXECUTION_ID_REQUIRED",
+      "ARTIFACT_REPRESENTATION_NOT_FOUND",
+      "BUSINESS_SNAPSHOT_PAGE_LIMIT_INVALID",
+      "BUSINESS_SNAPSHOT_CURSOR_INVALID",
+      "BUSINESS_SNAPSHOT_REVISION_CHANGED",
+      "BUSINESS_SNAPSHOT_PART_INVALID",
+    ].includes(code)
+  ) {
+    return businessError(grpc.status.INVALID_ARGUMENT, code);
+  }
+  if (code === "BUSINESS_SNAPSHOT_TOO_LARGE")
+    return businessError(grpc.status.RESOURCE_EXHAUSTED, code);
+  if (code === "BUSINESS_SNAPSHOT_OFFSET_AHEAD")
+    return businessError(grpc.status.OUT_OF_RANGE, code);
+  return serviceError(error, internalErrorCode);
 }
 function serviceError(error: unknown, internalErrorCode: string): grpc.ServiceError {
   return Object.assign(new Error(reason(error, internalErrorCode)), {

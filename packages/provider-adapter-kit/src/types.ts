@@ -43,6 +43,8 @@ export interface ProviderExecution {
   tracks: string[];
   arguments: Record<string, unknown>;
   executionContext: ExecutionContextRecord;
+  /** Set only for newly admitted executions whose business Context must be initialized. */
+  taskBusinessContextExpected?: boolean;
   downstreamMissionIds: string[];
   diagnosticBehavior?: {
     capabilityId: SmppDiagnosticCapabilityId;
@@ -162,7 +164,7 @@ export interface SnapshotRecord {
 }
 
 export interface BusinessEventDraft {
-  sourceId: "vehicle.execution" | "vehicle.health";
+  sourceId: "vehicle.execution" | "vehicle.health" | "vehicle.business";
   scope: "task" | "resource";
   occurredAt: string;
   eventType: string;

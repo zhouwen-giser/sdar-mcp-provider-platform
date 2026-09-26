@@ -121,6 +121,53 @@ describe("vehicle gRPC stream subscription lifecycle", () => {
     },
   );
 
+  it("does not write or subscribe when an asynchronous execution snapshot finishes after close", async () => {
+    const fixture = setup();
+    const snapshot = deferred<Record<string, unknown>>();
+    vi.spyOn(fixture.runtime, "executionSnapshot").mockReturnValue(snapshot.promise);
+    const call = executionCall();
+    fixture.handlers.streamExecutionEvents(call);
+    await settle();
+    call.emit("close");
+    snapshot.resolve({ taskId: execution.taskId, revision: execution.revision });
+    await settle();
+    expect(call.write).not.toHaveBeenCalled();
+    expect(call.error).not.toHaveBeenCalled();
+    expect(fixture.runtime.events.listenerCount(execution.taskId)).toBe(0);
+  });
+
+  it("replays a transition emitted while the durable execution snapshot is loading", async () => {
+    const fixture = setup();
+    const snapshot = deferred<Record<string, unknown>>();
+    vi.spyOn(fixture.runtime, "executionSnapshot").mockReturnValue(snapshot.promise);
+    const call = executionCall();
+    fixture.handlers.streamExecutionEvents(call);
+    await settle();
+    fixture.runtime.events.emit(execution.taskId, { taskId: execution.taskId, revision: 2 });
+    expect(call.write).not.toHaveBeenCalled();
+    snapshot.resolve({ taskId: execution.taskId, revision: 1 });
+    await settle();
+    expect(call.write).toHaveBeenCalledTimes(2);
+    expect(
+      call.write.mock.calls.map(([event]) => (event as { revision: string }).revision),
+    ).toEqual(["1", "2"]);
+    call.emit("close");
+  });
+
+  it("waits for an asynchronous snapshot before answering GetExecution", async () => {
+    const fixture = setup();
+    const snapshot = deferred<Record<string, unknown>>();
+    vi.spyOn(fixture.runtime, "executionSnapshot").mockReturnValue(snapshot.promise);
+    const callback = vi.fn();
+    fixture.handlers.getExecution({ request: { taskId: execution.taskId } }, callback);
+    await settle();
+    expect(callback).not.toHaveBeenCalled();
+    const value = { taskId: execution.taskId, revision: "1" };
+    snapshot.resolve(value);
+    await settle();
+    expect(callback).toHaveBeenCalledWith(null, value);
+  });
+
   it("reports execution lookup failures through the open stream", async () => {
     const fixture = setup();
     vi.spyOn(fixture.runtime, "get").mockRejectedValue(new Error("STORE_UNAVAILABLE"));
@@ -188,6 +235,10 @@ function setup() {
   const handlers = implementation as unknown as {
     streamBusinessEvents(call: FakeCall<Record<string, string>>): void;
     streamExecutionEvents(call: ReturnType<typeof executionCall>): void;
+    getExecution(
+      call: { request: { taskId: string } },
+      callback: (error: unknown, response?: unknown) => void,
+    ): void;
   };
   return {
     handlers,

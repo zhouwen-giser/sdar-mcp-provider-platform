@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "ugv-agent-profile.preflight-run-reservation/v1",
+  "runId": "ugvb-20260924-probe-01",
+  "generatedAt": "2026-09-24T10:04:16.619Z",
+  "reservedAt": "2026-09-24T10:04:16.619Z",
+  "status": "RESERVED_IMMUTABLY",
+  "evidenceClass": "external_simulation",
+  "expectedEvidence": "deployment-preflight-ugvb-20260924-probe-01.redacted.json",
+  "productionEligible": false,
+  "physicalVehicleQualified": false,
+  "authorizationGranted": false,
+  "safety": {
+    "toolsCallCount": 0,
+    "mqttPublishCount": 0,
+    "controlInvocationCount": 0,
+    "forbiddenOperationCallCount": 0
+  }
+}

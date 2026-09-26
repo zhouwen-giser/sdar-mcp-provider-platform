@@ -1,0 +1,193 @@
+{
+  "profileVersion": "1.0-rc2",
+  "source": "packages/adapter-protocol/src/task-business-profile.ts",
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "schemaVersion": {
+        "type": "string",
+        "const": "sdar.task-business-operation-profile/1.0-rc2"
+      },
+      "profileVersion": { "type": "string", "const": "1.0-rc2" },
+      "availability": { "type": "string", "const": "available" },
+      "source": {
+        "type": "object",
+        "properties": {
+          "sourceId": { "type": "string", "const": "vehicle.business" },
+          "deliverySemantics": { "type": "string", "const": "durable_at_least_once" },
+          "replaySupported": { "type": "boolean", "const": true }
+        },
+        "required": ["sourceId", "deliverySemantics", "replaySupported"],
+        "additionalProperties": false
+      },
+      "artifactTypes": {
+        "maxItems": 32,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "navigation.destination",
+            "navigation.route",
+            "navigation.trajectory",
+            "navigation.waypoints",
+            "recon.area",
+            "recon.coverage_plan",
+            "recon.current_footprint",
+            "recon.covered_area",
+            "target.object",
+            "target.track"
+          ]
+        }
+      },
+      "actionTypes": {
+        "maxItems": 32,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "sensor.visual_lock",
+            "sensor.visual_reacquire",
+            "navigation.replan",
+            "recon.resume_scan"
+          ]
+        }
+      },
+      "requiredInputTypes": {
+        "maxItems": 32,
+        "type": "array",
+        "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+      },
+      "interventionTypes": {
+        "maxItems": 32,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "navigation.adjust_plan",
+            "navigation.change_destination",
+            "recon.adjust_area",
+            "recon.adjust_scan",
+            "target.change_visual_lock"
+          ]
+        }
+      },
+      "methods": {
+        "type": "object",
+        "properties": {
+          "contextGet": { "type": "string", "const": "io.sdar/taskBusiness/context/get" },
+          "snapshotPartGet": {
+            "type": "string",
+            "const": "io.sdar/taskBusiness/snapshotParts/get"
+          },
+          "artifactGet": { "type": "string", "const": "io.sdar/taskBusiness/artifacts/get" },
+          "eventsListen": { "type": "string", "const": "io.sdar/businessEvents/listen" },
+          "contentGet": { "type": "boolean" },
+          "inputUpdate": { "type": "boolean" },
+          "interventionApply": { "type": "boolean" }
+        },
+        "required": [
+          "contextGet",
+          "artifactGet",
+          "eventsListen",
+          "contentGet",
+          "inputUpdate",
+          "interventionApply"
+        ],
+        "additionalProperties": false
+      },
+      "semantics": {
+        "type": "object",
+        "properties": {
+          "artifact": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "enum": ["requested", "planned", "observed", "derived"] }
+          },
+          "coordinateFrames": {
+            "maxItems": 32,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "transformRef": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "observationClockDomains": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "enum": ["utc", "simulator_relative", "device_monotonic"] }
+          }
+        },
+        "required": ["artifact", "coordinateFrames", "observationClockDomains"],
+        "additionalProperties": false
+      },
+      "limits": {
+        "type": "object",
+        "properties": {
+          "maxInlineArtifactBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 },
+          "maxWaitMs": { "type": "integer", "minimum": 1000, "maximum": 3600000 },
+          "trajectoryMinSamples": { "type": "integer", "minimum": 2, "maximum": 100 }
+        },
+        "required": ["maxInlineArtifactBytes", "maxWaitMs", "trajectoryMinSamples"],
+        "additionalProperties": false
+      },
+      "policy": {
+        "type": "object",
+        "properties": {
+          "visualLockOwner": {
+            "type": "string",
+            "enum": ["disabled", "device_native", "provider"]
+          },
+          "decisionMode": { "type": "string", "enum": ["none", "user_required", "agent_allowed"] },
+          "onExpire": {
+            "type": "string",
+            "enum": ["release_and_resume_scan", "end_observation", "reissue_request"]
+          },
+          "onDismiss": {
+            "type": "string",
+            "enum": ["release_and_resume_scan", "end_observation", "reissue_request"]
+          },
+          "footprintMode": {
+            "type": "string",
+            "enum": ["disabled", "device_reported", "estimated"]
+          },
+          "coverageMode": { "type": "string", "enum": ["disabled", "device_reported", "derived"] }
+        },
+        "required": [
+          "visualLockOwner",
+          "decisionMode",
+          "onExpire",
+          "onDismiss",
+          "footprintMode",
+          "coverageMode"
+        ],
+        "additionalProperties": false
+      },
+      "qualification": {
+        "type": "object",
+        "properties": {
+          "routeAdoption": { "type": "string", "enum": ["qualified", "not_supported"] },
+          "footprint": { "type": "string", "enum": ["qualified", "not_supported"] },
+          "automaticVisualLock": { "type": "string", "enum": ["qualified", "not_supported"] },
+          "runtimeReplan": { "type": "string", "enum": ["qualified", "not_supported"] }
+        },
+        "required": ["routeAdoption", "footprint", "automaticVisualLock", "runtimeReplan"],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "schemaVersion",
+      "profileVersion",
+      "availability",
+      "source",
+      "artifactTypes",
+      "actionTypes",
+      "requiredInputTypes",
+      "interventionTypes",
+      "methods",
+      "semantics",
+      "limits",
+      "policy",
+      "qualification"
+    ],
+    "additionalProperties": false
+  }
+}

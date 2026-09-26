@@ -30,6 +30,7 @@ export interface OperationDefinition {
     mode: "NONE" | "ARGUMENT_REFERENCE";
     resourceIdJsonPointer?: string;
   };
+  businessFeedbackProfile?: unknown;
 }
 
 export interface ProviderManifest {
@@ -136,6 +137,12 @@ export interface McpTaskInputResponse {
     action: "accept" | "decline" | "cancel";
     content?: unknown;
   };
+  /** Provenance supplied by Runtime after authentication and durable intake. */
+  verifiedResponder?: {
+    actorType: "user" | "agent" | "operator";
+    actorId: string;
+    source: "jwt_hs256" | "trusted_headers";
+  };
 }
 
 export interface StartOperationResponse {
@@ -199,4 +206,35 @@ export interface CommandAck {
     executionContext?: AdapterExecutionContext;
     commandSequence: string | number;
   };
+}
+
+export interface BusinessContextPageResponse {
+  page?: unknown;
+}
+
+export interface BusinessSnapshotPartSelector {
+  contextRevision: number;
+  objectRef?: {
+    kind: "artifact" | "action" | "input_request" | "intervention";
+    id: string;
+    revision: number;
+  };
+  offset: number;
+  maxBytes: number;
+}
+
+export interface BusinessSnapshotPartResponse {
+  jsonBytes: Uint8Array;
+  totalBytes: string;
+  sha256: string;
+  nextOffset?: string;
+}
+
+export interface BusinessArtifactReadResponse {
+  artifact?: unknown;
+  contentBytes?: Uint8Array;
+  mediaType: string;
+  sha256: string;
+  contentTotalBytes: string;
+  nextContentOffset?: string;
 }

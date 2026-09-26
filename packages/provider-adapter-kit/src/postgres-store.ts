@@ -15,9 +15,17 @@ import {
 } from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
+import type {
+  AdapterBusinessEvent,
+  BusinessEventSourceCapability,
+} from "../../adapter-protocol/src/index.js";
 import { canonicalSha256, jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
-import { businessEventSourceCapabilities } from "./sources.js";
+import {
+  businessEventSourceCapabilities,
+  scopedBusinessEventSourceCapability,
+  storedTaskBusinessSourceId,
+} from "./sources.js";
+import type { PostgresTaskBusinessStore } from "./postgres-task-business-store.js";
 import {
   assertMutationJournalEntry,
   assertMutationJournalTransition,
@@ -45,6 +53,7 @@ import type {
 export class PostgresProviderStore implements ProviderStore {
   readonly pool: Pool;
   readonly tables: ProviderStoreTables;
+  #taskBusinessSourceEnabled = false;
   constructor(
     connectionString: string,
     maximum = 8,
@@ -62,6 +71,13 @@ export class PostgresProviderStore implements ProviderStore {
   }
   async close(): Promise<void> {
     await this.pool.end();
+  }
+  /** Called only after the matching business Store and operation profile are wired. */
+  enableTaskBusinessSource(store: PostgresTaskBusinessStore): void {
+    if (this.tables !== TABLES.ugv || store.pool !== this.pool) {
+      throw new Error("TASK_BUSINESS_SOURCE_STORE_MISMATCH");
+    }
+    this.#taskBusinessSourceEnabled = true;
   }
   async getExecution(taskId: string): Promise<ProviderExecution | undefined> {
     const result = await this.pool.query<{ payload: ProviderExecution }>(
@@ -382,7 +398,7 @@ export class PostgresProviderStore implements ProviderStore {
        FROM ugv_diagnostic_lease lease
        JOIN LATERAL (
          SELECT payload FROM ugv_diagnostic_receipt
-         WHERE lease_id=lease.lease_id ORDER BY occurred_at DESC, receipt_id DESC LIMIT 1
+         WHERE lease_id=lease.lease_id AND action=lower(lease.state)
        ) receipt ON true
        WHERE (${scopePredicate(this.pool, "lease", "ugv_diagnostic_lease")}) AND ( lease.lease_id=$1) `,
       [leaseId],
@@ -581,52 +597,16 @@ export class PostgresProviderStore implements ProviderStore {
     }
   }
   async appendBusinessEvent(draft: BusinessEventDraft): Promise<AdapterBusinessEvent> {
+    if ((draft.sourceId as string) === "vehicle.business") {
+      throw new Error("TASK_BUSINESS_ATOMIC_COMMIT_REQUIRED");
+    }
     assertPostgresJsonbSafe(draft.rawPayload, "businessEvent.rawPayload");
     const source = this.businessEventSources().find((x) => x.sourceId === draft.sourceId);
     if (source === undefined) throw new Error("SOURCE_NOT_FOUND");
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
-      const sequence = await nextSequence(
-        client,
-        this.tables,
-        draft.sourceId,
-        source.sourceStreamId,
-      );
-      const sourceEventId = createHash("sha256")
-        .update(`${draft.sourceId}\0${sequence}\0${randomUUID()}`)
-        .digest("base64url");
-      const event: AdapterBusinessEvent = {
-        sourceEventId,
-        sourceSequence: sequence,
-        sourceStreamId: source.sourceStreamId,
-        scope: draft.scope,
-        occurredAt: timestamp(draft.occurredAt),
-        eventType: draft.eventType,
-        description: draft.description,
-        ...(draft.externalExecutionId === undefined
-          ? {}
-          : { externalExecutionId: draft.externalExecutionId }),
-        ...(draft.resourceRef === undefined ? {} : { resourceRef: draft.resourceRef }),
-        severityHint: draft.severityHint,
-        reasonCode: draft.reasonCode,
-        rawPayload: jsonToProtoStruct(draft.rawPayload),
-      };
-      await client.query(
-        `INSERT INTO ${this.tables.businessEventLog}
-         (${scopeColumns(client, "ugv_business_event_source_log")}source_id,source_sequence,source_event_id,source_stream_id,payload_hash,occurred_at,retain_until,payload)
-         VALUES(${scopeValues(client, "ugv_business_event_source_log")}$1,$2,$3,$4,$5,$6,$7,$8)`,
-        [
-          draft.sourceId,
-          sequence,
-          sourceEventId,
-          source.sourceStreamId,
-          canonicalSha256(draft.rawPayload),
-          draft.occurredAt,
-          draft.retainUntil,
-          event,
-        ],
-      );
+      const event = await insertBusinessEventInTransaction(client, this.tables, source, draft);
       await client.query("COMMIT");
       return event;
     } catch (error) {
@@ -644,10 +624,12 @@ export class PostgresProviderStore implements ProviderStore {
     const source = this.businessEventSources().find((x) => x.sourceId === sourceId);
     if (source === undefined) throw new Error("SOURCE_NOT_FOUND");
     if (source.sourceStreamId !== sourceStreamId) throw new Error("SOURCE_STREAM_RESET");
+    const storedSourceId =
+      sourceId === "vehicle.business" ? storedTaskBusinessSourceId(this.gowm) : sourceId;
     const range = await this.pool.query<{ minimum: string | null; maximum: string | null }>(
       `SELECT min(source_sequence)::text AS minimum, max(source_sequence)::text AS maximum
        FROM ${this.tables.businessEventLog} WHERE (${scopePredicate(this.pool, "ugv_business_event_source_log", "ugv_business_event_source_log")}) AND ( source_id=$1 AND retain_until > now()) `,
-      [sourceId],
+      [storedSourceId],
     );
     const maximum = BigInt(range.rows[0]?.maximum ?? "0");
     const minimum = BigInt(range.rows[0]?.minimum ?? "1");
@@ -658,31 +640,78 @@ export class PostgresProviderStore implements ProviderStore {
       `SELECT payload FROM ${this.tables.businessEventLog}
        WHERE (${scopePredicate(this.pool, "ugv_business_event_source_log", "ugv_business_event_source_log")}) AND ( source_id=$1 AND source_sequence>$2 AND retain_until > now()
        ) ORDER BY source_sequence LIMIT 1000`,
-      [sourceId, afterSourceSequence.toString()],
+      [storedSourceId, afterSourceSequence.toString()],
     );
     return result.rows.map((row) => row.payload);
   }
   businessEventSources() {
-    const config = storageScope(this.pool);
-    return businessEventSourceCapabilities().map((source) =>
-      config
-        ? {
-            ...source,
-            sourceStreamId: createHash("sha256")
-              .update(
-                JSON.stringify([
-                  source.sourceStreamId,
-                  config.allowedDeviceIds[0],
-                  config.sourceSessionKey,
-                ]),
-              )
-              .digest("hex")
-              .slice(0, 32)
-              .replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5"),
-          }
-        : source,
+    return businessEventSourceCapabilities(this.#taskBusinessSourceEnabled).map((source) =>
+      scopedBusinessEventSourceCapability(source, storageScope(this.pool)),
     );
   }
+}
+
+/** Reuse the UGV source sequence/log transaction path with a business Context write. */
+export async function appendTaskBusinessEventInTransaction(
+  client: PoolClient,
+  sourceStreamId: string,
+  draft: BusinessEventDraft & { sourceId: "vehicle.business" },
+  gowm?: GowmStorageConfig,
+): Promise<AdapterBusinessEvent> {
+  return insertBusinessEventInTransaction(
+    client,
+    TABLES.ugv,
+    { sourceId: draft.sourceId, sourceStreamId },
+    draft,
+    storedTaskBusinessSourceId(gowm),
+  );
+}
+
+async function insertBusinessEventInTransaction(
+  client: PoolClient,
+  tables: ProviderStoreTables,
+  source: Pick<BusinessEventSourceCapability, "sourceId" | "sourceStreamId">,
+  draft: BusinessEventDraft,
+  storedSourceId: string = draft.sourceId,
+): Promise<AdapterBusinessEvent> {
+  const sequence = await nextSequence(client, tables, storedSourceId, source.sourceStreamId);
+  const sourceEventId = createHash("sha256")
+    .update(`${draft.sourceId}\0${sequence}\0${randomUUID()}`)
+    .digest("hex");
+  const event: AdapterBusinessEvent = {
+    sourceEventId,
+    sourceSequence: sequence,
+    sourceStreamId: source.sourceStreamId,
+    scope: draft.scope,
+    occurredAt: timestamp(draft.occurredAt),
+    eventType: draft.eventType,
+    description: draft.description,
+    ...(draft.scope !== "task" || draft.externalExecutionId === undefined
+      ? {}
+      : { externalExecutionId: draft.externalExecutionId }),
+    ...(draft.scope !== "resource" || draft.resourceRef === undefined
+      ? {}
+      : { resourceRef: draft.resourceRef }),
+    severityHint: draft.severityHint,
+    reasonCode: draft.reasonCode,
+    rawPayload: jsonToProtoStruct(draft.rawPayload),
+  };
+  await client.query(
+    `INSERT INTO ${tables.businessEventLog}
+     (${scopeColumns(client, "ugv_business_event_source_log")}source_id,source_sequence,source_event_id,source_stream_id,payload_hash,occurred_at,retain_until,payload)
+     VALUES(${scopeValues(client, "ugv_business_event_source_log")}$1,$2,$3,$4,$5,$6,$7,$8)`,
+    [
+      storedSourceId,
+      sequence,
+      sourceEventId,
+      source.sourceStreamId,
+      canonicalSha256(draft.rawPayload),
+      draft.occurredAt,
+      draft.retainUntil,
+      event,
+    ],
+  );
+  return event;
 }
 
 async function nextSequence(

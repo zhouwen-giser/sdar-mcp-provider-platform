@@ -162,6 +162,11 @@ export class OperationDefinition extends jspb.Message {
     getResourceBinding(): ResourceBinding | undefined;
     setResourceBinding(value?: ResourceBinding): OperationDefinition;
 
+    hasBusinessFeedbackProfile(): boolean;
+    clearBusinessFeedbackProfile(): void;
+    getBusinessFeedbackProfile(): google_protobuf_struct_pb.Struct | undefined;
+    setBusinessFeedbackProfile(value?: google_protobuf_struct_pb.Struct): OperationDefinition;
+
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): OperationDefinition.AsObject;
     static toObject(includeInstance: boolean, msg: OperationDefinition): OperationDefinition.AsObject;
@@ -181,6 +186,7 @@ export namespace OperationDefinition {
         outputSchema?: google_protobuf_struct_pb.Struct.AsObject,
         capabilities?: OperationCapabilities.AsObject,
         resourceBinding?: ResourceBinding.AsObject,
+        businessFeedbackProfile?: google_protobuf_struct_pb.Struct.AsObject,
     }
 }
 
@@ -932,6 +938,11 @@ export class McpTaskInputResponse extends jspb.Message {
     getResult(): google_protobuf_struct_pb.Struct | undefined;
     setResult(value?: google_protobuf_struct_pb.Struct): McpTaskInputResponse;
 
+    hasVerifiedResponder(): boolean;
+    clearVerifiedResponder(): void;
+    getVerifiedResponder(): google_protobuf_struct_pb.Struct | undefined;
+    setVerifiedResponder(value?: google_protobuf_struct_pb.Struct): McpTaskInputResponse;
+
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): McpTaskInputResponse.AsObject;
     static toObject(includeInstance: boolean, msg: McpTaskInputResponse): McpTaskInputResponse.AsObject;
@@ -946,6 +957,7 @@ export namespace McpTaskInputResponse {
     export type AsObject = {
         key: string,
         result?: google_protobuf_struct_pb.Struct.AsObject,
+        verifiedResponder?: google_protobuf_struct_pb.Struct.AsObject,
     }
 }
 
@@ -1342,6 +1354,11 @@ export class UpdateExecutionRequest extends jspb.Message {
     setInputResponsesList(value: Array<McpTaskInputResponse>): UpdateExecutionRequest;
     addInputResponses(value?: McpTaskInputResponse, index?: number): McpTaskInputResponse;
 
+    hasBusinessInputCommand(): boolean;
+    clearBusinessInputCommand(): void;
+    getBusinessInputCommand(): google_protobuf_struct_pb.Struct | undefined;
+    setBusinessInputCommand(value?: google_protobuf_struct_pb.Struct): UpdateExecutionRequest;
+
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): UpdateExecutionRequest.AsObject;
     static toObject(includeInstance: boolean, msg: UpdateExecutionRequest): UpdateExecutionRequest.AsObject;
@@ -1358,6 +1375,298 @@ export namespace UpdateExecutionRequest {
         identity?: SideEffectIdentity.AsObject,
         inputsList: Array<UpdateValue.AsObject>,
         inputResponsesList: Array<McpTaskInputResponse.AsObject>,
+        businessInputCommand?: google_protobuf_struct_pb.Struct.AsObject,
+    }
+}
+
+export class GetBusinessContextRequest extends jspb.Message {
+
+    hasMetadata(): boolean;
+    clearMetadata(): void;
+    getMetadata(): RequestMetadata | undefined;
+    setMetadata(value?: RequestMetadata): GetBusinessContextRequest;
+    getTaskId(): string;
+    setTaskId(value: string): GetBusinessContextRequest;
+    getExternalExecutionId(): string;
+    setExternalExecutionId(value: string): GetBusinessContextRequest;
+
+    hasExecutionContext(): boolean;
+    clearExecutionContext(): void;
+    getExecutionContext(): ExecutionContext | undefined;
+    setExecutionContext(value?: ExecutionContext): GetBusinessContextRequest;
+    getMaxPageBytes(): number;
+    setMaxPageBytes(value: number): GetBusinessContextRequest;
+    getPageCursor(): string;
+    setPageCursor(value: string): GetBusinessContextRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessContextRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessContextRequest): GetBusinessContextRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessContextRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessContextRequest;
+    static deserializeBinaryFromReader(message: GetBusinessContextRequest, reader: jspb.BinaryReader): GetBusinessContextRequest;
+}
+
+export namespace GetBusinessContextRequest {
+    export type AsObject = {
+        metadata?: RequestMetadata.AsObject,
+        taskId: string,
+        externalExecutionId: string,
+        executionContext?: ExecutionContext.AsObject,
+        maxPageBytes: number,
+        pageCursor: string,
+    }
+}
+
+export class GetBusinessContextResponse extends jspb.Message {
+
+    hasPage(): boolean;
+    clearPage(): void;
+    getPage(): google_protobuf_struct_pb.Struct | undefined;
+    setPage(value?: google_protobuf_struct_pb.Struct): GetBusinessContextResponse;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessContextResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessContextResponse): GetBusinessContextResponse.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessContextResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessContextResponse;
+    static deserializeBinaryFromReader(message: GetBusinessContextResponse, reader: jspb.BinaryReader): GetBusinessContextResponse;
+}
+
+export namespace GetBusinessContextResponse {
+    export type AsObject = {
+        page?: google_protobuf_struct_pb.Struct.AsObject,
+    }
+}
+
+export class GetBusinessSnapshotPartRequest extends jspb.Message {
+
+    hasMetadata(): boolean;
+    clearMetadata(): void;
+    getMetadata(): RequestMetadata | undefined;
+    setMetadata(value?: RequestMetadata): GetBusinessSnapshotPartRequest;
+    getTaskId(): string;
+    setTaskId(value: string): GetBusinessSnapshotPartRequest;
+    getExternalExecutionId(): string;
+    setExternalExecutionId(value: string): GetBusinessSnapshotPartRequest;
+
+    hasExecutionContext(): boolean;
+    clearExecutionContext(): void;
+    getExecutionContext(): ExecutionContext | undefined;
+    setExecutionContext(value?: ExecutionContext): GetBusinessSnapshotPartRequest;
+    getContextRevision(): number;
+    setContextRevision(value: number): GetBusinessSnapshotPartRequest;
+    getObjectKind(): string;
+    setObjectKind(value: string): GetBusinessSnapshotPartRequest;
+    getObjectId(): string;
+    setObjectId(value: string): GetBusinessSnapshotPartRequest;
+
+    hasObjectRevision(): boolean;
+    clearObjectRevision(): void;
+    getObjectRevision(): number | undefined;
+    setObjectRevision(value: number): GetBusinessSnapshotPartRequest;
+    getOffset(): number;
+    setOffset(value: number): GetBusinessSnapshotPartRequest;
+    getMaxBytes(): number;
+    setMaxBytes(value: number): GetBusinessSnapshotPartRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessSnapshotPartRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessSnapshotPartRequest): GetBusinessSnapshotPartRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessSnapshotPartRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessSnapshotPartRequest;
+    static deserializeBinaryFromReader(message: GetBusinessSnapshotPartRequest, reader: jspb.BinaryReader): GetBusinessSnapshotPartRequest;
+}
+
+export namespace GetBusinessSnapshotPartRequest {
+    export type AsObject = {
+        metadata?: RequestMetadata.AsObject,
+        taskId: string,
+        externalExecutionId: string,
+        executionContext?: ExecutionContext.AsObject,
+        contextRevision: number,
+        objectKind: string,
+        objectId: string,
+        objectRevision?: number,
+        offset: number,
+        maxBytes: number,
+    }
+}
+
+export class GetBusinessSnapshotPartResponse extends jspb.Message {
+    getJsonBytes(): Uint8Array | string;
+    getJsonBytes_asU8(): Uint8Array;
+    getJsonBytes_asB64(): string;
+    setJsonBytes(value: Uint8Array | string): GetBusinessSnapshotPartResponse;
+    getTotalBytes(): number;
+    setTotalBytes(value: number): GetBusinessSnapshotPartResponse;
+    getSha256(): string;
+    setSha256(value: string): GetBusinessSnapshotPartResponse;
+
+    hasNextOffset(): boolean;
+    clearNextOffset(): void;
+    getNextOffset(): number | undefined;
+    setNextOffset(value: number): GetBusinessSnapshotPartResponse;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessSnapshotPartResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessSnapshotPartResponse): GetBusinessSnapshotPartResponse.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessSnapshotPartResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessSnapshotPartResponse;
+    static deserializeBinaryFromReader(message: GetBusinessSnapshotPartResponse, reader: jspb.BinaryReader): GetBusinessSnapshotPartResponse;
+}
+
+export namespace GetBusinessSnapshotPartResponse {
+    export type AsObject = {
+        jsonBytes: Uint8Array | string,
+        totalBytes: number,
+        sha256: string,
+        nextOffset?: number,
+    }
+}
+
+export class GetBusinessArtifactRequest extends jspb.Message {
+
+    hasMetadata(): boolean;
+    clearMetadata(): void;
+    getMetadata(): RequestMetadata | undefined;
+    setMetadata(value?: RequestMetadata): GetBusinessArtifactRequest;
+    getTaskId(): string;
+    setTaskId(value: string): GetBusinessArtifactRequest;
+    getExternalExecutionId(): string;
+    setExternalExecutionId(value: string): GetBusinessArtifactRequest;
+
+    hasExecutionContext(): boolean;
+    clearExecutionContext(): void;
+    getExecutionContext(): ExecutionContext | undefined;
+    setExecutionContext(value?: ExecutionContext): GetBusinessArtifactRequest;
+    getArtifactId(): string;
+    setArtifactId(value: string): GetBusinessArtifactRequest;
+
+    hasRevision(): boolean;
+    clearRevision(): void;
+    getRevision(): number | undefined;
+    setRevision(value: number): GetBusinessArtifactRequest;
+    getRepresentationName(): string;
+    setRepresentationName(value: string): GetBusinessArtifactRequest;
+    getIncludeContent(): boolean;
+    setIncludeContent(value: boolean): GetBusinessArtifactRequest;
+    getContentOffset(): number;
+    setContentOffset(value: number): GetBusinessArtifactRequest;
+    getMaxContentBytes(): number;
+    setMaxContentBytes(value: number): GetBusinessArtifactRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessArtifactRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessArtifactRequest): GetBusinessArtifactRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessArtifactRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessArtifactRequest;
+    static deserializeBinaryFromReader(message: GetBusinessArtifactRequest, reader: jspb.BinaryReader): GetBusinessArtifactRequest;
+}
+
+export namespace GetBusinessArtifactRequest {
+    export type AsObject = {
+        metadata?: RequestMetadata.AsObject,
+        taskId: string,
+        externalExecutionId: string,
+        executionContext?: ExecutionContext.AsObject,
+        artifactId: string,
+        revision?: number,
+        representationName: string,
+        includeContent: boolean,
+        contentOffset: number,
+        maxContentBytes: number,
+    }
+}
+
+export class GetBusinessArtifactResponse extends jspb.Message {
+
+    hasArtifact(): boolean;
+    clearArtifact(): void;
+    getArtifact(): google_protobuf_struct_pb.Struct | undefined;
+    setArtifact(value?: google_protobuf_struct_pb.Struct): GetBusinessArtifactResponse;
+
+    hasContentBytes(): boolean;
+    clearContentBytes(): void;
+    getContentBytes(): Uint8Array | string;
+    getContentBytes_asU8(): Uint8Array;
+    getContentBytes_asB64(): string;
+    setContentBytes(value: Uint8Array | string): GetBusinessArtifactResponse;
+    getMediaType(): string;
+    setMediaType(value: string): GetBusinessArtifactResponse;
+    getSha256(): string;
+    setSha256(value: string): GetBusinessArtifactResponse;
+    getContentTotalBytes(): number;
+    setContentTotalBytes(value: number): GetBusinessArtifactResponse;
+
+    hasNextContentOffset(): boolean;
+    clearNextContentOffset(): void;
+    getNextContentOffset(): number | undefined;
+    setNextContentOffset(value: number): GetBusinessArtifactResponse;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): GetBusinessArtifactResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: GetBusinessArtifactResponse): GetBusinessArtifactResponse.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: GetBusinessArtifactResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): GetBusinessArtifactResponse;
+    static deserializeBinaryFromReader(message: GetBusinessArtifactResponse, reader: jspb.BinaryReader): GetBusinessArtifactResponse;
+}
+
+export namespace GetBusinessArtifactResponse {
+    export type AsObject = {
+        artifact?: google_protobuf_struct_pb.Struct.AsObject,
+        contentBytes: Uint8Array | string,
+        mediaType: string,
+        sha256: string,
+        contentTotalBytes: number,
+        nextContentOffset?: number,
+    }
+}
+
+export class ApplyInterventionRequest extends jspb.Message {
+
+    hasMetadata(): boolean;
+    clearMetadata(): void;
+    getMetadata(): RequestMetadata | undefined;
+    setMetadata(value?: RequestMetadata): ApplyInterventionRequest;
+
+    hasIdentity(): boolean;
+    clearIdentity(): void;
+    getIdentity(): SideEffectIdentity | undefined;
+    setIdentity(value?: SideEffectIdentity): ApplyInterventionRequest;
+
+    hasCommand(): boolean;
+    clearCommand(): void;
+    getCommand(): google_protobuf_struct_pb.Struct | undefined;
+    setCommand(value?: google_protobuf_struct_pb.Struct): ApplyInterventionRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): ApplyInterventionRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: ApplyInterventionRequest): ApplyInterventionRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: ApplyInterventionRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): ApplyInterventionRequest;
+    static deserializeBinaryFromReader(message: ApplyInterventionRequest, reader: jspb.BinaryReader): ApplyInterventionRequest;
+}
+
+export namespace ApplyInterventionRequest {
+    export type AsObject = {
+        metadata?: RequestMetadata.AsObject,
+        identity?: SideEffectIdentity.AsObject,
+        command?: google_protobuf_struct_pb.Struct.AsObject,
     }
 }
 

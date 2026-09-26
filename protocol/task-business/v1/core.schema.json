@@ -1,0 +1,648 @@
+{
+  "profileVersion": "1.0-rc2",
+  "source": "packages/vehicle-provider-core/src/task-business-contract.ts",
+  "schemas": {
+    "identity": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "resourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "operationName": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "simulationId": { "type": "string", "minLength": 1, "maxLength": 256 }
+      },
+      "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+      "additionalProperties": false
+    },
+    "sourceCursor": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "sourceStreamId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "sourceSequence": { "type": "string", "pattern": "^[1-9][0-9]{0,18}$" }
+      },
+      "required": ["sourceId", "sourceStreamId", "sourceSequence"],
+      "additionalProperties": false
+    },
+    "runtimeCursor": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "streamId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "afterSequence": { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" }
+      },
+      "required": ["streamId", "afterSequence"],
+      "additionalProperties": false
+    },
+    "context": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.task-business-context/1.0-rc2" },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "providerId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "resourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "operationName": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "correlationId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "simulationId": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+          "additionalProperties": false
+        },
+        "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "effectivePlanRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "phase": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "label": { "type": "string" },
+                "since": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 }
+              },
+              "required": ["code", "since"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string", "enum": ["in_progress", "finalized"] },
+            "resultCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "properties": {
+              "type": "object",
+              "propertyNames": { "type": "string" },
+              "additionalProperties": {}
+            }
+          },
+          "required": ["status"],
+          "additionalProperties": false
+        },
+        "activeRefs": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["artifact", "action", "input_request", "intervention"]
+              },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "artifactRefs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "artifact" },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "actionRefs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "action" },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "requiredInputRefs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "input_request" },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "interventionRefs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "intervention" },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "finalizedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "identity",
+        "contextRevision",
+        "effectivePlanRevision",
+        "phase",
+        "summary",
+        "activeRefs",
+        "artifactRefs",
+        "actionRefs",
+        "requiredInputRefs",
+        "interventionRefs",
+        "updatedAt"
+      ],
+      "additionalProperties": false
+    },
+    "feedbackBody": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "BUSINESS_EVENT" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "eventType": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "description": { "type": "string" },
+                "subjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": ["artifact", "action", "input_request", "intervention"]
+                      },
+                      "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["kind", "id", "revision"],
+                    "additionalProperties": false
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "propertyNames": { "type": "string" },
+                  "additionalProperties": {}
+                },
+                "contextDelta": {
+                  "type": "object",
+                  "properties": {
+                    "phase": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "code": { "type": "string", "minLength": 1, "maxLength": 256 },
+                            "label": { "type": "string" },
+                            "since": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                            },
+                            "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 }
+                          },
+                          "required": ["code", "since"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "string", "enum": ["in_progress", "finalized"] },
+                        "resultCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+                        "properties": {
+                          "type": "object",
+                          "propertyNames": { "type": "string" },
+                          "additionalProperties": {}
+                        }
+                      },
+                      "required": ["status"],
+                      "additionalProperties": false
+                    },
+                    "activeRefs": {
+                      "type": "object",
+                      "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string",
+                            "enum": ["artifact", "action", "input_request", "intervention"]
+                          },
+                          "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                          "revision": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": ["kind", "id", "revision"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "effectivePlanRevision": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "legacyAlias": {
+                  "type": "object",
+                  "properties": {
+                    "sourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "sourceStreamId": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "sourceSequence": { "type": "string", "pattern": "^[1-9][0-9]{0,18}$" },
+                    "sourceEventId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                  },
+                  "required": ["sourceId", "sourceStreamId", "sourceSequence", "sourceEventId"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["eventType", "severity", "reasonCode", "description"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "ARTIFACT_CHANGED" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "type": "string",
+                  "enum": ["create", "update", "invalidate", "archive"]
+                },
+                "artifactRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "artifact" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                },
+                "previousRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "changedFields": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "required": ["change", "artifactRef", "reasonCode"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "ACTION_CHANGED" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "change": { "type": "string", "enum": ["create", "update"] },
+                "actionRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "action" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                },
+                "previousRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 }
+              },
+              "required": ["change", "actionRef", "reasonCode"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "REQUIRED_INPUT_CHANGED" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "change": { "type": "string", "enum": ["create", "update"] },
+                "requestRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "input_request" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                },
+                "previousRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 }
+              },
+              "required": ["change", "requestRef", "reasonCode"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "INTERVENTION_CHANGED" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "change": { "type": "string", "enum": ["create", "update"] },
+                "interventionRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "intervention" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                },
+                "previousRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 }
+              },
+              "required": ["change", "interventionRef", "reasonCode"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+            "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "providerRecordedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "kind": { "type": "string", "const": "CONTEXT_FINALIZED" },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "finalContextRevision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "summary": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "const": "finalized" },
+                    "resultCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "properties": {
+                      "type": "object",
+                      "propertyNames": { "type": "string" },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": ["status"],
+                  "additionalProperties": false
+                },
+                "artifactRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": { "type": "string", "const": "artifact" },
+                      "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["kind", "id", "revision"],
+                    "additionalProperties": false
+                  }
+                },
+                "actionRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": { "type": "string", "const": "action" },
+                      "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["kind", "id", "revision"],
+                    "additionalProperties": false
+                  }
+                },
+                "finalizedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "reasonCode",
+                "finalContextRevision",
+                "summary",
+                "artifactRefs",
+                "actionRefs",
+                "finalizedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": ["schemaVersion", "contextRevision", "providerRecordedAt", "kind", "payload"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "optionalExtension": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.task-business-feedback/1.0-rc2" },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "not": {
+            "enum": [
+              "BUSINESS_EVENT",
+              "ARTIFACT_CHANGED",
+              "ACTION_CHANGED",
+              "REQUIRED_INPUT_CHANGED",
+              "INTERVENTION_CHANGED",
+              "CONTEXT_FINALIZED"
+            ]
+          }
+        },
+        "required": { "type": "boolean", "const": false },
+        "contextRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "providerRecordedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "payload": { "$ref": "#/$defs/__schema0" }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "required",
+        "contextRevision",
+        "providerRecordedAt",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "$defs": {
+        "__schema0": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "null" },
+            { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
+            {
+              "type": "object",
+              "propertyNames": { "type": "string" },
+              "additionalProperties": { "$ref": "#/$defs/__schema0" }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

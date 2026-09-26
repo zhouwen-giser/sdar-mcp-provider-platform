@@ -709,6 +709,13 @@ function eventNotification(
       eventId: event.eventId,
       sequence: event.sequence,
       sourceId: event.sourceId,
+      ...(event.sourceId === "vehicle.business" && event.eventType === "vehicle.business.changed"
+        ? {
+            sourceStreamId: event.sourceStreamId,
+            sourceSequence: event.sourceSequence,
+            sourceEventId: event.sourceEventId,
+          }
+        : {}),
       eventType: event.eventType,
       occurredAt: event.occurredAt.toISOString(),
       scope: event.scope,

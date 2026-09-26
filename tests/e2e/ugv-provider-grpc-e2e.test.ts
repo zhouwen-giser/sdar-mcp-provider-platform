@@ -230,6 +230,95 @@ describe("UGV Adapter gRPC E2E", () => {
       options,
       "RUNNING",
     );
+    const deviceCallsBeforeIntervention = device.calls.length;
+    const interventionExecutionId = started.accepted?.externalExecutionId;
+    if (!interventionExecutionId) throw new Error("UGV_INTERVENTION_EXECUTION_ID_MISSING");
+    const interventionIdentity = {
+      taskId: options.taskId,
+      operationName: "vehicle_navigate",
+      argumentHash: options.argumentHash,
+      commandSequence: 1,
+    };
+    const interventionPayload = {
+      command: {
+        schemaVersion: "sdar.runtime-intervention-command/1.0-rc2",
+        commandId: "unsupported-adjustment-1",
+        taskId: options.taskId,
+        executionId: interventionExecutionId,
+        interventionId: "unavailable-adjustment-1",
+        guard: {
+          mode: "semantic",
+          expectedInterventionRevision: 1,
+          expectedEffectivePlanRevision: 0,
+        },
+        input: { destination: [114.3, 30.3] },
+      },
+      responder: {
+        source: "runtime_authorization_context",
+        actorType: "user",
+        verified: true,
+      },
+    };
+    const interventionOptions = {
+      ...options,
+      externalExecutionId: interventionExecutionId,
+    };
+    const updateIdentity = { ...interventionIdentity, commandSequence: 9 };
+    expect(
+      await gateway.updateMcpTaskExecution(updateIdentity, [], interventionOptions),
+    ).toMatchObject({ accepted: false, reasonCode: "INPUT_RESPONSE_REQUIRED" });
+    expect(
+      await gateway.updateMcpTaskExecution(
+        updateIdentity,
+        [
+          { key: "observation-decision", result: { action: "accept" } },
+          { key: "observation-decision", result: { action: "decline" } },
+        ],
+        interventionOptions,
+      ),
+    ).toMatchObject({ accepted: false, reasonCode: "INPUT_RESPONSE_WIRE_INVALID" });
+    const deniedUpdate = await gateway.updateMcpTaskExecution(
+      updateIdentity,
+      [{ key: "observation-decision", result: { action: "accept", content: { continue: true } } }],
+      interventionOptions,
+    );
+    expect(deniedUpdate).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INPUT_HANDLER_NOT_AVAILABLE",
+    });
+    expect(
+      await gateway.updateMcpTaskExecution(updateIdentity, [], interventionOptions),
+    ).toMatchObject({
+      accepted: false,
+      reasonCode: deniedUpdate.reasonCode,
+      commandSequence: "9",
+    });
+    expect(
+      await gateway.applyIntervention(interventionIdentity, { command: {} }, interventionOptions),
+    ).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_COMMAND_INVALID",
+      commandSequence: "1",
+    });
+    const rejectedIntervention = await gateway.applyIntervention(
+      interventionIdentity,
+      interventionPayload,
+      interventionOptions,
+    );
+    expect(rejectedIntervention).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_NOT_SUPPORTED",
+      commandSequence: "1",
+    });
+    expect(
+      await gateway.applyIntervention(interventionIdentity, { command: {} }, interventionOptions),
+    ).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_NOT_SUPPORTED",
+      commandSequence: "1",
+    });
+    expect(device.calls).toHaveLength(deviceCallsBeforeIntervention);
+    expect((await runtime.get(options.taskId))?.state).toBe("RUNNING");
     ingress.handle(
       "/ugv/mission_state",
       Buffer.from('{"entity_id":"ugv1","id":1,"type":1,"state":4,"progress":100}'),

@@ -11,6 +11,7 @@ export function frozenDiscoveryResult(
   serverVersion: string,
   providerCatalog: FrozenProviderCatalog,
   businessEvents?: Record<string, unknown>,
+  taskBusiness?: Record<string, unknown>,
 ): Record<string, unknown> {
   return {
     resultType: "complete",
@@ -30,6 +31,7 @@ export function frozenDiscoveryResult(
           manifestHash: providerCatalog.manifestHash,
         },
         ...(businessEvents === undefined ? {} : { "io.sdar/businessEvents": businessEvents }),
+        ...(taskBusiness === undefined ? {} : { "io.sdar/taskBusiness": taskBusiness }),
       },
     },
     _meta: {

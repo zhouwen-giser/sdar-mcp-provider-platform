@@ -193,9 +193,9 @@ export class MemoryProviderStore implements ProviderStore {
   getDiagnosticStatus(leaseId: string): Promise<SmppDiagnosticControlResult | undefined> {
     const lease = this.#diagnosticLeases.get(leaseId);
     if (lease === undefined) return Promise.resolve(undefined);
-    const receipt = [...this.#diagnosticReceipts.values()]
-      .filter((candidate) => candidate.leaseId === leaseId)
-      .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))[0];
+    const receipt = this.#diagnosticReceipts.get(
+      receiptKey(leaseId, lease.state.toLowerCase() as SmppDiagnosticReceipt["action"]),
+    );
     if (receipt === undefined)
       return Promise.reject(new Error("SMPP_DIAGNOSTIC_RECEIPT_NOT_FOUND"));
     return Promise.resolve({ lease: structuredClone(lease), receipt: structuredClone(receipt) });
@@ -337,7 +337,7 @@ export class MemoryProviderStore implements ProviderStore {
     const sequence = String(events.length + 1);
     const sourceEventId = createHash("sha256")
       .update(`${draft.sourceId}\0${sequence}\0${randomUUID()}`)
-      .digest("base64url");
+      .digest("hex");
     const event: AdapterBusinessEvent = {
       sourceEventId,
       sourceSequence: sequence,
@@ -346,10 +346,12 @@ export class MemoryProviderStore implements ProviderStore {
       occurredAt: timestamp(draft.occurredAt),
       eventType: draft.eventType,
       description: draft.description,
-      ...(draft.externalExecutionId === undefined
+      ...(draft.scope !== "task" || draft.externalExecutionId === undefined
         ? {}
         : { externalExecutionId: draft.externalExecutionId }),
-      ...(draft.resourceRef === undefined ? {} : { resourceRef: draft.resourceRef }),
+      ...(draft.scope !== "resource" || draft.resourceRef === undefined
+        ? {}
+        : { resourceRef: draft.resourceRef }),
       severityHint: draft.severityHint,
       reasonCode: draft.reasonCode,
       rawPayload: jsonToProtoStruct(draft.rawPayload),

@@ -15,6 +15,8 @@ import { UgvBusinessEventHub } from "./business-events.js";
 import { loadUgvProviderConfig } from "./config.js";
 import { UgvProviderRuntime } from "./runtime.js";
 import { UgvProviderServer } from "./server.js";
+import { UgvTaskBusinessContextService } from "./task-business-service.js";
+import { openUgvTaskBusinessStore } from "./task-business-bootstrap.js";
 import { UgvTelemetry } from "./telemetry.js";
 
 const config = loadUgvProviderConfig();
@@ -43,6 +45,11 @@ if (config.gowmStorage && store instanceof PostgresProviderStore) {
     false,
   );
 }
+const taskBusinessStore = await openUgvTaskBusinessStore(
+  store,
+  config.taskBusinessSettings,
+  config.gowmStorage,
+);
 const identity = {
   providerId: config.PROVIDER_ID,
   resourceId: config.UGV_RESOURCE_ID,
@@ -121,6 +128,15 @@ const telemetry = new UgvTelemetry({
   },
 });
 const businessEvents = new UgvBusinessEventHub(store, config.UGV_RESOURCE_ID);
+const taskBusiness = taskBusinessStore
+  ? new UgvTaskBusinessContextService(
+      store,
+      taskBusinessStore,
+      config.PROVIDER_ID,
+      config.UGV_RESOURCE_ID,
+      (event) => businessEvents.notifyCommittedTaskBusinessEvent(event),
+    )
+  : undefined;
 const runtime = new UgvProviderRuntime(
   {
     providerId: config.PROVIDER_ID,
@@ -163,6 +179,7 @@ const runtime = new UgvProviderRuntime(
   device,
   businessEvents,
   telemetry,
+  taskBusiness,
 );
 const server = new UgvProviderServer(
   {

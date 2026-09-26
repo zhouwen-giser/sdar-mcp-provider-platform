@@ -1,3 +1,4 @@
+import { compareIsoTimestamps } from "./time.js";
 import type {
   FreshnessPolicy,
   VehicleReconnaissanceState,
@@ -383,7 +384,7 @@ export function isNewAuthority(
     return compareSequence(current.sourceSequence, baseline.sourceSequence) > 0;
   return (
     current.cursor !== baseline.cursor &&
-    Date.parse(current.observedAt) >= Date.parse(baseline.observedAt)
+    compareIsoTimestamps(current.observedAt, baseline.observedAt) >= 0
   );
 }
 
@@ -404,7 +405,7 @@ function latestAuthority(
   if (right === undefined) return left;
   if (left.ingestSequence !== undefined && right.ingestSequence !== undefined)
     return right.ingestSequence > left.ingestSequence ? right : left;
-  return Date.parse(right.observedAt) > Date.parse(left.observedAt) ? right : left;
+  return compareIsoTimestamps(right.observedAt, left.observedAt) > 0 ? right : left;
 }
 
 function normalizeVehiclePositionObservation(

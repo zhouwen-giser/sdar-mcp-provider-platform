@@ -18,6 +18,10 @@ service ResourceProviderAdapter {
   rpc ResumeExecution(ResumeExecutionRequest) returns (CommandAck);
   rpc StreamExecutionEvents(StreamExecutionEventsRequest) returns (stream ExecutionEvent);
   rpc StreamBusinessEvents(StreamBusinessEventsRequest) returns (stream AdapterBusinessEvent);
+  rpc GetBusinessContext(GetBusinessContextRequest) returns (GetBusinessContextResponse);
+  rpc GetBusinessSnapshotPart(GetBusinessSnapshotPartRequest) returns (GetBusinessSnapshotPartResponse);
+  rpc GetBusinessArtifact(GetBusinessArtifactRequest) returns (GetBusinessArtifactResponse);
+  rpc ApplyIntervention(ApplyInterventionRequest) returns (CommandAck);
   rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse);
 }
 
@@ -139,6 +143,7 @@ message OperationDefinition {
   google.protobuf.Struct output_schema = 5;
   OperationCapabilities capabilities = 6;
   ResourceBinding resource_binding = 7;
+  google.protobuf.Struct business_feedback_profile = 8;
 }
 
 message DescribeProviderRequest {
@@ -303,6 +308,8 @@ message McpTaskInputRequest {
 message McpTaskInputResponse {
   string key = 1;
   google.protobuf.Struct result = 2;
+  // Runtime-authenticated provenance; never copied from tasks/update JSON.
+  google.protobuf.Struct verified_responder = 3;
 }
 
 message EvidencePayloadRef {
@@ -394,6 +401,78 @@ message UpdateExecutionRequest {
   SideEffectIdentity identity = 2;
   repeated UpdateValue inputs = 3 [deprecated = true];
   repeated McpTaskInputResponse input_responses = 4;
+  // Optional io.sdar/taskBusiness input command; not an MCP tasks/* method.
+  google.protobuf.Struct business_input_command = 5;
+}
+
+message GetBusinessContextRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string external_execution_id = 3;
+  ExecutionContext execution_context = 4;
+  uint32 max_page_bytes = 5;
+  string page_cursor = 6;
+}
+
+message GetBusinessContextResponse {
+  // TaskBusinessSnapshotPage, including exact revisions or read descriptors.
+  google.protobuf.Struct page = 1;
+}
+
+// Reads bounded JSON bytes for the exact Context revision or a version named by it.
+// The caller concatenates chunks and verifies the whole-value SHA-256 before parsing.
+message GetBusinessSnapshotPartRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string external_execution_id = 3;
+  ExecutionContext execution_context = 4;
+  uint64 context_revision = 5;
+  // All three object fields are omitted for the Context itself.
+  string object_kind = 6;
+  string object_id = 7;
+  optional uint64 object_revision = 8;
+  uint64 offset = 9;
+  // Zero requests the server default; each response is bounded to 1 MiB.
+  uint32 max_bytes = 10;
+}
+
+message GetBusinessSnapshotPartResponse {
+  bytes json_bytes = 1;
+  uint64 total_bytes = 2;
+  string sha256 = 3;
+  optional uint64 next_offset = 4;
+}
+
+message GetBusinessArtifactRequest {
+  RequestMetadata metadata = 1;
+  string task_id = 2;
+  string external_execution_id = 3;
+  ExecutionContext execution_context = 4;
+  string artifact_id = 5;
+  // Omitted means latest; present means the exact immutable revision.
+  optional uint64 revision = 6;
+  string representation_name = 7;
+  bool include_content = 8;
+  uint64 content_offset = 9;
+  // Zero requests the server default; every response is bounded to 1 MiB.
+  uint32 max_content_bytes = 10;
+}
+
+message GetBusinessArtifactResponse {
+  google.protobuf.Struct artifact = 1;
+  // Present only when include_content follows an actual stored content_ref.
+  optional bytes content_bytes = 2;
+  string media_type = 3;
+  string sha256 = 4;
+  uint64 content_total_bytes = 5;
+  optional uint64 next_content_offset = 6;
+}
+
+message ApplyInterventionRequest {
+  RequestMetadata metadata = 1;
+  SideEffectIdentity identity = 2;
+  // RuntimeInterventionCommandSchema; Runtime checks trusted identity and guard.
+  google.protobuf.Struct command = 3;
 }
 
 message PauseExecutionRequest {
