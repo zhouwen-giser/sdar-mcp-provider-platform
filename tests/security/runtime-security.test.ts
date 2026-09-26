@@ -21,6 +21,7 @@ describe("Runtime security boundaries", () => {
         authorization: "Bearer caller-supplied-value",
         "x-sdar-subject": "forged-subject",
         "x-sdar-tenant": "forged-tenant",
+        "x-sdar-actor-type": "user",
       }),
     );
     const simulation = resolve(
@@ -36,6 +37,7 @@ describe("Runtime security boundaries", () => {
       simulationId: null,
     });
     expect(attemptedIdentityOverride.hash).toBe(expectedHash);
+    expect(attemptedIdentityOverride.verifiedResponder).toBeUndefined();
     expect(simulation).toMatchObject({
       hash: expectedHash,
       executionMode: "simulation",
@@ -61,6 +63,27 @@ describe("Runtime security boundaries", () => {
     );
     expect(live.hash).not.toBe(otherUser.hash);
     expect(simulation).toMatchObject({ hash: live.hash, executionMode: "simulation" });
+    const human = resolve(
+      request({
+        "x-sdar-subject": "alice",
+        "x-sdar-tenant": "tenant-a",
+        "x-sdar-actor-type": "user",
+      }),
+    );
+    expect(human.verifiedResponder).toEqual({
+      actorType: "user",
+      actorId: "alice",
+      source: "trusted_headers",
+    });
+    expect(() =>
+      resolve(
+        request({
+          "x-sdar-subject": "alice",
+          "x-sdar-tenant": "tenant-a",
+          "x-sdar-actor-type": "device",
+        }),
+      ),
+    ).toThrow("INVALID_ACTOR_TYPE");
     expect(() =>
       resolve(
         request({
@@ -88,6 +111,22 @@ describe("Runtime security boundaries", () => {
       exp: Math.floor(Date.now() / 1_000) + 60,
     });
     expect(resolve(request({ authorization: `Bearer ${token}` })).hash).toHaveLength(64);
+    expect(
+      resolve(request({ authorization: `Bearer ${token}` })).verifiedResponder,
+    ).toBeUndefined();
+    const humanToken = jwt(secret, {
+      sub: "alice",
+      tenant: "tenant-a",
+      actor_type: "user",
+      iss: "issuer-a",
+      aud: "sdar-runtime",
+      exp: Math.floor(Date.now() / 1_000) + 60,
+    });
+    expect(resolve(request({ authorization: `Bearer ${humanToken}` })).verifiedResponder).toEqual({
+      actorType: "user",
+      actorId: "alice",
+      source: "jwt_hs256",
+    });
     expect(() => resolve(request({ authorization: `Bearer ${token.slice(0, -1)}x` }))).toThrow(
       "INVALID_BEARER_TOKEN",
     );

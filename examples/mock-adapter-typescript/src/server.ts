@@ -16,6 +16,11 @@ export interface MockAdapterOptions {
   providerVersion?: string;
   onStartSideEffect?: (taskId: string, reservationRef?: string) => void;
   onControlSideEffect?: (taskId: string, command: string) => void;
+  onMcpInputResponses?: (
+    taskId: string,
+    responses: readonly { key?: string; result?: unknown; verifiedResponder?: unknown }[],
+  ) => void;
+  onIntervention?: (taskId: string, command: Record<string, unknown>) => boolean;
   statePath?: string;
   startResponseDelayMs?: number;
   businessEventSources?: BusinessEventSourceCapability[];
@@ -491,7 +496,7 @@ export function createMockAdapterServer(options: MockAdapterOptions = {}): grpc.
         {
           identity?: { taskId?: string; commandSequence?: string | number };
           inputs?: { inputRequestKey?: string }[];
-          inputResponses?: { key?: string; result?: unknown }[];
+          inputResponses?: { key?: string; result?: unknown; verifiedResponder?: unknown }[];
         },
         unknown
       >,
@@ -508,6 +513,7 @@ export function createMockAdapterServer(options: MockAdapterOptions = {}): grpc.
       const expectedKey = execution?.inputRound === 2 ? "comment" : "approval";
       const legacyInputs = call.request.inputs ?? [];
       const frozenResponses = call.request.inputResponses ?? [];
+      options.onMcpInputResponses?.(taskId, frozenResponses);
       const accepted =
         execution?.waitingForInput === true &&
         ((legacyInputs.length > 0 &&
@@ -563,6 +569,37 @@ export function createMockAdapterServer(options: MockAdapterOptions = {}): grpc.
         identity: call.request.identity,
       };
       if (execution !== undefined) {
+        execution.commandAcks[commandKey] = ack;
+        executions.set(taskId, execution);
+      }
+      callback(null, ack);
+    },
+    applyIntervention: (
+      call: grpc.ServerUnaryCall<
+        { identity?: { taskId?: string; commandSequence?: string | number }; command?: unknown },
+        unknown
+      >,
+      callback: grpc.sendUnaryData<unknown>,
+    ) => {
+      const taskId = call.request.identity?.taskId ?? "";
+      const execution = executions.get(taskId);
+      const commandKey = `intervention:${String(call.request.identity?.commandSequence ?? "0")}`;
+      const existingAck = execution?.commandAcks[commandKey];
+      if (existingAck) {
+        callback(null, existingAck);
+        return;
+      }
+      const supplied = protoStructToJson(call.request.command);
+      const accepted =
+        execution !== undefined && options.onIntervention?.(taskId, supplied) === true;
+      const ack = {
+        accepted,
+        reasonCode: accepted ? "INTERVENTION_ACCEPTED" : "INTERVENTION_NOT_SUPPORTED",
+        message: accepted ? "Intervention intent accepted." : "Intervention is unavailable.",
+        commandSequence: call.request.identity?.commandSequence ?? "0",
+        identity: call.request.identity,
+      };
+      if (execution) {
         execution.commandAcks[commandKey] = ack;
         executions.set(taskId, execution);
       }

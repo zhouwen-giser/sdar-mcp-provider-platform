@@ -14,6 +14,7 @@ import {
   normalizeRfc3339Nano,
   parseBusinessEventSequence,
 } from "../../adapter-protocol/src/index.js";
+import { parseTaskBusinessFeedbackBody } from "../../vehicle-provider-core/src/task-business-contract.js";
 import type { BusinessEventProviderOpsRecorderLike } from "./business-event-provider-ops.js";
 
 export type BusinessEventDeliverySemantics = "durable_at_least_once" | "best_effort_live";
@@ -83,6 +84,7 @@ export interface BusinessEventSourceFact {
 export interface IntakeResult {
   disposition: "received" | "duplicate" | "rejected";
   sourceCanonicalHash?: string;
+  rejectReason?: string;
 }
 
 export interface FinalizedBusinessEvent {
@@ -413,7 +415,7 @@ export class BusinessEventRepository {
     };
     const sourceCanonicalHash = canonicalSha256(sourceCanonicalInput);
     const rawEnvelopeHash = canonicalSha256(fact);
-    const validationError = validateSourceFact(fact);
+    const validationError = validateSourceFact(fact, lease.sourceId);
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -546,7 +548,7 @@ export class BusinessEventRepository {
       );
       await client.query("COMMIT");
       return rejected
-        ? { disposition: "rejected", sourceCanonicalHash }
+        ? { disposition: "rejected", sourceCanonicalHash, rejectReason: validationError }
         : { disposition: "received", sourceCanonicalHash };
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -1685,7 +1687,7 @@ function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-function validateSourceFact(fact: BusinessEventSourceFact): string | undefined {
+function validateSourceFact(fact: BusinessEventSourceFact, sourceId: string): string | undefined {
   if (!/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,255}$/.test(fact.sourceEventId)) {
     return "SOURCE_EVENT_ID_INVALID";
   }
@@ -1721,6 +1723,16 @@ function validateSourceFact(fact: BusinessEventSourceFact): string | undefined {
     !/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/.test(fact.reasonCode)
   ) {
     return "REASON_CODE_INVALID";
+  }
+  if (sourceId === "vehicle.business") {
+    if (fact.scope !== "task" || fact.eventType !== "vehicle.business.changed") {
+      return "TASK_BUSINESS_ENVELOPE_INVALID";
+    }
+    try {
+      parseTaskBusinessFeedbackBody(fact.rawPayload);
+    } catch {
+      return "TASK_BUSINESS_PAYLOAD_INVALID";
+    }
   }
   return undefined;
 }

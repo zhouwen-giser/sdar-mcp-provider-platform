@@ -3,7 +3,7 @@
   "mappingState": "owner_directories",
   "inventory": {
     "mappedProvenanceEntries": 37,
-    "ownerDirectoryFiles": 46
+    "ownerDirectoryFiles": 49
   },
   "pathSemantics": {
     "oldPath": "Immutable path in the delivered offline baseline.",
@@ -21,7 +21,7 @@
     "provider:ugv": {
       "owner": "provider:ugv",
       "plannedDirectory": "migrations/providers/ugv",
-      "deliveredFiles": 5
+      "deliveredFiles": 8
     },
     "provider:npc-tank": {
       "owner": "provider:npc-tank",

@@ -10,7 +10,9 @@ import {
   scopeValues,
 } from "../../gowm-shared-storage-adapter/src/scope.js";
 import { createHash, randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { Pool, PoolClient } from "pg";
+import { z } from "zod";
 import type {
   AuthorizationContext,
   SnapshotTransition,
@@ -18,6 +20,7 @@ import type {
   TaskRecord,
 } from "../../domain/src/index.js";
 import {
+  InvalidParamsError,
   isTerminalState,
   TaskExpiredError,
   TaskNotFoundOrUnauthorizedError,
@@ -80,7 +83,7 @@ export interface AdmissionIntentRecord extends AdmissionIntentInput {
 export interface PendingCommandRecord {
   taskId: string;
   commandSequence: number;
-  commandType: "CANCEL" | "UPDATE" | "PAUSE" | "RESUME";
+  commandType: "CANCEL" | "UPDATE" | "PAUSE" | "RESUME" | "INTERVENTION";
   payload: Record<string, unknown>;
   state: "PENDING" | "CLAIMED" | "RETRY_WAIT" | "ACKNOWLEDGED" | "REJECTED" | "EXHAUSTED";
   attemptCount: number;
@@ -205,6 +208,63 @@ export interface InputResponseAcceptance {
   ignoredAnsweredKeys: string[];
   ignoredSupersededKeys: string[];
   duplicatePendingKeys: string[];
+}
+
+type VerifiedResponder = NonNullable<AuthorizationContext["verifiedResponder"]>;
+
+function inputBusinessMetadata(requestJson: InputRequestRecord["requestJson"]): unknown {
+  const meta = requestJson.params._meta;
+  return isJsonRecord(meta) ? meta["io.sdar/taskBusiness"] : undefined;
+}
+
+const businessInputDeadlineSchema = z.iso.datetime({ offset: true });
+
+function inputBusinessDeadlineAt(requestJson: InputRequestRecord["requestJson"]): Date | undefined {
+  const metadata = inputBusinessMetadata(requestJson);
+  if (metadata === undefined) return undefined;
+  if (!isJsonRecord(metadata)) throw new InvalidParamsError("BUSINESS_INPUT_METADATA_INVALID");
+  if (metadata.deadlineAt === undefined) return undefined;
+  const parsed = businessInputDeadlineSchema.safeParse(metadata.deadlineAt);
+  if (!parsed.success) throw new InvalidParamsError("BUSINESS_INPUT_DEADLINE_INVALID");
+  return new Date(parsed.data);
+}
+
+function decodeStoredInputResponse(value: unknown): {
+  response: McpInputResponse;
+  verifiedResponder?: VerifiedResponder;
+} {
+  if (!isJsonRecord(value)) throw new Error("INPUT_RESPONSE_INBOX_INVALID");
+  if (value.storageVersion === "sdar.runtime-verified-input/1") {
+    const response = value.response;
+    const responder = value.verifiedResponder;
+    if (!isMcpInputResponse(response) || !isVerifiedResponder(responder)) {
+      throw new Error("INPUT_RESPONSE_INBOX_INVALID");
+    }
+    return { response, verifiedResponder: responder };
+  }
+  if (!isMcpInputResponse(value)) throw new Error("INPUT_RESPONSE_INBOX_INVALID");
+  return { response: value };
+}
+
+function isMcpInputResponse(value: unknown): value is McpInputResponse {
+  return (
+    isJsonRecord(value) &&
+    (value.action === "accept" || value.action === "decline" || value.action === "cancel")
+  );
+}
+
+function isVerifiedResponder(value: unknown): value is VerifiedResponder {
+  return (
+    isJsonRecord(value) &&
+    (value.actorType === "user" || value.actorType === "agent" || value.actorType === "operator") &&
+    typeof value.actorId === "string" &&
+    value.actorId.length > 0 &&
+    (value.source === "jwt_hs256" || value.source === "trusted_headers")
+  );
+}
+
+function isJsonRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export interface ObservationRecord {
@@ -1040,7 +1100,7 @@ export class TaskRepository {
            FROM provider_task
           WHERE (${scopePredicate(client, "command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( provider_task.task_id=command.task_id
             AND provider_task.cancel_requested IS TRUE
-            AND command.command_type IN ('UPDATE','PAUSE','RESUME')
+            AND command.command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
             AND command.state='CLAIMED'
             AND command.claim_until <= GREATEST($1,clock_timestamp())
          ) RETURNING command.task_id, command.command_sequence, command.command_type,
@@ -1085,7 +1145,7 @@ export class TaskRepository {
          FROM task_command
          JOIN provider_task
            ON provider_task.task_id = task_command.task_id
-         WHERE (${scopePredicate(client, "task_command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME')
+         WHERE (${scopePredicate(client, "task_command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME','INTERVENTION')
            AND (
              (task_command.state IN ('PENDING','RETRY_WAIT')
               AND task_command.next_attempt_at <= GREATEST($1,clock_timestamp())
@@ -2692,8 +2752,9 @@ export class TaskRepository {
                 status: InputRequestRecord["status"];
                 schema: Record<string, unknown>;
                 request_json: InputRequestRecord["requestJson"];
+                response_hash: string | null;
               }>(
-                `SELECT request_key, status, schema, request_json FROM task_input_request
+                `SELECT request_key, status, schema, request_json, response_hash FROM task_input_request
                  WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[])
                  ) ORDER BY request_key FOR UPDATE`,
                 [taskId, keys],
@@ -2714,7 +2775,27 @@ export class TaskRepository {
           result.ignoredUnknownKeys.push(key);
           continue;
         }
+        const responseHash = createHash("sha256")
+          .update(canonicalizeResponse(response))
+          .digest("hex");
         if (request.status === "ANSWERED") {
+          if (inputBusinessMetadata(request.request_json) !== undefined) {
+            validateLockedResponse(
+              {
+                key,
+                status: request.status,
+                schema: request.schema,
+                requestJson: request.request_json,
+              },
+              response,
+            );
+            if (authorization.verifiedResponder === undefined) {
+              throw new Error("RESPONDER_NOT_AUTHORIZED");
+            }
+            if (request.response_hash !== responseHash) {
+              throw new InvalidParamsError("INPUT_ANSWER_CONFLICT");
+            }
+          }
           result.ignoredAnsweredKeys.push(key);
           continue;
         }
@@ -2731,16 +2812,58 @@ export class TaskRepository {
           },
           response,
         );
-        const responseHash = createHash("sha256")
-          .update(canonicalizeResponse(response))
-          .digest("hex");
+        const businessMetadata = inputBusinessMetadata(request.request_json);
+        if (
+          businessMetadata !== undefined &&
+          (task.cancel_requested ||
+            task.stop_reason !== null ||
+            task.internal_state === "STOPPING" ||
+            isTerminalState(task.internal_state))
+        ) {
+          throw new InvalidParamsError("BUSINESS_INPUT_TASK_STOPPING");
+        }
+        if (businessMetadata !== undefined && task.internal_state !== "INPUT_REQUIRED") {
+          throw new InvalidParamsError("BUSINESS_INPUT_TASK_NOT_WAITING");
+        }
+        const verifiedResponder = authorization.verifiedResponder;
+        if (businessMetadata !== undefined && verifiedResponder === undefined) {
+          throw new Error("RESPONDER_NOT_AUTHORIZED");
+        }
+        const deadlineAt = inputBusinessDeadlineAt(request.request_json);
+        if (businessMetadata !== undefined) {
+          const existingInbox = await client.query<{ response_hash: string }>(
+            `SELECT response_hash FROM task_input_response_inbox
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=$2 )`,
+            [taskId, key],
+          );
+          const existingHash = existingInbox.rows[0]?.response_hash;
+          if (existingHash !== undefined && existingHash !== responseHash) {
+            throw new InvalidParamsError("INPUT_ANSWER_CONFLICT");
+          }
+          if (existingHash === undefined && deadlineAt) {
+            const clock = await client.query<{ at: Date }>("SELECT clock_timestamp() AS at");
+            const at = clock.rows[0]?.at;
+            if (!at) throw new Error("BUSINESS_INPUT_CLOCK_UNAVAILABLE");
+            if (at.getTime() >= deadlineAt.getTime()) {
+              throw new InvalidParamsError("BUSINESS_INPUT_DEADLINE_EXPIRED");
+            }
+          }
+        }
+        const storedResponse =
+          businessMetadata === undefined
+            ? response
+            : {
+                storageVersion: "sdar.runtime-verified-input/1",
+                response,
+                verifiedResponder,
+              };
         const inserted = await client.query<{ request_key: string }>(
           `INSERT INTO task_input_response_inbox
             (${scopeColumns(client, "task_input_response_inbox")}task_id, request_key, response_hash, response_json, state)
            VALUES (${scopeValues(client, "task_input_response_inbox")}$1,$2,$3,$4::jsonb,'PENDING')
            ON CONFLICT (task_id, request_key) DO NOTHING
            RETURNING request_key`,
-          [taskId, key, responseHash, JSON.stringify(response)],
+          [taskId, key, responseHash, JSON.stringify(storedResponse)],
         );
         if (inserted.rows[0] === undefined) {
           result.duplicatePendingKeys.push(key);
@@ -2809,7 +2932,7 @@ export class TaskRepository {
           await client.query<{
             request_key: string;
             response_hash: string;
-            response_json: McpInputResponse;
+            response_json: unknown;
           }>(
             `SELECT request_key, response_hash, response_json
              FROM task_input_response_inbox
@@ -2843,6 +2966,68 @@ export class TaskRepository {
           await client.query("COMMIT");
           continue;
         }
+        const decodedResponses = responses.map((response) => ({
+          ...response,
+          stored: decodeStoredInputResponse(response.response_json),
+        }));
+        const businessKeys = decodedResponses
+          .filter((response) => response.stored.verifiedResponder !== undefined)
+          .map((response) => response.request_key);
+        const openBusinessRequests =
+          businessKeys.length === 0
+            ? []
+            : (
+                await client.query<{ request_key: string; status: InputRequestRecord["status"] }>(
+                  `SELECT request_key,status FROM task_input_request
+                   WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+                     AND task_id=$1 AND request_key=ANY($2::text[])
+                   ORDER BY request_key FOR UPDATE`,
+                  [taskId, businessKeys],
+                )
+              ).rows;
+        const openBusinessKeys = new Set(
+          openBusinessRequests
+            .filter((request) => request.status === "OPEN")
+            .map((request) => request.request_key),
+        );
+        const taskNoLongerWaiting = task.internal_state !== "INPUT_REQUIRED";
+        const staleBusinessKeys = businessKeys.filter(
+          (key) => taskNoLongerWaiting || !openBusinessKeys.has(key),
+        );
+        if (staleBusinessKeys.length > 0) {
+          if (taskNoLongerWaiting) {
+            await client.query(
+              `UPDATE task_input_request SET status='SUPERSEDED'
+               WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
+              [taskId, staleBusinessKeys],
+            );
+          }
+          await client.query(
+            `UPDATE task_input_response_inbox
+             SET state='IGNORED', updated_at=clock_timestamp(),
+                 last_error_code=$3,
+                 last_error_message=$4
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
+            [
+              taskId,
+              staleBusinessKeys,
+              taskNoLongerWaiting
+                ? "BUSINESS_INPUT_TASK_NOT_WAITING"
+                : "BUSINESS_INPUT_REQUEST_SUPERSEDED",
+              taskNoLongerWaiting
+                ? "The Task is no longer waiting for this business input."
+                : "The business input request is no longer open.",
+            ],
+          );
+        }
+        const readyResponses = decodedResponses.filter(
+          (response) => !staleBusinessKeys.includes(response.request_key),
+        );
+        if (readyResponses.length === 0) {
+          await reconcileMcpExecutionLinks(client);
+          await client.query("COMMIT");
+          continue;
+        }
         const updated = await client.query<{ next_command_sequence: string }>(
           `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
            WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
@@ -2851,11 +3036,18 @@ export class TaskRepository {
         const sequence = updated.rows[0]?.next_command_sequence;
         if (sequence === undefined) throw new Error("COMMAND_SEQUENCE_NOT_RETURNED");
         const normalized = Object.fromEntries(
-          responses.map((response) => [response.request_key, response.response_json]),
+          readyResponses.map((response) => [response.request_key, response.stored.response]),
+        );
+        const verifiedResponders = Object.fromEntries(
+          readyResponses.flatMap((response) =>
+            response.stored.verifiedResponder === undefined
+              ? []
+              : [[response.request_key, response.stored.verifiedResponder]],
+          ),
         );
         const requestHash = createHash("sha256")
           .update(
-            responses
+            readyResponses
               .map((response) => `${response.request_key}:${response.response_hash}`)
               .join("\n"),
           )
@@ -2864,16 +3056,24 @@ export class TaskRepository {
           `INSERT INTO task_command
             (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type, request_hash, state, payload)
            VALUES (${scopeValues(client, "task_command")}$1,$2,'UPDATE',$3,'PENDING',$4::jsonb)`,
-          [taskId, sequence, requestHash, JSON.stringify({ inputResponses: normalized })],
+          [
+            taskId,
+            sequence,
+            requestHash,
+            JSON.stringify({
+              inputResponses: normalized,
+              ...(Object.keys(verifiedResponders).length === 0 ? {} : { verifiedResponders }),
+            }),
+          ],
         );
         const assigned = await client.query(
           `UPDATE task_input_response_inbox
            SET state='ASSIGNED', command_sequence=$3, assigned_at=clock_timestamp(),
                updated_at=clock_timestamp()
            WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
-          [taskId, keys, sequence],
+          [taskId, readyResponses.map((response) => response.request_key), sequence],
         );
-        if (assigned.rowCount !== responses.length)
+        if (assigned.rowCount !== readyResponses.length)
           throw new Error("INPUT_RESPONSE_ASSIGNMENT_LOST");
         await insertCommandFact(
           client,
@@ -3008,7 +3208,7 @@ export class TaskRepository {
                last_error_message='Safe stop superseded the pending command.',
                updated_at=clock_timestamp()
          WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
-           AND command_type IN ('UPDATE','PAUSE','RESUME')
+           AND command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
            AND state IN ('PENDING','RETRY_WAIT')
          ) RETURNING command_sequence, command_type, attempt_count`,
         [taskId],
@@ -3142,6 +3342,152 @@ export class TaskRepository {
       await reconcileMcpExecutionLinks(client);
       await client.query("COMMIT");
       return fromRow(applied.row);
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async beginBusinessInterventionCommand(
+    taskId: string,
+    commandId: string,
+    semanticHash: string,
+    payload: Record<string, unknown>,
+  ): Promise<CommandResolution> {
+    if (
+      commandId.length < 1 ||
+      commandId.length > 256 ||
+      !/^[0-9a-f]{64}$/.test(semanticHash) ||
+      payload.commandId !== commandId ||
+      payload.semanticHash !== semanticHash ||
+      payload.command === null ||
+      typeof payload.command !== "object" ||
+      Array.isArray(payload.command)
+    ) {
+      throw new InvalidParamsError("BUSINESS_INTERVENTION_COMMAND_INVALID");
+    }
+    const requestHash = createHash("sha256")
+      .update(commandId)
+      .update("\0")
+      .update(semanticHash)
+      .digest("hex");
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const locked = await client.query<TaskRow>(
+        `SELECT * FROM provider_task
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND task_id=$1
+         FOR UPDATE`,
+        [taskId],
+      );
+      const task = locked.rows[0];
+      if (!task) throw new Error("TASK_NOT_FOUND");
+      const previous = await client.query<PendingCommandRecordRow>(
+        `SELECT task_id, command_sequence, command_type, state, payload, attempt_count,
+                claim_owner, stop_reason, adapter_ack, next_attempt_at, last_error_code,
+                last_error_message, claim_until
+         FROM task_command
+         WHERE (${scopePredicate(client, "task_command", "task_command")})
+           AND task_id=$1 AND command_type='INTERVENTION' AND payload->>'commandId'=$2
+         ORDER BY command_sequence DESC LIMIT 1`,
+        [taskId, commandId],
+      );
+      const existing = previous.rows[0];
+      if (existing) {
+        if (existing.payload.semanticHash !== semanticHash) {
+          throw new InvalidParamsError("COMMAND_ID_CONFLICT");
+        }
+        await client.query("COMMIT");
+        return { ...mapCommandResolution(existing), duplicate: true };
+      }
+      if (task.internal_state !== "RUNNING" || task.cancel_requested || task.stop_reason !== null) {
+        throw new InvalidParamsError("BUSINESS_INTERVENTION_TASK_NOT_RUNNING");
+      }
+      const unresolved = await client.query(
+        `SELECT 1 FROM task_command
+         WHERE (${scopePredicate(client, "task_command", "task_command")})
+           AND task_id=$1 AND command_type='INTERVENTION' AND state='EXHAUSTED'
+           AND last_error_code='INTERVENTION_DELIVERY_EXHAUSTED' LIMIT 1`,
+        [taskId],
+      );
+      if (unresolved.rowCount) {
+        throw new InvalidParamsError("BUSINESS_CHANGE_RECONCILIATION_REQUIRED");
+      }
+      const active = await client.query(
+        `SELECT 1 FROM task_command
+         WHERE (${scopePredicate(client, "task_command", "task_command")})
+           AND task_id=$1 AND state IN ('PENDING','CLAIMED','RETRY_WAIT') LIMIT 1`,
+        [taskId],
+      );
+      if (active.rowCount) throw new InvalidParamsError("BUSINESS_CHANGE_IN_PROGRESS");
+      const updated = await client.query<{ next_command_sequence: string }>(
+        `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND task_id=$1
+         RETURNING next_command_sequence`,
+        [taskId],
+      );
+      const sequence = updated.rows[0]?.next_command_sequence;
+      if (!sequence) throw new Error("TASK_COMMAND_SEQUENCE_MISSING");
+      await client.query(
+        `INSERT INTO task_command
+          (${scopeColumns(client, "task_command")}task_id, command_sequence, command_type,
+           request_hash, state, payload)
+         VALUES (${scopeValues(client, "task_command")}$1,$2,'INTERVENTION',$3,'PENDING',$4::jsonb)`,
+        [taskId, sequence, requestHash, JSON.stringify(payload)],
+      );
+      await transitionTask(client, {
+        taskId,
+        expectedVersion: Number(task.version),
+        update: {},
+        observation: {
+          type: "task.command_requested",
+          occurredAt: new Date(),
+          reasonCode: "INTERVENTION",
+          message: "intervention command requested.",
+          substate: task.substate,
+          source: "runtime",
+          payload: { commandType: "INTERVENTION", commandSequence: Number(sequence) },
+        },
+        outboxType: "task.command_requested",
+        eventKey: `${taskId}:command:${sequence}:requested`,
+        outboxPayload: {
+          commandType: "INTERVENTION",
+          commandSequence: Number(sequence),
+          previousState: null,
+          currentState: "PENDING",
+          attempt: 0,
+          adapterRpcStatus: "not_started",
+        },
+      });
+      await insertCommandFact(
+        client,
+        taskId,
+        {
+          sequence: Number(sequence),
+          commandType: "INTERVENTION",
+          state: "PENDING",
+          attemptCount: 0,
+        },
+        "task.command.created",
+        { adapterRpcStatus: "not_started" },
+      );
+      await reconcileMcpExecutionLinks(client);
+      await client.query("COMMIT");
+      return {
+        sequence: Number(sequence),
+        commandType: "INTERVENTION",
+        duplicate: false,
+        state: "PENDING",
+        disposition: "created",
+        adapterAck: null,
+        lastErrorCode: null,
+        lastErrorMessage: null,
+        nextAttemptAt: null,
+        claimOwner: null,
+        claimUntil: null,
+      };
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
       throw error;
@@ -3353,7 +3699,7 @@ export class TaskRepository {
              last_error_message='Safe stop superseded the pending command.',
              updated_at=clock_timestamp()
        WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
-         AND command_type IN ('UPDATE','PAUSE','RESUME')
+         AND command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
          AND state IN ${states}
        ) RETURNING command_sequence, command_type, attempt_count`,
         [taskId],
@@ -3398,7 +3744,7 @@ export class TaskRepository {
              updated_at=clock_timestamp()
        WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
          AND command_sequence=$2
-         AND command_type IN ('UPDATE','PAUSE','RESUME')
+         AND command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
          AND state='CLAIMED'
          AND claim_owner=$3) `,
         [command.taskId, command.commandSequence, command.claimOwner],
@@ -3433,6 +3779,289 @@ export class TaskRepository {
     }
   }
 
+  /** Rechecks Task wait and request liveness under the Task lock before any Adapter call. */
+  async supersedeClaimedBusinessInputIfNoLongerCurrent(
+    command: PendingCommandRecord,
+  ): Promise<boolean> {
+    if (
+      command.commandType !== "UPDATE" ||
+      !isJsonRecord(command.payload) ||
+      !isJsonRecord(command.payload.verifiedResponders) ||
+      Object.keys(command.payload.verifiedResponders).length === 0
+    )
+      return false;
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const lockedTask = await client.query<TaskRow>(
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
+        [command.taskId],
+      );
+      const task = lockedTask.rows[0];
+      if (task === undefined) throw new Error("TASK_NOT_FOUND");
+      const businessKeys = Object.keys(command.payload.verifiedResponders);
+      const requests = await client.query<{
+        request_key: string;
+        status: InputRequestRecord["status"];
+      }>(
+        `SELECT request_key,status FROM task_input_request
+         WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+           AND task_id=$1 AND request_key=ANY($2::text[])
+         ORDER BY request_key FOR UPDATE`,
+        [command.taskId, businessKeys],
+      );
+      const requestsStillOpen =
+        requests.rows.length === businessKeys.length &&
+        requests.rows.every((request) => request.status === "OPEN");
+      const taskStillWaiting =
+        task.internal_state === "INPUT_REQUIRED" &&
+        !task.cancel_requested &&
+        task.stop_reason === null;
+      if (taskStillWaiting && requestsStillOpen) {
+        await client.query("COMMIT");
+        return false;
+      }
+      const reasonCode = taskStillWaiting
+        ? "BUSINESS_INPUT_REQUEST_SUPERSEDED"
+        : task.cancel_requested || task.stop_reason !== null || task.internal_state === "STOPPING"
+          ? "SUPERSEDED_BY_SAFE_STOP"
+          : isTerminalState(task.internal_state)
+            ? "TASK_TERMINAL"
+            : "BUSINESS_INPUT_TASK_NOT_WAITING";
+      const reasonMessage =
+        reasonCode === "BUSINESS_INPUT_REQUEST_SUPERSEDED"
+          ? "Business input request is no longer open."
+          : "Business input response was superseded by Task state.";
+      const updated = await client.query(
+        `UPDATE task_command
+         SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
+             next_attempt_at=clock_timestamp(), last_error_code=$4,
+             last_error_message=$5,
+             updated_at=clock_timestamp()
+         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
+           AND command_sequence=$2 AND command_type='UPDATE'
+           AND state='CLAIMED' AND claim_owner=$3) `,
+        [command.taskId, command.commandSequence, command.claimOwner, reasonCode, reasonMessage],
+      );
+      if (updated.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
+      const keys = Object.keys(
+        (command.payload.inputResponses as Record<string, unknown> | undefined) ?? {},
+      );
+      if (!taskStillWaiting && keys.length > 0) {
+        await client.query(
+          `UPDATE task_input_request SET status='SUPERSEDED'
+           WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
+          [command.taskId, keys],
+        );
+      }
+      await client.query(
+        `UPDATE task_input_response_inbox
+         SET state='IGNORED', updated_at=clock_timestamp(), last_error_code=$3,
+             last_error_message=$4
+         WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND command_sequence=$2 AND state='ASSIGNED') `,
+        [command.taskId, command.commandSequence, reasonCode, reasonMessage],
+      );
+      await insertCommandFact(
+        client,
+        command.taskId,
+        {
+          sequence: command.commandSequence,
+          commandType: "UPDATE",
+          state: "EXHAUSTED",
+          attemptCount: command.attemptCount,
+        },
+        "task.command.superseded",
+        {
+          previousState: "CLAIMED",
+          reasonCode,
+          adapterRpcStatus: "not_dispatched",
+        },
+      );
+      await reconcileMcpExecutionLinks(client);
+      await client.query("COMMIT");
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Compare a promoted UPDATE with its durable inbox before any Adapter side effect. */
+  async rejectClaimedPromotedInputIfPayloadMismatch(
+    command: PendingCommandRecord,
+  ): Promise<boolean> {
+    if (command.commandType !== "UPDATE") return false;
+    const assigned = await this.pool.query<{
+      request_key: string;
+      response_json: unknown;
+      request_json: InputRequestRecord["requestJson"];
+    }>(
+      `SELECT inbox.request_key, inbox.response_json, input.request_json
+       FROM task_input_response_inbox AS inbox
+       JOIN task_input_request AS input
+         ON input.task_id=inbox.task_id AND input.request_key=inbox.request_key
+       WHERE (${scopePredicate(this.pool, "task_input_response_inbox", "inbox")})
+         AND (${scopePredicate(this.pool, "task_input_request", "input")})
+         AND inbox.task_id=$1 AND inbox.command_sequence=$2 AND inbox.state='ASSIGNED'
+       ORDER BY inbox.request_key`,
+      [command.taskId, command.commandSequence],
+    );
+    if (assigned.rows.length === 0) return false;
+    const expectedResponses: Record<string, McpInputResponse> = {};
+    const expectedResponders: Record<string, VerifiedResponder> = {};
+    let invalid = !isJsonRecord(command.payload);
+    try {
+      for (const row of assigned.rows) {
+        const decoded = decodeStoredInputResponse(row.response_json);
+        if (inputBusinessMetadata(row.request_json) !== undefined && !decoded.verifiedResponder) {
+          invalid = true;
+        }
+        expectedResponses[row.request_key] = decoded.response;
+        if (decoded.verifiedResponder) {
+          expectedResponders[row.request_key] = decoded.verifiedResponder;
+        }
+      }
+    } catch {
+      invalid = true;
+    }
+    const payloadResponses = isJsonRecord(command.payload) ? command.payload.inputResponses : null;
+    const payloadResponders = isJsonRecord(command.payload)
+      ? command.payload.verifiedResponders
+      : null;
+    if (
+      !isJsonRecord(payloadResponses) ||
+      (payloadResponders !== undefined && !isJsonRecord(payloadResponders)) ||
+      !isDeepStrictEqual(payloadResponses, expectedResponses) ||
+      !isDeepStrictEqual(payloadResponders ?? {}, expectedResponders)
+    ) {
+      invalid = true;
+    }
+    if (!invalid) return false;
+    await this.rejectClaimedCommand(
+      command,
+      "INPUT_RESPONSE_COMMAND_INTEGRITY_INVALID",
+      "Promoted input response differs from its durable inbox record.",
+    );
+    return true;
+  }
+
+  /** A queued optional change may not run after pause, input wait, stop, or termination. */
+  async supersedeClaimedBusinessInterventionIfNotRunning(
+    command: PendingCommandRecord,
+  ): Promise<boolean> {
+    if (command.commandType !== "INTERVENTION") return false;
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const locked = await client.query<TaskRow>(
+        `SELECT * FROM provider_task
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND task_id=$1
+         FOR UPDATE`,
+        [command.taskId],
+      );
+      const task = locked.rows[0];
+      if (!task) throw new Error("TASK_NOT_FOUND");
+      if (
+        task.internal_state === "RUNNING" &&
+        !task.cancel_requested &&
+        task.stop_reason === null
+      ) {
+        await client.query("COMMIT");
+        return false;
+      }
+      const reasonCode =
+        task.cancel_requested || task.stop_reason !== null || task.internal_state === "STOPPING"
+          ? "SUPERSEDED_BY_SAFE_STOP"
+          : isTerminalState(task.internal_state)
+            ? "TASK_TERMINAL"
+            : "BUSINESS_INTERVENTION_TASK_NOT_RUNNING";
+      const updated = await client.query(
+        `UPDATE task_command
+         SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
+             last_error_code=$4,
+             last_error_message='Business intervention was superseded by Task state.',
+             updated_at=clock_timestamp()
+         WHERE (${scopePredicate(client, "task_command", "task_command")})
+           AND task_id=$1 AND command_sequence=$2 AND command_type='INTERVENTION'
+           AND state='CLAIMED' AND claim_owner=$3`,
+        [command.taskId, command.commandSequence, command.claimOwner, reasonCode],
+      );
+      if (updated.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
+      await insertCommandFact(
+        client,
+        command.taskId,
+        {
+          sequence: command.commandSequence,
+          commandType: "INTERVENTION",
+          state: "EXHAUSTED",
+          attemptCount: command.attemptCount,
+        },
+        "task.command.superseded",
+        {
+          previousState: "CLAIMED",
+          reasonCode,
+          adapterRpcStatus: "not_dispatched",
+        },
+      );
+      await reconcileMcpExecutionLinks(client);
+      await client.query("COMMIT");
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Delivery exhausted with unknown southbound effect; do not fail the Task or admit a new change. */
+  async exhaustClaimedBusinessIntervention(
+    command: PendingCommandRecord,
+    message: string,
+  ): Promise<void> {
+    if (command.commandType !== "INTERVENTION") throw new Error("INTERVENTION_COMMAND_REQUIRED");
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const updated = await client.query(
+        `UPDATE task_command
+         SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
+             last_error_code='INTERVENTION_DELIVERY_EXHAUSTED', last_error_message=$4,
+             updated_at=clock_timestamp()
+         WHERE (${scopePredicate(client, "task_command", "task_command")})
+           AND task_id=$1 AND command_sequence=$2 AND command_type='INTERVENTION'
+           AND state='CLAIMED' AND claim_owner=$3`,
+        [command.taskId, command.commandSequence, command.claimOwner, message],
+      );
+      if (updated.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
+      await insertCommandFact(
+        client,
+        command.taskId,
+        {
+          sequence: command.commandSequence,
+          commandType: "INTERVENTION",
+          state: "EXHAUSTED",
+          attemptCount: command.attemptCount,
+        },
+        "task.command.exhausted",
+        {
+          previousState: "CLAIMED",
+          reasonCode: "INTERVENTION_DELIVERY_EXHAUSTED",
+          adapterRpcStatus: "unknown",
+        },
+      );
+      await reconcileMcpExecutionLinks(client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async supersedeExpiredClaimedNormalCommandsForSafeStop(taskId: string): Promise<number> {
     const client = await this.pool.connect();
     try {
@@ -3448,7 +4077,7 @@ export class TaskRepository {
              last_error_message='Safe stop superseded the pending command.',
              updated_at=clock_timestamp()
        WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1
-         AND command_type IN ('UPDATE','PAUSE','RESUME')
+         AND command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
          AND state='CLAIMED'
          AND claim_until <= clock_timestamp()
        ) RETURNING command_sequence, command_type, attempt_count`,
@@ -3575,7 +4204,12 @@ export class TaskRepository {
       value: unknown;
       response: Record<string, unknown>;
     }[],
-  ): Promise<"acknowledged" | "task_terminal" | "superseded_by_safe_stop"> {
+  ): Promise<
+    | "acknowledged"
+    | "task_terminal"
+    | "superseded_by_safe_stop"
+    | "business_input_no_longer_current_after_ack"
+  > {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -3606,9 +4240,17 @@ export class TaskRepository {
           `UPDATE task_command
              SET state='EXHAUSTED', claim_owner=NULL, claim_until=NULL,
                  next_attempt_at=clock_timestamp(), last_error_code=$4,
-                 last_error_message=$5, updated_at=clock_timestamp()
+                 last_error_message=$5, adapter_ack=$6::jsonb,
+                 updated_at=clock_timestamp()
            WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3) `,
-          [command.taskId, command.commandSequence, command.claimOwner, code, message],
+          [
+            command.taskId,
+            command.commandSequence,
+            command.claimOwner,
+            code,
+            message,
+            JSON.stringify(ack),
+          ],
         );
         if (result.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
       };
@@ -3653,7 +4295,7 @@ export class TaskRepository {
           {
             previousState: "CLAIMED",
             reasonCode: "TASK_TERMINAL",
-            adapterRpcStatus: "not_dispatched",
+            adapterRpcStatus: "success",
           },
         );
         await reconcileMcpExecutionLinks(client);
@@ -3680,12 +4322,93 @@ export class TaskRepository {
           {
             previousState: "CLAIMED",
             reasonCode: "SUPERSEDED_BY_SAFE_STOP",
-            adapterRpcStatus: "not_dispatched",
+            adapterRpcStatus: "success",
           },
         );
         await reconcileMcpExecutionLinks(client);
         await client.query("COMMIT");
         return "superseded_by_safe_stop";
+      }
+
+      const businessKeys = isJsonRecord(command.payload.verifiedResponders)
+        ? Object.keys(command.payload.verifiedResponders)
+        : [];
+      if (businessKeys.length > 0) {
+        const requests = await client.query<{
+          request_key: string;
+          status: InputRequestRecord["status"];
+        }>(
+          `SELECT request_key,status FROM task_input_request
+           WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+             AND task_id=$1 AND request_key=ANY($2::text[])
+           ORDER BY request_key FOR UPDATE`,
+          [command.taskId, businessKeys],
+        );
+        const taskStillWaiting = task.internal_state === "INPUT_REQUIRED";
+        const requestsStillOpen =
+          requests.rows.length === businessKeys.length &&
+          requests.rows.every((request) => request.status === "OPEN");
+        if (!taskStillWaiting || !requestsStillOpen) {
+          const reasonCode = taskStillWaiting
+            ? "BUSINESS_INPUT_REQUEST_SUPERSEDED"
+            : "BUSINESS_INPUT_TASK_NOT_WAITING";
+          const reasonMessage = taskStillWaiting
+            ? "Adapter accepted the response after its business input request was superseded."
+            : "Adapter accepted the response after the Task left the business input wait.";
+          if (!taskStillWaiting) {
+            await client.query(
+              `UPDATE task_input_request SET status='SUPERSEDED'
+               WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+                 AND task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN'`,
+              [command.taskId, businessKeys],
+            );
+          }
+          const exhausted = await client.query(
+            `UPDATE task_command
+             SET state='EXHAUSTED', adapter_ack=$4::jsonb,
+                 claim_owner=NULL, claim_until=NULL,
+                 next_attempt_at=clock_timestamp(), last_error_code=$5,
+                 last_error_message=$6, updated_at=clock_timestamp()
+             WHERE (${scopePredicate(client, "task_command", "task_command")})
+               AND task_id=$1 AND command_sequence=$2 AND state='CLAIMED' AND claim_owner=$3`,
+            [
+              command.taskId,
+              command.commandSequence,
+              command.claimOwner,
+              JSON.stringify(ack),
+              reasonCode,
+              reasonMessage,
+            ],
+          );
+          if (exhausted.rowCount !== 1) throw new Error("COMMAND_CLAIM_LOST");
+          await client.query(
+            `UPDATE task_input_response_inbox
+             SET state='IGNORED', updated_at=clock_timestamp(), last_error_code=$3,
+                 last_error_message=$4
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")})
+               AND task_id=$1 AND command_sequence=$2 AND state='ASSIGNED'`,
+            [command.taskId, command.commandSequence, reasonCode, reasonMessage],
+          );
+          await insertCommandFact(
+            client,
+            command.taskId,
+            {
+              sequence: command.commandSequence,
+              commandType: "UPDATE",
+              state: "EXHAUSTED",
+              attemptCount: command.attemptCount,
+            },
+            "task.command.superseded",
+            {
+              previousState: "CLAIMED",
+              reasonCode,
+              adapterRpcStatus: "success",
+            },
+          );
+          await reconcileMcpExecutionLinks(client);
+          await client.query("COMMIT");
+          return "business_input_no_longer_current_after_ack";
+        }
       }
 
       for (const answer of answers) {

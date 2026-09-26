@@ -1,14 +1,18 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Ajv2020 } from "ajv/dist/2020.js";
+import { z } from "zod";
 import * as grpc from "@grpc/grpc-js";
 import {
+  canonicalJson,
   protoStructToJson,
+  TaskBusinessOperationProfileSchema,
   validateAdapterSnapshotIdentity,
 } from "../../adapter-protocol/src/index.js";
 import type {
   AvailabilityCheckInput,
   ExecutionSnapshot,
   StartOperationResponse,
+  TaskBusinessOperationProfile,
 } from "../../adapter-protocol/src/index.js";
 import type { AuthorizationContext, TaskRecord } from "../../domain/src/index.js";
 import type {
@@ -51,6 +55,10 @@ import {
 } from "./result-contract.js";
 import { mapTaskToDetailedTask, type DetailedTaskProjection } from "./detailed-task.js";
 import { diagnosticResponseLossLeaseId, type TaskAdapterGateway } from "./diagnostic-gateway.js";
+import {
+  RuntimeInterventionCommandSchema,
+  type RuntimeInterventionCommand,
+} from "../../vehicle-provider-core/src/task-business-interaction.js";
 
 export type ToolInvocationResult =
   | { kind: "result"; result: Record<string, unknown> }
@@ -1015,12 +1023,21 @@ export class TaskEngine {
     if (!operation.capabilities.inputRequired) {
       throw new CapabilityNotSupportedError("INPUT_NOT_SUPPORTED");
     }
+    const businessProfile =
+      operation.businessFeedbackProfile === undefined
+        ? undefined
+        : TaskBusinessOperationProfileSchema.safeParse(operation.businessFeedbackProfile);
+    if (businessProfile !== undefined && !businessProfile.success) {
+      throw new AdapterContractError("BUSINESS_INPUT_PROFILE_INVALID");
+    }
+    const businessInputProfile = businessProfile?.data;
     const ajv = new Ajv2020({ strict: true, allErrors: true });
     await this.#repository.acceptMcpInputResponses(
       taskId,
       authorization,
       inputResponses,
       (request, response) => {
+        assertBusinessInputResponder(request, authorization, businessInputProfile);
         if (response.action !== "accept") return;
         let validate;
         try {
@@ -1033,6 +1050,63 @@ export class TaskEngine {
         }
       },
     );
+  }
+
+  /** Persist an optional adjustment in the existing Task command lane. Adapter acceptance is later. */
+  async enqueueBusinessIntervention(
+    candidate: RuntimeInterventionCommand,
+    authorization: AuthorizationContext,
+  ): Promise<Record<string, unknown>> {
+    const command = RuntimeInterventionCommandSchema.parse(candidate);
+    const task = await this.#repository.getAuthorized(command.taskId, authorization);
+    const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
+    const profile = TaskBusinessOperationProfileSchema.safeParse(operation.businessFeedbackProfile);
+    if (
+      !profile.success ||
+      !profile.data.methods.interventionApply ||
+      profile.data.interventionTypes.length === 0
+    ) {
+      throw new CapabilityNotSupportedError("BUSINESS_INTERVENTION_NOT_SUPPORTED");
+    }
+    if (!task.externalExecutionId || command.executionId !== task.externalExecutionId) {
+      throw new InvalidParamsError("BUSINESS_EXECUTION_ID_MISMATCH");
+    }
+    const verified = authorization.verifiedResponder;
+    if (!verified?.actorId || !["jwt_hs256", "trusted_headers"].includes(verified.source)) {
+      throw new CapabilityNotSupportedError("RESPONDER_NOT_AUTHORIZED");
+    }
+    const semantic = Object.fromEntries(
+      Object.entries(command).filter(([key]) => key !== "commandId"),
+    );
+    const semanticHash = createHash("sha256").update(canonicalJson(semantic)).digest("hex");
+    const resolution = await this.#repository.beginBusinessInterventionCommand(
+      task.taskId,
+      command.commandId,
+      semanticHash,
+      {
+        commandId: command.commandId,
+        semanticHash,
+        command,
+        responder: {
+          source: "runtime_authorization_context",
+          actorType: verified.actorType,
+          verified: true,
+        },
+        verifiedActorId: verified.actorId,
+      },
+    );
+    return {
+      resultType: "complete",
+      receipt: {
+        commandId: command.commandId,
+        commandSequence: resolution.sequence,
+        commandState: resolution.state,
+        durablyAccepted: true,
+        businessApplied: false,
+        duplicate: resolution.duplicate,
+        ...(resolution.lastErrorCode === null ? {} : { reasonCode: resolution.lastErrorCode }),
+      },
+    };
   }
 
   async controlTask(
@@ -1230,6 +1304,46 @@ export class TaskEngine {
       },
     };
   }
+}
+
+function assertBusinessInputResponder(
+  request: {
+    key: string;
+    requestJson: { params: Record<string, unknown> };
+  },
+  authorization: AuthorizationContext,
+  profile: TaskBusinessOperationProfile | undefined,
+): void {
+  const metadata = request.requestJson.params._meta;
+  const business =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata)
+      ? (metadata as Record<string, unknown>)["io.sdar/taskBusiness"]
+      : undefined;
+  if (business === undefined && (profile?.requiredInputTypes.length ?? 0) === 0) return;
+  if (business === null || typeof business !== "object" || Array.isArray(business))
+    throw new AdapterContractError("BUSINESS_INPUT_METADATA_MISSING");
+  const fields = business as Record<string, unknown>;
+  if (
+    fields.schemaVersion !== "sdar.required-input/1.0-rc2" ||
+    fields.requestKey !== request.key ||
+    typeof fields.inputType !== "string" ||
+    !profile?.requiredInputTypes.includes(fields.inputType) ||
+    !["user", "agent", "operator"].includes(String(fields.requiredResponder)) ||
+    (fields.deadlineAt !== undefined &&
+      !z.iso.datetime({ offset: true }).safeParse(fields.deadlineAt).success) ||
+    (profile.policy.decisionMode === "user_required" && fields.requiredResponder !== "user") ||
+    profile.policy.decisionMode === "none"
+  )
+    throw new AdapterContractError("BUSINESS_INPUT_METADATA_INVALID");
+  const responder = authorization.verifiedResponder;
+  if (
+    responder === undefined ||
+    responder.actorType !== fields.requiredResponder ||
+    typeof responder.actorId !== "string" ||
+    responder.actorId.length === 0 ||
+    !["jwt_hs256", "trusted_headers"].includes(responder.source)
+  )
+    throw new CapabilityNotSupportedError("RESPONDER_NOT_AUTHORIZED");
 }
 
 function validateStartResponseIdentity(

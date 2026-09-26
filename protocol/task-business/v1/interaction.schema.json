@@ -1,0 +1,511 @@
+{
+  "profileVersion": "1.0-rc2",
+  "source": "packages/vehicle-provider-core/src/task-business-interaction.ts",
+  "schemas": {
+    "action": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.business-action/1.0-rc2" },
+        "actionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "sensor.visual_lock",
+            "sensor.visual_reacquire",
+            "navigation.replan",
+            "recon.resume_scan"
+          ]
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "providerId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "resourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "operationName": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "correlationId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "simulationId": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+          "additionalProperties": false
+        },
+        "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+        "state": {
+          "type": "string",
+          "enum": ["requested", "active", "completed", "failed", "cancelled"]
+        },
+        "actor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["device", "provider", "agent", "user", "operator", "system"]
+            },
+            "actorId": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        "triggerOrigin": {
+          "type": "string",
+          "enum": [
+            "device_automatic",
+            "provider_policy",
+            "agent_command",
+            "user_command",
+            "operator_command",
+            "unknown"
+          ]
+        },
+        "subjectRefs": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["artifact", "action", "input_request", "intervention"]
+              },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "cause": {
+          "type": "object",
+          "properties": {
+            "messageId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "eventType": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "policyRef": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "additionalProperties": false
+        },
+        "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "endedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "endReason": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "properties": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "actionId",
+        "actionType",
+        "identity",
+        "revision",
+        "state",
+        "actor",
+        "triggerOrigin",
+        "reasonCode"
+      ],
+      "additionalProperties": false
+    },
+    "requiredInput": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.required-input/1.0-rc2" },
+        "requestId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "requestKey": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "inputType": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "providerId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "resourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "operationName": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "correlationId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "simulationId": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+          "additionalProperties": false
+        },
+        "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+        "blocking": { "type": "boolean", "const": true },
+        "state": {
+          "type": "string",
+          "enum": ["pending", "answered", "declined", "cancelled", "expired"]
+        },
+        "requiredResponder": { "type": "string", "enum": ["user", "agent", "operator"] },
+        "subjectBinding": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string", "const": "visual_lock" },
+                "targetId": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "lockSessionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "actionRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "action" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["kind", "targetId", "lockSessionId", "actionRef"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string", "const": "artifact_revision" },
+                "artifactRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "type": "string", "const": "artifact" },
+                    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["kind", "artifactRef"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "waitingPolicy": { "type": "string", "const": "pause_execution" },
+        "onExpire": {
+          "type": "string",
+          "enum": ["release_and_resume_scan", "end_observation", "reissue_request"]
+        },
+        "onDismiss": {
+          "type": "string",
+          "enum": ["release_and_resume_scan", "end_observation", "reissue_request"]
+        },
+        "onDecline": {
+          "type": "string",
+          "enum": ["release_and_resume_scan", "end_observation", "reissue_request"]
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "inputSchema": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "additionalProperties": {}
+        },
+        "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "deadlineAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "resolvedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "responseCommandId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "response": {
+          "type": "object",
+          "properties": {
+            "action": { "type": "string", "enum": ["accept", "decline", "cancel"] },
+            "value": {}
+          },
+          "required": ["action"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "requestKey",
+        "inputType",
+        "identity",
+        "revision",
+        "blocking",
+        "state",
+        "requiredResponder",
+        "subjectBinding",
+        "waitingPolicy",
+        "onExpire",
+        "onDismiss",
+        "onDecline",
+        "title",
+        "inputSchema",
+        "reasonCode",
+        "requestedAt"
+      ],
+      "additionalProperties": false
+    },
+    "intervention": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.runtime-intervention/1.0-rc2" },
+        "interventionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "interventionType": {
+          "type": "string",
+          "enum": [
+            "navigation.adjust_plan",
+            "navigation.change_destination",
+            "recon.adjust_area",
+            "recon.adjust_scan",
+            "target.change_visual_lock"
+          ]
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "providerId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "resourceId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "operationName": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "correlationId": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "simulationId": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+          "additionalProperties": false
+        },
+        "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+        "effectivePlanRevision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "blocking": { "type": "boolean", "const": false },
+        "state": {
+          "type": "string",
+          "enum": [
+            "available",
+            "submitted",
+            "applying",
+            "applied",
+            "failed",
+            "expired",
+            "withdrawn"
+          ]
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "inputSchema": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "additionalProperties": {}
+        },
+        "appliesTo": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["artifact", "action", "input_request", "intervention"]
+              },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        },
+        "reasonCode": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "acceptedCommandId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "resultRefs": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["artifact", "action", "input_request", "intervention"]
+              },
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "revision": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+            },
+            "required": ["kind", "id", "revision"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "interventionId",
+        "interventionType",
+        "identity",
+        "revision",
+        "effectivePlanRevision",
+        "blocking",
+        "state",
+        "title",
+        "inputSchema",
+        "reasonCode",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "inputCommand": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.required-input-response/1.0-rc2" },
+        "commandId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "requestId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "requestKey": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "guard": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string", "const": "semantic" },
+                "expectedRequestRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["mode", "expectedRequestRevision"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string", "const": "legacy_strict" },
+                "expectedContextRevision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["mode", "expectedContextRevision"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "result": {
+          "type": "object",
+          "properties": {
+            "action": { "type": "string", "enum": ["accept", "decline", "cancel"] },
+            "value": {}
+          },
+          "required": ["action"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "taskId",
+        "executionId",
+        "requestId",
+        "requestKey",
+        "guard",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "interventionCommand": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "sdar.runtime-intervention-command/1.0-rc2" },
+        "commandId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "executionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "interventionId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "guard": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string", "const": "semantic" },
+                "expectedInterventionRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "expectedEffectivePlanRevision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["mode", "expectedInterventionRevision", "expectedEffectivePlanRevision"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string", "const": "legacy_strict" },
+                "expectedContextRevision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["mode", "expectedContextRevision"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "input": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "taskId",
+        "executionId",
+        "interventionId",
+        "guard",
+        "input"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

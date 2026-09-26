@@ -15,6 +15,14 @@ export type AuthenticationOptions =
 
 export type AuthorizationResolver = (request: IncomingMessage) => AuthorizationContext;
 
+type ResponderType = NonNullable<AuthorizationContext["verifiedResponder"]>["actorType"];
+interface AuthenticatedIdentity {
+  subject: string;
+  tenant: string;
+  actorType?: ResponderType;
+  actorSource?: "jwt_hs256" | "trusted_headers";
+}
+
 export function createAuthorizationResolver(options: AuthenticationOptions): AuthorizationResolver {
   return (request) => {
     const identity =
@@ -35,12 +43,21 @@ export function createAuthorizationResolver(options: AuthenticationOptions): Aut
         .digest("hex"),
       executionMode: modeHeader,
       simulationId,
+      ...(identity.actorType === undefined || identity.actorSource === undefined
+        ? {}
+        : {
+            verifiedResponder: {
+              actorType: identity.actorType,
+              actorId: identity.subject,
+              source: identity.actorSource,
+            },
+          }),
       correlationId: correlationId(request),
     };
   };
 }
 
-function anonymousIdentity(): { subject: string; tenant: string } {
+function anonymousIdentity(): AuthenticatedIdentity {
   // Anonymous internal transport deliberately has one shared authorization domain. Identity-bearing
   // request headers are ignored so a caller cannot manufacture isolation or impersonate a tenant.
   return { subject: "internal-anonymous", tenant: "default" };
@@ -49,22 +66,26 @@ function anonymousIdentity(): { subject: string; tenant: string } {
 function trustedIdentity(
   request: IncomingMessage,
   allowDevelopmentAnonymous: boolean,
-): { subject: string; tenant: string } {
+): AuthenticatedIdentity {
   const subject = header(request, "x-sdar-subject");
   const tenant = header(request, "x-sdar-tenant");
   if (!allowDevelopmentAnonymous && (subject === undefined || tenant === undefined)) {
     throw new Error("AUTHENTICATION_REQUIRED");
   }
+  const actorType = allowDevelopmentAnonymous
+    ? undefined
+    : parseResponderType(header(request, "x-sdar-actor-type"));
   return {
     subject: subject ?? "development-anonymous",
     tenant: tenant ?? "default",
+    ...(actorType === undefined ? {} : { actorType, actorSource: "trusted_headers" as const }),
   };
 }
 
 function jwtIdentity(
   request: IncomingMessage,
   options: Extract<AuthenticationOptions, { mode: "jwt_hs256" }>,
-): { subject: string; tenant: string } {
+): AuthenticatedIdentity {
   const authorization = header(request, "authorization");
   if (!authorization?.startsWith("Bearer ")) {
     throw new Error("AUTHENTICATION_REQUIRED");
@@ -101,7 +122,18 @@ function jwtIdentity(
   if (typeof tenant !== "string" || tenant.length < 1 || tenant.length > 256) {
     throw new Error("INVALID_JWT_TENANT");
   }
-  return { subject: claims.sub, tenant };
+  const actorType = parseResponderType(claims.actor_type);
+  return {
+    subject: claims.sub,
+    tenant,
+    ...(actorType === undefined ? {} : { actorType, actorSource: "jwt_hs256" as const }),
+  };
+}
+
+function parseResponderType(value: unknown): ResponderType | undefined {
+  if (value === undefined) return undefined;
+  if (value === "user" || value === "agent" || value === "operator") return value;
+  throw new Error("INVALID_ACTOR_TYPE");
 }
 
 function parseSegment(segment: string): Record<string, unknown> {

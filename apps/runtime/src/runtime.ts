@@ -85,6 +85,8 @@ import { AdapterManifestWatcher } from "./manifest-watcher.js";
 import { AdapterBusinessEventSourceClient } from "./business-events/source-client.js";
 import { RuntimeDrainController } from "./shutdown.js";
 import { getSmppCapability, isSmppCapabilityId, listSmppCapabilities } from "./diagnostics.js";
+import { TaskBusinessGateway } from "./task-business-gateway.js";
+import { TaskBusinessPublicService } from "./task-business-public.js";
 import {
   assertRuntimeProviderIdentity,
   pendingRuntimeProviderIdentity,
@@ -133,6 +135,7 @@ export interface RuntimeApplication {
   drainState(): "accepting" | "draining" | "closed";
   registrationReadiness(): "ready" | "not_ready";
   providerIdentityEvidence(): RuntimeProviderIdentitySnapshot;
+  taskBusinessGateway(): TaskBusinessGateway | undefined;
 }
 
 export function createRuntime(config: RuntimeConfig): RuntimeApplication {
@@ -226,6 +229,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   let manifest: ProviderManifest | undefined;
   let validatedManifest: ValidatedManifest | undefined;
   let mcpRouter: ProtocolRouter | undefined;
+  let taskBusinessGateway: TaskBusinessGateway | undefined;
   let schedulerTimer: NodeJS.Timeout | undefined;
   let recoveryTimer: NodeJS.Timeout | undefined;
   let commandDispatcherTimer: NodeJS.Timeout | undefined;
@@ -676,6 +680,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       assertRuntimeProviderIdentity(providerIdentity);
       const validated = new OperationRegistry().validate(manifest);
       validatedManifest = validated;
+      assertTaskBusinessEventReadiness(validated, config.BUSINESS_EVENTS_ENABLED);
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
         throw new Error("BUSINESS_EVENTS_ENABLED_REQUIRES_SOURCE");
       }
@@ -777,6 +782,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
             eventRetentionMs: config.BUSINESS_EVENTS_RETENTION_MS,
             generationRetentionMs: config.BUSINESS_EVENTS_RETENTION_MS,
             mappingDeadlineMs: config.BUSINESS_EVENT_MAPPING_DEADLINE_MS,
+            pendingRetryMs: config.BUSINESS_EVENTS_POLL_INTERVAL_MS,
             metrics: businessEventMetrics,
           });
           const run = async (): Promise<void> => {
@@ -811,12 +817,20 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       dependencies.adapter = "ready";
       const manifestWatcher = new AdapterManifestWatcher(gateway, validated.manifestHash);
       dependencies.adapterManifest = "ready";
-      const snapshotIds = await new OperationSnapshotRepository(pool).saveManifest(validated);
+      const operationSnapshots = new OperationSnapshotRepository(pool);
+      const snapshotIds = await operationSnapshots.saveManifest(validated);
+      const taskRepository = new TaskRepository(pool);
+      taskBusinessGateway = new TaskBusinessGateway(
+        validated,
+        taskRepository,
+        operationSnapshots,
+        gateway,
+      );
       const taskEngine = new TaskEngine(
         validated,
         snapshotIds,
         gateway,
-        new TaskRepository(pool),
+        taskRepository,
         new IdempotencyRepository(pool, () => metrics.increment("sdar_idempotency_hits_total"), {
           leaseMs: config.IDEMPOTENCY_LEASE_MS,
           waitTimeoutMs: config.IDEMPOTENCY_WAIT_TIMEOUT_MS,
@@ -825,7 +839,18 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         undefined,
         metrics,
         (event) => logger.info(event, "task trace"),
+        operationSnapshots,
       );
+      const taskBusinessPublic = validated.operations.some(
+        (operation) => operation.businessFeedbackProfile !== undefined,
+      )
+        ? new TaskBusinessPublicService(
+            validated.providerId,
+            taskBusinessGateway,
+            businessEventRepository,
+            taskEngine,
+          )
+        : undefined;
       const legacyHandler = new LegacyMcpProtocolHandler(validated, gateway, taskEngine, {
         resolveAuthorization,
         maxArgumentBytes: config.ARGUMENT_MAX_BYTES,
@@ -867,13 +892,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         businessEventRelationManager,
         (error, requestId) =>
           logger.error({ err: error, requestId }, "Frozen MCP technical request failure"),
+        taskBusinessPublic,
       );
       mcpRouter = new ProtocolRouter(
         frozenHandler,
         legacyHandler,
         config.MCP_LEGACY_ENDPOINT_ENABLED,
       );
-      const taskRepository = new TaskRepository(pool);
       if (
         config.PROVIDER_TELEMETRY_INGRESS_ENABLED &&
         dependencies.providerTelemetryIngress !== "ready"
@@ -1268,10 +1293,23 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         ? "ready"
         : "not_ready",
     providerIdentityEvidence: () => providerIdentity,
+    taskBusinessGateway: () => taskBusinessGateway,
     initialize,
     applyOtelEnabled,
     telemetryEnabled: () => otelEnabled,
   };
+}
+
+export function assertTaskBusinessEventReadiness(
+  manifest: ValidatedManifest,
+  businessEventsEnabled: boolean,
+): void {
+  if (
+    !businessEventsEnabled &&
+    manifest.operations.some((operation) => operation.businessFeedbackProfile !== undefined)
+  ) {
+    throw new Error("TASK_BUSINESS_EVENTS_REQUIRED");
+  }
 }
 
 export function providerOpsEnvelopeForExport(

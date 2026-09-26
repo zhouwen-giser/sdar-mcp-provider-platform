@@ -1,4 +1,8 @@
-import { ADAPTER_PROTOCOL_VERSION, jsonToProtoStruct } from "../../adapter-protocol/src/index.js";
+import {
+  ADAPTER_PROTOCOL_VERSION,
+  jsonToProtoStruct,
+  type TaskBusinessOperationProfile,
+} from "../../adapter-protocol/src/index.js";
 import type { ProviderStore } from "../../provider-adapter-kit/src/index.js";
 import {
   vehicleCapabilitiesV1Schema,
@@ -32,6 +36,9 @@ export interface VehicleManifestProfile {
   supportsFireCommandRejectedOutput?: boolean;
   supportsReconCoverageOutput?: boolean;
   circularScanOmitsArea?: boolean;
+  businessFeedbackProfiles?: Partial<
+    Record<"vehicle_navigate" | "vehicle_area_recon", TaskBusinessOperationProfile>
+  >;
 }
 
 export function vehicleProviderManifest(
@@ -215,6 +222,13 @@ export function vehicleProviderManifest(
                 true,
               ),
               resourceBinding: binding,
+              ...(profile.businessFeedbackProfiles?.vehicle_navigate === undefined
+                ? {}
+                : {
+                    businessFeedbackProfile: jsonToProtoStruct(
+                      profile.businessFeedbackProfiles.vehicle_navigate,
+                    ),
+                  }),
             },
           ]
         : []),
@@ -258,6 +272,13 @@ export function vehicleProviderManifest(
               ),
               capabilities: caps(true, true, true, true, false, true),
               resourceBinding: binding,
+              ...(profile.businessFeedbackProfiles?.vehicle_area_recon === undefined
+                ? {}
+                : {
+                    businessFeedbackProfile: jsonToProtoStruct(
+                      profile.businessFeedbackProfiles.vehicle_area_recon,
+                    ),
+                  }),
             },
           ]
         : []),

@@ -88,6 +88,10 @@ x-sdar-admin-token: replace-with-secret-admin-token
 | `io.sdar/taskExecution/checkAvailability`  | 批量查询 Operation（操作）可用性                            |
 | `io.sdar/taskExecution/tasks/pause`        | 请求暂停支持该能力的 Task                                   |
 | `io.sdar/taskExecution/tasks/resume`       | 请求恢复支持该能力的 Task                                   |
+| `io.sdar/taskBusiness/context/get`         | 读取已授权 Task 的业务 Context 快照                         |
+| `io.sdar/taskBusiness/snapshotParts/get`   | 按已授权快照令牌分段读取大 Context 或精确对象版本           |
+| `io.sdar/taskBusiness/artifacts/get`       | 读取已授权 Task 的业务 Artifact 版本及可选内容              |
+| `io.sdar/taskBusiness/interventions/apply` | 有条件地持久接收可选业务调整命令；回执不代表调整已生效      |
 
 ### 2.1 通用调用样例
 
@@ -113,6 +117,9 @@ Authorization: Bearer replace-with-jwt
 内网：请求不需要凭据，所有调用共享固定的 `internal-anonymous/default` 授权域，调用方提交的
 身份请求头不会创建独立身份或租户隔离；`x-sdar-execution-mode`、`x-sdar-simulation-id` 和
 `x-correlation-id` 的既有校验仍然生效。
+业务 RequiredInput 需要受信答复者角色：代理还必须清除客户端的 `x-sdar-actor-type` 并根据认证结果设置；JWT 模式仅使用已验证签名中的 `actor_type`。普通请求 JSON 中自填的角色不是权限凭据。
+
+已受理的 RequiredInput 回答仍可能失效：例如原请求被新锁定会话取代。Runtime 在队列提升、Adapter 派发前及 Adapter 接受回执后核验请求状态。若检查时请求已失效，会忽略旧回答并以 `BUSINESS_INPUT_REQUEST_SUPERSEDED` 记录原因，Task 可继续等待当前有效请求。Adapter 已接受回执的情况会保留回执并终止旧命令，避免重试同一设备调用；已经下发的效果无法由 Runtime 撤销，Provider 必须核对实际会话和效果。调用方应重新读取 Task 与业务 Context，再按新的 request key 作答。回答受理回执不表示设备动作已经完成。
 
 ### 2.2 `io.sdar/taskExecution/tasks/observations`（Observation 分页）
 

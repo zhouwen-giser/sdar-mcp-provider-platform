@@ -7,6 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.stylisticTypeChecked,
   {
     ignores: [
+      ".codex/**",
       "**/dist/**",
       "coverage/**",
       "node_modules/**",

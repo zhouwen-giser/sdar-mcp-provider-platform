@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { compareIsoTimestamps } from "./time.js";
 import type {
   FreshnessDomain,
   FreshnessPolicy,
@@ -182,7 +183,9 @@ function latestObservedAt(current: string | undefined, candidate: string): strin
   const currentTime = Date.parse(current);
   const candidateTime = Date.parse(candidate);
   if (!Number.isFinite(candidateTime)) return current;
-  return !Number.isFinite(currentTime) || candidateTime >= currentTime ? candidate : current;
+  return !Number.isFinite(currentTime) || compareIsoTimestamps(candidate, current) >= 0
+    ? candidate
+    : current;
 }
 
 export function snapshotRevision(snapshot: VehicleSnapshot): string {

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "sdar.ugv-task-business-settings/1.0-rc2",
+  "enabled": false,
+  "visualLockOwner": "disabled",
+  "decisionMode": "none",
+  "maxWaitMs": 300000,
+  "onExpire": "release_and_resume_scan",
+  "onDismiss": "release_and_resume_scan",
+  "coordinates": {},
+  "trajectory": { "minSamples": 2, "sampleEveryMs": 1000 },
+  "footprint": { "mode": "disabled" },
+  "coverage": { "mode": "disabled" },
+  "adjustments": { "navigation": false, "reconnaissance": false },
+  "contentMode": "inline_up_to_limit",
+  "maxInlineArtifactBytes": 65536
+}

@@ -33,6 +33,7 @@ const UgvProviderInputBaseSchema = z.object({
     .url()
     .default("postgresql://ugv_adapter:ugv_adapter@127.0.0.1:5433/ugv_adapter"),
   UGV_ADAPTER_DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(32).default(8),
+  UGV_TASK_BUSINESS_PROFILE_PATH: optionalPath,
   UGV_MQTT_URL: z.string().min(1).default("mqtt://192.168.2.63:1883"),
   UGV_MQTT_CLIENT_ID: z.string().min(1).default("sdar-ugv-adapter-ugv1"),
   UGV_MQTT_USERNAME: optionalPath,
@@ -200,6 +201,7 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   ADAPTER_TLS_KEY_PATH: z.string().optional(),
   UGV_MQTT_USERNAME: z.string().optional(),
   UGV_MQTT_PASSWORD_FILE: z.string().optional(),
+  UGV_TASK_BUSINESS_PROFILE_PATH: z.string().optional(),
   UGV_MQTT_TLS_CA_PATH: z.string().optional(),
   UGV_MQTT_TLS_CERT_PATH: z.string().optional(),
   UGV_MQTT_TLS_KEY_PATH: z.string().optional(),

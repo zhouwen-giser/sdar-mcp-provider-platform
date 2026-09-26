@@ -23,6 +23,7 @@ export interface AdapterBusinessEventSourceClientOptions {
   eventRetentionMs?: number;
   mappingDeadlineMs?: number;
   generationRetentionMs?: number;
+  pendingRetryMs?: number;
   metrics?: {
     increment(name: string, labels?: Record<string, string>, amount?: number): void;
     gauge(name: string, value: number, labels?: Record<string, string>): void;
@@ -35,12 +36,15 @@ export interface AdapterBusinessEventSourceClientOptions {
   };
 }
 
+type FinalizationOutcome = "idle" | "rotated";
+
 export class AdapterBusinessEventSourceClient {
   readonly #leaseMs: number;
   readonly #inboxRetentionMs: number;
   readonly #eventRetentionMs: number;
   readonly #mappingDeadlineMs: number;
   readonly #generationRetentionMs: number;
+  #finalization: Promise<void> = Promise.resolve();
 
   constructor(
     readonly repository: BusinessEventRepository,
@@ -85,14 +89,47 @@ export class AdapterBusinessEventSourceClient {
         ? { afterSourceSequence: lease.lastPersistedSourceSequence }
         : {}),
     });
+    let latestSourceSequence = lease.lastPersistedSourceSequence;
+    let retryInFlight = false;
+    let rotationRequested = false;
+    const wasRotationRequested = (): boolean => rotationRequested;
+    const stopForRotation = (): void => {
+      if (rotationRequested) return;
+      rotationRequested = true;
+      stream.cancel();
+    };
+    const retry = setInterval(() => {
+      if (retryInFlight || rotationRequested) return;
+      retryInFlight = true;
+      void this.#queueFinalization(latestSourceSequence)
+        .then((outcome) => {
+          if (outcome === "rotated") stopForRotation();
+        })
+        .catch(() => {
+          this.#increment("sdar_business_event_source_blocked_total", {
+            sourceId: this.options.sourceId,
+            reason: "pending_finalizer_failure",
+          });
+        })
+        .finally(() => {
+          retryInFlight = false;
+        });
+    }, this.options.pendingRetryMs ?? 500);
+    retry.unref();
     try {
-      await consumeStream(stream, async (event) => this.#handleEvent(lease, event));
+      await consumeStream(stream, async (event) => {
+        latestSourceSequence = event.sourceSequence;
+        const outcome = await this.#handleEvent(lease, event);
+        if (outcome === "rotated") stopForRotation();
+      });
+      if (wasRotationRequested()) return "rotated";
       this.#event("business_events.source.connection", {
         sourceId: this.options.sourceId,
         outcome: "closed",
       });
       return "completed";
     } catch (error) {
+      if (wasRotationRequested()) return "rotated";
       if (isServiceError(error)) {
         const reason = businessEventReasonFromError(error) ?? "SOURCE_TEMPORARILY_UNAVAILABLE";
         this.#event("business_events.source.connection", {
@@ -133,10 +170,16 @@ export class AdapterBusinessEventSourceClient {
         return "degraded";
       }
       throw error;
+    } finally {
+      clearInterval(retry);
+      await this.#finalization;
     }
   }
 
-  async #handleEvent(lease: BusinessEventLease, event: AdapterBusinessEvent): Promise<void> {
+  async #handleEvent(
+    lease: BusinessEventLease,
+    event: AdapterBusinessEvent,
+  ): Promise<FinalizationOutcome> {
     const fact = normalizeAdapterEvent(event);
     const intake = await this.#trace(
       "business_events.source.ingest",
@@ -157,14 +200,14 @@ export class AdapterBusinessEventSourceClient {
       this.#increment("sdar_business_event_source_duplicate_total", {
         sourceId: this.options.sourceId,
       });
-      return;
+      return "idle";
     }
     if (intake.disposition === "rejected") {
       this.#event("business_events.source.rejected", {
         sourceId: this.options.sourceId,
         scope: fact.scope,
         outcome: "rejected",
-        reasonCode: fact.reasonCode ?? "SOURCE_POISON_EVENT",
+        reasonCode: intake.rejectReason ?? "SOURCE_POISON_EVENT",
       });
       this.#increment("sdar_business_event_source_rejected_total", {
         sourceId: this.options.sourceId,
@@ -193,69 +236,90 @@ export class AdapterBusinessEventSourceClient {
       this.#increment("sdar_business_event_continuity_loss_total", {
         reason: "SOURCE_POISON_EVENT",
       });
-      return;
+      return "rotated";
     }
-    const prepared = await this.#trace(
-      "business_events.source.prepare",
-      { sourceId: this.options.sourceId },
-      () => this.repository.prepareNextSourceEvent(this.options.providerId, this.options.sourceId),
+    return this.#queueFinalization(fact.sourceSequence);
+  }
+
+  #queueFinalization(sourceSequence: string): Promise<FinalizationOutcome> {
+    const work = this.#finalization.then(() => this.#finalizeBuffered(sourceSequence));
+    this.#finalization = work.then(
+      () => undefined,
+      () => undefined,
     );
-    if (prepared === "ready") {
-      await this.#trace(
-        "business_events.source.finalize",
-        { sourceId: this.options.sourceId, outcome: "finalized" },
+    return work;
+  }
+
+  async #finalizeBuffered(sourceSequence: string): Promise<FinalizationOutcome> {
+    // A Task-scoped source event may arrive before Runtime persists its external Execution ID.
+    // Retry the durable inbox while the source stream stays open, even without another event.
+    for (let index = 0; index < 100; index += 1) {
+      const prepared = await this.#trace(
+        "business_events.source.prepare",
+        { sourceId: this.options.sourceId },
         () =>
-          this.repository.finalizeNextSourceEvent(
-            this.options.providerId,
-            this.options.sourceId,
-            this.#eventRetentionMs,
-          ),
+          this.repository.prepareNextSourceEvent(this.options.providerId, this.options.sourceId),
       );
-      this.#increment("sdar_business_event_finalized_total", {
-        sourceId: this.options.sourceId,
-        outcome: "finalized",
-      });
-      this.#gauge("sdar_business_event_publication_barrier_waiting", 0, {
-        sourceId: this.options.sourceId,
-      });
-    } else if (
-      prepared === "terminal" &&
-      this.options.deliverySemantics === "durable_at_least_once"
-    ) {
-      this.#increment("sdar_business_event_source_mapping_failed_total", {
-        sourceId: this.options.sourceId,
-      });
-      await this.#trace(
-        "business_events.stream.rotate",
-        { sourceId: this.options.sourceId, outcome: "success", reason: "SOURCE_MAPPING_FAILED" },
-        () =>
-          this.repository.rotateStream(
-            this.options.providerId,
-            "SOURCE_MAPPING_FAILED",
-            [this.options.sourceId],
-            `${this.options.sourceStreamId}:mapping:${fact.sourceSequence}`,
-            this.#generationRetentionMs,
-          ),
-      );
-      this.#increment("sdar_business_event_stream_rotations_total", {
-        reason: "SOURCE_MAPPING_FAILED",
-      });
-      this.#increment("sdar_business_event_continuity_loss_total", {
-        reason: "SOURCE_MAPPING_FAILED",
-      });
-      this.#gauge("sdar_business_event_publication_barrier_waiting", 0, {
-        sourceId: this.options.sourceId,
-      });
-    } else if (prepared === "pending") {
-      this.#event("business_events.finalizer.wait", {
-        sourceId: this.options.sourceId,
-        outcome: "blocked",
-        reasonCode: "SOURCE_MAPPING_FAILED",
-      });
-      this.#gauge("sdar_business_event_publication_barrier_waiting", 1, {
-        sourceId: this.options.sourceId,
-      });
+      if (prepared === "ready") {
+        const finalized = await this.#trace(
+          "business_events.source.finalize",
+          { sourceId: this.options.sourceId, outcome: "finalized" },
+          () =>
+            this.repository.finalizeNextSourceEvent(
+              this.options.providerId,
+              this.options.sourceId,
+              this.#eventRetentionMs,
+            ),
+        );
+        if (!finalized) return "idle";
+        this.#increment("sdar_business_event_finalized_total", {
+          sourceId: this.options.sourceId,
+          outcome: "finalized",
+        });
+        this.#gauge("sdar_business_event_publication_barrier_waiting", 0, {
+          sourceId: this.options.sourceId,
+        });
+        continue;
+      }
+      if (prepared === "terminal" && this.options.deliverySemantics === "durable_at_least_once") {
+        this.#increment("sdar_business_event_source_mapping_failed_total", {
+          sourceId: this.options.sourceId,
+        });
+        await this.#trace(
+          "business_events.stream.rotate",
+          { sourceId: this.options.sourceId, outcome: "success", reason: "SOURCE_MAPPING_FAILED" },
+          () =>
+            this.repository.rotateStream(
+              this.options.providerId,
+              "SOURCE_MAPPING_FAILED",
+              [this.options.sourceId],
+              `${this.options.sourceStreamId}:mapping:${sourceSequence}`,
+              this.#generationRetentionMs,
+            ),
+        );
+        this.#increment("sdar_business_event_stream_rotations_total", {
+          reason: "SOURCE_MAPPING_FAILED",
+        });
+        this.#increment("sdar_business_event_continuity_loss_total", {
+          reason: "SOURCE_MAPPING_FAILED",
+        });
+        this.#gauge("sdar_business_event_publication_barrier_waiting", 0, {
+          sourceId: this.options.sourceId,
+        });
+        return "rotated";
+      } else if (prepared === "pending") {
+        this.#event("business_events.finalizer.wait", {
+          sourceId: this.options.sourceId,
+          outcome: "blocked",
+          reasonCode: "SOURCE_MAPPING_FAILED",
+        });
+        this.#gauge("sdar_business_event_publication_barrier_waiting", 1, {
+          sourceId: this.options.sourceId,
+        });
+      }
+      return "idle";
     }
+    return "idle";
   }
 
   #increment(name: string, labels: Record<string, string> = {}): void {

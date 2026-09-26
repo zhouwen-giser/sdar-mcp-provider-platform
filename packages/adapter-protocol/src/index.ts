@@ -5,3 +5,4 @@ export * from "./struct.js";
 export * from "./types.js";
 export * from "./identity.js";
 export * from "./business-events.js";
+export * from "./task-business-profile.js";

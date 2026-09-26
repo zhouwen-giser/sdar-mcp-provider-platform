@@ -99,6 +99,43 @@ describe("UGV MQTT exact routing and normalization", () => {
     expect(ingress.snapshot().chassis.position).toMatchObject({ latitude: 30, longitude: 114 });
   });
 
+  it("keeps ROS nanoseconds when ordering GNSS observations within one millisecond", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits);
+    const gnss = (nanosec: number, longitude: number) =>
+      Buffer.from(
+        JSON.stringify({
+          header: { stamp: { sec: 100, nanosec } },
+          entity_id: "ugv1",
+          latitude: 30,
+          longitude,
+        }),
+      );
+    ingress.handle("/ugv/gnss", gnss(100_000, 114));
+    expect(ingress.observationAuthority("/ugv/gnss")?.observedAt).toBe("1970-01-01T00:01:40.0001Z");
+    ingress.handle("/ugv/gnss", gnss(900_000, 115));
+    const revision = ingress.snapshot().revision;
+    expect(ingress.snapshot().chassis.position?.longitude).toBe(115);
+    expect(ingress.handle("/ugv/gnss", gnss(200_000, 113))).toMatchObject({
+      olderObservation: true,
+      revision,
+    });
+    expect(ingress.snapshot().chassis.position?.longitude).toBe(115);
+  });
+
+  it("preserves capture microseconds in target source authority", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits);
+    const captureTimeUs = Date.parse("2026-09-24T00:00:02Z") * 1000;
+    ingress.handle(
+      "/ugv/area_recon/targets",
+      Buffer.from(
+        JSON.stringify({ targets: [{ target_id: 1, capture_time_us: captureTimeUs + 123 }] }),
+      ),
+    );
+    expect(ingress.observationAuthority("/ugv/area_recon/targets")?.observedAt).toBe(
+      "2026-09-24T00:00:02.000123Z",
+    );
+  });
+
   it("isolates malformed identity and invalid mission progress", () => {
     const ingress = new VehicleMqttIngress("direct_domain_json", limits);
     expect(() =>

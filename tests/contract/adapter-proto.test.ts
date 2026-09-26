@@ -11,8 +11,12 @@ describe("Adapter Protocol v1", () => {
   it("declares every mandatory, conditional and optional RPC", () => {
     expect(Object.keys(adapterServiceDefinition()).sort()).toEqual(
       [
+        "ApplyIntervention",
         "CheckAvailability",
         "DescribeProvider",
+        "GetBusinessArtifact",
+        "GetBusinessContext",
+        "GetBusinessSnapshotPart",
         "GetExecution",
         "ListResources",
         "PauseExecution",
@@ -44,6 +48,7 @@ describe("Adapter Protocol v1", () => {
     expect(source).toContain("repeated McpTaskInputRequest mcp_input_requests = 17");
     expect(source).toContain("repeated UpdateValue inputs = 3 [deprecated = true]");
     expect(source).toContain("repeated McpTaskInputResponse input_responses = 4");
+    expect(source).toContain("google.protobuf.Struct verified_responder = 3");
   });
 
   it("adds type-only Evidence at field 16 without requirementId", () => {
@@ -56,6 +61,21 @@ describe("Adapter Protocol v1", () => {
   it("adds the frozen reservation reference without renumbering StartOperation", () => {
     const source = readFileSync(adapterProtoPath, "utf8");
     expect(source).toContain("optional string reservation_ref = 9");
+  });
+
+  it("adds task-business transport without renumbering frozen UpdateExecution fields", () => {
+    const source = readFileSync(adapterProtoPath, "utf8");
+    expect(source).toContain("repeated McpTaskInputResponse input_responses = 4");
+    expect(source).toContain("google.protobuf.Struct business_input_command = 5");
+    expect(source).toContain("rpc GetBusinessContext(GetBusinessContextRequest)");
+    expect(source).toContain("rpc GetBusinessSnapshotPart(GetBusinessSnapshotPartRequest)");
+    expect(source).toContain("rpc GetBusinessArtifact(GetBusinessArtifactRequest)");
+    expect(source).toContain("rpc ApplyIntervention(ApplyInterventionRequest)");
+    expect(source).toContain("optional uint64 revision = 6");
+    expect(source).toContain("optional bytes content_bytes = 2");
+    expect(source).toContain("uint64 content_offset = 9");
+    expect(source).toContain("uint32 max_content_bytes = 10");
+    expect(source).toContain("optional uint64 next_content_offset = 6");
   });
 
   it("has reproducibly generated JavaScript and TypeScript bindings", () => {

@@ -3,28 +3,28 @@
   "files": [
     {
       "path": "../packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_grpc_pb.d.ts",
-      "sha256": "0f78ac04fbb1557021d5e2dd76d2809055ef8262ea304ffc0c0505c7f36494d7",
-      "sizeBytes": 31192
+      "sha256": "4a601f1e06070cfdc3cc542ed03659ad35871d7d031097c6ca69d2f24246dfc3",
+      "sizeBytes": 42281
     },
     {
       "path": "../packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_grpc_pb.js",
-      "sha256": "b2aa7ad698feedd59c9e71ab43e6315a84e432d9653a4f923d67f93d6bde1b64",
-      "sizeBytes": 19694
+      "sha256": "b7b7b92020ab5ebbe4bf02dff4d23525a77e3d0ef4ec7a54913be553df27c797",
+      "sizeBytes": 26389
     },
     {
       "path": "../packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_pb.d.ts",
-      "sha256": "5357152711d97248b1cea7dc1f30bbaf1722e281d38af66023f40615a0c0cc7a",
-      "sizeBytes": 75607
+      "sha256": "11a6d569560921f2a0b9a9b7caaa77775f873871554cc296e75c283dce4df632",
+      "sizeBytes": 89614
     },
     {
       "path": "../packages/adapter-protocol/generated/io/sdar/mcp/tasks/adapter/v1/adapter_pb.js",
-      "sha256": "e2ae1173913b886779db7998359a1ef7600f2baf172435fc67b20214443164a4",
-      "sizeBytes": 468329
+      "sha256": "2b6bff559a17284a0f8fcb50fde5812dca0092cd457a1f908e2123dfd4f2fef6",
+      "sizeBytes": 553658
     },
     {
       "path": "../proto/io/sdar/mcp/tasks/adapter/v1/adapter.proto",
-      "sha256": "d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603",
-      "sizeBytes": 11705
+      "sha256": "51fc10abc7fc3740d5b6dad4ea5c66996a9b95f48757bc623756ccffce5ccf89",
+      "sizeBytes": 14600
     },
     {
       "path": "business-events-golden/event-id.json",
@@ -255,6 +255,61 @@
       "path": "smpp-diagnostics/task-execution-binding.schema.json",
       "sha256": "58a6ea51a1b122b765439a61537394fb965e9cbaab9d30c02bb4077b262d2e5a",
       "sizeBytes": 1091
+    },
+    {
+      "path": "task-business/v1/artifact.schema.json",
+      "sha256": "30ee236f236fd1758c236906e92db2b47830c993a639b430d9cff2b27b8e8cc9",
+      "sizeBytes": 111161
+    },
+    {
+      "path": "task-business/v1/core.schema.json",
+      "sha256": "c2df666d828f9cbe7b0dd83467eba7f9a85dd13c5ee0854573596dc9d7cb4a90",
+      "sizeBytes": 29839
+    },
+    {
+      "path": "task-business/v1/examples/conditional-write-wire.json",
+      "sha256": "ee9650ca1da7fc27c806ae169806c7f2955d2204f1c96063389ed81bfcb50ae1",
+      "sizeBytes": 4562
+    },
+    {
+      "path": "task-business/v1/examples/negative-catalog.json",
+      "sha256": "5ea52db0cca24f02df283b4d746533414aebf0c04fa278c9e4e9dde5f1898d49",
+      "sizeBytes": 12597
+    },
+    {
+      "path": "task-business/v1/examples/positive-catalog.json",
+      "sha256": "715648f6decd0ba622ec0ba3cc7aad33424e6b1cbe8f0cdc4ab8c11d542b5562",
+      "sizeBytes": 20832
+    },
+    {
+      "path": "task-business/v1/examples/public-action-changed.json",
+      "sha256": "597106656f9a80ee34e6938804460d743f317a7d833b40e7b1b831fd1c79280f",
+      "sizeBytes": 980
+    },
+    {
+      "path": "task-business/v1/examples/source-action-changed.json",
+      "sha256": "7503c64f45a557e2d3b2e5a11dec3245d866e4f5cc3427fc94b62e9d8e49ced3",
+      "sizeBytes": 698
+    },
+    {
+      "path": "task-business/v1/interaction.schema.json",
+      "sha256": "9d71f04e20b51b08930bec0f15e408d2dfafb816e1e64f8144c76e3f0dbdb4d1",
+      "sizeBytes": 21122
+    },
+    {
+      "path": "task-business/v1/legacy-adapter-surface.json",
+      "sha256": "597bd669378c965511f90de2071a06f7bfdcbfe02b4c857fa010bb227a44f9da",
+      "sizeBytes": 63513
+    },
+    {
+      "path": "task-business/v1/operation-profile.schema.json",
+      "sha256": "c6bacd16d74f5fc858a2f85dfe6ae729160ddac109406a1b852246536be9d5a7",
+      "sizeBytes": 6478
+    },
+    {
+      "path": "task-business/v1/README.md",
+      "sha256": "d6eeab1af62f4a400374e051a4ed6acbb68e196daff0ac1438798eb98b2553f6",
+      "sizeBytes": 1708
     },
     {
       "path": "upstream/mcp-2026-07-28/schema.json",

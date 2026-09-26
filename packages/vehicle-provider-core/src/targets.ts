@@ -1,3 +1,5 @@
+import { compareIsoTimestamps, isoTimestampFromEpochMicroseconds } from "./time.js";
+
 export function normalizeVehicleDeviceTargets(
   values: readonly unknown[],
   errorPrefix: "UGV" | "NPC_TANK",
@@ -81,12 +83,13 @@ function prefer(candidate: Record<string, unknown>, previous: Record<string, unk
     typeof candidate.observedAt === "string" ? Date.parse(candidate.observedAt) : Number.NaN;
   const previousTime =
     typeof previous.observedAt === "string" ? Date.parse(previous.observedAt) : Number.NaN;
-  if (
-    Number.isFinite(candidateTime) &&
-    Number.isFinite(previousTime) &&
-    candidateTime !== previousTime
-  )
-    return candidateTime > previousTime;
+  if (Number.isFinite(candidateTime) && Number.isFinite(previousTime)) {
+    const order = compareIsoTimestamps(
+      candidate.observedAt as string,
+      previous.observedAt as string,
+    );
+    if (order !== 0) return order > 0;
+  }
   return richness(candidate) > richness(previous);
 }
 
@@ -99,8 +102,7 @@ function richness(value: unknown): number {
 
 function captureTime(value: unknown): string | undefined {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) return undefined;
-  const date = new Date(Math.floor(value / 1000));
-  return Number.isNaN(date.valueOf()) ? undefined : date.toISOString();
+  return isoTimestampFromEpochMicroseconds(value);
 }
 
 function compact(value: Record<string, unknown>): Record<string, unknown> {
