@@ -31,6 +31,8 @@ export interface ReadOnlyProbeOptions {
   artifactId?: string;
   artifactRevision?: number;
   artifactChunkBytes?: number;
+  /** Fetch one complete public snapshot without opening the event listener. */
+  snapshotOnly?: boolean;
   emit: (line: Record<string, unknown>) => void | Promise<void>;
   fetchImpl?: typeof fetch;
 }
@@ -420,6 +422,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
   try {
     await bootstrapWithRetry();
     await readArtifact();
+    if (options.snapshotOnly) return;
     while (!controller.signal.aborted && applied < maxEvents) {
       if (!cursor || !state) throw new Error("BUSINESS_PROBE_STATE_MISSING");
       const requested = cursor;
@@ -533,7 +536,13 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
     clearTimeout(timer);
     await emit({
       type: "stopped",
-      reason: failed ? "failed" : applied >= maxEvents ? "max_events" : "duration_elapsed",
+      reason: failed
+        ? "failed"
+        : options.snapshotOnly
+          ? "snapshot_only"
+          : applied >= maxEvents
+            ? "max_events"
+            : "duration_elapsed",
       taskId: options.taskId,
       appliedEvents: applied,
       ...(cursor ? { cursor } : {}),

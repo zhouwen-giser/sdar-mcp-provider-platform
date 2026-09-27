@@ -2067,6 +2067,74 @@ describe("native PostgreSQL task business Store", () => {
     expect(await reopened.getContext(scope)).toEqual(afterRelease);
   });
 
+  it("atomically archives a pending UGV input as cancelled when its Execution terminates", async () => {
+    const run: ProviderExecution = {
+      ...execution(),
+      taskId: `task-terminal-input-${randomUUID()}`,
+      externalExecutionId: `execution-terminal-input-${randomUUID()}`,
+      operationName: "vehicle_area_recon",
+      arguments: { resourceId: "vehicle:ugv1", scanMode: "circular" },
+      taskBusinessContextExpected: true,
+      downstreamMissionIds: ["1"],
+      createdAt: at,
+      updatedAt: at,
+    };
+    const store = new PostgresTaskBusinessStore(pool);
+    const notified: AdapterBusinessEvent[] = [];
+    const service = new UgvTaskBusinessContextService(
+      { getExecution: async () => run },
+      store,
+      run.providerId ?? "isr.vehicle.ugv.ugv1",
+      run.resourceId,
+      (event) => notified.push(event),
+    );
+    await service.ensureForCreatedExecution(run.taskId);
+    const lock = new NativeLockBusinessProcessor(store, (event) => notified.push(event), {
+      maxWaitMs: 30_000,
+      onExpire: "release_and_resume_scan",
+      onDismiss: "release_and_resume_scan",
+      now: () => new Date("2026-09-23T00:00:02Z"),
+    });
+    await lock.apply(run, {
+      schemaVersion: "ugv.recon-native-lock-fact/1",
+      missionId: "1",
+      sourceCursor: "terminal-input-lock-1",
+      observedAt: "2026-09-23T00:00:01Z",
+      stage: 3,
+      targetId: "7",
+      motionStatus: 5,
+    });
+    expect(await service.activeRequiredInput(run)).toBeDefined();
+    const beforeEvents = notified.length;
+    const terminal = {
+      ...run,
+      state: "CANCELLED" as const,
+      reasonCode: "UGV_TASK_CANCELLED",
+      terminalAt: "2026-09-23T00:00:03Z",
+      updatedAt: "2026-09-23T00:00:03Z",
+    };
+    await service.finalizeForTerminalExecution(terminal);
+    const reopened = new PostgresTaskBusinessStore(pool);
+    const scope = BoundExecutionScope.fromExecution(run);
+    const context = await reopened.getContext(scope);
+    expect(context?.summary.status).toBe("finalized");
+    expect(context?.activeRefs).toEqual({});
+    const resolved = context?.requiredInputRefs.at(-1);
+    if (!resolved) throw new Error("TERMINAL_INPUT_REF_MISSING");
+    expect(await reopened.getObjectVersion(scope, resolved)).toMatchObject({
+      kind: "input_request",
+      value: { state: "cancelled", reasonCode: "INPUT_EXECUTION_TERMINATED" },
+    });
+    const bodies = notified
+      .slice(beforeEvents)
+      .map((event) => TaskBusinessFeedbackBodySchema.parse(protoStructToJson(event.rawPayload)));
+    expect(bodies.map((body) => body.kind)).toEqual([
+      "REQUIRED_INPUT_CHANGED",
+      "BUSINESS_EVENT",
+      "CONTEXT_FINALIZED",
+    ]);
+  });
+
   it("persists an initial scanning lock clock before any Action", async () => {
     const run: ProviderExecution = {
       ...execution(),

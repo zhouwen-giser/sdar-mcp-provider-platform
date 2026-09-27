@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { runUgvManualInputProbe, UgvManualInputProbeManifestSchema } from "./manual-input-probe.js";
 import { runReadOnlyTaskBusinessProbe } from "./read-only-probe.js";
 
 function argument(name: string): string | undefined {
@@ -5,11 +7,35 @@ function argument(name: string): string | undefined {
   return at < 0 ? undefined : process.argv[at + 1];
 }
 
+const mode = argument("--mode") ?? "read-only";
+const inputManifest = argument("--input-manifest");
 const mcpUrl = argument("--mcp-url");
 const taskId = argument("--task-id");
-if (!mcpUrl || !taskId) {
+if (mode === "input" && inputManifest) {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(inputManifest, "utf8"));
+    const manifest = UgvManualInputProbeManifestSchema.parse(parsed);
+    void runUgvManualInputProbe({
+      manifest,
+      bearerToken: process.env.SMPP_TASK_BUSINESS_PROBE_TOKEN ?? "",
+      emit: (line) => {
+        process.stdout.write(`${JSON.stringify(line)}\n`);
+      },
+    }).catch((error: unknown) => {
+      process.stderr.write(
+        `${error instanceof Error ? error.message : "UGV_INPUT_PROBE_FAILED"}\n`,
+      );
+      process.exitCode = 1;
+    });
+  } catch (error) {
+    process.stderr.write(
+      `${error instanceof Error ? error.message : "UGV_INPUT_PROBE_MANIFEST_INVALID"}\n`,
+    );
+    process.exitCode = 2;
+  }
+} else if (mode !== "read-only" || inputManifest || !mcpUrl || !taskId) {
   process.stderr.write(
-    "Usage: pnpm task-business:probe --mcp-url http://127.0.0.1:PORT/mcp --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n",
+    "Usage: pnpm task-business:probe --mcp-url URL --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n       pnpm task-business:probe --mode input --input-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n",
   );
   process.exitCode = 2;
 } else {

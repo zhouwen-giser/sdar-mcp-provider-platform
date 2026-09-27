@@ -1,0 +1,209 @@
+import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
+import {
+  BoundExecutionScope,
+  TaskBusinessCommandService,
+  taskBusinessCommandRequestHash,
+  taskBusinessInputResponseHash,
+  type ProviderExecution,
+  type TaskBusinessStore,
+} from "../../../packages/provider-adapter-kit/src/index.js";
+import {
+  TaskBusinessContextSchema,
+  TaskBusinessFeedbackBodySchema,
+} from "../../../packages/vehicle-provider-core/src/task-business-contract.js";
+import {
+  RequiredInputResponseCommandSchema,
+  RequiredInputSchema,
+  TrustedResponderSchema,
+  type RequiredInput,
+} from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
+import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
+
+/** Applies only the no-new-device-command continue choice to an observed active lock. */
+export class UgvManualInputBusinessHandler {
+  constructor(
+    readonly business: TaskBusinessStore,
+    readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
+    readonly now: () => Date = () => new Date(),
+  ) {}
+
+  async continueObservation(input: {
+    execution: ProviderExecution;
+    command: unknown;
+    responder: unknown;
+    runtimeCommandSequence: string;
+  }): Promise<"applied" | "duplicate"> {
+    const { execution } = input;
+    if (
+      execution.operationName !== "vehicle_area_recon" ||
+      execution.taskBusinessContextExpected !== true
+    )
+      throw new Error("UGV_INPUT_EXECUTION_INVALID");
+    const command = RequiredInputResponseCommandSchema.parse(input.command);
+    const responder = TrustedResponderSchema.parse(input.responder);
+    if (
+      responder.actorType !== "user" ||
+      command.result.action !== "accept" ||
+      command.result.value === undefined
+    )
+      throw new Error("UGV_INPUT_DECISION_NOT_SUPPORTED");
+    const scope = BoundExecutionScope.fromExecution(execution);
+    if (command.taskId !== scope.taskId || command.executionId !== scope.executionId)
+      throw new Error("UGV_INPUT_COMMAND_BINDING_INVALID");
+    const replay = await this.business.getCommand(scope, command.commandId);
+    if (replay) {
+      if (
+        replay.commandType !== "input_response" ||
+        replay.entryKey !== `input:${command.requestKey}` ||
+        replay.runtimeCommandSequence !== input.runtimeCommandSequence ||
+        replay.requestHash !== taskBusinessCommandRequestHash(command) ||
+        replay.responseHash !== taskBusinessInputResponseHash(command.result)
+      )
+        throw new Error("COMMAND_ID_CONFLICT");
+      if (replay.state === "applied") return "duplicate";
+    }
+    if (execution.state !== "WAITING_INPUT") throw new Error("UGV_INPUT_EXECUTION_NOT_WAITING");
+    const commands = new TaskBusinessCommandService(this.business, this.now);
+    const initial = await this.#currentRequest(scope, command.requestId);
+    await this.#assertCurrentLock(scope, execution, initial.request);
+    const claimed = await commands.submitInputResponse({
+      scope,
+      command,
+      responder,
+      currentSubjectBinding: initial.request.subjectBinding,
+      runtimeCommandSequence: input.runtimeCommandSequence,
+    });
+    if (!claimed.claimed && claimed.record.state === "applied") return "duplicate";
+    if (claimed.record.state !== "accepted") throw new Error("UGV_INPUT_COMMAND_NOT_ACCEPTED");
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { context, request } = await this.#currentRequest(scope, command.requestId);
+      await this.#assertCurrentLock(scope, execution, request);
+      const resolvedAt = this.now().toISOString();
+      const answered = RequiredInputSchema.parse({
+        ...request,
+        revision: request.revision + 1,
+        state: "answered",
+        reasonCode: "TARGET_OBSERVATION_CONTINUES",
+        resolvedAt,
+        responseCommandId: command.commandId,
+        response: command.result,
+      });
+      const ref = {
+        kind: "input_request" as const,
+        id: answered.requestId,
+        revision: answered.revision,
+      };
+      const activeRefs = Object.fromEntries(
+        Object.entries(context.activeRefs).filter(([, active]) => active.kind !== "input_request"),
+      );
+      const next = TaskBusinessContextSchema.parse({
+        ...context,
+        contextRevision: context.contextRevision + 1,
+        activeRefs,
+        requiredInputRefs: [...context.requiredInputRefs, ref],
+        updatedAt:
+          compareIsoTimestamps(resolvedAt, context.updatedAt) >= 0 ? resolvedAt : context.updatedAt,
+      });
+      const reasonCode = "TARGET_OBSERVATION_CONTINUES";
+      try {
+        const committed = await this.business.commitBusinessChangeSet(
+          {
+            scope,
+            expectedContextRevision: context.contextRevision,
+            context: next,
+            objects: [{ kind: "input_request", value: answered }],
+            command: {
+              ...claimed.record,
+              state: "applied",
+              resultCode: reasonCode,
+              resultRefs: [ref],
+              updatedAt: resolvedAt,
+            },
+          },
+          [
+            {
+              body: TaskBusinessFeedbackBodySchema.parse({
+                schemaVersion: "sdar.task-business-feedback/1.0-rc2",
+                kind: "REQUIRED_INPUT_CHANGED",
+                contextRevision: next.contextRevision,
+                providerRecordedAt: resolvedAt,
+                payload: {
+                  change: "update",
+                  requestRef: ref,
+                  previousRevision: request.revision,
+                  reasonCode,
+                },
+              }),
+              description: reasonCode,
+              reasonCode,
+              severityHint: "info",
+            },
+          ],
+        );
+        for (const event of committed.events) this.notifyCommitted(event);
+        return "applied";
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          error.message !== "BUSINESS_CONTEXT_REVISION_CONFLICT" ||
+          attempt === 2
+        )
+          throw error;
+      }
+    }
+    throw new Error("UGV_INPUT_COMMIT_RETRY_EXHAUSTED");
+  }
+
+  async #currentRequest(
+    scope: BoundExecutionScope,
+    requestId: string,
+  ): Promise<{
+    context: NonNullable<Awaited<ReturnType<TaskBusinessStore["getContext"]>>>;
+    request: RequiredInput;
+  }> {
+    const context = await this.business.getContext(scope);
+    const ref =
+      context &&
+      Object.values(context.activeRefs).find(
+        (item) => item.kind === "input_request" && item.id === requestId,
+      );
+    if (!context || !ref || context.summary.status !== "in_progress")
+      throw new Error("UGV_INPUT_REQUEST_NOT_CURRENT");
+    const version = await this.business.getObjectVersion(scope, ref);
+    if (version?.kind !== "input_request" || version.value.state !== "pending")
+      throw new Error("UGV_INPUT_REQUEST_NOT_CURRENT");
+    return { context, request: RequiredInputSchema.parse(version.value) };
+  }
+
+  async #assertCurrentLock(
+    scope: BoundExecutionScope,
+    execution: ProviderExecution,
+    request: RequiredInput,
+  ): Promise<void> {
+    const missionId = execution.downstreamMissionIds.at(-1);
+    const binding = request.subjectBinding;
+    if (
+      missionId === undefined ||
+      binding.kind !== "visual_lock" ||
+      request.identity.taskId !== scope.taskId ||
+      request.identity.executionId !== scope.executionId ||
+      request.identity.providerId !== scope.providerId ||
+      request.identity.resourceId !== scope.resourceId ||
+      request.identity.operationName !== execution.operationName
+    )
+      throw new Error("UGV_INPUT_SUBJECT_NOT_CURRENT");
+    const context = await this.business.getContext(scope);
+    const active = context?.activeRefs[`visualLock:${missionId}`];
+    if (active?.kind !== "action" || active.id !== binding.lockSessionId)
+      throw new Error("UGV_INPUT_SUBJECT_NOT_CURRENT");
+    const version = await this.business.getObjectVersion(scope, active);
+    if (
+      version?.kind !== "action" ||
+      version.value.state !== "active" ||
+      version.value.actionType !== "sensor.visual_lock" ||
+      version.value.properties?.phase !== "observing" ||
+      version.value.properties.sourceTargetId !== binding.targetId
+    )
+      throw new Error("UGV_INPUT_SUBJECT_NOT_CURRENT");
+  }
+}
