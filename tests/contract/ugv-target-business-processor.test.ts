@@ -440,6 +440,12 @@ describe("UGV target business projection", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        now: () => new Date("2026-09-24T00:00:10Z"),
+        businessManualDecision: {
+          maxWaitMs: 30_000,
+          onExpire: "release_and_resume_scan",
+          onDismiss: "release_and_resume_scan",
+        },
       },
       executions,
       ingress,
@@ -494,6 +500,10 @@ describe("UGV target business projection", () => {
       await vi.waitFor(async () => {
         const context = await business.getContext(scope);
         expect(context?.artifactRefs).toHaveLength(5);
+      });
+      expect((await service.activeRequiredInput(run))?.subjectBinding).toMatchObject({
+        kind: "visual_lock",
+        targetId: "1",
       });
       const snapshot = await business.getContextSnapshot(scope);
       const targetObjects = snapshot?.objects.filter(
@@ -622,6 +632,10 @@ describe("UGV target business projection", () => {
         );
         expect(latest?.properties).toMatchObject({ visibility: "visible" });
         expect(latest?.revision).toBe(3);
+      });
+      await vi.waitFor(async () => {
+        expect(await service.activeRequiredInput(run)).toBeUndefined();
+        expect((await executions.getExecution(run.taskId))?.state).toBe("RUNNING");
       });
       ingress.handle(
         "/ugv/area_recon/targets",

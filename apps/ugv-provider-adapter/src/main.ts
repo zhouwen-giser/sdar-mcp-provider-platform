@@ -173,6 +173,16 @@ const runtime = new UgvProviderRuntime(
       recoverySuccessThreshold: config.UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD,
     },
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
+    ...(config.taskBusinessSettings.enabled &&
+    config.taskBusinessSettings.decisionMode === "user_required"
+      ? {
+          businessManualDecision: {
+            maxWaitMs: config.taskBusinessSettings.maxWaitMs,
+            onExpire: config.taskBusinessSettings.onExpire,
+            onDismiss: config.taskBusinessSettings.onDismiss,
+          },
+        }
+      : {}),
   },
   store,
   ingress,

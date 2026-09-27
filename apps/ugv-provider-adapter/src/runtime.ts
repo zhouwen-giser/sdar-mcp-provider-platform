@@ -103,6 +103,7 @@ import {
 import { ReconBusinessProcessor } from "./recon-business-processor.js";
 import { TargetBusinessProcessor } from "./target-business-processor.js";
 import { NativeLockBusinessProcessor } from "./native-lock-business-processor.js";
+import { UgvManualInputBusinessHandler } from "./manual-input-business-handler.js";
 import { NavigationTrajectoryProcessor } from "./navigation-trajectory-processor.js";
 import type { VehicleBusinessReadIdentity } from "../../../packages/provider-adapter-kit/src/vehicle-grpc-server.js";
 import type { BusinessSnapshotPartSelector } from "../../../packages/adapter-protocol/src/index.js";
@@ -238,6 +239,11 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: number;
       };
       pollIntervalMs: number;
+      businessManualDecision?: {
+        maxWaitMs: number;
+        onExpire: RequiredInput["onExpire"];
+        onDismiss: RequiredInput["onDismiss"];
+      };
       diagnostics?: {
         enabled: boolean;
         controlToken: string;
@@ -1112,9 +1118,111 @@ export class UgvProviderRuntime {
       return this.#ackRecord(identity, command, false, "INPUT_RESPONSE_REQUIRED").response;
     if (!validUnsupportedInputEnvelope(update))
       return this.#ackRecord(identity, command, false, "INPUT_RESPONSE_WIRE_INVALID").response;
+    if (
+      this.options.businessManualDecision &&
+      this.taskBusiness &&
+      execution.operationName === "vehicle_area_recon"
+    ) {
+      return this.#applyManualReconInput(identity, execution, update);
+    }
     const denied = this.#ackRecord(identity, command, false, "UGV_INPUT_HANDLER_NOT_AVAILABLE");
     const claimed = await this.store.claimCommandAck(denied);
     return replayCommandResponse(claimed.record.response, identity);
+  }
+
+  async #applyManualReconInput(
+    identity: CommandIdentity,
+    execution: ProviderExecution,
+    update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+  ): Promise<Record<string, unknown>> {
+    const command = "update";
+    const taskBusiness = this.taskBusiness;
+    if (!taskBusiness) return this.#ack(identity, command, false, "BUSINESS_METHOD_NOT_ENABLED");
+    if (update.inputs.length !== 0 || update.inputResponses.length !== 1)
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONSE_COUNT_INVALID");
+    const item = update.inputResponses[0];
+    if (!record(item) || typeof item.key !== "string" || !record(item.result))
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONSE_WIRE_INVALID");
+    const response = protoStructToJson(item.result);
+    if (
+      response.action !== "accept" ||
+      !record(response.content) ||
+      !record(item.verifiedResponder)
+    )
+      return this.#ack(identity, command, false, "UGV_INPUT_RELEASE_NOT_QUALIFIED");
+    const verified = protoStructToJson(item.verifiedResponder);
+    if (verified.actorType !== "user")
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONDER_NOT_AUTHORIZED");
+    const request = await this.#manualReconRequestForKey(execution, item.key);
+    if (!request) return this.#ack(identity, command, false, "UGV_INPUT_REQUEST_NOT_CURRENT");
+    const commandId = `ugv-input-${createHash("sha256")
+      .update(
+        JSON.stringify([identity.taskId, identity.externalExecutionId, identity.commandSequence]),
+      )
+      .digest("hex")
+      .slice(0, 40)}`;
+    const latest = (await this.store.getExecution(identity.taskId)) ?? execution;
+    try {
+      await new UgvManualInputBusinessHandler(
+        taskBusiness.business,
+        taskBusiness.notifyCommitted,
+        () => this.#now(),
+      ).continueObservation({
+        execution:
+          latest.state === "RUNNING" ? await this.#reconcileReconRequiredInput(latest) : latest,
+        command: {
+          schemaVersion: "sdar.required-input-response/1.0-rc2",
+          commandId,
+          taskId: identity.taskId,
+          executionId: identity.externalExecutionId,
+          requestId: request.requestId,
+          requestKey: request.requestKey,
+          guard: { mode: "semantic", expectedRequestRevision: request.revision },
+          result: { action: "accept", value: response.content },
+        },
+        responder: {
+          source: "runtime_authorization_context",
+          actorType: "user",
+          verified: true,
+        },
+        runtimeCommandSequence: identity.commandSequence,
+      });
+      const after = await this.store.getExecution(identity.taskId);
+      if (after?.state === "WAITING_INPUT") await this.#reconcileReconRequiredInput(after);
+      return await this.#ack(identity, command, true, "TARGET_OBSERVATION_CONTINUES");
+    } catch (error) {
+      // A claimed or applied business command must remain retryable after an
+      // uncertain commit/ACK boundary. Do not persist a negative Runtime ACK.
+      const recorded = await taskBusiness.business.getCommand(
+        BoundExecutionScope.fromExecution(execution),
+        commandId,
+      );
+      if (recorded) throw error;
+      return await this.#ack(identity, command, false, reason(error));
+    }
+  }
+
+  async #manualReconRequestForKey(
+    execution: ProviderExecution,
+    key: string,
+  ): Promise<RequiredInput | undefined> {
+    if (!this.taskBusiness) return undefined;
+    const active = await this.taskBusiness.activeRequiredInput(execution);
+    if (active?.requestKey === key) return active;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const context = await this.taskBusiness.business.getContext(scope);
+    for (const ref of [...(context?.requiredInputRefs ?? [])].reverse()) {
+      const version = await this.taskBusiness.business.getObjectVersion(scope, ref);
+      if (version?.kind !== "input_request" || version.value.requestKey !== key) continue;
+      if (version.value.revision === 1) return version.value;
+      const original = await this.taskBusiness.business.getObjectVersion(scope, {
+        kind: "input_request",
+        id: ref.id,
+        revision: 1,
+      });
+      return original?.kind === "input_request" ? original.value : undefined;
+    }
+    return undefined;
   }
 
   async #updateFire(
@@ -1630,6 +1738,14 @@ export class UgvProviderRuntime {
     }
     if (execution.preemptedByTaskId !== undefined)
       return this.#refreshPreemptedExecution(execution);
+    if (
+      this.options.businessManualDecision &&
+      execution.operationName === "vehicle_area_recon" &&
+      (execution.state === "RUNNING" || execution.state === "WAITING_INPUT")
+    ) {
+      const reconciled = await this.#reconcileReconRequiredInput(execution);
+      if (reconciled.revision !== execution.revision) return reconciled;
+    }
     if (execution.operationName === "vehicle_fire_weapon") {
       const dispatch = await this.store.getCommandAck(
         execution.taskId,
@@ -2270,6 +2386,10 @@ export class UgvProviderRuntime {
     const processor = new NativeLockBusinessProcessor(
       this.taskBusiness.business,
       this.taskBusiness.notifyCommitted,
+      this.options.businessManualDecision && {
+        ...this.options.businessManualDecision,
+        now: () => this.#now(),
+      },
     );
     await processor.apply(execution, {
       schemaVersion: "ugv.recon-native-lock-fact/1",
@@ -2280,6 +2400,30 @@ export class UgvProviderRuntime {
       ...(recon.lock?.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
       motionStatus: recon.motionStatus,
     });
+    if (this.options.businessManualDecision) {
+      const latest = await this.store.getExecution(execution.taskId);
+      if (
+        latest?.externalExecutionId === execution.externalExecutionId &&
+        latest.downstreamMissionIds.at(-1) === missionId
+      )
+        await this.#reconcileReconRequiredInput(latest);
+    }
+  }
+
+  /** Recovers the Execution state after a Context commit or process restart. */
+  async #reconcileReconRequiredInput(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (!this.taskBusiness || execution.operationName !== "vehicle_area_recon") return execution;
+    const pending = await this.taskBusiness.activeRequiredInput(execution);
+    const next =
+      execution.state === "RUNNING" && pending
+        ? transition(execution, "WAITING_INPUT", "TARGET_OBSERVATION_DECISION_REQUIRED")
+        : execution.state === "WAITING_INPUT" && !pending
+          ? transition(execution, "RUNNING", "UGV_RECON_INPUT_SESSION_ENDED")
+          : execution;
+    if (next === execution) return execution;
+    await this.store.putExecution(next);
+    this.events.emit(execution.taskId, await this.executionSnapshot(next));
+    return next;
   }
 
   async #projectReconBusinessTargets(applied: AppliedMqttObservation): Promise<void> {
@@ -2426,6 +2570,18 @@ export class UgvProviderRuntime {
         visibility: "lost",
         trackingState: "unknown",
       });
+      if (this.options.businessManualDecision) {
+        const lock = new NativeLockBusinessProcessor(
+          this.taskBusiness.business,
+          this.taskBusiness.notifyCommitted,
+          { ...this.options.businessManualDecision, now: () => this.#now() },
+        );
+        if ((await lock.invalidateForTargetLoss(execution, sourceTargetId)) === "committed") {
+          const latest = await this.store.getExecution(execution.taskId);
+          if (latest?.externalExecutionId === execution.externalExecutionId)
+            await this.#reconcileReconRequiredInput(latest);
+        }
+      }
     }
   }
 

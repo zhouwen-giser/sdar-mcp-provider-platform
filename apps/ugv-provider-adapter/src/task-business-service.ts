@@ -260,8 +260,25 @@ export class UgvTaskBusinessContextService {
         compareIsoTimestamps(execution.terminalAt ?? execution.updatedAt, current.updatedAt) >= 0
           ? (execution.terminalAt ?? execution.updatedAt)
           : current.updatedAt;
+      const cancelledInputs: RequiredInput[] = [];
+      for (const ref of Object.values(current.activeRefs)) {
+        if (ref.kind !== "input_request") continue;
+        const version = await this.business.getObjectVersion(scope, ref);
+        if (version?.kind !== "input_request" || version.value.state !== "pending") continue;
+        cancelledInputs.push(
+          RequiredInputSchema.parse({
+            ...version.value,
+            revision: version.value.revision + 1,
+            state: "cancelled",
+            reasonCode: "INPUT_EXECUTION_TERMINATED",
+            resolvedAt: finalizedAt,
+          }),
+        );
+      }
+      const cancelledIds = new Set(cancelledInputs.map((input) => input.requestId));
       const unresolvedRefs = Object.values(current.activeRefs).filter(
-        (ref) => ref.kind !== "artifact",
+        (ref) =>
+          ref.kind !== "artifact" && !(ref.kind === "input_request" && cancelledIds.has(ref.id)),
       );
       const summary = {
         ...current.summary,
@@ -283,6 +300,14 @@ export class UgvTaskBusinessContextService {
         },
         summary,
         activeRefs: {},
+        requiredInputRefs: [
+          ...current.requiredInputRefs,
+          ...cancelledInputs.map((input) => ({
+            kind: "input_request" as const,
+            id: input.requestId,
+            revision: input.revision,
+          })),
+        ],
         updatedAt: finalizedAt,
         finalizedAt,
       });
@@ -320,8 +345,34 @@ export class UgvTaskBusinessContextService {
       });
       try {
         const committed = await this.business.commitBusinessChangeSet(
-          { scope, expectedContextRevision: current.contextRevision, context, objects: [] },
+          {
+            scope,
+            expectedContextRevision: current.contextRevision,
+            context,
+            objects: cancelledInputs.map((value) => ({ kind: "input_request" as const, value })),
+          },
           [
+            ...cancelledInputs.map((input) => ({
+              body: TaskBusinessFeedbackBodySchema.parse({
+                schemaVersion: "sdar.task-business-feedback/1.0-rc2",
+                kind: "REQUIRED_INPUT_CHANGED",
+                contextRevision: context.contextRevision,
+                providerRecordedAt: finalizedAt,
+                payload: {
+                  change: "update",
+                  requestRef: {
+                    kind: "input_request" as const,
+                    id: input.requestId,
+                    revision: input.revision,
+                  },
+                  previousRevision: input.revision - 1,
+                  reasonCode: "INPUT_EXECUTION_TERMINATED",
+                },
+              }),
+              description: "INPUT_EXECUTION_TERMINATED",
+              reasonCode: "INPUT_EXECUTION_TERMINATED",
+              severityHint: "info" as const,
+            })),
             {
               body: metadataBody,
               description: "Business Context terminal metadata",
