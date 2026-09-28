@@ -112,8 +112,26 @@ export function applySnapshotPatch(
   }
   if (patch.payload !== undefined) {
     const reconnaissancePatch = structuredClone(patch.payload.reconnaissance);
+    const previousReconnaissance = { ...next.payload.reconnaissance };
+    if (
+      reconnaissancePatch?.motionStatus !== undefined &&
+      reconnaissancePatch.id !== previousReconnaissance.id
+    ) {
+      // A new status without a mission ID cannot inherit the prior mission's
+      // identity or observations. Partial coverage/exception patches have no
+      // motionStatus and continue to merge into the current status.
+      delete previousReconnaissance.id;
+      delete previousReconnaissance.progress;
+      delete previousReconnaissance.coverage;
+      delete previousReconnaissance.lock;
+      delete previousReconnaissance.lastCommandAck;
+      delete previousReconnaissance.coverability;
+      delete previousReconnaissance.lastException;
+      delete previousReconnaissance.scanCount;
+      delete previousReconnaissance.outOfRange;
+    }
     const cameraFault =
-      reconnaissancePatch?.cameraFault ?? next.payload.reconnaissance.cameraFault ?? false;
+      reconnaissancePatch?.cameraFault ?? previousReconnaissance.cameraFault ?? false;
     if (cameraFault && reconnaissancePatch !== undefined) {
       delete reconnaissancePatch.progress;
       delete reconnaissancePatch.coverage;
@@ -127,13 +145,13 @@ export function applySnapshotPatch(
         reconnaissancePatch === undefined
           ? next.payload.reconnaissance
           : {
-              ...next.payload.reconnaissance,
+              ...previousReconnaissance,
               ...reconnaissancePatch,
               ...(reconnaissancePatch.coverage === undefined
                 ? {}
                 : {
                     coverage: {
-                      ...next.payload.reconnaissance.coverage,
+                      ...previousReconnaissance.coverage,
                       ...reconnaissancePatch.coverage,
                     },
                   }),
@@ -141,7 +159,7 @@ export function applySnapshotPatch(
                 ? {}
                 : {
                     lock: {
-                      ...next.payload.reconnaissance.lock,
+                      ...previousReconnaissance.lock,
                       ...reconnaissancePatch.lock,
                     },
                   }),
