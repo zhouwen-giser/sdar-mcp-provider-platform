@@ -27,6 +27,110 @@ export class UgvManualInputBusinessHandler {
     readonly now: () => Date = () => new Date(),
   ) {}
 
+  async assertPendingObservation(
+    execution: ProviderExecution,
+    requestId: string,
+  ): Promise<RequiredInput> {
+    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+      throw new Error("UGV_INPUT_EXECUTION_INVALID");
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const { request } = await this.#currentRequest(scope, requestId);
+    await this.#assertCurrentLock(scope, execution, request);
+    return request;
+  }
+
+  /** Records the elapsed deadline; device release and its confirmation are separate facts. */
+  async expireObservation(
+    execution: ProviderExecution,
+    requestId: string,
+  ): Promise<"applied" | "none"> {
+    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+      throw new Error("UGV_INPUT_EXECUTION_INVALID");
+    const scope = BoundExecutionScope.fromExecution(execution);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const context = await this.business.getContext(scope);
+      const ref = context?.activeRefs["input:visualLock"];
+      if (
+        context?.summary.status !== "in_progress" ||
+        ref?.kind !== "input_request" ||
+        ref.id !== requestId
+      )
+        return "none";
+      const version = await this.business.getObjectVersion(scope, ref);
+      if (version?.kind !== "input_request" || version.value.state !== "pending") return "none";
+      const request = RequiredInputSchema.parse(version.value);
+      if (
+        !request.deadlineAt ||
+        compareIsoTimestamps(this.now().toISOString(), request.deadlineAt) < 0
+      )
+        throw new Error("UGV_INPUT_DEADLINE_NOT_REACHED");
+      const resolvedAt = [this.now().toISOString(), request.requestedAt, context.updatedAt].reduce(
+        (latest, candidate) => (compareIsoTimestamps(candidate, latest) > 0 ? candidate : latest),
+      );
+      const reasonCode = "TARGET_OBSERVATION_DECISION_EXPIRED";
+      const expired = RequiredInputSchema.parse({
+        ...request,
+        revision: request.revision + 1,
+        state: "expired",
+        reasonCode,
+        resolvedAt,
+      });
+      const nextRef = {
+        kind: "input_request" as const,
+        id: requestId,
+        revision: expired.revision,
+      };
+      const next = TaskBusinessContextSchema.parse({
+        ...context,
+        contextRevision: context.contextRevision + 1,
+        activeRefs: Object.fromEntries(
+          Object.entries(context.activeRefs).filter(([key]) => key !== "input:visualLock"),
+        ),
+        requiredInputRefs: [...context.requiredInputRefs, nextRef],
+        updatedAt: resolvedAt,
+      });
+      try {
+        const committed = await this.business.commitBusinessChangeSet(
+          {
+            scope,
+            expectedContextRevision: context.contextRevision,
+            context: next,
+            objects: [{ kind: "input_request", value: expired }],
+          },
+          [
+            {
+              body: TaskBusinessFeedbackBodySchema.parse({
+                schemaVersion: "sdar.task-business-feedback/1.0-rc2",
+                kind: "REQUIRED_INPUT_CHANGED",
+                contextRevision: next.contextRevision,
+                providerRecordedAt: resolvedAt,
+                payload: {
+                  change: "update",
+                  requestRef: nextRef,
+                  previousRevision: request.revision,
+                  reasonCode,
+                },
+              }),
+              description: reasonCode,
+              reasonCode,
+              severityHint: "info",
+            },
+          ],
+        );
+        for (const event of committed.events) this.notifyCommitted(event);
+        return "applied";
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          error.message !== "BUSINESS_CONTEXT_REVISION_CONFLICT" ||
+          attempt === 2
+        )
+          throw error;
+      }
+    }
+    throw new Error("UGV_INPUT_COMMIT_RETRY_EXHAUSTED");
+  }
+
   async continueObservation(input: {
     execution: ProviderExecution;
     command: unknown;
