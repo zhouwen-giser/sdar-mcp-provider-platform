@@ -24,7 +24,7 @@ export const UgvManualInputProbeManifestSchema = z
     deadlineAt: z.iso.datetime({ offset: true }),
     lockSessionId: nonempty,
     targetId: nonempty,
-    decision: z.literal("continue_observation"),
+    decision: z.enum(["continue_observation", "decline", "cancel"]),
     cleanupTaskAfter: z.boolean().default(false),
     maxPolls: z.number().int().min(1).max(60).default(10),
     pollIntervalMs: z.number().int().min(100).max(10_000).default(1_000),
@@ -199,10 +199,10 @@ export async function runUgvManualInputProbe(input: {
     const updated = await request("tasks/update", {
       taskId: manifest.taskId,
       inputResponses: {
-        [manifest.requestKey]: {
-          action: "accept",
-          content: { decision: "continue_observation" },
-        },
+        [manifest.requestKey]:
+          manifest.decision === "continue_observation"
+            ? { action: "accept", content: { decision: "continue_observation" } }
+            : { action: manifest.decision },
       },
     });
     if (updated.resultType !== "complete") throw new Error("UGV_INPUT_PROBE_UPDATE_ACK_INVALID");
@@ -217,18 +217,32 @@ export async function runUgvManualInputProbe(input: {
       await wait(manifest.pollIntervalMs);
       const after = await publicSnapshot();
       const answered = after.selected;
+      const expectedState =
+        manifest.decision === "continue_observation"
+          ? "answered"
+          : manifest.decision === "decline"
+            ? "declined"
+            : "cancelled";
+      const expectedAction =
+        manifest.decision === "continue_observation" ? "accept" : manifest.decision;
+      const responseMatches =
+        answered.response?.action === expectedAction &&
+        (manifest.decision === "continue_observation"
+          ? record(answered.response.value) &&
+            answered.response.value.decision === "continue_observation"
+          : answered.response.value === undefined);
       if (
         answered.revision === manifest.requestRevision + 1 &&
-        answered.state === "answered" &&
-        answered.response?.action === "accept" &&
-        record(answered.response.value) &&
-        answered.response.value.decision === "continue_observation" &&
+        answered.state === expectedState &&
+        responseMatches &&
         !Object.values(after.activeRefs).some(
           (value) =>
             record(value) && value.kind === "input_request" && value.id === manifest.requestId,
         )
       ) {
         const finalTask = await request("tasks/get", { taskId: manifest.taskId });
+        if (finalTask.taskId !== manifest.taskId || finalTask.status !== "working")
+          throw new Error("UGV_INPUT_PROBE_TASK_NOT_RUNNING_AFTER_DECISION");
         await emit({
           type: "businessAnswerConfirmed",
           taskId: manifest.taskId,

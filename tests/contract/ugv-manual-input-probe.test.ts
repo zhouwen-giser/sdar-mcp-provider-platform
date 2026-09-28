@@ -45,6 +45,24 @@ const answer = RequiredInputSchema.parse({
   responseCommandId: "command-probe-1",
   response: { action: "accept", value: { decision: "continue_observation" } },
 });
+const declined = RequiredInputSchema.parse({
+  ...pending,
+  revision: 2,
+  state: "declined",
+  resolvedAt: "2026-09-26T00:00:01Z",
+  reasonCode: "TARGET_OBSERVATION_DECLINED",
+  responseCommandId: "command-probe-2",
+  response: { action: "decline" },
+});
+const dismissed = RequiredInputSchema.parse({
+  ...pending,
+  revision: 2,
+  state: "cancelled",
+  resolvedAt: "2026-09-26T00:00:01Z",
+  reasonCode: "TARGET_OBSERVATION_DISMISSED",
+  responseCommandId: "command-probe-3",
+  response: { action: "cancel" },
+});
 const actionRef = { kind: "action" as const, id: action.actionId, revision: action.revision };
 const inputRef = { kind: "input_request" as const, id: pending.requestId, revision: 1 };
 const before = TaskBusinessContextSchema.parse({
@@ -88,9 +106,11 @@ function fixtureFetch(
   methods: string[],
   applyAnswer = true,
   loseUpdateResponse = false,
+  decision: "continue_observation" | "decline" | "cancel" = "continue_observation",
 ): typeof fetch {
   let updated = false;
   let updateIssued = false;
+  const resolved = decision === "decline" ? declined : decision === "cancel" ? dismissed : answer;
   return async (_url, init) => {
     if (typeof init?.body !== "string") throw new Error("TEST_BODY_INVALID");
     const envelope = JSON.parse(init.body) as {
@@ -111,7 +131,7 @@ function fixtureFetch(
           objects: [
             { kind: "action", value: action },
             { kind: "input_request", value: pending },
-            ...(updated ? [{ kind: "input_request", value: answer }] : []),
+            ...(updated ? [{ kind: "input_request", value: resolved }] : []),
           ],
           objectDescriptors: [],
         },
@@ -142,10 +162,10 @@ function fixtureFetch(
           };
     } else if (envelope.method === "tasks/update") {
       expect(envelope.params.inputResponses).toEqual({
-        [pending.requestKey]: {
-          action: "accept",
-          content: { decision: "continue_observation" },
-        },
+        [pending.requestKey]:
+          decision === "continue_observation"
+            ? { action: "accept", content: { decision: "continue_observation" } }
+            : { action: decision },
       });
       updateIssued = true;
       updated = applyAnswer;
@@ -200,6 +220,39 @@ describe("UGV manual input public probe", () => {
     });
     expect(lines.at(-1)).toMatchObject({ type: "cleanupRequested", physicalStopConfirmed: false });
   });
+
+  for (const decision of ["decline", "cancel"] as const) {
+    it(`confirms ${decision} as an input decision without cancelling the Task`, async () => {
+      const methods: string[] = [];
+      const lines: Record<string, unknown>[] = [];
+      await runUgvManualInputProbe({
+        manifest: { ...manifest, decision, cleanupTaskAfter: false },
+        bearerToken: "test-token",
+        fetchImpl: fixtureFetch(methods, true, false, decision),
+        now: () => new Date("2026-09-26T00:00:00Z"),
+        wait: async () => {
+          await Promise.resolve();
+        },
+        emit: (line) => {
+          lines.push(line);
+        },
+      });
+      expect(methods).toEqual([
+        "io.sdar/taskBusiness/context/get",
+        "tasks/get",
+        "tasks/update",
+        "io.sdar/taskBusiness/context/get",
+        "tasks/get",
+      ]);
+      expect(lines.at(-1)).toMatchObject({
+        type: "businessAnswerConfirmed",
+        taskStatus: "working",
+        qualification: "runtime_wire_only",
+        deviceEffectConfirmed: false,
+        request: { state: decision === "decline" ? "declined" : "cancelled" },
+      });
+    });
+  }
 
   it("refuses a mismatched lock session before sending any write", async () => {
     const methods: string[] = [];
