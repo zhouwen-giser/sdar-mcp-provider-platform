@@ -2430,10 +2430,21 @@ export class UgvProviderRuntime {
     if (this.taskBusiness === undefined || applied.retained) return;
     const targets = applied.observation.patch.payload?.targets;
     if (!targets) return;
+    // A target list cannot borrow the mission ID from the latest status: it
+    // may arrive after a mission switch. Require identity on this source too.
+    const source = applied.observation.canonicalPayload;
+    if (!record(source) || source.mission_id === undefined) return;
+    let sourceMissionId: string;
+    try {
+      sourceMissionId = canonicalUgvMissionId(source.mission_id);
+    } catch {
+      return;
+    }
     const recon = this.ingress.snapshot().payload.reconnaissance;
     const missionId = recon.id;
     const statusAuthority = this.ingress.observationAuthority("/ugv/area_recon/status");
-    if (missionId === undefined || statusAuthority === undefined) return;
+    if (missionId === undefined || missionId !== sourceMissionId || statusAuthority === undefined)
+      return;
     const matches = (await this.store.listActiveExecutions()).filter(
       (execution) =>
         execution.operationName === "vehicle_area_recon" &&
