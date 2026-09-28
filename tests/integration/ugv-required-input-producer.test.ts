@@ -119,6 +119,38 @@ describe("UGV manual observation input production wire", () => {
       });
       expect(device.calls).toHaveLength(0);
 
+      ingress.handle(
+        "/ugv/area_recon/targets",
+        Buffer.from(
+          JSON.stringify({ targets: [{ target_id: 7, capture_time_us: (nowMs + 1) * 1_000 }] }),
+        ),
+        false,
+        at(1),
+      );
+      await runtime.pollActive();
+      expect(
+        (await business.getContextSnapshot(BoundExecutionScope.fromExecution(run)))?.objects.filter(
+          (item) => item.kind === "artifact" && item.value.artifactType === "target.object",
+        ),
+      ).toEqual([]);
+      ingress.handle(
+        "/ugv/area_recon/targets",
+        Buffer.from(
+          JSON.stringify({
+            mission_id: 1,
+            targets: [{ target_id: 7, capture_time_us: (nowMs + 2) * 1_000 }],
+          }),
+        ),
+        false,
+        at(2),
+      );
+      await runtime.pollActive();
+      expect(
+        (await business.getContextSnapshot(BoundExecutionScope.fromExecution(run)))?.objects.filter(
+          (item) => item.kind === "artifact" && item.value.artifactType === "target.object",
+        ),
+      ).toHaveLength(1);
+
       // Simulate a restart gap after the Context was committed but before the
       // Execution state was persisted; polling must restore the visible wait.
       await store.putExecution({ ...waiting, state: "RUNNING", revision: waiting.revision + 1 });

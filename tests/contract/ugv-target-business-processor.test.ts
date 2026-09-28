@@ -416,7 +416,7 @@ describe("UGV target business projection", () => {
     expect((await business.getContextSnapshot(scope))?.objects).toEqual(first?.objects);
   });
 
-  it("projects three real-shape MQTT targets through a uniquely bound recon session", async () => {
+  it("projects three mission-bound MQTT targets through a uniquely bound recon session", async () => {
     const { run, executions, business, service, scope } = await setup();
     const ingress = new VehicleMqttIngress("direct_domain_json", {
       maxPayloadBytes: 65_536,
@@ -478,6 +478,7 @@ describe("UGV target business projection", () => {
         "/ugv/area_recon/targets",
         Buffer.from(
           JSON.stringify({
+            mission_id: "mission-1",
             targets: [
               {
                 target_id: 1,
@@ -553,6 +554,7 @@ describe("UGV target business projection", () => {
         "/ugv/area_recon/targets",
         Buffer.from(
           JSON.stringify({
+            mission_id: "mission-1",
             targets: [
               {
                 target_id: 1,
@@ -613,6 +615,7 @@ describe("UGV target business projection", () => {
         "/ugv/area_recon/targets",
         Buffer.from(
           JSON.stringify({
+            mission_id: "mission-1",
             targets: [
               {
                 target_id: 2,
@@ -641,6 +644,7 @@ describe("UGV target business projection", () => {
         "/ugv/area_recon/targets",
         Buffer.from(
           JSON.stringify({
+            mission_id: "mission-1",
             header: { stamp: { sec: Date.parse("2026-09-24T00:00:05Z") / 1000, nanosec: 0 } },
             targets: [],
           }),
@@ -697,7 +701,7 @@ describe("UGV target business projection", () => {
     const publishTargets = (targets: Record<string, unknown>[], receivedAt: string) =>
       ingress.handle(
         "/ugv/area_recon/targets",
-        Buffer.from(JSON.stringify({ targets })),
+        Buffer.from(JSON.stringify({ mission_id: "mission-1", targets })),
         false,
         receivedAt,
       );
