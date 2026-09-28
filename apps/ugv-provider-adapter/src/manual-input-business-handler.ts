@@ -258,6 +258,187 @@ export class UgvManualInputBusinessHandler {
     throw new Error("UGV_INPUT_COMMIT_RETRY_EXHAUSTED");
   }
 
+  /** A decline or dismissal is admitted before the journaled device release. */
+  async releaseObservation(input: {
+    execution: ProviderExecution;
+    command: unknown;
+    responder: unknown;
+    runtimeCommandSequence: string;
+    release: (request: RequiredInput) => Promise<void>;
+  }): Promise<"applied" | "duplicate"> {
+    const { execution } = input;
+    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+      throw new Error("UGV_INPUT_EXECUTION_INVALID");
+    const command = RequiredInputResponseCommandSchema.parse(input.command);
+    const responder = TrustedResponderSchema.parse(input.responder);
+    if (
+      responder.actorType !== "user" ||
+      !["decline", "cancel"].includes(command.result.action) ||
+      command.result.value !== undefined
+    )
+      throw new Error("UGV_INPUT_DECISION_NOT_SUPPORTED");
+    const scope = BoundExecutionScope.fromExecution(execution);
+    if (command.taskId !== scope.taskId || command.executionId !== scope.executionId)
+      throw new Error("UGV_INPUT_COMMAND_BINDING_INVALID");
+    const replay = await this.business.getCommand(scope, command.commandId);
+    if (replay) {
+      if (
+        replay.commandType !== "input_response" ||
+        replay.entryKey !== `input:${command.requestKey}` ||
+        replay.runtimeCommandSequence !== input.runtimeCommandSequence ||
+        replay.requestHash !== taskBusinessCommandRequestHash(command) ||
+        replay.responseHash !== taskBusinessInputResponseHash(command.result)
+      )
+        throw new Error("COMMAND_ID_CONFLICT");
+      if (replay.state === "applied") return "duplicate";
+      if (replay.state === "rejected") throw new Error(replay.resultCode);
+    }
+    if (execution.state !== "WAITING_INPUT") throw new Error("UGV_INPUT_EXECUTION_NOT_WAITING");
+    const initial = await this.#currentRequest(scope, command.requestId);
+    await this.#assertCurrentLock(scope, execution, initial.request);
+    const disposition =
+      command.result.action === "cancel" ? initial.request.onDismiss : initial.request.onDecline;
+    if (disposition !== "release_and_resume_scan")
+      throw new Error("UGV_INPUT_DISPOSITION_NOT_SUPPORTED");
+    const claimed = await new TaskBusinessCommandService(
+      this.business,
+      this.now,
+    ).submitInputResponse({
+      scope,
+      command,
+      responder,
+      currentSubjectBinding: initial.request.subjectBinding,
+      runtimeCommandSequence: input.runtimeCommandSequence,
+    });
+    if (!claimed.claimed && claimed.record.state === "applied") return "duplicate";
+    if (claimed.record.state !== "accepted") throw new Error(claimed.record.resultCode);
+    await input.release(initial.request);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { context, request } = await this.#currentRequest(scope, command.requestId);
+      await this.#assertCurrentLock(scope, execution, request);
+      const resolvedAt = [this.now().toISOString(), context.updatedAt, request.requestedAt].reduce(
+        (latest, candidate) => (compareIsoTimestamps(candidate, latest) > 0 ? candidate : latest),
+      );
+      const reasonCode =
+        command.result.action === "cancel"
+          ? "TARGET_OBSERVATION_DISMISSED"
+          : "TARGET_OBSERVATION_DECLINED";
+      const resolved = RequiredInputSchema.parse({
+        ...request,
+        revision: request.revision + 1,
+        state: command.result.action === "cancel" ? "cancelled" : "declined",
+        reasonCode,
+        resolvedAt,
+        responseCommandId: command.commandId,
+        response: command.result,
+      });
+      const ref = {
+        kind: "input_request" as const,
+        id: request.requestId,
+        revision: resolved.revision,
+      };
+      const next = TaskBusinessContextSchema.parse({
+        ...context,
+        contextRevision: context.contextRevision + 1,
+        activeRefs: Object.fromEntries(
+          Object.entries(context.activeRefs).filter(([key]) => key !== "input:visualLock"),
+        ),
+        requiredInputRefs: [...context.requiredInputRefs, ref],
+        updatedAt: resolvedAt,
+      });
+      try {
+        const committed = await this.business.commitBusinessChangeSet(
+          {
+            scope,
+            expectedContextRevision: context.contextRevision,
+            context: next,
+            objects: [{ kind: "input_request", value: resolved }],
+            command: {
+              ...claimed.record,
+              state: "applied",
+              resultCode: reasonCode,
+              resultRefs: [ref],
+              updatedAt: resolvedAt,
+            },
+          },
+          [
+            {
+              body: TaskBusinessFeedbackBodySchema.parse({
+                schemaVersion: "sdar.task-business-feedback/1.0-rc2",
+                kind: "REQUIRED_INPUT_CHANGED",
+                contextRevision: next.contextRevision,
+                providerRecordedAt: resolvedAt,
+                payload: {
+                  change: "update",
+                  requestRef: ref,
+                  previousRevision: request.revision,
+                  reasonCode,
+                },
+              }),
+              description: reasonCode,
+              reasonCode,
+              severityHint: "info",
+            },
+          ],
+        );
+        for (const event of committed.events) this.notifyCommitted(event);
+        return "applied";
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          error.message !== "BUSINESS_CONTEXT_REVISION_CONFLICT" ||
+          attempt === 2
+        )
+          throw error;
+      }
+    }
+    throw new Error("UGV_INPUT_COMMIT_RETRY_EXHAUSTED");
+  }
+
+  /** Records a definite refusal while leaving the original prompt available. */
+  async rejectReleaseCommand(execution: ProviderExecution, commandId: string, resultCode: string) {
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const command = await this.business.getCommand(scope, commandId);
+    if (command?.commandType !== "input_response")
+      throw new Error("BUSINESS_COMMAND_CLAIM_REQUIRED");
+    if (command.state === "rejected") return;
+    if (command.state !== "accepted") throw new Error("BUSINESS_COMMAND_TRANSITION_INVALID");
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const context = await this.business.getContext(scope);
+      if (context?.summary.status !== "in_progress")
+        throw new Error("BUSINESS_CONTEXT_NOT_AVAILABLE");
+      const timestamp = this.now().toISOString();
+      const updatedAt =
+        compareIsoTimestamps(timestamp, context.updatedAt) >= 0 ? timestamp : context.updatedAt;
+      const next = TaskBusinessContextSchema.parse({
+        ...context,
+        contextRevision: context.contextRevision + 1,
+        updatedAt,
+      });
+      try {
+        await this.business.commitBusinessChangeSet(
+          {
+            scope,
+            expectedContextRevision: context.contextRevision,
+            context: next,
+            objects: [],
+            command: { ...command, state: "rejected", resultCode, updatedAt },
+          },
+          [],
+        );
+        return;
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          error.message !== "BUSINESS_CONTEXT_REVISION_CONFLICT" ||
+          attempt === 2
+        )
+          throw error;
+      }
+    }
+    throw new Error("UGV_INPUT_COMMIT_RETRY_EXHAUSTED");
+  }
+
   async #currentRequest(
     scope: BoundExecutionScope,
     requestId: string,

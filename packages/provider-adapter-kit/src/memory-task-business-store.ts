@@ -193,6 +193,23 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
     return Promise.resolve(value ? structuredClone(value) : undefined);
   }
 
+  getAcceptedInputCommand(
+    scope: BoundExecutionScope,
+    requestKey: string,
+  ): Promise<BusinessCommandRecord | undefined> {
+    assertBoundExecutionScope(scope);
+    if (!requestKey || requestKey.length > 256)
+      throw new Error("BUSINESS_INPUT_REQUEST_KEY_INVALID");
+    const matches = [...(this.#scopes.get(scope.key())?.commands.values() ?? [])].filter(
+      (command) =>
+        command.commandType === "input_response" &&
+        command.entryKey === `input:${requestKey}` &&
+        command.state === "accepted",
+    );
+    if (matches.length > 1) throw new Error("BUSINESS_ENTRY_CLAIM_CONFLICT");
+    return Promise.resolve(matches[0] ? structuredClone(matches[0]) : undefined);
+  }
+
   claimCommand(
     scope: BoundExecutionScope,
     candidate: BusinessCommandRecord,

@@ -1700,11 +1700,18 @@ describe("native PostgreSQL task business Store", () => {
       identity: context.identity,
       requestHash: "a".repeat(64),
       responseHash: taskBusinessInputResponseHash({ action: "decline" }),
+      inputResponse: { action: "decline" },
       state: "accepted",
       createdAt: at,
       updatedAt: at,
     });
     expect((await store.claimCommand(scope, command, inputRef)).claimed).toBe(true);
+    expect(
+      await new PostgresTaskBusinessStore(pool).getAcceptedInputCommand(
+        scope,
+        catalog.requiredInput.requestKey,
+      ),
+    ).toMatchObject({ commandId: command.commandId, inputResponse: { action: "decline" } });
     const cancelled = RequiredInputSchema.parse({
       ...pending,
       revision: 2,

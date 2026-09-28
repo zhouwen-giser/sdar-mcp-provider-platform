@@ -25,6 +25,7 @@ import {
   assertInterventionTransition,
   assertRequiredInputOpenAt,
   BusinessActionSchema,
+  RequiredInputResponseCommandSchema,
   RequiredInputSchema,
   RuntimeInterventionSchema,
   type BusinessAction,
@@ -395,6 +396,8 @@ export const BusinessCommandRecordSchema = z
       .string()
       .regex(/^[a-f0-9]{64}$/)
       .optional(),
+    /** Persisted only for an admitted input reply, so recovery can replay its effect. */
+    inputResponse: RequiredInputResponseCommandSchema.shape.result.optional(),
     state: z.enum(["accepted", "applied", "rejected"]),
     resultCode: z.string().min(1).max(256).optional(),
     resultRefs: z.array(BusinessObjectRefSchema).optional(),
@@ -415,6 +418,23 @@ export const BusinessCommandRecordSchema = z
         code: "custom",
         message: "INPUT_RESPONSE_HASH_UNEXPECTED",
         path: ["responseHash"],
+      });
+    }
+    if (command.inputResponse && command.commandType !== "input_response") {
+      ctx.addIssue({
+        code: "custom",
+        message: "INPUT_RESPONSE_ON_NON_INPUT_COMMAND",
+        path: ["inputResponse"],
+      });
+    }
+    if (
+      command.inputResponse &&
+      command.responseHash !== taskBusinessInputResponseHash(command.inputResponse)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "INPUT_RESPONSE_HASH_MISMATCH",
+        path: ["inputResponse"],
       });
     }
     if (Date.parse(command.updatedAt) < Date.parse(command.createdAt)) {
@@ -1116,6 +1136,11 @@ export interface TaskBusinessStore {
   getCommand(
     scope: BoundExecutionScope,
     commandId: string,
+  ): Promise<BusinessCommandRecord | undefined>;
+  /** The unique accepted reply for a pending input, if one was claimed. */
+  getAcceptedInputCommand(
+    scope: BoundExecutionScope,
+    requestKey: string,
   ): Promise<BusinessCommandRecord | undefined>;
   claimCommand(
     scope: BoundExecutionScope,
