@@ -1,5 +1,9 @@
 import { readFileSync } from "node:fs";
 import { runUgvManualInputProbe, UgvManualInputProbeManifestSchema } from "./manual-input-probe.js";
+import {
+  runUgvInterventionProbe,
+  UgvInterventionProbeManifestSchema,
+} from "./intervention-probe.js";
 import { runReadOnlyTaskBusinessProbe } from "./read-only-probe.js";
 
 function argument(name: string): string | undefined {
@@ -9,9 +13,30 @@ function argument(name: string): string | undefined {
 
 const mode = argument("--mode") ?? "read-only";
 const inputManifest = argument("--input-manifest");
+const interventionManifest = argument("--intervention-manifest");
 const mcpUrl = argument("--mcp-url");
 const taskId = argument("--task-id");
-if (mode === "input" && inputManifest) {
+if (mode === "intervention" && interventionManifest && !inputManifest && !mcpUrl && !taskId) {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(interventionManifest, "utf8"));
+    const manifest = UgvInterventionProbeManifestSchema.parse(parsed);
+    void runUgvInterventionProbe({
+      manifest,
+      bearerToken: process.env.SMPP_TASK_BUSINESS_PROBE_TOKEN ?? "",
+      emit: (line) => {
+        process.stdout.write(`${JSON.stringify(line)}\n`);
+      },
+    }).catch((error: unknown) => {
+      process.stderr.write(
+        `${error instanceof Error ? error.message : "UGV_INTERVENTION_PROBE_FAILED"}\n`,
+      );
+      process.exitCode = 1;
+    });
+  } catch {
+    process.stderr.write("UGV_INTERVENTION_PROBE_MANIFEST_INVALID\n");
+    process.exitCode = 2;
+  }
+} else if (mode === "input" && inputManifest && !interventionManifest && !mcpUrl && !taskId) {
   try {
     const parsed: unknown = JSON.parse(readFileSync(inputManifest, "utf8"));
     const manifest = UgvManualInputProbeManifestSchema.parse(parsed);
@@ -33,9 +58,9 @@ if (mode === "input" && inputManifest) {
     );
     process.exitCode = 2;
   }
-} else if (mode !== "read-only" || inputManifest || !mcpUrl || !taskId) {
+} else if (mode !== "read-only" || inputManifest || interventionManifest || !mcpUrl || !taskId) {
   process.stderr.write(
-    "Usage: pnpm task-business:probe --mcp-url URL --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n       pnpm task-business:probe --mode input --input-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n",
+    "Usage: pnpm task-business:probe --mcp-url URL --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n       pnpm task-business:probe --mode input --input-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n       pnpm task-business:probe --mode intervention --intervention-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n",
   );
   process.exitCode = 2;
 } else {

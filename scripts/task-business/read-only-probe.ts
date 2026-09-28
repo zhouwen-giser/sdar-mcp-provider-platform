@@ -85,6 +85,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
     serial += 1;
     return fetchImpl(url, {
       method: "POST",
+      redirect: "error",
       headers: {
         accept: "application/json, text/event-stream",
         "content-type": "application/json",
@@ -266,7 +267,9 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
     await emit({
       type: "snapshot",
       taskId: options.taskId,
+      identity: refreshed.context.identity,
       contextRevision: refreshed.context.contextRevision,
+      effectivePlanRevision: refreshed.context.effectivePlanRevision,
       resumeFrom: cursor,
       pages: pages.length,
       objectCount: refreshed.objectVersions.size,

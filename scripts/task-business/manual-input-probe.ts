@@ -4,6 +4,7 @@ import {
   type RequiredInput,
 } from "../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { runReadOnlyTaskBusinessProbe } from "./read-only-probe.js";
+import { createWriteProbeClient } from "./write-probe-client.js";
 
 const nonempty = z.string().min(1).max(512);
 
@@ -44,63 +45,19 @@ export async function runUgvManualInputProbe(input: {
   wait?: (ms: number) => Promise<void>;
 }): Promise<void> {
   const manifest = UgvManualInputProbeManifestSchema.parse(input.manifest);
-  const url = new URL(manifest.mcpUrl);
-  if (url.protocol !== "http:" && url.protocol !== "https:")
-    throw new Error("UGV_INPUT_PROBE_URL_INVALID");
-  if (!input.bearerToken.trim()) throw new Error("UGV_INPUT_PROBE_BEARER_REQUIRED");
   const fetchImpl = input.fetchImpl ?? fetch;
   const now = input.now ?? (() => new Date());
   const wait = input.wait ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
   const emit = async (line: RecordValue) =>
     input.emit({ schema: "sdar.ugv-manual-input-probe-result/v1", ...line });
-  let serial = 0;
-  const request = async (method: string, params: RecordValue): Promise<RecordValue> => {
-    serial += 1;
-    const response = await fetchImpl(url, {
-      method: "POST",
-      headers: {
-        accept: "application/json, text/event-stream",
-        "content-type": "application/json",
-        "mcp-protocol-version": "2026-07-28",
-        "mcp-method": method,
-        "mcp-name": manifest.taskId,
-        authorization: `Bearer ${input.bearerToken}`,
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: `ugv-input-probe-${serial}`,
-        method,
-        params: {
-          ...params,
-          _meta: {
-            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
-            "io.modelcontextprotocol/clientInfo": {
-              name: "sdar-ugv-manual-input-probe",
-              version: "1.0.0",
-            },
-            "io.modelcontextprotocol/clientCapabilities": {
-              extensions: {
-                "io.modelcontextprotocol/tasks": {},
-                "io.sdar/taskBusiness": { profileVersion: "1.0-rc2" },
-              },
-            },
-          },
-        },
-      }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    const envelope: unknown = await response.json();
-    if (!response.ok || !record(envelope) || !record(envelope.result)) {
-      const reason =
-        record(envelope) && record(envelope.error) && record(envelope.error.data)
-          ? envelope.error.data.reasonCode
-          : undefined;
-      throw new Error(
-        `UGV_INPUT_PROBE_RPC_FAILED:${typeof reason === "string" ? reason : response.status}`,
-      );
-    }
-    return envelope.result;
-  };
+  const request = createWriteProbeClient({
+    mcpUrl: manifest.mcpUrl,
+    taskId: manifest.taskId,
+    bearerToken: input.bearerToken,
+    clientName: "sdar-ugv-manual-input-probe",
+    errorPrefix: "UGV_INPUT_PROBE",
+    fetchImpl,
+  });
   const publicSnapshot = async () => {
     let contextRevision: number | undefined;
     let activeRefs: RecordValue | undefined;
