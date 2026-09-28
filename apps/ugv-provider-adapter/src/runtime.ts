@@ -2445,6 +2445,15 @@ export class UgvProviderRuntime {
       this.taskBusiness.notifyCommitted,
       () => this.#now(),
     );
+    const releaseStepId = `input-expire:${createHash("sha256")
+      .update(pending.requestId)
+      .digest("hex")
+      .slice(0, 40)}`;
+    const recordedRelease = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      releaseStepId,
+    );
+    const releaseAlreadyAccepted = recordedRelease?.state === "ACCEPTED";
     const missionId = execution.downstreamMissionIds.at(-1);
     const recon = this.ingress.snapshot().payload.reconnaissance;
     const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
@@ -2458,6 +2467,7 @@ export class UgvProviderRuntime {
         candidate.downstreamMissionIds.at(-1) === missionId,
     );
     if (
+      !releaseAlreadyAccepted &&
       missionId !== undefined &&
       reconCorrelationStrength(recon, missionId) === "STRICT_CORRELATED" &&
       recon.lock?.stage === 1 &&
@@ -2490,28 +2500,32 @@ export class UgvProviderRuntime {
     if (pending.onExpire !== "release_and_resume_scan")
       releaseFailure = "UGV_INPUT_EXPIRY_POLICY_UNSUPPORTED";
     else if (
-      missionId === undefined ||
-      pending.subjectBinding.kind !== "visual_lock" ||
-      activeForMission.length !== 1 ||
-      activeForMission[0]?.taskId !== execution.taskId ||
-      reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
-      recon.lock?.stage !== 3 ||
-      recon.lock.targetId !== pending.subjectBinding.targetId ||
-      authority === undefined ||
-      compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0 ||
-      !Number.isFinite(age) ||
-      age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
-      age > this.options.freshness.payload ||
-      execution.controlConfirmation?.command === "pause"
+      !releaseAlreadyAccepted &&
+      (missionId === undefined ||
+        pending.subjectBinding.kind !== "visual_lock" ||
+        activeForMission.length !== 1 ||
+        activeForMission[0]?.taskId !== execution.taskId ||
+        reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
+        recon.lock?.stage !== 3 ||
+        recon.lock.targetId !== pending.subjectBinding.targetId ||
+        authority === undefined ||
+        compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0 ||
+        !Number.isFinite(age) ||
+        age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
+        age > this.options.freshness.payload ||
+        execution.controlConfirmation?.command === "pause")
     )
       releaseFailure = "UGV_INPUT_EXPIRY_RELEASE_UNQUALIFIED";
     else {
       try {
-        const current = await handler.assertPendingObservation(execution, pending.requestId);
-        if (current.revision !== pending.revision) throw new Error("UGV_INPUT_REQUEST_NOT_CURRENT");
+        if (!releaseAlreadyAccepted) {
+          const current = await handler.assertPendingObservation(execution, pending.requestId);
+          if (current.revision !== pending.revision)
+            throw new Error("UGV_INPUT_REQUEST_NOT_CURRENT");
+        }
         await this.#callJournaledMutation(
           execution.taskId,
-          `input-expire:${createHash("sha256").update(pending.requestId).digest("hex").slice(0, 40)}`,
+          releaseStepId,
           "CLEANUP",
           buildUgvTargetLockCall(false, 0, missionId),
         );
@@ -2547,10 +2561,12 @@ export class UgvProviderRuntime {
       command: "input_release",
       requestId: pending.requestId,
       missionId,
-      sourceCursor: authority?.cursor,
-      dispatchedAt: this.#now().toISOString(),
+      ...(!releaseAlreadyAccepted && authority?.cursor !== undefined
+        ? { sourceCursor: authority.cursor }
+        : {}),
+      dispatchedAt: recordedRelease?.dispatchedAt ?? this.#now().toISOString(),
       deadlineAt: deadlineFrom(
-        this.#now().toISOString(),
+        recordedRelease?.dispatchedAt ?? this.#now().toISOString(),
         this.options.controlConfirmationTimeoutMs ?? 30_000,
       ),
     };

@@ -60,34 +60,42 @@ describe("UGV manual observation input production wire", () => {
       () => undefined,
     );
     await service.ensureForCreatedExecution(run.taskId);
-    const runtime = new UgvProviderRuntime(
-      {
-        providerId: "provider-a",
-        resourceId: "vehicle:ugv1",
-        freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
-        allowNavigationWithRecon: true,
-        fireRequiresChassisStopped: true,
-        pollIntervalMs: 60_000,
-        controlConfirmationTimeoutMs: 2_000,
-        businessManualDecision: {
-          maxWaitMs: 1_000,
-          onExpire: "release_and_resume_scan",
-          onDismiss: "release_and_resume_scan",
+    const makeRuntime = () =>
+      new UgvProviderRuntime(
+        {
+          providerId: "provider-a",
+          resourceId: "vehicle:ugv1",
+          freshness: {
+            chassis: 3_000,
+            mission: 3_000,
+            health: 5_000,
+            target: 3_000,
+            payload: 3_000,
+          },
+          allowNavigationWithRecon: true,
+          fireRequiresChassisStopped: true,
+          pollIntervalMs: 60_000,
+          controlConfirmationTimeoutMs: 2_000,
+          businessManualDecision: {
+            maxWaitMs: 1_000,
+            onExpire: "release_and_resume_scan",
+            onDismiss: "release_and_resume_scan",
+          },
+          now: () => new Date(clockMs),
         },
-        now: () => new Date(clockMs),
-      },
-      store,
-      ingress,
-      device,
-      new UgvBusinessEventHub(store),
-      new UgvTelemetry({
-        providerId: "provider-a",
-        enabled: false,
-        endpoint: "127.0.0.1:7002",
-        tlsMode: "disabled",
-      }),
-      service,
-    );
+        store,
+        ingress,
+        device,
+        new UgvBusinessEventHub(store),
+        new UgvTelemetry({
+          providerId: "provider-a",
+          enabled: false,
+          endpoint: "127.0.0.1:7002",
+          tlsMode: "disabled",
+        }),
+        service,
+      );
+    const runtime = makeRuntime();
     await runtime.initializeLocal();
     const status = (stage: number, targetId: number, observedAt: string) =>
       ingress.handle(
@@ -118,6 +126,7 @@ describe("UGV manual observation input production wire", () => {
       device,
       service,
       runtime,
+      makeRuntime,
       run,
       pending,
       at,
@@ -316,6 +325,59 @@ describe("UGV manual observation input production wire", () => {
         reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
       });
     } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("keeps deadline expiry across restart when stage 1 arrives after an accepted unlock", async () => {
+    const h = await deadlineRuntime();
+    let restarted: UgvProviderRuntime | undefined;
+    try {
+      const originalCommit = h.business.commitBusinessChangeSet.bind(h.business);
+      const commit = vi
+        .spyOn(h.business, "commitBusinessChangeSet")
+        .mockImplementation((changeSet, events) => {
+          if (
+            changeSet.objects.some(
+              (item) => item.kind === "input_request" && item.value.state === "expired",
+            )
+          )
+            return Promise.reject(new Error("TRANSIENT_BUSINESS_STORE_FAILURE"));
+          return originalCommit(changeSet, events);
+        });
+      h.advance(1_000);
+      await h.runtime.pollActive().catch(() => undefined);
+      expect(h.device.calls).toHaveLength(1);
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
+      await h.runtime.close();
+      commit.mockRestore();
+      h.advance(1_001);
+      h.status(1, 0, h.at(1_001));
+      restarted = h.makeRuntime();
+      await restarted.initializeLocal();
+      await restarted.pollActive();
+      expect(h.device.calls).toHaveLength(1);
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "RUNNING",
+        reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+      });
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "expired" } });
+      h.status(1, 0, h.at(1_002));
+      h.advance(1_002);
+      await restarted.pollActive();
+      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+    } finally {
+      await restarted?.close();
       await h.runtime.close();
     }
   });
