@@ -60,6 +60,8 @@ export interface ProviderExecution {
   dispatchBaseline?: Record<string, unknown>;
   /** Persisted post-command evidence fence used for pause/resume/cancel confirmation. */
   controlConfirmation?: Record<string, unknown>;
+  /** Last input-release key whose post-command scanning fact was confirmed. */
+  lastInputReleaseCompletionKey?: string;
   /** Deadline for the first correlated post-dispatch task observation. */
   startObservationDeadline?: string;
   /** Deadline for the first correlated active task observation. */

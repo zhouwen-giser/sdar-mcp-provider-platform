@@ -8,6 +8,7 @@ import {
   type ProtoValue,
 } from "../../../packages/adapter-protocol/src/index.js";
 import type {
+  BusinessCommandRecord,
   CommandAckRecord,
   ExecutionContextRecord,
   MutationJournalEntry,
@@ -1145,9 +1146,11 @@ export class UgvProviderRuntime {
     if (!record(item) || typeof item.key !== "string" || !record(item.result))
       return this.#ack(identity, command, false, "UGV_INPUT_RESPONSE_WIRE_INVALID");
     const response = protoStructToJson(item.result);
+    const action = response.action;
     if (
-      response.action !== "accept" ||
-      !record(response.content) ||
+      !["accept", "decline", "cancel"].includes(String(action)) ||
+      (action === "accept" && !record(response.content)) ||
+      (action !== "accept" && response.content !== undefined) ||
       !record(item.verifiedResponder)
     )
       return this.#ack(identity, command, false, "UGV_INPUT_RELEASE_NOT_QUALIFIED");
@@ -1163,34 +1166,58 @@ export class UgvProviderRuntime {
       .digest("hex")
       .slice(0, 40)}`;
     const latest = (await this.store.getExecution(identity.taskId)) ?? execution;
+    const handler = new UgvManualInputBusinessHandler(
+      taskBusiness.business,
+      taskBusiness.notifyCommitted,
+      () => this.#now(),
+    );
+    const responseCommand = {
+      schemaVersion: "sdar.required-input-response/1.0-rc2" as const,
+      commandId,
+      taskId: identity.taskId,
+      executionId: identity.externalExecutionId,
+      requestId: request.requestId,
+      requestKey: request.requestKey,
+      guard: { mode: "semantic" as const, expectedRequestRevision: request.revision },
+      result:
+        action === "accept"
+          ? { action: "accept" as const, value: response.content }
+          : { action: action as "decline" | "cancel" },
+    };
+    const currentExecution =
+      latest.state === "RUNNING" ? await this.#reconcileReconRequiredInput(latest) : latest;
     try {
-      await new UgvManualInputBusinessHandler(
-        taskBusiness.business,
-        taskBusiness.notifyCommitted,
-        () => this.#now(),
-      ).continueObservation({
-        execution:
-          latest.state === "RUNNING" ? await this.#reconcileReconRequiredInput(latest) : latest,
-        command: {
-          schemaVersion: "sdar.required-input-response/1.0-rc2",
-          commandId,
-          taskId: identity.taskId,
-          executionId: identity.externalExecutionId,
-          requestId: request.requestId,
-          requestKey: request.requestKey,
-          guard: { mode: "semantic", expectedRequestRevision: request.revision },
-          result: { action: "accept", value: response.content },
-        },
+      const handlerInput = {
+        execution: currentExecution,
+        command: responseCommand,
         responder: {
           source: "runtime_authorization_context",
           actorType: "user",
           verified: true,
         },
         runtimeCommandSequence: identity.commandSequence,
-      });
+      };
+      if (action === "accept") await handler.continueObservation(handlerInput);
+      else
+        await handler.releaseObservation({
+          ...handlerInput,
+          release: async (pending) => {
+            await this.#dispatchManualReconRelease(currentExecution, pending, commandId, handler);
+          },
+        });
       const after = await this.store.getExecution(identity.taskId);
-      if (after?.state === "WAITING_INPUT") await this.#reconcileReconRequiredInput(after);
-      return await this.#ack(identity, command, true, "TARGET_OBSERVATION_CONTINUES");
+      if (action === "accept") {
+        if (after?.state === "WAITING_INPUT") await this.#reconcileReconRequiredInput(after);
+        return await this.#ack(identity, command, true, "TARGET_OBSERVATION_CONTINUES");
+      }
+      if (after?.state === "WAITING_INPUT" || after?.state === "RUNNING")
+        await this.#recoverCommittedManualRelease(after);
+      return await this.#ack(
+        identity,
+        command,
+        true,
+        action === "cancel" ? "TARGET_OBSERVATION_DISMISSED" : "TARGET_OBSERVATION_DECLINED",
+      );
     } catch (error) {
       // A claimed or applied business command must remain retryable after an
       // uncertain commit/ACK boundary. Do not persist a negative Runtime ACK.
@@ -1198,6 +1225,44 @@ export class UgvProviderRuntime {
         BoundExecutionScope.fromExecution(execution),
         commandId,
       );
+      if (recorded?.state === "rejected")
+        return await this.#ack(identity, command, false, recorded.resultCode ?? reason(error));
+      if (recorded?.state === "accepted" && action !== "accept") {
+        const step = await this.store.getMutationJournalEntry(
+          identity.taskId,
+          this.#manualInputReleaseStepId(commandId),
+        );
+        if (step?.state !== "ACCEPTED") {
+          const definiteRefusal =
+            step?.state === "REJECTED" ||
+            error instanceof DeviceToolRejectedError ||
+            [
+              "UGV_INPUT_RELEASE_UNQUALIFIED",
+              "UGV_INPUT_REQUEST_NOT_CURRENT",
+              "UGV_INPUT_SUBJECT_NOT_CURRENT",
+            ].includes(reason(error));
+          if (!definiteRefusal && step?.state !== "UNCERTAIN" && step?.state !== "DISPATCHING")
+            throw error;
+          await handler.rejectReleaseCommand(currentExecution, commandId, reason(error));
+          if (step?.state === "UNCERTAIN" || step?.state === "DISPATCHING") {
+            const latestExecution =
+              (await this.store.getExecution(identity.taskId)) ?? currentExecution;
+            const failed = terminal(
+              latestExecution,
+              "TECHNICAL_FAILED",
+              "UGV_INPUT_RELEASE_UNCERTAIN",
+              {
+                resourceId: latestExecution.resourceId,
+                status: "release_unconfirmed",
+                requestId: request.requestId,
+                observedAt: this.#now().toISOString(),
+              },
+            );
+            await this.#commitManualReconTransition(latestExecution, failed);
+          }
+          return await this.#ack(identity, command, false, reason(error));
+        }
+      }
       if (recorded) throw error;
       return await this.#ack(identity, command, false, reason(error));
     }
@@ -1747,6 +1812,17 @@ export class UgvProviderRuntime {
       (execution.state === "RUNNING" || execution.state === "WAITING_INPUT")
     ) {
       const pending = await this.taskBusiness?.activeRequiredInput(execution);
+      if (pending && this.taskBusiness) {
+        const accepted = await this.taskBusiness.business.getAcceptedInputCommand(
+          BoundExecutionScope.fromExecution(execution),
+          pending.requestKey,
+        );
+        if (accepted) return this.#recoverAcceptedManualReconInput(execution, pending, accepted);
+      }
+      if (!pending) {
+        const recovered = await this.#recoverCommittedManualRelease(execution);
+        if (recovered.revision !== execution.revision) return recovered;
+      }
       if (
         pending?.deadlineAt &&
         compareIsoTimestamps(this.#now().toISOString(), pending.deadlineAt) >= 0
@@ -2435,6 +2511,213 @@ export class UgvProviderRuntime {
     return next;
   }
 
+  #manualInputReleaseStepId(commandId: string): string {
+    return `input-response:${createHash("sha256").update(commandId).digest("hex").slice(0, 40)}`;
+  }
+
+  #manualInputExpiryStepId(requestId: string): string {
+    return `input-expire:${createHash("sha256").update(requestId).digest("hex").slice(0, 40)}`;
+  }
+
+  async #recoverCommittedManualRelease(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (!this.taskBusiness || execution.operationName !== "vehicle_area_recon") return execution;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const context = await this.taskBusiness.business.getContext(scope);
+    if (context?.summary.status !== "in_progress") return execution;
+    const ref = context.requiredInputRefs.at(-1);
+    if (!ref) return execution;
+    const version = await this.taskBusiness.business.getObjectVersion(scope, ref);
+    if (version?.kind !== "input_request") return execution;
+    const request = version.value;
+    const releasedByReply =
+      request.state === "declined" ||
+      (request.state === "cancelled" && request.response?.action === "cancel");
+    if (!releasedByReply && request.state !== "expired") return execution;
+    let releaseKey: string;
+    let stepId: string;
+    if (request.state === "expired") {
+      releaseKey = `expiry:${request.requestId}`;
+      stepId = this.#manualInputExpiryStepId(request.requestId);
+    } else if (request.responseCommandId) {
+      releaseKey = `response:${request.responseCommandId}`;
+      stepId = this.#manualInputReleaseStepId(request.responseCommandId);
+    } else {
+      return execution;
+    }
+    if (
+      releaseKey === execution.lastInputReleaseCompletionKey ||
+      (execution.controlConfirmation?.command === "input_release" &&
+        execution.controlConfirmation.releaseKey === releaseKey)
+    )
+      return execution;
+    const journal = await this.store.getMutationJournalEntry(execution.taskId, stepId);
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (journal?.state !== "ACCEPTED" || !journal.dispatchedAt || !missionId) return execution;
+    const binding = request.subjectBinding;
+    if (binding.kind !== "visual_lock") return execution;
+    const action = await this.taskBusiness.business.getObjectVersion(scope, binding.actionRef);
+    if (
+      action?.kind !== "action" ||
+      action.value.properties?.observationSessionId !== missionId ||
+      action.value.actionId !== binding.lockSessionId
+    )
+      return execution;
+    const next = transition(
+      execution,
+      "RUNNING",
+      "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+    );
+    next.controlConfirmation = {
+      command: "input_release",
+      releaseKey,
+      requestId: request.requestId,
+      missionId,
+      dispatchedAt: journal.dispatchedAt,
+      deadlineAt: deadlineFrom(
+        journal.dispatchedAt,
+        this.options.controlConfirmationTimeoutMs ?? 30_000,
+      ),
+    };
+    return this.#commitManualReconTransition(execution, next);
+  }
+
+  async #recoverAcceptedManualReconInput(
+    execution: ProviderExecution,
+    pending: RequiredInput,
+    accepted: BusinessCommandRecord,
+  ): Promise<ProviderExecution> {
+    if (!this.taskBusiness) return execution;
+    const sequence = accepted.runtimeCommandSequence;
+    const expectedId =
+      sequence === undefined
+        ? undefined
+        : `ugv-input-${createHash("sha256")
+            .update(JSON.stringify([execution.taskId, execution.externalExecutionId, sequence]))
+            .digest("hex")
+            .slice(0, 40)}`;
+    if (
+      !accepted.inputResponse ||
+      !sequence ||
+      accepted.commandId !== expectedId ||
+      accepted.entryKey !== `input:${pending.requestKey}`
+    ) {
+      if (
+        !pending.deadlineAt ||
+        compareIsoTimestamps(this.#now().toISOString(), pending.deadlineAt) < 0
+      )
+        return execution;
+      await new UgvManualInputBusinessHandler(
+        this.taskBusiness.business,
+        this.taskBusiness.notifyCommitted,
+        () => this.#now(),
+      ).rejectReleaseCommand(
+        execution,
+        accepted.commandId,
+        "UGV_INPUT_COMMAND_RECOVERY_UNAVAILABLE",
+      );
+      const failed = terminal(
+        execution,
+        "TECHNICAL_FAILED",
+        "UGV_INPUT_COMMAND_RECOVERY_UNAVAILABLE",
+        {
+          resourceId: execution.resourceId,
+          status: "unresolved",
+          observedAt: this.#now().toISOString(),
+        },
+      );
+      return this.#commitManualReconTransition(execution, failed);
+    }
+    const result = {
+      action: accepted.inputResponse.action,
+      ...(accepted.inputResponse.action === "accept"
+        ? { content: accepted.inputResponse.value }
+        : {}),
+    };
+    await this.#applyManualReconInput(
+      {
+        taskId: execution.taskId,
+        externalExecutionId: execution.externalExecutionId,
+        operationName: execution.operationName,
+        argumentHash: execution.argumentHash,
+        executionContext: execution.executionContext,
+        commandSequence: sequence,
+      },
+      execution,
+      {
+        inputs: [],
+        inputResponses: [
+          {
+            key: pending.requestKey,
+            result: jsonToProtoStruct(result),
+            verifiedResponder: jsonToProtoStruct({ actorType: "user" }),
+          },
+        ],
+      },
+    );
+    return (await this.store.getExecution(execution.taskId)) ?? execution;
+  }
+
+  async #dispatchManualReconRelease(
+    execution: ProviderExecution,
+    pending: RequiredInput,
+    commandId: string,
+    handler: UgvManualInputBusinessHandler,
+  ): Promise<void> {
+    if (!this.taskBusiness) throw new Error("BUSINESS_METHOD_NOT_ENABLED");
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (missionId === undefined || pending.subjectBinding.kind !== "visual_lock")
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const stepId = this.#manualInputReleaseStepId(commandId);
+    const existing = await this.store.getMutationJournalEntry(execution.taskId, stepId);
+    const call = buildUgvTargetLockCall(false, 0, missionId);
+    if (existing?.state === "ACCEPTED") {
+      await this.#callJournaledMutation(execution.taskId, stepId, "CLEANUP", call);
+      return;
+    }
+    const currentExecution = await this.store.getExecution(execution.taskId);
+    const claimed = await this.taskBusiness.business.getAcceptedInputCommand(
+      BoundExecutionScope.fromExecution(execution),
+      pending.requestKey,
+    );
+    if (
+      currentExecution?.externalExecutionId !== execution.externalExecutionId ||
+      currentExecution.state !== "WAITING_INPUT" ||
+      currentExecution.downstreamMissionIds.at(-1) !== missionId ||
+      currentExecution.preemptedByTaskId !== undefined ||
+      currentExecution.controlConfirmation?.command === "pause" ||
+      claimed?.commandId !== commandId
+    )
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const request = await handler.assertPendingObservation(currentExecution, pending.requestId);
+    if (request.revision !== pending.revision || request.requestKey !== pending.requestKey)
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const snapshot = this.ingress.snapshot().payload.reconnaissance;
+    const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    const age =
+      authority === undefined
+        ? Number.NaN
+        : this.#now().getTime() - Date.parse(authority.observedAt);
+    const activeForMission = (await this.store.listActiveExecutions()).filter(
+      (candidate) =>
+        candidate.operationName === "vehicle_area_recon" &&
+        candidate.downstreamMissionIds.at(-1) === missionId,
+    );
+    if (
+      activeForMission.length !== 1 ||
+      activeForMission[0]?.taskId !== execution.taskId ||
+      reconCorrelationStrength(snapshot, missionId) !== "STRICT_CORRELATED" ||
+      snapshot.lock?.stage !== 3 ||
+      snapshot.lock.targetId !== pending.subjectBinding.targetId ||
+      authority === undefined ||
+      compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0 ||
+      !Number.isFinite(age) ||
+      age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
+      age > this.options.freshness.payload
+    )
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    await this.#callJournaledMutation(execution.taskId, stepId, "CLEANUP", call);
+  }
+
   async #expireManualReconInput(
     execution: ProviderExecution,
     pending: RequiredInput,
@@ -2445,10 +2728,7 @@ export class UgvProviderRuntime {
       this.taskBusiness.notifyCommitted,
       () => this.#now(),
     );
-    const releaseStepId = `input-expire:${createHash("sha256")
-      .update(pending.requestId)
-      .digest("hex")
-      .slice(0, 40)}`;
+    const releaseStepId = this.#manualInputExpiryStepId(pending.requestId);
     const recordedRelease = await this.store.getMutationJournalEntry(
       execution.taskId,
       releaseStepId,
@@ -2559,6 +2839,7 @@ export class UgvProviderRuntime {
     );
     next.controlConfirmation = {
       command: "input_release",
+      releaseKey: `expiry:${pending.requestId}`,
       requestId: pending.requestId,
       missionId,
       ...(!releaseAlreadyAccepted && authority?.cursor !== undefined
@@ -2583,7 +2864,6 @@ export class UgvProviderRuntime {
         ? Number.NaN
         : this.#now().getTime() - Date.parse(authority.observedAt);
     const scope = BoundExecutionScope.fromExecution(execution);
-    const context = await this.taskBusiness?.business.getContext(scope);
     if (
       typeof marker.missionId === "string" &&
       reconCorrelationStrength(recon, marker.missionId) === "STRICT_CORRELATED" &&
@@ -2595,12 +2875,40 @@ export class UgvProviderRuntime {
       age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
       age <= this.options.freshness.payload &&
       typeof marker.dispatchedAt === "string" &&
-      compareIsoTimestamps(authority.observedAt, marker.dispatchedAt) >= 0 &&
-      context?.activeRefs[`visualLock:${marker.missionId}`] === undefined
+      compareIsoTimestamps(authority.observedAt, marker.dispatchedAt) >= 0
     ) {
-      const confirmed = transition(execution, "RUNNING", "UGV_INPUT_RELEASE_CONFIRMED");
-      delete confirmed.controlConfirmation;
-      return this.#commitManualReconTransition(execution, confirmed);
+      let context = await this.taskBusiness?.business.getContext(scope);
+      if (
+        context?.activeRefs[`visualLock:${marker.missionId}`] !== undefined &&
+        this.taskBusiness
+      ) {
+        await new NativeLockBusinessProcessor(
+          this.taskBusiness.business,
+          this.taskBusiness.notifyCommitted,
+          this.options.businessManualDecision && {
+            ...this.options.businessManualDecision,
+            now: () => this.#now(),
+          },
+        ).apply(execution, {
+          schemaVersion: "ugv.recon-native-lock-fact/1",
+          missionId: marker.missionId,
+          sourceCursor: authority.cursor,
+          observedAt: authority.observedAt,
+          stage: 1,
+          ...(recon.lock.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
+          motionStatus: recon.motionStatus,
+        });
+        context = await this.taskBusiness.business.getContext(scope);
+      }
+      if (context?.activeRefs[`visualLock:${marker.missionId}`] === undefined) {
+        const confirmed = transition(execution, "RUNNING", "UGV_INPUT_RELEASE_CONFIRMED");
+        if (typeof marker.releaseKey === "string")
+          confirmed.lastInputReleaseCompletionKey = marker.releaseKey;
+        else if (typeof marker.requestId === "string")
+          confirmed.lastInputReleaseCompletionKey = `expiry:${marker.requestId}`;
+        delete confirmed.controlConfirmation;
+        return this.#commitManualReconTransition(execution, confirmed);
+      }
     }
     if (
       typeof marker.deadlineAt !== "string" ||

@@ -368,6 +368,26 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
       : parseBusinessCommandRecord(scope, BusinessCommandRecordSchema.parse(payload));
   }
 
+  async getAcceptedInputCommand(
+    scope: BoundExecutionScope,
+    requestKey: string,
+  ): Promise<BusinessCommandRecord | undefined> {
+    if (!requestKey || requestKey.length > 256)
+      throw new Error("BUSINESS_INPUT_REQUEST_KEY_INVALID");
+    const key = scopeKey(scope, this.gowm);
+    const result = await this.pool.query<{ payload: unknown }>(
+      `SELECT payload FROM ugv_task_business_command
+       WHERE scope_hash=$1 AND scope_key=$2 AND command_type='input_response'
+         AND state='accepted' AND payload->>'entryKey'=$3 LIMIT 2`,
+      [key.hash, key.text, `input:${requestKey}`],
+    );
+    if (result.rows.length > 1) throw new Error("BUSINESS_ENTRY_CLAIM_CONFLICT");
+    const payload = result.rows[0]?.payload;
+    return payload === undefined
+      ? undefined
+      : parseBusinessCommandRecord(scope, BusinessCommandRecordSchema.parse(payload));
+  }
+
   async claimCommand(
     scope: BoundExecutionScope,
     candidate: BusinessCommandRecord,

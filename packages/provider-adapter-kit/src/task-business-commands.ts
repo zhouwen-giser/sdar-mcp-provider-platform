@@ -178,7 +178,10 @@ export class TaskBusinessCommandService {
       identity: scopeBusinessIdentity(scope),
       requestHash: taskBusinessCommandRequestHash(command),
       ...("requestId" in command
-        ? { responseHash: taskBusinessInputResponseHash(command.result) }
+        ? {
+            responseHash: taskBusinessInputResponseHash(command.result),
+            inputResponse: command.result,
+          }
         : {}),
       state: "accepted",
       createdAt: timestamp,

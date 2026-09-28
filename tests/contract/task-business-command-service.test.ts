@@ -247,6 +247,12 @@ describe("task-business command ledger", () => {
     expect(first.record.responseHash).toBe(
       taskBusinessInputResponseHash(catalog.inputCommand.result),
     );
+    expect(
+      await store.getAcceptedInputCommand(scope, catalog.inputCommand.requestKey),
+    ).toMatchObject({
+      commandId: first.record.commandId,
+      inputResponse: catalog.inputCommand.result,
+    });
     expect(first.nextDisposition).toBe("await_result");
     const answered = RequiredInputSchema.parse({
       ...catalog.requiredInput,
@@ -276,6 +282,9 @@ describe("task-business command ledger", () => {
         updatedAt: later,
       },
     });
+    expect(
+      await store.getAcceptedInputCommand(scope, catalog.inputCommand.requestKey),
+    ).toBeUndefined();
     const replay = await service.submitInputResponse({
       scope,
       command: catalog.inputCommand,
