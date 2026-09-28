@@ -22,7 +22,9 @@ For a named isolated scene with a current `target.disposition_decision`, use [th
 COREPACK_HOME=/tmp/smpp-corepack corepack pnpm task-business:probe --mode input --input-manifest /path/to/isolated-input-manifest.json
 ```
 
-The manifest fixes the Runtime Task, Execution, scene, Provider/resource, request ID/key/revision/deadline and lock session. The probe reads the public Context and `tasks/get` first, then uses the existing `tasks/update` `inputResponses` map once with an authenticated user token. The Runtime derives the responder from that authentication, not from the request body. `resultType: complete` is Runtime acceptance; an `answered` RequiredInput at the next exact revision is Provider business application. Neither proves a physical lock release or scan resume. Optional cleanup requests `tasks/cancel` for the named Task only and reports physical confirmation separately.
+The manifest fixes the Runtime Task, Execution, scene, Provider/resource, request ID/key/revision/deadline and lock session. Its `decision` selects `continue_observation`, `decline`, or `cancel`. The probe reads the public Context and `tasks/get` first, then uses the existing `tasks/update` `inputResponses` map once with an authenticated user token. The Runtime derives the responder from that authentication, not from the request body. `resultType: complete` is Runtime acceptance; an `answered`, `declined`, or `cancelled` RequiredInput at the next exact revision, with the matching response and a still-running Task, is Provider business application. These public facts do not prove physical lock release or scan resume.
+
+An input `cancel` dismisses the pending decision. It does not call `tasks/cancel` or terminate the Task. Set `cleanupTaskAfter: false` to observe the Task continuing after `decline` or `cancel`. Optional cleanup is a separate `tasks/cancel` request for the named Task and reports physical confirmation separately. The local HTTP fixture verifies these wire distinctions; live UGV source and external SDAR evidence remain required.
 
 ## Plan adjustment boundary
 
