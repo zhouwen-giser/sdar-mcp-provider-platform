@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { jsonToProtoStruct } from "../../packages/adapter-protocol/src/index.js";
 import { UgvBusinessEventHub } from "../../apps/ugv-provider-adapter/src/business-events.js";
 import { UgvProviderRuntime } from "../../apps/ugv-provider-adapter/src/runtime.js";
@@ -14,6 +14,374 @@ import { MockUgvDeviceMcpClient } from "../../packages/vehicle-device-mcp-client
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 
 describe("UGV manual observation input production wire", () => {
+  async function deadlineRuntime() {
+    const store = new MemoryProviderStore();
+    const business = new MemoryTaskBusinessStore();
+    const device = new MockUgvDeviceMcpClient();
+    const ingress = new VehicleMqttIngress("direct_domain_json", {
+      maxPayloadBytes: 65_536,
+      maxDepth: 16,
+      maxNodes: 4_096,
+      maxStringBytes: 16_384,
+    });
+    const startMs = Date.now();
+    let clockMs = startMs;
+    const at = (offset: number) => new Date(startMs + offset).toISOString();
+    const run: ProviderExecution = {
+      taskId: "task-manual-deadline",
+      externalExecutionId: "execution-manual-deadline",
+      operationName: "vehicle_area_recon",
+      argumentHash: "d".repeat(64),
+      providerId: "provider-a",
+      resourceId: "vehicle:ugv1",
+      tracks: [],
+      arguments: { resourceId: "vehicle:ugv1", scanMode: "circular" },
+      executionContext: {
+        authorizationContextHash: "a".repeat(64),
+        executionMode: "SIMULATION",
+        simulationId: "scene-deadline-test-double",
+        correlationId: "correlation-deadline",
+      },
+      taskBusinessContextExpected: true,
+      downstreamMissionIds: ["11"],
+      state: "RUNNING",
+      revision: 2,
+      reasonCode: "UGV_RECON_RUNNING",
+      createdAt: at(-1_000),
+      updatedAt: at(-1_000),
+      evidence: [],
+    };
+    await store.putExecution(run);
+    const service = new UgvTaskBusinessContextService(
+      store,
+      business,
+      "provider-a",
+      "vehicle:ugv1",
+      () => undefined,
+    );
+    await service.ensureForCreatedExecution(run.taskId);
+    const makeRuntime = () =>
+      new UgvProviderRuntime(
+        {
+          providerId: "provider-a",
+          resourceId: "vehicle:ugv1",
+          freshness: {
+            chassis: 3_000,
+            mission: 3_000,
+            health: 5_000,
+            target: 3_000,
+            payload: 3_000,
+          },
+          allowNavigationWithRecon: true,
+          fireRequiresChassisStopped: true,
+          pollIntervalMs: 60_000,
+          controlConfirmationTimeoutMs: 2_000,
+          businessManualDecision: {
+            maxWaitMs: 1_000,
+            onExpire: "release_and_resume_scan",
+            onDismiss: "release_and_resume_scan",
+          },
+          now: () => new Date(clockMs),
+        },
+        store,
+        ingress,
+        device,
+        new UgvBusinessEventHub(store),
+        new UgvTelemetry({
+          providerId: "provider-a",
+          enabled: false,
+          endpoint: "127.0.0.1:7002",
+          tlsMode: "disabled",
+        }),
+        service,
+      );
+    const runtime = makeRuntime();
+    await runtime.initializeLocal();
+    const status = (stage: number, targetId: number, observedAt: string) =>
+      ingress.handle(
+        "/ugv/area_recon/status",
+        Buffer.from(
+          JSON.stringify({
+            status: 5,
+            mission_id: "11",
+            status_label: "running",
+            scan_mode: 1,
+            progress: 10,
+            coverage: 10,
+            lock: { stage, target_id: targetId, role_name: "", duration_sec: 0 },
+            online: true,
+          }),
+        ),
+        false,
+        observedAt,
+      );
+    status(3, 7, at(0));
+    await runtime.pollActive();
+    expect((await store.getExecution(run.taskId))?.state).toBe("WAITING_INPUT");
+    const pending = await service.activeRequiredInput(run);
+    if (!pending) throw new Error("PENDING_REQUEST_MISSING");
+    return {
+      store,
+      business,
+      device,
+      service,
+      runtime,
+      makeRuntime,
+      run,
+      pending,
+      at,
+      status,
+      advance: (offset: number) => {
+        clockMs = startMs + offset;
+      },
+    };
+  }
+
+  it("expires a bound decision, journals one release, and waits for post-command scan evidence", async () => {
+    const h = await deadlineRuntime();
+    try {
+      h.advance(1_000);
+      await h.runtime.pollActive();
+      const released = await h.store.getExecution(h.run.taskId);
+      expect(released).toMatchObject({
+        state: "RUNNING",
+        reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+        controlConfirmation: { command: "input_release", requestId: h.pending.requestId },
+      });
+      expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "expired" } });
+      expect(h.device.calls).toEqual([
+        {
+          name: "ugv_area_recon_lock",
+          arguments: { lock: false, target_id: 0, mission_id: 11 },
+          taskId: h.run.taskId,
+        },
+      ]);
+      await h.runtime.pollActive();
+      expect(h.device.calls).toHaveLength(1);
+      expect((await h.store.getExecution(h.run.taskId))?.reasonCode).toBe(
+        "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+      );
+      h.advance(1_001);
+      h.status(1, 0, h.at(1_001));
+      await h.runtime.pollActive();
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({ state: "RUNNING" });
+      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+      expect(
+        (await h.business.getContext(BoundExecutionScope.fromExecution(h.run)))?.activeRefs[
+          "visualLock:11"
+        ],
+      ).toBeUndefined();
+      expect(h.device.calls).toHaveLength(1);
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("expires without dispatch when the lock source is stale and reports unconfirmed release", async () => {
+    const h = await deadlineRuntime();
+    try {
+      h.advance(4_000);
+      await h.runtime.pollActive();
+      expect(h.device.calls).toHaveLength(0);
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "TECHNICAL_FAILED",
+        reasonCode: "UGV_INPUT_EXPIRY_RELEASE_UNQUALIFIED",
+      });
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(snapshot?.context.summary.status).toBe("finalized");
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "expired" } });
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("fails explicitly if an accepted release never produces post-command scanning evidence", async () => {
+    const h = await deadlineRuntime();
+    try {
+      h.advance(1_000);
+      await h.runtime.pollActive();
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
+      h.advance(3_001);
+      await h.runtime.pollActive();
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "TECHNICAL_FAILED",
+        reasonCode: "UGV_INPUT_RELEASE_CONFIRMATION_TIMEOUT",
+      });
+      expect(h.device.calls).toHaveLength(1);
+      expect(
+        (await h.business.getContext(BoundExecutionScope.fromExecution(h.run)))?.summary.status,
+      ).toBe("finalized");
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("records expiry and fails without claiming release when the device rejects unlock", async () => {
+    const h = await deadlineRuntime();
+    try {
+      h.device.responses.set("ugv_area_recon_lock", {
+        mission_id: 11,
+        cmd_res: 0,
+        fail_data: "lock release rejected",
+      });
+      h.advance(1_000);
+      await h.runtime.pollActive();
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "TECHNICAL_FAILED",
+        reasonCode: "UGV_INPUT_EXPIRY_RELEASE_REJECTED",
+      });
+      expect(h.device.calls).toHaveLength(1);
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "expired" } });
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("does not send a release after a new source fact already ended the lock", async () => {
+    const h = await deadlineRuntime();
+    try {
+      h.advance(1_000);
+      h.status(1, 0, h.at(1_000));
+      await h.runtime.pollActive();
+      expect(h.device.calls).toHaveLength(0);
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "cancelled" } });
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("replays an accepted release journal after the business commit fails", async () => {
+    const h = await deadlineRuntime();
+    try {
+      const originalCommit = h.business.commitBusinessChangeSet.bind(h.business);
+      let blockExpiredCommit = true;
+      let failedCommits = 0;
+      const commit = vi
+        .spyOn(h.business, "commitBusinessChangeSet")
+        .mockImplementation((changeSet, events) => {
+          if (
+            blockExpiredCommit &&
+            changeSet.objects.some(
+              (item) => item.kind === "input_request" && item.value.state === "expired",
+            )
+          ) {
+            failedCommits += 1;
+            return Promise.reject(new Error("TRANSIENT_BUSINESS_STORE_FAILURE"));
+          }
+          return originalCommit(changeSet, events);
+        });
+      h.advance(1_000);
+      await h.runtime.pollActive().catch(() => undefined);
+      expect(failedCommits).toBeGreaterThan(0);
+      expect(h.device.calls).toHaveLength(1);
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
+      blockExpiredCommit = false;
+      commit.mockRestore();
+      await h.runtime.pollActive();
+      expect(h.device.calls).toHaveLength(1);
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "RUNNING",
+        reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+      });
+    } finally {
+      await h.runtime.close();
+    }
+  });
+
+  it("keeps deadline expiry across restart when stage 1 arrives after an accepted unlock", async () => {
+    const h = await deadlineRuntime();
+    let restarted: UgvProviderRuntime | undefined;
+    try {
+      const originalCommit = h.business.commitBusinessChangeSet.bind(h.business);
+      const commit = vi
+        .spyOn(h.business, "commitBusinessChangeSet")
+        .mockImplementation((changeSet, events) => {
+          if (
+            changeSet.objects.some(
+              (item) => item.kind === "input_request" && item.value.state === "expired",
+            )
+          )
+            return Promise.reject(new Error("TRANSIENT_BUSINESS_STORE_FAILURE"));
+          return originalCommit(changeSet, events);
+        });
+      h.advance(1_000);
+      await h.runtime.pollActive().catch(() => undefined);
+      expect(h.device.calls).toHaveLength(1);
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
+      await h.runtime.close();
+      commit.mockRestore();
+      h.advance(1_001);
+      h.status(1, 0, h.at(1_001));
+      restarted = h.makeRuntime();
+      await restarted.initializeLocal();
+      await restarted.pollActive();
+      expect(h.device.calls).toHaveLength(1);
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "RUNNING",
+        reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+      });
+      const snapshot = await h.business.getContextSnapshot(
+        BoundExecutionScope.fromExecution(h.run),
+      );
+      expect(
+        snapshot?.objects.find(
+          (item) =>
+            item.kind === "input_request" &&
+            item.value.requestId === h.pending.requestId &&
+            item.value.revision === 2,
+        ),
+      ).toMatchObject({ value: { state: "expired" } });
+      h.status(1, 0, h.at(1_002));
+      h.advance(1_002);
+      await restarted.pollActive();
+      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+    } finally {
+      await restarted?.close();
+      await h.runtime.close();
+    }
+  });
+
   it("routes an MQTT lock through WAITING_INPUT and an authorized UpdateExecution response", async () => {
     const store = new MemoryProviderStore();
     const business = new MemoryTaskBusinessStore();
