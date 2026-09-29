@@ -1,1 +1,34 @@
-{"at": "20260909T160237Z", "runtimeImage": "smpp-gowm/runtime:c3599914785913ea107ac5394676537f7542a635-worktree-ff25ef7dbdde", "oldRuntimeImage": "smpp-gowm/runtime:c3599914785913ea107ac5394676537f7542a635-worktree-d6341a4153be", "adapterPreserved": true, "networksPreserved": true, "health": {"status": "ready", "dependencies": {"database": "ready", "adapter": "ready", "adapterManifest": "ready", "recovery": "ready", "scheduler": "ready", "commandDispatcher": "ready", "ttlCleaner": "ready", "outboxPublisher": "ready", "outboxCleaner": "ready", "providerTelemetryIngress": "ready", "businessEventPersistence": "ready", "businessEventReplay": "ready", "businessEventIngest": "ready", "businessEventFinalizer": "ready", "businessEventAdapterSources": {"vehicle.execution": "ready", "vehicle.health": "ready", "vehicle.target": "ready"}, "businessEventRetention": "ready", "businessEventProjection": "ready"}}, "sourcePackage": "/mnt/data/smpp-gowm-gdps-gsap-e0fb6719e8cd346a.tar.gz"}
+{
+  "at": "20260909T160237Z",
+  "runtimeImage": "smpp-gowm/runtime:c3599914785913ea107ac5394676537f7542a635-worktree-ff25ef7dbdde",
+  "oldRuntimeImage": "smpp-gowm/runtime:c3599914785913ea107ac5394676537f7542a635-worktree-d6341a4153be",
+  "adapterPreserved": true,
+  "networksPreserved": true,
+  "health": {
+    "status": "ready",
+    "dependencies": {
+      "database": "ready",
+      "adapter": "ready",
+      "adapterManifest": "ready",
+      "recovery": "ready",
+      "scheduler": "ready",
+      "commandDispatcher": "ready",
+      "ttlCleaner": "ready",
+      "outboxPublisher": "ready",
+      "outboxCleaner": "ready",
+      "providerTelemetryIngress": "ready",
+      "businessEventPersistence": "ready",
+      "businessEventReplay": "ready",
+      "businessEventIngest": "ready",
+      "businessEventFinalizer": "ready",
+      "businessEventAdapterSources": {
+        "vehicle.execution": "ready",
+        "vehicle.health": "ready",
+        "vehicle.target": "ready"
+      },
+      "businessEventRetention": "ready",
+      "businessEventProjection": "ready"
+    }
+  },
+  "sourcePackage": "/mnt/data/smpp-gowm-gdps-gsap-e0fb6719e8cd346a.tar.gz"
+}

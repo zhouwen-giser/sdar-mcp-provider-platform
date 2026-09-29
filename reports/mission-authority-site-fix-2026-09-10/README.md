@@ -14,7 +14,6 @@ Benchmark 已 completed，身份、就绪、确认、派发、绑定、物理到
 
 ## 调查与修复记录
 
-
 2026-09-10（Asia/Shanghai）。用户完成统一部署后继续验收。
 
 现场最初运行 96500c83ddb3bd4f / d6341a4153be，ingress ready，UGV_FIRE_ENABLED=false。首轮新导航成功，PRIMARY/FOLLOWUP 均 ACCEPTED，Mission 41989，SMPP Task 59813317-73e6-44d2-bc8f-20eab6efa7c1。但三个持久事实的 instanceId 错用了业务服务键 smpp.sz-gowm.ugv，未匹配 Telemetry v4 来源映射，导致 HTTP 400 和持久重试。首轮 Run run_16065fb29f6a1e590590c20d33b43a57f8c6221452231b6a166b0a65b60b66f2 已因 P10_CURRENT_AUTHORITY_TIMEOUT 失败，保留该结果。
@@ -29,13 +28,11 @@ Benchmark 已 completed，身份、就绪、确认、派发、绑定、物理到
 
 第二轮 Run run_248652c3d4f65960e866a3b964cbcc634daf69450c11ec55a8758c31e7b91b13 正在验收，最终结果待补充。
 
-
 第二轮导航也成功，Mission 权威事实随后正常交付，但逐条串行 OTLP 导出造成事实积压，再次触发 P10_CURRENT_AUTHORITY_TIMEOUT。后续正常交付不改写原 Run 的超时失败。
 
 追加修复：DurableProviderOpsPublisher 将同批领取记录通过一次完整 OTLP ACK 交付；批次失败则逐条重试隔离，未收到完整确认前不标记交付。21 项相关单测（含完整 ACK 和批次拒收隔离）、4 项实际 PostgreSQL 持久交付集成测试、TypeScript/ESLint 和 Docker 构建通过。
 
 最新联合包：8a24db60778d2937，SMPP revision c3599914785913ea107ac5394676537f7542a635-worktree-bdee729b9e9e，SHA256 f6b7704fa0af5f79b980bbf8e326868a25c24be37aed09f6f2c1cb6c9c57db12。上传路径 /mnt/data/smpp-gowm-gdps-gsap-8a24db60778d2937.tar.gz。
-
 
 第三轮 run_5e0c41a01409ce3aff91bc6da3f912e234fe9e1bedceb09ab9d29133bd5afc63 完成诊断链路，绑定、物理到达、结果检查通过，required/supporting evidence 完整。总结果 not_ready 的唯一原因是 UGV_DIAGNOSTIC_PROFILE_NOT_FORMALIZED，这是开发配置的正式资格限制，并非 Mission 缺失；未放宽该判定。
 

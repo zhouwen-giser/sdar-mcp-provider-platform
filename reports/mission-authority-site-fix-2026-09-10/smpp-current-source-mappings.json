@@ -14,10 +14,7 @@
       "sourceProduct": "sdar-mcp-provider-platform",
       "mappingVersion": 4,
       "policyVersion": 2,
-      "projectionRouteIds": [
-        "standalone-smpp",
-        "sdar-warehouse-shadow"
-      ],
+      "projectionRouteIds": ["standalone-smpp", "sdar-warehouse-shadow"],
       "status": "active",
       "validFrom": "2026-01-01T00:00:00Z",
       "validTo": null
@@ -35,10 +32,7 @@
       "sourceProduct": "sdar-mcp-provider-platform",
       "mappingVersion": 4,
       "policyVersion": 2,
-      "projectionRouteIds": [
-        "standalone-smpp",
-        "sdar-warehouse-shadow"
-      ],
+      "projectionRouteIds": ["standalone-smpp", "sdar-warehouse-shadow"],
       "status": "active",
       "validFrom": "2026-01-01T00:00:00Z",
       "validTo": null

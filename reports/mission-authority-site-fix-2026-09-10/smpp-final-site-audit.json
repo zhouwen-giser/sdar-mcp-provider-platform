@@ -66,9 +66,7 @@
         "source_record_id": "d53fe562-74cf-5a3a-a1b2-2f160b827669",
         "source_record_hash": "ece6770fcc8771204b99c22c4d91559e9ae8c4f1905aa122c5caaccc37c94bdf",
         "causation_fact_id": "fb4f4bd7-f0b4-5908-a122-8617373d682f",
-        "evidence_fact_ids": [
-          "fb4f4bd7-f0b4-5908-a122-8617373d682f"
-        ],
+        "evidence_fact_ids": ["fb4f4bd7-f0b4-5908-a122-8617373d682f"],
         "valid_from": "2026-09-09 16:17:20.140",
         "projected_at": "2026-09-09 16:18:47.357",
         "projection_id": "smpp_current_authority_read_model",

@@ -850,9 +850,7 @@
         "event": {
           "at": "2026-09-09T16:17:33.793Z",
           "kind": "profile_cleanup_completed",
-          "reasonCodes": [
-            "REFEREE_CLEANUP_CONFIRMED"
-          ],
+          "reasonCodes": ["REFEREE_CLEANUP_CONFIRMED"],
           "checkpointRef": {
             "uri": "/var/lib/benchmark/artifacts/core-node-development/run_222b3fb8f3d63b43988d7963a46f9cfee5a4436506f7f45b5561b50a57dfe3eb/UGV-CORE-001/sha256-205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e/cleanup.json",
             "sha256": "sha256:1fe1f1ad874ae1a40d0963224726c72703f77d7d2e1b4d32cb09fe5804b63818",
@@ -1050,10 +1048,7 @@
       "unavailableFields": []
     },
     "warnings": [],
-    "contracts": [
-      "sdar.evidence/v1",
-      "sdar-benchmark/0.1"
-    ],
+    "contracts": ["sdar.evidence/v1", "sdar-benchmark/0.1"],
     "generatedAt": "2026-09-09T16:18:28.004Z"
   },
   "provider_terminal_observed": {
@@ -1093,9 +1088,7 @@
       },
       "providerTimeline": {
         "asOf": "2026-09-09T16:17:27.509Z",
-        "externalExecutionIds": [
-          "vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae"
-        ],
+        "externalExecutionIds": ["vehicle:ugv:chassis:8efc31ed-7eaa-4f2d-ba1b-13554fe4ceae"],
         "firstProviderObservedAt": "2026-09-09T16:16:25.743Z",
         "lastProviderObservedAt": "2026-09-09T16:16:29.532Z",
         "providerObservedAtCount": 3,
@@ -1231,9 +1224,7 @@
         "readiness": {
           "conflictingEvidenceRefs": [],
           "missingEvidenceTypes": [],
-          "reasonCodes": [
-            "UGV_DIAGNOSTIC_PROFILE_NOT_FORMALIZED"
-          ],
+          "reasonCodes": ["UGV_DIAGNOSTIC_PROFILE_NOT_FORMALIZED"],
           "requiredEvidenceComplete": true,
           "status": "not_ready",
           "supportingEvidenceComplete": true
@@ -1248,9 +1239,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-IDENTITY-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-IDENTITY-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-IDENTITY-01"
           },
@@ -1258,9 +1247,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-READINESS-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-READINESS-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-READINESS-01"
           },
@@ -1268,9 +1255,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-CONFIRM-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-CONFIRM-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-CONFIRM-01"
           },
@@ -1278,9 +1263,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-DISPATCH-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-DISPATCH-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-DISPATCH-01"
           },
@@ -1288,9 +1271,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-BINDING-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-BINDING-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-BINDING-01"
           },
@@ -1298,9 +1279,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-RECONCILE-01_NOT_APPLICABLE"
-            ],
+            "reasonCodes": ["UGV-DG-RECONCILE-01_NOT_APPLICABLE"],
             "result": "not_applicable",
             "ruleId": "UGV-DG-RECONCILE-01"
           },
@@ -1308,9 +1287,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-CONTINUATION-01_NOT_APPLICABLE"
-            ],
+            "reasonCodes": ["UGV-DG-CONTINUATION-01_NOT_APPLICABLE"],
             "result": "not_applicable",
             "ruleId": "UGV-DG-CONTINUATION-01"
           },
@@ -1318,9 +1295,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-PHYSICAL-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-PHYSICAL-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-PHYSICAL-01"
           },
@@ -1328,9 +1303,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-OUTCOME-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-OUTCOME-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-OUTCOME-01"
           },
@@ -1338,9 +1311,7 @@
             "evidenceRefs": [
               "sha256:205296ede3a628ae0fa79835c3d6dd7a92b8edff48b83730eabe5e5f4708eb6e-rule-evidence"
             ],
-            "reasonCodes": [
-              "UGV-DG-FIRE-01_PASS"
-            ],
+            "reasonCodes": ["UGV-DG-FIRE-01_PASS"],
             "result": "pass",
             "ruleId": "UGV-DG-FIRE-01"
           }
