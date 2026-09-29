@@ -52,6 +52,40 @@ A failed external preflight stops startup and never selects `mock`.
 
 Evidence is written under `reports/ugv-provider-template-stabilization/`. Endpoint credentials and raw MQTT payloads are not written.
 
+## LAN access and Node debugging
+
+`compose.debug.yaml` enables debug logging and Node Inspector. It publishes Runtime HTTP on
+`0.0.0.0:19120` and Adapter gRPC on `0.0.0.0:17010`; Inspector remains on loopback ports
+`9229` (Runtime) and `9230` (Adapter). Use this development configuration on a trusted LAN.
+The override requires Docker Compose support for `!override` (validated with Compose 5.1.1).
+
+From the repository root, build and start the external profile, then apply the override:
+
+```bash
+UGV_LOG_LEVEL=debug bash deploy/development/ugv-provider-template/up.sh external
+docker compose --project-name sdar-development-ugv-provider-template \
+  --env-file deploy/development/ugv-provider-template/.env.example \
+  -f deploy/development/ugv-provider-template/compose.yaml \
+  -f deploy/development/ugv-provider-template/compose.debug.yaml --profile external \
+  up --detach --no-build --wait --wait-timeout 180 ugv-adapter ugv-runtime
+```
+
+If using a custom `.env` or project name, pass those same values to both commands.
+Connect clients to `http://<host-lan-address>:19120/mcp`; readiness is available at
+`http://<host-lan-address>:19120/health/ready`. Chrome `chrome://inspect` can attach to the
+two loopback Inspector ports. Neither process pauses on startup.
+
+```bash
+docker logs --follow --tail 100 sdar-development-ugv-provider-template-ugv-runtime-1
+docker logs --follow --tail 100 sdar-development-ugv-provider-template-ugv-adapter-1
+```
+
+The startup script can report a failed strict read-only smoke check after containers become
+healthy. Inspect the recorded failure before using device operations; enabling Inspector does
+not change freshness checks or make that smoke check pass. The 2026-09-29 startup and LAN access
+results, including the upstream timestamp failure, are recorded in
+[`DEBUG_STARTUP_20260929.md`](../../../reports/ugv-provider-template-stabilization/DEBUG_STARTUP_20260929.md).
+
 ## Controlled LIVE point validation
 
 The LIVE runner targets exactly `longitude=106.81344630`, `latitude=29.72034353`, `altitude=500.000`. It refuses to dispatch without every explicit flag below and fresh access to both Runtime and Adapter databases:
