@@ -1,0 +1,33 @@
+{
+  "schema": "bff-external-blockers/v1",
+  "observedAt": "2026-09-29",
+  "candidate": "5a2482aa5df25f2eebed604ed15f9d4c3a02a454",
+  "blockers": [
+    {
+      "id": "RECON_SOURCE_IDENTITY_MISSING",
+      "affects": ["BFF-008", "BFF-009", "BFF-010", "BFF-012"],
+      "required": "Status/target/lock source must carry real mission/session identity or an independently verified reset-safe mapping.",
+      "evidence": [
+        "evidence/recon-readonly-recheck.json",
+        "evidence/recon-active-source-recheck.json"
+      ],
+      "observed": "Active mission 47567: status=5 without mission/session identity; targets envelope contains only targets; coverage run_id=1 cannot bind both streams or survive process reset.",
+      "scopeBoundary": "User permits SMPP and packaged SQL only; source producer changes are outside scope.",
+      "neededExternalChange": "Authoritative shared mission/session ID plus reset-safe generation on recon status/targets/lock/coverage, or an independently verifiable lifecycle mapping.",
+      "cleanup": "Recon-specific cmd_type=4 acknowledged; observed terminated status=9 and lock stage=1."
+    },
+    {
+      "id": "SDAR_EXTERNAL_PENDING",
+      "affects": ["BFF-020"],
+      "required": "Same-candidate external consumer execution."
+    }
+  ],
+  "scopeDecision": "SMPP only; include deployment SQL; no isr-simulation changes; reuse existing planning and mission re-execution",
+  "completedLocalQualification": [
+    "existing planner + same Task two real public edits",
+    "full Runtime/Provider restart and public SSE recovery",
+    "complete GOWM SMPP installation and explicit Runtime 027/Provider 030 deployment SQL"
+  ],
+  "remoteInstallation": "NOT_RUN in this continuation",
+  "lastVerifiedAt": "2026-09-29T07:31:12.114Z"
+}

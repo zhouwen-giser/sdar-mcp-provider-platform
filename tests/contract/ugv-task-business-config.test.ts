@@ -82,7 +82,7 @@ describe("UGV task business settings", () => {
       ],
       [
         { ...readOnly, adjustments: { navigation: true, reconnaissance: false } },
-        "UGV_BUSINESS_ADJUSTMENT_NOT_WIRED",
+        "UGV_BUSINESS_NAVIGATION_PLANNER_REQUIRED",
       ],
       [{ ...readOnly, coverage: { mode: "disabled" } }, "UGV_BUSINESS_COVERAGE_MODE_MISMATCH"],
     ] as const) {
@@ -91,5 +91,48 @@ describe("UGV task business settings", () => {
         loadUgvProviderConfig({ UGV_TASK_BUSINESS_PROFILE_PATH: configuredPath }),
       ).toThrow(reason);
     }
+  });
+
+  it("enables airport planning only with an explicit simulator URL and a durable business profile", () => {
+    const env = {
+      UGV_EXECUTION_MODE: "simulation",
+      UGV_NAVIGATION_PLANNER_MODE: "isr_airport",
+      UGV_NAVIGATION_PLANNER_URL: "http://192.168.2.63:7879",
+    };
+    expect(() => loadUgvProviderConfig(env)).toThrow("UGV_PLANNER_BUSINESS_STORE_REQUIRED");
+    const configuredPath = join(
+      mkdtempSync(join(tmpdir(), "smpp-airport-profile-")),
+      "profile.json",
+    );
+    writeFileSync(
+      configuredPath,
+      JSON.stringify({
+        ...DISABLED_UGV_TASK_BUSINESS_SETTINGS,
+        enabled: true,
+        coverage: { mode: "device_reported" },
+        adjustments: { navigation: true, reconnaissance: false },
+      }),
+    );
+    expect(
+      loadUgvProviderConfig({ ...env, UGV_TASK_BUSINESS_PROFILE_PATH: configuredPath })
+        .taskBusinessSettings.adjustments.navigation,
+    ).toBe(true);
+    for (const invalid of [
+      { UGV_EXECUTION_MODE: "live" },
+      { UGV_ENTITY_ID: "ugv2" },
+      { UGV_NAVIGATION_PLANNER_URL: undefined },
+    ])
+      expect(() => loadUgvProviderConfiguration({ ...env, ...invalid })).toThrow(
+        "UGV_AIRPORT_PLANNER_REQUIRES_SIMULATION_UGV1_AND_URL",
+      );
+    expect(() =>
+      loadUgvProviderConfiguration({ UGV_NAVIGATION_PLANNER_URL: env.UGV_NAVIGATION_PLANNER_URL }),
+    ).toThrow("UGV_PLANNER_URL_WITHOUT_MODE");
+    expect(() =>
+      loadUgvProviderConfiguration({
+        ...env,
+        UGV_NAVIGATION_PLANNER_URL: "http://user:password@example.com",
+      }),
+    ).toThrow("UGV_PLANNER_ENDPOINT_INVALID");
   });
 });

@@ -1,0 +1,16 @@
+{
+  "schema": "bff-acceptance-scene/v1",
+  "name": "smpp-business-feedback-v1.2",
+  "instanceId": "smpp-bff-test-f286a981-3bce-417f-a71d-df662736cfc8",
+  "version": "acceptance-v1.2-20260929T033228Z",
+  "versionKind": "operator_assigned_acceptance_label",
+  "assignedAt": "2026-09-29T03:32:28.469251+00:00",
+  "assignmentAuthority": "User permits generated scene name, instance ID and version; no existing simulator identifier required.",
+  "deviceMcpUrl": "http://192.168.2.63:19000/mcp",
+  "simulatorBuildVerified": false,
+  "storage": "gowm_shared",
+  "fireEnabled": false,
+  "previousAcceptanceLabel": "smpp-bff-v12-20260929T033228Z",
+  "navigationTaskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+  "navigationEvidence": "evidence/navigation-public-restart.json"
+}

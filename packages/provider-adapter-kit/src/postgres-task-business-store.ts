@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import type { Pool, PoolClient } from "pg";
 import { inTransaction } from "../../gowm-shared-storage-adapter/src/connection.js";
@@ -679,7 +680,8 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
           claimed.responseHash !== command.responseHash ||
           claimed.createdAt !== command.createdAt ||
           claimed.entryKey !== command.entryKey ||
-          claimed.runtimeCommandSequence !== command.runtimeCommandSequence
+          claimed.runtimeCommandSequence !== command.runtimeCommandSequence ||
+          !isDeepStrictEqual(claimed.interventionRequest, command.interventionRequest)
         )
           throw new Error("COMMAND_ID_CONFLICT");
         if (Date.parse(command.updatedAt) < Date.parse(claimed.updatedAt)) {

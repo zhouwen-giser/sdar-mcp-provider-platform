@@ -1,0 +1,27 @@
+{
+  "workflow": "V-INPUT",
+  "status": "NOT_RUN",
+  "realQualification": false,
+  "reasonCode": "RECON_SOURCE_IDENTITY_MISSING",
+  "scopeDecision": "SMPP only; no isr-simulation repository changes; fire stays disabled.",
+  "observedDeviceMissionId": 47567,
+  "sourceCheckScope": "Direct device source audit only; not a Runtime business workflow.",
+  "evidence": [
+    "evidence/recon-readonly-recheck.json",
+    "evidence/recon-active-source-recheck.json",
+    "../../docs/protocol/UGV_RECON_CORRELATION_CONTRACT.md"
+  ],
+  "required": "Qualified lock session, trusted RequiredInput response, continue/release/expiry and observed scanning recovery.",
+  "sourceCleanup": {
+    "tool": "ugv_area_recon_control",
+    "cmd_type": 4,
+    "missionId": 47567,
+    "observedStatus": 9,
+    "lockStage": 1
+  },
+  "notes": [
+    "Receipt mission_id=47567 does not bind anonymous status/target packets.",
+    "Active capture has 121 status, 30 empty-target and 2 coverage packets; coverage run_id=1 has no shared mission binding.",
+    "No visual-lock or fire tool was called."
+  ]
+}

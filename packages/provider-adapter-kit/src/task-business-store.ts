@@ -28,6 +28,7 @@ import {
   RequiredInputResponseCommandSchema,
   RequiredInputSchema,
   RuntimeInterventionSchema,
+  RuntimeInterventionCommandSchema,
   type BusinessAction,
   type RequiredInput,
   type RuntimeIntervention,
@@ -398,6 +399,8 @@ export const BusinessCommandRecordSchema = z
       .optional(),
     /** Persisted only for an admitted input reply, so recovery can replay its effect. */
     inputResponse: RequiredInputResponseCommandSchema.shape.result.optional(),
+    /** Admitted semantic request for recovery in the existing command ledger. */
+    interventionRequest: RuntimeInterventionCommandSchema.optional(),
     state: z.enum(["accepted", "applied", "rejected"]),
     resultCode: z.string().min(1).max(256).optional(),
     resultRefs: z.array(BusinessObjectRefSchema).optional(),
@@ -406,6 +409,26 @@ export const BusinessCommandRecordSchema = z
   })
   .strict()
   .superRefine((command, ctx) => {
+    if (command.interventionRequest) {
+      const request = command.interventionRequest;
+      const semantic = Object.fromEntries(
+        Object.entries(request).filter(([key]) => key !== "commandId"),
+      );
+      if (
+        command.commandType !== "intervention" ||
+        request.commandId !== command.commandId ||
+        request.taskId !== command.identity.taskId ||
+        request.executionId !== command.identity.executionId ||
+        command.entryKey !== `intervention:${request.interventionId}` ||
+        createHash("sha256").update(canonicalJson(semantic)).digest("hex") !== command.requestHash
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "INTERVENTION_REQUEST_BINDING_INVALID",
+          path: ["interventionRequest"],
+        });
+      }
+    }
     if (command.commandType === "input_response" && !command.responseHash) {
       ctx.addIssue({
         code: "custom",

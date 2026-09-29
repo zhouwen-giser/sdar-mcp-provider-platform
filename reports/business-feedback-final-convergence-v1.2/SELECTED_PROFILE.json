@@ -1,0 +1,24 @@
+{
+  "schema": "bff-selected-profile/v1",
+  "selectedStorage": "gowm_shared",
+  "mapFull": false,
+  "coreRequired": {
+    "navigation": [
+      "destination_or_waypoints",
+      "real_route",
+      "route_adoption",
+      "trajectory",
+      "adjust_plan"
+    ],
+    "recon": [
+      "recon_area",
+      "target_object",
+      "provider_visual_lock",
+      "required_input",
+      "release_resume"
+    ],
+    "feedback": ["context_get", "artifact_get", "snapshot_parts", "business_events_listen"]
+  },
+  "mapFullRequiredWhenEnabled": ["recon.current_footprint", "recon.covered_area_geometry"],
+  "notes": "Core required remains unchanged. mapFull is disabled and unqualified. Selection follows this task shared GOWM storage requirement; native/component tests do not qualify the selected owner installation."
+}

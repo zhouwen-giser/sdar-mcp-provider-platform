@@ -1,0 +1,38 @@
+{
+  "schema": "bff-upstream-source-audit/v1",
+  "observedAt": "2026-09-29T04:40:33.408890+00:00",
+  "mode": "READ_ONLY_LOCAL_SOURCE",
+  "deployedVersionVerified": false,
+  "repositories": {
+    "simulation": {
+      "path": "/home/zhouwen/code/isr-simulation",
+      "head": "c10620572a7e1f0a881a8bd97198618bcf5d3d5a"
+    },
+    "gowm": {
+      "path": "/home/zhouwen/web-download/geospatial-operational-world-model",
+      "head": "506315b5a60e5f5fe405f020f61cec24be0be47d"
+    }
+  },
+  "files": [
+    {
+      "path": "/home/zhouwen/code/isr-simulation/ros_ws/src/ros2_mcp_server/ros2_mcp_server/mcp_server/ugv_mcp_server.py",
+      "sha256": "ad4f2f34d6eb65adcf521c96984f2905292ff26cf96d38e7f37fa709edea923c"
+    },
+    {
+      "path": "/home/zhouwen/code/isr-simulation/ros_ws/src/ros2_mqtt_bridge/config/bridge_config.yaml",
+      "sha256": "475499558949efaeffdaf8c2889e2780d768b5ede53c5486eaa54aa0e2781860"
+    },
+    {
+      "path": "/home/zhouwen/code/isr-simulation/ros_ws/src/actor_control/actor_control/gimbal_control/area_recon_scan.py",
+      "sha256": "0dda9912eb78c063b985c3901acfa7c2b5094ff4a2f77f734479d8607816a911"
+    },
+    {
+      "path": "/home/zhouwen/code/isr-simulation/ros_ws/src/actor_control/actor_control/ugv_control/mission_manager/vehicle_action_client.py",
+      "sha256": "9f84f18f78dce6aeb98c6e2545c86d6f42d12085a4485f0b8de08fdcb83d4bfc"
+    },
+    {
+      "path": "/home/zhouwen/code/isr-simulation/ros_ws/src/referee/referee/dashboard/combined_dashboard.py",
+      "sha256": "05538e4430d4db6e20f72bc8a2978455800b96d1b765b8e21b57ebf24c317c93"
+    }
+  ]
+}

@@ -1,0 +1,275 @@
+{
+  "schema": "bff-working-candidate/v1",
+  "head": "5a2482aa5df25f2eebed604ed15f9d4c3a02a454",
+  "sourceStatus": "DIRTY_WORKTREE",
+  "recordedAt": "2026-09-29T07:16:24.081086+00:00",
+  "changedCode": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "5e65025b119914fa8e7ff9ad957a4329e61a59a537e015c2d4a5914472e9977d"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/config.ts",
+      "sha256": "b55970097fd6d76fb9a3fbe8bbb2de711ea6025d306d683cdef6771aea11f55c"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/main.ts",
+      "sha256": "d484a8065452420a28bd42425ea6fb85257839b612b95d28e18caba867907fc5"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/native-lock-business-processor.ts",
+      "sha256": "2a08b552d51acff6b1c772bedf66a17a48bac609eaa68ac7f9bf2c21b6afcfbb"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/navigation-business-processor.ts",
+      "sha256": "862e6999949e4d85e60c141908a8866ce637a231a0e0cef39968307af54bd5a8"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/navigation-intervention-business.ts",
+      "sha256": "f982c1c518f771eb74dc5f648638b862a23daf89f86a6246d21aeb5d9d8b47e4"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/navigation-planner.ts",
+      "sha256": "34e383b07d1ae0a0bef6873a5cf943340f890687be9e3570ab1dc74576aa8464"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/navigation-trajectory-processor.ts",
+      "sha256": "9586677ce181382edabb8a3b525a3e442d78ba0178a88071ff573962a8a10442"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/provider-auto-lock-coordinator.ts",
+      "sha256": "20748a5f95514cc91eebbdacacbf71c6252ea5074a490482e1864afe3ff8f1f8"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/runtime.ts",
+      "sha256": "ab546fa628745e1910782378f1699da528e3b002c2871f0c78ba5e1b33f44f85"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/task-business-bootstrap.ts",
+      "sha256": "02fe09ef3af9b1cdded7b969de1b58842bbcfcf23585dde9dd5997f54079eec1"
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/task-business-service.ts",
+      "sha256": "bd1f0569abe3318c56b799c5de8feee318d580c23fcd7f648f69fe6b293ef665"
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business-runtime.json",
+      "sha256": "83baa6cac5b1ca446bdbc3250a68c94943f39a733a83e3520c5d168fab58f1af"
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business.json",
+      "sha256": "1be2997f512907d75851eb01fb5bf05d811b2f14098979acd6f0a8fedd66c169"
+    },
+    {
+      "path": "contracts/gowm-shared-storage/task-business-owner-handoff.sql.template",
+      "sha256": "f31e3e1dcb0a11af7115b7046506e3e2c5de53c96198d4059da13f968c936a4b"
+    },
+    {
+      "path": "deploy/development/server/.env.example",
+      "sha256": "4b44fd4519b7669c68d153760068dfa0528d7077f0dfe1e658be8ab6190427ea"
+    },
+    {
+      "path": "deploy/development/server/gowm-bootstrap.mjs",
+      "sha256": "f3b3a4ae279300d0c0cc7d9bbcecd6f8c1895b3c320a3aca4470cba3cd3c94a5"
+    },
+    {
+      "path": "deploy/development/server/prepare-gowm.mjs",
+      "sha256": "7f72dd0a686e60faa22220e09393224a252cd6c8f77446269f7467379ff9994f"
+    },
+    {
+      "path": "deploy/gowm-task-business/027_task_business_intervention_command.sql",
+      "sha256": "0acf7444a7acfbe295fc809804a7a83d247411c4b97fc2db6cd704291205d624"
+    },
+    {
+      "path": "deploy/gowm-task-business/030_task_business_versions.sql",
+      "sha256": "ed4b9491616b61dbf31668086a20f63a0379c75f746382653f76a3879f1be95b"
+    },
+    {
+      "path": "deploy/gowm-task-business/install.d.mts",
+      "sha256": "3ee514da3294488f2ab41dbb68b3f19f6349043edc6388096b69e4a2b828257c"
+    },
+    {
+      "path": "deploy/gowm-task-business/install.mjs",
+      "sha256": "3cbcbb1e9e03ae13f2de31d0a88befb85683e65b51fd143041614723e28c2866"
+    },
+    {
+      "path": "eslint.config.js",
+      "sha256": "b570047f42b63ab0e439fdde3336a8cffdfed04c0e5f8d40fa6099a57f640b3e"
+    },
+    {
+      "path": "examples/gowm-shared-storage/env.example",
+      "sha256": "9e69213f3c10bc8dc60ebf174f4664241f391220c082b8d78529b084fdcccb90"
+    },
+    {
+      "path": "examples/gowm-shared-storage/task-business-airport-navigation.example.json",
+      "sha256": "f86bb359203529c0e37a75ee1437d325b6bf9f438b1f1a0905daa016e0c16a15"
+    },
+    {
+      "path": "package.json",
+      "sha256": "4bea85cb34e07e076a79963ab182d42ca6a85517b3f95aaad291fcfefa4a0db2"
+    },
+    {
+      "path": "packages/gowm-shared-storage-adapter/src/contract-check.ts",
+      "sha256": "27bfdfc47aba9ead7bf163c0c27debf01cdd8610b8656b4de14d64ad25737a6c"
+    },
+    {
+      "path": "packages/gowm-shared-storage-adapter/src/task-business.ts",
+      "sha256": "273bb4c458b2425163ff4c6c072e16498f59d70603e23d0914dc535ccd6ee75e"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/memory-task-business-store.ts",
+      "sha256": "feb4cfa407257eadc3cfd6736c1526a2bb516507ca19d0f9269c1a87cf84a29b"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/postgres-task-business-store.ts",
+      "sha256": "2a5a1fb5e19684d8e44b9b5dbc5f78c34068cf84e825344679026d48d8a491d0"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/task-business-commands.ts",
+      "sha256": "98e8b111fadce12a95648d126ca74924b806254f4ad0c1958d51169688182724"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/task-business-store.ts",
+      "sha256": "32b425e894f4d75fcdce506063b9d8e3fcd02ac12e42bb8d892e01a8427f4d31"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/types.ts",
+      "sha256": "cafed018577c88996283e2262a264288d255e8879942ab242cb811afde6d2dc7"
+    },
+    {
+      "path": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "sha256": "f714b3aea6f745cb6b5955bda56c30ad43ec38758416f3937104a40aca68eea0"
+    },
+    {
+      "path": "packages/vehicle-provider-core/src/manifest.ts",
+      "sha256": "df4f6608c1efb2453109c0584a7b09348e2792e7b95030393651d78e3457a180"
+    },
+    {
+      "path": "reports/ugv-provider-v1/external-contract/ugv-device-mcp-tools.json",
+      "sha256": "50a5748fac322286afb4b946f49a816a14af27ee80c6edf50198223eaf34f54a"
+    },
+    {
+      "path": "schemas/config/provider.ugv.defaults.json",
+      "sha256": "f02eb7b16c3c2bdad2b7030f21935f533990fb4b6a66da0f7e016414d693ec52"
+    },
+    {
+      "path": "schemas/config/provider.ugv.schema.json",
+      "sha256": "25007a66df598ebba86e9cbb0505daaabf037b1f40125c2ae00bd9c5ada20bda"
+    },
+    {
+      "path": "schemas/config/provider.ugv.ui.json",
+      "sha256": "3126fdd4e38623c95a4ac4ffe9a56151be1c2b86d486899ad1ce5b052cd4b3a7"
+    },
+    {
+      "path": "scripts/package-development-server.mjs",
+      "sha256": "dcf872873b36021b81cd0436630f83bb430bcf9b418a6fe2b5dc21cc82094699"
+    },
+    {
+      "path": "scripts/task-business/intervention-probe.ts",
+      "sha256": "55724ab5243820ed93cac0cd55cc77036f3c342ca12100599f836cad5de3e215"
+    },
+    {
+      "path": "scripts/task-business/manual-acceptance.ts",
+      "sha256": "ebf311cbb0e4da4a4a9ca91afab13b361dfd634f180c8454b351db42fbb02e4b"
+    },
+    {
+      "path": "scripts/task-business/provision-gowm-test.mjs",
+      "sha256": "84bc860a1ee03a9c7b731ee9fcf2b32b84a55b01eb7c3f40ccfa20cbc38e2055"
+    },
+    {
+      "path": "scripts/task-business/qualify-navigation-public.mjs",
+      "sha256": "52edfdce161e1bf4c1626c887079c0d00fe10d84cf3631e04e5aa84e98ea6ea9"
+    },
+    {
+      "path": "scripts/task-business/qualify-navigation-source.mjs",
+      "sha256": "71dc9232bddb5131496d2f7f8712e0d22d16d2c26c2a54e0d40cd2e1ffa634f6"
+    },
+    {
+      "path": "scripts/task-business/read-only-probe.ts",
+      "sha256": "abb2bd3a93a01769624e7bff26d6ca1864dd951f858311235052b8ed1bbef8b1"
+    },
+    {
+      "path": "scripts/task-business/write-probe-client.ts",
+      "sha256": "b797b388d7c1c26c9049593e4d24ea3850a77ab5c63db14efd8f4e7a5bd235cb"
+    },
+    {
+      "path": "scripts/ugv-mcp-manual-acceptance.mjs",
+      "sha256": "2a46acc4fb8143057c59a893be46ad3d5d1c6e3197c5ae6ae5dae9091092e87a"
+    },
+    {
+      "path": "tests/contract/task-business-command-service.test.ts",
+      "sha256": "7ba85d70fb5e98f70fef4529adf1c95c0535510b23f9cfaa4fa80e0cff9fd8e9"
+    },
+    {
+      "path": "tests/contract/task-business-read-only-probe.test.ts",
+      "sha256": "167ae824c62a3899665fe421b9e2727e84a6d3778e327cee41f2cc2e75fcc481"
+    },
+    {
+      "path": "tests/contract/ugv-intervention-probe.test.ts",
+      "sha256": "2b52a750d0affefd42e391a0a6fb5e0934709fb87cd556343f805c7459767695"
+    },
+    {
+      "path": "tests/contract/ugv-manual-acceptance.test.ts",
+      "sha256": "0e33bbe45581b7bd881f704c6ece0ec545c5075d416418835389f6e2b8cd0d3a"
+    },
+    {
+      "path": "tests/contract/ugv-navigation-business-processor.test.ts",
+      "sha256": "eabd3138ea713086ef975538050a2145c4a5109250bf3ec533334669d718de43"
+    },
+    {
+      "path": "tests/contract/ugv-navigation-planner.test.ts",
+      "sha256": "976c40c8fe700215742694d7eaf6d40a088d2768b0055a808d56a1e1bba9ecd4"
+    },
+    {
+      "path": "tests/contract/ugv-navigation-trajectory.test.ts",
+      "sha256": "c2f4970072c79c78eb30022df41fc872bb0985ba0553b0e00c065ce3ad4f2216"
+    },
+    {
+      "path": "tests/contract/ugv-task-business-config.test.ts",
+      "sha256": "8f656986e34f0b4299b309b5b4ede496b1bf4270c2c32c59c82f1286876c8784"
+    },
+    {
+      "path": "tests/e2e/ugv-task-business-read-e2e.test.ts",
+      "sha256": "6c6a760ee392b5a0371feed237441460774fa387e349fd7e32bbd69867f6d316"
+    },
+    {
+      "path": "tests/integration/gowm-task-business-deployment-postgres.test.ts",
+      "sha256": "aee8ee9ea1a67c396b4f38626e25005983376ca02607be9ca9dead58d0d486e1"
+    },
+    {
+      "path": "tests/integration/gowm-task-business-open-postgres.test.ts",
+      "sha256": "058009b672948f4599fa87807368619e59a0e08eabbb5cf5db9465e2817715f0"
+    },
+    {
+      "path": "tests/integration/gowm-task-business-owner-template-postgres.test.ts",
+      "sha256": "4bd3761987a00ddef8a0399bfa647404d2097923d7f69d93c3a4d4f7c15f0f67"
+    },
+    {
+      "path": "tests/integration/task-business-intervention-submission-postgres.test.ts",
+      "sha256": "2ebb2491e61f87239f4d7736a83eba4fd3723513f1c79492e7c765c1646488e8"
+    },
+    {
+      "path": "tests/integration/ugv-provider-adapter.test.ts",
+      "sha256": "c7196c3d461458ca4f8f2fd79beedd06c221a27adb03af9c26026882ea43ec3c"
+    },
+    {
+      "path": "tests/integration/ugv-provider-auto-lock.test.ts",
+      "sha256": "c90e5cbbb1ac631fe16f9f895e16e77411e503a8596660bf79d39efef7bf8691"
+    },
+    {
+      "path": "tests/integration/ugv-task-business-public-postgres.test.ts",
+      "sha256": "1cd074246a393c8c045e4b9731d4d664953dad737d7cf9f3d5975f0b393d559c"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "2c5321fb9eaf37a0ab223e89c824c4a877de707bac2343f1061fc0130167518e"
+    }
+  ],
+  "sourceFingerprintSha256": "422cf1cfda8fb51fd4ad3babcd59bb5d684cf64879475ba41fea6c3799dbb6db",
+  "qualification": false,
+  "navigationQualification": {
+    "status": "PUBLIC_RUNTIME_POSITIVE_PASS",
+    "evidence": "evidence/navigation-public-restart.json",
+    "remaining": "recon workflows, external SDAR, hosted CI and independent audit"
+  }
+}

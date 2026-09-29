@@ -221,6 +221,12 @@
       "enum": ["auto", "ros_message_json", "direct_domain_json", "ros_bridge_json"],
       "type": "string"
     },
+    "UGV_NAVIGATION_PLANNER_MODE": {
+      "default": "disabled",
+      "enum": ["disabled", "isr_airport"],
+      "type": "string"
+    },
+    "UGV_NAVIGATION_PLANNER_URL": { "format": "uri", "type": "string" },
     "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS": {
       "default": 1000,
       "maximum": 5000,
@@ -281,6 +287,7 @@
       "maximum": 9007199254740991,
       "type": "integer"
     },
+    "UGV_TASK_BUSINESS_PROFILE_PATH": { "type": "string" },
     "UGV_VEHICLE_TYPE": { "default": "ugv", "pattern": "^[a-z][a-z0-9_-]{0,63}$", "type": "string" }
   },
   "required": [
@@ -296,6 +303,7 @@
     "ADAPTER_TLS_MODE",
     "UGV_ADAPTER_STORE_MODE",
     "UGV_ADAPTER_DATABASE_POOL_MAX",
+    "UGV_NAVIGATION_PLANNER_MODE",
     "UGV_MQTT_URL",
     "UGV_MQTT_CLIENT_ID",
     "UGV_MQTT_TLS_MODE",

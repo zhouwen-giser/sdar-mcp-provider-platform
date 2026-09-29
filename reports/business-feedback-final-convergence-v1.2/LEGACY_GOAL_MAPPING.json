@@ -1,0 +1,1700 @@
+{
+  "schema": "bff-legacy-mapping/v1",
+  "sourcePackage": "/home/zhouwen/下载/SMPP_UGV_Business_Feedback_Codex_Goal_v1.0.zip",
+  "sourceSha256": "04b48492310729a1ad4a72e803406b19939993c5b5131db69b111a425358e817",
+  "qualification": false,
+  "groups": {
+    "BASELINE": {
+      "sources": [
+        "reports/business-feedback-final-convergence-v1.2/BASELINE.md",
+        "reports/business-feedback-final-convergence-v1.2/REUSE_MATRIX.md"
+      ],
+      "tests": [],
+      "convergence": "BFF-001"
+    },
+    "SOURCE": {
+      "sources": ["reports/business-feedback-final-convergence-v1.2/DEVICE_SOURCE_MATRIX.md"],
+      "tests": [],
+      "convergence": "BFF-003"
+    },
+    "CORE": {
+      "sources": ["packages/vehicle-provider-core/src/task-business-contract.ts"],
+      "tests": ["tests/contract/task-business-core.test.ts"],
+      "convergence": "BFF-021"
+    },
+    "ARTIFACT": {
+      "sources": ["packages/vehicle-provider-core/src/task-business-artifact.ts"],
+      "tests": ["tests/contract/task-business-artifact.test.ts"],
+      "convergence": "BFF-021"
+    },
+    "INTERACTION": {
+      "sources": ["packages/vehicle-provider-core/src/task-business-interaction.ts"],
+      "tests": ["tests/contract/task-business-interaction.test.ts"],
+      "convergence": "BFF-010/BFF-016"
+    },
+    "PROFILE": {
+      "sources": [
+        "packages/adapter-protocol/src/task-business-profile.ts",
+        "apps/ugv-provider-adapter/src/task-business-bootstrap.ts",
+        "apps/ugv-provider-adapter/src/task-business-service.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-operation-profile.test.ts",
+        "tests/contract/ugv-task-business-config.test.ts"
+      ],
+      "convergence": "BFF-002/BFF-006/BFF-010"
+    },
+    "GENERATED": {
+      "sources": [
+        "scripts/task-business/generate-core-contract.mjs",
+        "scripts/task-business/check-adapter-proto-compat.mjs"
+      ],
+      "tests": ["tests/contract/task-business-catalog.test.ts"],
+      "convergence": "BFF-021"
+    },
+    "STORE": {
+      "sources": [
+        "packages/provider-adapter-kit/src/task-business-store.ts",
+        "packages/provider-adapter-kit/src/memory-task-business-store.ts"
+      ],
+      "tests": ["tests/contract/task-business-memory-store.test.ts"],
+      "convergence": "BFF-018"
+    },
+    "NATIVE": {
+      "sources": ["packages/provider-adapter-kit/src/postgres-task-business-store.ts"],
+      "tests": ["tests/ugv-business/persistence/task-business-postgres.test.ts"],
+      "convergence": "BFF-018"
+    },
+    "SHARED": {
+      "sources": [
+        "packages/gowm-shared-storage-adapter/src/task-business.ts",
+        "contracts/gowm-shared-storage/task-business-owner-handoff.sql.template"
+      ],
+      "tests": [
+        "tests/integration/gowm-task-business-open-postgres.test.ts",
+        "tests/integration/gowm-task-business-owner-template-postgres.test.ts"
+      ],
+      "convergence": "BFF-018"
+    },
+    "EVENT": {
+      "sources": [
+        "packages/provider-adapter-kit/src/postgres-store.ts",
+        "packages/mcp-protocol/src/task-business-feedback.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-projection.test.ts",
+        "tests/business-events/source/task-business-public-stream.test.ts"
+      ],
+      "convergence": "BFF-021"
+    },
+    "COMMAND": {
+      "sources": ["packages/provider-adapter-kit/src/task-business-commands.ts"],
+      "tests": ["tests/contract/task-business-command-service.test.ts"],
+      "convergence": "BFF-010/BFF-014"
+    },
+    "ADAPTER": {
+      "sources": [
+        "packages/provider-adapter-kit/src/vehicle-grpc-server.ts",
+        "apps/ugv-provider-adapter/src/task-business-service.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-adapter-wire.test.ts",
+        "tests/contract/ugv-task-business-query-service.test.ts"
+      ],
+      "convergence": "BFF-021"
+    },
+    "PUBLIC": {
+      "sources": [
+        "apps/runtime/src/task-business-gateway.ts",
+        "apps/runtime/src/task-business-public.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-public-wire.test.ts",
+        "tests/contract/task-business-runtime-gateway.test.ts",
+        "tests/e2e/ugv-task-business-read-e2e.test.ts"
+      ],
+      "convergence": "BFF-019/BFF-020"
+    },
+    "AUTH": {
+      "sources": ["apps/runtime/src/task-business-gateway.ts"],
+      "tests": ["tests/contract/task-business-runtime-input-authorization.test.ts"],
+      "convergence": "BFF-010"
+    },
+    "REDUCER": {
+      "sources": [
+        "packages/mcp-protocol/src/task-business-reducer.ts",
+        "scripts/task-business/read-only-probe.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-reducer.test.ts",
+        "tests/contract/task-business-read-only-probe.test.ts"
+      ],
+      "convergence": "BFF-019/BFF-020"
+    },
+    "NAV": {
+      "sources": [
+        "apps/ugv-provider-adapter/src/navigation-business-processor.ts",
+        "apps/ugv-provider-adapter/src/navigation-trajectory-processor.ts"
+      ],
+      "tests": [
+        "tests/contract/ugv-navigation-business-processor.test.ts",
+        "tests/integration/ugv-provider-adapter.test.ts"
+      ],
+      "convergence": "BFF-004/BFF-005/BFF-006/BFF-007"
+    },
+    "RECON": {
+      "sources": ["apps/ugv-provider-adapter/src/recon-business-processor.ts"],
+      "tests": ["tests/contract/ugv-recon-business-processor.test.ts"],
+      "convergence": "BFF-008/BFF-011/BFF-012"
+    },
+    "FOOTPRINT": {
+      "sources": ["apps/ugv-provider-adapter/src/footprint-business-processor.ts"],
+      "tests": ["tests/contract/ugv-footprint-business-processor.test.ts"],
+      "convergence": "BFF-011"
+    },
+    "TARGET": {
+      "sources": ["apps/ugv-provider-adapter/src/target-business-processor.ts"],
+      "tests": ["tests/contract/ugv-target-business-processor.test.ts"],
+      "convergence": "BFF-008/BFF-012"
+    },
+    "LOCK": {
+      "sources": ["apps/ugv-provider-adapter/src/native-lock-business-processor.ts"],
+      "tests": ["tests/contract/ugv-native-lock-business-processor.test.ts"],
+      "convergence": "BFF-008/BFF-009/BFF-012"
+    },
+    "AUTO": {
+      "sources": [
+        "apps/ugv-provider-adapter/src/provider-auto-lock-coordinator.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "tests": ["tests/integration/ugv-provider-auto-lock.test.ts"],
+      "convergence": "BFF-009/BFF-012"
+    },
+    "INPUT": {
+      "sources": [
+        "apps/ugv-provider-adapter/src/manual-input-business-handler.ts",
+        "apps/ugv-provider-adapter/src/runtime.ts"
+      ],
+      "tests": [
+        "tests/integration/ugv-required-input-producer.test.ts",
+        "tests/contract/ugv-manual-input-probe.test.ts"
+      ],
+      "convergence": "BFF-010/BFF-012"
+    },
+    "EDIT": {
+      "sources": [
+        "apps/ugv-provider-adapter/src/runtime.ts",
+        "packages/provider-adapter-kit/src/task-business-commands.ts"
+      ],
+      "tests": [
+        "tests/contract/task-business-command-service.test.ts",
+        "tests/contract/ugv-intervention-probe.test.ts"
+      ],
+      "convergence": "BFF-013/BFF-014/BFF-015/BFF-016/BFF-017"
+    },
+    "MANUAL": {
+      "sources": ["scripts/task-business/manual-acceptance.ts"],
+      "tests": ["tests/contract/ugv-manual-acceptance.test.ts"],
+      "convergence": "BFF-019"
+    },
+    "HANDOFF": {
+      "sources": [
+        "docs/integration/ugv-task-business-consumer-handoff.md",
+        "reports/business-feedback-final-convergence-v1.2/SDAR_HANDOFF.md"
+      ],
+      "tests": [],
+      "convergence": "BFF-020"
+    },
+    "CI": {
+      "sources": [".github/workflows/ci.yml", "package.json"],
+      "tests": [],
+      "convergence": "BFF-021"
+    },
+    "LIVE": {
+      "sources": [
+        "reports/business-feedback-final-convergence-v1.2/EXTERNAL_BLOCKERS.json",
+        "reports/business-feedback-final-convergence-v1.2/SCENE.json"
+      ],
+      "tests": [],
+      "convergence": "BFF-007/BFF-012/BFF-017"
+    },
+    "CLOSEOUT": {
+      "sources": ["reports/business-feedback-final-convergence-v1.2/DEFINITION_OF_DONE.md"],
+      "tests": [],
+      "convergence": "BFF-022"
+    }
+  },
+  "tasks": [
+    {
+      "id": "UGVB-001",
+      "title": "接纳本地真实基线并保护已有改动",
+      "groups": ["BASELINE"],
+      "convergenceTasks": ["BFF-001"],
+      "acceptanceIds": [],
+      "boundary": "CURRENT_ASSESSMENT_RECORDED; source inventory is not workflow qualification"
+    },
+    {
+      "id": "UGVB-002",
+      "title": "识别本地领先能力与等价实现",
+      "groups": ["BASELINE"],
+      "convergenceTasks": ["BFF-001"],
+      "acceptanceIds": [],
+      "boundary": "CURRENT_ASSESSMENT_RECORDED; source inventory is not workflow qualification"
+    },
+    {
+      "id": "UGVB-003",
+      "title": "盘点南向真实业务来源与缺口",
+      "groups": ["SOURCE"],
+      "convergenceTasks": ["BFF-003"],
+      "acceptanceIds": ["B01", "B07", "B09", "B10", "B13", "B24"],
+      "boundary": "CURRENT_ASSESSMENT_RECORDED; source inventory is not workflow qualification"
+    },
+    {
+      "id": "UGVB-004",
+      "title": "冻结本轮范围、Profile 和验证层次",
+      "groups": ["PROFILE"],
+      "convergenceTasks": ["BFF-002", "BFF-006", "BFF-010"],
+      "acceptanceIds": ["B34", "B36"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-005",
+      "title": "收口 Context 与判别联合合同",
+      "groups": ["CORE"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": ["C01", "C10", "B30", "B36"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-006",
+      "title": "固定来源事件与 Runtime 公开事件映射",
+      "groups": ["EVENT"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": ["C04", "C09", "C12", "B29", "B30"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-007",
+      "title": "空间对象、内容可用性与版本引用合同",
+      "groups": ["ARTIFACT"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": ["C02", "C03", "C11", "B03", "B05", "B08", "B09", "B11", "B31"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-008",
+      "title": "动作、人工输入和可选干预合同",
+      "groups": ["INTERACTION"],
+      "convergenceTasks": ["BFF-010", "BFF-016"],
+      "acceptanceIds": ["C06", "C07", "C08", "B19", "B20", "B22", "B23", "B25", "B26", "B32"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-009",
+      "title": "逐 Operation 能力发现与 Profile 业务开关",
+      "groups": ["PROFILE"],
+      "convergenceTasks": ["BFF-002", "BFF-006", "BFF-010"],
+      "acceptanceIds": ["C10", "B05", "B18", "B34", "B36"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-010",
+      "title": "生成合同产物并完成正反例门禁",
+      "groups": ["GENERATED"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-011",
+      "title": "业务Store端口与Memory实现",
+      "groups": ["STORE"],
+      "convergenceTasks": ["BFF-018"],
+      "acceptanceIds": ["B06", "B30", "B31", "B32", "B33"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-012",
+      "title": "Native PostgreSQL业务版本存储",
+      "groups": ["NATIVE"],
+      "convergenceTasks": ["BFF-018"],
+      "acceptanceIds": ["B06", "B30", "B31", "B32", "B33"],
+      "boundary": "BASELINE_NATIVE_IMPLEMENTATION; not selected GOWM qualification"
+    },
+    {
+      "id": "UGVB-013",
+      "title": "GOWM共享访问层与结构交接",
+      "groups": ["SHARED"],
+      "convergenceTasks": ["BFF-018"],
+      "acceptanceIds": ["B33", "B35"],
+      "boundary": "NOT_RUN_SELECTED_STORAGE; owner business installation missing; template component evidence only"
+    },
+    {
+      "id": "UGVB-014",
+      "title": "原子ChangeSet、业务持久源与提交后通知",
+      "groups": ["STORE", "EVENT"],
+      "convergenceTasks": ["BFF-018", "BFF-021"],
+      "acceptanceIds": ["B29", "B30", "B33", "B35", "C09"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-015",
+      "title": "业务命令账本与语义级幂等",
+      "groups": ["COMMAND"],
+      "convergenceTasks": ["BFF-010", "BFF-014"],
+      "acceptanceIds": ["B19", "B22", "B23", "B26", "B32", "B33", "C06"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-016",
+      "title": "对象版本读取、内容引用与归档策略",
+      "groups": ["STORE", "ARTIFACT"],
+      "convergenceTasks": ["BFF-018", "BFF-021"],
+      "acceptanceIds": ["B06", "B31", "B33", "C11"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-017",
+      "title": "Adapter Proto、Gateway 与能力合同扩展",
+      "groups": ["ADAPTER"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": ["B31", "B34", "B36", "C10"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-018",
+      "title": "Adapter 查询服务与 UGV 装配挂接",
+      "groups": ["ADAPTER"],
+      "convergenceTasks": ["BFF-021"],
+      "acceptanceIds": ["B31", "B33", "B34", "B36"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-019",
+      "title": "Runtime Task绑定、权限与业务网关",
+      "groups": ["PUBLIC", "AUTH"],
+      "convergenceTasks": ["BFF-010", "BFF-019", "BFF-020"],
+      "acceptanceIds": ["B33", "B34", "C07", "C09"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-020",
+      "title": "业务事件摄取、绑定与公开回传",
+      "groups": ["PUBLIC", "EVENT"],
+      "convergenceTasks": ["BFF-019", "BFF-020", "BFF-021"],
+      "acceptanceIds": ["B29", "B30", "B33", "C04", "C09", "C12"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-021",
+      "title": "公开业务查询与无遗漏快照接续",
+      "groups": ["PUBLIC"],
+      "convergenceTasks": ["BFF-019", "BFF-020"],
+      "acceptanceIds": ["B29", "B30", "B31", "B33", "C04", "C10", "C11"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-022",
+      "title": "SDAR式纯Reducer与只读消费探针",
+      "groups": ["REDUCER"],
+      "convergenceTasks": ["BFF-019", "BFF-020"],
+      "acceptanceIds": ["B29", "B30", "B31", "B33", "C05", "C12"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-023",
+      "title": "导航真实计划与有效引用投影",
+      "groups": ["NAV"],
+      "convergenceTasks": ["BFF-004", "BFF-005", "BFF-006", "BFF-007"],
+      "acceptanceIds": ["B01", "B02", "B03", "B05", "C02", "C03"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing"
+    },
+    {
+      "id": "UGVB-024",
+      "title": "实际轨迹、导航归档与第一条纵向闭环",
+      "groups": ["NAV"],
+      "convergenceTasks": ["BFF-004", "BFF-005", "BFF-006", "BFF-007"],
+      "acceptanceIds": ["B01", "B02", "B03", "B04", "B05", "B06", "B29", "B30"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing"
+    },
+    {
+      "id": "UGVB-025",
+      "title": "观察区域、扫描安排与覆盖结果投影",
+      "groups": ["RECON"],
+      "convergenceTasks": ["BFF-008", "BFF-011", "BFF-012"],
+      "acceptanceIds": ["B07", "B08", "B27"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-026",
+      "title": "当前观察范围与坐标/来源说明",
+      "groups": ["FOOTPRINT"],
+      "convergenceTasks": ["BFF-011"],
+      "acceptanceIds": ["B09", "B11", "C03"],
+      "boundary": "MAP_FULL_DISABLED_NOT_QUALIFIED; synthetic geometry tests only"
+    },
+    {
+      "id": "UGVB-027",
+      "title": "多目标发现、稳定ID与多表达",
+      "groups": ["TARGET"],
+      "convergenceTasks": ["BFF-008", "BFF-012"],
+      "acceptanceIds": ["B10", "B11", "B33", "C03", "C09"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-028",
+      "title": "目标丢失、重现与连续轨迹",
+      "groups": ["TARGET"],
+      "convergenceTasks": ["BFF-008", "BFF-012"],
+      "acceptanceIds": ["B04", "B12", "B33"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-029",
+      "title": "设备原生视觉锁定动作与阶段回传",
+      "groups": ["LOCK"],
+      "convergenceTasks": ["BFF-008", "BFF-009", "BFF-012"],
+      "acceptanceIds": ["B13", "B15", "B18", "C12"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-030",
+      "title": "按Profile补受限观察子动作协调",
+      "groups": ["AUTO"],
+      "convergenceTasks": ["BFF-009", "BFF-012"],
+      "acceptanceIds": ["B14", "B16"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-031",
+      "title": "扫描连续性、任务结束与观察纵向门",
+      "groups": ["RECON", "LOCK"],
+      "convergenceTasks": ["BFF-008", "BFF-009", "BFF-011", "BFF-012"],
+      "acceptanceIds": ["B06", "B07", "B10", "B12", "B13", "B15", "B16", "B18", "B30"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-032",
+      "title": "真实决策点生成RequiredInput与等待策略",
+      "groups": ["INPUT"],
+      "convergenceTasks": ["BFF-010", "BFF-012"],
+      "acceptanceIds": ["B17", "B18", "B20", "C07", "C08"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-033",
+      "title": "泛化 UpdateExecution 回复路由",
+      "groups": ["ADAPTER", "INPUT"],
+      "convergenceTasks": ["BFF-010", "BFF-012", "BFF-021"],
+      "acceptanceIds": ["B17", "B19", "B36", "C08", "C10"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-034",
+      "title": "Runtime输入回复、角色与语义守卫",
+      "groups": ["AUTH", "COMMAND"],
+      "convergenceTasks": ["BFF-010", "BFF-014"],
+      "acceptanceIds": ["B17", "B19", "B22", "B32", "B33", "C06", "C07"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-035",
+      "title": "输入失效、超时、dismiss与状态恢复",
+      "groups": ["INPUT"],
+      "convergenceTasks": ["BFF-010", "BFF-012"],
+      "acceptanceIds": ["B19", "B20", "B28", "B32", "C08"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-036",
+      "title": "阻塞式输入公开闭环测试与消息样例",
+      "groups": ["INPUT", "PUBLIC"],
+      "convergenceTasks": ["BFF-010", "BFF-012", "BFF-019", "BFF-020"],
+      "acceptanceIds": ["B17", "B18", "B19", "B20", "B22", "B32", "B33"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+    },
+    {
+      "id": "UGVB-037",
+      "title": "非阻塞Intervention入口生命周期",
+      "groups": ["EDIT"],
+      "convergenceTasks": ["BFF-013", "BFF-014", "BFF-015", "BFF-016", "BFF-017"],
+      "acceptanceIds": ["B21", "B25", "B26", "B34"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing"
+    },
+    {
+      "id": "UGVB-038",
+      "title": "非阻塞命令公开入口与原子受理",
+      "groups": ["PUBLIC", "COMMAND"],
+      "convergenceTasks": ["BFF-010", "BFF-014", "BFF-019", "BFF-020"],
+      "acceptanceIds": ["B21", "B22", "B23", "B26", "B32", "B33", "C06"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-039",
+      "title": "真实重规划、采用与有效Mission切换",
+      "groups": ["EDIT", "NAV"],
+      "convergenceTasks": [
+        "BFF-004",
+        "BFF-005",
+        "BFF-006",
+        "BFF-007",
+        "BFF-013",
+        "BFF-014",
+        "BFF-015",
+        "BFF-016",
+        "BFF-017"
+      ],
+      "acceptanceIds": ["B01", "B02", "B24", "B27", "B28"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing"
+    },
+    {
+      "id": "UGVB-040",
+      "title": "目的地与观察区域调整的一致性",
+      "groups": ["EDIT", "RECON"],
+      "convergenceTasks": [
+        "BFF-008",
+        "BFF-011",
+        "BFF-012",
+        "BFF-013",
+        "BFF-014",
+        "BFF-015",
+        "BFF-016",
+        "BFF-017"
+      ],
+      "acceptanceIds": ["B08", "B22", "B23", "B27"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing"
+    },
+    {
+      "id": "UGVB-041",
+      "title": "应用失败、迟到结果与连续调整",
+      "groups": ["EDIT"],
+      "convergenceTasks": ["BFF-013", "BFF-014", "BFF-015", "BFF-016", "BFF-017"],
+      "acceptanceIds": ["B25", "B26", "B28", "B32"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing"
+    },
+    {
+      "id": "UGVB-042",
+      "title": "运行中计划调整公开闭环门",
+      "groups": ["EDIT", "PUBLIC"],
+      "convergenceTasks": [
+        "BFF-013",
+        "BFF-014",
+        "BFF-015",
+        "BFF-016",
+        "BFF-017",
+        "BFF-019",
+        "BFF-020"
+      ],
+      "acceptanceIds": ["B21", "B22", "B23", "B24", "B25", "B26", "B27", "B28", "B32"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing"
+    },
+    {
+      "id": "UGVB-043",
+      "title": "选定Profile资格与关闭回归",
+      "groups": ["PROFILE"],
+      "convergenceTasks": ["BFF-002", "BFF-006", "BFF-010"],
+      "acceptanceIds": ["B05", "B18", "B34", "B35", "B36"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred"
+    },
+    {
+      "id": "UGVB-044",
+      "title": "受影响新旧回归与持久化门",
+      "groups": ["CI", "SHARED"],
+      "convergenceTasks": ["BFF-018", "BFF-021"],
+      "acceptanceIds": [
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B11",
+        "B12",
+        "B13",
+        "B14",
+        "B15",
+        "B16",
+        "B17",
+        "B18",
+        "B19",
+        "B20",
+        "B21",
+        "B22",
+        "B23",
+        "B24",
+        "B25",
+        "B26",
+        "B27",
+        "B28",
+        "B29",
+        "B30",
+        "B31",
+        "B32",
+        "B33",
+        "B34",
+        "B35",
+        "B36",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "boundary": "NOT_RUN_SELECTED_STORAGE; owner business installation missing; template component evidence only"
+    },
+    {
+      "id": "UGVB-045",
+      "title": "受控真实仿真四条业务链验收",
+      "groups": ["LIVE"],
+      "convergenceTasks": ["BFF-007", "BFF-012", "BFF-017"],
+      "acceptanceIds": [
+        "B01",
+        "B02",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B11",
+        "B12",
+        "B13",
+        "B15",
+        "B16",
+        "B17",
+        "B18",
+        "B19",
+        "B20",
+        "B21",
+        "B22",
+        "B23",
+        "B24",
+        "B25",
+        "B26",
+        "B27",
+        "B28",
+        "B29",
+        "B30",
+        "B31",
+        "B32",
+        "B33"
+      ],
+      "boundary": "NOT_RUN; same-candidate real workflows absent"
+    },
+    {
+      "id": "UGVB-046",
+      "title": "SDAR消费交接与消息示例",
+      "groups": ["HANDOFF", "MANUAL"],
+      "convergenceTasks": ["BFF-019", "BFF-020"],
+      "acceptanceIds": ["B29", "B30", "B31", "C04", "C05", "C10", "C12"],
+      "boundary": "EXTERNAL_PENDING; no same-candidate real SDAR samples"
+    },
+    {
+      "id": "UGVB-047",
+      "title": "独立设计与实现审计",
+      "groups": ["CLOSEOUT"],
+      "convergenceTasks": ["BFF-022"],
+      "acceptanceIds": [
+        "B01",
+        "B19",
+        "B22",
+        "B24",
+        "B27",
+        "B28",
+        "B29",
+        "B30",
+        "B32",
+        "B33",
+        "B35",
+        "C01",
+        "C07",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "boundary": "NOT_COMPLETE; four workflows, selected storage and independent audit remain open"
+    },
+    {
+      "id": "UGVB-048",
+      "title": "最终收口、状态声明与可恢复交付",
+      "groups": ["CLOSEOUT"],
+      "convergenceTasks": ["BFF-022"],
+      "acceptanceIds": [],
+      "boundary": "NOT_COMPLETE; four workflows, selected storage and independent audit remain open"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "B01",
+      "title": "真实导航路线",
+      "assertion": "planned路线来自已知规划结果，不是轨迹或直线",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "设备实际规划输出P1，轨迹T1与起终点不同。",
+      "when": "接入并执行一次导航，读Context/公开事件。",
+      "then": "对照planner源record、route adopted版本和轨迹来源，不仅比eventType。",
+      "owners": [
+        "UGVB-003",
+        "UGVB-023",
+        "UGVB-024",
+        "UGVB-039",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B02",
+      "title": "candidate与adopted",
+      "assertion": "candidate不切换当前有效路线；采用后引用切换",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "旧路线A在执行，新候选B已生成但未采用。",
+      "when": "先推候选，后推实际采用。",
+      "then": "先保持active=A；采用后切B；同一语义版action/refs一致。",
+      "owners": ["UGVB-023", "UGVB-024", "UGVB-039", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B03",
+      "title": "多导航模式",
+      "assertion": "无单一终点的模式不伪造destination；有序waypoints正确",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "点导航与有序多点/其他本地合法导航模式。",
+      "when": "分别建立执行和目标产物。",
+      "then": "目标类型与输入一致，不强制制造单点。",
+      "owners": ["UGVB-007", "UGVB-023", "UGVB-024", "UGVB-044"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV", "ARTIFACT"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B04",
+      "title": "实际轨迹更新",
+      "assertion": "同源重复样本不重复追加；缺口断段",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "带游标的位置序列，有重复与观测缺口。",
+      "when": "累计真实轨迹。",
+      "then": "重复不追加，缺口断段，单点合法，实际观测时间保留。",
+      "owners": ["UGVB-024", "UGVB-028", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B05",
+      "title": "路线不可用",
+      "assertion": "明确availability，无假geometry",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Profile/设备路线不存在或尚未产生。",
+      "when": "读取路线可用性。",
+      "then": "明确not_supported/not_produced/unavailable，禁止假LineString。",
+      "owners": ["UGVB-007", "UGVB-009", "UGVB-023", "UGVB-024", "UGVB-043", "UGVB-044"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV", "ARTIFACT"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B06",
+      "title": "任务结束",
+      "assertion": "实时对象归档，历史路线和最终轨迹可查询",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "有路线/目标/视场/未关闭输入的任务。",
+      "when": "正常/失败/取消分别终止。",
+      "then": "动态对象不实时；真实结果/待确认状态保留；最终Context可读。",
+      "owners": [
+        "UGVB-011",
+        "UGVB-012",
+        "UGVB-016",
+        "UGVB-024",
+        "UGVB-031",
+        "UGVB-044",
+        "UGVB-045"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV", "STORE"],
+      "boundary": "COMPONENT_ONLY; real planned route/adoption and V-NAV missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B07",
+      "title": "观察四种区域",
+      "assertion": "要求、计划、当前视场、已覆盖范围分离",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "不同的要求区、扫描区、footprint、coverage。",
+      "when": "执行观察并取业务快照。",
+      "then": "四者类型/semantics/来源不同，不能复制输入冒充覆盖。",
+      "owners": ["UGVB-003", "UGVB-025", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["RECON", "FOOTPRINT"],
+      "boundary": "MAP_FULL_DISABLED_NOT_QUALIFIED; synthetic geometry tests only",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B08",
+      "title": "覆盖统计与几何",
+      "assertion": "相同areaRevision、原点、网格与统计口径",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "有网格定义的覆盖数据与areaRevision。",
+      "when": "更新覆盖或调整区域。",
+      "then": "统计、几何、分母与原点一致，版本改变正确。",
+      "owners": ["UGVB-007", "UGVB-025", "UGVB-040", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["RECON"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B09",
+      "title": "估算视场",
+      "assertion": "标derived/estimated及模型，不冒充精确遮挡可见域",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "设备无遮挡footprint或姿态/FOV估算。",
+      "when": "发布current footprint。",
+      "then": "derived/nominal/estimated标签与方法齐全，不声称准确可见域。",
+      "owners": ["UGVB-003", "UGVB-007", "UGVB-026", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["FOOTPRINT", "ARTIFACT"],
+      "boundary": "MAP_FULL_DISABLED_NOT_QUALIFIED; synthetic geometry tests only",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B10",
+      "title": "发现多个目标",
+      "assertion": "全部合法观测上报；稳定ID；不限于锁定目标",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "同会话3个合法可见目标，1个被锁定。",
+      "when": "持续上报若干帧。",
+      "then": "3个稳定ID；只有一次首见；锁定列表不代替目标列表。",
+      "owners": ["UGVB-003", "UGVB-027", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["TARGET"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B11",
+      "title": "仅像素目标",
+      "assertion": "图像观测有效，不生成虚假经纬度",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "目标仅像素框，无地理坐标。",
+      "when": "生成target.object。",
+      "then": "保留图像定位，不伪造0,0或其他经纬度。",
+      "owners": ["UGVB-007", "UGVB-026", "UGVB-027", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["TARGET", "ARTIFACT"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B12",
+      "title": "目标丢失与重现",
+      "assertion": "lastSeen不伪更新；可确认身份再合并",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "目标T丢失后隐藏位置仍在仿真变化，后再现。",
+      "when": "读取目标与track。",
+      "then": "lastSeen冻结；隐藏位置不更新实测；身份可证再复用ID。",
+      "owners": ["UGVB-028", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["TARGET"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B13",
+      "title": "设备原生锁定",
+      "assertion": "记录真实来源，不再额外执行一遍锁定",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Profile=device_native，设备自动锁定。",
+      "when": "上报lock阶段。",
+      "then": "产生一个真实Action，无Provider第二次lock命令。",
+      "owners": ["UGVB-003", "UGVB-029", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["LOCK"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B14",
+      "title": "Provider局部策略",
+      "assertion": "仅在已授权Profile启用，复用本Execution资源",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Profile=provider_policy且允许，原Execution持有EO。",
+      "when": "触发一次合法内部视觉动作。",
+      "then": "复用同Execution资源，无独立公开跟踪Task；该模式未选则附Profile N/A。",
+      "owners": ["UGVB-030", "UGVB-044"],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": "provider_policy_selected",
+      "default_result": "NOT_RUN",
+      "groups": ["AUTO"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B15",
+      "title": "锁定阶段",
+      "assertion": "请求/建立/失败/丢失区分，不把ACK当成功",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "设备请求ACK与实际lock建立分开发生。",
+      "when": "推进requested→active→lost/failed/end。",
+      "then": "ACK不产生active；endReason真实，不能丢失伪成功。",
+      "owners": ["UGVB-029", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["AUTO", "LOCK"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B16",
+      "title": "恢复扫描",
+      "assertion": "锁定期间不虚增扫描覆盖；恢复未完成部分",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "同相机扫描被视觉锁定占用，有此前coverage。",
+      "when": "释放/丢失恢复扫描；再加入人工pause。",
+      "then": "占用时不虚增coverage，恢复未完成部分，不解除人工pause。",
+      "owners": ["UGVB-030", "UGVB-031", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["RECON", "INPUT"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B17",
+      "title": "RequiredInput",
+      "assertion": "必须人工决策时正确input_required，未授权不自动继续",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Profile要求user决策且实际lock已active。",
+      "when": "读取Input并用可信来源回答。",
+      "then": "Task input_required、Context pending一致；回答带来真实局部结果。",
+      "owners": ["UGVB-032", "UGVB-033", "UGVB-034", "UGVB-036", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["INPUT", "AUTH"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B18",
+      "title": "非人工默认模式",
+      "assertion": "原生有界锁定后继续扫描，无多余InputRequest",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Profile native自动有界观察，无人工策略。",
+      "when": "完成lock观察并返回扫描。",
+      "then": "无多余RequiredInput，Task正常运行。",
+      "owners": [
+        "UGVB-009",
+        "UGVB-029",
+        "UGVB-031",
+        "UGVB-032",
+        "UGVB-036",
+        "UGVB-043",
+        "UGVB-044",
+        "UGVB-045"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["LOCK", "INPUT"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B19",
+      "title": "人工输入失效",
+      "assertion": "目标或锁定会话改变，旧回答不能作用到新对象",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "浏览器持有request R绑定lock L1；设备换为L2或失去目标。",
+      "when": "提交旧R回答。",
+      "then": "SUBJECT_NO_LONGER_VALID/同义拒绝；不得作用于L2。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-015",
+        "UGVB-033",
+        "UGVB-034",
+        "UGVB-035",
+        "UGVB-036",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["INPUT", "COMMAND"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B20",
+      "title": "等待超时/拒绝",
+      "assertion": "按公开策略释放/恢复/结束，关闭弹窗不隐式cancel Task",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "pending Input有明示deadline和dismiss策略。",
+      "when": "分别expire/decline/cancel输入。",
+      "then": "按策略恢复/结束/新等待，不自动取消整个Task或批准。",
+      "owners": ["UGVB-008", "UGVB-032", "UGVB-035", "UGVB-036", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["INPUT"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B21",
+      "title": "干预入口存在",
+      "assertion": "原任务继续，不因未调整进入WAITING_INPUT",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "Task沿有效路线运行，adjust入口available。",
+      "when": "不提交任何输入。",
+      "then": "Task继续，不变WAITING_INPUT，不启动replan。",
+      "owners": ["UGVB-037", "UGVB-038", "UGVB-042", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["EDIT"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B22",
+      "title": "高频更新与人工调整",
+      "assertion": "轨迹/位置更新不导致计划守卫冲突",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "用户读取route3/request2后有多个轨迹/位置更新。",
+      "when": "提交合法对应guard。",
+      "then": "正常受理；无全局Context冲突。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-015",
+        "UGVB-034",
+        "UGVB-036",
+        "UGVB-038",
+        "UGVB-040",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["COMMAND"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B23",
+      "title": "有效计划已变",
+      "assertion": "基于旧计划的新命令明确冲突，无静默覆盖",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "用户基于plan3，当前实际已采用plan4。",
+      "when": "提交新command调整。",
+      "then": "PLAN_REVISION_CONFLICT，不产生实际副作用。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-015",
+        "UGVB-038",
+        "UGVB-040",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["COMMAND"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B24",
+      "title": "实际重规划采用",
+      "assertion": "新candidate出现不算applied，确认采用后才算",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "真实planner可修改当前导航，candidate与adopted分别可见。",
+      "when": "一次调整并等待真实采用。",
+      "then": "受理≠applied，只有采用后plan/refs/result改动。",
+      "owners": ["UGVB-003", "UGVB-039", "UGVB-042", "UGVB-044", "UGVB-045", "UGVB-047"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["EDIT", "NAV"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B25",
+      "title": "重规划失败",
+      "assertion": "明确failed；旧计划有效时保持，无伪applied",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "旧路线仍有效，真实重规划返回失败。",
+      "when": "提交调整。",
+      "then": "failed终态，旧计划保持；失败不是永远applying。",
+      "owners": ["UGVB-008", "UGVB-037", "UGVB-041", "UGVB-042", "UGVB-044", "UGVB-045"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["EDIT"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B26",
+      "title": "连续两次调整",
+      "assertion": "新入口可再提交，旧入口不倒退、command不覆盖",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "首个调整已应用。",
+      "when": "使用新入口提交第二次调整。",
+      "then": "两个入口和command/result均可查；旧入口不倒退/覆盖。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-015",
+        "UGVB-037",
+        "UGVB-038",
+        "UGVB-041",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["EDIT"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B27",
+      "title": "目的地/区域改变",
+      "assertion": "原arguments/hash保留；effectiveIntent与终态/覆盖基准更新",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "原目的地A/区域X，调整到B/Y。",
+      "when": "真实采用后继续执行到新目标/区域。",
+      "then": "原arguments/hash不变，effectiveIntent/成功基准/coverage口径同步。",
+      "owners": [
+        "UGVB-025",
+        "UGVB-039",
+        "UGVB-040",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["EDIT", "NAV", "RECON"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B28",
+      "title": "取消后迟到规划",
+      "assertion": "不重新激活，不恢复运动",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "已受理重规划但结果还未返回。",
+      "when": "先取消Task，再返回规划。",
+      "then": "只记候选或历史，不采用、不恢复运动，不误结束别的Mission。",
+      "owners": [
+        "UGVB-035",
+        "UGVB-039",
+        "UGVB-041",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": true,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["NAV", "EDIT"],
+      "boundary": "GENERIC_COMPONENT_ONLY; UGV running intervention still rejected; route/replan source missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B29",
+      "title": "快照/流重叠",
+      "assertion": "读取时发生变化，允许重复无遗漏；游标域不混用",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "公开C、Adapter快照R、延迟终结事件并发更新。",
+      "when": "在查询两个步骤之间插入变化和轮换。",
+      "then": "允许重叠无遗漏；先C后R；source/public分开；过期明确刷新。",
+      "owners": [
+        "UGVB-006",
+        "UGVB-014",
+        "UGVB-020",
+        "UGVB-021",
+        "UGVB-022",
+        "UGVB-024",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-046",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["PUBLIC", "REDUCER"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B30",
+      "title": "同Context多条消息",
+      "assertion": "route/action/input同revision均可消费，不丢后两条",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "同一changeset同时更新route/action/input/phase。",
+      "when": "消费同contextRevision的多条事件。",
+      "then": "各对象都应用，metadata一致，不能首条后全丢。",
+      "owners": [
+        "UGVB-005",
+        "UGVB-006",
+        "UGVB-011",
+        "UGVB-012",
+        "UGVB-014",
+        "UGVB-020",
+        "UGVB-021",
+        "UGVB-022",
+        "UGVB-024",
+        "UGVB-031",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-046",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["REDUCER"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B31",
+      "title": "精确版本内容",
+      "assertion": "大对象引用可读取并匹配版本；过期返回明确原因",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "大型版本内容、最新及旧revision、过期记录。",
+      "when": "GetArtifact读取指定版本/内容。",
+      "then": "真实可解引用，哈希一致；旧版不被新版覆盖，过期明确。",
+      "owners": [
+        "UGVB-007",
+        "UGVB-011",
+        "UGVB-012",
+        "UGVB-016",
+        "UGVB-017",
+        "UGVB-018",
+        "UGVB-021",
+        "UGVB-022",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-046"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["ARTIFACT", "STORE"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B32",
+      "title": "相同command重试",
+      "assertion": "返回原语义，不产生第二次业务动作",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "command c已applied且入口变更。",
+      "when": "同内容重试c；异内容重用c。",
+      "then": "同内容回原语义无新动作；异内容COMMAND_ID_CONFLICT。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-011",
+        "UGVB-012",
+        "UGVB-015",
+        "UGVB-034",
+        "UGVB-035",
+        "UGVB-036",
+        "UGVB-038",
+        "UGVB-041",
+        "UGVB-042",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["COMMAND", "SHARED"],
+      "boundary": "NOT_RUN_SELECTED_STORAGE; owner business installation missing; template component evidence only",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B33",
+      "title": "作用域隔离",
+      "assertion": "其他设备/Task/scene对象不能读取或操控",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "不同auth/device/scene共享名字或targetId。",
+      "when": "跨域查询/操控并伪造payload身份。",
+      "then": "拒绝或不可见，不覆盖真实Execution绑定。",
+      "owners": [
+        "UGVB-011",
+        "UGVB-012",
+        "UGVB-013",
+        "UGVB-014",
+        "UGVB-015",
+        "UGVB-016",
+        "UGVB-018",
+        "UGVB-019",
+        "UGVB-020",
+        "UGVB-021",
+        "UGVB-022",
+        "UGVB-027",
+        "UGVB-028",
+        "UGVB-034",
+        "UGVB-036",
+        "UGVB-038",
+        "UGVB-044",
+        "UGVB-045",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "PERSISTENCE", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["STORE", "PUBLIC", "SHARED"],
+      "boundary": "NOT_RUN_SELECTED_STORAGE; owner business installation missing; template component evidence only",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B34",
+      "title": "业务关闭",
+      "assertion": "既有navigate/recon接口继续可用；未启用能力不虚假声明",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "业务功能关闭或特定能力未启用。",
+      "when": "旧navigate/recon运行与新业务discovery。",
+      "then": "原调用正常，新能力不虚假声明；required缺口仍保留。",
+      "owners": [
+        "UGVB-004",
+        "UGVB-009",
+        "UGVB-017",
+        "UGVB-018",
+        "UGVB-019",
+        "UGVB-037",
+        "UGVB-043",
+        "UGVB-044"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["PROFILE"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B35",
+      "title": "共享存储",
+      "assertion": "使用既定GOWM结构和scope；无自动迁移/独立库回退",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "选定GOWM共享环境及独立native测试库。",
+      "when": "共享作用域读写；移除所需结构后启动验证。",
+      "then": "按owner结构访问，不启动DDL/不回退native；native通过不算shared通过。",
+      "owners": ["UGVB-013", "UGVB-014", "UGVB-043", "UGVB-044", "UGVB-047"],
+      "required_layers": ["COMPONENT", "PERSISTENCE"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": "shared_storage_selected",
+      "default_result": "NOT_RUN",
+      "groups": ["SHARED"],
+      "boundary": "NOT_RUN_SELECTED_STORAGE; owner business installation missing; template component evidence only",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "B36",
+      "title": "非目标Provider回归",
+      "assertion": "共享接口增补不破坏其他Adapter编译与原有调用",
+      "origin": "implementation-plan-B01-B36-not-benchmark-24",
+      "given": "共享Proto和类型被修改，其他Adapter不支持新业务。",
+      "when": "编译并运行原必要合同测试。",
+      "then": "旧调用正常，UGV专属字段不强制注入其他Provider。",
+      "owners": [
+        "UGVB-004",
+        "UGVB-005",
+        "UGVB-009",
+        "UGVB-017",
+        "UGVB-018",
+        "UGVB-033",
+        "UGVB-043",
+        "UGVB-044"
+      ],
+      "required_layers": ["COMPONENT"],
+      "simulation_required_for_selected_profile": false,
+      "conditional": null,
+      "default_result": "NOT_RUN",
+      "groups": ["ADAPTER", "CI"],
+      "boundary": "LOCAL_CHECKS_ONLY; selected persistence and final candidate CI not qualified",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C01",
+      "title": "判别联合",
+      "assertion": "kind与payload错配必须拒绝，不产生业务对象或成功回执。",
+      "owners": ["UGVB-005", "UGVB-010", "UGVB-044", "UGVB-047"],
+      "required_layers": ["CONTRACT", "COMPONENT"],
+      "default_result": "NOT_RUN",
+      "groups": ["CORE"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C02",
+      "title": "availability条件",
+      "assertion": "available需内容；不可用不需要假几何；empty不等于unavailable。",
+      "owners": ["UGVB-007", "UGVB-010", "UGVB-023", "UGVB-044"],
+      "required_layers": ["CONTRACT", "COMPONENT"],
+      "default_result": "NOT_RUN",
+      "groups": ["ARTIFACT"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C03",
+      "title": "空间表达",
+      "assertion": "拒绝非法线/多边形/非有限数值；局部坐标不能当经纬度；像素可不地理定位。",
+      "owners": ["UGVB-007", "UGVB-010", "UGVB-023", "UGVB-026", "UGVB-027", "UGVB-044"],
+      "required_layers": ["CONTRACT", "COMPONENT"],
+      "default_result": "NOT_RUN",
+      "groups": ["ARTIFACT"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C04",
+      "title": "游标域",
+      "assertion": "source游标不能作为公开stream恢复坐标；轮换有显式恢复路径。",
+      "owners": ["UGVB-006", "UGVB-010", "UGVB-020", "UGVB-021", "UGVB-044", "UGVB-046"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["PUBLIC", "REDUCER"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C05",
+      "title": "同版本业务摘要",
+      "assertion": "同Context多消息都应用；纯phase/activeRefs/summary改变也可恢复且旧摘要不覆盖新态。",
+      "owners": ["UGVB-022", "UGVB-044", "UGVB-046"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["REDUCER"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C06",
+      "title": "语义guard",
+      "assertion": "轨迹更新不冲突；计划/请求语义变更必须冲突。",
+      "owners": ["UGVB-008", "UGVB-010", "UGVB-015", "UGVB-034", "UGVB-038", "UGVB-044"],
+      "required_layers": ["CONTRACT", "COMPONENT"],
+      "default_result": "NOT_RUN",
+      "groups": ["COMMAND"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C07",
+      "title": "人工身份",
+      "assertion": "自填user actor不构成可信人类授权；只能走现有受信调用上下文。",
+      "owners": [
+        "UGVB-008",
+        "UGVB-010",
+        "UGVB-019",
+        "UGVB-032",
+        "UGVB-034",
+        "UGVB-044",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["AUTH"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C08",
+      "title": "输入取消含义",
+      "assertion": "dismiss/decline/input cancel按策略，不能默认为Task cancel或用户批准。",
+      "owners": ["UGVB-008", "UGVB-010", "UGVB-032", "UGVB-033", "UGVB-035", "UGVB-044"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["INPUT"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C09",
+      "title": "可信外层",
+      "assertion": "payload自填的Task/Provider/source不覆盖Runtime绑定或既有内容hash。",
+      "owners": [
+        "UGVB-006",
+        "UGVB-010",
+        "UGVB-014",
+        "UGVB-019",
+        "UGVB-020",
+        "UGVB-027",
+        "UGVB-044",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["EVENT", "PUBLIC"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C10",
+      "title": "协议兼容",
+      "assertion": "实际proto/schema/gateway一致；旧tasks/update响应与冻结协议不被破坏。",
+      "owners": [
+        "UGVB-005",
+        "UGVB-009",
+        "UGVB-010",
+        "UGVB-017",
+        "UGVB-021",
+        "UGVB-033",
+        "UGVB-044",
+        "UGVB-046",
+        "UGVB-047"
+      ],
+      "required_layers": ["CONTRACT", "COMPONENT"],
+      "default_result": "NOT_RUN",
+      "groups": ["ADAPTER", "GENERATED"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C11",
+      "title": "内容可读",
+      "assertion": "指定版本内容真的可读；过期明确；禁止任意URL代抓和无限引用循环。",
+      "owners": ["UGVB-007", "UGVB-010", "UGVB-016", "UGVB-021", "UGVB-044"],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["ARTIFACT", "PUBLIC"],
+      "boundary": "BASELINE_COMPONENT_MAPPING; see validation logs, no live qualification inferred",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    },
+    {
+      "id": "C12",
+      "title": "回传非命令",
+      "assertion": "刷新/重放Artifact与Action无设备副作用；legacy与typed共存不二次触发。",
+      "owners": [
+        "UGVB-006",
+        "UGVB-010",
+        "UGVB-020",
+        "UGVB-022",
+        "UGVB-029",
+        "UGVB-044",
+        "UGVB-046",
+        "UGVB-047"
+      ],
+      "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
+      "default_result": "NOT_RUN",
+      "groups": ["REDUCER", "LOCK"],
+      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
+    }
+  ]
+}

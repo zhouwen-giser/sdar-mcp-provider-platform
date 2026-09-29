@@ -182,7 +182,7 @@ export class TaskBusinessCommandService {
             responseHash: taskBusinessInputResponseHash(command.result),
             inputResponse: command.result,
           }
-        : {}),
+        : { interventionRequest: command }),
       state: "accepted",
       createdAt: timestamp,
       updatedAt: timestamp,

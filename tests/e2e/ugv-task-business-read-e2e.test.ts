@@ -65,6 +65,8 @@ describe("UGV Runtime business read assembly", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        // Exercise wire versioning with dense synthetic samples; production uses 1 s.
+        trajectorySampleEveryMs: 0,
       },
       store,
       ingress,

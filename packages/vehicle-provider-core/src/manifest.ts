@@ -212,6 +212,32 @@ export function vehicleProviderManifest(
                   enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
                 },
                 observationAuthority: { type: "string" },
+                ...(profile.businessFeedbackProfiles?.vehicle_navigate === undefined
+                  ? {}
+                  : {
+                      effectivePlanRevision: { type: "integer", minimum: 1 },
+                      destination: {
+                        type: "object",
+                        properties: {
+                          longitude: { type: "number", minimum: -180, maximum: 180 },
+                          latitude: { type: "number", minimum: -90, maximum: 90 },
+                          altitude: { type: "number" },
+                        },
+                        required: ["longitude", "latitude"],
+                        additionalProperties: false,
+                      },
+                      destinationDistanceM: { type: "number", minimum: 0 },
+                      routeRef: {
+                        type: "object",
+                        properties: {
+                          kind: { const: "artifact" },
+                          id: { type: "string", minLength: 1, maxLength: 256 },
+                          revision: { type: "integer", minimum: 1 },
+                        },
+                        required: ["kind", "id", "revision"],
+                        additionalProperties: false,
+                      },
+                    }),
               }),
               capabilities: caps(
                 true,

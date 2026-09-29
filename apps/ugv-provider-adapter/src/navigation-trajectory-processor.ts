@@ -60,9 +60,12 @@ export class NavigationTrajectoryProcessor {
     >,
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
     readonly maxGapMs: number,
+    readonly sampleEveryMs = 0,
   ) {
     if (!Number.isFinite(maxGapMs) || maxGapMs <= 0)
       throw new Error("TRAJECTORY_GAP_THRESHOLD_INVALID");
+    if (!Number.isSafeInteger(sampleEveryMs) || sampleEveryMs < 0)
+      throw new Error("TRAJECTORY_SAMPLE_INTERVAL_INVALID");
   }
 
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
@@ -104,6 +107,10 @@ export class NavigationTrajectoryProcessor {
             throw new Error("TRAJECTORY_SAME_TIME_POSITION_CONFLICT");
           return "duplicate";
         }
+        // The persisted last sample enforces the declared projection interval
+        // across restarts; raw MQTT and physical confirmation remain full-rate.
+        if (millisecondsBetweenIsoTimestamps(fact.observedAt, last.observedAt) < this.sampleEveryMs)
+          return "duplicate";
       }
       const oldRef = current.activeRefs.trajectory;
       if (oldRef !== undefined && oldRef.kind !== "artifact")

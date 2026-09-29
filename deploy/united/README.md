@@ -18,6 +18,8 @@ SMPP 从基础包 `.runtime/.../business-connections.env` 读取 `SMPP_DATABASE_
 
 首次写入前生成在线 PostgreSQL 备份，然后调用 GOWM 正式 SMPP 域安装器、补充必要的 Mission/目标访问权限，并通过 GOWM API 获取真实服务绑定。只启动 SMPP Runtime/Adapter，共用 GOWM database。完成后核对上游容器 ID 和启动时间保持不变。没有旧库删除、数据同步或设备控制探测。
 
+随后显式执行包内 `deploy/gowm-task-business/030_task_business_versions.sql`，在同一 GOWM 的 `ugv_smpp` 中安装四张业务反馈表、作用域 RLS、不可变内容保护与最小权限。部署器复用已有 GOWM 管理连接；事务和迁移记录共同提交，重复执行校验 SHA-256，冲突时停止。`contracts/gowm-shared-storage/current/task-business.json` 随源包与预构建镜像固定，启动只校验，不执行 DDL。详见包内 `deploy/gowm-task-business/README.md`。
+
 `node deploy.mjs build-images` 可在构建机编译两个带 SOURCE_REVISION 标签的镜像；传输这两个镜像后，现场 `up --prebuilt` 会校验标签并跳过构建。默认 `up` 在现场构建。构建输出日志不包含业务密码。
 
 本包的 SMPP 端口为19100，独立 MQTT client ID为smpp-sz-gowm-ugv。保留原有范围与设备 ugv:ugv；新消费者身份为 smpp.sz-gowm.ugv。正常启动会订阅 MQTT 并读取设备 MCP 工具目录，不会为验证主动派发导航、取消或武器命令。

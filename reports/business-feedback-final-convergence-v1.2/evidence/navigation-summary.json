@@ -1,0 +1,32 @@
+{
+  "schema": "smpp.real-navigation-summary/v1",
+  "status": "PUBLIC_NAVIGATION_AND_PROCESS_RESTART_PASS",
+  "taskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+  "sceneInstanceId": "smpp-bff-test-f286a981-3bce-417f-a71d-df662736cfc8",
+  "missions": ["47564", "47565", "47566"],
+  "effectivePlanRevision": 3,
+  "publicTaskStatus": "completed",
+  "providerState": "SUCCEEDED",
+  "destination": {
+    "latitude": 29.72041222,
+    "longitude": 106.81312856
+  },
+  "distanceM": 1.4545230713233517,
+  "speedKmh": 0,
+  "stationaryAtCompletion": true,
+  "restart": {
+    "beforePids": [725940, 725993],
+    "afterPids": [726395, 726454],
+    "journalUnchanged": true
+  },
+  "publicBusinessEvents": {
+    "initial": 15,
+    "recovered": 39
+  },
+  "fireEnabled": false,
+  "database": "disposable complete GOWM SMPP owner installation, PostgreSQL 18.6, ugv_smpp_app",
+  "sourceStatus": "DIRTY_WORKTREE",
+  "remoteDeployed": false,
+  "externalSdarQualified": false,
+  "completedAt": "2026-09-29T07:05:38.174Z"
+}

@@ -20,6 +20,8 @@ import type {
 import {
   assertDiagnosticControlSignature,
   BoundExecutionScope,
+  TaskBusinessCommandService,
+  taskBusinessCommandRequestHash,
   diagnosticCapabilityContract,
   diagnosticRequestHash,
   diagnosticStableOperationKey,
@@ -43,12 +45,14 @@ import type {
 import {
   buildUgvEmergencyStopCleanupCalls,
   buildUgvEmergencyStopPrimaryCall,
+  buildUgvStartFollowupCall,
   buildUgvTargetLockCall,
   controlDeviceCalls,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
   type DeviceToolCall,
   executeUgvStartFlow,
+  startDeviceCalls,
   type ExecuteUgvStartFlowOptions,
   fireConfirmationCalls,
   missionIdFromUgvResult,
@@ -75,6 +79,7 @@ import {
   capturePhysicalDispatchBaseline,
   navigationPhysicalConfirmation,
   navigationTerminalFacts,
+  vehiclePositionDisplacementM,
   reconCorrelationStrength,
   reconTerminalFacts,
   stationaryPhysicalConfirmation,
@@ -95,7 +100,10 @@ import {
   type VehicleTrack,
 } from "../../../packages/vehicle-provider-core/src/index.js";
 import type { UgvBusinessEventHub } from "./business-events.js";
-import type { UgvTaskBusinessContextService } from "./task-business-service.js";
+import {
+  airportNavigationBusinessProfile,
+  type UgvTaskBusinessContextService,
+} from "./task-business-service.js";
 import {
   RequiredInputSchema,
   RuntimeInterventionCommandSchema,
@@ -105,8 +113,25 @@ import {
 import { ReconBusinessProcessor } from "./recon-business-processor.js";
 import { TargetBusinessProcessor } from "./target-business-processor.js";
 import { NativeLockBusinessProcessor } from "./native-lock-business-processor.js";
+import {
+  ProviderAutoLockCoordinator,
+  providerAutoLockStepId,
+  type ProviderLockDispatch,
+} from "./provider-auto-lock-coordinator.js";
 import { UgvManualInputBusinessHandler } from "./manual-input-business-handler.js";
 import { NavigationTrajectoryProcessor } from "./navigation-trajectory-processor.js";
+import { NavigationBusinessProcessor } from "./navigation-business-processor.js";
+import {
+  AirportRoadPlanner,
+  NavigationPlanningRequestSchema,
+  NavigationPlanSchema,
+  type NavigationPlanner,
+} from "./navigation-planner.js";
+import {
+  EffectiveNavigationSchema,
+  NavigationAdjustmentInputSchema,
+  NavigationInterventionBusiness,
+} from "./navigation-intervention-business.js";
 import type { VehicleBusinessReadIdentity } from "../../../packages/provider-adapter-kit/src/vehicle-grpc-server.js";
 import type { BusinessSnapshotPartSelector } from "../../../packages/adapter-protocol/src/index.js";
 import type { UgvTelemetry } from "./telemetry.js";
@@ -204,6 +229,13 @@ export class UgvProviderRuntime {
   #unsubscribeDeviceConnection: (() => void) | undefined;
   #unsubscribeCallObservation: (() => void) | undefined;
   #mutationTail: Promise<void> = Promise.resolve();
+  readonly #pendingPriorityControls = new Map<string, Set<{ identity: CommandIdentity }>>();
+  #navigationMissionObservation: AppliedMqttObservation | undefined;
+  #lastObservationPollAtMs = Number.NEGATIVE_INFINITY;
+  readonly #autoLockSources = new Map<
+    string,
+    { cursor: string; missionId: string | undefined; retained: boolean }
+  >();
   #pollPromise: Promise<void> | undefined;
   #lastObservedSnapshot: UgvSnapshot | undefined;
   #localInitialization: Promise<void> | undefined;
@@ -241,6 +273,10 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: number;
       };
       pollIntervalMs: number;
+      businessVisualLockOwner?: "provider";
+      navigationPlanner?: NavigationPlanner;
+      navigationAdjustments?: boolean;
+      trajectorySampleEveryMs?: number;
       businessManualDecision?: {
         maxWaitMs: number;
         onExpire: RequiredInput["onExpire"];
@@ -338,6 +374,24 @@ export class UgvProviderRuntime {
     });
     this.ingress.setDeviceConnected(this.device.connected());
     this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic, applied) => {
+      if (topic === "/ugv/mission_state") this.#navigationMissionObservation = applied;
+      // Capture source identity synchronously: a newer anonymous/retained packet
+      // must revoke policy eligibility even while older projection work awaits IO.
+      if (applied && ["/ugv/area_recon/status", "/ugv/area_recon/targets"].includes(topic)) {
+        const source = applied.observation.canonicalPayload;
+        const rawId = record(source) ? source.mission_id : undefined;
+        const missionId =
+          typeof rawId === "string" && rawId.trim() === rawId && rawId.length > 0
+            ? rawId
+            : typeof rawId === "number" && Number.isSafeInteger(rawId)
+              ? String(rawId)
+              : undefined;
+        this.#autoLockSources.set(topic, {
+          cursor: applied.cursor,
+          missionId,
+          retained: applied.retained,
+        });
+      }
       void this.#serializeMutation(() => this.#observe(snapshot, topic, applied));
     });
     this.#refreshReadiness();
@@ -425,7 +479,12 @@ export class UgvProviderRuntime {
       return undefined;
     }
     return {
-      vehicle_navigate: this.taskBusiness.readOnlyProfile("vehicle_navigate"),
+      vehicle_navigate:
+        this.options.executionMode === "simulation" &&
+        this.options.entityId === "ugv1" &&
+        this.options.navigationPlanner instanceof AirportRoadPlanner
+          ? airportNavigationBusinessProfile(this.options.navigationAdjustments === true)
+          : this.taskBusiness.readOnlyProfile("vehicle_navigate"),
       vehicle_area_recon: this.taskBusiness.readOnlyProfile("vehicle_area_recon"),
     };
   }
@@ -532,6 +591,11 @@ export class UgvProviderRuntime {
         await this.#persistPreemptionRelations(input.taskId, preemptedExecutions, now);
       await this.store.putExecution(execution);
       executionPersisted = true;
+      // Shared storage attaches the verified device binding when it persists
+      // admission. Subsequent projections/failure cleanup must use that binding.
+      const persisted = await this.store.getExecution(execution.taskId);
+      if (!persisted) throw new Error("EXECUTION_NOT_FOUND_AFTER_ADMISSION");
+      execution = persisted;
       if (execution.taskBusinessContextExpected) {
         await this.taskBusiness?.ensureForCreatedExecution(execution.taskId);
       }
@@ -563,10 +627,11 @@ export class UgvProviderRuntime {
             input.taskId,
             await this.#emergencyStopArguments(input.arguments),
           );
-        } else
+        } else {
+          execution = await this.#prepareNavigationPlan(execution);
           await executeUgvStartFlow(
             input.operationName,
-            input.arguments,
+            navigationDispatchArguments(execution),
             (name, argumentsValue) => this.#callDevice(name, argumentsValue, input.taskId),
             {
               ...this.#journaledMultiStepStart(input.taskId),
@@ -574,9 +639,11 @@ export class UgvProviderRuntime {
                 if (execution.downstreamMissionIds.includes(missionId)) return;
                 execution = withMissionId(execution, missionId);
                 await this.store.putExecution(execution);
+                await this.#projectNavigationCandidate(execution);
               },
             },
           );
+        }
         const responseLoss = await this.#bindDiagnostic(execution, SMPP_RESPONSE_LOSS_CAPABILITY);
         const businessSuccess = await this.#bindDiagnostic(
           execution,
@@ -952,7 +1019,18 @@ export class UgvProviderRuntime {
     command: "pause" | "resume" | "cancel",
     identity: CommandIdentity,
   ): Promise<Record<string, unknown>> {
-    return this.#serializeMutation(() => this.#command(command, identity));
+    if (command === "resume")
+      return this.#serializeMutation(() => this.#command(command, identity));
+    const key = identity.taskId;
+    const pending =
+      this.#pendingPriorityControls.get(key) ?? new Set<{ identity: CommandIdentity }>();
+    const entry = { identity };
+    pending.add(entry);
+    this.#pendingPriorityControls.set(key, pending);
+    return this.#serializeMutation(() => this.#command(command, identity)).finally(() => {
+      pending.delete(entry);
+      if (pending.size === 0) this.#pendingPriorityControls.delete(key);
+    });
   }
 
   async #command(
@@ -961,10 +1039,13 @@ export class UgvProviderRuntime {
   ): Promise<Record<string, unknown>> {
     const old = await this.store.getCommandAck(identity.taskId, command, identity.commandSequence);
     if (old !== undefined) return old.response;
-    const execution = await this.store.getExecution(identity.taskId);
+    let execution = await this.store.getExecution(identity.taskId);
     if (execution === undefined) return this.#ack(identity, command, false, "EXECUTION_NOT_FOUND");
     if (!sameIdentity(execution, identity))
       return this.#ack(identity, command, false, "TASK_IDENTITY_CONFLICT");
+    execution = await this.#restoreEffectiveNavigation(execution);
+    if (execution.navigationReplacement && command !== "cancel")
+      return this.#ack(identity, command, false, "UGV_NAVIGATION_ADJUSTMENT_IN_PROGRESS");
     if (execution.operationName === "vehicle_fire_weapon" && command === "cancel") {
       if (execution.state === "WAITING_INPUT")
         return this.#cancelUndispatchedFire(
@@ -979,7 +1060,8 @@ export class UgvProviderRuntime {
     if (!commandSupported(execution.operationName, command))
       return this.#ack(identity, command, false, `${command.toUpperCase()}_NOT_SUPPORTED`);
     try {
-      const persistedMissionId = execution.downstreamMissionIds.at(-1);
+      const persistedMissionId =
+        execution.navigationReplacement?.missionId ?? execution.downstreamMissionIds.at(-1);
       if (
         persistedMissionId === undefined &&
         (execution.operationName === "vehicle_navigate" ||
@@ -996,10 +1078,21 @@ export class UgvProviderRuntime {
         `UGV_${command.toUpperCase()}_DISPATCH_FENCED`,
       );
       const commandFencedAt = this.#now().toISOString();
+      const replacementStart = execution.navigationReplacement
+        ? await this.store.getMutationJournalEntry(
+            execution.taskId,
+            navigationReplacementStep(execution.navigationReplacement.commandId, "start"),
+          )
+        : undefined;
+      const confirmationMission =
+        execution.navigationReplacement && !replacementStart?.dispatchedAt
+          ? execution.navigationReplacement.previousMissionId
+          : persistedMissionId;
       fenced.controlConfirmation = {
         command,
         fencedAt: commandFencedAt,
         baseline: commandBaseline,
+        ...(execution.navigationReplacement ? { missionId: confirmationMission } : {}),
       };
       fenced.controlConfirmationDeadline = deadlineFrom(
         commandFencedAt,
@@ -1051,25 +1144,35 @@ export class UgvProviderRuntime {
     return this.#serializeMutation(() => this.#updateInput(identity, update));
   }
 
-  /** A stale qualified Task must receive a terminal rejection while this UGV Profile is read-only. */
+  /** The existing Runtime command lane admits intent; observed adoption completes it. */
   applyIntervention(
     identity: CommandIdentity,
     payload: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     return this.#serializeMutation(async () => {
       const command = "intervention";
-      const execution = await this.store.getExecution(identity.taskId);
+      let execution = await this.store.getExecution(identity.taskId);
       if (!execution)
         return this.#ackRecord(identity, command, false, "EXECUTION_NOT_FOUND").response;
       if (!sameIdentity(execution, identity)) {
         return this.#ackRecord(identity, command, false, "TASK_IDENTITY_CONFLICT").response;
       }
+      execution = await this.#restoreEffectiveNavigation(execution);
       const existing = await this.store.getCommandAck(
         identity.taskId,
         command,
         identity.commandSequence,
       );
-      if (existing) return replayCommandResponse(existing.response, identity);
+      if (
+        existing &&
+        !(
+          this.options.navigationAdjustments &&
+          this.options.navigationPlanner &&
+          this.taskBusiness &&
+          execution.operationName === "vehicle_navigate"
+        )
+      )
+        return replayCommandResponse(existing.response, identity);
       const intervention = RuntimeInterventionCommandSchema.safeParse(payload.command);
       if (!intervention.success) {
         return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_COMMAND_INVALID")
@@ -1086,6 +1189,79 @@ export class UgvProviderRuntime {
         return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_RESPONDER_INVALID")
           .response;
       }
+      if (
+        this.options.navigationAdjustments &&
+        this.options.navigationPlanner &&
+        this.taskBusiness &&
+        execution.operationName === "vehicle_navigate"
+      ) {
+        const scope = BoundExecutionScope.fromExecution(execution);
+        const saved = await this.taskBusiness.business.getCommand(
+          scope,
+          intervention.data.commandId,
+        );
+        if (
+          saved &&
+          (saved.requestHash !== taskBusinessCommandRequestHash(intervention.data) ||
+            saved.runtimeCommandSequence !== identity.commandSequence)
+        )
+          return this.#ackRecord(identity, command, false, "COMMAND_ID_CONFLICT").response;
+        if (existing) {
+          if (!saved)
+            return this.#ackRecord(identity, command, false, "COMMAND_SEQUENCE_CONFLICT").response;
+          return replayCommandResponse(existing.response, identity);
+        }
+        if (saved)
+          return this.#ack(
+            identity,
+            command,
+            saved.state !== "rejected",
+            saved.resultCode ?? "UGV_NAVIGATION_ADJUSTMENT_ACCEPTED",
+          );
+        if (
+          execution.state !== "RUNNING" ||
+          execution.controlConfirmation ||
+          execution.preemptedByTaskId ||
+          this.#navigationControlPending(execution)
+        )
+          return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_TASK_NOT_RUNNING")
+            .response;
+        if (execution.navigationReplacement)
+          return this.#ackRecord(identity, command, false, "UGV_NAVIGATION_ADJUSTMENT_IN_PROGRESS")
+            .response;
+        try {
+          NavigationAdjustmentInputSchema.parse(intervention.data.input);
+          const entryRef = (await this.taskBusiness.business.getContext(scope))?.activeRefs
+            .navigationAdjustment;
+          const entry =
+            entryRef?.id === intervention.data.interventionId
+              ? await this.taskBusiness.business.getObjectVersion(scope, entryRef)
+              : undefined;
+          if (
+            entry?.kind !== "intervention" ||
+            entry.value.interventionType !== "navigation.adjust_plan"
+          )
+            throw new Error("UGV_NAVIGATION_INTERVENTION_TYPE_INVALID");
+          const accepted = await new TaskBusinessCommandService(this.taskBusiness.business, () =>
+            this.#now(),
+          ).submitIntervention({
+            scope,
+            command: intervention.data,
+            responder: payload.responder,
+            runtimeCommandSequence: identity.commandSequence,
+          });
+          for (const event of accepted.events ?? []) this.taskBusiness.notifyCommitted(event);
+          // A crash here is recovered from the admitted request in the same ledger.
+          await this.#initializeNavigationReplacement(execution, accepted.record);
+          return await this.#ack(identity, command, true, "UGV_NAVIGATION_ADJUSTMENT_ACCEPTED");
+        } catch (error) {
+          // Never poison a command already committed across an uncertain ACK boundary.
+          if (await this.taskBusiness.business.getCommand(scope, intervention.data.commandId))
+            throw error;
+          return this.#ackRecord(identity, command, false, reason(error)).response;
+        }
+      }
+      if (existing) return replayCommandResponse(existing.response, identity);
       const reasonCode =
         execution.state === "RUNNING"
           ? "UGV_INTERVENTION_NOT_SUPPORTED"
@@ -1576,6 +1752,7 @@ export class UgvProviderRuntime {
     await this.#emitResourceTransitions(this.ingress.snapshot());
     const active = await this.store.listActiveExecutions();
     for (const execution of active) {
+      await this.#runProviderAutoLock(execution);
       await this.#projectReconBusinessStatus(execution, active);
       await this.#refresh(execution);
     }
@@ -1801,6 +1978,38 @@ export class UgvProviderRuntime {
   }
 
   async #refresh(execution: ProviderExecution): Promise<ProviderExecution> {
+    execution = await this.#restoreEffectiveNavigation(execution);
+    if (
+      this.options.navigationAdjustments &&
+      this.taskBusiness &&
+      execution.operationName === "vehicle_navigate"
+    ) {
+      const handler = this.#navigationInterventionBusiness();
+      const pending = await handler.pending(execution);
+      if (
+        pending &&
+        (isTerminal(execution.state) ||
+          execution.state === "STOPPING" ||
+          execution.preemptedByTaskId)
+      ) {
+        await handler.transition(
+          execution,
+          pending.commandId,
+          "withdrawn",
+          "NAVIGATION_ADJUSTMENT_CANCELLED",
+        );
+      } else if (pending && !execution.navigationReplacement && execution.state === "RUNNING") {
+        execution = await this.#initializeNavigationReplacement(execution, pending);
+      }
+      if (
+        execution.navigationReplacement &&
+        execution.state === "RUNNING" &&
+        !execution.controlConfirmation &&
+        !execution.preemptedByTaskId
+      ) {
+        return this.#advanceNavigationReplacement(execution);
+      }
+    }
     if (isTerminal(execution.state)) {
       await this.taskBusiness?.finalizeForTerminalExecution(execution);
       return execution;
@@ -1845,6 +2054,9 @@ export class UgvProviderRuntime {
       }
     }
     if (execution.state === "WAITING_INPUT") return execution;
+    if (execution.state === "STOPPING" && execution.navigationReplacement?.phase === "failed")
+      await this.#cleanupFailedNavigationReplacement(execution);
+    execution = await this.#stopLateNavigationReplacement(execution);
     const snapshot = this.ingress.snapshot();
     const phaseObservation = taskPhaseObservation(execution, snapshot, this.ingress);
     let next = execution;
@@ -1855,7 +2067,10 @@ export class UgvProviderRuntime {
         execution.operationName,
         this.ingress,
       );
-      const missionId = execution.downstreamMissionIds.at(-1);
+      const missionId =
+        typeof execution.controlConfirmation?.missionId === "string"
+          ? execution.controlConfirmation.missionId
+          : execution.downstreamMissionIds.at(-1);
       const confirmation = navigationPhysicalConfirmation({
         snapshot,
         baseline,
@@ -1865,7 +2080,68 @@ export class UgvProviderRuntime {
         stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
         now: this.#now().getTime(),
       });
+      const effective = execution.effectiveNavigation;
+      const destinationDistanceM = effective
+        ? vehiclePositionDisplacementM(
+            {
+              type: "geodetic",
+              crs: "EPSG:4326",
+              longitude: effective.destination.longitude,
+              latitude: effective.destination.latitude,
+            },
+            snapshot.chassis.position !== undefined
+              ? {
+                  type: "geodetic",
+                  crs: "EPSG:4326",
+                  longitude: snapshot.chassis.position.longitude,
+                  latitude: snapshot.chassis.position.latitude,
+                }
+              : undefined,
+          )
+        : undefined;
+      // Use the adopted request, including after a process restart, for arrival.
+      if (
+        effective &&
+        snapshot.chassis.mission.state === 4 &&
+        (destinationDistanceM === undefined ||
+          destinationDistanceM > 20 ||
+          this.ingress.fieldFreshnessState(
+            "chassis.position.geodetic",
+            this.options.freshness.chassis,
+            this.#now().getTime(),
+          ) !== "fresh" ||
+          !isNewAuthority(
+            baseline.observationAuthorities,
+            this.ingress.fieldObservationAuthority("chassis.position.geodetic"),
+          ))
+      ) {
+        confirmation.confirmed = false;
+        confirmation.reasonCode = "UGV_NAVIGATION_EFFECTIVE_DESTINATION_UNCONFIRMED";
+      }
+      if (execution.navigationPlan && !effective && snapshot.chassis.mission.state === 4) {
+        confirmation.confirmed = false;
+        confirmation.reasonCode = "UGV_NAVIGATION_ROUTE_ADOPTION_UNCONFIRMED";
+      }
+      if (
+        execution.navigationReplacement &&
+        execution.controlConfirmation?.command === "cancel" &&
+        snapshot.chassis.mission.state === 4
+      ) {
+        confirmation.confirmed = false;
+        confirmation.reasonCode = "UGV_CANCEL_PHYSICAL_CONFIRMATION_PENDING";
+      }
       const requestedDistanceM = requestedDistance(execution.arguments);
+      const replacement = execution.navigationReplacement;
+      const cancellingUnadoptedStart =
+        execution.controlConfirmation?.command === "cancel" &&
+        replacement?.missionId !== undefined &&
+        execution.controlConfirmation.missionId === replacement.missionId;
+      const lateStartStop = cancellingUnadoptedStart
+        ? await this.store.getMutationJournalEntry(
+            execution.taskId,
+            navigationReplacementStep(replacement.commandId, "late-start-stop"),
+          )
+        : undefined;
       next = this.ingress.stateConflict()
         ? reconcileTaskStateConflict(stationaryExecution)
         : applyTrack(
@@ -1882,17 +2158,36 @@ export class UgvProviderRuntime {
                 this.options.stationaryStabilityMs ?? 0,
                 this.options.stationaryMinimumSamples ?? 2,
               ),
-              facts: navigationTerminalFacts({
-                snapshot,
-                baseline,
-                currentAuthorities,
-                ...(missionId === undefined ? {} : { missionId }),
-                ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
-                confirmation,
-              }),
-              controlObservationIsNew: controlObservationIsNew(execution, this.ingress),
+              facts: {
+                ...navigationTerminalFacts({
+                  snapshot,
+                  baseline,
+                  currentAuthorities,
+                  ...(missionId === undefined ? {} : { missionId }),
+                  ...(requestedDistanceM === undefined ? {} : { requestedDistanceM }),
+                  confirmation,
+                }),
+                ...(effective
+                  ? {
+                      effectivePlanRevision: effective.planRevision,
+                      destination: effective.destination,
+                      destinationDistanceM: destinationDistanceM ?? null,
+                      routeRef: effective.routeRef,
+                    }
+                  : {}),
+              },
+              controlObservationIsNew:
+                controlObservationIsNew(execution, this.ingress) &&
+                (!cancellingUnadoptedStart || lateStartStop?.dispatchedAt !== undefined),
             },
           );
+      if (next.state === "CANCELLED" && execution.navigationReplacement?.phase === "failed")
+        next = terminal(
+          next,
+          "TECHNICAL_FAILED",
+          "UGV_NAVIGATION_REPLACEMENT_FAILED",
+          next.result ?? {},
+        );
     } else if (execution.operationName === "vehicle_area_recon") {
       const baseline = executionPhysicalBaseline(execution);
       const authority = this.ingress.fieldObservationAuthority("payload.recon");
@@ -2306,8 +2601,10 @@ export class UgvProviderRuntime {
       observedAt: snapshot.observedAt,
       snapshot: snapshot as unknown as Record<string, unknown>,
     });
-    if (applied !== undefined)
+    if (applied !== undefined) {
+      await this.#projectNavigationAdoption(topic, applied);
       await this.#projectNavigationBusinessTrajectory(snapshot, topic, applied);
+    }
     if (topic === "/ugv/area_recon/status" && applied !== undefined) {
       await this.#projectNativeLock(applied);
       await this.#projectReconBusinessCoverage(applied);
@@ -2344,7 +2641,645 @@ export class UgvProviderRuntime {
             domain,
           );
     }
-    await this.#pollActive();
+    // High-rate GNSS/IMU streams must not enqueue a full persistence/recovery
+    // scan per packet: that delays mission facts past their freshness window.
+    // Persist/project every observation, but bound non-lifecycle polling to 20 Hz.
+    const pollNow = this.#now().getTime();
+    if (topic === "/ugv/mission_state" || intervalDue(this.#lastObservationPollAtMs, pollNow, 50)) {
+      this.#lastObservationPollAtMs = pollNow;
+      await this.#pollActive();
+    }
+  }
+
+  #navigationControlPending(execution: ProviderExecution): boolean {
+    return [...(this.#pendingPriorityControls.get(execution.taskId) ?? [])].some((control) =>
+      sameIdentity(execution, control.identity),
+    );
+  }
+
+  #navigationInterventionBusiness(): NavigationInterventionBusiness {
+    if (!this.taskBusiness) throw new Error("BUSINESS_METHOD_NOT_ENABLED");
+    return new NavigationInterventionBusiness(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+      () => this.#now(),
+    );
+  }
+
+  async #initializeNavigationReplacement(
+    execution: ProviderExecution,
+    command: BusinessCommandRecord,
+  ): Promise<ProviderExecution> {
+    if (execution.navigationReplacement) {
+      if (execution.navigationReplacement.commandId !== command.commandId)
+        throw new Error("UGV_NAVIGATION_ADJUSTMENT_IN_PROGRESS");
+      return execution;
+    }
+    if (
+      command.state !== "accepted" ||
+      !command.interventionRequest ||
+      !execution.effectiveNavigation
+    )
+      throw new Error("UGV_NAVIGATION_COMMAND_RECOVERY_INVALID");
+    const previousMissionId = execution.effectiveNavigation.missionId;
+    if (previousMissionId !== execution.downstreamMissionIds.at(-1))
+      throw new Error("UGV_NAVIGATION_EFFECTIVE_MISSION_MISMATCH");
+    const at = this.#now().toISOString();
+    const next: ProviderExecution = {
+      ...execution,
+      navigationReplacement: {
+        commandId: command.commandId,
+        previousMissionId,
+        phase: "stopping",
+        requested: NavigationAdjustmentInputSchema.parse(command.interventionRequest.input),
+        createdAt: at,
+        deadlineAt: deadlineFrom(at, this.options.controlConfirmationTimeoutMs ?? 30_000),
+        baseline: capturePhysicalDispatchBaseline(
+          this.ingress.snapshot(),
+          operationObservationAuthorities("vehicle_navigate", this.ingress),
+          at,
+        ) as unknown as Record<string, unknown>,
+        observationCursors: initialObservationCursors("vehicle_navigate", this.ingress) ?? {},
+      },
+      revision: execution.revision + 1,
+      updatedAt: at,
+      reasonCode: "UGV_NAVIGATION_ADJUSTMENT_ACCEPTED",
+    };
+    resetStationaryStability(next, this.ingress.fieldObservationAuthority("chassis.speed")?.cursor);
+    await this.store.putExecution(next);
+    await this.#navigationInterventionBusiness().transition(
+      next,
+      command.commandId,
+      "applying",
+      "NAVIGATION_REPLACEMENT_APPLYING",
+    );
+    return next;
+  }
+
+  async #restoreEffectiveNavigation(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (
+      !this.taskBusiness ||
+      execution.operationName !== "vehicle_navigate" ||
+      !execution.taskBusinessContextExpected ||
+      isTerminal(execution.state)
+    )
+      return execution;
+    const context = await this.taskBusiness.business.getContext(
+      BoundExecutionScope.fromExecution(execution),
+    );
+    if (!context) return execution;
+    const value = context.summary.properties?.navigationEffective;
+    if (value === undefined) return execution;
+    const effective = EffectiveNavigationSchema.parse(value);
+    const route = context.activeRefs.route;
+    if (
+      route?.id !== effective.routeRef.id ||
+      route.revision !== effective.routeRef.revision ||
+      context.effectivePlanRevision !== effective.planRevision
+    )
+      throw new Error("UGV_NAVIGATION_EFFECTIVE_PLAN_RECOVERY_INVALID");
+    if (
+      execution.effectiveNavigation &&
+      canonicalJson(execution.effectiveNavigation) === canonicalJson(effective)
+    )
+      return execution;
+    const replacing = execution.navigationReplacement;
+    const plan =
+      replacing?.plan?.planId === effective.planId ? replacing.plan : execution.navigationPlan;
+    if (
+      plan?.planId !== effective.planId ||
+      context.effectivePlanRevision !== effective.planRevision
+    )
+      throw new Error("UGV_NAVIGATION_EFFECTIVE_PLAN_RECOVERY_INVALID");
+    const next: ProviderExecution = {
+      ...execution,
+      navigationPlan: plan,
+      effectiveNavigation: effective,
+      downstreamMissionIds: execution.downstreamMissionIds.includes(effective.missionId)
+        ? execution.downstreamMissionIds
+        : [...execution.downstreamMissionIds, effective.missionId],
+      revision: execution.revision + 1,
+      updatedAt: this.#now().toISOString(),
+    };
+    if (replacing && effective.commandId === replacing.commandId) {
+      if (replacing.missionId !== effective.missionId)
+        throw new Error("UGV_NAVIGATION_EFFECTIVE_MISSION_MISMATCH");
+      next.dispatchBaseline = replacing.baseline;
+      next.observationCursors = replacing.observationCursors;
+      next.reasonCode = "UGV_NAVIGATION_REPLACEMENT_ADOPTED";
+      delete next.navigationReplacement;
+      delete next.startObservationDeadline;
+      delete next.activeObservationDeadline;
+      delete next.physicalConfirmationDeadline;
+      next.terminalObservationDeadline = deadlineFrom(
+        effective.adoptedAt,
+        this.options.terminalObservationTimeoutMs ?? 1_800_000,
+      );
+      resetStationaryStability(
+        next,
+        this.ingress.fieldObservationAuthority("chassis.speed")?.cursor,
+      );
+    }
+    await this.store.putExecution(next);
+    return next;
+  }
+
+  async #advanceNavigationReplacement(execution: ProviderExecution): Promise<ProviderExecution> {
+    const pending = execution.navigationReplacement;
+    if (!pending || !this.options.navigationPlanner || !this.taskBusiness) return execution;
+    if (
+      execution.state !== "RUNNING" ||
+      execution.controlConfirmation ||
+      this.#navigationControlPending(execution)
+    )
+      return execution;
+    const handler = this.#navigationInterventionBusiness();
+    try {
+      const admitted = await this.taskBusiness.business.getCommand(
+        BoundExecutionScope.fromExecution(execution),
+        pending.commandId,
+      );
+      if (admitted?.state !== "accepted")
+        throw new Error("UGV_NAVIGATION_COMMAND_NO_LONGER_ACCEPTED");
+      await handler.transition(
+        execution,
+        pending.commandId,
+        "applying",
+        "NAVIGATION_REPLACEMENT_APPLYING",
+      );
+      if (this.#now().getTime() >= Date.parse(pending.deadlineAt))
+        throw new Error("UGV_NAVIGATION_REPLACEMENT_TIMEOUT");
+      if (pending.phase === "stopping") {
+        const stepId = navigationReplacementStep(pending.commandId, "stop");
+        const journal = await this.store.getMutationJournalEntry(execution.taskId, stepId);
+        if (!journal || journal.state === "INTENT_PERSISTED") {
+          if (this.ingress.snapshot().chassis.mission.id !== pending.previousMissionId)
+            throw new Error("UGV_NAVIGATION_REPLACEMENT_SOURCE_MISMATCH");
+          await this.#callJournaledMutation(
+            execution.taskId,
+            stepId,
+            "CANCEL",
+            {
+              name: "ugv_mission_control",
+              arguments: {
+                action: "terminate",
+                mission_id: parseUgvMissionId(pending.previousMissionId),
+              },
+            },
+            () =>
+              !this.#navigationControlPending(execution) &&
+              this.ingress.snapshot().chassis.mission.id === pending.previousMissionId,
+          );
+          return execution;
+        }
+        if (journal.state === "REJECTED") throw new Error("UGV_NAVIGATION_PREVIOUS_STOP_REJECTED");
+        const observed = this.#navigationMissionObservation;
+        const mission = observed?.observation.patch.chassis?.mission;
+        if (
+          !observed ||
+          observed.retained ||
+          mission?.id !== pending.previousMissionId ||
+          mission.state !== 3 ||
+          !journal.dispatchedAt ||
+          compareIsoTimestamps(observed.observedAt, journal.dispatchedAt) <= 0
+        )
+          return execution;
+        const next = this.#advanceStationaryStability(execution, this.ingress.snapshot());
+        if (next.revision !== execution.revision) await this.store.putExecution(next);
+        const confirmation = navigationPhysicalConfirmation({
+          snapshot: this.ingress.snapshot(),
+          baseline: pending.baseline as unknown as PhysicalDispatchBaseline,
+          missionId: pending.previousMissionId,
+          currentAuthorities: operationObservationAuthorities("vehicle_navigate", this.ingress),
+          freshness: this.options.freshness,
+          stationarySpeedThresholdKmh: this.options.stationarySpeedThresholdKmh ?? 0.1,
+          now: this.#now().getTime(),
+        });
+        if (
+          !confirmation.confirmed ||
+          !stationaryStabilitySatisfied(
+            next,
+            this.ingress.fieldObservationAuthority("chassis.speed"),
+            this.options.stationaryStabilityMs ?? 0,
+            this.options.stationaryMinimumSamples ?? 2,
+          )
+        )
+          return next;
+        return await this.#saveNavigationReplacement(next, {
+          ...pending,
+          phase: "planning",
+          deadlineAt: deadlineFrom(this.#now().toISOString(), 60_000),
+        });
+      }
+      if (pending.phase === "planning") {
+        if (!this.#navigationReplacementSourceStopped(pending)) return execution;
+        const snapshot = this.ingress.snapshot();
+        if (
+          this.ingress.fieldFreshnessState(
+            "chassis.position.geodetic",
+            this.options.freshness.chassis,
+            this.#now().getTime(),
+          ) !== "fresh"
+        )
+          return execution;
+        const request = NavigationPlanningRequestSchema.parse({
+          ...pending.requested,
+          start: {
+            longitude: snapshot.chassis.position?.longitude,
+            latitude: snapshot.chassis.position?.latitude,
+          },
+        });
+        const plan = NavigationPlanSchema.parse(await this.options.navigationPlanner.plan(request));
+        return await this.#saveNavigationReplacement(execution, {
+          ...pending,
+          phase: "submitting",
+          plan,
+          deadlineAt: deadlineFrom(
+            this.#now().toISOString(),
+            this.options.startObservationTimeoutMs ?? 30_000,
+          ),
+          baseline: capturePhysicalDispatchBaseline(
+            this.ingress.snapshot(),
+            operationObservationAuthorities("vehicle_navigate", this.ingress),
+            this.#now().toISOString(),
+          ) as unknown as Record<string, unknown>,
+          observationCursors: initialObservationCursors("vehicle_navigate", this.ingress) ?? {},
+        });
+      }
+      if (pending.phase === "submitting") {
+        if (!this.#navigationReplacementSourceStopped(pending)) return execution;
+        if (!pending.plan) throw new Error("UGV_NAVIGATION_PLAN_REQUIRED");
+        const call = startDeviceCalls(
+          "vehicle_navigate",
+          navigationDispatchArguments({ ...execution, navigationPlan: pending.plan }),
+        )[0];
+        if (!call) throw new Error("UGV_NAVIGATION_PLAN_REQUIRED");
+        const step = navigationReplacementStep(pending.commandId, "create");
+        const old = await this.store.getMutationJournalEntry(execution.taskId, step);
+        // An uncertain create has no reliable allocated ID; never send it again.
+        if (old?.state === "DISPATCHING" || old?.state === "UNCERTAIN") return execution;
+        await this.#callJournaledMutation(
+          execution.taskId,
+          step,
+          "PRIMARY",
+          call,
+          () =>
+            !this.#navigationControlPending(execution) &&
+            this.#navigationReplacementSourceStopped(pending),
+        );
+        const created = await this.store.getMutationJournalEntry(execution.taskId, step);
+        const missionId = created?.externalMissionId;
+        if (!missionId || execution.downstreamMissionIds.includes(missionId))
+          throw new Error("UGV_NAVIGATION_REPLACEMENT_MISSION_INVALID");
+        return await this.#saveNavigationReplacement(execution, {
+          ...pending,
+          phase: "starting",
+          missionId,
+        });
+      }
+      if (pending.phase === "starting") {
+        if (!pending.plan || !pending.missionId)
+          throw new Error("UGV_NAVIGATION_PLAN_BINDING_REQUIRED");
+        const plannedExecution = navigationReplacementExecution(execution);
+        await new NavigationBusinessProcessor(
+          this.taskBusiness.business,
+          this.taskBusiness.notifyCommitted,
+        ).apply(
+          plannedExecution,
+          navigationPlanFact(plannedExecution, "candidate", pending.plan.observedAt),
+        );
+        const step = navigationReplacementStep(pending.commandId, "start");
+        const old = await this.store.getMutationJournalEntry(execution.taskId, step);
+        if (!old || old.state === "INTENT_PERSISTED") {
+          if (!this.#navigationReplacementSourceStopped(pending)) return execution;
+          await this.#callJournaledMutation(
+            execution.taskId,
+            step,
+            "FOLLOWUP",
+            buildUgvStartFollowupCall("vehicle_navigate", pending.missionId),
+            () =>
+              !this.#navigationControlPending(execution) &&
+              this.#navigationReplacementSourceStopped(pending),
+          );
+        } else if (old.state === "REJECTED")
+          throw new Error("UGV_NAVIGATION_REPLACEMENT_START_REJECTED");
+        return await this.#saveNavigationReplacement(execution, {
+          ...pending,
+          phase: "awaiting_adoption",
+        });
+      }
+      return execution;
+    } catch (error) {
+      if (error instanceof UncertainMutatingDeviceCallError) return execution;
+      if (this.#navigationControlPending(execution)) return execution;
+      return await this.#failNavigationReplacement(execution, reason(error));
+    }
+  }
+
+  async #saveNavigationReplacement(
+    execution: ProviderExecution,
+    pending: NonNullable<ProviderExecution["navigationReplacement"]>,
+  ): Promise<ProviderExecution> {
+    const next = {
+      ...execution,
+      navigationReplacement: pending,
+      revision: execution.revision + 1,
+      updatedAt: this.#now().toISOString(),
+    };
+    await this.store.putExecution(next);
+    return next;
+  }
+
+  async #stopLateNavigationReplacement(execution: ProviderExecution): Promise<ProviderExecution> {
+    const pending = execution.navigationReplacement;
+    const observed = this.#navigationMissionObservation;
+    if (
+      !pending?.missionId ||
+      execution.state !== "STOPPING" ||
+      !execution.controlConfirmation ||
+      observed?.retained !== false ||
+      observed.observation.patch.chassis?.mission?.id !== pending.missionId ||
+      observed.observation.patch.chassis.mission.state !== 1 ||
+      this.ingress.snapshot().chassis.mission.id !== pending.missionId ||
+      this.ingress.snapshot().chassis.mission.state !== 1 ||
+      this.#now().getTime() - Date.parse(observed.observedAt) > this.options.freshness.mission ||
+      compareIsoTimestamps(observed.observedAt, String(execution.controlConfirmation.fencedAt)) <= 0
+    )
+      return execution;
+    const step = navigationReplacementStep(pending.commandId, "late-start-stop");
+    const journal = await this.store.getMutationJournalEntry(execution.taskId, step);
+    if (journal && journal.state !== "INTENT_PERSISTED") return execution;
+    const at = this.#now().toISOString();
+    const next = transition(execution, "STOPPING", "UGV_NAVIGATION_LATE_START_STOP_PENDING");
+    next.controlConfirmation = {
+      command: "cancel",
+      missionId: pending.missionId,
+      fencedAt: at,
+      baseline: capturePhysicalDispatchBaseline(
+        this.ingress.snapshot(),
+        operationObservationAuthorities("vehicle_navigate", this.ingress),
+        at,
+      ),
+    };
+    next.controlConfirmationDeadline = deadlineFrom(
+      at,
+      this.options.controlConfirmationTimeoutMs ?? 30_000,
+    );
+    resetStationaryStability(next, this.ingress.fieldObservationAuthority("chassis.speed")?.cursor);
+    await this.store.putExecution(next);
+    try {
+      await this.#callJournaledMutation(execution.taskId, step, "CLEANUP", {
+        name: "ugv_motion_stop",
+        arguments: {},
+      });
+    } catch (error) {
+      if (!(error instanceof UncertainMutatingDeviceCallError)) throw error;
+    }
+    return next;
+  }
+
+  #navigationReplacementSourceStopped(
+    pending: NonNullable<ProviderExecution["navigationReplacement"]>,
+  ): boolean {
+    const observed = this.#navigationMissionObservation;
+    const snapshot = this.ingress.snapshot();
+    const age = observed ? this.#now().getTime() - Date.parse(observed.observedAt) : Infinity;
+    return (
+      observed?.retained === false &&
+      age >= 0 &&
+      age <= this.options.freshness.mission &&
+      observed.observation.patch.chassis?.mission?.id === pending.previousMissionId &&
+      observed.observation.patch.chassis.mission.state === 3 &&
+      snapshot.chassis.mission.id === pending.previousMissionId &&
+      snapshot.chassis.mission.state === 3 &&
+      this.ingress.fieldFreshnessState(
+        "chassis.speed",
+        this.options.freshness.chassis,
+        this.#now().getTime(),
+      ) === "fresh" &&
+      snapshot.chassis.speedKmh !== undefined &&
+      Math.abs(snapshot.chassis.speedKmh) <= (this.options.stationarySpeedThresholdKmh ?? 0.1)
+    );
+  }
+
+  async #failNavigationReplacement(
+    execution: ProviderExecution,
+    code: string,
+  ): Promise<ProviderExecution> {
+    const pending = execution.navigationReplacement;
+    if (!pending) return execution;
+    await this.#navigationInterventionBusiness().transition(
+      execution,
+      pending.commandId,
+      "failed",
+      code,
+    );
+    const at = this.#now().toISOString();
+    const start = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      navigationReplacementStep(pending.commandId, "start"),
+    );
+    const failed = transition(execution, "STOPPING", code);
+    failed.navigationReplacement = { ...pending, phase: "failed" };
+    failed.controlConfirmation = {
+      command: "cancel",
+      missionId: start?.dispatchedAt ? pending.missionId : pending.previousMissionId,
+      fencedAt: at,
+      baseline: capturePhysicalDispatchBaseline(
+        this.ingress.snapshot(),
+        operationObservationAuthorities("vehicle_navigate", this.ingress),
+        at,
+      ),
+    };
+    failed.controlConfirmationDeadline = deadlineFrom(
+      at,
+      this.options.controlConfirmationTimeoutMs ?? 30_000,
+    );
+    await this.store.putExecution(failed);
+    await this.#cleanupFailedNavigationReplacement(failed);
+    return failed;
+  }
+
+  async #cleanupFailedNavigationReplacement(execution: ProviderExecution): Promise<void> {
+    const pending = execution.navigationReplacement;
+    if (pending?.phase !== "failed") return;
+    const start = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      navigationReplacementStep(pending.commandId, "start"),
+    );
+    const calls: { step: string; call: DeviceToolCall }[] = [];
+    if (pending.missionId && !start?.dispatchedAt) {
+      calls.push({
+        step: "cleanup-ready",
+        call: {
+          name: "ugv_mission_control",
+          arguments: { action: "terminate", mission_id: parseUgvMissionId(pending.missionId) },
+        },
+      });
+    }
+    calls.push({ step: "cleanup-stop", call: { name: "ugv_motion_stop", arguments: {} } });
+    for (const { step, call } of calls) {
+      const id = navigationReplacementStep(pending.commandId, step);
+      const journal = await this.store.getMutationJournalEntry(execution.taskId, id);
+      if (journal && journal.state !== "INTENT_PERSISTED") continue;
+      try {
+        await this.#callJournaledMutation(execution.taskId, id, "CLEANUP", call);
+      } catch {
+        /* Retain the journal outcome; physical confirmation is still required. */
+      }
+    }
+  }
+
+  async #prepareNavigationPlan(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (
+      !this.options.navigationPlanner ||
+      !execution.taskBusinessContextExpected ||
+      execution.operationName !== "vehicle_navigate" ||
+      execution.navigationPlan
+    )
+      return execution;
+    const mission = execution.arguments.mission;
+    if (!record(mission) || !["point", "route"].includes(String(mission.type)))
+      throw new Error("UGV_PLANNER_MISSION_UNSUPPORTED");
+    const snapshot = this.ingress.snapshot();
+    if (
+      this.ingress.fieldFreshnessState(
+        "chassis.position.geodetic",
+        this.options.freshness.chassis,
+        this.#now().getTime(),
+      ) !== "fresh"
+    )
+      throw new Error("UGV_PLANNER_START_POSITION_STALE");
+    const request = NavigationPlanningRequestSchema.parse({
+      start: {
+        longitude: snapshot.chassis.position?.longitude,
+        latitude: snapshot.chassis.position?.latitude,
+      },
+      waypoints: mission.type === "point" ? [mission.target] : mission.waypoints,
+      density: execution.arguments.density ?? "adaptive",
+    });
+    const navigationPlan = NavigationPlanSchema.parse(
+      await this.options.navigationPlanner.plan(request),
+    );
+    const next = {
+      ...execution,
+      navigationPlan,
+      revision: execution.revision + 1,
+      updatedAt: this.#now().toISOString(),
+    };
+    await this.store.putExecution(next);
+    return next;
+  }
+
+  async #projectNavigationCandidate(execution: ProviderExecution): Promise<void> {
+    if (!this.taskBusiness || !execution.navigationPlan) return;
+    const current = await this.store.getExecution(execution.taskId);
+    if (!current?.navigationPlan) throw new Error("EXECUTION_NOT_FOUND");
+    await new NavigationBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    ).apply(current, navigationPlanFact(current, "candidate", current.navigationPlan.observedAt));
+  }
+
+  async #projectNavigationAdoption(topic: string, applied: AppliedMqttObservation): Promise<void> {
+    if (!this.taskBusiness || applied.retained || topic !== "/ugv/mission_state") return;
+    const mission = applied.observation.patch.chassis?.mission;
+    const age = this.#now().getTime() - Date.parse(applied.observedAt);
+    if (
+      mission?.id === undefined ||
+      mission.state !== 1 ||
+      age < 0 ||
+      age > this.options.freshness.mission ||
+      this.ingress.snapshot().chassis.mission.id !== mission.id ||
+      this.ingress.snapshot().chassis.mission.state !== 1
+    )
+      return;
+    const matches = (await this.store.listActiveExecutions()).filter(
+      (e) =>
+        e.operationName === "vehicle_navigate" &&
+        (e.navigationReplacement?.missionId ?? e.downstreamMissionIds.at(-1)) === mission.id,
+    );
+    const execution = matches.length === 1 ? matches[0] : undefined;
+    if (
+      !execution?.navigationPlan ||
+      !execution.taskBusinessContextExpected ||
+      !["STARTING", "RUNNING"].includes(execution.state) ||
+      execution.preemptedByTaskId ||
+      execution.controlConfirmation ||
+      this.#navigationControlPending(execution)
+    )
+      return;
+    const replacement = execution.navigationReplacement;
+    if (replacement && !["starting", "awaiting_adoption"].includes(replacement.phase)) return;
+    const planned = replacement ? navigationReplacementExecution(execution) : execution;
+    const primary = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      replacement
+        ? navigationReplacementStep(replacement.commandId, "create")
+        : startStepId("PRIMARY"),
+    );
+    const followup = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      replacement
+        ? navigationReplacementStep(replacement.commandId, "start")
+        : startStepId("FOLLOWUP"),
+    );
+    const plannedCall = startDeviceCalls(
+      "vehicle_navigate",
+      navigationDispatchArguments(planned),
+    )[0];
+    // A known mission with a journaled start and independent RUNNING observation
+    // can resolve a lost start receipt. An unknown create outcome cannot.
+    if (
+      !plannedCall ||
+      primary?.state !== "ACCEPTED" ||
+      primary.externalMissionId !== mission.id ||
+      primary.argumentHash !== mutationHash(plannedCall.arguments) ||
+      !followup ||
+      !["ACCEPTED", "UNCERTAIN", "DISPATCHING"].includes(followup.state) ||
+      followup.argumentHash !==
+        mutationHash(buildUgvStartFollowupCall("vehicle_navigate", mission.id).arguments) ||
+      !followup.dispatchedAt ||
+      compareIsoTimestamps(applied.observedAt, followup.dispatchedAt) <= 0
+    )
+      return;
+    const originalMission = execution.arguments.mission;
+    if (!record(originalMission)) throw new Error("UGV_PLANNER_MISSION_UNSUPPORTED");
+    const requested =
+      replacement?.requested ??
+      NavigationAdjustmentInputSchema.parse({
+        waypoints:
+          originalMission.type === "point" ? [originalMission.target] : originalMission.waypoints,
+        density: execution.arguments.density ?? "adaptive",
+      });
+    await new NavigationBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    ).apply(
+      planned,
+      navigationPlanFact(planned, "adopted", applied.observedAt),
+      () => {
+        const latest = this.#navigationMissionObservation;
+        const age = this.#now().getTime() - Date.parse(applied.observedAt);
+        return (
+          !this.#navigationControlPending(execution) &&
+          latest?.retained === false &&
+          latest.observation.patch.chassis?.mission?.id === mission.id &&
+          latest.observation.patch.chassis?.mission?.state === 1 &&
+          compareIsoTimestamps(latest.observedAt, applied.observedAt) >= 0 &&
+          age >= 0 &&
+          age <= this.options.freshness.mission &&
+          this.ingress.snapshot().chassis.mission.id === mission.id &&
+          this.ingress.snapshot().chassis.mission.state === 1
+        );
+      },
+      {
+        requested,
+        offerAdjustment: this.options.navigationAdjustments === true,
+        ...(replacement ? { commandId: replacement.commandId } : {}),
+      },
+    );
+    await this.#restoreEffectiveNavigation(execution);
   }
 
   async #projectNavigationBusinessTrajectory(
@@ -2388,6 +3323,7 @@ export class UgvProviderRuntime {
       this.taskBusiness.business,
       this.taskBusiness.notifyCommitted,
       this.options.freshness.chassis,
+      this.options.trajectorySampleEveryMs ?? 1000,
     ).apply(execution, {
       schemaVersion: "ugv.navigation-position-fact/1",
       missionId,
@@ -2448,6 +3384,10 @@ export class UgvProviderRuntime {
 
   async #projectNativeLock(applied: AppliedMqttObservation): Promise<void> {
     if (this.taskBusiness === undefined || applied.retained) return;
+    if (this.options.businessVisualLockOwner === "provider") {
+      const age = this.#now().getTime() - Date.parse(applied.observedAt);
+      if (!Number.isFinite(age) || age < 0 || age > this.options.freshness.payload) return;
+    }
     const recon = applied.observation.patch.payload?.reconnaissance;
     const missionId = recon?.id;
     const stage = recon?.lock?.stage;
@@ -2476,18 +3416,23 @@ export class UgvProviderRuntime {
       this.taskBusiness.notifyCommitted,
       this.options.businessManualDecision && {
         ...this.options.businessManualDecision,
+        requireProviderPolicy: this.options.businessVisualLockOwner === "provider",
         now: () => this.#now(),
       },
     );
-    await processor.apply(execution, {
-      schemaVersion: "ugv.recon-native-lock-fact/1",
-      missionId,
-      sourceCursor: applied.cursor,
-      observedAt: applied.observedAt,
-      stage,
-      ...(recon.lock?.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
-      motionStatus: recon.motionStatus,
-    });
+    await processor.apply(
+      execution,
+      {
+        schemaVersion: "ugv.recon-native-lock-fact/1",
+        missionId,
+        sourceCursor: applied.cursor,
+        observedAt: applied.observedAt,
+        stage,
+        ...(recon.lock?.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
+        motionStatus: recon.motionStatus,
+      },
+      await this.#providerLockDispatch(execution),
+    );
     if (this.options.businessManualDecision) {
       const latest = await this.store.getExecution(execution.taskId);
       if (
@@ -3118,6 +4063,132 @@ export class UgvProviderRuntime {
         }
       }
     }
+    await this.#runProviderAutoLock(execution, {
+      cursor: applied.cursor,
+      ids: targets.map((target) => target.targetId),
+    });
+  }
+
+  async #providerLockDispatch(
+    execution: ProviderExecution,
+  ): Promise<ProviderLockDispatch | undefined> {
+    if (!this.taskBusiness || this.options.businessVisualLockOwner !== "provider") return undefined;
+    if (execution.state !== "RUNNING" || this.#autoLockControlPending(execution)) return undefined;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const missionId = execution.downstreamMissionIds.at(-1);
+    const context = await this.taskBusiness.business.getContext(scope);
+    const ref = context?.activeRefs[`visualLock:${missionId ?? ""}`];
+    const version = ref && (await this.taskBusiness.business.getObjectVersion(scope, ref));
+    if (
+      !missionId ||
+      version?.kind !== "action" ||
+      version.value.triggerOrigin !== "provider_policy" ||
+      typeof version.value.properties?.sourceTargetId !== "string"
+    )
+      return undefined;
+    const call = buildUgvTargetLockCall(true, version.value.properties.sourceTargetId, missionId);
+    const journal = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      providerAutoLockStepId(version.value.actionId),
+    );
+    if (
+      !journal?.dispatchedAt ||
+      !["ACCEPTED", "DISPATCHING", "UNCERTAIN"].includes(journal.state) ||
+      journal.toolName !== call.name ||
+      journal.argumentHash !== mutationHash(call.arguments)
+    )
+      return undefined;
+    return { actionId: version.value.actionId, dispatchedAt: journal.dispatchedAt };
+  }
+
+  async #runProviderAutoLock(
+    execution: ProviderExecution,
+    source?: { cursor: string; ids: string[] },
+  ): Promise<void> {
+    if (!this.taskBusiness || this.options.businessVisualLockOwner !== "provider") return;
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (!missionId || execution.operationName !== "vehicle_area_recon") return;
+    const controlPending = () => this.#autoLockControlPending(execution);
+    const canDispatch = (targetId: string) => {
+      const sourceCurrent = (topic: string) => {
+        const latest = this.#autoLockSources.get(topic);
+        return (
+          latest?.missionId === missionId &&
+          !latest.retained &&
+          latest.cursor === this.ingress.observationCursor(topic)
+        );
+      };
+      if (
+        !source?.ids.includes(targetId) ||
+        controlPending() ||
+        !this.device.connected() ||
+        !this.ingress.snapshot().connectivity.mqttConnected ||
+        !sourceCurrent("/ugv/area_recon/targets") ||
+        !sourceCurrent("/ugv/area_recon/status")
+      )
+        return false;
+      const recon = this.ingress.snapshot().payload.reconnaissance;
+      const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+      const target = this.ingress
+        .snapshot()
+        .payload.targets.find((value) => value.targetId === targetId);
+      const now = this.#now().getTime();
+      const fresh = (at: string | undefined, maxAge: number) => {
+        const age = at === undefined ? Number.NaN : now - Date.parse(at);
+        return (
+          Number.isFinite(age) &&
+          age >= 0 &&
+          age <= maxAge &&
+          Date.parse(at ?? "") >= Date.parse(execution.createdAt)
+        );
+      };
+      if (
+        reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
+        recon.motionStatus !== 5 ||
+        recon.lock?.stage !== 1 ||
+        !authority ||
+        !fresh(authority.observedAt, this.options.freshness.payload) ||
+        target?.source !== "mqtt_area_recon" ||
+        !fresh(target.observedAt, this.options.freshness.target)
+      )
+        return false;
+      try {
+        buildUgvTargetLockCall(true, targetId, missionId);
+      } catch {
+        return false;
+      }
+      return true;
+    };
+    await new ProviderAutoLockCoordinator(
+      this.taskBusiness.business,
+      this.store,
+      this.taskBusiness.notifyCommitted,
+      () => this.#now(),
+      this.options.controlConfirmationTimeoutMs ?? 30_000,
+    ).run({
+      execution,
+      candidateIds: source?.ids ?? [],
+      controlPending,
+      canDispatch,
+      dispatch: (stepId, targetId) =>
+        this.#callJournaledMutation(
+          execution.taskId,
+          stepId,
+          "FOLLOWUP",
+          buildUgvTargetLockCall(true, targetId, missionId),
+          () => canDispatch(targetId),
+        ),
+    });
+  }
+
+  #autoLockControlPending(execution: ProviderExecution): boolean {
+    return (
+      [...(this.#pendingPriorityControls.get(execution.taskId) ?? [])].some(({ identity }) =>
+        sameIdentity(execution, identity),
+      ) ||
+      execution.preemptedByTaskId !== undefined ||
+      controlConfirmationPending(execution)
+    );
   }
 
   async #confirmationLatencyMetric(metricName: string, execution: ProviderExecution) {
@@ -3574,6 +4645,10 @@ export class UgvProviderRuntime {
   }
 
   async #recoverMultiStepExecution(execution: ProviderExecution): Promise<boolean> {
+    if (execution.navigationReplacement || execution.effectiveNavigation) {
+      await this.#refresh(execution);
+      return true;
+    }
     if (
       execution.operationName !== "vehicle_navigate" &&
       execution.operationName !== "vehicle_area_recon"
@@ -3645,9 +4720,10 @@ export class UgvProviderRuntime {
   ): Promise<void> {
     let current = execution;
     try {
+      current = await this.#prepareNavigationPlan(current);
       await executeUgvStartFlow(
         current.operationName,
-        current.arguments,
+        navigationDispatchArguments(current),
         (name, argumentsValue) => this.#callDevice(name, argumentsValue, current.taskId),
         {
           ...this.#journaledMultiStepStart(current.taskId, true),
@@ -3656,6 +4732,7 @@ export class UgvProviderRuntime {
             if (current.downstreamMissionIds.includes(missionId)) return;
             current = withMissionId(current, missionId);
             await this.store.putExecution(current);
+            await this.#projectNavigationCandidate(current);
           },
         },
       );
@@ -3696,6 +4773,7 @@ export class UgvProviderRuntime {
     stepId: string,
     phase: MutationJournalPhase,
     call: DeviceToolCall,
+    mayDispatch?: () => boolean,
   ): Promise<void> {
     const existing = await this.store.getMutationJournalEntry(taskId, stepId);
     let intent: MutationJournalEntry;
@@ -3728,6 +4806,7 @@ export class UgvProviderRuntime {
       throw new Error("UGV_MUTATION_JOURNAL_DISPATCH_CONFLICT");
     let result: Record<string, unknown> | undefined;
     try {
+      if (mayDispatch && !mayDispatch()) throw new Error("UGV_AUTO_LOCK_DISPATCH_SUPERSEDED");
       result = await this.#callDevice(call.name, call.arguments, taskId);
       const missionId = rejectedResultMissionId(call.name, result);
       const accepted: MutationJournalEntry = {
@@ -4403,7 +5482,10 @@ function trackBelongsToExecution(
   if (execution.downstreamMissionIds.length === 0) return false;
   if (track.id === undefined) return allowMissingObservedId;
   try {
-    return execution.downstreamMissionIds.includes(String(parseUgvMissionId(track.id)));
+    const controlled = execution.controlConfirmation?.missionId;
+    return typeof controlled === "string"
+      ? controlled === String(parseUgvMissionId(track.id))
+      : execution.downstreamMissionIds.includes(String(parseUgvMissionId(track.id)));
   } catch {
     return false;
   }
@@ -4414,7 +5496,10 @@ function isHistoricalMissionObservation(
   execution: ProviderExecution,
   observedMissionId: string | number | undefined,
 ): boolean {
-  if (observedMissionId === undefined || execution.downstreamMissionIds.length < 2) return false;
+  if (observedMissionId === undefined) return false;
+  if (typeof execution.controlConfirmation?.missionId === "string")
+    return String(observedMissionId) !== execution.controlConfirmation.missionId;
+  if (execution.downstreamMissionIds.length < 2) return false;
   try {
     const observed = String(parseUgvMissionId(observedMissionId));
     return (
@@ -5019,6 +6104,63 @@ function fireDispatchReason(recordValue: CommandAckRecord | undefined): string |
   const reasonCode = recordValue?.response.reasonCode;
   return typeof reasonCode === "string" ? reasonCode : undefined;
 }
+function navigationReplacementStep(commandId: string, step: string): string {
+  return `navigation-replace:${mutationHash(commandId)}:${step}`;
+}
+function navigationReplacementExecution(execution: ProviderExecution): ProviderExecution {
+  const pending = execution.navigationReplacement;
+  if (!pending?.missionId || !pending.plan) throw new Error("UGV_NAVIGATION_PLAN_BINDING_REQUIRED");
+  return {
+    ...execution,
+    navigationPlan: pending.plan,
+    downstreamMissionIds: [...execution.downstreamMissionIds, pending.missionId],
+  };
+}
+function navigationDispatchArguments(execution: ProviderExecution): Record<string, unknown> {
+  if (!execution.navigationPlan) return execution.arguments;
+  return {
+    ...execution.arguments,
+    mission: { type: "route", waypoints: execution.navigationPlan.waypoints },
+    density:
+      execution.navigationReplacement?.requested.density ??
+      execution.effectiveNavigation?.requested.density ??
+      execution.arguments.density ??
+      "adaptive",
+    needPlan: false,
+    planningMode: "direct",
+    jsonUrl: "",
+  };
+}
+
+function navigationPlanFact(
+  execution: ProviderExecution,
+  adoption: "candidate" | "adopted",
+  observedAt: string,
+) {
+  const plan = execution.navigationPlan;
+  const missionId = execution.downstreamMissionIds.at(-1);
+  if (!plan || !missionId) throw new Error("UGV_NAVIGATION_PLAN_BINDING_REQUIRED");
+  return {
+    schemaVersion: "ugv.navigation-plan-fact/1",
+    routeId: `route-${missionId}`,
+    routePlanId: plan.planId,
+    routeRevision: 1,
+    missionId,
+    sourceRecordId: plan.sourceRecordId,
+    routeSource: plan.routeSource,
+    adoption,
+    observedAt,
+    content: {
+      kind: "geojson",
+      crs: "OGC:CRS84",
+      geometry: {
+        type: "LineString",
+        coordinates: plan.waypoints.map((p) => [p.longitude, p.latitude]),
+      },
+    },
+  };
+}
+
 function startStepId(phase: "PRIMARY" | "FOLLOWUP"): string {
   return phase === "PRIMARY" ? "start:01:primary" : "start:02:followup";
 }

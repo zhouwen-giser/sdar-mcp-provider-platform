@@ -1,0 +1,2328 @@
+{
+  "schema": "smpp.navigation-source-qualification/v1",
+  "runId": "7177a49b-92ab-454f-a2f4-fb107b03d348",
+  "startedAt": "2026-09-29T06:20:48.845Z",
+  "status": "PROVIDER_SOURCE_PASS",
+  "layer": "PROVIDER_REAL_SOURCE_ON_SELECTED_GOWM",
+  "publicRuntimeQualified": false,
+  "fireEnabled": false,
+  "steps": [
+    {
+      "stage": "shared_store_verified",
+      "at": "2026-09-29T06:20:48.987Z"
+    },
+    {
+      "stage": "device_connected",
+      "at": "2026-09-29T06:20:49.078Z"
+    },
+    {
+      "stage": "read_only_preflight",
+      "at": "2026-09-29T06:20:49.331Z",
+      "mission": {
+        "id": "47548",
+        "type": 2,
+        "state": 4,
+        "progress": 100
+      },
+      "position": {
+        "latitude": 29.720404644171886,
+        "longitude": 106.81287262761634,
+        "altitude": 500.0501412935555
+      },
+      "speedKmh": 0,
+      "reconMotionStatus": 1
+    },
+    {
+      "stage": "initial_adopted",
+      "at": "2026-09-29T06:20:51.151Z",
+      "missionId": "47549"
+    },
+    {
+      "stage": "adjustment_accepted",
+      "at": "2026-09-29T06:20:51.628Z",
+      "number": 1,
+      "target": {
+        "longitude": 106.81179412264343,
+        "latitude": 29.720490136182608
+      }
+    },
+    {
+      "stage": "adjustment_adopted",
+      "at": "2026-09-29T06:20:55.940Z",
+      "number": 1,
+      "missionId": "47550"
+    },
+    {
+      "stage": "adjustment_accepted",
+      "at": "2026-09-29T06:20:56.904Z",
+      "number": 2,
+      "target": {
+        "longitude": 106.81312856,
+        "latitude": 29.72041222
+      }
+    },
+    {
+      "stage": "adjustment_adopted",
+      "at": "2026-09-29T06:21:01.377Z",
+      "number": 2,
+      "missionId": "47551"
+    },
+    {
+      "stage": "provider_source_pass",
+      "at": "2026-09-29T06:21:10.446Z",
+      "missionIds": ["47549", "47550", "47551"],
+      "effectivePlanRevision": 3
+    }
+  ],
+  "calls": [
+    {
+      "name": "ugv_path_follow_mission",
+      "at": "2026-09-29T06:20:49.800Z",
+      "argumentHash": "43c13aa3284da660da71e1df04fd282f31272607c14c3296503c26da381274d8"
+    },
+    {
+      "name": "ugv_mission_control",
+      "at": "2026-09-29T06:20:49.846Z",
+      "argumentHash": "d0a1de206086d6614b09ea48f363650bef466a4aae97f4f375231556a3e8bccb",
+      "action": "start",
+      "missionId": 47549
+    },
+    {
+      "name": "ugv_mission_control",
+      "at": "2026-09-29T06:20:51.671Z",
+      "argumentHash": "6e45b6371ab3d92111747fbd50930bb68e29400ca84eede8f8946fb0ee0c9533",
+      "action": "terminate",
+      "missionId": 47549
+    },
+    {
+      "name": "ugv_path_follow_mission",
+      "at": "2026-09-29T06:20:53.319Z",
+      "argumentHash": "dc614925ee5e8d4cfa58320a58e2596eb0a4c5d033b966308cb38fd65b559ae4"
+    },
+    {
+      "name": "ugv_mission_control",
+      "at": "2026-09-29T06:20:53.388Z",
+      "argumentHash": "b7b5bb0944e1744eac8d8124da76ba9f42c46410c1477561f1ca79b7d181d464",
+      "action": "start",
+      "missionId": 47550
+    },
+    {
+      "name": "ugv_mission_control",
+      "at": "2026-09-29T06:20:56.944Z",
+      "argumentHash": "d4f76924630ba50811ac6e0dd595b51f5fb66e93024524279b60e3d6f65b2868",
+      "action": "terminate",
+      "missionId": 47550
+    },
+    {
+      "name": "ugv_path_follow_mission",
+      "at": "2026-09-29T06:20:59.127Z",
+      "argumentHash": "bd39bccda89cfc31a4ea997430e3205fcf5c7f910648c9c0810a1fed8a1ca9d4"
+    },
+    {
+      "name": "ugv_mission_control",
+      "at": "2026-09-29T06:20:59.204Z",
+      "argumentHash": "3d294c214247adb630d200845577c88a52f3c1a366e3f45cb98057008f750611",
+      "action": "start",
+      "missionId": 47551
+    }
+  ],
+  "transitions": [
+    {
+      "state": "STARTING",
+      "at": "2026-09-29T06:20:49.999Z",
+      "reasonCode": "UGV_TASK_STATE_CONFLICT"
+    },
+    {
+      "state": "RUNNING",
+      "at": "2026-09-29T06:20:50.159Z",
+      "reasonCode": "UGV_DEVICE_TASK_RUNNING"
+    },
+    {
+      "state": "SUCCEEDED",
+      "at": "2026-09-29T06:21:10.429Z",
+      "reasonCode": "UGV_DEVICE_TASK_COMPLETED"
+    }
+  ],
+  "adoptions": [
+    {
+      "revision": 1,
+      "effective": {
+        "planId": "road-1d7bebc751c1cf64163c91c558537e6155c6f67778e79fc3f51292d6dbfb0055",
+        "routeRef": {
+          "id": "route-47549",
+          "kind": "artifact",
+          "revision": 2
+        },
+        "adoptedAt": "2026-09-29T06:20:50.725970322Z",
+        "missionId": "47549",
+        "requested": {
+          "density": "adaptive",
+          "waypoints": [
+            {
+              "latitude": 29.72041222,
+              "longitude": 106.81312856
+            }
+          ]
+        },
+        "destination": {
+          "latitude": 29.72041222,
+          "longitude": 106.81312856
+        },
+        "planRevision": 1
+      },
+      "contextRevision": 53
+    },
+    {
+      "revision": 2,
+      "effective": {
+        "planId": "road-46e3ef9913e276ba96b2746593d7e6f465e7a534507ce87d3a978c4f0c4eda20",
+        "routeRef": {
+          "id": "route-47550",
+          "kind": "artifact",
+          "revision": 2
+        },
+        "adoptedAt": "2026-09-29T06:20:53.725831432Z",
+        "commandId": "adjust-1-7177a49b-92ab-454f-a2f4-fb107b03d348",
+        "missionId": "47550",
+        "requested": {
+          "density": "adaptive",
+          "waypoints": [
+            {
+              "latitude": 29.720490136182608,
+              "longitude": 106.81179412264343
+            }
+          ]
+        },
+        "destination": {
+          "latitude": 29.720490136182608,
+          "longitude": 106.81179412264343
+        },
+        "planRevision": 2
+      },
+      "contextRevision": 84,
+      "command": {
+        "commandId": "adjust-1-7177a49b-92ab-454f-a2f4-fb107b03d348",
+        "commandType": "intervention",
+        "entryKey": "intervention:navigation-adjust-1",
+        "runtimeCommandSequence": "10",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "requestHash": "de2e848699c88ccc0dcf0b934ca3c5aca61459644773eebf5015ac50b2fc041c",
+        "interventionRequest": {
+          "schemaVersion": "sdar.runtime-intervention-command/1.0-rc2",
+          "commandId": "adjust-1-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "interventionId": "navigation-adjust-1",
+          "guard": {
+            "mode": "semantic",
+            "expectedInterventionRevision": 1,
+            "expectedEffectivePlanRevision": 1
+          },
+          "input": {
+            "density": "adaptive",
+            "waypoints": [
+              {
+                "latitude": 29.720490136182608,
+                "longitude": 106.81179412264343
+              }
+            ]
+          }
+        },
+        "state": "applied",
+        "resultCode": "NAVIGATION_REPLACEMENT_ADOPTED",
+        "resultRefs": [
+          {
+            "kind": "artifact",
+            "id": "route-47550",
+            "revision": 2
+          }
+        ],
+        "createdAt": "2026-09-29T06:20:51.493Z",
+        "updatedAt": "2026-09-29T06:20:53.725831432Z"
+      }
+    },
+    {
+      "revision": 3,
+      "effective": {
+        "planId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+        "routeRef": {
+          "id": "route-47551",
+          "kind": "artifact",
+          "revision": 2
+        },
+        "adoptedAt": "2026-09-29T06:20:59.726268393Z",
+        "commandId": "adjust-2-7177a49b-92ab-454f-a2f4-fb107b03d348",
+        "missionId": "47551",
+        "requested": {
+          "density": "adaptive",
+          "waypoints": [
+            {
+              "latitude": 29.72041222,
+              "longitude": 106.81312856
+            }
+          ]
+        },
+        "destination": {
+          "latitude": 29.72041222,
+          "longitude": 106.81312856
+        },
+        "planRevision": 3
+      },
+      "contextRevision": 139,
+      "command": {
+        "commandId": "adjust-2-7177a49b-92ab-454f-a2f4-fb107b03d348",
+        "commandType": "intervention",
+        "entryKey": "intervention:navigation-adjust-2",
+        "runtimeCommandSequence": "11",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "requestHash": "a0ec6bec0f0957ae22bbb68ce23a010f31fb9dbf45f72682077aa52bc2a61d5c",
+        "interventionRequest": {
+          "schemaVersion": "sdar.runtime-intervention-command/1.0-rc2",
+          "commandId": "adjust-2-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "interventionId": "navigation-adjust-2",
+          "guard": {
+            "mode": "semantic",
+            "expectedInterventionRevision": 1,
+            "expectedEffectivePlanRevision": 2
+          },
+          "input": {
+            "density": "adaptive",
+            "waypoints": [
+              {
+                "latitude": 29.72041222,
+                "longitude": 106.81312856
+              }
+            ]
+          }
+        },
+        "state": "applied",
+        "resultCode": "NAVIGATION_REPLACEMENT_ADOPTED",
+        "resultRefs": [
+          {
+            "kind": "artifact",
+            "id": "route-47551",
+            "revision": 2
+          }
+        ],
+        "createdAt": "2026-09-29T06:20:56.754Z",
+        "updatedAt": "2026-09-29T06:20:59.726268393Z"
+      }
+    }
+  ],
+  "sourceObservations": [
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:49.232Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjQ5LjIzMVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjgsInBheWxvYWRIYXNoIjoiMTFhNTlmMDc4MDRiM2JmMGU3MDJhMDQ1MjJmNDQzMjE3NjFjMTIyNTU1NmUwMDQwNjJlMDE0Y2YwZDk0YzA4YSJ9",
+      "position": {
+        "latitude": 29.720404644171886,
+        "longitude": 106.81287262761634,
+        "altitude": 500.0501412935555
+      },
+      "speedKmh": 0
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:49.941Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjQ5LjcyNjIyNjI5N1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjE0MywicGF5bG9hZEhhc2giOiIyYmZlOTM0MjZlOWQ5YmM1NWJjOWUxOTNkZjUwNWM2YjI3NGQyYWNiMGVlZmIwY2NhYTBmMTY5MWE2NTBhODllIn0",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662849,
+            "nanosec": 726226297
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47549,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:50.232Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUwLjIzMVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjIwMSwicGF5bG9hZEhhc2giOiI4NWUzOTA1NjIzMGI5M2Y1MzBmYmE1Njc0NWEzNGFlNzdkZWY2NjVhNTJiYzQwMzUwNTNhZmI5MzgxZTczN2EwIn0",
+      "position": {
+        "latitude": 29.720404643895808,
+        "longitude": 106.81287274207097,
+        "altitude": 500.04961547628045
+      },
+      "speedKmh": 0.5
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:50.922Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUwLjcyNTk3MDMyMloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjMzOSwicGF5bG9hZEhhc2giOiI5MTA0ODUwOWQxYjhhNTcwNjM2M2E2ZTg4NTJjZjFjNzY0MTljZTIwNDczNjE3NTgxOTA4YTRmYWJmZDYxMTc3In0",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662850,
+            "nanosec": 725970322
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47549,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:51.242Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUxLjI0MloiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjQwMCwicGF5bG9hZEhhc2giOiI3MWIwOTYxOGU2NDlmMDdlOWJkNGVmMTVlMmU4NjZhMDRmZmJkMDA5MjNkNTYxZmI3OWQwZTA0YmE5NGVlZmFhIn0",
+      "position": {
+        "latitude": 29.720404643136597,
+        "longitude": 106.81287920046447,
+        "altitude": 500.04841705039144
+      },
+      "speedKmh": 4.8
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:51.956Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUxLjcyNjQ4MDU0MVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjU0MSwicGF5bG9hZEhhc2giOiJmNmE1ZWNkOTFiY2ExYTFhM2UxY2NhMzE5ZDA0ZmU0NDE3YTNkMjM4Y2NkYWYzOWU5NTJlMDM0Yzk4ZTNmNWIzIn0",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662851,
+            "nanosec": 726480541
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47549,
+        "type": 2,
+        "state": 3,
+        "progress": 1
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:52.253Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUyLjI1MloiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjYwOCwicGF5bG9hZEhhc2giOiJkM2JkNjIyYzg2NTAwNDMyNThjOGU0M2I0MTNiMTBjMjMxY2I5NWUyN2FjOTEwNzc3YTAyOWI5MDYzMmQyNjg0In0",
+      "position": {
+        "latitude": 29.720404670054126,
+        "longitude": 106.81288814492207,
+        "altitude": 500.05200515687466
+      },
+      "speedKmh": 0.2
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:52.932Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUyLjcyNjAzMTY0NloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjczOSwicGF5bG9hZEhhc2giOiJmZTczZDE5ZmMzMzE4OTIxMDczOGVjNjdkMGJiMjVlYWRlOWI0ZTc5NjA0ZWUwZDQ3OGYyMGM0NGI5ZTMxNzYxIn0",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662852,
+            "nanosec": 726031646
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47549,
+        "type": 2,
+        "state": 3,
+        "progress": 1
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:53.300Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUzLjMwMFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjgxNCwicGF5bG9hZEhhc2giOiJjNzVlNDQzN2I0MWI1NTY1NGY0ZGE5N2UwMThjMzFmYjQ4Y2Q5N2I0OWYzYzQ0YjEyNGUxMjg2MjlhZGVjMjI4In0",
+      "position": {
+        "latitude": 29.720404671227456,
+        "longitude": 106.81288817014321,
+        "altitude": 500.050106048584
+      },
+      "speedKmh": 0
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:53.945Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjUzLjcyNTgzMTQzMloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjkzMSwicGF5bG9hZEhhc2giOiI0NzVjNTJkZDc0MDEyNDIzMTk3NjQ3YTcyNjk1YzExNTJjYmNlZjdjMDE1ZDE0NGNmMjY4Y2U1Nzg4ZTg2ZDU1In0",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662853,
+            "nanosec": 725831432
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:54.302Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU0LjMwMVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjEwMDksInBheWxvYWRIYXNoIjoiZGU1MmI5NjIxNTFjZGY0Y2I3N2NhZDBhOWIyYzljYTI3MTM5YjkxODZmNDExNTJmMmFlZWY3MTcwOWY3Mjk0YSJ9",
+      "position": {
+        "latitude": 29.72040376024158,
+        "longitude": 106.81288895528823,
+        "altitude": 500.04999282583594
+      },
+      "speedKmh": 1.3
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:54.942Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU0LjcyNTkwMzg0N1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjExMjgsInBheWxvYWRIYXNoIjoiODM2MDRlMzRjYjA3ZmNjMmI4MzUwNmEwMjNiNjk1NDM3MGUzN2MwOWI5Y2I3ZGE1OTZjOWZkNjk2M2RiYzQyNSJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662854,
+            "nanosec": 725903847
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:55.341Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU1LjM0MVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjEyMDksInBheWxvYWRIYXNoIjoiODU3ZDM4OWI5MWIwMjk5NDg2MThiMWU4NWM3NDQ3NDBkZDU4ZTU2YzdkZTUzN2Y5MzNhN2NkOGM5YjJmYzhjNiJ9",
+      "position": {
+        "latitude": 29.720400295472217,
+        "longitude": 106.81289114212547,
+        "altitude": 500.05014358460903
+      },
+      "speedKmh": 2.2
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:55.945Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU1LjcyNjA4MTM2NVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjEzMjksInBheWxvYWRIYXNoIjoiYTkzZWZkZTJiMWQzOTQ3N2NmYmUwYmU4YzNlNTA3ZDM3ZDQ4N2E5OWM2ZmZhZmQyYmQxZGE4MzBjODdkYzNhYyJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662855,
+            "nanosec": 726081365
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:56.350Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU2LjM1MFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjE0MTYsInBheWxvYWRIYXNoIjoiZDQwZTRiZTE3MWJlZDg5ZGRkZTVmODhlNDRlMjA3ODFlOGRkMmNkN2VkMWE2MjdjOWNlNTYwODQwNGIzMjUzYSJ9",
+      "position": {
+        "latitude": 29.72039514255955,
+        "longitude": 106.81289327372292,
+        "altitude": 500.05026626586914
+      },
+      "speedKmh": 2.5
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:56.924Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU2LjcyOTg5NDgxNFoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjE1MjgsInBheWxvYWRIYXNoIjoiMTQ5ODNjYjViODBkM2VhZWZjODE0M2NhOTEwYzdhYjMxNjEyYTIwMzU0OTRlZWNhZjczOTliNDI2NzhlN2JkMSJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662856,
+            "nanosec": 729894814
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:57.439Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU3LjQzOFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjE2MjUsInBheWxvYWRIYXNoIjoiNzE0OWM5NGI5YzE0ZmY3MjViN2I2ZjdmZTlmYWU1MTQzZTU2MzBkMWNlNGE4MDNjYTg2OTkyODhkZTMxY2UyZSJ9",
+      "position": {
+        "latitude": 29.720391658809877,
+        "longitude": 106.81289410218251,
+        "altitude": 500.0502804554999
+      },
+      "speedKmh": 0.3
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:57.935Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU3LjcyNTk1Mzg4NFoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjE3MjgsInBheWxvYWRIYXNoIjoiZThlYWRjNTE0OWVlYWM4NmRkZjNkOTRjZTRlMzYxMTc5ZmQ2MWI2YTg5MDdiMWIzZjViNzAyYzljMTRmMTlhZSJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662857,
+            "nanosec": 725953884
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 3,
+        "progress": 1
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:58.454Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU4LjQ1M1oiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjE4MjUsInBheWxvYWRIYXNoIjoiNjVmMjBjN2QyNDViMDVhOGE1ODMzYzk3ZDZhODY4OTM2ZGI0NGEyODYzOGZmZGJiNDRiMDAxMGNjNDZjYTlhYSJ9",
+      "position": {
+        "latitude": 29.72039165929301,
+        "longitude": 106.81289411438186,
+        "altitude": 500.0501110814512
+      },
+      "speedKmh": 0
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:58.932Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU4LjcyNjEyMDMwNloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjE5MDcsInBheWxvYWRIYXNoIjoiNTYwZjU3YTU0OGUzNzEzMDZiNmZkY2Y3NTRiYWVmMjg1MjY2ZjE1NDU0ODljMmY4MGY0M2YyYTNiM2ZkMzZlNiJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662858,
+            "nanosec": 726120306
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47550,
+        "type": 2,
+        "state": 3,
+        "progress": 1
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:20:59.531Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU5LjUzMFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjIwMTgsInBheWxvYWRIYXNoIjoiMTlkMTA0MDhiZjQ1NmQwYWMwZmU0ZDYyZGZkZjc1YWJmYTczN2YxMzdhYmE3NzM2NjgxYjdlMzI2Y2ZmODg5OCJ9",
+      "position": {
+        "latitude": 29.720391645972285,
+        "longitude": 106.81289420059979,
+        "altitude": 500.0497346483171
+      },
+      "speedKmh": 0.2
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:20:59.936Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU5LjcyNjI2ODM5M1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjIwOTcsInBheWxvYWRIYXNoIjoiZGFmNTY3MjViYWMxNjg0Yzg5NzAzYTQwN2ViZjY3MWU4OWY3Zjk1Y2I4YTg3ZDQ5NjBmMWY1OTBiMzFiOGFkMCJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662859,
+            "nanosec": 726268393
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:00.548Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAwLjU0OFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjIyMjUsInBheWxvYWRIYXNoIjoiMDBjYTNlMDQwYWQxMDZhMmFjYWQwZTMxMWFkODFmMThlMjljMTVmNDFhZTE5ZDk3MmEwNjkwYWE3ODE5MWZlYyJ9",
+      "position": {
+        "latitude": 29.720392650272267,
+        "longitude": 106.81289684552965,
+        "altitude": 500.04981353506446
+      },
+      "speedKmh": 1.8
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:00.933Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAwLjcyNTkyMzQzNloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjIyOTgsInBheWxvYWRIYXNoIjoiMDlkZjE2Mzk4MzExNjM4YWJjZWJkMzlmN2M2NTBiMWU3YWFlMzhiOWI3M2VmNTQ0OWMyYzUyMWZiMTI0MjU2YyJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662860,
+            "nanosec": 725923436
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:01.549Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAxLjU0OVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjI0MjIsInBheWxvYWRIYXNoIjoiMjJjNzQ0MzU4ZjhkNTVjNmE3YzMxMjg5YTEwYmQxMGRhZGNmMWZkZWVlNDI5ODQ2YTUxY2QwYzNmN2ExYmFhZiJ9",
+      "position": {
+        "latitude": 29.72039505359366,
+        "longitude": 106.81290113476813,
+        "altitude": 500.0501191690564
+      },
+      "speedKmh": 2.3
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:01.931Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAxLjcyNTczNTMwNVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjI0OTUsInBheWxvYWRIYXNoIjoiOTA2OTkyYzdhZTlhNDU5M2Q3OTljM2YwYTMwMzIyZDgyMDk5MjhlZGE4NTE2NGUwZjgzZTZjM2I5N2VjMzkyYSJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662861,
+            "nanosec": 725735305
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 1
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:02.576Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAyLjU3NloiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjI2MjAsInBheWxvYWRIYXNoIjoiNDY1ZWI3OGFlYzUzNTg2ODY1MzM1N2VmM2QyY2NhNzA1M2I5ZGEwNWM4OGRjNmRmMzFiZjE2YmFlNzRlMjEzYiJ9",
+      "position": {
+        "latitude": 29.720396694458735,
+        "longitude": 106.81290853086713,
+        "altitude": 500.0484558083117
+      },
+      "speedKmh": 4.7
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:02.946Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAyLjcyNjQ5OTQ5MVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjI2OTMsInBheWxvYWRIYXNoIjoiNDQyM2QzMzAyNmZhYjE3YmE2MmEwYjI2MTkyY2QxZGNmNWQ5M2MyMTkyMzM5MjY2MjY1MjYxMzBhZTczZWI1NiJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662862,
+            "nanosec": 726499491
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 4
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:03.633Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAzLjYzMloiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjI4MjcsInBheWxvYWRIYXNoIjoiMTQ0N2JmMzNmN2U1MzlmMmRmYzhjMjRkN2QzYTZjOGI0MmRmMTNmNGQ1MTgyNWQwNWMwOWJkZmY4NDdhMDkxZSJ9",
+      "position": {
+        "latitude": 29.720397157785364,
+        "longitude": 106.81292757556847,
+        "altitude": 500.0487507618964
+      },
+      "speedKmh": 9.2
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:03.946Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjAzLjcyNjAwNjY5N1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjI4ODksInBheWxvYWRIYXNoIjoiY2RmZjM0NTMxMjNmMzg5MmM4ZDUzMGJmYjQwNmY4MzRiN2E3ZGNmMmQwMmE2N2I4MTliNGM5MjIyZGU1ODMwMCJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662863,
+            "nanosec": 726006697
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 8
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:04.644Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA0LjY0NFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjMwMzYsInBheWxvYWRIYXNoIjoiYjBkOTExYWE1YzVkNjA5ZWI3YzQzZjU5ZmU0Mzc1ODVjNThmNzk3ZmNiMDBhOWVjNjI3NWJjZGE2MTY0ZWNmNCJ9",
+      "position": {
+        "latitude": 29.720398105903627,
+        "longitude": 106.81295598512541,
+        "altitude": 500.04908172413707
+      },
+      "speedKmh": 12.1
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:04.943Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA0LjcyNjE1MTMwMVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjMwODgsInBheWxvYWRIYXNoIjoiNmYwNjQ3OTk2ZTk4ZGMxZGNkZmQzZTEwMzdlMjA5OTc4ZmViMzk3ZjQ4NmMyY2RjZWM1OTM2YzM2MTNmZDU2NiJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662864,
+            "nanosec": 726151301
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 17
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:05.647Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA1LjY0NloiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjMyMjYsInBheWxvYWRIYXNoIjoiYWQwYzEyMGE2ZjUzMTllMTlhZDAyMWE3NDhjMGQ0MDdmM2Q0MWU3NTI4MjMwZTNhMTIzMTEwMjBiYmM3NzczOCJ9",
+      "position": {
+        "latitude": 29.720399280267188,
+        "longitude": 106.81298768275128,
+        "altitude": 500.049347076565
+      },
+      "speedKmh": 14.3
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:05.918Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA1LjcyNjAxNjcxMloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjMyODgsInBheWxvYWRIYXNoIjoiMDUwNDE5NDU3ZDQyZWUwNTVlN2Y0MDgyOTI0OGM5ZGMxMGNjY2I5NTg1OTlmOTE5MDRiYWRmNDQ1NGFkNGVhYiJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662865,
+            "nanosec": 726016712
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 29
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:06.657Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA2LjY1N1oiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjM0MzQsInBheWxvYWRIYXNoIjoiNTllNzMzMDU5YjQ3ZGNmODA5YzI4NzgwNTE0YWU0NTkwYjNmOTg3NDcxNTQ2NzAwNjE4MTY1ODAzZWYxODZiOCJ9",
+      "position": {
+        "latitude": 29.720400785854416,
+        "longitude": 106.81302731036928,
+        "altitude": 500.0495561212301
+      },
+      "speedKmh": 15.8
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:06.942Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA2LjcyNjEwMDM5OVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjM0ODgsInBheWxvYWRIYXNoIjoiMzdjMGZjZGEwYzY5YzRiMzViNDQ0NTM1NjUwZmNiYmY1MWNkMmMyYWZjN2FmMGFkM2QzYWViOGRjYzZkYTVhYyJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662866,
+            "nanosec": 726100399
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 44
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:07.730Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA3LjczMFoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjM2MzgsInBheWxvYWRIYXNoIjoiMzkwZTM5ZDgxMDIwNGYwMGQ3NzQ0NTkzZTM2MGY4ZGIwYjgzZTYyN2IxNDkxZTdiZmJkMzkzN2U0N2FiYzE3NSJ9",
+      "position": {
+        "latitude": 29.720402426305377,
+        "longitude": 106.81307032474761,
+        "altitude": 500.049683380872
+      },
+      "speedKmh": 17
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:07.934Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA3LjcyNjMwNjI2M1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjM2ODIsInBheWxvYWRIYXNoIjoiMTY3MWQxMWI5MWNhOWQ4Njg0MjZiNGMwYmIxZGRjYWUwN2Y0MjhiODdmNDdkZDFlM2RmMzA1ZGZjYjA0OGJmMCJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662867,
+            "nanosec": 726306263
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 1,
+        "progress": 60
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:08.750Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA4Ljc0OVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjM4NDEsInBheWxvYWRIYXNoIjoiM2Q1N2JlZjg2YzZjNGQ4ZWUzN2Q2MWJjZWM1OTY0ZDdjOWQ3NWZiMzhmMTEzNDc5MTIwYWNmNWVlZTZhNjM3MiJ9",
+      "position": {
+        "latitude": 29.720404170078247,
+        "longitude": 106.8131160105106,
+        "altitude": 500.0500820912421
+      },
+      "speedKmh": 17.7
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:08.931Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA4LjcyNTkxMDYyNVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjM4NzQsInBheWxvYWRIYXNoIjoiN2Q5ZjM4MTcwYTZmMGZjZjlhOGQzZTU5ZDA3Y2Y3NDkxZjAwZjAzMDE3MmFiMzk3Mjc5ZmZkNmYyZjE5NmQwZiJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662868,
+            "nanosec": 725910625
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 4,
+        "progress": 100
+      }
+    },
+    {
+      "topic": "/ugv/gnss",
+      "receivedAt": "2026-09-29T06:21:09.760Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvZ25zcyIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA5Ljc1OVoiLCJ0aW1lQXV0aG9yaXR5IjoiaW5nZXN0IiwiaW5nZXN0U2VxdWVuY2UiOjQwNDEsInBheWxvYWRIYXNoIjoiNjE5ZjY0NGFhZjQwYTA3ZDQ1ZmVhNDZlZmY4MmUwNzI4NDI1OGM1MjM4NDU1MzhhMTE3MGZlYTM0NTA4ZDBiZSJ9",
+      "position": {
+        "latitude": 29.720404920663242,
+        "longitude": 106.8131357356344,
+        "altitude": 500.053135830909
+      },
+      "speedKmh": 0.3
+    },
+    {
+      "topic": "/ugv/mission_state",
+      "receivedAt": "2026-09-29T06:21:09.942Z",
+      "retained": false,
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIxOjA5LjcyNjA2MzE5OVoiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjQwNzUsInBheWxvYWRIYXNoIjoiMWJiZWQ2NGY2ODFiMmY1OWM3Mzk2OWM2OGVlZmM2MGJhMjEyYzkyYjJhZjM5YTkxZDczYWM4NjQ1YmQ5NDE0ZCJ9",
+      "payload": {
+        "header": {
+          "stamp": {
+            "sec": 1790662869,
+            "nanosec": 726063199
+          },
+          "frame_id": ""
+        },
+        "entity_id": "ugv",
+        "id": 47551,
+        "type": 2,
+        "state": 4,
+        "progress": 100
+      }
+    }
+  ],
+  "projectionChecks": [
+    {
+      "missionId": "47549",
+      "result": "committed",
+      "elapsedMs": 100,
+      "at": "2026-09-29T06:20:51.068Z",
+      "observedAt": "2026-09-29T06:20:50.725970322Z",
+      "latestMission": {
+        "id": "47549",
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "missionId": "47550",
+      "result": "committed",
+      "elapsedMs": 79,
+      "at": "2026-09-29T06:20:54.892Z",
+      "observedAt": "2026-09-29T06:20:53.725831432Z",
+      "latestMission": {
+        "id": "47550",
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    },
+    {
+      "missionId": "47551",
+      "result": "committed",
+      "elapsedMs": 78,
+      "at": "2026-09-29T06:21:00.471Z",
+      "observedAt": "2026-09-29T06:20:59.726268393Z",
+      "latestMission": {
+        "id": "47551",
+        "type": 2,
+        "state": 1,
+        "progress": 0
+      }
+    }
+  ],
+  "preflight": {
+    "mission": {
+      "id": "47548",
+      "type": 2,
+      "state": 4,
+      "progress": 100
+    },
+    "position": {
+      "latitude": 29.720404644171886,
+      "longitude": 106.81287262761634,
+      "altitude": 500.0501412935555
+    },
+    "speedKmh": 0,
+    "reconMotionStatus": 1
+  },
+  "execution": {
+    "state": "SUCCEEDED",
+    "result": {
+      "status": "completed",
+      "routeRef": {
+        "id": "route-47551",
+        "kind": "artifact",
+        "revision": 2
+      },
+      "missionId": "47551",
+      "observedAt": "2026-09-29T06:21:10.391Z",
+      "resourceId": "vehicle:qualification-a",
+      "destination": {
+        "latitude": 29.72041222,
+        "longitude": 106.81312856
+      },
+      "endPosition": {
+        "crs": "EPSG:4326",
+        "type": "geodetic",
+        "latitude": 29.720405,
+        "longitude": 106.813136
+      },
+      "missionState": 4,
+      "finalSpeedKmh": 0.014883170542624696,
+      "startPosition": {
+        "crs": "EPSG:4326",
+        "type": "geodetic",
+        "latitude": 29.720392,
+        "longitude": 106.812894
+      },
+      "finalHeadingDeg": 92.19861602783203,
+      "snapshotRevision": "169d040adc29dfafa2e2587acb044ff7cb54bf06a91e4d06f81c3d50ebea07a2",
+      "positionAuthority": {
+        "field": "chassis.position.geodetic",
+        "topic": "status/ugv1",
+        "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMucG9zaXRpb24uZ2VvZGV0aWMiLCJ0b3BpYyI6InN0YXR1cy91Z3YxIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjE6MTAuMzUwWiIsInRpbWVBdXRob3JpdHkiOiJpbmdlc3QiLCJpbmdlc3RTZXF1ZW5jZSI6NDE2MywicGF5bG9hZEhhc2giOiIwNWNhY2M5YjI2NjFlYmE1YWI2YzFiMjM5NjVkYWMyYWMwZThiNzIyM2NlNDE3OGY1Y2NiNDczMGNlODgxYWM1In0",
+        "observedAt": "2026-09-29T06:21:10.350Z",
+        "timeAuthority": "ingest"
+      },
+      "correlationStrength": "STRICT_CORRELATED",
+      "destinationDistanceM": 1.0773684582385257,
+      "observationAuthority": "post_dispatch",
+      "effectivePlanRevision": 3,
+      "observedDisplacementM": 23.41407162376476,
+      "stationaryAtCompletion": true
+    },
+    "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+    "tracks": ["chassis"],
+    "evidence": [
+      {
+        "producer": ["isr.vehicle.ugv.qualification", "ugv-adapter"],
+        "evidenceId": "1GKMf6btXk-oGf8aiLT3YyQdIN2Js5KndbjCtnIM-TA",
+        "observedAt": "2026-09-29T06:21:10.402Z",
+        "payloadRef": {
+          "kind": "structured_content",
+          "jsonPointer": "/status"
+        },
+        "subjectRef": "execution:vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+        "evidenceType": "vehicle.mission.state"
+      }
+    ],
+    "progress": 100,
+    "revision": 351,
+    "arguments": {
+      "mission": {
+        "type": "point",
+        "target": {
+          "latitude": 29.72041222,
+          "longitude": 106.81312856
+        }
+      },
+      "resourceId": "vehicle:qualification-a",
+      "speedLimitKmh": 5,
+      "stopOnObstacle": true
+    },
+    "createdAt": "2026-09-29T06:20:49.382Z",
+    "updatedAt": "2026-09-29T06:21:10.402Z",
+    "providerId": "isr.vehicle.ugv.qualification",
+    "reasonCode": "UGV_DEVICE_TASK_COMPLETED",
+    "resourceId": "vehicle:qualification-a",
+    "terminalAt": "2026-09-29T06:21:10.402Z",
+    "argumentHash": "4836384602cb06efe3de17c0de475edfc7b20bdf74912ec8aaeaf77d9557845e",
+    "deviceContext": {
+      "deviceId": "smpp-bff-611e4469-b627-4fd8-a3a5-2b7911373f53-A",
+      "bindingId": "0271d925-5db3-4fd7-8bba-63df2b56c94f",
+      "providerId": "isr.vehicle.ugv.qualification",
+      "resourceId": "vehicle:qualification-a",
+      "dataScopeKey": "smpp-bff-test-611e4469-b627-4fd8-a3a5-2b7911373f53",
+      "smppServiceKey": "smpp-bff-test-611e4469-b627-4fd8-a3a5-2b7911373f53",
+      "sourceSessionKey": "test-session-611e4469-b627-4fd8-a3a5-2b7911373f53"
+    },
+    "operationName": "vehicle_navigate",
+    "navigationPlan": {
+      "planId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+      "waypoints": [
+        {
+          "latitude": 29.720394754017946,
+          "longitude": 106.81289522095436
+        },
+        {
+          "latitude": 29.720404649900487,
+          "longitude": 106.81291863093197
+        },
+        {
+          "latitude": 29.720404649900487,
+          "longitude": 106.81312856
+        }
+      ],
+      "observedAt": "2026-09-29T06:20:59.072Z",
+      "routeSource": "isr.airport.dashboard.road-planner/v1",
+      "sourceRecordId": "14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712"
+    },
+    "dispatchBaseline": {
+      "mission": {
+        "id": "47550",
+        "state": 3
+      },
+      "position": {
+        "crs": "EPSG:4326",
+        "type": "geodetic",
+        "latitude": 29.720392,
+        "longitude": 106.812894
+      },
+      "speedKmh": 0,
+      "capturedAt": "2026-09-29T06:20:59.073Z",
+      "headingDeg": 59.33159637451172,
+      "snapshotRevision": "c937517256f5963d4e3c58bf493bae5730e724c73db70ae187bb54c8392929d0",
+      "observationAuthorities": [
+        {
+          "field": "chassis.position.geodetic",
+          "topic": "status/ugv1",
+          "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMucG9zaXRpb24uZ2VvZGV0aWMiLCJ0b3BpYyI6InN0YXR1cy91Z3YxIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjA6NTkuMDQ3WiIsInRpbWVBdXRob3JpdHkiOiJpbmdlc3QiLCJpbmdlc3RTZXF1ZW5jZSI6MTkzMywicGF5bG9hZEhhc2giOiJiZWE3ODU5YmVjMjY2ZmIxMjI5YjEwZmE2Y2I1YWQ5NWI4MTAzMzlhYjk1MjI3MjE3YzVmZGRjY2IwYTk2MzZhIn0",
+          "observedAt": "2026-09-29T06:20:59.047Z",
+          "payloadHash": "bea7859bec266fb1229b10fa6cb5ad95b810339ab95227217c5fddccb0a9636a",
+          "timeAuthority": "ingest",
+          "ingestSequence": 1933
+        },
+        {
+          "field": "chassis.position.local",
+          "topic": "/ugv/nav_state",
+          "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMucG9zaXRpb24ubG9jYWwiLCJ0b3BpYyI6Ii91Z3YvbmF2X3N0YXRlIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjA6NTguNzI2Mzc1NjQ2WiIsInRpbWVBdXRob3JpdHkiOiJzb3VyY2UiLCJpbmdlc3RTZXF1ZW5jZSI6MTkwOCwicGF5bG9hZEhhc2giOiIyMjY3NjQwY2ExN2U0Y2RlODk2ODZhMmQ1YzRiOWZmZTgxOTQ5OGVkYmIzNDE4NjdhYzQxZDQ2YmM2MTA2OWVkIn0",
+          "observedAt": "2026-09-29T06:20:58.726375646Z",
+          "payloadHash": "2267640ca17e4cde89686a2d5c4b9ffe819498edbb341867ac41d46bc61069ed",
+          "timeAuthority": "source",
+          "ingestSequence": 1908
+        },
+        {
+          "field": "chassis.speed",
+          "topic": "status/ugv1",
+          "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMuc3BlZWQiLCJ0b3BpYyI6InN0YXR1cy91Z3YxIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjA6NTkuMDQ3WiIsInRpbWVBdXRob3JpdHkiOiJpbmdlc3QiLCJpbmdlc3RTZXF1ZW5jZSI6MTkzMywicGF5bG9hZEhhc2giOiI1ZmVjZWI2NmZmYzg2ZjM4ZDk1Mjc4NmM2ZDY5NmM3OWMyZGJjMjM5ZGQ0ZTkxYjQ2NzI5ZDczYTI3ZmI1N2U5In0",
+          "observedAt": "2026-09-29T06:20:59.047Z",
+          "payloadHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "timeAuthority": "ingest",
+          "ingestSequence": 1933
+        },
+        {
+          "field": "chassis.heading",
+          "topic": "/ugv/status",
+          "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMuaGVhZGluZyIsInRvcGljIjoiL3Vndi9zdGF0dXMiLCJvYnNlcnZlZEF0IjoiMjAyNi0wOS0yOVQwNjoyMDo1OC44ODIxMzI0NjlaIiwidGltZUF1dGhvcml0eSI6InNvdXJjZSIsImluZ2VzdFNlcXVlbmNlIjoxOTM2LCJwYXlsb2FkSGFzaCI6ImE0OGUxYmY2M2QxNGMxNDBhOGY5Nzg1ZGE2MzkzZjFhN2RkNWM4ZWE1ZDJiODNkZTlkNTNmOGNjZTc1ZDZjOWYifQ",
+          "observedAt": "2026-09-29T06:20:58.882132469Z",
+          "payloadHash": "a48e1bf63d14c140a8f9785da6393f1a7dd5c8ea5d2b83de9d53f8cce75d6c9f",
+          "timeAuthority": "source",
+          "ingestSequence": 1936
+        },
+        {
+          "field": "chassis.mission",
+          "topic": "/ugv/mission_state",
+          "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMubWlzc2lvbiIsInRvcGljIjoiL3Vndi9taXNzaW9uX3N0YXRlIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjA6NTguNzI2MTIwMzA2WiIsInRpbWVBdXRob3JpdHkiOiJzb3VyY2UiLCJpbmdlc3RTZXF1ZW5jZSI6MTkwNywicGF5bG9hZEhhc2giOiI0OGNhY2E3MjMzNTExYWI0OTY5MjhiYzBlZmEyMDE3ZmQxYTc2ZTE1ODVkZTIxN2M3YmQxY2QyNWMxNGQ2YjZkIn0",
+          "observedAt": "2026-09-29T06:20:58.726120306Z",
+          "payloadHash": "48caca7233511ab496928bc0efa2017fd1a76e1585de217c7bd1cd25c14d6b6d",
+          "timeAuthority": "source",
+          "ingestSequence": 1907
+        }
+      ]
+    },
+    "executionContext": {
+      "simulationId": "smpp-bff-test-611e4469-b627-4fd8-a3a5-2b7911373f53",
+      "correlationId": "7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "executionMode": "SIMULATION",
+      "authorizationContextHash": "5e07f8dec88b992617f4f793c2ca307a6825ebeef5c0820cc00ceb353a1fe836"
+    },
+    "observationCursors": {
+      "track": "[[\"/ugv/mission_state\",\"oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU4LjcyNjEyMDMwNloiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjE5MDcsInBheWxvYWRIYXNoIjoiNTYwZjU3YTU0OGUzNzEzMDZiNmZkY2Y3NTRiYWVmMjg1MjY2ZjE1NDU0ODljMmY4MGY0M2YyYTNiM2ZkMzZlNiJ9\"],[\"/ugv/status\",\"oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3Yvc3RhdHVzIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjA6NTguODgyMTMyNDY5WiIsInRpbWVBdXRob3JpdHkiOiJzb3VyY2UiLCJpbmdlc3RTZXF1ZW5jZSI6MTkzNiwicGF5bG9hZEhhc2giOiIyZGViOTYxMTVhN2IxN2RjZDAwMWJjNTVlZDI3M2ViODhhMmQxNDkzMzEyNzYzZGI4NzhiZjA0MmM1MDljY2I4In0\"]]",
+      "trackActive": "[[\"/ugv/mission_state\",\"oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3YvbWlzc2lvbl9zdGF0ZSIsIm9ic2VydmVkQXQiOiIyMDI2LTA5LTI5VDA2OjIwOjU5LjcyNjI2ODM5M1oiLCJ0aW1lQXV0aG9yaXR5Ijoic291cmNlIiwiaW5nZXN0U2VxdWVuY2UiOjIwOTcsInBheWxvYWRIYXNoIjoiZGFmNTY3MjViYWMxNjg0Yzg5NzAzYTQwN2ViZjY3MWU4OWY3Zjk1Y2I4YTg3ZDQ5NjBmMWY1OTBiMzFiOGFkMCJ9\"],[\"/ugv/status\",\"oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoidG9waWMiLCJ0b3BpYyI6Ii91Z3Yvc3RhdHVzIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDY6MjE6MDAuMjgyMTIyNDYyWiIsInRpbWVBdXRob3JpdHkiOiJzb3VyY2UiLCJpbmdlc3RTZXF1ZW5jZSI6MjIwOSwicGF5bG9hZEhhc2giOiI4NGRlNWUzMWNlMWRjNWE4MGM3NDJkMTZkYjE4ZDczM2JiYmZkNTUyNTMzZTdlZWIzNzJmMzc5NDUyMzRkYWJjIn0\"]]"
+    },
+    "effectiveNavigation": {
+      "planId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+      "routeRef": {
+        "id": "route-47551",
+        "kind": "artifact",
+        "revision": 2
+      },
+      "adoptedAt": "2026-09-29T06:20:59.726268393Z",
+      "commandId": "adjust-2-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "missionId": "47551",
+      "requested": {
+        "density": "adaptive",
+        "waypoints": [
+          {
+            "latitude": 29.72041222,
+            "longitude": 106.81312856
+          }
+        ]
+      },
+      "destination": {
+        "latitude": 29.72041222,
+        "longitude": 106.81312856
+      },
+      "planRevision": 3
+    },
+    "externalExecutionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+    "downstreamMissionIds": ["47549", "47550", "47551"],
+    "missionAuthorityVersion": 1,
+    "stationaryCandidateSince": "2026-09-29T06:21:09.889Z",
+    "activeObservationDeadline": "2026-09-29T06:21:30.470Z",
+    "lastStationarySpeedCursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMuc3BlZWQiLCJ0b3BpYyI6Ii91Z3Yvc3BlZWQiLCJvYnNlcnZlZEF0IjoiMjAyNi0wOS0yOVQwNjoyMToxMC4zOTFaIiwidGltZUF1dGhvcml0eSI6ImluZ2VzdCIsImluZ2VzdFNlcXVlbmNlIjo0MTY5LCJwYXlsb2FkSGFzaCI6IjU0ODY5MzI3OTAyZWE1ZjAwODQ1OTRjMjc1ZmU5YTFlMDYzMjNhYjg0ZGQ0ZTc4YjA4MDg4MzFmMTljYTM0YWEifQ",
+    "lastNonStationaryObservedAt": "2026-09-29T06:21:09.835Z",
+    "taskBusinessContextExpected": true,
+    "terminalObservationDeadline": "2026-09-29T06:50:59.726Z",
+    "physicalConfirmationDeadline": "2026-09-29T06:21:38.725Z",
+    "consecutiveStationaryObservations": 15
+  },
+  "context": {
+    "schemaVersion": "sdar.task-business-context/1.0-rc2",
+    "identity": {
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+      "providerId": "isr.vehicle.ugv.qualification",
+      "resourceId": "vehicle:qualification-a",
+      "operationName": "vehicle_navigate"
+    },
+    "contextRevision": 364,
+    "effectivePlanRevision": 3,
+    "phase": {
+      "code": "execution.succeeded",
+      "since": "2026-09-29T06:21:10.402Z",
+      "reasonCode": "UGV_DEVICE_TASK_COMPLETED"
+    },
+    "summary": {
+      "status": "finalized",
+      "resultCode": "UGV_DEVICE_TASK_COMPLETED",
+      "properties": {
+        "executionState": "SUCCEEDED",
+        "trajectoryLast": {
+          "position": {
+            "latitude": 29.720404,
+            "longitude": 106.813122
+          },
+          "missionId": "47551",
+          "segmentId": "trajectory-5cc245c599762dd07990a90a03a9b89c",
+          "cursorHash": "ae155e2277eac31b10212505973ecfd6d397f77f52c12840ef23b163b82a93b2",
+          "observedAt": "2026-09-29T06:21:08.930Z"
+        },
+        "unresolvedRefs": [
+          {
+            "id": "navigation-adjust-3",
+            "kind": "intervention",
+            "revision": 1
+          }
+        ],
+        "navigationEffective": {
+          "planId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+          "routeRef": {
+            "id": "route-47551",
+            "kind": "artifact",
+            "revision": 2
+          },
+          "adoptedAt": "2026-09-29T06:20:59.726268393Z",
+          "commandId": "adjust-2-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "missionId": "47551",
+          "requested": {
+            "density": "adaptive",
+            "waypoints": [
+              {
+                "latitude": 29.72041222,
+                "longitude": 106.81312856
+              }
+            ]
+          },
+          "destination": {
+            "latitude": 29.72041222,
+            "longitude": 106.81312856
+          },
+          "planRevision": 3
+        }
+      }
+    },
+    "activeRefs": {},
+    "artifactRefs": [
+      {
+        "kind": "artifact",
+        "id": "navigation-requested-destination",
+        "revision": 1
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47549",
+        "revision": 1
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47549",
+        "revision": 2
+      },
+      {
+        "kind": "artifact",
+        "id": "trajectory-d7e318246b891c743fd92f3d674b1638",
+        "revision": 57
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47550",
+        "revision": 1
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47550",
+        "revision": 2
+      },
+      {
+        "kind": "artifact",
+        "id": "trajectory-badb94947e2e782d08049e06562c301a",
+        "revision": 29
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47551",
+        "revision": 1
+      },
+      {
+        "kind": "artifact",
+        "id": "route-47551",
+        "revision": 2
+      },
+      {
+        "kind": "artifact",
+        "id": "trajectory-5cc245c599762dd07990a90a03a9b89c",
+        "revision": 188
+      }
+    ],
+    "actionRefs": [],
+    "requiredInputRefs": [],
+    "interventionRefs": [
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-1",
+        "revision": 2
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-1",
+        "revision": 3
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-1",
+        "revision": 4
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-2",
+        "revision": 2
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-2",
+        "revision": 3
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-2",
+        "revision": 4
+      },
+      {
+        "kind": "intervention",
+        "id": "navigation-adjust-3",
+        "revision": 1
+      }
+    ],
+    "updatedAt": "2026-09-29T06:21:10.402Z",
+    "finalizedAt": "2026-09-29T06:21:10.402Z"
+  },
+  "objects": [
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "navigation-requested-destination",
+        "artifactType": "navigation.destination",
+        "revision": 1,
+        "semantics": "requested",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "provider",
+          "sourceRecordRef": "4836384602cb06efe3de17c0de475edfc7b20bdf74912ec8aaeaf77d9557845e",
+          "method": "admitted_task_arguments"
+        },
+        "createdAt": "2026-09-29T06:20:49.382Z",
+        "updatedAt": "2026-09-29T06:20:49.382Z",
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [106.81312856, 29.72041222]
+          }
+        },
+        "properties": {
+          "intent": "requested"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47549",
+        "artifactType": "navigation.route",
+        "revision": 1,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "1d7bebc751c1cf64163c91c558537e6155c6f67778e79fc3f51292d6dbfb0055",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:49.788Z",
+        "updatedAt": "2026-09-29T06:20:49.788Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47549"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81287262761634, 29.720404649900487],
+              [106.81312856, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "candidate",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-1d7bebc751c1cf64163c91c558537e6155c6f67778e79fc3f51292d6dbfb0055"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47549",
+        "artifactType": "navigation.route",
+        "revision": 2,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "1d7bebc751c1cf64163c91c558537e6155c6f67778e79fc3f51292d6dbfb0055",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:49.788Z",
+        "updatedAt": "2026-09-29T06:20:50.725970322Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47549"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81287262761634, 29.720404649900487],
+              [106.81312856, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "adopted",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-1d7bebc751c1cf64163c91c558537e6155c6f67778e79fc3f51292d6dbfb0055"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "trajectory-d7e318246b891c743fd92f3d674b1638",
+        "artifactType": "navigation.trajectory",
+        "revision": 57,
+        "semantics": "observed",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device",
+          "sourceRecordRef": "status/ugv1",
+          "sourceRevision": "dae6c78b3e27b528d38b0511800c388508fa333a1663ab72304c6cd301e91733",
+          "method": "mqtt_navigation_position"
+        },
+        "createdAt": "2026-09-29T06:20:49.942Z",
+        "updatedAt": "2026-09-29T06:20:51.953Z",
+        "relations": [
+          {
+            "relationType": "observed_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47549"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.812873, 29.720405],
+              [106.81287262802755, 29.720404644171886, 500.05008529499173],
+              [106.812873, 29.720405],
+              [106.81287262556026, 29.720404644171886, 500.0500834658742],
+              [106.812873, 29.720405],
+              [106.81287262706805, 29.720404644240904, 500.0500717163086],
+              [106.812873, 29.720405],
+              [106.81287263611476, 29.720404644171886, 500.050019223243],
+              [106.812873, 29.720405],
+              [106.81287268450097, 29.72040464403385, 500.0497767627239],
+              [106.812873, 29.720405],
+              [106.81287274207097, 29.720404643895808, 500.04961547628045],
+              [106.812873, 29.720405],
+              [106.81287281485588, 29.720404643895808, 500.04947570711374],
+              [106.812873, 29.720405],
+              [106.81287290189623, 29.720404643688752, 500.04929641634226],
+              [106.812873, 29.720405],
+              [106.81287302402684, 29.720404643412675, 500.0491358935833],
+              [106.812873, 29.720405],
+              [106.81287315821976, 29.720404643274634, 500.0490142814815],
+              [106.812873, 29.720405],
+              [106.81287332160888, 29.720404642998556, 500.0489373765886],
+              [106.812873, 29.720405],
+              [106.81287349527835, 29.7204046427915, 500.0488046258688],
+              [106.81287372925924, 29.72040464272248, 500.0486944578588],
+              [106.812874, 29.720405],
+              [106.81287397132735, 29.72040464272248, 500.0485389716923],
+              [106.812874, 29.720405],
+              [106.81287424738916, 29.720404642515422, 500.04849883913994],
+              [106.812874, 29.720405],
+              [106.81287456813625, 29.720404642377385, 500.04835433885455],
+              [106.812875, 29.720405],
+              [106.81287489902662, 29.720404642308363, 500.04831878468394],
+              [106.812875, 29.720405],
+              [106.81287525787957, 29.720404642377385, 500.0482707209885],
+              [106.812875, 29.720405],
+              [106.81287564332438, 29.720404642446404, 500.0483796671033],
+              [106.812876, 29.720405],
+              [106.81287607276909, 29.720404642377385, 500.0483636446297],
+              [106.812876, 29.720405],
+              [106.81287654196451, 29.72040464265346, 500.0483267195523],
+              [106.812877, 29.720405],
+              [106.81287751448615, 29.72040464265346, 500.048362120986],
+              [106.812878, 29.720405],
+              [106.81287805057242, 29.720404642929537, 500.048408202827],
+              [106.81287862092655, 29.720404643067578, 500.04841705039144],
+              [106.812879, 29.720405],
+              [106.81287920046447, 29.720404643136597, 500.04841705039144],
+              [106.812879, 29.720405],
+              [106.81288746436253, 29.720404647967946, 500.0488450601697],
+              [106.812887, 29.720405],
+              [106.81288802539581, 29.720404659149075, 500.0505262762308],
+              [106.812888, 29.720405],
+              [106.81288811339566, 29.72040466964001, 500.05459121614695],
+              [106.812888, 29.720405],
+              [106.81288807967609, 29.72040466991609, 500.0572503656149],
+              [106.812888, 29.720405]
+            ]
+          }
+        },
+        "properties": {
+          "sampleCount": 57
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47550",
+        "artifactType": "navigation.route",
+        "revision": 1,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "46e3ef9913e276ba96b2746593d7e6f465e7a534507ce87d3a978c4f0c4eda20",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:53.274Z",
+        "updatedAt": "2026-09-29T06:20:53.274Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47550"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81288817192514, 29.720404649900487],
+              [106.81261465960472, 29.720404649900487],
+              [106.81234114728429, 29.720404649900487],
+              [106.81206763496387, 29.720404649900487],
+              [106.81179412264343, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "candidate",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-46e3ef9913e276ba96b2746593d7e6f465e7a534507ce87d3a978c4f0c4eda20"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47550",
+        "artifactType": "navigation.route",
+        "revision": 2,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "46e3ef9913e276ba96b2746593d7e6f465e7a534507ce87d3a978c4f0c4eda20",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:53.274Z",
+        "updatedAt": "2026-09-29T06:20:53.725831432Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47550"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81288817192514, 29.720404649900487],
+              [106.81261465960472, 29.720404649900487],
+              [106.81234114728429, 29.720404649900487],
+              [106.81206763496387, 29.720404649900487],
+              [106.81179412264343, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "adopted",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-46e3ef9913e276ba96b2746593d7e6f465e7a534507ce87d3a978c4f0c4eda20"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "trajectory-badb94947e2e782d08049e06562c301a",
+        "artifactType": "navigation.trajectory",
+        "revision": 29,
+        "semantics": "observed",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device",
+          "sourceRecordRef": "/ugv/gnss",
+          "sourceRevision": "3f39b5ff8a88e967e66d289c3bf8179b75dd6f7b1d74ec70d30ba8ea83e5fee6",
+          "method": "mqtt_navigation_position"
+        },
+        "createdAt": "2026-09-29T06:20:53.946Z",
+        "updatedAt": "2026-09-29T06:20:56.784Z",
+        "relations": [
+          {
+            "relationType": "observed_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47550"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.812888, 29.720404],
+              [106.81289, 29.720403],
+              [106.81288977017775, 29.7204025922278, 500.0500709526241],
+              [106.81289, 29.720403],
+              [106.81288987956073, 29.72040242299245, 500.05012847855687],
+              [106.81289, 29.720402],
+              [106.81288998921787, 29.720402256241798, 500.0501062013209],
+              [106.81289, 29.720402],
+              [106.81289009928621, 29.720402083348425, 500.05011565983295],
+              [106.81289, 29.720402],
+              [106.81289021565982, 29.720401904243317, 500.05007568374276],
+              [106.81289, 29.720402],
+              [106.81289033737923, 29.72040170809044, 500.05008590593934],
+              [106.81289, 29.720402],
+              [106.81289044785879, 29.720401525327304, 500.0500825494528],
+              [106.812892, 29.720399],
+              [106.81289205803661, 29.720398437127297, 500.05018554627895],
+              [106.812892, 29.720398],
+              [106.81289216385574, 29.720398190452283, 500.0502160638571],
+              [106.812892, 29.720398],
+              [106.81289226405494, 29.72039795564859, 500.0502288788557],
+              [106.812892, 29.720398],
+              [106.81289236685849, 29.720397699517928, 500.0502749606967],
+              [106.812892, 29.720398],
+              [106.81289245897048, 29.720397469752648, 500.05028976500034],
+              [106.812892, 29.720397],
+              [106.812894, 29.720394],
+              [106.81289377992763, 29.72039322768781, 500.0502586364746],
+              [106.81289384147269, 29.72039295285292, 500.05027114599943]
+            ]
+          }
+        },
+        "properties": {
+          "sampleCount": 29
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47551",
+        "artifactType": "navigation.route",
+        "revision": 1,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:59.072Z",
+        "updatedAt": "2026-09-29T06:20:59.072Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47551"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81289522095436, 29.720394754017946],
+              [106.81291863093197, 29.720404649900487],
+              [106.81312856, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "candidate",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "route-47551",
+        "artifactType": "navigation.route",
+        "revision": 2,
+        "semantics": "planned",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device_planner",
+          "sourceRecordRef": "14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712",
+          "sourceRevision": "1",
+          "method": "isr.airport.dashboard.road-planner/v1"
+        },
+        "createdAt": "2026-09-29T06:20:59.072Z",
+        "updatedAt": "2026-09-29T06:20:59.726268393Z",
+        "relations": [
+          {
+            "relationType": "planned_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47551"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.81289522095436, 29.720394754017946],
+              [106.81291863093197, 29.720404649900487],
+              [106.81312856, 29.720404649900487]
+            ]
+          }
+        },
+        "properties": {
+          "adoption": "adopted",
+          "purpose": "navigation",
+          "routeSource": "isr.airport.dashboard.road-planner/v1",
+          "routePlanId": "road-14508aa4f8240db1505d44ec1c62972376f03e52816997222b33e389c531b712"
+        }
+      }
+    },
+    {
+      "kind": "artifact",
+      "value": {
+        "schemaVersion": "sdar.task-artifact/1.0-rc2",
+        "artifactId": "trajectory-5cc245c599762dd07990a90a03a9b89c",
+        "artifactType": "navigation.trajectory",
+        "revision": 188,
+        "semantics": "observed",
+        "lifecycle": "active",
+        "identity": {
+          "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+          "executionId": "vehicle:qualification-a:chassis:522d4b37-fc33-45c9-a33c-5d9c2cff80b5",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_navigate"
+        },
+        "source": {
+          "producer": "device",
+          "sourceRecordRef": "status/ugv1",
+          "sourceRevision": "ae155e2277eac31b10212505973ecfd6d397f77f52c12840ef23b163b82a93b2",
+          "method": "mqtt_navigation_position"
+        },
+        "createdAt": "2026-09-29T06:20:59.937Z",
+        "updatedAt": "2026-09-29T06:21:08.930Z",
+        "relations": [
+          {
+            "relationType": "observed_for_mission",
+            "target": {
+              "externalType": "ugv.mission",
+              "externalId": "47551"
+            }
+          }
+        ],
+        "availability": "available",
+        "content": {
+          "kind": "geojson",
+          "crs": "OGC:CRS84",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [106.812895, 29.720392],
+              [106.81289490871067, 29.720391856274123, 500.04953521490097],
+              [106.812895, 29.720392],
+              [106.81289501946436, 29.720391897133553, 500.04953887686133],
+              [106.812895, 29.720392],
+              [106.81289515845478, 29.720391947931766, 500.0495666489005],
+              [106.812895, 29.720392],
+              [106.81289529977539, 29.72039200252604, 500.0495431497693],
+              [106.812895, 29.720392],
+              [106.81289546056016, 29.720392066299883, 500.0495426915586],
+              [106.812895, 29.720392],
+              [106.81289560585584, 29.720392123102776, 500.0495541356504],
+              [106.81289768002038, 29.720393040093327, 500.0498666353524],
+              [106.812898, 29.720393],
+              [106.81289809068632, 29.720393250119088, 500.0499607846141],
+              [106.812898, 29.720393],
+              [106.81289831424978, 29.720393364760163, 500.04997131228447],
+              [106.812898, 29.720393],
+              [106.81289851615597, 29.720393474569885, 500.0500595085323],
+              [106.812899, 29.720393],
+              [106.81289872752008, 29.720393586450186, 500.05008025839925],
+              [106.812899, 29.720394],
+              [106.81289894560068, 29.720393702264587, 500.0500883460045],
+              [106.812899, 29.720394],
+              [106.81289916395544, 29.72039382808679, 500.0500961281359],
+              [106.81289938066533, 29.720393948663524, 500.0500373840332],
+              [106.812899, 29.720394],
+              [106.81289961176772, 29.720394082008834, 500.0499891638756],
+              [106.8129, 29.720394],
+              [106.81289983135612, 29.720394212593366, 500.05004653707147],
+              [106.8129, 29.720394],
+              [106.81290005135573, 29.720394348285332, 500.0500964336097],
+              [106.8129, 29.720394],
+              [106.81290026285691, 29.720394483011024, 500.0501234419644],
+              [106.8129, 29.720394],
+              [106.8129020044862, 29.72039566379338, 500.05008636415005],
+              [106.812902, 29.720396],
+              [106.81290245188728, 29.720395999503303, 500.05009246617556],
+              [106.812902, 29.720396],
+              [106.81290266804889, 29.720396168531593, 500.0501292422414],
+              [106.812903, 29.720396],
+              [106.81290289037872, 29.72039633700773, 500.0501075722277],
+              [106.812903, 29.720396],
+              [106.81290315232218, 29.720396467454226, 500.0498114004731],
+              [106.812903, 29.720396],
+              [106.81290347060198, 29.720396541235868, 500.0494108572602],
+              [106.812903, 29.720397],
+              [106.81290386481935, 29.72039656905065, 500.04891876131296],
+              [106.81290428316129, 29.720396586995673, 500.048554379493],
+              [106.812904, 29.720397],
+              [106.81290473111065, 29.720396603767362, 500.0482984930277],
+              [106.812905, 29.720397],
+              [106.81290518865501, 29.72039661902063, 500.0482171624899],
+              [106.81291, 29.720397],
+              [106.81291056706289, 29.720396731522108, 500.04844116047025],
+              [106.812911, 29.720397],
+              [106.81291131766591, 29.720396744773815, 500.0484497062862],
+              [106.812911, 29.720397],
+              [106.81291207525958, 29.7203967600961, 500.0484367348254],
+              [106.812912, 29.720397],
+              [106.81291286890303, 29.72039677603956, 500.0484799183905],
+              [106.812913, 29.720397],
+              [106.81291364842812, 29.720396792535176, 500.0484793074429],
+              [106.812914, 29.720397],
+              [106.8129144893612, 29.720396810549214, 500.0485073849559],
+              [106.812914, 29.720397],
+              [106.812915, 29.720397],
+              [106.81291529026943, 29.720396828563256, 500.04849288985133],
+              [106.81291622961979, 29.720396850649436, 500.0484223924577],
+              [106.812916, 29.720397],
+              [106.812917, 29.720397],
+              [106.81291715622251, 29.720396872528557, 500.0484153740108],
+              [106.812918095847, 29.720396895857082, 500.0484436042607],
+              [106.812918, 29.720397],
+              [106.812919, 29.720397],
+              [106.812931, 29.720397],
+              [106.81293233852573, 29.720397302725917, 500.0488496385515],
+              [106.812932, 29.720397],
+              [106.81293357285375, 29.72039734130771, 500.0488745123148],
+              [106.812934, 29.720397],
+              [106.81293480060233, 29.72039738037264, 500.0488801561296],
+              [106.812935, 29.720397],
+              [106.81293610716699, 29.720397422129324, 500.04891891404986],
+              [106.812936, 29.720397],
+              [106.81293733847944, 29.720397462160523, 500.04888946563005],
+              [106.812937, 29.720397],
+              [106.81293874318723, 29.72039750826542, 500.0488974004984],
+              [106.812939, 29.720398],
+              [106.81294005920981, 29.720397551816607, 500.0488807670772],
+              [106.81294145158117, 29.7203975982666, 500.04885452240705],
+              [106.812941, 29.720398],
+              [106.81294283175316, 29.720397644923654, 500.04884124547243],
+              [106.812943, 29.720398],
+              [106.812956, 29.720398],
+              [106.81295751415696, 29.720398160842997, 500.0490824878216],
+              [106.812958, 29.720398],
+              [106.81295908759965, 29.72039821785295, 500.0491484068334],
+              [106.812959, 29.720398],
+              [106.81296062334769, 29.720398273689568, 500.04914352297783],
+              [106.812961, 29.720398],
+              [106.81296222406759, 29.720398332010888, 500.049107208848],
+              [106.812962, 29.720398],
+              [106.812964, 29.720398],
+              [106.81296540179402, 29.720398448170386, 500.04919067397714],
+              [106.812965, 29.720398],
+              [106.81296702293756, 29.720398508010128, 500.04924987629056],
+              [106.812967, 29.720399],
+              [106.81296873523358, 29.720398571024756, 500.04924438521266],
+              [106.812969, 29.720399],
+              [106.81297, 29.720399],
+              [106.81297030675726, 29.720398629208034, 500.04920883104205],
+              [106.8129720597635, 29.720398694224226, 500.0491998270154],
+              [106.812972, 29.720399],
+              [106.812989, 29.720399],
+              [106.81299120918737, 29.720399413336416, 500.0493991076946],
+              [106.81299312489737, 29.72039948580669, 500.0494142137468],
+              [106.812993, 29.720399],
+              [106.812995, 29.7204],
+              [106.81299491875087, 29.720399553721695, 500.04942916706204],
+              [106.81299673796259, 29.720399622741002, 500.0494100935757],
+              [106.812997, 29.7204],
+              [106.8129985346946, 29.720399690932084, 500.0494210794568],
+              [106.812999, 29.7204],
+              [106.81300047973787, 29.720399764506666, 500.0494256578386],
+              [106.813, 29.7204],
+              [106.81300229305552, 29.72039983318088, 500.04944106936455],
+              [106.813002, 29.7204],
+              [106.81300415448523, 29.720399903994693, 500.04944076389074],
+              [106.813004, 29.7204],
+              [106.81300606347872, 29.720399976464968, 500.0494276434183],
+              [106.813006, 29.7204],
+              [106.81300790983057, 29.72040004651957, 500.04943649098277],
+              [106.813008, 29.7204],
+              [106.81301, 29.7204],
+              [106.81300977427586, 29.720400117471417, 500.0494679249823],
+              [106.813027, 29.720401],
+              [106.81302935108839, 29.72040086357016, 500.04954360798],
+              [106.813029, 29.720401],
+              [106.81303129613167, 29.72040093783494, 500.04952331259847],
+              [106.813031, 29.720401],
+              [106.81303332588506, 29.720401014998526, 500.04952743276954],
+              [106.813033, 29.720401],
+              [106.81303530917125, 29.72040109071271, 500.04954681172967],
+              [106.813035, 29.720401],
+              [106.81303735674393, 29.720401168911586, 500.0495851114392],
+              [106.813037, 29.720401],
+              [106.81303933495849, 29.720401244487732, 500.04956329241395],
+              [106.813039, 29.720401],
+              [106.81304138965888, 29.72040132282465, 500.0495941154659],
+              [106.813041, 29.720401],
+              [106.81304349384206, 29.72040140288705, 500.04962097108364],
+              [106.813043, 29.720401],
+              [106.8130454419009, 29.720401477082806, 500.04960845783353],
+              [106.813045, 29.720401],
+              [106.81304754334265, 29.720401557214224, 500.0496298223734],
+              [106.813048, 29.720402],
+              [106.81304951497776, 29.72040163258331, 500.0496354661882],
+              [106.813068, 29.720402],
+              [106.81307032474761, 29.720402426305377, 500.049683380872],
+              [106.81307, 29.720402],
+              [106.81307265030111, 29.720402515064208, 500.04969695955515],
+              [106.813073, 29.720403],
+              [106.81307475311357, 29.720402595402685, 500.04967895522714],
+              [106.813075, 29.720403],
+              [106.81307681946504, 29.72040267422274, 500.0496488958597],
+              [106.813077, 29.720403],
+              [106.8130790555109, 29.720402759461585, 500.04969085752964],
+              [106.813079, 29.720403],
+              [106.81308109801193, 29.72040283731537, 500.04970245435834],
+              [106.813081, 29.720403],
+              [106.81308325085547, 29.720402919379328, 500.0497000105679],
+              [106.813083, 29.720403],
+              [106.81308536175514, 29.720403000062902, 500.049716796726],
+              [106.813085, 29.720403],
+              [106.81308755023723, 29.720403083507247, 500.04974273592234],
+              [106.81308978066316, 29.72040316860806, 500.04973892122507],
+              [106.81309, 29.720403],
+              [106.81309193282134, 29.720403250741036, 500.0497294589877],
+              [106.813092, 29.720403],
+              [106.8130941041695, 29.720403333840284, 500.0497357174754],
+              [106.8131160105106, 29.720404170078247, 500.0500820912421],
+              [106.813116, 29.720404],
+              [106.81311804588393, 29.720404247724968, 500.0505963116884],
+              [106.813118, 29.720404],
+              [106.81312015883967, 29.72040432847756, 500.0513693243265],
+              [106.81312, 29.720404],
+              [106.81312209442501, 29.72040440253528, 500.0521945171058],
+              [106.813122, 29.720404]
+            ]
+          }
+        },
+        "properties": {
+          "sampleCount": 188
+        }
+      }
+    }
+  ],
+  "mutationJournal": [
+    {
+      "phase": "PRIMARY",
+      "state": "ACCEPTED",
+      "stepId": "start:01:primary",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_path_follow_mission",
+      "resultHash": "cbb727898fb5387b3db24eaca55eccfcfa230357bc7b7ef2f00d40bab767c38b",
+      "completedAt": "2026-09-29T06:20:49.832Z",
+      "argumentHash": "43c13aa3284da660da71e1df04fd282f31272607c14c3296503c26da381274d8",
+      "dispatchedAt": "2026-09-29T06:20:49.797Z",
+      "externalMissionId": "47549",
+      "intentPersistedAt": "2026-09-29T06:20:49.795Z"
+    },
+    {
+      "phase": "FOLLOWUP",
+      "state": "ACCEPTED",
+      "stepId": "start:02:followup",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_mission_control",
+      "resultHash": "90c1f4678bfb4d5e81a1c8d93664acf1b98c5b43079b0432733fbd048b7d4d16",
+      "completedAt": "2026-09-29T06:20:49.855Z",
+      "argumentHash": "d0a1de206086d6614b09ea48f363650bef466a4aae97f4f375231556a3e8bccb",
+      "dispatchedAt": "2026-09-29T06:20:49.842Z",
+      "externalMissionId": "47549",
+      "intentPersistedAt": "2026-09-29T06:20:49.841Z"
+    },
+    {
+      "phase": "CANCEL",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:89d3d1ac9b8bea805ffb71bd30e9f3ca5c1924870c99aacbbfb601d5e600d374:stop",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_mission_control",
+      "resultHash": "3fbc3351e14f4835f72508e7018f7bb30d5eef5283b258d05e2498f749862a7e",
+      "completedAt": "2026-09-29T06:20:51.689Z",
+      "argumentHash": "6e45b6371ab3d92111747fbd50930bb68e29400ca84eede8f8946fb0ee0c9533",
+      "dispatchedAt": "2026-09-29T06:20:51.669Z",
+      "externalMissionId": "47549",
+      "intentPersistedAt": "2026-09-29T06:20:51.668Z"
+    },
+    {
+      "phase": "PRIMARY",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:89d3d1ac9b8bea805ffb71bd30e9f3ca5c1924870c99aacbbfb601d5e600d374:create",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_path_follow_mission",
+      "resultHash": "83525c8a1b73726a8c22e4e688ac0da0e2b4ff1e4416ed338021f8cd9c36f0bd",
+      "completedAt": "2026-09-29T06:20:53.328Z",
+      "argumentHash": "dc614925ee5e8d4cfa58320a58e2596eb0a4c5d033b966308cb38fd65b559ae4",
+      "dispatchedAt": "2026-09-29T06:20:53.317Z",
+      "externalMissionId": "47550",
+      "intentPersistedAt": "2026-09-29T06:20:53.316Z"
+    },
+    {
+      "phase": "FOLLOWUP",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:89d3d1ac9b8bea805ffb71bd30e9f3ca5c1924870c99aacbbfb601d5e600d374:start",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_mission_control",
+      "resultHash": "ea1e6b3bc6de9c60eba4e06a0a656f5dbc57645d980bd4d58b850375b4df460a",
+      "completedAt": "2026-09-29T06:20:53.398Z",
+      "argumentHash": "b7b5bb0944e1744eac8d8124da76ba9f42c46410c1477561f1ca79b7d181d464",
+      "dispatchedAt": "2026-09-29T06:20:53.386Z",
+      "externalMissionId": "47550",
+      "intentPersistedAt": "2026-09-29T06:20:53.385Z"
+    },
+    {
+      "phase": "CANCEL",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:b8972b675d5c5191c37acb712c887c9525fd24bf90d804c4f08d47ebc493204e:stop",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_mission_control",
+      "resultHash": "969e3a35bbc8cb7461800f24b4fa159678a80eb1c5a323494ac6b1998a8396ea",
+      "completedAt": "2026-09-29T06:20:56.953Z",
+      "argumentHash": "d4f76924630ba50811ac6e0dd595b51f5fb66e93024524279b60e3d6f65b2868",
+      "dispatchedAt": "2026-09-29T06:20:56.942Z",
+      "externalMissionId": "47550",
+      "intentPersistedAt": "2026-09-29T06:20:56.941Z"
+    },
+    {
+      "phase": "PRIMARY",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:b8972b675d5c5191c37acb712c887c9525fd24bf90d804c4f08d47ebc493204e:create",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_path_follow_mission",
+      "resultHash": "3522fdc99651a72863aab5e8544b67a8abb914295292cef4dd453c867bc73604",
+      "completedAt": "2026-09-29T06:20:59.140Z",
+      "argumentHash": "bd39bccda89cfc31a4ea997430e3205fcf5c7f910648c9c0810a1fed8a1ca9d4",
+      "dispatchedAt": "2026-09-29T06:20:59.125Z",
+      "externalMissionId": "47551",
+      "intentPersistedAt": "2026-09-29T06:20:59.124Z"
+    },
+    {
+      "phase": "FOLLOWUP",
+      "state": "ACCEPTED",
+      "stepId": "navigation-replace:b8972b675d5c5191c37acb712c887c9525fd24bf90d804c4f08d47ebc493204e:start",
+      "taskId": "source-nav-7177a49b-92ab-454f-a2f4-fb107b03d348",
+      "toolName": "ugv_mission_control",
+      "resultHash": "a40998aacdb7506eb08fd5abd26e7cb07fa3ed44c3cf834aa5ff44929d09e181",
+      "completedAt": "2026-09-29T06:20:59.214Z",
+      "argumentHash": "3d294c214247adb630d200845577c88a52f3c1a366e3f45cb98057008f750611",
+      "dispatchedAt": "2026-09-29T06:20:59.203Z",
+      "externalMissionId": "47551",
+      "intentPersistedAt": "2026-09-29T06:20:59.202Z"
+    }
+  ],
+  "completedAt": "2026-09-29T06:21:10.448Z"
+}

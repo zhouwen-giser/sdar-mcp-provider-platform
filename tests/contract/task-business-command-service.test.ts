@@ -189,6 +189,32 @@ describe("task-business command ledger", () => {
     expect((await store.getContext(scope))?.contextRevision).toBe(2);
   });
 
+  it("persists an immutable recoverable intervention request bound to its semantic hash", async () => {
+    const { scope, store, service } = await fixture();
+    const accepted = await service.submitIntervention({
+      scope,
+      command: catalog.interventionCommand,
+      responder,
+      runtimeCommandSequence: "21",
+    });
+    expect(accepted.record.interventionRequest).toEqual(catalog.interventionCommand);
+    expect(
+      (await store.getCommand(scope, catalog.interventionCommand.commandId))?.interventionRequest,
+    ).toEqual(catalog.interventionCommand);
+    for (const change of [
+      { input: { unexpected: true } },
+      { taskId: "other-task" },
+      { executionId: "other-execution" },
+      { commandId: "other-command" },
+    ])
+      expect(
+        BusinessCommandRecordSchema.safeParse({
+          ...accepted.record,
+          interventionRequest: { ...catalog.interventionCommand, ...change },
+        }).success,
+      ).toBe(false);
+  });
+
   it("does not reserve an Input or Intervention entry for schema-invalid command content", async () => {
     const { scope, store, service } = await fixture();
     await expect(

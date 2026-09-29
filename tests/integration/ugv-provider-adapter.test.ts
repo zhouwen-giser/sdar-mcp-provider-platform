@@ -12,6 +12,9 @@ import { OperationRegistry } from "../../packages/operation-registry/src/index.j
 import {
   diagnosticControlSignature,
   MemoryProviderStore,
+  MemoryTaskBusinessStore,
+  BoundExecutionScope,
+  businessEventSourceCapabilities,
   SMPP_DIAGNOSTIC_CONTRACT,
   SMPP_DIAGNOSTIC_CONTROL_OPERATION,
   SMPP_PROVIDER_BUSINESS_SUCCESS_CAPABILITY,
@@ -44,6 +47,8 @@ import {
   type CommandIdentity,
 } from "../../apps/ugv-provider-adapter/src/runtime.js";
 import { UgvTelemetry } from "../../apps/ugv-provider-adapter/src/telemetry.js";
+import { UgvTaskBusinessContextService } from "../../apps/ugv-provider-adapter/src/task-business-service.js";
+import { AirportRoadPlanner } from "../../apps/ugv-provider-adapter/src/navigation-planner.js";
 
 const active: UgvProviderRuntime[] = [];
 let lastReconObservationMs = 0;
@@ -52,6 +57,644 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("uses the persisted device binding during failed admission cleanup", async () => {
+    const store = new MemoryProviderStore();
+    const put = store.putExecution.bind(store);
+    store.putExecution = (execution) =>
+      put({
+        ...execution,
+        deviceContext: {
+          deviceId: "device-a",
+          bindingId: "binding-a",
+          dataScopeKey: "scope-a",
+          smppServiceKey: "service-a",
+          sourceSessionKey: "session-a",
+          providerId: "isr.vehicle.ugv.ugv1",
+          resourceId: "vehicle:ugv1",
+        },
+      });
+    const f = await createFixture(false, store, {
+      navigationPlanner: {
+        plan: async () => {
+          throw new Error("PLANNER_REFUSED");
+        },
+      },
+    });
+    const business = required(f.business);
+    const get = business.getContext.bind(business);
+    business.getContext = async (scope) => {
+      if (!scope.deviceContext) throw new Error("GOWM_BUSINESS_SCOPE_MISMATCH");
+      return get(scope);
+    };
+    await expect(
+      f.runtime.start(startInput("bound-failure", "vehicle_navigate", navigateArgs())),
+    ).rejects.toThrow("PLANNER_REFUSED");
+    const failed = required(await store.getExecution("bound-failure"));
+    expect(failed).toMatchObject({
+      state: "TECHNICAL_FAILED",
+      reasonCode: "PLANNER_REFUSED",
+      deviceContext: { deviceId: "device-a" },
+    });
+    expect(
+      (await business.getContext(BoundExecutionScope.fromExecution(failed)))?.summary.status,
+    ).toBe("finalized");
+    expect(f.device.calls).toHaveLength(0);
+  });
+
+  it("advertises route and adjustment capabilities only for the configured airport simulator adapter", async () => {
+    const f = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "simulation",
+      entityId: "ugv1",
+      navigationPlanner: new AirportRoadPlanner("http://127.0.0.1:7879"),
+      navigationAdjustments: true,
+    });
+    f.store.businessEventSources = () => businessEventSourceCapabilities(true);
+    expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate?.artifactTypes).toContain(
+      "navigation.route",
+    );
+    expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
+      interventionTypes: ["navigation.adjust_plan"],
+      methods: { interventionApply: true },
+      qualification: { routeAdoption: "qualified", runtimeReplan: "qualified" },
+    });
+    const unqualified = await createFixture(false, new MemoryProviderStore(), {
+      navigationPlanner: {
+        plan: async () => {
+          throw new Error("not dispatched");
+        },
+      },
+      navigationAdjustments: true,
+    });
+    unqualified.store.businessEventSources = () => businessEventSourceCapabilities(true);
+    expect(unqualified.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
+      interventionTypes: [],
+      methods: { interventionApply: false },
+      qualification: { routeAdoption: "not_supported", runtimeReplan: "not_supported" },
+    });
+  });
+
+  it.each([
+    { retained: true, state: 1 },
+    { retained: false, state: 3 },
+  ])(
+    "revokes adoption when the latest raw mission packet changes eligibility (%j)",
+    async (newer) => {
+      const f = await navigationAdjustmentFixture(`adoption-revoked-${newer.retained}`);
+      const initial = required(await f.store.getExecution(f.input.taskId));
+      await f.runtime.applyIntervention(
+        identityOf(initial, "10"),
+        await f.command("revoked-edit", 114.3),
+      );
+      await f.runtime.pollActive();
+      await f.emit(1, 3);
+      await f.emit(1, 3);
+      for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+      const pending = required((await f.store.getExecution(f.input.taskId))?.navigationReplacement);
+      const get = f.business.getArtifactLatest.bind(f.business);
+      let advanced = false;
+      f.business.getArtifactLatest = async (scope, id) => {
+        if (id === `route-${pending.missionId}` && !advanced) {
+          advanced = true;
+          f.advance(20);
+          f.ingress.handle(
+            "/ugv/mission_state",
+            Buffer.from(
+              JSON.stringify({ id: Number(pending.missionId), state: newer.state, progress: 11 }),
+            ),
+            newer.retained,
+            required(f.runtime.options.now)().toISOString(),
+          );
+        }
+        return get(scope, id);
+      };
+      await f.emit(Number(pending.missionId), 1);
+      expect(
+        (await f.business.getContext(BoundExecutionScope.fromExecution(initial)))
+          ?.effectivePlanRevision,
+      ).toBe(1);
+      expect(
+        (await f.business.getCommand(BoundExecutionScope.fromExecution(initial), "revoked-edit"))
+          ?.state,
+      ).toBe("accepted");
+    },
+  );
+
+  it("bounds recovery polling under a high-rate observation burst without discarding snapshots", async () => {
+    const now = new Date();
+    const f = await createFixture(false, new MemoryProviderStore(), { now: () => now });
+    let scans = 0;
+    let snapshots = 0;
+    const list = f.store.listActiveExecutions.bind(f.store);
+    f.store.listActiveExecutions = async () => {
+      scans++;
+      return list();
+    };
+    const put = f.store.putSnapshot.bind(f.store);
+    f.store.putSnapshot = async (record) => {
+      snapshots++;
+      return put(record);
+    };
+    for (let i = 0; i < 100; i++)
+      f.ingress.handle(
+        "/ugv/gnss",
+        Buffer.from(
+          JSON.stringify({
+            entity_id: "ugv1",
+            latitude: 30.1,
+            longitude: 114.1 + i / 100000,
+            altitude: 0,
+          }),
+        ),
+        false,
+        now.toISOString(),
+      );
+    await f.runtime.get("missing");
+    expect(snapshots).toBe(100);
+    expect(scans).toBeLessThan(5);
+  });
+
+  it("keeps a fresh adoption eligible while an equivalent RUNNING heartbeat arrives during Store reads", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-heartbeat");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    await f.runtime.applyIntervention(
+      identityOf(initial, "10"),
+      await f.command("heartbeat-edit", 114.3),
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    const pending = required((await f.store.getExecution(f.input.taskId))?.navigationReplacement);
+    expect(pending.phase).toBe("awaiting_adoption");
+    const firstObservedAt = new Date(
+      required(f.runtime.options.now)().getTime() + 100,
+    ).toISOString();
+    const get = f.business.getArtifactLatest.bind(f.business);
+    let advanced = false;
+    f.business.getArtifactLatest = async (scope, id) => {
+      if (id === `route-${pending.missionId}` && !advanced) {
+        advanced = true;
+        f.advance(20);
+        f.ingress.handle(
+          "/ugv/mission_state",
+          Buffer.from(JSON.stringify({ id: Number(pending.missionId), state: 1, progress: 11 })),
+          false,
+          required(f.runtime.options.now)().toISOString(),
+        );
+      }
+      return get(scope, id);
+    };
+    await f.emit(Number(pending.missionId), 1);
+    expect((await f.store.getExecution(f.input.taskId))?.effectiveNavigation?.adoptedAt).toBe(
+      firstObservedAt,
+    );
+  });
+
+  it("adopts two adjustments in one RUNNING Task without changing its original arguments", async () => {
+    const f = await navigationAdjustmentFixture("two-adjustments");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    const scope = BoundExecutionScope.fromExecution(initial);
+    for (let n = 1; n <= 2; n++) {
+      const before = required(await f.business.getContext(scope));
+      const payload = await f.command(`edit-${n}`, 114.2 + n / 10);
+      const identity = identityOf(initial, String(n + 10));
+      expect(await f.runtime.applyIntervention(identity, payload)).toMatchObject({
+        accepted: true,
+      });
+      await f.runtime.pollActive();
+      expect((await f.store.getExecution(f.input.taskId))?.state).toBe("RUNNING");
+      expect(f.device.calls.filter((c) => c.name === "ugv_path_follow_mission")).toHaveLength(n);
+      const oldId = required(
+        (await f.store.getExecution(f.input.taskId))?.downstreamMissionIds.at(-1),
+      );
+      await f.emit(Number(oldId), 3);
+      await f.emit(Number(oldId), 3);
+      for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+      const pending = required((await f.store.getExecution(f.input.taskId))?.navigationReplacement);
+      expect(pending.phase, JSON.stringify(await f.business.getCommand(scope, `edit-${n}`))).toBe(
+        "awaiting_adoption",
+      );
+      expect((await f.business.getContext(scope))?.effectivePlanRevision).toBe(
+        before.effectivePlanRevision,
+      );
+      expect((await f.business.getCommand(scope, `edit-${n}`))?.state).toBe("accepted");
+      await f.emit(Number(oldId), 4);
+      expect((await f.store.getExecution(f.input.taskId))?.state).toBe("RUNNING");
+      await f.emit(Number(pending.missionId), 1, true);
+      expect((await f.business.getCommand(scope, `edit-${n}`))?.state).toBe("accepted");
+      await f.emit(Number(pending.missionId), 1);
+      const effective = required(await f.store.getExecution(f.input.taskId));
+      expect(effective.state).toBe("RUNNING");
+      expect(effective.navigationReplacement).toBeUndefined();
+      expect(effective.effectiveNavigation).toMatchObject({
+        destination: { longitude: 114.2 + n / 10 },
+        missionId: pending.missionId,
+        planRevision: n + 1,
+      });
+      expect(effective.arguments).toEqual(initial.arguments);
+      expect(effective.argumentHash).toBe(initial.argumentHash);
+      expect((await f.business.getCommand(scope, `edit-${n}`))?.state).toBe("applied");
+      const current = required(await f.business.getContext(scope));
+      expect(current.activeRefs.navigationAdjustment?.id).not.toBe(
+        before.activeRefs.navigationAdjustment?.id,
+      );
+      const calls = f.device.calls.length;
+      expect(await f.runtime.applyIntervention(identity, payload)).toMatchObject({
+        accepted: true,
+      });
+      expect(
+        await f.runtime.applyIntervention(identity, {
+          ...payload,
+          command: {
+            ...payload.command,
+            input: { waypoints: [{ longitude: 115, latitude: 30.2 }] },
+          },
+        }),
+      ).toMatchObject({ accepted: false, reasonCode: "COMMAND_ID_CONFLICT" });
+      expect(f.device.calls).toHaveLength(calls);
+    }
+    const final = required(await f.store.getExecution(f.input.taskId));
+    await f.emit(Number(final.downstreamMissionIds[0]), 4);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("RUNNING");
+    await f.emit(Number(final.downstreamMissionIds.at(-1)), 4);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("RUNNING");
+    await f.emit(Number(final.downstreamMissionIds.at(-1)), 4, false, 114.4);
+    await f.emit(Number(final.downstreamMissionIds.at(-1)), 4, false, 114.4);
+    expect(await f.store.getExecution(f.input.taskId)).toMatchObject({
+      state: "SUCCEEDED",
+      result: { effectivePlanRevision: 3, destination: { longitude: 114.4 } },
+    });
+    f.store.businessEventSources = () => businessEventSourceCapabilities(true);
+    const manifest = new OperationRegistry().validate(
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        f.store,
+        "vehicle:ugv1",
+        { contracts: f.device.contracts(), executionMode: "simulation" },
+        f.runtime.businessFeedbackProfiles(),
+      ) as unknown as ProviderManifest,
+    );
+    const navigate = required(
+      manifest.operations.find((operation) => operation.name === "vehicle_navigate"),
+    );
+    const result = required((await f.store.getExecution(f.input.taskId))?.result);
+    expect(() => navigate.validateOutput(result)).not.toThrow();
+    expect(() => navigate.validateOutput({ ...result, effectivePlanRevision: 0 })).toThrow();
+    expect(() =>
+      navigate.validateOutput({ ...result, routeRef: { kind: "action", id: "bad", revision: 1 } }),
+    ).toThrow();
+  });
+
+  it("recovers accepted adjustment intent and committed adoption without resending device calls", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-restart");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    const scope = BoundExecutionScope.fromExecution(initial);
+    const payload = await f.command("recover-edit", 114.3);
+    expect(await f.runtime.applyIntervention(identityOf(initial, "10"), payload)).toMatchObject({
+      accepted: true,
+    });
+    const admitted = required(await f.store.getExecution(f.input.taskId));
+    delete admitted.navigationReplacement;
+    await f.store.putExecution(admitted);
+    await f.restart();
+    expect((await f.store.getExecution(f.input.taskId))?.navigationReplacement?.commandId).toBe(
+      "recover-edit",
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    const beforeAdoption = required(await f.store.getExecution(f.input.taskId));
+    expect(beforeAdoption.navigationReplacement?.phase).toBe("awaiting_adoption");
+    const calls = f.device.calls.length;
+    await f.restart();
+    expect(f.device.calls).toHaveLength(calls);
+    await f.emit(Number(beforeAdoption.navigationReplacement?.missionId), 1);
+    expect((await f.business.getCommand(scope, "recover-edit"))?.state).toBe("applied");
+    // Durable Context committed, but Execution cache update lost with the process.
+    await f.store.putExecution(beforeAdoption);
+    await f.restart();
+    expect(await f.store.getExecution(f.input.taskId)).toMatchObject({
+      state: "RUNNING",
+      effectiveNavigation: { commandId: "recover-edit", destination: { longitude: 114.3 } },
+    });
+    expect((await f.store.getExecution(f.input.taskId))?.navigationReplacement).toBeUndefined();
+    expect(f.device.calls).toHaveLength(calls);
+  });
+
+  it("resolves a lost start receipt by observed adoption without resending start", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-start-lost");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    const scope = BoundExecutionScope.fromExecution(initial);
+    f.device.handlers.set("ugv_mission_control", (args) => {
+      if (args.action === "start")
+        throw new UncertainMutatingDeviceCallError("UGV", "ugv_mission_control");
+      return {
+        mission_id: args.mission_id,
+        state: 3,
+        state_label: "cancelled",
+        message: "stopped",
+        error_code: 0,
+      };
+    });
+    expect(
+      await f.runtime.applyIntervention(
+        identityOf(initial, "10"),
+        await f.command("start-lost", 114.3),
+      ),
+    ).toMatchObject({ accepted: true });
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    const pending = required((await f.store.getExecution(f.input.taskId))?.navigationReplacement);
+    const starts = () =>
+      f.device.calls.filter(
+        (c) => c.name === "ugv_mission_control" && c.arguments.action === "start",
+      );
+    expect(starts()).toHaveLength(2);
+    await f.restart();
+    await f.emit(Number(pending.missionId), 1);
+    expect((await f.business.getCommand(scope, "start-lost"))?.state).toBe("applied");
+    expect(starts()).toHaveLength(2);
+  });
+
+  it("never retries an uncertain create or reports the unobserved replacement as applied", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-create-lost");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    const scope = BoundExecutionScope.fromExecution(initial);
+    f.device.handlers.set("ugv_path_follow_mission", () => {
+      throw new UncertainMutatingDeviceCallError("UGV", "ugv_path_follow_mission");
+    });
+    await f.runtime.applyIntervention(
+      identityOf(initial, "10"),
+      await f.command("create-lost", 114.3),
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    expect(f.device.calls.filter((c) => c.name === "ugv_path_follow_mission")).toHaveLength(2);
+    await f.restart();
+    await f.emit(1, 3);
+    expect(f.device.calls.filter((c) => c.name === "ugv_path_follow_mission")).toHaveLength(2);
+    f.advance(60_000);
+    await f.runtime.pollActive();
+    expect(await f.business.getCommand(scope, "create-lost")).toMatchObject({
+      state: "rejected",
+      resultCode: "UGV_NAVIGATION_REPLACEMENT_TIMEOUT",
+    });
+    expect((await f.business.getContext(scope))?.effectivePlanRevision).toBe(1);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("STOPPING");
+  });
+
+  it("cancels a replacement, stops its late start and requires fresh physical stop confirmation", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-cancel");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    const scope = BoundExecutionScope.fromExecution(initial);
+    await f.runtime.applyIntervention(
+      identityOf(initial, "10"),
+      await f.command("cancel-edit", 114.3),
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    const pending = required((await f.store.getExecution(f.input.taskId))?.navigationReplacement);
+    expect(await f.runtime.command("cancel", identityOf(initial, "11"))).toMatchObject({
+      accepted: true,
+    });
+    // An in-flight action can report cancellation before its delayed acceptance.
+    // Without a seen RUNNING state this is not yet proof that it cannot start.
+    await f.emit(Number(pending.missionId), 3);
+    await f.emit(Number(pending.missionId), 3);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("STOPPING");
+    await f.emit(Number(pending.missionId), 1);
+    expect(f.device.calls.filter((c) => c.name === "ugv_motion_stop")).toHaveLength(1);
+    expect(await f.business.getCommand(scope, "cancel-edit")).toMatchObject({ state: "rejected" });
+    expect((await f.business.getContext(scope))?.effectivePlanRevision).toBe(1);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("STOPPING");
+    await f.emit(Number(pending.missionId), 3);
+    await f.emit(Number(pending.missionId), 3);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("CANCELLED");
+  });
+
+  it("does not dispatch a replacement from retained stop telemetry or after a queued cancellation", async () => {
+    const f = await navigationAdjustmentFixture("adjustment-dispatch-fence");
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    await f.runtime.applyIntervention(
+      identityOf(initial, "10"),
+      await f.command("fenced-edit", 114.3),
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3, true);
+    await f.emit(1, 3, true);
+    expect((await f.store.getExecution(f.input.taskId))?.navigationReplacement?.phase).toBe(
+      "stopping",
+    );
+    const planner = required(f.runtime.options.navigationPlanner);
+    const originalPlan = planner.plan.bind(planner);
+    let release!: () => void;
+    let entered!: () => void;
+    const waiting = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    planner.plan = async (request) => {
+      entered();
+      await gate;
+      return originalPlan(request);
+    };
+    const observation = f.emit(1, 3);
+    await waiting;
+    const cancel = f.runtime.command("cancel", identityOf(initial, "11"));
+    release();
+    await observation;
+    expect(await cancel).toMatchObject({ accepted: true });
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    expect(f.device.calls.filter((c) => c.name === "ugv_path_follow_mission")).toHaveLength(1);
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("CANCELLED");
+  });
+
+  it("recovers a failed replacement cleanup and fences stale execution state after command rejection", async () => {
+    class CleanupClaimCrashStore extends MemoryProviderStore {
+      interrupted = true;
+      override claimMutationJournal(entry: MutationJournalEntry) {
+        if (this.interrupted && entry.stepId.endsWith(":cleanup-stop"))
+          throw new Error("TEST_PROCESS_INTERRUPTED_BEFORE_STOP_INTENT");
+        return super.claimMutationJournal(entry);
+      }
+    }
+    const store = new CleanupClaimCrashStore();
+    const f = await navigationAdjustmentFixture("adjustment-cleanup-restart", store);
+    const initial = required(await f.store.getExecution(f.input.taskId));
+    await f.runtime.applyIntervention(
+      identityOf(initial, "10"),
+      await f.command("cleanup-recover", 114.3),
+    );
+    await f.runtime.pollActive();
+    await f.emit(1, 3);
+    await f.emit(1, 3);
+    for (let i = 0; i < 5; i++) await f.runtime.pollActive();
+    const beforeFailure = required(await f.store.getExecution(f.input.taskId));
+    f.advance(60_000);
+    await f.runtime.pollActive();
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("STOPPING");
+    expect(f.device.calls.filter((c) => c.name === "ugv_motion_stop")).toHaveLength(0);
+    store.interrupted = false;
+    await f.restart();
+    expect(f.device.calls.filter((c) => c.name === "ugv_motion_stop")).toHaveLength(1);
+    // The rejected business command remains authoritative over a stale Execution.
+    const pending = required(beforeFailure.navigationReplacement);
+    pending.deadlineAt = new Date(Date.parse(pending.deadlineAt) + 120_000).toISOString();
+    await f.store.putExecution(beforeFailure);
+    const calls = f.device.calls.length;
+    await f.restart();
+    expect((await f.store.getExecution(f.input.taskId))?.state).toBe("STOPPING");
+    expect(f.device.calls).toHaveLength(calls);
+  });
+
+  it("persists the planner route, submits its exact points and adopts only from the matching live mission", async () => {
+    let now = Date.now();
+    const plan = {
+      planId: "road-real-source-fixture",
+      sourceRecordId: "road-source-fixture",
+      routeSource: "qualified-test-planner",
+      observedAt: new Date(now).toISOString(),
+      waypoints: [
+        { longitude: 114.1, latitude: 30.1 },
+        { longitude: 114.15, latitude: 30.15 },
+        { longitude: 114.2, latitude: 30.2 },
+      ],
+    };
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      navigationPlanner: { plan: async () => plan },
+    });
+    const input = startInput("nav-planned-business", "vehicle_navigate", navigateArgs());
+    await fixture.runtime.start(input);
+    const execution = required(await fixture.store.getExecution(input.taskId));
+    const scope = BoundExecutionScope.fromExecution(execution);
+    expect(execution.arguments).toEqual(input.arguments);
+    expect(execution.argumentHash).toBe(input.argumentHash);
+    expect(execution.navigationPlan).toEqual(plan);
+    expect(
+      fixture.device.calls.find((c) => c.name === "ugv_path_follow_mission")?.arguments,
+    ).toMatchObject({
+      need_plan: false,
+      task_points: plan.waypoints.map((p) => ({ ...p, altitude: 0 })),
+    });
+    const business = required(fixture.business);
+    expect(await business.getContext(scope)).toMatchObject({
+      effectivePlanRevision: 0,
+      activeRefs: {},
+    });
+    const emit = async (missionId: number, retained = false, state = 1, stamp?: string) => {
+      now += 100;
+      fixture.ingress.handle(
+        "/ugv/mission_state",
+        Buffer.from(JSON.stringify({ id: missionId, state, progress: 10 })),
+        retained,
+        stamp ?? new Date(now).toISOString(),
+      );
+      await fixture.runtime.get(input.taskId);
+    };
+    await emit(999);
+    await emit(Number(execution.downstreamMissionIds[0]), true);
+    expect(await business.getContext(scope)).toMatchObject({ effectivePlanRevision: 0 });
+    await emit(Number(execution.downstreamMissionIds[0]), false, 1, execution.createdAt);
+    expect(await business.getContext(scope)).toMatchObject({ effectivePlanRevision: 0 });
+    await emit(Number(execution.downstreamMissionIds[0]));
+    const adopted = await business.getContext(scope);
+    expect(adopted).toMatchObject({
+      effectivePlanRevision: 1,
+      activeRefs: { route: { revision: 2 } },
+    });
+    const ref = required(required(adopted).activeRefs.route);
+    expect(await business.getArtifactVersion(scope, ref.id, ref.revision)).toMatchObject({
+      properties: { adoption: "adopted" },
+      content: { geometry: { coordinates: plan.waypoints.map((p) => [p.longitude, p.latitude]) } },
+    });
+    await emit(Number(execution.downstreamMissionIds[0]));
+    expect((await business.getContext(scope))?.effectivePlanRevision).toBe(1);
+    expect(fixture.device.calls.filter((c) => c.name === "ugv_path_follow_mission")).toHaveLength(
+      1,
+    );
+  });
+  it("recovers a persisted planner route without replanning or resending and fences post-cancel adoption", async () => {
+    let now = Date.now();
+    let plans = 0;
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      navigationPlanner: {
+        plan: async () => {
+          plans += 1;
+          return {
+            planId: "road-recovery",
+            sourceRecordId: "road-recovery-source",
+            routeSource: "qualified-test-planner",
+            observedAt: new Date(now).toISOString(),
+            waypoints: [
+              { longitude: 114.1, latitude: 30.1 },
+              { longitude: 114.2, latitude: 30.2 },
+            ],
+          };
+        },
+      },
+    });
+    const input = startInput("nav-planned-recovery", "vehicle_navigate", navigateArgs());
+    await fixture.runtime.start(input);
+    const execution = required(await fixture.store.getExecution(input.taskId));
+    const before = fixture.device.calls.length;
+    const business = required(fixture.business);
+    await fixture.runtime.close();
+    active.splice(active.indexOf(fixture.runtime), 1);
+    const restarted = new UgvProviderRuntime(
+      fixture.runtime.options,
+      fixture.store,
+      fixture.ingress,
+      fixture.device,
+      fixture.events,
+      fixture.telemetry,
+      new UgvTaskBusinessContextService(
+        fixture.store,
+        business,
+        "isr.vehicle.ugv.ugv1",
+        "vehicle:ugv1",
+        () => undefined,
+      ),
+    );
+    active.push(restarted);
+    await restarted.initialize();
+    expect(plans).toBe(1);
+    expect(fixture.device.calls).toHaveLength(before);
+    expect((await fixture.store.getExecution(input.taskId))?.navigationPlan).toEqual(
+      execution.navigationPlan,
+    );
+    now += 100;
+    expect(await restarted.command("cancel", identityOf(execution, "22"))).toMatchObject({
+      accepted: true,
+    });
+    now += 100;
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from(
+        JSON.stringify({ id: Number(execution.downstreamMissionIds[0]), state: 1, progress: 25 }),
+      ),
+      false,
+      new Date(now).toISOString(),
+    );
+    await restarted.get(input.taskId);
+    expect(await business.getContext(BoundExecutionScope.fromExecution(execution))).toMatchObject({
+      effectivePlanRevision: 0,
+      activeRefs: {},
+    });
+  });
+
   it("routes UpdateExecution from the persisted operation without sending navigation input to fire control", async () => {
     const fixture = await createFixture();
     await fixture.runtime.start(
@@ -3031,6 +3674,118 @@ async function seedMutationJournal(
   );
 }
 
+async function navigationAdjustmentFixture(taskId: string, store = new MemoryProviderStore()) {
+  let now = Date.now();
+  let plans = 0;
+  let allocated = 0;
+  const device = new MockUgvDeviceMcpClient();
+  device.handlers.set("ugv_path_follow_mission", () => ({
+    mission_id: ++allocated,
+    state: 0,
+    state_label: "ready",
+    message: "ready",
+    error_code: 0,
+  }));
+  const fixture = await createFixture(
+    false,
+    store,
+    {
+      navigationAdjustments: true,
+      now: () => new Date(now),
+      navigationPlanner: {
+        plan: async (request) => ({
+          planId: `plan-${++plans}`,
+          sourceRecordId: `source-${plans}`,
+          routeSource: "test-existing-planner",
+          observedAt: new Date(now).toISOString(),
+          waypoints: [request.start, ...request.waypoints],
+        }),
+      },
+    },
+    device,
+  );
+  const business = required(fixture.business);
+  const input = startInput(taskId, "vehicle_navigate", navigateArgs());
+  await fixture.runtime.start(input);
+  const emit = async (id: number, state: number, retained = false, longitude = 114.1) => {
+    now += 100;
+    const stamp = new Date(now).toISOString();
+    fixture.ingress.handle(
+      "/ugv/mission_state",
+      Buffer.from(JSON.stringify({ id, state, progress: 10 })),
+      retained,
+      stamp,
+    );
+    fixture.ingress.handle(
+      "/ugv/gnss",
+      Buffer.from(JSON.stringify({ entity_id: "ugv1", longitude, latitude: 30.2, altitude: 0 })),
+      false,
+      stamp,
+    );
+    status(fixture.ingress, {}, stamp);
+    await fixture.runtime.get(input.taskId);
+    await settleSnapshotObservers();
+  };
+  await emit(
+    Number(required(await fixture.store.getExecution(taskId)).downstreamMissionIds.at(-1)),
+    1,
+  );
+  const command = async (commandId: string, longitude: number) => {
+    const ex = required(await fixture.store.getExecution(taskId));
+    const context = required(await business.getContext(BoundExecutionScope.fromExecution(ex)));
+    const ref = required(context.activeRefs.navigationAdjustment);
+    return {
+      command: {
+        schemaVersion: "sdar.runtime-intervention-command/1.0-rc2",
+        commandId,
+        taskId,
+        executionId: ex.externalExecutionId,
+        interventionId: ref.id,
+        guard: {
+          mode: "semantic",
+          expectedInterventionRevision: ref.revision,
+          expectedEffectivePlanRevision: context.effectivePlanRevision,
+        },
+        input: { waypoints: [{ longitude, latitude: 30.2 }], density: "medium" },
+      },
+      responder: { source: "runtime_authorization_context", actorType: "operator", verified: true },
+    };
+  };
+  const result = {
+    ...fixture,
+    business,
+    input,
+    emit,
+    command,
+    advance: (ms: number) => {
+      now += ms;
+    },
+    restart: async () => {
+      await fixture.runtime.close();
+      active.splice(active.indexOf(fixture.runtime), 1);
+      fixture.runtime = new UgvProviderRuntime(
+        fixture.runtime.options,
+        fixture.store,
+        fixture.ingress,
+        fixture.device,
+        fixture.events,
+        fixture.telemetry,
+        new UgvTaskBusinessContextService(
+          fixture.store,
+          business,
+          "isr.vehicle.ugv.ugv1",
+          "vehicle:ugv1",
+          () => undefined,
+        ),
+      );
+      active.push(fixture.runtime);
+      await fixture.runtime.initialize();
+      result.runtime = fixture.runtime;
+    },
+  };
+  return result;
+}
+
 async function createFixture(
   withTarget = false,
   store = new MemoryProviderStore(),
@@ -3074,6 +3829,16 @@ async function createFixture(
     tlsMode: "disabled",
   });
   const events = new UgvBusinessEventHub(store);
+  const business = overrides.navigationPlanner ? new MemoryTaskBusinessStore() : undefined;
+  const taskBusiness = business
+    ? new UgvTaskBusinessContextService(
+        store,
+        business,
+        "isr.vehicle.ugv.ugv1",
+        "vehicle:ugv1",
+        () => undefined,
+      )
+    : undefined;
   const runtime = new UgvProviderRuntime(
     { ...runtimeOptions(), ...overrides },
     store,
@@ -3081,10 +3846,11 @@ async function createFixture(
     device,
     events,
     telemetry,
+    taskBusiness,
   );
   active.push(runtime);
   await runtime.initialize();
-  return { store, ingress, device, telemetry, events, runtime };
+  return { store, ingress, device, telemetry, events, runtime, business };
 }
 
 class ContractFixtureUgvDevice extends MockUgvDeviceMcpClient {

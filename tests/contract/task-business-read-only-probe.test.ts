@@ -87,6 +87,215 @@ function nonObjectLines(lines: Record<string, unknown>[]): Record<string, unknow
 }
 
 describe("read-only public business probe", () => {
+  it.each([false, true])(
+    "captures complete selected public payloads only when opted in (capture=%s)",
+    async (capturePublicPayloads) => {
+      const lines: Record<string, unknown>[] = [];
+      const selected = notification("8", "vehicle.business");
+      await runReadOnlyTaskBusinessProbe({
+        mcpUrl: "http://127.0.0.1:1/mcp",
+        taskId,
+        bearerToken: "private-header-only-token",
+        capturePublicPayloads,
+        maxEvents: 1,
+        emit: (line) => {
+          lines.push(line);
+        },
+        fetchImpl: async (_url, init) => {
+          expect(new Headers(init?.headers).get("authorization")).toBe(
+            "Bearer private-header-only-token",
+          );
+          if (typeof init?.body !== "string") throw Error("TEST_BODY_REQUIRED");
+          const rpc = JSON.parse(init.body) as { id: string; method: string };
+          if (rpc.method === "io.sdar/taskBusiness/context/get")
+            return Response.json({
+              jsonrpc: "2.0",
+              id: rpc.id,
+              result: {
+                snapshotToken: "private-snapshot-capability",
+                snapshot: {
+                  context,
+                  contextRevision: context.contextRevision,
+                  objects: snapshotObjects,
+                  objectDescriptors: [],
+                },
+                resumeFrom: { streamId, afterSequence: "5" },
+              },
+            });
+          return new Response(
+            sse(notification("6", "vehicle.business", "other-task")) +
+              sse(notification("7", "vehicle.execution")) +
+              sse(selected),
+            { headers: { "content-type": "text/event-stream" } },
+          );
+        },
+      });
+      const snapshot = lines.find((line) => line.type === "snapshot");
+      const events = lines.filter((line) => line.type === "businessEvent");
+      expect(events).toHaveLength(1);
+      if (capturePublicPayloads) {
+        expect(snapshot?.context).toEqual(context);
+        expect(events[0]?.notification).toEqual(selected);
+      } else {
+        expect(snapshot).not.toHaveProperty("context");
+        expect(events[0]).not.toHaveProperty("notification");
+      }
+      expect(JSON.stringify(lines)).not.toContain("private-header-only-token");
+      expect(JSON.stringify(lines)).not.toContain("private-snapshot-capability");
+      expect(JSON.stringify(lines)).not.toContain("other-task");
+    },
+  );
+
+  it("aborts an open listener before waiting for cancellation during a continuity refresh", async () => {
+    let snapshots = 0;
+    let listeners = 0;
+    let aborted = 0;
+    const lines: Record<string, unknown>[] = [];
+    await runReadOnlyTaskBusinessProbe({
+      mcpUrl: "http://127.0.0.1:1/mcp",
+      taskId,
+      durationMs: 1000,
+      maxEvents: 1,
+      emit: (line) => {
+        lines.push(line);
+      },
+      fetchImpl: async (_url, init) => {
+        if (typeof init?.body !== "string") throw Error("TEST_BODY_REQUIRED");
+        const rpc = JSON.parse(init.body) as { id: string; method: string };
+        if (rpc.method === "io.sdar/taskBusiness/context/get") {
+          snapshots += 1;
+          return Response.json({
+            jsonrpc: "2.0",
+            id: rpc.id,
+            result: {
+              snapshot: {
+                context,
+                contextRevision: 4,
+                objects: snapshotObjects,
+                objectDescriptors: [],
+              },
+              resumeFrom: { streamId, afterSequence: "5" },
+            },
+          });
+        }
+        listeners += 1;
+        const signal = init?.signal;
+        if (!signal) throw Error("TEST_SIGNAL_MISSING");
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            const message =
+              listeners === 1
+                ? {
+                    jsonrpc: "2.0",
+                    method: "notifications/io.sdar/businessEvents/continuity",
+                    params: {},
+                  }
+                : notification("6", "vehicle.business");
+            controller.enqueue(new TextEncoder().encode(sse(message)));
+          },
+          cancel() {
+            // A peer which does not close until the HTTP request is aborted.
+            return new Promise<void>((resolve) => {
+              if (signal.aborted) {
+                aborted += 1;
+                resolve();
+              } else
+                signal.addEventListener(
+                  "abort",
+                  () => {
+                    aborted += 1;
+                    resolve();
+                  },
+                  { once: true },
+                );
+            });
+          },
+        });
+        return new Response(body, { headers: { "content-type": "text/event-stream" } });
+      },
+    });
+    expect(snapshots).toBe(2);
+    expect(listeners).toBe(2);
+    expect(aborted).toBe(2);
+    expect(lines.at(-1)).toMatchObject({ reason: "max_events", appliedEvents: 1 });
+  });
+
+  it("bounds consecutive snapshot races rather than all successful hydration cycles", async () => {
+    let revision = 1;
+    let retry = false;
+    const lines: Record<string, unknown>[] = [];
+    await runReadOnlyTaskBusinessProbe({
+      mcpUrl: "http://127.0.0.1:1/mcp",
+      taskId,
+      durationMs: 2000,
+      maxEvents: 5,
+      emit: (line) => {
+        lines.push(line);
+      },
+      fetchImpl: async (_url, init) => {
+        if (typeof init?.body !== "string") throw Error("TEST_BODY_REQUIRED");
+        const rpc = JSON.parse(init.body) as { id: string; method: string };
+        if (rpc.method === "io.sdar/taskBusiness/context/get") {
+          if (retry) {
+            retry = false;
+            return Response.json(
+              {
+                jsonrpc: "2.0",
+                id: rpc.id,
+                error: { code: -32602, data: { reasonCode: "BUSINESS_SNAPSHOT_REVISION_CHANGED" } },
+              },
+              { status: 400 },
+            );
+          }
+          const artifact: Record<string, unknown> = {
+            ...routeLine,
+            identity: context.identity,
+            revision,
+          };
+          const ref = { kind: "artifact", id: artifact.artifactId, revision };
+          return Response.json({
+            jsonrpc: "2.0",
+            id: rpc.id,
+            result: {
+              snapshot: {
+                context: {
+                  ...context,
+                  contextRevision: revision + 3,
+                  activeRefs: { ...context.activeRefs, route: ref },
+                  artifactRefs: [ref],
+                },
+                contextRevision: revision + 3,
+                objects: [{ kind: "artifact", value: artifact }, ...snapshotObjects.slice(1)],
+                objectDescriptors: [],
+              },
+              resumeFrom: { streamId, afterSequence: String(revision + 4) },
+            },
+          });
+        }
+        revision += 1;
+        retry = true;
+        const event = notification(String(revision + 4), "vehicle.business", taskId, 1);
+        event.params.rawPayload = {
+          schemaVersion: "sdar.task-business-feedback/1.0-rc2",
+          kind: "ARTIFACT_CHANGED",
+          contextRevision: revision + 3,
+          providerRecordedAt: "2026-09-23T00:02:00Z",
+          payload: {
+            change: "update",
+            artifactRef: { kind: "artifact", id: routeLine.artifactId, revision },
+            reasonCode: "ROUTE_UPDATED",
+          },
+        };
+        return new Response(sse(event), { headers: { "content-type": "text/event-stream" } });
+      },
+    });
+    expect(lines.filter((line) => line.type === "businessEvent")).toHaveLength(5);
+    expect(
+      lines.filter((line) => line.reasonCode === "BUSINESS_SNAPSHOT_REVISION_CHANGED"),
+    ).toHaveLength(5);
+    expect(lines.at(-1)).toMatchObject({ reason: "max_events", appliedEvents: 5 });
+  });
+
   it.each(["valid", "bad-digest"] as const)(
     "hydrates chunked Context and Action descriptors before reducer bootstrap (case=%s)",
     async (scenario) => {
@@ -187,6 +396,7 @@ describe("read-only public business probe", () => {
       const run = runReadOnlyTaskBusinessProbe({
         mcpUrl: "http://127.0.0.1:1/mcp",
         taskId,
+        capturePublicPayloads: true,
         maxEvents: 1,
         durationMs: 10_000,
         fetchImpl,
@@ -197,10 +407,13 @@ describe("read-only public business probe", () => {
       if (scenario === "bad-digest") {
         await expect(run).rejects.toThrow("BUSINESS_PROBE_SNAPSHOT_DIGEST_MISMATCH");
         expect(lines.at(-1)).toMatchObject({ type: "stopped", reason: "failed" });
+        expect(lines.some((line) => line.context !== undefined)).toBe(false);
       } else {
         await run;
         expect(lines.find((line) => line.type === "snapshot")).toMatchObject({ objectCount: 4 });
+        expect(lines.find((line) => line.type === "snapshot")?.context).toEqual(largeContext);
         expect(lines.filter((line) => line.type === "businessObject")).toHaveLength(4);
+        expect(JSON.stringify(lines)).not.toContain("fixture-token");
       }
       expect(methods.filter((method) => method.endsWith("snapshotParts/get"))).toHaveLength(4);
     },

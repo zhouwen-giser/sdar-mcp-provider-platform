@@ -123,6 +123,8 @@ beforeAll(async () => {
       allowNavigationWithRecon: true,
       fireRequiresChassisStopped: true,
       pollIntervalMs: 60_000,
+      // Dense synthetic samples exercise exact public Artifact versioning.
+      trajectorySampleEveryMs: 0,
     },
     providerStore,
     ingress,

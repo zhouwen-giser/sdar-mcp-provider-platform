@@ -19,6 +19,7 @@ import {
   type RequiredInput,
 } from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
+import type { ProviderLockDispatch } from "./provider-auto-lock-coordinator.js";
 
 const id = z.string().min(1).max(256);
 const lockFactSchema = z
@@ -65,6 +66,7 @@ export class NativeLockBusinessProcessor {
       onExpire: RequiredInput["onExpire"];
       onDismiss: RequiredInput["onDismiss"];
       now?: () => Date;
+      requireProviderPolicy?: boolean;
     },
   ) {}
 
@@ -192,7 +194,11 @@ export class NativeLockBusinessProcessor {
     throw new Error("NATIVE_LOCK_TARGET_LOSS_RETRY_EXHAUSTED");
   }
 
-  async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
+  async apply(
+    execution: ProviderExecution,
+    input: unknown,
+    policyDispatch?: ProviderLockDispatch,
+  ): Promise<"committed" | "duplicate"> {
     const fact = lockFactSchema.parse(input);
     if (
       execution.operationName !== "vehicle_area_recon" ||
@@ -245,8 +251,15 @@ export class NativeLockBusinessProcessor {
       if (activeRef && activeVersion?.kind !== "action")
         throw new Error("NATIVE_LOCK_ACTIVE_REF_INVALID");
       const active = activeVersion?.kind === "action" ? activeVersion.value : undefined;
-      if (active && (active.actionType !== "sensor.visual_lock" || active.state !== "active"))
+      if (
+        active &&
+        (active.actionType !== "sensor.visual_lock" ||
+          (active.state !== "active" &&
+            !(active.state === "requested" && active.triggerOrigin === "provider_policy")))
+      )
         throw new Error("NATIVE_LOCK_ACTIVE_ACTION_INVALID");
+      if (active?.requestedAt && compareIsoTimestamps(fact.observedAt, active.requestedAt) < 0)
+        return "duplicate";
       if (active?.startedAt && compareIsoTimestamps(fact.observedAt, active.startedAt) < 0)
         return "duplicate";
       const objects: BusinessAction[] = [];
@@ -256,7 +269,7 @@ export class NativeLockBusinessProcessor {
         Object.entries(current.activeRefs).filter(([candidate]) => candidate !== key),
       );
       if (fact.stage === 1) {
-        if (!active) {
+        if (!active || (active.state === "requested" && fact.motionStatus === 5)) {
           sourceOnly = true;
         } else {
           const outcome = terminalOutcome(fact.motionStatus);
@@ -264,7 +277,10 @@ export class NativeLockBusinessProcessor {
             BusinessActionSchema.parse({
               ...active,
               revision: active.revision + 1,
-              state: outcome.state,
+              state:
+                active.state === "requested" && outcome.state === "completed"
+                  ? "cancelled"
+                  : outcome.state,
               reasonCode: outcome.endReason,
               endReason: outcome.endReason,
               endedAt: fact.observedAt,
@@ -274,6 +290,17 @@ export class NativeLockBusinessProcessor {
         }
       } else if (fact.stage === 4 || fact.targetId === undefined || fact.targetId === "0") {
         // These facts cannot qualify an Action or a release, but still order the source stream.
+        sourceOnly = true;
+      } else if (
+        active?.triggerOrigin === "provider_policy" &&
+        sourceTarget(active) === fact.targetId &&
+        (fact.stage === 2 ||
+          (active.state === "requested" &&
+            (policyDispatch?.actionId !== active.actionId ||
+              compareIsoTimestamps(fact.observedAt, policyDispatch.dispatchedAt) <= 0)))
+      ) {
+        // A requested policy Action needs a durable dispatch fence AND a later
+        // observing fact. Stage 2 and command ACK never activate it.
         sourceOnly = true;
       } else {
         const snapshot = await this.business.getContextSnapshot(scope);
@@ -316,7 +343,7 @@ export class NativeLockBusinessProcessor {
             BusinessActionSchema.parse({
               ...active,
               revision: active.revision + 1,
-              state: "completed",
+              state: active.state === "requested" ? "cancelled" : "completed",
               reasonCode: "VISUAL_LOCK_REPLACED",
               endReason: "VISUAL_LOCK_REPLACED",
               endedAt: fact.observedAt,
@@ -327,9 +354,10 @@ export class NativeLockBusinessProcessor {
         const sameTarget = active && sourceTarget(active) === fact.targetId ? active : undefined;
         const phase = fact.stage === 2 ? "locking" : "observing";
         sourceOnly = Boolean(
-          sameTarget &&
-          sameTarget.properties?.phase === phase &&
-          ((sameTarget.subjectRefs?.length ?? 0) > 0 || targetRef === undefined),
+          (sameTarget?.triggerOrigin === "provider_policy" && (!targetRef || targetLost)) ||
+          (sameTarget &&
+            sameTarget.properties?.phase === phase &&
+            ((sameTarget.subjectRefs?.length ?? 0) > 0 || targetRef === undefined)),
         );
         if (!sourceOnly) {
           const action = BusinessActionSchema.parse({
@@ -349,24 +377,28 @@ export class NativeLockBusinessProcessor {
             identity: scopeBusinessIdentity(scope),
             revision: (sameTarget?.revision ?? 0) + 1,
             state: "active",
-            actor: { type: "device" },
+            actor: sameTarget?.actor ?? { type: "device" },
             // The source reports a device state, but not who triggered it.
-            triggerOrigin: "unknown",
+            triggerOrigin: sameTarget?.triggerOrigin ?? "unknown",
             ...(sameTarget?.subjectRefs !== undefined
               ? { subjectRefs: sameTarget.subjectRefs }
               : targetRef === undefined
                 ? {}
                 : { subjectRefs: [targetRef] }),
-            cause: { eventType: "mqtt_area_recon_status" },
+            cause: { ...sameTarget?.cause, eventType: "mqtt_area_recon_status" },
             reasonCode:
               fact.stage === 2 ? "VISUAL_LOCK_LOCKING_OBSERVED" : "VISUAL_LOCK_ACTIVE_OBSERVED",
             startedAt: sameTarget?.startedAt ?? fact.observedAt,
             properties: {
+              ...sameTarget?.properties,
               observationSessionId: fact.missionId,
               sourceTargetId: fact.targetId,
               phase,
               nativeLockStage: fact.stage,
-              triggerQualification: "unverified",
+              triggerQualification:
+                sameTarget?.triggerOrigin === "provider_policy"
+                  ? "journal_and_observation"
+                  : "unverified",
             },
           });
           objects.push(action);
@@ -416,6 +448,8 @@ export class NativeLockBusinessProcessor {
       if (
         this.manualDecision &&
         observing &&
+        (!this.manualDecision.requireProviderPolicy ||
+          observing.triggerOrigin === "provider_policy") &&
         !targetLost &&
         nextActiveRefs[inputKey] === undefined
       ) {

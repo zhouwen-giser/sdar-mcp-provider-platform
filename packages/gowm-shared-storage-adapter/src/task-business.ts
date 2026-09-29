@@ -110,7 +110,7 @@ const requiredIndexes = [
 const ownerContract = z
   .object({
     schema: z.literal("gowm.task-business-storage/v1"),
-    family: z.literal("SMPP_PROVIDER_UGV"),
+    family: z.literal("UGV_PROVIDER"),
     migrationFile: z.literal("030_task_business_versions.sql"),
     installedSha256: z.string().regex(/^[a-f0-9]{64}$/),
   })
@@ -296,4 +296,72 @@ export async function verifyGowmTaskBusinessStorage(
   if (Number(contentTrigger.rows[0]?.trigger_count) !== 1) {
     throw new Error("GOWM_BUSINESS_CONTENT_IMMUTABILITY_MISSING");
   }
+}
+
+export const GOWM_INTERVENTION_COMMAND_TYPE_CONSTRAINT =
+  "CHECK ((command_type = ANY (ARRAY['CANCEL'::text, 'UPDATE'::text, 'PAUSE'::text, 'RESUME'::text, 'INTERVENTION'::text])))";
+
+/** A read-only gate for the Runtime command lane used by navigation adjustments. */
+export async function verifyGowmTaskBusinessRuntimeCommands(
+  pool: Pick<Pool, "query">,
+  config: Pick<GowmStorageConfig, "contractDir">,
+): Promise<void> {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(
+      await readFile(join(config.contractDir, "task-business-runtime.json"), "utf8"),
+    ) as unknown;
+  } catch {
+    throw new Error("GOWM_BUSINESS_RUNTIME_CONTRACT_MISSING");
+  }
+  const parsed = z
+    .object({
+      schema: z.literal("gowm.task-business-runtime/v1"),
+      family: z.literal("SMPP_RUNTIME"),
+      migrationFile: z.literal("027_task_business_intervention_command.sql"),
+      installedSha256: z.string().regex(/^[a-f0-9]{64}$/),
+    })
+    .strict()
+    .safeParse(raw);
+  if (!parsed.success) throw new Error("GOWM_BUSINESS_RUNTIME_CONTRACT_INVALID");
+  const contract = parsed.data;
+  const history = await pool.query<{ checksum: string }>(
+    "SELECT checksum FROM ugv_smpp.gowm_install_history WHERE family=$1 AND file=$2",
+    [contract.family, contract.migrationFile],
+  );
+  if (history.rows.length !== 1 || history.rows[0]?.checksum !== contract.installedSha256)
+    throw new Error("GOWM_BUSINESS_RUNTIME_INSTALL_HISTORY_MISMATCH");
+  const constraints = await pool.query<{
+    conname: string;
+    definition: string;
+    convalidated: boolean;
+  }>(
+    `SELECT conname,pg_get_constraintdef(oid) definition,convalidated FROM pg_constraint WHERE conrelid='ugv_smpp.task_command'::regclass AND conname=ANY($1::text[])`,
+    [["task_command_command_type_check", "task_command_intervention_payload_check"]],
+  );
+  const types = constraints.rows.find((row) => row.conname === "task_command_command_type_check");
+  const payload = constraints.rows.find(
+    (row) => row.conname === "task_command_intervention_payload_check",
+  );
+  if (
+    !types?.convalidated ||
+    types.definition !== GOWM_INTERVENTION_COMMAND_TYPE_CONSTRAINT ||
+    !payload?.convalidated ||
+    !["INTERVENTION", "commandId", "semanticHash", "command"].every((key) =>
+      payload.definition.includes(key),
+    )
+  )
+    throw new Error("GOWM_BUSINESS_RUNTIME_COMMAND_CONSTRAINT_MISSING");
+  const index = await pool.query<{ definition: string; valid: boolean; unique: boolean }>(
+    `SELECT pg_get_indexdef(i.indexrelid) definition,i.indisvalid valid,i.indisunique unique FROM pg_index i JOIN pg_class c ON c.oid=i.indexrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='ugv_smpp' AND c.relname='task_command_intervention_id_idx' AND i.indrelid='ugv_smpp.task_command'::regclass`,
+  );
+  const row = index.rows[0];
+  if (
+    !row?.valid ||
+    !row.unique ||
+    !["device_id, task_id", "commandId", "INTERVENTION"].every((key) =>
+      row.definition.includes(key),
+    )
+  )
+    throw new Error("GOWM_BUSINESS_RUNTIME_COMMAND_INDEX_MISSING");
 }

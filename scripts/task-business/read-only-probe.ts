@@ -33,6 +33,8 @@ export interface ReadOnlyProbeOptions {
   artifactChunkBytes?: number;
   /** Fetch one complete public snapshot without opening the event listener. */
   snapshotOnly?: boolean;
+  /** Include validated full Context and selected parsed SSE notification payloads. */
+  capturePublicPayloads?: boolean;
   emit: (line: Record<string, unknown>) => void | Promise<void>;
   fetchImpl?: typeof fetch;
 }
@@ -81,7 +83,11 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
   const emit = async (line: Record<string, unknown>): Promise<void> => {
     await options.emit({ schema: "sdar.task-business-probe-ndjson/v1", ...line });
   };
-  const request = async (method: string, params: Record<string, unknown>): Promise<Response> => {
+  const request = async (
+    method: string,
+    params: Record<string, unknown>,
+    signal = controller.signal,
+  ): Promise<Response> => {
     serial += 1;
     return fetchImpl(url, {
       method: "POST",
@@ -123,7 +129,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
           },
         },
       }),
-      signal: controller.signal,
+      signal,
     });
   };
   const readSnapshotDescriptor = async (
@@ -277,6 +283,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
       summary: refreshed.context.summary,
       activeRefs: refreshed.context.activeRefs,
       unresolvedRefs: unresolvedTaskBusinessRefs(refreshed),
+      ...(options.capturePublicPayloads ? { context: refreshed.context } : {}),
     });
     for (const object of refreshed.objectVersions.values()) {
       await emit({
@@ -292,6 +299,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
     minimumContextRevision?: number,
     minimumPublicCursor?: RuntimeBusinessCursor,
   ): Promise<void> => {
+    let consecutiveFailures = 0;
     for (;;) {
       try {
         await bootstrap(minimumContextRevision, minimumPublicCursor);
@@ -305,7 +313,8 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
           "BUSINESS_SNAPSHOT_CURSOR_INVALID",
         ].find((code) => reason.endsWith(`:${code}`) || reason === code);
         if (!refreshable) throw error;
-        if (++refreshes > 3) throw new Error("BUSINESS_PROBE_REFRESH_LIMIT", { cause: error });
+        if (++consecutiveFailures > 3)
+          throw new Error("BUSINESS_PROBE_REFRESH_LIMIT", { cause: error });
         await emit({ type: "refresh", reasonCode: refreshable });
       }
     }
@@ -429,7 +438,12 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
     while (!controller.signal.aborted && applied < maxEvents) {
       if (!cursor || !state) throw new Error("BUSINESS_PROBE_STATE_MISSING");
       const requested = cursor;
-      const response = await request(EVENTS_LISTEN, { cursor: requested });
+      const listener = new AbortController();
+      const response = await request(
+        EVENTS_LISTEN,
+        { cursor: requested },
+        AbortSignal.any([controller.signal, listener.signal]),
+      );
       if (!response.ok) {
         const envelope: unknown = await response.json();
         const reasonCode = errorReason(envelope);
@@ -450,7 +464,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
       let refresh: "continuity" | "unresolved_refs" | undefined;
       let minimumContextRevision: number | undefined;
       let minimumPublicCursor: RuntimeBusinessCursor | undefined;
-      for await (const message of sseMessages(response.body)) {
+      for await (const message of sseMessages(response.body, () => listener.abort())) {
         if (isRecord(message) && isRecord(message.error)) {
           throw new Error(`BUSINESS_PROBE_SSE_ERROR:${errorReason(message) ?? "UNKNOWN"}`);
         }
@@ -501,6 +515,7 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
               summary: state.context.summary,
               activeRefs: state.context.activeRefs,
               unresolvedRefs,
+              ...(options.capturePublicPayloads ? { notification: message } : {}),
               ...(state.opaqueDiagnostics.at(-1)?.messageId === feedback.messageId
                 ? { opaqueDiagnostic: state.opaqueDiagnostics.at(-1) }
                 : {}),
@@ -568,7 +583,7 @@ function errorReason(envelope: unknown): string | undefined {
     : undefined;
 }
 
-async function* sseMessages(body: ReadableStream<Uint8Array>): AsyncGenerator {
+async function* sseMessages(body: ReadableStream<Uint8Array>, abort: () => void): AsyncGenerator {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffered = "";
@@ -593,6 +608,9 @@ async function* sseMessages(body: ReadableStream<Uint8Array>): AsyncGenerator {
       if (buffered.length > 2_097_152) throw new Error("BUSINESS_PROBE_SSE_FRAME_TOO_LARGE");
     }
   } finally {
+    // Abort the HTTP request before awaiting cancellation: an open SSE peer can
+    // otherwise keep the reader cancellation pending after a continuity refresh.
+    abort();
     try {
       await reader.cancel();
     } catch {

@@ -128,8 +128,9 @@
     "proto:check:detached": "node scripts/ugv-work-checks.mjs generated-self-check",
     "task-business:generate": "node --import tsx scripts/task-business/generate-core-contract.mjs && node --import tsx scripts/task-business/generate-fixtures.mjs",
     "task-business:check": "node --import tsx scripts/task-business/generate-core-contract.mjs --check && node --import tsx scripts/task-business/generate-fixtures.mjs --check && node scripts/task-business/check-adapter-proto-compat.mjs",
-    "test:task-business:ugv-local": "vitest run tests/contract/ugv-intervention-probe.test.ts tests/contract/ugv-manual-input-probe.test.ts tests/contract/task-business-read-only-probe.test.ts tests/contract/ugv-native-lock-business-processor.test.ts tests/contract/ugv-target-business-processor.test.ts tests/integration/ugv-required-input-producer.test.ts tests/contract/task-business-command-service.test.ts tests/contract/task-business-interaction.test.ts tests/e2e/ugv-task-business-read-e2e.test.ts",
+    "test:task-business:ugv-local": "vitest run tests/contract/ugv-navigation-planner.test.ts tests/contract/ugv-navigation-trajectory.test.ts tests/integration/ugv-provider-auto-lock.test.ts tests/contract/ugv-manual-acceptance.test.ts tests/contract/ugv-intervention-probe.test.ts tests/contract/ugv-manual-input-probe.test.ts tests/contract/task-business-read-only-probe.test.ts tests/contract/ugv-native-lock-business-processor.test.ts tests/contract/ugv-target-business-processor.test.ts tests/integration/ugv-required-input-producer.test.ts tests/contract/task-business-command-service.test.ts tests/contract/task-business-interaction.test.ts tests/e2e/ugv-task-business-read-e2e.test.ts tests/contract/ugv-navigation-business-processor.test.ts tests/contract/ugv-recon-business-processor.test.ts tests/contract/ugv-footprint-business-processor.test.ts tests/contract/ugv-task-business-config.test.ts tests/integration/ugv-provider-adapter.test.ts",
     "test:task-business:ugv-native": "node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/ugv-business/persistence/task-business-postgres.test.ts tests/integration/ugv-task-business-public-postgres.test.ts",
+    "test:task-business:ugv-gowm": "node scripts/require-env.mjs SMPP_GOWM_SHARED_OPEN_TEST_CONFIG_FILE && SMPP_GOWM_SHARED_OPEN_TEST_ENABLE=true vitest run tests/integration/gowm-task-business-open-postgres.test.ts",
     "work:baseline:capture": "node scripts/ugv-work-checks.mjs baseline",
     "work:protected:check": "node scripts/ugv-work-checks.mjs protected-check",
     "work:generated:check": "node scripts/ugv-work-checks.mjs generated-self-check",
@@ -207,7 +208,11 @@
     "gowm-storage:test:postgres": "node scripts/gowm-storage/run.mjs postgres",
     "gowm-storage:smoke": "node scripts/gowm-storage/run.mjs smoke",
     "package:united-server": "python3 scripts/package-united-deployment.py",
-    "package:smpp-server": "node scripts/package-development-server.mjs"
+    "package:smpp-server": "node scripts/package-development-server.mjs",
+    "task-business:manual-acceptance": "node --import tsx scripts/ugv-mcp-manual-acceptance.mjs",
+    "test:task-business:gowm-template": "node scripts/require-env.mjs SMPP_GOWM_BUSINESS_TEMPLATE_TEST_URL && SMPP_GOWM_BUSINESS_TEMPLATE_TEST_ENABLE=true vitest run tests/integration/gowm-task-business-owner-template-postgres.test.ts tests/contract/gowm-task-business-gate.test.ts",
+    "verify:task-business:ugv": "node scripts/require-env.mjs SMPP_GOWM_SHARED_OPEN_TEST_CONFIG_FILE && pnpm task-business:check && pnpm typecheck && pnpm test:task-business:ugv-local && pnpm test:task-business:ugv-gowm",
+    "test:task-business:gowm-deployment": "node scripts/require-env.mjs SMPP_GOWM_BUSINESS_DEPLOY_TEST_URL && vitest run tests/integration/gowm-task-business-deployment-postgres.test.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.4",

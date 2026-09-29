@@ -83,6 +83,28 @@ export const UGV_NAVIGATION_BUSINESS_PROFILE = TaskBusinessOperationProfileSchem
   semantics: { ...UGV_READ_ONLY_BUSINESS_PROFILE.semantics, artifact: ["requested", "observed"] },
 });
 
+/** Qualified by the airport source run; callers must select that concrete adapter. */
+export function airportNavigationBusinessProfile(
+  adjustments: boolean,
+): TaskBusinessOperationProfile {
+  return TaskBusinessOperationProfileSchema.parse({
+    ...UGV_NAVIGATION_BUSINESS_PROFILE,
+    artifactTypes: [...UGV_NAVIGATION_BUSINESS_PROFILE.artifactTypes, "navigation.route"],
+    interventionTypes: adjustments ? ["navigation.adjust_plan"] : [],
+    methods: { ...UGV_NAVIGATION_BUSINESS_PROFILE.methods, interventionApply: adjustments },
+    semantics: {
+      ...UGV_NAVIGATION_BUSINESS_PROFILE.semantics,
+      artifact: ["requested", "planned", "observed"],
+      coordinateFrames: ["EPSG:4326"],
+    },
+    qualification: {
+      ...UGV_NAVIGATION_BUSINESS_PROFILE.qualification,
+      routeAdoption: "qualified",
+      runtimeReplan: adjustments ? "qualified" : "not_supported",
+    },
+  });
+}
+
 export const UGV_RECON_BUSINESS_PROFILE = TaskBusinessOperationProfileSchema.parse({
   ...UGV_READ_ONLY_BUSINESS_PROFILE,
   actionTypes: ["sensor.visual_lock"],
