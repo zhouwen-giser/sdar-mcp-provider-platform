@@ -110,7 +110,7 @@ export interface RuntimeDependencies {
   ttlCleaner: "starting" | "ready" | "failed";
   outboxPublisher: "starting" | "ready" | "failed";
   outboxCleaner: "starting" | "ready" | "failed";
-  providerTelemetryIngress: "starting" | "ready" | "failed";
+  providerTelemetryIngress: "disabled" | "starting" | "ready" | "failed";
   businessEventPersistence: BusinessEventReadinessStatus;
   businessEventReplay: BusinessEventReadinessStatus;
   businessEventIngest: BusinessEventReadinessStatus;
@@ -217,7 +217,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     ttlCleaner: "starting",
     outboxPublisher: "starting",
     outboxCleaner: "starting",
-    providerTelemetryIngress: config.PROVIDER_TELEMETRY_INGRESS_ENABLED ? "starting" : "ready",
+    providerTelemetryIngress: config.PROVIDER_TELEMETRY_INGRESS_ENABLED ? "starting" : "disabled",
     businessEventPersistence: config.BUSINESS_EVENTS_ENABLED ? "starting" : "disabled",
     businessEventReplay: config.BUSINESS_EVENTS_ENABLED ? "starting" : "disabled",
     businessEventIngest: config.BUSINESS_EVENTS_ENABLED ? "starting" : "disabled",
@@ -426,7 +426,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       dependencies.ttlCleaner,
       dependencies.outboxPublisher,
       dependencies.outboxCleaner,
-      dependencies.providerTelemetryIngress,
+      ...(config.PROVIDER_TELEMETRY_INGRESS_ENABLED ? [dependencies.providerTelemetryIngress] : []),
     ];
     const businessEventStatuses = [
       dependencies.businessEventPersistence,
@@ -1277,7 +1277,9 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
           dependencies.ttlCleaner,
           dependencies.outboxPublisher,
           dependencies.outboxCleaner,
-          dependencies.providerTelemetryIngress,
+          ...(config.PROVIDER_TELEMETRY_INGRESS_ENABLED
+            ? [dependencies.providerTelemetryIngress]
+            : []),
         ],
         [
           dependencies.businessEventPersistence,
@@ -1316,7 +1318,16 @@ export function providerOpsEnvelopeForExport(
   recordBody: ProviderOpsEnvelope,
   emittedAt = new Date().toISOString(),
 ): ProviderOpsEnvelope {
-  return { ...recordBody, emittedAt };
+  const navigationReceiptAuthority =
+    recordBody.attributes["sdar.evidence.authority"] === "navigation_dispatch_receipt_v1" ||
+    recordBody.attributes["sdar.mission.authority"] === "navigation_dispatch_receipt_v1";
+  // Instance identity is delivery metadata, excluded from recordHash. Normalize
+  // already queued navigation receipts to the registered durable Runtime source.
+  return {
+    ...recordBody,
+    ...(navigationReceiptAuthority ? { instanceId: "smpp-runtime-postgres-authority" } : {}),
+    emittedAt,
+  };
 }
 
 function runtimeDependenciesReady(

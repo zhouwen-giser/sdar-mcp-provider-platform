@@ -74,7 +74,7 @@ const overrides = {
     SIMULATOR_CREDENTIAL_FREE: true,
     UGV_DIAGNOSTICS_ENABLED: true,
     UGV_EXECUTION_MODE: "live",
-    UGV_FIRE_ENABLED: true,
+    UGV_FIRE_ENABLED: false,
     UGV_MQTT_WIRE_MODE: "ros_bridge_json",
     UGV_MQTT_SESSION_MODE: "clean",
     UGV_DEVICE_MCP_CONTRACT_REPORT_PATH: "/var/lib/sdar/contracts/capture.json",
@@ -185,6 +185,19 @@ const shared = values.RUNTIME.SMPP_STORAGE_MODE === "gowm-shared";
 if (siteProfile && !shared) throw Error("SZ_GOWM_PROFILE_REQUIRES_SHARED_STORAGE");
 if (shared !== (values.ADAPTER.SMPP_STORAGE_MODE === "gowm-shared"))
   throw Error("GOWM_MODE_MISMATCH");
+if (shared && values.ADAPTER.PROVIDER_TELEMETRY_ENABLED === "true") {
+  if (values.RUNTIME.PROVIDER_TELEMETRY_INGRESS_ENABLED !== "true")
+    throw Error("PROVIDER_TELEMETRY_INGRESS_REQUIRED");
+  if (values.RUNTIME.PROVIDER_TELEMETRY_HOST !== "0.0.0.0")
+    throw Error("PROVIDER_TELEMETRY_INGRESS_NOT_REACHABLE");
+  if (
+    values.ADAPTER.PROVIDER_TELEMETRY_ENDPOINT !==
+    `runtime:${values.RUNTIME.PROVIDER_TELEMETRY_PORT}`
+  )
+    throw Error("PROVIDER_TELEMETRY_ENDPOINT_MISMATCH");
+  if (values.ADAPTER.PROVIDER_TELEMETRY_TLS_MODE !== values.RUNTIME.PROVIDER_TELEMETRY_TLS_MODE)
+    throw Error("PROVIDER_TELEMETRY_TLS_MODE_MISMATCH");
+}
 if (shared) {
   const bindingFile = resolve(configDirectory, "gowm-binding.json");
   const binding = existsSync(bindingFile)

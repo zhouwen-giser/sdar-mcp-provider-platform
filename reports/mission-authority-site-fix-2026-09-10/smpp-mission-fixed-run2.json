@@ -1,0 +1,162 @@
+{
+  "request": {
+    "nativeRequirement": "require_native",
+    "telemetryPolicy": "require_full",
+    "observationTimePolicy": "require_source_observed_at",
+    "reconciliationPolicy": "automatic",
+    "streamingEnabled": true,
+    "datasetVersionRef": "sz-gowm-ugv-diagnostic/0.2",
+    "candidate": {
+      "snapshotRef": "sz-gowm-runtime-af6f021ff9fc0526a8bc/v1",
+      "specification": { "baseUrl": "http://17.26.1.20:10999" }
+    },
+    "environment": {
+      "adapter": "external_integration",
+      "ref": "sz-gowm-ugv-development",
+      "config": {
+        "requireNativeMoveAdmission": true,
+        "requiredCandidateSkillId": "embodied.move_to",
+        "refereeBaseUrl": "http://192.168.2.63:7879",
+        "providerBaseUrl": "http://17.26.1.20:19100",
+        "telemetryBaseUrl": "http://17.26.1.20:28081"
+      }
+    },
+    "executionPolicy": {
+      "provenance": {
+        "nativePermitRef": {
+          "permitId": "sz-gowm-native-8a8d845a482d123a/v2",
+          "configurationHash": "sha256:8a8d845a482d123ab0f4ed6d8e6532a8f666886187d5b01eb02119497710b62d",
+          "resourceId": "vehicle:ugv"
+        }
+      },
+      "runClass": "development",
+      "target": "live",
+      "executionProfile": "ugv-diagnostic-development/0.1",
+      "allowDevelopmentSubstitutions": false,
+      "fallbackToSimulation": false,
+      "permit": {
+        "schemaVersion": "sdar-benchmark.development-execution-permit/v1",
+        "enabled": true,
+        "environmentRef": "sz-gowm-ugv-development",
+        "target": "live",
+        "maxConcurrentRuns": 1,
+        "notes": "Manual Development tests only; substitutions must remain labeled; no formal scores.",
+        "allowedFaultProfiles": [
+          "stale-state/v1",
+          "response-loss-after-durable-dispatch/v1",
+          "control-success-physical-no-effect/v1"
+        ],
+        "expiresAt": null
+      },
+      "selectedCaseIds": ["UGV-CORE-001"],
+      "repeatCount": 1
+    },
+    "contractReleaseRef": "sdar-benchmark-contracts/0.1.0-rc.1",
+    "idempotencyKey": "smpp-mission-authority-fixed-20260910-02"
+  },
+  "preflight": {
+    "schemaVersion": "sdar-benchmark.development-run-preflight/v1",
+    "preflightId": "preflight:6e2210055315ffcda9656faa9c7d17052aef93cecb481976a58c24ecbd3424a9",
+    "status": "ready",
+    "canCreateRun": true,
+    "canExecuteRun": true,
+    "formalEligible": false,
+    "checks": [
+      { "checkId": "native-physical-readiness", "status": "pass", "reasonCodes": [] },
+      {
+        "checkId": "native-case:UGV-CORE-001",
+        "status": "pass",
+        "reasonCodes": [],
+        "details": { "caseId": "UGV-CORE-001", "execution": "native", "formalEligible": false }
+      },
+      { "checkId": "dataset", "status": "pass", "reasonCodes": [] },
+      { "checkId": "persistence", "status": "pass", "reasonCodes": [] },
+      { "checkId": "contract-release", "status": "pass", "reasonCodes": [] },
+      { "checkId": "execution-profile", "status": "pass", "reasonCodes": [] },
+      { "checkId": "environment-lease", "status": "pass", "reasonCodes": [] },
+      {
+        "checkId": "external-capabilities",
+        "status": "pass",
+        "reasonCodes": [],
+        "details": { "selectedCount": 4, "substitutedCount": 0 }
+      }
+    ],
+    "substitutions": [
+      {
+        "schemaVersion": "sdar-benchmark.development-substitution/v1",
+        "substitutionId": "development-substitution:6a3bf448bd88da56fd4e0e3a6e6a7abbd68882749913198fc01f9be70714ff87",
+        "capabilityId": "candidate-a2a",
+        "implementationKind": "native",
+        "implementationId": "sdar-a2a",
+        "sourceCapabilityStatus": "available",
+        "activatedAt": "2026-09-09T16:03:25.015Z",
+        "reasonCode": "DEV_NATIVE_CAPABILITY_SELECTED",
+        "artifactRef": null,
+        "formalEligible": false
+      },
+      {
+        "schemaVersion": "sdar-benchmark.development-substitution/v1",
+        "substitutionId": "development-substitution:1c487fe80c40a02ea64c09adf35597009ac60a0b01503f1bd598cfd687c04c89",
+        "capabilityId": "ugv-simulator",
+        "implementationKind": "native",
+        "implementationId": "external-simulator",
+        "sourceCapabilityStatus": "available",
+        "activatedAt": "2026-09-09T16:03:25.015Z",
+        "reasonCode": "DEV_NATIVE_CAPABILITY_SELECTED",
+        "artifactRef": null,
+        "formalEligible": false
+      },
+      {
+        "schemaVersion": "sdar-benchmark.development-substitution/v1",
+        "substitutionId": "development-substitution:1dd0094f6f1088c3b87cd71459e78a0f5d7312cb60ab845870f08b6520de3f81",
+        "capabilityId": "telemetry-evidence",
+        "implementationKind": "native",
+        "implementationId": "sdar-telemetry-handoff",
+        "sourceCapabilityStatus": "available",
+        "activatedAt": "2026-09-09T16:03:25.015Z",
+        "reasonCode": "DEV_NATIVE_CAPABILITY_SELECTED",
+        "artifactRef": null,
+        "formalEligible": false
+      },
+      {
+        "schemaVersion": "sdar-benchmark.development-substitution/v1",
+        "substitutionId": "development-substitution:8b5288b5a5cf5885a2d2b7f61faf70481ad9dabdb88ff13caad9ee5fec63d25d",
+        "capabilityId": "physical-truth",
+        "implementationKind": "native",
+        "implementationId": "referee-source-observed-at",
+        "sourceCapabilityStatus": "available",
+        "activatedAt": "2026-09-09T16:03:25.015Z",
+        "reasonCode": "DEV_NATIVE_CAPABILITY_SELECTED",
+        "artifactRef": null,
+        "formalEligible": false
+      }
+    ],
+    "warnings": ["EXACT_COMMIT_CHECK_SKIPPED_FOR_DEVELOPMENT"],
+    "generatedAt": "2026-09-09T16:03:25.015Z"
+  },
+  "response": {
+    "runId": "run_248652c3d4f65960e866a3b964cbcc634daf69450c11ec55a8758c31e7b91b13",
+    "status": "queued",
+    "cancellationRequested": false,
+    "datasetVersionRef": "sz-gowm-ugv-diagnostic/0.2",
+    "candidateSnapshotId": "sz-gowm-runtime-af6f021ff9fc0526a8bc/v1",
+    "contractReleaseId": "sdar-benchmark-contracts/0.1.0-rc.1",
+    "totalCaseCount": 0,
+    "completedCaseCount": 0,
+    "passedCaseCount": 0,
+    "failedCaseCount": 0,
+    "notReadyCaseCount": 0,
+    "failureClass": null,
+    "failureCode": null,
+    "createdAt": "2026-09-09T16:03:25.941Z",
+    "startedAt": null,
+    "completedAt": null,
+    "updatedAt": "2026-09-09T16:03:25.941Z",
+    "formalEligible": false,
+    "qualificationStatus": "not_requested",
+    "qualityScore": null,
+    "releaseGate": "unavailable",
+    "substitutionCount": 0,
+    "created": true
+  }
+}

@@ -132,6 +132,23 @@ describe("durable Provider Ops audit delivery", () => {
     expect(exported).toEqual([original.recordId]);
   });
 
+  it("claims committed Mission evidence before an older observation backlog", async () => {
+    const older = await capture("older-observation");
+    const receipt = await capture("receipt", {
+      "sdar.evidence.authority": "navigation_dispatch_receipt_v1",
+    });
+    const relation = await capture("relation", {
+      "sdar.mission.authority": "navigation_dispatch_receipt_v1",
+    });
+    const repository = new ProviderOpsDeliveryRepository(pool);
+    const first = await repository.claimDue("owner", 30000, 2);
+    expect(first.map((r) => r.recordId).sort()).toEqual(
+      [receipt.recordId, relation.recordId].sort(),
+    );
+    const second = await repository.claimDue("owner", 30000, 1);
+    expect(second.map((r) => r.recordId)).toEqual([older.recordId]);
+  });
+
   it("reclaims an expired lease without letting the old owner acknowledge it", async () => {
     await capture("expired");
     const repository = new ProviderOpsDeliveryRepository(pool);
@@ -148,8 +165,8 @@ describe("durable Provider Ops audit delivery", () => {
   });
 });
 
-async function capture(identity: string) {
-  const record = envelope(identity);
+async function capture(identity: string, attributes: Record<string, string> = { source: "test" }) {
+  const record = envelope(identity, attributes);
   const client = await pool.connect();
   try {
     await captureProviderOpsDelivery(client, {
@@ -164,7 +181,7 @@ async function capture(identity: string) {
   return record;
 }
 
-function envelope(identity: string) {
+function envelope(identity: string, attributes: Record<string, string> = { source: "test" }) {
   return createProviderOpsEnvelope({
     recordType: "provider.task.lifecycle",
     eventCategory: "task.lifecycle",
@@ -177,7 +194,7 @@ function envelope(identity: string) {
     eventIdentity: `event:${identity}`,
     revision: 1,
     occurredAt: "2026-01-01T00:00:00.000Z",
-    attributes: { source: "test" },
+    attributes,
     payload: { currentState: "RUNNING" },
   });
 }

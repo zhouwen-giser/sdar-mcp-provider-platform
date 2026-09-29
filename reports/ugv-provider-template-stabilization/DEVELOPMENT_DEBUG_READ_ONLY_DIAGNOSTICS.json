@@ -1,0 +1,103 @@
+{
+  "checkedAt": "2026-09-29T02:04:32.176Z",
+  "evidenceClass": "local_debug_read_only_diagnostics",
+  "mutatingToolCalls": 0,
+  "inspectors": [
+    {
+      "port": 9229,
+      "httpStatus": 200,
+      "targets": [
+        {
+          "type": "node",
+          "title": "dist/apps/runtime/src/main.js",
+          "url": "file:///app/dist/apps/runtime/src/main.js",
+          "webSocketAvailable": true
+        }
+      ]
+    },
+    {
+      "port": 9230,
+      "httpStatus": 200,
+      "targets": [
+        {
+          "type": "node",
+          "title": "dist/apps/ugv-provider-adapter/src/main.js",
+          "url": "file:///app/dist/apps/ugv-provider-adapter/src/main.js",
+          "webSocketAvailable": true
+        }
+      ]
+    }
+  ],
+  "reads": [
+    {
+      "name": "vehicle_get_state",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "error": null,
+      "connectivity": {
+        "mqttConnected": true,
+        "deviceMcpConnected": true,
+        "deviceAvailable": true,
+        "packetLossRate": 0,
+        "averageRoundTripTimeMs": 20
+      },
+      "freshness": {
+        "chassisObservedAt": "2026-09-29T02:04:33.722343744Z",
+        "missionObservedAt": "2026-09-29T02:04:33.722343744Z",
+        "payloadObservedAt": "2026-09-29T02:04:33.722343744Z",
+        "healthObservedAt": "2026-09-29T02:04:33.722343744Z",
+        "positionObservedAt": "2026-09-29T02:04:32.256Z"
+      },
+      "mqttIngressSequence": 9541,
+      "observedAgeMs": -1387
+    },
+    {
+      "name": "vehicle_get_capabilities",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "error": null
+    },
+    {
+      "name": "vehicle_get_payload_status",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "error": null
+    },
+    {
+      "name": "vehicle_get_targets",
+      "httpStatus": 200,
+      "resultType": "complete",
+      "error": null,
+      "targetCount": 0
+    }
+  ],
+  "readiness": {
+    "httpStatus": 200,
+    "body": {
+      "status": "ready",
+      "dependencies": {
+        "database": "ready",
+        "adapter": "ready",
+        "adapterManifest": "ready",
+        "recovery": "ready",
+        "scheduler": "ready",
+        "commandDispatcher": "ready",
+        "ttlCleaner": "ready",
+        "outboxPublisher": "ready",
+        "outboxCleaner": "ready",
+        "providerTelemetryIngress": "disabled",
+        "businessEventPersistence": "ready",
+        "businessEventReplay": "ready",
+        "businessEventIngest": "ready",
+        "businessEventFinalizer": "ready",
+        "businessEventAdapterSources": {
+          "vehicle.execution": "ready",
+          "vehicle.health": "ready",
+          "vehicle.target": "ready"
+        },
+        "businessEventRetention": "ready",
+        "businessEventProjection": "ready"
+      }
+    }
+  }
+}

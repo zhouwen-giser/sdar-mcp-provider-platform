@@ -28,6 +28,8 @@ execFileSync(
     primary,
     "-lc",
     [
+      // Load the actual application module graphs using production dependencies only.
+      `node --input-type=module -e 'await import("./dist/apps/runtime/src/runtime.js"); await import("./dist/apps/ugv-provider-adapter/src/runtime.js")'`,
       "test -f /app/dist/apps/runtime/src/main.js",
       "test -d /app/proto",
       "test -d /app/migrations",

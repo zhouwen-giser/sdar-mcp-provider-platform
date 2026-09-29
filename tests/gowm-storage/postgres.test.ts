@@ -1,3 +1,5 @@
+import { storageScope } from "../../packages/gowm-shared-storage-adapter/src/scope.js";
+import { capturePendingNavigationMissions } from "../../packages/gowm-shared-storage-adapter/src/navigation-mission-outbox.js";
 import {
   insertCommittedTaskEvent,
   OutboxRepository,
@@ -340,6 +342,138 @@ describe("actual GOWM-installed SMPP repositories", () => {
       expect(await other.store.getExecution(e.taskId)).toBeUndefined();
     }
     expect(new Set(missions).size).toBe(2);
+  });
+  it("durably publishes new navigation receipts atomically and never backfills legacy executions", async () => {
+    const d = requireValue(devices[0]);
+    const task = admission(d),
+      e = execution(d, task);
+    e.missionAuthorityVersion = 1;
+    await d.tasks.createAdmissionIntent(task);
+    await d.store.putExecution(e);
+    const intent: MutationJournalEntry = {
+      taskId: e.taskId,
+      stepId: "authority-primary",
+      phase: "PRIMARY",
+      toolName: "ugv_path_follow_mission",
+      argumentHash: hash,
+      state: "INTENT_PERSISTED",
+      intentPersistedAt: new Date().toISOString(),
+    };
+    await d.store.claimMutationJournal(intent);
+    const dispatch = {
+      ...intent,
+      state: "DISPATCHING" as const,
+      dispatchedAt: new Date().toISOString(),
+    };
+    await d.store.advanceMutationJournal(dispatch, "INTENT_PERSISTED");
+    await d.store.advanceMutationJournal(
+      {
+        ...dispatch,
+        state: "ACCEPTED",
+        externalMissionId: "41987",
+        resultHash: hash,
+        completedAt: new Date().toISOString(),
+      },
+      "DISPATCHING",
+    );
+    await capturePendingNavigationMissions(d.pool);
+    const facts = async () =>
+      (
+        await d.pool.query<{ record_body: Record<string, unknown> }>(
+          "SELECT record_body FROM provider_ops_delivery WHERE aggregate_id=$1 AND record_body->'attributes'->>'sdar.mission.authority'='navigation_dispatch_receipt_v1'",
+          [task.taskId],
+        )
+      ).rows;
+    expect(await facts()).toHaveLength(0);
+    await publish(d, task, e);
+    e.state = "SUCCEEDED";
+    e.terminalAt = new Date().toISOString();
+    e.updatedAt = e.terminalAt;
+    e.revision++;
+    await d.store.putExecution(e);
+    // A different configured device must not pick up this publication intent.
+    await capturePendingNavigationMissions(requireValue(devices[1]).pool);
+    expect(await facts()).toHaveLength(0);
+    await admin.query(`CREATE OR REPLACE FUNCTION ugv_smpp.test_navigation_outbox_failure() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.aggregate_id='${task.taskId}' AND NEW.record_type='provider.execution.progress' THEN RAISE EXCEPTION 'INJECTED_AUTHORITY_WRITE_FAILURE'; END IF; RETURN NEW; END $$`);
+    await admin.query(
+      "CREATE TRIGGER test_navigation_outbox_failure BEFORE INSERT ON ugv_smpp.provider_ops_delivery FOR EACH ROW EXECUTE FUNCTION ugv_smpp.test_navigation_outbox_failure()",
+    );
+    try {
+      await expect(capturePendingNavigationMissions(d.pool)).rejects.toThrow(
+        "INJECTED_AUTHORITY_WRITE_FAILURE",
+      );
+      const partial = await d.pool.query<{ n: string }>(
+        "SELECT count(*) n FROM provider_ops_delivery WHERE aggregate_id=$1 AND record_body->'attributes'->>'sdar.evidence.authority'='navigation_dispatch_receipt_v1'",
+        [task.taskId],
+      );
+      expect(partial.rows[0]?.n).toBe("0");
+    } finally {
+      await admin.query(
+        "DROP TRIGGER test_navigation_outbox_failure ON ugv_smpp.provider_ops_delivery",
+      );
+      await admin.query("DROP FUNCTION ugv_smpp.test_navigation_outbox_failure()");
+    }
+    const restartedPool = createGowmPool(requireValue(storageScope(d.pool)));
+    try {
+      await Promise.all([
+        capturePendingNavigationMissions(d.pool),
+        capturePendingNavigationMissions(restartedPool),
+      ]);
+    } finally {
+      await restartedPool.end();
+    }
+    const first = await facts();
+    expect(first).toHaveLength(1);
+    expect(first[0]?.record_body.payload).toMatchObject({
+      relationStatus: "exact",
+      deviceMissionId: "41987",
+    });
+    await capturePendingNavigationMissions(d.pool);
+    expect(await facts()).toEqual(first);
+    const count = await d.pool.query<{ n: string }>(
+      "SELECT count(*) n FROM provider_ops_delivery WHERE aggregate_id=$1 AND record_body->'attributes'->>'sdar.evidence.authority'='navigation_dispatch_receipt_v1'",
+      [task.taskId],
+    );
+    expect(count.rows[0]?.n).toBe("1");
+    const legacyTask = admission(d),
+      legacy = execution(d, legacyTask);
+    expect(legacy.missionAuthorityVersion).toBeUndefined();
+    await d.tasks.createAdmissionIntent(legacyTask);
+    await d.store.putExecution(legacy);
+    const legacyIntent = { ...intent, taskId: legacy.taskId };
+    await d.store.claimMutationJournal(legacyIntent);
+    const legacyDispatch = {
+      ...legacyIntent,
+      state: "DISPATCHING" as const,
+      dispatchedAt: new Date().toISOString(),
+    };
+    await d.store.advanceMutationJournal(legacyDispatch, "INTENT_PERSISTED");
+    await d.store.advanceMutationJournal(
+      {
+        ...legacyDispatch,
+        state: "ACCEPTED",
+        externalMissionId: "41988",
+        resultHash: hash,
+        completedAt: new Date().toISOString(),
+      },
+      "DISPATCHING",
+    );
+    await publish(d, legacyTask, legacy);
+    legacy.state = "SUCCEEDED";
+    legacy.terminalAt = new Date().toISOString();
+    legacy.updatedAt = legacy.terminalAt;
+    legacy.revision++;
+    await d.store.putExecution(legacy);
+    await capturePendingNavigationMissions(d.pool);
+    expect(
+      (
+        await d.pool.query(
+          "SELECT 1 FROM provider_ops_delivery WHERE aggregate_id=$1 AND record_body->'attributes'->>'sdar.mission.authority'='navigation_dispatch_receipt_v1'",
+          [legacy.taskId],
+        )
+      ).rowCount,
+    ).toBe(0);
   });
   it("same-device workers claim once while B claims its own commands", async () => {
     const taskIds = [];

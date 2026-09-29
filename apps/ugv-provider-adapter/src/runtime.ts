@@ -492,6 +492,9 @@ export class UgvProviderRuntime {
     );
     const baselineSpeedCursor = this.ingress.fieldObservationAuthority("chassis.speed")?.cursor;
     let execution: ProviderExecution = {
+      ...(input.operationName === "vehicle_navigate"
+        ? { missionAuthorityVersion: 1 as const }
+        : {}),
       taskId: input.taskId,
       externalExecutionId: `${this.options.resourceId ?? "vehicle:ugv1"}:${tracks[0] ?? "query"}:${randomUUID()}`,
       operationName: input.operationName,

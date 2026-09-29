@@ -1,0 +1,23 @@
+services:
+  ugv-runtime:
+    environment:
+      LOG_LEVEL: debug
+    command:
+      - node
+      - --inspect=0.0.0.0:9229
+      - --enable-source-maps
+      - dist/apps/runtime/src/main.js
+    ports: !override
+      - "0.0.0.0:19120:8080"
+      - "127.0.0.1:9229:9229"
+
+  ugv-adapter:
+    environment:
+      LOG_LEVEL: debug
+    command:
+      - sh
+      - -c
+      - node dist/apps/ugv-provider-adapter/src/migrate.js && exec node --inspect=0.0.0.0:9229 --enable-source-maps dist/apps/ugv-provider-adapter/src/main.js
+    ports: !override
+      - "0.0.0.0:17010:7010"
+      - "127.0.0.1:9230:9229"

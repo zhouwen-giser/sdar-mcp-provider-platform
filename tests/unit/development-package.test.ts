@@ -84,9 +84,10 @@ describe("sz-gowm deployment profile", () => {
       networks: Record<string, { external?: boolean; name?: string }>;
     };
     expect(Object.keys(compose.services).sort()).toEqual(["adapter", "runtime"]);
-    expect(compose.services.adapter?.environment.UGV_FIRE_ENABLED).toBe("true");
+    expect(compose.services.adapter?.environment.UGV_FIRE_ENABLED).toBe("false");
     expect(compose.services.adapter?.environment.PROVIDER_TELEMETRY_ENDPOINT).toBe("runtime:7002");
     expect(compose.services.runtime?.environment.PROVIDER_TELEMETRY_HOST).toBe("0.0.0.0");
+    expect(compose.services.runtime?.environment.PROVIDER_TELEMETRY_INGRESS_ENABLED).toBe("true");
     expect(Object.keys(compose.volumes).sort()).toEqual(["adapter-state", "runtime-state"]);
     expect(compose.networks.gowm).toEqual({
       external: true,
@@ -117,8 +118,38 @@ describe("sz-gowm deployment profile", () => {
       60000,
     );
     expect(loadUgvProviderConfig({ ...side("ADAPTER__"), ...identity }).UGV_FIRE_ENABLED).toBe(
-      true,
+      false,
     );
+  });
+  it.each([
+    ["RUNTIME__PROVIDER_TELEMETRY_INGRESS_ENABLED", "false", "PROVIDER_TELEMETRY_INGRESS_REQUIRED"],
+    ["RUNTIME__PROVIDER_TELEMETRY_HOST", "127.0.0.1", "PROVIDER_TELEMETRY_INGRESS_NOT_REACHABLE"],
+    [
+      "ADAPTER__PROVIDER_TELEMETRY_ENDPOINT",
+      "runtime:7999",
+      "PROVIDER_TELEMETRY_ENDPOINT_MISMATCH",
+    ],
+    ["ADAPTER__PROVIDER_TELEMETRY_TLS_MODE", "required", "PROVIDER_TELEMETRY_TLS_MODE_MISMATCH"],
+  ])("rejects broken shared telemetry wiring: %s", (key, value, reason) => {
+    const dir = mkdtempSync(join(tmpdir(), "smpp-telemetry-wiring-"));
+    try {
+      const file = join(dir, "test.env");
+      const input = shared.replace(
+        new RegExp(`^${key}=.*$`, "m"),
+        `${key}=${JSON.stringify(value)}`,
+      );
+      writeFileSync(file, input);
+      let stderr = "";
+      try {
+        execFileSync(process.execPath, [script, "config", file], { stdio: "pipe" });
+      } catch (error) {
+        stderr = String((error as { stderr: Buffer }).stderr);
+      }
+      expect(stderr).toContain(reason);
+      expect(readFileSync(file, "utf8")).toBe(input);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
   it("rejects one-sided mode and legacy connection before calling Docker", () => {
     const dir = mkdtempSync(join(tmpdir(), "smpp-gowm-profile-"));

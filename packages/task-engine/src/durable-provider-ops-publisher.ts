@@ -37,12 +37,25 @@ export class DurableProviderOpsPublisher {
     const records = await this.repository.claimDue(
       this.ownerId,
       this.options.leaseMilliseconds ?? 30_000,
-      this.options.batchSize ?? 100,
+      this.options.batchSize ?? 10,
     );
     result.claimed = records.length;
+    // The exporter acknowledges a complete batch. Avoid one HTTP round trip per
+    // record, which lets high-frequency observations delay terminal authority.
+    // If a batch is rejected, isolate records below without acknowledging any
+    // unconfirmed delivery; accepted duplicates retain their original identity.
+    let batchAcknowledged = false;
+    if (records.length > 1) {
+      try {
+        await this.exporter.export(records);
+        batchAcknowledged = true;
+      } catch {
+        // Per-record fallback preserves permanent-error isolation.
+      }
+    }
     for (const record of records) {
       try {
-        await this.exporter.export([record]);
+        if (!batchAcknowledged) await this.exporter.export([record]);
         if (!(await this.repository.markDelivered(record.recordId, this.ownerId))) continue;
         result.delivered += 1;
         this.#emit("delivered", 1);

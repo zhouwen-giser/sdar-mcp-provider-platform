@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "deployment": {
+    "status": "PASS",
+    "deployedAt": "2026-09-09T02:00:19.794Z",
+    "baseRoot": "/mnt/data/gowm-analysis-releases/341a14aceee94a4a/gowm-gdps-analysis-dev-server-0.1.0",
+    "baseSha256": "341a14aceee94a4abc65215aa18c30a16cf20afb03c65dc4ec5ab31109202f8f",
+    "gowmSha256": "01b37aeb563179a7449844b93d28cccafdf507a9befffa241d7482460aab221a",
+    "smppRevision": "c3599914785913ea107ac5394676537f7542a635-worktree-17d17b081c11",
+    "databaseId": "7683345516196352043",
+    "account": "ugv_smpp_app",
+    "upstreamContainersPreserved": 33,
+    "credentialSource": "/mnt/data/gowm-analysis-releases/341a14aceee94a4a/gowm-gdps-analysis-dev-server-0.1.0/.runtime/gdps-gowm-dev-server-0.2.2-gowm-0.7.1/.runtime/gowm/gowm-dev-server-0.7.1/.runtime/dev-deploy/business-connections.env"
+  },
+  "fireEnabled": false,
+  "readiness": {
+    "status": "ready",
+    "dependencies": {
+      "database": "ready",
+      "adapter": "ready",
+      "adapterManifest": "ready",
+      "recovery": "ready",
+      "scheduler": "ready",
+      "commandDispatcher": "ready",
+      "ttlCleaner": "ready",
+      "outboxPublisher": "ready",
+      "outboxCleaner": "ready",
+      "providerTelemetryIngress": "ready",
+      "businessEventPersistence": "ready",
+      "businessEventReplay": "ready",
+      "businessEventIngest": "ready",
+      "businessEventFinalizer": "ready",
+      "businessEventAdapterSources": {
+        "vehicle.execution": "ready",
+        "vehicle.health": "ready",
+        "vehicle.target": "ready"
+      },
+      "businessEventRetention": "ready",
+      "businessEventProjection": "ready"
+    }
+  },
+  "containers": [
+    {
+      "name": "/smpp-gowm-runtime-1",
+      "image": "smpp-gowm/runtime:c3599914785913ea107ac5394676537f7542a635-worktree-17d17b081c11",
+      "running": true
+    },
+    {
+      "name": "/smpp-gowm-adapter-1",
+      "image": "smpp-gowm/adapter:c3599914785913ea107ac5394676537f7542a635-worktree-17d17b081c11",
+      "running": true
+    }
+  ],
+  "oldContainersRemoved": 2,
+  "oldVolumesBackedUpAndRecreated": ["smpp-gowm_adapter-state", "smpp-gowm_runtime-state"],
+  "oldImagesRemoved": [
+    "smpp-gowm/adapter:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-ced8640b8ced",
+    "smpp-gowm/runtime:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-ced8640b8ced",
+    "smpp-gowm/adapter:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-2ffd872cf274",
+    "smpp-gowm/runtime:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-2ffd872cf274",
+    "smpp-gowm/adapter:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-d5106be7fe47",
+    "smpp-gowm/runtime:877221a171e6f0f7d8d1a9e248095d590e416e33-worktree-d5106be7fe47"
+  ],
+  "oldImagesStillReferenced": [],
+  "otherContainersPreserved": 54,
+  "backupDirectory": "/mnt/data/smpp-refresh-20260909"
+}

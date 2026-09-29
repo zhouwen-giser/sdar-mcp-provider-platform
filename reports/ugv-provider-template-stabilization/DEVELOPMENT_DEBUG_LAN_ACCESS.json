@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-09-29T02:19:05.575Z",
+  "probeOrigin": "disposable Docker bridge container",
+  "runtimeHealth": {
+    "url": "http://17.26.1.20:19120/health/ready",
+    "httpStatus": 200,
+    "status": "ready"
+  },
+  "mcp": {
+    "url": "http://17.26.1.20:19120/mcp",
+    "httpStatus": 200,
+    "toolCount": 10
+  },
+  "providerTcp": {
+    "host": "17.26.1.20",
+    "port": 17010,
+    "reachable": true
+  },
+  "mutatingToolCalls": 0
+}

@@ -1,3 +1,4 @@
+import { storageScope } from "../../gowm-shared-storage-adapter/src/scope.js";
 import * as grpc from "@grpc/grpc-js";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -291,6 +292,24 @@ async function captureMissionRelationFact(
   source: ReturnType<typeof createProviderOpsEnvelope>,
   sourceEventKey: string,
 ): Promise<void> {
+  // Opted-in navigations derive their final authority from committed dispatch
+  // receipts. Observations remain evidence, but cannot overwrite that relation.
+  const scope = storageScope(client);
+  if (scope) {
+    const durable = await client.query(
+      `SELECT 1 FROM ugv_smpp.ugv_execution WHERE device_id=$1 AND smpp_service_key=$2
+       AND gowm_binding_id=$3 AND mcp_task_id=$4 AND external_execution_id=$5
+       AND operation_name='vehicle_navigate' AND payload->>'missionAuthorityVersion'='1'`,
+      [
+        scope.allowedDeviceIds[0],
+        scope.serviceKey,
+        scope.bindingId,
+        task.taskId,
+        task.externalExecutionId,
+      ],
+    );
+    if (durable.rowCount) return;
+  }
   const externalExecutionId = task.externalExecutionId;
   if (externalExecutionId === null) throw new Error("PROVIDER_EVENT_EXECUTION_ID_MISSING");
   const resourceId = source.resourceId;
