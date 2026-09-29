@@ -1,0 +1,118 @@
+{
+  "schema": "sdar.task-business-conditional-write-wire-examples/v1",
+  "qualification": "synthetic_contract_only",
+  "note": "These are complete frozen /mcp envelopes for a hypothetical qualified Profile. The selected UGV Profile does not advertise either business write capability. A complete response acknowledges a queued command, not a device effect.",
+  "exchanges": [
+    {
+      "logicalInterface": "RespondTaskInput",
+      "precondition": "A persisted Task has a pending RequiredInput with requestKey approval, requiredResponder user, and a matching qualified Operation Profile.",
+      "request": {
+        "headers": {
+          "accept": "application/json, text/event-stream",
+          "content-type": "application/json",
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tasks/update",
+          "mcp-name": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a1004",
+          "x-sdar-subject": "synthetic-user",
+          "x-sdar-tenant": "synthetic-tenant",
+          "x-sdar-actor-type": "user"
+        },
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "synthetic-input-answer",
+          "method": "tasks/update",
+          "params": {
+            "taskId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a1004",
+            "inputResponses": {
+              "approval": { "action": "accept", "content": { "decision": "continue_observation" } }
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "synthetic-business-consumer",
+                "version": "1.0.0"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {
+                "extensions": { "io.modelcontextprotocol/tasks": {} }
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "httpStatus": 200,
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "synthetic-input-answer",
+          "result": { "resultType": "complete" }
+        }
+      }
+    },
+    {
+      "logicalInterface": "ApplyTaskIntervention",
+      "precondition": "A persisted Task has a nonblocking available Intervention revision 1, effective plan revision 2, verified user, and a Profile with a qualified interventionApply method.",
+      "request": {
+        "headers": {
+          "accept": "application/json, text/event-stream",
+          "content-type": "application/json",
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "io.sdar/taskBusiness/interventions/apply",
+          "mcp-name": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a1004",
+          "x-sdar-subject": "synthetic-user",
+          "x-sdar-tenant": "synthetic-tenant",
+          "x-sdar-actor-type": "user"
+        },
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "synthetic-plan-adjustment",
+          "method": "io.sdar/taskBusiness/interventions/apply",
+          "params": {
+            "schemaVersion": "sdar.runtime-intervention-command/1.0-rc2",
+            "commandId": "synthetic-adjustment-1",
+            "taskId": "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a1004",
+            "executionId": "execution-stored",
+            "interventionId": "intervention-1",
+            "guard": {
+              "mode": "semantic",
+              "expectedInterventionRevision": 1,
+              "expectedEffectivePlanRevision": 2
+            },
+            "input": { "viaPoints": [[116.1, 39.1]] },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "synthetic-business-consumer",
+                "version": "1.0.0"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {
+                "extensions": {
+                  "io.modelcontextprotocol/tasks": {},
+                  "io.sdar/taskBusiness": { "profileVersion": "1.0-rc2" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "httpStatus": 200,
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "synthetic-plan-adjustment",
+          "result": {
+            "resultType": "complete",
+            "receipt": {
+              "commandId": "synthetic-adjustment-1",
+              "commandSequence": "1",
+              "commandState": "PENDING",
+              "durablyAccepted": true,
+              "businessApplied": false,
+              "duplicate": false
+            },
+            "profileVersion": "1.0-rc2"
+          }
+        }
+      }
+    }
+  ]
+}

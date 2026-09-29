@@ -4,11 +4,15 @@ import {
   validateCommandAckIdentity,
 } from "../../adapter-protocol/src/index.js";
 import type { GrpcAdapterGateway } from "../../adapter-protocol/src/index.js";
-import type { Clock, ExecutionMode } from "../../domain/src/index.js";
+import type { AuthorizationContext, Clock, ExecutionMode } from "../../domain/src/index.js";
 import { isTerminalState, systemClock } from "../../domain/src/index.js";
 import { OperationSnapshotRepository } from "../../persistence-postgres/src/index.js";
 import type { PendingCommandRecord, TaskRepository } from "../../persistence-postgres/src/index.js";
 import type { ValidatedOperation } from "../../operation-registry/src/index.js";
+import {
+  RuntimeInterventionCommandSchema,
+  TrustedResponderSchema,
+} from "../../vehicle-provider-core/src/task-business-interaction.js";
 import { withLeaseHeartbeat } from "./lease-heartbeat.js";
 import { validatedSnapshotTransition } from "./result-contract.js";
 
@@ -16,6 +20,7 @@ export interface CommandDispatcherOptions {
   concurrency?: number;
   leaseMilliseconds?: number;
   maxInputResponseAttempts?: number;
+  maxInterventionAttempts?: number;
   onMetric?: (durationMs: number) => void;
 }
 
@@ -85,6 +90,14 @@ export class DurableCommandDispatcher {
     const leaseMilliseconds = this.options.leaseMilliseconds ?? this.claimLeaseMs;
     const renew = () => this.repository.renewCommandClaim(command, leaseMilliseconds);
     await renew();
+    if (await this.repository.supersedeClaimedBusinessInputIfNoLongerCurrent(command)) {
+      result.exhausted += 1;
+      return;
+    }
+    if (await this.repository.supersedeClaimedBusinessInterventionIfNotRunning(command)) {
+      result.exhausted += 1;
+      return;
+    }
     const task = await this.repository.getById(command.taskId);
     if (task === null || isTerminalState(task.internalState)) {
       await this.repository.rejectClaimedCommand(
@@ -106,6 +119,8 @@ export class DurableCommandDispatcher {
         outcome = await this.dispatchCancel(command, task, operation);
       } else if (command.commandType === "UPDATE") {
         outcome = await this.dispatchUpdate(command, task, operation.name);
+      } else if (command.commandType === "INTERVENTION") {
+        outcome = await this.dispatchIntervention(command, task, operation.name);
       } else {
         outcome = await this.dispatchPauseOrResume(
           command,
@@ -160,6 +175,17 @@ export class DurableCommandDispatcher {
           result.exhausted += 1;
           return;
         }
+      }
+      if (
+        command.commandType === "INTERVENTION" &&
+        command.attemptCount >= (this.options.maxInterventionAttempts ?? 8)
+      ) {
+        await this.repository.exhaustClaimedBusinessIntervention(
+          command,
+          error instanceof Error ? error.message : "Intervention delivery state is unknown.",
+        );
+        result.exhausted += 1;
+        return;
       }
       await this.repository.retryClaimedCommand(
         command,
@@ -285,7 +311,23 @@ export class DurableCommandDispatcher {
     },
     operationName: string,
   ): Promise<"acknowledged" | "retriable" | "rejected" | "exhausted"> {
-    const update = parseUpdatePayload(command.payload);
+    let update: ReturnType<typeof parseUpdatePayload>;
+    try {
+      update = parseUpdatePayload(command.payload);
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== "INVALID_UPDATE_COMMAND_PAYLOAD") {
+        throw error;
+      }
+      await this.repository.rejectClaimedCommand(
+        command,
+        "INVALID_UPDATE_COMMAND_PAYLOAD",
+        "Persisted Update command payload is invalid.",
+      );
+      return "rejected";
+    }
+    if (await this.repository.rejectClaimedPromotedInputIfPayloadMismatch(command)) {
+      return "rejected";
+    }
     const answers = update.answers;
     const identity = {
       taskId: task.taskId,
@@ -302,7 +344,13 @@ export class DurableCommandDispatcher {
         return update.kind === "frozen"
           ? this.gateway.updateMcpTaskExecution(
               identity,
-              answers.map((answer) => ({ key: answer.key, result: answer.response })),
+              answers.map((answer) => ({
+                key: answer.key,
+                result: answer.response,
+                ...(answer.verifiedResponder === undefined
+                  ? {}
+                  : { verifiedResponder: answer.verifiedResponder }),
+              })),
               options,
             )
           : this.gateway.updateExecution(identity, answers, options);
@@ -328,6 +376,14 @@ export class DurableCommandDispatcher {
             ack.message || "Adapter rejected update command.",
           );
           return "retriable";
+        }
+        if (answers.some((answer) => answer.verifiedResponder !== undefined)) {
+          await this.repository.rejectClaimedCommand(
+            command,
+            typeof ack.reasonCode === "string" ? ack.reasonCode : "ADAPTER_REJECTED",
+            ack.message || "Business input response was rejected.",
+          );
+          return "rejected";
         }
         await this.repository.rejectInputResponseAndFailTask(
           command,
@@ -424,6 +480,109 @@ export class DurableCommandDispatcher {
     }
   }
 
+  private async dispatchIntervention(
+    command: PendingCommandRecord,
+    task: {
+      taskId: string;
+      operationName: string;
+      argumentHash: string;
+      externalExecutionId: string | null;
+      authorizationContextHash: string;
+      executionMode: ExecutionMode;
+      simulationId: string | null;
+    },
+    operationName: string,
+  ): Promise<"acknowledged" | "retriable" | "rejected" | "exhausted"> {
+    const parsed = RuntimeInterventionCommandSchema.safeParse(command.payload.command);
+    if (!parsed.success) {
+      await this.repository.rejectClaimedCommand(
+        command,
+        "INTERVENTION_COMMAND_INVALID",
+        "Persisted Intervention command is invalid.",
+      );
+      return "rejected";
+    }
+    const intervention = parsed.data;
+    if (
+      intervention.taskId !== task.taskId ||
+      intervention.commandId !== command.payload.commandId
+    ) {
+      await this.repository.rejectClaimedCommand(
+        command,
+        "INTERVENTION_COMMAND_BINDING_INVALID",
+        "Persisted Intervention command identity does not match its Task command.",
+      );
+      return "rejected";
+    }
+    const responder = TrustedResponderSchema.safeParse(command.payload.responder);
+    if (!responder.success) {
+      await this.repository.rejectClaimedCommand(
+        command,
+        "RESPONDER_NOT_AUTHORIZED",
+        "Persisted Intervention responder is not verified.",
+      );
+      return "rejected";
+    }
+    const identity = {
+      taskId: task.taskId,
+      operationName,
+      argumentHash: task.argumentHash,
+      commandSequence: command.commandSequence,
+    };
+    const ack = await this.withClaimHeartbeat(command, () =>
+      this.gateway.applyIntervention(
+        identity,
+        {
+          command: intervention,
+          responder: responder.data,
+        },
+        {
+          ...executionOptions(task),
+          externalExecutionId: task.externalExecutionId,
+        },
+      ),
+    );
+    validateCommandAckIdentity(ack, {
+      taskId: task.taskId,
+      externalExecutionId: task.externalExecutionId,
+      operationName,
+      argumentHash: task.argumentHash,
+      authorizationContextHash: task.authorizationContextHash,
+      executionMode: task.executionMode,
+      simulationId: task.simulationId,
+      commandSequence: command.commandSequence,
+    });
+    if (!ack.accepted) {
+      if (isRetryableAck(ack.reasonCode)) {
+        if (await this.trySupersedeClaimedCommandForSafeStop(command)) return "exhausted";
+        if (command.attemptCount >= (this.options.maxInterventionAttempts ?? 8)) {
+          await this.repository.exhaustClaimedBusinessIntervention(
+            command,
+            ack.message || "Intervention delivery state is unknown.",
+          );
+          return "exhausted";
+        }
+        await this.retry(
+          command,
+          ack.reasonCode || "ADAPTER_RETRYABLE_REJECTION",
+          ack.message || "Adapter rejected intervention command temporarily.",
+        );
+        return "retriable";
+      }
+      await this.repository.rejectClaimedCommand(
+        command,
+        ack.reasonCode || "ADAPTER_REJECTED",
+        ack.message || "Adapter rejected intervention command.",
+      );
+      return "rejected";
+    }
+    await this.repository.acknowledgeClaimedCommand(
+      command,
+      ack as unknown as Record<string, unknown>,
+    );
+    return "acknowledged";
+  }
+
   private async withClaimHeartbeat<T>(
     command: PendingCommandRecord,
     operation: () => Promise<T>,
@@ -481,22 +640,33 @@ function isIdentityError(error: unknown): boolean {
   return error instanceof Error && error.message.includes("IDENTITY_MISMATCH");
 }
 
-function parseUpdatePayload(payload: Record<string, unknown>): {
+function parseUpdatePayload(candidate: unknown): {
   kind: "legacy" | "frozen";
   answers: {
     key: string;
     value: unknown;
     answerHash: string;
     response: { action: "accept" | "decline" | "cancel"; content?: unknown };
+    verifiedResponder?: NonNullable<AuthorizationContext["verifiedResponder"]>;
   }[];
 } {
+  if (candidate === null || typeof candidate !== "object" || Array.isArray(candidate)) {
+    throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+  }
+  const payload = candidate as Record<string, unknown>;
   const inputResponses = payload.inputResponses;
-  if (
-    inputResponses !== undefined &&
-    inputResponses !== null &&
-    typeof inputResponses === "object" &&
-    !Array.isArray(inputResponses)
-  ) {
+  if (Object.hasOwn(payload, "inputResponses")) {
+    if (
+      inputResponses === null ||
+      typeof inputResponses !== "object" ||
+      Array.isArray(inputResponses)
+    ) {
+      throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+    }
+    const verifiedResponders = parseVerifiedResponders(payload.verifiedResponders);
+    if (Object.keys(verifiedResponders).some((key) => !Object.hasOwn(inputResponses, key))) {
+      throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+    }
     const answers = Object.entries(inputResponses as Record<string, unknown>).map(
       ([key, value]) => {
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
@@ -518,10 +688,16 @@ function parseUpdatePayload(payload: Record<string, unknown>): {
           value: response.content ?? null,
           answerHash: commandHash(normalized),
           response: normalized,
+          ...(verifiedResponders[key] === undefined
+            ? {}
+            : { verifiedResponder: verifiedResponders[key] }),
         };
       },
     );
     return { kind: "frozen", answers };
+  }
+  if (Object.hasOwn(payload, "verifiedResponders")) {
+    throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
   }
   const answers = payload.answers;
   if (
@@ -542,6 +718,32 @@ function parseUpdatePayload(payload: Record<string, unknown>): {
       response: { action: "accept", content: value },
     })),
   };
+}
+
+function parseVerifiedResponders(
+  value: unknown,
+): Record<string, NonNullable<AuthorizationContext["verifiedResponder"]>> {
+  if (value === undefined) return {};
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+  }
+  const output: Record<string, NonNullable<AuthorizationContext["verifiedResponder"]>> = {};
+  for (const [key, responder] of Object.entries(value)) {
+    if (responder === null || typeof responder !== "object" || Array.isArray(responder)) {
+      throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+    }
+    const fields = responder as Record<string, unknown>;
+    if (
+      !["user", "agent", "operator"].includes(String(fields.actorType)) ||
+      typeof fields.actorId !== "string" ||
+      fields.actorId.length === 0 ||
+      !["jwt_hs256", "trusted_headers"].includes(String(fields.source))
+    ) {
+      throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
+    }
+    output[key] = fields as unknown as NonNullable<AuthorizationContext["verifiedResponder"]>;
+  }
+  return output;
 }
 
 function canonicalize(value: unknown): string {

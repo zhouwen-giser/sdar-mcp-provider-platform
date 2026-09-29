@@ -4,8 +4,11 @@ import {
   canonicalJson,
   jsonToProtoStruct,
   protoStructToJson,
+  protoValueToJson,
+  type ProtoValue,
 } from "../../../packages/adapter-protocol/src/index.js";
 import type {
+  BusinessCommandRecord,
   CommandAckRecord,
   ExecutionContextRecord,
   MutationJournalEntry,
@@ -16,6 +19,7 @@ import type {
 } from "../../../packages/provider-adapter-kit/src/index.js";
 import {
   assertDiagnosticControlSignature,
+  BoundExecutionScope,
   diagnosticCapabilityContract,
   diagnosticRequestHash,
   diagnosticStableOperationKey,
@@ -39,6 +43,7 @@ import type {
 import {
   buildUgvEmergencyStopCleanupCalls,
   buildUgvEmergencyStopPrimaryCall,
+  buildUgvTargetLockCall,
   controlDeviceCalls,
   canonicalUgvMissionId,
   DeviceToolRejectedError,
@@ -54,11 +59,14 @@ import {
 } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
   normalizeMqttObservation,
+  type AppliedMqttObservation,
   type VehicleMqttIngress,
 } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 import {
   assertNoRefereeData,
   checkVehicleAvailability,
+  compareIsoTimestamps,
+  millisecondsBetweenIsoTimestamps,
   freshnessState,
   isNewAuthority,
   mapReconMotionStatus,
@@ -80,12 +88,27 @@ import {
   type PhysicalDispatchBaseline,
   type PhysicalObservationAuthority,
   type UgvSnapshot,
+  type VehicleManifestProfile,
   type VehicleObservationField,
   type VehicleReconnaissanceState,
   type VehicleTaskTrack,
   type VehicleTrack,
 } from "../../../packages/vehicle-provider-core/src/index.js";
 import type { UgvBusinessEventHub } from "./business-events.js";
+import type { UgvTaskBusinessContextService } from "./task-business-service.js";
+import {
+  RequiredInputSchema,
+  RuntimeInterventionCommandSchema,
+  TrustedResponderSchema,
+  type RequiredInput,
+} from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
+import { ReconBusinessProcessor } from "./recon-business-processor.js";
+import { TargetBusinessProcessor } from "./target-business-processor.js";
+import { NativeLockBusinessProcessor } from "./native-lock-business-processor.js";
+import { UgvManualInputBusinessHandler } from "./manual-input-business-handler.js";
+import { NavigationTrajectoryProcessor } from "./navigation-trajectory-processor.js";
+import type { VehicleBusinessReadIdentity } from "../../../packages/provider-adapter-kit/src/vehicle-grpc-server.js";
+import type { BusinessSnapshotPartSelector } from "../../../packages/adapter-protocol/src/index.js";
 import type { UgvTelemetry } from "./telemetry.js";
 import { normalizeUgvCapabilities } from "./capabilities.js";
 import { UgvOperationHealthTracker } from "./operation-health.js";
@@ -108,6 +131,10 @@ const FRESHNESS_TELEMETRY_INTERVAL_MS = 10_000;
 const FIRE_LOCAL_CANCELLATION_REASONS = new Set([
   "UGV_FIRE_CONFIRMATION_REJECTED",
   "UGV_FIRE_CANCELLED_BEFORE_DISPATCH",
+]);
+const TARGET_PROJECTION_CONFLICT_REASONS = new Set([
+  "TARGET_SOURCE_VERSION_CONFLICT",
+  "TARGET_SAME_TIME_POSITION_CONFLICT",
 ]);
 
 const BLOCKING_QUALIFICATION_REASONS: ReadonlySet<UgvQualificationReasonCode> = new Set([
@@ -214,6 +241,11 @@ export class UgvProviderRuntime {
         recoverySuccessThreshold: number;
       };
       pollIntervalMs: number;
+      businessManualDecision?: {
+        maxWaitMs: number;
+        onExpire: RequiredInput["onExpire"];
+        onDismiss: RequiredInput["onDismiss"];
+      };
       diagnostics?: {
         enabled: boolean;
         controlToken: string;
@@ -227,6 +259,7 @@ export class UgvProviderRuntime {
     readonly device: UgvDeviceMcpClient,
     readonly businessEvents: UgvBusinessEventHub,
     readonly telemetry: UgvTelemetry,
+    readonly taskBusiness?: UgvTaskBusinessContextService,
   ) {
     this.arbiter = new TrackArbiter(
       options.allowNavigationWithRecon,
@@ -304,8 +337,8 @@ export class UgvProviderRuntime {
         void this.telemetry.metric("device_mcp_uncertain_total", 1, "call", observation.toolName);
     });
     this.ingress.setDeviceConnected(this.device.connected());
-    this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic) => {
-      void this.#observe(snapshot, topic);
+    this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic, applied) => {
+      void this.#serializeMutation(() => this.#observe(snapshot, topic, applied));
     });
     this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
@@ -362,8 +395,55 @@ export class UgvProviderRuntime {
       ...(phase === undefined ? {} : { phase }),
     });
   }
-  executionSnapshot(execution: ProviderExecution): Record<string, unknown> {
-    return executionSnapshot(execution);
+  async executionSnapshot(execution: ProviderExecution): Promise<Record<string, unknown>> {
+    const request =
+      execution.operationName === "vehicle_area_recon" && execution.state === "WAITING_INPUT"
+        ? await this.taskBusiness?.activeRequiredInput(execution)
+        : undefined;
+    return executionSnapshot(execution, request);
+  }
+  getBusinessContext(
+    identity: VehicleBusinessReadIdentity,
+    maxPageBytes: number,
+    pageCursor: string,
+  ): Promise<Record<string, unknown>> {
+    if (!this.taskBusiness) return Promise.reject(new Error("BUSINESS_METHOD_NOT_ENABLED"));
+    return this.taskBusiness.getBusinessContext(identity, maxPageBytes, pageCursor);
+  }
+  getBusinessSnapshotPart(
+    identity: VehicleBusinessReadIdentity,
+    selector: BusinessSnapshotPartSelector,
+  ): ReturnType<UgvTaskBusinessContextService["getBusinessSnapshotPart"]> {
+    if (!this.taskBusiness) return Promise.reject(new Error("BUSINESS_METHOD_NOT_ENABLED"));
+    return this.taskBusiness.getBusinessSnapshotPart(identity, selector);
+  }
+  businessFeedbackProfiles(): VehicleManifestProfile["businessFeedbackProfiles"] | undefined {
+    if (
+      !this.taskBusiness ||
+      !this.store.businessEventSources().some((source) => source.sourceId === "vehicle.business")
+    ) {
+      return undefined;
+    }
+    return {
+      vehicle_navigate: this.taskBusiness.readOnlyProfile("vehicle_navigate"),
+      vehicle_area_recon: this.taskBusiness.readOnlyProfile("vehicle_area_recon"),
+    };
+  }
+  getBusinessArtifact(
+    identity: VehicleBusinessReadIdentity,
+    artifactId: string,
+    revision: number | undefined,
+    representationName: string,
+    includeContent: boolean,
+  ): ReturnType<UgvTaskBusinessContextService["getBusinessArtifact"]> {
+    if (!this.taskBusiness) return Promise.reject(new Error("BUSINESS_METHOD_NOT_ENABLED"));
+    return this.taskBusiness.getBusinessArtifact(
+      identity,
+      artifactId,
+      revision,
+      representationName,
+      includeContent,
+    );
   }
   start(
     input: StartUgvOperation,
@@ -382,9 +462,12 @@ export class UgvProviderRuntime {
     const existing = await this.store.getExecution(input.taskId);
     if (existing !== undefined) {
       assertIdentity(existing, input);
+      if (existing.taskBusinessContextExpected && this.taskBusiness) {
+        await this.taskBusiness.ensureForCreatedExecution(existing.taskId);
+      }
       return {
         externalExecutionId: existing.externalExecutionId,
-        initialSnapshot: executionSnapshot(existing),
+        initialSnapshot: await this.executionSnapshot(existing),
       };
     }
     const decision = this.availability(input.operationName, input.arguments);
@@ -421,6 +504,9 @@ export class UgvProviderRuntime {
       tracks,
       arguments: structuredClone(input.arguments),
       executionContext: structuredClone(input.executionContext),
+      ...(this.taskBusiness?.supports(input.operationName)
+        ? { taskBusinessContextExpected: true }
+        : {}),
       downstreamMissionIds: [],
       ...(observationCursors === undefined ? {} : { observationCursors }),
       dispatchBaseline: dispatchBaseline as unknown as Record<string, unknown>,
@@ -440,12 +526,28 @@ export class UgvProviderRuntime {
         ? {}
         : { preemptedTaskIds: preemptedExecutions.map(({ taskId }) => taskId).sort() }),
     };
+    let executionPersisted = false;
     try {
       if (input.operationName === "vehicle_emergency_stop")
         await this.#persistPreemptionRelations(input.taskId, preemptedExecutions, now);
       await this.store.putExecution(execution);
+      executionPersisted = true;
+      if (execution.taskBusinessContextExpected) {
+        await this.taskBusiness?.ensureForCreatedExecution(execution.taskId);
+      }
     } catch (error) {
       this.arbiter.release(input.taskId);
+      if (executionPersisted && execution.taskBusinessContextExpected) {
+        const failed = transition(execution, "TECHNICAL_FAILED", "BUSINESS_CONTEXT_INIT_FAILED");
+        failed.taskBusinessContextExpected = false;
+        failed.terminalAt = failed.updatedAt;
+        failed.result = {
+          resourceId: execution.resourceId,
+          status: "failed",
+          observedAt: failed.updatedAt,
+        };
+        await this.store.putExecution(failed);
+      }
       throw error;
     }
     try {
@@ -555,7 +657,7 @@ export class UgvProviderRuntime {
       );
       return {
         externalExecutionId: execution.externalExecutionId,
-        initialSnapshot: executionSnapshot(execution),
+        initialSnapshot: await this.executionSnapshot(execution),
       };
     } catch (error) {
       if (error instanceof SmppDiagnosticResponseLossError) throw error;
@@ -564,7 +666,7 @@ export class UgvProviderRuntime {
         await this.store.putExecution(execution);
         return {
           externalExecutionId: execution.externalExecutionId,
-          initialSnapshot: executionSnapshot(execution),
+          initialSnapshot: await this.executionSnapshot(execution),
         };
       }
       if (error instanceof UncertainMutatingDeviceCallError) {
@@ -573,7 +675,7 @@ export class UgvProviderRuntime {
         await this.store.putExecution(execution);
         return {
           externalExecutionId: execution.externalExecutionId,
-          initialSnapshot: executionSnapshot(execution),
+          initialSnapshot: await this.executionSnapshot(execution),
         };
       }
       this.arbiter.release(input.taskId);
@@ -588,6 +690,7 @@ export class UgvProviderRuntime {
         },
       );
       await this.store.putExecution(failed);
+      await this.taskBusiness?.finalizeForTerminalExecution(failed);
       throw error;
     }
   }
@@ -941,6 +1044,256 @@ export class UgvProviderRuntime {
     return this.#serializeMutation(() => this.#updateFire(identity, responses));
   }
 
+  updateInput(
+    identity: CommandIdentity,
+    update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+  ): Promise<Record<string, unknown>> {
+    return this.#serializeMutation(() => this.#updateInput(identity, update));
+  }
+
+  /** A stale qualified Task must receive a terminal rejection while this UGV Profile is read-only. */
+  applyIntervention(
+    identity: CommandIdentity,
+    payload: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    return this.#serializeMutation(async () => {
+      const command = "intervention";
+      const execution = await this.store.getExecution(identity.taskId);
+      if (!execution)
+        return this.#ackRecord(identity, command, false, "EXECUTION_NOT_FOUND").response;
+      if (!sameIdentity(execution, identity)) {
+        return this.#ackRecord(identity, command, false, "TASK_IDENTITY_CONFLICT").response;
+      }
+      const existing = await this.store.getCommandAck(
+        identity.taskId,
+        command,
+        identity.commandSequence,
+      );
+      if (existing) return replayCommandResponse(existing.response, identity);
+      const intervention = RuntimeInterventionCommandSchema.safeParse(payload.command);
+      if (!intervention.success) {
+        return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_COMMAND_INVALID")
+          .response;
+      }
+      if (
+        intervention.data.taskId !== identity.taskId ||
+        intervention.data.executionId !== identity.externalExecutionId
+      ) {
+        return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_COMMAND_BINDING_INVALID")
+          .response;
+      }
+      if (!TrustedResponderSchema.safeParse(payload.responder).success) {
+        return this.#ackRecord(identity, command, false, "UGV_INTERVENTION_RESPONDER_INVALID")
+          .response;
+      }
+      const reasonCode =
+        execution.state === "RUNNING"
+          ? "UGV_INTERVENTION_NOT_SUPPORTED"
+          : "UGV_INTERVENTION_TASK_NOT_RUNNING";
+      const rejected = this.#ackRecord(identity, command, false, reasonCode);
+      const claim = await this.store.claimCommandAck(rejected);
+      return replayCommandResponse(claim.record.response, identity);
+    });
+  }
+
+  async #updateInput(
+    identity: CommandIdentity,
+    update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+  ): Promise<Record<string, unknown>> {
+    const command = "update";
+    const execution = await this.store.getExecution(identity.taskId);
+    if (execution === undefined)
+      return this.#ackRecord(identity, command, false, "EXECUTION_NOT_FOUND").response;
+    if (!sameIdentity(execution, identity))
+      return this.#ackRecord(identity, command, false, "TASK_IDENTITY_CONFLICT").response;
+    const existing = await this.store.getCommandAck(
+      identity.taskId,
+      command,
+      identity.commandSequence,
+    );
+    if (existing) return replayCommandResponse(existing.response, identity);
+    if (update.inputs.length > 0 && update.inputResponses.length > 0)
+      return this.#ackRecord(identity, command, false, "INPUT_RESPONSE_WIRE_AMBIGUOUS").response;
+    if (execution.operationName === "vehicle_fire_weapon") {
+      const responses =
+        update.inputs.length > 0 ? legacyFireInputResponses(update.inputs) : update.inputResponses;
+      return this.#updateFire(identity, responses);
+    }
+    if (update.inputs.length === 0 && update.inputResponses.length === 0)
+      return this.#ackRecord(identity, command, false, "INPUT_RESPONSE_REQUIRED").response;
+    if (!validUnsupportedInputEnvelope(update))
+      return this.#ackRecord(identity, command, false, "INPUT_RESPONSE_WIRE_INVALID").response;
+    if (
+      this.options.businessManualDecision &&
+      this.taskBusiness &&
+      execution.operationName === "vehicle_area_recon"
+    ) {
+      return this.#applyManualReconInput(identity, execution, update);
+    }
+    const denied = this.#ackRecord(identity, command, false, "UGV_INPUT_HANDLER_NOT_AVAILABLE");
+    const claimed = await this.store.claimCommandAck(denied);
+    return replayCommandResponse(claimed.record.response, identity);
+  }
+
+  async #applyManualReconInput(
+    identity: CommandIdentity,
+    execution: ProviderExecution,
+    update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+  ): Promise<Record<string, unknown>> {
+    const command = "update";
+    const taskBusiness = this.taskBusiness;
+    if (!taskBusiness) return this.#ack(identity, command, false, "BUSINESS_METHOD_NOT_ENABLED");
+    if (update.inputs.length !== 0 || update.inputResponses.length !== 1)
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONSE_COUNT_INVALID");
+    const item = update.inputResponses[0];
+    if (!record(item) || typeof item.key !== "string" || !record(item.result))
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONSE_WIRE_INVALID");
+    const response = protoStructToJson(item.result);
+    const action = response.action;
+    if (
+      !["accept", "decline", "cancel"].includes(String(action)) ||
+      (action === "accept" && !record(response.content)) ||
+      (action !== "accept" && response.content !== undefined) ||
+      !record(item.verifiedResponder)
+    )
+      return this.#ack(identity, command, false, "UGV_INPUT_RELEASE_NOT_QUALIFIED");
+    const verified = protoStructToJson(item.verifiedResponder);
+    if (verified.actorType !== "user")
+      return this.#ack(identity, command, false, "UGV_INPUT_RESPONDER_NOT_AUTHORIZED");
+    const request = await this.#manualReconRequestForKey(execution, item.key);
+    if (!request) return this.#ack(identity, command, false, "UGV_INPUT_REQUEST_NOT_CURRENT");
+    const commandId = `ugv-input-${createHash("sha256")
+      .update(
+        JSON.stringify([identity.taskId, identity.externalExecutionId, identity.commandSequence]),
+      )
+      .digest("hex")
+      .slice(0, 40)}`;
+    const latest = (await this.store.getExecution(identity.taskId)) ?? execution;
+    const handler = new UgvManualInputBusinessHandler(
+      taskBusiness.business,
+      taskBusiness.notifyCommitted,
+      () => this.#now(),
+    );
+    const responseCommand = {
+      schemaVersion: "sdar.required-input-response/1.0-rc2" as const,
+      commandId,
+      taskId: identity.taskId,
+      executionId: identity.externalExecutionId,
+      requestId: request.requestId,
+      requestKey: request.requestKey,
+      guard: { mode: "semantic" as const, expectedRequestRevision: request.revision },
+      result:
+        action === "accept"
+          ? { action: "accept" as const, value: response.content }
+          : { action: action as "decline" | "cancel" },
+    };
+    const currentExecution =
+      latest.state === "RUNNING" ? await this.#reconcileReconRequiredInput(latest) : latest;
+    try {
+      const handlerInput = {
+        execution: currentExecution,
+        command: responseCommand,
+        responder: {
+          source: "runtime_authorization_context",
+          actorType: "user",
+          verified: true,
+        },
+        runtimeCommandSequence: identity.commandSequence,
+      };
+      if (action === "accept") await handler.continueObservation(handlerInput);
+      else
+        await handler.releaseObservation({
+          ...handlerInput,
+          release: async (pending) => {
+            await this.#dispatchManualReconRelease(currentExecution, pending, commandId, handler);
+          },
+        });
+      const after = await this.store.getExecution(identity.taskId);
+      if (action === "accept") {
+        if (after?.state === "WAITING_INPUT") await this.#reconcileReconRequiredInput(after);
+        return await this.#ack(identity, command, true, "TARGET_OBSERVATION_CONTINUES");
+      }
+      if (after?.state === "WAITING_INPUT" || after?.state === "RUNNING")
+        await this.#recoverCommittedManualRelease(after);
+      return await this.#ack(
+        identity,
+        command,
+        true,
+        action === "cancel" ? "TARGET_OBSERVATION_DISMISSED" : "TARGET_OBSERVATION_DECLINED",
+      );
+    } catch (error) {
+      // A claimed or applied business command must remain retryable after an
+      // uncertain commit/ACK boundary. Do not persist a negative Runtime ACK.
+      const recorded = await taskBusiness.business.getCommand(
+        BoundExecutionScope.fromExecution(execution),
+        commandId,
+      );
+      if (recorded?.state === "rejected")
+        return await this.#ack(identity, command, false, recorded.resultCode ?? reason(error));
+      if (recorded?.state === "accepted" && action !== "accept") {
+        const step = await this.store.getMutationJournalEntry(
+          identity.taskId,
+          this.#manualInputReleaseStepId(commandId),
+        );
+        if (step?.state !== "ACCEPTED") {
+          const definiteRefusal =
+            step?.state === "REJECTED" ||
+            error instanceof DeviceToolRejectedError ||
+            [
+              "UGV_INPUT_RELEASE_UNQUALIFIED",
+              "UGV_INPUT_REQUEST_NOT_CURRENT",
+              "UGV_INPUT_SUBJECT_NOT_CURRENT",
+            ].includes(reason(error));
+          if (!definiteRefusal && step?.state !== "UNCERTAIN" && step?.state !== "DISPATCHING")
+            throw error;
+          await handler.rejectReleaseCommand(currentExecution, commandId, reason(error));
+          if (step?.state === "UNCERTAIN" || step?.state === "DISPATCHING") {
+            const latestExecution =
+              (await this.store.getExecution(identity.taskId)) ?? currentExecution;
+            const failed = terminal(
+              latestExecution,
+              "TECHNICAL_FAILED",
+              "UGV_INPUT_RELEASE_UNCERTAIN",
+              {
+                resourceId: latestExecution.resourceId,
+                status: "release_unconfirmed",
+                requestId: request.requestId,
+                observedAt: this.#now().toISOString(),
+              },
+            );
+            await this.#commitManualReconTransition(latestExecution, failed);
+          }
+          return await this.#ack(identity, command, false, reason(error));
+        }
+      }
+      if (recorded) throw error;
+      return await this.#ack(identity, command, false, reason(error));
+    }
+  }
+
+  async #manualReconRequestForKey(
+    execution: ProviderExecution,
+    key: string,
+  ): Promise<RequiredInput | undefined> {
+    if (!this.taskBusiness) return undefined;
+    const active = await this.taskBusiness.activeRequiredInput(execution);
+    if (active?.requestKey === key) return active;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const context = await this.taskBusiness.business.getContext(scope);
+    for (const ref of [...(context?.requiredInputRefs ?? [])].reverse()) {
+      const version = await this.taskBusiness.business.getObjectVersion(scope, ref);
+      if (version?.kind !== "input_request" || version.value.requestKey !== key) continue;
+      if (version.value.revision === 1) return version.value;
+      const original = await this.taskBusiness.business.getObjectVersion(scope, {
+        kind: "input_request",
+        id: ref.id,
+        revision: 1,
+      });
+      return original?.kind === "input_request" ? original.value : undefined;
+    }
+    return undefined;
+  }
+
   async #updateFire(
     identity: CommandIdentity,
     responses: unknown,
@@ -1145,7 +1498,7 @@ export class UgvProviderRuntime {
     const refreshed = await this.#refresh(execution);
     return {
       status: "FOUND",
-      snapshot: executionSnapshot(refreshed),
+      snapshot: await this.executionSnapshot(refreshed),
       externalExecutionId: refreshed.externalExecutionId,
       reasonCode: "EXECUTION_FOUND",
       message: "Execution reconciled from local UGV observations.",
@@ -1221,7 +1574,58 @@ export class UgvProviderRuntime {
     await this.#ensureDeviceConnection();
     this.#refreshReadiness();
     await this.#emitResourceTransitions(this.ingress.snapshot());
-    for (const execution of await this.store.listActiveExecutions()) await this.#refresh(execution);
+    const active = await this.store.listActiveExecutions();
+    for (const execution of active) {
+      await this.#projectReconBusinessStatus(execution, active);
+      await this.#refresh(execution);
+    }
+  }
+
+  async #projectReconBusinessStatus(
+    execution: ProviderExecution,
+    active: readonly ProviderExecution[],
+  ): Promise<void> {
+    if (
+      this.taskBusiness === undefined ||
+      execution.taskBusinessContextExpected !== true ||
+      execution.operationName !== "vehicle_area_recon" ||
+      execution.state === "ACCEPTED"
+    )
+      return;
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (
+      missionId === undefined ||
+      active.filter(
+        (candidate) =>
+          candidate.operationName === "vehicle_area_recon" &&
+          candidate.downstreamMissionIds.at(-1) === missionId,
+      ).length !== 1
+    )
+      return;
+    const recon = this.ingress.snapshot().payload.reconnaissance;
+    const cursor = this.ingress.observationCursor("/ugv/area_recon/status");
+    const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    if (
+      reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
+      typeof recon.motionStatus !== "number" ||
+      cursor === undefined ||
+      cursor === execution.observationCursors?.reconnaissance ||
+      authority === undefined ||
+      compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0
+    )
+      return;
+    const processor = new ReconBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    );
+    await processor.applyStatus(execution, {
+      schemaVersion: "ugv.recon-status-fact/1",
+      missionId,
+      sourceCursor: cursor,
+      observedAt: authority.observedAt,
+      motionStatus: recon.motionStatus,
+      ...(recon.lock?.stage === undefined ? {} : { lockStage: recon.lock.stage }),
+    });
   }
 
   async #ensureDeviceConnection(): Promise<void> {
@@ -1397,9 +1801,39 @@ export class UgvProviderRuntime {
   }
 
   async #refresh(execution: ProviderExecution): Promise<ProviderExecution> {
-    if (isTerminal(execution.state)) return execution;
+    if (isTerminal(execution.state)) {
+      await this.taskBusiness?.finalizeForTerminalExecution(execution);
+      return execution;
+    }
     if (execution.preemptedByTaskId !== undefined)
       return this.#refreshPreemptedExecution(execution);
+    if (execution.controlConfirmation?.command === "input_release")
+      return this.#confirmExpiredInputRelease(execution);
+    if (
+      this.options.businessManualDecision &&
+      execution.operationName === "vehicle_area_recon" &&
+      (execution.state === "RUNNING" || execution.state === "WAITING_INPUT")
+    ) {
+      const pending = await this.taskBusiness?.activeRequiredInput(execution);
+      if (pending && this.taskBusiness) {
+        const accepted = await this.taskBusiness.business.getAcceptedInputCommand(
+          BoundExecutionScope.fromExecution(execution),
+          pending.requestKey,
+        );
+        if (accepted) return this.#recoverAcceptedManualReconInput(execution, pending, accepted);
+      }
+      if (!pending) {
+        const recovered = await this.#recoverCommittedManualRelease(execution);
+        if (recovered.revision !== execution.revision) return recovered;
+      }
+      if (
+        pending?.deadlineAt &&
+        compareIsoTimestamps(this.#now().toISOString(), pending.deadlineAt) >= 0
+      )
+        return this.#expireManualReconInput(execution, pending);
+      const reconciled = await this.#reconcileReconRequiredInput(execution);
+      if (reconciled.revision !== execution.revision) return reconciled;
+    }
     if (execution.operationName === "vehicle_fire_weapon") {
       const dispatch = await this.store.getCommandAck(
         execution.taskId,
@@ -1600,7 +2034,8 @@ export class UgvProviderRuntime {
     if (next.revision !== execution.revision) {
       await this.#emitPhysicalEvidence(next, snapshot);
       await this.store.putExecution(next);
-      this.events.emit(execution.taskId, executionSnapshot(next));
+      if (isTerminal(next.state)) await this.taskBusiness?.finalizeForTerminalExecution(next);
+      this.events.emit(execution.taskId, await this.executionSnapshot(next));
       await this.telemetry.emit(
         "EXECUTION_PROGRESS",
         executionProgressPayload(next),
@@ -1859,7 +2294,11 @@ export class UgvProviderRuntime {
     });
   }
 
-  async #observe(snapshot: UgvSnapshot, topic: string): Promise<void> {
+  async #observe(
+    snapshot: UgvSnapshot,
+    topic: string,
+    applied?: AppliedMqttObservation,
+  ): Promise<void> {
     this.#refreshReadiness();
     await this.store.putSnapshot({
       channel: topic,
@@ -1867,6 +2306,14 @@ export class UgvProviderRuntime {
       observedAt: snapshot.observedAt,
       snapshot: snapshot as unknown as Record<string, unknown>,
     });
+    if (applied !== undefined)
+      await this.#projectNavigationBusinessTrajectory(snapshot, topic, applied);
+    if (topic === "/ugv/area_recon/status" && applied !== undefined) {
+      await this.#projectNativeLock(applied);
+      await this.#projectReconBusinessCoverage(applied);
+    }
+    if (topic === "/ugv/area_recon/targets" && applied !== undefined)
+      await this.#projectReconBusinessTargets(applied);
     const telemetryNowMs = this.#now().getTime();
     if (
       intervalDue(this.#lastResourceTelemetryAtMs, telemetryNowMs, RESOURCE_TELEMETRY_INTERVAL_MS)
@@ -1897,7 +2344,780 @@ export class UgvProviderRuntime {
             domain,
           );
     }
-    await this.pollActive();
+    await this.#pollActive();
+  }
+
+  async #projectNavigationBusinessTrajectory(
+    observedSnapshot: UgvSnapshot,
+    topic: string,
+    applied: AppliedMqttObservation,
+  ): Promise<void> {
+    if (this.taskBusiness === undefined || applied.retained) return;
+    const position = applied.observation.patch.chassis?.position;
+    if (position === undefined || !["/ugv/gnss", "status/ugv1"].includes(topic)) return;
+    const mission = observedSnapshot.chassis.mission;
+    const missionId = mission.id;
+    const missionAuthority = this.ingress.fieldObservationAuthority("chassis.mission");
+    if (
+      missionId === undefined ||
+      mission.state !== 1 ||
+      missionAuthority === undefined ||
+      this.ingress.snapshot().chassis.mission.id !== missionId ||
+      compareIsoTimestamps(applied.observedAt, missionAuthority.observedAt) < 0 ||
+      this.ingress.fieldFreshnessState(
+        "chassis.mission",
+        this.options.freshness.mission,
+        this.#now().getTime(),
+      ) !== "fresh"
+    )
+      return;
+    const matches = (await this.store.listActiveExecutions()).filter(
+      (execution) =>
+        execution.operationName === "vehicle_navigate" &&
+        execution.downstreamMissionIds.at(-1) === missionId,
+    );
+    const execution = matches.length === 1 ? matches[0] : undefined;
+    if (
+      execution?.taskBusinessContextExpected !== true ||
+      execution.state === "ACCEPTED" ||
+      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
+      compareIsoTimestamps(missionAuthority.observedAt, execution.createdAt) < 0
+    )
+      return;
+    await new NavigationTrajectoryProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+      this.options.freshness.chassis,
+    ).apply(execution, {
+      schemaVersion: "ugv.navigation-position-fact/1",
+      missionId,
+      sourceCursor: applied.cursor,
+      sourceTopic: topic,
+      observedAt: applied.observedAt,
+      position,
+    });
+  }
+
+  async #projectReconBusinessCoverage(applied: AppliedMqttObservation): Promise<void> {
+    if (this.taskBusiness === undefined || applied.retained) return;
+    const recon = applied.observation.patch.payload?.reconnaissance;
+    const missionId = recon?.id;
+    const coverage = recon?.coverage;
+    if (missionId === undefined || coverage === undefined) return;
+    // The same EO sensor is occupied by native visual lock at stages 2/3.
+    // An aggregate coverage counter in this status is not proof of scanning.
+    if (recon?.lock?.stage === 2 || recon?.lock?.stage === 3) return;
+    if (
+      coverage.coveragePercent === undefined &&
+      coverage.coveredCount === undefined &&
+      coverage.coveredCells === undefined &&
+      coverage.sectorsCovered === undefined
+    )
+      return;
+    const matches = (await this.store.listActiveExecutions()).filter(
+      (execution) =>
+        execution.operationName === "vehicle_area_recon" &&
+        execution.downstreamMissionIds.at(-1) === missionId,
+    );
+    const execution = matches.length === 1 ? matches[0] : undefined;
+    if (
+      execution?.taskBusinessContextExpected !== true ||
+      execution.state === "ACCEPTED" ||
+      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
+      applied.cursor === execution.observationCursors?.reconnaissance
+    )
+      return;
+    // This status topic has no area revision. After adoption its counters cannot
+    // be attributed to the new area, although mission status remains usable.
+    const context = await this.taskBusiness.business.getContext(
+      BoundExecutionScope.fromExecution(execution),
+    );
+    if (context?.activeRefs.reconEffectiveArea !== undefined) return;
+    const processor = new ReconBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    );
+    await processor.applyCoverage(execution, {
+      schemaVersion: "ugv.recon-coverage-fact/1",
+      missionId,
+      sourceCursor: applied.cursor,
+      observedAt: applied.observedAt,
+      coverage,
+    });
+  }
+
+  async #projectNativeLock(applied: AppliedMqttObservation): Promise<void> {
+    if (this.taskBusiness === undefined || applied.retained) return;
+    const recon = applied.observation.patch.payload?.reconnaissance;
+    const missionId = recon?.id;
+    const stage = recon?.lock?.stage;
+    if (
+      recon === undefined ||
+      missionId === undefined ||
+      stage === undefined ||
+      typeof recon.motionStatus !== "number"
+    )
+      return;
+    const matches = (await this.store.listActiveExecutions()).filter(
+      (execution) =>
+        execution.operationName === "vehicle_area_recon" &&
+        execution.downstreamMissionIds.at(-1) === missionId,
+    );
+    const execution = matches.length === 1 ? matches[0] : undefined;
+    if (
+      execution?.taskBusinessContextExpected !== true ||
+      execution.state === "ACCEPTED" ||
+      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
+      applied.cursor === execution.observationCursors?.reconnaissance
+    )
+      return;
+    const processor = new NativeLockBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+      this.options.businessManualDecision && {
+        ...this.options.businessManualDecision,
+        now: () => this.#now(),
+      },
+    );
+    await processor.apply(execution, {
+      schemaVersion: "ugv.recon-native-lock-fact/1",
+      missionId,
+      sourceCursor: applied.cursor,
+      observedAt: applied.observedAt,
+      stage,
+      ...(recon.lock?.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
+      motionStatus: recon.motionStatus,
+    });
+    if (this.options.businessManualDecision) {
+      const latest = await this.store.getExecution(execution.taskId);
+      if (
+        latest?.externalExecutionId === execution.externalExecutionId &&
+        latest.downstreamMissionIds.at(-1) === missionId
+      )
+        await this.#reconcileReconRequiredInput(latest);
+    }
+  }
+
+  /** Recovers the Execution state after a Context commit or process restart. */
+  async #reconcileReconRequiredInput(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (!this.taskBusiness || execution.operationName !== "vehicle_area_recon") return execution;
+    const pending = await this.taskBusiness.activeRequiredInput(execution);
+    const next =
+      execution.state === "RUNNING" && pending
+        ? transition(execution, "WAITING_INPUT", "TARGET_OBSERVATION_DECISION_REQUIRED")
+        : execution.state === "WAITING_INPUT" && !pending
+          ? transition(execution, "RUNNING", "UGV_RECON_INPUT_SESSION_ENDED")
+          : execution;
+    if (next === execution) return execution;
+    await this.store.putExecution(next);
+    this.events.emit(execution.taskId, await this.executionSnapshot(next));
+    return next;
+  }
+
+  #manualInputReleaseStepId(commandId: string): string {
+    return `input-response:${createHash("sha256").update(commandId).digest("hex").slice(0, 40)}`;
+  }
+
+  #manualInputExpiryStepId(requestId: string): string {
+    return `input-expire:${createHash("sha256").update(requestId).digest("hex").slice(0, 40)}`;
+  }
+
+  async #recoverCommittedManualRelease(execution: ProviderExecution): Promise<ProviderExecution> {
+    if (!this.taskBusiness || execution.operationName !== "vehicle_area_recon") return execution;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const context = await this.taskBusiness.business.getContext(scope);
+    if (context?.summary.status !== "in_progress") return execution;
+    const ref = context.requiredInputRefs.at(-1);
+    if (!ref) return execution;
+    const version = await this.taskBusiness.business.getObjectVersion(scope, ref);
+    if (version?.kind !== "input_request") return execution;
+    const request = version.value;
+    const releasedByReply =
+      request.state === "declined" ||
+      (request.state === "cancelled" && request.response?.action === "cancel");
+    if (!releasedByReply && request.state !== "expired") return execution;
+    let releaseKey: string;
+    let stepId: string;
+    if (request.state === "expired") {
+      releaseKey = `expiry:${request.requestId}`;
+      stepId = this.#manualInputExpiryStepId(request.requestId);
+    } else if (request.responseCommandId) {
+      releaseKey = `response:${request.responseCommandId}`;
+      stepId = this.#manualInputReleaseStepId(request.responseCommandId);
+    } else {
+      return execution;
+    }
+    if (
+      releaseKey === execution.lastInputReleaseCompletionKey ||
+      (execution.controlConfirmation?.command === "input_release" &&
+        execution.controlConfirmation.releaseKey === releaseKey)
+    )
+      return execution;
+    const journal = await this.store.getMutationJournalEntry(execution.taskId, stepId);
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (journal?.state !== "ACCEPTED" || !journal.dispatchedAt || !missionId) return execution;
+    const binding = request.subjectBinding;
+    if (binding.kind !== "visual_lock") return execution;
+    const action = await this.taskBusiness.business.getObjectVersion(scope, binding.actionRef);
+    if (
+      action?.kind !== "action" ||
+      action.value.properties?.observationSessionId !== missionId ||
+      action.value.actionId !== binding.lockSessionId
+    )
+      return execution;
+    const next = transition(
+      execution,
+      "RUNNING",
+      "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+    );
+    next.controlConfirmation = {
+      command: "input_release",
+      releaseKey,
+      requestId: request.requestId,
+      missionId,
+      dispatchedAt: journal.dispatchedAt,
+      deadlineAt: deadlineFrom(
+        journal.dispatchedAt,
+        this.options.controlConfirmationTimeoutMs ?? 30_000,
+      ),
+    };
+    return this.#commitManualReconTransition(execution, next);
+  }
+
+  async #recoverAcceptedManualReconInput(
+    execution: ProviderExecution,
+    pending: RequiredInput,
+    accepted: BusinessCommandRecord,
+  ): Promise<ProviderExecution> {
+    if (!this.taskBusiness) return execution;
+    const sequence = accepted.runtimeCommandSequence;
+    const expectedId =
+      sequence === undefined
+        ? undefined
+        : `ugv-input-${createHash("sha256")
+            .update(JSON.stringify([execution.taskId, execution.externalExecutionId, sequence]))
+            .digest("hex")
+            .slice(0, 40)}`;
+    if (
+      !accepted.inputResponse ||
+      !sequence ||
+      accepted.commandId !== expectedId ||
+      accepted.entryKey !== `input:${pending.requestKey}`
+    ) {
+      if (
+        !pending.deadlineAt ||
+        compareIsoTimestamps(this.#now().toISOString(), pending.deadlineAt) < 0
+      )
+        return execution;
+      await new UgvManualInputBusinessHandler(
+        this.taskBusiness.business,
+        this.taskBusiness.notifyCommitted,
+        () => this.#now(),
+      ).rejectReleaseCommand(
+        execution,
+        accepted.commandId,
+        "UGV_INPUT_COMMAND_RECOVERY_UNAVAILABLE",
+      );
+      const failed = terminal(
+        execution,
+        "TECHNICAL_FAILED",
+        "UGV_INPUT_COMMAND_RECOVERY_UNAVAILABLE",
+        {
+          resourceId: execution.resourceId,
+          status: "unresolved",
+          observedAt: this.#now().toISOString(),
+        },
+      );
+      return this.#commitManualReconTransition(execution, failed);
+    }
+    const result = {
+      action: accepted.inputResponse.action,
+      ...(accepted.inputResponse.action === "accept"
+        ? { content: accepted.inputResponse.value }
+        : {}),
+    };
+    await this.#applyManualReconInput(
+      {
+        taskId: execution.taskId,
+        externalExecutionId: execution.externalExecutionId,
+        operationName: execution.operationName,
+        argumentHash: execution.argumentHash,
+        executionContext: execution.executionContext,
+        commandSequence: sequence,
+      },
+      execution,
+      {
+        inputs: [],
+        inputResponses: [
+          {
+            key: pending.requestKey,
+            result: jsonToProtoStruct(result),
+            verifiedResponder: jsonToProtoStruct({ actorType: "user" }),
+          },
+        ],
+      },
+    );
+    return (await this.store.getExecution(execution.taskId)) ?? execution;
+  }
+
+  async #dispatchManualReconRelease(
+    execution: ProviderExecution,
+    pending: RequiredInput,
+    commandId: string,
+    handler: UgvManualInputBusinessHandler,
+  ): Promise<void> {
+    if (!this.taskBusiness) throw new Error("BUSINESS_METHOD_NOT_ENABLED");
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (missionId === undefined || pending.subjectBinding.kind !== "visual_lock")
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const stepId = this.#manualInputReleaseStepId(commandId);
+    const existing = await this.store.getMutationJournalEntry(execution.taskId, stepId);
+    const call = buildUgvTargetLockCall(false, 0, missionId);
+    if (existing?.state === "ACCEPTED") {
+      await this.#callJournaledMutation(execution.taskId, stepId, "CLEANUP", call);
+      return;
+    }
+    const currentExecution = await this.store.getExecution(execution.taskId);
+    const claimed = await this.taskBusiness.business.getAcceptedInputCommand(
+      BoundExecutionScope.fromExecution(execution),
+      pending.requestKey,
+    );
+    if (
+      currentExecution?.externalExecutionId !== execution.externalExecutionId ||
+      currentExecution.state !== "WAITING_INPUT" ||
+      currentExecution.downstreamMissionIds.at(-1) !== missionId ||
+      currentExecution.preemptedByTaskId !== undefined ||
+      currentExecution.controlConfirmation?.command === "pause" ||
+      claimed?.commandId !== commandId
+    )
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const request = await handler.assertPendingObservation(currentExecution, pending.requestId);
+    if (request.revision !== pending.revision || request.requestKey !== pending.requestKey)
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const snapshot = this.ingress.snapshot().payload.reconnaissance;
+    const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    const age =
+      authority === undefined
+        ? Number.NaN
+        : this.#now().getTime() - Date.parse(authority.observedAt);
+    const activeForMission = (await this.store.listActiveExecutions()).filter(
+      (candidate) =>
+        candidate.operationName === "vehicle_area_recon" &&
+        candidate.downstreamMissionIds.at(-1) === missionId,
+    );
+    if (
+      activeForMission.length !== 1 ||
+      activeForMission[0]?.taskId !== execution.taskId ||
+      reconCorrelationStrength(snapshot, missionId) !== "STRICT_CORRELATED" ||
+      snapshot.lock?.stage !== 3 ||
+      snapshot.lock.targetId !== pending.subjectBinding.targetId ||
+      authority === undefined ||
+      compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0 ||
+      !Number.isFinite(age) ||
+      age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
+      age > this.options.freshness.payload
+    )
+      throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    await this.#callJournaledMutation(execution.taskId, stepId, "CLEANUP", call);
+  }
+
+  async #expireManualReconInput(
+    execution: ProviderExecution,
+    pending: RequiredInput,
+  ): Promise<ProviderExecution> {
+    if (!this.taskBusiness) return execution;
+    const handler = new UgvManualInputBusinessHandler(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+      () => this.#now(),
+    );
+    const releaseStepId = this.#manualInputExpiryStepId(pending.requestId);
+    const recordedRelease = await this.store.getMutationJournalEntry(
+      execution.taskId,
+      releaseStepId,
+    );
+    const releaseAlreadyAccepted = recordedRelease?.state === "ACCEPTED";
+    const missionId = execution.downstreamMissionIds.at(-1);
+    const recon = this.ingress.snapshot().payload.reconnaissance;
+    const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    const age =
+      authority === undefined
+        ? Number.NaN
+        : this.#now().getTime() - Date.parse(authority.observedAt);
+    const activeForMission = (await this.store.listActiveExecutions()).filter(
+      (candidate) =>
+        candidate.operationName === "vehicle_area_recon" &&
+        candidate.downstreamMissionIds.at(-1) === missionId,
+    );
+    if (
+      !releaseAlreadyAccepted &&
+      missionId !== undefined &&
+      reconCorrelationStrength(recon, missionId) === "STRICT_CORRELATED" &&
+      recon.lock?.stage === 1 &&
+      typeof recon.motionStatus === "number" &&
+      authority !== undefined &&
+      compareIsoTimestamps(authority.observedAt, execution.createdAt) >= 0 &&
+      Number.isFinite(age) &&
+      age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
+      age <= this.options.freshness.payload
+    ) {
+      await new NativeLockBusinessProcessor(
+        this.taskBusiness.business,
+        this.taskBusiness.notifyCommitted,
+        this.options.businessManualDecision && {
+          ...this.options.businessManualDecision,
+          now: () => this.#now(),
+        },
+      ).apply(execution, {
+        schemaVersion: "ugv.recon-native-lock-fact/1",
+        missionId,
+        sourceCursor: authority.cursor,
+        observedAt: authority.observedAt,
+        stage: 1,
+        ...(recon.lock.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
+        motionStatus: recon.motionStatus,
+      });
+      return this.#reconcileReconRequiredInput(execution);
+    }
+    let releaseFailure: string | undefined;
+    if (pending.onExpire !== "release_and_resume_scan")
+      releaseFailure = "UGV_INPUT_EXPIRY_POLICY_UNSUPPORTED";
+    else if (
+      !releaseAlreadyAccepted &&
+      (missionId === undefined ||
+        pending.subjectBinding.kind !== "visual_lock" ||
+        activeForMission.length !== 1 ||
+        activeForMission[0]?.taskId !== execution.taskId ||
+        reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
+        recon.lock?.stage !== 3 ||
+        recon.lock.targetId !== pending.subjectBinding.targetId ||
+        authority === undefined ||
+        compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0 ||
+        !Number.isFinite(age) ||
+        age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
+        age > this.options.freshness.payload ||
+        execution.controlConfirmation?.command === "pause")
+    )
+      releaseFailure = "UGV_INPUT_EXPIRY_RELEASE_UNQUALIFIED";
+    else {
+      try {
+        if (!releaseAlreadyAccepted) {
+          const current = await handler.assertPendingObservation(execution, pending.requestId);
+          if (current.revision !== pending.revision)
+            throw new Error("UGV_INPUT_REQUEST_NOT_CURRENT");
+        }
+        await this.#callJournaledMutation(
+          execution.taskId,
+          releaseStepId,
+          "CLEANUP",
+          buildUgvTargetLockCall(false, 0, missionId),
+        );
+      } catch (error) {
+        releaseFailure =
+          error instanceof UncertainMutatingDeviceCallError
+            ? "UGV_INPUT_EXPIRY_RELEASE_UNCERTAIN"
+            : error instanceof DeviceToolRejectedError
+              ? "UGV_INPUT_EXPIRY_RELEASE_REJECTED"
+              : reason(error);
+      }
+    }
+    const applied = await handler.expireObservation(execution, pending.requestId);
+    if (applied === "none") {
+      const current = (await this.store.getExecution(execution.taskId)) ?? execution;
+      return this.#reconcileReconRequiredInput(current);
+    }
+    if (releaseFailure !== undefined) {
+      const failed = terminal(execution, "TECHNICAL_FAILED", releaseFailure, {
+        resourceId: execution.resourceId,
+        status: "release_unconfirmed",
+        requestId: pending.requestId,
+        observedAt: this.#now().toISOString(),
+      });
+      return this.#commitManualReconTransition(execution, failed);
+    }
+    const next = transition(
+      execution,
+      "RUNNING",
+      "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+    );
+    next.controlConfirmation = {
+      command: "input_release",
+      releaseKey: `expiry:${pending.requestId}`,
+      requestId: pending.requestId,
+      missionId,
+      ...(!releaseAlreadyAccepted && authority?.cursor !== undefined
+        ? { sourceCursor: authority.cursor }
+        : {}),
+      dispatchedAt: recordedRelease?.dispatchedAt ?? this.#now().toISOString(),
+      deadlineAt: deadlineFrom(
+        recordedRelease?.dispatchedAt ?? this.#now().toISOString(),
+        this.options.controlConfirmationTimeoutMs ?? 30_000,
+      ),
+    };
+    return this.#commitManualReconTransition(execution, next);
+  }
+
+  async #confirmExpiredInputRelease(execution: ProviderExecution): Promise<ProviderExecution> {
+    const marker = execution.controlConfirmation;
+    if (marker?.command !== "input_release") return execution;
+    const recon = this.ingress.snapshot().payload.reconnaissance;
+    const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    const age =
+      authority === undefined
+        ? Number.NaN
+        : this.#now().getTime() - Date.parse(authority.observedAt);
+    const scope = BoundExecutionScope.fromExecution(execution);
+    if (
+      typeof marker.missionId === "string" &&
+      reconCorrelationStrength(recon, marker.missionId) === "STRICT_CORRELATED" &&
+      recon.lock?.stage === 1 &&
+      recon.motionStatus === 5 &&
+      authority !== undefined &&
+      authority.cursor !== marker.sourceCursor &&
+      Number.isFinite(age) &&
+      age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
+      age <= this.options.freshness.payload &&
+      typeof marker.dispatchedAt === "string" &&
+      compareIsoTimestamps(authority.observedAt, marker.dispatchedAt) >= 0
+    ) {
+      let context = await this.taskBusiness?.business.getContext(scope);
+      if (
+        context?.activeRefs[`visualLock:${marker.missionId}`] !== undefined &&
+        this.taskBusiness
+      ) {
+        await new NativeLockBusinessProcessor(
+          this.taskBusiness.business,
+          this.taskBusiness.notifyCommitted,
+          this.options.businessManualDecision && {
+            ...this.options.businessManualDecision,
+            now: () => this.#now(),
+          },
+        ).apply(execution, {
+          schemaVersion: "ugv.recon-native-lock-fact/1",
+          missionId: marker.missionId,
+          sourceCursor: authority.cursor,
+          observedAt: authority.observedAt,
+          stage: 1,
+          ...(recon.lock.targetId === undefined ? {} : { targetId: recon.lock.targetId }),
+          motionStatus: recon.motionStatus,
+        });
+        context = await this.taskBusiness.business.getContext(scope);
+      }
+      if (context?.activeRefs[`visualLock:${marker.missionId}`] === undefined) {
+        const confirmed = transition(execution, "RUNNING", "UGV_INPUT_RELEASE_CONFIRMED");
+        if (typeof marker.releaseKey === "string")
+          confirmed.lastInputReleaseCompletionKey = marker.releaseKey;
+        else if (typeof marker.requestId === "string")
+          confirmed.lastInputReleaseCompletionKey = `expiry:${marker.requestId}`;
+        delete confirmed.controlConfirmation;
+        return this.#commitManualReconTransition(execution, confirmed);
+      }
+    }
+    if (
+      typeof marker.deadlineAt !== "string" ||
+      !deadlineExpired(marker.deadlineAt, this.#now().getTime())
+    )
+      return execution;
+    const failed = terminal(
+      execution,
+      "TECHNICAL_FAILED",
+      "UGV_INPUT_RELEASE_CONFIRMATION_TIMEOUT",
+      {
+        resourceId: execution.resourceId,
+        status: "release_unconfirmed",
+        requestId: marker.requestId,
+        observedAt: this.#now().toISOString(),
+      },
+    );
+    return this.#commitManualReconTransition(execution, failed);
+  }
+
+  async #commitManualReconTransition(
+    previous: ProviderExecution,
+    next: ProviderExecution,
+  ): Promise<ProviderExecution> {
+    await this.store.putExecution(next);
+    if (isTerminal(next.state)) await this.taskBusiness?.finalizeForTerminalExecution(next);
+    this.events.emit(next.taskId, await this.executionSnapshot(next));
+    await this.telemetry.emit(
+      "EXECUTION_PROGRESS",
+      executionProgressPayload(next),
+      identityTelemetry(next, executionProgressAttributes(next)),
+    );
+    await this.#transitionEvent(previous, next);
+    if (isTerminal(next.state)) this.arbiter.release(next.taskId);
+    return next;
+  }
+
+  async #projectReconBusinessTargets(applied: AppliedMqttObservation): Promise<void> {
+    if (this.taskBusiness === undefined || applied.retained) return;
+    const targets = applied.observation.patch.payload?.targets;
+    if (!targets) return;
+    // A target list cannot borrow the mission ID from the latest status: it
+    // may arrive after a mission switch. Require identity on this source too.
+    const source = applied.observation.canonicalPayload;
+    if (!record(source) || source.mission_id === undefined) return;
+    const sourceMissionId =
+      typeof source.mission_id === "string"
+        ? source.mission_id
+        : typeof source.mission_id === "number" && Number.isSafeInteger(source.mission_id)
+          ? String(source.mission_id)
+          : undefined;
+    if (!sourceMissionId?.trim() || sourceMissionId.trim() !== sourceMissionId) return;
+    const recon = this.ingress.snapshot().payload.reconnaissance;
+    const missionId = recon.id;
+    const statusAuthority = this.ingress.observationAuthority("/ugv/area_recon/status");
+    if (missionId === undefined || missionId !== sourceMissionId || statusAuthority === undefined)
+      return;
+    const matches = (await this.store.listActiveExecutions()).filter(
+      (execution) =>
+        execution.operationName === "vehicle_area_recon" &&
+        execution.downstreamMissionIds.at(-1) === missionId,
+    );
+    const execution = matches.length === 1 ? matches[0] : undefined;
+    if (
+      execution?.taskBusinessContextExpected !== true ||
+      execution.state === "ACCEPTED" ||
+      statusAuthority.cursor === execution.observationCursors?.reconnaissance ||
+      compareIsoTimestamps(statusAuthority.observedAt, execution.createdAt) < 0
+    )
+      return;
+    const processor = new TargetBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    );
+    const sourceTimeEligible = (target: (typeof targets)[number]) =>
+      target.source === "mqtt_area_recon" &&
+      target.captureTimeUs !== undefined &&
+      compareIsoTimestamps(target.observedAt, statusAuthority.observedAt) >= 0 &&
+      compareIsoTimestamps(target.observedAt, execution.createdAt) >= 0;
+    let completeList = targets.every(sourceTimeEligible);
+    for (const target of targets) {
+      if (!sourceTimeEligible(target)) continue;
+      const location =
+        target.position?.longitude === undefined || target.position.latitude === undefined
+          ? undefined
+          : {
+              longitude: target.position.longitude,
+              latitude: target.position.latitude,
+              ...(target.position.altitude === undefined
+                ? {}
+                : { altitude: target.position.altitude }),
+            };
+      const pixel =
+        target.pixelPosition?.x === undefined || target.pixelPosition.y === undefined
+          ? undefined
+          : {
+              x: target.pixelPosition.x,
+              y: target.pixelPosition.y,
+              ...(target.pixelPosition.width === undefined ||
+              target.pixelPosition.height === undefined
+                ? {}
+                : {
+                    width: target.pixelPosition.width,
+                    height: target.pixelPosition.height,
+                  }),
+            };
+      try {
+        await processor.apply(execution, {
+          schemaVersion: "ugv.recon-target-fact/1",
+          missionId,
+          observationSessionId: missionId,
+          sensorId: "ugv.area_recon.targets",
+          sourceTargetId: target.targetId,
+          sourceRevision: String(target.captureTimeUs),
+          observedAt: target.observedAt,
+          visibility: "visible",
+          trackingState: "unknown",
+          ...(target.objectType === undefined ? {} : { targetType: target.objectType }),
+          ...(target.confidence === undefined || target.confidence < 0 || target.confidence > 1
+            ? {}
+            : { confidence: target.confidence }),
+          ...(location === undefined ? {} : { location }),
+          ...(pixel === undefined ? {} : { pixel }),
+        });
+      } catch (error) {
+        if (!(error instanceof Error) || !TARGET_PROJECTION_CONFLICT_REASONS.has(error.message))
+          throw error;
+        completeList = false;
+        await this.telemetry
+          .metric("target_projection_conflict_total", 1, "target", error.message, {
+            taskId: execution.taskId,
+            externalExecutionId: execution.externalExecutionId,
+            operationName: execution.operationName,
+          })
+          .catch(() => undefined);
+      }
+    }
+    // The exact recon target topic carries a complete current list. Only a
+    // fully qualified list in this mission may make an absent target lost.
+    if (
+      !completeList ||
+      compareIsoTimestamps(applied.observedAt, statusAuthority.observedAt) < 0 ||
+      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0
+    )
+      return;
+    const scope = BoundExecutionScope.fromExecution(execution);
+    const snapshot = await this.taskBusiness.business.getContextSnapshot(scope);
+    if (snapshot === undefined) return;
+    const latest = new Map<
+      string,
+      Extract<(typeof snapshot.objects)[number], { kind: "artifact" }>
+    >();
+    for (const item of snapshot.objects) {
+      if (
+        item.kind !== "artifact" ||
+        item.value.artifactType !== "target.object" ||
+        item.value.source.method !== "mqtt_area_recon_targets" ||
+        item.value.source.sourceRecordRef === undefined ||
+        item.value.properties === undefined ||
+        !("observationSessionId" in item.value.properties) ||
+        item.value.properties.observationSessionId !== missionId
+      )
+        continue;
+      const old = latest.get(item.value.artifactId);
+      if (old === undefined || old.value.revision < item.value.revision)
+        latest.set(item.value.artifactId, item);
+    }
+    const observedIds = new Set(targets.map((target) => target.targetId));
+    for (const item of latest.values()) {
+      const sourceTargetId = item.value.source.sourceRecordRef;
+      if (
+        sourceTargetId === undefined ||
+        observedIds.has(sourceTargetId) ||
+        item.value.properties === undefined ||
+        !("visibility" in item.value.properties) ||
+        item.value.properties.visibility !== "visible" ||
+        compareIsoTimestamps(applied.observedAt, item.value.updatedAt) <= 0
+      )
+        continue;
+      await processor.apply(execution, {
+        schemaVersion: "ugv.recon-target-fact/1",
+        missionId,
+        observationSessionId: missionId,
+        sensorId: "ugv.area_recon.targets",
+        sourceTargetId,
+        sourceRevision: `lost-${createHash("sha256")
+          .update(`${applied.cursor}\0${sourceTargetId}`)
+          .digest("hex")
+          .slice(0, 32)}`,
+        observedAt: applied.observedAt,
+        visibility: "lost",
+        trackingState: "unknown",
+      });
+      if (this.options.businessManualDecision) {
+        const lock = new NativeLockBusinessProcessor(
+          this.taskBusiness.business,
+          this.taskBusiness.notifyCommitted,
+          { ...this.options.businessManualDecision, now: () => this.#now() },
+        );
+        if ((await lock.invalidateForTargetLoss(execution, sourceTargetId)) === "committed") {
+          const latest = await this.store.getExecution(execution.taskId);
+          if (latest?.externalExecutionId === execution.externalExecutionId)
+            await this.#reconcileReconRequiredInput(latest);
+        }
+      }
+    }
   }
 
   async #confirmationLatencyMetric(metricName: string, execution: ProviderExecution) {
@@ -2383,6 +3603,7 @@ export class UgvProviderRuntime {
         observedAt: this.#now().toISOString(),
       });
       await this.store.putExecution(failed);
+      await this.taskBusiness?.finalizeForTerminalExecution(failed);
       this.arbiter.release(failed.taskId);
       return true;
     }
@@ -2465,6 +3686,7 @@ export class UgvProviderRuntime {
         },
       );
       await this.store.putExecution(failed);
+      await this.taskBusiness?.finalizeForTerminalExecution(failed);
       this.arbiter.release(failed.taskId);
     }
   }
@@ -2747,7 +3969,8 @@ export class UgvProviderRuntime {
     previous: ProviderExecution,
     next: ProviderExecution,
   ): Promise<void> {
-    this.events.emit(next.taskId, executionSnapshot(next));
+    if (isTerminal(next.state)) await this.taskBusiness?.finalizeForTerminalExecution(next);
+    this.events.emit(next.taskId, await this.executionSnapshot(next));
     await this.telemetry
       .emit(
         "EXECUTION_PROGRESS",
@@ -2833,10 +4056,29 @@ export class UgvProviderRuntime {
   }
 }
 
-export function executionSnapshot(execution: ProviderExecution): Record<string, unknown> {
+export function executionSnapshot(
+  execution: ProviderExecution,
+  pendingInput?: RequiredInput,
+): Record<string, unknown> {
   const result =
     execution.result === undefined ? undefined : sanitizeFireResult(execution.result).value;
   if (result !== undefined) assertNoRefereeData(result);
+  let reconInput: RequiredInput | undefined;
+  if (execution.state === "WAITING_INPUT" && execution.operationName === "vehicle_area_recon") {
+    if (pendingInput === undefined) throw new Error("UGV_REQUIRED_INPUT_NOT_BOUND");
+    const request = RequiredInputSchema.parse(pendingInput);
+    if (
+      !execution.taskBusinessContextExpected ||
+      request.state !== "pending" ||
+      request.identity.taskId !== execution.taskId ||
+      request.identity.executionId !== execution.externalExecutionId ||
+      request.identity.providerId !== execution.providerId ||
+      request.identity.resourceId !== execution.resourceId ||
+      request.identity.operationName !== execution.operationName
+    )
+      throw new Error("UGV_REQUIRED_INPUT_NOT_BOUND");
+    reconInput = request;
+  }
   return {
     taskId: execution.taskId,
     externalExecutionId: execution.externalExecutionId,
@@ -2861,7 +4103,7 @@ export function executionSnapshot(execution: ProviderExecution): Record<string, 
     retryable: execution.state === "TECHNICAL_FAILED",
     observedAt: timestamp(execution.updatedAt),
     evidence: execution.evidence,
-    ...(execution.state === "WAITING_INPUT"
+    ...(execution.state === "WAITING_INPUT" && execution.operationName === "vehicle_fire_weapon"
       ? {
           mcpInputRequests: [
             {
@@ -2881,6 +4123,33 @@ export function executionSnapshot(execution: ProviderExecution): Record<string, 
           ],
         }
       : {}),
+    ...(reconInput === undefined
+      ? {}
+      : {
+          mcpInputRequests: [
+            {
+              key: reconInput.requestKey,
+              method: "elicitation/create",
+              params: jsonToProtoStruct({
+                message: reconInput.description ?? reconInput.title,
+                requestedSchema: reconInput.inputSchema,
+                _meta: {
+                  "io.sdar/taskBusiness": {
+                    schemaVersion: reconInput.schemaVersion,
+                    requestId: reconInput.requestId,
+                    requestKey: reconInput.requestKey,
+                    inputType: reconInput.inputType,
+                    requiredResponder: reconInput.requiredResponder,
+                    revision: reconInput.revision,
+                    ...(reconInput.deadlineAt === undefined
+                      ? {}
+                      : { deadlineAt: reconInput.deadlineAt }),
+                  },
+                },
+              }),
+            },
+          ],
+        }),
   };
 }
 
@@ -2900,6 +4169,11 @@ function applyTrack(
   if (
     !isNewOperationObservation(execution, observationCursor) &&
     physical?.observationChanged !== true
+  )
+    return execution;
+  if (
+    execution.operationName === "vehicle_navigate" &&
+    isHistoricalMissionObservation(execution, track.id)
   )
     return execution;
   if (!trackBelongsToExecution(execution, track)) {
@@ -3030,6 +4304,7 @@ function applyReconTrack(
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))
     return execution;
+  if (isHistoricalMissionObservation(execution, reconnaissance.id)) return execution;
   if (observedAt === undefined || Number.isNaN(Date.parse(observedAt)))
     return execution.reasonCode === "UGV_RECON_CORRELATION_UNKNOWN"
       ? execution
@@ -3134,6 +4409,23 @@ function trackBelongsToExecution(
   }
 }
 
+/** A replacement mission owns current Task state; older IDs remain only for history. */
+function isHistoricalMissionObservation(
+  execution: ProviderExecution,
+  observedMissionId: string | number | undefined,
+): boolean {
+  if (observedMissionId === undefined || execution.downstreamMissionIds.length < 2) return false;
+  try {
+    const observed = String(parseUgvMissionId(observedMissionId));
+    return (
+      observed !== execution.downstreamMissionIds.at(-1) &&
+      execution.downstreamMissionIds.includes(observed)
+    );
+  } catch {
+    return false;
+  }
+}
+
 interface TaskPhaseObservation {
   observedAt: string;
   startObserved: boolean;
@@ -3149,7 +4441,11 @@ function taskPhaseObservation(
   if (execution.operationName === "vehicle_navigate") {
     const cursor = operationObservationCursor(execution.operationName, ingress);
     const track = snapshot.chassis.mission;
-    if (!isNewOperationObservation(execution, cursor) || !trackBelongsToExecution(execution, track))
+    if (
+      !isNewOperationObservation(execution, cursor) ||
+      isHistoricalMissionObservation(execution, track.id) ||
+      !trackBelongsToExecution(execution, track)
+    )
       return undefined;
     const mapped = mapVehicleTaskState(track.state, true).state;
     if (mapped === "RECONCILE") return undefined;
@@ -3167,6 +4463,7 @@ function taskPhaseObservation(
     if (
       !isNewReconObservation(execution, cursor) ||
       authority === undefined ||
+      isHistoricalMissionObservation(execution, track.id) ||
       !trackBelongsToExecution(execution, track, true)
     )
       return undefined;
@@ -3256,8 +4553,10 @@ function stationaryStabilitySatisfied(
   )
     return false;
   return (
-    Date.parse(speedAuthority.observedAt) - Date.parse(execution.stationaryCandidateSince) >=
-    stabilityMs
+    millisecondsBetweenIsoTimestamps(
+      speedAuthority.observedAt,
+      execution.stationaryCandidateSince,
+    ) >= stabilityMs
   );
 }
 
@@ -3634,6 +4933,81 @@ function fireConfirmationDecision(value: unknown): "accepted" | "declined" | "in
     return "invalid";
   }
   return "invalid";
+}
+function legacyFireInputResponses(inputs: readonly unknown[]): unknown[] {
+  return inputs.map((item) => {
+    if (!record(item) || typeof item.inputRequestKey !== "string" || !record(item.value))
+      return { key: "", result: jsonToProtoStruct({ action: "invalid" }) };
+    let value: unknown;
+    try {
+      value = protoValueToJson(item.value as ProtoValue);
+    } catch {
+      return { key: item.inputRequestKey, result: jsonToProtoStruct({ action: "invalid" }) };
+    }
+    const confirmed = value === true || (record(value) && value.confirmed === true);
+    const declined = value === false || (record(value) && value.confirmed === false);
+    return {
+      key: item.inputRequestKey,
+      result: jsonToProtoStruct(
+        confirmed
+          ? { action: "accept", content: { confirmed: true } }
+          : { action: declined ? "decline" : "invalid" },
+      ),
+    };
+  });
+}
+function validUnsupportedInputEnvelope(update: {
+  inputs: readonly unknown[];
+  inputResponses: readonly unknown[];
+}): boolean {
+  const keys = new Set<string>();
+  for (const item of update.inputResponses) {
+    if (!record(item) || typeof item.key !== "string" || item.key.length === 0) return false;
+    if (keys.has(item.key) || !record(item.result) || !record(item.result.fields)) return false;
+    keys.add(item.key);
+    try {
+      const result = protoStructToJson(item.result);
+      if (result.action !== "accept" && result.action !== "decline" && result.action !== "cancel")
+        return false;
+      if (item.verifiedResponder != null) {
+        if (!record(item.verifiedResponder) || !record(item.verifiedResponder.fields)) return false;
+        const responder = protoStructToJson(item.verifiedResponder);
+        if (
+          !["user", "agent", "operator"].includes(String(responder.actorType)) ||
+          typeof responder.actorId !== "string" ||
+          responder.actorId.length === 0 ||
+          !["jwt_hs256", "trusted_headers"].includes(String(responder.source))
+        ) {
+          return false;
+        }
+      }
+    } catch {
+      return false;
+    }
+  }
+  for (const item of update.inputs) {
+    if (
+      !record(item) ||
+      typeof item.inputRequestKey !== "string" ||
+      item.inputRequestKey.length === 0 ||
+      keys.has(item.inputRequestKey) ||
+      !record(item.value) ||
+      ["nullValue", "numberValue", "stringValue", "boolValue", "listValue", "structValue"].filter(
+        (key) => Object.hasOwn(item.value as Record<string, unknown>, key),
+      ).length !== 1 ||
+      typeof item.answerHash !== "string" ||
+      item.answerHash.length === 0
+    ) {
+      return false;
+    }
+    try {
+      protoValueToJson(item.value as ProtoValue);
+    } catch {
+      return false;
+    }
+    keys.add(item.inputRequestKey);
+  }
+  return true;
 }
 function fireCancellationReason(recordValue: CommandAckRecord | undefined): string | undefined {
   const reasonCode = fireDispatchReason(recordValue);

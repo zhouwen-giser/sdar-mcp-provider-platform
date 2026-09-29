@@ -17,6 +17,17 @@ function deserialize_io_sdar_mcp_tasks_adapter_v1_AdapterBusinessEvent(buffer_ar
   return io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_io_sdar_mcp_tasks_adapter_v1_ApplyInterventionRequest(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.ApplyInterventionRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_ApplyInterventionRequest(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_io_sdar_mcp_tasks_adapter_v1_CheckAvailabilityRequest(arg) {
   if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.CheckAvailabilityRequest)) {
     throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.CheckAvailabilityRequest');
@@ -81,6 +92,72 @@ function serialize_io_sdar_mcp_tasks_adapter_v1_ExecutionSnapshot(arg) {
 
 function deserialize_io_sdar_mcp_tasks_adapter_v1_ExecutionSnapshot(buffer_arg) {
   return io_sdar_mcp_tasks_adapter_v1_adapter_pb.ExecutionSnapshot.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactRequest(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessArtifactRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactRequest(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactResponse(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessArtifactResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactResponse(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextRequest(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessContextRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextRequest(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextResponse(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessContextResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextResponse(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartRequest(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessSnapshotPartRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartRequest(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartResponse(arg) {
+  if (!(arg instanceof io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse)) {
+    throw new Error('Expected argument of type io.sdar.mcp.tasks.adapter.v1.GetBusinessSnapshotPartResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartResponse(buffer_arg) {
+  return io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_io_sdar_mcp_tasks_adapter_v1_GetExecutionRequest(arg) {
@@ -360,6 +437,50 @@ var ResourceProviderAdapterService = exports.ResourceProviderAdapterService = {
     requestDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_StreamBusinessEventsRequest,
     responseSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_AdapterBusinessEvent,
     responseDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_AdapterBusinessEvent,
+  },
+  getBusinessContext: {
+    path: '/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessContext',
+    requestStream: false,
+    responseStream: false,
+    requestType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest,
+    responseType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse,
+    requestSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextRequest,
+    requestDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextRequest,
+    responseSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextResponse,
+    responseDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessContextResponse,
+  },
+  getBusinessSnapshotPart: {
+    path: '/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessSnapshotPart',
+    requestStream: false,
+    responseStream: false,
+    requestType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest,
+    responseType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse,
+    requestSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartRequest,
+    requestDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartRequest,
+    responseSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartResponse,
+    responseDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessSnapshotPartResponse,
+  },
+  getBusinessArtifact: {
+    path: '/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessArtifact',
+    requestStream: false,
+    responseStream: false,
+    requestType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest,
+    responseType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse,
+    requestSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactRequest,
+    requestDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactRequest,
+    responseSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactResponse,
+    responseDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_GetBusinessArtifactResponse,
+  },
+  applyIntervention: {
+    path: '/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ApplyIntervention',
+    requestStream: false,
+    responseStream: false,
+    requestType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest,
+    responseType: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck,
+    requestSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_ApplyInterventionRequest,
+    requestDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_ApplyInterventionRequest,
+    responseSerialize: serialize_io_sdar_mcp_tasks_adapter_v1_CommandAck,
+    responseDeserialize: deserialize_io_sdar_mcp_tasks_adapter_v1_CommandAck,
   },
   listResources: {
     path: '/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ListResources',

@@ -44,6 +44,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
             store,
             options.identity?.resourceId ?? "vehicle:ugv1",
             runtime.qualificationContext(),
+            runtime.businessFeedbackProfiles(),
           ),
         resource: (snapshot) => ugvResource(snapshot as UgvSnapshot, runtime.readiness()),
       },

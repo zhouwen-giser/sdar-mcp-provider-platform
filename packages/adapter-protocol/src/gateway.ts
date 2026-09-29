@@ -1,11 +1,15 @@
 import * as grpc from "@grpc/grpc-js";
 import { createHash, randomUUID } from "node:crypto";
 import { adapterClientConstructor } from "./proto.js";
-import { jsonToProtoStruct, jsonToProtoValue } from "./struct.js";
+import { jsonToProtoStruct, jsonToProtoValue, protoStructToJson } from "./struct.js";
 import { ADAPTER_PROTOCOL_VERSION } from "./types.js";
 import type {
   AvailabilityCheckInput,
   AdapterBusinessEvent,
+  BusinessArtifactReadResponse,
+  BusinessContextPageResponse,
+  BusinessSnapshotPartResponse,
+  BusinessSnapshotPartSelector,
   CheckAvailabilityResponse,
   CommandAck,
   ExecutionSnapshot,
@@ -26,6 +30,10 @@ type UnaryAdapterMethod<T> = (
 type AdapterClient = grpc.Client & {
   describeProvider: UnaryAdapterMethod<ProviderManifest>;
   getExecution: UnaryAdapterMethod<ExecutionSnapshot>;
+  getBusinessContext: UnaryAdapterMethod<BusinessContextPageResponse>;
+  getBusinessSnapshotPart: UnaryAdapterMethod<BusinessSnapshotPartResponse>;
+  getBusinessArtifact: UnaryAdapterMethod<BusinessArtifactReadResponse>;
+  applyIntervention: UnaryAdapterMethod<CommandAck>;
   startOperation: UnaryAdapterMethod<StartOperationResponse>;
   checkAvailability: UnaryAdapterMethod<CheckAvailabilityResponse>;
   reconcileExecution: UnaryAdapterMethod<ReconcileExecutionResponse>;
@@ -94,6 +102,11 @@ export interface StartOperationOptions {
   rootTraceparent?: string;
   rootTracestate?: string;
   reservationRef?: string;
+}
+
+export interface BusinessArtifactReadOptions extends StartOperationOptions {
+  contentOffset?: number;
+  maxContentBytes?: number;
 }
 
 export class GrpcAdapterGateway {
@@ -165,6 +178,100 @@ export class GrpcAdapterGateway {
       },
       rpcContext(taskId, externalExecutionId, undefined, undefined, options),
     );
+  }
+
+  async getBusinessContext(
+    taskId: string,
+    externalExecutionId: string,
+    maxPageBytes: number,
+    pageCursor = "",
+    options: StartOperationOptions = {},
+  ): Promise<Record<string, unknown>> {
+    const response = await this.#unary<BusinessContextPageResponse>(
+      "getBusinessContext",
+      {
+        metadata: this.#metadata(options.correlationId),
+        taskId,
+        externalExecutionId,
+        executionContext: this.#executionContext(options),
+        maxPageBytes,
+        pageCursor,
+      },
+      rpcContext(taskId, externalExecutionId, undefined, undefined, options),
+    );
+    return protoStructToJson(response.page);
+  }
+
+  async getBusinessSnapshotPart(
+    taskId: string,
+    externalExecutionId: string,
+    selector: BusinessSnapshotPartSelector,
+    options: StartOperationOptions = {},
+  ): Promise<BusinessSnapshotPartResponse> {
+    return this.#unary<BusinessSnapshotPartResponse>(
+      "getBusinessSnapshotPart",
+      {
+        metadata: this.#metadata(options.correlationId),
+        taskId,
+        externalExecutionId,
+        executionContext: this.#executionContext(options),
+        contextRevision: String(selector.contextRevision),
+        ...(selector.objectRef === undefined
+          ? {}
+          : {
+              objectKind: selector.objectRef.kind,
+              objectId: selector.objectRef.id,
+              objectRevision: String(selector.objectRef.revision),
+            }),
+        offset: String(selector.offset),
+        maxBytes: selector.maxBytes,
+      },
+      rpcContext(taskId, externalExecutionId, undefined, undefined, options),
+    );
+  }
+
+  async getBusinessArtifact(
+    taskId: string,
+    externalExecutionId: string,
+    artifactId: string,
+    revision: number | undefined,
+    representationName: string,
+    includeContent: boolean,
+    options: BusinessArtifactReadOptions = {},
+  ): Promise<{
+    artifact: Record<string, unknown>;
+    contentBytes?: Uint8Array;
+    mediaType: string;
+    sha256: string;
+    contentTotalBytes: string;
+    nextContentOffset?: string;
+  }> {
+    const response = await this.#unary<BusinessArtifactReadResponse>(
+      "getBusinessArtifact",
+      {
+        metadata: this.#metadata(options.correlationId),
+        taskId,
+        externalExecutionId,
+        executionContext: this.#executionContext(options),
+        artifactId,
+        ...(revision === undefined ? {} : { revision: String(revision) }),
+        representationName,
+        includeContent,
+        contentOffset: String(options.contentOffset ?? 0),
+        maxContentBytes: options.maxContentBytes ?? 0,
+      },
+      rpcContext(taskId, externalExecutionId, undefined, undefined, options),
+    );
+    return {
+      artifact: protoStructToJson(response.artifact),
+      ...(response.contentBytes === undefined ? {} : { contentBytes: response.contentBytes }),
+      mediaType: response.mediaType,
+      sha256: response.sha256,
+      contentTotalBytes: response.contentTotalBytes,
+      ...(response.nextContentOffset === undefined
+        ? {}
+        : { nextContentOffset: response.nextContentOffset }),
+    };
   }
 
   checkAvailability(
@@ -297,7 +404,72 @@ export class GrpcAdapterGateway {
         inputResponses: inputResponses.map((response) => ({
           key: response.key,
           result: jsonToProtoStruct(response.result),
+          ...(response.verifiedResponder === undefined
+            ? {}
+            : { verifiedResponder: jsonToProtoStruct(response.verifiedResponder) }),
         })),
+      },
+      rpcContext(
+        identity.taskId,
+        options.externalExecutionId,
+        identity.commandSequence,
+        identity.operationName,
+        options,
+      ),
+    );
+  }
+
+  updateTaskBusinessInput(
+    identity: {
+      taskId: string;
+      operationName: string;
+      argumentHash: string;
+      commandSequence: number;
+    },
+    command: Record<string, unknown>,
+    options: StartOperationOptions = {},
+  ): Promise<CommandAck> {
+    return this.#unary<CommandAck>(
+      "updateExecution",
+      {
+        metadata: this.#metadata(options.correlationId),
+        identity: {
+          ...identity,
+          externalExecutionId: options.externalExecutionId ?? "",
+          executionContext: this.#executionContext(options),
+        },
+        businessInputCommand: jsonToProtoStruct(command),
+      },
+      rpcContext(
+        identity.taskId,
+        options.externalExecutionId,
+        identity.commandSequence,
+        identity.operationName,
+        options,
+      ),
+    );
+  }
+
+  applyIntervention(
+    identity: {
+      taskId: string;
+      operationName: string;
+      argumentHash: string;
+      commandSequence: number;
+    },
+    command: Record<string, unknown>,
+    options: StartOperationOptions = {},
+  ): Promise<CommandAck> {
+    return this.#unary<CommandAck>(
+      "applyIntervention",
+      {
+        metadata: this.#metadata(options.correlationId),
+        identity: {
+          ...identity,
+          externalExecutionId: options.externalExecutionId ?? "",
+          executionContext: this.#executionContext(options),
+        },
+        command: jsonToProtoStruct(command),
       },
       rpcContext(
         identity.taskId,
@@ -421,6 +593,10 @@ export class GrpcAdapterGateway {
     method:
       | "describeProvider"
       | "getExecution"
+      | "getBusinessContext"
+      | "getBusinessSnapshotPart"
+      | "getBusinessArtifact"
+      | "applyIntervention"
       | "startOperation"
       | "checkAvailability"
       | "reconcileExecution"
@@ -460,6 +636,34 @@ export class GrpcAdapterGateway {
             metadata,
             { deadline },
             callback as grpc.requestCallback<ExecutionSnapshot>,
+          );
+        } else if (method === "getBusinessContext") {
+          this.#client.getBusinessContext(
+            request,
+            metadata,
+            { deadline },
+            callback as grpc.requestCallback<BusinessContextPageResponse>,
+          );
+        } else if (method === "getBusinessSnapshotPart") {
+          this.#client.getBusinessSnapshotPart(
+            request,
+            metadata,
+            { deadline },
+            callback as grpc.requestCallback<BusinessSnapshotPartResponse>,
+          );
+        } else if (method === "getBusinessArtifact") {
+          this.#client.getBusinessArtifact(
+            request,
+            metadata,
+            { deadline },
+            callback as grpc.requestCallback<BusinessArtifactReadResponse>,
+          );
+        } else if (method === "applyIntervention") {
+          this.#client.applyIntervention(
+            request,
+            metadata,
+            { deadline },
+            callback as grpc.requestCallback<CommandAck>,
           );
         } else if (method === "startOperation") {
           this.#client.startOperation(

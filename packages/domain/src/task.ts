@@ -18,6 +18,12 @@ export interface AuthorizationContext {
   hash: string;
   executionMode: ExecutionMode;
   simulationId: string | null;
+  /** Set only by a verified authentication resolver, never from task input JSON. */
+  verifiedResponder?: {
+    actorType: "user" | "agent" | "operator";
+    actorId: string;
+    source: "jwt_hs256" | "trusted_headers";
+  };
   correlationId?: string;
   traceId?: string;
   rootTraceparent?: string;

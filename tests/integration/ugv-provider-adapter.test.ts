@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   canonicalJson,
   jsonToProtoStruct,
+  jsonToProtoValue,
   protoStructToJson,
   type ExecutionSnapshot,
   type ProviderManifest,
@@ -51,6 +52,166 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("routes UpdateExecution from the persisted operation without sending navigation input to fire control", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-update-routing", "vehicle_navigate", navigateArgs()),
+    );
+    const execution = required(await fixture.runtime.get("nav-update-routing"));
+    const callsBefore = fixture.device.calls.length;
+    const ack = await fixture.runtime.updateInput(identityOf(execution, "1"), {
+      inputs: [],
+      inputResponses: [
+        {
+          key: "observation-decision",
+          result: jsonToProtoStruct({ action: "accept", content: { continued: true } }),
+        },
+      ],
+    });
+    expect(ack).toMatchObject({ accepted: false, reasonCode: "UGV_INPUT_HANDLER_NOT_AVAILABLE" });
+    const replay = await fixture.runtime.updateInput(identityOf(execution, "1"), {
+      inputs: [{ inputRequestKey: "other" }],
+      inputResponses: [{ key: "other" }],
+    });
+    expect(replay).toEqual(ack);
+    const malformed = await fixture.runtime.updateInput(identityOf(execution, "3"), {
+      inputs: [{ inputRequestKey: "other" }],
+      inputResponses: [{ key: "other" }],
+    });
+    expect(malformed).toMatchObject({
+      accepted: false,
+      reasonCode: "INPUT_RESPONSE_WIRE_AMBIGUOUS",
+    });
+    const corrected = await fixture.runtime.updateInput(identityOf(execution, "3"), {
+      inputs: [],
+      inputResponses: [
+        {
+          key: "observation-decision",
+          result: jsonToProtoStruct({ action: "accept", content: { continued: true } }),
+        },
+      ],
+    });
+    expect(corrected).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INPUT_HANDLER_NOT_AVAILABLE",
+    });
+    const malformedResponse = await fixture.runtime.updateInput(identityOf(execution, "4"), {
+      inputs: [],
+      inputResponses: [{ key: "observation-decision" }],
+    });
+    expect(malformedResponse).toMatchObject({
+      accepted: false,
+      reasonCode: "INPUT_RESPONSE_WIRE_INVALID",
+    });
+    const correctedResponse = await fixture.runtime.updateInput(identityOf(execution, "4"), {
+      inputs: [],
+      inputResponses: [
+        {
+          key: "observation-decision",
+          result: jsonToProtoStruct({ action: "decline" }),
+        },
+      ],
+    });
+    expect(correctedResponse).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INPUT_HANDLER_NOT_AVAILABLE",
+    });
+    expect(
+      await fixture.runtime.updateInput(identityOf(execution, "5"), {
+        inputs: [{ inputRequestKey: "legacy-decision", value: {}, answerHash: "fixture" }],
+        inputResponses: [],
+      }),
+    ).toMatchObject({ accepted: false, reasonCode: "INPUT_RESPONSE_WIRE_INVALID" });
+    expect(
+      await fixture.runtime.updateInput(identityOf(execution, "5"), {
+        inputs: [
+          {
+            inputRequestKey: "legacy-decision",
+            value: jsonToProtoValue(true),
+            answerHash: "fixture",
+          },
+        ],
+        inputResponses: [],
+      }),
+    ).toMatchObject({ accepted: false, reasonCode: "UGV_INPUT_HANDLER_NOT_AVAILABLE" });
+    const spoofed = await fixture.runtime.updateInput(
+      { ...identityOf(execution, "2"), operationName: "vehicle_fire_weapon" },
+      { inputs: [], inputResponses: [{ key: "fire_confirmation" }] },
+    );
+    expect(spoofed).toMatchObject({ accepted: false, reasonCode: "TASK_IDENTITY_CONFLICT" });
+    expect(fixture.device.calls).toHaveLength(callsBefore);
+  });
+
+  it("rejects a spoofed Intervention identity without poisoning its command sequence", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-intervention-denied", "vehicle_navigate", navigateArgs()),
+    );
+    missionWithId(fixture.ingress, 1, 1, 20);
+    const execution = required(await fixture.runtime.get("nav-intervention-denied"));
+    expect(execution.state).toBe("RUNNING");
+    const identity = identityOf(execution, "77");
+    const callsBefore = fixture.device.calls.length;
+    const payload = {
+      command: {
+        schemaVersion: "sdar.runtime-intervention-command/1.0-rc2",
+        commandId: "unsupported-adjustment-77",
+        taskId: execution.taskId,
+        executionId: execution.externalExecutionId,
+        interventionId: "unavailable-adjustment-77",
+        guard: {
+          mode: "semantic",
+          expectedInterventionRevision: 1,
+          expectedEffectivePlanRevision: 0,
+        },
+        input: { destination: [114.3, 30.3] },
+      },
+      responder: {
+        source: "runtime_authorization_context",
+        actorType: "user",
+        verified: true,
+      },
+    };
+    expect(
+      await fixture.runtime.applyIntervention(
+        { ...identity, externalExecutionId: "spoofed-execution" },
+        payload,
+      ),
+    ).toMatchObject({ accepted: false, reasonCode: "TASK_IDENTITY_CONFLICT" });
+    expect(await fixture.runtime.applyIntervention(identity, { command: {} })).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_COMMAND_INVALID",
+    });
+    expect(
+      await fixture.runtime.applyIntervention(identity, {
+        ...payload,
+        command: { ...payload.command, executionId: "another-execution" },
+      }),
+    ).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_COMMAND_BINDING_INVALID",
+    });
+    expect(
+      await fixture.runtime.applyIntervention(identity, { ...payload, responder: {} }),
+    ).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_RESPONDER_INVALID",
+    });
+    expect(
+      await fixture.store.getCommandAck(execution.taskId, "intervention", "77"),
+    ).toBeUndefined();
+    expect(await fixture.runtime.applyIntervention(identity, payload)).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_NOT_SUPPORTED",
+    });
+    expect(await fixture.runtime.applyIntervention(identity, { command: {} })).toMatchObject({
+      accepted: false,
+      reasonCode: "UGV_INTERVENTION_NOT_SUPPORTED",
+    });
+    expect(fixture.device.calls).toHaveLength(callsBefore);
+    expect((await fixture.runtime.get(execution.taskId))?.state).toBe("RUNNING");
+  });
+
   it("refreshes operation health after Device MCP contract discovery without a tool call", async () => {
     const device = new ConnectPopulatesContractUgvDevice();
     const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);
@@ -148,6 +309,52 @@ describe("UGV long-running operation integration", () => {
     expect(evidence?.externalExecutionId).toContain("vehicle:ugv1:chassis:");
     expect(evidence?.attributes.redispatchAllowed).toBe(false);
     expect(evidence?.attributes["sdar.diagnostic.deviceMissionId"]).toBe("1");
+  });
+
+  it("returns the receipt for the current diagnostic state when bind and consume timestamps tie", async () => {
+    const token = "diagnostic-control-token-for-tests";
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      executionMode: "live",
+      diagnostics: { enabled: true, controlToken: token, maximumTtlMs: 60_000 },
+    });
+    const argumentHash = "d".repeat(64);
+    const armed = await diagnosticControl(fixture.runtime, token, SMPP_RESPONSE_LOSS_CAPABILITY, {
+      contract: SMPP_DIAGNOSTIC_CONTRACT,
+      action: "arm",
+      idempotencyKey: "same-timestamp-receipt-arm",
+      ttlMs: 60_000,
+      scope: {
+        runId: "run-same-timestamp",
+        caseId: "UGV-MCP-003",
+        caseExecutionId: "case-same-timestamp",
+        repetitionId: "repetition-1",
+        selector: { operationName: "vehicle_navigate", argumentHash },
+      },
+    });
+    const leaseId = stringProperty(armed.lease, "leaseId");
+    const lease = required(await fixture.store.getDiagnosticLease(leaseId));
+    const observedAt = lease.armedAt;
+    const bound = await fixture.store.bindDiagnosticLease({
+      capabilityId: SMPP_RESPONSE_LOSS_CAPABILITY,
+      operationName: "vehicle_navigate",
+      argumentHash,
+      logicalInvocationId: "same-timestamp-invocation",
+      taskId: "same-timestamp-task",
+      externalExecutionId: "same-timestamp-execution",
+      deviceMissionId: "1",
+      observedAt,
+    });
+    expect(bound?.receipt.action).toBe("bound");
+    await fixture.store.consumeDiagnosticLease(
+      leaseId,
+      lease.canonicalRequestHash,
+      "00000000-0000-4000-8000-000000000001",
+      observedAt,
+    );
+    expect(await fixture.store.getDiagnosticStatus(leaseId)).toMatchObject({
+      lease: { state: "CONSUMED" },
+      receipt: { action: "consumed", state: "CONSUMED" },
+    });
   });
 
   it("scopes Provider business success to one exact mission without asserting physical arrival", async () => {
@@ -1445,6 +1652,36 @@ describe("UGV long-running operation integration", () => {
     });
   });
 
+  it("ignores a late prior navigation mission failure after the bound mission changes", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("nav-prior-mission-terminal", "vehicle_navigate", navigateArgs()),
+    );
+    missionWithId(fixture.ingress, 1, 1, 20);
+    const running = required(await fixture.runtime.get("nav-prior-mission-terminal"));
+    expect(running.state).toBe("RUNNING");
+    await fixture.store.putExecution({
+      ...running,
+      downstreamMissionIds: [...running.downstreamMissionIds, "2"],
+      revision: running.revision + 1,
+      updatedAt: new Date().toISOString(),
+    });
+
+    missionWithId(fixture.ingress, 1, 5, 100);
+    expect(await fixture.runtime.get("nav-prior-mission-terminal")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: running.reasonCode,
+      downstreamMissionIds: ["1", "2"],
+    });
+    missionWithId(fixture.ingress, 2, 1, 30);
+    expect((await fixture.runtime.get("nav-prior-mission-terminal"))?.state).toBe("RUNNING");
+    missionWithId(fixture.ingress, 2, 5, 100);
+    expect(await fixture.runtime.get("nav-prior-mission-terminal")).toMatchObject({
+      state: "BUSINESS_FAILED",
+      reasonCode: "UGV_DEVICE_TASK_FAILED",
+    });
+  });
+
   it("accepts immediate completion only with correlated post-dispatch physical proof", async () => {
     let now = Date.now();
     const fixture = await createFixture(false, new MemoryProviderStore(), {
@@ -1738,6 +1975,36 @@ describe("UGV long-running operation integration", () => {
     });
   });
 
+  it("ignores a late prior Recon mission terminal without obscuring current mission state", async () => {
+    const fixture = await createFixture();
+    await fixture.runtime.start(
+      startInput("recon-prior-mission-terminal", "vehicle_area_recon", reconArgs()),
+    );
+    reconStatus(fixture.ingress, 5, 20, undefined, "1");
+    const running = required(await fixture.runtime.get("recon-prior-mission-terminal"));
+    expect(running.state).toBe("RUNNING");
+    await fixture.store.putExecution({
+      ...running,
+      downstreamMissionIds: [...running.downstreamMissionIds, "2"],
+      revision: running.revision + 1,
+      updatedAt: new Date().toISOString(),
+    });
+
+    reconStatus(fixture.ingress, 11, 100, undefined, "1");
+    expect(await fixture.runtime.get("recon-prior-mission-terminal")).toMatchObject({
+      state: "RUNNING",
+      reasonCode: running.reasonCode,
+      downstreamMissionIds: ["1", "2"],
+    });
+    reconStatus(fixture.ingress, 5, 30, undefined, "2");
+    expect((await fixture.runtime.get("recon-prior-mission-terminal"))?.state).toBe("RUNNING");
+    reconStatus(fixture.ingress, 11, 100, undefined, "2");
+    expect(await fixture.runtime.get("recon-prior-mission-terminal")).toMatchObject({
+      state: "SUCCEEDED",
+      result: { missionId: "2" },
+    });
+  });
+
   it("does not complete a new recon task from a terminal observation captured before dispatch", async () => {
     const fixture = await createFixture();
     reconStatus(fixture.ingress, 11, 100);
@@ -1814,12 +2081,16 @@ describe("UGV long-running operation integration", () => {
     expect(fixture.device.calls).toEqual([]);
 
     const waiting = await fixture.runtime.get("fire-1");
-    const ack = await fixture.runtime.updateFire(identityOf(required(waiting), "1"), [
-      {
-        key: "fire_confirmation",
-        result: jsonToProtoStruct({ action: "accept", content: { confirmed: true } }),
-      },
-    ]);
+    const ack = await fixture.runtime.updateInput(identityOf(required(waiting), "1"), {
+      inputs: [
+        {
+          inputRequestKey: "fire_confirmation",
+          value: jsonToProtoValue(true),
+          answerHash: "a".repeat(64),
+        },
+      ],
+      inputResponses: [],
+    });
     expect(ack).toMatchObject({ accepted: true, reasonCode: "UGV_FIRE_CONFIRMATION_ACCEPTED" });
     expect((await fixture.runtime.get("fire-1"))?.downstreamMissionIds).toEqual(["1"]);
     expect(fixture.device.calls.at(-1)).toMatchObject({

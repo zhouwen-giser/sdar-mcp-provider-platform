@@ -1,0 +1,608 @@
+{
+  "provenance": "synthetic_contract_fixture_not_simulation",
+  "context": {
+    "schemaVersion": "sdar.task-business-context/1.0-rc2",
+    "identity": {
+      "taskId": "task-catalog-1",
+      "executionId": "execution-catalog-1",
+      "providerId": "provider-catalog-1",
+      "resourceId": "vehicle:ugv1",
+      "operationName": "vehicle_area_recon"
+    },
+    "contextRevision": 4,
+    "effectivePlanRevision": 2,
+    "phase": { "code": "recon.scanning", "since": "2026-09-23T00:00:00Z" },
+    "summary": { "status": "in_progress", "resultCode": "SCAN_ACTIVE" },
+    "activeRefs": {
+      "route": { "kind": "artifact", "id": "route-line", "revision": 1 },
+      "lock": { "kind": "action", "id": "lock-1", "revision": 1 },
+      "input": { "kind": "input_request", "id": "input-1", "revision": 1 },
+      "intervention": { "kind": "intervention", "id": "intervention-1", "revision": 1 }
+    },
+    "artifactRefs": [{ "kind": "artifact", "id": "route-line", "revision": 1 }],
+    "actionRefs": [{ "kind": "action", "id": "lock-1", "revision": 1 }],
+    "requiredInputRefs": [{ "kind": "input_request", "id": "input-1", "revision": 1 }],
+    "interventionRefs": [{ "kind": "intervention", "id": "intervention-1", "revision": 1 }],
+    "updatedAt": "2026-09-23T00:01:00Z"
+  },
+  "feedback": [
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "BUSINESS_EVENT",
+      "payload": {
+        "eventType": "recon.route_adopted",
+        "severity": "info",
+        "reasonCode": "ROUTE_ADOPTED",
+        "description": "Route adopted in catalog fixture",
+        "subjects": [{ "kind": "artifact", "id": "route-line", "revision": 1 }],
+        "contextDelta": {
+          "phase": { "code": "recon.scanning", "since": "2026-09-23T00:00:00Z" },
+          "activeRefs": {
+            "route": { "kind": "artifact", "id": "route-line", "revision": 1 },
+            "lock": { "kind": "action", "id": "lock-1", "revision": 1 },
+            "input": { "kind": "input_request", "id": "input-1", "revision": 1 },
+            "intervention": { "kind": "intervention", "id": "intervention-1", "revision": 1 }
+          },
+          "effectivePlanRevision": 2
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "ARTIFACT_CHANGED",
+      "payload": {
+        "change": "create",
+        "artifactRef": { "kind": "artifact", "id": "route-line", "revision": 1 },
+        "reasonCode": "ROUTE_AVAILABLE"
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "ACTION_CHANGED",
+      "payload": {
+        "change": "create",
+        "actionRef": { "kind": "action", "id": "lock-1", "revision": 1 },
+        "reasonCode": "LOCK_REQUESTED"
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "REQUIRED_INPUT_CHANGED",
+      "payload": {
+        "change": "create",
+        "requestRef": { "kind": "input_request", "id": "input-1", "revision": 1 },
+        "reasonCode": "DECISION_REQUIRED"
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "INTERVENTION_CHANGED",
+      "payload": {
+        "change": "create",
+        "interventionRef": { "kind": "intervention", "id": "intervention-1", "revision": 1 },
+        "reasonCode": "ADJUSTMENT_AVAILABLE"
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+      "contextRevision": 4,
+      "providerRecordedAt": "2026-09-23T00:01:00Z",
+      "kind": "CONTEXT_FINALIZED",
+      "payload": {
+        "reasonCode": "CATALOG_FINALIZED",
+        "finalContextRevision": 5,
+        "summary": { "status": "finalized", "resultCode": "COMPLETED" },
+        "artifactRefs": [{ "kind": "artifact", "id": "route-line", "revision": 1 }],
+        "actionRefs": [{ "kind": "action", "id": "lock-1", "revision": 1 }],
+        "finalizedAt": "2026-09-23T00:01:00Z"
+      }
+    }
+  ],
+  "optionalExtension": {
+    "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+    "contextRevision": 4,
+    "providerRecordedAt": "2026-09-23T00:01:00Z",
+    "kind": "FUTURE_OPTIONAL_OBSERVATION",
+    "required": false,
+    "payload": { "nested": ["preserved", { "value": 2 }], "newField": true }
+  },
+  "artifacts": [
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "destination-point",
+      "artifactType": "navigation.destination",
+      "semantics": "requested",
+      "availability": "available",
+      "properties": { "intent": "requested" },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": { "type": "Point", "coordinates": [116, 39] }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "waypoints-multi-point",
+      "artifactType": "navigation.waypoints",
+      "semantics": "planned",
+      "availability": "available",
+      "properties": { "ordered": true, "waypointCount": 2 },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": {
+          "type": "MultiPoint",
+          "coordinates": [
+            [116, 39],
+            [116.001, 39.001]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "route-line",
+      "artifactType": "navigation.route",
+      "semantics": "planned",
+      "availability": "available",
+      "properties": {
+        "adoption": "adopted",
+        "purpose": "navigation",
+        "routeSource": "catalog_fixture"
+      },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [116, 39],
+            [116.001, 39.001]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "trajectory-multi-line",
+      "artifactType": "navigation.trajectory",
+      "semantics": "observed",
+      "availability": "available",
+      "properties": { "sampleCount": 4 },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [
+            [
+              [116, 39],
+              [116.001, 39.001]
+            ],
+            [
+              [116.001, 39.001],
+              [116.002, 39.002]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "area-polygon",
+      "artifactType": "recon.area",
+      "semantics": "requested",
+      "availability": "available",
+      "properties": { "areaRevision": 1 },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [116, 39],
+              [116.001, 39.001],
+              [116.002, 39.002],
+              [116, 39]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "covered-multi-polygon",
+      "artifactType": "recon.covered_area",
+      "semantics": "derived",
+      "availability": "available",
+      "properties": {
+        "areaRevision": 1,
+        "grid": {
+          "frameId": "map-1",
+          "origin": [0, 0],
+          "cellSizeM": 1,
+          "denominatorCellCount": 10
+        },
+        "numeratorCellCount": 3
+      },
+      "content": {
+        "kind": "geojson",
+        "crs": "OGC:CRS84",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [116, 39],
+                [116.001, 39.001],
+                [116.002, 39.002],
+                [116, 39]
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "route-local",
+      "artifactType": "navigation.route",
+      "semantics": "planned",
+      "availability": "available",
+      "properties": {
+        "adoption": "adopted",
+        "purpose": "navigation",
+        "routeSource": "catalog_fixture"
+      },
+      "content": {
+        "kind": "local_geometry",
+        "frameId": "sim-map-1",
+        "unit": "m",
+        "axisConvention": "ENU",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [300, 400],
+            [301, 402]
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "target-image",
+      "artifactType": "target.object",
+      "semantics": "observed",
+      "availability": "available",
+      "properties": {
+        "targetId": "target-image",
+        "visibility": "visible",
+        "trackingState": "unlocked",
+        "firstSeen": { "clockDomain": "utc", "observedAt": "2026-09-23T00:00:00Z" },
+        "lastSeen": { "clockDomain": "utc", "observedAt": "2026-09-23T00:01:00Z" },
+        "sensorId": "camera-1",
+        "observationSessionId": "session-1",
+        "lastSeenPositionQuality": "unknown"
+      },
+      "content": {
+        "kind": "image_observation",
+        "frameId": "camera-frame-1",
+        "bbox": { "coordinateMode": "pixel", "x": 20, "y": 30, "width": 15, "height": 10 }
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "route-ref",
+      "artifactType": "navigation.route",
+      "semantics": "planned",
+      "availability": "available",
+      "properties": {
+        "adoption": "adopted",
+        "purpose": "navigation",
+        "routeSource": "catalog_fixture"
+      },
+      "content": {
+        "kind": "content_ref",
+        "artifactId": "route-ref",
+        "revision": 1,
+        "readMethod": "business_artifact_content",
+        "handle": "route-ref_1",
+        "mediaType": "application/geo+json",
+        "sizeBytes": 500,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "expiresAt": "2026-09-24T00:00:00Z"
+      }
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "trajectory-empty",
+      "artifactType": "navigation.trajectory",
+      "semantics": "observed",
+      "availability": "empty",
+      "reasonCode": "NO_SAMPLES",
+      "readPerformedAt": "2026-09-23T00:01:00Z"
+    },
+    {
+      "schemaVersion": "sdar.task-artifact/1.0-rc2",
+      "revision": 1,
+      "lifecycle": "active",
+      "identity": {
+        "taskId": "task-catalog-1",
+        "executionId": "execution-catalog-1",
+        "providerId": "provider-catalog-1",
+        "resourceId": "vehicle:ugv1",
+        "operationName": "vehicle_area_recon"
+      },
+      "source": { "producer": "device_planner", "sourceRecordRef": "catalog-source-1" },
+      "createdAt": "2026-09-23T00:00:00Z",
+      "updatedAt": "2026-09-23T00:01:00Z",
+      "artifactId": "route-unavailable",
+      "artifactType": "navigation.route",
+      "semantics": "planned",
+      "availability": "unavailable",
+      "reasonCode": "PLANNER_NOT_READY"
+    }
+  ],
+  "action": {
+    "schemaVersion": "sdar.business-action/1.0-rc2",
+    "actionId": "lock-1",
+    "actionType": "sensor.visual_lock",
+    "identity": {
+      "taskId": "task-catalog-1",
+      "executionId": "execution-catalog-1",
+      "providerId": "provider-catalog-1",
+      "resourceId": "vehicle:ugv1",
+      "operationName": "vehicle_area_recon"
+    },
+    "revision": 1,
+    "state": "requested",
+    "actor": { "type": "device" },
+    "triggerOrigin": "device_automatic",
+    "subjectRefs": [{ "kind": "artifact", "id": "target-image", "revision": 1 }],
+    "reasonCode": "LOCK_REQUESTED",
+    "requestedAt": "2026-09-23T00:00:00Z"
+  },
+  "requiredInput": {
+    "schemaVersion": "sdar.required-input/1.0-rc2",
+    "requestId": "input-1",
+    "requestKey": "input-key-1",
+    "inputType": "target.disposition_decision",
+    "identity": {
+      "taskId": "task-catalog-1",
+      "executionId": "execution-catalog-1",
+      "providerId": "provider-catalog-1",
+      "resourceId": "vehicle:ugv1",
+      "operationName": "vehicle_area_recon"
+    },
+    "revision": 1,
+    "blocking": true,
+    "state": "pending",
+    "requiredResponder": "user",
+    "subjectBinding": {
+      "kind": "visual_lock",
+      "targetId": "target-image",
+      "lockSessionId": "lock-session-1",
+      "actionRef": { "kind": "action", "id": "lock-1", "revision": 1 }
+    },
+    "waitingPolicy": "pause_execution",
+    "onExpire": "release_and_resume_scan",
+    "onDismiss": "release_and_resume_scan",
+    "onDecline": "end_observation",
+    "title": "Choose target disposition",
+    "inputSchema": { "type": "object", "required": ["decision"] },
+    "reasonCode": "DECISION_REQUIRED",
+    "requestedAt": "2026-09-23T00:00:00Z",
+    "deadlineAt": "2026-09-24T00:00:00Z"
+  },
+  "answeredInput": {
+    "schemaVersion": "sdar.required-input/1.0-rc2",
+    "requestId": "input-1",
+    "requestKey": "input-key-1",
+    "inputType": "target.disposition_decision",
+    "identity": {
+      "taskId": "task-catalog-1",
+      "executionId": "execution-catalog-1",
+      "providerId": "provider-catalog-1",
+      "resourceId": "vehicle:ugv1",
+      "operationName": "vehicle_area_recon"
+    },
+    "revision": 2,
+    "blocking": true,
+    "state": "answered",
+    "requiredResponder": "user",
+    "subjectBinding": {
+      "kind": "visual_lock",
+      "targetId": "target-image",
+      "lockSessionId": "lock-session-1",
+      "actionRef": { "kind": "action", "id": "lock-1", "revision": 1 }
+    },
+    "waitingPolicy": "pause_execution",
+    "onExpire": "release_and_resume_scan",
+    "onDismiss": "release_and_resume_scan",
+    "onDecline": "end_observation",
+    "title": "Choose target disposition",
+    "inputSchema": { "type": "object", "required": ["decision"] },
+    "reasonCode": "DECISION_REQUIRED",
+    "requestedAt": "2026-09-23T00:00:00Z",
+    "deadlineAt": "2026-09-24T00:00:00Z",
+    "resolvedAt": "2026-09-23T00:01:00Z",
+    "responseCommandId": "input-command-1",
+    "response": { "action": "accept", "value": { "decision": "continue_observation" } }
+  },
+  "intervention": {
+    "schemaVersion": "sdar.runtime-intervention/1.0-rc2",
+    "interventionId": "intervention-1",
+    "interventionType": "navigation.adjust_plan",
+    "identity": {
+      "taskId": "task-catalog-1",
+      "executionId": "execution-catalog-1",
+      "providerId": "provider-catalog-1",
+      "resourceId": "vehicle:ugv1",
+      "operationName": "vehicle_area_recon"
+    },
+    "revision": 1,
+    "effectivePlanRevision": 2,
+    "blocking": false,
+    "state": "available",
+    "title": "Adjust route",
+    "inputSchema": { "type": "object", "properties": { "viaPoints": { "type": "array" } } },
+    "appliesTo": [{ "kind": "artifact", "id": "route-line", "revision": 1 }],
+    "reasonCode": "ADJUSTMENT_AVAILABLE",
+    "createdAt": "2026-09-23T00:00:00Z"
+  },
+  "inputCommand": {
+    "schemaVersion": "sdar.required-input-response/1.0-rc2",
+    "commandId": "input-command-1",
+    "taskId": "task-catalog-1",
+    "executionId": "execution-catalog-1",
+    "requestId": "input-1",
+    "requestKey": "input-key-1",
+    "guard": { "mode": "semantic", "expectedRequestRevision": 1 },
+    "result": { "action": "accept", "value": { "decision": "continue_observation" } }
+  },
+  "interventionCommand": {
+    "schemaVersion": "sdar.runtime-intervention-command/1.0-rc2",
+    "commandId": "intervention-command-1",
+    "taskId": "task-catalog-1",
+    "executionId": "execution-catalog-1",
+    "interventionId": "intervention-1",
+    "guard": {
+      "mode": "semantic",
+      "expectedInterventionRevision": 1,
+      "expectedEffectivePlanRevision": 2
+    },
+    "input": { "viaPoints": [[116, 39]] }
+  },
+  "cursor": { "streamId": "public-stream-1", "afterSequence": "7" }
+}

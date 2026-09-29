@@ -7,7 +7,7 @@ Runtime has four inbound authentication modes:
   identity headers, and is accepted in production only with
   `ALLOW_INSECURE_INTERNAL_TRANSPORT=true`; every caller shares Task visibility, idempotency, and
   subscription quota state, so this mode is limited to an isolated trusted network;
-- `trusted_headers` requires `x-sdar-subject` and `x-sdar-tenant` from an authenticated trusted proxy;
+- `trusted_headers` requires `x-sdar-subject` and `x-sdar-tenant` from an authenticated trusted proxy; if business RequiredInput is enabled, that proxy must also strip any client `x-sdar-actor-type` and set it from its authenticated role, or omit it so human decisions fail closed;
 - `jwt_hs256` requires a secret of at least 32 characters and validates HS256, `exp`, optional `nbf`, configured issuer/audience, `sub`, and `tenant`.
 
 Clients may select `live`, `simulation`, or `historical-replay`, but non-live requests must include a simulation id. Task ownership is the SHA-256 binding of tenant and subject plus the exact execution mode/simulation identity. Cross-context get, update, and cancel return not-found.

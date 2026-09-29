@@ -21,6 +21,10 @@ interface IResourceProviderAdapterService extends grpc.ServiceDefinition<grpc.Un
     resumeExecution: IResourceProviderAdapterService_IResumeExecution;
     streamExecutionEvents: IResourceProviderAdapterService_IStreamExecutionEvents;
     streamBusinessEvents: IResourceProviderAdapterService_IStreamBusinessEvents;
+    getBusinessContext: IResourceProviderAdapterService_IGetBusinessContext;
+    getBusinessSnapshotPart: IResourceProviderAdapterService_IGetBusinessSnapshotPart;
+    getBusinessArtifact: IResourceProviderAdapterService_IGetBusinessArtifact;
+    applyIntervention: IResourceProviderAdapterService_IApplyIntervention;
     listResources: IResourceProviderAdapterService_IListResources;
 }
 
@@ -123,6 +127,42 @@ interface IResourceProviderAdapterService_IStreamBusinessEvents extends grpc.Met
     responseSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
     responseDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
 }
+interface IResourceProviderAdapterService_IGetBusinessContext extends grpc.MethodDefinition<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse> {
+    path: "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessContext";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest>;
+    requestDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest>;
+    responseSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse>;
+    responseDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse>;
+}
+interface IResourceProviderAdapterService_IGetBusinessSnapshotPart extends grpc.MethodDefinition<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse> {
+    path: "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessSnapshotPart";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest>;
+    requestDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest>;
+    responseSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse>;
+    responseDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse>;
+}
+interface IResourceProviderAdapterService_IGetBusinessArtifact extends grpc.MethodDefinition<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse> {
+    path: "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetBusinessArtifact";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest>;
+    requestDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest>;
+    responseSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse>;
+    responseDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse>;
+}
+interface IResourceProviderAdapterService_IApplyIntervention extends grpc.MethodDefinition<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck> {
+    path: "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ApplyIntervention";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest>;
+    requestDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest>;
+    responseSerialize: grpc.serialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck>;
+    responseDeserialize: grpc.deserialize<io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck>;
+}
 interface IResourceProviderAdapterService_IListResources extends grpc.MethodDefinition<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse> {
     path: "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ListResources";
     requestStream: false;
@@ -147,6 +187,10 @@ export interface IResourceProviderAdapterServer extends grpc.UntypedServiceImple
     resumeExecution: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ResumeExecutionRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck>;
     streamExecutionEvents: grpc.handleServerStreamingCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamExecutionEventsRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.ExecutionEvent>;
     streamBusinessEvents: grpc.handleServerStreamingCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamBusinessEventsRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
+    getBusinessContext: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse>;
+    getBusinessSnapshotPart: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse>;
+    getBusinessArtifact: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse>;
+    applyIntervention: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck>;
     listResources: grpc.handleUnaryCall<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse>;
 }
 
@@ -182,6 +226,18 @@ export interface IResourceProviderAdapterClient {
     streamExecutionEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamExecutionEventsRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ExecutionEvent>;
     streamBusinessEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamBusinessEventsRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
     streamBusinessEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamBusinessEventsRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
+    getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
+    applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
+    applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
     listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;
     listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;
     listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;
@@ -220,6 +276,18 @@ export class ResourceProviderAdapterClient extends grpc.Client implements IResou
     public streamExecutionEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamExecutionEventsRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.ExecutionEvent>;
     public streamBusinessEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamBusinessEventsRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
     public streamBusinessEvents(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.StreamBusinessEventsRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<io_sdar_mcp_tasks_adapter_v1_adapter_pb.AdapterBusinessEvent>;
+    public getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessContext(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessContextResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessSnapshotPart(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessSnapshotPartResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    public getBusinessArtifact(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.GetBusinessArtifactResponse) => void): grpc.ClientUnaryCall;
+    public applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
+    public applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
+    public applyIntervention(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ApplyInterventionRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.CommandAck) => void): grpc.ClientUnaryCall;
     public listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;
     public listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;
     public listResources(request: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: io_sdar_mcp_tasks_adapter_v1_adapter_pb.ListResourcesResponse) => void): grpc.ClientUnaryCall;

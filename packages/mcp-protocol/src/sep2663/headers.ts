@@ -11,6 +11,9 @@ const namedMethods = new Set([
   "io.sdar/taskExecution/tasks/pause",
   "io.sdar/taskExecution/tasks/resume",
   "io.sdar/businessEvents/relatedTasks/list",
+  "io.sdar/taskBusiness/context/get",
+  "io.sdar/taskBusiness/artifacts/get",
+  "io.sdar/taskBusiness/interventions/apply",
 ]);
 
 export function validateFrozenHeaders(

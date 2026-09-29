@@ -4,6 +4,7 @@ import {
   applySnapshotPatch,
   createNpcTankSnapshot,
   createUgvSnapshot,
+  compareIsoTimestamps,
   encodeObservationCursorV1,
   type FieldObservationAuthority,
   type FreshnessDomain,
@@ -32,6 +33,14 @@ export interface IngestResult {
   olderObservation: boolean;
   retained: boolean;
   revision: string;
+}
+
+/** Exact accepted message behind a snapshot change, before sticky fields can obscure provenance. */
+export interface AppliedMqttObservation {
+  observation: NormalizedMqttObservation;
+  cursor: string;
+  observedAt: string;
+  retained: boolean;
 }
 
 export const VEHICLE_OBSERVATION_FIELDS = [
@@ -184,7 +193,9 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
   snapshot(): TSnapshot {
     return structuredClone(this.#snapshot);
   }
-  onSnapshot(listener: (snapshot: TSnapshot, topic: string) => void): () => void {
+  onSnapshot(
+    listener: (snapshot: TSnapshot, topic: string, applied?: AppliedMqttObservation) => void,
+  ): () => void {
     this.#events.on("snapshot", listener);
     return () => this.#events.off("snapshot", listener);
   }
@@ -257,7 +268,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       latestForAuthority?.observedAt === observedAt && latestForAuthority.hash === hash;
     const older =
       latestForAuthority !== undefined &&
-      Date.parse(observedAt) < Date.parse(latestForAuthority.observedAt);
+      compareIsoTimestamps(observedAt, latestForAuthority.observedAt) < 0;
     if (duplicate && !compositeDecision.promotesAuthority)
       return {
         accepted: true,
@@ -309,7 +320,17 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       });
       this.#latestByAuthority.set(authorityCursor, { observedAt, hash });
     }
-    if (applyToSnapshot) this.#events.emit("snapshot", this.snapshot(), topic);
+    if (applyToSnapshot) {
+      const cursor = this.observationCursor(topic);
+      this.#events.emit(
+        "snapshot",
+        this.snapshot(),
+        topic,
+        cursor === undefined
+          ? undefined
+          : { observation: structuredClone(observation), cursor, observedAt, retained },
+      );
+    }
     return {
       accepted: true,
       reasonCode: this.profile.acceptedReasonCode,
@@ -506,7 +527,7 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
       if (
         previous !== undefined &&
         !this.#isCompositeAuthorityHandoff(topic, previous.topic) &&
-        Date.parse(observedAt) < Date.parse(previous.observedAt)
+        compareIsoTimestamps(observedAt, previous.observedAt) < 0
       )
         removeObservationField(accepted.patch, field);
     }

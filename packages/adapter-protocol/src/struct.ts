@@ -21,12 +21,12 @@ export function jsonToProtoValue(value: unknown): ProtoValue {
   throw new TypeError(`Unsupported protobuf Struct value: ${typeof value}`);
 }
 
-function fromProtoValue(value: ProtoValue): unknown {
+export function protoValueToJson(value: ProtoValue): unknown {
   if ("nullValue" in value) return null;
   if ("numberValue" in value) return value.numberValue;
   if ("stringValue" in value) return value.stringValue;
   if ("boolValue" in value) return value.boolValue;
-  if ("listValue" in value) return value.listValue.values.map(fromProtoValue);
+  if ("listValue" in value) return value.listValue.values.map(protoValueToJson);
   return protoStructToJson(value.structValue);
 }
 
@@ -42,6 +42,6 @@ export function protoStructToJson(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || !("fields" in value)) return {};
   const fields = (value as ProtoStruct).fields;
   return Object.fromEntries(
-    Object.entries(fields).map(([key, item]) => [key, fromProtoValue(item)]),
+    Object.entries(fields).map(([key, item]) => [key, protoValueToJson(item)]),
   );
 }

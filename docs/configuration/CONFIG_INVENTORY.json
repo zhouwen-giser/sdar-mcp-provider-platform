@@ -18,7 +18,7 @@
     },
     "provider": {
       "description": "UGV, NPC Tank, and Home Assistant Adapter inputs.",
-      "items": 154
+      "items": 155
     },
     "collector": {
       "description": "No Collector configuration source exists in the delivered repository; no fields are invented.",
@@ -32,7 +32,7 @@
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 73
+      "items": 74
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -1897,6 +1897,21 @@
       "secretKind": "none",
       "applyMode": "restart_required",
       "applyModeStatus": "pending_review"
+    },
+    {
+      "key": "UGV_TASK_BUSINESS_PROFILE_PATH",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "domain",
+      "defaultDefined": false,
+      "defaultValue": null,
+      "required": false,
+      "validator": "optionalPath",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
     },
     {
       "key": "UGV_MQTT_URL",

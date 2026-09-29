@@ -1,6 +1,9 @@
 import type { ProviderStore } from "../../../packages/provider-adapter-kit/src/index.js";
 import type { UgvQualificationMatrixInput } from "../../../packages/vehicle-device-mcp-client/src/index.js";
-import { vehicleProviderManifest } from "../../../packages/vehicle-provider-core/src/index.js";
+import {
+  vehicleProviderManifest,
+  type VehicleManifestProfile,
+} from "../../../packages/vehicle-provider-core/src/index.js";
 import { qualifyUgvCapabilities } from "./capabilities.js";
 
 export function ugvManifest(
@@ -9,6 +12,7 @@ export function ugvManifest(
   store: ProviderStore,
   resourceId: string,
   qualificationContext: UgvQualificationMatrixInput,
+  businessFeedbackProfiles?: VehicleManifestProfile["businessFeedbackProfiles"],
 ): Record<string, unknown> {
   const support = qualifyUgvCapabilities({
     contracts: qualificationContext.contracts,
@@ -38,6 +42,7 @@ export function ugvManifest(
       supportsFireCommandRejectedOutput: support.fire,
       supportsReconCoverageOutput: support.reconnaissance.area,
       circularScanOmitsArea: true,
+      ...(businessFeedbackProfiles === undefined ? {} : { businessFeedbackProfiles }),
     },
     store,
   );

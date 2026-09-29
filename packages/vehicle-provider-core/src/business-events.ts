@@ -1,12 +1,17 @@
 import { createHash } from "node:crypto";
 import { EventEmitter } from "node:events";
-import { jsonToProtoStruct, type AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
+import {
+  jsonToProtoStruct,
+  protoStructToJson,
+  type AdapterBusinessEvent,
+} from "../../adapter-protocol/src/index.js";
 import {
   BUSINESS_EVENT_SOURCE_STREAMS,
   type BusinessEventDraft,
   type ProviderStore,
 } from "../../provider-adapter-kit/src/index.js";
 import { assertNoRefereeData } from "./snapshot.js";
+import { parseTaskBusinessFeedbackBody } from "./task-business-contract.js";
 
 const TASK_EVENTS = new Set([
   "vehicle.mission.started",
@@ -74,7 +79,7 @@ export class VehicleBusinessEventHub {
       const event: AdapterBusinessEvent = {
         sourceEventId: createHash("sha256")
           .update(`${sequence}\0${draft.occurredAt}\0${draft.eventType}`)
-          .digest("base64url"),
+          .digest("hex"),
         sourceSequence: sequence,
         sourceStreamId: BUSINESS_EVENT_SOURCE_STREAMS["vehicle.target"],
         scope: "resource",
@@ -95,6 +100,25 @@ export class VehicleBusinessEventHub {
     });
     this.#events.emit(draft.sourceId, event);
     return event;
+  }
+  /** Emits an event returned by the committed business Store; never appends it again. */
+  notifyCommittedTaskBusinessEvent(event: AdapterBusinessEvent): void {
+    const source = this.store
+      .businessEventSources()
+      .find((item) => item.sourceId === "vehicle.business");
+    if (
+      event.sourceStreamId !== source?.sourceStreamId ||
+      event.scope !== "task" ||
+      event.eventType !== "vehicle.business.changed" ||
+      !event.sourceEventId ||
+      !event.externalExecutionId ||
+      event.resourceRef !== undefined
+    ) {
+      throw new Error(`${this.identity.reasonPrefix}_TASK_BUSINESS_COMMITTED_EVENT_INVALID`);
+    }
+    parseTaskBusinessFeedbackBody(protoStructToJson(event.rawPayload));
+    assertNoRefereeData(protoStructToJson(event.rawPayload));
+    this.#events.emit("vehicle.business", event);
   }
   subscribe(sourceId: string, listener: (event: AdapterBusinessEvent) => void): () => void {
     this.#events.on(sourceId, listener);

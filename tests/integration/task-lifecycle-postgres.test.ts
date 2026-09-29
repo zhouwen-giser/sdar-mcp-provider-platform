@@ -1,7 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
+import type { IncomingMessage } from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { Ajv2020 } from "ajv/dist/2020.js";
 import {
   CallToolResultSchema,
   CreateTaskResultSchema,
@@ -16,10 +18,24 @@ import {
   bindMockAdapter,
   createMockAdapterServer,
 } from "../../examples/mock-adapter-typescript/src/server.js";
-import { GrpcAdapterGateway } from "../../packages/adapter-protocol/src/index.js";
+import {
+  GrpcAdapterGateway,
+  jsonToProtoStruct,
+  protoStructToJson,
+  TaskBusinessOperationProfileSchema,
+} from "../../packages/adapter-protocol/src/index.js";
 import type { AuthorizationContext, Clock } from "../../packages/domain/src/index.js";
-import { McpProtocolHandler } from "../../packages/mcp-protocol/src/index.js";
+import {
+  createAuthorizationResolver,
+  FROZEN_PROTOCOL_VERSION,
+  McpProtocolHandler,
+  Sep2663ProtocolHandler,
+} from "../../packages/mcp-protocol/src/index.js";
 import { OperationRegistry } from "../../packages/operation-registry/src/index.js";
+import {
+  taskBusinessCommandRequestHash,
+  taskBusinessSourceCapability,
+} from "../../packages/provider-adapter-kit/src/index.js";
 import {
   OperationSnapshotRepository,
   IdempotencyRepository,
@@ -34,6 +50,13 @@ import {
   TaskEngine,
   TtlCleaner,
 } from "../../packages/task-engine/src/index.js";
+import { UGV_READ_ONLY_BUSINESS_PROFILE } from "../../apps/ugv-provider-adapter/src/task-business-service.js";
+import { TaskBusinessGateway } from "../../apps/runtime/src/task-business-gateway.js";
+import { TaskBusinessPublicService } from "../../apps/runtime/src/task-business-public.js";
+import {
+  RuntimeInterventionCommandSchema,
+  TASK_BUSINESS_INTERVENTION_COMMAND_SCHEMA_VERSION,
+} from "../../packages/vehicle-provider-core/src/task-business-interaction.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 if (databaseUrl === undefined)
@@ -55,6 +78,10 @@ let engine: TaskEngine;
 let sideEffectCount = 0;
 let controlSideEffectCount = 0;
 let lastReservationRef: string | undefined;
+let lastForwardedResponder: Record<string, unknown> | undefined;
+let interventionDispatches = 0;
+let lastIntervention: Record<string, unknown> | undefined;
+let interventionAccepted = true;
 
 class FakeClock implements Clock {
   constructor(private value: Date) {}
@@ -82,6 +109,14 @@ beforeAll(async () => {
     onControlSideEffect: () => {
       controlSideEffectCount += 1;
     },
+    onMcpInputResponses: (_taskId, responses) => {
+      lastForwardedResponder = protoStructToJson(responses[0]?.verifiedResponder);
+    },
+    onIntervention: (_taskId, command) => {
+      interventionDispatches += 1;
+      lastIntervention = command;
+      return interventionAccepted;
+    },
   });
   const port = await bindMockAdapter(adapter, "127.0.0.1:0");
   gateway = new GrpcAdapterGateway({
@@ -101,6 +136,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   lastReservationRef = undefined;
+  lastForwardedResponder = undefined;
+  interventionDispatches = 0;
+  lastIntervention = undefined;
+  interventionAccepted = true;
   await pool.query(`TRUNCATE TABLE
     smpp_reconciliation_audit, smpp_dispatch_uncertainty, task_input_response_inbox, provider_ops_delivery, runtime_lease, outbox_event, idempotency_record,
     task_command, task_input_request,
@@ -252,6 +291,1432 @@ describe("durable task lifecycle", () => {
       },
     ]);
     expect(await engine.getTask(taskId, authorization)).toMatchObject({ status: "completed" });
+  });
+
+  it("rolls back a whole input response batch when a later response fails validation", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "atomic-input-batch", scenario: "input_required_frozen" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+    const taskId = String(created.task.taskId);
+    const repository = new TaskRepository(pool);
+    const [approval] = await repository.listInputRequests(taskId);
+    if (approval === undefined) throw new Error("Expected approval request");
+    await pool.query(
+      `INSERT INTO task_input_request(
+         task_id,request_key,schema,status,description,required,request_json)
+       VALUES ($1,$2,$3::jsonb,'OPEN','Second approval',true,$4::jsonb)`,
+      [taskId, "approval-2", JSON.stringify(approval.schema), JSON.stringify(approval.requestJson)],
+    );
+
+    await expect(
+      engine.updateTaskInputResponses(
+        taskId,
+        {
+          approval: { action: "accept", content: true },
+          "approval-2": { action: "accept", content: "invalid" },
+        },
+        authorization,
+      ),
+    ).rejects.toMatchObject({ reasonCode: "INVALID_INPUT_RESPONSE" });
+    const inboxAfterReject = await pool.query<{ count: string }>(
+      "SELECT count(*)::text AS count FROM task_input_response_inbox WHERE task_id=$1",
+      [taskId],
+    );
+    expect(inboxAfterReject.rows[0]?.count).toBe("0");
+    expect(await repository.listInputRequests(taskId)).toMatchObject([
+      { key: "approval", status: "OPEN" },
+      { key: "approval-2", status: "OPEN" },
+    ]);
+
+    await engine.updateTaskInputResponses(
+      taskId,
+      {
+        approval: { action: "accept", content: true },
+        "approval-2": { action: "accept", content: true },
+      },
+      authorization,
+    );
+    const inboxAfterAccept = await pool.query<{ count: string }>(
+      "SELECT count(*)::text AS count FROM task_input_response_inbox WHERE task_id=$1",
+      [taskId],
+    );
+    expect(inboxAfterAccept.rows[0]?.count).toBe("2");
+  });
+
+  it("keeps Runtime-verified business responder provenance through inbox promotion", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "business-input-provenance", scenario: "input_required_frozen" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+    const taskId = String(created.task.taskId);
+    const requestJson = {
+      method: "elicitation/create",
+      params: {
+        mode: "form",
+        message: "Synthetic business decision",
+        _meta: {
+          "io.sdar/taskBusiness": {
+            schemaVersion: "sdar.required-input/1.0-rc2",
+            requestKey: "approval",
+            inputType: "target.observation_decision",
+            requiredResponder: "user",
+          },
+        },
+      },
+    };
+    await pool.query(
+      `UPDATE task_input_request SET request_json=$2::jsonb
+       WHERE task_id=$1 AND request_key='approval'`,
+      [taskId, JSON.stringify(requestJson)],
+    );
+    const repository = new TaskRepository(pool);
+    const answer = { approval: { action: "accept" as const, content: true } };
+    await expect(repository.acceptMcpInputResponses(taskId, authorization, answer)).rejects.toThrow(
+      "RESPONDER_NOT_AUTHORIZED",
+    );
+    const verifiedResponder = {
+      actorType: "user" as const,
+      actorId: "test-user-proxy",
+      source: "trusted_headers" as const,
+    };
+    await repository.acceptMcpInputResponses(
+      taskId,
+      { ...authorization, verifiedResponder },
+      answer,
+    );
+    await expect(
+      repository.acceptMcpInputResponses(
+        taskId,
+        { ...authorization, verifiedResponder },
+        { approval: { action: "decline" } },
+      ),
+    ).rejects.toMatchObject({ reasonCode: "INPUT_ANSWER_CONFLICT" });
+    const inbox = await pool.query<{ response_json: Record<string, unknown> }>(
+      "SELECT response_json FROM task_input_response_inbox WHERE task_id=$1",
+      [taskId],
+    );
+    expect(inbox.rows[0]?.response_json).toMatchObject({
+      storageVersion: "sdar.runtime-verified-input/1",
+      response: { action: "accept", content: true },
+      verifiedResponder,
+    });
+    expect(await repository.promotePendingInputResponses()).toBe(1);
+    const promoted = await pool.query<{ payload: Record<string, unknown> }>(
+      "SELECT payload FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+      [taskId],
+    );
+    expect(promoted.rows[0]?.payload).toMatchObject({
+      inputResponses: answer,
+      verifiedResponders: { approval: verifiedResponder },
+    });
+    await new DurableCommandDispatcher(gateway, repository).tick();
+    expect(lastForwardedResponder).toEqual(verifiedResponder);
+    const replay = await repository.acceptMcpInputResponses(
+      taskId,
+      { ...authorization, verifiedResponder },
+      answer,
+    );
+    expect(replay.ignoredAnsweredKeys).toEqual(["approval"]);
+    await expect(
+      repository.acceptMcpInputResponses(
+        taskId,
+        { ...authorization, verifiedResponder },
+        { approval: { action: "decline" } },
+      ),
+    ).rejects.toMatchObject({ reasonCode: "INPUT_ANSWER_CONFLICT" });
+  });
+
+  it.each([
+    "invalid_frozen_shape",
+    "missing_frozen_responses",
+    "invalid_frozen_action",
+    "missing_verified_responder",
+    "changed_frozen_answer",
+    "changed_responder",
+  ] as const)(
+    "rejects %s persisted business Update without Adapter delivery or Task failure",
+    async (caseName) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-corrupt-update-${caseName}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      const repository = new TaskRepository(pool);
+      await repository.acceptMcpInputResponses(
+        taskId,
+        {
+          ...authorization,
+          verifiedResponder: {
+            actorType: "user",
+            actorId: "test-user-proxy",
+            source: "trusted_headers",
+          },
+        },
+        { approval: { action: "accept", content: true } },
+      );
+      expect(await repository.promotePendingInputResponses()).toBe(1);
+      const queued = await pool.query<{ payload: Record<string, unknown> }>(
+        "SELECT payload FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId],
+      );
+      const payload = queued.rows[0]?.payload;
+      if (payload === undefined) throw new Error("Business Update command missing");
+      let corrupted: unknown;
+      if (caseName === "invalid_frozen_shape") {
+        corrupted = { ...payload, inputResponses: [], answers: { approval: true } };
+      } else if (caseName === "missing_frozen_responses") {
+        corrupted = { verifiedResponders: payload.verifiedResponders, answers: { approval: true } };
+      } else if (caseName === "invalid_frozen_action") {
+        corrupted = {
+          ...payload,
+          inputResponses: { approval: { action: "unsupported", content: true } },
+        };
+      } else if (caseName === "missing_verified_responder") {
+        const withoutResponder = { ...payload };
+        delete withoutResponder.verifiedResponders;
+        corrupted = withoutResponder;
+      } else if (caseName === "changed_frozen_answer") {
+        corrupted = { ...payload, inputResponses: { approval: { action: "decline" } } };
+      } else {
+        corrupted = {
+          ...payload,
+          verifiedResponders: {
+            approval: { actorType: "agent", actorId: "forged-agent", source: "trusted_headers" },
+          },
+        };
+      }
+      await pool.query(
+        "UPDATE task_command SET payload=$2::jsonb WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId, JSON.stringify(corrupted)],
+      );
+      const controlBefore = controlSideEffectCount;
+      const dispatched = await new DurableCommandDispatcher(gateway, repository).tick();
+      expect(dispatched).toMatchObject({ claimed: 1, rejected: 1, retried: 0, exhausted: 0 });
+      expect(controlSideEffectCount).toBe(controlBefore);
+      expect(lastForwardedResponder).toBeUndefined();
+      expect(await repository.getById(taskId)).toMatchObject({ internalState: "INPUT_REQUIRED" });
+      expect(await repository.listInputRequests(taskId)).toMatchObject([
+        { key: "approval", status: "OPEN" },
+      ]);
+      const result = await pool.query<{ state: string; last_error_code: string }>(
+        "SELECT state,last_error_code FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId],
+      );
+      expect(result.rows[0]).toMatchObject({
+        state: "REJECTED",
+        last_error_code: [
+          "missing_verified_responder",
+          "changed_frozen_answer",
+          "changed_responder",
+        ].includes(caseName)
+          ? "INPUT_RESPONSE_COMMAND_INTEGRITY_INVALID"
+          : "INVALID_UPDATE_COMMAND_PAYLOAD",
+      });
+      const inbox = await pool.query<{ state: string }>(
+        "SELECT state FROM task_input_response_inbox WHERE task_id=$1",
+        [taskId],
+      );
+      expect(inbox.rows[0]).toMatchObject({ state: "FAILED" });
+      expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+        claimed: 0,
+      });
+    },
+  );
+
+  it("rejects an expired business answer before inbox insertion and preserves an existing duplicate", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "business-input-deadline", scenario: "input_required_frozen" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+    const taskId = String(created.task.taskId);
+    const businessRequest = (deadlineAt: string) => ({
+      method: "elicitation/create",
+      params: {
+        message: "Synthetic business decision",
+        _meta: {
+          "io.sdar/taskBusiness": {
+            schemaVersion: "sdar.required-input/1.0-rc2",
+            requestKey: "approval",
+            inputType: "target.observation_decision",
+            requiredResponder: "user",
+            deadlineAt,
+          },
+        },
+      },
+    });
+    const saveDeadline = async (deadlineAt: string) => {
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [taskId, JSON.stringify(businessRequest(deadlineAt))],
+      );
+    };
+    const repository = new TaskRepository(pool);
+    const verifiedAuthorization = {
+      ...authorization,
+      verifiedResponder: {
+        actorType: "user" as const,
+        actorId: "test-user-proxy",
+        source: "trusted_headers" as const,
+      },
+    };
+    const answer = { approval: { action: "accept" as const, content: true } };
+    await saveDeadline("bad-date");
+    await expect(
+      repository.acceptMcpInputResponses(taskId, verifiedAuthorization, answer),
+    ).rejects.toMatchObject({ reasonCode: "BUSINESS_INPUT_DEADLINE_INVALID" });
+    await saveDeadline("2026-09-24T00:00:00Z");
+    await expect(
+      repository.acceptMcpInputResponses(taskId, verifiedAuthorization, answer),
+    ).rejects.toMatchObject({ reasonCode: "BUSINESS_INPUT_DEADLINE_EXPIRED" });
+    const absent = await pool.query<{ count: string }>(
+      "SELECT count(*)::text AS count FROM task_input_response_inbox WHERE task_id=$1",
+      [taskId],
+    );
+    expect(absent.rows[0]?.count).toBe("0");
+
+    await saveDeadline("2100-01-01T00:00:00Z");
+    const accepted = await repository.acceptMcpInputResponses(
+      taskId,
+      verifiedAuthorization,
+      answer,
+    );
+    expect(accepted.acceptedKeys).toEqual(["approval"]);
+    // Only this synthetic fixture rewrites the stored request to exercise replay ordering.
+    await saveDeadline("2026-09-24T00:00:00Z");
+    const repeated = await repository.acceptMcpInputResponses(
+      taskId,
+      verifiedAuthorization,
+      answer,
+    );
+    expect(repeated.duplicatePendingKeys).toEqual(["approval"]);
+    await expect(
+      repository.acceptMcpInputResponses(taskId, verifiedAuthorization, {
+        approval: { action: "decline" },
+      }),
+    ).rejects.toMatchObject({ reasonCode: "INPUT_ANSWER_CONFLICT" });
+    const unchanged = await pool.query<{ response_json: Record<string, unknown> }>(
+      "SELECT response_json FROM task_input_response_inbox WHERE task_id=$1 AND request_key='approval'",
+      [taskId],
+    );
+    expect(unchanged.rows[0]?.response_json).toMatchObject({
+      storageVersion: "sdar.runtime-verified-input/1",
+      response: { action: "accept", content: true },
+    });
+  });
+
+  it.each([
+    ["INPUT_REQUIRED", true, null, "BUSINESS_INPUT_TASK_STOPPING"],
+    ["INPUT_REQUIRED", false, "DEADLINE_REACHED", "BUSINESS_INPUT_TASK_STOPPING"],
+    ["PAUSED", false, null, "BUSINESS_INPUT_TASK_NOT_WAITING"],
+    ["TERMINAL_CANCELLED", false, null, "BUSINESS_INPUT_TASK_STOPPING"],
+  ] as const)(
+    "rejects a new business answer after Task control changes to %s (cancel requested: %s)",
+    async (state, cancelRequested, stopReason, reasonCode) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-input-control-${state}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      await pool.query(
+        `UPDATE provider_task
+         SET internal_state=$2, cancel_requested=$3, stop_reason=$4,
+             terminal_at=CASE WHEN $2='TERMINAL_CANCELLED' THEN clock_timestamp() ELSE NULL END,
+             handle_expires_at=CASE WHEN $2='TERMINAL_CANCELLED'
+               THEN clock_timestamp() + interval '1 day' ELSE handle_expires_at END
+         WHERE task_id=$1`,
+        [taskId, state, cancelRequested, stopReason],
+      );
+      await expect(
+        new TaskRepository(pool).acceptMcpInputResponses(
+          taskId,
+          {
+            ...authorization,
+            verifiedResponder: {
+              actorType: "user",
+              actorId: "test-user-proxy",
+              source: "trusted_headers",
+            },
+          },
+          { approval: { action: "accept", content: true } },
+        ),
+      ).rejects.toMatchObject({ reasonCode });
+      const inbox = await pool.query<{ count: string }>(
+        "SELECT count(*)::text AS count FROM task_input_response_inbox WHERE task_id=$1",
+        [taskId],
+      );
+      expect(inbox.rows[0]?.count).toBe("0");
+    },
+  );
+
+  it.each(["PAUSED", "RUNNING"] as const)(
+    "does not promote an accepted business answer after the Task leaves input wait for %s",
+    async (state) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-input-race-${state}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      const repository = new TaskRepository(pool);
+      await repository.acceptMcpInputResponses(
+        taskId,
+        {
+          ...authorization,
+          verifiedResponder: {
+            actorType: "user",
+            actorId: "test-user-proxy",
+            source: "trusted_headers",
+          },
+        },
+        { approval: { action: "accept", content: true } },
+      );
+      await pool.query("UPDATE provider_task SET internal_state=$2 WHERE task_id=$1", [
+        taskId,
+        state,
+      ]);
+      expect(await repository.promotePendingInputResponses()).toBe(0);
+      const inbox = await pool.query<{
+        state: string;
+        last_error_code: string | null;
+      }>("SELECT state,last_error_code FROM task_input_response_inbox WHERE task_id=$1", [taskId]);
+      expect(inbox.rows[0]).toMatchObject({
+        state: "IGNORED",
+        last_error_code: "BUSINESS_INPUT_TASK_NOT_WAITING",
+      });
+      const request = await pool.query<{ status: string }>(
+        "SELECT status FROM task_input_request WHERE task_id=$1 AND request_key='approval'",
+        [taskId],
+      );
+      expect(request.rows[0]?.status).toBe("SUPERSEDED");
+      const commands = await pool.query<{ count: string }>(
+        "SELECT count(*)::text AS count FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId],
+      );
+      expect(commands.rows[0]?.count).toBe("0");
+    },
+  );
+
+  it.each(["PENDING", "ASSIGNED"] as const)(
+    "does not deliver a superseded business request answer while the Task still waits (%s)",
+    async (phase) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-request-superseded-${phase}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      const repository = new TaskRepository(pool);
+      expect(
+        (
+          await repository.acceptMcpInputResponses(
+            taskId,
+            {
+              ...authorization,
+              verifiedResponder: {
+                actorType: "user",
+                actorId: "test-user-proxy",
+                source: "trusted_headers",
+              },
+            },
+            { approval: { action: "accept", content: true } },
+          )
+        ).acceptedKeys,
+      ).toEqual(["approval"]);
+      if (phase === "ASSIGNED") expect(await repository.promotePendingInputResponses()).toBe(1);
+      await pool.query(
+        `UPDATE task_input_request SET status='SUPERSEDED'
+         WHERE task_id=$1 AND request_key='approval'`,
+        [taskId],
+      );
+      if (phase === "PENDING") {
+        expect(await repository.promotePendingInputResponses()).toBe(0);
+      } else {
+        expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+          claimed: 1,
+          exhausted: 1,
+        });
+      }
+      expect(lastForwardedResponder).toBeUndefined();
+      expect(await repository.getById(taskId)).toMatchObject({
+        internalState: "INPUT_REQUIRED",
+        mcpStatus: "input_required",
+      });
+      const inbox = await pool.query<{ state: string; last_error_code: string | null }>(
+        "SELECT state,last_error_code FROM task_input_response_inbox WHERE task_id=$1",
+        [taskId],
+      );
+      expect(inbox.rows[0]).toMatchObject({
+        state: "IGNORED",
+        last_error_code: "BUSINESS_INPUT_REQUEST_SUPERSEDED",
+      });
+      const commands = await pool.query<{ state: string; last_error_code: string | null }>(
+        "SELECT state,last_error_code FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId],
+      );
+      if (phase === "PENDING") expect(commands.rows).toEqual([]);
+      else
+        expect(commands.rows[0]).toMatchObject({
+          state: "EXHAUSTED",
+          last_error_code: "BUSINESS_INPUT_REQUEST_SUPERSEDED",
+        });
+    },
+  );
+
+  it.each([
+    ["request superseded", "INPUT_REQUIRED", "BUSINESS_INPUT_REQUEST_SUPERSEDED"],
+    ["Task left input wait", "PAUSED", "BUSINESS_INPUT_TASK_NOT_WAITING"],
+    ["safe stop", "STOPPING", "SUPERSEDED_BY_SAFE_STOP"],
+  ] as const)(
+    "records an accepted Adapter reply when %s during the RPC",
+    async (_case, nextState, reasonCode) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-post-ack-${nextState}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+       WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      const repository = new TaskRepository(pool);
+      await repository.acceptMcpInputResponses(
+        taskId,
+        {
+          ...authorization,
+          verifiedResponder: {
+            actorType: "user",
+            actorId: "test-user-proxy",
+            source: "trusted_headers",
+          },
+        },
+        { approval: { action: "accept", content: true } },
+      );
+      expect(await repository.promotePendingInputResponses()).toBe(1);
+      const originalUpdate = gateway.updateMcpTaskExecution.bind(gateway);
+      const updateSpy = vi
+        .spyOn(gateway, "updateMcpTaskExecution")
+        .mockImplementationOnce(async (...args) => {
+          const ack = await originalUpdate(...args);
+          if (nextState === "INPUT_REQUIRED") {
+            await pool.query(
+              `UPDATE task_input_request SET status='SUPERSEDED'
+             WHERE task_id=$1 AND request_key='approval'`,
+              [taskId],
+            );
+          } else if (nextState === "STOPPING") {
+            await pool.query(
+              `UPDATE provider_task
+             SET internal_state=$2, mcp_status='working', cancel_requested=true,
+                 stop_reason='USER_REQUESTED'
+             WHERE task_id=$1`,
+              [taskId, nextState],
+            );
+          } else {
+            await pool.query(
+              "UPDATE provider_task SET internal_state=$2, mcp_status='working' WHERE task_id=$1",
+              [taskId, nextState],
+            );
+          }
+          return ack;
+        });
+      try {
+        expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+          claimed: 1,
+          exhausted: 1,
+        });
+        expect(updateSpy).toHaveBeenCalledTimes(1);
+        expect(lastForwardedResponder).toMatchObject({ actorType: "user" });
+        expect(await repository.getById(taskId)).toMatchObject({
+          internalState: nextState,
+          mcpStatus: nextState === "INPUT_REQUIRED" ? "input_required" : "working",
+        });
+        const request = await pool.query<{ status: string }>(
+          "SELECT status FROM task_input_request WHERE task_id=$1 AND request_key='approval'",
+          [taskId],
+        );
+        expect(request.rows[0]?.status).toBe("SUPERSEDED");
+        const command = await pool.query<{
+          state: string;
+          last_error_code: string | null;
+          adapter_ack: unknown;
+        }>(
+          "SELECT state,last_error_code,adapter_ack FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+          [taskId],
+        );
+        expect(command.rows[0]).toMatchObject({
+          state: "EXHAUSTED",
+          last_error_code: reasonCode,
+        });
+        expect(command.rows[0]?.adapter_ack).not.toBeNull();
+        await expectCommandLifecycle(taskId, "task.command.superseded", {
+          currentState: "EXHAUSTED",
+          reasonCode,
+          adapterRpcStatus: "success",
+        });
+        const inbox = await pool.query<{ state: string; last_error_code: string | null }>(
+          "SELECT state,last_error_code FROM task_input_response_inbox WHERE task_id=$1",
+          [taskId],
+        );
+        expect(inbox.rows[0]).toMatchObject({
+          state: "IGNORED",
+          last_error_code: reasonCode,
+        });
+      } finally {
+        updateSpy.mockRestore();
+      }
+    },
+  );
+
+  it.each(["PAUSED", "RUNNING"] as const)(
+    "does not dispatch an assigned business answer after the Task leaves input wait for %s",
+    async (state) => {
+      const created = await engine.callOperation(
+        requiredOperation("durable_task"),
+        { resourceId: `business-assigned-race-${state}`, scenario: "input_required_frozen" },
+        authorization,
+      );
+      if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+      const taskId = String(created.task.taskId);
+      await pool.query(
+        `UPDATE task_input_request SET request_json=$2::jsonb
+         WHERE task_id=$1 AND request_key='approval'`,
+        [
+          taskId,
+          JSON.stringify({
+            method: "elicitation/create",
+            params: {
+              message: "Synthetic business decision",
+              _meta: {
+                "io.sdar/taskBusiness": {
+                  schemaVersion: "sdar.required-input/1.0-rc2",
+                  requestKey: "approval",
+                  inputType: "target.observation_decision",
+                  requiredResponder: "user",
+                },
+              },
+            },
+          }),
+        ],
+      );
+      const repository = new TaskRepository(pool);
+      await repository.acceptMcpInputResponses(
+        taskId,
+        {
+          ...authorization,
+          verifiedResponder: {
+            actorType: "user",
+            actorId: "test-user-proxy",
+            source: "trusted_headers",
+          },
+        },
+        { approval: { action: "accept", content: true } },
+      );
+      expect(await repository.promotePendingInputResponses()).toBe(1);
+      await pool.query("UPDATE provider_task SET internal_state=$2 WHERE task_id=$1", [
+        taskId,
+        state,
+      ]);
+      const dispatched = await new DurableCommandDispatcher(gateway, repository).tick();
+      expect(dispatched).toMatchObject({ claimed: 1, exhausted: 1 });
+      expect(lastForwardedResponder).toBeUndefined();
+      const command = await pool.query<{ state: string; last_error_code: string }>(
+        "SELECT state,last_error_code FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+        [taskId],
+      );
+      expect(command.rows[0]).toMatchObject({
+        state: "EXHAUSTED",
+        last_error_code: "BUSINESS_INPUT_TASK_NOT_WAITING",
+      });
+      const inbox = await pool.query<{ state: string; last_error_code: string }>(
+        "SELECT state,last_error_code FROM task_input_response_inbox WHERE task_id=$1",
+        [taskId],
+      );
+      expect(inbox.rows[0]).toMatchObject({
+        state: "IGNORED",
+        last_error_code: "BUSINESS_INPUT_TASK_NOT_WAITING",
+      });
+      const request = await pool.query<{ status: string }>(
+        "SELECT status FROM task_input_request WHERE task_id=$1 AND request_key='approval'",
+        [taskId],
+      );
+      expect(request.rows[0]?.status).toBe("SUPERSEDED");
+    },
+  );
+
+  it("keeps the Task alive when a synthetic Adapter rejects a business answer", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "business-answer-rejected", scenario: "input_required_frozen" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+    const taskId = String(created.task.taskId);
+    await pool.query(
+      `UPDATE task_input_request SET request_json=$2::jsonb
+       WHERE task_id=$1 AND request_key='approval'`,
+      [
+        taskId,
+        JSON.stringify({
+          method: "elicitation/create",
+          params: {
+            message: "Synthetic business decision",
+            _meta: {
+              "io.sdar/taskBusiness": {
+                schemaVersion: "sdar.required-input/1.0-rc2",
+                requestKey: "approval",
+                inputType: "target.observation_decision",
+                requiredResponder: "user",
+              },
+            },
+          },
+        }),
+      ],
+    );
+    const repository = new TaskRepository(pool);
+    await repository.acceptMcpInputResponses(
+      taskId,
+      {
+        ...authorization,
+        verifiedResponder: {
+          actorType: "user",
+          actorId: "test-user-proxy",
+          source: "trusted_headers",
+        },
+      },
+      { approval: { action: "decline" } },
+    );
+    const dispatched = await new DurableCommandDispatcher(gateway, repository).tick();
+    expect(dispatched).toMatchObject({ claimed: 1, rejected: 1 });
+    expect(lastForwardedResponder).toMatchObject({ actorType: "user" });
+    expect(await repository.getById(taskId)).toMatchObject({
+      internalState: "INPUT_REQUIRED",
+      mcpStatus: "input_required",
+    });
+    const command = await pool.query<{ state: string; last_error_code: string }>(
+      "SELECT state,last_error_code FROM task_command WHERE task_id=$1 AND command_type='UPDATE'",
+      [taskId],
+    );
+    expect(command.rows[0]).toMatchObject({ state: "REJECTED", last_error_code: "INPUT_REJECTED" });
+    const inbox = await pool.query<{ state: string }>(
+      "SELECT state FROM task_input_response_inbox WHERE task_id=$1",
+      [taskId],
+    );
+    expect(inbox.rows[0]?.state).toBe("FAILED");
+  });
+
+  it("routes a synthetic business answer over frozen HTTP with trusted caller role", async () => {
+    const profile = TaskBusinessOperationProfileSchema.parse({
+      ...UGV_READ_ONLY_BUSINESS_PROFILE,
+      requiredInputTypes: ["target.observation_decision"],
+      methods: { ...UGV_READ_ONLY_BUSINESS_PROFILE.methods, inputUpdate: true },
+      policy: { ...UGV_READ_ONLY_BUSINESS_PROFILE.policy, decisionMode: "user_required" },
+    });
+    const described = await gateway.describeProvider();
+    const manifest = new OperationRegistry().validate({
+      ...described,
+      businessEventSources: [taskBusinessSourceCapability()],
+      operations: described.operations.map((operation) =>
+        operation.name === "durable_task"
+          ? { ...operation, businessFeedbackProfile: jsonToProtoStruct(profile) }
+          : operation,
+      ),
+    });
+    const snapshotIds = await new OperationSnapshotRepository(pool).saveManifest(manifest);
+    const repository = new TaskRepository(pool);
+    const businessEngine = new TaskEngine(manifest, snapshotIds, gateway, repository);
+    const resolveAuthorization = createAuthorizationResolver({ mode: "trusted_headers" });
+    const identityHeaders = {
+      "x-sdar-subject": "test-user-proxy",
+      "x-sdar-tenant": "test-tenant",
+    };
+    const userAuthorization = resolveAuthorization({
+      headers: { ...identityHeaders, "x-sdar-actor-type": "user" },
+    } as unknown as IncomingMessage);
+    const operation = manifest.operations.find((candidate) => candidate.name === "durable_task");
+    if (!operation) throw new Error("Synthetic durable operation missing");
+    const created = await businessEngine.callOperation(
+      operation,
+      { resourceId: "http-business-input", scenario: "input_required_frozen" },
+      userAuthorization,
+    );
+    if (created.kind !== "task") throw new Error("Expected frozen MRTR Task");
+    const taskId = String(created.task.taskId);
+    await pool.query(
+      `UPDATE task_input_request SET request_json=$2::jsonb
+       WHERE task_id=$1 AND request_key='approval'`,
+      [
+        taskId,
+        JSON.stringify({
+          method: "elicitation/create",
+          params: {
+            message: "Synthetic business decision",
+            _meta: {
+              "io.sdar/taskBusiness": {
+                schemaVersion: "sdar.required-input/1.0-rc2",
+                requestKey: "approval",
+                inputType: "target.observation_decision",
+                requiredResponder: "user",
+              },
+            },
+          },
+        }),
+      ],
+    );
+
+    const handler = new Sep2663ProtocolHandler(
+      manifest,
+      "test-runtime",
+      businessEngine,
+      resolveAuthorization,
+    );
+    const http = Fastify();
+    http.post("/mcp", async (request, reply) => {
+      reply.hijack();
+      await handler.handle(request.raw, reply.raw, request.body);
+    });
+    await http.listen({ host: "127.0.0.1", port: 0 });
+    try {
+      const address = http.server.address();
+      if (address === null || typeof address === "string") throw new Error("MCP_HTTP_NOT_BOUND");
+      const url = `http://127.0.0.1:${String(address.port)}/mcp`;
+      const body = {
+        jsonrpc: "2.0",
+        id: "synthetic-business-answer",
+        method: "tasks/update",
+        params: {
+          taskId,
+          inputResponses: { approval: { action: "accept", content: true } },
+          _meta: {
+            "io.modelcontextprotocol/protocolVersion": FROZEN_PROTOCOL_VERSION,
+            "io.modelcontextprotocol/clientInfo": { name: "synthetic-test-client", version: "1" },
+            "io.modelcontextprotocol/clientCapabilities": {
+              extensions: { "io.modelcontextprotocol/tasks": {} },
+            },
+          },
+        },
+      };
+      const send = async (
+        actorType: "agent" | "user",
+        inputResponses: Record<string, unknown> = body.params.inputResponses,
+      ) => {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            ...identityHeaders,
+            "x-sdar-actor-type": actorType,
+            accept: "application/json, text/event-stream",
+            "content-type": "application/json",
+            "mcp-protocol-version": FROZEN_PROTOCOL_VERSION,
+            "mcp-method": "tasks/update",
+            "mcp-name": taskId,
+          },
+          body: JSON.stringify({ ...body, params: { ...body.params, inputResponses } }),
+        });
+        return {
+          status: response.status,
+          body: (await response.json()) as Record<string, unknown>,
+        };
+      };
+      const rejected = await send("agent");
+      expect(rejected.body).toMatchObject({
+        error: { data: { reasonCode: "RESPONDER_NOT_AUTHORIZED" } },
+      });
+      const before = await pool.query<{ count: string }>(
+        "SELECT count(*)::text AS count FROM task_input_response_inbox WHERE task_id=$1",
+        [taskId],
+      );
+      expect(before.rows[0]?.count).toBe("0");
+
+      const accepted = await send("user");
+      expect(accepted).toMatchObject({ status: 200, body: { result: { resultType: "complete" } } });
+      const conflicting = await send("user", { approval: { action: "decline" } });
+      expect(conflicting).toMatchObject({
+        status: 400,
+        body: { error: { data: { reasonCode: "INPUT_ANSWER_CONFLICT" } } },
+      });
+      await new DurableCommandDispatcher(gateway, repository).tick();
+      expect(lastForwardedResponder).toEqual({
+        actorType: "user",
+        actorId: "test-user-proxy",
+        source: "trusted_headers",
+      });
+    } finally {
+      await http.close();
+    }
+  });
+
+  it("queues a synthetic optional Intervention over HTTP and dispatches once through durable Task control", async () => {
+    const profile = TaskBusinessOperationProfileSchema.parse({
+      ...UGV_READ_ONLY_BUSINESS_PROFILE,
+      interventionTypes: ["navigation.change_destination"],
+      methods: { ...UGV_READ_ONLY_BUSINESS_PROFILE.methods, interventionApply: true },
+      qualification: {
+        ...UGV_READ_ONLY_BUSINESS_PROFILE.qualification,
+        runtimeReplan: "qualified",
+      },
+    });
+    const described = await gateway.describeProvider();
+    const manifest = new OperationRegistry().validate({
+      ...described,
+      businessEventSources: [taskBusinessSourceCapability()],
+      operations: described.operations.map((operation) =>
+        operation.name === "durable_task"
+          ? { ...operation, businessFeedbackProfile: jsonToProtoStruct(profile) }
+          : operation,
+      ),
+    });
+    const snapshots = new OperationSnapshotRepository(pool);
+    const snapshotIds = await snapshots.saveManifest(manifest);
+    const repository = new TaskRepository(pool);
+    const businessEngine = new TaskEngine(manifest, snapshotIds, gateway, repository);
+    const resolveAuthorization = createAuthorizationResolver({ mode: "trusted_headers" });
+    const identityHeaders = {
+      "x-sdar-subject": "intervention-test-user",
+      "x-sdar-tenant": "test-tenant",
+      "x-sdar-actor-type": "user",
+    };
+    const userAuthorization = resolveAuthorization({
+      headers: identityHeaders,
+    } as unknown as IncomingMessage);
+    const operation = manifest.operations.find((candidate) => candidate.name === "durable_task");
+    if (!operation) throw new Error("SYNTHETIC_INTERVENTION_OPERATION_MISSING");
+    const created = await businessEngine.callOperation(
+      operation,
+      { resourceId: "synthetic-intervention", scenario: "running" },
+      userAuthorization,
+    );
+    if (created.kind !== "task") throw new Error("SYNTHETIC_INTERVENTION_TASK_MISSING");
+    const taskId = String(created.task.taskId);
+    const task = await repository.getById(taskId);
+    if (!task?.externalExecutionId) throw new Error("SYNTHETIC_INTERVENTION_EXECUTION_MISSING");
+    const business = new TaskBusinessGateway(manifest, repository, snapshots, gateway);
+    const publicBusiness = new TaskBusinessPublicService(
+      manifest.providerId,
+      business,
+      { currentGeneration: async () => undefined },
+      businessEngine,
+    );
+    const handler = new Sep2663ProtocolHandler(
+      manifest,
+      "test-runtime",
+      businessEngine,
+      resolveAuthorization,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      publicBusiness,
+    );
+    const http = Fastify();
+    http.post("/mcp", async (request, reply) => {
+      reply.hijack();
+      await handler.handle(request.raw, reply.raw, request.body);
+    });
+    await http.listen({ host: "127.0.0.1", port: 0 });
+    try {
+      const address = http.server.address();
+      if (address === null || typeof address === "string") throw new Error("MCP_HTTP_NOT_BOUND");
+      const params = {
+        schemaVersion: TASK_BUSINESS_INTERVENTION_COMMAND_SCHEMA_VERSION,
+        commandId: "synthetic-change-1",
+        taskId,
+        executionId: task.externalExecutionId,
+        interventionId: "synthetic-offer-1",
+        guard: {
+          mode: "semantic",
+          expectedInterventionRevision: 1,
+          expectedEffectivePlanRevision: 0,
+        },
+        input: { destination: [116.1, 39.1] },
+        _meta: {
+          "io.modelcontextprotocol/protocolVersion": FROZEN_PROTOCOL_VERSION,
+          "io.modelcontextprotocol/clientInfo": { name: "synthetic-test-client", version: "1" },
+          "io.modelcontextprotocol/clientCapabilities": {
+            extensions: {
+              "io.modelcontextprotocol/tasks": {},
+              "io.sdar/taskBusiness": { profileVersion: "1.0-rc2" },
+            },
+          },
+        },
+      };
+      const send = async (patch: Record<string, unknown> = {}) => {
+        const response = await fetch(`http://127.0.0.1:${String(address.port)}/mcp`, {
+          method: "POST",
+          headers: {
+            ...identityHeaders,
+            accept: "application/json, text/event-stream",
+            "content-type": "application/json",
+            "mcp-protocol-version": FROZEN_PROTOCOL_VERSION,
+            "mcp-method": "io.sdar/taskBusiness/interventions/apply",
+            "mcp-name": taskId,
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: "synthetic-intervention",
+            method: "io.sdar/taskBusiness/interventions/apply",
+            params: { ...params, ...patch },
+          }),
+        });
+        return {
+          status: response.status,
+          body: (await response.json()) as Record<string, unknown>,
+        };
+      };
+      const discoveryResponse = await fetch(`http://127.0.0.1:${String(address.port)}/mcp`, {
+        method: "POST",
+        headers: {
+          ...identityHeaders,
+          accept: "application/json, text/event-stream",
+          "content-type": "application/json",
+          "mcp-protocol-version": FROZEN_PROTOCOL_VERSION,
+          "mcp-method": "server/discover",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "synthetic-discovery",
+          method: "server/discover",
+          params: { _meta: params._meta },
+        }),
+      });
+      expect(discoveryResponse.status).toBe(200);
+      const discovery = (await discoveryResponse.json()) as {
+        result: { capabilities: { extensions: Record<string, unknown> } };
+      };
+      const extension = discovery.result.capabilities.extensions["io.sdar/taskBusiness"] as {
+        methods: { interventionApply?: string };
+        interventionApplySchema: Record<string, unknown>;
+        interventionApplyResultSchema: Record<string, unknown>;
+      };
+      expect(extension.methods.interventionApply).toBe("io.sdar/taskBusiness/interventions/apply");
+      const ajv = new Ajv2020({ strict: true });
+      expect(ajv.compile(extension.interventionApplySchema)({ ...params })).toBe(true);
+      const wrong = await send({ executionId: "other-execution" });
+      expect(wrong.body).toMatchObject({
+        error: { data: { reasonCode: "BUSINESS_EXECUTION_ID_MISMATCH" } },
+      });
+      expect(await repository.listPendingCommands(taskId)).toHaveLength(0);
+      const first = await send();
+      expect(first).toMatchObject({
+        status: 200,
+        body: {
+          result: {
+            resultType: "complete",
+            receipt: {
+              commandId: "synthetic-change-1",
+              commandState: "PENDING",
+              durablyAccepted: true,
+              businessApplied: false,
+              duplicate: false,
+            },
+          },
+        },
+      });
+      expect(ajv.compile(extension.interventionApplyResultSchema)(first.body.result)).toBe(true);
+      const persistedHash = await pool.query<{ semantic_hash: string }>(
+        `SELECT payload->>'semanticHash' AS semantic_hash FROM task_command
+         WHERE task_id=$1 AND command_type='INTERVENTION'`,
+        [taskId],
+      );
+      expect(persistedHash.rows[0]?.semantic_hash).toBe(
+        taskBusinessCommandRequestHash(
+          RuntimeInterventionCommandSchema.parse({
+            schemaVersion: params.schemaVersion,
+            commandId: params.commandId,
+            taskId: params.taskId,
+            executionId: params.executionId,
+            interventionId: params.interventionId,
+            guard: params.guard,
+            input: params.input,
+          }),
+        ),
+      );
+      expect((await repository.getById(taskId))?.internalState).toBe("RUNNING");
+      const retry = await send();
+      expect(retry.body).toMatchObject({
+        result: { receipt: { commandId: "synthetic-change-1", duplicate: true } },
+      });
+      const changed = await send({ input: { destination: [116.2, 39.2] } });
+      expect(changed.body).toMatchObject({
+        error: { data: { reasonCode: "COMMAND_ID_CONFLICT" } },
+      });
+      const competing = await send({ commandId: "synthetic-change-2" });
+      expect(competing.body).toMatchObject({
+        error: { data: { reasonCode: "BUSINESS_CHANGE_IN_PROGRESS" } },
+      });
+      const dispatched = await new DurableCommandDispatcher(gateway, repository).tick();
+      expect(dispatched).toMatchObject({ claimed: 1, acknowledged: 1 });
+      expect(interventionDispatches).toBe(1);
+      expect(lastIntervention).toMatchObject({
+        command: { commandId: "synthetic-change-1" },
+        responder: { actorType: "user", verified: true },
+      });
+      const after = await send();
+      expect(after.body).toMatchObject({
+        result: {
+          receipt: {
+            commandId: "synthetic-change-1",
+            commandState: "ACKNOWLEDGED",
+            duplicate: true,
+            businessApplied: false,
+          },
+        },
+      });
+      expect(interventionDispatches).toBe(1);
+      const second = await send({ commandId: "synthetic-change-2" });
+      expect(second.body).toMatchObject({
+        result: { receipt: { commandId: "synthetic-change-2", commandState: "PENDING" } },
+      });
+      await businessEngine.cancelTask(taskId, userAuthorization);
+      const superseded = await pool.query<{ state: string; last_error_code: string }>(
+        `SELECT state,last_error_code FROM task_command
+         WHERE task_id=$1 AND command_type='INTERVENTION' AND payload->>'commandId'=$2`,
+        [taskId, "synthetic-change-2"],
+      );
+      expect(superseded.rows[0]).toMatchObject({
+        state: "EXHAUSTED",
+        last_error_code: "SUPERSEDED_BY_SAFE_STOP",
+      });
+      await new DurableCommandDispatcher(gateway, repository).tick();
+      expect(interventionDispatches).toBe(1);
+    } finally {
+      await http.close();
+    }
+  });
+
+  it("rejects a persisted Intervention without verified responder before Adapter dispatch", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "synthetic-intervention-invalid-responder", scenario: "running" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("SYNTHETIC_INTERVENTION_TASK_MISSING");
+    const taskId = String(created.task.taskId);
+    const repository = new TaskRepository(pool);
+    const task = await repository.getById(taskId);
+    if (!task?.externalExecutionId) throw new Error("SYNTHETIC_INTERVENTION_EXECUTION_MISSING");
+    const command = RuntimeInterventionCommandSchema.parse({
+      schemaVersion: TASK_BUSINESS_INTERVENTION_COMMAND_SCHEMA_VERSION,
+      commandId: "synthetic-unverified-1",
+      taskId,
+      executionId: task.externalExecutionId,
+      interventionId: "synthetic-offer-unverified",
+      guard: {
+        mode: "semantic",
+        expectedInterventionRevision: 1,
+        expectedEffectivePlanRevision: 0,
+      },
+      input: { destination: [116.1, 39.1] },
+    });
+    const semanticHash = taskBusinessCommandRequestHash(command);
+    await repository.beginBusinessInterventionCommand(taskId, command.commandId, semanticHash, {
+      commandId: command.commandId,
+      semanticHash,
+      command,
+    });
+    expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+      claimed: 1,
+      rejected: 1,
+      retried: 0,
+      exhausted: 0,
+    });
+    expect(interventionDispatches).toBe(0);
+    const persisted = await pool.query<{ state: string; last_error_code: string }>(
+      `SELECT state,last_error_code FROM task_command
+       WHERE task_id=$1 AND command_type='INTERVENTION'`,
+      [taskId],
+    );
+    expect(persisted.rows[0]).toMatchObject({
+      state: "REJECTED",
+      last_error_code: "RESPONDER_NOT_AUTHORIZED",
+    });
+    expect((await repository.getById(taskId))?.internalState).toBe("RUNNING");
+    const next = { ...command, commandId: "synthetic-verified-2" };
+    const nextHash = taskBusinessCommandRequestHash(next);
+    await repository.beginBusinessInterventionCommand(taskId, next.commandId, nextHash, {
+      commandId: next.commandId,
+      semanticHash: nextHash,
+      command: next,
+      responder: {
+        source: "runtime_authorization_context",
+        actorType: "user",
+        verified: true,
+      },
+    });
+    expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+      claimed: 1,
+      acknowledged: 1,
+    });
+    expect(interventionDispatches).toBe(1);
+  });
+
+  it("records an explicit Intervention denial without retrying or stopping the running Task", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "synthetic-intervention-denial", scenario: "running" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("SYNTHETIC_INTERVENTION_TASK_MISSING");
+    const taskId = String(created.task.taskId);
+    const repository = new TaskRepository(pool);
+    const task = await repository.getById(taskId);
+    if (!task?.externalExecutionId) throw new Error("SYNTHETIC_INTERVENTION_EXECUTION_MISSING");
+    const command = RuntimeInterventionCommandSchema.parse({
+      schemaVersion: TASK_BUSINESS_INTERVENTION_COMMAND_SCHEMA_VERSION,
+      commandId: "synthetic-denied-1",
+      taskId,
+      executionId: task.externalExecutionId,
+      interventionId: "synthetic-offer-denied",
+      guard: {
+        mode: "semantic",
+        expectedInterventionRevision: 1,
+        expectedEffectivePlanRevision: 0,
+      },
+      input: { destination: [116.1, 39.1] },
+    });
+    const semanticHash = taskBusinessCommandRequestHash(command);
+    const responder = {
+      source: "runtime_authorization_context",
+      actorType: "user",
+      verified: true,
+    };
+    const payload = { commandId: command.commandId, semanticHash, command, responder };
+    await repository.beginBusinessInterventionCommand(
+      taskId,
+      command.commandId,
+      semanticHash,
+      payload,
+    );
+    interventionAccepted = false;
+    expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+      claimed: 1,
+      rejected: 1,
+      retried: 0,
+      exhausted: 0,
+    });
+    expect(interventionDispatches).toBe(1);
+    const persisted = await pool.query<{ state: string; last_error_code: string }>(
+      `SELECT state,last_error_code FROM task_command
+       WHERE task_id=$1 AND command_type='INTERVENTION'`,
+      [taskId],
+    );
+    expect(persisted.rows[0]).toMatchObject({
+      state: "REJECTED",
+      last_error_code: "INTERVENTION_NOT_SUPPORTED",
+    });
+    expect((await repository.getById(taskId))?.internalState).toBe("RUNNING");
+    expect(
+      await repository.beginBusinessInterventionCommand(
+        taskId,
+        command.commandId,
+        semanticHash,
+        payload,
+      ),
+    ).toMatchObject({ duplicate: true, state: "REJECTED" });
+    expect(await new DurableCommandDispatcher(gateway, repository).tick()).toMatchObject({
+      claimed: 0,
+      retried: 0,
+    });
+    expect(interventionDispatches).toBe(1);
+    const next = { ...command, commandId: "synthetic-denied-2" };
+    const nextHash = taskBusinessCommandRequestHash(next);
+    expect(
+      await repository.beginBusinessInterventionCommand(taskId, next.commandId, nextHash, {
+        commandId: next.commandId,
+        semanticHash: nextHash,
+        command: next,
+        responder,
+      }),
+    ).toMatchObject({ duplicate: false, state: "PENDING" });
+  });
+
+  it("keeps a running Task intact and fences new changes after uncertain Intervention delivery is exhausted", async () => {
+    const created = await engine.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "synthetic-intervention-exhaustion", scenario: "running" },
+      authorization,
+    );
+    if (created.kind !== "task") throw new Error("SYNTHETIC_INTERVENTION_TASK_MISSING");
+    const taskId = String(created.task.taskId);
+    const repository = new TaskRepository(pool);
+    const task = await repository.getById(taskId);
+    if (!task?.externalExecutionId) throw new Error("SYNTHETIC_INTERVENTION_EXECUTION_MISSING");
+    const command = RuntimeInterventionCommandSchema.parse({
+      schemaVersion: TASK_BUSINESS_INTERVENTION_COMMAND_SCHEMA_VERSION,
+      commandId: "synthetic-exhaust-1",
+      taskId,
+      executionId: task.externalExecutionId,
+      interventionId: "synthetic-offer-exhaust",
+      guard: {
+        mode: "semantic",
+        expectedInterventionRevision: 1,
+        expectedEffectivePlanRevision: 0,
+      },
+      input: { destination: [116.1, 39.1] },
+    });
+    const semanticHash = taskBusinessCommandRequestHash(command);
+    await repository.beginBusinessInterventionCommand(taskId, command.commandId, semanticHash, {
+      commandId: command.commandId,
+      semanticHash,
+      command,
+      responder: {
+        source: "runtime_authorization_context",
+        actorType: "user",
+        verified: true,
+      },
+    });
+    const failure = vi
+      .spyOn(gateway, "applyIntervention")
+      .mockRejectedValueOnce(new Error("synthetic Adapter response lost"));
+    try {
+      const dispatched = await new DurableCommandDispatcher(
+        gateway,
+        repository,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { maxInterventionAttempts: 1 },
+      ).tick();
+      expect(dispatched).toMatchObject({ claimed: 1, exhausted: 1 });
+    } finally {
+      failure.mockRestore();
+    }
+    const persisted = await pool.query<{ state: string; last_error_code: string }>(
+      `SELECT state,last_error_code FROM task_command
+       WHERE task_id=$1 AND command_type='INTERVENTION'`,
+      [taskId],
+    );
+    expect(persisted.rows[0]).toMatchObject({
+      state: "EXHAUSTED",
+      last_error_code: "INTERVENTION_DELIVERY_EXHAUSTED",
+    });
+    expect((await repository.getById(taskId))?.internalState).toBe("RUNNING");
+    await expect(
+      repository.beginBusinessInterventionCommand(taskId, "synthetic-exhaust-2", semanticHash, {
+        commandId: "synthetic-exhaust-2",
+        semanticHash,
+        command: { ...command, commandId: "synthetic-exhaust-2" },
+      }),
+    ).rejects.toThrow("BUSINESS_CHANGE_RECONCILIATION_REQUIRED");
   });
 
   it("records cooperative cancellation when the Adapter cannot stop", async () => {

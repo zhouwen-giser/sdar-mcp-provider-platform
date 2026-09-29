@@ -1,0 +1,2266 @@
+{
+  "schema": "sdar.adapter-proto-legacy-surface/v1",
+  "baselineSourceSha256": "d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603",
+  "definitions": {
+    "io.sdar.mcp.tasks.adapter.v1.AdapterBusinessEvent": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "source_event_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "source_sequence",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "source_stream_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "scope",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "occurred_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "event_type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "description",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "9": {
+          "name": "resource_ref",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_resource_ref",
+          "proto3Optional": false
+        },
+        "10": {
+          "name": "severity_hint",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "11": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        },
+        "12": {
+          "name": "raw_payload",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": "_external_execution_id",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AdapterExecutionState": {
+      "kind": "enum",
+      "values": {
+        "ACCEPTED": 1,
+        "ADAPTER_EXECUTION_STATE_UNSPECIFIED": 0,
+        "BUSINESS_FAILED": 21,
+        "CANCELLED": 23,
+        "PARTIALLY_COMPLETED": 22,
+        "PAUSED": 5,
+        "QUEUED": 3,
+        "RESUMING": 6,
+        "RUNNING": 4,
+        "SCHEDULED": 2,
+        "STOPPING": 8,
+        "SUCCEEDED": 20,
+        "TECHNICAL_FAILED": 24,
+        "WAITING_INPUT": 7
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AdmissionRejected": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "message",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "retryable",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "alternatives",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "Alternative",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.Alternative": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "suggested_start_time",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "arguments",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "description",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AvailabilityCheck": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "request_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "arguments_value",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "arguments_value",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "arguments",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": "arguments_value",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "unresolved_arguments",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "UnresolvedArguments",
+          "oneof": "arguments_value",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "timing",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "TaskTiming",
+          "oneof": "arguments_value",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AvailabilityResult": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "request_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "availability",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "AvailabilityState",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "risk_level",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "RiskLevel",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "description",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "valid_until",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "earliest_start_time",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "9": {
+          "name": "next_available_windows",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "AvailableWindow",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "10": {
+          "name": "estimated_delay_ms",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "11": {
+          "name": "possible_effects",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "12": {
+          "name": "reservation_mode",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "ReservationMode",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "13": {
+          "name": "reservation_ref",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AvailabilityState": {
+      "kind": "enum",
+      "values": {
+        "AVAILABILITY_STATE_UNSPECIFIED": 0,
+        "AVAILABLE": 1,
+        "DISABLED": 3,
+        "RESTRICTED": 2,
+        "UNKNOWN": 4
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.AvailableWindow": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "start_time",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "end_time",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.BusinessEventSourceCapability": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "source_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "source_stream_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "delivery_semantics",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "replay_supported",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "source_retention_ms",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "max_event_bytes",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "max_payload_depth",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT32",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "max_payload_nodes",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT32",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "9": {
+          "name": "max_payload_string_bytes",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.CheckAvailabilityRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "checks",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "AvailabilityCheck",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.CheckAvailabilityResponse": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "profile_version",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "checked_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "checks",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "AvailabilityResult",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.CommandAck": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "accepted",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "message",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "command_sequence",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "identity",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "SideEffectIdentity",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.DescribeProviderRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.EvidenceItem": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "evidence_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "evidence_type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "observed_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "subject_ref",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "payload_ref",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "EvidencePayloadRef",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "producer",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_subject_ref",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.EvidencePayloadRef": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "kind",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_json_pointer",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "json_pointer",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_json_pointer",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "uri",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_uri",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "media_type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_media_type",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "sha256",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_sha256",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ExecutionAccepted": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "initial_snapshot",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionSnapshot",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ExecutionContext": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "authorization_context_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "execution_mode",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "ExecutionMode",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "simulation_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "correlation_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ExecutionEvent": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "revision",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "occurred_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "progress",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "Progress",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "snapshot",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionSnapshot",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ExecutionMode": {
+      "kind": "enum",
+      "values": {
+        "EXECUTION_MODE_UNSPECIFIED": 0,
+        "HISTORICAL_REPLAY": 3,
+        "LIVE": 1,
+        "SIMULATION": 2
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ExecutionSnapshot": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "state",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "AdapterExecutionState",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "revision",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "message",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "progress",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "Progress",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "input_requests",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "InputRequest",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "9": {
+          "name": "result",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "10": {
+          "name": "retryable",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "11": {
+          "name": "alternatives",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "Alternative",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "12": {
+          "name": "observed_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "13": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "14": {
+          "name": "argument_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "15": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "16": {
+          "name": "evidence",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "EvidenceItem",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "17": {
+          "name": "mcp_input_requests",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "McpTaskInputRequest",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.GetExecutionRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.InputRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "key",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "description",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "input_schema",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "required",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.InventoryMode": {
+      "kind": "enum",
+      "values": {
+        "INVENTORY_MODE_UNSPECIFIED": 0,
+        "OPAQUE": 2,
+        "RUNTIME_VISIBLE": 1
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ListResourcesRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "page_token",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "page_size",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT32",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ListResourcesResponse": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "resources",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ResourceInstance",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "next_page_token",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.McpTaskInputRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "key",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "method",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "params",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.McpTaskInputResponse": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "key",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "result",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.OperationCapabilities": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "availability",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "scheduling",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "max_elapsed",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "cancel",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "pause_resume",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "input_required",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "idempotency",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "observations",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.OperationDefinition": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "description",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "execution",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "OperationExecution",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "input_schema",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "output_schema",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "capabilities",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "OperationCapabilities",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "resource_binding",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ResourceBinding",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.OperationExecution": {
+      "kind": "enum",
+      "values": {
+        "OPERATION_EXECUTION_UNSPECIFIED": 0,
+        "SYNCHRONOUS": 1,
+        "TASK_CAPABLE": 2,
+        "TASK_REQUIRED": 3
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.PauseExecutionRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "identity",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "SideEffectIdentity",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.Progress": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "current",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_DOUBLE",
+          "typeName": "",
+          "oneof": "_current",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "total",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_DOUBLE",
+          "typeName": "",
+          "oneof": "_total",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "unit",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_current",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "percentage",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_DOUBLE",
+          "typeName": "",
+          "oneof": "_percentage",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ProviderManifest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "adapter_protocol_version",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "provider_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "provider_type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "provider_version",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "inventory_mode",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "InventoryMode",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "operations",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "OperationDefinition",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "business_event_sources",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "BusinessEventSourceCapability",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ReconcileExecutionRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "argument_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ReconcileExecutionResponse": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "status",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "ReconcileStatus",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "snapshot",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionSnapshot",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "message",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "retryable",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ReconcileStatus": {
+      "kind": "enum",
+      "values": {
+        "CONFLICT": 4,
+        "FOUND": 1,
+        "NOT_FOUND": 2,
+        "RECONCILE_STATUS_UNSPECIFIED": 0,
+        "TRANSIENT_UNAVAILABLE": 3
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.RequestCancelRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "identity",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "SideEffectIdentity",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "reason",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "StopReason",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.RequestMetadata": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "adapter_protocol_version",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "provider_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "correlation_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ReservationMode": {
+      "kind": "enum",
+      "values": {
+        "BEST_EFFORT": 2,
+        "GUARANTEED": 3,
+        "NONE": 1,
+        "RESERVATION_MODE_UNSPECIFIED": 0
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ResourceBinding": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "mode",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "Mode",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "resource_id_json_pointer",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ResourceInstance": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "resource_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "display_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "resource_type",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "enabled",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_BOOL",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "health",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "labels",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "Labels",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "last_seen_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter": {
+      "kind": "service",
+      "methods": {
+        "CheckAvailability": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/CheckAvailability",
+          "requestType": "CheckAvailabilityRequest",
+          "responseType": "CheckAvailabilityResponse",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "DescribeProvider": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/DescribeProvider",
+          "requestType": "DescribeProviderRequest",
+          "responseType": "ProviderManifest",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "GetExecution": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/GetExecution",
+          "requestType": "GetExecutionRequest",
+          "responseType": "ExecutionSnapshot",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "ListResources": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ListResources",
+          "requestType": "ListResourcesRequest",
+          "responseType": "ListResourcesResponse",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "PauseExecution": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/PauseExecution",
+          "requestType": "PauseExecutionRequest",
+          "responseType": "CommandAck",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "ReconcileExecution": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ReconcileExecution",
+          "requestType": "ReconcileExecutionRequest",
+          "responseType": "ReconcileExecutionResponse",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "RequestCancel": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/RequestCancel",
+          "requestType": "RequestCancelRequest",
+          "responseType": "CommandAck",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "ResumeExecution": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/ResumeExecution",
+          "requestType": "ResumeExecutionRequest",
+          "responseType": "CommandAck",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "StartOperation": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/StartOperation",
+          "requestType": "StartOperationRequest",
+          "responseType": "StartOperationResponse",
+          "requestStream": false,
+          "responseStream": false
+        },
+        "StreamBusinessEvents": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/StreamBusinessEvents",
+          "requestType": "StreamBusinessEventsRequest",
+          "responseType": "AdapterBusinessEvent",
+          "requestStream": false,
+          "responseStream": true
+        },
+        "StreamExecutionEvents": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/StreamExecutionEvents",
+          "requestType": "StreamExecutionEventsRequest",
+          "responseType": "ExecutionEvent",
+          "requestStream": false,
+          "responseStream": true
+        },
+        "UpdateExecution": {
+          "path": "/io.sdar.mcp.tasks.adapter.v1.ResourceProviderAdapter/UpdateExecution",
+          "requestType": "UpdateExecutionRequest",
+          "responseType": "CommandAck",
+          "requestStream": false,
+          "responseStream": false
+        }
+      }
+    },
+    "io.sdar.mcp.tasks.adapter.v1.ResumeExecutionRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "identity",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "SideEffectIdentity",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "reason_code",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.RiskLevel": {
+      "kind": "enum",
+      "values": {
+        "CRITICAL": 4,
+        "HIGH": 3,
+        "LOW": 1,
+        "MEDIUM": 2,
+        "RISK_LEVEL_UNSPECIFIED": 0
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.SideEffectIdentity": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "argument_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "command_sequence",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "external_execution_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.StartOperationRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "task_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "operation_name",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "arguments",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "5": {
+          "name": "timing",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "TaskTiming",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "6": {
+          "name": "execution_context",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionContext",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "7": {
+          "name": "argument_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "8": {
+          "name": "invocation_attempt",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT32",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        },
+        "9": {
+          "name": "reservation_ref",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_reservation_ref",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.StartOperationResponse": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "accepted",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "ExecutionAccepted",
+          "oneof": "result",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "rejected",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "AdmissionRejected",
+          "oneof": "result",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.StopReason": {
+      "kind": "enum",
+      "values": {
+        "DEADLINE_REACHED": 2,
+        "RUNTIME_SHUTDOWN": 4,
+        "START_WINDOW_MISSED": 3,
+        "STOP_REASON_UNSPECIFIED": 0,
+        "USER_REQUESTED": 1
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.StreamBusinessEventsRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": "_after_source_sequence",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "source_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_after_source_sequence",
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "source_stream_id",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": "_after_source_sequence",
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "after_source_sequence",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": "_after_source_sequence",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.StreamExecutionEventsRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "execution",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "GetExecutionRequest",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "after_revision",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.TaskStart": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "mode",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_ENUM",
+          "typeName": "Mode",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "scheduled_at",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Timestamp",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "start_tolerance_ms",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.TaskTiming": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "start",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "TaskStart",
+          "oneof": "_max_elapsed_ms",
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "max_elapsed_ms",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_UINT64",
+          "typeName": "",
+          "oneof": "_max_elapsed_ms",
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.UnresolvedArguments": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "known_arguments",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Struct",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "unresolved_paths",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.UpdateExecutionRequest": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "metadata",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "RequestMetadata",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "identity",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "SideEffectIdentity",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "inputs",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "UpdateValue",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "4": {
+          "name": "input_responses",
+          "label": "LABEL_REPEATED",
+          "type": "TYPE_MESSAGE",
+          "typeName": "McpTaskInputResponse",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    },
+    "io.sdar.mcp.tasks.adapter.v1.UpdateValue": {
+      "kind": "message",
+      "fields": {
+        "1": {
+          "name": "input_request_key",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "2": {
+          "name": "value",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_MESSAGE",
+          "typeName": "google.protobuf.Value",
+          "oneof": null,
+          "proto3Optional": false
+        },
+        "3": {
+          "name": "answer_hash",
+          "label": "LABEL_OPTIONAL",
+          "type": "TYPE_STRING",
+          "typeName": "",
+          "oneof": null,
+          "proto3Optional": false
+        }
+      },
+      "reservedRanges": [],
+      "reservedNames": []
+    }
+  }
+}

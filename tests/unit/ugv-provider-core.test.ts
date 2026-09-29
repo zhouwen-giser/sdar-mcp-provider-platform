@@ -5,6 +5,7 @@ import {
   createUgvSnapshot,
   freshnessState,
   mapVehicleTaskState,
+  reconCorrelationStrength,
   sanitizeFireResult,
   TrackArbiter,
   UGV_OPERATION_TRACKS,
@@ -25,6 +26,72 @@ const limits = { maxPayloadBytes: 4096, maxDepth: 8, maxNodes: 128, maxStringByt
 const freshness = { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 };
 
 describe("UGV MQTT exact routing and normalization", () => {
+  it("retires a previous reconnaissance mission when a newer live status omits its ID", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits);
+    ingress.handle(
+      "/ugv/area_recon/status",
+      Buffer.from('{"mission_id":17,"status":5,"progress":40}'),
+      false,
+      "2026-09-28T03:00:00.000Z",
+    );
+    expect(reconCorrelationStrength(ingress.snapshot().payload.reconnaissance, "17")).toBe(
+      "STRICT_CORRELATED",
+    );
+
+    ingress.handle(
+      "/ugv/area_recon/status",
+      Buffer.from('{"status":5,"progress":60}'),
+      false,
+      "2026-09-28T03:00:01.000Z",
+    );
+    expect(ingress.snapshot().payload.reconnaissance).toMatchObject({
+      motionStatus: 5,
+      progress: 60,
+    });
+    expect(ingress.snapshot().payload.reconnaissance.id).toBeUndefined();
+    expect(reconCorrelationStrength(ingress.snapshot().payload.reconnaissance, "17")).toBe(
+      "WEAK_UNCORRELATED",
+    );
+  });
+
+  it("does not carry prior mission coverage or lock into a different mission", () => {
+    const first = applySnapshotPatch(
+      createUgvSnapshot(),
+      {
+        payload: {
+          reconnaissance: {
+            id: "17",
+            state: 1,
+            motionStatus: 5,
+            progress: 80,
+            coverage: { coveragePercent: 80 },
+            lock: { stage: 3, targetId: "9" },
+          },
+        },
+      },
+      "2026-09-28T03:00:00.000Z",
+      ["mission", "payload"],
+    );
+    const partial = applySnapshotPatch(
+      first,
+      { payload: { reconnaissance: { coverage: { coveragePercent: 81 } } } },
+      "2026-09-28T03:00:00.500Z",
+      ["payload"],
+    );
+    expect(partial.payload.reconnaissance.id).toBe("17");
+    expect(partial.payload.reconnaissance.coverage?.coveragePercent).toBe(81);
+    const second = applySnapshotPatch(
+      partial,
+      { payload: { reconnaissance: { id: "18", state: 1, motionStatus: 5 } } },
+      "2026-09-28T03:00:01.000Z",
+      ["mission", "payload"],
+    );
+    expect(second.payload.reconnaissance.id).toBe("18");
+    expect(second.payload.reconnaissance.progress).toBeUndefined();
+    expect(second.payload.reconnaissance.coverage).toBeUndefined();
+    expect(second.payload.reconnaissance.lock).toBeUndefined();
+  });
+
   it("contains the 19 real-boundary UGV topics and rejects wildcard or referee topics", () => {
     expect(UGV_MQTT_TOPICS).toHaveLength(19);
     expect(() => assertExactSubscriptions(UGV_MQTT_TOPICS)).not.toThrow();
@@ -97,6 +164,43 @@ describe("UGV MQTT exact routing and normalization", () => {
     expect(duplicate).toMatchObject({ duplicate: true, revision });
     expect(older).toMatchObject({ olderObservation: true, revision });
     expect(ingress.snapshot().chassis.position).toMatchObject({ latitude: 30, longitude: 114 });
+  });
+
+  it("keeps ROS nanoseconds when ordering GNSS observations within one millisecond", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits);
+    const gnss = (nanosec: number, longitude: number) =>
+      Buffer.from(
+        JSON.stringify({
+          header: { stamp: { sec: 100, nanosec } },
+          entity_id: "ugv1",
+          latitude: 30,
+          longitude,
+        }),
+      );
+    ingress.handle("/ugv/gnss", gnss(100_000, 114));
+    expect(ingress.observationAuthority("/ugv/gnss")?.observedAt).toBe("1970-01-01T00:01:40.0001Z");
+    ingress.handle("/ugv/gnss", gnss(900_000, 115));
+    const revision = ingress.snapshot().revision;
+    expect(ingress.snapshot().chassis.position?.longitude).toBe(115);
+    expect(ingress.handle("/ugv/gnss", gnss(200_000, 113))).toMatchObject({
+      olderObservation: true,
+      revision,
+    });
+    expect(ingress.snapshot().chassis.position?.longitude).toBe(115);
+  });
+
+  it("preserves capture microseconds in target source authority", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", limits);
+    const captureTimeUs = Date.parse("2026-09-24T00:00:02Z") * 1000;
+    ingress.handle(
+      "/ugv/area_recon/targets",
+      Buffer.from(
+        JSON.stringify({ targets: [{ target_id: 1, capture_time_us: captureTimeUs + 123 }] }),
+      ),
+    );
+    expect(ingress.observationAuthority("/ugv/area_recon/targets")?.observedAt).toBe(
+      "2026-09-24T00:00:02.000123Z",
+    );
   });
 
   it("isolates malformed identity and invalid mission progress", () => {
