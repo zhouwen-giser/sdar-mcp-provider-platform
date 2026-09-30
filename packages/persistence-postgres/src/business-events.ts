@@ -150,6 +150,35 @@ export class BusinessEventRepository {
     sources: BusinessEventSourceDefinition[],
     generationRetentionMs: number,
   ): Promise<BusinessEventGeneration> {
+    const generation = await this.initializeProviderGeneration(
+      providerId,
+      sources,
+      generationRetentionMs,
+    );
+    const roster = await this.sourceRoster(providerId, generation.streamId);
+    const desired = [...sources].sort((left, right) => compareText(left.sourceId, right.sourceId));
+    if (canonicalSha256(roster) === canonicalSha256(desired)) return generation;
+    // An upgraded manifest may add durable business feedback to an existing
+    // provider. Preserve the old replay boundary and register the new sources
+    // through the same atomic rotation used for explicit roster changes.
+    await this.rotateStream(
+      providerId,
+      "SOURCE_ROSTER_CHANGED",
+      [...new Set([...roster, ...desired].map((source) => source.sourceId))].sort(compareText),
+      `initialize:${generation.streamId}:${canonicalSha256(desired)}`,
+      generationRetentionMs,
+      desired,
+    );
+    const current = await this.currentGeneration(providerId);
+    if (!current) throw new Error("BUSINESS_EVENT_NOT_FOUND");
+    return current;
+  }
+
+  private async initializeProviderGeneration(
+    providerId: string,
+    sources: BusinessEventSourceDefinition[],
+    generationRetentionMs: number,
+  ): Promise<BusinessEventGeneration> {
     if (sources.length < 1 || sources.length > 16)
       throw new Error("BUSINESS_EVENT_SOURCE_COUNT_INVALID");
     const client = await this.pool.connect();

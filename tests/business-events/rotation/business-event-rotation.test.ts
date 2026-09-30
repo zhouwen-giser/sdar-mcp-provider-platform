@@ -34,6 +34,63 @@ beforeAll(async () => {
 afterAll(() => harness.stop());
 
 describe("Business Event atomic rotation", () => {
+  it("registers a newly enabled durable source on restart without losing the old replay boundary", async () => {
+    const providerId = "provider.rotation.upgrade";
+    const legacy = {
+      sourceId: "vehicle.execution",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0511",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const business = {
+      sourceId: "vehicle.business",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0512",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const before = await repository.initializeProvider(
+      providerId,
+      [legacy],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    await publishResource(providerId, legacy.sourceId, legacy.sourceStreamId, "1");
+    const upgraded = await repository.initializeProvider(
+      providerId,
+      [legacy, business],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    expect(upgraded.streamId).not.toBe(before.streamId);
+    await expect(repository.generation(providerId, before.streamId)).resolves.toMatchObject({
+      status: "replayable_closed",
+      lastReplayableSequence: "1",
+    });
+    await expect(repository.sourceRoster(providerId, upgraded.streamId)).resolves.toEqual([
+      business,
+      legacy,
+    ]);
+    const existingLease = await requireLease(
+      repository,
+      providerId,
+      legacy.sourceId,
+      legacy.sourceStreamId,
+      "replica-a",
+    );
+    expect(existingLease.lastPersistedSourceSequence).toBe("1");
+    await requireLease(
+      repository,
+      providerId,
+      business.sourceId,
+      business.sourceStreamId,
+      "replica-a",
+    );
+    await publishResource(providerId, legacy.sourceId, legacy.sourceStreamId, "2");
+    const restarted = await repository.initializeProvider(
+      providerId,
+      [business, legacy],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    expect(restarted.streamId).toBe(upgraded.streamId);
+    expect(restarted.currentSequence).toBe("1");
+  });
+
   it("closes the replay boundary, retries idempotently, and restarts runtime sequence at one", async () => {
     const providerId = "provider.rotation.operator";
     const sourceId = "durable.source";

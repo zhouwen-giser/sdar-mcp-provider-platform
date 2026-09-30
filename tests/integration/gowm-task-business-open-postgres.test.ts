@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { UgvTaskBusinessContextService } from "../../apps/ugv-provider-adapter/src/task-business-service.js";
 import type { AdapterBusinessEvent } from "../../packages/adapter-protocol/src/index.js";
+import { BusinessEventRepository } from "../../packages/persistence-postgres/src/business-events.js";
 import { TaskRepository } from "../../packages/persistence-postgres/src/tasks.js";
 import {
   createGowmPool,
@@ -77,6 +78,39 @@ suite("GOWM shared Task Business Store in an isolated database", () => {
   const externalExecutionId = `ugvb-execution-${runKey}`;
   const commandId = `ugvb-command-${runKey}`;
   const now = new Date().toISOString();
+
+  it("registers an upgraded business source under the selected GOWM application role", async () => {
+    const repository = new BusinessEventRepository(pools[0]);
+    const providerId = `provider.upgrade.${runKey}`;
+    const legacy = {
+      sourceId: "vehicle.execution",
+      sourceStreamId: randomUUID(),
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const business = {
+      sourceId: "vehicle.business",
+      sourceStreamId: randomUUID(),
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const before = await repository.initializeProvider(providerId, [legacy], 604800000);
+    const after = await repository.initializeProvider(providerId, [legacy, business], 604800000);
+    expect(after.streamId).not.toBe(before.streamId);
+    await expect(repository.generation(providerId, before.streamId)).resolves.toMatchObject({
+      status: "replayable_closed",
+    });
+    await expect(
+      repository.acquireSourceLease(
+        providerId,
+        business.sourceId,
+        business.sourceStreamId,
+        "upgrade-test",
+        30000,
+      ),
+    ).resolves.toMatchObject({ sourceId: "vehicle.business", lastPersistedSourceSequence: "0" });
+    await expect(
+      repository.initializeProvider(providerId, [business, legacy], 604800000),
+    ).resolves.toMatchObject({ streamId: after.streamId });
+  });
 
   it("batches every raw snapshot under the app role and isolates identity conflicts", async () => {
     const store = new PostgresProviderStore(fixture.databaseUrl, 2, "ugv", configs[0]);

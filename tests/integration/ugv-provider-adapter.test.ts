@@ -58,6 +58,39 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("reconciles mission transitions immediately but keeps heartbeats on the configured cadence", async () => {
+    let now = Date.now();
+    const f = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+      pollIntervalMs: 1000,
+    });
+    const read = vi.spyOn(f.store, "listActiveExecutions");
+    const emit = async (state: number) => {
+      now += 10;
+      f.ingress.handle(
+        "/ugv/mission_state",
+        Buffer.from(JSON.stringify({ id: 123, state, progress: 0 })),
+        false,
+        new Date(now).toISOString(),
+      );
+      await f.runtime.get("not-created");
+    };
+    try {
+      await emit(0);
+      read.mockClear();
+      for (let i = 0; i < 10; i++) await emit(0);
+      expect(read).not.toHaveBeenCalled();
+      await emit(4);
+      expect(read).toHaveBeenCalledTimes(1);
+      read.mockClear();
+      now += 1000;
+      await emit(4);
+      expect(read).toHaveBeenCalledTimes(1);
+    } finally {
+      read.mockRestore();
+    }
+  });
+
   it("keeps the latest durable map input when older persistence finishes later", async () => {
     let now = Date.now();
     const f = await createFixture(

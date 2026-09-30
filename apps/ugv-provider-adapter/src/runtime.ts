@@ -242,6 +242,7 @@ export class UgvProviderRuntime {
   #durableNavigationMissionObservation: AppliedMqttObservation | undefined;
   #durableNavigationSequence = -1;
   #lastObservationPollAtMs = Number.NEGATIVE_INFINITY;
+  #lastPolledMissionState: string | undefined;
   readonly #autoLockSources = new Map<string, AppliedMqttObservation>();
   #pollPromise: Promise<void> | undefined;
   #lastObservedSnapshot: UgvSnapshot | undefined;
@@ -2827,11 +2828,17 @@ export class UgvProviderRuntime {
     // Persist/project every observation, but share the configured reconciliation
     // cadence with the timer. High-rate telemetry must not multiply that work.
     const pollNow = this.#now().getTime();
+    const mission = applied?.observation.patch.chassis?.mission;
+    const missionState =
+      topic === "/ugv/mission_state" && mission
+        ? JSON.stringify([mission.id, mission.type, mission.state, applied.retained])
+        : undefined;
     if (
-      topic === "/ugv/mission_state" ||
+      (missionState !== undefined && missionState !== this.#lastPolledMissionState) ||
       intervalDue(this.#lastObservationPollAtMs, pollNow, this.options.pollIntervalMs)
     ) {
       await this.#pollActive();
+      if (missionState !== undefined) this.#lastPolledMissionState = missionState;
     }
   }
 
