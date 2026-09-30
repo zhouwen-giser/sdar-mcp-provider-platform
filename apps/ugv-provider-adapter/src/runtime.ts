@@ -239,6 +239,8 @@ export class UgvProviderRuntime {
   #mutationTail: Promise<void> = Promise.resolve();
   readonly #pendingPriorityControls = new Map<string, Set<{ identity: CommandIdentity }>>();
   #navigationMissionObservation: AppliedMqttObservation | undefined;
+  #durableNavigationMissionObservation: AppliedMqttObservation | undefined;
+  #durableNavigationSequence = -1;
   #lastObservationPollAtMs = Number.NEGATIVE_INFINITY;
   readonly #autoLockSources = new Map<string, AppliedMqttObservation>();
   #pollPromise: Promise<void> | undefined;
@@ -467,8 +469,19 @@ export class UgvProviderRuntime {
         snapshot: snapshot as unknown as Record<string, unknown>,
       });
       void persisted.catch(() => undefined);
+      // Current-state views use the latest durable packet, even while older
+      // projections are queued. Historical facts still drain below in order.
+      const sequence = this.ingress.ingestSequence();
+      const published = persisted.then(() => {
+        if (topic === "/ugv/mission_state" && sequence > this.#durableNavigationSequence) {
+          this.#durableNavigationSequence = sequence;
+          this.#durableNavigationMissionObservation = applied;
+        }
+        this.#captureMapSource(topic, applied);
+      });
+      void published.catch(() => undefined);
       void this.#serializeMutation(async () => {
-        await persisted;
+        await published;
         await this.#observe(snapshot, topic, applied);
       });
     });
@@ -1835,6 +1848,8 @@ export class UgvProviderRuntime {
     await this.#ensureDeviceConnection();
     this.#refreshReadiness();
     await this.#emitResourceTransitions(this.ingress.snapshot());
+    const mission = this.#durableNavigationMissionObservation;
+    if (mission) await this.#projectNavigationAdoption("/ugv/mission_state", mission);
     const active = await this.store.listActiveExecutions();
     for (const execution of active) {
       await this.#runProviderAutoLock(execution);
@@ -2733,26 +2748,38 @@ export class UgvProviderRuntime {
     });
   }
 
+  #captureMapSource(topic: string, applied: AppliedMqttObservation | undefined): void {
+    if (this.options.businessMapFull && applied) {
+      const set = (key: string) => {
+        const previous = this.#mapSources.get(key);
+        const sequence = decodeObservationCursorV1(applied.cursor)?.ingestSequence;
+        const previousSequence = previous
+          ? decodeObservationCursorV1(previous.cursor)?.ingestSequence
+          : undefined;
+        if (sequence !== undefined && sequence > (previousSequence ?? -1))
+          this.#mapSources.set(key, applied);
+      };
+      if (topic === "/ugv/area_recon/status") set("status");
+      if (topic === "/ugv/eo/pose") set("gimbal");
+      if (
+        ["/ugv/gnss", "status/ugv1"].includes(topic) &&
+        applied.observation.patch.chassis?.position
+      )
+        set("position");
+      if (
+        ["status/ugv", "/ugv/status"].includes(topic) &&
+        applied.observation.patch.chassis?.compassHeadingDeg !== undefined
+      )
+        set("heading");
+    }
+  }
+
   async #observe(
     snapshot: UgvSnapshot,
     topic: string,
     applied?: AppliedMqttObservation,
   ): Promise<void> {
     this.#refreshReadiness();
-    if (this.options.businessMapFull && applied) {
-      if (topic === "/ugv/area_recon/status") this.#mapSources.set("status", applied);
-      if (topic === "/ugv/eo/pose") this.#mapSources.set("gimbal", applied);
-      if (
-        ["/ugv/gnss", "status/ugv1"].includes(topic) &&
-        applied.observation.patch.chassis?.position
-      )
-        this.#mapSources.set("position", applied);
-      if (
-        ["status/ugv", "/ugv/status"].includes(topic) &&
-        applied.observation.patch.chassis?.compassHeadingDeg !== undefined
-      )
-        this.#mapSources.set("heading", applied);
-    }
     if (applied !== undefined) {
       await this.#projectNavigationAdoption(topic, applied);
       await this.#projectNavigationBusinessTrajectory(snapshot, topic, applied);
@@ -3361,6 +3388,7 @@ export class UgvProviderRuntime {
         (e.navigationReplacement?.missionId ?? e.downstreamMissionIds.at(-1)) === mission.id,
     );
     const execution = matches.length === 1 ? matches[0] : undefined;
+    if (execution?.effectiveNavigation?.missionId === mission.id) return;
     if (
       !execution?.navigationPlan ||
       !execution.taskBusinessContextExpected ||

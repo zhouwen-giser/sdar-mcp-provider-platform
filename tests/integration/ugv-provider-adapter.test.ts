@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as airportGeometry from "../../apps/ugv-provider-adapter/src/airport-map-geometry.js";
 import {
   canonicalJson,
   jsonToProtoStruct,
@@ -57,6 +58,75 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("keeps the latest durable map input when older persistence finishes later", async () => {
+    let now = Date.now();
+    const f = await createFixture(
+      false,
+      new MemoryProviderStore(),
+      {
+        now: () => new Date(now),
+        pollIntervalMs: 1000,
+        businessMapFull: true,
+        navigationPlanner: {
+          plan: async () => {
+            throw new Error("UNUSED_PLANNER");
+          },
+        },
+      },
+      new MockUgvDeviceMcpClient(),
+      "ros_bridge_json",
+    );
+    await f.runtime.start(startInput("durable-map", "vehicle_area_recon", reconArgs()));
+    reconStatus(f.ingress, 5, 10);
+    await f.runtime.get("durable-map");
+    const project = vi.spyOn(airportGeometry, "airportFootprintFact");
+    const put = f.store.putSnapshot.bind(f.store);
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let count = 0;
+    f.store.putSnapshot = async (record) => {
+      if (record.channel === "/ugv/eo/pose" && ++count === 1) await pending;
+      return put(record);
+    };
+    now += 1001;
+    f.ingress.handle(
+      "/ugv/eo/pose",
+      Buffer.from('{"data":[10,0,1]}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    now += 10;
+    f.ingress.handle(
+      "/ugv/eo/pose",
+      Buffer.from('{"data":[20,0,1]}'),
+      false,
+      new Date(now).toISOString(),
+    );
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(project).not.toHaveBeenCalled();
+    release();
+    try {
+      await f.runtime.get("durable-map");
+      expect(count).toBe(2);
+      expect(project.mock.calls[0]?.[0].gimbal?.observation.patch.payload?.gimbal?.yaw).toBe(20);
+    } finally {
+      project.mockRestore();
+    }
+  });
+
+  it("does not reread route objects for already-adopted mission heartbeats", async () => {
+    const f = await navigationAdjustmentFixture("adopted-heartbeats");
+    const read = vi.spyOn(f.business, "getArtifactLatest");
+    try {
+      for (let i = 0; i < 10; i++) await f.emit(1, 1);
+      expect(read.mock.calls.filter(([, id]) => id.startsWith("route-"))).toHaveLength(0);
+    } finally {
+      read.mockRestore();
+    }
+  });
+
   it("uses the persisted device binding during failed admission cleanup", async () => {
     const store = new MemoryProviderStore();
     const put = store.putExecution.bind(store);
@@ -3824,9 +3894,10 @@ async function createFixture(
   store = new MemoryProviderStore(),
   overrides: Partial<UgvProviderRuntime["options"]> = {},
   device: MockUgvDeviceMcpClient = new MockUgvDeviceMcpClient(),
+  wireMode: "direct_domain_json" | "ros_bridge_json" = "direct_domain_json",
 ) {
   const observedAt = overrides.now?.().toISOString() ?? new Date().toISOString();
-  const ingress = new VehicleMqttIngress("direct_domain_json", {
+  const ingress = new VehicleMqttIngress(wireMode, {
     maxPayloadBytes: 65536,
     maxDepth: 16,
     maxNodes: 4096,
