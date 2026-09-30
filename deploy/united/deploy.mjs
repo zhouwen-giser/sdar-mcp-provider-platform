@@ -48,17 +48,29 @@ if (action === "build-images") {
   for (const [side, target] of [
     ["runtime", "ugv-real-runtime"],
     ["adapter", "ugv-real-adapter"],
-  ])
-    run("docker", [
-      "build",
-      "--build-arg",
-      "VCS_REF=" + manifest.smpp.revision,
-      "--target",
-      target,
-      "-t",
-      `smpp-gowm/${side}:${manifest.smpp.revision}`,
-      smpp,
-    ]);
+  ]) {
+    // Build the verified archive bytes directly. Directory-context metadata
+    // caching can otherwise reuse stale files from deterministic extractions.
+    const context = fs.openSync(path.join(root, "upstream/smpp.tar.gz"), "r");
+    try {
+      run(
+        "docker",
+        [
+          "build",
+          "--build-arg",
+          "VCS_REF=" + manifest.smpp.revision,
+          "--target",
+          target,
+          "-t",
+          `smpp-gowm/${side}:${manifest.smpp.revision}`,
+          "-",
+        ],
+        { stdio: [context, "inherit", "inherit"] },
+      );
+    } finally {
+      fs.closeSync(context);
+    }
+  }
   process.exit(0);
 }
 baseRoot = fs.realpathSync(baseRoot);
