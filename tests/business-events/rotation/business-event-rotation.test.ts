@@ -150,6 +150,60 @@ describe("Business Event atomic rotation", () => {
     expect(upgraded.status).toBe("current");
   });
 
+  it("finalizes a rejected invalid ID without rewriting its evidence or reopening its barrier", async () => {
+    const providerId = "provider.rotation.rejected-barrier";
+    const sourceId = "durable.source";
+    const sourceStreamId = "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0515";
+    await initialize(providerId, sourceId, sourceStreamId);
+    const lease = await requireLease(repository, providerId, sourceId, sourceStreamId, "replica-a");
+    await repository.intakeSourceFact(
+      lease,
+      sourceFact(sourceStreamId, "1", { sourceEventId: "_invalid-id" }),
+      BUSINESS_EVENT_RETENTION_MS,
+      MAPPING_DEADLINE_MS,
+    );
+    const before = await harness.pool.query<{ evidence: unknown }>(
+      "SELECT to_jsonb(i)-'finalized_at' AS evidence FROM adapter_business_event_inbox i WHERE provider_id=$1",
+      [providerId],
+    );
+    await expect(repository.prepareNextSourceEvent(providerId, sourceId)).resolves.toBe("terminal");
+    const rotated = await repository.rotateStream(
+      providerId,
+      "SOURCE_MAPPING_FAILED",
+      [sourceId],
+      "rejected-barrier:1",
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const after = await harness.pool.query<{ evidence: unknown; finalized_at: Date | null }>(
+      "SELECT to_jsonb(i)-'finalized_at' AS evidence,finalized_at FROM adapter_business_event_inbox i WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(after.rows[0]?.evidence).toEqual(before.rows[0]?.evidence);
+    expect(after.rows[0]?.finalized_at).toBeInstanceOf(Date);
+    await expect(repository.prepareNextSourceEvent(providerId, sourceId)).resolves.toBe("none");
+    await publishResource(providerId, sourceId, sourceStreamId, "2");
+    await expect(repository.currentGeneration(providerId)).resolves.toMatchObject({
+      streamId: rotated.newStreamId,
+      currentSequence: "1",
+    });
+    const published = await harness.pool.query(
+      "SELECT xmin::text,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1 ORDER BY inbox_id",
+      [providerId],
+    );
+    await repository.rotateStream(
+      providerId,
+      "OPERATOR_REQUESTED",
+      [sourceId],
+      "rejected-barrier:2",
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const unchanged = await harness.pool.query(
+      "SELECT xmin::text,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1 ORDER BY inbox_id",
+      [providerId],
+    );
+    expect(unchanged.rows).toEqual(published.rows);
+  });
+
   it("closes the replay boundary, retries idempotently, and restarts runtime sequence at one", async () => {
     const providerId = "provider.rotation.operator";
     const sourceId = "durable.source";

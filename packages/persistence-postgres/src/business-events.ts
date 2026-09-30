@@ -665,6 +665,7 @@ export class BusinessEventRepository {
         `SELECT * FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY normalized_source_sequence NULLS FIRST, inbox_id
          LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, state.source_stream_id],
@@ -819,6 +820,7 @@ export class BusinessEventRepository {
         `SELECT * FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, sourceState.source_stream_id],
       );
@@ -1024,6 +1026,7 @@ export class BusinessEventRepository {
         `SELECT inbox_id FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
            AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY source_id,normalized_source_sequence NULLS FIRST,inbox_id FOR UPDATE`,
         [providerId, normalizedAffectedSourceIds],
       );
@@ -1135,13 +1138,16 @@ export class BusinessEventRepository {
           generationRetentionMs,
         ],
       );
+      // Rejected payloads may violate the decoded-event constraints. Preserve
+      // their rejection and immutable evidence, and close only their barrier.
+      // Never rewrite already published or finalized rows during rotation.
       await client.query(
         `UPDATE adapter_business_event_inbox
-         SET status=CASE WHEN status IN ('continuity_loss_pending','rejected','mapping_failed')
-                         THEN 'terminal_skipped' ELSE status END,
-             finalized_at=CASE WHEN status IN ('continuity_loss_pending','rejected','mapping_failed')
-                               THEN clock_timestamp() ELSE finalized_at END
-         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])) `,
+         SET status=CASE WHEN status='rejected' THEN status ELSE 'terminal_skipped' END,
+             finalized_at=clock_timestamp()
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
+           AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL) `,
         [providerId, normalizedAffectedSourceIds],
       );
       const generationVersion = (BigInt(current.generation_version) + 1n).toString();
