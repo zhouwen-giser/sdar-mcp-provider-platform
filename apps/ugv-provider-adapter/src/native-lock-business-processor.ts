@@ -1,3 +1,4 @@
+import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
@@ -26,6 +27,7 @@ const lockFactSchema = z
   .object({
     schemaVersion: z.literal("ugv.recon-native-lock-fact/1"),
     missionId: id,
+    correlation: z.enum(RECON_CORRELATIONS).optional(),
     sourceCursor: z.string().min(1).max(4096),
     observedAt: z.iso.datetime({ offset: true }),
     stage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
@@ -245,6 +247,7 @@ export class NativeLockBusinessProcessor {
         nativeLockCursorHash: cursorHash,
         nativeLockSignature: signature,
         nativeLockObservedAt: fact.observedAt,
+        ...(fact.correlation ? { nativeLockCorrelation: fact.correlation } : {}),
       };
       const activeRef = current.activeRefs[key];
       const activeVersion = activeRef && (await this.business.getObjectVersion(scope, activeRef));
@@ -395,6 +398,7 @@ export class NativeLockBusinessProcessor {
               sourceTargetId: fact.targetId,
               phase,
               nativeLockStage: fact.stage,
+              ...(fact.correlation ? { correlation: fact.correlation } : {}),
               triggerQualification:
                 sameTarget?.triggerOrigin === "provider_policy"
                   ? "journal_and_observation"

@@ -1,0 +1,3412 @@
+{
+  "schema": "smpp.public-recon-qualification/v1",
+  "runId": "bc43df85-a5f5-4821-9b32-05c5b6b220e3",
+  "startedAt": "2026-09-29T23:11:36.291Z",
+  "status": "FAILED",
+  "fireEnabled": false,
+  "capturePublicPayloads": true,
+  "sceneInstanceId": "smpp-bff-test-a0af6ae8-d19d-490f-8252-81d03c0603d6",
+  "steps": [
+    {
+      "stage": "public_ready",
+      "at": "2026-09-29T23:11:41.008Z"
+    },
+    {
+      "stage": "public_task_created",
+      "at": "2026-09-29T23:11:41.175Z",
+      "name": "vehicle_area_recon",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6"
+    },
+    {
+      "stage": "public_stream",
+      "at": "2026-09-29T23:11:41.312Z",
+      "type": "businessEvent"
+    },
+    {
+      "stage": "public_stream",
+      "at": "2026-09-29T23:11:41.415Z",
+      "type": "businessEvent"
+    },
+    {
+      "stage": "public_stream",
+      "at": "2026-09-29T23:11:41.416Z",
+      "type": "businessEvent"
+    },
+    {
+      "stage": "public_stream",
+      "at": "2026-09-29T23:11:41.418Z",
+      "type": "businessEvent"
+    },
+    {
+      "stage": "public_stream_failure",
+      "at": "2026-09-29T23:12:36.176Z",
+      "reason": "PUBLIC_STREAM_TIMEOUT"
+    },
+    {
+      "stage": "failed",
+      "at": "2026-09-29T23:13:41.373Z",
+      "reason": "QUALIFICATION_TIMEOUT:public_policy_lock_and_input"
+    },
+    {
+      "stage": "public_stream",
+      "at": "2026-09-29T23:13:41.386Z",
+      "type": "stopped",
+      "reason": "duration_elapsed"
+    }
+  ],
+  "reads": [],
+  "streams": [
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "snapshot",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "identity": {
+        "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+        "executionId": "vehicle:qualification-a:eo:53fe84d4-25f4-46d8-8fc5-8cdd0d323197",
+        "providerId": "isr.vehicle.ugv.qualification",
+        "resourceId": "vehicle:qualification-a",
+        "operationName": "vehicle_area_recon"
+      },
+      "contextRevision": 1,
+      "effectivePlanRevision": 0,
+      "resumeFrom": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "174"
+      },
+      "pages": 1,
+      "objectCount": 3,
+      "phase": {
+        "code": "execution.accepted",
+        "since": "2026-09-29T23:11:41.036Z"
+      },
+      "summary": {
+        "status": "in_progress"
+      },
+      "activeRefs": {},
+      "unresolvedRefs": [],
+      "context": {
+        "schemaVersion": "sdar.task-business-context/1.0-rc2",
+        "identity": {
+          "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+          "executionId": "vehicle:qualification-a:eo:53fe84d4-25f4-46d8-8fc5-8cdd0d323197",
+          "providerId": "isr.vehicle.ugv.qualification",
+          "resourceId": "vehicle:qualification-a",
+          "operationName": "vehicle_area_recon"
+        },
+        "contextRevision": 1,
+        "effectivePlanRevision": 0,
+        "phase": {
+          "code": "execution.accepted",
+          "since": "2026-09-29T23:11:41.036Z"
+        },
+        "summary": {
+          "status": "in_progress"
+        },
+        "activeRefs": {},
+        "artifactRefs": [
+          {
+            "kind": "artifact",
+            "id": "recon-requested-area",
+            "revision": 1
+          },
+          {
+            "kind": "artifact",
+            "id": "recon-scan-plan",
+            "revision": 1
+          },
+          {
+            "kind": "artifact",
+            "id": "recon-covered-area",
+            "revision": 1
+          }
+        ],
+        "actionRefs": [],
+        "requiredInputRefs": [],
+        "interventionRefs": [],
+        "updatedAt": "2026-09-29T23:11:41.036Z"
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessObject",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "contextRevision": 1,
+      "resumeFrom": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "174"
+      },
+      "object": {
+        "kind": "artifact",
+        "value": {
+          "schemaVersion": "sdar.task-artifact/1.0-rc2",
+          "artifactId": "recon-requested-area",
+          "artifactType": "recon.area",
+          "revision": 1,
+          "semantics": "requested",
+          "lifecycle": "active",
+          "identity": {
+            "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+            "executionId": "vehicle:qualification-a:eo:53fe84d4-25f4-46d8-8fc5-8cdd0d323197",
+            "providerId": "isr.vehicle.ugv.qualification",
+            "resourceId": "vehicle:qualification-a",
+            "operationName": "vehicle_area_recon"
+          },
+          "source": {
+            "producer": "provider",
+            "sourceRecordRef": "7a31dfcbebca02c39e85e13c1285169fb64fe39246d1cdaefb1c974d3a36b6c6",
+            "method": "admitted_task_arguments"
+          },
+          "createdAt": "2026-09-29T23:11:41.036Z",
+          "updatedAt": "2026-09-29T23:11:41.036Z",
+          "availability": "available",
+          "content": {
+            "kind": "geojson",
+            "crs": "OGC:CRS84",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [106.81271124, 29.71821513],
+                  [106.81268055, 29.71864445],
+                  [106.81323289, 29.71869495],
+                  [106.81345382, 29.71816462],
+                  [106.81271124, 29.71821513]
+                ]
+              ]
+            }
+          },
+          "properties": {
+            "areaRevision": 1
+          }
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessObject",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "contextRevision": 1,
+      "resumeFrom": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "174"
+      },
+      "object": {
+        "kind": "artifact",
+        "value": {
+          "schemaVersion": "sdar.task-artifact/1.0-rc2",
+          "artifactId": "recon-scan-plan",
+          "artifactType": "recon.coverage_plan",
+          "revision": 1,
+          "semantics": "planned",
+          "lifecycle": "active",
+          "identity": {
+            "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+            "executionId": "vehicle:qualification-a:eo:53fe84d4-25f4-46d8-8fc5-8cdd0d323197",
+            "providerId": "isr.vehicle.ugv.qualification",
+            "resourceId": "vehicle:qualification-a",
+            "operationName": "vehicle_area_recon"
+          },
+          "source": {
+            "producer": "provider",
+            "sourceRecordRef": "7a31dfcbebca02c39e85e13c1285169fb64fe39246d1cdaefb1c974d3a36b6c6",
+            "method": "admitted_task_arguments"
+          },
+          "createdAt": "2026-09-29T23:11:41.036Z",
+          "updatedAt": "2026-09-29T23:11:41.036Z",
+          "availability": "not_produced_yet",
+          "reasonCode": "SCAN_PLAN_NOT_PRODUCED"
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessObject",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "contextRevision": 1,
+      "resumeFrom": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "174"
+      },
+      "object": {
+        "kind": "artifact",
+        "value": {
+          "schemaVersion": "sdar.task-artifact/1.0-rc2",
+          "artifactId": "recon-covered-area",
+          "artifactType": "recon.covered_area",
+          "revision": 1,
+          "semantics": "derived",
+          "lifecycle": "active",
+          "identity": {
+            "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+            "executionId": "vehicle:qualification-a:eo:53fe84d4-25f4-46d8-8fc5-8cdd0d323197",
+            "providerId": "isr.vehicle.ugv.qualification",
+            "resourceId": "vehicle:qualification-a",
+            "operationName": "vehicle_area_recon"
+          },
+          "source": {
+            "producer": "provider",
+            "sourceRecordRef": "7a31dfcbebca02c39e85e13c1285169fb64fe39246d1cdaefb1c974d3a36b6c6",
+            "method": "admitted_task_arguments"
+          },
+          "createdAt": "2026-09-29T23:11:41.036Z",
+          "updatedAt": "2026-09-29T23:11:41.036Z",
+          "availability": "not_produced_yet",
+          "reasonCode": "COVERAGE_NOT_OBSERVED"
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessEvent",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "messageId": "0NAasr0K3B7Qhy9CkZfdLGo00RT5YjtWnjFI3FykNG4",
+      "kind": "BUSINESS_EVENT",
+      "contextRevision": 1,
+      "publicCursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "175"
+      },
+      "sourceCursor": {
+        "sourceId": "vehicle.business",
+        "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+        "sourceSequence": "165"
+      },
+      "phase": {
+        "code": "execution.accepted",
+        "since": "2026-09-29T23:11:41.036Z"
+      },
+      "summary": {
+        "status": "in_progress"
+      },
+      "activeRefs": {},
+      "unresolvedRefs": [],
+      "notification": {
+        "jsonrpc": "2.0",
+        "method": "notifications/io.sdar/businessEvents",
+        "params": {
+          "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+          "eventId": "0NAasr0K3B7Qhy9CkZfdLGo00RT5YjtWnjFI3FykNG4",
+          "sequence": "175",
+          "sourceId": "vehicle.business",
+          "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+          "sourceSequence": "165",
+          "sourceEventId": "2c42f1ba491b4788e9da79ee50df7460ed81ca4e431ac1cfab3ecd202073a522",
+          "eventType": "vehicle.business.changed",
+          "occurredAt": "2026-09-29T23:11:41.036Z",
+          "scope": "task",
+          "description": "Business Context initialized",
+          "severityHint": "info",
+          "reasonCode": "BUSINESS_CONTEXT_INITIALIZED",
+          "rawPayload": {
+            "kind": "BUSINESS_EVENT",
+            "payload": {
+              "severity": "info",
+              "eventType": "business.context_initialized",
+              "reasonCode": "BUSINESS_CONTEXT_INITIALIZED",
+              "description": "Business Context initialized for admitted execution",
+              "contextDelta": {
+                "phase": {
+                  "code": "execution.accepted",
+                  "since": "2026-09-29T23:11:41.036Z"
+                },
+                "summary": {
+                  "status": "in_progress"
+                },
+                "activeRefs": {},
+                "effectivePlanRevision": 0
+              }
+            },
+            "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+            "contextRevision": 1,
+            "providerRecordedAt": "2026-09-29T23:11:41.036Z"
+          },
+          "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+          "_meta": {
+            "io.modelcontextprotocol/subscriptionId": "business-probe-2",
+            "io.sdar/businessEvents": {
+              "profileVersion": "1.0"
+            }
+          }
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "cursor",
+      "cursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "175"
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessEvent",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "messageId": "X7QpX0ShsTK1mUA7RkxqoxoaWe4SYytUfAdvvhWxcqY",
+      "kind": "ARTIFACT_CHANGED",
+      "contextRevision": 1,
+      "publicCursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "176"
+      },
+      "sourceCursor": {
+        "sourceId": "vehicle.business",
+        "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+        "sourceSequence": "166"
+      },
+      "phase": {
+        "code": "execution.accepted",
+        "since": "2026-09-29T23:11:41.036Z"
+      },
+      "summary": {
+        "status": "in_progress"
+      },
+      "activeRefs": {},
+      "unresolvedRefs": [],
+      "notification": {
+        "jsonrpc": "2.0",
+        "method": "notifications/io.sdar/businessEvents",
+        "params": {
+          "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+          "eventId": "X7QpX0ShsTK1mUA7RkxqoxoaWe4SYytUfAdvvhWxcqY",
+          "sequence": "176",
+          "sourceId": "vehicle.business",
+          "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+          "sourceSequence": "166",
+          "sourceEventId": "b750c947ccbb89a1dd747de763f27836188e35607486ba95d9c5b88ad8f49744",
+          "eventType": "vehicle.business.changed",
+          "occurredAt": "2026-09-29T23:11:41.036Z",
+          "scope": "task",
+          "description": "RECON_AREA_REQUESTED",
+          "severityHint": "info",
+          "reasonCode": "RECON_AREA_REQUESTED",
+          "rawPayload": {
+            "kind": "ARTIFACT_CHANGED",
+            "payload": {
+              "change": "create",
+              "reasonCode": "RECON_AREA_REQUESTED",
+              "artifactRef": {
+                "id": "recon-requested-area",
+                "kind": "artifact",
+                "revision": 1
+              }
+            },
+            "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+            "contextRevision": 1,
+            "providerRecordedAt": "2026-09-29T23:11:41.036Z"
+          },
+          "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+          "_meta": {
+            "io.modelcontextprotocol/subscriptionId": "business-probe-2",
+            "io.sdar/businessEvents": {
+              "profileVersion": "1.0"
+            }
+          }
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "cursor",
+      "cursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "176"
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessEvent",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "messageId": "pNyIoCKpoB2YCLjXmkaIGf_ewq_xO9bkPPckH5IGAlo",
+      "kind": "ARTIFACT_CHANGED",
+      "contextRevision": 1,
+      "publicCursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "177"
+      },
+      "sourceCursor": {
+        "sourceId": "vehicle.business",
+        "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+        "sourceSequence": "167"
+      },
+      "phase": {
+        "code": "execution.accepted",
+        "since": "2026-09-29T23:11:41.036Z"
+      },
+      "summary": {
+        "status": "in_progress"
+      },
+      "activeRefs": {},
+      "unresolvedRefs": [],
+      "notification": {
+        "jsonrpc": "2.0",
+        "method": "notifications/io.sdar/businessEvents",
+        "params": {
+          "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+          "eventId": "pNyIoCKpoB2YCLjXmkaIGf_ewq_xO9bkPPckH5IGAlo",
+          "sequence": "177",
+          "sourceId": "vehicle.business",
+          "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+          "sourceSequence": "167",
+          "sourceEventId": "05dac174869321016e446db2c086c43b3d15a1a948cb568b3dddc3060e5ed5ba",
+          "eventType": "vehicle.business.changed",
+          "occurredAt": "2026-09-29T23:11:41.036Z",
+          "scope": "task",
+          "description": "RECON_SCAN_PLAN_NOT_PRODUCED",
+          "severityHint": "info",
+          "reasonCode": "RECON_SCAN_PLAN_NOT_PRODUCED",
+          "rawPayload": {
+            "kind": "ARTIFACT_CHANGED",
+            "payload": {
+              "change": "create",
+              "reasonCode": "RECON_SCAN_PLAN_NOT_PRODUCED",
+              "artifactRef": {
+                "id": "recon-scan-plan",
+                "kind": "artifact",
+                "revision": 1
+              }
+            },
+            "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+            "contextRevision": 1,
+            "providerRecordedAt": "2026-09-29T23:11:41.036Z"
+          },
+          "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+          "_meta": {
+            "io.modelcontextprotocol/subscriptionId": "business-probe-2",
+            "io.sdar/businessEvents": {
+              "profileVersion": "1.0"
+            }
+          }
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "cursor",
+      "cursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "177"
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "businessEvent",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "messageId": "xV_4_YYbae2Y-omtdNNtIRVAp2fLCNEoY7i7XGHsDIQ",
+      "kind": "ARTIFACT_CHANGED",
+      "contextRevision": 1,
+      "publicCursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "178"
+      },
+      "sourceCursor": {
+        "sourceId": "vehicle.business",
+        "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+        "sourceSequence": "168"
+      },
+      "phase": {
+        "code": "execution.accepted",
+        "since": "2026-09-29T23:11:41.036Z"
+      },
+      "summary": {
+        "status": "in_progress"
+      },
+      "activeRefs": {},
+      "unresolvedRefs": [],
+      "notification": {
+        "jsonrpc": "2.0",
+        "method": "notifications/io.sdar/businessEvents",
+        "params": {
+          "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+          "eventId": "xV_4_YYbae2Y-omtdNNtIRVAp2fLCNEoY7i7XGHsDIQ",
+          "sequence": "178",
+          "sourceId": "vehicle.business",
+          "sourceStreamId": "cc470e05-8ba2-f323-ba3c-b17b9354c021",
+          "sourceSequence": "168",
+          "sourceEventId": "574acdb8bb40614414dcf3a3cb89a43c718708f3ae16d68fe9ad9588c2635be9",
+          "eventType": "vehicle.business.changed",
+          "occurredAt": "2026-09-29T23:11:41.036Z",
+          "scope": "task",
+          "description": "RECON_COVERAGE_NOT_PRODUCED",
+          "severityHint": "info",
+          "reasonCode": "RECON_COVERAGE_NOT_PRODUCED",
+          "rawPayload": {
+            "kind": "ARTIFACT_CHANGED",
+            "payload": {
+              "change": "create",
+              "reasonCode": "RECON_COVERAGE_NOT_PRODUCED",
+              "artifactRef": {
+                "id": "recon-covered-area",
+                "kind": "artifact",
+                "revision": 1
+              }
+            },
+            "schemaVersion": "sdar.task-business-feedback/1.0-rc2",
+            "contextRevision": 1,
+            "providerRecordedAt": "2026-09-29T23:11:41.036Z"
+          },
+          "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+          "_meta": {
+            "io.modelcontextprotocol/subscriptionId": "business-probe-2",
+            "io.sdar/businessEvents": {
+              "profileVersion": "1.0"
+            }
+          }
+        }
+      },
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "cursor",
+      "cursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "178"
+      },
+      "window": "continue_observation"
+    },
+    {
+      "type": "streamFailure",
+      "reason": "PUBLIC_STREAM_TIMEOUT",
+      "window": "continue_observation"
+    },
+    {
+      "schema": "sdar.task-business-probe-ndjson/v1",
+      "type": "stopped",
+      "reason": "duration_elapsed",
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "appliedEvents": 4,
+      "cursor": {
+        "streamId": "d08af525-2376-4882-b77b-9fa46154e7a1",
+        "afterSequence": "178"
+      },
+      "window": "continue_observation"
+    }
+  ],
+  "decisions": [],
+  "runs": [
+    {
+      "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+      "decision": "continue_observation"
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-09-29T23:11:36.349Z",
+      "name": "ugv_area_recon_get_status",
+      "value": {
+        "status": 9,
+        "status_label": "被中断",
+        "scan_mode": 1,
+        "scan_mode_label": "区域侦察",
+        "scan_pitch": 0,
+        "out_of_range": false,
+        "scan_num": 1,
+        "progress": 59,
+        "coverage": 59,
+        "coverage_covered": 252,
+        "coverage_total": 424,
+        "coverage_incomplete": true,
+        "coverage_reason": "仍有 172 处未被视场扫到，覆盖率 59%",
+        "eo_fov": 120,
+        "camera_fault": false,
+        "work_mode": 1,
+        "recon_type": 1,
+        "load_status": 2,
+        "load_status_label": "就绪",
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        },
+        "attack_ready": false,
+        "last_cmd_ack": {
+          "seq": 600994,
+          "ok": true,
+          "message": "已停止，云台回到初始角度"
+        },
+        "region": {
+          "type": 5,
+          "points": [
+            [-238.0867632009165, -142.02952979991338],
+            [-241.5031740012131, -94.57249700007786],
+            [-180.01668520135695, -88.99022700003393],
+            [-155.422757600046, -147.61290520004877]
+          ]
+        },
+        "online": true,
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    },
+    {
+      "at": "2026-09-29T23:13:41.487Z",
+      "name": "ugv_area_recon_get_status",
+      "value": {
+        "status": 3,
+        "status_label": "就绪",
+        "scan_mode": 1,
+        "scan_mode_label": "区域侦察",
+        "scan_pitch": 0,
+        "out_of_range": false,
+        "scan_num": 0,
+        "progress": 0,
+        "coverage": 0,
+        "coverage_covered": 252,
+        "coverage_total": 424,
+        "coverage_incomplete": true,
+        "coverage_reason": "仍有 172 处未被视场扫到，覆盖率 59%",
+        "eo_fov": 120,
+        "camera_fault": false,
+        "work_mode": 1,
+        "recon_type": 1,
+        "load_status": 4,
+        "load_status_label": "故障",
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        },
+        "attack_ready": false,
+        "last_cmd_ack": {
+          "seq": 600995,
+          "ok": true,
+          "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+          "data": {
+            "coverability": {
+              "coverable": "unknown",
+              "coverable_label": "未预检(机位不可用)",
+              "region_min_dist_m": null,
+              "region_max_dist_m": null,
+              "detection_range_m": 140
+            }
+          }
+        },
+        "region": {
+          "type": 5,
+          "points": [
+            [-238.0867632009165, -142.02952979991338],
+            [-241.5031740012131, -94.57249700007786],
+            [-180.01668520135695, -88.99022700003393],
+            [-155.422757600046, -147.61290520004877]
+          ]
+        },
+        "online": true,
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    },
+    {
+      "at": "2026-09-29T23:13:41.495Z",
+      "name": "ugv_area_recon_get_targets",
+      "value": {
+        "targets": [],
+        "message": "最近 10.0s 无检测目标"
+      }
+    }
+  ],
+  "processes": [
+    {
+      "mode": "provider",
+      "pid": 1134228,
+      "startedAt": "2026-09-29T23:11:36.352Z"
+    },
+    {
+      "mode": "runtime",
+      "pid": 1134308,
+      "startedAt": "2026-09-29T23:11:39.456Z"
+    }
+  ],
+  "baseline": {
+    "status": 9,
+    "status_label": "被中断",
+    "scan_mode": 1,
+    "scan_mode_label": "区域侦察",
+    "scan_pitch": 0,
+    "out_of_range": false,
+    "scan_num": 1,
+    "progress": 59,
+    "coverage": 59,
+    "coverage_covered": 252,
+    "coverage_total": 424,
+    "coverage_incomplete": true,
+    "coverage_reason": "仍有 172 处未被视场扫到，覆盖率 59%",
+    "eo_fov": 120,
+    "camera_fault": false,
+    "work_mode": 1,
+    "recon_type": 1,
+    "load_status": 2,
+    "load_status_label": "就绪",
+    "lock": {
+      "stage": 1,
+      "target_id": 0,
+      "role_name": "",
+      "duration_sec": 0
+    },
+    "attack_ready": false,
+    "last_cmd_ack": {
+      "seq": 600994,
+      "ok": true,
+      "message": "已停止，云台回到初始角度"
+    },
+    "region": {
+      "type": 5,
+      "points": [
+        [-238.0867632009165, -142.02952979991338],
+        [-241.5031740012131, -94.57249700007786],
+        [-180.01668520135695, -88.99022700003393],
+        [-155.422757600046, -147.61290520004877]
+      ]
+    },
+    "online": true,
+    "gimbal": {
+      "yaw": 0,
+      "pitch": 0,
+      "zoom": 1
+    }
+  },
+  "discovery": {
+    "resultType": "complete",
+    "supportedVersions": ["2026-07-28"],
+    "capabilities": {
+      "tools": {},
+      "extensions": {
+        "io.modelcontextprotocol/tasks": {},
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskNotifications": true
+        },
+        "io.sdar/providerCatalog": {
+          "providerId": "isr.vehicle.ugv.qualification",
+          "providerType": "isr.vehicle.ugv",
+          "providerVersion": "1.0.0",
+          "manifestHash": "014d196659b1deec59c312cfc895908df4dcfae8c384eb7b0a1ef274e4f2a3ae"
+        },
+        "io.sdar/businessEvents": {
+          "profileVersion": "1.0",
+          "delivery": "post_sse",
+          "scopes": ["task", "resource"],
+          "resumeMode": "stream_sequence",
+          "maxRelatedTaskIds": 256,
+          "retentionMs": 604800000,
+          "authorizationModel": "subscription_snapshot_projection",
+          "relationOverflow": "paged_query",
+          "streamCancellation": "connection_close",
+          "continuityClass": "mixed",
+          "sources": [
+            {
+              "sourceId": "vehicle.business",
+              "deliverySemantics": "durable_at_least_once"
+            },
+            {
+              "sourceId": "vehicle.execution",
+              "deliverySemantics": "durable_at_least_once"
+            },
+            {
+              "sourceId": "vehicle.health",
+              "deliverySemantics": "durable_at_least_once"
+            },
+            {
+              "sourceId": "vehicle.target",
+              "deliverySemantics": "best_effort_live"
+            }
+          ]
+        },
+        "io.sdar/taskBusiness": {
+          "profileVersion": "1.0-rc2",
+          "schemaVersion": "sdar.task-business-public-query/1.0-rc2",
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventListen": "io.sdar/businessEvents/listen",
+            "interventionApply": "io.sdar/taskBusiness/interventions/apply"
+          },
+          "snapshotResume": "public-watermark-before-adapter-snapshot",
+          "contextQuerySchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["taskId", "_meta"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "maxPageBytes": {
+                "type": "integer",
+                "minimum": 1024,
+                "maximum": 1048576
+              },
+              "pageCursor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "externalExecutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "resourceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionMode": {
+                "enum": ["live", "simulation"]
+              },
+              "simulationId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "_meta": {
+                "type": "object"
+              }
+            }
+          },
+          "snapshotPartQuerySchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["taskId", "snapshotToken", "_meta"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "snapshotToken": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "objectRef": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "id", "revision"],
+                "properties": {
+                  "kind": {
+                    "enum": ["artifact", "action", "input_request", "intervention"]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxBytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1048576
+              },
+              "externalExecutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "resourceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionMode": {
+                "enum": ["live", "simulation"]
+              },
+              "simulationId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "_meta": {
+                "type": "object"
+              }
+            }
+          },
+          "snapshotPartResultSchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["resultType", "profileVersion", "part"],
+            "properties": {
+              "resultType": {
+                "const": "complete"
+              },
+              "profileVersion": {
+                "const": "1.0-rc2"
+              },
+              "part": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["encoding", "bytes", "totalBytes", "sha256", "offset"],
+                "properties": {
+                  "encoding": {
+                    "const": "base64"
+                  },
+                  "bytes": {
+                    "type": "string"
+                  },
+                  "totalBytes": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)$"
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "nextOffset": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                }
+              }
+            }
+          },
+          "artifactQuerySchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["taskId", "artifactId", "_meta"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "artifactId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "representationName": {
+                "type": "string",
+                "maxLength": 128
+              },
+              "includeContent": {
+                "type": "boolean"
+              },
+              "contentOffset": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxContentBytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1048576
+              },
+              "externalExecutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "resourceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionMode": {
+                "enum": ["live", "simulation"]
+              },
+              "simulationId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "_meta": {
+                "type": "object"
+              }
+            }
+          },
+          "contextResultSchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["resultType", "profileVersion", "snapshot", "resumeFrom"],
+            "properties": {
+              "resultType": {
+                "const": "complete"
+              },
+              "profileVersion": {
+                "const": "1.0-rc2"
+              },
+              "snapshotToken": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "snapshot": {
+                "type": "object",
+                "required": ["contextRevision"],
+                "properties": {
+                  "contextRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "resumeFrom": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["streamId", "afterSequence"],
+                "properties": {
+                  "streamId": {
+                    "type": "string"
+                  },
+                  "afterSequence": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)$"
+                  }
+                }
+              }
+            }
+          },
+          "artifactResultSchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["resultType", "profileVersion", "artifact"],
+            "properties": {
+              "resultType": {
+                "const": "complete"
+              },
+              "profileVersion": {
+                "const": "1.0-rc2"
+              },
+              "artifact": {
+                "type": "object"
+              },
+              "content": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["encoding", "bytes", "mediaType", "sha256", "totalBytes", "offset"],
+                "properties": {
+                  "encoding": {
+                    "const": "base64"
+                  },
+                  "bytes": {
+                    "type": "string"
+                  },
+                  "mediaType": {
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "totalBytes": {
+                    "type": "string"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "nextOffset": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "interventionApplySchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "commandId",
+              "taskId",
+              "executionId",
+              "interventionId",
+              "guard",
+              "input",
+              "_meta"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sdar.runtime-intervention-command/1.0-rc2"
+              },
+              "commandId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "taskId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "interventionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "guard": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "mode",
+                      "expectedInterventionRevision",
+                      "expectedEffectivePlanRevision"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "const": "semantic"
+                      },
+                      "expectedInterventionRevision": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "expectedEffectivePlanRevision": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["mode", "expectedContextRevision"],
+                    "properties": {
+                      "mode": {
+                        "const": "legacy_strict"
+                      },
+                      "expectedContextRevision": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              "input": {
+                "type": "object"
+              },
+              "externalExecutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "resourceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionMode": {
+                "enum": ["live", "simulation"]
+              },
+              "simulationId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "_meta": {
+                "type": "object"
+              }
+            }
+          },
+          "interventionApplyResultSchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["resultType", "profileVersion", "receipt"],
+            "properties": {
+              "resultType": {
+                "const": "complete"
+              },
+              "profileVersion": {
+                "const": "1.0-rc2"
+              },
+              "receipt": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "commandId",
+                  "commandSequence",
+                  "commandState",
+                  "durablyAccepted",
+                  "businessApplied",
+                  "duplicate"
+                ],
+                "properties": {
+                  "commandId": {
+                    "type": "string"
+                  },
+                  "commandSequence": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "commandState": {
+                    "type": "string"
+                  },
+                  "durablyAccepted": {
+                    "const": true
+                  },
+                  "businessApplied": {
+                    "const": false
+                  },
+                  "duplicate": {
+                    "type": "boolean"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": {
+        "name": "sdar-mcp-tasks-provider-runtime",
+        "version": "2.0.0-rc.1"
+      }
+    },
+    "instructions": "This server provides SDAR task-capable tools.",
+    "ttlMs": 3600000,
+    "cacheScope": "public"
+  },
+  "tools": {
+    "tools": [
+      {
+        "name": "vehicle_get_state",
+        "description": "Read the normalized local UGV state without referee or global-truth data.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": ["chassis", "payload", "health", "targets"]
+              }
+            }
+          },
+          "required": ["resourceId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleStateV1",
+              "type": "object",
+              "properties": {
+                "identity": {
+                  "type": "object",
+                  "properties": {
+                    "providerId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "resourceId": {
+                      "type": "string",
+                      "const": "vehicle:qualification-a"
+                    },
+                    "vehicleType": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "executionMode": {
+                      "type": "string",
+                      "enum": ["simulation", "live"]
+                    }
+                  },
+                  "required": ["providerId", "resourceId", "vehicleType", "executionMode"],
+                  "additionalProperties": false
+                },
+                "connectivity": {
+                  "type": "object",
+                  "properties": {
+                    "mqttConnected": {
+                      "type": "boolean"
+                    },
+                    "deviceMcpConnected": {
+                      "type": "boolean"
+                    },
+                    "deviceAvailable": {
+                      "type": "boolean"
+                    },
+                    "packetLossRate": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "averageRoundTripTimeMs": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": ["mqttConnected", "deviceMcpConnected"],
+                  "additionalProperties": false
+                },
+                "freshness": {
+                  "type": "object",
+                  "properties": {
+                    "chassisObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "positionObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "healthObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "missionObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "targetObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "payloadObservedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "chassis": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "payload": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "health": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "revision": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "mqttIngressSequence": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "identity",
+                "connectivity",
+                "freshness",
+                "revision",
+                "observedAt",
+                "mqttIngressSequence"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "synchronous_only",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": false,
+            "supportsCancellation": false,
+            "supportsPauseResume": false,
+            "supportsObservations": false,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_get_capabilities",
+        "description": "Read device-reported UGV capability facts without inventing unsupported limits.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            }
+          },
+          "required": ["resourceId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleCapabilitiesV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "source": {
+                  "type": "string",
+                  "const": "device_mcp"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "navigation": {
+                  "type": "object",
+                  "properties": {
+                    "point": {
+                      "type": "boolean"
+                    },
+                    "route": {
+                      "type": "boolean"
+                    },
+                    "distance": {
+                      "type": "boolean"
+                    },
+                    "returnHome": {
+                      "type": "boolean"
+                    },
+                    "pauseResumeCancel": {
+                      "type": "boolean"
+                    },
+                    "planningDensities": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    },
+                    "supportsRoadNetworkPlanning": {
+                      "type": "boolean"
+                    },
+                    "needPlanDefault": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "point",
+                    "route",
+                    "distance",
+                    "returnHome",
+                    "pauseResumeCancel",
+                    "planningDensities",
+                    "supportsRoadNetworkPlanning"
+                  ],
+                  "additionalProperties": false
+                },
+                "payload": {
+                  "type": "object",
+                  "properties": {
+                    "reconnaissance": {
+                      "type": "object",
+                      "properties": {
+                        "area": {
+                          "type": "boolean"
+                        },
+                        "circular": {
+                          "type": "boolean"
+                        },
+                        "scanModes": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "uniqueItems": true
+                        },
+                        "movingWhileRecon": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["area", "circular", "scanModes", "movingWhileRecon"],
+                      "additionalProperties": false
+                    },
+                    "gimbal": {
+                      "type": "object",
+                      "properties": {
+                        "supported": {
+                          "type": "boolean"
+                        },
+                        "modes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "uniqueItems": true
+                        },
+                        "manualYawSweep": {
+                          "type": "boolean"
+                        },
+                        "continuousPitchSweep": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["supported", "modes", "manualYawSweep", "continuousPitchSweep"],
+                      "additionalProperties": false
+                    },
+                    "targetTracking": {
+                      "type": "boolean"
+                    },
+                    "laserRange": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["reconnaissance", "gimbal", "targetTracking", "laserRange"],
+                  "additionalProperties": false
+                },
+                "provenance": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "string",
+                      "enum": [
+                        "device_reported",
+                        "contract_inferred",
+                        "managed_configuration",
+                        "unverified"
+                      ]
+                    },
+                    "navigation": {
+                      "type": "object",
+                      "properties": {
+                        "point": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "route": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "distance": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "returnHome": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "pauseResumeCancel": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "planningDensities": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "supportsRoadNetworkPlanning": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "needPlanDefault": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "point",
+                        "route",
+                        "distance",
+                        "returnHome",
+                        "pauseResumeCancel",
+                        "planningDensities",
+                        "supportsRoadNetworkPlanning",
+                        "needPlanDefault"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "reconnaissance": {
+                          "type": "object",
+                          "properties": {
+                            "area": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "circular": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "scanModes": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "movingWhileRecon": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            }
+                          },
+                          "required": ["area", "circular", "scanModes", "movingWhileRecon"],
+                          "additionalProperties": false
+                        },
+                        "gimbal": {
+                          "type": "object",
+                          "properties": {
+                            "supported": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "modes": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "manualYawSweep": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            },
+                            "continuousPitchSweep": {
+                              "type": "string",
+                              "enum": [
+                                "device_reported",
+                                "contract_inferred",
+                                "managed_configuration",
+                                "unverified"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "supported",
+                            "modes",
+                            "manualYawSweep",
+                            "continuousPitchSweep"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "targetTracking": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        },
+                        "laserRange": {
+                          "type": "string",
+                          "enum": [
+                            "device_reported",
+                            "contract_inferred",
+                            "managed_configuration",
+                            "unverified"
+                          ]
+                        }
+                      },
+                      "required": ["reconnaissance", "gimbal", "targetTracking", "laserRange"],
+                      "additionalProperties": false
+                    },
+                    "deviceReported": {
+                      "type": "string",
+                      "enum": [
+                        "device_reported",
+                        "contract_inferred",
+                        "managed_configuration",
+                        "unverified"
+                      ]
+                    },
+                    "engineeringProfile": {
+                      "type": "string",
+                      "enum": [
+                        "device_reported",
+                        "contract_inferred",
+                        "managed_configuration",
+                        "unverified"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "available",
+                    "navigation",
+                    "payload",
+                    "deviceReported",
+                    "engineeringProfile"
+                  ],
+                  "additionalProperties": false
+                },
+                "deviceReported": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "engineeringProfile": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "resourceId",
+                "source",
+                "available",
+                "navigation",
+                "payload",
+                "provenance",
+                "deviceReported",
+                "engineeringProfile",
+                "observedAt"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "synchronous_only",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": false,
+            "supportsCancellation": false,
+            "supportsPauseResume": false,
+            "supportsObservations": false,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_get_payload_status",
+        "description": "Read local UGV payload, gimbal, laser and task status.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            }
+          },
+          "required": ["resourceId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "synchronous_only",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": false,
+            "supportsCancellation": false,
+            "supportsPauseResume": false,
+            "supportsObservations": false,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_get_targets",
+        "description": "Read targets observed by local UGV sensors only.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            }
+          },
+          "required": ["resourceId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "freshness": {
+                  "type": "object"
+                },
+                "observedAt": {
+                  "type": "string"
+                }
+              },
+              "required": ["resourceId", "targets", "freshness", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "synchronous_only",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": false,
+            "supportsCancellation": false,
+            "supportsPauseResume": false,
+            "supportsObservations": false,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_navigate",
+        "description": "Run a point, route, distance or return-home chassis mission.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "mission": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "point"
+                    },
+                    "target": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        "longitude": {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        },
+                        "altitude": {
+                          "type": "number"
+                        }
+                      },
+                      "required": ["latitude", "longitude"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["type", "target"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "route"
+                    },
+                    "waypoints": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1024,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "minimum": -180,
+                            "maximum": 180
+                          },
+                          "altitude": {
+                            "type": "number"
+                          }
+                        },
+                        "required": ["latitude", "longitude"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["type", "waypoints"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "distance"
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": ["forward", "backward", "left", "right"]
+                    },
+                    "distanceM": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "required": ["type", "direction", "distanceM"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "return_home"
+                    }
+                  },
+                  "required": ["type"],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "speedLimitKmh": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "stopOnObstacle": {
+              "type": "boolean"
+            },
+            "planningMode": {
+              "type": "string",
+              "enum": ["auto", "road_network", "direct"]
+            },
+            "density": {
+              "type": "string",
+              "enum": ["adaptive", "dense", "medium", "sparse"]
+            }
+          },
+          "required": ["resourceId", "mission"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["completed", "failed", "cancelled", "timeout"]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "requestedDistanceM": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "startPosition": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "endPosition": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "observedDisplacementM": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "displacementUnavailableReason": {
+                  "type": "string",
+                  "enum": ["POSITION_AUTHORITY_MISMATCH"]
+                },
+                "positionAuthority": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "topic": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string"
+                    },
+                    "timeAuthority": {
+                      "type": "string",
+                      "enum": ["source", "ingest"]
+                    },
+                    "cursor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["field", "topic", "observedAt", "timeAuthority", "cursor"],
+                  "additionalProperties": false
+                },
+                "finalHeadingDeg": {
+                  "type": "number"
+                },
+                "finalSpeedKmh": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "missionId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "missionState": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "snapshotRevision": {
+                  "type": "string"
+                },
+                "stationaryAtCompletion": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "correlationStrength": {
+                  "type": "string",
+                  "enum": ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"]
+                },
+                "observationAuthority": {
+                  "type": "string"
+                },
+                "effectivePlanRevision": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "destination": {
+                  "type": "object",
+                  "properties": {
+                    "longitude": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "altitude": {
+                      "type": "number"
+                    }
+                  },
+                  "required": ["longitude", "latitude"],
+                  "additionalProperties": false
+                },
+                "destinationDistanceM": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "routeRef": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "artifact"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": ["kind", "id", "revision"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": true,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": true,
+            "supportsPauseResume": true,
+            "supportsObservations": true,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          },
+          "io.sdar/taskBusiness": {
+            "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+            "profileVersion": "1.0-rc2",
+            "availability": "available",
+            "source": {
+              "sourceId": "vehicle.business",
+              "deliverySemantics": "durable_at_least_once",
+              "replaySupported": true
+            },
+            "artifactTypes": [
+              "navigation.destination",
+              "navigation.waypoints",
+              "navigation.trajectory",
+              "navigation.route"
+            ],
+            "actionTypes": [],
+            "requiredInputTypes": [],
+            "interventionTypes": ["navigation.adjust_plan"],
+            "methods": {
+              "contextGet": "io.sdar/taskBusiness/context/get",
+              "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+              "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+              "eventsListen": "io.sdar/businessEvents/listen",
+              "contentGet": true,
+              "inputUpdate": false,
+              "interventionApply": true
+            },
+            "semantics": {
+              "artifact": ["requested", "planned", "observed"],
+              "coordinateFrames": ["EPSG:4326"],
+              "observationClockDomains": ["utc"]
+            },
+            "limits": {
+              "maxInlineArtifactBytes": 65536,
+              "maxWaitMs": 300000,
+              "trajectoryMinSamples": 2
+            },
+            "policy": {
+              "visualLockOwner": "disabled",
+              "decisionMode": "none",
+              "onExpire": "end_observation",
+              "onDismiss": "end_observation",
+              "footprintMode": "disabled",
+              "coverageMode": "disabled"
+            },
+            "qualification": {
+              "routeAdoption": "qualified",
+              "footprint": "not_supported",
+              "automaticVisualLock": "not_supported",
+              "runtimeReplan": "qualified"
+            }
+          }
+        }
+      },
+      {
+        "name": "vehicle_area_recon",
+        "description": "Run local electro-optical reconnaissance.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "area": {
+              "type": "object",
+              "properties": {
+                "polygon": {
+                  "type": "array",
+                  "minItems": 3,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      }
+                    },
+                    "required": ["latitude", "longitude"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["polygon"],
+              "additionalProperties": false
+            },
+            "scanMode": {
+              "type": "string",
+              "enum": ["area", "circular"]
+            },
+            "scanCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "regionType": {
+              "type": "integer",
+              "enum": [2, 3, 4, 5]
+            },
+            "targetTypes": {
+              "type": "array",
+              "maxItems": 128,
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "lockDurationLimitSec": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reconType": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "enum": [1, 2, 3, 4]
+                },
+                {
+                  "type": "string",
+                  "enum": ["adaptive", "visible", "infrared", "dc"]
+                }
+              ]
+            },
+            "scanSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "scanPitch": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "required": ["resourceId", "scanMode"],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "scanMode": {
+                    "const": "circular"
+                  }
+                },
+                "required": ["scanMode"]
+              },
+              "then": {},
+              "else": {
+                "properties": {
+                  "area": {}
+                },
+                "required": ["area"]
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["completed", "failed", "cancelled", "timeout"]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "coverability": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "outOfRange": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "missionId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "scanMode": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "progress": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "coverage": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observedTargetCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "terminalMotionStatus": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "cameraFault": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "exception": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "snapshotRevision": {
+                  "type": "string"
+                },
+                "correlationStrength": {
+                  "type": "string",
+                  "enum": [
+                    "STRICT_CORRELATED",
+                    "INFERRED_CURRENT_EXECUTION",
+                    "WEAK_UNCORRELATED",
+                    "MISMATCH",
+                    "UNKNOWN"
+                  ]
+                },
+                "observationIsNew": {
+                  "type": "boolean"
+                },
+                "timeAuthority": {
+                  "type": "string"
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": true,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": true,
+            "supportsPauseResume": true,
+            "supportsObservations": true,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          },
+          "io.sdar/taskBusiness": {
+            "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+            "profileVersion": "1.0-rc2",
+            "availability": "available",
+            "source": {
+              "sourceId": "vehicle.business",
+              "deliverySemantics": "durable_at_least_once",
+              "replaySupported": true
+            },
+            "artifactTypes": [
+              "recon.area",
+              "recon.coverage_plan",
+              "recon.covered_area",
+              "target.object",
+              "target.track"
+            ],
+            "actionTypes": ["sensor.visual_lock"],
+            "requiredInputTypes": ["target.disposition_decision"],
+            "interventionTypes": [],
+            "methods": {
+              "contextGet": "io.sdar/taskBusiness/context/get",
+              "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+              "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+              "eventsListen": "io.sdar/businessEvents/listen",
+              "contentGet": true,
+              "inputUpdate": true,
+              "interventionApply": false
+            },
+            "semantics": {
+              "artifact": ["requested", "planned", "derived", "observed"],
+              "coordinateFrames": [],
+              "observationClockDomains": ["utc"]
+            },
+            "limits": {
+              "maxInlineArtifactBytes": 65536,
+              "maxWaitMs": 300000,
+              "trajectoryMinSamples": 2
+            },
+            "policy": {
+              "visualLockOwner": "provider",
+              "decisionMode": "user_required",
+              "onExpire": "release_and_resume_scan",
+              "onDismiss": "release_and_resume_scan",
+              "footprintMode": "disabled",
+              "coverageMode": "device_reported"
+            },
+            "qualification": {
+              "routeAdoption": "not_supported",
+              "footprint": "not_supported",
+              "automaticVisualLock": "qualified",
+              "runtimeReplan": "not_supported"
+            }
+          }
+        }
+      },
+      {
+        "name": "vehicle_track_target",
+        "description": "Track a locally observed target and fail locally when lock is lost.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "targetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": ["resourceId", "targetId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["target_locked", "target_lost", "cancelled", "timeout"]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": true,
+            "supportsPauseResume": false,
+            "supportsObservations": true,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_control_gimbal",
+        "description": "Run a finite absolute, relative, or reset electro-optical gimbal adjustment.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "mode": {
+              "type": "string",
+              "enum": ["absolute", "relative", "reset"]
+            },
+            "yaw": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "pitch": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "yawSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "pitchSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "deltaZoom": {
+              "type": "number"
+            }
+          },
+          "required": ["resourceId", "mode"],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "reset"
+                  }
+                },
+                "required": ["mode"]
+              },
+              "then": {},
+              "else": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "yaw": {}
+                    },
+                    "required": ["yaw"]
+                  },
+                  {
+                    "properties": {
+                      "pitch": {}
+                    },
+                    "required": ["pitch"]
+                  },
+                  {
+                    "properties": {
+                      "deltaZoom": {}
+                    },
+                    "required": ["deltaZoom"]
+                  }
+                ]
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["completed", "failed", "cancelled", "timeout"]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": true,
+            "supportsPauseResume": false,
+            "supportsObservations": true,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_fire_weapon",
+        "description": "Execute one confirmed local fire-control cycle without hit, damage or destruction semantics.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            },
+            "targetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "engagementMode": {
+              "const": "single"
+            },
+            "requireConfirmation": {
+              "const": true
+            },
+            "approvalRef": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "required": ["resourceId", "targetId", "engagementMode", "requireConfirmation"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "fire_command_accepted",
+                    "fire_command_rejected",
+                    "fire_cycle_completed",
+                    "target_not_found",
+                    "target_not_locked",
+                    "out_of_range",
+                    "out_of_fov",
+                    "no_ammo_reported_by_weapon",
+                    "weapon_fault",
+                    "friendly_target_rejected",
+                    "timeout",
+                    "cancelled"
+                  ]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": true,
+            "supportsPauseResume": false,
+            "supportsObservations": true,
+            "supportsInputRequired": true,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      },
+      {
+        "name": "vehicle_emergency_stop",
+        "description": "Preempt and stop only this UGV's local tracks.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resourceId": {
+              "type": "string",
+              "const": "vehicle:qualification-a"
+            }
+          },
+          "required": ["resourceId"],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "type": "object",
+          "anyOf": [
+            {
+              "title": "VehicleTaskResultV1",
+              "type": "object",
+              "properties": {
+                "resourceId": {
+                  "type": "string",
+                  "const": "vehicle:qualification-a"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["stopped", "timeout", "failed"]
+                },
+                "observedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "finalSpeedKmh": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "missionState": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "reconMotionStatus": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "eoTaskState": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "weaponTaskState": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "targetUnlocked": {
+                  "type": "boolean"
+                },
+                "observationAuthority": {
+                  "type": "string"
+                },
+                "snapshotRevision": {
+                  "type": "string"
+                }
+              },
+              "required": ["resourceId", "status", "observedAt"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonCode": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "taskBehavior": "task_required",
+            "availability": "dynamic",
+            "supportsScheduling": false,
+            "supportsMaxElapsed": true,
+            "supportsCancellation": false,
+            "supportsPauseResume": false,
+            "supportsObservations": true,
+            "supportsInputRequired": false,
+            "idempotency": "server_managed"
+          },
+          "io.sdar/resourceBinding": {
+            "mode": "ARGUMENT_REFERENCE",
+            "resourceIdJsonPointer": "/resourceId"
+          }
+        }
+      }
+    ]
+  },
+  "reason": "QUALIFICATION_TIMEOUT:public_policy_lock_and_input",
+  "cleanup": {
+    "resultType": "complete",
+    "taskId": "eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6",
+    "status": "failed",
+    "statusMessage": "UGV_PERSISTED_MISSION_ID_REQUIRED",
+    "createdAt": "2026-09-29T23:11:41.154Z",
+    "lastUpdatedAt": "2026-09-29T23:12:12.846Z",
+    "ttlMs": 259231692,
+    "_meta": {
+      "io.sdar/taskExecution": {
+        "profileVersion": "1.0",
+        "runtimeRevision": "10",
+        "providerRevision": "3",
+        "cancellationRequested": true
+      }
+    },
+    "error": {
+      "code": -32603,
+      "data": {
+        "reasonCode": "SAFE_STOP_UNCONFIRMED"
+      },
+      "message": "UGV_PERSISTED_MISSION_ID_REQUIRED"
+    }
+  },
+  "finalDeviceStatus": {
+    "status": 3,
+    "status_label": "就绪",
+    "scan_mode": 1,
+    "scan_mode_label": "区域侦察",
+    "scan_pitch": 0,
+    "out_of_range": false,
+    "scan_num": 0,
+    "progress": 0,
+    "coverage": 0,
+    "coverage_covered": 252,
+    "coverage_total": 424,
+    "coverage_incomplete": true,
+    "coverage_reason": "仍有 172 处未被视场扫到，覆盖率 59%",
+    "eo_fov": 120,
+    "camera_fault": false,
+    "work_mode": 1,
+    "recon_type": 1,
+    "load_status": 4,
+    "load_status_label": "故障",
+    "lock": {
+      "stage": 1,
+      "target_id": 0,
+      "role_name": "",
+      "duration_sec": 0
+    },
+    "attack_ready": false,
+    "last_cmd_ack": {
+      "seq": 600995,
+      "ok": true,
+      "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+      "data": {
+        "coverability": {
+          "coverable": "unknown",
+          "coverable_label": "未预检(机位不可用)",
+          "region_min_dist_m": null,
+          "region_max_dist_m": null,
+          "detection_range_m": 140
+        }
+      }
+    },
+    "region": {
+      "type": 5,
+      "points": [
+        [-238.0867632009165, -142.02952979991338],
+        [-241.5031740012131, -94.57249700007786],
+        [-180.01668520135695, -88.99022700003393],
+        [-155.422757600046, -147.61290520004877]
+      ]
+    },
+    "online": true,
+    "gimbal": {
+      "yaw": 0,
+      "pitch": 0,
+      "zoom": 1
+    }
+  },
+  "finalDeviceTargets": {
+    "targets": [],
+    "message": "最近 10.0s 无检测目标"
+  },
+  "completedAt": "2026-09-29T23:13:41.505Z"
+}

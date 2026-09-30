@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { UgvTaskBusinessContextService } from "../../apps/ugv-provider-adapter/src/task-business-service.js";
 import type { AdapterBusinessEvent } from "../../packages/adapter-protocol/src/index.js";
+import { TaskRepository } from "../../packages/persistence-postgres/src/tasks.js";
 import {
   createGowmPool,
   verifyGowmStorage,
@@ -219,6 +220,27 @@ suite("GOWM shared Task Business Store in an isolated database", () => {
       );
       expect(result.rows[0]).toEqual({ rolsuper: false, rolbypassrls: false });
     }
+  });
+
+  it("checks promoted Runtime input using valid scoped SQL aliases under both application bindings", async () => {
+    for (const pool of pools)
+      await expect(
+        new TaskRepository(pool).rejectClaimedPromotedInputIfPayloadMismatch({
+          taskId: runKey,
+          commandSequence: 1,
+          commandType: "UPDATE",
+          payload: {},
+          state: "CLAIMED",
+          attemptCount: 1,
+          claimOwner: "isolated-test",
+          stopReason: null,
+          adapterAck: null,
+          nextAttemptAt: null,
+          lastErrorCode: null,
+          lastErrorMessage: null,
+          claimUntil: null,
+        }),
+      ).resolves.toBe(false);
   });
 
   it("persists same-name Context, Artifact and source events in two device scopes", async () => {

@@ -220,6 +220,51 @@ describe("read-only public business probe", () => {
     expect(lines.at(-1)).toMatchObject({ reason: "max_events", appliedEvents: 1 });
   });
 
+  it("ends an idle stream at the deadline even if the peer never settles cancellation", async () => {
+    const lines: Record<string, unknown>[] = [];
+    await runReadOnlyTaskBusinessProbe({
+      mcpUrl: "http://127.0.0.1:1/mcp",
+      taskId,
+      durationMs: 100,
+      maxEvents: 10,
+      emit: (line) => {
+        lines.push(line);
+      },
+      fetchImpl: async (_url, init) => {
+        if (typeof init?.body !== "string") throw Error("TEST_BODY_REQUIRED");
+        const rpc = JSON.parse(init.body) as { id: string; method: string };
+        if (rpc.method === "io.sdar/taskBusiness/context/get")
+          return Response.json({
+            jsonrpc: "2.0",
+            id: rpc.id,
+            result: {
+              snapshot: {
+                context,
+                contextRevision: 4,
+                objects: snapshotObjects,
+                objectDescriptors: [],
+              },
+              resumeFrom: { streamId, afterSequence: "5" },
+            },
+          });
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            cancel: () =>
+              new Promise<void>(() => {
+                /* Simulates a peer that never settles cancellation. */
+              }),
+          }),
+          { headers: { "content-type": "text/event-stream" } },
+        );
+      },
+    });
+    expect(lines.at(-1)).toMatchObject({
+      type: "stopped",
+      reason: "duration_elapsed",
+      appliedEvents: 0,
+    });
+  });
+
   it("bounds consecutive snapshot races rather than all successful hydration cycles", async () => {
     let revision = 1;
     let retry = false;

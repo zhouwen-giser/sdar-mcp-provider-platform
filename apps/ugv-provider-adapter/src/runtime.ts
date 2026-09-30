@@ -1,3 +1,10 @@
+import { airportFootprintFact, AIRPORT_MAP_FRAME } from "./airport-map-geometry.js";
+import { FootprintBusinessProcessor } from "./footprint-business-processor.js";
+import { decodeObservationCursorV1 } from "../../../packages/vehicle-provider-core/src/observation-cursor.js";
+import {
+  resolveReconExecutionCorrelation,
+  type ReconCorrelation,
+} from "./recon-execution-correlation.js";
 import { createHash, randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import {
@@ -102,6 +109,7 @@ import {
 import type { UgvBusinessEventHub } from "./business-events.js";
 import {
   airportNavigationBusinessProfile,
+  providerReconBusinessProfile,
   type UgvTaskBusinessContextService,
 } from "./task-business-service.js";
 import {
@@ -232,10 +240,7 @@ export class UgvProviderRuntime {
   readonly #pendingPriorityControls = new Map<string, Set<{ identity: CommandIdentity }>>();
   #navigationMissionObservation: AppliedMqttObservation | undefined;
   #lastObservationPollAtMs = Number.NEGATIVE_INFINITY;
-  readonly #autoLockSources = new Map<
-    string,
-    { cursor: string; missionId: string | undefined; retained: boolean }
-  >();
+  readonly #autoLockSources = new Map<string, AppliedMqttObservation>();
   #pollPromise: Promise<void> | undefined;
   #lastObservedSnapshot: UgvSnapshot | undefined;
   #localInitialization: Promise<void> | undefined;
@@ -274,6 +279,7 @@ export class UgvProviderRuntime {
       };
       pollIntervalMs: number;
       businessVisualLockOwner?: "provider";
+      businessMapFull?: boolean;
       navigationPlanner?: NavigationPlanner;
       navigationAdjustments?: boolean;
       trajectorySampleEveryMs?: number;
@@ -319,6 +325,73 @@ export class UgvProviderRuntime {
       recoveryComplete: false,
       observedAt: this.#now().toISOString(),
     };
+  }
+
+  readonly #mapSources = new Map<string, AppliedMqttObservation>();
+  #mapRange?: { value?: number; checkedAt: number };
+
+  async #projectMapFull(
+    execution: ProviderExecution,
+    active: readonly ProviderExecution[],
+  ): Promise<void> {
+    if (
+      !this.options.businessMapFull ||
+      !this.taskBusiness ||
+      execution.operationName !== "vehicle_area_recon" ||
+      !execution.taskBusinessContextExpected ||
+      execution.state === "ACCEPTED" ||
+      !execution.downstreamMissionIds.length
+    )
+      return;
+    const status = this.#mapSources.get("status");
+    const resolved = this.#resolveRecon(status, active);
+    const correlated =
+      resolved.kind !== "UNRESOLVED" &&
+      resolved.execution.externalExecutionId === execution.externalExecutionId;
+    const nowMs = this.#now().getTime();
+    if (correlated && (!this.#mapRange || nowMs - this.#mapRange.checkedAt > 60_000)) {
+      this.#mapRange = { checkedAt: nowMs };
+      try {
+        const result = await this.#callDevice("get_capabilities", {}, execution.taskId);
+        const source =
+          typeof result.capabilities === "object" && result.capabilities !== null
+            ? (result.capabilities as Record<string, unknown>)
+            : result;
+        const eo = source.eo as { detection_range_m?: unknown } | undefined;
+        const value = eo?.detection_range_m;
+        if (
+          source.available !== false &&
+          ["ugv", "ugv1"].includes(String(source.entity_id)) &&
+          typeof value === "number" &&
+          Number.isFinite(value) &&
+          value > 0 &&
+          value <= 10000
+        )
+          this.#mapRange = { value, checkedAt: this.#now().getTime() };
+      } catch {
+        /* Missing capabilities invalidate the estimate; never invent a range. */
+      }
+    }
+    const missionId = execution.downstreamMissionIds.at(-1);
+    if (!missionId) return;
+    const position = this.#mapSources.get("position");
+    const heading = this.#mapSources.get("heading");
+    const gimbal = this.#mapSources.get("gimbal");
+    const fact = airportFootprintFact({
+      missionId,
+      createdAt: execution.createdAt,
+      nowMs: this.#now().getTime(),
+      maxAgeMs: Math.min(this.options.freshness.payload, this.options.freshness.chassis),
+      ...(this.#mapRange?.value === undefined ? {} : { rangeM: this.#mapRange.value }),
+      ...(correlated && status ? { status } : {}),
+      ...(position ? { position } : {}),
+      ...(heading ? { heading } : {}),
+      ...(gimbal ? { gimbal } : {}),
+    });
+    await new FootprintBusinessProcessor(
+      this.taskBusiness.business,
+      this.taskBusiness.notifyCommitted,
+    ).apply(execution, fact);
   }
 
   #now(): Date {
@@ -375,23 +448,14 @@ export class UgvProviderRuntime {
     this.ingress.setDeviceConnected(this.device.connected());
     this.#unsubscribeSnapshot = this.ingress.onSnapshot((snapshot, topic, applied) => {
       if (topic === "/ugv/mission_state") this.#navigationMissionObservation = applied;
-      // Capture source identity synchronously: a newer anonymous/retained packet
-      // must revoke policy eligibility even while older projection work awaits IO.
-      if (applied && ["/ugv/area_recon/status", "/ugv/area_recon/targets"].includes(topic)) {
-        const source = applied.observation.canonicalPayload;
-        const rawId = record(source) ? source.mission_id : undefined;
-        const missionId =
-          typeof rawId === "string" && rawId.trim() === rawId && rawId.length > 0
-            ? rawId
-            : typeof rawId === "number" && Number.isSafeInteger(rawId)
-              ? String(rawId)
-              : undefined;
-        this.#autoLockSources.set(topic, {
-          cursor: applied.cursor,
-          missionId,
-          retained: applied.retained,
-        });
-      }
+      // Keep the exact latest packet; retained or explicit mismatches revoke eligibility.
+      if (
+        applied &&
+        ["/ugv/area_recon/status", "/ugv/area_recon/targets", "/ugv/area_recon/coverage"].includes(
+          topic,
+        )
+      )
+        this.#autoLockSources.set(topic, applied);
       void this.#serializeMutation(() => this.#observe(snapshot, topic, applied));
     });
     this.#refreshReadiness();
@@ -485,7 +549,13 @@ export class UgvProviderRuntime {
         this.options.navigationPlanner instanceof AirportRoadPlanner
           ? airportNavigationBusinessProfile(this.options.navigationAdjustments === true)
           : this.taskBusiness.readOnlyProfile("vehicle_navigate"),
-      vehicle_area_recon: this.taskBusiness.readOnlyProfile("vehicle_area_recon"),
+      vehicle_area_recon:
+        this.options.businessVisualLockOwner === "provider"
+          ? providerReconBusinessProfile(
+              this.options.businessManualDecision,
+              this.options.businessMapFull === true,
+            )
+          : this.taskBusiness.readOnlyProfile("vehicle_area_recon"),
     };
   }
   getBusinessArtifact(
@@ -1754,8 +1824,34 @@ export class UgvProviderRuntime {
     for (const execution of active) {
       await this.#runProviderAutoLock(execution);
       await this.#projectReconBusinessStatus(execution, active);
+      await this.#projectMapFull(execution, active);
       await this.#refresh(execution);
     }
+    this.#lastObservationPollAtMs = this.#now().getTime();
+  }
+
+  #resolveRecon(applied: AppliedMqttObservation | undefined, active: readonly ProviderExecution[]) {
+    return resolveReconExecutionCorrelation({
+      applied,
+      active,
+      providerId: this.options.providerId,
+      resourceId: this.options.resourceId ?? "vehicle:ugv1",
+      nowMs: this.#now().getTime(),
+      maxAgeMs: applied?.observation.patch.payload?.targets
+        ? this.options.freshness.target
+        : this.options.freshness.payload,
+    });
+  }
+
+  async #currentReconCorrelation(execution: ProviderExecution) {
+    const result = this.#resolveRecon(
+      this.#autoLockSources.get("/ugv/area_recon/status"),
+      await this.store.listActiveExecutions(),
+    );
+    return result.kind !== "UNRESOLVED" &&
+      result.execution.externalExecutionId === execution.externalExecutionId
+      ? result
+      : undefined;
   }
 
   async #projectReconBusinessStatus(
@@ -1769,28 +1865,22 @@ export class UgvProviderRuntime {
       execution.state === "ACCEPTED"
     )
       return;
-    const missionId = execution.downstreamMissionIds.at(-1);
+    const resolved = this.#resolveRecon(
+      this.#autoLockSources.get("/ugv/area_recon/status"),
+      active,
+    );
     if (
-      missionId === undefined ||
-      active.filter(
-        (candidate) =>
-          candidate.operationName === "vehicle_area_recon" &&
-          candidate.downstreamMissionIds.at(-1) === missionId,
-      ).length !== 1
+      resolved.kind === "UNRESOLVED" ||
+      resolved.execution.externalExecutionId !== execution.externalExecutionId
     )
       return;
-    const recon = this.ingress.snapshot().payload.reconnaissance;
-    const cursor = this.ingress.observationCursor("/ugv/area_recon/status");
+    const { missionId } = resolved;
+    const recon =
+      this.#autoLockSources.get("/ugv/area_recon/status")?.observation.patch.payload
+        ?.reconnaissance;
     const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
-    if (
-      reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
-      typeof recon.motionStatus !== "number" ||
-      cursor === undefined ||
-      cursor === execution.observationCursors?.reconnaissance ||
-      authority === undefined ||
-      compareIsoTimestamps(authority.observedAt, execution.createdAt) < 0
-    )
-      return;
+    if (typeof recon?.motionStatus !== "number" || !authority) return;
+    const cursor = authority.cursor;
     const processor = new ReconBusinessProcessor(
       this.taskBusiness.business,
       this.taskBusiness.notifyCommitted,
@@ -1798,6 +1888,7 @@ export class UgvProviderRuntime {
     await processor.applyStatus(execution, {
       schemaVersion: "ugv.recon-status-fact/1",
       missionId,
+      correlation: resolved.kind,
       sourceCursor: cursor,
       observedAt: authority.observedAt,
       motionStatus: recon.motionStatus,
@@ -2192,18 +2283,54 @@ export class UgvProviderRuntime {
       const baseline = executionPhysicalBaseline(execution);
       const authority = this.ingress.fieldObservationAuthority("payload.recon");
       const reconMissionId = execution.downstreamMissionIds.at(-1);
+      const packet = this.#autoLockSources.get("/ugv/area_recon/status");
+      const resolved = execution.taskBusinessContextExpected
+        ? this.#resolveRecon(packet, await this.store.listActiveExecutions())
+        : undefined;
+      if (
+        resolved &&
+        (resolved.kind === "UNRESOLVED" ||
+          resolved.execution.externalExecutionId !== execution.externalExecutionId)
+      )
+        return execution;
+      const sourceTrack = { ...snapshot.payload.reconnaissance };
+      if (resolved && packet?.observation.patch.payload?.reconnaissance) {
+        // Do not inherit another packet's explicit mission into an inferred observation.
+        delete sourceTrack.id;
+        Object.assign(sourceTrack, packet.observation.patch.payload.reconnaissance);
+      }
+      // The simulator pauses scanning (motionStatus=8) while its EO sensor locks.
+      // This is not an operator Task pause when our journal and a later same-target
+      // observation establish the policy lock. Pending controls still win.
+      if (
+        resolved &&
+        packet &&
+        sourceTrack.motionStatus === 8 &&
+        (sourceTrack.lock?.stage === 2 || sourceTrack.lock?.stage === 3)
+      ) {
+        const dispatch = await this.#providerLockDispatch(execution, sourceTrack.lock.targetId);
+        if (dispatch && compareIsoTimestamps(packet.observedAt, dispatch.dispatchedAt) > 0) {
+          await this.#projectNativeLock(packet);
+          return (await this.store.getExecution(execution.taskId)) ?? execution;
+        }
+      }
       next = applyReconTrack(
         execution,
-        snapshot.payload.reconnaissance,
+        sourceTrack,
         this.ingress.observationCursor("/ugv/area_recon/status"),
         authority?.observedAt,
-        reconCorrelationStrength(snapshot.payload.reconnaissance, reconMissionId),
-        reconTerminalFacts({
-          snapshot,
-          ...(reconMissionId === undefined ? {} : { expectedMissionId: reconMissionId }),
-          ...(authority === undefined ? {} : { currentAuthority: authority }),
-          baseline,
-        }),
+        resolved?.kind ?? reconCorrelationStrength(sourceTrack, reconMissionId),
+        {
+          ...reconTerminalFacts({
+            snapshot,
+            ...(reconMissionId === undefined ? {} : { expectedMissionId: reconMissionId }),
+            ...(authority === undefined ? {} : { currentAuthority: authority }),
+            baseline,
+          }),
+          ...(resolved
+            ? { correlationStrength: resolved.kind, missionId: resolved.missionId }
+            : {}),
+        },
       );
     } else if (execution.operationName === "vehicle_control_gimbal")
       next = applyTrack(
@@ -2595,6 +2722,20 @@ export class UgvProviderRuntime {
     applied?: AppliedMqttObservation,
   ): Promise<void> {
     this.#refreshReadiness();
+    if (this.options.businessMapFull && applied) {
+      if (topic === "/ugv/area_recon/status") this.#mapSources.set("status", applied);
+      if (topic === "/ugv/eo/pose") this.#mapSources.set("gimbal", applied);
+      if (
+        ["/ugv/gnss", "status/ugv1"].includes(topic) &&
+        applied.observation.patch.chassis?.position
+      )
+        this.#mapSources.set("position", applied);
+      if (
+        ["status/ugv", "/ugv/status"].includes(topic) &&
+        applied.observation.patch.chassis?.compassHeadingDeg !== undefined
+      )
+        this.#mapSources.set("heading", applied);
+    }
     await this.store.putSnapshot({
       channel: topic,
       revision: snapshot.revision,
@@ -2609,6 +2750,8 @@ export class UgvProviderRuntime {
       await this.#projectNativeLock(applied);
       await this.#projectReconBusinessCoverage(applied);
     }
+    if (topic === "/ugv/area_recon/coverage" && applied !== undefined)
+      await this.#projectReconBusinessCoverage(applied);
     if (topic === "/ugv/area_recon/targets" && applied !== undefined)
       await this.#projectReconBusinessTargets(applied);
     const telemetryNowMs = this.#now().getTime();
@@ -2643,10 +2786,13 @@ export class UgvProviderRuntime {
     }
     // High-rate GNSS/IMU streams must not enqueue a full persistence/recovery
     // scan per packet: that delays mission facts past their freshness window.
-    // Persist/project every observation, but bound non-lifecycle polling to 20 Hz.
+    // Persist/project every observation, but share the configured reconciliation
+    // cadence with the timer. High-rate telemetry must not multiply that work.
     const pollNow = this.#now().getTime();
-    if (topic === "/ugv/mission_state" || intervalDue(this.#lastObservationPollAtMs, pollNow, 50)) {
-      this.#lastObservationPollAtMs = pollNow;
+    if (
+      topic === "/ugv/mission_state" ||
+      intervalDue(this.#lastObservationPollAtMs, pollNow, this.options.pollIntervalMs)
+    ) {
       await this.#pollActive();
     }
   }
@@ -3336,13 +3482,30 @@ export class UgvProviderRuntime {
 
   async #projectReconBusinessCoverage(applied: AppliedMqttObservation): Promise<void> {
     if (this.taskBusiness === undefined || applied.retained) return;
+    const coverageTopic =
+      decodeObservationCursorV1(applied.cursor)?.topic === "/ugv/area_recon/coverage";
+    if (this.options.businessMapFull && !coverageTopic) return;
     const recon = applied.observation.patch.payload?.reconnaissance;
-    const missionId = recon?.id;
+    const active = await this.store.listActiveExecutions();
+    const resolved = this.#resolveRecon(applied, active);
     const coverage = recon?.coverage;
-    if (missionId === undefined || coverage === undefined) return;
+    if (resolved.kind === "UNRESOLVED" || coverage === undefined) return;
+    const { execution, missionId } = resolved;
     // The same EO sensor is occupied by native visual lock at stages 2/3.
     // An aggregate coverage counter in this status is not proof of scanning.
     if (recon?.lock?.stage === 2 || recon?.lock?.stage === 3) return;
+    if (decodeObservationCursorV1(applied.cursor)?.topic === "/ugv/area_recon/coverage") {
+      const statusPacket = this.#autoLockSources.get("/ugv/area_recon/status");
+      const status = this.#resolveRecon(statusPacket, active);
+      const scanning = statusPacket?.observation.patch.payload?.reconnaissance;
+      if (
+        status.kind === "UNRESOLVED" ||
+        status.execution.externalExecutionId !== execution.externalExecutionId ||
+        scanning?.motionStatus !== 5 ||
+        scanning.lock?.stage !== 1
+      )
+        return;
+    }
     if (
       coverage.coveragePercent === undefined &&
       coverage.coveredCount === undefined &&
@@ -3350,19 +3513,7 @@ export class UgvProviderRuntime {
       coverage.sectorsCovered === undefined
     )
       return;
-    const matches = (await this.store.listActiveExecutions()).filter(
-      (execution) =>
-        execution.operationName === "vehicle_area_recon" &&
-        execution.downstreamMissionIds.at(-1) === missionId,
-    );
-    const execution = matches.length === 1 ? matches[0] : undefined;
-    if (
-      execution?.taskBusinessContextExpected !== true ||
-      execution.state === "ACCEPTED" ||
-      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
-      applied.cursor === execution.observationCursors?.reconnaissance
-    )
-      return;
+    if (!execution.taskBusinessContextExpected) return;
     // This status topic has no area revision. After adoption its counters cannot
     // be attributed to the new area, although mission status remains usable.
     const context = await this.taskBusiness.business.getContext(
@@ -3376,9 +3527,13 @@ export class UgvProviderRuntime {
     await processor.applyCoverage(execution, {
       schemaVersion: "ugv.recon-coverage-fact/1",
       missionId,
+      correlation: resolved.kind,
       sourceCursor: applied.cursor,
       observedAt: applied.observedAt,
       coverage,
+      ...(this.options.businessMapFull && coverageTopic && coverage.scanMode === 1
+        ? { displayGrid: AIRPORT_MAP_FRAME }
+        : {}),
     });
   }
 
@@ -3389,28 +3544,16 @@ export class UgvProviderRuntime {
       if (!Number.isFinite(age) || age < 0 || age > this.options.freshness.payload) return;
     }
     const recon = applied.observation.patch.payload?.reconnaissance;
-    const missionId = recon?.id;
     const stage = recon?.lock?.stage;
+    const resolved = this.#resolveRecon(applied, await this.store.listActiveExecutions());
     if (
-      recon === undefined ||
-      missionId === undefined ||
+      resolved.kind === "UNRESOLVED" ||
       stage === undefined ||
-      typeof recon.motionStatus !== "number"
+      typeof recon?.motionStatus !== "number"
     )
       return;
-    const matches = (await this.store.listActiveExecutions()).filter(
-      (execution) =>
-        execution.operationName === "vehicle_area_recon" &&
-        execution.downstreamMissionIds.at(-1) === missionId,
-    );
-    const execution = matches.length === 1 ? matches[0] : undefined;
-    if (
-      execution?.taskBusinessContextExpected !== true ||
-      execution.state === "ACCEPTED" ||
-      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
-      applied.cursor === execution.observationCursors?.reconnaissance
-    )
-      return;
+    const { execution, missionId } = resolved;
+    if (!execution.taskBusinessContextExpected) return;
     const processor = new NativeLockBusinessProcessor(
       this.taskBusiness.business,
       this.taskBusiness.notifyCommitted,
@@ -3425,6 +3568,7 @@ export class UgvProviderRuntime {
       {
         schemaVersion: "ugv.recon-native-lock-fact/1",
         missionId,
+        correlation: resolved.kind,
         sourceCursor: applied.cursor,
         observedAt: applied.observedAt,
         stage,
@@ -3639,6 +3783,7 @@ export class UgvProviderRuntime {
     const request = await handler.assertPendingObservation(currentExecution, pending.requestId);
     if (request.revision !== pending.revision || request.requestKey !== pending.requestKey)
       throw new Error("UGV_INPUT_RELEASE_UNQUALIFIED");
+    const correlation = await this.#currentReconCorrelation(execution);
     const snapshot = this.ingress.snapshot().payload.reconnaissance;
     const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
     const age =
@@ -3653,7 +3798,7 @@ export class UgvProviderRuntime {
     if (
       activeForMission.length !== 1 ||
       activeForMission[0]?.taskId !== execution.taskId ||
-      reconCorrelationStrength(snapshot, missionId) !== "STRICT_CORRELATED" ||
+      correlation === undefined ||
       snapshot.lock?.stage !== 3 ||
       snapshot.lock.targetId !== pending.subjectBinding.targetId ||
       authority === undefined ||
@@ -3683,6 +3828,7 @@ export class UgvProviderRuntime {
     );
     const releaseAlreadyAccepted = recordedRelease?.state === "ACCEPTED";
     const missionId = execution.downstreamMissionIds.at(-1);
+    const correlation = await this.#currentReconCorrelation(execution);
     const recon = this.ingress.snapshot().payload.reconnaissance;
     const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
     const age =
@@ -3697,7 +3843,7 @@ export class UgvProviderRuntime {
     if (
       !releaseAlreadyAccepted &&
       missionId !== undefined &&
-      reconCorrelationStrength(recon, missionId) === "STRICT_CORRELATED" &&
+      correlation !== undefined &&
       recon.lock?.stage === 1 &&
       typeof recon.motionStatus === "number" &&
       authority !== undefined &&
@@ -3733,7 +3879,7 @@ export class UgvProviderRuntime {
         pending.subjectBinding.kind !== "visual_lock" ||
         activeForMission.length !== 1 ||
         activeForMission[0]?.taskId !== execution.taskId ||
-        reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
+        correlation === undefined ||
         recon.lock?.stage !== 3 ||
         recon.lock.targetId !== pending.subjectBinding.targetId ||
         authority === undefined ||
@@ -3805,6 +3951,7 @@ export class UgvProviderRuntime {
   async #confirmExpiredInputRelease(execution: ProviderExecution): Promise<ProviderExecution> {
     const marker = execution.controlConfirmation;
     if (marker?.command !== "input_release") return execution;
+    const correlation = await this.#currentReconCorrelation(execution);
     const recon = this.ingress.snapshot().payload.reconnaissance;
     const authority = this.ingress.observationAuthority("/ugv/area_recon/status");
     const age =
@@ -3814,7 +3961,7 @@ export class UgvProviderRuntime {
     const scope = BoundExecutionScope.fromExecution(execution);
     if (
       typeof marker.missionId === "string" &&
-      reconCorrelationStrength(recon, marker.missionId) === "STRICT_CORRELATED" &&
+      correlation?.missionId === marker.missionId &&
       recon.lock?.stage === 1 &&
       recon.motionStatus === 5 &&
       authority !== undefined &&
@@ -3898,33 +4045,17 @@ export class UgvProviderRuntime {
     if (this.taskBusiness === undefined || applied.retained) return;
     const targets = applied.observation.patch.payload?.targets;
     if (!targets) return;
-    // A target list cannot borrow the mission ID from the latest status: it
-    // may arrive after a mission switch. Require identity on this source too.
-    const source = applied.observation.canonicalPayload;
-    if (!record(source) || source.mission_id === undefined) return;
-    const sourceMissionId =
-      typeof source.mission_id === "string"
-        ? source.mission_id
-        : typeof source.mission_id === "number" && Number.isSafeInteger(source.mission_id)
-          ? String(source.mission_id)
-          : undefined;
-    if (!sourceMissionId?.trim() || sourceMissionId.trim() !== sourceMissionId) return;
-    const recon = this.ingress.snapshot().payload.reconnaissance;
-    const missionId = recon.id;
+    const active = await this.store.listActiveExecutions();
+    const resolved = this.#resolveRecon(applied, active);
+    if (resolved.kind === "UNRESOLVED") return;
+    const { execution, missionId } = resolved;
+    const status = this.#resolveRecon(this.#autoLockSources.get("/ugv/area_recon/status"), active);
     const statusAuthority = this.ingress.observationAuthority("/ugv/area_recon/status");
-    if (missionId === undefined || missionId !== sourceMissionId || statusAuthority === undefined)
-      return;
-    const matches = (await this.store.listActiveExecutions()).filter(
-      (execution) =>
-        execution.operationName === "vehicle_area_recon" &&
-        execution.downstreamMissionIds.at(-1) === missionId,
-    );
-    const execution = matches.length === 1 ? matches[0] : undefined;
     if (
-      execution?.taskBusinessContextExpected !== true ||
-      execution.state === "ACCEPTED" ||
-      statusAuthority.cursor === execution.observationCursors?.reconnaissance ||
-      compareIsoTimestamps(statusAuthority.observedAt, execution.createdAt) < 0
+      !execution.taskBusinessContextExpected ||
+      status.kind === "UNRESOLVED" ||
+      status.execution.externalExecutionId !== execution.externalExecutionId ||
+      !statusAuthority
     )
       return;
     const processor = new TargetBusinessProcessor(
@@ -3934,7 +4065,8 @@ export class UgvProviderRuntime {
     const sourceTimeEligible = (target: (typeof targets)[number]) =>
       target.source === "mqtt_area_recon" &&
       target.captureTimeUs !== undefined &&
-      compareIsoTimestamps(target.observedAt, statusAuthority.observedAt) >= 0 &&
+      this.#now().getTime() - Date.parse(target.observedAt) >= 0 &&
+      this.#now().getTime() - Date.parse(target.observedAt) <= this.options.freshness.target &&
       compareIsoTimestamps(target.observedAt, execution.createdAt) >= 0;
     let completeList = targets.every(sourceTimeEligible);
     for (const target of targets) {
@@ -3967,6 +4099,7 @@ export class UgvProviderRuntime {
         await processor.apply(execution, {
           schemaVersion: "ugv.recon-target-fact/1",
           missionId,
+          correlation: resolved.kind,
           observationSessionId: missionId,
           sensorId: "ugv.area_recon.targets",
           sourceTargetId: target.targetId,
@@ -3996,12 +4129,7 @@ export class UgvProviderRuntime {
     }
     // The exact recon target topic carries a complete current list. Only a
     // fully qualified list in this mission may make an absent target lost.
-    if (
-      !completeList ||
-      compareIsoTimestamps(applied.observedAt, statusAuthority.observedAt) < 0 ||
-      compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0
-    )
-      return;
+    if (!completeList || compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0) return;
     const scope = BoundExecutionScope.fromExecution(execution);
     const snapshot = await this.taskBusiness.business.getContextSnapshot(scope);
     if (snapshot === undefined) return;
@@ -4039,6 +4167,7 @@ export class UgvProviderRuntime {
       await processor.apply(execution, {
         schemaVersion: "ugv.recon-target-fact/1",
         missionId,
+        correlation: resolved.kind,
         observationSessionId: missionId,
         sensorId: "ugv.area_recon.targets",
         sourceTargetId,
@@ -4071,6 +4200,7 @@ export class UgvProviderRuntime {
 
   async #providerLockDispatch(
     execution: ProviderExecution,
+    expectedTargetId?: string,
   ): Promise<ProviderLockDispatch | undefined> {
     if (!this.taskBusiness || this.options.businessVisualLockOwner !== "provider") return undefined;
     if (execution.state !== "RUNNING" || this.#autoLockControlPending(execution)) return undefined;
@@ -4083,7 +4213,9 @@ export class UgvProviderRuntime {
       !missionId ||
       version?.kind !== "action" ||
       version.value.triggerOrigin !== "provider_policy" ||
-      typeof version.value.properties?.sourceTargetId !== "string"
+      typeof version.value.properties?.sourceTargetId !== "string" ||
+      (expectedTargetId !== undefined &&
+        version.value.properties.sourceTargetId !== expectedTargetId)
     )
       return undefined;
     const call = buildUgvTargetLockCall(true, version.value.properties.sourceTargetId, missionId);
@@ -4108,14 +4240,17 @@ export class UgvProviderRuntime {
     if (!this.taskBusiness || this.options.businessVisualLockOwner !== "provider") return;
     const missionId = execution.downstreamMissionIds.at(-1);
     if (!missionId || execution.operationName !== "vehicle_area_recon") return;
+    const active = await this.store.listActiveExecutions();
     const controlPending = () => this.#autoLockControlPending(execution);
     const canDispatch = (targetId: string) => {
       const sourceCurrent = (topic: string) => {
         const latest = this.#autoLockSources.get(topic);
+        const resolved = this.#resolveRecon(latest, active);
         return (
-          latest?.missionId === missionId &&
-          !latest.retained &&
-          latest.cursor === this.ingress.observationCursor(topic)
+          resolved.kind !== "UNRESOLVED" &&
+          resolved.execution.externalExecutionId === execution.externalExecutionId &&
+          resolved.missionId === missionId &&
+          latest?.cursor === this.ingress.observationCursor(topic)
         );
       };
       if (
@@ -4143,7 +4278,6 @@ export class UgvProviderRuntime {
         );
       };
       if (
-        reconCorrelationStrength(recon, missionId) !== "STRICT_CORRELATED" ||
         recon.motionStatus !== 5 ||
         recon.lock?.stage !== 1 ||
         !authority ||
@@ -5378,7 +5512,7 @@ function applyReconTrack(
   reconnaissance: UgvSnapshot["payload"]["reconnaissance"],
   observationCursor: string | undefined,
   observedAt: string | undefined,
-  correlation: CorrelationStrength,
+  correlation: CorrelationStrength | ReconCorrelation,
   terminalFacts: Record<string, unknown> = {},
 ): ProviderExecution {
   if (execution.state === "ACCEPTED" || !isNewReconObservation(execution, observationCursor))

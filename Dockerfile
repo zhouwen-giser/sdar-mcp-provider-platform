@@ -119,6 +119,7 @@ LABEL org.opencontainers.image.title="SDAR Real UGV Provider Adapter" \
       org.opencontainers.image.revision="${VCS_REF}"
 COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /app/dist/apps/ugv-provider-adapter
 COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
+COPY --from=build --chown=root:root /workspace/deploy/development/server/profiles /app/profiles
 CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]
 
 FROM production-dependencies AS npc-real-production-dependencies

@@ -122,6 +122,45 @@ export const UGV_RECON_BUSINESS_PROFILE = TaskBusinessOperationProfileSchema.par
   policy: { ...UGV_READ_ONLY_BUSINESS_PROFILE.policy, coverageMode: "device_reported" },
 });
 
+/** Advertise only the already wired Provider policy and trusted-user input path. */
+export function providerReconBusinessProfile(
+  manualDecision?: {
+    maxWaitMs: number;
+    onExpire: "release_and_resume_scan" | "end_observation" | "reissue_request";
+    onDismiss: "release_and_resume_scan" | "end_observation" | "reissue_request";
+  },
+  mapFull = false,
+): TaskBusinessOperationProfile {
+  return TaskBusinessOperationProfileSchema.parse({
+    ...UGV_RECON_BUSINESS_PROFILE,
+    ...(mapFull
+      ? {
+          artifactTypes: [...UGV_RECON_BUSINESS_PROFILE.artifactTypes, "recon.current_footprint"],
+          semantics: { ...UGV_RECON_BUSINESS_PROFILE.semantics, coordinateFrames: ["OGC:CRS84"] },
+        }
+      : {}),
+    requiredInputTypes: manualDecision ? ["target.disposition_decision"] : [],
+    methods: { ...UGV_RECON_BUSINESS_PROFILE.methods, inputUpdate: !!manualDecision },
+    limits: {
+      ...UGV_RECON_BUSINESS_PROFILE.limits,
+      ...(manualDecision ? { maxWaitMs: manualDecision.maxWaitMs } : {}),
+    },
+    policy: {
+      ...UGV_RECON_BUSINESS_PROFILE.policy,
+      visualLockOwner: "provider",
+      ...(mapFull ? { footprintMode: "estimated" } : {}),
+      decisionMode: manualDecision ? "user_required" : "none",
+      onExpire: manualDecision?.onExpire ?? "release_and_resume_scan",
+      onDismiss: manualDecision?.onDismiss ?? "release_and_resume_scan",
+    },
+    qualification: {
+      ...UGV_RECON_BUSINESS_PROFILE.qualification,
+      automaticVisualLock: "qualified",
+      ...(mapFull ? { footprint: "qualified" } : {}),
+    },
+  });
+}
+
 /** Reuses the admitted Provider execution and its persisted scope for every read. */
 export class UgvTaskBusinessContextService {
   constructor(

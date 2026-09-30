@@ -117,9 +117,13 @@ describe("sz-gowm deployment profile", () => {
     expect(loadRuntimeConfig({ ...side("RUNTIME__"), ...identity }).ADAPTER_RPC_TIMEOUT_MS).toBe(
       60000,
     );
-    expect(loadUgvProviderConfig({ ...side("ADAPTER__"), ...identity }).UGV_FIRE_ENABLED).toBe(
-      false,
-    );
+    expect(
+      loadUgvProviderConfig({
+        ...side("ADAPTER__"),
+        ...identity,
+        UGV_TASK_BUSINESS_PROFILE_PATH: "deploy/development/server/profiles/ugv-business.json",
+      }).UGV_FIRE_ENABLED,
+    ).toBe(false);
   });
   it.each([
     ["RUNTIME__PROVIDER_TELEMETRY_INGRESS_ENABLED", "false", "PROVIDER_TELEMETRY_INGRESS_REQUIRED"],

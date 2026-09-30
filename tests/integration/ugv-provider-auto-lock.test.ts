@@ -18,7 +18,7 @@ import {
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 
-async function fixture(enabled = true) {
+async function fixture(enabled = true, sourceMission: string | null = "11") {
   const store = new MemoryProviderStore();
   const business = new MemoryTaskBusinessStore();
   const device = new MockUgvDeviceMcpClient();
@@ -106,15 +106,16 @@ async function fixture(enabled = true) {
     stage: number,
     targetId: number,
     delta: number,
-    missionId: string | null = "11",
+    missionId: string | null = sourceMission,
     retained = false,
+    motionStatus = 5,
   ) => {
     offset = delta;
     ingress.handle(
       "/ugv/area_recon/status",
       Buffer.from(
         JSON.stringify({
-          status: 5,
+          status: motionStatus,
           ...(missionId ? { mission_id: missionId } : {}),
           status_label: "running",
           scan_mode: 1,
@@ -131,7 +132,7 @@ async function fixture(enabled = true) {
   const targets = async (
     delta: number,
     ids = [7, 8],
-    missionId: string | null = "11",
+    missionId: string | null = sourceMission,
     retained = false,
   ) => {
     offset = delta;
@@ -186,52 +187,130 @@ async function fixture(enabled = true) {
 }
 
 describe("Provider auto-lock production wire (synthetic source and device, not live qualification)", () => {
-  it("selects the first visible bound target once, waits for stage 3, then requests manual input", async () => {
-    const h = await fixture();
+  it("persists every telemetry packet without exceeding the configured reconciliation cadence", async () => {
+    const h = await fixture(false);
+    const scan = vi.spyOn(h.store, "listActiveExecutions");
+    const persist = vi.spyOn(h.store, "putSnapshot");
+    try {
+      h.advance(100);
+      for (let i = 0; i < 20; i++)
+        h.ingress.handle(
+          "/ugv/imu",
+          Buffer.from(JSON.stringify({ yaw: i, pitch: 0, roll: 0 })),
+          false,
+          h.at(100 + i),
+        );
+      await h.runtime().get("queue-drain-without-an-execution");
+      expect(persist).toHaveBeenCalledTimes(20);
+      expect(scan).not.toHaveBeenCalled();
+      await h.runtime().pollActive();
+      expect(scan).toHaveBeenCalled();
+    } finally {
+      await h.close();
+    }
+  });
+
+  it("finalizes an inferred recon stop and rejects packets after terminal", async () => {
+    const h = await fixture(false, null);
+    try {
+      await h.targets(100, [7]);
+      await h.status(1, 0, 200, null, false, 9);
+      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+        state: "CANCELLED",
+        result: { correlationStrength: "INFERRED_CURRENT_EXECUTION", missionId: "11" },
+      });
+      const finalized = await h.business.getContextSnapshot(h.scope);
+      await h.targets(300, [8]);
+      await h.status(3, 8, 400);
+      expect(await h.business.getContextSnapshot(h.scope)).toEqual(finalized);
+      expect(h.device.calls).toHaveLength(0);
+    } finally {
+      await h.close();
+    }
+  });
+
+  it("keeps a policy-owned scan pause RUNNING until its post-dispatch lock generates input", async () => {
+    const h = await fixture(true, null);
     try {
       await h.targets(100);
-      expect(h.device.calls).toEqual([
-        {
-          name: "ugv_area_recon_lock",
-          arguments: { lock: true, target_id: 7, mission_id: 11 },
-          taskId: h.run.taskId,
-        },
-      ]);
-      expect((await h.actions()).at(-1)).toMatchObject({
-        state: "requested",
-        triggerOrigin: "provider_policy",
-        actor: { type: "provider" },
-      });
-      expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
-      await h.targets(200);
-      expect(h.device.calls).toHaveLength(1);
-      await h.status(2, 7, 300);
-      expect((await h.actions()).at(-1)).toMatchObject({ state: "requested" });
-      expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
-      await h.status(3, 7, 400);
+      // The source callback updates the latest packet before queued projection runs.
+      // Exercise the same poll ordering as production status/target callbacks.
+      await h.status(2, 7, 200, null, false, 8);
+      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
+      expect((await h.actions()).at(-1)?.state).toBe("requested");
+      await h.status(3, 7, 300, null, false, 8);
       expect((await h.actions()).at(-1)).toMatchObject({
         state: "active",
         triggerOrigin: "provider_policy",
-        startedAt: h.at(400),
-        properties: { phase: "observing", triggerQualification: "journal_and_observation" },
-      });
-      expect(await h.service.activeRequiredInput(h.run)).toMatchObject({
-        state: "pending",
-        subjectBinding: { targetId: "7" },
       });
       expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
-      expect(await h.store.listActiveExecutions()).toHaveLength(1);
-      await h.status(3, 7, 500);
+      expect(await h.service.activeRequiredInput(h.run)).toMatchObject({ state: "pending" });
       expect(h.device.calls).toHaveLength(1);
     } finally {
       await h.close();
     }
   });
 
-  it.each(["continue_observation", "decline", "cancel"] as const)(
-    "applies a trusted %s to the policy lock without relocking after scan resume",
-    async (decision) => {
-      const h = await fixture();
+  it.each(["11", null])(
+    "selects a target once and waits for stage 3 (source mission=%s)",
+    async (sourceMission) => {
+      const h = await fixture(true, sourceMission);
+      try {
+        await h.targets(100);
+        expect(h.device.calls).toEqual([
+          {
+            name: "ugv_area_recon_lock",
+            arguments: { lock: true, target_id: 7, mission_id: 11 },
+            taskId: h.run.taskId,
+          },
+        ]);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "requested",
+          triggerOrigin: "provider_policy",
+          actor: { type: "provider" },
+        });
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        await h.targets(200);
+        expect(h.device.calls).toHaveLength(1);
+        await h.status(2, 7, 300);
+        expect((await h.actions()).at(-1)).toMatchObject({ state: "requested" });
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        await h.status(3, 7, 400);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "active",
+          triggerOrigin: "provider_policy",
+          startedAt: h.at(400),
+          properties: {
+            phase: "observing",
+            triggerQualification: "journal_and_observation",
+            correlation: sourceMission ? "STRICT_CORRELATED" : "INFERRED_CURRENT_EXECUTION",
+          },
+        });
+        expect(await h.service.activeRequiredInput(h.run)).toMatchObject({
+          state: "pending",
+          subjectBinding: { targetId: "7" },
+        });
+        expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
+        expect(await h.store.listActiveExecutions()).toHaveLength(1);
+        await h.status(3, 7, 500);
+        expect(h.device.calls).toHaveLength(1);
+      } finally {
+        await h.close();
+      }
+    },
+  );
+
+  it.each(
+    ["11", null].flatMap((mission) =>
+      (["continue_observation", "decline", "cancel"] as const).map((decision) => ({
+        mission,
+        decision,
+      })),
+    ),
+  )(
+    "applies $decision with source mission=$mission and no relock after resume",
+    async ({ mission, decision }) => {
+      const h = await fixture(true, mission);
       try {
         await h.targets(100);
         await h.status(3, 7, 300);
@@ -327,66 +406,62 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     },
   );
 
-  it("expires the policy input and recovers one release across restart before scan confirmation", async () => {
-    const h = await fixture();
-    try {
-      await h.targets(100);
-      await h.status(3, 7, 300);
-      const pending = await h.service.activeRequiredInput(h.run);
-      if (!pending?.deadlineAt) throw new Error("POLICY_INPUT_DEADLINE_MISSING");
-      const deadline = Date.parse(pending.deadlineAt) - Date.parse(h.at(0));
-      await h.targets(deadline - 200);
-      await h.status(3, 7, deadline - 100);
-      h.advance(deadline);
-      await h.runtime().pollActive();
-      expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
-      const ref = (await h.business.getContext(h.scope))?.requiredInputRefs.at(-1);
-      if (!ref) throw new Error("EXPIRED_POLICY_INPUT_MISSING");
-      expect(await h.business.getObjectVersion(h.scope, ref)).toMatchObject({
-        kind: "input_request",
-        value: { state: "expired", requestId: pending.requestId },
-      });
-      expect(h.device.calls).toHaveLength(2);
-      expect(h.device.calls[1]).toMatchObject({
-        name: "ugv_area_recon_lock",
-        arguments: { lock: false, target_id: 0, mission_id: 11 },
-      });
-      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toMatchObject({
-        command: "input_release",
-      });
-      await h.restart();
-      await h.status(1, 0, deadline + 100);
-      await h.targets(deadline + 200);
-      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
-      expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
-      expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
-      expect(h.device.calls).toHaveLength(2);
-    } finally {
-      await h.close();
-    }
-  });
+  it.each(["11", null])(
+    "expires input and recovers one release across restart (mission=%s)",
+    async (mission) => {
+      const h = await fixture(true, mission);
+      try {
+        await h.targets(100);
+        await h.status(3, 7, 300);
+        const pending = await h.service.activeRequiredInput(h.run);
+        if (!pending?.deadlineAt) throw new Error("POLICY_INPUT_DEADLINE_MISSING");
+        const deadline = Date.parse(pending.deadlineAt) - Date.parse(h.at(0));
+        await h.targets(deadline - 200);
+        await h.status(3, 7, deadline - 100);
+        h.advance(deadline);
+        await h.runtime().pollActive();
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        const ref = (await h.business.getContext(h.scope))?.requiredInputRefs.at(-1);
+        if (!ref) throw new Error("EXPIRED_POLICY_INPUT_MISSING");
+        expect(await h.business.getObjectVersion(h.scope, ref)).toMatchObject({
+          kind: "input_request",
+          value: { state: "expired", requestId: pending.requestId },
+        });
+        expect(h.device.calls).toHaveLength(2);
+        expect(h.device.calls[1]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: false, target_id: 0, mission_id: 11 },
+        });
+        expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toMatchObject({
+          command: "input_release",
+        });
+        await h.restart();
+        await h.status(1, 0, deadline + 100);
+        await h.targets(deadline + 200);
+        expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+        expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        expect(h.device.calls).toHaveLength(2);
+      } finally {
+        await h.close();
+      }
+    },
+  );
 
   it.each([
     "no-owner",
-    "no-target-identity",
     "foreign-target-mission",
     "retained-targets",
-    "no-status-identity",
     "retained-status",
     "stale-status",
   ])("does not dispatch for %s", async (scenario) => {
     const h = await fixture(scenario !== "no-owner");
     try {
-      if (scenario === "no-status-identity") await h.status(1, 0, 50, null);
       if (scenario === "retained-status") await h.status(1, 0, 50, "11", true);
       await h.targets(
         scenario === "stale-status" ? 4000 : 100,
         [7],
-        scenario === "no-target-identity"
-          ? null
-          : scenario === "foreign-target-mission"
-            ? "12"
-            : "11",
+        scenario === "foreign-target-mission" ? "12" : "11",
         scenario === "retained-targets",
       );
       expect(h.device.calls).toHaveLength(0);
@@ -561,44 +636,41 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     }
   });
 
-  it.each([true, false])(
-    "rechecks source identity at dispatch while accepting newer valid scanning facts (identified=%s)",
-    async (identified) => {
-      const h = await fixture();
-      const advance = h.store.advanceMutationJournal.bind(h.store);
-      const spy = vi
-        .spyOn(h.store, "advanceMutationJournal")
-        .mockImplementation(async (entry, previous) => {
-          if (entry.stepId.startsWith("auto-lock:") && entry.state === "DISPATCHING") {
-            h.advance(150);
-            h.ingress.handle(
-              "/ugv/area_recon/status",
-              Buffer.from(
-                JSON.stringify({
-                  status: 5,
-                  ...(identified ? { mission_id: "11" } : {}),
-                  lock: { stage: 1, target_id: 0 },
-                }),
-              ),
-              false,
-              h.at(150),
-            );
-          }
-          return advance(entry, previous);
-        });
-      try {
-        await h.targets(100);
-        await h.runtime().pollActive();
-        expect(h.device.calls).toHaveLength(identified ? 1 : 0);
-        expect((await h.actions()).at(-1)).toMatchObject({
-          state: identified ? "requested" : "failed",
-        });
-      } finally {
-        spy.mockRestore();
-        await h.close();
-      }
-    },
-  );
+  it.each(["11", null, "12"])("rechecks source at dispatch (mission=%s)", async (mission) => {
+    const h = await fixture();
+    const advance = h.store.advanceMutationJournal.bind(h.store);
+    const spy = vi
+      .spyOn(h.store, "advanceMutationJournal")
+      .mockImplementation(async (entry, previous) => {
+        if (entry.stepId.startsWith("auto-lock:") && entry.state === "DISPATCHING") {
+          h.advance(150);
+          h.ingress.handle(
+            "/ugv/area_recon/status",
+            Buffer.from(
+              JSON.stringify({
+                status: 5,
+                ...(mission ? { mission_id: mission } : {}),
+                lock: { stage: 1, target_id: 0 },
+              }),
+            ),
+            false,
+            h.at(150),
+          );
+        }
+        return advance(entry, previous);
+      });
+    try {
+      await h.targets(100);
+      await h.runtime().pollActive();
+      expect(h.device.calls).toHaveLength(mission !== "12" ? 1 : 0);
+      expect((await h.actions()).at(-1)).toMatchObject({
+        state: mission !== "12" ? "requested" : "failed",
+      });
+    } finally {
+      spy.mockRestore();
+      await h.close();
+    }
+  });
 
   it("does not attribute a different target lock to the Provider policy or ask for its input", async () => {
     const h = await fixture();

@@ -1,4 +1,9 @@
 import {
+  AIRPORT_SECTOR_MODEL,
+  AIRPORT_MAP_FRAME,
+  AIRPORT_MAP_TRANSFORM,
+} from "./airport-map-geometry.js";
+import {
   PostgresProviderStore,
   PostgresTaskBusinessStore,
   openGowmTaskBusinessStore,
@@ -19,17 +24,28 @@ export function assertUgvTaskBusinessSettingsSupported(
   if (navigationPlannerConfigured && !settings.enabled)
     throw new Error("UGV_PLANNER_BUSINESS_STORE_REQUIRED");
   if (!settings.enabled) return;
-  if (settings.decisionMode !== "none") throw new Error("UGV_BUSINESS_DECISION_NOT_WIRED");
-  if (settings.visualLockOwner !== "disabled")
+  if (
+    settings.decisionMode !== "none" &&
+    (settings.decisionMode !== "user_required" || settings.visualLockOwner !== "provider")
+  )
+    throw new Error("UGV_BUSINESS_DECISION_NOT_WIRED");
+  if (settings.visualLockOwner !== "disabled" && settings.visualLockOwner !== "provider")
     throw new Error("UGV_BUSINESS_VISUAL_LOCK_NOT_QUALIFIED");
-  if (settings.footprint.mode !== "disabled")
+  const mapFull =
+    settings.footprint.mode === "estimated" &&
+    settings.footprint.model === AIRPORT_SECTOR_MODEL &&
+    settings.coordinates.frameId === AIRPORT_MAP_FRAME &&
+    settings.coordinates.transformRef === AIRPORT_MAP_TRANSFORM &&
+    navigationPlannerConfigured &&
+    settings.visualLockOwner === "provider";
+  if (settings.footprint.mode !== "disabled" && !mapFull)
     throw new Error("UGV_BUSINESS_FOOTPRINT_NOT_QUALIFIED");
   if (settings.coverage.mode !== "device_reported")
     throw new Error("UGV_BUSINESS_COVERAGE_MODE_MISMATCH");
   if (settings.adjustments.reconnaissance) throw new Error("UGV_BUSINESS_ADJUSTMENT_NOT_WIRED");
   if (settings.adjustments.navigation && !navigationPlannerConfigured)
     throw new Error("UGV_BUSINESS_NAVIGATION_PLANNER_REQUIRED");
-  if (settings.coordinates.frameId || settings.coordinates.transformRef)
+  if (!mapFull && (settings.coordinates.frameId || settings.coordinates.transformRef))
     throw new Error("UGV_BUSINESS_COORDINATE_POLICY_NOT_WIRED");
   if (settings.trajectory.minSamples !== 2 || settings.trajectory.sampleEveryMs !== 1_000)
     throw new Error("UGV_BUSINESS_TRAJECTORY_POLICY_NOT_WIRED");

@@ -3902,8 +3902,8 @@ export class TaskRepository {
        FROM task_input_response_inbox AS inbox
        JOIN task_input_request AS input
          ON input.task_id=inbox.task_id AND input.request_key=inbox.request_key
-       WHERE (${scopePredicate(this.pool, "task_input_response_inbox", "inbox")})
-         AND (${scopePredicate(this.pool, "task_input_request", "input")})
+       WHERE (${scopePredicate(this.pool, "inbox", "task_input_response_inbox")})
+         AND (${scopePredicate(this.pool, "input", "task_input_request")})
          AND inbox.task_id=$1 AND inbox.command_sequence=$2 AND inbox.state='ASSIGNED'
        ORDER BY inbox.request_key`,
       [command.taskId, command.commandSequence],
@@ -4438,10 +4438,27 @@ export class TaskRepository {
       );
 
       const keys = answers.map((answer) => answer.key).sort();
+      const remaining = await client.query(
+        `SELECT 1 FROM task_input_request
+         WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+           AND task_id=$1 AND status='OPEN' LIMIT 1`,
+        [command.taskId],
+      );
+      const inputComplete = task.internal_state === "INPUT_REQUIRED" && !remaining.rowCount;
       await transitionTask(client, {
         taskId: command.taskId,
         expectedVersion: Number(task.version),
-        update: {},
+        // The accepted answer ends the prompt, not the physical operation.
+        // Publish this together with ANSWERED so tasks/get never exposes an
+        // input_required Task with no open input requests while recovery polls.
+        update: inputComplete
+          ? {
+              internalState: "RUNNING",
+              mcpStatus: "working",
+              substate: null,
+              statusMessage: "Task input accepted; awaiting Provider observation.",
+            }
+          : {},
         observation: {
           type: "task.input_answered",
           occurredAt: new Date(),

@@ -1,49 +1,17 @@
-# Interim closeout — goal incomplete
+# Final candidate qualification in progress
 
 `SMPP_UGV_BUSINESS_FEEDBACK_IMPLEMENTATION_COMPLETE=false`
 
 `SMPP_UGV_BUSINESS_FEEDBACK_END_TO_END_READY=false`
 
-This is a recoverable progress report, not final acceptance. The current local
-candidate is identified by CANDIDATE.json; it is uncommitted and has not been
-released as a final package or deployed during this goal. The selected requirements remain core
-business feedback with `gowm_shared`, `mapFull=false` and fire disabled. The
-user-authorized generated scene labels are recorded separately from any verified
-simulator build.
+The operator selected all implemented non-fire capabilities, including the airport estimated Map-full profile. Fire remains disabled. Only SMPP and packaged SQL changed; GOWM and simulator source are untouched.
 
-| Required result     | Current result                                    | Remaining boundary                                   |
-| ------------------- | ------------------------------------------------- | ---------------------------------------------------- |
-| V-NAV               | Real public Runtime positive PASS                 | External SDAR / final deployed candidate             |
-| V-OBS               | NOT_RUN                                           | Reset-safe real reconnaissance identity              |
-| V-INPUT             | NOT_RUN                                           | Same-candidate real lock/input/release/resume        |
-| V-EDIT              | Two real public edits + full process restart PASS | External SDAR / remaining live fault cases           |
-| Selected GOWM Store | 9 strict tests + public process restart PASS      | sz-gowm installation not performed this continuation |
-| Final CI            | Local checks recorded in VALIDATION.md            | No hosted candidate CI result                        |
-| External SDAR       | EXTERNAL_PENDING                                  | Same-candidate consumer results                      |
-| Map-full            | DISABLED / NOT_QUALIFIED                          | Not selected                                         |
+- Actual public Recon, Provider lock with later same-target stage 3, continue and decline/release: PASS (`evidence/map-full-recon.json`).
+- Actual estimated current footprint and device covered-area geometry: PASS. This qualifies a horizontal range-sector estimate, not calibrated visibility.
+- Public Map-full replay: 101 complete Contexts, 166 selected notifications and duplicate no-op checks PASS (`evidence/map-full-replay.json`).
+- Current core navigation before Map-full changes: PASS with two adjustments, process restart and actual final arrival (`evidence/final-candidate-navigation.json`).
+- Map-full navigation: route adoption, two adjustments and restart passed; arrival timed out. Device subsequently reported mobility_blocked=true / mobility_status=1 with throttle 0.4 and speed about 0.01 km/h. Cancelled through public Runtime. Final arrival requires a restored simulator; no success inferred from ACK or route adoption.
+- Final local checks: UGV 324, unit 288, selected GOWM 10, native PostgreSQL 27, cross-contract/lock-order 49, configuration 46 and release candidate 23 PASS. Hosted CI, package and site results will be recorded separately.
+- External SDAR remains EXTERNAL_PENDING and only gates END_TO_END_READY.
 
-Delivered progress includes the auto-lock coordinator and observation/journal
-fences, the discover-first manual acceptance wrapper, GOWM family/grant fixes,
-expanded strict Store tests and CI coverage, and the source/consumer contracts.
-VALIDATION.md records each executed check and its limits. Legacy mapping covers
-all 48 UGVB tasks and B01–B36/C01–C12 without promoting test associations to
-acceptance. The completion audit remains open for V-OBS/V-INPUT and final
-same-candidate validation; local self-checks do not qualify those workflows.
-
-Navigation can be explicitly enabled with the qualified airport profile. Recon
-policy/input gates remain closed until their source identity is qualified. Keep
-route candidates separate from adoption, task acceptance separate from device
-effects, and current mission/intent authoritative after adoption. Do not replace
-missing real workflows with fixtures or call the goal complete based on CI.
-
-The 2026-09-29 active-source recheck ran mission 47567 in the user-provided area
-and confirmed anonymous status/target messages while running. Recon-specific stop
-was observed as status 9 with lock stage 1; no chassis, lock or fire action ran.
-This is source evidence only, not V-OBS or V-INPUT acceptance. Their explicit
-NOT_RUN records and the six-file navigation consumer export are now present.
-
-The subsequent full-payload navigation run also passed (Task
-c572b7d9-468c-45d7-a657-ae21b8a34201, missions 47568→47569→47570). Its 19 complete
-Contexts and 38 selected original notifications replay correctly through the
-public normalizer/reducer. See V-PUBLIC-PAYLOADS.md. This closes the navigation
-payload-capture gap; recon/Input and external SDAR remain unqualified.
+Historical failures and the core-only captures remain evidence of their own candidate/profile. They are not relabelled as final Map-full arrival or site acceptance.

@@ -4,7 +4,7 @@ import {
   type RequiredInput,
 } from "../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { runReadOnlyTaskBusinessProbe } from "./read-only-probe.js";
-import { createWriteProbeClient } from "./write-probe-client.js";
+import { createWriteProbeClient, simulationProbeFetch } from "./write-probe-client.js";
 
 const nonempty = z.string().min(1).max(512);
 
@@ -29,6 +29,7 @@ export const UgvManualInputProbeManifestSchema = z
     cleanupTaskAfter: z.boolean().default(false),
     maxPolls: z.number().int().min(1).max(60).default(10),
     pollIntervalMs: z.number().int().min(100).max(10_000).default(1_000),
+    maxPageBytes: z.number().int().min(1_024).max(1_048_576).default(65_536),
   })
   .strict();
 
@@ -45,7 +46,7 @@ export async function runUgvManualInputProbe(input: {
   wait?: (ms: number) => Promise<void>;
 }): Promise<void> {
   const manifest = UgvManualInputProbeManifestSchema.parse(input.manifest);
-  const fetchImpl = input.fetchImpl ?? fetch;
+  const fetchImpl = simulationProbeFetch(input.fetchImpl ?? fetch, manifest.sceneInstanceId);
   const now = input.now ?? (() => new Date());
   const wait = input.wait ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
   const emit = async (line: RecordValue) =>
@@ -67,6 +68,7 @@ export async function runUgvManualInputProbe(input: {
       taskId: manifest.taskId,
       bearerToken: input.bearerToken,
       snapshotOnly: true,
+      maxPageBytes: manifest.maxPageBytes,
       durationMs: 15_000,
       emit: (line) => {
         if (line.type === "snapshot") {
@@ -107,7 +109,8 @@ export async function runUgvManualInputProbe(input: {
     pending.identity.executionId !== manifest.executionId ||
     pending.identity.providerId !== manifest.providerId ||
     pending.identity.resourceId !== manifest.resourceId ||
-    pending.identity.simulationId !== manifest.sceneInstanceId ||
+    (pending.identity.simulationId !== undefined &&
+      pending.identity.simulationId !== manifest.sceneInstanceId) ||
     pending.identity.operationName !== "vehicle_area_recon" ||
     binding.kind !== "visual_lock" ||
     binding.lockSessionId !== manifest.lockSessionId ||

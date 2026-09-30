@@ -206,9 +206,13 @@ function validateCoverability(name: UgvDeviceToolName, value: unknown): void {
   if (!new Set(["full", "partial", "none", "unknown"]).has(value.coverable as string))
     protocol(name, "DEVICE_COVERABILITY_INVALID");
   requireString(value.coverable_label, name, "DEVICE_COVERABILITY_INVALID");
-  for (const key of ["region_min_dist_m", "region_max_dist_m", "detection_range_m"])
+  for (const key of ["region_min_dist_m", "region_max_dist_m", "detection_range_m"]) {
+    // A skipped camera preflight explicitly has unknown distances, not zero distances.
+    if (value.coverable === "unknown" && key !== "detection_range_m" && value[key] === null)
+      continue;
     if (value[key] !== undefined)
       finiteNonnegative(value[key], name, "DEVICE_COVERABILITY_INVALID");
+  }
 }
 
 function validateStatusRead(name: UgvDeviceToolName, result: Record<string, unknown>): void {

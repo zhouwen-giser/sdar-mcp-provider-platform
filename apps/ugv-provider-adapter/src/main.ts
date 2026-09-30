@@ -176,6 +176,7 @@ const runtime = new UgvProviderRuntime(
     },
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
     trajectorySampleEveryMs: config.taskBusinessSettings.trajectory.sampleEveryMs,
+    businessMapFull: config.taskBusinessSettings.footprint.mode === "estimated",
     ...(config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" && config.UGV_NAVIGATION_PLANNER_URL
       ? {
           navigationPlanner: new AirportRoadPlanner(config.UGV_NAVIGATION_PLANNER_URL),

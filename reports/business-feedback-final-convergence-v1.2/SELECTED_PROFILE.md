@@ -1,3 +1,5 @@
-# BFF-002 selected profile
+# Selected deployment profile
 
-`SELECTED_PROFILE.json` freezes `gowm_shared`, core enabled, mapFull=false. Every coreRequired capability remains mandatory. Unsupported route/adoption, auto-lock, manual input or adjustment cannot close this goal. Current production gates stay closed until source qualification. Current footprint is disabled; coverage cells without frame/origin/axis cannot be exported as map geometry.
+GOWM shared storage; all implemented non-fire capabilities enabled. Map-full uses the operator-authorized airport range-sector estimate (`isr.airport.eo-range-sector/v1`) and actual device display-cell coverage. Fire remains disabled. Navigation adjustment is enabled; unsupported online Recon area adjustment is not advertised.
+
+`quality=estimated` does not claim calibrated camera visibility or terrain/occlusion modelling. Profile source: `deploy/development/server/profiles/ugv-business.json`. Actual Map-full public evidence and replay: `evidence/map-full-recon.json`, `evidence/map-full-replay.json`.

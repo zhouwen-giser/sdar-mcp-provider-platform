@@ -1,6 +1,6 @@
 {
   "mode": "captured",
-  "capturedAt": "2026-09-29T07:41:46.509Z",
+  "capturedAt": "2026-09-30T03:59:38.018Z",
   "serverInfo": {
     "name": "ugv-mcp-server",
     "version": "1.26.0"
@@ -59,7 +59,7 @@
         },
         "title": "ugv_path_follow_missionArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "ccd5b661731d32680af7613603e5fef6f64d2a6cbfd3834b8909f9fcef9e2ccf"
     },
     {
@@ -76,7 +76,7 @@
         },
         "title": "ugv_return_homeArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "06687bfdfaa3d1f9ad48f6e5de057610d3fd04538bff744e60ff04a0a7ee6a25"
     },
     {
@@ -111,10 +111,13 @@
             "title": "Speed"
           }
         },
-        "required": ["direction", "distance"],
+        "required": [
+          "direction",
+          "distance"
+        ],
         "title": "ugv_move_distanceArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "c67dc224841378fb8fb5e77ccbbd2e67e55b604177ab18a334a036bbf93893ba"
     },
     {
@@ -133,10 +136,12 @@
             "type": "integer"
           }
         },
-        "required": ["action"],
+        "required": [
+          "action"
+        ],
         "title": "ugv_mission_controlArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "83af48af745175e28023d29a745215ce9f411b8e372260070be90eed0f5918b6"
     },
     {
@@ -147,7 +152,7 @@
         "properties": {},
         "title": "ugv_motion_stopArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "8e60a641bd2d62fb265190e644f2d11bf970781dc3b47bdb671c4ede7be3dad7"
     },
     {
@@ -158,7 +163,7 @@
         "properties": {},
         "title": "get_statusArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "b7157a6708b985f3ce7f13cc5617cc0ee4c84fde4d23fdcdc57cfb89749cd36a"
     },
     {
@@ -169,7 +174,7 @@
         "properties": {},
         "title": "get_capabilitiesArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "45924635f6613d29c53ec771f9f74c1f3efe26238fff6dac4d31ebc2046aee44"
     },
     {
@@ -233,7 +238,7 @@
         },
         "title": "ugv_area_recon_configureArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "34f51e463e1ad4a07daf9b7621ef0fb83f609a888e991b19269976fd1338bc47"
     },
     {
@@ -252,10 +257,12 @@
             "type": "integer"
           }
         },
-        "required": ["cmd_type"],
+        "required": [
+          "cmd_type"
+        ],
         "title": "ugv_area_recon_controlArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "d89027b1a9e0c9ed082a560fe0ec1924e6c6da3194d99cf21c4d79fd35a27d54"
     },
     {
@@ -279,10 +286,12 @@
             "type": "integer"
           }
         },
-        "required": ["lock"],
+        "required": [
+          "lock"
+        ],
         "title": "ugv_area_recon_lockArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "6044b85bd3786a0226dab406db61e6be282fffd8dd5ba456c6478b2e9b09a33d"
     },
     {
@@ -293,7 +302,7 @@
         "properties": {},
         "title": "ugv_area_recon_get_statusArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "d72c81dc1cef14da36f886eeb3899c8bc0652d1dd015e8fdcd439db89da28797"
     },
     {
@@ -304,7 +313,7 @@
         "properties": {},
         "title": "ugv_area_recon_get_targetsArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "c996eade8d3cda0fd2582ed6a9f766fb92232086f1b18f6cc36cc2853cabb969"
     },
     {
@@ -321,7 +330,7 @@
         },
         "title": "ugv_area_recon_resetArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "3bbf3da0021534d7565e38edfc3800ea0db59291d4e783313aca9a8a467a48ea"
     },
     {
@@ -340,10 +349,12 @@
             "type": "integer"
           }
         },
-        "required": ["confirm"],
+        "required": [
+          "confirm"
+        ],
         "title": "ugv_area_recon_attack_confirmArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "8eec6da1b13500105899477d9933471e7dd9c13ac2fc475fb9a5435c84fe6fae"
     },
     {
@@ -387,10 +398,12 @@
             "type": "integer"
           }
         },
-        "required": ["mode"],
+        "required": [
+          "mode"
+        ],
         "title": "ugv_gimbal_moveArguments"
       },
-      "capturedAt": "2026-09-29T07:41:46.507Z",
+      "capturedAt": "2026-09-30T03:59:38.016Z",
       "schemaHash": "db051e08c0a18ae3a92a6ab89698c1ce79cf4a8de9394e043ba239b8f5246a54"
     }
   ],

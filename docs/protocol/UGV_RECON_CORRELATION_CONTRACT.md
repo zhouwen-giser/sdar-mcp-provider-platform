@@ -1,66 +1,63 @@
-# UGV reconnaissance source identity — qualification pending
+# Recon current-execution correlation
 
-Status: **BLOCKED_SOURCE_IDENTITY**. `mission_id` on a command reply is not the
-identity of an unrelated telemetry packet.
+The 2026-09-29 v1.2 supplement replaces the former producer identity prerequisite.
+Explicit mission/session identity is preferred. If absent, the Provider supports
+`INFERRED_CURRENT_EXECUTION` for the same resource's unique active
+`vehicle_area_recon` Execution. No upstream change or new session service/table is required.
 
-The 2026-09-29 07:23 UTC read-only recheck is in
-`reports/business-feedback-final-convergence-v1.2/evidence/recon-readonly-recheck.json`.
-Two read-only MCP calls succeeded; 121 status frames and one coverage frame were
-received without device mutations. Status/lock and the empty target response
-still have no mission/session identity; coverage has `run_id=0`. No target frame
-was observed during this idle window, so this capture does not establish active
-target behavior or a new producer version.
+`resolveReconExecutionCorrelation` checks the exact accepted MQTT packet rather
+than borrowing a sticky mission ID from another topic. Present identities must
+all match the latest saved downstream mission. Malformed, conflicting or foreign
+identities return `UNRESOLVED`. Anonymous data requires exactly one nonterminal,
+started Recon Execution in the same Provider/resource scope. No active execution,
+multiple candidates, retained packets, stale/future observations, pre-creation
+observations and the recorded start/baseline cursor are rejected. The same checks
+apply to status, target, lock and coverage facts. A restarted Runtime waits for a
+new accepted packet; a persisted Context is not fresh source evidence.
 
-Read-only inspection of `area_recon_scan.py` confirms `_run_id` starts at zero
-in the constructor and increments on start; only coverage includes it. Status
-publishes `last_cmd_ack`, while target items have capture time but no mission or
-run ID. The MCP command sequence is a receipt identifier, not a shared generation
-on status/targets/coverage, and also restarts with its process. Neither mechanism
-establishes a reset-safe lifecycle mapping. Upstream files were not changed.
+Accepted facts return `STRICT_CORRELATED` or `INFERRED_CURRENT_EXECUTION` and use
+the Execution's saved latest downstream mission. Public Context summary properties
+record `reconStatusCorrelation`, `reconTargetCorrelation`, `nativeLockCorrelation`
+and `reconCoverageCorrelation`; an observed lock Action records `correlation`.
+This is an explicit inference policy, not proof that the device supplied identity.
+Without source time/identity, ingress time cannot distinguish every delayed
+non-retained historical packet; the supplement accepts this boundary with the
+existing freshness, Execution and cursor checks.
 
-Current read-only capture is recorded in
-`reports/business-feedback-final-convergence-v1.2/evidence/device-read-only-20260929.json`.
-MQTT `/ugv/area_recon/status` wraps JSON in `data`; it contains status, lock stage
-and target ID, but no mission/session ID or source observation time. The MCP
-status and empty-target replies likewise lack mission identity. Coverage exposes
-`run_id`, but no observed mapping to the MCP mission. An idle window supplies no
-fresh target packet; the historical active capture also lacked authoritative
-target-list mission identity.
+AutoLock reuses the existing deterministic selection, command journal and priority
+control gates: RUNNING, fresh visible target, scanning/unlocked, saved mission and
+no pending pause/cancel. Both accepted correlation types are eligible. ACK only
+records the request. Only post-dispatch stage 3 for the requested target establishes
+a Provider-policy active Action and its RequiredInput. Mission replacement,
+target loss, restart and uncertain command handling retain their existing fences.
+Trusted user continue/decline/cancel and expiry reuse the existing handler and
+release-and-resume observation confirmation.
 
-Required producer contract: status, targets, lock and coverage carry the same
-real mission/session ID, a reset-safe generation, and source time/sequence.
-Alternatively supply a verified lifecycle mapping that cannot attribute a
-buffered old packet to the next mission. Record configure/start/stop/reset,
-disconnect/reconnect and restart behavior. Reusing a previous status mission or
-stamping the currently active Execution onto anonymous target packets is invalid.
+Provider policy and user-required input are opt-in configuration paths. Their
+presence does not itself establish live workflow qualification. V-OBS and V-INPUT
+must run through the public Runtime with independent simulator observations,
+record correlation, and prove continue plus decline/cancel. Automated expiry is
+sufficient. Fire remains disabled; no weapon behavior is added or enabled.
 
-The existing Runtime/state-store mission fence must stay fail-closed. Provider
-auto-lock may act only on a visible target belonging to the current recon
-Execution; its requested Action and journal must bind mission/session/target.
-Only a later stage-3 observing fact for that binding establishes active locking.
-Pause/cancel wins over policy dispatch. A different mission, target loss or old
-lock session must not answer or reissue a RequiredInput for the new session.
+Coverage statistics do not establish map geometry. A separate coverage packet
+also requires current scanning status for the same Execution; native lock stages
+2/3 cannot be counted as scanning. Frame/origin/axis/transform/area revision rules
+remain unchanged. `mapFull=false`; current footprint stays disabled.
 
-The implemented [Provider policy](UGV_TASK_BUSINESS_PROVIDER_AUTO_LOCK.md) enforces
-these consumer fences and is covered by Runtime component tests. Its presence
-does not supply the missing producer identity or open the production gate.
+## Preserved source audit facts
 
-The selected profile is core. Current footprint remains disabled; coverage
-cells are not map geometry without declared frame, origin, axis, transform and
-area revision. Requested recon area, cumulative coverage and instantaneous
-footprint remain distinct artifacts.
+The read-only and active captures are retained in
+`reports/business-feedback-final-convergence-v1.2/evidence/recon-readonly-recheck.json`
+and `recon-active-source-recheck.json`. On mission 47567, the active audit received
+121 status, 30 empty-target and two coverage packets. Status/target/lock had no
+shared mission/session identity; coverage alone had `run_id=1`. The local producer
+inspection found run_id resets at construction and increments on start, so it is
+not a shared reset-safe identity. The command reply's mission ID is a receipt,
+not an identity field on a telemetry packet. These facts remain valid; they no
+longer prevent Provider-side current-execution inference.
 
-## Active source recheck
-
-The follow-up `evidence/recon-active-source-recheck.json` under the same report
-directory records configure/start for mission 47567 in the user-provided region.
-MCP observed status 5 (running). MQTT produced 121 active status packets, 30
-empty-target packets and two coverage packets. Status and target envelopes still
-lack mission/session identity; coverage reports run_id=1 only. This is not a
-nonempty target observation or a proof of a reset-safe session mapping.
-
-The audit used `ugv_area_recon_control(cmd_type=4, mission_id=47567)` for cleanup;
-a subsequent status reported 9 (terminated) and lock stage 1. No chassis movement,
-visual lock or fire call occurred. The current deployed tool description differs
-from the local simulator source, so the local code audit is supporting evidence
-only and is not presented as a verified deployed build.
+Cleanup used `ugv_area_recon_control(cmd_type=4, mission_id=47567)` and observed
+status 9 with lock stage 1. That audit made no chassis, visual-lock or fire call
+and saw no nonempty target. It is source inspection, not V-OBS/V-INPUT acceptance.
+The deployed tool description differed from local source; no deployed simulator
+build identity is claimed. Neither upstream repository was modified.

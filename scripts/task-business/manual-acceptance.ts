@@ -46,6 +46,7 @@ export const UgvManualAcceptanceManifestSchema = z
       .default([]),
     durationMs: z.number().int().min(100).max(60_000).default(10_000),
     maxEvents: z.number().int().min(1).max(1_000).default(20),
+    maxPageBytes: z.number().int().min(1_024).max(1_048_576).default(65_536),
     snapshotOnly: z.boolean().default(false),
     write: write.optional(),
   })
@@ -208,6 +209,7 @@ export async function runUgvManualAcceptance(options: {
   };
   if (!manifest.snapshotOnly)
     await runReadOnlyTaskBusinessProbe({
+      maxPageBytes: manifest.maxPageBytes,
       ...readerOptions,
       emit: options.emit,
     });
@@ -216,6 +218,7 @@ export async function runUgvManualAcceptance(options: {
   let snapshot: ProbeRecord | undefined;
   const latest = new Map<string, ProbeRecord>();
   await runReadOnlyTaskBusinessProbe({
+    maxPageBytes: manifest.maxPageBytes,
     ...readerOptions,
     durationMs: 15_000,
     snapshotOnly: true,

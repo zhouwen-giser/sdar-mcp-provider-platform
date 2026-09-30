@@ -81,6 +81,61 @@ async function setup() {
 }
 
 describe("UGV recon business projection (synthetic mission-bound facts)", () => {
+  it("projects signed display centres while retaining the independent precision-grid percentage", async () => {
+    const { run, business, processor, scope } = await setup();
+    const fact = {
+      schemaVersion: "ugv.recon-coverage-fact/1",
+      missionId: "mission-1",
+      sourceCursor: "display-cells-1",
+      observedAt: "2026-09-24T00:00:01Z",
+      displayGrid: "isr.airport.display-centres/v1",
+      coverage: {
+        scanMode: 1,
+        cellSizeM: 3,
+        coveragePercent: 73,
+        coveredCount: 2,
+        totalCount: 2,
+        coveredCells: [
+          { x: -6.5, y: -3.5 },
+          { x: -3.5, y: -3.5 },
+        ],
+      },
+    };
+    expect(await processor.applyCoverage(run, fact)).toBe("committed");
+    expect(await business.getArtifactLatest(scope, "recon-covered-area")).toMatchObject({
+      availability: "available",
+      semantics: "derived",
+      source: { method: "airport_display_cell_centres" },
+      content: { kind: "geojson", geometry: { type: "MultiPolygon" } },
+    });
+    expect((await business.getContext(scope))?.summary.properties?.reconCoverage).toMatchObject({
+      coveragePercent: 73,
+      coveredCount: 2,
+      totalCount: 2,
+    });
+    await expect(
+      processor.applyCoverage(run, {
+        ...fact,
+        sourceCursor: "invalid-count",
+        observedAt: "2026-09-24T00:00:02Z",
+        coverage: { ...fact.coverage, coveredCount: 1 },
+      }),
+    ).rejects.toThrow("RECON_DISPLAY_GRID_INVALID");
+    await expect(
+      processor.applyCoverage(run, {
+        ...fact,
+        sourceCursor: "invalid-duplicate",
+        observedAt: "2026-09-24T00:00:02Z",
+        coverage: {
+          ...fact.coverage,
+          coveredCells: [
+            { x: -6.5, y: -3.5 },
+            { x: -6.5, y: -3.5 },
+          ],
+        },
+      }),
+    ).rejects.toThrow("RECON_COVERAGE_GRID_CELLS_INVALID");
+  });
   it("requires an applied area adjustment to return both effective area and reset coverage", async () => {
     const { business, scope } = await setup();
     const previous = await business.getContext(scope);
@@ -661,6 +716,10 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
       maxNodes: 4_096,
       maxStringBytes: 16_384,
     });
+    let observationClock = Date.parse("2026-09-24T00:00:00Z");
+    ingress.onSnapshot((_snapshot, _topic, applied) => {
+      if (applied) observationClock = Math.max(observationClock, Date.parse(applied.observedAt));
+    });
     const runtime = new UgvProviderRuntime(
       {
         providerId: run.providerId ?? "provider-a",
@@ -675,6 +734,7 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        now: () => new Date(observationClock),
       },
       executions,
       ingress,
@@ -689,6 +749,7 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
       service,
     );
     try {
+      await runtime.initializeLocal();
       ingress.handle(
         "/ugv/area_recon/status",
         Buffer.from(JSON.stringify({ mission_id: "mission-1", status: 5 })),
@@ -729,6 +790,10 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
       maxNodes: 4_096,
       maxStringBytes: 16_384,
     });
+    let observationClock = Date.parse("2026-09-24T00:00:00Z");
+    ingress.onSnapshot((_snapshot, _topic, applied) => {
+      if (applied) observationClock = Math.max(observationClock, Date.parse(applied.observedAt));
+    });
     const runtime = new UgvProviderRuntime(
       {
         providerId: run.providerId ?? "provider-a",
@@ -743,6 +808,7 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        now: () => new Date(observationClock),
       },
       executions,
       ingress,
@@ -843,6 +909,10 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
       maxNodes: 4_096,
       maxStringBytes: 16_384,
     });
+    let observationClock = Date.parse("2026-09-24T00:00:00Z");
+    ingress.onSnapshot((_snapshot, _topic, applied) => {
+      if (applied) observationClock = Math.max(observationClock, Date.parse(applied.observedAt));
+    });
     const runtime = new UgvProviderRuntime(
       {
         providerId: run.providerId ?? "provider-a",
@@ -857,6 +927,7 @@ describe("UGV recon business projection (synthetic mission-bound facts)", () => 
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        now: () => new Date(observationClock),
       },
       executions,
       ingress,

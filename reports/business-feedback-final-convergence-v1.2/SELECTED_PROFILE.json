@@ -1,7 +1,7 @@
 {
   "schema": "bff-selected-profile/v1",
   "selectedStorage": "gowm_shared",
-  "mapFull": false,
+  "mapFull": true,
   "coreRequired": {
     "navigation": [
       "destination_or_waypoints",
@@ -20,5 +20,7 @@
     "feedback": ["context_get", "artifact_get", "snapshot_parts", "business_events_listen"]
   },
   "mapFullRequiredWhenEnabled": ["recon.current_footprint", "recon.covered_area_geometry"],
-  "notes": "Core required remains unchanged. mapFull is disabled and unqualified. Selection follows this task shared GOWM storage requirement; native/component tests do not qualify the selected owner installation."
+  "notes": "Operator selected all implemented non-fire capabilities including estimated Map-full on 2026-09-30. Airport range sector is an estimate, not calibrated visibility; cumulative coverage comes from device display cells. Recon area adjustment remains unsupported.",
+  "fireEnabled": false,
+  "footprintModel": "isr.airport.eo-range-sector/v1"
 }

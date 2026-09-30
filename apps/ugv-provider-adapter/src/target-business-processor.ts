@@ -1,3 +1,4 @@
+import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
@@ -23,6 +24,7 @@ const targetFactSchema = z
   .object({
     schemaVersion: z.literal("ugv.recon-target-fact/1"),
     missionId: id,
+    correlation: z.enum(RECON_CORRELATIONS).optional(),
     observationSessionId: id,
     sensorId: id,
     sourceTargetId: id,
@@ -334,6 +336,13 @@ export class TargetBusinessProcessor {
         ...current,
         contextRevision: current.contextRevision + 1,
         activeRefs,
+        summary: {
+          ...current.summary,
+          properties: {
+            ...current.summary.properties,
+            ...(fact.correlation ? { reconTargetCorrelation: fact.correlation } : {}),
+          },
+        },
         artifactRefs: [...current.artifactRefs, ref, ...(trackRef === undefined ? [] : [trackRef])],
         updatedAt:
           compareIsoTimestamps(fact.observedAt, current.updatedAt) > 0

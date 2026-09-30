@@ -1,3 +1,74 @@
+# Restored Recon final validation, 2026-09-30
+
+Real V-OBS and V-INPUT: **PASS**, production Provider/Runtime + isolated full GOWM
+app-role storage + actual software simulator. Both continue and decline, public
+input/task state, independent device effect and final cancellation passed.
+See RECON_SUPPLEMENT.md and evidence/recon-public-attempt-17.json.
+
+| Final check                                            | Result                                                  | Evidence                                                                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| UGV local regression                                   | 318 tests / 19 files PASS                               | evidence/recon-validation-final-local.txt                                                                                            |
+| Native Store/public Runtime/input cancel order/interop | 34 tests / 4 files PASS                                 | evidence/recon-validation-final-postgres.txt                                                                                         |
+| Strict GOWM and promoted-input SQL                     | 10 tests PASS                                           | evidence/recon-validation-final-gowm.txt                                                                                             |
+| UGV/NPC/Device contracts                               | 35 tests PASS                                           | evidence/recon-validation-final-provider-contracts.txt                                                                               |
+| Whole workspace lint / typecheck / build               | PASS                                                    | evidence/recon-validation-final-lint.txt; evidence/recon-validation-final-typecheck.txt; evidence/recon-validation-final-build.txt   |
+| Business contract / frozen protocol / SBOM             | PASS                                                    | evidence/recon-validation-final-contract.txt; evidence/recon-validation-final-protocol.txt; evidence/recon-validation-final-sbom.txt |
+| Complete public payload replay                         | 54 Contexts, 76 notifications, 76 duplicate no-ops PASS | evidence/recon-public-replay.json                                                                                                    |
+| Corrupted evidence rejection                           | 5 cases PASS                                            | evidence/recon-public-replay-negative.json                                                                                           |
+| Formatting and Goal package shape                      | PASS                                                    | evidence/recon-validation-final-format.txt; evidence/recon-validation-goalcheck.txt                                                  |
+| Hosted CI / deployment / external SDAR                 | NOT_RUN                                                 | FINAL_CLOSEOUT.md                                                                                                                    |
+
+The first final native run hit a fixture freshness admission failure under
+concurrent load; an isolated rerun and the final 34-test run passed without
+relaxing freshness. Sandbox EPERM blocked child-process SBOM inspection and
+loopback listeners in Device contracts; the same checks passed outside the
+sandbox. Failed diagnostics are retained separately. SQL reference batching,
+repeatable-read pages and compiled-schema reuse preserve scope, immutable
+versions, source ordering and input validation. New regressions cover those
+boundaries, partial inputs and safe-stop competition.
+
+This validates the changed Recon supplement, not final same-candidate navigation
+and edit acceptance or deployment. Earlier validation and failures follow.
+
+---
+
+# Recon supplement validation, 2026-09-30
+
+Only BFF-008/009/010/012/022 requirements were amended; existing Goal work and
+historical evidence below are retained. CANDIDATE.json identifies the current
+worktree. The supplement implementation is not deployed or remotely CI-qualified.
+
+| Check                                       | Result                            | Evidence                                                                                                           |
+| ------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| UGV local suite                             | PASS: 19 files / 315 tests        | evidence/recon-validation-local.txt                                                                                |
+| Device MCP contract                         | PASS: 20 tests                    | evidence/recon-validation-device-contract.txt                                                                      |
+| Native PostgreSQL Store and public Runtime  | PASS: 26 tests                    | evidence/recon-validation-native-final.txt                                                                         |
+| Selected complete GOWM strict Store         | PASS: 9 tests                     | evidence/recon-validation-gowm.txt                                                                                 |
+| Workspace lint, plus final changed test     | PASS                              | evidence/recon-validation-lint.txt; evidence/recon-validation-lint-last-test.txt                                   |
+| Typecheck                                   | PASS                              | evidence/recon-validation-typecheck-final.txt                                                                      |
+| Build                                       | PASS                              | evidence/recon-validation-build.txt                                                                                |
+| Frozen protocol, business contract and SBOM | PASS                              | evidence/recon-validation-protocol.txt; evidence/recon-validation-contract.txt; evidence/recon-validation-sbom.txt |
+| Whole-workspace formatting                  | PASS                              | evidence/recon-validation-format.txt                                                                               |
+| Real V-OBS and V-INPUT                      | FAILED attempts; MUST_RUN remains | RECON_SUPPLEMENT.md; V-OBS.json; V-INPUT.json                                                                      |
+| Hosted CI, deployment, external SDAR        | NOT_RUN                           | FINAL_CLOSEOUT.md                                                                                                  |
+
+The PostgreSQL test initially exposed a calendar-dependent fixture: September 23
+records expired from replay after seven days while durable sequence state remained.
+The atomic event test now timestamps new events at execution time and replays from
+the saved durable cursor, preserving consecutive sequences and rollback assertions.
+Both failed diagnostics and the subsequent complete passing run are retained.
+Production retention behavior was not changed.
+
+The database tests used disposable PostgreSQL 18.6 and a full owner-installed
+GOWM fixture on loopback. Live tests used production Provider/Runtime entrypoints,
+JWT user authentication and the real software simulator; fire remained disabled.
+The first attempt exposed a scan-pause mapping defect, the next an EO load fault.
+The latest readiness check stopped before mutation. No failed attempt is reported
+as a passed workflow. The current candidate must still complete the real
+continue/decline flow after restoration.
+
+## Prior validation history
+
 # Complete public-payload capture continuation, 2026-09-29
 
 The probe now optionally emits a full validated Context and original parsed
@@ -162,3 +233,9 @@ The packaged GOWM SQL suite passed 5 tests on an isolated PostgreSQL 17.10 insta
 Workspace typecheck and targeted lint pass (`existing-planner-typecheck.log`, `existing-planner-eslint.log`). A temporary source archive was generated only for package validation; its SQL/checksum and deployment entrypoints were verified (`business-sql-package.json`). This is not a final united release, remote deployment or hosted CI pass. No fire configuration change or device movement was made.
 
 The final adoption commit-boundary regression adds one case: a priority control arriving during Store reads defers adoption without writing a new route revision. The affected Runtime and navigation projection suites were rerun: 2 files / 81 tests PASS (`route-commit-fence.log`), bringing the current UGV-local unique case total to 256. Final workspace typecheck and targeted lint/format checks pass. Whole-workspace formatting also passed before this last formatted change; no hosted CI result is claimed.
+
+## Final Map-full candidate checks (2026-09-30)
+
+UGV local 324, unit 288, native PostgreSQL 27, selected GOWM 10, cross-contract/lock-order 49, configuration 46 and release-candidate 23 tests passed. Lint/typecheck/build, frozen business/protocol and SBOM checks passed locally. Development-package tests initially hit sandbox spawnSync EPERM, then passed in the permitted unit run. Config inventory originally omitted two planner fields; the inventory and exact-key equality check were corrected, not bypassed. Hosted CI is pending.
+
+Actual Map-full public recon and both input decisions passed. Public replay checked 101 Contexts and 166 notifications. Final navigation arrival remains blocked by simulator mobility, while adoption, two changes and restart succeeded. See FINAL_CLOSEOUT.md and current captures.

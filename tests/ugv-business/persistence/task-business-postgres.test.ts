@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Pool } from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { runUgvProviderMigrations } from "../../../apps/ugv-provider-adapter/src/migrate.js";
 import { UgvBusinessEventHub } from "../../../apps/ugv-provider-adapter/src/business-events.js";
@@ -572,7 +572,7 @@ describe("native PostgreSQL task business Store", () => {
     await store.commitChangeSet({ scope, expectedContextRevision: null, context, objects });
     const restarted = new PostgresTaskBusinessStore(pool);
     expect(await restarted.getContext(scope)).toEqual(context);
-    expect((await restarted.getContextSnapshot(scope))?.objects).toHaveLength(4);
+    expect((await restarted.getContextSnapshot(scope))?.objects).toEqual(objects);
     expect(await restarted.getArtifactVersion(scope, route.artifactId, 1)).toEqual(route);
     expect(await restarted.getArtifactLatest(scope, route.artifactId)).toEqual(route);
     expect(
@@ -584,7 +584,17 @@ describe("native PostgreSQL task business Store", () => {
       executionContext: { ...execution().executionContext, simulationId: "scene-b" },
     });
     expect(await restarted.getContext(other)).toBeUndefined();
+    expect(await restarted.getContextSnapshot(other)).toBeUndefined();
     expect(await restarted.getArtifactVersion(other, route.artifactId, 1)).toBeUndefined();
+    await expect(
+      restarted.commitChangeSet({
+        scope: other,
+        expectedContextRevision: null,
+        context,
+        objects: [],
+      }),
+    ).rejects.toThrow("BUSINESS_CONTEXT_REF_NOT_FOUND");
+    expect(await restarted.getContext(other)).toBeUndefined();
 
     const route2 = TaskArtifactSchema.parse({ ...route, revision: 2 });
     const ref2 = { kind: "artifact" as const, id: route.artifactId, revision: 2 };
@@ -592,7 +602,7 @@ describe("native PostgreSQL task business Store", () => {
       ...context,
       contextRevision: 2,
       activeRefs: { ...context.activeRefs, route: ref2 },
-      artifactRefs: [ref2],
+      artifactRefs: [ref2, { kind: "artifact", id: route.artifactId, revision: 1 }],
     });
     await expect(
       restarted.commitChangeSet({
@@ -614,6 +624,22 @@ describe("native PostgreSQL task business Store", () => {
     });
     expect(await store.getArtifactVersion(scope, route.artifactId, 1)).toEqual(route);
     expect(await store.getArtifactVersion(scope, route.artifactId, 2)).toEqual(route2);
+    const snapshot = await store.getContextSnapshot(scope);
+    expect(snapshot?.context).toEqual(next);
+    expect(snapshot?.objects).toEqual([{ kind: "artifact", value: route2 }, ...objects]);
+    await expect(
+      store.commitChangeSet({
+        scope,
+        expectedContextRevision: 2,
+        context: {
+          ...next,
+          contextRevision: 3,
+          artifactRefs: [...next.artifactRefs, { ...ref2, revision: 99 }],
+        },
+        objects: [],
+      }),
+    ).rejects.toThrow("BUSINESS_CONTEXT_REF_NOT_FOUND");
+    expect(await store.getContext(scope)).toEqual(next);
     const referenceFixture = catalog.artifacts.find((item) => item.artifactId === "route-ref");
     const unavailable = catalog.artifacts.find((item) => item.artifactId === "route-unavailable");
     if (
@@ -684,6 +710,56 @@ describe("native PostgreSQL task business Store", () => {
     expect(writers.filter((item) => item.status === "fulfilled")).toHaveLength(1);
     expect(writers.filter((item) => item.status === "rejected")).toHaveLength(1);
     expect((await store.getContext(scope))?.contextRevision).toBe(4);
+  });
+
+  it("returns a consistent page when a producer commits between its Context and object reads", async () => {
+    const scope = BoundExecutionScope.fromExecution({
+      ...execution(),
+      executionContext: { ...execution().executionContext, simulationId: "scene-page-race" },
+    });
+    const store = new PostgresTaskBusinessStore(pool);
+    const route = catalog.artifacts.find((item) => item.artifactId === "route-line");
+    if (!route) throw new Error("CATALOG_ROUTE_MISSING");
+    const context = TaskBusinessContextSchema.parse({ ...catalog.context, contextRevision: 1 });
+    const objects: BusinessObjectVersion[] = [
+      { kind: "artifact", value: route },
+      { kind: "action", value: catalog.action },
+      { kind: "input_request", value: catalog.requiredInput },
+      { kind: "intervention", value: catalog.intervention },
+    ];
+    await store.commitChangeSet({ scope, expectedContextRevision: null, context, objects });
+    const client = await pool.connect();
+    const query = client.query.bind(client);
+    const connectSpy = vi
+      .spyOn(pool, "connect")
+      .mockImplementationOnce((async () => client) as typeof pool.connect);
+    let advanced = false;
+    const querySpy = vi.spyOn(client, "query").mockImplementation((async (
+      sql: string,
+      values?: unknown[],
+    ) => {
+      const result = await query(sql, values);
+      if (!advanced && sql.includes("SELECT payload FROM ugv_task_business_context")) {
+        advanced = true;
+        await store.commitChangeSet({
+          scope,
+          expectedContextRevision: 1,
+          context: { ...context, contextRevision: 2 },
+          objects: [],
+        });
+      }
+      return result;
+    }) as typeof client.query);
+    try {
+      const page = await store.getContextSnapshotPage(scope, 65_536);
+      expect(advanced).toBe(true);
+      expect(page?.context).toEqual(context);
+      expect(page?.objects).toEqual(objects);
+    } finally {
+      querySpy.mockRestore();
+      connectSpy.mockRestore();
+    }
+    expect((await store.getContext(scope))?.contextRevision).toBe(2);
   });
 
   it("reapplying the append-only business migration keeps existing Context and versions", async () => {
@@ -1804,6 +1880,7 @@ describe("native PostgreSQL task business Store", () => {
 
   it("commits two business source events with one Context revision and rolls back failed source writes", async () => {
     const sourceStore = new PostgresProviderStore(scopedUrl.toString(), 4, "ugv");
+    const recordedAt = new Date().toISOString();
     try {
       const store = new PostgresTaskBusinessStore(sourceStore.pool);
       const scope = BoundExecutionScope.fromExecution({
@@ -1830,7 +1907,7 @@ describe("native PostgreSQL task business Store", () => {
           schemaVersion: "sdar.task-business-feedback/1.0-rc2",
           kind: "BUSINESS_EVENT",
           contextRevision,
-          providerRecordedAt: later,
+          providerRecordedAt: recordedAt,
           payload: { eventType, severity: "info", reasonCode: "TEST", description: eventType },
         }),
         description: eventType,
@@ -1845,12 +1922,13 @@ describe("native PostgreSQL task business Store", () => {
         .businessEventSources()
         .find((item) => item.sourceId === "vehicle.business");
       if (!source) throw new Error("BUSINESS_SOURCE_MISSING");
-      const before = await sourceStore.replayBusinessEvents(
-        "vehicle.business",
-        source.sourceStreamId,
-        0n,
+      // Retention may hide old fixtures without resetting the durable sequence.
+      const sequenceState = await sourceStore.pool.query<{ value: string }>(
+        `SELECT (next_sequence - 1)::text AS value FROM ${sourceStore.tables.businessEventState}
+         WHERE source_id=$1 AND source_stream_id=$2`,
+        ["vehicle.business", source.sourceStreamId],
       );
-      const beforeSequence = BigInt(before.at(-1)?.sourceSequence ?? "0");
+      const beforeSequence = BigInt(sequenceState.rows[0]?.value ?? "0");
       const hub = new VehicleBusinessEventHub(sourceStore, {
         reasonPrefix: "UGV",
         resourceId: scope.resourceId,
@@ -1870,8 +1948,12 @@ describe("native PostgreSQL task business Store", () => {
       expect(new Set(committed.events.map((event) => event.sourceEventId)).size).toBe(2);
       expect((await store.getContext(scope))?.contextRevision).toBe(1);
       expect(
-        await sourceStore.replayBusinessEvents("vehicle.business", source.sourceStreamId, 0n),
-      ).toHaveLength(before.length + 2);
+        await sourceStore.replayBusinessEvents(
+          "vehicle.business",
+          source.sourceStreamId,
+          beforeSequence,
+        ),
+      ).toHaveLength(2);
 
       const finalized = TaskBusinessContextSchema.parse({
         ...context,
@@ -1909,13 +1991,21 @@ describe("native PostgreSQL task business Store", () => {
       ).rejects.toThrow("BUSINESS_EVENT_FINALIZATION_MISMATCH");
       expect((await store.getContext(scope))?.contextRevision).toBe(1);
       expect(
-        await sourceStore.replayBusinessEvents("vehicle.business", source.sourceStreamId, 0n),
-      ).toHaveLength(before.length + 2);
+        await sourceStore.replayBusinessEvents(
+          "vehicle.business",
+          source.sourceStreamId,
+          beforeSequence,
+        ),
+      ).toHaveLength(2);
       for (const event of committed.events) hub.notifyCommittedTaskBusinessEvent(event);
       expect(notified).toEqual(committed.events.map((event) => event.sourceEventId));
       expect(
-        await sourceStore.replayBusinessEvents("vehicle.business", source.sourceStreamId, 0n),
-      ).toHaveLength(before.length + 2);
+        await sourceStore.replayBusinessEvents(
+          "vehicle.business",
+          source.sourceStreamId,
+          beforeSequence,
+        ),
+      ).toHaveLength(2);
 
       await sourceStore.pool.query(`CREATE FUNCTION reject_business_source_test() RETURNS trigger
         LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'SOURCE_INSERT_REJECTED'; END $$`);
@@ -1931,8 +2021,12 @@ describe("native PostgreSQL task business Store", () => {
       ).rejects.toThrow("SOURCE_INSERT_REJECTED");
       expect((await store.getContext(scope))?.contextRevision).toBe(1);
       expect(
-        await sourceStore.replayBusinessEvents("vehicle.business", source.sourceStreamId, 0n),
-      ).toHaveLength(before.length + 2);
+        await sourceStore.replayBusinessEvents(
+          "vehicle.business",
+          source.sourceStreamId,
+          beforeSequence,
+        ),
+      ).toHaveLength(2);
       await sourceStore.pool.query(
         "DROP TRIGGER reject_business_source_test ON ugv_business_event_source_log",
       );

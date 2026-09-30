@@ -12,5 +12,14 @@
   "fireEnabled": false,
   "previousAcceptanceLabel": "smpp-bff-v12-20260929T033228Z",
   "navigationTaskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
-  "navigationEvidence": "evidence/navigation-public-restart.json"
+  "navigationEvidence": "evidence/navigation-public-restart.json",
+  "reconnaissanceQualification": {
+    "name": "smpp-business-feedback-v1.2",
+    "instanceId": "smpp-bff-test-a0af6ae8-d19d-490f-8252-81d03c0603d6",
+    "version": "acceptance-recon-v1.2-20260930",
+    "versionKind": "operator_assigned_acceptance_label",
+    "simulatorBuildVerified": false,
+    "evidence": "evidence/recon-public-attempt-17.json",
+    "taskIds": ["a3c0a208-ef97-459f-afee-0dc346941d7c", "2b9a9455-92f8-4c80-8931-de92f318c82f"]
+  }
 }

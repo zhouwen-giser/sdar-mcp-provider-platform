@@ -464,7 +464,11 @@ export async function runReadOnlyTaskBusinessProbe(options: ReadOnlyProbeOptions
       let refresh: "continuity" | "unresolved_refs" | undefined;
       let minimumContextRevision: number | undefined;
       let minimumPublicCursor: RuntimeBusinessCursor | undefined;
-      for await (const message of sseMessages(response.body, () => listener.abort())) {
+      for await (const message of sseMessages(
+        response.body,
+        () => listener.abort(),
+        controller.signal,
+      )) {
         if (isRecord(message) && isRecord(message.error)) {
           throw new Error(`BUSINESS_PROBE_SSE_ERROR:${errorReason(message) ?? "UNKNOWN"}`);
         }
@@ -583,8 +587,20 @@ function errorReason(envelope: unknown): string | undefined {
     : undefined;
 }
 
-async function* sseMessages(body: ReadableStream<Uint8Array>, abort: () => void): AsyncGenerator {
+async function* sseMessages(
+  body: ReadableStream<Uint8Array>,
+  abort: () => void,
+  signal: AbortSignal,
+): AsyncGenerator {
   const reader = body.getReader();
+  // Some idle SSE transports do not settle a read/cancel until their peer writes.
+  // Cancel the reader on the probe deadline as well as aborting the HTTP request.
+  const cancelOnDeadline = () => {
+    abort();
+    void reader.cancel().catch(() => undefined);
+  };
+  signal.addEventListener("abort", cancelOnDeadline, { once: true });
+  if (signal.aborted) cancelOnDeadline();
   const decoder = new TextDecoder();
   let buffered = "";
   try {
@@ -610,9 +626,12 @@ async function* sseMessages(body: ReadableStream<Uint8Array>, abort: () => void)
   } finally {
     // Abort the HTTP request before awaiting cancellation: an open SSE peer can
     // otherwise keep the reader cancellation pending after a continuity refresh.
+    signal.removeEventListener("abort", cancelOnDeadline);
     abort();
     try {
-      await reader.cancel();
+      const cancellation = reader.cancel();
+      if (signal.aborted) void cancellation.catch(() => undefined);
+      else await cancellation;
     } catch {
       /* Closed by peer or abort. */
     }

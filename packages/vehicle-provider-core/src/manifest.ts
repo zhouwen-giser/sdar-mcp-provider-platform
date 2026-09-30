@@ -289,14 +289,27 @@ export function vehicleProviderManifest(
                       snapshotRevision: { type: "string" },
                       correlationStrength: {
                         type: "string",
-                        enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
+                        enum: [
+                          "STRICT_CORRELATED",
+                          "INFERRED_CURRENT_EXECUTION",
+                          "WEAK_UNCORRELATED",
+                          "MISMATCH",
+                          "UNKNOWN",
+                        ],
                       },
                       observationIsNew: { type: "boolean" },
                       timeAuthority: { type: "string" },
                     }
                   : {},
               ),
-              capabilities: caps(true, true, true, true, false, true),
+              capabilities: caps(
+                true,
+                true,
+                true,
+                true,
+                profile.businessFeedbackProfiles?.vehicle_area_recon?.methods.inputUpdate === true,
+                true,
+              ),
               resourceBinding: binding,
               ...(profile.businessFeedbackProfiles?.vehicle_area_recon === undefined
                 ? {}

@@ -1,10 +1,7 @@
 # Provider automatic visual lock
 
 Implementation status: the coordinator and Runtime wiring are present and covered
-by synthetic Runtime tests. Production qualification is pending. The public
-Profile and startup gate remain closed until the real status and target sources
-meet [the recon identity contract](UGV_RECON_CORRELATION_CONTRACT.md). Enabling an
-internal Runtime option in a test is not production qualification.
+by synthetic Runtime tests. Production qualification is pending. The opt-in public Profile and startup gate allow Provider policy and trusted-user input under [the recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md). Live V-OBS/V-INPUT remain mandatory qualification; configured capability and synthetic tests do not by themselves prove it.
 
 With `businessVisualLockOwner: "provider"`, the existing area-recon Execution
 selects the first eligible target from the just-projected complete target list.
@@ -13,11 +10,10 @@ ranking, retargeting or automatic retry after rejection, timeout or release.
 It neither starts a second public tracking Task nor invokes a weapon action.
 
 Eligibility requires a running, non-preempted Execution; connected device and
-MQTT ingress; fresh, non-retained status and target messages carrying their own
-matching mission IDs; scanning status 5/stage 1; and a unique current visible
+MQTT ingress; fresh, non-retained status and target messages with either matching explicit identity or unique-current-execution inference; scanning status 5/stage 1; and a unique current visible
 `target.object` from the same mission. Target and source times must be within
 the existing freshness windows and cannot predate the Execution or be in the
-future. A cached mission on another topic does not qualify an anonymous packet.
+future. The exact packet is checked; anonymous packets use the unique active Execution, never an inherited mission field from another topic.
 
 Before dispatch, the existing business Store atomically saves a requested
 `sensor.visual_lock` Action, its Context references, the mission selection marker
@@ -44,7 +40,8 @@ are never resent; a later matching observation can resolve an uncertain effect.
 Rejection and confirmation timeout end the requested Action and retain the
 selection marker. Missing or lost targets cannot establish active locking.
 Newer valid status messages remain eligible during database awaits, while a
-newer anonymous or retained message revokes eligibility before dispatch.
+newer explicit mismatch, ambiguous source or retained message revokes eligibility
+before dispatch.
 
 When the Execution's current mission changes, a requested policy Action from
 the prior mission is cancelled with `UGV_AUTO_LOCK_MISSION_REPLACED` and removed

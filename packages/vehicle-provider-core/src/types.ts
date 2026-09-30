@@ -98,6 +98,7 @@ export interface VehicleReconnaissanceState extends VehicleTaskTrack {
   scanMode?: 1 | 2;
   scanModeLabel?: string;
   scanPitchDeg?: number;
+  eoFovDeg?: number;
   outOfRange?: boolean;
   cameraFault?: boolean;
   progressAuthoritative?: boolean;

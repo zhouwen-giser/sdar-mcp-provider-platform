@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { Ajv2020 } from "ajv/dist/2020.js";
+import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
 import {
@@ -599,11 +599,29 @@ function assertCommandInputSchema(
   if (!validate(value)) throw new Error(inputError);
 }
 
+// Persisted entries are parsed repeatedly during observation/recovery. Cache only
+// JSON schemas by complete content, never by a mutable object or a reused $id.
+const entryValidators = new Map<string, ValidateFunction>();
 function compileBusinessEntryInputSchema(schema: Record<string, unknown>, errorCode: string) {
-  const ajv = new Ajv2020({ strict: false, allErrors: true });
-  addFormatsImport.default(ajv);
   try {
-    return ajv.compile(schema);
+    const serialized = JSON.stringify(schema);
+    const copy: unknown = JSON.parse(serialized);
+    const cacheable = Buffer.byteLength(serialized) <= 65_536 && isDeepStrictEqual(copy, schema);
+    const cached = cacheable ? entryValidators.get(serialized) : undefined;
+    if (cached) return cached;
+    const ajv = new Ajv2020({ strict: false, allErrors: true });
+    addFormatsImport.default(ajv);
+    // An independent copy prevents later caller mutation from changing a cached
+    // validator's referenced enum/const values under an earlier content key.
+    const validate = ajv.compile(cacheable ? (copy as Record<string, unknown>) : schema);
+    if (cacheable) {
+      if (entryValidators.size >= 64) {
+        const oldest = entryValidators.keys().next().value;
+        if (oldest !== undefined) entryValidators.delete(oldest);
+      }
+      entryValidators.set(serialized, validate);
+    }
+    return validate;
   } catch {
     throw new Error(errorCode);
   }

@@ -435,7 +435,7 @@
       "groups": ["RECON"],
       "convergenceTasks": ["BFF-008", "BFF-011", "BFF-012"],
       "acceptanceIds": ["B07", "B08", "B27"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-026",
@@ -451,7 +451,7 @@
       "groups": ["TARGET"],
       "convergenceTasks": ["BFF-008", "BFF-012"],
       "acceptanceIds": ["B10", "B11", "B33", "C03", "C09"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-028",
@@ -459,7 +459,7 @@
       "groups": ["TARGET"],
       "convergenceTasks": ["BFF-008", "BFF-012"],
       "acceptanceIds": ["B04", "B12", "B33"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-029",
@@ -467,7 +467,7 @@
       "groups": ["LOCK"],
       "convergenceTasks": ["BFF-008", "BFF-009", "BFF-012"],
       "acceptanceIds": ["B13", "B15", "B18", "C12"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-030",
@@ -475,7 +475,7 @@
       "groups": ["AUTO"],
       "convergenceTasks": ["BFF-009", "BFF-012"],
       "acceptanceIds": ["B14", "B16"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-031",
@@ -483,7 +483,7 @@
       "groups": ["RECON", "LOCK"],
       "convergenceTasks": ["BFF-008", "BFF-009", "BFF-011", "BFF-012"],
       "acceptanceIds": ["B06", "B07", "B10", "B12", "B13", "B15", "B16", "B18", "B30"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-032",
@@ -491,7 +491,7 @@
       "groups": ["INPUT"],
       "convergenceTasks": ["BFF-010", "BFF-012"],
       "acceptanceIds": ["B17", "B18", "B20", "C07", "C08"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-033",
@@ -499,7 +499,7 @@
       "groups": ["ADAPTER", "INPUT"],
       "convergenceTasks": ["BFF-010", "BFF-012", "BFF-021"],
       "acceptanceIds": ["B17", "B19", "B36", "C08", "C10"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-034",
@@ -515,7 +515,7 @@
       "groups": ["INPUT"],
       "convergenceTasks": ["BFF-010", "BFF-012"],
       "acceptanceIds": ["B19", "B20", "B28", "B32", "C08"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-036",
@@ -523,7 +523,7 @@
       "groups": ["INPUT", "PUBLIC"],
       "convergenceTasks": ["BFF-010", "BFF-012", "BFF-019", "BFF-020"],
       "acceptanceIds": ["B17", "B18", "B19", "B20", "B22", "B32", "B33"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing"
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open"
     },
     {
       "id": "UGVB-037",
@@ -896,7 +896,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["RECON"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -930,7 +930,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["TARGET"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -947,7 +947,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["TARGET", "ARTIFACT"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -964,7 +964,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["TARGET"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -981,7 +981,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["LOCK"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -998,7 +998,7 @@
       "conditional": "provider_policy_selected",
       "default_result": "NOT_RUN",
       "groups": ["AUTO"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1015,7 +1015,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["AUTO", "LOCK"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1032,7 +1032,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["RECON", "INPUT"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1049,7 +1049,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["INPUT", "AUTH"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1075,7 +1075,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["LOCK", "INPUT"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1102,7 +1102,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["INPUT", "COMMAND"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1119,7 +1119,7 @@
       "conditional": null,
       "default_result": "NOT_RUN",
       "groups": ["INPUT"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1621,7 +1621,7 @@
       "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
       "default_result": "NOT_RUN",
       "groups": ["INPUT"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     },
     {
@@ -1693,7 +1693,7 @@
       "required_layers": ["COMPONENT", "RUNTIME_WIRE"],
       "default_result": "NOT_RUN",
       "groups": ["REDUCER", "LOCK"],
-      "boundary": "COMPONENT_ONLY; production recon identity and V-OBS/V-INPUT missing",
+      "boundary": "INFERRED_CURRENT_EXECUTION; real public V-OBS/V-INPUT PASS; overall final-candidate Goal still open",
       "currentAcceptanceResult": "NOT_PROVEN_BY_MAPPING"
     }
   ]

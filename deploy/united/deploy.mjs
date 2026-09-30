@@ -9,13 +9,16 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, "UNION.json")));
 const [action = "status", ...args] = process.argv.slice(2);
 if (!["verify", "build-images", "up", "status", "logs"].includes(action))
   throw Error(
-    "Usage: node deploy.mjs verify|build-images|up|status|logs [--prebuilt] [--base-root DIRECTORY]",
+    "Usage: node deploy.mjs verify|build-images|up|status|logs [--prebuilt] [--base-root DIRECTORY] [--backup-scope full|smpp]",
   );
 let baseRoot = "/mnt/data/gowm-analysis-current",
-  prebuilt = false;
+  prebuilt = false,
+  backupScope = "full";
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--prebuilt") prebuilt = true;
   else if (args[i] === "--base-root" && args[i + 1]) baseRoot = args[++i];
+  else if (args[i] === "--backup-scope" && ["full", "smpp"].includes(args[i + 1]))
+    backupScope = args[++i];
   else throw Error("Invalid argument");
 }
 const sha = (b) => createHash("sha256").update(b).digest("hex");
@@ -163,13 +166,29 @@ if (action === "up") {
         2,
       ),
     );
-    const backup = path.join(state, "before-smpp.dump");
+    const backup = path.join(state, `before-smpp-${backupScope}.dump`);
     if (!fs.existsSync(backup)) {
       const out = fs.openSync(backup, "wx", 0o600);
       try {
-        run("docker", ["exec", db.Id, "pg_dump", "-U", "gowm", "-d", "gowm", "-Fc"], {
-          stdio: ["ignore", out, "inherit"],
-        });
+        run(
+          "docker",
+          [
+            "exec",
+            db.Id,
+            "pg_dump",
+            "-U",
+            "gowm",
+            "-d",
+            "gowm",
+            "-Fc",
+            ...(backupScope === "smpp"
+              ? ["--schema=ugv_smpp", "--exclude-table-data=ugv_smpp.ugv_state_snapshot"]
+              : []),
+          ],
+          {
+            stdio: ["ignore", out, "inherit"],
+          },
+        );
       } finally {
         fs.closeSync(out);
       }
@@ -196,6 +215,8 @@ if (action === "up") {
           smppRevision: manifest.smpp.revision,
           databaseId,
           account: url.username,
+          backupScope,
+          backupExcludedTableData: backupScope === "smpp" ? ["ugv_smpp.ugv_state_snapshot"] : [],
           upstreamContainersPreserved: after.length,
           credentialSource: configs[0],
         },

@@ -34,7 +34,7 @@ if (args.includes("--worker")) {
   );
 } else if (args.includes("--help") || args.length === 0) {
   console.log(
-    "node --import tsx scripts/task-business/qualify-navigation-public.mjs --fixture /private/gowm-test.json --report /private/public-navigation.json --allow-motion\nRequires SMPP_UGV_SOURCE_QUALIFICATION_ALLOW_MOTION=true. Runs production Provider/Runtime entrypoints on loopback with a disposable selected GOWM app fixture and JWT authentication. Public MCP only for task creation, business reads, edits and cancellation. Fire disabled. Restarts both processes between edits. No production deployment.",
+    "node --import tsx scripts/task-business/qualify-navigation-public.mjs --fixture /private/gowm-test.json --report /private/public-navigation.json --allow-motion [--map-full]\nRequires SMPP_UGV_SOURCE_QUALIFICATION_ALLOW_MOTION=true. Runs production Provider/Runtime entrypoints on loopback with a disposable selected GOWM app fixture and JWT authentication. Public MCP only for task creation, business reads, edits and cancellation. Fire disabled. Restarts both processes between edits. No production deployment.",
   );
 } else {
   if (
@@ -78,6 +78,7 @@ async function qualify() {
     status: "NOT_RUN",
     fireEnabled: false,
     capturePublicPayloads: true,
+    mapFull: args.includes("--map-full"),
     sceneInstanceId: fixture.dataScopeKey,
     steps: [],
     reads: [],
@@ -106,12 +107,14 @@ async function qualify() {
   const profilePath = join(privateDir, "profile.json");
   await writeFile(
     profilePath,
-    JSON.stringify({
-      ...DISABLED_UGV_TASK_BUSINESS_SETTINGS,
-      enabled: true,
-      coverage: { mode: "device_reported" },
-      adjustments: { navigation: true, reconnaissance: false },
-    }),
+    args.includes("--map-full")
+      ? await readFile("deploy/development/server/profiles/ugv-business.json", "utf8")
+      : JSON.stringify({
+          ...DISABLED_UGV_TASK_BUSINESS_SETTINGS,
+          enabled: true,
+          coverage: { mode: "device_reported" },
+          adjustments: { navigation: true, reconnaissance: false },
+        }),
     { mode: 0o600 },
   );
   const adapterPort = await unusedPort();
@@ -307,6 +310,7 @@ async function qualify() {
       mcpUrl,
       taskId,
       snapshotOnly: true,
+      maxPageBytes: 1_048_576,
       capturePublicPayloads: true,
       bearerToken,
       fetchImpl: fetchWithAuth,
@@ -330,6 +334,7 @@ async function qualify() {
         fetchImpl: fetchWithAuth,
         durationMs,
         maxEvents: 1000,
+        maxPageBytes: 1_048_576,
         capturePublicPayloads: true,
         emit: (line) => {
           report.streams.push({ ...line, window });
@@ -417,6 +422,7 @@ async function qualify() {
           mcpUrl,
           taskId,
           snapshotOnly: true,
+          maxPageBytes: 1_048_576,
           expectedTools: ["vehicle_navigate"],
           write: {
             kind: "intervention",
@@ -478,7 +484,7 @@ async function qualify() {
         const task = await rpc("tasks/get", { taskId }, taskId);
         return ["completed", "failed", "cancelled"].includes(task.status) ? task : undefined;
       },
-      180000,
+      600000,
     );
     report.task = final;
     if (final.status !== "completed") throw Error(`PUBLIC_TASK_TERMINAL:${final.status}`);

@@ -464,6 +464,7 @@ function reconStatus(
   const scanModeValue = scanMode(object.scan_mode);
   const scanModeLabel = scalarText(object.scan_mode_label);
   const scanPitchDeg = optionalNumber(object.scan_pitch);
+  const eoFovDeg = optionalNumber(object.eo_fov);
   const outOfRange = optionalBoolean(object.out_of_range);
   const scanCount = optionalInteger(object.scan_num);
   const workMode = optionalInteger(object.work_mode);
@@ -486,6 +487,7 @@ function reconStatus(
           ...(scanModeValue === undefined ? {} : { scanMode: scanModeValue }),
           ...(scanModeLabel === undefined ? {} : { scanModeLabel }),
           ...(scanPitchDeg === undefined ? {} : { scanPitchDeg }),
+          ...(eoFovDeg === undefined ? {} : { eoFovDeg }),
           ...(outOfRange === undefined ? {} : { outOfRange }),
           ...(cameraFault === undefined
             ? {}

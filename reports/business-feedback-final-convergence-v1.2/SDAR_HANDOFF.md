@@ -19,8 +19,7 @@ The old 47564–47566 capture and six-file projection export remain separate and
 cannot satisfy the complete-payload verifier. Their original candidate manifest
 is preserved in `evidence/navigation-original-candidate.json`. No events or
 Context fields from different runs were merged. The current CANDIDATE.json
-includes the new capture/verifier tooling; production Runtime/Provider logic was
-unchanged in this continuation.
+also records the later Recon fixes; the earlier navigation candidate is preserved separately.
 
 These are selected parsed public messages, not a complete HTTP/SSE byte stream.
 Authentication headers, signed snapshot tokens and internal process/Execution
@@ -28,8 +27,13 @@ records are excluded from the consumer export. Preserve public resume cursors,
 source provenance, exact object versions and receipt/application distinctions.
 The consumer contract is in `docs/integration/ugv-task-business-consumer-handoff.md`.
 
-V-OBS and V-INPUT remain NOT_RUN because reset-safe recon source identity is
-missing. Their real Input/Action evidence cannot be invented from these navigation
-records. External SDAR has not run against this candidate. No external message
-was sent and no remote deployment was performed. Both Goal completion flags
-remain false.
+Actual V-OBS and V-INPUT now pass with `INFERRED_CURRENT_EXECUTION`.
+The [Recon handoff](evidence/recon-public-handoff/README.md) contains the actual
+public snapshots, events and answered Input records for continue and decline.
+Replay verifies 54 Contexts and 76 selected notifications, including duplicate
+no-ops. It is separate from the historical navigation run; their source identities
+and candidate boundaries are preserved, not merged into one claimed execution.
+
+External SDAR has not run against this candidate. No external message was sent
+and no remote deployment was performed. Both overall Goal flags remain false;
+see FINAL_CLOSEOUT.md for the final-candidate navigation/edit boundary.

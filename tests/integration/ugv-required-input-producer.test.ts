@@ -338,6 +338,9 @@ describe("UGV manual observation input production wire", () => {
         reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
         controlConfirmation: { command: "input_release" },
       });
+      // A recreated Runtime must receive a new packet; the sticky ingress snapshot is not provenance.
+      h.advance(2);
+      h.status(1, 0, h.at(2));
       await restarted.pollActive();
       expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
       expect(h.device.calls).toHaveLength(1);
@@ -710,7 +713,10 @@ describe("UGV manual observation input production wire", () => {
         (await business.getContextSnapshot(BoundExecutionScope.fromExecution(run)))?.objects.filter(
           (item) => item.kind === "artifact" && item.value.artifactType === "target.object",
         ),
-      ).toEqual([]);
+      ).toHaveLength(1);
+      expect(
+        (await business.getContext(BoundExecutionScope.fromExecution(run)))?.summary.properties,
+      ).toMatchObject({ reconTargetCorrelation: "INFERRED_CURRENT_EXECUTION" });
       ingress.handle(
         "/ugv/area_recon/targets",
         Buffer.from(
@@ -727,7 +733,20 @@ describe("UGV manual observation input production wire", () => {
         (await business.getContextSnapshot(BoundExecutionScope.fromExecution(run)))?.objects.filter(
           (item) => item.kind === "artifact" && item.value.artifactType === "target.object",
         ),
-      ).toHaveLength(1);
+      ).toHaveLength(2);
+      const targetVersions = (
+        await business.getContextSnapshot(BoundExecutionScope.fromExecution(run))
+      )?.objects.filter(
+        (item) => item.kind === "artifact" && item.value.artifactType === "target.object",
+      );
+      expect(
+        new Set(
+          targetVersions?.map((item) => (item.kind === "artifact" ? item.value.artifactId : "")),
+        ).size,
+      ).toBe(1);
+      expect(
+        (await business.getContext(BoundExecutionScope.fromExecution(run)))?.summary.properties,
+      ).toMatchObject({ reconTargetCorrelation: "STRICT_CORRELATED" });
 
       // Simulate a restart gap after the Context was committed but before the
       // Execution state was persisted; polling must restore the visible wait.
