@@ -12,7 +12,12 @@ import {
 } from "../../../packages/adapter-protocol/src/index.js";
 import { BusinessEventRepository } from "../../../packages/persistence-postgres/src/index.js";
 import { BusinessEventsPostgresHarness } from "../postgres-harness.js";
-import { BUSINESS_EVENT_RETENTION_MS } from "../runtime-fixtures.js";
+import {
+  BUSINESS_EVENT_RETENTION_MS,
+  requireLease,
+  sourceFact,
+  taskSourceFact,
+} from "../runtime-fixtures.js";
 
 const harness = new BusinessEventsPostgresHarness();
 const providerId = "provider.source.grpc";
@@ -76,6 +81,74 @@ afterAll(async () => {
 });
 
 describe("AdapterBusinessEventSourceClient", () => {
+  it("rotates successive buffered mapping barriers even when the received cursor does not change", async () => {
+    const id = "provider.source.successive-barriers";
+    await repository.initializeProvider(
+      id,
+      [{ sourceId, sourceStreamId, deliverySemantics: "durable_at_least_once" }],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const lease = await requireLease(repository, id, sourceId, sourceStreamId, "barrier-replica");
+    await repository.intakeSourceFact(
+      lease,
+      taskSourceFact(sourceStreamId, "1", "missing-first"),
+      BUSINESS_EVENT_RETENTION_MS,
+      -1,
+    );
+    await repository.intakeSourceFact(
+      lease,
+      taskSourceFact(sourceStreamId, "2", "missing-second"),
+      BUSINESS_EVENT_RETENTION_MS,
+      3600000,
+    );
+    const heldGateway = {
+      streamBusinessEvents: () => {
+        const held = new EventEmitter();
+        Object.assign(held, {
+          pause: () => undefined,
+          resume: () => undefined,
+          cancel: () => queueMicrotask(() => held.emit("end")),
+        });
+        return held;
+      },
+    } as unknown as GrpcAdapterGateway;
+    const worker = new AdapterBusinessEventSourceClient(repository, heldGateway, {
+      providerId: id,
+      sourceId,
+      sourceStreamId,
+      deliverySemantics: "durable_at_least_once",
+      replicaId: "barrier-replica",
+      pendingRetryMs: 10,
+    });
+    await expect(worker.runOnce()).resolves.toBe("rotated");
+    await harness.pool.query(
+      "UPDATE adapter_business_event_inbox SET mapping_deadline=clock_timestamp()-interval '1 second' WHERE provider_id=$1 AND normalized_source_sequence=2",
+      [id],
+    );
+    await expect(worker.runOnce()).resolves.toBe("rotated");
+    const rows = await harness.pool.query<{ status: string }>(
+      "SELECT status FROM adapter_business_event_inbox WHERE provider_id=$1 ORDER BY normalized_source_sequence",
+      [id],
+    );
+    expect(rows.rows).toEqual([{ status: "terminal_skipped" }, { status: "terminal_skipped" }]);
+    const generations = await harness.pool.query(
+      "SELECT continuity_reason_identity FROM provider_business_event_continuity_record WHERE provider_id=$1",
+      [id],
+    );
+    expect(generations.rowCount).toBe(2);
+    const resumed = await requireLease(repository, id, sourceId, sourceStreamId, "barrier-replica");
+    await repository.intakeSourceFact(
+      resumed,
+      sourceFact(sourceStreamId, "3"),
+      BUSINESS_EVENT_RETENTION_MS,
+      1000,
+    );
+    await expect(repository.prepareNextSourceEvent(id, sourceId)).resolves.toBe("ready");
+    await expect(
+      repository.finalizeNextSourceEvent(id, sourceId, BUSINESS_EVENT_RETENTION_MS),
+    ).resolves.toMatchObject({ sourceSequence: "3" });
+  });
+
   it("holds no database transaction while waiting on gRPC and publishes the received fact", async () => {
     const worker = new AdapterBusinessEventSourceClient(repository, gateway, {
       providerId,

@@ -784,6 +784,23 @@ export class BusinessEventRepository {
     }
   }
 
+  async terminalSourceBarrierId(
+    providerId: string,
+    sourceId: string,
+    sourceStreamId: string,
+  ): Promise<string | undefined> {
+    const result = await this.pool.query<{ inbox_id: string }>(
+      `SELECT inbox_id::text FROM adapter_business_event_inbox
+       WHERE (${scopePredicate(this.pool, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND (
+         provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+         AND finalized_at IS NULL
+       ) ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1`,
+      [providerId, sourceId, sourceStreamId],
+    );
+    return result.rows[0]?.inbox_id;
+  }
+
   async finalizeNextSourceEvent(
     providerId: string,
     sourceId: string,
