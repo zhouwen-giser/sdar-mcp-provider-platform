@@ -179,6 +179,39 @@ describe("UGV long-running operation integration", () => {
     },
   );
 
+  it("queues a full burst for durable batching before serialized projections drain", async () => {
+    const now = new Date();
+    const f = await createFixture(false, new MemoryProviderStore(), { now: () => now });
+    let finish!: () => void;
+    const commit = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const put = f.store.putSnapshot.bind(f.store);
+    let queued = 0;
+    f.store.putSnapshot = async (record) => {
+      queued++;
+      await commit;
+      await put(record);
+    };
+    for (let i = 0; i < 100; i++)
+      f.ingress.handle(
+        "/ugv/imu",
+        Buffer.from(JSON.stringify({ yaw: i, pitch: 0, roll: 0 })),
+        false,
+        now.toISOString(),
+      );
+    let drained = false;
+    const barrier = f.runtime.get("snapshot-durability-barrier").then(() => {
+      drained = true;
+    });
+    await Promise.resolve();
+    expect(queued).toBe(100);
+    expect(drained).toBe(false);
+    finish();
+    await barrier;
+    expect(drained).toBe(true);
+  });
+
   it("bounds recovery polling under a high-rate observation burst without discarding snapshots", async () => {
     const now = new Date();
     const f = await createFixture(false, new MemoryProviderStore(), { now: () => now });

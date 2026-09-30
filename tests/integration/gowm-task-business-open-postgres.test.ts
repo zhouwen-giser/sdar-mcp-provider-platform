@@ -3,7 +3,7 @@ import { readFileSync, mkdtempSync, cpSync, writeFileSync, rmSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Pool, PoolClient } from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { UgvTaskBusinessContextService } from "../../apps/ugv-provider-adapter/src/task-business-service.js";
 import type { AdapterBusinessEvent } from "../../packages/adapter-protocol/src/index.js";
@@ -18,6 +18,7 @@ import {
   BoundExecutionScope,
   BusinessCommandRecordSchema,
   openGowmTaskBusinessStore,
+  PostgresProviderStore,
   scopeBusinessIdentity,
   taskBusinessInputResponseHash,
   type PostgresTaskBusinessStore,
@@ -76,6 +77,59 @@ suite("GOWM shared Task Business Store in an isolated database", () => {
   const externalExecutionId = `ugvb-execution-${runKey}`;
   const commandId = `ugvb-command-${runKey}`;
   const now = new Date().toISOString();
+
+  it("batches every raw snapshot under the app role and isolates identity conflicts", async () => {
+    const store = new PostgresProviderStore(fixture.databaseUrl, 2, "ugv", configs[0]);
+    await store.initialize();
+    const query = vi.spyOn(store.pool, "query");
+    const records = Array.from({ length: 260 }, (_, index) => ({
+      channel: "/ugv/imu",
+      revision: createHash("sha256").update(`${runKey}:snapshot:${index}`).digest("hex"),
+      observedAt: now,
+      snapshot: { sample: index },
+    }));
+    try {
+      await Promise.all(records.map((record) => store.putSnapshot(record)));
+      expect(
+        query.mock.calls.filter(([sql]) => sql.includes("jsonb_to_recordset")),
+      ).toHaveLength(3);
+      const saved = await store.pool.query<{ revision: string; snapshot: { sample: number } }>(
+        "SELECT revision,snapshot FROM ugv_smpp.ugv_state_snapshot WHERE revision=ANY($1::text[])",
+        [records.map((record) => record.revision)],
+      );
+      expect(saved.rows).toHaveLength(260);
+      for (const record of records)
+        expect(saved.rows.find((row) => row.revision === record.revision)?.snapshot).toEqual(
+          record.snapshot,
+        );
+      const first = records[0];
+      if (!first) throw new Error("SNAPSHOT_FIXTURE_MISSING");
+      const fresh = {
+        ...first,
+        revision: createHash("sha256").update(`${runKey}:unrelated`).digest("hex"),
+      };
+      const results = await Promise.allSettled([
+        store.putSnapshot(first),
+        store.putSnapshot(first),
+        store.putSnapshot({ ...first, snapshot: { sample: -1 } }),
+        store.putSnapshot(fresh),
+      ]);
+      expect(results.map((result) => result.status)).toEqual([
+        "fulfilled",
+        "fulfilled",
+        "rejected",
+        "fulfilled",
+      ]);
+      expect(results[2]).toMatchObject({ reason: new Error("SNAPSHOT_IDENTITY_CONFLICT") });
+      const immutable = await store.pool.query<{ snapshot: { sample: number } }>(
+        "SELECT snapshot FROM ugv_smpp.ugv_state_snapshot WHERE revision=$1",
+        [first.revision],
+      );
+      expect(immutable.rows[0]?.snapshot).toEqual(first.snapshot);
+    } finally {
+      await store.close();
+    }
+  });
 
   function execution(index: 0 | 1): ProviderExecution {
     const config = configs[index];

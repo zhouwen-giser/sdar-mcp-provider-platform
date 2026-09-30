@@ -456,7 +456,20 @@ export class UgvProviderRuntime {
         )
       )
         this.#autoLockSources.set(topic, applied);
-      void this.#serializeMutation(() => this.#observe(snapshot, topic, applied));
+      // Queue raw persistence at ingress so the shared Store can commit packets
+      // in batches. Business projections still run in arrival order, after their
+      // exact snapshot is durable; no observation or critical transition is lost.
+      const persisted = this.store.putSnapshot({
+        channel: topic,
+        revision: snapshot.revision,
+        observedAt: snapshot.observedAt,
+        snapshot: snapshot as unknown as Record<string, unknown>,
+      });
+      void persisted.catch(() => undefined);
+      void this.#serializeMutation(async () => {
+        await persisted;
+        await this.#observe(snapshot, topic, applied);
+      });
     });
     this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
@@ -2736,12 +2749,6 @@ export class UgvProviderRuntime {
       )
         this.#mapSources.set("heading", applied);
     }
-    await this.store.putSnapshot({
-      channel: topic,
-      revision: snapshot.revision,
-      observedAt: snapshot.observedAt,
-      snapshot: snapshot as unknown as Record<string, unknown>,
-    });
     if (applied !== undefined) {
       await this.#projectNavigationAdoption(topic, applied);
       await this.#projectNavigationBusinessTrajectory(snapshot, topic, applied);
