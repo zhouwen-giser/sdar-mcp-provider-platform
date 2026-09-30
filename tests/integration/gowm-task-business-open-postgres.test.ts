@@ -90,9 +90,9 @@ suite("GOWM shared Task Business Store in an isolated database", () => {
     }));
     try {
       await Promise.all(records.map((record) => store.putSnapshot(record)));
-      expect(
-        query.mock.calls.filter(([sql]) => sql.includes("jsonb_to_recordset")),
-      ).toHaveLength(3);
+      expect(query.mock.calls.filter(([sql]) => sql.includes("jsonb_to_recordset"))).toHaveLength(
+        3,
+      );
       const saved = await store.pool.query<{ revision: string; snapshot: { sample: number } }>(
         "SELECT revision,snapshot FROM ugv_smpp.ugv_state_snapshot WHERE revision=ANY($1::text[])",
         [records.map((record) => record.revision)],
