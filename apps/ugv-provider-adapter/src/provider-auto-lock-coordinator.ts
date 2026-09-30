@@ -35,6 +35,7 @@ export class ProviderAutoLockCoordinator {
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
     readonly now: () => Date,
     readonly confirmationTimeoutMs: number,
+    readonly maximumFutureSkewMs = 0,
   ) {}
 
   async run(input: {
@@ -130,7 +131,8 @@ export class ProviderAutoLockCoordinator {
         const target = targets.length === 1 ? targets[0]?.value : undefined;
         if (!target) continue;
         const requestedAt = this.now().toISOString();
-        if (Date.parse(target.updatedAt) > Date.parse(requestedAt)) continue;
+        if (Date.parse(target.updatedAt) - Date.parse(requestedAt) > this.maximumFutureSkewMs)
+          continue;
         const actionId = `policy-lock-${createHash("sha256")
           .update(JSON.stringify([execution.externalExecutionId, missionId, targetId]))
           .digest("hex")

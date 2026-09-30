@@ -20,6 +20,7 @@ export function resolveReconExecutionCorrelation(input: {
   applied: AppliedMqttObservation | undefined;
   nowMs: number;
   maxAgeMs: number;
+  maximumFutureSkewMs?: number;
 }): Resolution {
   const unresolved: Resolution = { kind: "UNRESOLVED" };
   const { applied } = input;
@@ -34,7 +35,8 @@ export function resolveReconExecutionCorrelation(input: {
   )
     return unresolved;
   const age = input.nowMs - Date.parse(applied.observedAt);
-  if (!Number.isFinite(age) || age < 0 || age > input.maxAgeMs) return unresolved;
+  if (!Number.isFinite(age) || age < -(input.maximumFutureSkewMs ?? 0) || age > input.maxAgeMs)
+    return unresolved;
   const source = applied.observation.canonicalPayload;
   if (!record(source)) return unresolved;
   const identities: string[] = [];

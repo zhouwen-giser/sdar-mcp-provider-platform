@@ -52,6 +52,7 @@ export function airportFootprintFact(input: {
   createdAt: string;
   nowMs: number;
   maxAgeMs: number;
+  maximumFutureSkewMs?: number;
   rangeM?: number;
   status?: AppliedMqttObservation;
   position?: AppliedMqttObservation;
@@ -67,7 +68,7 @@ export function airportFootprintFact(input: {
       p &&
       !p.retained &&
       Date.parse(p.observedAt) >= Date.parse(input.createdAt) &&
-      input.nowMs - Date.parse(p.observedAt) >= 0 &&
+      input.nowMs - Date.parse(p.observedAt) >= -(input.maximumFutureSkewMs ?? 0) &&
       input.nowMs - Date.parse(p.observedAt) <= input.maxAgeMs,
   );
   const active =

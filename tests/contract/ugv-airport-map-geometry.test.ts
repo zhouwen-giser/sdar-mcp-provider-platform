@@ -69,6 +69,27 @@ describe("airport estimated Map-full source", () => {
       validUntil: new Date(now + 3000).toISOString(),
     });
   });
+  it("allows only the configured future skew and keeps the source expiry unchanged", () => {
+    const p = input();
+    const shifted = {
+      ...p,
+      maximumFutureSkewMs: 3000,
+      gimbal: { ...p.gimbal, observedAt: new Date(now + 1700).toISOString() },
+    };
+    expect(airportFootprintFact(shifted)).toMatchObject({
+      state: "active",
+      observedAt: new Date(now + 1700).toISOString(),
+      validUntil: new Date(now + 3000).toISOString(),
+    });
+    expect(airportFootprintFact({ ...shifted, maximumFutureSkewMs: 1000 }).state).toBe("paused");
+    expect(
+      airportFootprintFact({
+        ...shifted,
+        gimbal: { ...p.gimbal, observedAt: new Date(now + 3001).toISOString() },
+      }).state,
+    ).toBe("paused");
+    expect(airportFootprintFact({ ...shifted, nowMs: now + 3001 }).state).toBe("paused");
+  });
   it("invalidates stale, retained, pre-execution, missing, paused and faulty observations", () => {
     const p = input();
     for (const changed of [

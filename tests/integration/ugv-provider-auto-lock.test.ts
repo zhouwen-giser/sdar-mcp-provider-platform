@@ -18,7 +18,12 @@ import {
 } from "../../packages/vehicle-device-mcp-client/src/index.js";
 import { VehicleMqttIngress } from "../../packages/vehicle-mqtt-ingress/src/index.js";
 
-async function fixture(enabled = true, sourceMission: string | null = "11") {
+async function fixture(
+  enabled = true,
+  sourceMission: string | null = "11",
+  sourceSkewMs = 0,
+  maximumFutureSkewMs = 0,
+) {
   const store = new MemoryProviderStore();
   const business = new MemoryTaskBusinessStore();
   const device = new MockUgvDeviceMcpClient();
@@ -72,7 +77,14 @@ async function fixture(enabled = true, sourceMission: string | null = "11") {
       {
         providerId: "provider-a",
         resourceId: "vehicle:ugv1",
-        freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
+        freshness: {
+          chassis: 3000,
+          mission: 3000,
+          health: 5000,
+          target: 3000,
+          payload: 3000,
+          maximumFutureSkewMs,
+        },
         allowNavigationWithRecon: true,
         fireEnabled: false,
         fireRequiresChassisStopped: true,
@@ -125,7 +137,7 @@ async function fixture(enabled = true, sourceMission: string | null = "11") {
         }),
       ),
       retained,
-      at(delta),
+      at(delta + sourceSkewMs),
     );
     await runtime.pollActive();
   };
@@ -143,12 +155,12 @@ async function fixture(enabled = true, sourceMission: string | null = "11") {
           ...(missionId ? { mission_id: missionId } : {}),
           targets: ids.map((targetId) => ({
             target_id: targetId,
-            capture_time_us: (base + delta) * 1000,
+            capture_time_us: (base + delta + sourceSkewMs) * 1000,
           })),
         }),
       ),
       retained,
-      at(delta),
+      at(delta + sourceSkewMs),
     );
     await runtime.pollActive();
   };
@@ -187,6 +199,30 @@ async function fixture(enabled = true, sourceMission: string | null = "11") {
 }
 
 describe("Provider auto-lock production wire (synthetic source and device, not live qualification)", () => {
+  it.each([1700, 3000, 3001])(
+    "propagates the future tolerance through target selection and stage-3 input (%s ms)",
+    async (sourceSkewMs) => {
+      const h = await fixture(true, null, sourceSkewMs, 3000);
+      try {
+        await h.targets(100, [7]);
+        await h.status(2, 7, 200, null, false, 8);
+        await h.status(3, 7, 300, null, false, 8);
+        if (sourceSkewMs <= 3000) {
+          expect(h.device.calls).toHaveLength(1);
+          expect((await h.actions()).at(-1)).toMatchObject({
+            state: "active",
+            triggerOrigin: "provider_policy",
+          });
+          expect(await h.service.activeRequiredInput(h.run)).toMatchObject({ state: "pending" });
+        } else {
+          expect(h.device.calls).toHaveLength(0);
+          expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        }
+      } finally {
+        await h.close();
+      }
+    },
+  );
   it("persists every telemetry packet without exceeding the configured reconciliation cadence", async () => {
     const h = await fixture(false);
     const scan = vi.spyOn(h.store, "listActiveExecutions");

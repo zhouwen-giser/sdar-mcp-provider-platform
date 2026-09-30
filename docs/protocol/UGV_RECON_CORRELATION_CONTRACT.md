@@ -10,10 +10,17 @@ than borrowing a sticky mission ID from another topic. Present identities must
 all match the latest saved downstream mission. Malformed, conflicting or foreign
 identities return `UNRESOLVED`. Anonymous data requires exactly one nonterminal,
 started Recon Execution in the same Provider/resource scope. No active execution,
-multiple candidates, retained packets, stale/future observations, pre-creation
+multiple candidates, retained packets, expired observations, future observations
+beyond `UGV_OBSERVATION_MAX_FUTURE_SKEW_MS`, pre-creation
 observations and the recorded start/baseline cursor are rejected. The same checks
 apply to status, target, lock and coverage facts. A restarted Runtime waits for a
 new accepted packet; a persisted Context is not fresh source evidence.
+
+The configured future tolerance also applies to target capture time, policy-lock
+selection and confirmation, estimated footprint inputs, and navigation field
+freshness/adoption. Source timestamps remain unchanged; expiration thresholds
+and pre-dispatch/cursor fences remain in force. The sz-gowm operator approved
+3000 ms for its measured simulator clock offset; no global default is changed.
 
 Accepted facts return `STRICT_CORRELATED` or `INFERRED_CURRENT_EXECUTION` and use
 the Execution's saved latest downstream mission. Public Context summary properties
@@ -42,7 +49,10 @@ sufficient. Fire remains disabled; no weapon behavior is added or enabled.
 Coverage statistics do not establish map geometry. A separate coverage packet
 also requires current scanning status for the same Execution; native lock stages
 2/3 cannot be counted as scanning. Frame/origin/axis/transform/area revision rules
-remain unchanged. `mapFull=false`; current footprint stays disabled.
+remain unchanged. The operator subsequently selected `mapFull=true` using the
+`isr.airport.eo-range-sector/v1` estimate from actual range, FOV, GNSS, heading
+and EO yaw. It reports `quality=estimated` and an expiry; it is not calibrated
+visibility. Covered-area geometry comes separately from device-reported cells.
 
 ## Preserved source audit facts
 

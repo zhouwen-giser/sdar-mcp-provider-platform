@@ -382,6 +382,7 @@ export class UgvProviderRuntime {
       createdAt: execution.createdAt,
       nowMs: this.#now().getTime(),
       maxAgeMs: Math.min(this.options.freshness.payload, this.options.freshness.chassis),
+      maximumFutureSkewMs: this.options.freshness.maximumFutureSkewMs ?? 0,
       ...(this.#mapRange?.value === undefined ? {} : { rangeM: this.#mapRange.value }),
       ...(correlated && status ? { status } : {}),
       ...(position ? { position } : {}),
@@ -1053,6 +1054,7 @@ export class UgvProviderRuntime {
             "chassis.position.geodetic",
             this.options.freshness.chassis,
             this.#now().getTime(),
+            this.options.freshness.maximumFutureSkewMs ?? 0,
           ) !== "fresh"))
     )
       decision = {
@@ -1850,6 +1852,7 @@ export class UgvProviderRuntime {
       providerId: this.options.providerId,
       resourceId: this.options.resourceId ?? "vehicle:ugv1",
       nowMs: this.#now().getTime(),
+      maximumFutureSkewMs: this.options.freshness.maximumFutureSkewMs ?? 0,
       maxAgeMs: applied?.observation.patch.payload?.targets
         ? this.options.freshness.target
         : this.options.freshness.payload,
@@ -2213,6 +2216,7 @@ export class UgvProviderRuntime {
             "chassis.position.geodetic",
             this.options.freshness.chassis,
             this.#now().getTime(),
+            this.options.freshness.maximumFutureSkewMs ?? 0,
           ) !== "fresh" ||
           !isNewAuthority(
             baseline.observationAuthorities,
@@ -3032,6 +3036,7 @@ export class UgvProviderRuntime {
             "chassis.position.geodetic",
             this.options.freshness.chassis,
             this.#now().getTime(),
+            this.options.freshness.maximumFutureSkewMs ?? 0,
           ) !== "fresh"
         )
           return execution;
@@ -3199,7 +3204,7 @@ export class UgvProviderRuntime {
     const age = observed ? this.#now().getTime() - Date.parse(observed.observedAt) : Infinity;
     return (
       observed?.retained === false &&
-      age >= 0 &&
+      age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
       age <= this.options.freshness.mission &&
       observed.observation.patch.chassis?.mission?.id === pending.previousMissionId &&
       observed.observation.patch.chassis.mission.state === 3 &&
@@ -3209,6 +3214,7 @@ export class UgvProviderRuntime {
         "chassis.speed",
         this.options.freshness.chassis,
         this.#now().getTime(),
+        this.options.freshness.maximumFutureSkewMs ?? 0,
       ) === "fresh" &&
       snapshot.chassis.speedKmh !== undefined &&
       Math.abs(snapshot.chassis.speedKmh) <= (this.options.stationarySpeedThresholdKmh ?? 0.1)
@@ -3300,6 +3306,7 @@ export class UgvProviderRuntime {
         "chassis.position.geodetic",
         this.options.freshness.chassis,
         this.#now().getTime(),
+        this.options.freshness.maximumFutureSkewMs ?? 0,
       ) !== "fresh"
     )
       throw new Error("UGV_PLANNER_START_POSITION_STALE");
@@ -3341,7 +3348,8 @@ export class UgvProviderRuntime {
     if (
       mission?.id === undefined ||
       mission.state !== 1 ||
-      age < 0 ||
+      !Number.isFinite(age) ||
+      age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
       age > this.options.freshness.mission ||
       this.ingress.snapshot().chassis.mission.id !== mission.id ||
       this.ingress.snapshot().chassis.mission.state !== 1
@@ -3420,7 +3428,7 @@ export class UgvProviderRuntime {
           latest.observation.patch.chassis?.mission?.id === mission.id &&
           latest.observation.patch.chassis?.mission?.state === 1 &&
           compareIsoTimestamps(latest.observedAt, applied.observedAt) >= 0 &&
-          age >= 0 &&
+          age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
           age <= this.options.freshness.mission &&
           this.ingress.snapshot().chassis.mission.id === mission.id &&
           this.ingress.snapshot().chassis.mission.state === 1
@@ -3456,6 +3464,7 @@ export class UgvProviderRuntime {
         "chassis.mission",
         this.options.freshness.mission,
         this.#now().getTime(),
+        this.options.freshness.maximumFutureSkewMs ?? 0,
       ) !== "fresh"
     )
       return;
@@ -3548,7 +3557,12 @@ export class UgvProviderRuntime {
     if (this.taskBusiness === undefined || applied.retained) return;
     if (this.options.businessVisualLockOwner === "provider") {
       const age = this.#now().getTime() - Date.parse(applied.observedAt);
-      if (!Number.isFinite(age) || age < 0 || age > this.options.freshness.payload) return;
+      if (
+        !Number.isFinite(age) ||
+        age < -(this.options.freshness.maximumFutureSkewMs ?? 0) ||
+        age > this.options.freshness.payload
+      )
+        return;
     }
     const recon = applied.observation.patch.payload?.reconnaissance;
     const stage = recon?.lock?.stage;
@@ -4072,7 +4086,8 @@ export class UgvProviderRuntime {
     const sourceTimeEligible = (target: (typeof targets)[number]) =>
       target.source === "mqtt_area_recon" &&
       target.captureTimeUs !== undefined &&
-      this.#now().getTime() - Date.parse(target.observedAt) >= 0 &&
+      this.#now().getTime() - Date.parse(target.observedAt) >=
+        -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
       this.#now().getTime() - Date.parse(target.observedAt) <= this.options.freshness.target &&
       compareIsoTimestamps(target.observedAt, execution.createdAt) >= 0;
     let completeList = targets.every(sourceTimeEligible);
@@ -4279,7 +4294,7 @@ export class UgvProviderRuntime {
         const age = at === undefined ? Number.NaN : now - Date.parse(at);
         return (
           Number.isFinite(age) &&
-          age >= 0 &&
+          age >= -(this.options.freshness.maximumFutureSkewMs ?? 0) &&
           age <= maxAge &&
           Date.parse(at ?? "") >= Date.parse(execution.createdAt)
         );
@@ -4306,6 +4321,7 @@ export class UgvProviderRuntime {
       this.taskBusiness.notifyCommitted,
       () => this.#now(),
       this.options.controlConfirmationTimeoutMs ?? 30_000,
+      this.options.freshness.maximumFutureSkewMs ?? 0,
     ).run({
       execution,
       candidateIds: source?.ids ?? [],

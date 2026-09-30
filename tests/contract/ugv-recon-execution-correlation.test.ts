@@ -63,18 +63,56 @@ function packet(topic = "status", identity: Record<string, unknown> = {}, observ
   return applied;
 }
 
-function resolve(applied: AppliedMqttObservation | undefined, active = [run]) {
+function resolve(
+  applied: AppliedMqttObservation | undefined,
+  active = [run],
+  maximumFutureSkewMs = 0,
+) {
   return resolveReconExecutionCorrelation({
     active,
     applied,
     nowMs,
     maxAgeMs: 3000,
+    maximumFutureSkewMs,
     providerId: "provider-a",
     resourceId: "vehicle:ugv1",
   });
 }
 
 describe("Recon exact-packet correlation, supplement R1–R3", () => {
+  it("applies the same future tolerance to individual physical observation fields", () => {
+    const ingress = new VehicleMqttIngress("direct_domain_json", {
+      maxPayloadBytes: 65536,
+      maxDepth: 16,
+      maxNodes: 4096,
+      maxStringBytes: 16384,
+    });
+    ingress.handle("/ugv/speed", Buffer.from('{"speed_kmh":0}'), false, at);
+    expect(ingress.fieldFreshnessState("chassis.speed", 3000, nowMs - 1700)).toBe("stale");
+    for (const offset of [1700, 3000])
+      expect(ingress.fieldFreshnessState("chassis.speed", 3000, nowMs - offset, 3000)).toBe(
+        "fresh",
+      );
+    for (const offset of [-3001, 3001])
+      expect(ingress.fieldFreshnessState("chassis.speed", 3000, nowMs + offset, 3000)).toBe(
+        "stale",
+      );
+  });
+  it.each(["status", "targets", "coverage"])(
+    "uses the configured future clock tolerance for %s without extending expiry",
+    (topic) => {
+      const active = [{ ...run, createdAt: new Date(nowMs - 10000).toISOString() }];
+      for (const offset of [1700, 3000]) {
+        const source = packet(topic, {}, new Date(nowMs + offset).toISOString());
+        expect(resolve(source, active, 3000).kind).toBe("INFERRED_CURRENT_EXECUTION");
+        expect(resolve(source, active, 1000).kind).toBe("UNRESOLVED");
+      }
+      for (const offset of [3001, -3001])
+        expect(
+          resolve(packet(topic, {}, new Date(nowMs + offset).toISOString()), active, 3000).kind,
+        ).toBe("UNRESOLVED");
+    },
+  );
   it.each(["status", "targets", "coverage"])(
     "infers fresh anonymous %s from a unique active execution",
     (topic) => {
