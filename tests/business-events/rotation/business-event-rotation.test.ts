@@ -91,6 +91,65 @@ describe("Business Event atomic rotation", () => {
     expect(restarted.currentSequence).toBe("1");
   });
 
+  it("does not rewrite an unrelated legacy rejected event when a source is added", async () => {
+    const providerId = "provider.rotation.legacy-rejection";
+    const legacy = {
+      sourceId: "vehicle.health",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0513",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const business = {
+      sourceId: "vehicle.business",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0514",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    await repository.initializeProvider(providerId, [legacy], BUSINESS_EVENT_RETENTION_MS);
+    const lease = await requireLease(
+      repository,
+      providerId,
+      legacy.sourceId,
+      legacy.sourceStreamId,
+      "legacy",
+    );
+    await expect(
+      repository.intakeSourceFact(
+        lease,
+        sourceFact(legacy.sourceStreamId, "1", { sourceEventId: "_legacy-invalid" }),
+        BUSINESS_EVENT_RETENTION_MS,
+        MAPPING_DEADLINE_MS,
+      ),
+    ).resolves.toMatchObject({ disposition: "rejected" });
+    const before = await harness.pool.query(
+      "SELECT status,decode_status,reject_reason,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1",
+      [providerId],
+    );
+    const upgraded = await repository.initializeProvider(
+      providerId,
+      [legacy, business],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const after = await harness.pool.query(
+      "SELECT status,decode_status,reject_reason,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(after.rows).toEqual(before.rows);
+    const continuity = await harness.pool.query(
+      "SELECT affected_source_ids FROM provider_business_event_continuity_record WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(continuity.rows).toEqual([{ affected_source_ids: ["vehicle.business"] }]);
+    await expect(
+      repository.acquireSourceLease(
+        providerId,
+        business.sourceId,
+        business.sourceStreamId,
+        "new",
+        30000,
+      ),
+    ).resolves.toBeDefined();
+    expect(upgraded.status).toBe("current");
+  });
+
   it("closes the replay boundary, retries idempotently, and restarts runtime sequence at one", async () => {
     const providerId = "provider.rotation.operator";
     const sourceId = "durable.source";

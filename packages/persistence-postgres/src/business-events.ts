@@ -164,7 +164,13 @@ export class BusinessEventRepository {
     await this.rotateStream(
       providerId,
       "SOURCE_ROSTER_CHANGED",
-      [...new Set([...roster, ...desired].map((source) => source.sourceId))].sort(compareText),
+      [...new Set([...roster, ...desired].map((source) => source.sourceId))]
+        .filter((id) => {
+          const previous = roster.find((source) => source.sourceId === id);
+          const next = desired.find((source) => source.sourceId === id);
+          return !previous || !next || canonicalSha256(previous) !== canonicalSha256(next);
+        })
+        .sort(compareText),
       `initialize:${generation.streamId}:${canonicalSha256(desired)}`,
       generationRetentionMs,
       desired,
