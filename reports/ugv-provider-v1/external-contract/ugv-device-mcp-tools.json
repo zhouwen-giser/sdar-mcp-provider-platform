@@ -111,10 +111,7 @@
             "title": "Speed"
           }
         },
-        "required": [
-          "direction",
-          "distance"
-        ],
+        "required": ["direction", "distance"],
         "title": "ugv_move_distanceArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",
@@ -136,9 +133,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "action"
-        ],
+        "required": ["action"],
         "title": "ugv_mission_controlArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",
@@ -257,9 +252,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "cmd_type"
-        ],
+        "required": ["cmd_type"],
         "title": "ugv_area_recon_controlArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",
@@ -286,9 +279,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "lock"
-        ],
+        "required": ["lock"],
         "title": "ugv_area_recon_lockArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",
@@ -349,9 +340,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "confirm"
-        ],
+        "required": ["confirm"],
         "title": "ugv_area_recon_attack_confirmArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",
@@ -398,9 +387,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "mode"
-        ],
+        "required": ["mode"],
         "title": "ugv_gimbal_moveArguments"
       },
       "capturedAt": "2026-09-30T03:59:38.016Z",

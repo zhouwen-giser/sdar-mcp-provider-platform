@@ -15,3 +15,5 @@ The operator selected all implemented non-fire capabilities, including the airpo
 - External SDAR remains EXTERNAL_PENDING and only gates END_TO_END_READY.
 
 Historical failures and the core-only captures remain evidence of their own candidate/profile. They are not relabelled as final Map-full arrival or site acceptance.
+
+A subsequent final-source repeat retained current footprint and both decision effects, but produced no covered cells within the bounded map wait at the mobility-blocked position; source reported 0% and 118/424 cells outside 140 m. Capture: `evidence/map-full-recon-current-site-failure.json`. The final timeout closes the stream during cleanup; that termination is not an independent Runtime crash. Earlier complete Map-full PASS remains historical evidence, not proof that this later repeat passed.
