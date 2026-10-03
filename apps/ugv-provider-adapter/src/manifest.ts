@@ -32,6 +32,7 @@ export function ugvManifest(
       supportsScanModes: support.reconnaissance.area,
       supportsCircularEoScan: support.reconnaissance.circular,
       supportsCapabilityQuery: support.capabilityQuery,
+      supportsBusinessSemantics: true,
       supportsTargetTracking: support.targetTracking,
       supportsGimbalControl: support.gimbal,
       supportsNavigationPlanning: support.navigation.point,

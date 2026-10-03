@@ -11,6 +11,36 @@ beforeEach(() => harness.reset());
 afterAll(() => harness.stop());
 
 describe("UPDATE acknowledgement and safe-stop lock order", () => {
+  it.each([false, true])(
+    "keeps the public Task and remaining inputs consistent after an ACK (other open input=%s)",
+    async (otherOpen) => {
+      const { taskId, command, repository } = await claimedUpdate(`public-${otherOpen}`);
+      if (otherOpen)
+        await harness.pool.query(
+          `INSERT INTO task_input_request
+             (task_id,request_key,description,schema,required,request_json,status)
+           SELECT task_id,'second',description,schema,required,request_json,'OPEN'
+           FROM task_input_request WHERE task_id=$1 AND request_key='approval'`,
+          [taskId],
+        );
+      await repository.acknowledgeUpdateAndCompleteInputAnswers(command, { accepted: true }, [
+        {
+          key: "approval",
+          answerHash: "b".repeat(64),
+          value: true,
+          response: { action: "accept", content: true },
+        },
+      ]);
+      const task = await harness.engine.getFrozenTask(taskId, authorization);
+      expect(task.status).toBe(otherOpen ? "input_required" : "working");
+      if (otherOpen) expect(Object.keys(task.inputRequests as object)).toEqual(["second"]);
+      else {
+        expect(task.inputRequests).toBeUndefined();
+        expect(task.statusMessage).toContain("awaiting Provider observation");
+      }
+    },
+  );
+
   it.each(["acknowledge", "reject", "delivery"] as const)(
     "lets safe stop win against %s",
     async (operation) => {

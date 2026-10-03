@@ -1,4 +1,4 @@
-/* global deploymentInput */
+/* global deploymentInput, installGowmTaskBusiness */
 // Runs only inside the existing GOWM application image, with its existing admin connection.
 // deploymentInput is supplied over stdin by prepare-gowm.mjs, never as a process argument.
 import pg from "pg";
@@ -75,10 +75,14 @@ try {
   }
   if (!apply) {
     const schema = await c.query("SELECT to_regclass('ugv_smpp.gowm_install_history') name");
+    const taskBusiness = schema.rows[0].name
+      ? await installGowmTaskBusiness(c, deploymentInput.taskBusinessMigration, false)
+      : { installed: false };
     console.log(
       JSON.stringify({
         status: "PREFLIGHT_PASS",
         schemaInstalled: !!schema.rows[0].name,
+        taskBusinessInstalled: taskBusiness.installed,
         roleExists: !!role,
         deviceId: site.deviceId,
       }),
@@ -92,9 +96,14 @@ try {
       await c.query(`GRANT CONNECT ON DATABASE ${identifier(site.database)} TO ${login}`);
       await c.query(`GRANT gowm_device_reader TO ${login}`);
       await c.query(`GRANT USAGE ON SCHEMA ugv_smpp,gowm_task,gowm_execution TO ${login}`);
-      await c.query(
-        `GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ugv_smpp TO ${login}`,
-      );
+      const mutableTables = await c.query(`SELECT tablename FROM pg_tables
+        WHERE schemaname='ugv_smpp' AND tablename NOT IN
+        ('ugv_task_business_context','ugv_task_business_command',
+         'ugv_task_business_object_version','ugv_task_business_content')`);
+      for (const { tablename } of mutableTables.rows)
+        await c.query(
+          `GRANT SELECT,INSERT,UPDATE,DELETE ON ugv_smpp.${identifier(tablename)} TO ${login}`,
+        );
       await c.query(
         `GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA gowm_task,gowm_execution TO ${login}`,
       );
@@ -110,8 +119,18 @@ try {
         resourceId: site.resourceId,
       });
       await c.query("COMMIT");
+      const taskBusiness = await installGowmTaskBusiness(
+        c,
+        deploymentInput.taskBusinessMigration,
+        true,
+      );
       console.log(
-        JSON.stringify({ ...binding, providerId: site.providerId, resourceId: site.resourceId }),
+        JSON.stringify({
+          ...binding,
+          providerId: site.providerId,
+          resourceId: site.resourceId,
+          taskBusiness,
+        }),
       );
     } catch (e) {
       await c.query("ROLLBACK");

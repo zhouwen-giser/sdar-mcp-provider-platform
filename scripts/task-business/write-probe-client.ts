@@ -4,6 +4,27 @@ export function isProbeRecord(value: unknown): value is ProbeRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** Scene authorization is carried by the Runtime request, even when optional
+ * public business identity fields are omitted by the producer. */
+export function simulationProbeFetch(
+  fetchImpl: typeof fetch,
+  sceneInstanceId: string,
+): typeof fetch {
+  return (url, init) => {
+    const headers = new Headers(init?.headers);
+    for (const [key, value] of [
+      ["x-sdar-execution-mode", "simulation"],
+      ["x-sdar-simulation-id", sceneInstanceId],
+    ] as const) {
+      const existing = headers.get(key);
+      if (existing !== null && existing !== value)
+        throw new Error("PROBE_SIMULATION_CONTEXT_MISMATCH");
+      headers.set(key, value);
+    }
+    return fetchImpl(url, { ...init, headers });
+  };
+}
+
 /** Shared authenticated transport for the explicit, single-Task write probes. */
 export function createWriteProbeClient(options: {
   mcpUrl: string;

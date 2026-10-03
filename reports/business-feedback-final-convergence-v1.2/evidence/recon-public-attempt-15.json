@@ -1,0 +1,25 @@
+{
+  "schema": "smpp.public-recon-qualification/v1",
+  "runId": "c607abe0-5855-40ca-91ba-82b6263f7076",
+  "startedAt": "2026-09-30T02:33:59.130Z",
+  "status": "FAILED",
+  "fireEnabled": false,
+  "capturePublicPayloads": true,
+  "sceneInstanceId": "smpp-bff-test-a0af6ae8-d19d-490f-8252-81d03c0603d6",
+  "steps": [
+    {
+      "stage": "failed",
+      "at": "2026-09-30T02:33:59.208Z",
+      "reason": "fetch failed"
+    }
+  ],
+  "reads": [],
+  "streams": [],
+  "decisions": [],
+  "runs": [],
+  "observations": [],
+  "processes": [],
+  "reason": "fetch failed",
+  "observerError": "Not connected",
+  "completedAt": "2026-09-30T02:33:59.209Z"
+}

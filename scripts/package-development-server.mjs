@@ -12,6 +12,7 @@ import { dirname, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { taskBusinessMigration } from "../deploy/gowm-task-business/install.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -28,6 +29,8 @@ for (let i = 0; i < args.length; i += 2) {
   else throw Error("Invalid arguments; use --help");
 }
 const out = resolve(outputDir ?? resolve(root, "artifacts"));
+// Pin the exact explicit owner SQL before assembling source/prebuilt images.
+taskBusinessMigration();
 execFileSync(
   process.execPath,
   [resolve(root, "deploy/development/server/package.mjs"), "check-template"],

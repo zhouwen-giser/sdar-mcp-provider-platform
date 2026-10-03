@@ -4,6 +4,10 @@ import { join } from "node:path";
 import type { Pool } from "pg";
 import type { GowmStorageConfig } from "./config.js";
 import { readConsumedStructure } from "./structure.js";
+import {
+  verifyGowmTaskBusinessRuntimeCommands,
+  GOWM_INTERVENTION_COMMAND_TYPE_CONSTRAINT,
+} from "./task-business.js";
 
 type CatalogRow = Record<string, unknown>;
 interface SourceContract {
@@ -53,13 +57,26 @@ export async function verifyGowmStorage(
       )
         mismatch(`${entry.family}/${entry.file}`);
     }
+    const hasInterventions = history.rows.some(
+      (row) =>
+        row.family === "SMPP_RUNTIME" && row.file === "027_task_business_intervention_command.sql",
+    );
+    if (hasInterventions) await verifyGowmTaskBusinessRuntimeCommands(client, config);
     const actual = (await readConsumedStructure(client)) as Record<string, CatalogRow[]>;
     for (const [category, rows] of Object.entries(expected)) {
       const available = new Set((actual[category] ?? []).map(canonical));
       for (const row of rows) {
         // PG <18 represents NOT NULL in pg_attribute; columns already enforce it.
         if (category === "constraints" && String(row.definition).startsWith("NOT NULL ")) continue;
-        if (!available.has(canonical(row)))
+        const expectedRow =
+          hasInterventions &&
+          category === "constraints" &&
+          row.schema === "ugv_smpp" &&
+          row.name === "task_command" &&
+          row.conname === "task_command_command_type_check"
+            ? { ...row, definition: GOWM_INTERVENTION_COMMAND_TYPE_CONSTRAINT }
+            : row;
+        if (!available.has(canonical(expectedRow)))
           mismatch(`${category}:${String(row.schema)}.${String(row.name)}`);
       }
     }

@@ -5,7 +5,11 @@ import {
 } from "../../adapter-protocol/src/index.js";
 import type { GrpcAdapterGateway } from "../../adapter-protocol/src/index.js";
 import type { AuthorizationContext, Clock, ExecutionMode } from "../../domain/src/index.js";
-import { isTerminalState, systemClock } from "../../domain/src/index.js";
+import {
+  isTerminalState,
+  isRuntimeBusinessResponder,
+  systemClock,
+} from "../../domain/src/index.js";
 import { OperationSnapshotRepository } from "../../persistence-postgres/src/index.js";
 import type { PendingCommandRecord, TaskRepository } from "../../persistence-postgres/src/index.js";
 import type { ValidatedOperation } from "../../operation-registry/src/index.js";
@@ -733,15 +737,10 @@ function parseVerifiedResponders(
       throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
     }
     const fields = responder as Record<string, unknown>;
-    if (
-      !["user", "agent", "operator"].includes(String(fields.actorType)) ||
-      typeof fields.actorId !== "string" ||
-      fields.actorId.length === 0 ||
-      !["jwt_hs256", "trusted_headers"].includes(String(fields.source))
-    ) {
+    if (!isRuntimeBusinessResponder(fields)) {
       throw new Error("INVALID_UPDATE_COMMAND_PAYLOAD");
     }
-    output[key] = fields as unknown as NonNullable<AuthorizationContext["verifiedResponder"]>;
+    output[key] = fields;
   }
   return output;
 }

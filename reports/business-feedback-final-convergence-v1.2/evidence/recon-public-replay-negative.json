@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "fire-flag",
+      "exitCode": 1,
+      "rejected": true
+    },
+    {
+      "case": "unresolved-correlation",
+      "exitCode": 1,
+      "rejected": true
+    },
+    {
+      "case": "missing-notification",
+      "exitCode": 1,
+      "rejected": true
+    },
+    {
+      "case": "release-not-observed",
+      "exitCode": 1,
+      "rejected": true
+    },
+    {
+      "case": "duplicate-dispatch",
+      "exitCode": 1,
+      "rejected": true
+    }
+  ]
+}

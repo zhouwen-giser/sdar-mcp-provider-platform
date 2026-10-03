@@ -18,6 +18,7 @@ import { UgvProviderServer } from "./server.js";
 import { UgvTaskBusinessContextService } from "./task-business-service.js";
 import { openUgvTaskBusinessStore } from "./task-business-bootstrap.js";
 import { UgvTelemetry } from "./telemetry.js";
+import { AirportRoadPlanner } from "./navigation-planner.js";
 
 const config = loadUgvProviderConfig();
 const logger = pino({
@@ -49,6 +50,7 @@ const taskBusinessStore = await openUgvTaskBusinessStore(
   store,
   config.taskBusinessSettings,
   config.gowmStorage,
+  config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport",
 );
 const identity = {
   providerId: config.PROVIDER_ID,
@@ -173,6 +175,18 @@ const runtime = new UgvProviderRuntime(
       recoverySuccessThreshold: config.UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD,
     },
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
+    trajectorySampleEveryMs: config.taskBusinessSettings.trajectory.sampleEveryMs,
+    businessMapFull: config.taskBusinessSettings.footprint.mode === "estimated",
+    ...(config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" && config.UGV_NAVIGATION_PLANNER_URL
+      ? {
+          navigationPlanner: new AirportRoadPlanner(config.UGV_NAVIGATION_PLANNER_URL),
+          navigationAdjustments: config.taskBusinessSettings.adjustments.navigation,
+        }
+      : {}),
+    ...(config.taskBusinessSettings.enabled &&
+    config.taskBusinessSettings.visualLockOwner === "provider"
+      ? { businessVisualLockOwner: "provider" as const }
+      : {}),
     ...(config.taskBusinessSettings.enabled &&
     config.taskBusinessSettings.decisionMode === "user_required"
       ? {

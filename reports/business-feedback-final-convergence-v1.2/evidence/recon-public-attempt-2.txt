@@ -1,0 +1,9 @@
+{"stage":"public_ready","at":"2026-09-29T23:11:41.008Z"}
+{"stage":"public_task_created","at":"2026-09-29T23:11:41.175Z","name":"vehicle_area_recon","taskId":"eacb0d01-de70-4ec8-b3d5-23bc3db5dfe6"}
+{"stage":"public_stream","at":"2026-09-29T23:11:41.312Z","type":"businessEvent"}
+{"stage":"public_stream","at":"2026-09-29T23:11:41.415Z","type":"businessEvent"}
+{"stage":"public_stream","at":"2026-09-29T23:11:41.416Z","type":"businessEvent"}
+{"stage":"public_stream","at":"2026-09-29T23:11:41.418Z","type":"businessEvent"}
+{"stage":"public_stream_failure","at":"2026-09-29T23:12:36.176Z","reason":"PUBLIC_STREAM_TIMEOUT"}
+{"stage":"failed","at":"2026-09-29T23:13:41.373Z","reason":"QUALIFICATION_TIMEOUT:public_policy_lock_and_input"}
+{"stage":"public_stream","at":"2026-09-29T23:13:41.386Z","type":"stopped","reason":"duration_elapsed"}

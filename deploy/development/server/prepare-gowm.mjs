@@ -2,6 +2,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync } from "n
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  installGowmTaskBusiness,
+  taskBusinessMigration,
+} from "../../gowm-task-business/install.mjs";
 const dir = dirname(fileURLToPath(import.meta.url));
 const apply = process.argv.includes("--apply");
 if (process.argv.includes("--help")) {
@@ -47,6 +51,7 @@ const contract = JSON.parse(
 const input = {
   site,
   contract,
+  taskBusinessMigration: taskBusinessMigration(),
   password: decodeURIComponent(connection.password),
   credentialExists,
   apply,
@@ -60,6 +65,8 @@ if (apply) {
 const script =
   "const deploymentInput=" +
   JSON.stringify(input) +
+  ";\n" +
+  installGowmTaskBusiness.toString() +
   ";\n" +
   readFileSync(resolve(dir, "gowm-bootstrap.mjs"), "utf8");
 const result = spawnSync(
@@ -80,6 +87,13 @@ if (apply) {
   writeFileSync(resolve(config, "gowm-binding.json"), JSON.stringify(output, null, 2) + "\n", {
     mode: 0o644,
   });
+  if (
+    JSON.stringify(output.taskBusiness.contract) !==
+      JSON.stringify(input.taskBusinessMigration.contract) ||
+    JSON.stringify(output.taskBusiness.runtimeContract) !==
+      JSON.stringify(input.taskBusinessMigration.runtime.contract)
+  )
+    throw Error("GOWM_BUSINESS_INSTALLED_CONTRACT_MISMATCH");
 }
 console.log(
   JSON.stringify({
@@ -89,6 +103,10 @@ console.log(
     schema: "ugv_smpp",
     ...(apply
       ? { bindingId: output.bindingId }
-      : { schemaInstalled: output.schemaInstalled, roleExists: output.roleExists }),
+      : {
+          schemaInstalled: output.schemaInstalled,
+          taskBusinessInstalled: output.taskBusinessInstalled,
+          roleExists: output.roleExists,
+        }),
   }),
 );

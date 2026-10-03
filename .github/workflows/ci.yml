@@ -64,6 +64,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm task-business:check
       - run: pnpm test:task-business:ugv-local
+      - name: GOWM owner template components (not selected installation qualification)
+        run: pnpm test:task-business:gowm-template
+        env:
+          SMPP_GOWM_BUSINESS_TEMPLATE_TEST_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_ugv_business_test
+      - name: Packaged GOWM SQL transaction and retry checks
+        run: pnpm test:task-business:gowm-deployment
+        env:
+          SMPP_GOWM_BUSINESS_DEPLOY_TEST_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_ugv_business_test
       - run: pnpm test:task-business:ugv-native
 
   static:

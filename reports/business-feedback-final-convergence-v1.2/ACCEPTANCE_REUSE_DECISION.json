@@ -1,0 +1,6 @@
+{
+  "at": "2026-09-30T07:57:17.182968+00:00",
+  "request": "不再需要重复测试验证已完成的功能",
+  "effect": "Reuse completed functional evidence with its original source identity. Stop navigation, reconnaissance, lock and human-input repeats. Only finish known event recovery fixes, packaging/deployment, CI/static checks and passive service verification.",
+  "doesNotClaim": "No additional site navigation, Recon, Map-full or external SDAR qualification is inferred."
+}

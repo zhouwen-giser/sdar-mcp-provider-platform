@@ -1,3 +1,4 @@
+import { UGV_BUSINESS_SEMANTICS_JSON_SCHEMA } from "./ugv-business-semantics.js";
 import {
   ADAPTER_PROTOCOL_VERSION,
   jsonToProtoStruct,
@@ -25,6 +26,7 @@ export interface VehicleManifestProfile {
     returnHome: boolean;
     pauseResumeCancel: boolean;
   };
+  supportsBusinessSemantics?: boolean;
   supportsCapabilityQuery?: boolean;
   supportsTargetTracking?: boolean;
   supportsGimbalControl?: boolean;
@@ -68,6 +70,9 @@ export function vehicleProviderManifest(
     jsonToProtoStruct({ type: "object", properties, required, additionalProperties: false });
   const taskOutput = (statuses: string[], optionalProperties: Record<string, unknown> = {}) =>
     jsonToProtoStruct(vehicleTaskResultV1Schema(profile.resourceId, statuses, optionalProperties));
+  const semanticProperties = profile.supportsBusinessSemantics
+    ? { businessSemantics: UGV_BUSINESS_SEMANTICS_JSON_SCHEMA }
+    : {};
   const nullable = (value: Record<string, unknown>) => ({
     anyOf: [value, { type: "null" }],
   });
@@ -105,7 +110,9 @@ export function vehicleProviderManifest(
           },
           ["resourceId"],
         ),
-        outputSchema: jsonToProtoStruct(vehicleStateV1Schema(profile.resourceId)),
+        outputSchema: jsonToProtoStruct(
+          vehicleStateV1Schema(profile.resourceId, profile.supportsBusinessSemantics),
+        ),
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
@@ -127,7 +134,11 @@ export function vehicleProviderManifest(
         description: `Read local ${profile.displayKind} payload, gimbal, laser and task status.`,
         execution: "SYNCHRONOUS",
         inputSchema: schema({ resourceId }, ["resourceId"]),
-        outputSchema: jsonToProtoStruct({ type: "object", additionalProperties: true }),
+        outputSchema: jsonToProtoStruct({
+          type: "object",
+          properties: semanticProperties,
+          additionalProperties: true,
+        }),
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
@@ -139,6 +150,7 @@ export function vehicleProviderManifest(
         outputSchema: schema(
           {
             resourceId,
+            ...semanticProperties,
             targets: { type: "array", items: { type: "object" } },
             freshness: { type: "object" },
             observedAt: { type: "string" },
@@ -212,6 +224,32 @@ export function vehicleProviderManifest(
                   enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
                 },
                 observationAuthority: { type: "string" },
+                ...(profile.businessFeedbackProfiles?.vehicle_navigate === undefined
+                  ? {}
+                  : {
+                      effectivePlanRevision: { type: "integer", minimum: 1 },
+                      destination: {
+                        type: "object",
+                        properties: {
+                          longitude: { type: "number", minimum: -180, maximum: 180 },
+                          latitude: { type: "number", minimum: -90, maximum: 90 },
+                          altitude: { type: "number" },
+                        },
+                        required: ["longitude", "latitude"],
+                        additionalProperties: false,
+                      },
+                      destinationDistanceM: { type: "number", minimum: 0 },
+                      routeRef: {
+                        type: "object",
+                        properties: {
+                          kind: { const: "artifact" },
+                          id: { type: "string", minLength: 1, maxLength: 256 },
+                          revision: { type: "integer", minimum: 1 },
+                        },
+                        required: ["kind", "id", "revision"],
+                        additionalProperties: false,
+                      },
+                    }),
               }),
               capabilities: caps(
                 true,
@@ -263,14 +301,27 @@ export function vehicleProviderManifest(
                       snapshotRevision: { type: "string" },
                       correlationStrength: {
                         type: "string",
-                        enum: ["STRICT_CORRELATED", "WEAK_UNCORRELATED", "MISMATCH", "UNKNOWN"],
+                        enum: [
+                          "STRICT_CORRELATED",
+                          "INFERRED_CURRENT_EXECUTION",
+                          "WEAK_UNCORRELATED",
+                          "MISMATCH",
+                          "UNKNOWN",
+                        ],
                       },
                       observationIsNew: { type: "boolean" },
                       timeAuthority: { type: "string" },
                     }
                   : {},
               ),
-              capabilities: caps(true, true, true, true, false, true),
+              capabilities: caps(
+                true,
+                true,
+                true,
+                true,
+                profile.businessFeedbackProfiles?.vehicle_area_recon?.methods.inputUpdate === true,
+                true,
+              ),
               resourceBinding: binding,
               ...(profile.businessFeedbackProfiles?.vehicle_area_recon === undefined
                 ? {}

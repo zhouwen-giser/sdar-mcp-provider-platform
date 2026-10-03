@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import type { Pool, PoolClient } from "pg";
 import { inTransaction } from "../../gowm-shared-storage-adapter/src/connection.js";
@@ -204,17 +205,34 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
       const payload = result.rows[0]?.payload;
       if (payload === undefined) return undefined;
       const context = parseBusinessContext(scope, TaskBusinessContextSchema.parse(payload));
-      const objects: BusinessObjectVersion[] = [];
-      for (const ref of contextObjectRefs(context)) {
-        const version = await client.query<{ payload: unknown }>(
-          `SELECT payload FROM ugv_task_business_object_version
-           WHERE scope_hash=$1 AND scope_key=$2 AND object_kind=$3 AND object_id=$4 AND revision=$5`,
-          [key.hash, key.text, ref.kind, ref.id, ref.revision],
-        );
-        const record = version.rows[0]?.payload;
-        if (record === undefined) throw new Error("BUSINESS_CONTEXT_REF_NOT_FOUND");
-        objects.push(decodeVersion(scope, ref.kind, record));
-      }
+      const refs = contextObjectRefs(context);
+      // Read all exact versions in one round trip. Recon target histories grow
+      // while scanning; one query per version can starve control/recovery RPCs.
+      const versions = refs.length
+        ? await client.query<{ payload: unknown }>(
+            `SELECT stored.payload
+             FROM unnest($3::text[], $4::text[], $5::bigint[]) WITH ORDINALITY
+               AS wanted(kind,id,revision,position)
+             LEFT JOIN ugv_task_business_object_version stored
+               ON stored.scope_hash=$1 AND stored.scope_key=$2
+               AND stored.object_kind=wanted.kind AND stored.object_id=wanted.id
+               AND stored.revision=wanted.revision
+             ORDER BY wanted.position`,
+            [
+              key.hash,
+              key.text,
+              refs.map((r) => r.kind),
+              refs.map((r) => r.id),
+              refs.map((r) => r.revision),
+            ],
+          )
+        : { rows: [] };
+      const objects = refs.map((ref, index) => {
+        const record = versions.rows[index]?.payload;
+        if (record === undefined || record === null)
+          throw new Error("BUSINESS_CONTEXT_REF_NOT_FOUND");
+        return decodeVersion(scope, ref.kind, record);
+      });
       return { context, objects };
     });
     if (snapshot && Buffer.byteLength(JSON.stringify(snapshot)) > 1_048_576) {
@@ -228,7 +246,40 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
     maxBytes: number,
     cursor?: string,
   ): Promise<TaskBusinessSnapshotPage | undefined> {
-    return loadTaskBusinessSnapshotPage(this, scope, maxBytes, cursor);
+    const key = scopeKey(scope, this.gowm);
+    // A high-rate producer may advance Context during even a single page read.
+    // Pin this page to one database snapshot; a later page still checks its
+    // cursor against that page's current Context and rejects revision changes.
+    return inTransaction(this.pool, async (client) => {
+      await client.query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY");
+      return loadTaskBusinessSnapshotPage(
+        {
+          getContext: async () => {
+            const result = await client.query<{ payload: unknown }>(
+              `SELECT payload FROM ugv_task_business_context WHERE scope_hash=$1 AND scope_key=$2`,
+              [key.hash, key.text],
+            );
+            const payload = result.rows[0]?.payload;
+            return payload === undefined
+              ? undefined
+              : parseBusinessContext(scope, TaskBusinessContextSchema.parse(payload));
+          },
+          getObjectVersion: async (_scope, candidate) => {
+            const ref = BusinessObjectRefSchema.parse(candidate);
+            const result = await client.query<{ payload: unknown }>(
+              `SELECT payload FROM ugv_task_business_object_version
+               WHERE scope_hash=$1 AND scope_key=$2 AND object_kind=$3 AND object_id=$4 AND revision=$5`,
+              [key.hash, key.text, ref.kind, ref.id, ref.revision],
+            );
+            const payload = result.rows[0]?.payload;
+            return payload === undefined ? undefined : decodeVersion(scope, ref.kind, payload);
+          },
+        },
+        scope,
+        maxBytes,
+        cursor,
+      );
+    });
   }
 
   async getArtifactVersion(
@@ -654,8 +705,29 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
       for (const ref of Object.values(context.activeRefs)) {
         if (!listedSet.has(refKey(ref))) throw new Error("BUSINESS_ACTIVE_REF_NOT_LISTED");
       }
-      for (const ref of [...listed, ...Object.values(context.activeRefs)]) {
-        await assertRefExists(client, key, pending, ref, "BUSINESS_CONTEXT_REF_NOT_FOUND");
+      const persistedRefs = contextObjectRefs(context).filter((ref) => {
+        const version = pending.get(JSON.stringify([ref.kind, ref.id]));
+        return !version || businessObjectRef(version).revision !== ref.revision;
+      });
+      if (persistedRefs.length) {
+        const missing = await client.query(
+          `SELECT 1 FROM unnest($3::text[], $4::text[], $5::bigint[])
+             AS wanted(kind,id,revision)
+           WHERE NOT EXISTS (
+             SELECT 1 FROM ugv_task_business_object_version stored
+             WHERE stored.scope_hash=$1 AND stored.scope_key=$2
+               AND stored.object_kind=wanted.kind AND stored.object_id=wanted.id
+               AND stored.revision=wanted.revision
+           ) LIMIT 1`,
+          [
+            key.hash,
+            key.text,
+            persistedRefs.map((ref) => ref.kind),
+            persistedRefs.map((ref) => ref.id),
+            persistedRefs.map((ref) => ref.revision),
+          ],
+        );
+        if (missing.rowCount) throw new Error("BUSINESS_CONTEXT_REF_NOT_FOUND");
       }
 
       let command: BusinessCommandRecord | undefined;
@@ -679,7 +751,9 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
           claimed.responseHash !== command.responseHash ||
           claimed.createdAt !== command.createdAt ||
           claimed.entryKey !== command.entryKey ||
-          claimed.runtimeCommandSequence !== command.runtimeCommandSequence
+          claimed.runtimeCommandSequence !== command.runtimeCommandSequence ||
+          !isDeepStrictEqual(claimed.responder, command.responder) ||
+          !isDeepStrictEqual(claimed.interventionRequest, command.interventionRequest)
         )
           throw new Error("COMMAND_ID_CONFLICT");
         if (Date.parse(command.updatedAt) < Date.parse(claimed.updatedAt)) {

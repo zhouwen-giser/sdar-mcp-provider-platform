@@ -1,0 +1,2 @@
+$ node --import tsx scripts/generate-config-schemas.mjs --check
+CONFIGURATION_SCHEMA_CHECK_OK

@@ -83,6 +83,21 @@ async function setup() {
 }
 
 describe("UGV navigation business projection (synthetic source facts)", () => {
+  it("defers adoption when a priority control arrives during Store reads", async () => {
+    const { run, business, processor, scope } = await setup();
+    await processor.apply(run, planFact("candidate"));
+    const before = await business.getContext(scope);
+    let allowed = true;
+    const read = business.getArtifactLatest.bind(business);
+    business.getArtifactLatest = async (...args) => {
+      const value = await read(...args);
+      allowed = false;
+      return value;
+    };
+    expect(await processor.apply(run, planFact("adopted"), () => allowed)).toBe("deferred");
+    expect(await business.getContext(scope)).toEqual(before);
+    expect((await business.getArtifactLatest(scope, "route-1"))?.revision).toBe(1);
+  });
   it("keeps a candidate separate, adopts only on an adoption fact, and retains old route versions", async () => {
     const { run, business, processor, events, scope } = await setup();
     expect(await processor.apply(run, planFact("candidate"))).toBe("committed");

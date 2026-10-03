@@ -407,11 +407,14 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     field: VehicleObservationField,
     maximumAgeMs: number,
     now = Date.now(),
+    maximumFutureSkewMs = 0,
   ): "fresh" | "stale" | "unknown" {
     const authority = this.#fieldAuthorities.get(field);
     if (authority === undefined) return "unknown";
     const age = now - Date.parse(authority.observedAt);
-    return Number.isFinite(age) && age >= 0 && age <= maximumAgeMs ? "fresh" : "stale";
+    return Number.isFinite(age) && age >= -maximumFutureSkewMs && age <= maximumAgeMs
+      ? "fresh"
+      : "stale";
   }
   stateConflict(): boolean {
     return this.#stateConflict;

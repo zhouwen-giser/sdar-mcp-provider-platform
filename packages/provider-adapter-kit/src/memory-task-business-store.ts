@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import {
   assertActionTransition,
   assertInterventionTransition,
@@ -462,7 +463,9 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
           claimed.responseHash !== command.responseHash ||
           claimed.createdAt !== command.createdAt ||
           claimed.entryKey !== command.entryKey ||
-          claimed.runtimeCommandSequence !== command.runtimeCommandSequence
+          claimed.runtimeCommandSequence !== command.runtimeCommandSequence ||
+          !isDeepStrictEqual(claimed.responder, command.responder) ||
+          !isDeepStrictEqual(claimed.interventionRequest, command.interventionRequest)
         ) {
           throw new Error("COMMAND_ID_CONFLICT");
         }

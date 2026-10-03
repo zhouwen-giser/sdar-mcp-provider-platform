@@ -1,0 +1,174 @@
+{
+  "checkedAt": "2026-10-03T15:33:35.067374+00:00",
+  "scope": "passive service and read-only MCP queries; no task creation or device control",
+  "revision": "0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+  "health": {
+    "/health/live": {
+      "statusCode": 200,
+      "body": {
+        "status": "live"
+      }
+    },
+    "/health/ready": {
+      "statusCode": 200,
+      "body": {
+        "status": "ready",
+        "dependencies": {
+          "database": "ready",
+          "adapter": "ready",
+          "adapterManifest": "ready",
+          "recovery": "ready",
+          "scheduler": "ready",
+          "commandDispatcher": "ready",
+          "ttlCleaner": "ready",
+          "outboxPublisher": "ready",
+          "outboxCleaner": "ready",
+          "providerTelemetryIngress": "ready",
+          "businessEventPersistence": "ready",
+          "businessEventReplay": "ready",
+          "businessEventIngest": "ready",
+          "businessEventFinalizer": "ready",
+          "businessEventAdapterSources": {
+            "vehicle.business": "ready",
+            "vehicle.execution": "ready",
+            "vehicle.health": "ready",
+            "vehicle.target": "ready"
+          },
+          "businessEventRetention": "ready",
+          "businessEventProjection": "ready"
+        }
+      }
+    }
+  },
+  "calls": [
+    {
+      "method": "server/discover",
+      "name": null,
+      "httpStatus": 200,
+      "isError": false
+    },
+    {
+      "method": "tools/list",
+      "name": null,
+      "httpStatus": 200,
+      "isError": false,
+      "tools": [
+        "vehicle_get_state",
+        "vehicle_get_capabilities",
+        "vehicle_get_payload_status",
+        "vehicle_get_targets",
+        "vehicle_navigate",
+        "vehicle_area_recon",
+        "vehicle_track_target",
+        "vehicle_control_gimbal",
+        "vehicle_fire_weapon",
+        "vehicle_emergency_stop"
+      ],
+      "semanticSchemas": {
+        "vehicle_get_state": true,
+        "vehicle_get_payload_status": true,
+        "vehicle_get_targets": true
+      }
+    },
+    {
+      "method": "tools/call",
+      "name": "vehicle_get_state",
+      "httpStatus": 200,
+      "isError": false,
+      "businessSemantics": {
+        "schemaVersion": "ugv.business-semantics/1",
+        "missionTaskState": "starting",
+        "reconPhase": "idle",
+        "visualLockState": "unlocked",
+        "sensorMode": "adaptive",
+        "payloadHealth": "unknown",
+        "payloadLoadState": "unknown",
+        "native": {
+          "missionTaskState": 0,
+          "reconMotionStatus": 1,
+          "lockStage": 1,
+          "reconType": 1,
+          "loadStatus": 1,
+          "cameraFault": false,
+          "online": null,
+          "sensorHealth": "normal"
+        }
+      },
+      "freshness": {
+        "chassisObservedAt": "2026-10-03T15:33:37.474298673Z",
+        "healthObservedAt": "2026-10-03T15:33:37.474298673Z",
+        "missionObservedAt": "2026-10-03T15:33:37.474298673Z",
+        "payloadObservedAt": "2026-10-03T15:33:37.474298673Z",
+        "positionObservedAt": "2026-10-03T15:33:35.155Z"
+      }
+    },
+    {
+      "method": "tools/call",
+      "name": "vehicle_get_payload_status",
+      "httpStatus": 200,
+      "isError": false,
+      "businessSemantics": {
+        "schemaVersion": "ugv.business-semantics/1",
+        "missionTaskState": "starting",
+        "reconPhase": "idle",
+        "visualLockState": "unlocked",
+        "sensorMode": "adaptive",
+        "payloadHealth": "unknown",
+        "payloadLoadState": "unknown",
+        "native": {
+          "missionTaskState": 0,
+          "reconMotionStatus": 1,
+          "lockStage": 1,
+          "reconType": 1,
+          "loadStatus": 1,
+          "cameraFault": false,
+          "online": true,
+          "sensorHealth": "normal"
+        }
+      },
+      "freshness": null
+    },
+    {
+      "method": "tools/call",
+      "name": "vehicle_get_targets",
+      "httpStatus": 200,
+      "isError": false,
+      "businessSemantics": {
+        "schemaVersion": "ugv.business-semantics/1",
+        "missionTaskState": "starting",
+        "reconPhase": "idle",
+        "visualLockState": "unlocked",
+        "sensorMode": "adaptive",
+        "payloadHealth": "unknown",
+        "payloadLoadState": "unknown",
+        "native": {
+          "missionTaskState": 0,
+          "reconMotionStatus": 1,
+          "lockStage": 1,
+          "reconType": 1,
+          "loadStatus": 1,
+          "cameraFault": false,
+          "online": true,
+          "sensorHealth": "normal"
+        }
+      },
+      "freshness": {
+        "targetObservedAt": null
+      }
+    }
+  ],
+  "logWindowStart": "2026-10-03T15:33:07.131075353Z",
+  "logCounts": {
+    "smpp-gowm-runtime-1": {
+      "lines": 43,
+      "constraintFailures": 0,
+      "finalizerFailures": 0
+    },
+    "smpp-gowm-adapter-1": {
+      "lines": 12,
+      "constraintFailures": 0,
+      "finalizerFailures": 0
+    }
+  },
+  "status": "PASS"
+}

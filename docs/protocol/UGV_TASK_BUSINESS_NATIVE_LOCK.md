@@ -1,6 +1,19 @@
 # UGV recon visual lock observations
 
-The Runtime reads only accepted, non-retained `/ugv/area_recon/status` messages with an explicit recon mission ID. It requires exactly one active `vehicle_area_recon` Execution owning that mission and a status time after Task creation. The 2026-09-28 live status stream omitted that ID throughout a lock cycle, so this production gate did not receive a qualified Task-bound source. For qualified facts, `NativeLockBusinessProcessor` persists one `sensor.visual_lock` Action per observed lock cycle in the Execution's Context; it has no Device MCP client and makes no lock Tool call. Existing standalone `vehicle_track_target` resource events remain on their original path.
+For requested Actions initiated by the new Provider policy, see
+[Provider automatic visual lock](UGV_TASK_BUSINESS_PROVIDER_AUTO_LOCK.md).
+That path requires journal dispatch plus a later stage-3 observation before
+activation. The device-observation path described below retains its existing
+unknown-origin semantics. Production automatic ownership remains unqualified.
+
+The Runtime accepts exact non-retained, fresh status packets using strict explicit
+identity or unique-current-execution inference under the
+[Recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md). The historical
+anonymous source audit is preserved; it no longer blocks projection by itself.
+For accepted facts, `NativeLockBusinessProcessor` persists observed Actions in the
+existing Context. It has no device client and makes no lock call. The Action and
+Context record the actual correlation type. Standalone `vehicle_track_target`
+resource events retain their existing path.
 
 If the Execution later has a replacement mission, old mission lock stages cannot create or change its current Action. A mission switch alone does not prove physical release of the prior lock; the true release and resume timeline still needs source qualification.
 

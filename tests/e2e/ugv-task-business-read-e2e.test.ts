@@ -61,10 +61,13 @@ describe("UGV Runtime business read assembly", () => {
       {
         providerId: "isr.vehicle.ugv.ugv1",
         resourceId: "vehicle:ugv1",
+        executionMode: "simulation",
         freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        // Exercise wire versioning with dense synthetic samples; production uses 1 s.
+        trajectorySampleEveryMs: 0,
       },
       store,
       ingress,

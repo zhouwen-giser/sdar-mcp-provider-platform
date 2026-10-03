@@ -118,11 +118,15 @@ beforeAll(async () => {
   adapterRuntime = new UgvProviderRuntime(
     {
       providerId,
+      executionMode: "simulation",
+      fireEnabled: false,
       resourceId: "vehicle:ugv1",
       freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
       allowNavigationWithRecon: true,
       fireRequiresChassisStopped: true,
       pollIntervalMs: 60_000,
+      // Dense synthetic samples exercise exact public Artifact versioning.
+      trajectorySampleEveryMs: 0,
     },
     providerStore,
     ingress,

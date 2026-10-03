@@ -1,0 +1,10 @@
+$ vitest run test
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform/packages/runtime-configuration-contract
+
+
+ Test Files  8 passed (8)
+      Tests  46 passed (46)
+   Start at  11:56:22
+   Duration  2.65s (transform 153ms, setup 0ms, import 848ms, tests 767ms, environment 1ms)
+

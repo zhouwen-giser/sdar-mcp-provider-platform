@@ -1,3 +1,5 @@
+import type { RuntimeBusinessResponder } from "./business-responder.js";
+
 export type ExecutionMode = "live" | "simulation" | "historical-replay";
 export type McpTaskStatus = "working" | "input_required" | "completed" | "failed" | "cancelled";
 export type InternalTaskState =
@@ -18,12 +20,8 @@ export interface AuthorizationContext {
   hash: string;
   executionMode: ExecutionMode;
   simulationId: string | null;
-  /** Set only by a verified authentication resolver, never from task input JSON. */
-  verifiedResponder?: {
-    actorType: "user" | "agent" | "operator";
-    actorId: string;
-    source: "jwt_hs256" | "trusted_headers";
-  };
+  /** Internal legacy field name: authenticated identity OR explicit development policy. */
+  verifiedResponder?: RuntimeBusinessResponder;
   correlationId?: string;
   traceId?: string;
   rootTraceparent?: string;
