@@ -2,7 +2,7 @@
 
 本文面向接入 UGV 的业务后端、智能体和界面开发人员，说明如何通过 SMPP Runtime 调用车辆能力、管理长任务、读取业务对象和消费事件。
 
-文档核对日期：2026-10-03；仓库 HEAD 为 `367910c75f4ffa3969aed1f612b77d74a6518ed4`。公开协议与参数依据当前工作区源码核对，工作区包含尚未发布的 v1.3 认证和模式调整；涉及这些差异的地方单独注明。sz-gowm 配置取自[最近一次部署记录](../reports/business-feedback-final-convergence-v1.2/SITE_DELIVERY.md)，未在编写文档时重新探测站点。所有请求示例都是调用模板；v1.3 本地受控环境验证结果与范围见[验收记录](../reports/ugv-business-simplification/VALIDATION.md)，不代表新的现场验收。
+文档核对日期：2026-10-03；v1.3 实现提交为 `0a4a7c36865d4c9920a4e65857c0903e9ef12533`，已部署到 sz-gowm。配置和现场只读验证见[最新部署记录](../reports/ugv-business-simplification/SITE_DELIVERY.md)。所有请求示例都是调用模板；[实现验收记录](../reports/ugv-business-simplification/VALIDATION.md)基于本地受控设备夹具，部署后的健康和只读查询检查不代替新的现场业务链或 SDAR 联调验收。
 
 建议阅读顺序：首次接入读第 1–4 节；导航及运行中调整读第 5 节；侦察和人工决策读第 6 节；界面接入读第 7 节的快照与事件；停止与排障读第 8–9 节。
 
@@ -44,8 +44,8 @@ flowchart LR
 | 数据库设备 ID                                 | `ugv:ugv`，用于服务端持久化作用域，不替代请求的 `resourceId`                  |
 | 对外协议版本                                  | `2026-07-28`                                                                  |
 | TaskExecution / TaskBusiness / BusinessEvents | `1.0` / `1.0-rc2` / `1.0`                                                     |
-| 执行模式                                      | 最近部署记录为 `simulation`；运行中请求必须匹配 Provider 配置                 |
-| 认证                                          | 最近部署为 `AUTH_MODE=development`；业务答复存在版本差异，见第 2.4 节         |
+| 执行模式                                      | 当前部署为 `live`；可省略模式头，不发送 simulation-id                         |
+| 认证                                          | 当前为 `AUTH_MODE=development`，无凭据业务答复；旧版差异见第 2.4 节           |
 | 业务存储                                      | GOWM 共享数据库 `ugv_smpp` schema，复用既有角色和绑定；客户端不直接访问业务表 |
 | 地图反馈                                      | 启用估算视场扇形；不是经过标定的可见区域                                      |
 | 发射能力                                      | `UGV_FIRE_ENABLED=false`，保持禁用；`UGV_FIRE_DISABLED` 是拒绝原因码          |
@@ -177,14 +177,14 @@ ugv_rpc tools/call '{"name":"vehicle_get_state","arguments":{"resourceId":"vehic
 
 这两个配置维度相互独立：`UGV_EXECUTION_MODE` 决定请求执行上下文；`AUTH_MODE` 决定身份和业务答复策略。调用方不能通过工具参数选择服务器认证模式。
 
-| 场景                                              | 请求约定                                                   | 业务答复行为                                                                                |
-| ------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| 最近部署的 v1.2，`AUTH_MODE=development`          | 无凭据查询和创建任务；按部署记录发送 `simulation` 与场景头 | 匿名没有受信人工身份，`user_required` Input 与受信 Intervention 仍可能被拒绝                |
-| 当前工作区 v1.3 开发改动，`AUTH_MODE=development` | 不需要登录、JWT 或角色字段；执行模式按 Provider 配置       | Runtime 生成内部 `development_anonymous` 标记，允许走业务答复策略；不表示真实人工身份已验证 |
-| `AUTH_MODE=anonymous`                             | 服务端使用共享匿名授权域                                   | 与 `development` 不同，不生成上述开发答复标记                                               |
-| `AUTH_MODE=jwt_hs256` / `trusted_headers`         | 由既有身份系统或受信代理提供有效身份，保持 Task 授权域一致 | 按已验证 responder 与请求策略检查；普通客户端自填 user 角色不能替代认证                     |
+| 场景                                      | 请求约定                                                   | 业务答复行为                                                                                |
+| ----------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 历史 v1.2，`AUTH_MODE=development`        | 无凭据查询和创建任务；按部署记录发送 `simulation` 与场景头 | 匿名没有受信人工身份，`user_required` Input 与受信 Intervention 仍可能被拒绝                |
+| 当前部署 v1.3，`AUTH_MODE=development`    | 不需要登录、JWT 或角色字段；执行模式按 Provider 配置       | Runtime 生成内部 `development_anonymous` 标记，允许走业务答复策略；不表示真实人工身份已验证 |
+| `AUTH_MODE=anonymous`                     | 服务端使用共享匿名授权域                                   | 与 `development` 不同，不生成上述开发答复标记                                               |
+| `AUTH_MODE=jwt_hs256` / `trusted_headers` | 由既有身份系统或受信代理提供有效身份，保持 Task 授权域一致 | 按已验证 responder 与请求策略检查；普通客户端自填 user 角色不能替代认证                     |
 
-当前工作区的开发策略保留 Task/Execution 绑定、有效请求、期限、版本、对象绑定和命令幂等检查；它不是取消业务守卫。客户端不要提交内部 `verifiedResponder`、`runtime_development_policy` 等字段。上述 v1.3 改动尚不能视为 sz-gowm 已升级或全链路已验收。
+当前 v1.3 开发策略保留 Task/Execution 绑定、有效请求、期限、版本、对象绑定和命令幂等检查；它不是取消业务守卫。客户端不要提交内部 `verifiedResponder`、`runtime_development_policy` 等字段。sz-gowm 已升级并通过健康和只读查询验证；完整 SDAR 联调另行记录。
 
 配置为 `live` 的实例采用下面的客户端设置即可；封装函数不会发送场景头：
 
@@ -246,7 +246,7 @@ ugv_rpc tools/call '{"name":"vehicle_laser_range","arguments":{"resourceId":"veh
 
 `vehicle_get_state`、`vehicle_get_payload_status`、`vehicle_get_targets` 新增 `businessSemantics`，包含 `missionTaskState`、`reconPhase`、`visualLockState`、`sensorMode`、`payloadHealth` 和 `payloadLoadState`。客户端可直接展示这些稳定枚举；`native` 与原查询字段保留设备码。
 
-侦察 Context 的 `summary.properties.businessSemantics` 与状态事件复用同一映射。未知码显示 `unknown`，不以零值或旧值替代；新鲜度、任务关联强度和 Task 终态仍独立判断。完整字段、码表依据及示例见[UGV 业务语义投影合同](providers/ugv-business-semantics.md)。该字段属于当前 v1.3 工作区版本，旧部署须升级后才会返回。
+侦察 Context 的 `summary.properties.businessSemantics` 与状态事件复用同一映射。未知码显示 `unknown`，不以零值或旧值替代；新鲜度、任务关联强度和 Task 终态仍独立判断。完整字段、码表依据及示例见[UGV 业务语义投影合同](providers/ugv-business-semantics.md)。当前 sz-gowm v1.3 已返回该字段；其他旧部署须升级后才会返回。
 
 ### 3.3 导航参数
 
@@ -538,7 +538,7 @@ Map-full 不是一个工具名，也不是任意给 `tools/call` 增加 `mapFull
 
 后一个 JSON 仅展示两个 response 值，不能把 `declineExample/dismissExample` 当作实际 request key。`tasks/update` 不接受客户端自填 `respondedBy`、`actorId`、`expectedRequestRevision` 或任意额外字段；Runtime 根据锁定请求及可信认证上下文处理。
 
-答复权限按第 2.4 节区分版本：最近部署的 v1.2 对 `user_required` 仍要求受信人工身份；当前工作区 v1.3 的 `development` 模式使用服务端生成的匿名开发策略答复。其他认证模式的受信身份要求继续保留。客户端发送的 `tasks/update` JSON 形状相同，不添加角色或内部审计字段。
+答复权限按第 2.4 节区分版本：历史 v1.2 对 `user_required` 要求受信人工身份；当前部署 v1.3 的 `development` 模式使用服务端生成的匿名开发策略答复。其他认证模式的受信身份要求继续保留。客户端发送的 `tasks/update` JSON 形状相同，不添加角色或内部审计字段。
 
 `tasks/update` 返回 `resultType=complete` 仅是 Runtime 受理。继续读取该 RequiredInput 的新版本：接受对应 `answered`，拒绝对应 `declined`，撤销提示对应带回答的 `cancelled`。之后仍需根据业务对象和设备状态确认实际后续行为。
 
@@ -734,7 +734,7 @@ JSON-RPC `error`、`CallToolResult.isError`、Task `failed/error` 和业务 `rea
 6. 对导航调整、人工观察决策分别实现版本守卫和权限处理，不把 Ack 当作业务应用。
 7. 界面保留 `estimated`、关联强度、新鲜度和 unavailable 原因，避免把推断或旧数据呈现为确定当前事实。
 
-认证和业务答复按第 2.4 节选择正确版本行为；发射仍禁用。既有功能验收记录按原版本保留，本文没有重复现场功能测试，也不宣称尚未发布的工作区改动或外部 SDAR 消费方已完成端到端验收。
+认证和业务答复按第 2.4 节选择正确版本行为；发射仍禁用。既有功能验收记录按原版本保留，本次更新只验证服务健康与只读查询，没有重复现场功能测试，也不宣称外部 SDAR 消费方已完成端到端验收。
 
 ## 11. 标识与数据读取速查
 

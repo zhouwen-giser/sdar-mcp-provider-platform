@@ -1,6 +1,6 @@
 {
   "baselineCommit": "367910c75f4ffa3969aed1f612b77d74a6518ed4",
-  "scope": "UGVBIZ v1.3 working tree source; excludes preexisting reports and device contract captures",
+  "scope": "Validated UGVBIZ v1.3 source at validatedCommit; hashes intentionally precede delivery-only guide updates and exclude preexisting v1.2 evidence",
   "files": {
     "README.md": "dfe48e0b0dae2aaca1932a9cbdb88e5cc6de015bf664b16232c1c32b64c8d542",
     "apps/ugv-provider-adapter/src/capabilities.ts": "6556cf19e05eadb47c5c2a73cc9b1e80ade09963376de3bfa81d057dfc39e056",
@@ -57,5 +57,6 @@
     "tests/integration/ugv-task-business-public-postgres.test.ts": "30a50aa0c48e46010559e4a3eb88133a6d58553a4013623a0d2f7980cc69682d",
     "tests/security/runtime-security.test.ts": "cb368440c0c00d383361ad49c4c5d5230e7b18cbe5fa8f5c06965e85846eda29",
     "tests/ugv-business/persistence/task-business-postgres.test.ts": "817af423a954669428e3666b5f9075f53bc38c5efa84d916547fde9726860178"
-  }
+  },
+  "validatedCommit": "0a4a7c36865d4c9920a4e65857c0903e9ef12533"
 }

@@ -1,5 +1,7 @@
 # UGV Provider MCP 业务简化与语义投影 v1.3 收口
 
+后续交付更新：本轮实现已提交为 `0a4a7c3`，PR #35 已正式待审，sz-gowm 已升级。详见 [SITE_DELIVERY](SITE_DELIVERY.md)。以下保留实现验收当时的范围与证据。
+
 审计日期：2026-10-03。基线 HEAD：`367910c75f4ffa3969aed1f612b77d74a6518ed4`。结论：全部 12 项任务及 ACCEPTANCE A–F 验收通过。`state/PROGRESS.json` 已将 12 项任务记录为 DONE，`UGV_PROVIDER_MCP_BUSINESS_SIMPLIFICATION_COMPLETE=true`。
 
 本轮在 SMPP 既有调用链上实现 development 无身份门禁、live 默认、严格受约束的独占设备 Recon 推断，以及统一的业务语义投影。业务 binding、版本、时间、幂等和设备确认要求继续生效。`UGV_FIRE_ENABLED=false`。
