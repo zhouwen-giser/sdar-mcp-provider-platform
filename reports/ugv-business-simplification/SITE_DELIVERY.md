@@ -4,6 +4,8 @@
 
 该提交的 [CI 37132978147](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147) 中 static、development-tests、task-business-ugv 全部通过。其余 release/dispatch 专用作业按工作流条件跳过，未视作通过。
 
+后续交付文档提交 `ff495bc` 的 [CI 37133939847](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37133939847) 出现一项测试失败：Recon 测试的全局递增样本时间可能领先 Runtime 时钟，启动前被判为 `UGV_STATE_STALE`。现将该测试改用同一受控时钟，显式推进派发前、派发后、运行中和终态样本时间；原断言与生产新鲜度限制不变。修复后本地 Provider 集成 94 项、完整 UGV 本地集 407 项及 typecheck、单文件 lint/format 均通过。最新托管检查以 [PR #35 Checks](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/pull/35/checks) 为准；本次跟进只有测试与交付记录变更，已部署应用源码仍对应 `0a4a7c3`。
+
 ## 运行身份
 
 - 更新时间：2026-10-03 23:33（Asia/Shanghai）。

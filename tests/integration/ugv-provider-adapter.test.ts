@@ -2845,20 +2845,30 @@ describe("UGV long-running operation integration", () => {
   });
 
   it("does not complete a new recon task from a terminal observation captured before dispatch", async () => {
-    const fixture = await createFixture();
-    reconStatus(fixture.ingress, 11, 100);
+    let now = Date.parse("2026-10-03T00:00:00.000Z");
+    const fixture = await createFixture(false, new MemoryProviderStore(), {
+      now: () => new Date(now),
+    });
+    const observeRecon = (state: number, progress: number) =>
+      reconStatus(fixture.ingress, state, progress, undefined, "1", new Date(now).toISOString());
+    // Keep observations and Runtime on one clock; the shared monotonic helper can be in the future.
+    observeRecon(11, 100);
+    now += 10;
     await fixture.runtime.start(startInput("recon-stale", "vehicle_area_recon", reconArgs()));
     expect(await fixture.runtime.get("recon-stale")).toMatchObject({ state: "STARTING" });
 
-    reconStatus(fixture.ingress, 11, 100);
+    now += 10;
+    observeRecon(11, 100);
     expect(await fixture.runtime.get("recon-stale")).toMatchObject({
       state: "STARTING",
       reasonCode: "UGV_RECON_TERMINAL_UNCONFIRMED",
     });
 
-    reconStatus(fixture.ingress, 5, 50);
+    now += 10;
+    observeRecon(5, 50);
     expect(await fixture.runtime.get("recon-stale")).toMatchObject({ state: "RUNNING" });
-    reconStatus(fixture.ingress, 11, 100);
+    now += 10;
+    observeRecon(11, 100);
     expect(await fixture.runtime.get("recon-stale")).toMatchObject({ state: "SUCCEEDED" });
   });
 
@@ -4382,6 +4392,7 @@ function reconStatus(
   progress: number,
   lockedTargetId?: string,
   missionId: string | null = "1",
+  observedAt?: string,
 ) {
   ingress.handle(
     "/ugv/area_recon/status",
@@ -4406,7 +4417,7 @@ function reconStatus(
       }),
     ),
     false,
-    nextReconObservedAt(),
+    observedAt ?? nextReconObservedAt(),
   );
 }
 
