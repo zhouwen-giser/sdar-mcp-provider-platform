@@ -159,6 +159,20 @@ describe("Recon exact-packet correlation, supplement R1–R3", () => {
     ).toEqual({ kind: "UNRESOLVED" });
   });
 
+  it.each(["SIMULATION", "LIVE"])(
+    "requires observations strictly after creation and dispatch in %s",
+    (executionMode) => {
+      const active = { ...run, executionContext: { ...run.executionContext, executionMode } };
+      expect(resolve(packet("status", {}, run.createdAt), [active])).toEqual({
+        kind: "UNRESOLVED",
+      });
+      expect(resolve(packet(), [{ ...active, dispatchBaseline: { capturedAt: at } }])).toEqual({
+        kind: "UNRESOLVED",
+      });
+      expect(resolve(packet(), [active]).kind).toBe("INFERRED_CURRENT_EXECUTION");
+    },
+  );
+
   it("rejects no active execution, wrong resource, terminal and ambiguous executions", () => {
     const source = packet();
     for (const active of [

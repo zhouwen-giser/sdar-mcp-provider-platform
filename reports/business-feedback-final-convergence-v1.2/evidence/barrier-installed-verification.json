@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-09-30T08:05:57.638748+00:00",
+  "deployment": {
+    "status": "PASS",
+    "deployedAt": "2026-09-30T08:05:23.395Z",
+    "baseRoot": "/mnt/data/union-reset-release-20260909/base/gowm-gdps-analysis-dev-server-0.1.0",
+    "baseSha256": "321700fd62de81f19b3a7e1e92f2ea22ba538be5ea94aef02bc5633711f95f52",
+    "gowmSha256": "62fd9970d399039df7c7c138e8534f73c294e33836f629f64e56da3a4a91eb81",
+    "smppRevision": "367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+    "databaseId": "7683543732855070763",
+    "account": "ugv_smpp_app",
+    "backupScope": "smpp",
+    "backupExcludedTableData": ["ugv_smpp.ugv_state_snapshot"],
+    "upstreamContainersPreserved": 33,
+    "credentialSource": "/mnt/data/union-reset-release-20260909/base/gowm-gdps-analysis-dev-server-0.1.0/.runtime/gdps-gowm-dev-server-0.2.2-gowm-0.7.1/.runtime/gowm/gowm-dev-server-0.7.1/.runtime/dev-deploy/business-connections.env"
+  },
+  "containers": [
+    {
+      "name": "/smpp-gowm-runtime-1",
+      "id": "b4d280efc4b7d249751444d76943a5845d7e235edd2373752322d2af5db22d6f",
+      "imageId": "sha256:0d19c47f66823a94e8a4573bbf35969d9841ad7568ab0e9ade4febde5f70710a",
+      "image": "smpp-gowm/runtime:367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+      "running": true,
+      "startedAt": "2026-09-30T08:05:19.343046626Z",
+      "config": {
+        "AUTH_MODE": "development",
+        "SIMULATOR_CREDENTIAL_FREE": "true",
+        "SMPP_STORAGE_MODE": "gowm-shared",
+        "SMPP_SERVICE_KEY": "smpp.sz-gowm.ugv",
+        "SMPP_ALLOWED_DEVICE_IDS": "[\"ugv:ugv\"]",
+        "SMPP_GOWM_BINDING_ID": "805f5132-4613-48ae-877f-7bcd317121c9",
+        "SMPP_SOURCE_SESSION_KEY": "smpp-sz-gowm-ugv-mqtt",
+        "PROVIDER_ID": "isr.vehicle.ugv.ugv"
+      },
+      "volumes": [
+        {
+          "name": "smpp-gowm_runtime-state",
+          "destination": "/var/lib/sdar"
+        }
+      ]
+    },
+    {
+      "name": "/smpp-gowm-adapter-1",
+      "id": "1bb929a8e9d50b26e9296d0e5d07d13bfc020996ffde11325d4503b3bb201513",
+      "imageId": "sha256:7360257db16ff201efd627cbf3c7bc761b2f73abc34ee78321aeff1635de512e",
+      "image": "smpp-gowm/adapter:367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+      "running": true,
+      "startedAt": "2026-09-30T08:05:18.80668237Z",
+      "config": {
+        "SIMULATOR_CREDENTIAL_FREE": "true",
+        "UGV_FIRE_ENABLED": "false",
+        "UGV_OBSERVATION_MAX_FUTURE_SKEW_MS": "3000",
+        "UGV_CHASSIS_FRESHNESS_MS": "3000",
+        "UGV_MISSION_FRESHNESS_MS": "3000",
+        "UGV_PAYLOAD_FRESHNESS_MS": "3000",
+        "UGV_TARGET_FRESHNESS_MS": "3000",
+        "UGV_ENTITY_ID": "ugv1",
+        "UGV_TASK_BUSINESS_PROFILE_PATH": "/app/profiles/ugv-business.json",
+        "UGV_NAVIGATION_PLANNER_MODE": "isr_airport",
+        "SMPP_STORAGE_MODE": "gowm-shared",
+        "SMPP_SERVICE_KEY": "smpp.sz-gowm.ugv",
+        "SMPP_ALLOWED_DEVICE_IDS": "[\"ugv:ugv\"]",
+        "SMPP_GOWM_BINDING_ID": "805f5132-4613-48ae-877f-7bcd317121c9",
+        "SMPP_SOURCE_SESSION_KEY": "smpp-sz-gowm-ugv-mqtt",
+        "PROVIDER_ID": "isr.vehicle.ugv.ugv",
+        "UGV_RESOURCE_ID": "vehicle:ugv",
+        "UGV_EXECUTION_MODE": "simulation"
+      },
+      "volumes": [
+        {
+          "name": "smpp-gowm_adapter-state",
+          "destination": "/var/lib/sdar"
+        }
+      ]
+    }
+  ],
+  "status": "PASS"
+}

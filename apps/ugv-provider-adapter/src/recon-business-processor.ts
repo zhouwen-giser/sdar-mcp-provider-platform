@@ -1,3 +1,8 @@
+import { isDeepStrictEqual } from "node:util";
+import {
+  UgvSemanticSourceSchema,
+  projectUgvSemanticSource,
+} from "../../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
 import { AIRPORT_MAP_FRAME, airportCoveredCells } from "./airport-map-geometry.js";
 import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
@@ -31,23 +36,9 @@ const statusFactSchema = z
     correlation: z.enum(RECON_CORRELATIONS).optional(),
     sourceCursor,
     observedAt,
-    motionStatus: z.union([
-      z.literal(1),
-      z.literal(2),
-      z.literal(3),
-      z.literal(4),
-      z.literal(5),
-      z.literal(6),
-      z.literal(7),
-      z.literal(8),
-      z.literal(9),
-      z.literal(10),
-      z.literal(11),
-      z.literal(12),
-      z.literal(13),
-      z.literal(99),
-    ]),
-    lockStage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+    motionStatus: z.number().int(),
+    lockStage: z.number().int().optional(),
+    semanticSource: UgvSemanticSourceSchema.optional(),
   })
   .strict();
 const coverageObservationSchema = z
@@ -117,6 +108,11 @@ export class ReconBusinessProcessor {
     this.assertExecution(execution, fact.missionId, fact.observedAt);
     const scope = BoundExecutionScope.fromExecution(execution);
     const cursorHash = hash(fact.sourceCursor);
+    const businessSemantics = projectUgvSemanticSource({
+      ...fact.semanticSource,
+      reconMotionStatus: fact.motionStatus,
+      ...(fact.lockStage === undefined ? {} : { lockStage: fact.lockStage }),
+    });
     const statusSignature = hash(
       JSON.stringify([fact.missionId, fact.observedAt, fact.motionStatus, fact.lockStage ?? null]),
     );
@@ -171,9 +167,14 @@ export class ReconBusinessProcessor {
         reconStatusMissionId: fact.missionId,
         reconStatusObservedAt: fact.observedAt,
         reconStatusSignature: statusSignature,
+        businessSemantics,
         ...(fact.correlation ? { reconStatusCorrelation: fact.correlation } : {}),
       };
-      if (current.phase?.code === phase.code && sameMission) {
+      if (
+        current.phase?.code === phase.code &&
+        sameMission &&
+        isDeepStrictEqual(current.summary.properties?.businessSemantics, businessSemantics)
+      ) {
         const context = TaskBusinessContextSchema.parse({
           ...current,
           contextRevision: current.contextRevision + 1,
@@ -221,10 +222,11 @@ export class ReconBusinessProcessor {
           data: {
             missionId: fact.missionId,
             motionStatus: fact.motionStatus,
+            businessSemantics,
             ...(fact.correlation ? { correlation: fact.correlation } : {}),
             ...(fact.lockStage === undefined ? {} : { lockStage: fact.lockStage }),
           },
-          contextDelta: { phase },
+          contextDelta: { phase, summary: context.summary },
         },
       });
       try {

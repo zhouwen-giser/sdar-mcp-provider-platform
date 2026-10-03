@@ -141,6 +141,7 @@ describe("UGV manual observation input production wire", () => {
     h: Awaited<ReturnType<typeof deadlineRuntime>>,
     action: "decline" | "cancel",
     commandSequence: string,
+    development = false,
   ) {
     return h.runtime.updateInput(
       {
@@ -157,11 +158,15 @@ describe("UGV manual observation input production wire", () => {
           {
             key: h.pending.requestKey,
             result: jsonToProtoStruct({ action }),
-            verifiedResponder: jsonToProtoStruct({
-              source: "jwt_hs256",
-              actorType: "user",
-              actorId: "test-user",
-            }),
+            verifiedResponder: jsonToProtoStruct(
+              development
+                ? {
+                    source: "development",
+                    actorType: "development_anonymous",
+                    actorId: "development-anonymous",
+                  }
+                : { source: "jwt_hs256", actorType: "user", actorId: "test-user" },
+            ),
           },
         ],
       },
@@ -257,58 +262,98 @@ describe("UGV manual observation input production wire", () => {
     }
   });
 
-  it("recovers a claimed decline after restart without a second unlock", async () => {
-    const h = await deadlineRuntime();
-    let restarted: UgvProviderRuntime | undefined;
-    try {
-      const originalCommit = h.business.commitBusinessChangeSet.bind(h.business);
-      const commit = vi
-        .spyOn(h.business, "commitBusinessChangeSet")
-        .mockImplementation((changeSet, events) => {
-          if (
-            changeSet.objects.some(
-              (item) => item.kind === "input_request" && item.value.state === "declined",
+  it.each([
+    { development: false, legacy: false },
+    { development: true, legacy: false },
+    { development: false, legacy: true },
+  ])(
+    "recovers a claimed decline without a second unlock (development=$development, legacy=$legacy)",
+    async ({ development, legacy }) => {
+      const h = await deadlineRuntime();
+      let restarted: UgvProviderRuntime | undefined;
+      try {
+        const originalClaim = h.business.claimCommand.bind(h.business);
+        const legacyClaim = legacy
+          ? vi
+              .spyOn(h.business, "claimCommand")
+              .mockImplementation((scope, candidate, ref, now, revision, options) => {
+                const admitted = { ...candidate };
+                delete admitted.responder;
+                return originalClaim(scope, admitted, ref, now, revision, options);
+              })
+          : undefined;
+        const originalCommit = h.business.commitBusinessChangeSet.bind(h.business);
+        const commit = vi
+          .spyOn(h.business, "commitBusinessChangeSet")
+          .mockImplementation((changeSet, events) => {
+            if (
+              changeSet.objects.some(
+                (item) => item.kind === "input_request" && item.value.state === "declined",
+              )
             )
-          )
-            return Promise.reject(new Error("TRANSIENT_BUSINESS_STORE_FAILURE"));
-          return originalCommit(changeSet, events);
+              return Promise.reject(new Error("TRANSIENT_BUSINESS_STORE_FAILURE"));
+            return originalCommit(changeSet, events);
+          });
+        await expect(answer(h, "decline", "12", development)).rejects.toThrow(
+          "TRANSIENT_BUSINESS_STORE_FAILURE",
+        );
+        const accepted = await h.business.getAcceptedInputCommand(
+          BoundExecutionScope.fromExecution(h.run),
+          h.pending.requestKey,
+        );
+        expect(accepted).toMatchObject({
+          state: "accepted",
+          inputResponse: { action: "decline" },
         });
-      await expect(answer(h, "decline", "12")).rejects.toThrow("TRANSIENT_BUSINESS_STORE_FAILURE");
-      const accepted = await h.business.getAcceptedInputCommand(
-        BoundExecutionScope.fromExecution(h.run),
-        h.pending.requestKey,
-      );
-      expect(accepted).toMatchObject({
-        state: "accepted",
-        inputResponse: { action: "decline" },
-      });
-      expect(h.device.calls).toHaveLength(1);
-      await h.runtime.close();
-      commit.mockRestore();
-      h.advance(1_000);
-      restarted = h.makeRuntime();
-      await restarted.initializeLocal();
-      await restarted.pollActive();
-      expect(h.device.calls).toHaveLength(1);
-      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
-        state: "RUNNING",
-        reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
-      });
-      const context = await h.business.getContext(BoundExecutionScope.fromExecution(h.run));
-      const ref = context?.requiredInputRefs.at(-1);
-      if (!ref) throw new Error("RESOLVED_INPUT_MISSING");
-      expect(
-        await h.business.getObjectVersion(BoundExecutionScope.fromExecution(h.run), ref),
-      ).toMatchObject({ value: { state: "declined" } });
-      h.advance(1_001);
-      h.status(1, 0, h.at(1_001));
-      await restarted.pollActive();
-      expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
-    } finally {
-      await restarted?.close();
-      await h.runtime.close();
-    }
-  });
+        expect(accepted?.responder).toEqual(
+          legacy
+            ? undefined
+            : development
+              ? {
+                  source: "runtime_development_policy",
+                  actorType: "development_anonymous",
+                  verified: false,
+                }
+              : { source: "runtime_authorization_context", actorType: "user", verified: true },
+        );
+        expect(h.device.calls).toHaveLength(1);
+        await h.runtime.close();
+        commit.mockRestore();
+        legacyClaim?.mockRestore();
+        h.advance(legacy ? 500 : 1_000);
+        restarted = h.makeRuntime();
+        await restarted.initializeLocal();
+        await restarted.pollActive();
+        expect(h.device.calls).toHaveLength(1);
+        if (legacy) {
+          // Old admitted records have no auditable responder. Recovery waits for
+          // Runtime to replay its original envelope instead of inventing an identity.
+          expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
+          expect(await answer({ ...h, runtime: restarted }, "decline", "12")).toMatchObject({
+            accepted: true,
+          });
+          expect(h.device.calls).toHaveLength(1);
+        }
+        expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+          state: "RUNNING",
+          reasonCode: "UGV_INPUT_RELEASE_ACCEPTED_AWAITING_OBSERVATION",
+        });
+        const context = await h.business.getContext(BoundExecutionScope.fromExecution(h.run));
+        const ref = context?.requiredInputRefs.at(-1);
+        if (!ref) throw new Error("RESOLVED_INPUT_MISSING");
+        expect(
+          await h.business.getObjectVersion(BoundExecutionScope.fromExecution(h.run), ref),
+        ).toMatchObject({ value: { state: "declined" } });
+        h.advance(1_001);
+        h.status(1, 0, h.at(1_001));
+        await restarted.pollActive();
+        expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+      } finally {
+        await restarted?.close();
+        await h.runtime.close();
+      }
+    },
+  );
 
   it("rebuilds release confirmation after the reply committed but Execution persistence failed", async () => {
     const h = await deadlineRuntime();

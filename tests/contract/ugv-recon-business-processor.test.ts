@@ -1,3 +1,4 @@
+import { projectUgvSemanticSource } from "../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
 import { describe, expect, it, vi } from "vitest";
 import { ReconBusinessProcessor } from "../../apps/ugv-provider-adapter/src/recon-business-processor.js";
 import { UgvProviderRuntime } from "../../apps/ugv-provider-adapter/src/runtime.js";
@@ -81,6 +82,48 @@ async function setup() {
 }
 
 describe("UGV recon business projection (synthetic mission-bound facts)", () => {
+  it("emits semantic changes even when the native Recon phase is unchanged", async () => {
+    const { run, processor, business, scope, events } = await setup();
+    const fact = {
+      schemaVersion: "ugv.recon-status-fact/1",
+      missionId: "mission-1",
+      correlation: "INFERRED_CURRENT_EXECUTION",
+      motionStatus: 5,
+      lockStage: 1,
+    };
+    await processor.applyStatus(run, {
+      ...fact,
+      sourceCursor: "semantic-1",
+      observedAt: "2026-09-24T00:00:01Z",
+      semanticSource: { reconType: 2, cameraFault: false },
+    });
+    const before = events.length;
+    const source = { reconMotionStatus: 5, lockStage: 1, reconType: 3, cameraFault: true };
+    await processor.applyStatus(run, {
+      ...fact,
+      sourceCursor: "semantic-2",
+      observedAt: "2026-09-24T00:00:02Z",
+      semanticSource: source,
+    });
+    expect(events.length).toBe(before + 1);
+    expect((await business.getContext(scope))?.summary.properties).toMatchObject({
+      businessSemantics: projectUgvSemanticSource(source),
+      reconStatusCorrelation: "INFERRED_CURRENT_EXECUTION",
+    });
+    expect(JSON.stringify(events.at(-1))).toContain('"businessSemantics"');
+    expect(JSON.stringify(events.at(-1))).toContain('"infrared"');
+    expect(JSON.stringify(events.at(-1))).toContain('"INFERRED_CURRENT_EXECUTION"');
+    expect(
+      await processor.applyStatus(run, {
+        ...fact,
+        sourceCursor: "semantic-2",
+        observedAt: "2026-09-24T00:00:02Z",
+        semanticSource: source,
+      }),
+    ).toBe("duplicate");
+    expect(events.length).toBe(before + 1);
+  });
+
   it("projects signed display centres while retaining the independent precision-grid percentage", async () => {
     const { run, business, processor, scope } = await setup();
     const fact = {

@@ -1,3 +1,4 @@
+import { projectUgvBusinessSemantics } from "../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
 import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as airportGeometry from "../../apps/ugv-provider-adapter/src/airport-map-geometry.js";
@@ -204,37 +205,40 @@ describe("UGV long-running operation integration", () => {
     expect(f.device.calls).toHaveLength(0);
   });
 
-  it("advertises route and adjustment capabilities only for the configured airport simulator adapter", async () => {
-    const f = await createFixture(false, new MemoryProviderStore(), {
-      executionMode: "simulation",
-      entityId: "ugv1",
-      navigationPlanner: new AirportRoadPlanner("http://127.0.0.1:7879"),
-      navigationAdjustments: true,
-    });
-    f.store.businessEventSources = () => businessEventSourceCapabilities(true);
-    expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate?.artifactTypes).toContain(
-      "navigation.route",
-    );
-    expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
-      interventionTypes: ["navigation.adjust_plan"],
-      methods: { interventionApply: true },
-      qualification: { routeAdoption: "qualified", runtimeReplan: "qualified" },
-    });
-    const unqualified = await createFixture(false, new MemoryProviderStore(), {
-      navigationPlanner: {
-        plan: async () => {
-          throw new Error("not dispatched");
+  it.each(["simulation", "live"] as const)(
+    "advertises configured airport route and adjustments in %s",
+    async (executionMode) => {
+      const f = await createFixture(false, new MemoryProviderStore(), {
+        executionMode,
+        entityId: "ugv1",
+        navigationPlanner: new AirportRoadPlanner("http://127.0.0.1:7879"),
+        navigationAdjustments: true,
+      });
+      f.store.businessEventSources = () => businessEventSourceCapabilities(true);
+      expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate?.artifactTypes).toContain(
+        "navigation.route",
+      );
+      expect(f.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
+        interventionTypes: ["navigation.adjust_plan"],
+        methods: { interventionApply: true },
+        qualification: { routeAdoption: "qualified", runtimeReplan: "qualified" },
+      });
+      const unqualified = await createFixture(false, new MemoryProviderStore(), {
+        navigationPlanner: {
+          plan: async () => {
+            throw new Error("not dispatched");
+          },
         },
-      },
-      navigationAdjustments: true,
-    });
-    unqualified.store.businessEventSources = () => businessEventSourceCapabilities(true);
-    expect(unqualified.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
-      interventionTypes: [],
-      methods: { interventionApply: false },
-      qualification: { routeAdoption: "not_supported", runtimeReplan: "not_supported" },
-    });
-  });
+        navigationAdjustments: true,
+      });
+      unqualified.store.businessEventSources = () => businessEventSourceCapabilities(true);
+      expect(unqualified.runtime.businessFeedbackProfiles()?.vehicle_navigate).toMatchObject({
+        interventionTypes: [],
+        methods: { interventionApply: false },
+        qualification: { routeAdoption: "not_supported", runtimeReplan: "not_supported" },
+      });
+    },
+  );
 
   it.each([
     { retained: true, state: 1 },
@@ -1743,6 +1747,62 @@ describe("UGV long-running operation integration", () => {
     }
     expect(fixture.ingress.ingestSequence()).toBe(mqttSequence);
     expect(fixture.ingress.snapshot().freshness).toEqual(mqttFreshness);
+  });
+
+  it("exposes identical additive semantics and unknown native codes on all UGV queries", async () => {
+    const f = await createFixture();
+    f.device.responses.set("get_status", { available: true, chassis_task: { id: 19, state: 731 } });
+    f.device.responses.set("ugv_area_recon_get_status", {
+      status: 732,
+      recon_type: 733,
+      load_status: 734,
+      lock: { stage: 735, target_id: 0 },
+      out_of_range: false,
+      camera_fault: false,
+    });
+    const manifest = new OperationRegistry().validate(
+      ugvManifest(
+        "isr.vehicle.ugv.ugv1",
+        "1.0.0",
+        f.store,
+        "vehicle:ugv1",
+        f.runtime.qualificationContext(),
+      ) as unknown as ProviderManifest,
+    );
+    for (const operationName of [
+      "vehicle_get_payload_status",
+      "vehicle_get_state",
+      "vehicle_get_targets",
+    ]) {
+      const result = await f.runtime.start(
+        startInput(`semantics-${operationName}`, operationName, { resourceId: "vehicle:ugv1" }),
+      );
+      const operation = required(manifest.operations.find((op) => op.name === operationName));
+      expect(() =>
+        synchronousResult(operation, result.initialSnapshot as unknown as ExecutionSnapshot),
+      ).not.toThrow();
+      const value = protoStructToJson(result.initialSnapshot.result);
+      expect(value.businessSemantics).toEqual(projectUgvBusinessSemantics(f.ingress.snapshot()));
+      expect(value.businessSemantics).toMatchObject({
+        reconPhase: "unknown",
+        visualLockState: "unknown",
+        sensorMode: "unknown",
+        payloadLoadState: "unknown",
+        native: { reconMotionStatus: 732, lockStage: 735, reconType: 733, loadStatus: 734 },
+      });
+      if (operationName === "vehicle_get_payload_status")
+        expect(value.reconnaissance).toMatchObject({
+          motionStatus: 732,
+          reconType: 733,
+          loadStatus: 734,
+          lock: { stage: 735 },
+        });
+      if (operationName === "vehicle_get_state")
+        expect(value).toMatchObject({
+          chassis: { mission: { state: 731 } },
+          businessSemantics: { missionTaskState: "unknown", native: { missionTaskState: 731 } },
+        });
+    }
   });
 
   it("validates stable state, capability and evidence DTOs without raw device status", async () => {
@@ -4086,6 +4146,7 @@ function withoutOutputSchema(contract: CapturedToolContract): CapturedToolContra
 }
 function runtimeOptions() {
   return {
+    executionMode: "simulation" as const,
     providerId: "isr.vehicle.ugv.ugv1",
     freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
     allowNavigationWithRecon: true,

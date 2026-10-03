@@ -22,6 +22,7 @@ import type {
 import {
   InvalidParamsError,
   isTerminalState,
+  isRuntimeBusinessResponder,
   TaskExpiredError,
   TaskNotFoundOrUnauthorizedError,
   RUNTIME_VERSION,
@@ -254,13 +255,7 @@ function isMcpInputResponse(value: unknown): value is McpInputResponse {
 }
 
 function isVerifiedResponder(value: unknown): value is VerifiedResponder {
-  return (
-    isJsonRecord(value) &&
-    (value.actorType === "user" || value.actorType === "agent" || value.actorType === "operator") &&
-    typeof value.actorId === "string" &&
-    value.actorId.length > 0 &&
-    (value.source === "jwt_hs256" || value.source === "trusted_headers")
-  );
+  return isRuntimeBusinessResponder(value);
 }
 
 function isJsonRecord(value: unknown): value is Record<string, unknown> {

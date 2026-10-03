@@ -1,5 +1,7 @@
 # UGV Provider V1
 
+当前共享部署及冻结 MCP 协议的调用方式见[UGV Provider MCP 服务接口与业务调用指南](../ugv-provider-mcp-api-guide.md)。以下内容保留 V1 初始设计背景；工具清单、数据库部署方式和任务字段应以当前指南及运行时发现结果为准。
+
 The UGV Provider is an independent SDAR Runtime and Adapter deployment for one simulation vehicle.
 It exposes exactly one Runtime-visible resource:
 

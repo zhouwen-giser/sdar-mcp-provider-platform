@@ -70,7 +70,7 @@ export function resolveReconExecutionCorrelation(input: {
   if (
     !missionId ||
     execution.state === "ACCEPTED" ||
-    compareIsoTimestamps(applied.observedAt, execution.createdAt) < 0 ||
+    compareIsoTimestamps(applied.observedAt, execution.createdAt) <= 0 ||
     applied.cursor === execution.observationCursors?.reconnaissance
   )
     return unresolved;
@@ -78,7 +78,7 @@ export function resolveReconExecutionCorrelation(input: {
   if (record(baseline)) {
     if (
       typeof baseline.capturedAt === "string" &&
-      compareIsoTimestamps(applied.observedAt, baseline.capturedAt) < 0
+      compareIsoTimestamps(applied.observedAt, baseline.capturedAt) <= 0
     )
       return unresolved;
     if (

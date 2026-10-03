@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
+import type { RuntimeBusinessResponder } from "../../domain/src/business-responder.js";
 import {
   BusinessObjectRefSchema,
   TaskBusinessIdentitySchema,
@@ -451,18 +452,30 @@ export function assertInterventionTransition(
     throw new Error("INTERVENTION_STATE_TRANSITION_INVALID");
 }
 
-export interface TrustedResponder {
-  source: "runtime_authorization_context";
-  actorType: "user" | "agent" | "operator";
-  verified: boolean;
+export const TrustedResponderSchema = z.discriminatedUnion("source", [
+  z
+    .object({
+      source: z.literal("runtime_authorization_context"),
+      actorType: z.enum(["user", "agent", "operator"]),
+      verified: z.literal(true),
+    })
+    .strict(),
+  z
+    .object({
+      source: z.literal("runtime_development_policy"),
+      actorType: z.literal("development_anonymous"),
+      verified: z.literal(false),
+    })
+    .strict(),
+]);
+export type TrustedResponder = z.infer<typeof TrustedResponderSchema>;
+
+/** Development policy is explicit audit provenance, never a claim of a verified human. */
+export function taskBusinessResponder(responder: RuntimeBusinessResponder): TrustedResponder {
+  return responder.source === "development"
+    ? { source: "runtime_development_policy", actorType: "development_anonymous", verified: false }
+    : { source: "runtime_authorization_context", actorType: responder.actorType, verified: true };
 }
-export const TrustedResponderSchema = z
-  .object({
-    source: z.literal("runtime_authorization_context"),
-    actorType: z.enum(["user", "agent", "operator"]),
-    verified: z.literal(true),
-  })
-  .strict();
 
 export function assertRequiredInputOpenAt(request: RequiredInput, now: Date): void {
   RequiredInputSchema.parse(request);
@@ -486,7 +499,7 @@ export function assertInterventionAvailableAt(intervention: RuntimeIntervention,
 export function assessRequiredInputResponse(
   request: RequiredInput,
   command: RequiredInputResponseCommand,
-  responder: TrustedResponder,
+  responder: unknown,
   currentContextRevision: number,
   currentSubjectBinding: RequiredInput["subjectBinding"],
   now: Date,
@@ -505,9 +518,11 @@ export function assessRequiredInputResponse(
     throw new Error("INPUT_BINDING_INVALID");
   }
   assertRequiredInputOpenAt(request, now);
+  const parsedResponder = TrustedResponderSchema.safeParse(responder);
   if (
-    !TrustedResponderSchema.safeParse(responder).success ||
-    responder.actorType !== request.requiredResponder
+    !parsedResponder.success ||
+    (parsedResponder.data.source !== "runtime_development_policy" &&
+      parsedResponder.data.actorType !== request.requiredResponder)
   ) {
     throw new Error("RESPONDER_NOT_AUTHORIZED");
   }

@@ -278,6 +278,7 @@ describe("task-business command ledger", () => {
     ).toMatchObject({
       commandId: first.record.commandId,
       inputResponse: catalog.inputCommand.result,
+      responder,
     });
     expect(first.nextDisposition).toBe("await_result");
     const answered = RequiredInputSchema.parse({
@@ -295,6 +296,26 @@ describe("task-business command ledger", () => {
       requiredInputRefs: [ref],
       activeRefs: { ...context.activeRefs, input: ref },
     });
+    await expect(
+      store.commitChangeSet({
+        scope,
+        expectedContextRevision: 1,
+        context: next,
+        objects: [{ kind: "input_request", value: answered }],
+        command: {
+          ...first.record,
+          state: "applied",
+          responder: {
+            source: "runtime_development_policy",
+            actorType: "development_anonymous",
+            verified: false,
+          },
+          resultCode: "APPLIED",
+          resultRefs: [ref],
+          updatedAt: later,
+        },
+      }),
+    ).rejects.toThrow("COMMAND_ID_CONFLICT");
     await store.commitChangeSet({
       scope,
       expectedContextRevision: 1,

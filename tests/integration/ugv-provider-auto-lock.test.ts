@@ -1,3 +1,4 @@
+import { projectUgvBusinessSemantics } from "../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
 import { describe, expect, it, vi } from "vitest";
 import { jsonToProtoStruct } from "../../packages/adapter-protocol/src/index.js";
 import { UgvBusinessEventHub } from "../../apps/ugv-provider-adapter/src/business-events.js";
@@ -23,6 +24,7 @@ async function fixture(
   sourceMission: string | null = "11",
   sourceSkewMs = 0,
   maximumFutureSkewMs = 0,
+  executionMode: "live" | "simulation" = "simulation",
 ) {
   const store = new MemoryProviderStore();
   const business = new MemoryTaskBusinessStore();
@@ -47,8 +49,8 @@ async function fixture(
     arguments: { resourceId: "vehicle:ugv1", scanMode: "circular" },
     executionContext: {
       authorizationContextHash: "b".repeat(64),
-      executionMode: "SIMULATION",
-      simulationId: "synthetic-auto-lock",
+      executionMode: executionMode === "live" ? "LIVE" : "SIMULATION",
+      simulationId: executionMode === "live" ? "" : "synthetic-auto-lock",
       correlationId: "test-auto-lock",
     },
     taskBusinessContextExpected: true,
@@ -76,6 +78,7 @@ async function fixture(
     new UgvProviderRuntime(
       {
         providerId: "provider-a",
+        executionMode,
         resourceId: "vehicle:ugv1",
         freshness: {
           chassis: 3000,
@@ -199,6 +202,30 @@ async function fixture(
 }
 
 describe("Provider auto-lock production wire (synthetic source and device, not live qualification)", () => {
+  it("projects query and inferred business status consistently, including unknown lock codes", async () => {
+    const h = await fixture(false, null, 0, 0, "live");
+    try {
+      await h.status(735, 0, 100, null, false, 732);
+      const semantic = projectUgvBusinessSemantics(h.ingress.snapshot());
+      const context = await h.business.getContext(h.scope);
+      expect(context?.summary.properties).toMatchObject({
+        reconStatusCorrelation: "INFERRED_CURRENT_EXECUTION",
+        businessSemantics: semantic,
+      });
+      expect(semantic).toMatchObject({
+        reconPhase: "unknown",
+        visualLockState: "unknown",
+        native: { reconMotionStatus: 732, lockStage: 735 },
+      });
+      expect(await h.actions()).toEqual([]);
+      expect(h.device.calls).toEqual([]);
+      expect(JSON.stringify(h.events)).toContain('"businessSemantics"');
+      expect(JSON.stringify(h.events)).toContain('"INFERRED_CURRENT_EXECUTION"');
+    } finally {
+      await h.close();
+    }
+  });
+
   it.each([1700, 3000, 3001])(
     "propagates the future tolerance through target selection and stage-3 input (%s ms)",
     async (sourceSkewMs) => {
@@ -337,16 +364,22 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
   );
 
   it.each(
-    ["11", null].flatMap((mission) =>
-      (["continue_observation", "decline", "cancel"] as const).map((decision) => ({
-        mission,
-        decision,
-      })),
+    (["simulation", "live"] as const).flatMap((mode) =>
+      (["user", "development_anonymous"] as const).flatMap((responder) =>
+        ["11", null].flatMap((mission) =>
+          (["continue_observation", "decline", "cancel"] as const).map((decision) => ({
+            mode,
+            responder,
+            mission,
+            decision,
+          })),
+        ),
+      ),
     ),
   )(
-    "applies $decision with source mission=$mission and no relock after resume",
-    async ({ mission, decision }) => {
-      const h = await fixture(true, mission);
+    "applies $decision in $mode as $responder with source mission=$mission and no relock after resume",
+    async ({ mission, decision, mode, responder }) => {
+      const h = await fixture(true, mission, 0, 0, mode);
       try {
         await h.targets(100);
         await h.status(3, 7, 300);
@@ -360,7 +393,7 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
           executionContext: h.run.executionContext,
           commandSequence: "12",
         };
-        const response = (actorType: "agent" | "user") => ({
+        const response = (actorType: "agent" | "user" | "development_anonymous") => ({
           inputs: [],
           inputResponses: [
             {
@@ -371,9 +404,12 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
                   : { action: decision },
               ),
               verifiedResponder: jsonToProtoStruct({
-                source: "jwt_hs256",
+                source: actorType === "development_anonymous" ? "development" : "jwt_hs256",
                 actorType,
-                actorId: "synthetic-policy-input-user",
+                actorId:
+                  actorType === "development_anonymous"
+                    ? "development-anonymous"
+                    : "synthetic-policy-input-user",
               }),
             },
           ],
@@ -387,9 +423,9 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
         });
         expect(h.device.calls).toHaveLength(1);
         expect((await h.store.getExecution(h.run.taskId))?.state).toBe("WAITING_INPUT");
-        const ack = await h.runtime().updateInput(identity, response("user"));
+        const ack = await h.runtime().updateInput(identity, response(responder));
         expect(ack).toMatchObject({ accepted: true });
-        expect(await h.runtime().updateInput(identity, response("user"))).toMatchObject({
+        expect(await h.runtime().updateInput(identity, response(responder))).toMatchObject({
           accepted: true,
           reasonCode: ack.reasonCode,
         });

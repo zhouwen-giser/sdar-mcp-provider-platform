@@ -28,7 +28,7 @@ export function mapVehicleTaskState(
       return hasActiveExecution
         ? { state: "RECONCILE", reasonCode: "UNCERTAIN_EXECUTION_STATE" }
         : { state: "ACCEPTED", reasonCode: `${reasonPrefix}_DEVICE_IDLE` };
-    case "unknown":
+    default:
       return { state: "RECONCILE", reasonCode: "UNCERTAIN_EXECUTION_STATE" };
   }
 }
@@ -68,7 +68,7 @@ export function mapReconMotionStatus(
     case 13:
       return { state: "RECONCILE", reasonCode: `${reasonPrefix}_RECON_MANUAL_INTERVENTION` };
     case 99:
-    case "unknown":
+    default:
       return { state: "RECONCILE", reasonCode: "UNCERTAIN_EXECUTION_STATE" };
   }
 }
@@ -96,7 +96,7 @@ export function projectReconMotionStatus(status: ReconMotionStatus): VehicleTask
       return 4;
     case 13:
     case 99:
-    case "unknown":
+    default:
       return "unknown";
   }
 }

@@ -186,13 +186,16 @@ describe("UGV task business settings", () => {
       loadUgvProviderConfig({ ...env, UGV_TASK_BUSINESS_PROFILE_PATH: configuredPath })
         .taskBusinessSettings.adjustments.navigation,
     ).toBe(true);
-    for (const invalid of [
-      { UGV_EXECUTION_MODE: "live" },
-      { UGV_ENTITY_ID: "ugv2" },
-      { UGV_NAVIGATION_PLANNER_URL: undefined },
-    ])
+    expect(
+      loadUgvProviderConfig({
+        ...env,
+        UGV_EXECUTION_MODE: "live",
+        UGV_TASK_BUSINESS_PROFILE_PATH: configuredPath,
+      }).taskBusinessSettings.adjustments.navigation,
+    ).toBe(true);
+    for (const invalid of [{ UGV_ENTITY_ID: "ugv2" }, { UGV_NAVIGATION_PLANNER_URL: undefined }])
       expect(() => loadUgvProviderConfiguration({ ...env, ...invalid })).toThrow(
-        "UGV_AIRPORT_PLANNER_REQUIRES_SIMULATION_UGV1_AND_URL",
+        "UGV_AIRPORT_PLANNER_REQUIRES_UGV1_AND_URL",
       );
     expect(() =>
       loadUgvProviderConfiguration({ UGV_NAVIGATION_PLANNER_URL: env.UGV_NAVIGATION_PLANNER_URL }),

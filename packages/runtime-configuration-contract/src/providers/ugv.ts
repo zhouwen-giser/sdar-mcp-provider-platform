@@ -131,13 +131,11 @@ const UgvProviderInputBaseSchema = z.object({
 const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, context) => {
   if (
     value.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" &&
-    (!value.UGV_NAVIGATION_PLANNER_URL ||
-      value.UGV_EXECUTION_MODE !== "simulation" ||
-      value.UGV_ENTITY_ID !== "ugv1")
+    (!value.UGV_NAVIGATION_PLANNER_URL || value.UGV_ENTITY_ID !== "ugv1")
   )
     context.addIssue({
       code: "custom",
-      message: "UGV_AIRPORT_PLANNER_REQUIRES_SIMULATION_UGV1_AND_URL",
+      message: "UGV_AIRPORT_PLANNER_REQUIRES_UGV1_AND_URL",
       path: ["UGV_NAVIGATION_PLANNER_MODE"],
     });
   if (value.UGV_NAVIGATION_PLANNER_MODE === "disabled" && value.UGV_NAVIGATION_PLANNER_URL)

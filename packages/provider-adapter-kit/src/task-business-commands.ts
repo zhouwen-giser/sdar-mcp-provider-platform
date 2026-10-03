@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { z } from "zod";
 import { canonicalJson } from "../../adapter-protocol/src/index.js";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import {
   RequiredInputResponseCommandSchema,
+  TrustedResponderSchema,
   RuntimeInterventionCommandSchema,
   assessRequiredInputResponse,
   assertInterventionCommand,
@@ -75,6 +75,7 @@ export class TaskBusinessCommandService {
       "input_response",
       entryKey,
       input.runtimeCommandSequence,
+      responder,
     );
     const replay = await this.#replay(scope, record);
     if (replay) return replay;
@@ -121,7 +122,7 @@ export class TaskBusinessCommandService {
     assertBoundExecutionScope(scope);
     const command = RuntimeInterventionCommandSchema.parse(input.command);
     assertScopeCommand(scope, command);
-    parseTrustedResponder(input.responder);
+    const responder = parseTrustedResponder(input.responder);
     const entryKey = `intervention:${command.interventionId}`;
     const record = this.#record(
       scope,
@@ -129,6 +130,7 @@ export class TaskBusinessCommandService {
       "intervention",
       entryKey,
       input.runtimeCommandSequence,
+      responder,
     );
     const replay = await this.#replay(scope, record);
     if (replay) return replay;
@@ -167,6 +169,7 @@ export class TaskBusinessCommandService {
     commandType: BusinessCommandRecord["commandType"],
     entryKey: string,
     runtimeCommandSequence: string,
+    responder: TrustedResponder,
   ): BusinessCommandRecord {
     if (!sequence.test(runtimeCommandSequence)) throw new Error("RUNTIME_COMMAND_SEQUENCE_INVALID");
     const timestamp = this.now().toISOString();
@@ -175,6 +178,7 @@ export class TaskBusinessCommandService {
       commandType,
       entryKey,
       runtimeCommandSequence,
+      responder,
       identity: scopeBusinessIdentity(scope),
       requestHash: taskBusinessCommandRequestHash(command),
       ...("requestId" in command
@@ -230,14 +234,7 @@ function assertScopeCommand(
 }
 
 function parseTrustedResponder(input: unknown): TrustedResponder {
-  const parsed = z
-    .object({
-      source: z.literal("runtime_authorization_context"),
-      actorType: z.enum(["user", "agent", "operator"]),
-      verified: z.literal(true),
-    })
-    .strict()
-    .safeParse(input);
+  const parsed = TrustedResponderSchema.safeParse(input);
   if (!parsed.success) throw new Error("RESPONDER_NOT_AUTHORIZED");
   return parsed.data;
 }

@@ -29,6 +29,7 @@ import {
   RequiredInputSchema,
   RuntimeInterventionSchema,
   RuntimeInterventionCommandSchema,
+  TrustedResponderSchema,
   type BusinessAction,
   type RequiredInput,
   type RuntimeIntervention,
@@ -391,6 +392,8 @@ export const BusinessCommandRecordSchema = z
       .string()
       .regex(/^[1-9][0-9]{0,18}$/)
       .optional(),
+    /** Original admission provenance; optional for pre-existing ledger records. */
+    responder: TrustedResponderSchema.optional(),
     identity: TaskBusinessIdentitySchema,
     requestHash: z.string().regex(/^[a-f0-9]{64}$/),
     responseHash: z

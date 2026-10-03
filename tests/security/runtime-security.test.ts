@@ -9,6 +9,28 @@ import {
 import { createLogger, RuntimeMetrics } from "../../packages/observability/src/index.js";
 
 describe("Runtime security boundaries", () => {
+  it("issues an honest development policy responder without accepting caller role claims", () => {
+    const resolve = createAuthorizationResolver({ mode: "development" });
+    for (const headers of [{}, { authorization: "Bearer forged", "x-sdar-actor-type": "user" }]) {
+      expect(resolve(request(headers))).toMatchObject({
+        executionMode: "live",
+        simulationId: null,
+        verifiedResponder: {
+          source: "development",
+          actorType: "development_anonymous",
+          actorId: "development-anonymous",
+        },
+      });
+    }
+    expect(
+      resolve(
+        request({
+          "x-sdar-execution-mode": "simulation",
+          "x-sdar-simulation-id": "explicit-scene",
+        }),
+      ),
+    ).toMatchObject({ executionMode: "simulation", simulationId: "explicit-scene" });
+  });
   it("uses one fixed anonymous authorization domain and ignores caller identity headers", () => {
     const resolve = createAuthorizationResolver({ mode: "anonymous" });
     const expectedHash = createHash("sha256")

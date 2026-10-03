@@ -1,0 +1,2 @@
+{"gate": "runtime-provider-integration", "exitCode": 0, "log": "/tmp/ugvbiz-closeout-runtime-provider-integration.log"}
+{"cleanup": "removed owned temporary container and volumes", "container": "smpp-ugvbiz-v13-test-a3f7c9fd42"}

@@ -1,3 +1,4 @@
+import { UGV_BUSINESS_SEMANTICS_JSON_SCHEMA } from "./ugv-business-semantics.js";
 import {
   ADAPTER_PROTOCOL_VERSION,
   jsonToProtoStruct,
@@ -25,6 +26,7 @@ export interface VehicleManifestProfile {
     returnHome: boolean;
     pauseResumeCancel: boolean;
   };
+  supportsBusinessSemantics?: boolean;
   supportsCapabilityQuery?: boolean;
   supportsTargetTracking?: boolean;
   supportsGimbalControl?: boolean;
@@ -68,6 +70,9 @@ export function vehicleProviderManifest(
     jsonToProtoStruct({ type: "object", properties, required, additionalProperties: false });
   const taskOutput = (statuses: string[], optionalProperties: Record<string, unknown> = {}) =>
     jsonToProtoStruct(vehicleTaskResultV1Schema(profile.resourceId, statuses, optionalProperties));
+  const semanticProperties = profile.supportsBusinessSemantics
+    ? { businessSemantics: UGV_BUSINESS_SEMANTICS_JSON_SCHEMA }
+    : {};
   const nullable = (value: Record<string, unknown>) => ({
     anyOf: [value, { type: "null" }],
   });
@@ -105,7 +110,9 @@ export function vehicleProviderManifest(
           },
           ["resourceId"],
         ),
-        outputSchema: jsonToProtoStruct(vehicleStateV1Schema(profile.resourceId)),
+        outputSchema: jsonToProtoStruct(
+          vehicleStateV1Schema(profile.resourceId, profile.supportsBusinessSemantics),
+        ),
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
@@ -127,7 +134,11 @@ export function vehicleProviderManifest(
         description: `Read local ${profile.displayKind} payload, gimbal, laser and task status.`,
         execution: "SYNCHRONOUS",
         inputSchema: schema({ resourceId }, ["resourceId"]),
-        outputSchema: jsonToProtoStruct({ type: "object", additionalProperties: true }),
+        outputSchema: jsonToProtoStruct({
+          type: "object",
+          properties: semanticProperties,
+          additionalProperties: true,
+        }),
         capabilities: caps(false, false, false, false, false, false),
         resourceBinding: binding,
       },
@@ -139,6 +150,7 @@ export function vehicleProviderManifest(
         outputSchema: schema(
           {
             resourceId,
+            ...semanticProperties,
             targets: { type: "array", items: { type: "object" } },
             freshness: { type: "object" },
             observedAt: { type: "string" },

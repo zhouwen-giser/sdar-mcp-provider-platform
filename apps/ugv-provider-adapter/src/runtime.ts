@@ -1,4 +1,10 @@
+import {
+  projectUgvBusinessSemantics,
+  ugvSemanticSource,
+} from "../../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
 import { airportFootprintFact, AIRPORT_MAP_FRAME } from "./airport-map-geometry.js";
+import { isRuntimeBusinessResponder } from "../../../packages/domain/src/index.js";
+import { taskBusinessResponder } from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { FootprintBusinessProcessor } from "./footprint-business-processor.js";
 import { decodeObservationCursorV1 } from "../../../packages/vehicle-provider-core/src/observation-cursor.js";
 import {
@@ -117,6 +123,7 @@ import {
   RuntimeInterventionCommandSchema,
   TrustedResponderSchema,
   type RequiredInput,
+  type TrustedResponder,
 } from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { ReconBusinessProcessor } from "./recon-business-processor.js";
 import { TargetBusinessProcessor } from "./target-business-processor.js";
@@ -526,7 +533,7 @@ export class UgvProviderRuntime {
     return {
       contracts: this.device.contracts(),
       toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
-      executionMode: this.options.executionMode ?? "simulation",
+      executionMode: this.options.executionMode ?? "live",
     };
   }
   operationQualification(
@@ -572,7 +579,6 @@ export class UgvProviderRuntime {
     }
     return {
       vehicle_navigate:
-        this.options.executionMode === "simulation" &&
         this.options.entityId === "ugv1" &&
         this.options.navigationPlanner instanceof AirportRoadPlanner
           ? airportNavigationBusinessProfile(this.options.navigationAdjustments === true)
@@ -1319,7 +1325,7 @@ export class UgvProviderRuntime {
           );
         if (
           execution.state !== "RUNNING" ||
-          execution.controlConfirmation ||
+          controlConfirmationPending(execution) ||
           execution.preemptedByTaskId ||
           this.#navigationControlPending(execution)
         )
@@ -1414,6 +1420,7 @@ export class UgvProviderRuntime {
     identity: CommandIdentity,
     execution: ProviderExecution,
     update: { inputs: readonly unknown[]; inputResponses: readonly unknown[] },
+    recoveredResponder?: TrustedResponder,
   ): Promise<Record<string, unknown>> {
     const command = "update";
     const taskBusiness = this.taskBusiness;
@@ -1429,11 +1436,20 @@ export class UgvProviderRuntime {
       !["accept", "decline", "cancel"].includes(String(action)) ||
       (action === "accept" && !record(response.content)) ||
       (action !== "accept" && response.content !== undefined) ||
-      !record(item.verifiedResponder)
+      (recoveredResponder === undefined && !record(item.verifiedResponder))
     )
       return this.#ack(identity, command, false, "UGV_INPUT_RELEASE_NOT_QUALIFIED");
-    const verified = protoStructToJson(item.verifiedResponder);
-    if (verified.actorType !== "user")
+    // Recovery reuses the admitted command's original provenance, never an invented user.
+    let responder: TrustedResponder;
+    if (recoveredResponder !== undefined) {
+      responder = TrustedResponderSchema.parse(recoveredResponder);
+    } else {
+      const verified = protoStructToJson(item.verifiedResponder);
+      if (!isRuntimeBusinessResponder(verified))
+        return this.#ack(identity, command, false, "UGV_INPUT_RESPONDER_NOT_AUTHORIZED");
+      responder = taskBusinessResponder(verified);
+    }
+    if (responder.source !== "runtime_development_policy" && responder.actorType !== "user")
       return this.#ack(identity, command, false, "UGV_INPUT_RESPONDER_NOT_AUTHORIZED");
     const request = await this.#manualReconRequestForKey(execution, item.key);
     if (!request) return this.#ack(identity, command, false, "UGV_INPUT_REQUEST_NOT_CURRENT");
@@ -1468,11 +1484,7 @@ export class UgvProviderRuntime {
       const handlerInput = {
         execution: currentExecution,
         command: responseCommand,
-        responder: {
-          source: "runtime_authorization_context",
-          actorType: "user",
-          verified: true,
-        },
+        responder,
         runtimeCommandSequence: identity.commandSequence,
       };
       if (action === "accept") await handler.continueObservation(handlerInput);
@@ -1924,6 +1936,7 @@ export class UgvProviderRuntime {
       sourceCursor: cursor,
       observedAt: authority.observedAt,
       motionStatus: recon.motionStatus,
+      semanticSource: ugvSemanticSource(this.ingress.snapshot()),
       ...(recon.lock?.stage === undefined ? {} : { lockStage: recon.lock.stage }),
     });
   }
@@ -2018,7 +2031,7 @@ export class UgvProviderRuntime {
         this.options.resourceId ?? "vehicle:ugv1",
         {
           toolHealth: UGV_DEVICE_TOOL_ALLOWLIST.map((toolName) => this.device.toolHealth(toolName)),
-          executionMode: this.options.executionMode ?? "simulation",
+          executionMode: this.options.executionMode ?? "live",
         },
       );
     } else if (input.operationName === "vehicle_get_payload_status") {
@@ -2069,6 +2082,13 @@ export class UgvProviderRuntime {
         valid: response.valid !== false,
         observedAt,
       };
+    }
+    if (
+      ["vehicle_get_state", "vehicle_get_payload_status", "vehicle_get_targets"].includes(
+        input.operationName,
+      )
+    ) {
+      result.businessSemantics = projectUgvBusinessSemantics(this.ingress.snapshot());
     }
     const sanitized = sanitizeFireResult(result).value;
     assertNoRefereeData(sanitized);
@@ -2127,7 +2147,7 @@ export class UgvProviderRuntime {
       if (
         execution.navigationReplacement &&
         execution.state === "RUNNING" &&
-        !execution.controlConfirmation &&
+        !controlConfirmationPending(execution) &&
         !execution.preemptedByTaskId
       ) {
         return this.#advanceNavigationReplacement(execution);
@@ -2980,7 +3000,7 @@ export class UgvProviderRuntime {
     if (!pending || !this.options.navigationPlanner || !this.taskBusiness) return execution;
     if (
       execution.state !== "RUNNING" ||
-      execution.controlConfirmation ||
+      controlConfirmationPending(execution) ||
       this.#navigationControlPending(execution)
     )
       return execution;
@@ -3401,7 +3421,7 @@ export class UgvProviderRuntime {
       !execution.taskBusinessContextExpected ||
       !["STARTING", "RUNNING"].includes(execution.state) ||
       execution.preemptedByTaskId ||
-      execution.controlConfirmation ||
+      controlConfirmationPending(execution) ||
       this.#navigationControlPending(execution)
     )
       return;
@@ -3605,6 +3625,7 @@ export class UgvProviderRuntime {
     if (
       resolved.kind === "UNRESOLVED" ||
       stage === undefined ||
+      ![1, 2, 3, 4].includes(stage) ||
       typeof recon?.motionStatus !== "number"
     )
       return;
@@ -3745,6 +3766,7 @@ export class UgvProviderRuntime {
             .slice(0, 40)}`;
     if (
       !accepted.inputResponse ||
+      !accepted.responder ||
       !sequence ||
       accepted.commandId !== expectedId ||
       accepted.entryKey !== `input:${pending.requestKey}`
@@ -3797,10 +3819,10 @@ export class UgvProviderRuntime {
           {
             key: pending.requestKey,
             result: jsonToProtoStruct(result),
-            verifiedResponder: jsonToProtoStruct({ actorType: "user" }),
           },
         ],
       },
+      accepted.responder,
     );
     return (await this.store.getExecution(execution.taskId)) ?? execution;
   }
@@ -6249,12 +6271,7 @@ function validUnsupportedInputEnvelope(update: {
       if (item.verifiedResponder != null) {
         if (!record(item.verifiedResponder) || !record(item.verifiedResponder.fields)) return false;
         const responder = protoStructToJson(item.verifiedResponder);
-        if (
-          !["user", "agent", "operator"].includes(String(responder.actorType)) ||
-          typeof responder.actorId !== "string" ||
-          responder.actorId.length === 0 ||
-          !["jwt_hs256", "trusted_headers"].includes(String(responder.source))
-        ) {
+        if (!isRuntimeBusinessResponder(responder)) {
           return false;
         }
       }
@@ -6408,7 +6425,7 @@ function validateStart(
   if (input.arguments.resourceId !== (options.resourceId ?? "vehicle:ugv1"))
     throw new Error("UGV_RESOURCE_NOT_FOUND");
   const requestedMode = normalizeExecutionMode(input.executionContext.executionMode);
-  if (requestedMode !== (options.executionMode ?? "simulation"))
+  if (requestedMode !== (options.executionMode ?? "live"))
     throw new Error("UGV_EXECUTION_MODE_MISMATCH");
 }
 

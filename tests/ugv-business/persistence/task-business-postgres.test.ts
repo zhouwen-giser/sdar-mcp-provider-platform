@@ -191,6 +191,11 @@ describe("native PostgreSQL task business Store", () => {
       commandType: "input_response",
       entryKey: `input:${pending.requestKey}`,
       runtimeCommandSequence: "91",
+      responder: {
+        source: "runtime_development_policy",
+        actorType: "development_anonymous",
+        verified: false,
+      },
       identity: context.identity,
       requestHash: "a".repeat(64),
       responseHash: taskBusinessInputResponseHash(response),
@@ -229,6 +234,18 @@ describe("native PostgreSQL task business Store", () => {
         command: {
           ...command,
           responseHash: "f".repeat(64),
+          state: "rejected",
+          resultCode: "LOCAL_ACTION_FAILED",
+          updatedAt: later,
+        },
+      }),
+    ).rejects.toThrow("COMMAND_ID_CONFLICT");
+    await expect(
+      store.commitChangeSet({
+        ...changeSet,
+        command: {
+          ...command,
+          responder: { source: "runtime_authorization_context", actorType: "user", verified: true },
           state: "rejected",
           resultCode: "LOCAL_ACTION_FAILED",
           updatedAt: later,
