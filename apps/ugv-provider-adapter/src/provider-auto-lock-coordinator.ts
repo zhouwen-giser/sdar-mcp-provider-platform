@@ -25,7 +25,7 @@ export interface ProviderLockDispatch {
 export const AUTO_LOCK_POLICY = "ugv.sequential-visible-target/1";
 export const providerAutoLockStepId = (actionId: string): string => `auto-lock:${actionId}`;
 
-/** One policy selection per recon mission. Physical dispatch uses the existing journal. */
+/** One attempt per target per recon mission. Dispatch uses the existing journal. */
 export class ProviderAutoLockCoordinator {
   constructor(
     readonly business: Pick<

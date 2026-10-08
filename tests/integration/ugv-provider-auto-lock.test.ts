@@ -601,7 +601,12 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
         expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
         expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
         expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
-        expect(h.device.calls).toHaveLength(2);
+        // The original release remains one-shot; the new lock is for target 8.
+        expect(h.device.calls).toHaveLength(3);
+        expect(h.device.calls[2]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: true, target_id: 8, mission_id: 11 },
+        });
       } finally {
         await h.close();
       }

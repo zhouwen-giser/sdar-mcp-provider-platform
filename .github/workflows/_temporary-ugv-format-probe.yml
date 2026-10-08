@@ -1,0 +1,25 @@
+name: Temporary Prettier Diff Probe
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  format-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Print exact Prettier adjustments
+        run: |
+          pnpm exec prettier --write apps/ugv-provider-adapter/src/provider-auto-lock-coordinator.ts tests/integration/ugv-provider-auto-lock.test.ts docs/protocol/UGV_TASK_BUSINESS_PROVIDER_AUTO_LOCK.md
+          git diff -- apps/ugv-provider-adapter/src/provider-auto-lock-coordinator.ts tests/integration/ugv-provider-auto-lock.test.ts docs/protocol/UGV_TASK_BUSINESS_PROVIDER_AUTO_LOCK.md
