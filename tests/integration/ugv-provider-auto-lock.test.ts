@@ -377,7 +377,7 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
       ),
     ),
   )(
-    "applies $decision in $mode as $responder with source mission=$mission and no relock after resume",
+    "applies $decision in $mode as $responder without re-locking the same target",
     async ({ mission, decision, mode, responder }) => {
       const h = await fixture(true, mission, 0, 0, mode);
       try {
@@ -467,7 +467,7 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
         expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
         expect((await h.store.getExecution(h.run.taskId))?.state).toBe("RUNNING");
         const callCount = h.device.calls.length;
-        await h.targets(700);
+        await h.targets(700, [7]);
         await h.status(1, 0, 800);
         expect(h.device.calls).toHaveLength(callCount);
         expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
@@ -477,6 +477,94 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
       }
     },
   );
+
+
+  it.each(["11", null])(
+    "locks a second target only after confirmed release and fresh observations (source mission=%s)",
+    async (sourceMission) => {
+      const h = await fixture(true, sourceMission, 0, 0, "live");
+      try {
+        await h.targets(100, [7, 8]);
+        await h.status(3, 7, 200);
+        const first = await h.service.activeRequiredInput(h.run);
+        if (!first) throw new Error("FIRST_POLICY_INPUT_MISSING");
+        h.advance(300);
+        const ack = await h.runtime().updateInput(
+          {
+            taskId: h.run.taskId,
+            externalExecutionId: h.run.externalExecutionId,
+            operationName: h.run.operationName,
+            argumentHash: h.run.argumentHash,
+            executionContext: h.run.executionContext,
+            commandSequence: "12",
+          },
+          {
+            inputs: [],
+            inputResponses: [
+              {
+                key: first.requestKey,
+                result: jsonToProtoStruct({ action: "decline" }),
+                verifiedResponder: jsonToProtoStruct({
+                  source: "development",
+                  actorType: "development_anonymous",
+                  actorId: "development-anonymous",
+                }),
+              },
+            ],
+          },
+        );
+        expect(ack).toMatchObject({ accepted: true });
+        expect(h.device.calls).toHaveLength(2);
+        await h.targets(350, [7, 8]);
+        expect(h.device.calls).toHaveLength(2); // Release ACK cannot authorize another lock.
+        await h.status(1, 0, 400);
+        expect((await h.store.getExecution(h.run.taskId))?.controlConfirmation).toBeUndefined();
+        await h.targets(450, [7]);
+        expect(h.device.calls).toHaveLength(2); // Never relock an attempted target ID.
+        await h.restart(); // The selection history must survive process restart.
+        await h.status(1, 0, 500);
+        await h.targets(550, [7, 8]);
+        expect(h.device.calls).toHaveLength(3);
+        expect(h.device.calls[2]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: true, target_id: 8, mission_id: 11 },
+        });
+        await h.status(3, 8, 600);
+        const second = await h.service.activeRequiredInput(h.run);
+        expect(second).toMatchObject({
+          state: "pending",
+          subjectBinding: { targetId: "8" },
+        });
+        expect(second?.requestId).not.toBe(first.requestId);
+        await h.targets(650, [7, 8]);
+        expect(h.device.calls).toHaveLength(3);
+      } finally {
+        await h.close();
+      }
+    },
+  );
+
+  it("waits for a post-failure scan before selecting the next fresh target", async () => {
+    const h = await fixture(true, null);
+    try {
+      h.device.responses.set("ugv_area_recon_lock", { mission_id: 11, cmd_res: 0 });
+      await h.targets(100, [7, 8]);
+      expect((await h.actions()).at(-1)).toMatchObject({ state: "failed" });
+      expect(h.device.calls).toHaveLength(1);
+      h.device.responses.delete("ugv_area_recon_lock");
+      await h.targets(200, [7, 8]);
+      expect(h.device.calls).toHaveLength(1);
+      await h.status(1, 0, 300);
+      await h.targets(400, [7, 8]);
+      expect(h.device.calls).toHaveLength(2);
+      expect(h.device.calls[1]).toMatchObject({
+        name: "ugv_area_recon_lock",
+        arguments: { lock: true, target_id: 8, mission_id: 11 },
+      });
+    } finally {
+      await h.close();
+    }
+  });
 
   it.each(["11", null])(
     "expires input and recovers one release across restart (mission=%s)",

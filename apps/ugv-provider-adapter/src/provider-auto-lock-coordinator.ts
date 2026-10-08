@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
 import {
   BoundExecutionScope,
@@ -21,7 +22,7 @@ export interface ProviderLockDispatch {
   dispatchedAt: string;
 }
 
-export const AUTO_LOCK_POLICY = "ugv.first-visible-target/1";
+export const AUTO_LOCK_POLICY = "ugv.sequential-visible-target/1";
 export const providerAutoLockStepId = (actionId: string): string => `auto-lock:${actionId}`;
 
 /** One policy selection per recon mission. Physical dispatch uses the existing journal. */
@@ -85,10 +86,11 @@ export class ProviderAutoLockCoordinator {
     }
     let action: BusinessAction | undefined;
     const selected = context.summary.properties?.providerAutoLockMissionId === missionId;
-    if (selected) {
-      const ref = context.activeRefs[key];
-      const version = ref && (await this.business.getObjectVersion(scope, ref));
+    const currentRef = context.activeRefs[key];
+    if (currentRef) {
+      const version = await this.business.getObjectVersion(scope, currentRef);
       if (
+        !selected ||
         version?.kind !== "action" ||
         version.value.triggerOrigin !== "provider_policy" ||
         version.value.actionId !== context.summary.properties?.providerAutoLockActionId ||
@@ -100,7 +102,7 @@ export class ProviderAutoLockCoordinator {
       if (
         execution.state !== "RUNNING" ||
         input.controlPending() ||
-        context.activeRefs[key] ||
+        Object.keys(context.activeRefs).some((name) => name.startsWith("visualLock:")) ||
         context.activeRefs["input:visualLock"]
       )
         return;
@@ -109,14 +111,48 @@ export class ProviderAutoLockCoordinator {
         string,
         Extract<NonNullable<typeof snapshot>["objects"][number], { kind: "artifact" }>
       >();
+      // Action versions already persist every attempted target in this mission.
+      // Reuse that history rather than adding a session store or a target ledger.
+      const attemptedIds = new Set<string>();
+      let previousSelection: BusinessAction | undefined;
       for (const object of snapshot?.objects ?? []) {
-        if (object.kind !== "artifact") continue;
-        const previous = latest.get(object.value.artifactId);
-        if (!previous || object.value.revision > previous.value.revision)
-          latest.set(object.value.artifactId, object);
+        if (object.kind === "artifact") {
+          const previous = latest.get(object.value.artifactId);
+          if (!previous || object.value.revision > previous.value.revision)
+            latest.set(object.value.artifactId, object);
+        } else if (
+          object.kind === "action" &&
+          object.value.actionType === "sensor.visual_lock" &&
+          object.value.triggerOrigin === "provider_policy" &&
+          object.value.properties?.observationSessionId === missionId
+        ) {
+          const id = object.value.properties?.sourceTargetId;
+          if (typeof id === "string") attemptedIds.add(id);
+          if (
+            selected &&
+            object.value.actionId === context.summary.properties?.providerAutoLockActionId &&
+            (!previousSelection || object.value.revision > previousSelection.revision)
+          )
+            previousSelection = object.value;
+        }
+      }
+      // Continue only after the previous Action has ended AND a new scanning
+      // status has established that there is no active visual lock. Never use
+      // an old target list as justification for a second device command.
+      const previousEnd = previousSelection?.endedAt;
+      if (selected) {
+        const lockStatusAt = context.summary.properties?.nativeLockObservedAt;
+        if (
+          !previousSelection ||
+          !["completed", "failed", "cancelled"].includes(previousSelection.state) ||
+          !previousEnd ||
+          typeof lockStatusAt !== "string" ||
+          compareIsoTimestamps(lockStatusAt, previousEnd) < 0
+        )
+          return;
       }
       for (const targetId of input.candidateIds) {
-        if (!input.canDispatch(targetId)) continue;
+        if (attemptedIds.has(targetId) || !input.canDispatch(targetId)) continue;
         const targets = [...latest.values()].filter(
           ({ value }) =>
             value.artifactType === "target.object" &&
@@ -129,7 +165,11 @@ export class ProviderAutoLockCoordinator {
             value.properties.visibility === "visible",
         );
         const target = targets.length === 1 ? targets[0]?.value : undefined;
-        if (!target) continue;
+        if (
+          !target ||
+          (previousEnd && compareIsoTimestamps(target.updatedAt, previousEnd) <= 0)
+        )
+          continue;
         const requestedAt = this.now().toISOString();
         if (Date.parse(target.updatedAt) - Date.parse(requestedAt) > this.maximumFutureSkewMs)
           continue;

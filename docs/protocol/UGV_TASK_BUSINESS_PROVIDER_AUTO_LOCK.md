@@ -1,12 +1,17 @@
 # Provider automatic visual lock
 
-Implementation status: the coordinator and Runtime wiring are present and covered
-by synthetic Runtime tests. Production qualification is pending. The opt-in public Profile and startup gate allow Provider policy and trusted-user input under [the recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md). Live V-OBS/V-INPUT remain mandatory qualification; configured capability and synthetic tests do not by themselves prove it.
+Implementation status: the Provider-to-device lock and input path has real public Runtime
+software-simulator V-OBS/V-INPUT evidence. This sequential multi-target policy is covered
+by synthetic Runtime tests and still needs its own real-source qualification. The opt-in
+public Profile uses the [recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md).
+Synthetic tests do not by themselves establish new field qualification.
 
 With `businessVisualLockOwner: "provider"`, the existing area-recon Execution
 selects the first eligible target from the just-projected complete target list.
-Policy `ugv.first-visible-target/1` makes one selection per mission, without
-ranking, retargeting or automatic retry after rejection, timeout or release.
+Policy `ugv.sequential-visible-target/1` processes distinct targets sequentially:
+only one lock and Input may be active at a time, and each target ID is attempted
+at most once per mission. After a lock ends, new fresh scanning/target evidence
+can select the next unattempted target. No ranking or automatic same-target retry.
 It neither starts a second public tracking Task nor invokes a weapon action.
 
 Eligibility requires a running, non-preempted Execution; connected device and
@@ -38,7 +43,9 @@ after the requested Action but before dispatch can resume the same Action after
 fresh eligible source messages. `ACCEPTED`, `DISPATCHING` and `UNCERTAIN` entries
 are never resent; a later matching observation can resolve an uncertain effect.
 Rejection and confirmation timeout end the requested Action and retain the
-selection marker. Missing or lost targets cannot establish active locking.
+selection history. Another target is eligible only after a fresh unlocked/scanning
+status and a newly observed target list; uncertain dispatch remains fenced.
+Missing or lost targets cannot establish active locking.
 Newer valid status messages remain eligible during database awaits, while a
 newer explicit mismatch, ambiguous source or retained message revokes eligibility
 before dispatch.
@@ -63,5 +70,8 @@ The same tests now exercise trusted continue/decline/cancel responses to the
 policy-generated input, reject an agent response, and verify that retries do not
 repeat device effects. Continue keeps observation active without another device
 command. Decline/cancel send one release and wait for a later scanning fact;
-expiry also survives a Runtime restart before that confirmation. None of these
-branches select another target when scanning resumes in the same mission.
+expiry also survives a Runtime restart before that confirmation. No previous
+target is automatically re-locked. A *different* fresh visible target may be
+selected after the previous Action is terminal, a later unlocked/scanning
+observation is confirmed, and a new target observation is accepted. The history
+is recovered from existing Context Action versions without new session storage.
