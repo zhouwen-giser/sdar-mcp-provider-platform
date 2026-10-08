@@ -126,7 +126,7 @@ export class ProviderAutoLockCoordinator {
           object.value.triggerOrigin === "provider_policy" &&
           object.value.properties?.observationSessionId === missionId
         ) {
-          const id = object.value.properties?.sourceTargetId;
+          const id = object.value.properties.sourceTargetId;
           if (typeof id === "string") attemptedIds.add(id);
           if (
             selected &&
