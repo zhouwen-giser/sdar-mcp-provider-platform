@@ -165,10 +165,7 @@ export class ProviderAutoLockCoordinator {
             value.properties.visibility === "visible",
         );
         const target = targets.length === 1 ? targets[0]?.value : undefined;
-        if (
-          !target ||
-          (previousEnd && compareIsoTimestamps(target.updatedAt, previousEnd) <= 0)
-        )
+        if (!target || (previousEnd && compareIsoTimestamps(target.updatedAt, previousEnd) <= 0))
           continue;
         const requestedAt = this.now().toISOString();
         if (Date.parse(target.updatedAt) - Date.parse(requestedAt) > this.maximumFutureSkewMs)

@@ -71,7 +71,7 @@ policy-generated input, reject an agent response, and verify that retries do not
 repeat device effects. Continue keeps observation active without another device
 command. Decline/cancel send one release and wait for a later scanning fact;
 expiry also survives a Runtime restart before that confirmation. No previous
-target is automatically re-locked. A *different* fresh visible target may be
+target is automatically re-locked. A _different_ fresh visible target may be
 selected after the previous Action is terminal, a later unlocked/scanning
 observation is confirmed, and a new target observation is accepted. The history
 is recovered from existing Context Action versions without new session storage.

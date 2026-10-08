@@ -1,5 +1,9 @@
 # Final candidate qualification in progress
 
+Large original captures are preserved in the [immutable evidence archive](EVIDENCE_ARCHIVE_INDEX.md).
+The active PR retains concise acceptance records; source evidence remains available
+by path and Git blob hash from the archive index.
+
 `SMPP_UGV_BUSINESS_FEEDBACK_IMPLEMENTATION_COMPLETE=false`
 
 `SMPP_UGV_BUSINESS_FEEDBACK_END_TO_END_READY=false`

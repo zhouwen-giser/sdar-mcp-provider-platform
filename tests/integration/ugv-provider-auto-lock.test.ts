@@ -478,7 +478,6 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     },
   );
 
-
   it.each(["11", null])(
     "locks a second target only after confirmed release and fresh observations (source mission=%s)",
     async (sourceMission) => {

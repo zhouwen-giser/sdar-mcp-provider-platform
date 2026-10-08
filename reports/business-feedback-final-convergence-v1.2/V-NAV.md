@@ -17,7 +17,7 @@ Runtime and Provider restarted between adjustments without adding mutations.
 Public SSE applied 15 initial and 39 recovered-window events.
 
 See [structured results](V-NAV.json), the original
-[public run](evidence/navigation-public-restart.json), and the
+[public run](https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-restart.json), and the
 [consumer sample manifest](evidence/navigation-public-handoff/manifest.json).
 The sample manifest pins the source report, unchanged candidate source fingerprint,
 and all six NDJSON files. Those files preserve captured probe records and exact
