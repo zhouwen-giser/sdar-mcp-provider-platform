@@ -245,6 +245,7 @@ export class UgvProviderRuntime {
   #unsubscribeCallObservation: (() => void) | undefined;
   #mutationTail: Promise<void> = Promise.resolve();
   readonly #pendingPriorityControls = new Map<string, Set<{ identity: CommandIdentity }>>();
+  readonly #pendingEmergencyStops = new Set<{ taskId: string; resourceId: string }>();
   #navigationMissionObservation: AppliedMqttObservation | undefined;
   #durableNavigationMissionObservation: AppliedMqttObservation | undefined;
   #durableNavigationSequence = -1;
@@ -611,7 +612,23 @@ export class UgvProviderRuntime {
   start(
     input: StartUgvOperation,
   ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
-    return this.#serializeMutation(() => this.#start(input));
+    if (input.operationName !== "vehicle_emergency_stop")
+      return this.#serializeMutation(() => this.#start(input));
+    try {
+      validateStart(input, this.options);
+    } catch (error) {
+      return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+    }
+    // Expose the queued stop to the final AutoLock guard before admission can
+    // persist preemption. Keep each request separate until its queue turn ends.
+    const entry = {
+      taskId: input.taskId,
+      resourceId: this.options.resourceId ?? "vehicle:ugv1",
+    };
+    this.#pendingEmergencyStops.add(entry);
+    return this.#serializeMutation(() => this.#start(input)).finally(() => {
+      this.#pendingEmergencyStops.delete(entry);
+    });
   }
 
   async #start(
@@ -4400,6 +4417,10 @@ export class UgvProviderRuntime {
       [...(this.#pendingPriorityControls.get(execution.taskId) ?? [])].some(({ identity }) =>
         sameIdentity(execution, identity),
       ) ||
+      (execution.providerId === this.options.providerId &&
+        [...this.#pendingEmergencyStops].some(
+          (stop) => stop.taskId !== execution.taskId && stop.resourceId === execution.resourceId,
+        )) ||
       execution.preemptedByTaskId !== undefined ||
       controlConfirmationPending(execution)
     );

@@ -21,11 +21,16 @@ no-op. Negative copies with a missing Context, missing original notification or
 foreign Task are rejected; the older projection-only report is also rejected
 instead of being reconstructed into a supposed raw capture.
 
-Run the read-only verifier from the repository root:
+Restore the immutable raw capture from the [archive index](EVIDENCE_ARCHIVE_INDEX.md),
+then run the read-only verifier from the repository root:
 
 ```sh
+git fetch origin archive/ugv-pr35-raw-evidence-20261008
+git show 9f6714d1fc06a65fb7438d66df435da51226455a:reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-payloads.json > /tmp/pr35-navigation-public-payloads.json
+git hash-object /tmp/pr35-navigation-public-payloads.json
+# Expected: 9f4137b4761d57b4acc49d912586dea78dee5738
 node --import tsx scripts/task-business/replay-public-navigation.mjs \
-  reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-payloads.json
+  /tmp/pr35-navigation-public-payloads.json
 ```
 
 The [eight-file handoff](evidence/navigation-public-payload-handoff/README.md)

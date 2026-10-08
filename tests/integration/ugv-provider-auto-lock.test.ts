@@ -201,6 +201,42 @@ async function fixture(
   };
 }
 
+function respondToPolicyInput(
+  h: Awaited<ReturnType<typeof fixture>>,
+  requestKey: string,
+  action: "continue_observation" | "decline" | "cancel",
+  commandSequence: string,
+) {
+  return h.runtime().updateInput(
+    {
+      taskId: h.run.taskId,
+      externalExecutionId: h.run.externalExecutionId,
+      operationName: h.run.operationName,
+      argumentHash: h.run.argumentHash,
+      executionContext: h.run.executionContext,
+      commandSequence,
+    },
+    {
+      inputs: [],
+      inputResponses: [
+        {
+          key: requestKey,
+          result: jsonToProtoStruct(
+            action === "continue_observation"
+              ? { action: "accept", content: { decision: action } }
+              : { action },
+          ),
+          verifiedResponder: jsonToProtoStruct({
+            source: "development",
+            actorType: "development_anonymous",
+            actorId: "development-anonymous",
+          }),
+        },
+      ],
+    },
+  );
+}
+
 describe("Provider auto-lock production wire (synthetic source and device, not live qualification)", () => {
   it("projects query and inferred business status consistently, including unknown lock codes", async () => {
     const h = await fixture(false, null, 0, 0, "live");
@@ -273,24 +309,27 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     }
   });
 
-  it("finalizes an inferred recon stop and rejects packets after terminal", async () => {
-    const h = await fixture(false, null);
-    try {
-      await h.targets(100, [7]);
-      await h.status(1, 0, 200, null, false, 9);
-      expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
-        state: "CANCELLED",
-        result: { correlationStrength: "INFERRED_CURRENT_EXECUTION", missionId: "11" },
-      });
-      const finalized = await h.business.getContextSnapshot(h.scope);
-      await h.targets(300, [8]);
-      await h.status(3, 8, 400);
-      expect(await h.business.getContextSnapshot(h.scope)).toEqual(finalized);
-      expect(h.device.calls).toHaveLength(0);
-    } finally {
-      await h.close();
-    }
-  });
+  it.each([false, true])(
+    "finalizes an inferred recon stop and rejects packets after terminal (owner=%s)",
+    async (enabled) => {
+      const h = await fixture(enabled, null);
+      try {
+        await h.targets(100, [7]);
+        await h.status(1, 0, 200, null, false, 9);
+        expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+          state: "CANCELLED",
+          result: { correlationStrength: "INFERRED_CURRENT_EXECUTION", missionId: "11" },
+        });
+        const finalized = await h.business.getContextSnapshot(h.scope);
+        await h.targets(300, [8]);
+        await h.status(3, 8, 400);
+        expect(await h.business.getContextSnapshot(h.scope)).toEqual(finalized);
+        expect(h.device.calls).toHaveLength(enabled ? 1 : 0);
+      } finally {
+        await h.close();
+      }
+    },
+  );
 
   it("keeps a policy-owned scan pause RUNNING until its post-dispatch lock generates input", async () => {
     const h = await fixture(true, null);
@@ -479,8 +518,46 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
   );
 
   it.each(["11", null])(
-    "locks a second target only after confirmed release and fresh observations (source mission=%s)",
+    "keeps the continued target active when a different target appears (mission=%s)",
     async (sourceMission) => {
+      const h = await fixture(true, sourceMission, 0, 0, "live");
+      try {
+        await h.targets(100);
+        await h.status(3, 7, 200);
+        const first = await h.service.activeRequiredInput(h.run);
+        if (!first) throw new Error("FIRST_POLICY_INPUT_MISSING");
+        h.advance(300);
+        expect(
+          await respondToPolicyInput(h, first.requestKey, "continue_observation", "12"),
+        ).toMatchObject({ accepted: true });
+        await h.targets(350, [7, 8]);
+        await h.status(3, 7, 400);
+        expect(h.device.calls).toHaveLength(1);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "active",
+          properties: { sourceTargetId: "7" },
+        });
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+        await h.status(1, 0, 500);
+        await h.targets(600, [7, 8]);
+        expect(h.device.calls).toHaveLength(2);
+        expect(h.device.calls[1]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: true, target_id: 8, mission_id: 11 },
+        });
+      } finally {
+        await h.close();
+      }
+    },
+  );
+
+  it.each(
+    ["11", null].flatMap((sourceMission) =>
+      (["decline", "cancel"] as const).map((decision) => ({ sourceMission, decision })),
+    ),
+  )(
+    "locks three distinct targets serially after $decision (source mission=$sourceMission)",
+    async ({ sourceMission, decision }) => {
       const h = await fixture(true, sourceMission, 0, 0, "live");
       try {
         await h.targets(100, [7, 8]);
@@ -488,30 +565,7 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
         const first = await h.service.activeRequiredInput(h.run);
         if (!first) throw new Error("FIRST_POLICY_INPUT_MISSING");
         h.advance(300);
-        const ack = await h.runtime().updateInput(
-          {
-            taskId: h.run.taskId,
-            externalExecutionId: h.run.externalExecutionId,
-            operationName: h.run.operationName,
-            argumentHash: h.run.argumentHash,
-            executionContext: h.run.executionContext,
-            commandSequence: "12",
-          },
-          {
-            inputs: [],
-            inputResponses: [
-              {
-                key: first.requestKey,
-                result: jsonToProtoStruct({ action: "decline" }),
-                verifiedResponder: jsonToProtoStruct({
-                  source: "development",
-                  actorType: "development_anonymous",
-                  actorId: "development-anonymous",
-                }),
-              },
-            ],
-          },
-        );
+        const ack = await respondToPolicyInput(h, first.requestKey, decision, "12");
         expect(ack).toMatchObject({ accepted: true });
         expect(h.device.calls).toHaveLength(2);
         await h.targets(350, [7, 8]);
@@ -530,40 +584,82 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
         });
         await h.status(3, 8, 600);
         const second = await h.service.activeRequiredInput(h.run);
+        if (!second) throw new Error("SECOND_POLICY_INPUT_MISSING");
         expect(second).toMatchObject({
           state: "pending",
           subjectBinding: { targetId: "8" },
         });
-        expect(second?.requestId).not.toBe(first.requestId);
-        await h.targets(650, [7, 8]);
+        expect(second.requestId).not.toBe(first.requestId);
+        await h.targets(650, [7, 8, 9]);
         expect(h.device.calls).toHaveLength(3);
+        expect(await h.service.activeRequiredInput(h.run)).toEqual(second);
+        h.advance(700);
+        expect(await respondToPolicyInput(h, second.requestKey, decision, "13")).toMatchObject({
+          accepted: true,
+        });
+        expect(h.device.calls).toHaveLength(4);
+        await h.targets(750, [7, 8, 9]);
+        expect(h.device.calls).toHaveLength(4);
+        await h.status(1, 0, 800);
+        await h.targets(850, [7, 8, 9]);
+        expect(h.device.calls).toHaveLength(5);
+        expect(h.device.calls[4]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: true, target_id: 9, mission_id: 11 },
+        });
+        await h.status(3, 9, 900);
+        const third = await h.service.activeRequiredInput(h.run);
+        expect(third).toMatchObject({ state: "pending", subjectBinding: { targetId: "9" } });
+        expect(third?.requestId).not.toBe(second.requestId);
+        expect(
+          h.device.calls
+            .filter((call) => call.name === "ugv_area_recon_lock" && call.arguments.lock === true)
+            .map((call) => call.arguments.target_id),
+        ).toEqual([7, 8, 9]);
+        const history = await h.actions();
+        expect(new Set(history.map((action) => action.actionId)).size).toBe(3);
+        for (const targetId of ["7", "8", "9"]) {
+          expect(
+            history
+              .filter((action) => action.properties?.sourceTargetId === targetId)
+              .map((action) => action.state),
+          ).toEqual(expect.arrayContaining(["requested", "active"]));
+        }
       } finally {
         await h.close();
       }
     },
   );
 
-  it("waits for a post-failure scan before selecting the next fresh target", async () => {
-    const h = await fixture(true, null);
-    try {
-      h.device.responses.set("ugv_area_recon_lock", { mission_id: 11, cmd_res: 0 });
-      await h.targets(100, [7, 8]);
-      expect((await h.actions()).at(-1)).toMatchObject({ state: "failed" });
-      expect(h.device.calls).toHaveLength(1);
-      h.device.responses.delete("ugv_area_recon_lock");
-      await h.targets(200, [7, 8]);
-      expect(h.device.calls).toHaveLength(1);
-      await h.status(1, 0, 300);
-      await h.targets(400, [7, 8]);
-      expect(h.device.calls).toHaveLength(2);
-      expect(h.device.calls[1]).toMatchObject({
-        name: "ugv_area_recon_lock",
-        arguments: { lock: true, target_id: 8, mission_id: 11 },
-      });
-    } finally {
-      await h.close();
-    }
-  });
+  it.each(["rejected", "timeout"])(
+    "waits for a post-failure scan before selecting the next fresh target (%s)",
+    async (failure) => {
+      const h = await fixture(true, null);
+      try {
+        if (failure === "rejected")
+          h.device.responses.set("ugv_area_recon_lock", { mission_id: 11, cmd_res: 0 });
+        await h.targets(100, [7, 8]);
+        if (failure === "timeout") {
+          h.advance(1200);
+          await h.runtime().pollActive();
+        }
+        expect((await h.actions()).at(-1)).toMatchObject({ state: "failed" });
+        expect(h.device.calls).toHaveLength(1);
+        h.device.responses.delete("ugv_area_recon_lock");
+        await h.targets(1300, [7, 8]);
+        expect(h.device.calls).toHaveLength(1);
+        await h.status(1, 0, 1400);
+        await h.targets(1500, [7, 8]);
+        expect(h.device.calls).toHaveLength(2);
+        expect(h.device.calls[1]).toMatchObject({
+          name: "ugv_area_recon_lock",
+          arguments: { lock: true, target_id: 8, mission_id: 11 },
+        });
+      } finally {
+        await h.close();
+      }
+    },
+  );
 
   it.each(["11", null])(
     "expires input and recovers one release across restart (mission=%s)",
@@ -854,27 +950,46 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     }
   });
 
-  it("does not replay an uncertain dispatch and can confirm it from a later bound observation", async () => {
-    const h = await fixture();
-    try {
-      h.device.handlers.set("ugv_area_recon_lock", () => {
-        throw new UncertainMutatingDeviceCallError("UGV", "ugv_area_recon_lock");
-      });
-      await h.targets(100);
-      expect((await h.store.listMutationJournal(h.run.taskId))[0]?.state).toBe("UNCERTAIN");
-      await h.restart();
-      await h.targets(200);
-      expect(h.device.calls).toHaveLength(1);
-      expect((await h.actions()).at(-1)).toMatchObject({ state: "requested" });
-      await h.status(3, 7, 300);
-      expect((await h.actions()).at(-1)).toMatchObject({
-        state: "active",
-        triggerOrigin: "provider_policy",
-      });
-    } finally {
-      await h.close();
-    }
-  });
+  it.each(["UNCERTAIN", "DISPATCHING"] as const)(
+    "does not replay %s and can confirm it from a later bound observation",
+    async (journalState) => {
+      const h = await fixture();
+      const advance = h.store.advanceMutationJournal.bind(h.store);
+      const spy = vi.spyOn(h.store, "advanceMutationJournal");
+      try {
+        if (journalState === "UNCERTAIN") {
+          h.device.handlers.set("ugv_area_recon_lock", () => {
+            throw new UncertainMutatingDeviceCallError("UGV", "ugv_area_recon_lock");
+          });
+        } else {
+          spy.mockImplementation(async (entry, previous) => {
+            if (entry.state === "ACCEPTED" || entry.state === "UNCERTAIN")
+              throw new Error("CRASH_AFTER_DEVICE_DISPATCH");
+            return advance(entry, previous);
+          });
+        }
+        await h.targets(100);
+        expect((await h.store.listMutationJournal(h.run.taskId))[0]?.state).toBe(journalState);
+        spy.mockRestore();
+        await h.restart();
+        await h.targets(200);
+        expect(h.device.calls).toHaveLength(1);
+        expect((await h.actions()).at(-1)).toMatchObject({ state: "requested" });
+        await h.status(3, 7, 300);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "active",
+          triggerOrigin: "provider_policy",
+        });
+        expect(await h.service.activeRequiredInput(h.run)).toMatchObject({
+          state: "pending",
+          subjectBinding: { targetId: "7" },
+        });
+      } finally {
+        spy.mockRestore();
+        await h.close();
+      }
+    },
+  );
 
   it("fails a rejected or expired request without retrying another target in the mission", async () => {
     for (const rejected of [true, false]) {
@@ -899,10 +1014,19 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
     }
   });
 
-  it.each(["pause", "cancel"] as const)(
-    "lets a queued %s win at the final dispatch boundary",
-    async (command) => {
+  it.each(
+    (["pause", "cancel"] as const).flatMap((command) =>
+      [false, true].map((secondTarget) => ({ command, secondTarget })),
+    ),
+  )(
+    "lets a queued $command win at the final dispatch boundary (secondTarget=$secondTarget)",
+    async ({ command, secondTarget }) => {
       const h = await fixture();
+      if (secondTarget) {
+        await h.targets(100);
+        await h.status(3, 7, 200);
+        await h.status(1, 0, 300);
+      }
       let control: Promise<Record<string, unknown>> | undefined;
       const advance = h.store.advanceMutationJournal.bind(h.store);
       const spy = vi
@@ -921,11 +1045,13 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
           return advance(entry, previous);
         });
       try {
-        await h.targets(100);
+        await h.targets(secondTarget ? 400 : 100);
         await control;
-        expect(h.device.calls.filter((call) => call.name === "ugv_area_recon_lock")).toHaveLength(
-          0,
-        );
+        expect(
+          h.device.calls.filter(
+            (call) => call.name === "ugv_area_recon_lock" && call.arguments.lock === true,
+          ),
+        ).toHaveLength(secondTarget ? 1 : 0);
         expect((await h.actions()).at(-1)).toMatchObject({
           state: "cancelled",
           reasonCode: "UGV_AUTO_LOCK_CONTROL_SUPERSEDED",
@@ -970,4 +1096,134 @@ describe("Provider auto-lock production wire (synthetic source and device, not l
       await h.close();
     }
   });
+
+  it("lets a queued emergency stop prevent the second target lock", async () => {
+    const h = await fixture(true, "11", 0, 0, "live");
+    let stop: ReturnType<UgvProviderRuntime["start"]> | undefined;
+    try {
+      await h.store.putExecution({ ...h.run, tracks: ["eo"] });
+      await h.runtime().initializeDependencies();
+      expect(h.runtime().readiness().state).toBe("READY");
+      await h.targets(100);
+      await h.status(3, 7, 200);
+      await h.status(1, 0, 300);
+      const advance = h.store.advanceMutationJournal.bind(h.store);
+      const spy = vi
+        .spyOn(h.store, "advanceMutationJournal")
+        .mockImplementation(async (entry, previous) => {
+          if (entry.stepId.startsWith("auto-lock:") && entry.state === "DISPATCHING") {
+            stop = h.runtime().start({
+              taskId: "queued-emergency-stop",
+              operationName: "vehicle_emergency_stop",
+              arguments: { resourceId: h.run.resourceId },
+              argumentHash: "c".repeat(64),
+              executionContext: h.run.executionContext,
+            });
+          }
+          return advance(entry, previous);
+        });
+      try {
+        await h.targets(400, [7, 8]);
+        expect(stop).toBeDefined();
+        await stop;
+        expect(
+          h.device.calls.filter(
+            (call) => call.name === "ugv_area_recon_lock" && call.arguments.lock === true,
+          ),
+        ).toEqual([
+          expect.objectContaining({ arguments: { lock: true, target_id: 7, mission_id: 11 } }),
+        ]);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "cancelled",
+          reasonCode: "UGV_AUTO_LOCK_CONTROL_SUPERSEDED",
+        });
+        expect(await h.store.getExecution(h.run.taskId)).toMatchObject({
+          state: "STOPPING",
+          preemptedByTaskId: "queued-emergency-stop",
+        });
+        expect(h.device.calls.some((call) => call.name === "ugv_motion_stop")).toBe(true);
+        await h.status(1, 0, 500);
+        await h.targets(600, [7, 8, 9]);
+        expect(
+          h.device.calls.filter(
+            (call) => call.name === "ugv_area_recon_lock" && call.arguments.lock === true,
+          ),
+        ).toHaveLength(1);
+      } finally {
+        spy.mockRestore();
+      }
+    } finally {
+      await h.close();
+    }
+  });
+
+  it.each(["resource", "mode", "identity"])(
+    "does not grant priority to an invalid emergency stop (%s)",
+    async (invalid) => {
+      const h = await fixture();
+      let stop: Promise<unknown> | undefined;
+      const advance = h.store.advanceMutationJournal.bind(h.store);
+      const spy = vi
+        .spyOn(h.store, "advanceMutationJournal")
+        .mockImplementation(async (entry, previous) => {
+          if (entry.stepId.startsWith("auto-lock:") && entry.state === "DISPATCHING") {
+            stop = h
+              .runtime()
+              .start({
+                taskId: invalid === "identity" ? "" : "invalid-emergency-stop",
+                operationName: "vehicle_emergency_stop",
+                arguments: {
+                  resourceId: invalid === "resource" ? "vehicle:foreign" : h.run.resourceId,
+                },
+                argumentHash: "c".repeat(64),
+                executionContext: {
+                  ...h.run.executionContext,
+                  executionMode: invalid === "mode" ? "LIVE" : "SIMULATION",
+                },
+              })
+              .catch((error: unknown) => (error instanceof Error ? error.message : error));
+          }
+          return advance(entry, previous);
+        });
+      try {
+        await h.targets(100);
+        expect(await stop).toBe(
+          invalid === "resource"
+            ? "UGV_RESOURCE_NOT_FOUND"
+            : invalid === "mode"
+              ? "UGV_EXECUTION_MODE_MISMATCH"
+              : "UGV_START_IDENTITY_INVALID",
+        );
+        expect(h.device.calls).toHaveLength(1);
+        expect((await h.actions()).at(-1)).toMatchObject({
+          state: "requested",
+          properties: { sourceTargetId: "7" },
+        });
+      } finally {
+        spy.mockRestore();
+        await h.close();
+      }
+    },
+  );
+
+  it.each(["11", null])(
+    "refuses AutoLock when two active executions can own the source (mission=%s)",
+    async (sourceMission) => {
+      const h = await fixture(true, sourceMission);
+      try {
+        await h.store.putExecution({
+          ...h.run,
+          taskId: "ambiguous-recon-task",
+          externalExecutionId: "ambiguous-recon-execution",
+        });
+        await h.status(1, 0, 100);
+        await h.targets(200);
+        expect(h.device.calls).toHaveLength(0);
+        expect(await h.actions()).toEqual([]);
+        expect(await h.service.activeRequiredInput(h.run)).toBeUndefined();
+      } finally {
+        await h.close();
+      }
+    },
+  );
 });

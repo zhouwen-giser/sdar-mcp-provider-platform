@@ -18,6 +18,9 @@ git hash-object map-full-recon.json
 ```
 
 Compare `git hash-object` to `gitBlobSha1` in the manifest.
+Run `python3 scripts/audit_evidence_archive.py --repo .` to verify all archived
+bytes, manifest paths, immutable URLs and their absence from the candidate tree.
+The audit is read-only and requires the pinned archive objects fetched above.
 Restore other paths with the same command. References such as
 `evidence/map-full-recon.json` in older reports point to this archived
 snapshot when the path is absent from the active PR.

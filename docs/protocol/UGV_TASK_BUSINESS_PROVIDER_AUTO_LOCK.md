@@ -27,8 +27,11 @@ and the `ACTION_CHANGED` source event. The Action records
 mutation step ID. The existing mutation journal then fences
 `ugv_area_recon_lock(true, target, mission)`. Runtime checks pending controls and
 the latest source qualification again at the last dispatch boundary. A queued
-pause or cancel with the matching execution identity wins that boundary; an
-invalid identity does not claim priority.
+pause or cancel with the matching execution identity wins that boundary. A
+queued emergency stop for the same resource also blocks dispatch before its
+existing admission path persists preemption. Resource, mode and start identity
+are validated before registering that pending stop, and each request's fence is
+removed when its queue turn completes. Invalid controls do not claim priority.
 
 Device acceptance leaves the Action requested. Stage 2 records locking without
 activating this requested Action. Only a fresh later stage-3 observation for the
@@ -75,3 +78,7 @@ target is automatically re-locked. A _different_ fresh visible target may be
 selected after the previous Action is terminal, a later unlocked/scanning
 observation is confirmed, and a new target observation is accepted. The history
 is recovered from existing Context Action versions without new session storage.
+Regression coverage includes three distinct targets in sequence, a new target
+arriving during the second Input without changing its binding, post-timeout
+recovery, DISPATCHING persistence loss across restart, and priority controls at
+the second-target dispatch boundary.
