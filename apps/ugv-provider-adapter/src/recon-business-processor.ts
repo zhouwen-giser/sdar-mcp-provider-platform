@@ -1,3 +1,10 @@
+import { isDeepStrictEqual } from "node:util";
+import {
+  UgvSemanticSourceSchema,
+  projectUgvSemanticSource,
+} from "../../../packages/vehicle-provider-core/src/ugv-business-semantics.js";
+import { AIRPORT_MAP_FRAME, airportCoveredCells } from "./airport-map-geometry.js";
+import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
@@ -26,25 +33,12 @@ const statusFactSchema = z
   .object({
     schemaVersion: z.literal("ugv.recon-status-fact/1"),
     missionId: id,
+    correlation: z.enum(RECON_CORRELATIONS).optional(),
     sourceCursor,
     observedAt,
-    motionStatus: z.union([
-      z.literal(1),
-      z.literal(2),
-      z.literal(3),
-      z.literal(4),
-      z.literal(5),
-      z.literal(6),
-      z.literal(7),
-      z.literal(8),
-      z.literal(9),
-      z.literal(10),
-      z.literal(11),
-      z.literal(12),
-      z.literal(13),
-      z.literal(99),
-    ]),
-    lockStage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+    motionStatus: z.number().int(),
+    lockStage: z.number().int().optional(),
+    semanticSource: UgvSemanticSourceSchema.optional(),
   })
   .strict();
 const coverageObservationSchema = z
@@ -56,7 +50,7 @@ const coverageObservationSchema = z
     totalCount: nonnegativeInteger.optional(),
     cellSizeM: z.number().positive().optional(),
     coveredCells: z
-      .array(z.object({ x: nonnegativeInteger, y: nonnegativeInteger }).strict())
+      .array(z.object({ x: z.number(), y: z.number() }).strict())
       .max(10_000)
       .optional(),
     sectorWidthDeg: z.number().nonnegative().optional(),
@@ -80,12 +74,14 @@ const coverageFactSchema = z
   .object({
     schemaVersion: z.literal("ugv.recon-coverage-fact/1"),
     missionId: id,
+    correlation: z.enum(RECON_CORRELATIONS).optional(),
     /** Required after an adopted area change; the current status topic does not carry it. */
     areaRevision: z.number().int().positive().optional(),
     sourceCursor,
     observedAt,
     coverage: coverageObservationSchema,
     grid: gridSchema.optional(),
+    displayGrid: z.literal(AIRPORT_MAP_FRAME).optional(),
   })
   .strict();
 export type ReconStatusFact = z.infer<typeof statusFactSchema>;
@@ -112,6 +108,11 @@ export class ReconBusinessProcessor {
     this.assertExecution(execution, fact.missionId, fact.observedAt);
     const scope = BoundExecutionScope.fromExecution(execution);
     const cursorHash = hash(fact.sourceCursor);
+    const businessSemantics = projectUgvSemanticSource({
+      ...fact.semanticSource,
+      reconMotionStatus: fact.motionStatus,
+      ...(fact.lockStage === undefined ? {} : { lockStage: fact.lockStage }),
+    });
     const statusSignature = hash(
       JSON.stringify([fact.missionId, fact.observedAt, fact.motionStatus, fact.lockStage ?? null]),
     );
@@ -140,7 +141,9 @@ export class ReconBusinessProcessor {
         return "duplicate";
       const mapped = mapReconMotionStatus(fact.motionStatus, true);
       const lockPhase =
-        fact.motionStatus === 5 || fact.motionStatus === 6
+        fact.motionStatus === 5 ||
+        fact.motionStatus === 6 ||
+        (fact.motionStatus === 8 && (fact.lockStage === 2 || fact.lockStage === 3))
           ? fact.lockStage === 2
             ? "recon.locking"
             : fact.lockStage === 3
@@ -164,8 +167,14 @@ export class ReconBusinessProcessor {
         reconStatusMissionId: fact.missionId,
         reconStatusObservedAt: fact.observedAt,
         reconStatusSignature: statusSignature,
+        businessSemantics,
+        ...(fact.correlation ? { reconStatusCorrelation: fact.correlation } : {}),
       };
-      if (current.phase?.code === phase.code && sameMission) {
+      if (
+        current.phase?.code === phase.code &&
+        sameMission &&
+        isDeepStrictEqual(current.summary.properties?.businessSemantics, businessSemantics)
+      ) {
         const context = TaskBusinessContextSchema.parse({
           ...current,
           contextRevision: current.contextRevision + 1,
@@ -213,9 +222,11 @@ export class ReconBusinessProcessor {
           data: {
             missionId: fact.missionId,
             motionStatus: fact.motionStatus,
+            businessSemantics,
+            ...(fact.correlation ? { correlation: fact.correlation } : {}),
             ...(fact.lockStage === undefined ? {} : { lockStage: fact.lockStage }),
           },
-          contextDelta: { phase },
+          contextDelta: { phase, summary: context.summary },
         },
       });
       try {
@@ -256,6 +267,7 @@ export class ReconBusinessProcessor {
               }),
         },
         grid: fact.grid ?? null,
+        displayGrid: fact.displayGrid ?? null,
       }),
     );
     if (
@@ -346,11 +358,21 @@ export class ReconBusinessProcessor {
         compareIsoTimestamps(fact.observedAt, priorCoverage.sourceObservedAt) <= 0
       )
         return "duplicate";
-      const geometry = coverageGeometry(fact);
+      const displayContent =
+        fact.displayGrid &&
+        fact.coverage.coveredCells &&
+        fact.coverage.cellSizeM &&
+        fact.coverage.incomplete !== true
+          ? airportCoveredCells(fact.coverage.coveredCells, fact.coverage.cellSizeM)
+          : undefined;
+      const geometry =
+        displayContent && fact.coverage.coveredCells
+          ? { cellCount: fact.coverage.coveredCells.length, content: displayContent }
+          : coverageGeometry(fact);
       const unavailableReason =
         fact.coverage.incomplete === true
           ? "COVERAGE_SOURCE_INCOMPLETE"
-          : fact.grid === undefined
+          : fact.grid === undefined && !fact.displayGrid
             ? "COVERAGE_GRID_FRAME_ORIGIN_UNKNOWN"
             : fact.coverage.coveredCells === undefined || fact.coverage.coveredCells.length === 0
               ? "COVERAGE_CELLS_MISSING"
@@ -367,7 +389,7 @@ export class ReconBusinessProcessor {
         source: {
           producer: "device",
           sourceRecordRef: cursorHash,
-          method: "mqtt_area_recon_coverage",
+          method: fact.displayGrid ? "airport_display_cell_centres" : "mqtt_area_recon_coverage",
         },
         createdAt: previous.createdAt,
         updatedAt: fact.observedAt,
@@ -381,10 +403,12 @@ export class ReconBusinessProcessor {
               properties: {
                 areaRevision,
                 grid: {
-                  frameId: fact.grid?.frameId,
-                  origin: fact.grid?.origin,
-                  cellSizeM: fact.grid?.cellSizeM,
-                  denominatorCellCount: fact.grid?.denominatorCellCount,
+                  frameId: fact.displayGrid ?? fact.grid?.frameId,
+                  origin: fact.displayGrid ? [0, 0] : fact.grid?.origin,
+                  cellSizeM: fact.displayGrid ? fact.coverage.cellSizeM : fact.grid?.cellSizeM,
+                  denominatorCellCount: fact.displayGrid
+                    ? fact.coverage.totalCount
+                    : fact.grid?.denominatorCellCount,
                 },
                 numeratorCellCount: geometry.cellCount,
               },
@@ -417,6 +441,7 @@ export class ReconBusinessProcessor {
             reconCoverageCursorHash: cursorHash,
             reconCoverageSignature: coverageSignature,
             reconCoverageMissionId: fact.missionId,
+            ...(fact.correlation ? { reconCoverageCorrelation: fact.correlation } : {}),
             reconCoverage: coverageStats,
           },
         },
@@ -519,11 +544,28 @@ function assertCoverageCounters(fact: ReconCoverageFact): void {
   if (grid && coverage.cellSizeM !== undefined && coverage.cellSizeM !== grid.cellSizeM) {
     throw new Error("RECON_COVERAGE_GRID_CELL_SIZE_CONFLICT");
   }
-  if (grid && coverage.coveredCells) {
+  if (
+    grid &&
+    coverage.coveredCells?.some(
+      (cell) => !Number.isInteger(cell.x) || !Number.isInteger(cell.y) || cell.x < 0 || cell.y < 0,
+    )
+  )
+    throw new Error("RECON_COVERAGE_GRID_CELLS_INVALID");
+  if (
+    fact.displayGrid &&
+    (grid ||
+      coverage.scanMode !== 1 ||
+      !coverage.cellSizeM ||
+      !coverage.totalCount ||
+      !coverage.coveredCells ||
+      coverage.coveredCount !== coverage.coveredCells.length)
+  )
+    throw new Error("RECON_DISPLAY_GRID_INVALID");
+  if ((grid || fact.displayGrid) && coverage.coveredCells) {
     const uniqueCells = new Set(coverage.coveredCells.map((cell) => `${cell.x},${cell.y}`));
     if (
       uniqueCells.size !== coverage.coveredCells.length ||
-      coverage.coveredCells.length > grid.denominatorCellCount
+      coverage.coveredCells.length > (grid?.denominatorCellCount ?? coverage.totalCount ?? 0)
     ) {
       throw new Error("RECON_COVERAGE_GRID_CELLS_INVALID");
     }
@@ -545,6 +587,7 @@ function assertCoverageCounters(fact: ReconCoverageFact): void {
       ? coverage.coveredCells.length
       : undefined);
   if (
+    !fact.displayGrid &&
     coverage.coveragePercent !== undefined &&
     numerator !== undefined &&
     denominator !== undefined &&

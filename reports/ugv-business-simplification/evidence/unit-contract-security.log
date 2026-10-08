@@ -1,0 +1,29 @@
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+{"level":30,"time":1790766118898,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766118902,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":3.407479999999964,"msg":"request completed"}
+{"level":30,"time":1790766120340,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/v1/diagnostics/response-loss","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766120347,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":400},"responseTime":5.523279000000002,"msg":"request completed"}
+{"level":30,"time":1790766120347,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"POST","url":"/v1/diagnostics/provider-business-success","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766120348,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":400},"responseTime":1.179226999999969,"msg":"request completed"}
+{"level":30,"time":1790766120349,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","req":{"method":"GET","url":"/internal/provider-identity","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766120349,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","res":{"statusCode":200},"responseTime":0.2770699999999806,"msg":"request completed"}
+{"level":30,"time":1790766121155,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766121171,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/SMPP-MISSION-RELATION","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766121177,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/PV-LATEST-TASK","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766121159,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":3.2040949999999384,"msg":"request completed"}
+{"level":30,"time":1790766121171,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":0.35012399999993704,"msg":"request completed"}
+{"level":30,"time":1790766121177,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":404},"responseTime":0.28424599999993916,"msg":"request completed"}
+{"level":30,"time":1790766122658,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766122677,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766122662,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":3.376359999999977,"msg":"request completed"}
+{"level":30,"time":1790766122663,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790766122664,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":503},"responseTime":0.46084399999995185,"msg":"request completed"}
+{"level":30,"time":1790766122678,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"err":{"type":"FastifyError","message":"Request body is too large","stack":"FastifyError: Request body is too large\n    at rawBody (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/content-type-parser.js:241:10)\n    at ContentTypeParser.run (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/content-type-parser.js:205:5)\n    at Object.handleRequest (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/handle-request.js:66:46)\n    at runPreParsing (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/route.js:657:19)\n    at next (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/hooks.js:236:9)\n    at handleResolve (/home/zhouwen/web-download/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.10.0/node_modules/fastify/lib/hooks.js:253:7)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","code":"FST_ERR_CTP_BODY_TOO_LARGE","name":"FastifyError","statusCode":413},"msg":"Request body is too large"}
+{"level":30,"time":1790766122680,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"responseTime":3.282261999999946,"msg":"request completed"}
+
+ Test Files  102 passed (102)
+      Tests  716 passed (716)
+   Start at  19:01:31
+   Duration  63.81s (transform 2.82s, setup 0ms, import 33.94s, tests 16.21s, environment 12ms)

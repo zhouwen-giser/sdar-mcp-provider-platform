@@ -18,7 +18,9 @@ SMPP 从基础包 `.runtime/.../business-connections.env` 读取 `SMPP_DATABASE_
 
 首次写入前生成在线 PostgreSQL 备份，然后调用 GOWM 正式 SMPP 域安装器、补充必要的 Mission/目标访问权限，并通过 GOWM API 获取真实服务绑定。只启动 SMPP Runtime/Adapter，共用 GOWM database。完成后核对上游容器 ID 和启动时间保持不变。没有旧库删除、数据同步或设备控制探测。
 
-`node deploy.mjs build-images` 可在构建机编译两个带 SOURCE_REVISION 标签的镜像；传输这两个镜像后，现场 `up --prebuilt` 会校验标签并跳过构建。默认 `up` 在现场构建。构建输出日志不包含业务密码。
+随后显式执行包内 `deploy/gowm-task-business/030_task_business_versions.sql`，在同一 GOWM 的 `ugv_smpp` 中安装四张业务反馈表、作用域 RLS、不可变内容保护与最小权限。部署器复用已有 GOWM 管理连接；事务和迁移记录共同提交，重复执行校验 SHA-256，冲突时停止。`contracts/gowm-shared-storage/current/task-business.json` 随源包与预构建镜像固定，启动只校验，不执行 DDL。详见包内 `deploy/gowm-task-business/README.md`。
+
+`node deploy.mjs build-images` 直接把已校验的 `upstream/smpp.tar.gz` 字节送入 Docker，避免目录上下文元数据缓存复用旧文件，并保持冻结锁文件检查。可在构建机编译两个带 SOURCE_REVISION 标签的镜像；传输这两个镜像后，现场 `up --prebuilt` 会校验标签并跳过构建。默认 `up` 在现场构建。构建输出日志不包含业务密码。
 
 本包的 SMPP 端口为19100，独立 MQTT client ID为smpp-sz-gowm-ugv。保留原有范围与设备 ugv:ugv；新消费者身份为 smpp.sz-gowm.ugv。正常启动会订阅 MQTT 并读取设备 MCP 工具目录，不会为验证主动派发导航、取消或武器命令。
 
@@ -29,3 +31,7 @@ SMPP 从基础包 `.runtime/.../business-connections.env` 读取 `SMPP_DATABASE_
 共享部署启用 Runtime 的 Provider 遥测接收器。生成配置时检查 Adapter 与 Runtime 的开关、监听地址、端口及 TLS 模式一致；关闭的接收器在健康接口中显示 disabled，不再显示 ready。
 
 新建导航使用 missionAuthorityVersion=1：执行终态与已提交回执作为持久发布依据，服务通过受设备、绑定和服务范围约束的事务，将来源事实与最终 Mission 关系写入已有 provider_ops_delivery。只有回执 hash 与原生链接一致才发布 exact；缺失、响应不确定和身份冲突继续阻断。重启重放使用稳定 record ID/hash，无需新增数据库或表；未标记的旧执行不会回填。实时观测不覆盖此版本导航的最终回执关系。此机制限定导航，不改变发射功能。
+
+共享部署默认启用已接入的非发射业务反馈：真实规划与路线采用、连续导航调整、目标关联、Provider 光电锁定和人工决策，以及机场仿真的估算视场与设备扫描覆盖区。`profiles/ugv-business.json` 固定模型与坐标转换，`UGV_ENTITY_ID=ugv1` 是设备传输别名；GOWM 设备仍为 `ugv:ugv`。当前视场标注 estimated，使用设备侦察距离和可视角形成扇形，不代表精确可见性或遮挡分析。侦察区域在线调整尚无可验证采用链路，保持不对外声明。发射继续禁用。
+
+已有大体量共享库可显式选择 `up --backup-scope smpp`：备份 `ugv_smpp` 定义及业务数据，排除未被此次 SQL 修改的 `ugv_state_snapshot` 观测快照数据（表定义仍保留）。它是 SMPP 升级备份，不是全库灾备；GOWM 其他域及原快照继续保留在原数据库中。默认 `full` 仍备份整库。不要用局部备份执行全库替换恢复。部署记录明确记录备份范围，且两种范围使用不同文件名。

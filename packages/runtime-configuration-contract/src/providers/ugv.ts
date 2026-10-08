@@ -34,6 +34,21 @@ const UgvProviderInputBaseSchema = z.object({
     .default("postgresql://ugv_adapter:ugv_adapter@127.0.0.1:5433/ugv_adapter"),
   UGV_ADAPTER_DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(32).default(8),
   UGV_TASK_BUSINESS_PROFILE_PATH: optionalPath,
+  UGV_NAVIGATION_PLANNER_MODE: z.enum(["disabled", "isr_airport"]).default("disabled"),
+  UGV_NAVIGATION_PLANNER_URL: z
+    .url()
+    .refine((value) => {
+      const url = new URL(value);
+      return (
+        ["http:", "https:"].includes(url.protocol) &&
+        !url.username &&
+        !url.password &&
+        !url.search &&
+        !url.hash &&
+        url.pathname === "/"
+      );
+    }, "UGV_PLANNER_ENDPOINT_INVALID")
+    .optional(),
   UGV_MQTT_URL: z.string().min(1).default("mqtt://192.168.2.63:1883"),
   UGV_MQTT_CLIENT_ID: z.string().min(1).default("sdar-ugv-adapter-ugv1"),
   UGV_MQTT_USERNAME: optionalPath,
@@ -114,6 +129,21 @@ const UgvProviderInputBaseSchema = z.object({
 });
 
 const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, context) => {
+  if (
+    value.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" &&
+    (!value.UGV_NAVIGATION_PLANNER_URL || value.UGV_ENTITY_ID !== "ugv1")
+  )
+    context.addIssue({
+      code: "custom",
+      message: "UGV_AIRPORT_PLANNER_REQUIRES_UGV1_AND_URL",
+      path: ["UGV_NAVIGATION_PLANNER_MODE"],
+    });
+  if (value.UGV_NAVIGATION_PLANNER_MODE === "disabled" && value.UGV_NAVIGATION_PLANNER_URL)
+    context.addIssue({
+      code: "custom",
+      message: "UGV_PLANNER_URL_WITHOUT_MODE",
+      path: ["UGV_NAVIGATION_PLANNER_URL"],
+    });
   const expectedRuntimeEnvironment =
     value.UGV_DELIVERY_STAGE === "development_debug"
       ? "development"

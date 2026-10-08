@@ -84,6 +84,37 @@ async function setup() {
 }
 
 describe("mission-bound observed navigation trajectory", () => {
+  it("uses the durable sampling interval across restarts while preserving mission boundaries and gaps", async () => {
+    const { run, business, scope } = await setup();
+    const sample = (ms: number, longitude: number) => ({
+      ...fact(1, longitude, `sample-${ms}`),
+      observedAt: new Date(Date.parse("2026-09-24T00:00:00Z") + ms).toISOString(),
+    });
+    await new NavigationTrajectoryProcessor(business, () => undefined, 3000, 1000).apply(
+      run,
+      sample(1000, 116),
+    );
+    const before = await business.getContext(scope);
+    const restarted = new NavigationTrajectoryProcessor(business, () => undefined, 3000, 1000);
+    for (let ms = 1050; ms < 2000; ms += 50)
+      expect(await restarted.apply(run, sample(ms, 116.1))).toBe("duplicate");
+    expect(await business.getContext(scope)).toEqual(before);
+    await restarted.apply(run, sample(2000, 116.2));
+    const second = (await business.getContext(scope))?.activeRefs.trajectory;
+    expect(second).toMatchObject({ id: before?.activeRefs.trajectory?.id, revision: 2 });
+    await restarted.apply(
+      { ...run, downstreamMissionIds: ["mission-new"] },
+      { ...sample(2100, 116.3), missionId: "mission-new" },
+    );
+    const newMission = (await business.getContext(scope))?.activeRefs.trajectory;
+    expect(newMission?.id).not.toBe(second?.id);
+    await restarted.apply(
+      { ...run, downstreamMissionIds: ["mission-new"] },
+      { ...sample(5200, 116.4), missionId: "mission-new" },
+    );
+    expect((await business.getContext(scope))?.activeRefs.trajectory?.id).not.toBe(newMission?.id);
+  });
+
   it("keeps a legal first Point, dedupes cursors, avoids stationary geometry revisions and splits gaps", async () => {
     const { run, business, events, scope } = await setup();
     const processor = new NavigationTrajectoryProcessor(
@@ -272,6 +303,8 @@ describe("mission-bound observed navigation trajectory", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        // This fixture checks nanosecond ordering independently of production sampling.
+        trajectorySampleEveryMs: 0,
         now: () => new Date("2026-09-24T00:00:03Z"),
       },
       executions,

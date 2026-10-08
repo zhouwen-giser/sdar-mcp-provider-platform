@@ -208,6 +208,48 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_task_business_profile_path setting.",
+      "displayName": "UGV_TASK_BUSINESS_PROFILE_PATH",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_TASK_BUSINESS_PROFILE_PATH",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_navigation_planner_mode setting.",
+      "displayName": "UGV_NAVIGATION_PLANNER_MODE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_NAVIGATION_PLANNER_MODE",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_navigation_planner_url setting.",
+      "displayName": "UGV_NAVIGATION_PLANNER_URL",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_NAVIGATION_PLANNER_URL",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_mqtt_url setting.",
       "displayName": "UGV_MQTT_URL",
       "overridePolicy": {

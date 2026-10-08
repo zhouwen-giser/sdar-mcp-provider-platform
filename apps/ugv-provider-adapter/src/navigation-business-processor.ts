@@ -6,6 +6,9 @@ import {
   scopeBusinessIdentity,
   type ProviderExecution,
   type TaskBusinessStore,
+  type BusinessObjectVersion,
+  type BusinessCommandRecord,
+  type TaskBusinessEventDraft,
 } from "../../../packages/provider-adapter-kit/src/index.js";
 import {
   TaskBusinessContextSchema,
@@ -16,6 +19,10 @@ import {
   TaskArtifactSchema,
 } from "../../../packages/vehicle-provider-core/src/task-business-artifact.js";
 import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
+import {
+  prepareNavigationAdoption,
+  NavigationAdjustmentInputSchema,
+} from "./navigation-intervention-business.js";
 
 const planFactSchema = z
   .object({
@@ -40,17 +47,30 @@ export type NavigationPlanFact = z.infer<typeof planFactSchema>;
 
 const terminal = new Set(["SUCCEEDED", "BUSINESS_FAILED", "CANCELLED", "TECHNICAL_FAILED"]);
 
-/** Receives a verified planner fact from a future southbound source; never derives a route. */
+/** Receives a verified planner/adoption fact; never derives a route from motion. */
 export class NavigationBusinessProcessor {
   constructor(
     readonly business: Pick<
       TaskBusinessStore,
-      "getContext" | "getArtifactLatest" | "getObjectVersion" | "commitBusinessChangeSet"
+      | "getContext"
+      | "getArtifactLatest"
+      | "getObjectVersion"
+      | "getCommand"
+      | "commitBusinessChangeSet"
     >,
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
   ) {}
 
-  async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
+  async apply(
+    execution: ProviderExecution,
+    input: unknown,
+    mayCommit: () => boolean = () => true,
+    adoption?: {
+      requested: z.input<typeof NavigationAdjustmentInputSchema>;
+      commandId?: string;
+      offerAdjustment: boolean;
+    },
+  ): Promise<"committed" | "duplicate" | "deferred"> {
     const fact = planFactSchema.parse(input);
     if (
       execution.operationName !== "vehicle_navigate" ||
@@ -155,7 +175,7 @@ export class NavigationBusinessProcessor {
       const ref = { kind: "artifact" as const, id: artifact.artifactId, revision };
       const activeRefs =
         fact.adoption === "adopted" ? { ...current.activeRefs, route: ref } : current.activeRefs;
-      const context = TaskBusinessContextSchema.parse({
+      let context = TaskBusinessContextSchema.parse({
         ...current,
         contextRevision: current.contextRevision + 1,
         effectivePlanRevision:
@@ -167,6 +187,37 @@ export class NavigationBusinessProcessor {
             ? fact.observedAt
             : current.updatedAt,
       });
+      const objects: BusinessObjectVersion[] = [{ kind: "artifact", value: artifact }];
+      let command: BusinessCommandRecord | undefined;
+      let adoptionEvents: Awaited<ReturnType<typeof prepareNavigationAdoption>>["events"] = [];
+      if (adoption && fact.adoption === "adopted") {
+        if (fact.content.kind !== "geojson" || fact.content.geometry.type !== "LineString")
+          throw new Error("UGV_NAVIGATION_EFFECTIVE_GEOMETRY_REQUIRED");
+        const requested = NavigationAdjustmentInputSchema.parse(adoption.requested);
+        const destination = requested.waypoints.at(-1);
+        if (!destination) throw new Error("UGV_NAVIGATION_DESTINATION_REQUIRED");
+        const prepared = await prepareNavigationAdoption(
+          this.business,
+          scope,
+          current,
+          context,
+          {
+            missionId: fact.missionId,
+            planId: fact.routePlanId,
+            planRevision: context.effectivePlanRevision,
+            routeRef: ref,
+            requested,
+            destination,
+            adoptedAt: fact.observedAt,
+            ...(adoption.commandId ? { commandId: adoption.commandId } : {}),
+          },
+          adoption.offerAdjustment,
+        );
+        context = prepared.context;
+        objects.push(...prepared.objects);
+        command = prepared.command;
+        adoptionEvents = prepared.events;
+      }
       const reasonCode =
         fact.adoption === "adopted" ? "NAVIGATION_ROUTE_ADOPTED" : "NAVIGATION_ROUTE_CANDIDATE";
       const body = TaskBusinessFeedbackBodySchema.parse({
@@ -181,8 +232,11 @@ export class NavigationBusinessProcessor {
           reasonCode,
         },
       });
-      const drafts = [{ body, description: reasonCode, reasonCode, severityHint: "info" as const }];
-      if (fact.adoption === "adopted")
+      const drafts: TaskBusinessEventDraft[] = [
+        { body, description: reasonCode, reasonCode, severityHint: "info" },
+      ];
+      drafts.push(...adoptionEvents);
+      if (fact.adoption === "adopted" && !adoption)
         drafts.push({
           body: TaskBusinessFeedbackBodySchema.parse({
             schemaVersion: "sdar.task-business-feedback/1.0-rc2",
@@ -203,12 +257,16 @@ export class NavigationBusinessProcessor {
           severityHint: "info",
         });
       try {
+        // A queued priority control can arrive while the source projection is
+        // awaiting Store reads. Check again at the final commit boundary.
+        if (!mayCommit()) return "deferred";
         const committed = await this.business.commitBusinessChangeSet(
           {
             scope,
             expectedContextRevision: current.contextRevision,
             context,
-            objects: [{ kind: "artifact", value: artifact }],
+            objects,
+            ...(command ? { command } : {}),
           },
           drafts,
         );

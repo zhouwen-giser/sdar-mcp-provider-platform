@@ -1,0 +1,9 @@
+$ node scripts/require-env.mjs SMPP_GOWM_SHARED_OPEN_TEST_CONFIG_FILE && SMPP_GOWM_SHARED_OPEN_TEST_ENABLE=true vitest run tests/integration/gowm-task-business-open-postgres.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  18:51:41
+   Duration  1.95s (transform 547ms, setup 0ms, import 994ms, tests 834ms, environment 0ms)

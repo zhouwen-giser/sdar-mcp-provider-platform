@@ -214,10 +214,14 @@ describe("T-047 rc.1 full-state database forward migration", () => {
          AND lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL AND claim_attempt=1`,
       ),
     ).toMatchObject({ rowCount: 1 });
-    expect(
-      (await pool.query<{ count: string }>("SELECT count(*) FROM runtime_schema_migration")).rows[0]
-        ?.count,
-    ).toBe("27");
+    const installed = await pool.query<{ version: string }>(
+      "SELECT version FROM runtime_schema_migration ORDER BY version",
+    );
+    expect(installed.rows.map(({ version }) => version)).toEqual(
+      (await readdir(resolve(process.cwd(), "migrations/runtime")))
+        .filter((name) => name.endsWith(".sql"))
+        .sort(),
+    );
     expect(
       await pool.query(
         `SELECT 1 FROM provider_task WHERE task_id=$1

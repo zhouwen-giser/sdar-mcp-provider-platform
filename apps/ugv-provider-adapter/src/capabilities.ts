@@ -74,7 +74,7 @@ export function normalizeUgvCapabilities(
   observedAt = new Date().toISOString(),
   resourceId = "vehicle:ugv1",
   qualificationInput: Omit<UgvQualificationMatrixInput, "contracts"> = {
-    executionMode: "simulation",
+    executionMode: "live",
   },
 ): Record<string, unknown> {
   const normalized = normalizeVehicleCapabilities(

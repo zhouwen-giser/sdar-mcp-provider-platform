@@ -5,8 +5,6 @@ import {
 } from "./errors.js";
 import type { UgvDeviceToolName } from "./tool-allowlist.js";
 
-const RECON_STATUSES = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 99]);
-
 export interface UgvDeviceResultPolicy {
   policyId: string;
   kind: "read" | "mutating";
@@ -206,9 +204,13 @@ function validateCoverability(name: UgvDeviceToolName, value: unknown): void {
   if (!new Set(["full", "partial", "none", "unknown"]).has(value.coverable as string))
     protocol(name, "DEVICE_COVERABILITY_INVALID");
   requireString(value.coverable_label, name, "DEVICE_COVERABILITY_INVALID");
-  for (const key of ["region_min_dist_m", "region_max_dist_m", "detection_range_m"])
+  for (const key of ["region_min_dist_m", "region_max_dist_m", "detection_range_m"]) {
+    // A skipped camera preflight explicitly has unknown distances, not zero distances.
+    if (value.coverable === "unknown" && key !== "detection_range_m" && value[key] === null)
+      continue;
     if (value[key] !== undefined)
       finiteNonnegative(value[key], name, "DEVICE_COVERABILITY_INVALID");
+  }
 }
 
 function validateStatusRead(name: UgvDeviceToolName, result: Record<string, unknown>): void {
@@ -223,8 +225,8 @@ function validateCapabilitiesRead(name: UgvDeviceToolName, result: Record<string
 }
 
 function validateReconStatus(name: UgvDeviceToolName, result: Record<string, unknown>): void {
-  const status = safeInteger(result.status, name, "DEVICE_RECON_STATUS_INVALID");
-  if (!RECON_STATUSES.has(status)) protocol(name, "DEVICE_RECON_STATUS_INVALID");
+  // Read observations may carry new native enum values; preserve them for unknown semantics.
+  safeInteger(result.status, name, "DEVICE_RECON_STATUS_INVALID");
   if (result.status_label !== undefined)
     requireString(result.status_label, name, "DEVICE_RECON_STATUS_LABEL_INVALID");
   if (typeof result.out_of_range !== "boolean") protocol(name, "DEVICE_RECON_OUT_OF_RANGE_INVALID");
@@ -240,7 +242,7 @@ function validateReconStatus(name: UgvDeviceToolName, result: Record<string, unk
   if (result.lock !== undefined) {
     if (!record(result.lock)) protocol(name, "DEVICE_RECON_LOCK_INVALID");
     if (result.lock.stage !== undefined)
-      safeInteger(result.lock.stage, name, "DEVICE_RECON_LOCK_INVALID", 1);
+      safeInteger(result.lock.stage, name, "DEVICE_RECON_LOCK_INVALID");
     if (result.lock.target_id !== undefined)
       safeInteger(result.lock.target_id, name, "DEVICE_RECON_LOCK_INVALID", 0);
   }

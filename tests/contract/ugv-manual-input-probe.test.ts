@@ -221,6 +221,31 @@ describe("UGV manual input public probe", () => {
     expect(lines.at(-1)).toMatchObject({ type: "cleanupRequested", physicalStopConfirmed: false });
   });
 
+  it("binds simulation through authenticated request headers when optional public identity omits it", async () => {
+    const methods: string[] = [];
+    const inner = fixtureFetch(methods);
+    await runUgvManualInputProbe({
+      manifest,
+      bearerToken: "test-token",
+      now: () => new Date("2026-09-26T00:00:00Z"),
+      wait: () => Promise.resolve(),
+      emit: () => undefined,
+      fetchImpl: async (url, init) => {
+        const headers = new Headers(init?.headers);
+        expect(headers.get("x-sdar-execution-mode")).toBe("simulation");
+        expect(headers.get("x-sdar-simulation-id")).toBe(manifest.sceneInstanceId);
+        const response = await inner(url, init);
+        const body = (await response.json()) as Record<string, unknown>;
+        // Public identity is intentionally smaller than the durable authorization scope.
+        const sanitized = JSON.parse(JSON.stringify(body), (key, value: unknown) =>
+          key === "simulationId" ? undefined : value,
+        ) as unknown;
+        return Response.json(sanitized);
+      },
+    });
+    expect(methods.filter((m) => m === "tasks/update")).toHaveLength(1);
+  });
+
   for (const decision of ["decline", "cancel"] as const) {
     it(`confirms ${decision} as an input decision without cancelling the Task`, async () => {
       const methods: string[] = [];

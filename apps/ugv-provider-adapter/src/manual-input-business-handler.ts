@@ -146,7 +146,7 @@ export class UgvManualInputBusinessHandler {
     const command = RequiredInputResponseCommandSchema.parse(input.command);
     const responder = TrustedResponderSchema.parse(input.responder);
     if (
-      responder.actorType !== "user" ||
+      (responder.source !== "runtime_development_policy" && responder.actorType !== "user") ||
       command.result.action !== "accept" ||
       command.result.value === undefined
     )
@@ -272,7 +272,7 @@ export class UgvManualInputBusinessHandler {
     const command = RequiredInputResponseCommandSchema.parse(input.command);
     const responder = TrustedResponderSchema.parse(input.responder);
     if (
-      responder.actorType !== "user" ||
+      (responder.source !== "runtime_development_policy" && responder.actorType !== "user") ||
       !["decline", "cancel"].includes(command.result.action) ||
       command.result.value !== undefined
     )

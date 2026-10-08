@@ -48,6 +48,41 @@ export interface ProviderExecution {
   /** Set only for newly admitted executions whose business Context must be initialized. */
   taskBusinessContextExpected?: boolean;
   downstreamMissionIds: string[];
+  /** Exact real-planner output persisted before Device MCP submission. */
+  navigationPlan?: {
+    planId: string;
+    sourceRecordId: string;
+    routeSource: string;
+    observedAt: string;
+    waypoints: { longitude: number; latitude: number }[];
+  };
+  /** Cache of the atomic business Context authority; never changes admission arguments. */
+  effectiveNavigation?: {
+    missionId: string;
+    planId: string;
+    planRevision: number;
+    routeRef: { kind: "artifact"; id: string; revision: number };
+    requested: {
+      waypoints: { longitude: number; latitude: number; altitude?: number | undefined }[];
+      density: "adaptive" | "dense" | "medium" | "sparse";
+    };
+    destination: { longitude: number; latitude: number; altitude?: number | undefined };
+    adoptedAt: string;
+    commandId?: string | undefined;
+  };
+  /** Recoverable steps in the existing execution, while effective mission stays unchanged. */
+  navigationReplacement?: {
+    commandId: string;
+    previousMissionId: string;
+    phase: "stopping" | "planning" | "submitting" | "starting" | "awaiting_adoption" | "failed";
+    requested: NonNullable<ProviderExecution["effectiveNavigation"]>["requested"];
+    createdAt: string;
+    deadlineAt: string;
+    baseline: Record<string, unknown>;
+    observationCursors: Record<string, string>;
+    plan?: NonNullable<ProviderExecution["navigationPlan"]>;
+    missionId?: string;
+  };
   diagnosticBehavior?: {
     capabilityId: SmppDiagnosticCapabilityId;
     leaseId: string;

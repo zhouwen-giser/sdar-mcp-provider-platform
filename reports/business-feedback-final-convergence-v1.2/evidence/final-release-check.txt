@@ -1,0 +1,150 @@
+$ node scripts/release/verify-release-candidate-workflow.mjs && node --test scripts/release/verify-release-candidate-workflow.test.mjs scripts/release/verify-release-metadata.test.mjs scripts/release/release-artifact-volume-layout.test.mjs
+RELEASE_CANDIDATE_WORKFLOW_OK .github/workflows/release-candidate.yml
+TAP version 13
+# Subtest: release fixtures use Docker-managed volumes instead of host credential bind mounts
+ok 1 - release fixtures use Docker-managed volumes instead of host credential bind mounts
+  ---
+  duration_ms: 0.897923
+  type: 'test'
+  ...
+# Subtest: release smoke copies fixtures into managed volumes with restrictive modes
+ok 2 - release smoke copies fixtures into managed volumes with restrictive modes
+  ---
+  duration_ms: 0.974508
+  type: 'test'
+  ...
+# Subtest: release smoke materializes dependencies and starts the exact extracted runtime through PM2
+ok 3 - release smoke materializes dependencies and starts the exact extracted runtime through PM2
+  ---
+  duration_ms: 0.333863
+  type: 'test'
+  ...
+# Subtest: release PMS Web uses the same-origin Console API proxy
+ok 4 - release PMS Web uses the same-origin Console API proxy
+  ---
+  duration_ms: 0.189376
+  type: 'test'
+  ...
+# Subtest: Runtime image verification records size without enforcing a fixed ceiling
+ok 5 - Runtime image verification records size without enforcing a fixed ceiling
+  ---
+  duration_ms: 0.216678
+  type: 'test'
+  ...
+# Subtest: accepts the exact release candidate workflow
+ok 6 - accepts the exact release candidate workflow
+  ---
+  duration_ms: 2.480629
+  type: 'test'
+  ...
+# Subtest: candidate qualification cannot automatically run on development PRs or pushes
+ok 7 - candidate qualification cannot automatically run on development PRs or pushes
+  ---
+  duration_ms: 0.618165
+  type: 'test'
+  ...
+# Subtest: development CI retains quality gates and makes production suites opt-in
+ok 8 - development CI retains quality gates and makes production suites opt-in
+  ---
+  duration_ms: 0.401072
+  type: 'test'
+  ...
+# Subtest: accepts a CRLF workflow without changing its semantics
+ok 9 - accepts a CRLF workflow without changing its semantics
+  ---
+  duration_ms: 0.337212
+  type: 'test'
+  ...
+# Subtest: rejects a missing required job
+ok 10 - rejects a missing required job
+  ---
+  duration_ms: 0.387596
+  type: 'test'
+  ...
+# Subtest: rejects a checkout that can drift from the candidate
+ok 11 - rejects a checkout that can drift from the candidate
+  ---
+  duration_ms: 0.305752
+  type: 'test'
+  ...
+# Subtest: rejects an incomplete metadata dependency graph
+ok 12 - rejects an incomplete metadata dependency graph
+  ---
+  duration_ms: 0.42072
+  type: 'test'
+  ...
+# Subtest: requires Linux provider regression to depend on the exact-candidate Windows gate
+ok 13 - requires Linux provider regression to depend on the exact-candidate Windows gate
+  ---
+  duration_ms: 0.216968
+  type: 'test'
+  ...
+# Subtest: rejects publication from qualification
+ok 14 - rejects publication from qualification
+  ---
+  duration_ms: 0.455524
+  type: 'test'
+  ...
+# Subtest: rejects a qualified SHA that does not exist
+ok 15 - rejects a qualified SHA that does not exist
+  ---
+  duration_ms: 1.126769
+  type: 'test'
+  ...
+# Subtest: rejects a qualified SHA that is not an ancestor
+ok 16 - rejects a qualified SHA that is not an ancestor
+  ---
+  duration_ms: 0.198039
+  type: 'test'
+  ...
+# Subtest: rejects a failed CI conclusion presented as qualification
+ok 17 - rejects a failed CI conclusion presented as qualification
+  ---
+  duration_ms: 0.328358
+  type: 'test'
+  ...
+# Subtest: rejects a missing or mismatched qualified source SHA
+ok 18 - rejects a missing or mismatched qualified source SHA
+  ---
+  duration_ms: 0.185154
+  type: 'test'
+  ...
+# Subtest: rejects missing Candidate jobs
+ok 19 - rejects missing Candidate jobs
+  ---
+  duration_ms: 0.26395
+  type: 'test'
+  ...
+# Subtest: rejects a failed Candidate job
+ok 20 - rejects a failed Candidate job
+  ---
+  duration_ms: 0.203884
+  type: 'test'
+  ...
+# Subtest: rejects an artifact report from a different SHA or without digests
+ok 21 - rejects an artifact report from a different SHA or without digests
+  ---
+  duration_ms: 0.29025
+  type: 'test'
+  ...
+# Subtest: rejects product changes after source qualification
+ok 22 - rejects product changes after source qualification
+  ---
+  duration_ms: 0.509057
+  type: 'test'
+  ...
+# Subtest: accepts only release allowlist changes after qualification
+ok 23 - accepts only release allowlist changes after qualification
+  ---
+  duration_ms: 0.353633
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 89.776258

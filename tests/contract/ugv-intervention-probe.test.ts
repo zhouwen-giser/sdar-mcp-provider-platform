@@ -53,9 +53,14 @@ interface FixtureOptions {
   optimisticReceipt?: boolean;
   taskStatus?: string;
   wrongRpcId?: boolean;
+  omitSceneIdentity?: boolean;
 }
 
 function fixture(methods: string[], options: FixtureOptions = {}): typeof fetch {
+  const actualIdentity = {
+    ...identity,
+    ...(options.omitSceneIdentity ? { simulationId: undefined } : {}),
+  };
   let written = false;
   let polls = 0;
   return async (_url, init) => {
@@ -79,7 +84,7 @@ function fixture(methods: string[], options: FixtureOptions = {}): typeof fetch 
       const applied = state === "applied";
       const route = TaskArtifactSchema.parse({
         ...catalog.artifacts.find((item) => item.artifactId === "route-line"),
-        identity,
+        identity: actualIdentity,
         revision: applied ? 2 : 1,
         properties: {
           adoption: options.candidateRoute && applied ? "candidate" : "adopted",
@@ -94,6 +99,7 @@ function fixture(methods: string[], options: FixtureOptions = {}): typeof fetch 
       };
       const entry = RuntimeInterventionSchema.parse({
         ...offered,
+        identity: actualIdentity,
         state,
         revision: !written ? 1 : applied || state === "failed" ? 4 : 2,
         ...(written
@@ -114,7 +120,7 @@ function fixture(methods: string[], options: FixtureOptions = {}): typeof fetch 
       };
       const context = TaskBusinessContextSchema.parse({
         ...catalog.context,
-        identity,
+        identity: actualIdentity,
         contextRevision: written ? 6 + polls : 4,
         effectivePlanRevision: applied && !options.stalePlan ? 3 : 2,
         activeRefs: {
@@ -241,6 +247,30 @@ describe("explicit UGV navigation intervention probe (synthetic public fixture)"
       results: [{ value: { artifactType: "navigation.route", revision: 2 } }],
     });
     expect(JSON.stringify(lines)).not.toContain("test-token");
+  });
+
+  it("authorizes the scene in HTTP headers when optional public identity metadata is absent", async () => {
+    const methods: string[] = [];
+    const lines: Record<string, unknown>[] = [];
+    const delegate = fixture(methods, { omitSceneIdentity: true });
+    await runUgvInterventionProbe({
+      manifest,
+      bearerToken: "test-token",
+      fetchImpl: (url, init) => {
+        const headers = new Headers(init?.headers);
+        expect(headers.get("x-sdar-execution-mode")).toBe("simulation");
+        expect(headers.get("x-sdar-simulation-id")).toBe(manifest.sceneInstanceId);
+        return delegate(url, init);
+      },
+      now: () => new Date("2026-09-28T00:00:00Z"),
+      wait: async () => {
+        await Promise.resolve();
+      },
+      emit: (line) => {
+        lines.push(line);
+      },
+    });
+    expect(lines.at(-1)?.type).toBe("businessAppliedConfirmed");
   });
 
   for (const [options, reason] of [

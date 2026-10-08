@@ -150,6 +150,41 @@ export class BusinessEventRepository {
     sources: BusinessEventSourceDefinition[],
     generationRetentionMs: number,
   ): Promise<BusinessEventGeneration> {
+    const generation = await this.initializeProviderGeneration(
+      providerId,
+      sources,
+      generationRetentionMs,
+    );
+    const roster = await this.sourceRoster(providerId, generation.streamId);
+    const desired = [...sources].sort((left, right) => compareText(left.sourceId, right.sourceId));
+    if (canonicalSha256(roster) === canonicalSha256(desired)) return generation;
+    // An upgraded manifest may add durable business feedback to an existing
+    // provider. Preserve the old replay boundary and register the new sources
+    // through the same atomic rotation used for explicit roster changes.
+    await this.rotateStream(
+      providerId,
+      "SOURCE_ROSTER_CHANGED",
+      [...new Set([...roster, ...desired].map((source) => source.sourceId))]
+        .filter((id) => {
+          const previous = roster.find((source) => source.sourceId === id);
+          const next = desired.find((source) => source.sourceId === id);
+          return !previous || !next || canonicalSha256(previous) !== canonicalSha256(next);
+        })
+        .sort(compareText),
+      `initialize:${generation.streamId}:${canonicalSha256(desired)}`,
+      generationRetentionMs,
+      desired,
+    );
+    const current = await this.currentGeneration(providerId);
+    if (!current) throw new Error("BUSINESS_EVENT_NOT_FOUND");
+    return current;
+  }
+
+  private async initializeProviderGeneration(
+    providerId: string,
+    sources: BusinessEventSourceDefinition[],
+    generationRetentionMs: number,
+  ): Promise<BusinessEventGeneration> {
     if (sources.length < 1 || sources.length > 16)
       throw new Error("BUSINESS_EVENT_SOURCE_COUNT_INVALID");
     const client = await this.pool.connect();
@@ -630,6 +665,7 @@ export class BusinessEventRepository {
         `SELECT * FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY normalized_source_sequence NULLS FIRST, inbox_id
          LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, state.source_stream_id],
@@ -748,6 +784,23 @@ export class BusinessEventRepository {
     }
   }
 
+  async terminalSourceBarrierId(
+    providerId: string,
+    sourceId: string,
+    sourceStreamId: string,
+  ): Promise<string | undefined> {
+    const result = await this.pool.query<{ inbox_id: string }>(
+      `SELECT inbox_id::text FROM adapter_business_event_inbox
+       WHERE (${scopePredicate(this.pool, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND (
+         provider_id=$1 AND source_id=$2 AND source_stream_id=$3
+         AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+         AND finalized_at IS NULL
+       ) ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1`,
+      [providerId, sourceId, sourceStreamId],
+    );
+    return result.rows[0]?.inbox_id;
+  }
+
   async finalizeNextSourceEvent(
     providerId: string,
     sourceId: string,
@@ -784,6 +837,7 @@ export class BusinessEventRepository {
         `SELECT * FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=$2 AND source_stream_id=$3
            AND status IN ('received','pending_mapping','ready','continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY normalized_source_sequence NULLS FIRST,inbox_id LIMIT 1 FOR UPDATE`,
         [providerId, sourceId, sourceState.source_stream_id],
       );
@@ -989,6 +1043,7 @@ export class BusinessEventRepository {
         `SELECT inbox_id FROM adapter_business_event_inbox
          WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
            AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL
          ) ORDER BY source_id,normalized_source_sequence NULLS FIRST,inbox_id FOR UPDATE`,
         [providerId, normalizedAffectedSourceIds],
       );
@@ -1100,13 +1155,16 @@ export class BusinessEventRepository {
           generationRetentionMs,
         ],
       );
+      // Rejected payloads may violate the decoded-event constraints. Preserve
+      // their rejection and immutable evidence, and close only their barrier.
+      // Never rewrite already published or finalized rows during rotation.
       await client.query(
         `UPDATE adapter_business_event_inbox
-         SET status=CASE WHEN status IN ('continuity_loss_pending','rejected','mapping_failed')
-                         THEN 'terminal_skipped' ELSE status END,
-             finalized_at=CASE WHEN status IN ('continuity_loss_pending','rejected','mapping_failed')
-                               THEN clock_timestamp() ELSE finalized_at END
-         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])) `,
+         SET status=CASE WHEN status='rejected' THEN status ELSE 'terminal_skipped' END,
+             finalized_at=clock_timestamp()
+         WHERE (${scopePredicate(client, "adapter_business_event_inbox", "adapter_business_event_inbox")}) AND ( provider_id=$1 AND source_id=ANY($2::text[])
+           AND status IN ('continuity_loss_pending','rejected','mapping_failed')
+           AND finalized_at IS NULL) `,
         [providerId, normalizedAffectedSourceIds],
       );
       const generationVersion = (BigInt(current.generation_version) + 1n).toString();

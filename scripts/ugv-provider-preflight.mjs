@@ -14,7 +14,7 @@ const startedAt = new Date().toISOString();
 const localChecks = {
   providerStore:
     (environment.UGV_ADAPTER_STORE_MODE ?? "postgres") === "postgres" ? "PASS" : "FAIL",
-  executionMode: ["simulation", "live"].includes(environment.UGV_EXECUTION_MODE ?? "simulation")
+  executionMode: ["simulation", "live"].includes(environment.UGV_EXECUTION_MODE ?? "live")
     ? "PASS"
     : "FAIL",
   mockFallback: !["true", "1"].includes(environment.UGV_DEVICE_MCP_ALLOW_MOCK_CONTRACT ?? "false")

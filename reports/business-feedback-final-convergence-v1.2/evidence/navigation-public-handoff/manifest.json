@@ -1,0 +1,138 @@
+{
+  "schema": "smpp.navigation-public-handoff/v1",
+  "createdAt": "2026-09-29T07:25:47.219814+00:00",
+  "sourceFile": "../navigation-public-restart.json",
+  "sourceSha256": "f71bbdc7e38bbbdb5967fbb385b0a7a86164ee0a9a892e5746a8dba2e24993e2",
+  "candidateSourceFingerprintSha256": "422cf1cfda8fb51fd4ad3babcd59bb5d684cf64879475ba41fea6c3799dbb6db",
+  "sourceStatus": "DIRTY_WORKTREE",
+  "runId": "2e308e87-ffc8-41ce-b627-20630b0834e6",
+  "taskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+  "sceneInstanceId": "smpp-bff-test-f286a981-3bce-417f-a71d-df662736cfc8",
+  "capturedAt": "2026-09-29T07:04:33.192Z",
+  "completedAt": "2026-09-29T07:05:38.174Z",
+  "files": [
+    {
+      "file": "stream-initial.ndjson",
+      "records": 139,
+      "sha256": "c13a4f210732d87fe2c552dcbf0301a702a0c742cba1c579bf8f49f0532be59c",
+      "description": "Actual read-only probe output in recorded order; reducer summaries and hydrated objects, not raw SSE envelopes."
+    },
+    {
+      "file": "stream-recovered.ndjson",
+      "records": 359,
+      "sha256": "781d668c81cb4ab8f04b95a4b4f5aafcfdcc601eae068376dd0c984d2d9df9c3",
+      "description": "Actual read-only probe output in recorded order; reducer summaries and hydrated objects, not raw SSE envelopes."
+    },
+    {
+      "file": "intervention-1.ndjson",
+      "records": 25,
+      "sha256": "8cdfff298d1036c3c80b42b7fe5ab85e9c02dabcd066eecfc1b379b11a4e3e50",
+      "description": "Actual public intervention probe: request preflight, Runtime receipt, Provider states, applied result and snapshot."
+    },
+    {
+      "file": "intervention-2.ndjson",
+      "records": 30,
+      "sha256": "5dd8c7801f879e1336d365709c79d6793f897b80888213f61f01792167f34f5b",
+      "description": "Actual public intervention probe: request preflight, Runtime receipt, Provider states, applied result and snapshot."
+    },
+    {
+      "file": "snapshots.ndjson",
+      "records": 5,
+      "sha256": "1a91c18cb44e01fca9f204413d0dd3e3713fef118b92fcaf24fe84f033083c6e",
+      "description": "Complete recorded probe summaries plus exact hydrated object versions. Not a reconstructed full Context wire response."
+    },
+    {
+      "file": "task-result.ndjson",
+      "records": 1,
+      "sha256": "c9da263b50d4674033258488adf407fe019f476c83383fbea87060d8269fddca",
+      "description": "Actual public tasks/result response including device completion evidence."
+    }
+  ],
+  "redaction": {
+    "policy": "Allow only public probe records and public Task result; omit internal execution, journal, process environment, auth and database connection data. Preserve public object IDs and both cursor domains.",
+    "removedFieldPaths": []
+  },
+  "verification": {
+    "status": "PASS",
+    "candidateFiles": 65,
+    "consistentExactObjectVersions": 23,
+    "appliedSseEvents": {
+      "initial": 15,
+      "recovered": 39
+    },
+    "candidateAndAdoptedRoutes": [
+      {
+        "missionId": "47564",
+        "candidateRef": {
+          "kind": "artifact",
+          "id": "route-47564",
+          "revision": 1
+        },
+        "adoptedRef": {
+          "kind": "artifact",
+          "id": "route-47564",
+          "revision": 2
+        },
+        "geometrySha256": "944e4fc9aa5cd6e1d757d8f7ac96f1b23240436f8563f6ad29a69e43e9801c5f",
+        "pointCount": 14,
+        "source": {
+          "method": "isr.airport.dashboard.road-planner/v1",
+          "producer": "device_planner",
+          "sourceRecordRef": "95bb2fd71e7e5aaf42834fd4457b0f257a35eac6f0a14c80a8193b1da235c713",
+          "sourceRevision": "1"
+        }
+      },
+      {
+        "missionId": "47565",
+        "candidateRef": {
+          "kind": "artifact",
+          "id": "route-47565",
+          "revision": 1
+        },
+        "adoptedRef": {
+          "kind": "artifact",
+          "id": "route-47565",
+          "revision": 2
+        },
+        "geometrySha256": "525d6ef6808425bbe57750765644e23ad4ce446da500c02a0f4cd6127615a6c5",
+        "pointCount": 7,
+        "source": {
+          "method": "isr.airport.dashboard.road-planner/v1",
+          "producer": "device_planner",
+          "sourceRecordRef": "0b986ddc6d92ee19baeabfccc9b3757124903387def263ee63a0419f8380ef7c",
+          "sourceRevision": "1"
+        }
+      },
+      {
+        "missionId": "47566",
+        "candidateRef": {
+          "kind": "artifact",
+          "id": "route-47566",
+          "revision": 1
+        },
+        "adoptedRef": {
+          "kind": "artifact",
+          "id": "route-47566",
+          "revision": 2
+        },
+        "geometrySha256": "5676650734f5e73ae26de51ac816c2a2318e94951655406b0685e577d465f201",
+        "pointCount": 3,
+        "source": {
+          "method": "isr.airport.dashboard.road-planner/v1",
+          "producer": "device_planner",
+          "sourceRecordRef": "5d152619d83557e7b1dbd9b22d0df747ee0a50e29a5227d5133ccbc4db318284",
+          "sourceRevision": "1"
+        }
+      }
+    ],
+    "finalDistanceM": 1.4545230713233517,
+    "restartJournalUnchanged": true
+  },
+  "limitations": [
+    "Read-only probe projections are not raw JSON-RPC/SSE transcripts.",
+    "Snapshot records contain probe summary and exact objects, not the complete original Context envelope.",
+    "V-OBS and V-INPUT have not run.",
+    "No external SDAR consumption or remote deployment is claimed.",
+    "No total ordering is inferred between separate stream, snapshot and intervention files."
+  ]
+}

@@ -1,0 +1,2 @@
+$ node --import tsx scripts/task-business/generate-core-contract.mjs --check && node --import tsx scripts/task-business/generate-fixtures.mjs --check && node scripts/task-business/check-adapter-proto-compat.mjs
+{"status":"PASS","baselineSourceSha256":"d36d49e8f6d85c5cb35e7c92fb6e66d8275c8d7cb4b97343c7f212d5c8ffc603","currentSourceSha256":"51fc10abc7fc3740d5b6dad4ea5c66996a9b95f48757bc623756ccffce5ccf89","legacyDefinitions":55,"currentDefinitions":62}

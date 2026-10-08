@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+
+ Test Files  3 passed (3)
+      Tests  35 passed (35)
+   Start at  10:47:37
+   Duration  3.42s (transform 722ms, setup 0ms, import 2.08s, tests 960ms, environment 0ms)
+

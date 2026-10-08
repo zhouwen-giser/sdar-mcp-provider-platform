@@ -117,6 +117,21 @@ describe("native PostgreSQL Intervention submission", () => {
     });
     expect(first.claimed).toBe(true);
     expect(first.events).toHaveLength(2);
+    const restartUrl = new URL(databaseUrl);
+    restartUrl.searchParams.set("options", `-c search_path=${schema}`);
+    const restartedPool = new Pool({ connectionString: restartUrl.href, max: 1 });
+    try {
+      expect(
+        (
+          await new PostgresTaskBusinessStore(restartedPool).getCommand(
+            scope,
+            first.record.commandId,
+          )
+        )?.interventionRequest,
+      ).toEqual(catalog.interventionCommand);
+    } finally {
+      await restartedPool.end();
+    }
     const current = await store.getContext(scope);
     expect(current).toMatchObject({
       contextRevision: 2,

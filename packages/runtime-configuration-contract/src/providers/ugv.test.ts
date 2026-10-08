@@ -33,7 +33,7 @@ describe("UGV Provider configuration contract", () => {
     ).toContain("ros_bridge_json");
   });
 
-  it("covers all 74 inventory fields", () => {
+  it("covers all 76 inventory fields, including navigation planner configuration", () => {
     const inventory = JSON.parse(
       readFileSync(
         new URL("../../../../docs/configuration/CONFIG_INVENTORY.json", import.meta.url),
@@ -48,7 +48,7 @@ describe("UGV Provider configuration contract", () => {
       .map(({ path }) => path.slice(1))
       .sort();
 
-    expect(actual).toHaveLength(74);
+    expect(actual).toHaveLength(76);
     expect(actual).toEqual(expected);
   });
 

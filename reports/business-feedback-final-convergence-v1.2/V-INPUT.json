@@ -1,0 +1,95 @@
+{
+  "workflow": "V-INPUT",
+  "status": "REAL_PUBLIC_RUNTIME_PASS",
+  "realQualification": true,
+  "scope": "Local production Provider/Runtime, complete isolated GOWM app-role storage, actual software simulator; not deployment or external SDAR qualification",
+  "reasonCode": "RECON_INFERRED_CURRENT_EXECUTION_REAL_PASS",
+  "scopeDecision": "SMPP only; no isr-simulation repository changes; fire stays disabled.",
+  "required": "Public Runtime pending RequiredInput and input_required; trusted continue_observation plus decline or cancel; real subsequent observations and recovery. Expiry covered by automation.",
+  "acceptedCorrelations": ["STRICT_CORRELATED", "INFERRED_CURRENT_EXECUTION"],
+  "observedCorrelation": "INFERRED_CURRENT_EXECUTION",
+  "sourceIdentityExternalBlocker": false,
+  "updatedAt": "2026-09-30T02:46:11.972811+00:00",
+  "sourceCheckScope": "Full public Context/SSE and trusted user input, plus independent read-only device observations.",
+  "evidence": [
+    "evidence/recon-public-attempt-17.json",
+    "evidence/recon-public-attempt-17.txt",
+    "evidence/recon-public-replay.json",
+    "evidence/recon-public-replay-negative.json",
+    "evidence/recon-public-handoff/manifest.json",
+    "RECON_SUPPLEMENT.md"
+  ],
+  "latestAttempt": "evidence/recon-public-attempt-17.json",
+  "pendingEnvironment": null,
+  "fireEnabled": false,
+  "runs": [
+    {
+      "taskId": "a3c0a208-ef97-459f-afee-0dc346941d7c",
+      "executionId": "vehicle:qualification-b:eo:6a064de7-83ad-497a-9414-b43b5b8a43d2",
+      "missionId": "35668",
+      "decision": "continue_observation",
+      "targetId": "9",
+      "correlation": "INFERRED_CURRENT_EXECUTION",
+      "runtimeInputStatus": "input_required",
+      "providerRecoveredState": "RUNNING",
+      "deviceAfterDecision": {
+        "status": 8,
+        "lock": {
+          "stage": 3,
+          "target_id": 9,
+          "role_name": "soldier_1",
+          "duration_sec": 10
+        }
+      },
+      "finalTaskStatus": "cancelled"
+    },
+    {
+      "taskId": "2b9a9455-92f8-4c80-8931-de92f318c82f",
+      "executionId": "vehicle:qualification-b:eo:a129935e-c480-415f-8993-5f2ce1183b1c",
+      "missionId": "35669",
+      "decision": "decline",
+      "targetId": "9",
+      "correlation": "INFERRED_CURRENT_EXECUTION",
+      "runtimeInputStatus": "input_required",
+      "providerRecoveredState": "RUNNING",
+      "deviceAfterDecision": {
+        "status": 5,
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        }
+      },
+      "finalTaskStatus": "cancelled"
+    }
+  ],
+  "finalDeviceStatus": {
+    "status": 9,
+    "load_status": 2,
+    "lock": {
+      "stage": 1,
+      "target_id": 0,
+      "role_name": "",
+      "duration_sec": 0
+    }
+  },
+  "history": {
+    "priorStatus": "MUST_RUN",
+    "priorLatestAttempt": "evidence/recon-public-attempt-4.json",
+    "sourceCleanup": {
+      "tool": "ugv_area_recon_control",
+      "cmd_type": 4,
+      "missionId": 47567,
+      "observedStatus": 9,
+      "lockStage": 1
+    },
+    "failedAttempts": "RECON_SUPPLEMENT.md; evidence/recon-public-attempt-1..16.json"
+  },
+  "externalSdarQualified": false,
+  "mapFullQualification": {
+    "evidence": "evidence/map-full-recon.json",
+    "status": "REAL_PUBLIC_RUNTIME_PASS",
+    "fireEnabled": false
+  }
+}

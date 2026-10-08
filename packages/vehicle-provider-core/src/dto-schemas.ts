@@ -1,10 +1,15 @@
+import { UGV_BUSINESS_SEMANTICS_JSON_SCHEMA } from "./ugv-business-semantics.js";
 const dateTime = { type: "string", format: "date-time" } as const;
 
-export function vehicleStateV1Schema(resourceId: string): Record<string, unknown> {
+export function vehicleStateV1Schema(
+  resourceId: string,
+  businessSemantics = false,
+): Record<string, unknown> {
   return {
     title: "VehicleStateV1",
     type: "object",
     properties: {
+      ...(businessSemantics ? { businessSemantics: UGV_BUSINESS_SEMANTICS_JSON_SCHEMA } : {}),
       identity: {
         type: "object",
         properties: {

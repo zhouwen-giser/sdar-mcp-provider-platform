@@ -1,0 +1,641 @@
+{
+  "schema": "smpp.recon-load-diagnosis/v1",
+  "startedAt": "2026-09-30T01:10:24.971Z",
+  "reads": [
+    {
+      "at": "2026-09-30T01:10:25.095Z",
+      "name": "ugv_area_recon_get_status",
+      "value": {
+        "status": 1,
+        "status_label": "空闲",
+        "scan_mode": 1,
+        "scan_mode_label": "区域侦察",
+        "scan_pitch": 0,
+        "out_of_range": false,
+        "scan_num": 0,
+        "progress": 0,
+        "coverage": 0,
+        "coverage_covered": 0,
+        "coverage_total": 0,
+        "coverage_incomplete": false,
+        "coverage_reason": "",
+        "eo_fov": 120,
+        "camera_fault": false,
+        "work_mode": 1,
+        "recon_type": 1,
+        "load_status": 4,
+        "load_status_label": "故障",
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        },
+        "attack_ready": false,
+        "last_cmd_ack": {
+          "seq": 600995,
+          "ok": true,
+          "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+          "data": {
+            "coverability": {
+              "coverable": "unknown",
+              "coverable_label": "未预检(机位不可用)",
+              "region_min_dist_m": null,
+              "region_max_dist_m": null,
+              "detection_range_m": 140
+            }
+          }
+        },
+        "region": null,
+        "online": true,
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T01:10:25.101Z",
+      "name": "get_status",
+      "value": {
+        "vehicle_id": 15,
+        "role_name": "ugv",
+        "entity_id": "ugv",
+        "position": {
+          "x": -340.18,
+          "y": 109.45,
+          "z": 0.05
+        },
+        "speed_kmh": 0,
+        "control": {
+          "throttle": 0,
+          "steer": 0,
+          "brake": 1,
+          "reverse": false
+        },
+        "mobility_blocked": false,
+        "mobility_status": 0,
+        "mobility_state_label": "正常",
+        "stamp": {
+          "sec": 1790730625,
+          "nanosec": 82110695
+        },
+        "lvbattery_soc": 97.83525085449219,
+        "hvbattery1_soc": 97.83525085449219,
+        "hvbattery2_soc": 97.83525085449219,
+        "fuel1": 97.83525085449219,
+        "fuel2": 97.83525085449219,
+        "motor_temp": 40.000000000000085,
+        "engine_water_temp": 70.00000000000017,
+        "ready_status": 1,
+        "gear_status": 0,
+        "veh_speed": 0,
+        "brake_status": 1,
+        "emergency_stop_status": 0,
+        "heading": 89.99998474121094,
+        "roll": -0.0017700179014354944,
+        "pitch": -0.01441169809550047,
+        "ins_init": 3,
+        "gnss": 1,
+        "location_status": 4,
+        "power_supply_status": 2,
+        "operate_mode_status": 2,
+        "fault": 0,
+        "ping_status": 1,
+        "packet_loss_rate": 0,
+        "average_round_trip_time": 20,
+        "chassis_task": {
+          "id": -1,
+          "type": -1,
+          "state": 0,
+          "progress": -1
+        },
+        "eo_task": {
+          "id": 21,
+          "type": -1,
+          "state": 4,
+          "progress": 100
+        },
+        "weapon_task": {
+          "id": -1,
+          "type": -1,
+          "state": 0,
+          "progress": -1
+        },
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T01:10:28.108Z",
+      "name": "ugv_area_recon_get_status",
+      "value": {
+        "status": 1,
+        "status_label": "空闲",
+        "scan_mode": 1,
+        "scan_mode_label": "区域侦察",
+        "scan_pitch": 0,
+        "out_of_range": false,
+        "scan_num": 0,
+        "progress": 0,
+        "coverage": 0,
+        "coverage_covered": 0,
+        "coverage_total": 0,
+        "coverage_incomplete": false,
+        "coverage_reason": "",
+        "eo_fov": 120,
+        "camera_fault": false,
+        "work_mode": 1,
+        "recon_type": 1,
+        "load_status": 4,
+        "load_status_label": "故障",
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        },
+        "attack_ready": false,
+        "last_cmd_ack": {
+          "seq": 600995,
+          "ok": true,
+          "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+          "data": {
+            "coverability": {
+              "coverable": "unknown",
+              "coverable_label": "未预检(机位不可用)",
+              "region_min_dist_m": null,
+              "region_max_dist_m": null,
+              "detection_range_m": 140
+            }
+          }
+        },
+        "region": null,
+        "online": true,
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T01:10:28.114Z",
+      "name": "get_status",
+      "value": {
+        "vehicle_id": 15,
+        "role_name": "ugv",
+        "entity_id": "ugv",
+        "position": {
+          "x": -340.18,
+          "y": 109.45,
+          "z": 0.05
+        },
+        "speed_kmh": 0,
+        "control": {
+          "throttle": 0,
+          "steer": 0,
+          "brake": 1,
+          "reverse": false
+        },
+        "mobility_blocked": false,
+        "mobility_status": 0,
+        "mobility_state_label": "正常",
+        "stamp": {
+          "sec": 1790730628,
+          "nanosec": 82152457
+        },
+        "lvbattery_soc": 97.83525085449219,
+        "hvbattery1_soc": 97.83525085449219,
+        "hvbattery2_soc": 97.83525085449219,
+        "fuel1": 97.83525085449219,
+        "fuel2": 97.83525085449219,
+        "motor_temp": 40.000000000000085,
+        "engine_water_temp": 70.00000000000017,
+        "ready_status": 1,
+        "gear_status": 0,
+        "veh_speed": 0,
+        "brake_status": 1,
+        "emergency_stop_status": 0,
+        "heading": 89.99998474121094,
+        "roll": -0.0017700179014354944,
+        "pitch": -0.01441169809550047,
+        "ins_init": 3,
+        "gnss": 1,
+        "location_status": 4,
+        "power_supply_status": 2,
+        "operate_mode_status": 2,
+        "fault": 0,
+        "ping_status": 1,
+        "packet_loss_rate": 0,
+        "average_round_trip_time": 20,
+        "chassis_task": {
+          "id": -1,
+          "type": -1,
+          "state": 0,
+          "progress": -1
+        },
+        "eo_task": {
+          "id": 21,
+          "type": -1,
+          "state": 4,
+          "progress": 100
+        },
+        "weapon_task": {
+          "id": -1,
+          "type": -1,
+          "state": 0,
+          "progress": -1
+        },
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    }
+  ],
+  "mqtt": {
+    "/ugv/area_recon/status": {
+      "count": 62,
+      "samples": [
+        {
+          "receivedAt": "2026-09-30T01:10:25.074Z",
+          "retained": false,
+          "payload": {
+            "status": 1,
+            "status_label": "空闲",
+            "scan_mode": 1,
+            "scan_mode_label": "区域侦察",
+            "scan_pitch": 0,
+            "out_of_range": false,
+            "scan_num": 0,
+            "progress": 0,
+            "coverage": 0,
+            "coverage_covered": 0,
+            "coverage_total": 0,
+            "coverage_incomplete": false,
+            "coverage_reason": "",
+            "eo_fov": 120,
+            "camera_fault": false,
+            "work_mode": 1,
+            "recon_type": 1,
+            "load_status": 4,
+            "load_status_label": "故障",
+            "lock": {
+              "stage": 1,
+              "target_id": 0,
+              "role_name": "",
+              "duration_sec": 0
+            },
+            "attack_ready": false,
+            "last_cmd_ack": {
+              "seq": 600995,
+              "ok": true,
+              "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+              "data": {
+                "coverability": {
+                  "coverable": "unknown",
+                  "coverable_label": "未预检(机位不可用)",
+                  "region_min_dist_m": null,
+                  "region_max_dist_m": null,
+                  "detection_range_m": 140
+                }
+              }
+            },
+            "region": null
+          }
+        },
+        {
+          "receivedAt": "2026-09-30T01:10:25.092Z",
+          "retained": false,
+          "payload": {
+            "status": 1,
+            "status_label": "空闲",
+            "scan_mode": 1,
+            "scan_mode_label": "区域侦察",
+            "scan_pitch": 0,
+            "out_of_range": false,
+            "scan_num": 0,
+            "progress": 0,
+            "coverage": 0,
+            "coverage_covered": 0,
+            "coverage_total": 0,
+            "coverage_incomplete": false,
+            "coverage_reason": "",
+            "eo_fov": 120,
+            "camera_fault": false,
+            "work_mode": 1,
+            "recon_type": 1,
+            "load_status": 4,
+            "load_status_label": "故障",
+            "lock": {
+              "stage": 1,
+              "target_id": 0,
+              "role_name": "",
+              "duration_sec": 0
+            },
+            "attack_ready": false,
+            "last_cmd_ack": {
+              "seq": 600995,
+              "ok": true,
+              "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+              "data": {
+                "coverability": {
+                  "coverable": "unknown",
+                  "coverable_label": "未预检(机位不可用)",
+                  "region_min_dist_m": null,
+                  "region_max_dist_m": null,
+                  "detection_range_m": 140
+                }
+              }
+            },
+            "region": null
+          }
+        }
+      ],
+      "last": {
+        "receivedAt": "2026-09-30T01:10:28.092Z",
+        "retained": false,
+        "payload": {
+          "status": 1,
+          "status_label": "空闲",
+          "scan_mode": 1,
+          "scan_mode_label": "区域侦察",
+          "scan_pitch": 0,
+          "out_of_range": false,
+          "scan_num": 0,
+          "progress": 0,
+          "coverage": 0,
+          "coverage_covered": 0,
+          "coverage_total": 0,
+          "coverage_incomplete": false,
+          "coverage_reason": "",
+          "eo_fov": 120,
+          "camera_fault": false,
+          "work_mode": 1,
+          "recon_type": 1,
+          "load_status": 4,
+          "load_status_label": "故障",
+          "lock": {
+            "stage": 1,
+            "target_id": 0,
+            "role_name": "",
+            "duration_sec": 0
+          },
+          "attack_ready": false,
+          "last_cmd_ack": {
+            "seq": 600995,
+            "ok": true,
+            "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+            "data": {
+              "coverability": {
+                "coverable": "unknown",
+                "coverable_label": "未预检(机位不可用)",
+                "region_min_dist_m": null,
+                "region_max_dist_m": null,
+                "detection_range_m": 140
+              }
+            }
+          },
+          "region": null
+        }
+      }
+    },
+    "/ugv/status": {
+      "count": 16,
+      "samples": [
+        {
+          "receivedAt": "2026-09-30T01:10:25.082Z",
+          "retained": false,
+          "payload": {
+            "vehicle_id": 15,
+            "role_name": "ugv",
+            "entity_id": "ugv",
+            "position": {
+              "x": -340.18,
+              "y": 109.45,
+              "z": 0.05
+            },
+            "speed_kmh": 0,
+            "control": {
+              "throttle": 0,
+              "steer": 0,
+              "brake": 1,
+              "reverse": false
+            },
+            "mobility_blocked": false,
+            "mobility_status": 0,
+            "mobility_state_label": "正常",
+            "stamp": {
+              "sec": 1790730625,
+              "nanosec": 82110695
+            },
+            "lvbattery_soc": 97.83525085449219,
+            "hvbattery1_soc": 97.83525085449219,
+            "hvbattery2_soc": 97.83525085449219,
+            "fuel1": 97.83525085449219,
+            "fuel2": 97.83525085449219,
+            "motor_temp": 40.000000000000085,
+            "engine_water_temp": 70.00000000000017,
+            "ready_status": 1,
+            "gear_status": 0,
+            "veh_speed": 0,
+            "brake_status": 1,
+            "emergency_stop_status": 0,
+            "heading": 89.99998474121094,
+            "roll": -0.0017700179014354944,
+            "pitch": -0.01441169809550047,
+            "ins_init": 3,
+            "gnss": 1,
+            "location_status": 4,
+            "power_supply_status": 2,
+            "operate_mode_status": 2,
+            "fault": 0,
+            "ping_status": 1,
+            "packet_loss_rate": 0,
+            "average_round_trip_time": 20,
+            "chassis_task": {
+              "id": -1,
+              "type": -1,
+              "state": 0,
+              "progress": -1
+            },
+            "eo_task": {
+              "id": 21,
+              "type": -1,
+              "state": 4,
+              "progress": 100
+            },
+            "weapon_task": {
+              "id": -1,
+              "type": -1,
+              "state": 0,
+              "progress": -1
+            },
+            "gimbal": {
+              "yaw": 0,
+              "pitch": 0,
+              "zoom": 1
+            }
+          }
+        },
+        {
+          "receivedAt": "2026-09-30T01:10:25.282Z",
+          "retained": false,
+          "payload": {
+            "vehicle_id": 15,
+            "role_name": "ugv",
+            "entity_id": "ugv",
+            "position": {
+              "x": -340.18,
+              "y": 109.45,
+              "z": 0.05
+            },
+            "speed_kmh": 0,
+            "control": {
+              "throttle": 0,
+              "steer": 0,
+              "brake": 1,
+              "reverse": false
+            },
+            "mobility_blocked": false,
+            "mobility_status": 0,
+            "mobility_state_label": "正常",
+            "stamp": {
+              "sec": 1790730625,
+              "nanosec": 282277228
+            },
+            "lvbattery_soc": 97.83525085449219,
+            "hvbattery1_soc": 97.83525085449219,
+            "hvbattery2_soc": 97.83525085449219,
+            "fuel1": 97.83525085449219,
+            "fuel2": 97.83525085449219,
+            "motor_temp": 40.000000000000085,
+            "engine_water_temp": 70.00000000000017,
+            "ready_status": 1,
+            "gear_status": 0,
+            "veh_speed": 0,
+            "brake_status": 1,
+            "emergency_stop_status": 0,
+            "heading": 89.99998474121094,
+            "roll": -0.0017700179014354944,
+            "pitch": -0.01441169809550047,
+            "ins_init": 3,
+            "gnss": 1,
+            "location_status": 4,
+            "power_supply_status": 2,
+            "operate_mode_status": 2,
+            "fault": 0,
+            "ping_status": 1,
+            "packet_loss_rate": 0,
+            "average_round_trip_time": 20,
+            "chassis_task": {
+              "id": -1,
+              "type": -1,
+              "state": 0,
+              "progress": -1
+            },
+            "eo_task": {
+              "id": 21,
+              "type": -1,
+              "state": 4,
+              "progress": 100
+            },
+            "weapon_task": {
+              "id": -1,
+              "type": -1,
+              "state": 0,
+              "progress": -1
+            },
+            "gimbal": {
+              "yaw": 0,
+              "pitch": 0,
+              "zoom": 1
+            }
+          }
+        }
+      ],
+      "last": {
+        "receivedAt": "2026-09-30T01:10:28.080Z",
+        "retained": false,
+        "payload": {
+          "vehicle_id": 15,
+          "role_name": "ugv",
+          "entity_id": "ugv",
+          "position": {
+            "x": -340.18,
+            "y": 109.45,
+            "z": 0.05
+          },
+          "speed_kmh": 0,
+          "control": {
+            "throttle": 0,
+            "steer": 0,
+            "brake": 1,
+            "reverse": false
+          },
+          "mobility_blocked": false,
+          "mobility_status": 0,
+          "mobility_state_label": "正常",
+          "stamp": {
+            "sec": 1790730628,
+            "nanosec": 82152457
+          },
+          "lvbattery_soc": 97.83525085449219,
+          "hvbattery1_soc": 97.83525085449219,
+          "hvbattery2_soc": 97.83525085449219,
+          "fuel1": 97.83525085449219,
+          "fuel2": 97.83525085449219,
+          "motor_temp": 40.000000000000085,
+          "engine_water_temp": 70.00000000000017,
+          "ready_status": 1,
+          "gear_status": 0,
+          "veh_speed": 0,
+          "brake_status": 1,
+          "emergency_stop_status": 0,
+          "heading": 89.99998474121094,
+          "roll": -0.0017700179014354944,
+          "pitch": -0.01441169809550047,
+          "ins_init": 3,
+          "gnss": 1,
+          "location_status": 4,
+          "power_supply_status": 2,
+          "operate_mode_status": 2,
+          "fault": 0,
+          "ping_status": 1,
+          "packet_loss_rate": 0,
+          "average_round_trip_time": 20,
+          "chassis_task": {
+            "id": -1,
+            "type": -1,
+            "state": 0,
+            "progress": -1
+          },
+          "eo_task": {
+            "id": 21,
+            "type": -1,
+            "state": 4,
+            "progress": 100
+          },
+          "weapon_task": {
+            "id": -1,
+            "type": -1,
+            "state": 0,
+            "progress": -1
+          },
+          "gimbal": {
+            "yaw": 0,
+            "pitch": 0,
+            "zoom": 1
+          }
+        }
+      }
+    }
+  },
+  "completedAt": "2026-09-30T01:10:28.119Z"
+}

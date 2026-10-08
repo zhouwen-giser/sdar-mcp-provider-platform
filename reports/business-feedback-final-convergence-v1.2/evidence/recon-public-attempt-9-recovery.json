@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-30T02:19:06.049Z",
+  "source": "/tmp/bff-recon-public-9.json",
+  "executions": [
+    {
+      "taskId": "d5082529-ac5f-4589-8c67-729c01c6c2e7",
+      "state": "CANCELLED",
+      "reasonCode": "UGV_RECON_TERMINATED",
+      "revision": 24
+    }
+  ],
+  "active": 0
+}
