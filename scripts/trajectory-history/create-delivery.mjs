@@ -80,6 +80,7 @@ const requiredRuns = [
   "m3-history-path-",
   "m3-ugv-task-business-",
   "m3-public-intake-",
+  "m3-ugv-image-open-",
 ].map((prefix) => {
   const passed = runs
     .filter((run) => run.run.startsWith(prefix) && run.exitCode === 0 && run.matchesFrozenSource)
@@ -99,7 +100,7 @@ for (const item of baseline.baselineFrozenAssets) {
   assert.equal(digest(git("show", baseline.baselineCommit + ":" + item.path)), item.sha256);
   assert.equal(digest(readFileSync(item.path)), item.sha256, item.path);
 }
-const [completeGate, history, taskBusinessGate, intakeGate] = requiredRuns;
+const [completeGate, history, taskBusinessGate, intakeGate, imageGate] = requiredRuns;
 const test = (name) => "tests/" + name + ".test.ts";
 const claims = [
   {
@@ -172,7 +173,7 @@ const claims = [
   {
     id: "forward-owner-installation-and-isolation",
     status: "PASS",
-    evidence: [history, taskBusinessGate],
+    evidence: [history, taskBusinessGate, imageGate],
     tests: [
       test("integration/trajectory-history-gowm-postgres"),
       test("integration/trajectory-history-full-gowm"),
@@ -267,7 +268,7 @@ const acceptance = {
 writeFileSync(reportRoot + "/ACCEPTANCE.json", JSON.stringify(acceptance, null, 2) + "\n");
 writeFileSync(
   reportRoot + "/ACCEPTANCE.md",
-  `# 轨迹接收时间与历史证明验收\n\n源码：\`${sourceCommit}\`。本地隔离验收通过；真实设备、现场操作、SDAR 实际互通和 19100 部署为 NOT_RUN。\n\n最终四项门禁均使用相同源码输入，exit 0，运行期间源码未改变：\n\n${requiredRuns.map((name) => "- " + name).join("\n")}\n\n提供实际 MQTT 接收时间、独立数据库记录时间、只读版本化 MCP、签名有限保留范围、稳定分页及原子坐标侧车。完整保留范围不表示物理回调全捕获，也不表示设备应产生的全部历史完整。后两者保持 unknown。\n\nSDK、schema、例子和迁移说明见 contracts/ugv-trajectory-history/v1/README.md。详细逐项保证、测试路径、所有成功与失败命令、精确源码输入及原始日志 SHA-256 见 ACCEPTANCE.json。开发阶段失败未改写为通过；发生源码改变的旧门禁不作为最终证据。\n\n所有旧冻结资产 ${baseline.baselineFrozenAssets.length} 个字节不变。设备全量证明仍需可信生产者身份/epoch、认证开始结束边界、计数或连续序号与补传语义；设备采集时间还需时基与校准合同。\n`,
+  `# 轨迹接收时间与历史证明验收\n\n源码：\`${sourceCommit}\`。本地隔离验收通过；真实设备、现场操作、SDAR 实际互通和 19100 部署为 NOT_RUN。\n\n最终门禁均使用相同源码输入，exit 0，运行期间源码未改变：\n\n${requiredRuns.map((name) => "- " + name).join("\n")}\n\n提供实际 MQTT 接收时间、独立数据库记录时间、只读版本化 MCP、签名有限保留范围、稳定分页及原子坐标侧车。完整保留范围不表示物理回调全捕获，也不表示设备应产生的全部历史完整。后两者保持 unknown。\n\nSDK、schema、例子和迁移说明见 contracts/ugv-trajectory-history/v1/README.md。详细逐项保证、测试路径、所有成功与失败命令、精确源码输入及原始日志 SHA-256 见 ACCEPTANCE.json。开发阶段失败未改写为通过；发生源码改变的旧门禁不作为最终证据。\n\n所有旧冻结资产 ${baseline.baselineFrozenAssets.length} 个字节不变。设备全量证明仍需可信生产者身份/epoch、认证开始结束边界、计数或连续序号与补传语义；设备采集时间还需时基与校准合同。\n`,
 );
 const artifactRoot = path.join(root, "artifacts/trajectory-history");
 const name = "smpp-trajectory-history-" + sourceCommit.slice(0, 12);

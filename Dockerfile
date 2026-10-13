@@ -118,6 +118,7 @@ ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="SDAR Real UGV Provider Adapter" \
       org.opencontainers.image.revision="${VCS_REF}"
 COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /app/dist/apps/ugv-provider-adapter
+COPY --from=build --chown=root:root /workspace/contracts/ugv-trajectory-history/v1/gowm-storage.json /app/contracts/ugv-trajectory-history/v1/gowm-storage.json
 COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
 COPY --from=build --chown=root:root /workspace/deploy/development/server/profiles /app/profiles
 CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]
@@ -367,6 +368,8 @@ FROM runtime AS home-assistant-light-provider
 CMD ["node", "dist/apps/home-assistant-light-provider/src/main.js"]
 
 FROM runtime AS ugv-provider-adapter
+COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
+COPY --from=build --chown=root:root /workspace/contracts/ugv-trajectory-history/v1/gowm-storage.json /app/contracts/ugv-trajectory-history/v1/gowm-storage.json
 CMD ["node", "dist/apps/ugv-provider-adapter/src/main.js"]
 
 FROM runtime AS npc-tank-provider-adapter
