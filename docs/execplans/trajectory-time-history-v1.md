@@ -164,3 +164,10 @@ in ignored, temporary test configuration. Hash every delivered evidence file.
   the existing GOWM contract. A mounted image fixture verifies the actual production
   image against the isolated full GOWM with its non-bypass application role. Final
   source acceptance requires that image check and another complete same-source gate.
+- `784763c2` passed complete `m3-verify-v2-02` with exit 0, all 54 history cases,
+  the 437 local/full-GOWM UGV TaskBusiness cases, owner/deployment regressions and
+  actual production-image open. Source stayed unchanged. Archive byte auditing
+  then rejected `git archive` because existing export-ignore omitted the public
+  `.env.example`. The failure remains in `m3-package-export-ignore-01`; the exporter
+  now stages every individually verified frozen input and audits extracted bytes,
+  retaining the exact deployment template. Final source gates must pass again.

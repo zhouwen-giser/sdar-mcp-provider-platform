@@ -303,7 +303,36 @@ function gzip(file) {
   unlinkSync(file);
 }
 const sourceTar = path.join(delivery, "source.tar");
-git("archive", "--format=tar", "--output=" + sourceTar, sourceCommit, "--", ...files);
+// Git export-ignore omits the public .env.example. Export every verified frozen
+// input explicitly so the archive retains all deployment templates and exact bytes.
+const sourceStage = mkdtempSync(path.join(os.tmpdir(), "smpp-trajectory-source-stage-"));
+try {
+  for (const input of sourceInputs) {
+    const target = path.join(sourceStage, input.file);
+    mkdirSync(path.dirname(target), { recursive: true });
+    cpSync(path.join(root, input.file), target);
+    assert.equal(
+      digest(readFileSync(target)),
+      input.sha256,
+      "Source changed before archive: " + input.file,
+    );
+  }
+  execFileSync("tar", [
+    "--sort=name",
+    "--mtime=@0",
+    "--owner=0",
+    "--group=0",
+    "--numeric-owner",
+    "--format=gnu",
+    "-C",
+    sourceStage,
+    "-cf",
+    sourceTar,
+    ".",
+  ]);
+} finally {
+  rmSync(sourceStage, { recursive: true, force: true });
+}
 gzip(sourceTar);
 function inventory(folder, relative = "") {
   return readdirSync(path.join(folder, relative))
