@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "resourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "historyVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "fromSequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,18})$"
+    },
+    "throughSequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,18})$"
+    },
+    "pageCursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16384
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 256
+    },
+    "maxPageBytes": {
+      "type": "integer",
+      "minimum": 8192,
+      "maximum": 1048576
+    }
+  },
+  "required": ["resourceId", "historyVersion"],
+  "additionalProperties": false
+}

@@ -1,0 +1,6 @@
+{
+  "schema": "gowm.trajectory-history-storage/v1",
+  "family": "UGV_PROVIDER",
+  "migrationFile": "031_trajectory_reception_history.sql",
+  "installedSha256": "2fbd6f3b929201734d04ad03f4f70202729ac7b9b8dcd2fa0843252ca24d4ddd"
+}

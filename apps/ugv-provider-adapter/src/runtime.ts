@@ -152,15 +152,30 @@ import type { BusinessSnapshotPartSelector } from "../../../packages/adapter-pro
 import type { UgvTelemetry } from "./telemetry.js";
 import { normalizeUgvCapabilities } from "./capabilities.js";
 import { UgvOperationHealthTracker } from "./operation-health.js";
+import type { TrajectoryHistoryReader } from "../../../packages/trajectory-history/src/reader.js";
+import {
+  HISTORY_QUERY_OPERATION,
+  HISTORY_EVIDENCE_OPERATION,
+  HistoryQuerySchema,
+  TrajectoryEvidenceQuerySchema,
+} from "../../../packages/trajectory-history/src/contract.js";
+import {
+  buildProjectionEvidence,
+  signProjectionEvidence,
+} from "../../../packages/trajectory-history/src/projection.js";
 import { deduplicateTargets, normalizeDeviceTargets } from "./targets.js";
 
 const OPERATIONS = new Set(Object.keys(UGV_OPERATION_TRACKS));
+OPERATIONS.add(HISTORY_QUERY_OPERATION);
+OPERATIONS.add(HISTORY_EVIDENCE_OPERATION);
 const SYNC_OPERATIONS = new Set([
   "vehicle_get_state",
   "vehicle_get_capabilities",
   "vehicle_get_payload_status",
   "vehicle_get_targets",
   "vehicle_laser_range",
+  HISTORY_QUERY_OPERATION,
+  HISTORY_EVIDENCE_OPERATION,
 ]);
 const FIRE_DISPATCH_COMMAND = "fire_dispatch";
 const FIRE_DISPATCH_SEQUENCE = "0";
@@ -294,6 +309,7 @@ export class UgvProviderRuntime {
       navigationPlanner?: NavigationPlanner;
       navigationAdjustments?: boolean;
       trajectorySampleEveryMs?: number;
+      trajectoryHistory?: TrajectoryHistoryReader;
       businessManualDecision?: {
         maxWaitMs: number;
         onExpire: RequiredInput["onExpire"];
@@ -1038,6 +1054,22 @@ export class UgvProviderRuntime {
     argumentsValue: Record<string, unknown>,
     ignoreOwnedByTaskId?: string,
   ): AvailabilityDecision {
+    if (operationName === HISTORY_QUERY_OPERATION || operationName === HISTORY_EVIDENCE_OPERATION)
+      return {
+        availability:
+          this.options.trajectoryHistory &&
+          (operationName === HISTORY_QUERY_OPERATION || this.taskBusiness)
+            ? "AVAILABLE"
+            : "DISABLED",
+        riskLevel: "LOW",
+        reasonCode:
+          this.options.trajectoryHistory &&
+          (operationName === HISTORY_QUERY_OPERATION || this.taskBusiness)
+            ? "TRAJECTORY_HISTORY_READ_AVAILABLE"
+            : "TRAJECTORY_HISTORY_NOT_ENABLED",
+        description:
+          "Read the bounded Provider retained trajectory evidence without device control.",
+      };
     if (this.#readiness.state === "NOT_READY")
       return {
         availability: "UNKNOWN",
@@ -2020,7 +2052,47 @@ export class UgvProviderRuntime {
   async #synchronous(input: StartUgvOperation) {
     const observedAt = new Date().toISOString();
     let result: Record<string, unknown>;
-    if (input.operationName === "vehicle_get_state") {
+    if (input.operationName === HISTORY_QUERY_OPERATION) {
+      if (!this.options.trajectoryHistory) throw Error("TRAJECTORY_HISTORY_NOT_ENABLED");
+      result = await this.options.trajectoryHistory.read(
+        HistoryQuerySchema.parse(input.arguments),
+        input.executionContext.authorizationContextHash,
+      );
+    } else if (input.operationName === HISTORY_EVIDENCE_OPERATION) {
+      const history = this.options.trajectoryHistory;
+      if (!history || !this.taskBusiness) throw Error("TRAJECTORY_EVIDENCE_NOT_ENABLED");
+      const query = TrajectoryEvidenceQuerySchema.parse(input.arguments);
+      const execution = await this.store.getExecution(query.taskId);
+      if (
+        execution?.externalExecutionId !== query.executionId ||
+        execution.providerId !== this.options.providerId ||
+        execution.resourceId !== query.resourceId ||
+        query.resourceId !== (this.options.resourceId ?? "vehicle:ugv1") ||
+        execution.operationName !== "vehicle_navigate" ||
+        execution.executionContext.authorizationContextHash !==
+          input.executionContext.authorizationContextHash ||
+        normalizeExecutionMode(execution.executionContext.executionMode) !==
+          normalizeExecutionMode(input.executionContext.executionMode) ||
+        execution.executionContext.simulationId !== input.executionContext.simulationId
+      )
+        throw Error("TRAJECTORY_EVIDENCE_EXECUTION_SCOPE_OR_AUTHORIZATION_MISMATCH");
+      const scope = BoundExecutionScope.fromExecution(execution);
+      const artifact = await this.taskBusiness.business.getArtifactVersion(
+        scope,
+        query.artifactId,
+        query.revision,
+      );
+      if (!artifact) throw Error("TRAJECTORY_EVIDENCE_ARTIFACT_UNAVAILABLE");
+      const stored = await this.taskBusiness.business.getTrajectoryProjectionEvidence(
+        scope,
+        query.artifactId,
+        query.revision,
+      );
+      result = signProjectionEvidence(
+        stored ?? buildProjectionEvidence(artifact),
+        history.signingKey,
+      );
+    } else if (input.operationName === "vehicle_get_state") {
       if (this.device.hasTool("get_status")) {
         const deviceStatus = await this.#callDevice("get_status", {}, input.taskId);
         const observation = normalizeMqttObservation("status/ugv", deviceStatus);
@@ -2131,6 +2203,11 @@ export class UgvProviderRuntime {
             observedAt,
             this.options.providerId,
             externalExecutionId,
+            input.operationName === HISTORY_QUERY_OPERATION
+              ? "/rangeReadFinished"
+              : input.operationName === HISTORY_EVIDENCE_OPERATION
+                ? "/evidence/artifactGeometrySha256"
+                : "/observedAt",
           ),
         ],
       },
@@ -3558,6 +3635,8 @@ export class UgvProviderRuntime {
       this.taskBusiness.notifyCommitted,
       this.options.freshness.chassis,
       this.options.trajectorySampleEveryMs ?? 1000,
+      this.options.trajectoryHistory !== undefined,
+      this.options.trajectoryHistory?.store.scope.streamId,
     ).apply(execution, {
       schemaVersion: "ugv.navigation-position-fact/1",
       missionId,
@@ -3565,6 +3644,7 @@ export class UgvProviderRuntime {
       sourceTopic: topic,
       observedAt: applied.observedAt,
       position,
+      ...(applied.receptionId ? { receptionId: applied.receptionId } : {}),
     });
   }
 
@@ -6225,6 +6305,7 @@ function synchronousEvidence(
   observedAt: string,
   providerId: string,
   externalExecutionId: string,
+  payloadRef = "/observedAt",
 ) {
   const evidenceType =
     operationName === "vehicle_get_targets"
@@ -6232,13 +6313,10 @@ function synchronousEvidence(
       : operationName === "vehicle_get_payload_status" || operationName === "vehicle_laser_range"
         ? "vehicle.payload.status"
         : "vehicle.state.observation";
-  return vehicleEvidence(
-    evidenceType,
-    observedAt,
-    "/observedAt",
-    `execution:${externalExecutionId}`,
-    [providerId, "ugv-adapter"],
-  );
+  return vehicleEvidence(evidenceType, observedAt, payloadRef, `execution:${externalExecutionId}`, [
+    providerId,
+    "ugv-adapter",
+  ]);
 }
 function fireConfirmationDecision(value: unknown): "accepted" | "declined" | "invalid" {
   if (!Array.isArray(value)) return "invalid";

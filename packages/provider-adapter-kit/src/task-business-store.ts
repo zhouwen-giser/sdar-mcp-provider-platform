@@ -35,6 +35,10 @@ import {
   type RuntimeIntervention,
 } from "../../vehicle-provider-core/src/task-business-interaction.js";
 import type { ProviderExecution } from "./types.js";
+import type {
+  ProjectionEvidence,
+  TrajectoryProjectionWrite,
+} from "../../trajectory-history/src/contract.js";
 
 /** Construct only from the already admitted Provider execution, never request JSON. */
 export class BoundExecutionScope {
@@ -721,6 +725,8 @@ export interface BusinessChangeSet {
   contents?: readonly BusinessContentWrite[];
   /** Terminal result of a previously claimed command, saved with the object changes. */
   command?: BusinessCommandRecord;
+  /** Opt-in extension; committed atomically without changing the frozen Artifact shape. */
+  trajectoryEvidence?: readonly TrajectoryProjectionWrite[];
 }
 
 export interface BusinessContentWrite {
@@ -1125,6 +1131,11 @@ export async function loadTaskBusinessSnapshotPage(
 
 /** Same observable port for Memory and the native/shared PostgreSQL implementations. */
 export interface TaskBusinessStore {
+  getTrajectoryProjectionEvidence(
+    scope: BoundExecutionScope,
+    artifactId: string,
+    revision: number,
+  ): Promise<ProjectionEvidence | undefined>;
   getContext(scope: BoundExecutionScope): Promise<TaskBusinessContext | undefined>;
   getContextSnapshot(scope: BoundExecutionScope): Promise<TaskBusinessSnapshot | undefined>;
   getContextSnapshotPage(

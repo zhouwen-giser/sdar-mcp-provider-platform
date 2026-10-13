@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "ugv.trajectory-history-page/1.0",
+  "snapshot": {
+    "manifest": {
+      "schemaVersion": "ugv.trajectory-history-manifest/1.0",
+      "scope": {
+        "providerId": "isr.vehicle.ugv.SIMULATED-example",
+        "resourceId": "vehicle:SIMULATED-example",
+        "deviceId": "SIMULATED-ugv1",
+        "deviceIdentityAuthority": "PROVIDER_RESOURCE_CONFIGURATION",
+        "streamId": "11111111-1111-4111-8111-111111111111",
+        "sourceSessionKey": "SIMULATED-example"
+      },
+      "snapshotId": "44444444-4444-4444-8444-444444444444",
+      "capturedFromSequence": "1",
+      "capturedFromRecordingTime": "2026-10-01T00:00:00.000000Z",
+      "activationClockOwner": "POSTGRESQL_STREAM_CREATION_CLOCK",
+      "guaranteedSinceHistoryVersion": "1.0",
+      "fromSequence": "1",
+      "throughSequence": "3",
+      "highWatermark": "3",
+      "retainedEntryCount": "3",
+      "expectedOrdinalCount": "3",
+      "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "terminalHash": "910e1cb08c19d133cbf00b8570bb7460eece0c05c9fe68c1c671a62d4d66a39f",
+      "chainAlgorithm": "SMPP_CANONICAL_JSON_SHA256_CHAIN_V1",
+      "ordering": "DURABLE_PROVIDER_RECEIPT_SEQUENCE",
+      "deduplication": "RECEPTIONS_NOT_COLLAPSED_INTO_DEVICE_SAMPLES",
+      "retainedHistory": {
+        "status": "complete",
+        "reasons": []
+      },
+      "providerCaptureCoverage": {
+        "status": "unknown",
+        "reasons": ["COMMITTED_RECEIPT_RANGE_NOT_ALL_PHYSICAL_CALLBACKS"]
+      },
+      "deviceGenerationHistory": {
+        "status": "unknown",
+        "reasons": ["PRODUCER_BOUNDARY_ATTESTATION_MISSING", "PRODUCER_EPOCH_NOT_ATTESTED"]
+      },
+      "legacyHistory": "NO_RETROACTIVE_RECEPTION_TIME_OR_DEVICE_COMPLETENESS_CLAIM",
+      "prunedThroughSequence": "0",
+      "recovery": {
+        "uncleanSessionCount": 0,
+        "disconnectCount": 0,
+        "captureFailureCount": 0
+      },
+      "evidenceClass": "SIMULATED"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "06e3fd8fda29bb60ab59557de61edb0aecdb231134be30e75b455f8e1b792fa9",
+      "value": "Yhdo8s907sV2Gdl6HkC_iPUXzcWf5DQtL9mTEL4fMKyYPR21bUnxnBYyX5uKaoAYbXkokgtyX1szuxFuTzzsAw"
+    }
+  },
+  "entries": [
+    {
+      "sequence": "1",
+      "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "17825bac3d5cce43deb93cbf788d59337d80eb385993f3f82d2e190fbd95ffea",
+      "receipt": {
+        "schemaVersion": "ugv.trajectory-reception/1.0",
+        "receptionId": "22222222-2222-4222-8222-000000000001",
+        "sessionId": "33333333-3333-4333-8333-333333333333",
+        "sourceTopic": "/ugv/gnss",
+        "originalMessageSha256": "dfbb9cda16160b86c8b1fef9169d91f1c281b2feff88a3fe904a687091f3336a",
+        "originalMessageBytes": 54,
+        "originalMessageReference": "mqtt-wire:sha256:dfbb9cda16160b86c8b1fef9169d91f1c281b2feff88a3fe904a687091f3336a",
+        "providerReceivedAt": {
+          "utc": "2026-10-01T00:00:00.001Z",
+          "owner": "PROVIDER_MQTT_MESSAGE_CALLBACK",
+          "clockId": "SIMULATED-example-clock",
+          "resolution": "MILLISECOND",
+          "synchronization": "UNVERIFIED",
+          "accuracyBoundMilliseconds": null,
+          "processMonotonicNanoseconds": "1000001"
+        },
+        "reportedTime": null,
+        "deviceAcquisitionTime": null,
+        "deviceClockAttribution": "NOT_ATTESTED_BY_PRODUCER_CONTRACT",
+        "sourceReportedSequence": null,
+        "sourceProducerEpoch": null,
+        "transport": {
+          "qos": 1,
+          "packetId": 1,
+          "duplicateDeliveryHint": false,
+          "retainedDelivery": false
+        },
+        "disposition": "POSITION_OBSERVATION",
+        "reasonCode": "POSITION_NORMALIZED",
+        "position": {
+          "longitude": 114.001,
+          "latitude": 30,
+          "crs": "OGC:CRS84",
+          "derivation": "VERSIONED_PROVIDER_NORMALIZER"
+        },
+        "reportedMission": null,
+        "evidenceClass": "SIMULATED",
+        "diagnostics": ["SOURCE_REPORTED_TIME_UNAVAILABLE_OR_OVER_LIMIT"]
+      },
+      "recordedAt": "2026-10-01T00:00:00.002001Z",
+      "recordingClockOwner": "POSTGRESQL_RECORD_INSERTION_CLOCK",
+      "recordingResolution": "MICROSECOND",
+      "exactTransactionCommittedAt": null
+    },
+    {
+      "sequence": "2",
+      "previousHash": "17825bac3d5cce43deb93cbf788d59337d80eb385993f3f82d2e190fbd95ffea",
+      "hash": "dc0ad9b3a0e3be32a5ae37726f4d19eac6f9f72c59206216ac201b077fc26e1c",
+      "receipt": {
+        "schemaVersion": "ugv.trajectory-reception/1.0",
+        "receptionId": "22222222-2222-4222-8222-000000000002",
+        "sessionId": "33333333-3333-4333-8333-333333333333",
+        "sourceTopic": "/ugv/gnss",
+        "originalMessageSha256": "30a2d4d5b9cb099b0c1f27145dd60ee8823f42c3453242350391b2613d6643e9",
+        "originalMessageBytes": 54,
+        "originalMessageReference": "mqtt-wire:sha256:30a2d4d5b9cb099b0c1f27145dd60ee8823f42c3453242350391b2613d6643e9",
+        "providerReceivedAt": {
+          "utc": "2026-10-01T00:00:00.001Z",
+          "owner": "PROVIDER_MQTT_MESSAGE_CALLBACK",
+          "clockId": "SIMULATED-example-clock",
+          "resolution": "MILLISECOND",
+          "synchronization": "UNVERIFIED",
+          "accuracyBoundMilliseconds": null,
+          "processMonotonicNanoseconds": "1000002"
+        },
+        "reportedTime": null,
+        "deviceAcquisitionTime": null,
+        "deviceClockAttribution": "NOT_ATTESTED_BY_PRODUCER_CONTRACT",
+        "sourceReportedSequence": null,
+        "sourceProducerEpoch": null,
+        "transport": {
+          "qos": 1,
+          "packetId": 2,
+          "duplicateDeliveryHint": false,
+          "retainedDelivery": false
+        },
+        "disposition": "POSITION_OBSERVATION",
+        "reasonCode": "POSITION_NORMALIZED",
+        "position": {
+          "longitude": 114.002,
+          "latitude": 30,
+          "crs": "OGC:CRS84",
+          "derivation": "VERSIONED_PROVIDER_NORMALIZER"
+        },
+        "reportedMission": null,
+        "evidenceClass": "SIMULATED",
+        "diagnostics": ["SOURCE_REPORTED_TIME_UNAVAILABLE_OR_OVER_LIMIT"]
+      },
+      "recordedAt": "2026-10-01T00:00:00.002002Z",
+      "recordingClockOwner": "POSTGRESQL_RECORD_INSERTION_CLOCK",
+      "recordingResolution": "MICROSECOND",
+      "exactTransactionCommittedAt": null
+    },
+    {
+      "sequence": "3",
+      "previousHash": "dc0ad9b3a0e3be32a5ae37726f4d19eac6f9f72c59206216ac201b077fc26e1c",
+      "hash": "910e1cb08c19d133cbf00b8570bb7460eece0c05c9fe68c1c671a62d4d66a39f",
+      "receipt": {
+        "schemaVersion": "ugv.trajectory-reception/1.0",
+        "receptionId": "22222222-2222-4222-8222-000000000003",
+        "sessionId": "33333333-3333-4333-8333-333333333333",
+        "sourceTopic": "/ugv/gnss",
+        "originalMessageSha256": "49fd6bb3c099fde69f67313389c43df0204364d25887acfbc47c9dd7b813b6ef",
+        "originalMessageBytes": 54,
+        "originalMessageReference": "mqtt-wire:sha256:49fd6bb3c099fde69f67313389c43df0204364d25887acfbc47c9dd7b813b6ef",
+        "providerReceivedAt": {
+          "utc": "2026-10-01T00:00:00.001Z",
+          "owner": "PROVIDER_MQTT_MESSAGE_CALLBACK",
+          "clockId": "SIMULATED-example-clock",
+          "resolution": "MILLISECOND",
+          "synchronization": "UNVERIFIED",
+          "accuracyBoundMilliseconds": null,
+          "processMonotonicNanoseconds": "1000003"
+        },
+        "reportedTime": null,
+        "deviceAcquisitionTime": null,
+        "deviceClockAttribution": "NOT_ATTESTED_BY_PRODUCER_CONTRACT",
+        "sourceReportedSequence": null,
+        "sourceProducerEpoch": null,
+        "transport": {
+          "qos": 1,
+          "packetId": 3,
+          "duplicateDeliveryHint": false,
+          "retainedDelivery": false
+        },
+        "disposition": "POSITION_OBSERVATION",
+        "reasonCode": "POSITION_NORMALIZED",
+        "position": {
+          "longitude": 114.003,
+          "latitude": 30,
+          "crs": "OGC:CRS84",
+          "derivation": "VERSIONED_PROVIDER_NORMALIZER"
+        },
+        "reportedMission": null,
+        "evidenceClass": "SIMULATED",
+        "diagnostics": ["SOURCE_REPORTED_TIME_UNAVAILABLE_OR_OVER_LIMIT"]
+      },
+      "recordedAt": "2026-10-01T00:00:00.002003Z",
+      "recordingClockOwner": "POSTGRESQL_RECORD_INSERTION_CLOCK",
+      "recordingResolution": "MICROSECOND",
+      "exactTransactionCommittedAt": null
+    }
+  ],
+  "nextCursor": null,
+  "rangeReadFinished": true
+}

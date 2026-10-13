@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { ProjectionEvidenceSchema } from "../../trajectory-history/src/contract.js";
+import { insertTrajectoryProjection } from "../../trajectory-history/src/postgres-projection.js";
 import { isDeepStrictEqual } from "node:util";
 import type { AdapterBusinessEvent } from "../../adapter-protocol/src/index.js";
 import type { Pool, PoolClient } from "pg";
@@ -162,6 +164,22 @@ function assertScopeRow(actual: string, expected: string): void {
 
 /** Native PostgreSQL adapter. The migration is applied separately, never at startup. */
 export class PostgresTaskBusinessStore implements TaskBusinessStore {
+  async getTrajectoryProjectionEvidence(
+    scope: BoundExecutionScope,
+    artifactId: string,
+    revision: number,
+  ) {
+    const key = scopeKey(scope, this.gowm);
+    const result = await this.pool.query<{ scope_key: string; payload: unknown }>(
+      `SELECT scope_key,payload FROM ugv_trajectory_projection_evidence
+      WHERE scope_hash=$1 AND artifact_id=$2 AND revision=$3`,
+      [key.hash, artifactId, revision],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    assertScopeRow(row.scope_key, key.text);
+    return ProjectionEvidenceSchema.parse(row.payload);
+  }
   constructor(
     readonly pool: Pool,
     private readonly gowm?: GowmStorageConfig,
@@ -768,6 +786,16 @@ export class PostgresTaskBusinessStore implements TaskBusinessStore {
         assertPostgresJsonbSafe(command, "taskBusinessCommand");
       }
 
+      const evidenceIds = new Set<string>();
+      for (const write of changeSet.trajectoryEvidence ?? []) {
+        if (evidenceIds.has(write.artifactId))
+          throw Error("TRAJECTORY_EVIDENCE_DUPLICATE_IN_CHANGESET");
+        evidenceIds.add(write.artifactId);
+        const version = pending.get(JSON.stringify(["artifact", write.artifactId]));
+        if (version?.kind !== "artifact")
+          throw Error("TRAJECTORY_EVIDENCE_ARTIFACT_NOT_IN_CHANGESET");
+        await insertTrajectoryProjection(client, scope, key, version.value, write);
+      }
       for (const version of pending.values()) {
         if (
           version.kind !== "input_request" ||

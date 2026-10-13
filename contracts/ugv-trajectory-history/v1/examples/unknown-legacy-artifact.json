@@ -1,0 +1,80 @@
+{
+  "artifact": {
+    "schemaVersion": "sdar.task-artifact/1.0-rc2",
+    "artifactId": "SIMULATED-legacy",
+    "artifactType": "navigation.trajectory",
+    "revision": 1,
+    "semantics": "observed",
+    "lifecycle": "active",
+    "identity": {
+      "taskId": "SIMULATED-legacy-task",
+      "executionId": "SIMULATED-legacy-execution",
+      "providerId": "isr.vehicle.ugv.SIMULATED-example",
+      "resourceId": "vehicle:SIMULATED-example",
+      "operationName": "vehicle_navigate"
+    },
+    "source": {
+      "producer": "provider",
+      "method": "legacy_projection_unknown"
+    },
+    "createdAt": "2020-01-01T00:00:00Z",
+    "updatedAt": "2020-01-01T00:00:00Z",
+    "availability": "available",
+    "content": {
+      "kind": "geojson",
+      "crs": "OGC:CRS84",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [114, 30],
+          [114.1, 30.1]
+        ]
+      }
+    },
+    "properties": {
+      "sampleCount": 2
+    }
+  },
+  "signedEvidence": {
+    "evidence": {
+      "schemaVersion": "ugv.trajectory-artifact-evidence/1.0",
+      "identity": {
+        "taskId": "SIMULATED-legacy-task",
+        "executionId": "SIMULATED-legacy-execution",
+        "providerId": "isr.vehicle.ugv.SIMULATED-example",
+        "resourceId": "vehicle:SIMULATED-example",
+        "operationName": "vehicle_navigate"
+      },
+      "artifactId": "SIMULATED-legacy",
+      "revision": 1,
+      "artifactGeometrySha256": "461feaaefdc034813c31d0fa0dd3de6332eb2437fff9d88954800ee905adf9e0",
+      "projectionPolicy": "SAMPLED_GEOMETRY_NOT_FULL_RECEPTION_HISTORY",
+      "sampleEveryMilliseconds": null,
+      "missionBinding": {
+        "missionId": null,
+        "authority": "PROVIDER_CURRENT_MISSION_AND_UNIQUE_ACTIVE_EXECUTION",
+        "deviceExecutionOwnership": "NOT_ATTESTED"
+      },
+      "points": [
+        {
+          "coordinateIndex": 0,
+          "coordinate": [114, 30],
+          "reception": null,
+          "receptionTimeQuality": "UNKNOWN_LEGACY_OR_UNJOURNALED"
+        },
+        {
+          "coordinateIndex": 1,
+          "coordinate": [114.1, 30.1],
+          "reception": null,
+          "receptionTimeQuality": "UNKNOWN_LEGACY_OR_UNJOURNALED"
+        }
+      ],
+      "deviceGenerationHistory": "UNKNOWN_PRODUCER_BOUNDARIES_NOT_ATTESTED"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "06e3fd8fda29bb60ab59557de61edb0aecdb231134be30e75b455f8e1b792fa9",
+      "value": "0fPXpFXOCvaLB9pdWWUPZytH-NemUCTY7pVF3DHMLsjzLduMIh1j3oD7zlsFENSee4Pk1l_qGSHsloKhNlMsBg"
+    }
+  }
+}

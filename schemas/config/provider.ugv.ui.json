@@ -222,6 +222,48 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_trajectory_history_enabled setting.",
+      "displayName": "UGV_TRAJECTORY_HISTORY_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_TRAJECTORY_HISTORY_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_trajectory_history_signing_key_file setting.",
+      "displayName": "UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE",
+      "required": false,
+      "secret": true,
+      "secretRef": true,
+      "writeOnly": true
+    },
+    {
+      "applyMode": "restart_required",
+      "description": "UGV Provider ugv_trajectory_history_max_pending setting.",
+      "displayName": "UGV_TRAJECTORY_HISTORY_MAX_PENDING",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_TRAJECTORY_HISTORY_MAX_PENDING",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_navigation_planner_mode setting.",
       "displayName": "UGV_NAVIGATION_PLANNER_MODE",
       "overridePolicy": {

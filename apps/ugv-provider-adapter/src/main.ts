@@ -19,6 +19,10 @@ import { UgvTaskBusinessContextService } from "./task-business-service.js";
 import { openUgvTaskBusinessStore } from "./task-business-bootstrap.js";
 import { UgvTelemetry } from "./telemetry.js";
 import { AirportRoadPlanner } from "./navigation-planner.js";
+import { PostgresReceptionStore } from "../../../packages/trajectory-history/src/postgres-store.js";
+import { TrajectoryReceptionJournal } from "../../../packages/trajectory-history/src/journal.js";
+import { TrajectoryHistoryReader } from "../../../packages/trajectory-history/src/reader.js";
+import { loadHistorySigningKey } from "../../../packages/trajectory-history/src/signing-key.js";
 
 const config = loadUgvProviderConfig();
 const logger = pino({
@@ -69,6 +73,35 @@ const ingress = new VehicleMqttIngress(
   },
   ugvMqttProfile(identity),
 );
+let receptionJournal: TrajectoryReceptionJournal | undefined;
+let trajectoryHistory: TrajectoryHistoryReader | undefined;
+if (config.UGV_TRAJECTORY_HISTORY_ENABLED) {
+  if (!(store instanceof PostgresProviderStore) || !config.UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE)
+    throw Error("TRAJECTORY_HISTORY_POSTGRES_AND_KEY_REQUIRED");
+  const historyStore = new PostgresReceptionStore(store.pool, {
+    providerId: identity.providerId,
+    resourceId: identity.resourceId,
+    deviceId: config.gowmStorage?.allowedDeviceIds[0] ?? identity.entityId,
+    deviceIdentityAuthority: config.gowmStorage
+      ? "GOWM_DEVICE_BINDING"
+      : "PROVIDER_RESOURCE_CONFIGURATION",
+    sourceSessionKey: config.gowmStorage?.sourceSessionKey ?? "standalone:" + identity.resourceId,
+    ...(config.gowmStorage
+      ? { smppServiceKey: config.gowmStorage.serviceKey, bindingId: config.gowmStorage.bindingId }
+      : {}),
+  });
+  const key = loadHistorySigningKey(config.UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE);
+  const evidenceClass =
+    config.UGV_EXECUTION_MODE === "simulation" ? "SIMULATED" : "UNQUALIFIED_SOURCE";
+  receptionJournal = new TrajectoryReceptionJournal(
+    historyStore,
+    ingress,
+    evidenceClass,
+    config.UGV_TRAJECTORY_HISTORY_MAX_PENDING,
+  );
+  await receptionJournal.initialize();
+  trajectoryHistory = new TrajectoryHistoryReader(historyStore, key, evidenceClass);
+}
 const mqtt = new UgvMqttClient(
   {
     url: config.UGV_MQTT_URL,
@@ -82,6 +115,7 @@ const mqtt = new UgvMqttClient(
     sessionMode: config.UGV_MQTT_SESSION_MODE,
     reconnectMinMs: config.UGV_MQTT_RECONNECT_MIN_MS,
     reconnectMaxMs: config.UGV_MQTT_RECONNECT_MAX_MS,
+    ...(receptionJournal ? { receptionJournal } : {}),
   },
   ingress,
 );
@@ -177,6 +211,7 @@ const runtime = new UgvProviderRuntime(
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
     trajectorySampleEveryMs: config.taskBusinessSettings.trajectory.sampleEveryMs,
     businessMapFull: config.taskBusinessSettings.footprint.mode === "estimated",
+    ...(trajectoryHistory ? { trajectoryHistory } : {}),
     ...(config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" && config.UGV_NAVIGATION_PLANNER_URL
       ? {
           navigationPlanner: new AirportRoadPlanner(config.UGV_NAVIGATION_PLANNER_URL),

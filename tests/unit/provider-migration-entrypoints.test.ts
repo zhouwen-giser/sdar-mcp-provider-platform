@@ -20,8 +20,14 @@ describe("Provider Migration entrypoints", () => {
 
     await runUgvProviderMigrations(executor, workspaceRoot);
 
-    expect(executor.statements).toHaveLength(8);
+    expect(executor.statements).toHaveLength(9);
     const statements = executor.statements.join("\n");
+    expect(
+      executor.statements.filter((sql) =>
+        sql.includes("CREATE TABLE IF NOT EXISTS ugv_trajectory_history_reception"),
+      ),
+    ).toHaveLength(1);
+    expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_trajectory_projection_evidence");
     expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_execution");
     expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_mutation_journal");
     expect(statements).toContain("CREATE TABLE IF NOT EXISTS ugv_diagnostic_lease");

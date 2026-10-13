@@ -10,15 +10,18 @@ beforeAll(() => harness.start());
 afterAll(() => harness.stop());
 
 describe("Business Events migration 023", () => {
-  it("applies after the complete 022 baseline and records exactly one new migration", async () => {
+  it("applies the full Runtime baseline and records Business Events 023 and intervention 027 exactly once", async () => {
     const applied = await harness.pool.query<{ version: string }>(
       "SELECT version FROM runtime_schema_migration ORDER BY version",
     );
-    expect(applied.rows).toHaveLength(27);
-    expect(applied.rows.at(-4)?.version).toBe("023_business_events_profile_v1.sql");
-    expect(applied.rows.at(-3)?.version).toBe("024_accepted_task_substate.sql");
-    expect(applied.rows.at(-2)?.version).toBe("025_smpp_dispatch_uncertainty.sql");
-    expect(applied.rows.at(-1)?.version).toBe("026_smpp_reconciliation_audit.sql");
+    expect(applied.rows).toHaveLength(28);
+    expect(applied.rows.slice(-5).map((row) => row.version)).toEqual([
+      "023_business_events_profile_v1.sql",
+      "024_accepted_task_substate.sql",
+      "025_smpp_dispatch_uncertainty.sql",
+      "026_smpp_reconciliation_audit.sql",
+      "027_task_business_intervention_command.sql",
+    ]);
     expect(
       readdirSync(resolve("migrations/runtime")).filter((name) => name.startsWith("023_")),
     ).toEqual(["023_business_events_profile_v1.sql"]);

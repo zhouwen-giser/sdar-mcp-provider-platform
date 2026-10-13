@@ -33,6 +33,7 @@ const factSchema = z
     sourceTopic: z.string().min(1).max(256),
     observedAt: z.iso.datetime({ offset: true }),
     position: positionSchema,
+    receptionId: z.uuid().optional(),
   })
   .strict();
 export type NavigationPositionFact = z.infer<typeof factSchema>;
@@ -61,6 +62,8 @@ export class NavigationTrajectoryProcessor {
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
     readonly maxGapMs: number,
     readonly sampleEveryMs = 0,
+    readonly receptionEvidenceEnabled = false,
+    readonly receptionStreamId?: string,
   ) {
     if (!Number.isFinite(maxGapMs) || maxGapMs <= 0)
       throw new Error("TRAJECTORY_GAP_THRESHOLD_INVALID");
@@ -265,6 +268,20 @@ export class NavigationTrajectoryProcessor {
             expectedContextRevision: current.contextRevision,
             context,
             objects: [{ kind: "artifact", value: artifact }],
+            ...(this.receptionEvidenceEnabled
+              ? {
+                  trajectoryEvidence: [
+                    {
+                      artifactId: artifact.artifactId,
+                      revision: artifact.revision,
+                      missionId: fact.missionId,
+                      sampleEveryMilliseconds: this.sampleEveryMs,
+                      receptionId: fact.receptionId ?? null,
+                      sourceStreamId: this.receptionStreamId ?? null,
+                    },
+                  ],
+                }
+              : {}),
           },
           [{ body, description: reasonCode, reasonCode, severityHint: "info" }],
         );

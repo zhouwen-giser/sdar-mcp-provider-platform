@@ -41,6 +41,8 @@ export interface AppliedMqttObservation {
   cursor: string;
   observedAt: string;
   retained: boolean;
+  /** Durable raw receipt identity, supplied only by the optional entrance journal. */
+  receptionId?: string;
 }
 
 export const VEHICLE_OBSERVATION_FIELDS = [
@@ -238,12 +240,13 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
     this.#events.emit("snapshot", this.snapshot(), "device_mcp");
     return this.snapshot();
   }
-  handle(
+  inspectMessage(
     topic: string,
     payload: Buffer,
-    retained = false,
-    receivedAt = new Date().toISOString(),
-  ): IngestResult {
+  ): {
+    decoded: unknown;
+    observation: NormalizedMqttObservation;
+  } {
     if (!this.profile.exactTopic(topic)) throw new Error(this.profile.topicNotAllowedReasonCode);
     let decoded: unknown;
     let observation: NormalizedMqttObservation;
@@ -259,6 +262,16 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         throw new Error(error.message.replace(/^UGV_/, "NPC_TANK_"), { cause: error });
       throw error;
     }
+    return { decoded, observation };
+  }
+  handle(
+    topic: string,
+    payload: Buffer,
+    retained = false,
+    receivedAt = new Date().toISOString(),
+    receptionId?: string,
+  ): IngestResult {
+    let { observation } = this.inspectMessage(topic, payload);
     const observedAt = observation.sourceObservedAt ?? receivedAt;
     const hash = createHash("sha256").update(canonical(observation.canonicalPayload)).digest("hex");
     const authorityCursor = JSON.stringify([topic, observation.timeAuthority]);
@@ -328,7 +341,13 @@ export class VehicleMqttIngress<TSnapshot extends VehicleSnapshot = UgvSnapshot>
         topic,
         cursor === undefined
           ? undefined
-          : { observation: structuredClone(observation), cursor, observedAt, retained },
+          : {
+              observation: structuredClone(observation),
+              cursor,
+              observedAt,
+              retained,
+              ...(receptionId === undefined ? {} : { receptionId }),
+            },
       );
     }
     return {

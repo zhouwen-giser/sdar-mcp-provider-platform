@@ -43,14 +43,23 @@ describe("Business Event durable authorities", () => {
       "provider.persistence",
       [
         {
-          sourceId: "ignored.after.initialization",
-          sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2affff",
+          sourceId: "adapter.live",
+          sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0002",
           deliverySemantics: "best_effort_live",
+        },
+        {
+          sourceId: "adapter.durable",
+          sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0001",
+          deliverySemantics: "durable_at_least_once",
         },
       ],
       604_800_000,
     );
     expect(repeated.streamId).toBe(streamId);
+    expect(await repository.sourceRoster("provider.persistence", repeated.streamId)).toEqual([
+      expect.objectContaining({ sourceId: "adapter.durable" }),
+      expect.objectContaining({ sourceId: "adapter.live" }),
+    ]);
   });
 
   it("uses database time, a single cursor row, and fencing on lease takeover", async () => {

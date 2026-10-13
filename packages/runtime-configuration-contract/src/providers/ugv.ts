@@ -34,6 +34,9 @@ const UgvProviderInputBaseSchema = z.object({
     .default("postgresql://ugv_adapter:ugv_adapter@127.0.0.1:5433/ugv_adapter"),
   UGV_ADAPTER_DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(32).default(8),
   UGV_TASK_BUSINESS_PROFILE_PATH: optionalPath,
+  UGV_TRAJECTORY_HISTORY_ENABLED: bool.default(false),
+  UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE: optionalPath,
+  UGV_TRAJECTORY_HISTORY_MAX_PENDING: z.coerce.number().int().min(1).max(4096).default(256),
   UGV_NAVIGATION_PLANNER_MODE: z.enum(["disabled", "isr_airport"]).default("disabled"),
   UGV_NAVIGATION_PLANNER_URL: z
     .url()
@@ -129,6 +132,16 @@ const UgvProviderInputBaseSchema = z.object({
 });
 
 const UgvProviderInputSchema = UgvProviderInputBaseSchema.superRefine((value, context) => {
+  if (
+    value.UGV_TRAJECTORY_HISTORY_ENABLED &&
+    (value.UGV_ADAPTER_STORE_MODE !== "postgres" ||
+      value.UGV_ADAPTER_DATABASE_POOL_MAX < 2 ||
+      !value.UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE)
+  )
+    context.addIssue({
+      code: "custom",
+      message: "UGV_TRAJECTORY_HISTORY_REQUIRES_POSTGRES_AND_PERSISTENT_SIGNING_KEY",
+    });
   if (
     value.UGV_NAVIGATION_PLANNER_MODE === "isr_airport" &&
     (!value.UGV_NAVIGATION_PLANNER_URL || value.UGV_ENTITY_ID !== "ugv1")
@@ -232,6 +245,8 @@ export const UgvProviderResolvedSchema = UgvProviderInputBaseSchema.extend({
   UGV_MQTT_USERNAME: z.string().optional(),
   UGV_MQTT_PASSWORD_FILE: z.string().optional(),
   UGV_TASK_BUSINESS_PROFILE_PATH: z.string().optional(),
+  UGV_TRAJECTORY_HISTORY_ENABLED: z.boolean(),
+  UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE: z.string().optional(),
   UGV_MQTT_TLS_CA_PATH: z.string().optional(),
   UGV_MQTT_TLS_CERT_PATH: z.string().optional(),
   UGV_MQTT_TLS_KEY_PATH: z.string().optional(),
@@ -266,6 +281,7 @@ const secretKeys = new Set([
   "UGV_MQTT_TLS_KEY_PATH",
   "UGV_DEVICE_MCP_HEADERS_FILE",
   "UGV_DIAGNOSTICS_CONTROL_TOKEN_FILE",
+  "UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE",
   "PROVIDER_TELEMETRY_TLS_KEY_PATH",
 ]);
 const configurationKeys = Object.keys(UgvProviderResolvedSchema.shape);

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "smpp.trajectory-proof-sdk-sources/1",
+  "sources": [
+    {
+      "path": "packages/trajectory-history/src/contract.ts",
+      "sha256": "8c204c76c2304aca206caa202590f52f5188d54b5fc6b62d50861e25366f6da8"
+    },
+    {
+      "path": "packages/trajectory-history/src/proof.ts",
+      "sha256": "568daf46b30d470ae73764cf01578d5ef3accc43ee2247be6323dff645b75e84"
+    },
+    {
+      "path": "packages/trajectory-history/src/projection.ts",
+      "sha256": "10a81d789d75cf807593ca4f160e7871ef7ee6a2294c04f7106fc0c619a79a5d"
+    }
+  ]
+}
