@@ -61,7 +61,7 @@ jobs:
           --health-interval 2s --health-timeout 2s --health-retries 20
     env:
       TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime_candidate
-      SMPP_INSPECTION_TEST_CONFIG_FILE: ${{ runner.temp }}/smpp-inspection/environment.json
+      SMPP_INSPECTION_TEST_CONFIG_FILE: /tmp/smpp-inspection-${{ github.run_id }}-${{ github.run_attempt }}/environment.json
     steps:
       - uses: actions/checkout@v4
         with:
