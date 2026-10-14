@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Publish SMPP + an intact GOWM/GDPS/GSAP union with pinned upstream bytes."""
-import argparse, hashlib, io, json, pathlib, subprocess, tarfile, tempfile, gzip, shutil, os
+import argparse, hashlib, io, json, pathlib, subprocess, tarfile, tempfile, gzip, shutil, os, sys
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 def digest(b): return hashlib.sha256(b).hexdigest()
 def read_archive(p):
@@ -15,6 +15,9 @@ def read_archive(p):
         return files
 
 def main():
+    if '--wsgs-package' in sys.argv[1:]:
+        subprocess.run([sys.executable, str(ROOT/'scripts/package-wsgs-united-deployment.py'), *sys.argv[1:]], cwd=ROOT, check=True)
+        return
     a=argparse.ArgumentParser();a.add_argument('--analysis-package',type=pathlib.Path,default=ROOT.parent/'gowm-spatiotemporal-analysis-providers/output/deployment/current/gowm-gdps-analysis-dev-server-0.1.0.tar.gz');a.add_argument('--gowm-package',type=pathlib.Path,default=ROOT.parent/'geospatial-operational-world-model/output/deployment/gowm-dev-server-0.7.1.tar.gz');a.add_argument('--output-dir',type=pathlib.Path,default=ROOT/'artifacts/united');args=a.parse_args()
     sources={}
     for key,p in [('analysis',args.analysis_package),('gowm',args.gowm_package)]:

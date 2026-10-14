@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { z } from "zod";
@@ -79,7 +80,7 @@ export class NativeLockBusinessProcessor {
   ): Promise<"committed" | "none"> {
     const missionId = execution.downstreamMissionIds.at(-1);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       missionId === undefined ||
       terminal.has(execution.state) ||
@@ -203,7 +204,7 @@ export class NativeLockBusinessProcessor {
   ): Promise<"committed" | "duplicate"> {
     const fact = lockFactSchema.parse(input);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== fact.missionId ||
       compareIsoTimestamps(fact.observedAt, execution.createdAt) < 0 ||

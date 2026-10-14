@@ -1,0 +1,17 @@
+{
+  "name": "smpp-inspection-typecheck-02",
+  "command": "pnpm",
+  "args": [
+    "typecheck"
+  ],
+  "startedAt": "2026-10-13T17:08:51.732Z",
+  "completedAt": "2026-10-13T17:09:13.765Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "8d365351aabad513aa68daed496ee5a47b3feee81b1494698470e372d526f626",
+  "sourceAfter": "8d365351aabad513aa68daed496ee5a47b3feee81b1494698470e372d526f626",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-typecheck-02.log",
+  "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+}

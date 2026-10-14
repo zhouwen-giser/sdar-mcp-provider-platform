@@ -45,6 +45,11 @@ if (action === "verify") {
   process.exit(0);
 }
 if (action === "build-images") {
+  const buildEnvFile = path.join(server, ".env");
+  const project = fs.existsSync(buildEnvFile)
+    ? (parseEnv(fs.readFileSync(buildEnvFile, "utf8")).DEPLOY_PROJECT ?? "smpp-gowm")
+    : "smpp-gowm";
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(project)) throw Error("INVALID_PROJECT");
   for (const [side, target] of [
     ["runtime", "ugv-real-runtime"],
     ["adapter", "ugv-real-adapter"],
@@ -62,7 +67,7 @@ if (action === "build-images") {
           "--target",
           target,
           "-t",
-          `smpp-gowm/${side}:${manifest.smpp.revision}`,
+          `${project}/${side}:${manifest.smpp.revision}`,
           "-",
         ],
         { stdio: [context, "inherit", "inherit"] },

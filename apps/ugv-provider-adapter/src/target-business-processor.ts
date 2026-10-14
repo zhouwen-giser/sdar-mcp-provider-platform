@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
@@ -72,7 +73,7 @@ export class TargetBusinessProcessor {
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
     const fact = targetFactSchema.parse(input);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== fact.missionId ||
       fact.observationSessionId !== fact.missionId ||

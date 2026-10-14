@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import type { ProviderExecution } from "../../../packages/provider-adapter-kit/src/index.js";
 import type { AppliedMqttObservation } from "../../../packages/vehicle-mqtt-ingress/src/index.js";
 import { decodeObservationCursorV1 } from "../../../packages/vehicle-provider-core/src/observation-cursor.js";
@@ -28,9 +29,12 @@ export function resolveReconExecutionCorrelation(input: {
   const cursor = decodeObservationCursorV1(applied.cursor);
   if (
     cursor?.kind !== "topic" ||
-    !["/ugv/area_recon/status", "/ugv/area_recon/targets", "/ugv/area_recon/coverage"].includes(
-      cursor.topic,
-    ) ||
+    ![
+      "/ugv/area_recon/status",
+      "/ugv/area_recon/targets",
+      "/ugv/area_recon/coverage",
+      "/ugv/area_recon/exception",
+    ].includes(cursor.topic) ||
     cursor.observedAt !== applied.observedAt
   )
     return unresolved;
@@ -59,7 +63,7 @@ export function resolveReconExecutionCorrelation(input: {
     (execution) =>
       execution.providerId === input.providerId &&
       execution.resourceId === input.resourceId &&
-      execution.operationName === "vehicle_area_recon" &&
+      isReconOperation(execution.operationName) &&
       !terminal.has(execution.state) &&
       (explicit === undefined || execution.downstreamMissionIds.at(-1) === explicit),
   );

@@ -1,0 +1,21 @@
+{
+  "name": "smpp-inspection-conformance-capacity-01",
+  "command": "node",
+  "args": [
+    "scripts/inspection/isolated-env.mjs",
+    "exec",
+    "bash",
+    "-c",
+    "pnpm test:conformance && pnpm capacity:baseline"
+  ],
+  "startedAt": "2026-10-13T21:15:55.135Z",
+  "completedAt": "2026-10-13T21:19:08.842Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "92d160efc930d876d82ce69c2a928780183e890c5a6d6197670638afb847c243",
+  "sourceAfter": "92d160efc930d876d82ce69c2a928780183e890c5a6d6197670638afb847c243",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-conformance-capacity-01.log",
+  "logSha256": "2a3ab68c508797aca769e27882eee36c5b62d1806cd62f15630989ee692da1fa"
+}

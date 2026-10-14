@@ -1,0 +1,17 @@
+{
+  "name": "smpp-inspection-lint-01",
+  "command": "pnpm",
+  "args": [
+    "lint"
+  ],
+  "startedAt": "2026-10-13T18:10:48.714Z",
+  "completedAt": "2026-10-13T18:12:12.002Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "2ea8add56584230fc80c46df923a7b749e09400f636a8e12bd5738447f93071c",
+  "sourceAfter": "2ea8add56584230fc80c46df923a7b749e09400f636a8e12bd5738447f93071c",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-lint-01.log",
+  "logSha256": "7aeb21c3f06336af76209158f803c98fdfcda7548f9a3532a49a5d90cb42a591"
+}

@@ -1,0 +1,82 @@
+{
+  "status": "PASS",
+  "runId": "uap-p3-b02-inspection-joint-95727a5d93134535970d5d4ef4c37764",
+  "evidenceClass": "ISOLATED_SIMULATION_REAL_PG_MQTT_MCP",
+  "jointReportSha256": "cab08976f3dab8c3c127cdb69d21198bd4f104088605c3dab496cd25b2ee9ad0",
+  "cases": [
+    {
+      "case": "inspection-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findingCount": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-findings",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findingCount": 1,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findingCount": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-partial",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findingCount": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "patrol-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findingCount": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findingCount": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-failed",
+      "taskPhase": "completed",
+      "reportStatus": "failed",
+      "findingCount": 1,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-cancel",
+      "taskPhase": "canceled",
+      "reportStatus": "cancelled",
+      "findingCount": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 0,
+      "childTasks": 2
+    }
+  ],
+  "physicalExecution": "NOT_RUN",
+  "deployment": "PENDING"
+}

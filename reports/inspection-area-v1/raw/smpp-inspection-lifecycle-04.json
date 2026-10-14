@@ -1,0 +1,23 @@
+{
+  "name": "smpp-inspection-lifecycle-04",
+  "command": "node",
+  "args": [
+    "scripts/inspection/isolated-env.mjs",
+    "exec",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/integration/ugv-inspection-postgres-mqtt.test.ts"
+  ],
+  "startedAt": "2026-10-13T17:28:14.329Z",
+  "completedAt": "2026-10-13T17:28:21.609Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "f943bcc05a695fde95c951c03be8972ad898b9d5c18b779ce58b6db2e660f02d",
+  "sourceAfter": "f943bcc05a695fde95c951c03be8972ad898b9d5c18b779ce58b6db2e660f02d",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-lifecycle-04.log",
+  "logSha256": "db1b54600a95737ec1589113b8d570748c40c0b60f606539263ac50c22e0b235"
+}

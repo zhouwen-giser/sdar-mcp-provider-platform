@@ -1,3 +1,4 @@
+import { isReconOperation } from "./inspection.js";
 import type { VehicleTrack } from "./types.js";
 
 export const OPERATION_TRACKS: Record<string, VehicleTrack[]> = {
@@ -8,6 +9,7 @@ export const OPERATION_TRACKS: Record<string, VehicleTrack[]> = {
   vehicle_laser_range: [],
   vehicle_navigate: ["chassis"],
   vehicle_area_recon: ["eo"],
+  vehicle_inspect_area: ["eo"],
   vehicle_track_target: ["eo"],
   vehicle_control_gimbal: ["eo"],
   vehicle_fire_weapon: ["eo", "weapon"],
@@ -53,7 +55,7 @@ export class TrackArbiter {
           this.allowReconChain &&
           track === "eo" &&
           targetId !== undefined &&
-          ((holder.operationName === "vehicle_area_recon" &&
+          ((isReconOperation(holder.operationName) &&
             (operationName === "vehicle_track_target" ||
               operationName === "vehicle_fire_weapon")) ||
             (holder.operationName === "vehicle_track_target" &&
@@ -79,7 +81,7 @@ export class TrackArbiter {
       const conflictingTrack =
         operationName === "vehicle_navigate"
           ? "eo"
-          : operationName === "vehicle_area_recon"
+          : isReconOperation(operationName)
             ? "chassis"
             : undefined;
       if (conflictingTrack !== undefined && occupied.has(conflictingTrack))

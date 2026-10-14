@@ -64,6 +64,10 @@ COPY Dockerfile Dockerfile
 COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
 RUN node scripts/verify-docker-workspace-manifests.mjs
 COPY . .
+# Deployment extraction keeps source parents private. These public assets are
+# copied into non-root images, so normalize their directory access in the build.
+RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} + \
+    && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
 RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked \
     test "$VITE_PMS_DATA_MODE" = api \
     && pnpm build \

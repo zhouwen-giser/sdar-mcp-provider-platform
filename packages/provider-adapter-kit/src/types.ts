@@ -47,6 +47,43 @@ export interface ProviderExecution {
   executionContext: ExecutionContextRecord;
   /** Set only for newly admitted executions whose business Context must be initialized. */
   taskBusinessContextExpected?: boolean;
+  /** Scope-qualified inspection source receipts; durable alongside the original execution. */
+  inspectionEvidence?: {
+    version: 1;
+    deadlineAt: string;
+    requestedMissionId?: string;
+    budgetExceeded?: boolean;
+    targetReport?: {
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      count: number;
+      complete: boolean;
+    };
+    coverageReport?: {
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      coverage: Record<string, unknown>;
+    };
+    exceptions?: {
+      sourceVersion?: string;
+      targetId?: string;
+      targetType?: string;
+      longitude?: number;
+      latitude?: number;
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      kind: string;
+      errorCode: number | null;
+      reason: string | null;
+    }[];
+    missingEvidence: string[];
+  };
   downstreamMissionIds: string[];
   /** Exact real-planner output persisted before Device MCP submission. */
   navigationPlan?: {

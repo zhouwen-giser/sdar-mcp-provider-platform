@@ -222,6 +222,20 @@
     },
     {
       "applyMode": "restart_required",
+      "description": "UGV Provider ugv_inspection_enabled setting.",
+      "displayName": "UGV_INSPECTION_ENABLED",
+      "overridePolicy": {
+        "allowedTargetTypes": ["provider_type", "provider"],
+        "mode": "inheritable"
+      },
+      "path": "/UGV_INSPECTION_ENABLED",
+      "required": false,
+      "secret": false,
+      "secretRef": false,
+      "writeOnly": false
+    },
+    {
+      "applyMode": "restart_required",
       "description": "UGV Provider ugv_trajectory_history_enabled setting.",
       "displayName": "UGV_TRAJECTORY_HISTORY_ENABLED",
       "overridePolicy": {

@@ -12,6 +12,60 @@ export function adapterResultPayload(snapshot: ExecutionSnapshot): Record<string
   return protoStructToJson(snapshot.result);
 }
 
+/** Retain scoped inspection facts when the Runtime's timing outcome owns the terminal result. */
+export function inspectionStoppedTransition(
+  operation: ValidatedOperation,
+  snapshot: ExecutionSnapshot,
+  transition: SnapshotTransition,
+): SnapshotTransition {
+  if (operation.name !== "vehicle_inspect_area" || transition.result === null) return transition;
+  const report = sanitizedAdapterResultPayload(snapshot);
+  operation.validateOutput(report);
+  const base = transition.result.structuredContent as Record<string, unknown>;
+  const { adapterResult: ignored, ...timing } = base;
+  void ignored;
+  const inspectionReport = report.inspectionReport as Record<string, unknown>;
+  const anomalies = [...(report.anomalies as unknown[])];
+  const artifactRefs = [...(inspectionReport.artifactRefs as unknown[])];
+  const missing = new Set(report.missingEvidence as string[]);
+  missing.add(
+    timing.outcome === "deadline_reached"
+      ? "INSPECTION_TASK_DEADLINE_REACHED"
+      : "INSPECTION_START_WINDOW_MISSED",
+  );
+  const structured = {
+    ...report,
+    ...timing,
+    status: timing.outcome === "deadline_reached" ? "timeout" : "failed",
+    anomalies,
+    missingEvidence: [...missing],
+    inspectionReport: {
+      ...inspectionReport,
+      artifactRefs,
+      truncated: inspectionReport.truncated === true,
+      completion: inspectionReport.targetReportComplete === true ? "partial" : "unavailable",
+    },
+  };
+  while (
+    Buffer.byteLength(JSON.stringify(structured), "utf8") > 60 * 1024 &&
+    (anomalies.length || artifactRefs.length)
+  ) {
+    if (anomalies.length) anomalies.pop();
+    else artifactRefs.pop();
+    structured.inspectionReport.truncated = true;
+    missing.add("INSPECTION_INLINE_REPORT_TRUNCATED");
+    structured.missingEvidence = [...missing];
+  }
+  return {
+    ...transition,
+    result: attachEvidenceToResult(
+      { ...transition.result, structuredContent: structured },
+      snapshot,
+      structured,
+    ),
+  };
+}
+
 export function assertAdapterResultContract(
   operation: ValidatedOperation,
   snapshot: ExecutionSnapshot,
@@ -47,11 +101,42 @@ export function validatedSnapshotTransition(
     ) {
       operation.validateOutput(result);
     }
-    return attachEvidence(
-      mapAdapterSnapshot(normalizeSnapshot(snapshot, result)),
-      snapshot,
-      result,
-    );
+    let transition = mapAdapterSnapshot(normalizeSnapshot(snapshot, result));
+    if (
+      operation.name === "vehicle_inspect_area" &&
+      (snapshot.state === "TECHNICAL_FAILED" || snapshot.state === "CANCELLED")
+    ) {
+      operation.validateOutput(result);
+      const detail = transition.error?.data;
+      transition = {
+        ...transition,
+        result: {
+          content: [{ type: "text", text: snapshot.message || snapshot.reasonCode }],
+          isError: true,
+          structuredContent: {
+            outcome: snapshot.state === "CANCELLED" ? "cancelled" : "technical_failure",
+            reasonCode: snapshot.reasonCode,
+            retryable: snapshot.retryable,
+            completedAt: result.observedAt,
+            ...result,
+          },
+        },
+        ...(transition.error === null
+          ? {}
+          : {
+              error: {
+                ...transition.error,
+                data: {
+                  ...(typeof detail === "object" && detail !== null && !Array.isArray(detail)
+                    ? detail
+                    : {}),
+                  ...result,
+                },
+              },
+            }),
+      };
+    }
+    return attachEvidence(transition, snapshot, result);
   } catch (error) {
     if (error instanceof AdapterContractError) {
       return technicalFailureTransition(error.reasonCode);

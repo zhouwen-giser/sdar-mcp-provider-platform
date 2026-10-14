@@ -1,3 +1,8 @@
+import {
+  INSPECTION_OPERATION,
+  inspectionReconArguments,
+} from "../../../packages/vehicle-provider-core/src/inspection.js";
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { createHash } from "node:crypto";
 import {
   TASK_BUSINESS_OPERATION_PROFILE_SCHEMA_VERSION,
@@ -31,7 +36,11 @@ import {
 } from "../../../packages/vehicle-provider-core/src/task-business-interaction.js";
 import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
 
-const businessOperations = new Set(["vehicle_navigate", "vehicle_area_recon"]);
+const businessOperations = new Set([
+  "vehicle_navigate",
+  "vehicle_area_recon",
+  "vehicle_inspect_area",
+]);
 
 export const UGV_READ_ONLY_BUSINESS_PROFILE = TaskBusinessOperationProfileSchema.parse({
   schemaVersion: TASK_BUSINESS_OPERATION_PROFILE_SCHEMA_VERSION,
@@ -176,7 +185,7 @@ export class UgvTaskBusinessContextService {
   }
 
   readOnlyProfile(
-    operationName: "vehicle_navigate" | "vehicle_area_recon",
+    operationName: "vehicle_navigate" | "vehicle_area_recon" | "vehicle_inspect_area",
   ): TaskBusinessOperationProfile {
     return operationName === "vehicle_navigate"
       ? UGV_NAVIGATION_BUSINESS_PROFILE
@@ -185,7 +194,7 @@ export class UgvTaskBusinessContextService {
 
   /** Resolve an input from the durable Context rather than inventing one from Execution state. */
   async activeRequiredInput(execution: ProviderExecution): Promise<RequiredInput | undefined> {
-    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+    if (!isReconOperation(execution.operationName) || !execution.taskBusinessContextExpected)
       return undefined;
     const scope = this.scopeFor(execution);
     const context = await this.business.getContext(scope);
@@ -348,6 +357,13 @@ export class UgvTaskBusinessContextService {
         properties: {
           ...current.summary.properties,
           executionState: execution.state,
+          ...(execution.operationName === INSPECTION_OPERATION
+            ? {
+                inspectionReport: execution.result?.inspectionReport ?? null,
+                inspectionResult: execution.result ?? null,
+                inspectionExceptions: execution.inspectionEvidence?.exceptions ?? [],
+              }
+            : {}),
           unresolvedRefs,
         },
       };
@@ -674,7 +690,7 @@ export function requestedReconArtifacts(
   execution: ProviderExecution,
   identity: TaskBusinessIdentity,
 ): TaskArtifact[] {
-  if (execution.operationName !== "vehicle_area_recon") return [];
+  if (!isReconOperation(execution.operationName)) return [];
   const common = {
     schemaVersion: "sdar.task-artifact/1.0-rc2",
     revision: 1,
@@ -691,7 +707,10 @@ export function requestedReconArtifacts(
   const results: TaskArtifact[] = [];
   const scanMode = execution.arguments.scanMode;
   if (scanMode !== "circular" && scanMode !== 2) {
-    const area = execution.arguments.area;
+    const area =
+      execution.operationName === INSPECTION_OPERATION
+        ? inspectionReconArguments(execution.arguments).area
+        : execution.arguments.area;
     if (!area || typeof area !== "object" || Array.isArray(area))
       throw new Error("BUSINESS_RECON_AREA_INVALID");
     const polygon = (area as Record<string, unknown>).polygon;

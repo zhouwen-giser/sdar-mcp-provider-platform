@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "smpp.trajectory-history-delivery/1.0",
+  "status": "PASS",
+  "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+  "sourceInputsSha256": "659356cc403c54f0acc6f0b134e72c6cca23c6ffcefb25e84c78c44a17c6ec35",
+  "archive": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/trajectory-history/smpp-trajectory-history-cfda8c7f2f65.tar.gz",
+  "archiveSha256": "7ae25a2bce05972581e7012f4cff4542741c7c2e28cf393d268278cfc5049b9a",
+  "deliveredFiles": 182,
+  "archiveExtractedBytesVerified": true,
+  "sourceArchiveMatchesFrozenInputs": true,
+  "mandatoryGates": [
+    "m3-verify-v2-05",
+    "m3-history-path-02",
+    "m3-ugv-task-business-02",
+    "m3-public-intake-03",
+    "m3-ugv-image-open-02"
+  ],
+  "realDeviceQualification": "NOT_RUN",
+  "siteOperations": "NOT_RUN",
+  "deployment19100": "NOT_RUN"
+}

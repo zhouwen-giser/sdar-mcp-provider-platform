@@ -162,6 +162,7 @@
       "maximum": 9007199254740991,
       "type": "integer"
     },
+    "UGV_INSPECTION_ENABLED": { "type": "boolean" },
     "UGV_MISSION_FRESHNESS_MS": {
       "default": 3000,
       "exclusiveMinimum": 0,
@@ -315,6 +316,7 @@
     "ADAPTER_TLS_MODE",
     "UGV_ADAPTER_STORE_MODE",
     "UGV_ADAPTER_DATABASE_POOL_MAX",
+    "UGV_INSPECTION_ENABLED",
     "UGV_TRAJECTORY_HISTORY_ENABLED",
     "UGV_TRAJECTORY_HISTORY_MAX_PENDING",
     "UGV_NAVIGATION_PLANNER_MODE",

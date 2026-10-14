@@ -50,6 +50,7 @@ import type {
 } from "../../persistence-postgres/src/index.js";
 import { OperationSnapshotRepository } from "../../persistence-postgres/src/index.js";
 import {
+  inspectionStoppedTransition,
   sanitizedAdapterResultPayload,
   synchronousResult,
   validatedSnapshotTransition,
@@ -1614,22 +1615,28 @@ function stopTransition(
   snapshot: ExecutionSnapshot,
   completedAt: Date,
 ): SnapshotTransition {
+  const retain = (transition: SnapshotTransition) =>
+    inspectionStoppedTransition(operation, snapshot, transition);
   if (snapshot.state === "CANCELLED" && task.stopReason === "DEADLINE_REACHED") {
-    return deadlineReached(snapshot.message, completedAt);
+    return retain(deadlineReached(snapshot.message, completedAt));
   }
   if (snapshot.state === "CANCELLED" && task.stopReason === "START_WINDOW_MISSED") {
-    return startWindowMissedTransition(
-      snapshot.message,
-      completedAt,
-      sanitizedAdapterResultPayload(snapshot),
+    return retain(
+      startWindowMissedTransition(
+        snapshot.message,
+        completedAt,
+        sanitizedAdapterResultPayload(snapshot),
+      ),
     );
   }
   if (task.stopReason === "START_WINDOW_MISSED" && isTerminalTaskState(snapshot.state)) {
-    return startWindowMissedWithAdapterResultTransition(
-      snapshot,
-      task,
-      completedAt,
-      "START_WINDOW_MISSED",
+    return retain(
+      startWindowMissedWithAdapterResultTransition(
+        snapshot,
+        task,
+        completedAt,
+        "START_WINDOW_MISSED",
+      ),
     );
   }
   return validatedSnapshotTransition(operation, snapshot);

@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { createHash } from "node:crypto";
 import { compareIsoTimestamps } from "../../../packages/vehicle-provider-core/src/time.js";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
@@ -50,7 +51,7 @@ export class ProviderAutoLockCoordinator {
     const { execution } = input;
     const missionId = execution.downstreamMissionIds.at(-1);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       !execution.taskBusinessContextExpected ||
       !missionId
     )

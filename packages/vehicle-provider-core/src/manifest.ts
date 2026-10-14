@@ -39,7 +39,10 @@ export interface VehicleManifestProfile {
   supportsReconCoverageOutput?: boolean;
   circularScanOmitsArea?: boolean;
   businessFeedbackProfiles?: Partial<
-    Record<"vehicle_navigate" | "vehicle_area_recon", TaskBusinessOperationProfile>
+    Record<
+      "vehicle_navigate" | "vehicle_area_recon" | "vehicle_inspect_area",
+      TaskBusinessOperationProfile
+    >
   >;
 }
 

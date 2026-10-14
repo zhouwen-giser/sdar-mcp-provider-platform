@@ -56,6 +56,11 @@ const taskBusinessStore = await openUgvTaskBusinessStore(
   config.gowmStorage,
   config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport",
 );
+if (
+  config.UGV_INSPECTION_ENABLED &&
+  (!config.taskBusinessSettings.enabled || !(store instanceof PostgresProviderStore))
+)
+  throw Error("UGV_INSPECTION_REQUIRES_POSTGRES_TASK_BUSINESS");
 const identity = {
   providerId: config.PROVIDER_ID,
   resourceId: config.UGV_RESOURCE_ID,
@@ -209,6 +214,7 @@ const runtime = new UgvProviderRuntime(
       recoverySuccessThreshold: config.UGV_OPERATION_RECOVERY_SUCCESS_THRESHOLD,
     },
     pollIntervalMs: config.UGV_EXECUTION_POLL_INTERVAL_MS,
+    inspectionEnabled: config.UGV_INSPECTION_ENABLED,
     trajectorySampleEveryMs: config.taskBusinessSettings.trajectory.sampleEveryMs,
     businessMapFull: config.taskBusinessSettings.footprint.mode === "estimated",
     ...(trajectoryHistory ? { trajectoryHistory } : {}),

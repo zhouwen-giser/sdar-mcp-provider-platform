@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { isDeepStrictEqual } from "node:util";
 import {
   UgvSemanticSourceSchema,
@@ -503,7 +504,7 @@ export class ReconBusinessProcessor {
 
   private assertExecution(execution: ProviderExecution, missionId: string, factAt: string): void {
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== missionId ||
       compareIsoTimestamps(factAt, execution.createdAt) < 0

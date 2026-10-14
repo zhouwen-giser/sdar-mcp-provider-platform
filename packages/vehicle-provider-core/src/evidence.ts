@@ -10,6 +10,7 @@ const ALLOWED = new Set([
   "vehicle.target.observation",
   "vehicle.target.lock",
   "vehicle.weapon.local_result",
+  "inspection.report",
 ]);
 
 export function vehicleEvidence(

@@ -1,3 +1,7 @@
+import {
+  INSPECTION_OPERATION,
+  inspectionSchemas,
+} from "../../../packages/vehicle-provider-core/src/inspection.js";
 import type { ProviderStore } from "../../../packages/provider-adapter-kit/src/index.js";
 import type { UgvQualificationMatrixInput } from "../../../packages/vehicle-device-mcp-client/src/index.js";
 import {
@@ -22,6 +26,7 @@ export function ugvManifest(
   qualificationContext: UgvQualificationMatrixInput,
   businessFeedbackProfiles?: VehicleManifestProfile["businessFeedbackProfiles"],
   trajectoryHistory?: TrajectoryHistoryReader,
+  inspectionEnabled = false,
 ): Record<string, unknown> {
   const support = qualifyUgvCapabilities({
     contracts: qualificationContext.contracts,
@@ -56,6 +61,33 @@ export function ugvManifest(
     },
     store,
   );
+  if (
+    inspectionEnabled &&
+    support.reconnaissance.area &&
+    businessFeedbackProfiles?.vehicle_inspect_area
+  ) {
+    const schemas = inspectionSchemas(resourceId);
+    (manifest.operations as Record<string, unknown>[]).push({
+      name: INSPECTION_OPERATION,
+      description:
+        "Inspect one authorized WGS84 subregion in one bounded scan. x is longitude; y is latitude. Target discoveries and qualified events retain their source. Unknown coverage or missing target reports cannot establish complete inspection. Default maximum elapsed time: 300 seconds.",
+      execution: "TASK_REQUIRED",
+      inputSchema: jsonToProtoStruct(schemas.input),
+      outputSchema: jsonToProtoStruct(schemas.result),
+      resourceBinding: { mode: "ARGUMENT_REFERENCE", resourceIdJsonPointer: "/resourceId" },
+      capabilities: {
+        availability: true,
+        scheduling: true,
+        maxElapsed: true,
+        cancel: true,
+        pauseResume: true,
+        inputRequired: businessFeedbackProfiles.vehicle_inspect_area.methods.inputUpdate,
+        idempotency: true,
+        observations: true,
+      },
+      businessFeedbackProfile: jsonToProtoStruct(businessFeedbackProfiles.vehicle_inspect_area),
+    });
+  }
   if (trajectoryHistory) {
     const schemas = trajectoryHistorySchemas();
     const input = {

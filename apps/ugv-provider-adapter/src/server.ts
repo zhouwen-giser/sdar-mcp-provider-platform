@@ -46,6 +46,7 @@ export class UgvProviderServer extends VehicleProviderGrpcServer {
             runtime.qualificationContext(),
             runtime.businessFeedbackProfiles(),
             runtime.options.trajectoryHistory,
+            runtime.options.inspectionEnabled,
           ),
         resource: (snapshot) => ugvResource(snapshot as UgvSnapshot, runtime.readiness()),
       },

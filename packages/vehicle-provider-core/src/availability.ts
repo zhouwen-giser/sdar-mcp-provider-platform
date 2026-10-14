@@ -1,3 +1,4 @@
+import { isReconOperation } from "./inspection.js";
 import { freshnessState } from "./snapshot.js";
 import { OPERATION_TRACKS } from "./track-arbiter.js";
 import type { AvailabilityContext, AvailabilityDecision, VehicleTrack } from "./types.js";
@@ -29,7 +30,7 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
   if (context.snapshot.connectivity.deviceAvailable === false)
     return result("DISABLED", code("DEVICE_UNAVAILABLE"));
   if (
-    context.operationName === "vehicle_area_recon" &&
+    isReconOperation(context.operationName) &&
     context.circularScanSupported === false &&
     context.scanMode === "circular"
   )
@@ -65,7 +66,7 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
   )
     return result("DISABLED", code("PATH_BLOCKED"));
   if (
-    context.operationName === "vehicle_area_recon" ||
+    isReconOperation(context.operationName) ||
     context.operationName === "vehicle_track_target" ||
     context.operationName === "vehicle_control_gimbal"
   ) {
@@ -99,7 +100,7 @@ export function checkVehicleAvailability(context: AvailabilityContext): Availabi
 function domains(operationName: string) {
   if (operationName === "vehicle_fire_weapon") return ["mission", "target", "payload"] as const;
   if (
-    operationName === "vehicle_area_recon" ||
+    isReconOperation(operationName) ||
     operationName === "vehicle_track_target" ||
     operationName === "vehicle_control_gimbal" ||
     operationName === "vehicle_get_payload_status" ||

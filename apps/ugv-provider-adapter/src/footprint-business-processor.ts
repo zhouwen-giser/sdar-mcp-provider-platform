@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
@@ -88,7 +89,7 @@ export class FootprintBusinessProcessor {
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
     const fact = footprintFactSchema.parse(input);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== fact.missionId ||
       compareIsoTimestamps(fact.observedAt, execution.createdAt) < 0

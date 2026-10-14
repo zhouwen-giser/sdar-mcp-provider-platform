@@ -53,7 +53,7 @@ const files = [
 ]
   .filter(
     (p) =>
-      !/(^|\/)(reports|artifacts|node_modules|\.git|\.codex|\.agents|state|secrets)(\/|$)/.test(
+      !/(^|\/)(reports|artifacts|node_modules|__pycache__|\.git|\.codex|\.agents|state|secrets)(\/|$)/.test(
         p,
       ) &&
       (!/(^|\/)\.env($|\.(?!example$))/.test(p) ||
@@ -61,7 +61,8 @@ const files = [
       p !== "SOURCE_REVISION" &&
       !p.startsWith("deploy/development/server/config/") &&
       !resolve(root, p).startsWith(`${out}/`) &&
-      !/\.(token|pem|key|pfx|p12|log)$/.test(p),
+      (!/\.(token|pem|key|pfx|p12|log|pyc|pyo|tsbuildinfo)$/.test(p) ||
+        p === "contracts/ugv-trajectory-history/v1/examples/SIMULATED_PUBLIC_KEY.pem"),
   )
   .filter((p) => {
     try {

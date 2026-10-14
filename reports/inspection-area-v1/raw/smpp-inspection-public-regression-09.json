@@ -1,0 +1,23 @@
+{
+  "name": "smpp-inspection-public-regression-09",
+  "command": "node",
+  "args": [
+    "scripts/inspection/isolated-env.mjs",
+    "exec",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/integration/ugv-task-business-public-postgres.test.ts"
+  ],
+  "startedAt": "2026-10-13T23:04:42.137Z",
+  "completedAt": "2026-10-13T23:05:03.391Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "24b665d6f2dce90156afb01ccce478a091bc6bc04d8037cb16336f6770dd31b0",
+  "sourceAfter": "24b665d6f2dce90156afb01ccce478a091bc6bc04d8037cb16336f6770dd31b0",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-public-regression-09.log",
+  "logSha256": "d776e0b887e5d29938594d09f6e5b521cc393877d7c37028e6029faeab0769b2"
+}

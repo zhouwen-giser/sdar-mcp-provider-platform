@@ -34,3 +34,6 @@ reports/ugv-simulation/REAL_EXTERNAL_PREFLIGHT.json
 reports/ugv-agent-profile-simulation/attempts/deployment-preflight-uap-p1b02-20260821t032832z.redacted.json
 # Byte-addressed command receipts and original logs must remain unchanged.
 reports/trajectory-time-history-v1/raw/**
+
+# Immutable inspection command receipts and logs are addressed by their original SHA-256.
+reports/inspection-area-v1/raw/**

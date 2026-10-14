@@ -1,0 +1,18 @@
+{
+  "name": "smpp-inspection-static-11",
+  "command": "bash",
+  "args": [
+    "-c",
+    "pnpm format:check && pnpm lint && pnpm typecheck"
+  ],
+  "startedAt": "2026-10-13T23:41:57.095Z",
+  "completedAt": "2026-10-13T23:44:28.125Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "5ef98587354a0bdec58bff45c62495aa283f9d59bde64330fb61c381f51b4c62",
+  "sourceAfter": "5ef98587354a0bdec58bff45c62495aa283f9d59bde64330fb61c381f51b4c62",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-static-11.log",
+  "logSha256": "d9cc195c9ff2cd2ebf96543906534ed87450ac272351980b94976cf03a9a0491"
+}

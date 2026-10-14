@@ -1,0 +1,20 @@
+{
+  "name": "smpp-inspection-public-03",
+  "command": "pnpm",
+  "args": [
+    "exec",
+    "vitest",
+    "run",
+    "tests/integration/ugv-inspection-public-task.test.ts"
+  ],
+  "startedAt": "2026-10-13T19:50:19.039Z",
+  "completedAt": "2026-10-13T19:50:45.691Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "94a8b5e67acabbe8f65eac630e72b5f88b99bf43fe17a5f75cea8915e001b35d",
+  "sourceAfter": "94a8b5e67acabbe8f65eac630e72b5f88b99bf43fe17a5f75cea8915e001b35d",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-public-03.log",
+  "logSha256": "1baa4dd41b306d621c6b11b44b6a1c18ac11f83cc4d64f1d74dc2dc6603f0b0c"
+}

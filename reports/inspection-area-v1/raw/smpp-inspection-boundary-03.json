@@ -1,0 +1,20 @@
+{
+  "name": "smpp-inspection-boundary-03",
+  "command": "pnpm",
+  "args": [
+    "exec",
+    "vitest",
+    "run",
+    "tests/unit/ugv-inspection.test.ts"
+  ],
+  "startedAt": "2026-10-13T23:58:09.945Z",
+  "completedAt": "2026-10-13T23:58:14.978Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "e4777fbd26e10d23b9f4ec1a9e83605a5436b8a05687323d2de7fa22583e6543",
+  "sourceAfter": "e4777fbd26e10d23b9f4ec1a9e83605a5436b8a05687323d2de7fa22583e6543",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-boundary-03.log",
+  "logSha256": "4d02acd154f72c505a5cff420144b86b7f0b39a993d5502ce7fa43f3169cea8e"
+}
