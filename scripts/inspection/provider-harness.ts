@@ -211,7 +211,23 @@ await new Promise<void>((resolve, reject) => {
   publisher.once("connect", () => resolve());
   publisher.once("error", reject);
 });
-await until(() => ingress.snapshot().connectivity.mqttConnected);
+// A fresh broker has no previous traffic. Qualify the real subscription with
+// current fixture GNSS observations, including a publish after its SUBACK.
+await until(async () => {
+  const time = Date.now();
+  await publisher.publishAsync(
+    "/ugv/gnss",
+    JSON.stringify({
+      entity_id: "ugv1",
+      longitude: 116,
+      latitude: 39,
+      altitude: 0,
+      header: { stamp: { sec: Math.floor(time / 1000), nanosec: (time % 1000) * 1000000 } },
+    }),
+    { qos: 1 },
+  );
+  return ingress.snapshot().connectivity.mqttConnected;
+});
 async function publish(topic: string, value: Record<string, unknown>) {
   const before = ingress.observationCursor(topic);
   const now = Date.now();

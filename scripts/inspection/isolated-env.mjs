@@ -36,7 +36,8 @@ if (action === "create") {
       env,
       "-p",
       "127.0.0.1::5432",
-      "sdar/postgres-pgvector:17.10-0.8.5-alpine3.23",
+      process.env.SMPP_INSPECTION_TEST_POSTGRES_IMAGE ??
+        "sdar/postgres-pgvector:17.10-0.8.5-alpine3.23",
     );
     containers.push(postgres);
     const broker = docker(

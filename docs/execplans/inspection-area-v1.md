@@ -70,3 +70,5 @@ reports/inspection-area-v1 保存基线、真实命令回执、测试、门禁�
 ## 2026-10-14 最终实现验证
 
 SMPP gate-11 日志 SHA256 `1a019b426c3ec5419a4b5d464cb7b1a2bce0bda3a19b5bf2cd6b88686b23e1ee`。SDAR joint-60 日志 SHA256 `0d93163da3621555c50ec9d8f0e94dcaa2f20b9cc333db5b56a5dc3b2c72327e`，固定 SDAR 源码 `8f97a9f7ff95529c9aa0ed00fc0a4a448d2cb4b57235d785794c2b1abd497fa0` 和 SMPP 源码 `2ab531b7502ea7851c17e07963991f38365a5a8ce766f8e172315c6135b9622a`。全部命令均 exit 0，运行期间两仓库源码未变。224 个 SMPP 冻结资产及 165 个 SDAR 冻结资产最终哈希未变。门禁后的本文更新仅为验收状态，运行源码另以 RUNTIME_SOURCE_LOCK.json 固定。
+
+CI 与发布候选完整门禁现自动创建、标记及清理独占的 PostgreSQL/MQTT 配置，支持使用 CI 既有 PostgreSQL 17 镜像。全新 broker 暴露了旧测试夹具在首条有效消息前等待 qualified connectivity 的环路；夹具现通过真实 MQTT 重复发布当前 GNSS，等待正常 SUBACK 及正式入口验证，不修改连接资格规则。ci-integration-02 在全新设施上实际通过全部 13 个原生生命周期与公共 Task 测试，创建和清理 exit 0。门禁后仅变更两份 CI 配置和两个隔离测试脚本，生产模块、合同和迁移哈希不变，详见 RUNTIME_SOURCE_LOCK.json 的 postGateChanges。

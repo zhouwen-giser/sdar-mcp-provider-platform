@@ -6434,5 +6434,31 @@
       "path": "vitest.config.ts",
       "sha256": "677dbb87a38adec75486b7a1378babf35732d4b14dbe9377e2c2f8b62f9b031b"
     }
-  ]
+  ],
+  "postGateChanges": {
+    "reason": "CI-owned test provisioning and fresh broker fixture qualification; production modules unchanged",
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "beforeSha256": "5e65025b119914fa8e7ff9ad957a4329e61a59a537e015c2d4a5914472e9977d",
+        "afterSha256": "2bb7ce962065d86ac7db8b4aed6337e5955024671e1ab42f34cc6c849d5244ee"
+      },
+      {
+        "path": ".github/workflows/release-candidate.yml",
+        "beforeSha256": "a5b8e916e36c402bfe54b588d1ca5cea106cbf581098ab7b9d625ae907b39ebd",
+        "afterSha256": "0e9f2878a3770da775cc5e2c8fda77a0cd3bc50202b5b45f3823323d9c9d409b"
+      },
+      {
+        "path": "scripts/inspection/isolated-env.mjs",
+        "beforeSha256": "ec340d25dedcbe1707ce5f4dc7b0862889a80f48009cacfdbd9d6e292e443039",
+        "afterSha256": "9ce864f013ef73af5bc9f94adead5a1425cb53d47be19a7ccf9b9474dae93267"
+      },
+      {
+        "path": "scripts/inspection/provider-harness.ts",
+        "beforeSha256": "a797543332a826e5977e3fa8d66d94ced643dabacb1fe4e2d3e659892481b767",
+        "afterSha256": "5cc6d8a2da3a91459acb0f628fd770572bb8c5c81f7994b1c325852de545773c"
+      }
+    ],
+    "validation": "smpp-inspection-ci-integration-02: all 13 lifecycle/public tests passed on newly created PostgreSQL 17 and MQTT; cleanup passed"
+  }
 }

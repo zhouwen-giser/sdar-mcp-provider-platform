@@ -116,6 +116,7 @@ jobs:
           --health-retries 20
     env:
       TEST_DATABASE_URL: postgresql://sdar:sdar@127.0.0.1:5432/sdar_runtime_test
+      SMPP_INSPECTION_TEST_CONFIG_FILE: ${{ runner.temp }}/smpp-inspection/environment.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,7 +133,17 @@ jobs:
           version: 1.57.2
           github_token: ${{ github.token }}
       - run: pnpm install --frozen-lockfile
+      - name: Create owned inspection PostgreSQL and MQTT
+        run: node scripts/inspection/isolated-env.mjs create
+        env:
+          SMPP_INSPECTION_TEST_POSTGRES_IMAGE: postgres:17-alpine
       - run: pnpm verify:v2
+      - name: Remove owned inspection infrastructure
+        if: always()
+        run: |
+          if [ -f "$SMPP_INSPECTION_TEST_CONFIG_FILE" ]; then
+            node scripts/inspection/isolated-env.mjs remove
+          fi
       - run: buf lint proto
       - name: Check Protobuf compatibility against imported rc.1 baseline
         run: |
