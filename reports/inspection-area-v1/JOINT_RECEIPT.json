@@ -1,11 +1,7 @@
 {
   "name": "sdar-inspection-joint-60",
   "command": "pnpm",
-  "args": [
-    "exec",
-    "tsx",
-    "scripts/inspection/joint.mts"
-  ],
+  "args": ["exec", "tsx", "scripts/inspection/joint.mts"],
   "startedAt": "2026-10-14T02:34:19.991Z",
   "completedAt": "2026-10-14T02:37:09.027Z",
   "exitCode": 0,

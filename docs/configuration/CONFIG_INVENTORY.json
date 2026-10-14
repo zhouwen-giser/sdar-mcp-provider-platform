@@ -32,7 +32,7 @@
     },
     "ugv": {
       "source": "apps/ugv-provider-adapter/src/config.ts",
-      "items": 76
+      "items": 80
     },
     "npc-tank": {
       "source": "apps/npc-tank-provider-adapter/src/config.ts",
@@ -100,12 +100,12 @@
     }
   ],
   "coverage": {
-    "expectedItems": 257,
-    "actualItems": 257,
-    "secretItems": 24,
+    "expectedItems": 264,
+    "actualItems": 264,
+    "secretItems": 25,
     "byComponent": {
       "runtime": 103,
-      "ugv": 73,
+      "ugv": 80,
       "npc-tank": 53,
       "home-assistant-climate": 28
     }
@@ -4009,6 +4009,66 @@
       "defaultValue": null,
       "required": false,
       "validator": "z.url().optional()",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_INSPECTION_ENABLED",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "domain",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_TRAJECTORY_HISTORY_ENABLED",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "domain",
+      "defaultDefined": true,
+      "defaultValue": false,
+      "required": false,
+      "validator": "bool.default(false)",
+      "secret": false,
+      "secretKind": "none",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_TRAJECTORY_HISTORY_SIGNING_KEY_FILE",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "domain",
+      "defaultDefined": false,
+      "defaultValue": null,
+      "required": false,
+      "validator": "optionalPath",
+      "secret": true,
+      "secretKind": "secret_file_reference",
+      "applyMode": "restart_required",
+      "applyModeStatus": "reviewed"
+    },
+    {
+      "key": "UGV_TRAJECTORY_HISTORY_MAX_PENDING",
+      "component": "ugv",
+      "source": "packages/runtime-configuration-contract/src/providers/ugv.ts",
+      "group": "provider",
+      "subgroup": "domain",
+      "defaultDefined": true,
+      "defaultValue": 256,
+      "required": false,
+      "validator": "z.coerce.number().int().min(1).max(4096).default(256)",
       "secret": false,
       "secretKind": "none",
       "applyMode": "restart_required",
