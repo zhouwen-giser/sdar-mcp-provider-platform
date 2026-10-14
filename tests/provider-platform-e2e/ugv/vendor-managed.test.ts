@@ -122,6 +122,7 @@ describe("vendor_managed UGV Provider platform integration", () => {
     adapterRuntime = new UgvProviderRuntime(
       {
         providerId,
+        executionMode: "simulation",
         freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
