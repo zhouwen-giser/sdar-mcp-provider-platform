@@ -1,0 +1,10 @@
+$ vitest run test
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/runtime-configuration-contract
+
+
+ Test Files  8 passed (8)
+      Tests  46 passed (46)
+   Start at  21:07:17
+   Duration  4.21s (transform 365ms, setup 0ms, import 1.47s, tests 1.20s, environment 1ms)
+

@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "evidenceClass": "ISOLATED_SIMULATION_REAL_PG_MQTT_MCP",
+  "runId": "uap-p3-b02-inspection-joint-ef85213df82f43b398af10885486e830",
+  "physicalExecution": "NOT_RUN",
+  "jointReportSha256": "68075014af6b9bc6c9028a2c7a24c9b67fb6f98e047392038142d5263bc6476f",
+  "commandReceipt": "raw/sdar-inspection-joint-67.json",
+  "cleanupStages": 9,
+  "cleanupErrors": 0,
+  "traceDerivation": "JOINT_CLEANUP_TRACE_DERIVATION.json",
+  "cases": [
+    {
+      "case": "inspection-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-findings",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 1,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-partial",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "patrol-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-failed",
+      "taskPhase": "completed",
+      "reportStatus": "failed",
+      "findings": 1,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-cancel",
+      "taskPhase": "canceled",
+      "reportStatus": "cancelled",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 0,
+      "childTasks": 2
+    }
+  ]
+}

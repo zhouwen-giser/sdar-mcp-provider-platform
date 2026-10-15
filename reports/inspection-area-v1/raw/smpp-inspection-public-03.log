@@ -1,0 +1,591 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (5 tests | 4 failed) 24912ms
+     × retains honest full inspection results and exact task identity 5350ms
+     × retains honest findings inspection results and exact task identity 4787ms
+     × retains honest missing inspection results and exact task identity 5086ms
+     × retains honest partial inspection results and exact task identity 4894ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest full inspection results and exact task identity
+AssertionError: expected { Object (outcome, retryable, ...) } to match object { resourceId: 'vehicle:ugv1', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
++   "adapterOutcome": "SUCCEEDED",
++   "adapterResult": {
++     "fields": {
++       "anomalies": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "correlationStrength": {
++         "kind": "stringValue",
++         "stringValue": "STRICT_CORRELATED",
++       },
++       "coverage": {
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "coveragePercent": {
++               "kind": "numberValue",
++               "numberValue": 100,
++             },
++             "incomplete": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++           },
++         },
++       },
+        "inspectionReport": {
+-     "completion": "complete",
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "artifactRefs": {
++               "kind": "listValue",
++               "listValue": {
++                 "values": [],
++               },
++             },
++             "completion": {
++               "kind": "stringValue",
++               "stringValue": "complete",
++             },
++             "coverageState": {
++               "kind": "stringValue",
++               "stringValue": "full",
++             },
++             "findingCount": {
++               "kind": "numberValue",
++               "numberValue": 0,
++             },
++             "targetReportComplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++             "targetReportObservedAt": {
++               "kind": "stringValue",
++               "stringValue": "2026-10-13T19:50:25.414Z",
++             },
++             "truncated": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "version": {
++               "kind": "stringValue",
++               "stringValue": "1.0",
++             },
++           },
++         },
++       },
++       "missingEvidence": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "observedAt": {
++         "kind": "stringValue",
++         "stringValue": "2026-10-13T19:50:25.482Z",
++       },
++       "resourceId": {
++         "kind": "stringValue",
++         "stringValue": "vehicle:ugv1",
++       },
++       "status": {
++         "kind": "stringValue",
++         "stringValue": "completed",
++       },
++     },
+    },
+-   "resourceId": "vehicle:ugv1",
+-   "status": "completed",
++   "completedAt": "2026-10-13T19:50:30.184Z",
++   "outcome": "start_window_missed",
++   "reasonCode": "START_WINDOW_MISSED",
++   "retryable": true,
++   "stopReason": "START_WINDOW_MISSED",
+  }
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:147:45
+    145|         unknown
+    146|       >;
+    147|       expect(output?.["structuredContent"]).toMatchObject({
+       |                                             ^
+    148|         resourceId: input.resourceId,
+    149|         status: "completed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest findings inspection results and exact task identity
+AssertionError: expected { Object (outcome, retryable, ...) } to match object { resourceId: 'vehicle:ugv1', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
++   "adapterOutcome": "SUCCEEDED",
++   "adapterResult": {
++     "fields": {
++       "anomalies": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [
++             {
++               "kind": "structValue",
++               "structValue": {
++                 "fields": {
++                   "artifactId": {
++                     "kind": "stringValue",
++                     "stringValue": "target-4c10f28b84f5029736b51d44635963a8",
++                   },
++                   "artifactRevision": {
++                     "kind": "numberValue",
++                     "numberValue": 1,
++                   },
++                   "confidence": {
++                     "kind": "nullValue",
++                     "nullValue": "NULL_VALUE",
++                   },
++                   "correlationStrength": {
++                     "kind": "stringValue",
++                     "stringValue": "STRICT_CORRELATED",
++                   },
++                   "findingId": {
++                     "kind": "stringValue",
++                     "stringValue": "target-4c10f28b84f5029736b51d44635963a8",
++                   },
++                   "frame": {
++                     "kind": "stringValue",
++                     "stringValue": "EPSG:4326",
++                   },
++                   "kind": {
++                     "kind": "stringValue",
++                     "stringValue": "target_observed",
++                   },
++                   "lastReportObservedAt": {
++                     "kind": "stringValue",
++                     "stringValue": "2026-10-13T19:50:30.592Z",
++                   },
++                   "observedAt": {
++                     "kind": "stringValue",
++                     "stringValue": "2026-10-13T19:50:30.592Z",
++                   },
++                   "sourceRecordRef": {
++                     "kind": "stringValue",
++                     "stringValue": "7",
++                   },
++                   "sourceRevision": {
++                     "kind": "stringValue",
++                     "stringValue": "1791921030592000",
++                   },
++                   "spatialRelation": {
++                     "kind": "stringValue",
++                     "stringValue": "inside",
++                   },
++                   "targetId": {
++                     "kind": "stringValue",
++                     "stringValue": "7",
++                   },
++                   "targetType": {
++                     "kind": "stringValue",
++                     "stringValue": "1",
++                   },
++                   "visibility": {
++                     "kind": "stringValue",
++                     "stringValue": "visible",
++                   },
++                   "x": {
++                     "kind": "numberValue",
++                     "numberValue": 116.5,
++                   },
++                   "y": {
++                     "kind": "numberValue",
++                     "numberValue": 39.5,
++                   },
++                 },
++               },
++             },
++           ],
++         },
++       },
++       "correlationStrength": {
++         "kind": "stringValue",
++         "stringValue": "STRICT_CORRELATED",
++       },
++       "coverage": {
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "coveragePercent": {
++               "kind": "numberValue",
++               "numberValue": 100,
++             },
++             "incomplete": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++           },
++         },
++       },
+        "inspectionReport": {
+-     "completion": "complete",
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "artifactRefs": {
++               "kind": "listValue",
++               "listValue": {
++                 "values": [
++                   {
++                     "kind": "structValue",
++                     "structValue": {
++                       "fields": {
++                         "id": {
++                           "kind": "stringValue",
++                           "stringValue": "target-4c10f28b84f5029736b51d44635963a8",
++                         },
++                         "kind": {
++                           "kind": "stringValue",
++                           "stringValue": "artifact",
++                         },
++                         "revision": {
++                           "kind": "numberValue",
++                           "numberValue": 1,
++                         },
++                       },
++                     },
++                   },
++                 ],
++               },
++             },
++             "completion": {
++               "kind": "stringValue",
++               "stringValue": "complete",
++             },
++             "coverageState": {
++               "kind": "stringValue",
++               "stringValue": "full",
++             },
++             "findingCount": {
++               "kind": "numberValue",
++               "numberValue": 1,
++             },
++             "targetReportComplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++             "targetReportObservedAt": {
++               "kind": "stringValue",
++               "stringValue": "2026-10-13T19:50:30.592Z",
++             },
++             "truncated": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "version": {
++               "kind": "stringValue",
++               "stringValue": "1.0",
++             },
++           },
++         },
++       },
++       "missingEvidence": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "observedAt": {
++         "kind": "stringValue",
++         "stringValue": "2026-10-13T19:50:30.600Z",
++       },
++       "resourceId": {
++         "kind": "stringValue",
++         "stringValue": "vehicle:ugv1",
++       },
++       "status": {
++         "kind": "stringValue",
++         "stringValue": "completed",
++       },
++     },
+    },
+-   "resourceId": "vehicle:ugv1",
+-   "status": "completed",
++   "completedAt": "2026-10-13T19:50:34.995Z",
++   "outcome": "start_window_missed",
++   "reasonCode": "START_WINDOW_MISSED",
++   "retryable": true,
++   "stopReason": "START_WINDOW_MISSED",
+  }
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:147:45
+    145|         unknown
+    146|       >;
+    147|       expect(output?.["structuredContent"]).toMatchObject({
+       |                                             ^
+    148|         resourceId: input.resourceId,
+    149|         status: "completed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest missing inspection results and exact task identity
+AssertionError: expected { Object (outcome, retryable, ...) } to match object { resourceId: 'vehicle:ugv1', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
++   "adapterOutcome": "SUCCEEDED",
++   "adapterResult": {
++     "fields": {
++       "anomalies": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "correlationStrength": {
++         "kind": "stringValue",
++         "stringValue": "STRICT_CORRELATED",
++       },
++       "coverage": {
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "coveragePercent": {
++               "kind": "numberValue",
++               "numberValue": 100,
++             },
++             "incomplete": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++           },
++         },
++       },
+        "inspectionReport": {
+-     "completion": "unavailable",
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "artifactRefs": {
++               "kind": "listValue",
++               "listValue": {
++                 "values": [],
+                },
+-   "resourceId": "vehicle:ugv1",
+-   "status": "completed",
++             },
++             "completion": {
++               "kind": "stringValue",
++               "stringValue": "unavailable",
++             },
++             "coverageState": {
++               "kind": "stringValue",
++               "stringValue": "full",
++             },
++             "findingCount": {
++               "kind": "numberValue",
++               "numberValue": 0,
++             },
++             "targetReportComplete": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "targetReportObservedAt": {
++               "kind": "nullValue",
++               "nullValue": "NULL_VALUE",
++             },
++             "truncated": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "version": {
++               "kind": "stringValue",
++               "stringValue": "1.0",
++             },
++           },
++         },
++       },
++       "missingEvidence": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [
++             {
++               "kind": "stringValue",
++               "stringValue": "INSPECTION_TARGET_REPORT_MISSING",
++             },
++           ],
++         },
++       },
++       "observedAt": {
++         "kind": "stringValue",
++         "stringValue": "2026-10-13T19:50:35.244Z",
++       },
++       "resourceId": {
++         "kind": "stringValue",
++         "stringValue": "vehicle:ugv1",
++       },
++       "status": {
++         "kind": "stringValue",
++         "stringValue": "completed",
++       },
++     },
++   },
++   "completedAt": "2026-10-13T19:50:40.066Z",
++   "outcome": "start_window_missed",
++   "reasonCode": "START_WINDOW_MISSED",
++   "retryable": true,
++   "stopReason": "START_WINDOW_MISSED",
+  }
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:147:45
+    145|         unknown
+    146|       >;
+    147|       expect(output?.["structuredContent"]).toMatchObject({
+       |                                             ^
+    148|         resourceId: input.resourceId,
+    149|         status: "completed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: expected { Object (outcome, retryable, ...) } to match object { resourceId: 'vehicle:ugv1', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
++   "adapterOutcome": "SUCCEEDED",
++   "adapterResult": {
++     "fields": {
++       "anomalies": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "correlationStrength": {
++         "kind": "stringValue",
++         "stringValue": "STRICT_CORRELATED",
++       },
++       "coverage": {
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "coveragePercent": {
++               "kind": "numberValue",
++               "numberValue": 50,
++             },
++             "incomplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++           },
++         },
++       },
+        "inspectionReport": {
+-     "completion": "partial",
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "artifactRefs": {
++               "kind": "listValue",
++               "listValue": {
++                 "values": [],
+                },
+-   "resourceId": "vehicle:ugv1",
+-   "status": "completed",
++             },
++             "completion": {
++               "kind": "stringValue",
++               "stringValue": "partial",
++             },
++             "coverageState": {
++               "kind": "stringValue",
++               "stringValue": "partial",
++             },
++             "findingCount": {
++               "kind": "numberValue",
++               "numberValue": 0,
++             },
++             "targetReportComplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++             "targetReportObservedAt": {
++               "kind": "stringValue",
++               "stringValue": "2026-10-13T19:50:40.442Z",
++             },
++             "truncated": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "version": {
++               "kind": "stringValue",
++               "stringValue": "1.0",
++             },
++           },
++         },
++       },
++       "missingEvidence": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [
++             {
++               "kind": "stringValue",
++               "stringValue": "INSPECTION_COVERAGE_INCOMPLETE",
++             },
++           ],
++         },
++       },
++       "observedAt": {
++         "kind": "stringValue",
++         "stringValue": "2026-10-13T19:50:40.472Z",
++       },
++       "resourceId": {
++         "kind": "stringValue",
++         "stringValue": "vehicle:ugv1",
++       },
++       "status": {
++         "kind": "stringValue",
++         "stringValue": "completed",
++       },
++     },
++   },
++   "completedAt": "2026-10-13T19:50:44.967Z",
++   "outcome": "start_window_missed",
++   "reasonCode": "START_WINDOW_MISSED",
++   "retryable": true,
++   "stopReason": "START_WINDOW_MISSED",
+  }
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:147:45
+    145|         unknown
+    146|       >;
+    147|       expect(output?.["structuredContent"]).toMatchObject({
+       |                                             ^
+    148|         resourceId: input.resourceId,
+    149|         status: "completed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  03:50:20
+   Duration  25.17s (transform 41ms, setup 0ms, import 62ms, tests 24.91s, environment 0ms)
+

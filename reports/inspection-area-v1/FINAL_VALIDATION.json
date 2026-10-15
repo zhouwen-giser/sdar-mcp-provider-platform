@@ -1,0 +1,295 @@
+{
+  "status": "LOCAL_DEPLOYED_READONLY_ACCEPTED",
+  "recordedAt": "2026-10-15T08:20:27.259337+00:00",
+  "smppFullGate": {
+    "name": "smpp-inspection-gate-11",
+    "status": "PASS",
+    "exitCode": 0,
+    "sourceBefore": "2ab531b7502ea7851c17e07963991f38365a5a8ce766f8e172315c6135b9622a",
+    "sourceAfter": "2ab531b7502ea7851c17e07963991f38365a5a8ce766f8e172315c6135b9622a",
+    "logSha256": "1a019b426c3ec5419a4b5d464cb7b1a2bce0bda3a19b5bf2cd6b88686b23e1ee"
+  },
+  "freshInfrastructure": {
+    "name": "smpp-inspection-ci-integration-02",
+    "status": "PASS",
+    "exitCode": 0,
+    "sourceBefore": "84e3ea3fc395666a2fa0d3762e7db7cb05bcc6038013a2bcb9fe4c3eb36a4d68",
+    "sourceAfter": "84e3ea3fc395666a2fa0d3762e7db7cb05bcc6038013a2bcb9fe4c3eb36a4d68",
+    "logSha256": "af23de3582f3920e13c52c57956a062b3e287b7553ccd85517a201ef2ac59c67"
+  },
+  "inspectionSourceScopes": {
+    "name": "smpp-inspection-source-scope-01",
+    "status": "PASS",
+    "exitCode": 0,
+    "sourceBefore": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+    "sourceAfter": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+    "logSha256": "85b5ec5cda03a75e59e8a8eba583471705d8e155759f3d41b27d38baa3099586"
+  },
+  "formalJoint": {
+    "name": "sdar-inspection-joint-68",
+    "status": "PASS",
+    "exitCode": 0,
+    "sourceBefore": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+    "sourceAfter": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+    "logSha256": "fc2d5a273cb55b6c29e5adc1a3500cd24fb7ef1befe417ee83a8a83c344940a6"
+  },
+  "physicalExecution": "NOT_RUN",
+  "requirements": [
+    {
+      "id": "INSPECT-01",
+      "status": "PASS",
+      "coverage": [
+        "WGS84 longitude/latitude",
+        "invalid geometry",
+        "unresolved exclusions",
+        "parent deadline clip",
+        "strict 13/14 catalogs"
+      ],
+      "tests": [
+        "tests/unit/ugv-inspection.test.ts",
+        "packages/domain/test/area-inspection.unit.test.ts",
+        "packages/runtime-control-application/test/inspection-patrol-policy.unit.test.ts"
+      ]
+    },
+    {
+      "id": "INSPECT-02",
+      "status": "PASS",
+      "coverage": [
+        "once scan",
+        "pause/resume/cancel",
+        "RequiredInput",
+        "timeout acknowledgement",
+        "restart without duplicate dispatch"
+      ],
+      "tests": [
+        "tests/integration/ugv-inspection-postgres-mqtt.test.ts",
+        "tests/integration/ugv-inspection-public-task.test.ts"
+      ]
+    },
+    {
+      "id": "INSPECT-03",
+      "status": "PASS",
+      "coverage": [
+        "findings and qualified empty",
+        "missing source",
+        "conflicting/duplicate versions",
+        "retained/expired/future/pre-dispatch packets",
+        "cross-resource and cross-task scopes",
+        "256 inline/full objects readable"
+      ],
+      "tests": [
+        "tests/unit/ugv-inspection.test.ts",
+        "reports/inspection-area-v1/inspection-correlation.test.ts",
+        "tests/integration/ugv-inspection-postgres-mqtt.test.ts"
+      ]
+    },
+    {
+      "id": "INSPECT-04",
+      "status": "PASS",
+      "coverage": [
+        "partial/unavailable reports",
+        "byte truncation",
+        "changed effective area",
+        "failure/cancellation/timeout retention",
+        "real trajectory required"
+      ],
+      "tests": [
+        "tests/integration/result-contract-hardening.test.ts",
+        "packages/domain/test/area-patrol.unit.test.ts",
+        "apps/server/test/patrol-retained-evidence.unit.test.ts"
+      ]
+    },
+    {
+      "id": "INSPECT-05",
+      "status": "PASS",
+      "coverage": [
+        "native governed publication and idempotence",
+        "two independent child Tasks",
+        "one remote admission per child",
+        "full/degraded/failed/cancelled aggregation",
+        "fixed readiness TTL refresh/no replay"
+      ],
+      "evidence": "JOINT.json"
+    },
+    {
+      "id": "INSPECT-06",
+      "status": "PASS",
+      "coverage": [
+        "all full gates",
+        "joint deployment archives",
+        "idle-gated local services update",
+        "read-only catalog/governance/composability acceptance",
+        "preserved data/configuration/signing keys/PMS"
+      ],
+      "evidence": [
+        "FULL_GATE.json",
+        "JOINT.json",
+        "CATALOG_AFTER.json",
+        "BOOTSTRAP.json",
+        "BINDING_UPGRADE.json",
+        "GOVERNANCE_AFTER.json",
+        "PRESERVATION.json",
+        "CONTAINER_SOURCE.json",
+        "DURABLE_DELIVERY.json"
+      ]
+    }
+  ],
+  "frozenAssets": {
+    "smpp": 224,
+    "sdar": 165,
+    "changed": 0
+  },
+  "sdarFullGate": {
+    "name": "sdar-inspection-gate-18",
+    "status": "PASS",
+    "exitCode": 0,
+    "sourceBefore": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+    "sourceAfter": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+    "logSha256": "e8f051a7dd5baec5261b334d9f8996b03102b82910d9b0869bc05c860a4e25cd"
+  },
+  "nativeCatalogToolCount": 13,
+  "siteSkillInventory": 14,
+  "siteAcceptance": "native publication and readonly composability; no physical patrol submitted",
+  "sdarRuntimeInputSha256": "c01c7839a283f08e43b3b4019b103c9b00c958c2b7d7c394d68f1bb0873cca52",
+  "smppPostGateChanges": {
+    "reason": "CI-owned infrastructure and qualified MQTT fixture; configuration inventory and exact test count include four declared inspection/trajectory settings; production modules unchanged",
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "beforeSha256": "5e65025b119914fa8e7ff9ad957a4329e61a59a537e015c2d4a5914472e9977d",
+        "afterSha256": "a9635300cdde2ae10e4d3f25b976ee92b292f555d91338236d0fe48d48dc4a37"
+      },
+      {
+        "path": ".github/workflows/release-candidate.yml",
+        "beforeSha256": "a5b8e916e36c402bfe54b588d1ca5cea106cbf581098ab7b9d625ae907b39ebd",
+        "afterSha256": "1b1192439a2dcc09f16959f8d978109825476ab73e4caa84fc430a599dde24c4"
+      },
+      {
+        "path": "scripts/inspection/isolated-env.mjs",
+        "beforeSha256": "ec340d25dedcbe1707ce5f4dc7b0862889a80f48009cacfdbd9d6e292e443039",
+        "afterSha256": "9ce864f013ef73af5bc9f94adead5a1425cb53d47be19a7ccf9b9474dae93267"
+      },
+      {
+        "path": "scripts/inspection/provider-harness.ts",
+        "beforeSha256": "a797543332a826e5977e3fa8d66d94ced643dabacb1fe4e2d3e659892481b767",
+        "afterSha256": "5cc6d8a2da3a91459acb0f628fd770572bb8c5c81f7994b1c325852de545773c"
+      },
+      {
+        "path": "docs/configuration/CONFIG_INVENTORY.json",
+        "beforeSha256": "7d485a07c24200fc9eb24cd70dae5519339ee61249159e62f8fd39987d89c66a",
+        "afterSha256": "c2b7db2e4b5cc0235c899d6f50c946f5c550f248ca1c161deea54a0067f17da1"
+      },
+      {
+        "path": "packages/runtime-configuration-contract/src/providers/ugv.test.ts",
+        "beforeSha256": "5f33d194bcb57d80f47881266e06bd1ab2f8a814d2937463eff8971b4f08cc0c",
+        "afterSha256": "4e847d3bae97be7e52e53e9423189e20bb66059fa9cb026783908769c93219bc"
+      },
+      {
+        "path": "tests/provider-platform-e2e/ugv/vendor-managed.test.ts",
+        "beforeSha256": "f89946b475a0c91c7c9c5b0ad6fd5fcbea400643c33a05707cdcf6858a53f993",
+        "afterSha256": "7bb6b92b49f83a89711f3d47f87a259ecdcd6ad160a28c0830e650ae5de4bb1d"
+      },
+      {
+        "path": "scripts/run-release-artifact-smoke.mjs",
+        "beforeSha256": "05d194b30435b3429e8d193ed4264548f4febd70b2c8e6de00e17bc0c1ac0628",
+        "afterSha256": "aee739315393814b11f1b12b58b114ca76162d2d3f36a232dc67d39298ae6994"
+      }
+    ],
+    "validation": "smpp-inspection-ci-integration-02: all 13 lifecycle/public tests passed on newly created PostgreSQL 17 and MQTT; cleanup passed; ci-context-01: 23 workflow regressions passed; GitHub rejected job-level runner.temp, now uses allowed github run identity in private /tmp path; runtime bytes unchanged; ci-config-contract-01: all 46 configuration-contract checks passed, exact inventory equality retained; vendor-mode-01: original five tests pass with explicit simulation fixture; Worker exact filesystem list includes its existing contracts directory; production unchanged"
+  },
+  "delivery": {
+    "status": "PASS",
+    "checkedAt": "2026-10-15T08:12:44.940925+00:00",
+    "privateRollbackBackups": "/home/sz/.smpp-debug/inspection-area-v1-20261014/backups",
+    "sourceRoots": {
+      "smpp": "/mnt/data/inspection-area-v1-20261014/source/smpp-175cc2594300",
+      "sdar": "/mnt/data/inspection-area-v1-20261014/source/sdar-c8a39c8616c5"
+    },
+    "packages": [
+      {
+        "component": "smpp",
+        "path": "/mnt/data/inspection-area-v1-20261014/smpp-gowm-gdps-gsap-wsgs-telemetry-fe559b1e4ef8bfd8.tar.gz",
+        "sha256": "1bbc900373513577907847543e918ceb8ca2de2a64f69c7c1a5e6c64f79f9ae2",
+        "bytes": 25729380
+      },
+      {
+        "component": "sdar",
+        "path": "/mnt/data/inspection-area-v1-20261014/sdar-united-5fafef5102a10fdb2a1a.tar.gz",
+        "sha256": "406625efa8be7ce4b94ce5db73bdc9c0163b4f14b8618eb05f16908b59a54c4b",
+        "bytes": 31858180
+      }
+    ]
+  },
+  "postGateDocumentation": {
+    "status": "PASS",
+    "scope": "One deployment README correction after full gate; no production, test, configuration, contract, dependency or migration changes.",
+    "qualifiedGate": "raw/sdar-inspection-gate-18.json",
+    "qualifiedCommit": "ebe1e7ebced304c35448553dba27840af1bb651b",
+    "sourceRevision": "c8a39c8616c5c9574afb104077fb59879c32ea0b",
+    "files": [
+      {
+        "path": "deploy/united/README.md",
+        "beforeSha256": "0a8ab39bf39b5e6cec4ca133e75c11358fb048b068d91921d97bb56b95a63fdd",
+        "afterSha256": "a6df4aed3f61b142e74671da9d4e61979034bdaa09e2769c04325b90875a161f",
+        "classification": "deployment documentation only"
+      }
+    ]
+  },
+  "performanceMetrics": {
+    "baselineP95RawMs": 434.0573599999916,
+    "evidenceEnabledP95RawMs": 444.43893099999696,
+    "regressionRawPercent": 2.3917509427799017,
+    "baselineMedianDriftRawPercent": 0.7675745897774275,
+    "appendP95RawMs": 3.447567999999592
+  },
+  "verificationEnvironment": {
+    "mainPostgresStorage": "owned disposable tmpfs 2GiB with real WAL; separate persistent-volume integration and migration evidence retained",
+    "performanceCpuAffinity": {
+      "node": 1,
+      "hostCpus": [13, 14, 15, 16, 20, 21, 22, 23, 37, 38, 39, 40, 44, 45, 46, 47],
+      "databaseCpus": [17, 18, 19, 12],
+      "evidence": "PERFORMANCE_CPU_GATE18.json"
+    },
+    "officialTckPinnedCache": "PINNED_TCK_CACHE_GATE18.json",
+    "testsOrThresholdsChanged": false,
+    "productionSloOrDurabilityQualified": false
+  },
+  "postgresBindingRegression": {
+    "receipt": {
+      "name": "sdar-inspection-cas-persistence-green-02",
+      "status": "PASS",
+      "exitCode": 0,
+      "sourceBefore": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+      "sourceAfter": "dc43ba7f485b57f97f866b7c37b5a7d0f390c26351f495ae7eb589df4da91fbf",
+      "logSha256": "64dee2bda99ee4ebaaba00ba9a131eb70c13a229bf600c75bcfe5c3b3285f197"
+    },
+    "scope": "Real PostgreSQL: retained immediate Catalog lineage, exact old versions, idempotent replay, counter-only rejection under binding/source locks; three tests passed."
+  },
+  "formalJointTraceDerivation": {
+    "path": "JOINT_CLEANUP_TRACE_DERIVATION.json",
+    "sha256": "de19b3f8387f7affe336464e5d3e7cd3605636a2ee55d3fccdd67747ef89b7da"
+  },
+  "retainedFailures": [
+    "GATE14_NETWORK_FAILURE.json",
+    "JOINT_66_SHUTDOWN.json",
+    "raw/sdar-inspection-gate-12.json",
+    "raw/sdar-inspection-gate-13.json",
+    "raw/sdar-inspection-gate-15.json",
+    "raw/sdar-inspection-perf-cpu-01.json",
+    "raw/sdar-inspection-gate-17.json",
+    "raw/sdar-inspection-binding-upgrade-01.json",
+    "raw/sdar-inspection-binding-upgrade-02.json",
+    "raw/sdar-inspection-binding-upgrade-03.json",
+    "raw/sdar-inspection-live-bootstrap-02.json",
+    "raw/sdar-inspection-cas-persistence-red-02.json",
+    "raw/sdar-inspection-cas-persistence-green-01.json"
+  ],
+  "nativeEvidence": {
+    "BOOTSTRAP": "a8a48a0e31bca9a74713378cb4866c1f6548a87c98c73f91128e51318fc8a254",
+    "BINDING_UPGRADE": "e91ce722ae0bb7c265beeb9edbb3216bc6e6ffc5b30e5cb5ea637eb62c44910a",
+    "GOVERNANCE_AFTER": "c5d3492073eef0ffc6479922e3b10076c212d8549edd1dd05ab2a9f65fbd09b1",
+    "PRESERVATION": "3a1746925bc0c9b95faf9e69b5263c8e625f8f8b4d7da81b8fde122a4cd36864",
+    "CONTAINER_SOURCE": "822114faaa2079ffbc6eda6a0e0dae09940a4531bd940dd94945a6016cf0849e",
+    "CATALOG_AFTER": "51d3653923a45f8a6c60a2246c33617e7d1daca73b807e41c357c01d152e59fe"
+  }
+}

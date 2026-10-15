@@ -1,0 +1,18 @@
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check && pnpm audit:dependencies && pnpm sbom:check && pnpm deployment:check && pnpm container:check && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm test:recovery && pnpm test:security && pnpm test:e2e && pnpm test:conformance && pnpm capacity:baseline
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ tsc --noEmit -p tsconfig.json
+scripts/inspection/provider-harness.ts(170,29): error TS2345: Argument of type '(value: void | PromiseLike<void>) => void' is not assignable to parameter of type 'OnConnectCallback'.
+  Types of parameters 'value' and 'packet' are incompatible.
+    Type 'IConnackPacket' is not assignable to type 'void | PromiseLike<void>'.
+tests/unit/ugv-inspection.test.ts(334,5): error TS2322: Type '{ cursor: string; sourceVersion: string; observedAt: string; missionId: string; correlation: "STRICT_CORRELATED"; kind: "recon_exception"; errorCode: string; reason: string; }[]' is not assignable to type '{ sourceVersion?: string; targetId?: string; targetType?: string; longitude?: number; latitude?: number; cursor: string; observedAt: string; missionId: string; correlation: string; kind: string; errorCode: number | null; reason: string | null; }[]'.
+  Type '{ cursor: string; sourceVersion: string; observedAt: string; missionId: string; correlation: "STRICT_CORRELATED"; kind: "recon_exception"; errorCode: string; reason: string; }' is not assignable to type '{ sourceVersion?: string; targetId?: string; targetType?: string; longitude?: number; latitude?: number; cursor: string; observedAt: string; missionId: string; correlation: string; kind: string; errorCode: number | null; reason: string | null; }'.
+    Types of property 'errorCode' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+tests/unit/ugv-inspection.test.ts(344,5): error TS18048: 'state.exceptions' is possibly 'undefined'.
+tests/unit/ugv-inspection.test.ts(345,10): error TS18048: 'state.exceptions' is possibly 'undefined'.
+tests/unit/ugv-inspection.test.ts(352,7): error TS2322: Type 'string' is not assignable to type 'number'.
+[ELIFECYCLE] Command failed with exit code 2.
+[ELIFECYCLE] Command failed with exit code 2.

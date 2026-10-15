@@ -1,0 +1,20 @@
+{
+  "name": "smpp-inspection-source-scope-01",
+  "command": "pnpm",
+  "args": [
+    "exec",
+    "vitest",
+    "run",
+    "reports/inspection-area-v1/inspection-correlation.test.ts"
+  ],
+  "startedAt": "2026-10-14T03:14:14.468Z",
+  "completedAt": "2026-10-14T03:14:18.224Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+  "sourceAfter": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-source-scope-01.log",
+  "logSha256": "85b5ec5cda03a75e59e8a8eba583471705d8e155759f3d41b27d38baa3099586"
+}

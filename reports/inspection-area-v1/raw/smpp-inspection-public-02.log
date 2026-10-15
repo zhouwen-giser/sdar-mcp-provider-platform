@@ -1,0 +1,112 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (5 tests | 5 failed) 22295ms
+     × retains honest full inspection results and exact task identity 5152ms
+     × retains honest findings inspection results and exact task identity 4973ms
+     × retains honest missing inspection results and exact task identity 4980ms
+     × retains honest partial inspection results and exact task identity 2772ms
+     × rejects illegal geometry before any physical task starts 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest full inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"29d9e4cd-486a-4ff1-8391-37ed91354294","error":{"code":-32601,"message":"Method not found"}}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:138:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest findings inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"b795fa1c-de1f-4528-871c-0ed9ef835fcb","error":{"code":-32601,"message":"Method not found"}}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:138:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest missing inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"4b4b91f7-2ac5-411c-8140-bd7eaf31d214","error":{"code":-32601,"message":"Method not found"}}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:138:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: {"error":"rate_limit_exceeded"}: expected 429 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 429
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:136:22
+ ❯ until tests/integration/ugv-inspection-public-task.test.ts:90:9
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:135:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > rejects illegal geometry before any physical task starts
+Error: RECON_CONTEXT_UNAVAILABLE
+ ❯ ChildProcess.<anonymous> tests/integration/ugv-inspection-public-task.test.ts:44:38
+     42|         if (waiter) {
+     43|           pending.delete(data.id);
+     44|           data.error ? waiter.reject(Error(data.error)) : waiter.resol…
+       |                                      ^
+     45|         }
+     46|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  03:48:33
+   Duration  22.55s (transform 51ms, setup 0ms, import 70ms, tests 22.30s, environment 0ms)
+

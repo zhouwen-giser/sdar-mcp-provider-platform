@@ -1,0 +1,24 @@
+{
+  "name": "smpp-inspection-image-runtime-05",
+  "command": "docker",
+  "args": [
+    "build",
+    "--target",
+    "ugv-real-runtime",
+    "--build-arg",
+    "VCS_REF=e34ba51f04c04d62b54b07eeceba2ba716190910-worktree-51921e4dd9e5",
+    "--tag",
+    "smpp-inspection/runtime:e34ba51f04c04d62b54b07eeceba2ba716190910-worktree-51921e4dd9e5",
+    "/tmp/smpp-inspection-v1-20261014/deployment/smpp-source-final-v4"
+  ],
+  "startedAt": "2026-10-14T13:17:41.643Z",
+  "completedAt": "2026-10-14T13:22:30.613Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceAfter": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-image-runtime-05.log",
+  "logSha256": "59cf54ce45527b5cb7fcca6c3bf53305d85500cca63dc2a4bb4d66febd588879"
+}

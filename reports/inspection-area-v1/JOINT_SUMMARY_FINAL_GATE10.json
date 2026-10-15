@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "evidenceClass": "ISOLATED_SIMULATION_REAL_PG_MQTT_MCP",
+  "runId": "uap-p3-b02-inspection-joint-723cfd2fe64740cab28092ec062f540b",
+  "physicalExecution": "NOT_RUN",
+  "jointReportSha256": "f986c84a790d16d8b9f736511a16b5fe99733ac550f6f25f824743be2f625c39",
+  "cases": [
+    {
+      "case": "inspection-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-findings",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 1,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "inspection-partial",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 0,
+      "inspectionReports": 0,
+      "childTasks": 0
+    },
+    {
+      "case": "patrol-full",
+      "taskPhase": "completed",
+      "reportStatus": "completed",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-missing",
+      "taskPhase": "completed",
+      "reportStatus": "degraded",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-failed",
+      "taskPhase": "completed",
+      "reportStatus": "failed",
+      "findings": 1,
+      "trajectoryPoints": 2,
+      "inspectionReports": 1,
+      "childTasks": 2
+    },
+    {
+      "case": "patrol-cancel",
+      "taskPhase": "canceled",
+      "reportStatus": "cancelled",
+      "findings": 0,
+      "trajectoryPoints": 2,
+      "inspectionReports": 0,
+      "childTasks": 2
+    }
+  ]
+}

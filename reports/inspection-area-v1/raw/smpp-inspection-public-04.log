@@ -1,0 +1,97 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (5 tests | 4 failed) 10585ms
+     × retains honest full inspection results and exact task identity 1235ms
+     × retains honest findings inspection results and exact task identity 1415ms
+     × retains honest missing inspection results and exact task identity 1270ms
+     × retains honest partial inspection results and exact task identity 1259ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest full inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"fa0e5897-f9df-4868-88c3-b5c20b5fc9db","error":{"code":-32003,"message":"Missing required client capability","data":{"requiredCapabilities":{"extensions":{"io.sdar/taskBusiness":{"profileVersion":"1.0-rc2"}}}}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:89:33
+     87|   });
+     88|   const body = await response.text();
+     89|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     90|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     91| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:160:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest findings inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"c3cc8eb5-90a2-4681-84b4-67fa66da5c03","error":{"code":-32003,"message":"Missing required client capability","data":{"requiredCapabilities":{"extensions":{"io.sdar/taskBusiness":{"profileVersion":"1.0-rc2"}}}}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:89:33
+     87|   });
+     88|   const body = await response.text();
+     89|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     90|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     91| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:160:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest missing inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"b0ce3310-6150-4f08-b261-f7908b47d335","error":{"code":-32003,"message":"Missing required client capability","data":{"requiredCapabilities":{"extensions":{"io.sdar/taskBusiness":{"profileVersion":"1.0-rc2"}}}}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:89:33
+     87|   });
+     88|   const body = await response.text();
+     89|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     90|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     91| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:160:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"6f1b00f6-f73a-4b3f-a3a6-77bab63b47af","error":{"code":-32003,"message":"Missing required client capability","data":{"requiredCapabilities":{"extensions":{"io.sdar/taskBusiness":{"profileVersion":"1.0-rc2"}}}}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:89:33
+     87|   });
+     88|   const body = await response.text();
+     89|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     90|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     91| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:160:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  03:52:22
+   Duration  10.89s (transform 54ms, setup 0ms, import 81ms, tests 10.59s, environment 0ms)
+

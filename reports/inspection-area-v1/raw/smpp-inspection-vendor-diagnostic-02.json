@@ -1,0 +1,22 @@
+{
+  "name": "smpp-inspection-vendor-diagnostic-02",
+  "command": "node",
+  "args": [
+    "scripts/inspection/isolated-env.mjs",
+    "exec",
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "reports/inspection-area-v1/debug/vendor-managed.test.ts"
+  ],
+  "startedAt": "2026-10-14T13:23:58.048Z",
+  "completedAt": "2026-10-14T13:24:06.497Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceAfter": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-vendor-diagnostic-02.log",
+  "logSha256": "cabdf2104ad8028643e25f7f244782f73b54078e3c3b52b965207845a6626c00"
+}

@@ -1,0 +1,11 @@
+{
+  "baselineContract": "tests/contract/ugv-recon-execution-correlation.test.ts",
+  "baselineSha256": "c0b87daa186fc72c769e6478d6fbd8333a9fd177a8cabf674c6ea99220c2ae6f",
+  "inspectionContract": "reports/inspection-area-v1/inspection-correlation.test.ts",
+  "inspectionSha256": "915b513bc41df6f701a8c88911858858c40a36bba32b28e99e4dcfd976f8f4f2",
+  "changes": [
+    "Task operation fixture identity vehicle_area_recon -> vehicle_inspect_area",
+    "Suite description only"
+  ],
+  "assertionsUnchanged": true
+}

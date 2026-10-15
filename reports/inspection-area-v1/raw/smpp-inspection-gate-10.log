@@ -1,0 +1,741 @@
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check && pnpm audit:dependencies && pnpm sbom:check && pnpm deployment:check && pnpm container:check && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm test:recovery && pnpm test:security && pnpm test:e2e && pnpm test:conformance && pnpm capacity:baseline
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ tsc --noEmit -p tsconfig.json
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+$ node scripts/ugv-work-checks.mjs generated-self-check
+{"status":"PASS","generatedFiles":9}
+$ pnpm audit --audit-level high
+23 vulnerabilities found
+Severity: 1 low | 22 moderate
+$ node scripts/generate-sbom.mjs --check
+SBOM current: 345 production components
+$ node scripts/check-kubernetes.mjs
+Validated 10 Kubernetes manifests
+$ docker compose config -q && docker build --check . && node scripts/check-runtime-image.mjs
+time="2026-10-14T08:12:44+08:00" level=warning msg="Found multiple config files with supported names: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yaml, /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yml"
+time="2026-10-14T08:12:44+08:00" level=warning msg="Using /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yaml"
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+Check complete, no warnings found.
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+
+#4 [build  1/55] FROM docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#4 resolve docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.05MB 0.2s done
+#5 DONE 0.2s
+
+#6 [build 29/55] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#6 CACHED
+
+#7 [build 25/55] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#7 CACHED
+
+#8 [build  7/55] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#8 CACHED
+
+#9 [build 45/55] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#9 CACHED
+
+#10 [build  4/55] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#10 CACHED
+
+#11 [build 23/55] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#11 CACHED
+
+#12 [build 16/55] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#12 CACHED
+
+#13 [build 26/55] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#13 CACHED
+
+#14 [build 27/55] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#14 CACHED
+
+#15 [build 37/55] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#15 CACHED
+
+#16 [build 19/55] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#16 CACHED
+
+#17 [build 36/55] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#17 CACHED
+
+#18 [build  9/55] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#18 CACHED
+
+#19 [build  2/55] RUN corepack enable
+#19 CACHED
+
+#20 [build 49/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#20 CACHED
+
+#21 [build 51/55] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#21 CACHED
+
+#22 [build 12/55] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#22 CACHED
+
+#23 [build 11/55] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#23 CACHED
+
+#24 [build 40/55] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#24 CACHED
+
+#25 [build  3/55] WORKDIR /workspace
+#25 CACHED
+
+#26 [build 43/55] COPY packages/secret-store/package.json packages/secret-store/package.json
+#26 CACHED
+
+#27 [build 39/55] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#27 CACHED
+
+#28 [build 21/55] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#28 CACHED
+
+#29 [build 20/55] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#29 CACHED
+
+#30 [build 44/55] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#30 CACHED
+
+#31 [build 10/55] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#31 CACHED
+
+#32 [build 42/55] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#32 CACHED
+
+#33 [build 47/55] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#33 CACHED
+
+#34 [build 28/55] COPY packages/pms-application/package.json packages/pms-application/package.json
+#34 CACHED
+
+#35 [build 34/55] COPY packages/task-engine/package.json packages/task-engine/package.json
+#35 CACHED
+
+#36 [build 30/55] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#36 CACHED
+
+#37 [build 41/55] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#37 CACHED
+
+#38 [build 46/55] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#38 CACHED
+
+#39 [build 17/55] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#39 CACHED
+
+#40 [build 18/55] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#40 CACHED
+
+#41 [build 24/55] COPY packages/observability/package.json packages/observability/package.json
+#41 CACHED
+
+#42 [build 50/55] COPY Dockerfile Dockerfile
+#42 CACHED
+
+#43 [build  5/55] COPY apps/runtime/package.json apps/runtime/package.json
+#43 CACHED
+
+#44 [build 14/55] COPY apps/pms-api/package.json apps/pms-api/package.json
+#44 CACHED
+
+#45 [build  8/55] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#45 CACHED
+
+#46 [build 31/55] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#46 CACHED
+
+#47 [build 15/55] COPY apps/pms-web/package.json apps/pms-web/package.json
+#47 CACHED
+
+#48 [build 13/55] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#48 CACHED
+
+#49 [build 38/55] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#49 CACHED
+
+#50 [build 48/55] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#50 CACHED
+
+#51 [build 33/55] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#51 CACHED
+
+#52 [build 22/55] COPY packages/domain/package.json packages/domain/package.json
+#52 CACHED
+
+#53 [build  6/55] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#53 CACHED
+
+#54 [build 32/55] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#54 CACHED
+
+#55 [build 35/55] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#55 CACHED
+
+#56 [build 52/55] RUN node scripts/verify-docker-workspace-manifests.mjs
+#56 CACHED
+
+#57 [build 53/55] COPY . .
+#57 DONE 12.9s
+
+#58 [build 54/55] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#58 DONE 6.2s
+
+#59 [build 55/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#59 1.392 $ pnpm proto:generate && tsc -p tsconfig.build.json
+#59 2.125 $ node scripts/generate-proto.mjs
+#59 43.53 $ npm run contract:check && npm run validate:architecture && npm run validate:pages && npm run check:imports && npm run typecheck && vite build
+#59 46.41 
+#59 46.41 > @sdar/pms-web@0.1.0 contract:check
+#59 46.41 > node scripts/check-contract-types.mjs
+#59 46.41 
+#59 50.22 Contract check passed: 1.0.0 dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042
+#59 50.49 
+#59 50.49 > @sdar/pms-web@0.1.0 validate:architecture
+#59 50.49 > node scripts/validate-architecture.mjs
+#59 50.49 
+#59 50.55 Architecture validation passed
+#59 50.72 
+#59 50.72 > @sdar/pms-web@0.1.0 validate:pages
+#59 50.72 > node scripts/validate-page-completion.mjs
+#59 50.72 
+#59 50.79 Page completion validation passed: 123 routes
+#59 50.95 
+#59 50.95 > @sdar/pms-web@0.1.0 check:imports
+#59 50.95 > node scripts/check-relative-imports.mjs
+#59 50.95 
+#59 51.04 Relative import validation passed
+#59 51.22 
+#59 51.22 > @sdar/pms-web@0.1.0 typecheck
+#59 51.22 > tsc --noEmit -p tsconfig.json
+#59 51.22 
+#59 59.18 vite v8.1.5 building client environment for production...
+#59 59.20 [2Ktransforming...✓ 105 modules transformed.
+#59 59.89 rendering chunks...
+#59 60.55 computing gzip size...
+#59 60.59 dist/index.html                               0.73 kB │ gzip:   0.46 kB
+#59 60.59 dist/assets/index-BfOSSl_w.css                9.20 kB │ gzip:   2.91 kB
+#59 60.59 dist/assets/product-components--jyh2IvQ.js    2.78 kB │ gzip:   1.35 kB │ map:     7.36 kB
+#59 60.59 dist/assets/ResourcePages-BUrPMguk.js         5.53 kB │ gzip:   2.11 kB │ map:    16.56 kB
+#59 60.59 dist/assets/GovernancePages-C0kOkh3V.js       7.33 kB │ gzip:   2.72 kB │ map:    20.03 kB
+#59 60.59 dist/assets/OverviewPages-a2m3RS99.js         7.47 kB │ gzip:   2.87 kB │ map:    19.75 kB
+#59 60.59 dist/assets/SystemPages-DA3J_4mh.js          10.96 kB │ gzip:   4.19 kB │ map:    25.82 kB
+#59 60.59 dist/assets/ConfigurationPages-DyPgJ3zN.js   12.91 kB │ gzip:   4.19 kB │ map:    38.36 kB
+#59 60.59 dist/assets/DiscoveryPages-D9KwZjx_.js       13.52 kB │ gzip:   4.43 kB │ map:    37.63 kB
+#59 60.59 dist/assets/OperationsPages-DXQq_ksm.js      13.79 kB │ gzip:   4.09 kB │ map:    38.50 kB
+#59 60.59 dist/assets/ProviderPages-D96QnSmT.js        16.18 kB │ gzip:   5.13 kB │ map:    45.48 kB
+#59 60.59 dist/assets/hooks-Drxy1ZGi.js                23.37 kB │ gzip:   6.82 kB │ map:    88.61 kB
+#59 60.59 dist/assets/RuntimePages-ya-pD650.js         25.13 kB │ gzip:   6.95 kB │ map:    70.28 kB
+#59 60.59 dist/assets/index-B5roESGf.js               379.60 kB │ gzip: 114.36 kB │ map: 1,665.10 kB
+#59 60.59 
+#59 60.59 ✓ built in 1.41s
+#59 DONE 72.8s
+
+#60 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#60 143.3 Scope: 44 of 45 workspace projects
+#60 143.5 ✓ Lockfile passes supply-chain policies (verified 14h ago)
+#60 143.5 Lockfile is up to date, resolution step is skipped
+#60 143.6 Progress: resolved 1, reused 0, downloaded 0, added 0
+#60 143.6 .                                        | +313 +++++++++++++++++++++++++++++++
+#60 144.6 Progress: resolved 313, reused 313, downloaded 0, added 31
+#60 145.6 Progress: resolved 313, reused 313, downloaded 0, added 79
+#60 146.6 Progress: resolved 313, reused 313, downloaded 0, added 87
+#60 147.6 Progress: resolved 313, reused 313, downloaded 0, added 96
+#60 148.6 Progress: resolved 313, reused 313, downloaded 0, added 106
+#60 149.6 Progress: resolved 313, reused 313, downloaded 0, added 114
+#60 150.6 Progress: resolved 313, reused 313, downloaded 0, added 123
+#60 151.6 Progress: resolved 313, reused 313, downloaded 0, added 145
+#60 152.6 Progress: resolved 313, reused 313, downloaded 0, added 156
+#60 153.6 Progress: resolved 313, reused 313, downloaded 0, added 180
+#60 154.6 Progress: resolved 313, reused 313, downloaded 0, added 199
+#60 155.6 Progress: resolved 313, reused 313, downloaded 0, added 202
+#60 156.6 Progress: resolved 313, reused 313, downloaded 0, added 239
+#60 157.6 Progress: resolved 313, reused 313, downloaded 0, added 258
+#60 158.6 Progress: resolved 313, reused 313, downloaded 0, added 263
+#60 159.6 Progress: resolved 313, reused 313, downloaded 0, added 279
+#60 160.6 Progress: resolved 313, reused 313, downloaded 0, added 288
+#60 161.6 Progress: resolved 313, reused 313, downloaded 0, added 291
+#60 162.6 Progress: resolved 313, reused 313, downloaded 0, added 309
+#60 163.6 Progress: resolved 313, reused 313, downloaded 0, added 311
+#60 164.6 Progress: resolved 313, reused 313, downloaded 0, added 312
+#60 178.4 Progress: resolved 313, reused 313, downloaded 0, added 313
+#60 178.4 Progress: resolved 313, reused 313, downloaded 0, added 313, done
+#60 178.6 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#60 178.7 .../node_modules/protobufjs postinstall: Done
+#60 179.2 Done in 36.6s using pnpm v11.13.1
+#60 DONE 186.0s
+
+#61 [runtime 2/7] WORKDIR /app
+#61 CACHED
+
+#62 [runtime 3/7] COPY --from=production-dependencies /workspace/node_modules /app/node_modules
+#62 CACHED
+
+#63 [runtime 4/7] COPY --from=build /workspace/dist /app/dist
+#63 DONE 2.0s
+
+#64 [runtime 5/7] COPY --from=build /workspace/proto /app/proto
+#64 DONE 0.4s
+
+#65 [runtime 6/7] COPY --from=build /workspace/migrations /app/migrations
+#65 DONE 0.2s
+
+#66 [runtime 7/7] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#66 DONE 0.9s
+
+#67 exporting to image
+#67 exporting layers
+#67 exporting layers 0.9s done
+#67 exporting manifest sha256:3e40340a4a869404ed4ce37c2d344acd833b60d91efc9e8675f7422e3e76dd33
+#67 exporting manifest sha256:3e40340a4a869404ed4ce37c2d344acd833b60d91efc9e8675f7422e3e76dd33 0.2s done
+#67 exporting config sha256:0b3e686c1c345c7bd89521f92934887dfc8f388080f02a16ccd3155aa2efa28c
+#67 exporting config sha256:0b3e686c1c345c7bd89521f92934887dfc8f388080f02a16ccd3155aa2efa28c 0.1s done
+#67 exporting attestation manifest sha256:c230a61703a59ed5f0f546735fdd4c9818f3c1ce8e60ee065737b401a7a72649
+#67 exporting attestation manifest sha256:c230a61703a59ed5f0f546735fdd4c9818f3c1ce8e60ee065737b401a7a72649 0.3s done
+#67 exporting manifest list sha256:33eed4238aeab0c34f92978e13cb06cea28d8fb45e7b54005a2be4a908176490 0.1s done
+#67 naming to docker.io/library/sdar-runtime:v2-audit-primary done
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-primary
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-primary 0.7s done
+#67 DONE 2.5s
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B 0.0s done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [build  1/55] FROM docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#5 resolve docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 143.38kB 0.2s done
+#4 DONE 0.2s
+
+#6 [build 17/55] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#6 CACHED
+
+#7 [build 10/55] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#7 CACHED
+
+#8 [build 48/55] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#8 CACHED
+
+#9 [build 38/55] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#9 CACHED
+
+#10 [runtime 5/7] COPY --from=build /workspace/proto /app/proto
+#10 CACHED
+
+#11 [build 20/55] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#11 CACHED
+
+#12 [runtime 6/7] COPY --from=build /workspace/migrations /app/migrations
+#12 CACHED
+
+#13 [build 18/55] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#13 CACHED
+
+#14 [build  3/55] WORKDIR /workspace
+#14 CACHED
+
+#15 [build 12/55] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#15 CACHED
+
+#16 [build 31/55] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#16 CACHED
+
+#17 [build 34/55] COPY packages/task-engine/package.json packages/task-engine/package.json
+#17 CACHED
+
+#18 [build 33/55] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#18 CACHED
+
+#19 [build 36/55] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#19 CACHED
+
+#20 [build 16/55] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#20 CACHED
+
+#21 [build 52/55] RUN node scripts/verify-docker-workspace-manifests.mjs
+#21 CACHED
+
+#22 [build  2/55] RUN corepack enable
+#22 CACHED
+
+#23 [runtime 2/7] WORKDIR /app
+#23 CACHED
+
+#24 [build 45/55] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#24 CACHED
+
+#25 [runtime 3/7] COPY --from=production-dependencies /workspace/node_modules /app/node_modules
+#25 CACHED
+
+#26 [build  7/55] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#26 CACHED
+
+#27 [build 50/55] COPY Dockerfile Dockerfile
+#27 CACHED
+
+#28 [build 55/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#28 CACHED
+
+#29 [build 47/55] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#29 CACHED
+
+#30 [build 14/55] COPY apps/pms-api/package.json apps/pms-api/package.json
+#30 CACHED
+
+#31 [build  5/55] COPY apps/runtime/package.json apps/runtime/package.json
+#31 CACHED
+
+#32 [runtime 4/7] COPY --from=build /workspace/dist /app/dist
+#32 CACHED
+
+#33 [build 13/55] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#33 CACHED
+
+#34 [build 28/55] COPY packages/pms-application/package.json packages/pms-application/package.json
+#34 CACHED
+
+#35 [build 26/55] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#35 CACHED
+
+#36 [build 39/55] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#36 CACHED
+
+#37 [build 32/55] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#37 CACHED
+
+#38 [build  6/55] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#38 CACHED
+
+#39 [build 35/55] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#39 CACHED
+
+#40 [build 25/55] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#40 CACHED
+
+#41 [build 30/55] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#41 CACHED
+
+#42 [build 23/55] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#42 CACHED
+
+#43 [build 44/55] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#43 CACHED
+
+#44 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#44 CACHED
+
+#45 [build  8/55] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#45 CACHED
+
+#46 [build 24/55] COPY packages/observability/package.json packages/observability/package.json
+#46 CACHED
+
+#47 [build 51/55] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#47 CACHED
+
+#48 [build 11/55] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#48 CACHED
+
+#49 [build 21/55] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#49 CACHED
+
+#50 [build 22/55] COPY packages/domain/package.json packages/domain/package.json
+#50 CACHED
+
+#51 [build 15/55] COPY apps/pms-web/package.json apps/pms-web/package.json
+#51 CACHED
+
+#52 [build 43/55] COPY packages/secret-store/package.json packages/secret-store/package.json
+#52 CACHED
+
+#53 [build 27/55] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#53 CACHED
+
+#54 [build 46/55] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#54 CACHED
+
+#55 [build 29/55] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#55 CACHED
+
+#56 [build 41/55] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#56 CACHED
+
+#57 [build 42/55] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#57 CACHED
+
+#58 [build 37/55] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#58 CACHED
+
+#59 [build 19/55] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#59 CACHED
+
+#60 [build 40/55] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#60 CACHED
+
+#61 [build 54/55] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#61 CACHED
+
+#62 [build  9/55] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#62 CACHED
+
+#63 [build 49/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#63 CACHED
+
+#64 [build  4/55] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#64 CACHED
+
+#65 [build 53/55] COPY . .
+#65 CACHED
+
+#66 [runtime 7/7] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#66 CACHED
+
+#67 exporting to image
+#67 exporting layers done
+#67 exporting manifest sha256:3e40340a4a869404ed4ce37c2d344acd833b60d91efc9e8675f7422e3e76dd33 done
+#67 exporting config sha256:0b3e686c1c345c7bd89521f92934887dfc8f388080f02a16ccd3155aa2efa28c done
+#67 exporting attestation manifest sha256:4b93dd03c8e1879f0b0b3156755f70e8fde4808c22c651733e4b42b550df5ab3
+#67 exporting attestation manifest sha256:4b93dd03c8e1879f0b0b3156755f70e8fde4808c22c651733e4b42b550df5ab3 0.3s done
+#67 exporting manifest list sha256:95cb947b78715bde6b60fa88ae4b056453b4be175ba45ebe9e9ae8086b4ac8b4
+#67 exporting manifest list sha256:95cb947b78715bde6b60fa88ae4b056453b4be175ba45ebe9e9ae8086b4ac8b4 0.1s done
+#67 naming to docker.io/library/sdar-runtime:v2-audit-repeat
+#67 naming to docker.io/library/sdar-runtime:v2-audit-repeat done
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-repeat done
+#67 DONE 0.5s
+{"status":"pass","image":"sdar-runtime:v2-audit-primary","sizeBytes":103153032,"sizeLimitEnforced":false,"user":"node","layers":11,"filesystemHash":"7357bd045f6ef22bf36dbb34b62c8b184067bf0ad8568478d90b18f4df556abb","reproducibleFilesystemAndConfig":true}
+$ vitest run tests/unit
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1791937081914,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/v1/diagnostics/response-loss","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937081926,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":400},"responseTime":9.996063999999933,"msg":"request completed"}
+{"level":30,"time":1791937081927,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"POST","url":"/v1/diagnostics/provider-business-success","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937081929,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":400},"responseTime":2.2031530000001567,"msg":"request completed"}
+{"level":30,"time":1791937081930,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","req":{"method":"GET","url":"/internal/provider-identity","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937081931,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","res":{"statusCode":200},"responseTime":0.5096690000000308,"msg":"request completed"}
+{"level":30,"time":1791937083013,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937083037,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937083019,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.380374000000074,"msg":"request completed"}
+{"level":30,"time":1791937083020,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937083020,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":503},"responseTime":0.60015199999998,"msg":"request completed"}
+{"level":30,"time":1791937083038,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"err":{"type":"FastifyError","message":"Request body is too large","stack":"FastifyError: Request body is too large\n    at rawBody (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:245:10)\n    at ContentTypeParser.run (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:209:5)\n    at Object.handleRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/handle-request.js:87:46)\n    at runPreParsing (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/route.js:661:19)\n    at next (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:236:9)\n    at handleResolve (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:253:7)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","code":"FST_ERR_CTP_BODY_TOO_LARGE","name":"FastifyError","statusCode":413},"msg":"Request body is too large"}
+{"level":30,"time":1791937083040,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"responseTime":3.741608000000042,"msg":"request completed"}
+{"level":30,"time":1791937084135,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937084159,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/SMPP-MISSION-RELATION","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937084169,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/PV-LATEST-TASK","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791937084141,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.710207999999966,"msg":"request completed"}
+{"level":30,"time":1791937084160,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":0.5729819999999108,"msg":"request completed"}
+{"level":30,"time":1791937084169,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":404},"responseTime":0.48015699999996286,"msg":"request completed"}
+
+ Test Files  57 passed (57)
+      Tests  325 passed (325)
+   Start at  08:17:54
+   Duration  36.71s (transform 2.78s, setup 0ms, import 22.57s, tests 3.85s, environment 7ms)
+
+$ vitest run tests/contract
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  39 passed (39)
+      Tests  369 passed (369)
+   Start at  08:18:32
+   Duration  52.39s (transform 3.35s, setup 0ms, import 22.65s, tests 22.35s, environment 5ms)
+
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/integration
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (6 tests | 1 failed) 16738ms
+     × retains honest partial inspection results and exact task identity 5154ms
+ ❯ tests/integration/task-lifecycle-postgres.test.ts (150 tests | 1 failed) 46573ms
+     × T-001/T-029/T-030 persists cancel before transport failure and retries after restart 406ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/task-lifecycle-postgres.test.ts > durable task lifecycle > T-001/T-029/T-030 persists cancel before transport failure and retries after restart
+AssertionError: expected 321.1626840000026 to be less than 100
+ ❯ tests/integration/task-lifecycle-postgres.test.ts:4723:41
+    4721|     const started = performance.now();
+    4722|     expect(await engine.cancelTask(taskId, authorization)).toMatchObje…
+    4723|     expect(performance.now() - started).toBeLessThan(100);
+       |                                         ^
+    4724|     const repository = new TaskRepository(pool);
+    4725|     expect(await repository.getById(taskId)).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: expected { Object (outcome, retryable, ...) } to match object { resourceId: 'vehicle:ugv1', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
++   "adapterOutcome": "SUCCEEDED",
++   "adapterResult": {
++     "fields": {
++       "anomalies": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [],
++         },
++       },
++       "correlationStrength": {
++         "kind": "stringValue",
++         "stringValue": "STRICT_CORRELATED",
++       },
++       "coverage": {
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "coveragePercent": {
++               "kind": "numberValue",
++               "numberValue": 50,
++             },
++             "incomplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++           },
++         },
++       },
+        "inspectionReport": {
+-     "completion": "partial",
++         "kind": "structValue",
++         "structValue": {
++           "fields": {
++             "artifactRefs": {
++               "kind": "listValue",
++               "listValue": {
++                 "values": [],
+                },
+-   "resourceId": "vehicle:ugv1",
+-   "status": "completed",
++             },
++             "completion": {
++               "kind": "stringValue",
++               "stringValue": "partial",
++             },
++             "coverageState": {
++               "kind": "stringValue",
++               "stringValue": "partial",
++             },
++             "findingCount": {
++               "kind": "numberValue",
++               "numberValue": 0,
++             },
++             "targetReportComplete": {
++               "boolValue": true,
++               "kind": "boolValue",
++             },
++             "targetReportObservedAt": {
++               "kind": "stringValue",
++               "stringValue": "2026-10-14T00:19:38.880Z",
++             },
++             "truncated": {
++               "boolValue": false,
++               "kind": "boolValue",
++             },
++             "version": {
++               "kind": "stringValue",
++               "stringValue": "1.0",
++             },
++           },
++         },
++       },
++       "missingEvidence": {
++         "kind": "listValue",
++         "listValue": {
++           "values": [
++             {
++               "kind": "stringValue",
++               "stringValue": "INSPECTION_COVERAGE_INCOMPLETE",
++             },
++           ],
++         },
++       },
++       "observedAt": {
++         "kind": "stringValue",
++         "stringValue": "2026-10-14T00:19:38.952Z",
++       },
++       "resourceId": {
++         "kind": "stringValue",
++         "stringValue": "vehicle:ugv1",
++       },
++       "status": {
++         "kind": "stringValue",
++         "stringValue": "completed",
++       },
++     },
++   },
++   "completedAt": "2026-10-14T00:19:40.905Z",
++   "outcome": "start_window_missed",
++   "reasonCode": "START_WINDOW_MISSED",
++   "retryable": true,
++   "stopReason": "START_WINDOW_MISSED",
+  }
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:154:41
+    152|         unknown
+    153|       >;
+    154|       expect(output?.structuredContent).toMatchObject({
+       |                                         ^
+    155|         resourceId: input.resourceId,
+    156|         status: "completed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 41 passed | 7 skipped (50)
+      Tests  2 failed | 520 passed | 39 skipped (561)
+   Start at  08:19:25
+   Duration  200.00s (transform 4.56s, setup 0ms, import 35.80s, tests 154.62s, environment 7ms)
+
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.

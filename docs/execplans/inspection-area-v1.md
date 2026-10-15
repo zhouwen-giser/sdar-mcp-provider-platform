@@ -26,7 +26,7 @@ SDAR 新增精确 13/14 工具目录配置、同名 Skill/Capability，绑定目
 - [x] 实现 SMPP 区域合同、共同 EO 执行和持久报告。
 - [x] 实现 SDAR 适配、治理和巡逻后继版本。
 - [x] 2026-10-14 隔离 MQTT、设备 MCP、真实 PostgreSQL 与双项目正式流程验收；八场景 joint-60 通过。
-- [ ] 完整门禁、固定源码交付、本地只读发布与回退验证。
+- [x] 完整门禁、固定源码交付、本地原生发布及只读验收；回退步骤和私有配置已保留，实际生产回退演练 NOT_RUN。
 
 ## Discoveries and Surprises
 
@@ -72,3 +72,7 @@ reports/inspection-area-v1 保存基线、真实命令回执、测试、门禁�
 SMPP gate-11 日志 SHA256 `1a019b426c3ec5419a4b5d464cb7b1a2bce0bda3a19b5bf2cd6b88686b23e1ee`。SDAR joint-60 日志 SHA256 `0d93163da3621555c50ec9d8f0e94dcaa2f20b9cc333db5b56a5dc3b2c72327e`，固定 SDAR 源码 `8f97a9f7ff95529c9aa0ed00fc0a4a448d2cb4b57235d785794c2b1abd497fa0` 和 SMPP 源码 `2ab531b7502ea7851c17e07963991f38365a5a8ce766f8e172315c6135b9622a`。全部命令均 exit 0，运行期间两仓库源码未变。224 个 SMPP 冻结资产及 165 个 SDAR 冻结资产最终哈希未变。门禁后的本文更新仅为验收状态，运行源码另以 RUNTIME_SOURCE_LOCK.json 固定。
 
 CI 与发布候选完整门禁现自动创建、标记及清理独占的 PostgreSQL/MQTT 配置，支持使用 CI 既有 PostgreSQL 17 镜像。全新 broker 暴露了旧测试夹具在首条有效消息前等待 qualified connectivity 的环路；夹具现通过真实 MQTT 重复发布当前 GNSS，等待正常 SUBACK 及正式入口验证，不修改连接资格规则。ci-integration-02 在全新设施上实际通过全部 13 个原生生命周期与公共 Task 测试，创建和清理 exit 0。门禁后仅变更两份 CI 配置和两个隔离测试脚本，生产模块、合同和迁移哈希不变，详见 RUNTIME_SOURCE_LOCK.json 的 postGateChanges。
+
+## 交付验收封存（2026-10-15）
+
+SMPP gate-11 完整门禁及最终远端 Runtime CI 通过；8 项后续 CI/夹具/配置清单调整均记录独立回执，生产模块及冻结迁移未变。SDAR 最终 gate-18 通过全部 30 阶段和清理，joint-68 的四个检查与四个巡逻场景通过。原生同一 Provider CAS 目录升级保留绑定身份及旧版本，正式 bootstrap 发布检查与巡逻后继版本，19100 返回精确 13 工具。五个目标容器、三份 SDAR 源码、镜像身份及 48 个上游实例的保留核验通过；数据库卷、签名密钥及 PMS 配置保留。联合包、命令、退出码、源码和日志哈希见 reports/inspection-area-v1/FINAL_VALIDATION.json。现场巡逻与实际生产回退演练为 NOT_RUN；不声明全项目或生产耐久性验收。

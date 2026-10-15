@@ -1,0 +1,18 @@
+{
+  "name": "smpp-inspection-united-verify-05",
+  "command": "python3",
+  "args": [
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/verify-wsgs-united-deployment.py",
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/united-final-v5/smpp-gowm-gdps-gsap-wsgs-377e8764fecf7f77.tar.gz"
+  ],
+  "startedAt": "2026-10-14T13:26:05.419Z",
+  "completedAt": "2026-10-14T13:27:11.348Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "f84566d8948fb116a43b7cab324b5e63b8ddade33f0f99f8c5e45d1e1e4239c0",
+  "sourceAfter": "f84566d8948fb116a43b7cab324b5e63b8ddade33f0f99f8c5e45d1e1e4239c0",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-united-verify-05.log",
+  "logSha256": "3f2a34140b7775a213af914a17cb9176f6ef83e8126564ee798f777621b8b55a"
+}

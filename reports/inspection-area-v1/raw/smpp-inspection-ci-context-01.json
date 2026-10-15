@@ -1,0 +1,18 @@
+{
+  "name": "smpp-inspection-ci-context-01",
+  "command": "node",
+  "args": [
+    "--test",
+    "scripts/release/verify-release-candidate-workflow.test.mjs"
+  ],
+  "startedAt": "2026-10-14T13:01:18.012Z",
+  "completedAt": "2026-10-14T13:01:18.384Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "30ee150be0746683ecf4ba6fea587e7e5768eeb3ae2166e62c602480156a9bf3",
+  "sourceAfter": "30ee150be0746683ecf4ba6fea587e7e5768eeb3ae2166e62c602480156a9bf3",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-ci-context-01.log",
+  "logSha256": "8cb4d012404516affb6573cff2afb43f3933554dfd4bae43ad53c6377ac515a3"
+}

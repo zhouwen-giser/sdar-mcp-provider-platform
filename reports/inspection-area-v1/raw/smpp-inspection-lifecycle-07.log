@@ -1,0 +1,24 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts (4 tests | 1 failed) 2742ms
+     × stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report 113ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report
+error: invalid input syntax for type bigint: "internal-inspection-deadline"
+ ❯ node_modules/.pnpm/pg-pool@3.14.0_pg@8.22.0/node_modules/pg-pool/index.js:45:11
+ ❯ PostgresProviderStore.getCommandAck packages/provider-adapter-kit/src/postgres-store.ts:164:20
+
+ ❯ UgvProviderRuntime.#command apps/ugv-provider-adapter/src/runtime.ts:1316:17
+ ❯ UgvProviderRuntime.#refresh apps/ugv-provider-adapter/src/runtime.ts:2351:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  01:34:51
+   Duration  5.58s (transform 1.73s, setup 0ms, import 2.65s, tests 2.74s, environment 0ms)
+

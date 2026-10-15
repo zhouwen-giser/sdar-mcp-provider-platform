@@ -1,0 +1,11 @@
+file:///home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/isolated-env.mjs:127
+  } else throw Error("ISOLATED_ACTION_INVALID");
+               ^
+
+Error: ISOLATED_ACTION_INVALID
+    at file:///home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/isolated-env.mjs:127:16
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.23.2

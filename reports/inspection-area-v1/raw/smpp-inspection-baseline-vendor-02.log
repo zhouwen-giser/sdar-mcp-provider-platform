@@ -1,0 +1,10 @@
+{"baselineCommit": "5a2482aa5df25f2eebed604ed15f9d4c3a02a454", "scope": "unchanged pre-existing vendor integration cases on remote main"}
+
+ RUN  v4.1.10 /tmp/smpp-inspection-v1-20261014/baseline-main-vendor-v2
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  21:22:49
+   Duration  6.29s (transform 2.27s, setup 0ms, import 3.43s, tests 2.67s, environment 0ms)
+

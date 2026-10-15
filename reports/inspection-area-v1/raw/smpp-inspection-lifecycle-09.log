@@ -1,0 +1,41 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts (5 tests | 1 failed) 2851ms
+     × archives mission-correlated exception facts and refuses a retained source replay 196ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > archives mission-correlated exception facts and refuses a retained source replay
+AssertionError: expected { resourceId: 'vehicle:ugv1', …(7) } to match object { status: 'completed', …(2) }
+(14 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "anomalies": [],
+    "inspectionReport": {
+-     "findingCount": 1,
++     "findingCount": 0,
+    },
+    "status": "completed",
+  }
+
+ ❯ terminal tests/integration/ugv-inspection-postgres-mqtt.test.ts:167:26
+    165|   const result = await runtime.get(execution.taskId);
+    166|   expect(result?.state).toBe("SUCCEEDED");
+    167|   expect(result?.result).toMatchObject({
+       |                          ^
+    168|     status: "completed",
+    169|     anomalies: expect.any(Array),
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts:367:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 19 passed (20)
+   Start at  01:51:11
+   Duration  6.94s (transform 1.63s, setup 0ms, import 3.15s, tests 3.42s, environment 0ms)
+

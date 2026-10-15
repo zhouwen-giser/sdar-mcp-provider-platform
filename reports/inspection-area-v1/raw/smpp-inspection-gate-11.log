@@ -1,0 +1,718 @@
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check && pnpm audit:dependencies && pnpm sbom:check && pnpm deployment:check && pnpm container:check && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm test:recovery && pnpm test:security && pnpm test:e2e && pnpm test:conformance && pnpm capacity:baseline
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ tsc --noEmit -p tsconfig.json
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+$ node scripts/ugv-work-checks.mjs generated-self-check
+{"status":"PASS","generatedFiles":9}
+$ pnpm audit --audit-level high
+23 vulnerabilities found
+Severity: 1 low | 22 moderate
+$ node scripts/generate-sbom.mjs --check
+SBOM current: 345 production components
+$ node scripts/check-kubernetes.mjs
+Validated 10 Kubernetes manifests
+$ docker compose config -q && docker build --check . && node scripts/check-runtime-image.mjs
+time="2026-10-14T08:41:19+08:00" level=warning msg="Found multiple config files with supported names: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yaml, /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yml"
+time="2026-10-14T08:41:19+08:00" level=warning msg="Using /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/compose.yaml"
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+Check complete, no warnings found.
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [build  1/55] FROM docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#5 resolve docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 1.01MB 0.2s done
+#4 DONE 0.2s
+
+#6 [build 13/55] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#6 CACHED
+
+#7 [build 21/55] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#7 CACHED
+
+#8 [build 39/55] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#8 CACHED
+
+#9 [build 49/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#9 CACHED
+
+#10 [build 35/55] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#10 CACHED
+
+#11 [build 29/55] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#11 CACHED
+
+#12 [build  2/55] RUN corepack enable
+#12 CACHED
+
+#13 [build 19/55] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#13 CACHED
+
+#14 [build 45/55] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#14 CACHED
+
+#15 [build 51/55] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#15 CACHED
+
+#16 [build 41/55] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#16 CACHED
+
+#17 [build 33/55] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#17 CACHED
+
+#18 [build  8/55] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#18 CACHED
+
+#19 [build  5/55] COPY apps/runtime/package.json apps/runtime/package.json
+#19 CACHED
+
+#20 [build 48/55] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#20 CACHED
+
+#21 [build 40/55] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#21 CACHED
+
+#22 [build 17/55] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#22 CACHED
+
+#23 [build 43/55] COPY packages/secret-store/package.json packages/secret-store/package.json
+#23 CACHED
+
+#24 [build 25/55] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#24 CACHED
+
+#25 [build 12/55] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#25 CACHED
+
+#26 [build 23/55] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#26 CACHED
+
+#27 [build 46/55] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#27 CACHED
+
+#28 [build 14/55] COPY apps/pms-api/package.json apps/pms-api/package.json
+#28 CACHED
+
+#29 [build 36/55] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#29 CACHED
+
+#30 [build 37/55] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#30 CACHED
+
+#31 [build 15/55] COPY apps/pms-web/package.json apps/pms-web/package.json
+#31 CACHED
+
+#32 [build 30/55] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#32 CACHED
+
+#33 [build 32/55] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#33 CACHED
+
+#34 [build  7/55] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#34 CACHED
+
+#35 [build 24/55] COPY packages/observability/package.json packages/observability/package.json
+#35 CACHED
+
+#36 [build 47/55] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#36 CACHED
+
+#37 [build 16/55] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#37 CACHED
+
+#38 [build 10/55] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#38 CACHED
+
+#39 [build 22/55] COPY packages/domain/package.json packages/domain/package.json
+#39 CACHED
+
+#40 [build  9/55] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#40 CACHED
+
+#41 [build 50/55] COPY Dockerfile Dockerfile
+#41 CACHED
+
+#42 [build  4/55] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#42 CACHED
+
+#43 [build 18/55] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#43 CACHED
+
+#44 [build 34/55] COPY packages/task-engine/package.json packages/task-engine/package.json
+#44 CACHED
+
+#45 [build  3/55] WORKDIR /workspace
+#45 CACHED
+
+#46 [build 38/55] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#46 CACHED
+
+#47 [build 20/55] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#47 CACHED
+
+#48 [build 27/55] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#48 CACHED
+
+#49 [build 11/55] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#49 CACHED
+
+#50 [build 28/55] COPY packages/pms-application/package.json packages/pms-application/package.json
+#50 CACHED
+
+#51 [build 31/55] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#51 CACHED
+
+#52 [build 26/55] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#52 CACHED
+
+#53 [build 42/55] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#53 CACHED
+
+#54 [build 44/55] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#54 CACHED
+
+#55 [build  6/55] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#55 CACHED
+
+#56 [build 52/55] RUN node scripts/verify-docker-workspace-manifests.mjs
+#56 CACHED
+
+#57 [build 53/55] COPY . .
+#57 DONE 12.6s
+
+#58 [build 54/55] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#58 DONE 6.2s
+
+#59 [build 55/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#59 1.371 $ pnpm proto:generate && tsc -p tsconfig.build.json
+#59 2.085 $ node scripts/generate-proto.mjs
+#59 36.90 $ npm run contract:check && npm run validate:architecture && npm run validate:pages && npm run check:imports && npm run typecheck && vite build
+#59 39.07 
+#59 39.07 > @sdar/pms-web@0.1.0 contract:check
+#59 39.07 > node scripts/check-contract-types.mjs
+#59 39.07 
+#59 41.32 Contract check passed: 1.0.0 dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042
+#59 41.56 
+#59 41.56 > @sdar/pms-web@0.1.0 validate:architecture
+#59 41.56 > node scripts/validate-architecture.mjs
+#59 41.56 
+#59 41.63 Architecture validation passed
+#59 41.80 
+#59 41.80 > @sdar/pms-web@0.1.0 validate:pages
+#59 41.80 > node scripts/validate-page-completion.mjs
+#59 41.80 
+#59 41.86 Page completion validation passed: 123 routes
+#59 42.01 
+#59 42.01 > @sdar/pms-web@0.1.0 check:imports
+#59 42.01 > node scripts/check-relative-imports.mjs
+#59 42.01 
+#59 42.09 Relative import validation passed
+#59 42.26 
+#59 42.26 > @sdar/pms-web@0.1.0 typecheck
+#59 42.26 > tsc --noEmit -p tsconfig.json
+#59 42.26 
+#59 48.90 vite v8.1.5 building client environment for production...
+#59 48.92 [2Ktransforming...✓ 105 modules transformed.
+#59 49.44 rendering chunks...
+#59 50.15 computing gzip size...
+#59 50.17 dist/index.html                               0.73 kB │ gzip:   0.46 kB
+#59 50.17 dist/assets/index-BfOSSl_w.css                9.20 kB │ gzip:   2.91 kB
+#59 50.17 dist/assets/product-components--jyh2IvQ.js    2.78 kB │ gzip:   1.35 kB │ map:     7.36 kB
+#59 50.17 dist/assets/ResourcePages-BUrPMguk.js         5.53 kB │ gzip:   2.11 kB │ map:    16.56 kB
+#59 50.17 dist/assets/GovernancePages-C0kOkh3V.js       7.33 kB │ gzip:   2.72 kB │ map:    20.03 kB
+#59 50.17 dist/assets/OverviewPages-a2m3RS99.js         7.47 kB │ gzip:   2.87 kB │ map:    19.75 kB
+#59 50.17 dist/assets/SystemPages-DA3J_4mh.js          10.96 kB │ gzip:   4.19 kB │ map:    25.82 kB
+#59 50.17 dist/assets/ConfigurationPages-DyPgJ3zN.js   12.91 kB │ gzip:   4.19 kB │ map:    38.36 kB
+#59 50.17 dist/assets/DiscoveryPages-D9KwZjx_.js       13.52 kB │ gzip:   4.43 kB │ map:    37.63 kB
+#59 50.17 dist/assets/OperationsPages-DXQq_ksm.js      13.79 kB │ gzip:   4.09 kB │ map:    38.50 kB
+#59 50.17 dist/assets/ProviderPages-D96QnSmT.js        16.18 kB │ gzip:   5.13 kB │ map:    45.48 kB
+#59 50.17 dist/assets/hooks-Drxy1ZGi.js                23.37 kB │ gzip:   6.82 kB │ map:    88.61 kB
+#59 50.17 dist/assets/RuntimePages-ya-pD650.js         25.13 kB │ gzip:   6.95 kB │ map:    70.28 kB
+#59 50.17 dist/assets/index-B5roESGf.js               379.60 kB │ gzip: 114.36 kB │ map: 1,665.10 kB
+#59 50.17 
+#59 50.17 ✓ built in 1.27s
+#59 DONE 63.7s
+
+#60 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#60 157.8 Scope: 44 of 45 workspace projects
+#60 158.0 ✓ Lockfile passes supply-chain policies (verified 14h ago)
+#60 158.0 Lockfile is up to date, resolution step is skipped
+#60 158.0 Progress: resolved 1, reused 0, downloaded 0, added 0
+#60 158.1 .                                        | +313 +++++++++++++++++++++++++++++++
+#60 159.0 Progress: resolved 313, reused 313, downloaded 0, added 4
+#60 160.0 Progress: resolved 313, reused 313, downloaded 0, added 13
+#60 161.0 Progress: resolved 313, reused 313, downloaded 0, added 33
+#60 163.1 Progress: resolved 313, reused 313, downloaded 0, added 34
+#60 164.1 Progress: resolved 313, reused 313, downloaded 0, added 45
+#60 165.1 Progress: resolved 313, reused 313, downloaded 0, added 69
+#60 166.1 Progress: resolved 313, reused 313, downloaded 0, added 122
+#60 167.1 Progress: resolved 313, reused 313, downloaded 0, added 124
+#60 168.1 Progress: resolved 313, reused 313, downloaded 0, added 127
+#60 169.1 Progress: resolved 313, reused 313, downloaded 0, added 130
+#60 170.1 Progress: resolved 313, reused 313, downloaded 0, added 132
+#60 171.1 Progress: resolved 313, reused 313, downloaded 0, added 134
+#60 172.1 Progress: resolved 313, reused 313, downloaded 0, added 140
+#60 173.1 Progress: resolved 313, reused 313, downloaded 0, added 146
+#60 174.1 Progress: resolved 313, reused 313, downloaded 0, added 148
+#60 175.1 Progress: resolved 313, reused 313, downloaded 0, added 149
+#60 176.8 Progress: resolved 313, reused 313, downloaded 0, added 150
+#60 177.8 Progress: resolved 313, reused 313, downloaded 0, added 159
+#60 178.8 Progress: resolved 313, reused 313, downloaded 0, added 171
+#60 179.8 Progress: resolved 313, reused 313, downloaded 0, added 184
+#60 180.8 Progress: resolved 313, reused 313, downloaded 0, added 204
+#60 181.8 Progress: resolved 313, reused 313, downloaded 0, added 226
+#60 182.8 Progress: resolved 313, reused 313, downloaded 0, added 241
+#60 183.8 Progress: resolved 313, reused 313, downloaded 0, added 258
+#60 184.8 Progress: resolved 313, reused 313, downloaded 0, added 265
+#60 185.8 Progress: resolved 313, reused 313, downloaded 0, added 280
+#60 186.8 Progress: resolved 313, reused 313, downloaded 0, added 282
+#60 187.8 Progress: resolved 313, reused 313, downloaded 0, added 294
+#60 188.8 Progress: resolved 313, reused 313, downloaded 0, added 300
+#60 189.8 Progress: resolved 313, reused 313, downloaded 0, added 312
+#60 204.0 Progress: resolved 313, reused 313, downloaded 0, added 313
+#60 204.0 Progress: resolved 313, reused 313, downloaded 0, added 313, done
+#60 204.4 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#60 204.4 .../node_modules/protobufjs postinstall: Done
+#60 205.6 Done in 48.6s using pnpm v11.13.1
+#60 DONE 213.5s
+
+#61 [runtime 2/7] WORKDIR /app
+#61 CACHED
+
+#62 [runtime 3/7] COPY --from=production-dependencies /workspace/node_modules /app/node_modules
+#62 CACHED
+
+#63 [runtime 4/7] COPY --from=build /workspace/dist /app/dist
+#63 DONE 3.3s
+
+#64 [runtime 5/7] COPY --from=build /workspace/proto /app/proto
+#64 DONE 1.2s
+
+#65 [runtime 6/7] COPY --from=build /workspace/migrations /app/migrations
+#65 DONE 0.9s
+
+#66 [runtime 7/7] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#66 DONE 1.6s
+
+#67 exporting to image
+#67 exporting layers
+#67 exporting layers 1.1s done
+#67 exporting manifest sha256:56f3b96d27de4eb56b0f205e4511f0f49b064fd226709581539560c8bd8d18f8 0.1s done
+#67 exporting config sha256:fbed98c1b13afbc001c6e8b83db08dfc2657edee9407f2260b6abeb092c38cd0
+#67 exporting config sha256:fbed98c1b13afbc001c6e8b83db08dfc2657edee9407f2260b6abeb092c38cd0 0.1s done
+#67 exporting attestation manifest sha256:def0839792fe2e68cb3e03ea75406b6cdfaca50b242b52af59d6770fc18058c6
+#67 exporting attestation manifest sha256:def0839792fe2e68cb3e03ea75406b6cdfaca50b242b52af59d6770fc18058c6 0.3s done
+#67 exporting manifest list sha256:6a7ca708888d0af3bf8103637a51bb871612f72c776e618bc74585397ee9fb5e
+#67 exporting manifest list sha256:6a7ca708888d0af3bf8103637a51bb871612f72c776e618bc74585397ee9fb5e 0.2s done
+#67 naming to docker.io/library/sdar-runtime:v2-audit-primary
+#67 naming to docker.io/library/sdar-runtime:v2-audit-primary done
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-primary
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-primary 0.7s done
+#67 DONE 2.6s
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 22.81kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [build  1/55] FROM docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#5 resolve docker.io/library/node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 143.38kB 0.2s done
+#4 DONE 0.2s
+
+#6 [build 29/55] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#6 CACHED
+
+#7 [build 26/55] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#7 CACHED
+
+#8 [build 31/55] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#8 CACHED
+
+#9 [build 16/55] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#9 CACHED
+
+#10 [build 17/55] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#10 CACHED
+
+#11 [build 32/55] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#11 CACHED
+
+#12 [build 34/55] COPY packages/task-engine/package.json packages/task-engine/package.json
+#12 CACHED
+
+#13 [build 54/55] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#13 CACHED
+
+#14 [build 46/55] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#14 CACHED
+
+#15 [build 18/55] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#15 CACHED
+
+#16 [build 50/55] COPY Dockerfile Dockerfile
+#16 CACHED
+
+#17 [build 30/55] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#17 CACHED
+
+#18 [build 41/55] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#18 CACHED
+
+#19 [build 40/55] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#19 CACHED
+
+#20 [build  6/55] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#20 CACHED
+
+#21 [build 15/55] COPY apps/pms-web/package.json apps/pms-web/package.json
+#21 CACHED
+
+#22 [build 47/55] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#22 CACHED
+
+#23 [build  3/55] WORKDIR /workspace
+#23 CACHED
+
+#24 [build 10/55] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#24 CACHED
+
+#25 [build 52/55] RUN node scripts/verify-docker-workspace-manifests.mjs
+#25 CACHED
+
+#26 [runtime 4/7] COPY --from=build /workspace/dist /app/dist
+#26 CACHED
+
+#27 [build 24/55] COPY packages/observability/package.json packages/observability/package.json
+#27 CACHED
+
+#28 [runtime 5/7] COPY --from=build /workspace/proto /app/proto
+#28 CACHED
+
+#29 [build 35/55] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#29 CACHED
+
+#30 [build 43/55] COPY packages/secret-store/package.json packages/secret-store/package.json
+#30 CACHED
+
+#31 [build 13/55] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#31 CACHED
+
+#32 [build 33/55] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#32 CACHED
+
+#33 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#33 CACHED
+
+#34 [build 53/55] COPY . .
+#34 CACHED
+
+#35 [build 21/55] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#35 CACHED
+
+#36 [build 55/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#36 CACHED
+
+#37 [build 22/55] COPY packages/domain/package.json packages/domain/package.json
+#37 CACHED
+
+#38 [build  5/55] COPY apps/runtime/package.json apps/runtime/package.json
+#38 CACHED
+
+#39 [build 38/55] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#39 CACHED
+
+#40 [runtime 6/7] COPY --from=build /workspace/migrations /app/migrations
+#40 CACHED
+
+#41 [build 27/55] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#41 CACHED
+
+#42 [build  4/55] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#42 CACHED
+
+#43 [build 37/55] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#43 CACHED
+
+#44 [build 45/55] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#44 CACHED
+
+#45 [build 28/55] COPY packages/pms-application/package.json packages/pms-application/package.json
+#45 CACHED
+
+#46 [build 48/55] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#46 CACHED
+
+#47 [runtime 3/7] COPY --from=production-dependencies /workspace/node_modules /app/node_modules
+#47 CACHED
+
+#48 [build  7/55] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#48 CACHED
+
+#49 [build 12/55] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#49 CACHED
+
+#50 [build 39/55] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#50 CACHED
+
+#51 [build  2/55] RUN corepack enable
+#51 CACHED
+
+#52 [build 20/55] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#52 CACHED
+
+#53 [build 36/55] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#53 CACHED
+
+#54 [build  9/55] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#54 CACHED
+
+#55 [runtime 2/7] WORKDIR /app
+#55 CACHED
+
+#56 [build 49/55] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#56 CACHED
+
+#57 [build 14/55] COPY apps/pms-api/package.json apps/pms-api/package.json
+#57 CACHED
+
+#58 [build 44/55] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#58 CACHED
+
+#59 [build 51/55] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#59 CACHED
+
+#60 [build 23/55] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#60 CACHED
+
+#61 [build 19/55] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#61 CACHED
+
+#62 [build  8/55] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#62 CACHED
+
+#63 [build 11/55] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#63 CACHED
+
+#64 [build 25/55] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#64 CACHED
+
+#65 [build 42/55] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#65 CACHED
+
+#66 [runtime 7/7] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#66 CACHED
+
+#67 exporting to image
+#67 exporting layers done
+#67 exporting manifest sha256:56f3b96d27de4eb56b0f205e4511f0f49b064fd226709581539560c8bd8d18f8 0.0s done
+#67 exporting config sha256:fbed98c1b13afbc001c6e8b83db08dfc2657edee9407f2260b6abeb092c38cd0 0.0s done
+#67 exporting attestation manifest sha256:2587fdbf2442992c24d6ed65458f79b0e8a759e72512d97f56cbf59a36d32dcc
+#67 exporting attestation manifest sha256:2587fdbf2442992c24d6ed65458f79b0e8a759e72512d97f56cbf59a36d32dcc 0.2s done
+#67 exporting manifest list sha256:fd9a59baa497e6c53a5d1037966c01b9c99d96a9d185f68967670c3717c7f09e 0.1s done
+#67 naming to docker.io/library/sdar-runtime:v2-audit-repeat done
+#67 unpacking to docker.io/library/sdar-runtime:v2-audit-repeat 0.0s done
+#67 DONE 0.5s
+{"status":"pass","image":"sdar-runtime:v2-audit-primary","sizeBytes":103154065,"sizeLimitEnforced":false,"user":"node","layers":11,"filesystemHash":"4bb863f7963c77f8931ea24f72a58c64ac07675274968d5197f9850e10333502","reproducibleFilesystemAndConfig":true}
+$ vitest run tests/unit
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1791938826551,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/v1/diagnostics/response-loss","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938826560,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":400},"responseTime":8.05527300000017,"msg":"request completed"}
+{"level":30,"time":1791938826561,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"POST","url":"/v1/diagnostics/provider-business-success","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938826563,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":400},"responseTime":1.6883510000000115,"msg":"request completed"}
+{"level":30,"time":1791938826563,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","req":{"method":"GET","url":"/internal/provider-identity","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938826564,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","res":{"statusCode":200},"responseTime":0.3733199999999215,"msg":"request completed"}
+{"level":30,"time":1791938827961,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938827993,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/SMPP-MISSION-RELATION","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938828009,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/PV-LATEST-TASK","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938827968,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":5.502491999999847,"msg":"request completed"}
+{"level":30,"time":1791938827994,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":0.8118719999999939,"msg":"request completed"}
+{"level":30,"time":1791938828010,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":404},"responseTime":0.7148219999999128,"msg":"request completed"}
+{"level":30,"time":1791938829352,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938829375,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938829358,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.605045000000018,"msg":"request completed"}
+{"level":30,"time":1791938829359,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791938829359,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":503},"responseTime":0.6208679999999731,"msg":"request completed"}
+{"level":30,"time":1791938829377,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"err":{"type":"FastifyError","message":"Request body is too large","stack":"FastifyError: Request body is too large\n    at rawBody (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:245:10)\n    at ContentTypeParser.run (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:209:5)\n    at Object.handleRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/handle-request.js:87:46)\n    at runPreParsing (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/route.js:661:19)\n    at next (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:236:9)\n    at handleResolve (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:253:7)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","code":"FST_ERR_CTP_BODY_TOO_LARGE","name":"FastifyError","statusCode":413},"msg":"Request body is too large"}
+{"level":30,"time":1791938829380,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"responseTime":4.207132999999885,"msg":"request completed"}
+
+ Test Files  57 passed (57)
+      Tests  325 passed (325)
+   Start at  08:46:58
+   Duration  39.38s (transform 2.68s, setup 0ms, import 24.27s, tests 4.34s, environment 8ms)
+
+$ vitest run tests/contract
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  39 passed (39)
+      Tests  369 passed (369)
+   Start at  08:47:38
+   Duration  50.52s (transform 3.24s, setup 0ms, import 22.09s, tests 21.07s, environment 5ms)
+
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/integration
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  43 passed | 7 skipped (50)
+      Tests  524 passed | 39 skipped (563)
+   Start at  08:48:30
+   Duration  189.84s (transform 4.19s, setup 0ms, import 33.20s, tests 147.30s, environment 7ms)
+
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/recovery
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1791939109215,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109220,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":503},"responseTime":3.9595070000004853,"msg":"request completed"}
+{"level":30,"time":1791939109320,"service":"sdar-mcp-tasks-runtime","recovery":{"admissionsRecovered":0,"tasksReconciled":0,"notFound":0,"deferred":0,"lockSkipped":0},"providerId":"recovery-provider","msg":"startup recovery scanned"}
+{"level":30,"time":1791939109370,"service":"sdar-mcp-tasks-runtime","providerId":"recovery-provider","providerVersion":"1.0.0","msg":"runtime dependencies initialized"}
+{"level":30,"time":1791939109371,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109372,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":200},"responseTime":0.9170699999995122,"msg":"request completed"}
+{"level":30,"time":1791939109372,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","req":{"method":"GET","url":"/metrics","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109376,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","res":{"statusCode":200},"responseTime":3.0958080000000336,"msg":"request completed"}
+{"level":30,"time":1791939109376,"service":"sdar-mcp-tasks-runtime","reqId":"req-4","req":{"method":"POST","url":"/mcp/legacy","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109379,"service":"sdar-mcp-tasks-runtime","reqId":"req-4","res":{"statusCode":404},"responseTime":2.678277999999409,"msg":"request completed"}
+{"level":30,"time":1791939109380,"service":"sdar-mcp-tasks-runtime","reqId":"req-5","req":{"method":"POST","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109381,"service":"sdar-mcp-tasks-runtime","reqId":"req-5","res":{"statusCode":401},"responseTime":1.424764000000323,"msg":"request completed"}
+{"level":30,"time":1791939109382,"service":"sdar-mcp-tasks-runtime","reqId":"req-6","req":{"method":"GET","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109382,"service":"sdar-mcp-tasks-runtime","reqId":"req-6","res":{"statusCode":405},"responseTime":0.1883609999995315,"msg":"request completed"}
+{"level":30,"time":1791939109382,"service":"sdar-mcp-tasks-runtime","reqId":"req-7","req":{"method":"GET","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939109383,"service":"sdar-mcp-tasks-runtime","reqId":"req-7","res":{"statusCode":429},"responseTime":0.16448599999966973,"msg":"request completed"}
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  08:51:42
+   Duration  7.14s (transform 1.59s, setup 0ms, import 2.59s, tests 4.37s, environment 0ms)
+
+$ vitest run tests/security
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1791939114856,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1791939114862,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.488144999999804,"msg":"request completed"}
+
+ Test Files  9 passed (9)
+      Tests  55 passed (55)
+   Start at  08:51:50
+   Duration  9.79s (transform 2.49s, setup 0ms, import 7.29s, tests 810ms, environment 1ms)
+
+$ vitest run tests/e2e
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":40,"time":1791939131559,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":1,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131599,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":1,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131651,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":2,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131699,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":2,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131751,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":3,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131799,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":3,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131851,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":4,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131898,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":4,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131951,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":5,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939131998,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":5,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132051,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":6,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132099,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":6,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132150,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":7,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132200,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":7,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132250,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":8,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132300,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":8,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132351,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":9,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132400,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":9,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132451,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":10,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132500,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: null. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: null. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: null. Resolution note: ","metadata":{}},"failures":10,"msg":"Adapter health probe failed"}
+{"level":40,"time":1791939132552,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:627:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:37907. Resolution note: ","metadata":{}},"failures":11,"msg":"Adapter health probe failed"}
+
+ Test Files  4 passed (4)
+      Tests  10 passed (10)
+   Start at  08:52:01
+   Duration  18.75s (transform 2.37s, setup 0ms, import 6.13s, tests 11.90s, environment 1ms)
+
+$ node scripts/require-env.mjs TEST_DATABASE_URL && pnpm build && node scripts/run-conformance.mjs
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+Collecting grpcio==1.76.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 1))
+  Using cached grpcio-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.7 kB)
+Collecting grpcio-tools==1.76.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 2))
+  Using cached grpcio_tools-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (5.3 kB)
+Collecting protobuf==6.33.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 3))
+  Using cached protobuf-6.33.0-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+Collecting typing-extensions~=4.12 (from grpcio==1.76.0->-r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 1))
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting setuptools (from grpcio-tools==1.76.0->-r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 2))
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Using cached grpcio-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (6.6 MB)
+Using cached grpcio_tools-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.7 MB)
+Using cached protobuf-6.33.0-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Installing collected packages: typing-extensions, setuptools, protobuf, grpcio, grpcio-tools
+
+Successfully installed grpcio-1.76.0 grpcio-tools-1.76.0 protobuf-6.33.0 setuptools-84.0.0 typing-extensions-4.16.0
+INFO:root:Python mock Adapter listening on 127.0.0.1:35365
+INFO:root:Python mock Adapter listening on 127.0.0.1:41499
+Expanded Adapter conformance PASS; Runtime Profile scope is partial and resource safety is not claimed (typescript, python)
+$ node scripts/require-env.mjs TEST_DATABASE_URL && pnpm build && node scripts/run-capacity-baseline.mjs
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+[capacity] initialize
+[capacity] slow-adapter-pool
+[capacity] slow-adapter-side-effect-observed
+[capacity] slow-adapter-database-query-complete
+[capacity] slow-adapter-response-complete
+[capacity] workloads
+[capacity] dispatcher
+[capacity] scheduled-scan
+[capacity] watchdog-scan
+[capacity] recovery-candidate-scans
+[capacity] durable-growth-and-image
+[capacity] complete
+{"version":"2.0.0-rc.1","generatedAt":"2026-10-14T00:55:43.550Z","environment":{"node":"v22.23.2","platform":"linux/x64","cpuLogicalCount":48,"memoryBytes":168221470720,"database":"TEST_DATABASE_URL target (credentials redacted)","topology":"two Runtime replicas, shared PostgreSQL, single TypeScript Adapter"},"workloads":{"synchronousTool":{"iterations":100,"durationMs":815.1426480000009,"throughputPerSecond":122.67791440597018,"latencyMs":{"p50":7.329827999998088,"p95":11.421887000000424,"p99":14.617904999999155,"max":48.118821999996726}},"concurrentTaskAdmission":{"tasks":1000,"runtimeReplicas":2,"durationMs":43691.449338,"tasksPerSecond":22.88777358388669},"slowAdapterDatabaseAvailability":{"adapterResponseDelayMs":15000,"databaseQueryDurationMs":0.8156509999998889,"databaseQueryCompletedBeforeAdapterResponse":true,"taskId":"1ec20856-4e47-4291-a69f-7c7d49307df0"},"durableCommandDispatcher":{"commands":500,"runtimeReplicas":2,"duplicateAdapterSideEffects":0,"durationMs":47410.997577999995,"commandsPerSecond":10.546076343941214,"result":{"claimed":484,"acknowledged":484,"retried":0,"rejected":0,"exhausted":0,"terminal":0,"durableAcknowledged":500}},"scheduledScan":{"futureTasks":32,"durationMs":10.025823999996646,"result":{"started":0,"missed":0,"deferred":0,"deadlineStops":0,"watchdogStops":0,"reconciled":0}},"watchdogScan":{"overdueTasks":16,"durationMs":657.4020329999912,"result":{"watchdogStops":15,"reconciled":0,"durableStopRequests":16}},"recoveryCandidateScans":{"100":{"requested":100,"returned":100,"durationMs":5.582013000006555,"candidatesPerSecond":17914.684182907236},"500":{"requested":500,"returned":500,"durationMs":21.20906299998751,"candidatesPerSecond":23574.827421668484},"1000":{"requested":1000,"returned":1000,"durationMs":39.86663500001305,"candidatesPerSecond":25083.631964415174}},"observationOutboxGrowth":{"observations":{"before":{"rows":0,"bytes":32768},"after":{"rows":1580,"bytes":573440},"rows":1580,"bytes":540672},"outbox":{"before":{"rows":0,"bytes":32768},"after":{"rows":3596,"bytes":6971392},"rows":3596,"bytes":6938624}},"runtimeImage":{"schemaVersion":1,"measurementEnvironment":"linux/x64 Docker Engine","image":"sdar-runtime:v2-audit-primary","base":"node:22-bookworm-slim","sizeBytes":103154065,"sizeLimitEnforced":false,"user":"node","layers":11,"filesystemHash":"4bb863f7963c77f8931ea24f72a58c64ac07675274968d5197f9850e10333502","frozenLockfile":true,"productionDependenciesOnly":true,"containsTestsDocsOrReferences":false,"containsTypescriptOrVitest":false,"containsProtoAndMigrations":true,"reproducibleFilesystemAndConfig":true}},"interpretation":{"productionSlo":false,"recoveryScope":"Measures the real PostgreSQL candidate-selection/materialization path; Adapter reconciliation latency is resource-specific.","thresholds":"Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and non-root reproducible image policy; image size is recorded without a fixed ceiling."}}

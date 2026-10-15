@@ -1,0 +1,25 @@
+{
+  "name": "smpp-inspection-telemetry-package-03",
+  "command": "python3",
+  "args": [
+    "/home/sz/code/smpp-telemetry-platform/deploy/united-telemetry/package.py",
+    "--upstream",
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/united-final-v3/smpp-gowm-gdps-gsap-wsgs-4c85909d52dde9db.tar.gz",
+    "--sdar-schema",
+    "/mnt/data/sdar-local-integrated-20261013/release/smpp-gowm-gdps-gsap-wsgs-telemetry-13361e5b82c6acd7/sdar/schema.json",
+    "--sdar-release",
+    "/mnt/data/sdar-local-integrated-20261013/release/smpp-gowm-gdps-gsap-wsgs-telemetry-13361e5b82c6acd7/sdar/schema-contract-release.jsonl",
+    "--output",
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/telemetry-final-v3"
+  ],
+  "startedAt": "2026-10-14T13:02:59.395Z",
+  "completedAt": "2026-10-14T13:03:01.393Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "30ee150be0746683ecf4ba6fea587e7e5768eeb3ae2166e62c602480156a9bf3",
+  "sourceAfter": "30ee150be0746683ecf4ba6fea587e7e5768eeb3ae2166e62c602480156a9bf3",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-telemetry-package-03.log",
+  "logSha256": "7628c5589bda07140e9701f43f28df64726b7abbd447c5f39a5b5bf65b5a70e9"
+}
