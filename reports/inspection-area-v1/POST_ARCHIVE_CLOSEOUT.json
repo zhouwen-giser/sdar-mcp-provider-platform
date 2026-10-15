@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "phase": "Post-archive CI closeout",
+  "priorCiRun": 38705512944,
+  "priorFailedJob": "static / Run pnpm lint",
+  "cause": "Evidence TypeScript test was outside the root TypeScript project and had no local project configuration.",
+  "change": "reports/inspection-area-v1/tsconfig.json extends the original strict root config, enables noEmit and includes the existing correlation test. No lint rules disabled; test bytes and assertions unchanged; production/package runtime inputs unchanged.",
+  "receipts": [
+    {
+      "name": "smpp-inspection-evidence-lint-01",
+      "status": "PASS",
+      "sourceBefore": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "sourceAfter": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "smpp-inspection-evidence-typecheck-01",
+      "status": "PASS",
+      "sourceBefore": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "sourceAfter": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "smpp-inspection-evidence-correlation-01",
+      "status": "PASS",
+      "sourceBefore": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "sourceAfter": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+      "logSha256": "626081d57afd06667a418b33933e698f1d031084f72f7d8fdb2d7403d72cb110"
+    }
+  ],
+  "originalArchiveUnchanged": true,
+  "publicationSupplement": "Final CI and merge records are delivered separately in PUBLICATION.json."
+}
