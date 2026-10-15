@@ -1,0 +1,6 @@
+{
+  "schema": "smpp.trajectory-history-storage/v1",
+  "family": "UGV_PROVIDER",
+  "migrationFile": "033_trajectory_reception_history.sql",
+  "installedSha256": "1c2203ff8b9b4631888a270cdc16a6448c2b68f3e6a8d2289c4e44e8a562feb0"
+}

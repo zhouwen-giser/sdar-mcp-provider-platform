@@ -1,0 +1,11 @@
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts
+  332:65  error  Expected an error object to be thrown  @typescript-eslint/only-throw-error
+
+✖ 1 problem (1 error, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

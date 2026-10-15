@@ -1,0 +1,118 @@
+{
+  "checkedAt": "2026-09-30T08:07:22.706555+00:00",
+  "scope": "PASSIVE_NO_DEVICE_COMMANDS",
+  "deployment": {
+    "status": "PASS",
+    "deployedAt": "2026-09-30T08:05:23.395Z",
+    "baseRoot": "/mnt/data/union-reset-release-20260909/base/gowm-gdps-analysis-dev-server-0.1.0",
+    "baseSha256": "321700fd62de81f19b3a7e1e92f2ea22ba538be5ea94aef02bc5633711f95f52",
+    "gowmSha256": "62fd9970d399039df7c7c138e8534f73c294e33836f629f64e56da3a4a91eb81",
+    "smppRevision": "367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+    "databaseId": "7683543732855070763",
+    "account": "ugv_smpp_app",
+    "backupScope": "smpp",
+    "backupExcludedTableData": ["ugv_smpp.ugv_state_snapshot"],
+    "upstreamContainersPreserved": 33,
+    "credentialSource": "/mnt/data/union-reset-release-20260909/base/gowm-gdps-analysis-dev-server-0.1.0/.runtime/gdps-gowm-dev-server-0.2.2-gowm-0.7.1/.runtime/gowm/gowm-dev-server-0.7.1/.runtime/dev-deploy/business-connections.env"
+  },
+  "/health/live": {
+    "statusCode": 200,
+    "body": "{\"status\":\"live\"}"
+  },
+  "/health/ready": {
+    "statusCode": 200,
+    "body": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"ready\",\"adapter\":\"ready\",\"adapterManifest\":\"ready\",\"recovery\":\"ready\",\"scheduler\":\"ready\",\"commandDispatcher\":\"ready\",\"ttlCleaner\":\"ready\",\"outboxPublisher\":\"ready\",\"outboxCleaner\":\"ready\",\"providerTelemetryIngress\":\"ready\",\"businessEventPersistence\":\"ready\",\"businessEventReplay\":\"ready\",\"businessEventIngest\":\"ready\",\"businessEventFinalizer\":\"ready\",\"businessEventAdapterSources\":{\"vehicle.business\":\"ready\",\"vehicle.execution\":\"ready\",\"vehicle.health\":\"ready\",\"vehicle.target\":\"ready\"},\"businessEventRetention\":\"ready\",\"businessEventProjection\":\"ready\"}}"
+  },
+  "database": [
+    {
+      "record": "source",
+      "source_id": "vehicle.target",
+      "status": "active",
+      "persisted": 0,
+      "finalized": 0,
+      "error": "SOURCE_TEMPORARILY_UNAVAILABLE"
+    },
+    {
+      "record": "source",
+      "source_id": "vehicle.health",
+      "status": "active",
+      "persisted": 40,
+      "finalized": 39,
+      "error": "SOURCE_TEMPORARILY_UNAVAILABLE"
+    },
+    {
+      "record": "source",
+      "source_id": "vehicle.execution",
+      "status": "active",
+      "persisted": 27,
+      "finalized": 27,
+      "error": "SOURCE_TEMPORARILY_UNAVAILABLE"
+    },
+    {
+      "record": "source",
+      "source_id": "vehicle.business",
+      "status": "active",
+      "persisted": 171,
+      "finalized": 167,
+      "error": "TASK_MAPPING_FAILED"
+    },
+    {
+      "record": "historical_rejected",
+      "id": 52,
+      "status": "rejected",
+      "reason": "SOURCE_EVENT_ID_INVALID",
+      "finalized_at": "2026-09-30T07:51:21.812724+00:00"
+    },
+    {
+      "record": "business_recent",
+      "sequence": 171,
+      "status": "terminal_skipped",
+      "finalized_at": "2026-09-30T08:05:24.791136+00:00"
+    },
+    {
+      "record": "business_recent",
+      "sequence": 170,
+      "status": "terminal_skipped",
+      "finalized_at": "2026-09-30T08:05:23.740808+00:00"
+    },
+    {
+      "record": "business_recent",
+      "sequence": 169,
+      "status": "terminal_skipped",
+      "finalized_at": "2026-09-30T08:05:22.674323+00:00"
+    },
+    {
+      "record": "business_recent",
+      "sequence": 168,
+      "status": "terminal_skipped",
+      "finalized_at": "2026-09-30T07:35:25.957259+00:00"
+    },
+    {
+      "record": "business_recent",
+      "sequence": 167,
+      "status": "published",
+      "finalized_at": "2026-09-30T07:33:16.483066+00:00"
+    }
+  ],
+  "logWindowStart": "2026-09-30T08:05:19.343046626Z",
+  "logCounts": {
+    "gowm-analysis-dev-d2bf0ea98e-postgres-1": {
+      "scope": "last_2000_lines_since_runtime_start",
+      "lines": 13,
+      "constraintFailures": 0,
+      "finalizerFailures": 0
+    },
+    "smpp-gowm-runtime-1": {
+      "scope": "last_2000_lines_since_runtime_start",
+      "lines": 148,
+      "constraintFailures": 0,
+      "finalizerFailures": 0
+    },
+    "smpp-gowm-adapter-1": {
+      "scope": "last_2000_lines_since_runtime_start",
+      "lines": 12,
+      "constraintFailures": 0,
+      "finalizerFailures": 0
+    }
+  }
+}

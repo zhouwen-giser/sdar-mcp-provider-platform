@@ -1,8 +1,18 @@
 # UGV recon targets in Task Business Context
 
-Each accepted `/ugv/area_recon/targets` message is processed as its own observation, not from a sticky resource snapshot. The Runtime attaches it to a Task only when the target-list payload supplies `mission_id`, that ID matches the current reconnaissance status, exactly one active recon Execution owns it, and every projected target has a source capture timestamp at or after that status and Task creation. Retained, old, uncorrelated or ambiguous resource messages are not copied to Tasks. A target list cannot borrow a mission ID from the latest status.
+Each accepted `/ugv/area_recon/targets` packet is resolved independently under the
+[Recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md). Explicit identity
+must match the latest saved mission; anonymous fresh, non-retained data may use
+the unique active same-resource Recon Execution. The status packet must independently
+resolve to that Execution. Target capture times must be fresh and not predate the
+Task; they need not follow the latest status heartbeat. A sticky status mission
+ID is never used as the target packet's explicit identity.
 
-In a 2026-09-28 live scan, the target feed reported target `9` with WGS84 position, capture microseconds and pixel coordinates, then an empty list after the finite scan ended. The status messages in that run did not carry a mission ID, and the target list had no mission/session ID of its own. This device-layer capture proves the source has target detail and a later empty list; it cannot establish a Task-bound `target.object` or a qualified loss transition through the current Runtime gate. The missing binding is tracked as `EXT-UGV-RECON-CORRELATION`.
+The historical 2026-09-28 scan observed target `9` with WGS84 position, capture
+microseconds and pixels, followed by an empty list, without source mission IDs.
+That source-only capture remains historical evidence, not live Runtime acceptance.
+Under the v1.2 supplement, absent identity alone no longer blocks current-execution
+inference; V-OBS/V-INPUT still need their own public Runtime evidence.
 
 When an Execution has more than one downstream mission, only its latest mission can publish current target revisions; earlier mission captures remain historical and cannot alter the current Context.
 
@@ -10,7 +20,7 @@ When an Execution has more than one downstream mission, only its latest mission 
 
 Targets in one message can carry different capture times. A later accepted capture for one target does not move the Task Context clock backward when another target's older capture is committed afterward; each target Artifact and its change event retain their own source observation time. For the exact recon feed, `sourceRevision` carries the numeric microsecond capture time. The projector compares that value for successive versions of the same target, so an older capture cannot replace a newer one even when both UTC strings fall in the same millisecond. A newer same-millisecond capture may still add compatible metadata; a changed position at the same represented time remains a conflict.
 
-The exact `/ugv/area_recon/targets` list is complete for the current observation. When every present target has qualified source capture time and the list carries the current mission ID, absence of a previously visible ID records a `lost` revision. A list with an unqualified target, an old/retained message, or an ambiguous mission never drives loss. If one target conflicts with a previously stored source version or same-time position, Runtime records a `target_projection_conflict_total` metric and continues projecting eligible peers in that list. The conflicted list cannot drive absence-based loss. Unexpected Store or projection failures still propagate. A lost object keeps its last spatial expression but `visibility: lost` and the earlier `lastSeen`; `updatedAt` is the loss observation time. This makes the position historical rather than a fresh fix. Visual lock loss does not imply target visibility loss or Task failure.
+The exact `/ugv/area_recon/targets` list is complete for the current observation. When every present target has qualified source capture time and the list resolves to the current Execution, absence of a previously visible ID records a `lost` revision. A list with an unqualified target, an old/retained message, or an ambiguous mission never drives loss. If one target conflicts with a previously stored source version or same-time position, Runtime records a `target_projection_conflict_total` metric and continues projecting eligible peers in that list. The conflicted list cannot drive absence-based loss. Unexpected Store or projection failures still propagate. A lost object keeps its last spatial expression but `visibility: lost` and the earlier `lastSeen`; `updatedAt` is the loss observation time. This makes the position historical rather than a fresh fix. Visual lock loss does not imply target visibility loss or Task failure.
 
 Two strictly later, consecutive WGS84 source observations create an observed `target.track` LineString. Later measured points extend that segment. A first point alone creates no LineString; a loss or missing geographic fix removes the current track reference, and a reappearance starts a new segment only after two new measured points. Older segments remain readable in Context history. The processor does not append predictions or bridge gaps. A metadata update at the same sample time leaves the active segment intact; a different position at the same sample time is a conflict.
 

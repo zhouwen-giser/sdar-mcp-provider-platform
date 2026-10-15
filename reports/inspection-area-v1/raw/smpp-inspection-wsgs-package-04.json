@@ -1,0 +1,23 @@
+{
+  "name": "smpp-inspection-wsgs-package-04",
+  "command": "python3",
+  "args": [
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/package-wsgs-united-deployment.py",
+    "--wsgs-package",
+    "/home/sz/code/world-semantic-grounding-service/output/deployment/gowm-gdps-gsap-wsgs-dev-server-0.2.1.tar.gz",
+    "--smpp-package",
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/source-final-v4/smpp-sz-gowm-e34ba51f04c0-51921e4dd9e5.tar.gz",
+    "--output-dir",
+    "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/united-final-v4"
+  ],
+  "startedAt": "2026-10-14T13:10:14.104Z",
+  "completedAt": "2026-10-14T13:10:18.124Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceAfter": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-wsgs-package-04.log",
+  "logSha256": "db0305f1ef2adc345de25d7ffdd5dfee49b35796473225bb7c886b6fcac01b2f"
+}

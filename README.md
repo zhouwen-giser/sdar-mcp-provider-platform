@@ -45,6 +45,7 @@ immutable.
 
 面向外部系统的接口以中文说明为主，并保留协议中的英文标识符：
 
+- [UGV Provider MCP 使用说明](docs/ugv-provider-mcp-api-guide.md)：车辆工具参数、导航调整、侦察人工决策、Task 生命周期及业务事件续传。
 - [Runtime API 参考](docs/protocol/api-reference.md)：说明 HTTP 健康/管理接口、MCP JSON-RPC 方法、`tasks/observations`（任务观测分页）和 Adapter gRPC 方法，包含输入输出样例。
 - [Provider 遥测入口](docs/protocol/provider-telemetry-ingress.md)：说明 `ProviderTelemetryIngress`（Provider 遥测入口）及 `EmitProviderEvents`（批量提交事件）的字段、mTLS 身份规则、错误码和 TypeScript/Python 客户端样例。
 - [Provider 运维遥测](docs/operations/provider-ops-telemetry.md)：说明 `ProviderOpsEnvelope`（Provider 运维事件信封）、外部 Collector 输出、指标、隐私和失败语义。

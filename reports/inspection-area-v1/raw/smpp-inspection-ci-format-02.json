@@ -1,0 +1,24 @@
+{
+  "name": "smpp-inspection-ci-format-02",
+  "command": "pnpm",
+  "args": [
+    "exec",
+    "prettier",
+    "--check",
+    ".github/workflows/ci.yml",
+    ".github/workflows/release-candidate.yml",
+    "scripts/inspection/provider-harness.ts",
+    "scripts/inspection/isolated-env.mjs",
+    "docs/execplans/inspection-area-v1.md"
+  ],
+  "startedAt": "2026-10-14T02:56:35.188Z",
+  "completedAt": "2026-10-14T02:56:36.970Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+  "sourceAfter": "f4e53b14632fcae7f99083ebfbe386534b8d5c821e03fec9499c96b977778be4",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-ci-format-02.log",
+  "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+}

@@ -1,0 +1,6 @@
+{
+  "schema": "gowm.task-business-runtime/v1",
+  "family": "SMPP_RUNTIME",
+  "migrationFile": "027_task_business_intervention_command.sql",
+  "installedSha256": "0acf7444a7acfbe295fc809804a7a83d247411c4b97fc2db6cd704291205d624"
+}

@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
@@ -41,15 +42,21 @@ const footprintFactSchema = z.discriminatedUnion("state", [
       ...source,
       state: z.literal("active"),
       quality: z.enum(["observed", "nominal", "estimated"]),
-      sourceKind: z.enum(["device_reported", "calibrated_model"]),
+      sourceKind: z.enum(["device_reported", "calibrated_model", "configured_model"]),
       modelRef: id.optional(),
+      validUntil: z.iso.datetime({ offset: true }).optional(),
       content: geometry,
     })
     .strict()
     .superRefine((fact, ctx) => {
       if (fact.quality === "observed" && fact.sourceKind !== "device_reported")
         ctx.addIssue({ code: "custom", message: "FOOTPRINT_OBSERVED_SOURCE_INVALID" });
-      if (fact.quality !== "observed" && (fact.sourceKind !== "calibrated_model" || !fact.modelRef))
+      if (fact.sourceKind === "configured_model" && fact.quality !== "estimated")
+        ctx.addIssue({ code: "custom", message: "CONFIGURED_MODEL_MUST_BE_ESTIMATED" });
+      if (
+        fact.quality !== "observed" &&
+        (!["calibrated_model", "configured_model"].includes(fact.sourceKind) || !fact.modelRef)
+      )
         ctx.addIssue({ code: "custom", message: "FOOTPRINT_MODEL_REQUIRED" });
       if (
         fact.quality !== "observed" &&
@@ -69,7 +76,7 @@ export type ReconFootprintFact = z.infer<typeof footprintFactSchema>;
 
 const terminal = new Set(["SUCCEEDED", "BUSINESS_FAILED", "CANCELLED", "TECHNICAL_FAILED"]);
 
-/** Accepts actual reported or calibrated footprint geometry; no FOV is inferred here. */
+/** Projects reported or explicitly modelled geometry; estimation runs in the source adapter. */
 export class FootprintBusinessProcessor {
   constructor(
     readonly business: Pick<
@@ -82,7 +89,7 @@ export class FootprintBusinessProcessor {
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
     const fact = footprintFactSchema.parse(input);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== fact.missionId ||
       compareIsoTimestamps(fact.observedAt, execution.createdAt) < 0
@@ -192,6 +199,7 @@ export class FootprintBusinessProcessor {
         ...(fact.state === "active"
           ? {
               availability: "available",
+              ...(fact.validUntil ? { validUntil: fact.validUntil } : {}),
               properties: {
                 areaRevision: fact.areaRevision,
                 quality: fact.quality,

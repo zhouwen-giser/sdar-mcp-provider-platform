@@ -1,0 +1,20 @@
+{
+  "name": "smpp-inspection-gate-10",
+  "command": "node",
+  "args": [
+    "scripts/inspection/isolated-env.mjs",
+    "exec",
+    "pnpm",
+    "verify"
+  ],
+  "startedAt": "2026-10-14T00:09:40.466Z",
+  "completedAt": "2026-10-14T00:22:46.315Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "63df34b7a1e503e329e4438ee25724da22884d4312251430abf177f9564b7eaa",
+  "sourceAfter": "63df34b7a1e503e329e4438ee25724da22884d4312251430abf177f9564b7eaa",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-gate-10.log",
+  "logSha256": "e06b32529314521ef179dcf09d78992cae23bff2ef3f7191f823fbb188bdbc6a"
+}

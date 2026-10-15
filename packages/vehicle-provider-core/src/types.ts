@@ -1,6 +1,6 @@
-export type VehicleTaskState = -1 | 0 | 1 | 2 | 3 | 4 | 5 | "unknown";
-export type ReconMotionStatus =
-  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 99 | "unknown";
+// Unknown numeric device codes are retained; reducers must fail closed on them.
+export type VehicleTaskState = number | "unknown";
+export type ReconMotionStatus = number | "unknown";
 export type ComponentHealth = "normal" | "fault" | "unknown";
 export type VehicleTrack = "chassis" | "eo" | "weapon";
 export type VehicleExecutionMode = "simulation" | "live";
@@ -48,7 +48,7 @@ export interface ReconCoverability {
 }
 
 export interface ReconLockObservation {
-  stage?: 1 | 2 | 3 | 4;
+  stage?: number;
   targetId?: string;
   roleName?: string;
   durationSec?: number;
@@ -98,6 +98,7 @@ export interface VehicleReconnaissanceState extends VehicleTaskTrack {
   scanMode?: 1 | 2;
   scanModeLabel?: string;
   scanPitchDeg?: number;
+  eoFovDeg?: number;
   outOfRange?: boolean;
   cameraFault?: boolean;
   progressAuthoritative?: boolean;

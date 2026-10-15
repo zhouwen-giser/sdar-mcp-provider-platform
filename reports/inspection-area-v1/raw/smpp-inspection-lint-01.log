@@ -1,0 +1,53 @@
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-provider-adapter/src/inspection-report.ts
+  39:43  error  Unnecessary conditional, comparison is always true, since `"artifact" === "artifact"` is true  @typescript-eslint/no-unnecessary-condition
+  41:28  error  Forbidden non-null assertion                                                                   @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-provider-adapter/src/manifest.ts
+  84:24  error  This expression unnecessarily compares a boolean value to a boolean instead of using it directly  @typescript-eslint/no-unnecessary-boolean-literal-compare
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-provider-adapter/src/runtime.ts
+   673:22  error  Forbidden non-null assertion                                                                              @typescript-eslint/no-non-null-assertion
+   710:19  error  This assertion is unnecessary since the receiver accepts the original type of the expression              @typescript-eslint/no-unnecessary-type-assertion
+   728:71  error  Forbidden non-null assertion                                                                              @typescript-eslint/no-non-null-assertion
+   745:72  error  'details.target_id' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+   746:69  error  'details.type' may use Object's default stringification format ('[object Object]') when stringified       @typescript-eslint/no-base-to-string
+  2384:7   error  Forbidden non-null assertion                                                                              @typescript-eslint/no-non-null-assertion
+  2385:7   error  Forbidden non-null assertion                                                                              @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-device-mcp-client/src/tool-mapping.ts
+  103:31  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-provider-core/src/inspection.ts
+   73:34  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   73:47  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   80:17  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   83:15  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   84:11  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   90:28  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   90:41  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  112:15  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  113:11  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  151:3   error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/integration/ugv-inspection-postgres-mqtt.test.ts
+   47:7   error  'observedAt' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  162:51  error  Forbidden non-null assertion                     @typescript-eslint/no-non-null-assertion
+  169:5   error  Unsafe assignment of an `any` value              @typescript-eslint/no-unsafe-assignment
+  172:10  error  Forbidden non-null assertion                     @typescript-eslint/no-non-null-assertion
+  346:7   error  Unsafe assignment of an `any` value              @typescript-eslint/no-unsafe-assignment
+  353:7   error  Unsafe assignment of an `any` value              @typescript-eslint/no-unsafe-assignment
+  457:7   error  Unsafe assignment of an `any` value              @typescript-eslint/no-unsafe-assignment
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/unit/ugv-inspection.test.ts
+   87:3   error  Forbidden non-null assertion                                                    @typescript-eslint/no-non-null-assertion
+   95:3   error  Forbidden non-null assertion                                                    @typescript-eslint/no-non-null-assertion
+  259:5   error  Forbidden non-null assertion                                                    @typescript-eslint/no-non-null-assertion
+  259:5   error  Forbidden non-null assertion                                                    @typescript-eslint/no-non-null-assertion
+  339:25  error  Operands of '+' operations must be a number or string. Got `string` + `number`  @typescript-eslint/restrict-plus-operands
+
+✖ 33 problems (33 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+[ELIFECYCLE] Command failed with exit code 1.

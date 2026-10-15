@@ -105,10 +105,14 @@ describe("pre-012 database forward upgrade", () => {
       { column_name: "runtime_revision", is_nullable: "NO" },
       { column_name: "runtime_updated_at", is_nullable: "NO" },
     ]);
-    const current = await upgradePool.query<{ count: string }>(
-      "SELECT count(*) FROM runtime_schema_migration",
+    const current = await upgradePool.query<{ version: string }>(
+      "SELECT version FROM runtime_schema_migration ORDER BY version",
     );
-    expect(current.rows[0]?.count).toBe("27");
+    expect(current.rows.map(({ version }) => version)).toEqual(
+      (await readdir(resolve(process.cwd(), "migrations/runtime")))
+        .filter((name) => name.endsWith(".sql"))
+        .sort(),
+    );
     const providerTables = await upgradePool.query<{ table_name: string }>(
       `SELECT table_name FROM information_schema.tables
        WHERE table_schema=$1

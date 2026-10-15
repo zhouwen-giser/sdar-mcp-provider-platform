@@ -1,0 +1,77 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts (4 tests | 3 failed) 2206ms
+     × persists discoveries, valid empty reports and source/mission isolation under the inspection identity 563ms
+     × uses native pause/resume/cancel and idempotent recovery without a second dispatch 118ms
+     × stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > persists discoveries, valid empty reports and source/mission isolation under the inspection identity
+AssertionError: expected { resourceId: 'vehicle:ugv1', …(7) } to match object { status: 'completed', …(2) }
+(14 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -18,9 +18,9 @@
+        "x": 116.5,
+        "y": 39.5,
+      },
+    ],
+    "inspectionReport": {
+-     "findingCount": 0,
++     "findingCount": 1,
+    },
+    "status": "completed",
+  }
+
+ ❯ terminal tests/integration/ugv-inspection-postgres-mqtt.test.ts:167:26
+    165|   const result = await runtime.get(execution.taskId);
+    166|   expect(result?.state).toBe("SUCCEEDED");
+    167|   expect(result?.result).toMatchObject({
+       |                          ^
+    168|     status: "completed",
+    169|     anomalies: expect.any(Array),
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts:334:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > uses native pause/resume/cancel and idempotent recovery without a second dispatch
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts:366:65
+    364|       commandSequence: "1",
+    365|     };
+    366|     expect((await runtime.command("pause", identity)).accepted).toBe(t…
+       |                                                                 ^
+    367|     await status(mission(execution), 13);
+    368|     expect((await runtime.get(execution.taskId))?.state).toBe("PAUSED"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report
+Error: UGV_EO_TRACK_BUSY
+ ❯ UgvProviderRuntime.#start apps/ugv-provider-adapter/src/runtime.ts:775:54
+    773|     }
+    774|     const decision = this.availability(input.operationName, input.argu…
+    775|     if (decision.availability !== "AVAILABLE") throw new Error(decisio…
+       |                                                      ^
+    776|     const preemptedExecutions =
+    777|       input.operationName === "vehicle_emergency_stop"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  01:29:37
+   Duration  5.13s (transform 1.81s, setup 0ms, import 2.73s, tests 2.21s, environment 0ms)
+

@@ -426,6 +426,10 @@ describe("UGV target business projection", () => {
     });
     const device = new MockUgvDeviceMcpClient();
     const deviceCalls = vi.spyOn(device, "call");
+    let observationClock = Date.parse("2026-09-24T00:00:00Z");
+    ingress.onSnapshot((_snapshot, _topic, applied) => {
+      if (applied) observationClock = Math.max(observationClock, Date.parse(applied.observedAt));
+    });
     const runtime = new UgvProviderRuntime(
       {
         providerId: run.providerId ?? "provider-a",
@@ -440,7 +444,7 @@ describe("UGV target business projection", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
-        now: () => new Date("2026-09-24T00:00:10Z"),
+        now: () => new Date(observationClock),
         businessManualDecision: {
           maxWaitMs: 30_000,
           onExpire: "release_and_resume_scan",
@@ -682,6 +686,10 @@ describe("UGV target business projection", () => {
       endpoint: "127.0.0.1:7002",
       tlsMode: "disabled",
     });
+    let observationClock = Date.parse("2026-09-24T00:00:00Z");
+    ingress.onSnapshot((_snapshot, _topic, applied) => {
+      if (applied) observationClock = Math.max(observationClock, Date.parse(applied.observedAt));
+    });
     const runtime = new UgvProviderRuntime(
       {
         providerId: run.providerId ?? "provider-a",
@@ -690,6 +698,7 @@ describe("UGV target business projection", () => {
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,
         pollIntervalMs: 60_000,
+        now: () => new Date(observationClock),
       },
       executions,
       ingress,

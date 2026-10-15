@@ -1,0 +1,18 @@
+{"baselineCommit": "5a2482aa5df25f2eebed604ed15f9d4c3a02a454", "scope": "unchanged pre-existing vendor integration cases on remote main"}
+Scope: all 45 workspace projects
+[ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY] Aborted removal of modules directory due to no TTY
+
+If you are running pnpm in CI, set the CI environment variable to "true", or set "confirmModulesPurge" to "false".
+[ERROR] Command failed with exit code 1: /home/sz/.nvm/versions/node/v22.23.2/bin/node /home/sz/.cache/node/corepack/v1/pnpm/11.13.1/bin/pnpm.mjs install
+
+pnpm: Command failed with exit code 1: /home/sz/.nvm/versions/node/v22.23.2/bin/node /home/sz/.cache/node/corepack/v1/pnpm/11.13.1/bin/pnpm.mjs install
+    at getFinalError (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:88106:14)
+    at makeError (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:90413:21)
+    at getSyncResult (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:92257:10)
+    at spawnSubprocessSync (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:92217:14)
+    at execaCoreSync (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:92147:23)
+    at callBoundExeca (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:94675:23)
+    at boundExeca (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:94652:49)
+    at sync2 (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:94811:10)
+    at runPnpmCli (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:248250:5)
+    at runDepsStatusCheck (file:///home/sz/.cache/node/corepack/v1/pnpm/11.13.1/dist/pnpm.mjs:250016:7)

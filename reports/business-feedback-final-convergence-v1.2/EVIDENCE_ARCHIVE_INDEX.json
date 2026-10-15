@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "sdar.pr35-raw-evidence-archive/1",
+  "reason": "Preserve large immutable qualification captures outside the active PR tree.",
+  "archiveBranch": "archive/ugv-pr35-raw-evidence-20261008",
+  "archiveCommit": "9f6714d1fc06a65fb7438d66df435da51226455a",
+  "previousActivePrHead": "9f6714d1fc06a65fb7438d66df435da51226455a",
+  "activePr": 35,
+  "thresholdBytes": 100000,
+  "fileCount": 20,
+  "totalBytes": 81789766,
+  "integrity": "git blob SHA-1; verify with git hash-object on restored bytes",
+  "files": [
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/map-full-recon-current-site-failure.json",
+      "sizeBytes": 34698356,
+      "gitBlobSha1": "b10cb66f4ce32efc4f5d3e839a1c1437a8ca9758",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/map-full-recon-current-site-failure.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/map-full-recon.json",
+      "sizeBytes": 22489800,
+      "gitBlobSha1": "9aca65a2f0a4d0cb68e33778bd2f7fc3a49ec811",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/map-full-recon.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-17.json",
+      "sizeBytes": 5380721,
+      "gitBlobSha1": "14d05b16e438547d0d63831e7797cefc2292fbcc",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-17.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-16.json",
+      "sizeBytes": 4584393,
+      "gitBlobSha1": "c910ff6a7e3e816e64fc5728de0af530db219736",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-16.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-14.json",
+      "sizeBytes": 3008594,
+      "gitBlobSha1": "7b771359fef7fd69fbe57c06915d3215f0bff2fd",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-14.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/final-candidate-navigation.json",
+      "sizeBytes": 2609399,
+      "gitBlobSha1": "35860a49862aa20995e09c515c18fe8442efcc04",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/final-candidate-navigation.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/map-full-navigation-timeout.json",
+      "sizeBytes": 1955570,
+      "gitBlobSha1": "7676dd9a59b93b5ca57fd74e98a63fce7f1ed258",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/map-full-navigation-timeout.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-restart.json",
+      "sizeBytes": 1431544,
+      "gitBlobSha1": "571a098a56c14b06df7c8158f270584c11da9ee3",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-restart.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-13.json",
+      "sizeBytes": 1361547,
+      "gitBlobSha1": "df455b998f7132b73918ceb72da6a6aac00a69b4",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-13.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-payloads.json",
+      "sizeBytes": 1149723,
+      "gitBlobSha1": "9f4137b4761d57b4acc49d912586dea78dee5738",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/navigation-public-payloads.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-1.json",
+      "sizeBytes": 869925,
+      "gitBlobSha1": "23f551c276b26743079770f8c11aea78256a1707",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-1.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-11.json",
+      "sizeBytes": 375945,
+      "gitBlobSha1": "b5a24d3ff5630e1567bbb9076447e78b2c2570b4",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-11.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-12.json",
+      "sizeBytes": 369009,
+      "gitBlobSha1": "13b5f26c81d4ba3363df5fc55f406a15efb068c6",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-12.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-5.json",
+      "sizeBytes": 318723,
+      "gitBlobSha1": "7e107f340d277e29b0106977fddaed4674d0f43e",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-5.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-7.json",
+      "sizeBytes": 252298,
+      "gitBlobSha1": "920226ff3df2e33ccbee02d1dbc0294b429330a7",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-7.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-6.json",
+      "sizeBytes": 247555,
+      "gitBlobSha1": "5d61e3f92824b3dc57472f6c2acb9562c1d5d9d6",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-6.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-8.json",
+      "sizeBytes": 229153,
+      "gitBlobSha1": "9a59be8d7f1afdf3a91fcfd8494583a1466371de",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-8.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-9.json",
+      "sizeBytes": 219176,
+      "gitBlobSha1": "60d5d11970dc6e089adf8d97a366c1f0c33969dd",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-9.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-10.json",
+      "sizeBytes": 127360,
+      "gitBlobSha1": "6a4af3dfe24970b7c9f4290026ab1882d72967a4",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-10.json"
+    },
+    {
+      "path": "reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-2.json",
+      "sizeBytes": 110975,
+      "gitBlobSha1": "3d15aeebedcd63ce2139ca336bc24655b961c6bf",
+      "immutableUrl": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/blob/9f6714d1fc06a65fb7438d66df435da51226455a/reports/business-feedback-final-convergence-v1.2/evidence/recon-public-attempt-2.json"
+    }
+  ]
+}

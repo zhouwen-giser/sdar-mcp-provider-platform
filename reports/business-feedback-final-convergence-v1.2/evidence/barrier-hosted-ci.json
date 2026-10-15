@@ -1,0 +1,465 @@
+{
+  "conclusion": "success",
+  "headSha": "367910c75f4ffa3969aed1f612b77d74a6518ed4",
+  "jobs": [
+    {
+      "completedAt": "2026-09-30T08:00:18Z",
+      "conclusion": "success",
+      "databaseId": 109794213261,
+      "name": "static",
+      "startedAt": "2026-09-30T07:57:28Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-30T07:57:29Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-30T07:57:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:32Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-09-30T07:57:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:33Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 3,
+          "startedAt": "2026-09-30T07:57:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:37Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 4,
+          "startedAt": "2026-09-30T07:57:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:42Z",
+          "conclusion": "success",
+          "name": "Run pnpm install --frozen-lockfile",
+          "number": 5,
+          "startedAt": "2026-09-30T07:57:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:40Z",
+          "conclusion": "success",
+          "name": "Run pnpm format:check",
+          "number": 6,
+          "startedAt": "2026-09-30T07:57:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:59:41Z",
+          "conclusion": "success",
+          "name": "Run pnpm lint",
+          "number": 7,
+          "startedAt": "2026-09-30T07:58:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:59:58Z",
+          "conclusion": "success",
+          "name": "Run pnpm typecheck",
+          "number": 8,
+          "startedAt": "2026-09-30T07:59:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:13Z",
+          "conclusion": "success",
+          "name": "Run pnpm build",
+          "number": 9,
+          "startedAt": "2026-09-30T07:59:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:14Z",
+          "conclusion": "success",
+          "name": "Run pnpm protocol:check",
+          "number": 10,
+          "startedAt": "2026-09-30T08:00:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:16Z",
+          "conclusion": "success",
+          "name": "Run pnpm sbom:check",
+          "number": 11,
+          "startedAt": "2026-09-30T08:00:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:16Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 20,
+          "startedAt": "2026-09-30T08:00:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:16Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 21,
+          "startedAt": "2026-09-30T08:00:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:16Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 22,
+          "startedAt": "2026-09-30T08:00:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T08:00:16Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 23,
+          "startedAt": "2026-09-30T08:00:16Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794213261"
+    },
+    {
+      "completedAt": "2026-09-30T07:58:13Z",
+      "conclusion": "success",
+      "databaseId": 109794213538,
+      "name": "development-tests",
+      "startedAt": "2026-09-30T07:57:29Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-30T07:57:31Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-30T07:57:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:34Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-09-30T07:57:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:36Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 3,
+          "startedAt": "2026-09-30T07:57:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:40Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 4,
+          "startedAt": "2026-09-30T07:57:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:45Z",
+          "conclusion": "success",
+          "name": "Run pnpm install --frozen-lockfile",
+          "number": 5,
+          "startedAt": "2026-09-30T07:57:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:06Z",
+          "conclusion": "success",
+          "name": "Run pnpm test:unit",
+          "number": 6,
+          "startedAt": "2026-09-30T07:57:45Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:09Z",
+          "conclusion": "success",
+          "name": "Run pnpm --filter @sdar/runtime-configuration-contract test",
+          "number": 7,
+          "startedAt": "2026-09-30T07:58:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:09Z",
+          "conclusion": "success",
+          "name": "Run pnpm release:candidate:check",
+          "number": 8,
+          "startedAt": "2026-09-30T07:58:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:09Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 14,
+          "startedAt": "2026-09-30T07:58:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:09Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 15,
+          "startedAt": "2026-09-30T07:58:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:10Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 16,
+          "startedAt": "2026-09-30T07:58:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:10Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "startedAt": "2026-09-30T07:58:10Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794213538"
+    },
+    {
+      "completedAt": "2026-09-30T07:58:31Z",
+      "conclusion": "success",
+      "databaseId": 109794213737,
+      "name": "task-business-ugv",
+      "startedAt": "2026-09-30T07:57:28Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-30T07:57:30Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-30T07:57:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:38Z",
+          "conclusion": "success",
+          "name": "Initialize containers",
+          "number": 2,
+          "startedAt": "2026-09-30T07:57:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:41Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 3,
+          "startedAt": "2026-09-30T07:57:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:43Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 4,
+          "startedAt": "2026-09-30T07:57:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:46Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 5,
+          "startedAt": "2026-09-30T07:57:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:51Z",
+          "conclusion": "success",
+          "name": "Run pnpm install --frozen-lockfile",
+          "number": 6,
+          "startedAt": "2026-09-30T07:57:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:57:54Z",
+          "conclusion": "success",
+          "name": "Run pnpm task-business:check",
+          "number": 7,
+          "startedAt": "2026-09-30T07:57:51Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:11Z",
+          "conclusion": "success",
+          "name": "Run pnpm test:task-business:ugv-local",
+          "number": 8,
+          "startedAt": "2026-09-30T07:57:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:13Z",
+          "conclusion": "success",
+          "name": "GOWM owner template components (not selected installation qualification)",
+          "number": 9,
+          "startedAt": "2026-09-30T07:58:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:14Z",
+          "conclusion": "success",
+          "name": "Packaged GOWM SQL transaction and retry checks",
+          "number": 10,
+          "startedAt": "2026-09-30T07:58:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:28Z",
+          "conclusion": "success",
+          "name": "Run pnpm test:task-business:ugv-native",
+          "number": 11,
+          "startedAt": "2026-09-30T07:58:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:28Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 19,
+          "startedAt": "2026-09-30T07:58:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:28Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 20,
+          "startedAt": "2026-09-30T07:58:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:29Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 21,
+          "startedAt": "2026-09-30T07:58:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:29Z",
+          "conclusion": "success",
+          "name": "Stop containers",
+          "number": 22,
+          "startedAt": "2026-09-30T07:58:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:58:29Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 23,
+          "startedAt": "2026-09-30T07:58:29Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794213737"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794214699,
+      "name": "worker-lease-safety",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794214699"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:26Z",
+      "conclusion": "skipped",
+      "databaseId": 109794214706,
+      "name": "provider-regression",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794214706"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794214900,
+      "name": "pms-api-production",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794214900"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794214956,
+      "name": "runtime-compose",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794214956"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794215004,
+      "name": "worker-pm2-production",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794215004"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:26Z",
+      "conclusion": "skipped",
+      "databaseId": 109794215073,
+      "name": "platform-e2e",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794215073"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794215102,
+      "name": "runtime-ci",
+      "startedAt": "2026-09-30T07:57:26Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794215102"
+    },
+    {
+      "completedAt": "2026-09-30T07:57:25Z",
+      "conclusion": "skipped",
+      "databaseId": 109794251759,
+      "name": "release-artifacts",
+      "startedAt": "2026-09-30T07:57:33Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297/job/109794251759"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/36686731297"
+}

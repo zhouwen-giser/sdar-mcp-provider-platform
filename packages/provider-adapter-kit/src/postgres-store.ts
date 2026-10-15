@@ -54,6 +54,13 @@ export class PostgresProviderStore implements ProviderStore {
   readonly pool: Pool;
   readonly tables: ProviderStoreTables;
   #taskBusinessSourceEnabled = false;
+  #pendingSnapshots: {
+    record: SnapshotRecord;
+    resolve: () => void;
+    reject: (error: unknown) => void;
+  }[] = [];
+  #snapshotFlush: Promise<void> | undefined;
+  #snapshotFlushTimer: NodeJS.Timeout | undefined;
   constructor(
     connectionString: string,
     maximum = 8,
@@ -70,6 +77,7 @@ export class PostgresProviderStore implements ProviderStore {
     await this.pool.query("SELECT 1");
   }
   async close(): Promise<void> {
+    while (this.#pendingSnapshots.length || this.#snapshotFlush) await this.#flushSnapshots();
     await this.pool.end();
   }
   /** Called only after the matching business Store and operation profile are wired. */
@@ -284,24 +292,10 @@ export class PostgresProviderStore implements ProviderStore {
     const config = storageScope(this.pool);
     if (config) {
       if (!record.channel) throw new Error("SNAPSHOT_CHANNEL_REQUIRED");
-      const source = record.sourceSessionKey ?? config.sourceSessionKey;
-      const result = await this.pool.query(
-        `INSERT INTO ugv_smpp.ugv_state_snapshot
-        (device_id,source_session_key,channel,revision,observed_at,snapshot)
-        VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(device_id,source_session_key,channel,revision)
-        DO UPDATE SET revision=EXCLUDED.revision
-        WHERE ugv_state_snapshot.snapshot=EXCLUDED.snapshot
-          AND ugv_state_snapshot.observed_at=EXCLUDED.observed_at RETURNING revision`,
-        [
-          config.allowedDeviceIds[0],
-          source,
-          record.channel,
-          record.revision,
-          record.observedAt,
-          record.snapshot,
-        ],
-      );
-      if (result.rowCount !== 1) throw new Error("SNAPSHOT_IDENTITY_CONFLICT");
+      await new Promise<void>((resolve, reject) => {
+        this.#pendingSnapshots.push({ record, resolve, reject });
+        this.#scheduleSnapshotFlush();
+      });
       return;
     }
     await this.pool.query(
@@ -309,6 +303,71 @@ export class PostgresProviderStore implements ProviderStore {
        VALUES(${scopeValues(this.pool, "ugv_state_snapshot")}$1,$2,$3) ON CONFLICT DO NOTHING`,
       [record.revision, record.observedAt, record.snapshot],
     );
+  }
+
+  #scheduleSnapshotFlush(): void {
+    if (this.#snapshotFlush || this.#snapshotFlushTimer) return;
+    this.#snapshotFlushTimer = setTimeout(() => {
+      this.#snapshotFlushTimer = undefined;
+      void this.#flushSnapshots();
+    }, 10);
+  }
+
+  async #flushSnapshots(): Promise<void> {
+    if (this.#snapshotFlush) return this.#snapshotFlush;
+    if (this.#snapshotFlushTimer) clearTimeout(this.#snapshotFlushTimer);
+    this.#snapshotFlushTimer = undefined;
+    const entries = this.#pendingSnapshots.splice(0, 128);
+    if (!entries.length) return;
+    const flush = async () => {
+      try {
+        await this.#writeSnapshots(entries.map((entry) => entry.record));
+        for (const entry of entries) entry.resolve();
+      } catch {
+        // A conflicting or duplicate identity must not discard unrelated packets.
+        // Retry separately so each caller gets the original immutable-write result.
+        for (const entry of entries) {
+          try {
+            await this.#writeSnapshots([entry.record]);
+            entry.resolve();
+          } catch (error) {
+            entry.reject(error);
+          }
+        }
+      }
+    };
+    this.#snapshotFlush = flush().finally(() => {
+      this.#snapshotFlush = undefined;
+      if (this.#pendingSnapshots.length) this.#scheduleSnapshotFlush();
+    });
+    await this.#snapshotFlush;
+  }
+
+  async #writeSnapshots(records: SnapshotRecord[]): Promise<void> {
+    const config = storageScope(this.pool);
+    if (!config) throw new Error("GOWM_SNAPSHOT_SCOPE_REQUIRED");
+    const rows = records.map((record) => ({
+      device_id: config.allowedDeviceIds[0],
+      source_session_key: record.sourceSessionKey ?? config.sourceSessionKey,
+      channel: record.channel,
+      revision: record.revision,
+      observed_at: record.observedAt,
+      snapshot: record.snapshot,
+    }));
+    const result = await this.pool.query(
+      `INSERT INTO ugv_smpp.ugv_state_snapshot
+       (device_id,source_session_key,channel,revision,observed_at,snapshot)
+       SELECT device_id,source_session_key,channel,revision,observed_at,snapshot
+       FROM jsonb_to_recordset($1::jsonb) AS incoming(
+         device_id text,source_session_key text,channel text,revision text,
+         observed_at timestamptz,snapshot jsonb)
+       ON CONFLICT(device_id,source_session_key,channel,revision)
+       DO UPDATE SET revision=EXCLUDED.revision
+       WHERE ugv_state_snapshot.snapshot=EXCLUDED.snapshot
+         AND ugv_state_snapshot.observed_at=EXCLUDED.observed_at RETURNING revision`,
+      [JSON.stringify(rows)],
+    );
+    if (result.rowCount !== records.length) throw new Error("SNAPSHOT_IDENTITY_CONFLICT");
   }
   async armDiagnosticLease(
     lease: Omit<SmppDiagnosticLease, "fence">,

@@ -1,0 +1,9 @@
+$ node scripts/require-env.mjs SMPP_GOWM_BUSINESS_DEPLOY_TEST_URL && vitest run tests/integration/gowm-task-business-deployment-postgres.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  19:01:04
+   Duration  440ms (transform 54ms, setup 0ms, import 122ms, tests 192ms, environment 0ms)

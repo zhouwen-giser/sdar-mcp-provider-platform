@@ -29,7 +29,7 @@ export function createUgvSnapshot(
     resourceId: "vehicle:ugv1",
     entityId: "ugv1",
     vehicleType: "ugv",
-    executionMode: "simulation",
+    executionMode: "live",
   },
   now = new Date().toISOString(),
 ): UgvSnapshot {

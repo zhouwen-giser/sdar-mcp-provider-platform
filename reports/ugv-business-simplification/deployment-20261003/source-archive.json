@@ -1,0 +1,8 @@
+{
+  "revision": "0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+  "archive": "/tmp/smpp-ugvbiz-v13-0a4a7c36865d-source.tar.gz",
+  "sha256": "e1e39b0246e6d6a3cfcee82a3e309e1b27f3d8a9a999fa50149ec5052aae5004",
+  "bytes": 15034764,
+  "members": 2120,
+  "excludedTopLevel": ["reports", ".github", ".codex"]
+}

@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "archive": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/united-final/smpp-gowm-gdps-gsap-wsgs-ce8189e1847f66f0.tar.gz",
+  "sha256": "7b2214c73fe1574442f6b79661ca3f09b396e417e07f09e5e49ab19ede8ad6ee",
+  "smppPackage": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/source-final/smpp-sz-gowm-e59c19815d48-b8c9ec5026f7.tar.gz",
+  "components": {
+    "gsap": {
+      "path": "packages/gowm-gdps-analysis-dev-server-0.1.0.tar.gz",
+      "root": "gowm-gdps-analysis-dev-server-0.1.0",
+      "sha256": "c963ab2230a6c2e5d3948470dfa8c0765df4cd21f6a73f630e021121de8aec9f",
+      "version": "0.1.0"
+    },
+    "wsgs": {
+      "path": "packages/wsgs-development.tar.gz",
+      "root": "wsgs-development",
+      "sha256": "33941ed9e76dbe7951a8d94aeb9a0e29d05cbdec44a95f6cfb16f61ba98a45ed",
+      "version": "0.2.1",
+      "branch": "codex/wsgs-v0.2.4-stable-world-analysis-service",
+      "gitCommit": "0615c07b38f61038453b6ee4e1166418516f4e4a"
+    },
+    "gdps": {
+      "packageName": "gdps-gowm-dev-server-0.2.3-gowm-0.7.1.tar.gz",
+      "version": "0.2.3",
+      "sha256": "83039247c936e71e817c420981c876204e4125814399ee422e9ac8b6b89ec89a"
+    },
+    "gowm": {
+      "packageName": "gowm-dev-server-0.7.1.tar.gz",
+      "version": "0.7.1",
+      "sha256": "1f5dd4002c6d480148b0b86e04c6899b1f3caf53b097d424cc2a37758529d8c6"
+    },
+    "smpp": {
+      "name": "smpp-sz-gowm-e59c19815d48-b8c9ec5026f7.tar.gz",
+      "path": "upstream/smpp.tar.gz",
+      "sha256": "ab47b87a786afab0fad8ac226e0743d6269b8eb92cdb446596ae039d184be8ae",
+      "revision": "e59c19815d484ac705c17d0d8318d2747805419f-worktree-b8c9ec5026f7",
+      "version": "0.1.0"
+    }
+  },
+  "upstreamPackagePreserved": true,
+  "storageCompatibility": {
+    "status": "PASS",
+    "sharedStorageEntries": 32,
+    "overlays": 3,
+    "coreMigration": "078_device_shared_business_storage.sql"
+  },
+  "delivery": "ONLINE_SOURCE_BUILD",
+  "siteAcceptance": "NOT_RUN",
+  "credentialsIncluded": false
+}

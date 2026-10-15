@@ -1,0 +1,10 @@
+Archive closure and SMPP/GOWM storage contracts: PASS
+Fresh extracted initialization: PASS
+Repeated initialization and Compose configuration: PASS
+Port conflicts and disabled UGV startup guards: PASS
+Traceback (most recent call last):
+  File "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/verify-wsgs-united-deployment.py", line 137, in <module>
+    main()
+  File "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/verify-wsgs-united-deployment.py", line 119, in main
+    raise ValueError('Container inventory changed during packaging verification')
+ValueError: Container inventory changed during packaging verification

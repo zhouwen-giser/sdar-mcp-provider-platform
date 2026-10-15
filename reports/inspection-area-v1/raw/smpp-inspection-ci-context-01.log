@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: accepts the exact release candidate workflow
+ok 1 - accepts the exact release candidate workflow
+  ---
+  duration_ms: 3.606662
+  type: 'test'
+  ...
+# Subtest: candidate qualification cannot automatically run on development PRs or pushes
+ok 2 - candidate qualification cannot automatically run on development PRs or pushes
+  ---
+  duration_ms: 0.839481
+  type: 'test'
+  ...
+# Subtest: development CI retains quality gates and makes production suites opt-in
+ok 3 - development CI retains quality gates and makes production suites opt-in
+  ---
+  duration_ms: 0.603661
+  type: 'test'
+  ...
+# Subtest: accepts a CRLF workflow without changing its semantics
+ok 4 - accepts a CRLF workflow without changing its semantics
+  ---
+  duration_ms: 0.483769
+  type: 'test'
+  ...
+# Subtest: rejects a missing required job
+ok 5 - rejects a missing required job
+  ---
+  duration_ms: 0.43397
+  type: 'test'
+  ...
+# Subtest: rejects a checkout that can drift from the candidate
+ok 6 - rejects a checkout that can drift from the candidate
+  ---
+  duration_ms: 0.284841
+  type: 'test'
+  ...
+# Subtest: rejects an incomplete metadata dependency graph
+ok 7 - rejects an incomplete metadata dependency graph
+  ---
+  duration_ms: 0.457448
+  type: 'test'
+  ...
+# Subtest: requires Linux provider regression to depend on the exact-candidate Windows gate
+ok 8 - requires Linux provider regression to depend on the exact-candidate Windows gate
+  ---
+  duration_ms: 0.317997
+  type: 'test'
+  ...
+# Subtest: rejects publication from qualification
+ok 9 - rejects publication from qualification
+  ---
+  duration_ms: 0.677109
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 123.057147

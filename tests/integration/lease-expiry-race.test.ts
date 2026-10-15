@@ -87,6 +87,19 @@ class LeaseRaceRepository {
   acknowledged = 0;
   claimLosses = 0;
 
+  supersedeClaimedBusinessInputIfNoLongerCurrent(command: PendingCommandRecord): Promise<boolean> {
+    // This fixture models cancellation leases, not promoted business Input commands.
+    expect(command.commandType).toBe("CANCEL");
+    return Promise.resolve(false);
+  }
+
+  supersedeClaimedBusinessInterventionIfNotRunning(
+    command: PendingCommandRecord,
+  ): Promise<boolean> {
+    expect(command.commandType).toBe("CANCEL");
+    return Promise.resolve(false);
+  }
+
   constructor(count: number) {
     this.commands = Array.from({ length: count }, (_, index) => ({
       taskId: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,

@@ -34,6 +34,176 @@ beforeAll(async () => {
 afterAll(() => harness.stop());
 
 describe("Business Event atomic rotation", () => {
+  it("registers a newly enabled durable source on restart without losing the old replay boundary", async () => {
+    const providerId = "provider.rotation.upgrade";
+    const legacy = {
+      sourceId: "vehicle.execution",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0511",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const business = {
+      sourceId: "vehicle.business",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0512",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const before = await repository.initializeProvider(
+      providerId,
+      [legacy],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    await publishResource(providerId, legacy.sourceId, legacy.sourceStreamId, "1");
+    const upgraded = await repository.initializeProvider(
+      providerId,
+      [legacy, business],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    expect(upgraded.streamId).not.toBe(before.streamId);
+    await expect(repository.generation(providerId, before.streamId)).resolves.toMatchObject({
+      status: "replayable_closed",
+      lastReplayableSequence: "1",
+    });
+    await expect(repository.sourceRoster(providerId, upgraded.streamId)).resolves.toEqual([
+      business,
+      legacy,
+    ]);
+    const existingLease = await requireLease(
+      repository,
+      providerId,
+      legacy.sourceId,
+      legacy.sourceStreamId,
+      "replica-a",
+    );
+    expect(existingLease.lastPersistedSourceSequence).toBe("1");
+    await requireLease(
+      repository,
+      providerId,
+      business.sourceId,
+      business.sourceStreamId,
+      "replica-a",
+    );
+    await publishResource(providerId, legacy.sourceId, legacy.sourceStreamId, "2");
+    const restarted = await repository.initializeProvider(
+      providerId,
+      [business, legacy],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    expect(restarted.streamId).toBe(upgraded.streamId);
+    expect(restarted.currentSequence).toBe("1");
+  });
+
+  it("does not rewrite an unrelated legacy rejected event when a source is added", async () => {
+    const providerId = "provider.rotation.legacy-rejection";
+    const legacy = {
+      sourceId: "vehicle.health",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0513",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    const business = {
+      sourceId: "vehicle.business",
+      sourceStreamId: "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0514",
+      deliverySemantics: "durable_at_least_once" as const,
+    };
+    await repository.initializeProvider(providerId, [legacy], BUSINESS_EVENT_RETENTION_MS);
+    const lease = await requireLease(
+      repository,
+      providerId,
+      legacy.sourceId,
+      legacy.sourceStreamId,
+      "legacy",
+    );
+    await expect(
+      repository.intakeSourceFact(
+        lease,
+        sourceFact(legacy.sourceStreamId, "1", { sourceEventId: "_legacy-invalid" }),
+        BUSINESS_EVENT_RETENTION_MS,
+        MAPPING_DEADLINE_MS,
+      ),
+    ).resolves.toMatchObject({ disposition: "rejected" });
+    const before = await harness.pool.query(
+      "SELECT status,decode_status,reject_reason,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1",
+      [providerId],
+    );
+    const upgraded = await repository.initializeProvider(
+      providerId,
+      [legacy, business],
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const after = await harness.pool.query(
+      "SELECT status,decode_status,reject_reason,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(after.rows).toEqual(before.rows);
+    const continuity = await harness.pool.query(
+      "SELECT affected_source_ids FROM provider_business_event_continuity_record WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(continuity.rows).toEqual([{ affected_source_ids: ["vehicle.business"] }]);
+    await expect(
+      repository.acquireSourceLease(
+        providerId,
+        business.sourceId,
+        business.sourceStreamId,
+        "new",
+        30000,
+      ),
+    ).resolves.toBeDefined();
+    expect(upgraded.status).toBe("current");
+  });
+
+  it("finalizes a rejected invalid ID without rewriting its evidence or reopening its barrier", async () => {
+    const providerId = "provider.rotation.rejected-barrier";
+    const sourceId = "durable.source";
+    const sourceStreamId = "018f0d4e-7b3a-7cc1-8d57-2f4d9e2a0515";
+    await initialize(providerId, sourceId, sourceStreamId);
+    const lease = await requireLease(repository, providerId, sourceId, sourceStreamId, "replica-a");
+    await repository.intakeSourceFact(
+      lease,
+      sourceFact(sourceStreamId, "1", { sourceEventId: "_invalid-id" }),
+      BUSINESS_EVENT_RETENTION_MS,
+      MAPPING_DEADLINE_MS,
+    );
+    const before = await harness.pool.query<{ evidence: unknown }>(
+      "SELECT to_jsonb(i)-'finalized_at' AS evidence FROM adapter_business_event_inbox i WHERE provider_id=$1",
+      [providerId],
+    );
+    await expect(repository.prepareNextSourceEvent(providerId, sourceId)).resolves.toBe("terminal");
+    const rotated = await repository.rotateStream(
+      providerId,
+      "SOURCE_MAPPING_FAILED",
+      [sourceId],
+      "rejected-barrier:1",
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const after = await harness.pool.query<{ evidence: unknown; finalized_at: Date | null }>(
+      "SELECT to_jsonb(i)-'finalized_at' AS evidence,finalized_at FROM adapter_business_event_inbox i WHERE provider_id=$1",
+      [providerId],
+    );
+    expect(after.rows[0]?.evidence).toEqual(before.rows[0]?.evidence);
+    expect(after.rows[0]?.finalized_at).toBeInstanceOf(Date);
+    await expect(repository.prepareNextSourceEvent(providerId, sourceId)).resolves.toBe("none");
+    await publishResource(providerId, sourceId, sourceStreamId, "2");
+    await expect(repository.currentGeneration(providerId)).resolves.toMatchObject({
+      streamId: rotated.newStreamId,
+      currentSequence: "1",
+    });
+    const published = await harness.pool.query(
+      "SELECT xmin::text,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1 ORDER BY inbox_id",
+      [providerId],
+    );
+    await repository.rotateStream(
+      providerId,
+      "OPERATOR_REQUESTED",
+      [sourceId],
+      "rejected-barrier:2",
+      BUSINESS_EVENT_RETENTION_MS,
+    );
+    const unchanged = await harness.pool.query(
+      "SELECT xmin::text,finalized_at FROM adapter_business_event_inbox WHERE provider_id=$1 ORDER BY inbox_id",
+      [providerId],
+    );
+    expect(unchanged.rows).toEqual(published.rows);
+  });
+
   it("closes the replay boundary, retries idempotently, and restarts runtime sequence at one", async () => {
     const providerId = "provider.rotation.operator";
     const sourceId = "durable.source";

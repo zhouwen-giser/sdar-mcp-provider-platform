@@ -1,0 +1,27 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (6 tests | 1 failed) 22275ms
+     × retains a failed inspection report in the frozen error and finalized Context 10536ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains a failed inspection report in the frozen error and finalized Context
+Error: INSPECTION_PUBLIC_WAIT_TIMEOUT: 
+ ❯ until tests/integration/ugv-inspection-public-task.test.ts:102:9
+    100|     await new Promise((r) => setTimeout(r, 50));
+    101|   }
+    102|   throw Error("INSPECTION_PUBLIC_WAIT_TIMEOUT: " + failure);
+       |         ^
+    103| }
+    104| const input = {
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:216:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  05:54:22
+   Duration  22.55s (transform 50ms, setup 0ms, import 72ms, tests 22.27s, environment 0ms)
+

@@ -27,6 +27,7 @@ let otherSession: Pool;
 let contractDir: string;
 let ownerSchemaCreated = false;
 let deviceSchemaCreated = false;
+let migrationMarkerCreated = false;
 
 function roleDatabaseUrl(): URL {
   if (!databaseUrl) throw new Error("ISOLATED_GOWM_BUSINESS_TEMPLATE_TEST_DATABASE_REQUIRED");
@@ -58,10 +59,15 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
     const existing = await admin.query<{
       owner_schema: string | null;
       device_schema: string | null;
+      migration_marker: string | null;
     }>(
-      "SELECT to_regnamespace('ugv_smpp')::text AS owner_schema,to_regnamespace('gowm_device')::text AS device_schema",
+      "SELECT to_regnamespace('ugv_smpp')::text AS owner_schema,to_regnamespace('gowm_device')::text AS device_schema,to_regclass('public.schema_migration')::text AS migration_marker",
     );
-    if (existing.rows[0]?.owner_schema || existing.rows[0]?.device_schema) {
+    if (
+      existing.rows[0]?.owner_schema ||
+      existing.rows[0]?.device_schema ||
+      existing.rows[0]?.migration_marker
+    ) {
       throw new Error("GOWM_BUSINESS_TEMPLATE_TEST_REQUIRES_EMPTY_SCHEMAS");
     }
     await admin.query(`CREATE ROLE ${role} LOGIN PASSWORD '${password}'`);
@@ -70,12 +76,15 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
     await admin.query("CREATE SCHEMA gowm_device");
     deviceSchemaCreated = true;
     await admin.query(
+      "CREATE TABLE public.schema_migration(version text PRIMARY KEY,checksum text NOT NULL)",
+    );
+    migrationMarkerCreated = true;
+    await admin.query(
       "CREATE TABLE gowm_device.device_service_binding(binding_id uuid PRIMARY KEY)",
     );
     await admin.query(
       "CREATE TABLE ugv_smpp.gowm_install_history(family text NOT NULL,file text NOT NULL,checksum text NOT NULL)",
     );
-    await admin.query("GRANT SELECT ON ugv_smpp.gowm_install_history TO " + role);
     await admin.query(
       "INSERT INTO gowm_device.device_service_binding(binding_id) VALUES($1),($2)",
       [firstBinding, secondBinding],
@@ -86,14 +95,14 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
     const checksum = createHash("sha256").update(installedSql).digest("hex");
     await admin.query(
       "INSERT INTO ugv_smpp.gowm_install_history(family,file,checksum) VALUES($1,$2,$3)",
-      ["SMPP_PROVIDER_UGV", "030_task_business_versions.sql", checksum],
+      ["UGV_PROVIDER", "030_task_business_versions.sql", checksum],
     );
     contractDir = await mkdtemp(join(tmpdir(), "smpp-gowm-business-template-"));
     await writeFile(
       join(contractDir, "task-business.json"),
       JSON.stringify({
         schema: "gowm.task-business-storage/v1",
-        family: "SMPP_PROVIDER_UGV",
+        family: "UGV_PROVIDER",
         migrationFile: "030_task_business_versions.sql",
         installedSha256: checksum,
       }),
@@ -125,6 +134,7 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
     if (admin) {
       if (ownerSchemaCreated) await admin.query("DROP SCHEMA ugv_smpp CASCADE");
       if (deviceSchemaCreated) await admin.query("DROP SCHEMA gowm_device CASCADE");
+      if (migrationMarkerCreated) await admin.query("DROP TABLE public.schema_migration");
       await admin.query(`DROP ROLE IF EXISTS ${role}`);
       await admin.end();
     }
@@ -166,6 +176,17 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
     }
   });
 
+  it("grants read-only core and overlay marker access without test-side grants", async () => {
+    for (const table of ["public.schema_migration", "ugv_smpp.gowm_install_history"]) {
+      const privileges = await first.query<{ readable: boolean; writable: boolean }>(
+        "SELECT has_table_privilege(current_user,$1,'SELECT') AS readable,has_table_privilege(current_user,$1,'INSERT,UPDATE,DELETE') AS writable",
+        [table],
+      );
+      expect(privileges.rows[0]).toEqual({ readable: true, writable: false });
+      await expect(first.query(`SELECT * FROM ${table}`)).resolves.toBeDefined();
+    }
+  });
+
   it("rejects a manifest checksum that differs from the installed history", async () => {
     const path = join(contractDir, "task-business.json");
     const original = await readFile(path, "utf8");
@@ -175,6 +196,27 @@ suite("GOWM owner template component qualification in disposable PostgreSQL", ()
       await writeFile(path, JSON.stringify(altered));
       await expect(verifyGowmTaskBusinessStorage(first, { contractDir })).rejects.toThrow(
         "GOWM_BUSINESS_INSTALL_HISTORY_MISMATCH",
+      );
+    } finally {
+      await writeFile(path, original);
+    }
+  });
+
+  it("uses the installed UGV migration family instead of inventing a second family", async () => {
+    const source = JSON.parse(
+      await readFile("contracts/gowm-shared-storage/current/source.json", "utf8"),
+    ) as { entries: { family: string; file: string }[] };
+    expect(source.entries.find((entry) => entry.file === "024_ugv_provider.sql")?.family).toBe(
+      "UGV_PROVIDER",
+    );
+    const path = join(contractDir, "task-business.json");
+    const original = await readFile(path, "utf8");
+    try {
+      const altered = JSON.parse(original) as Record<string, unknown>;
+      altered.family = "SMPP_PROVIDER_UGV";
+      await writeFile(path, JSON.stringify(altered));
+      await expect(verifyGowmTaskBusinessStorage(first, { contractDir })).rejects.toThrow(
+        "GOWM_BUSINESS_CONTRACT_INVALID",
       );
     } finally {
       await writeFile(path, original);

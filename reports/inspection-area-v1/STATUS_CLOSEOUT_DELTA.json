@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "reason": "Post-gate acceptance status only; qualified runtime inputs are unchanged.",
+  "files": [
+    {
+      "path": "docs/execplans/inspection-area-v1.md",
+      "beforeSha256": "161969b0ebb9ef5976afb0cdf9b22823be0766d0a6ea21d45fda89add8fc58a7",
+      "afterSha256": "814a3c56d45199acb9c20e775057ef3a2c11ef51d3b573f22438c837c1228c0b"
+    }
+  ]
+}

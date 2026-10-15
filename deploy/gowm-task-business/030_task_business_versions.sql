@@ -1,0 +1,181 @@
+-- Explicit deployment migration for the existing GOWM ugv_smpp schema.
+-- Applied transactionally by install.mjs under the owner connection; never at SMPP startup.
+
+CREATE TABLE ugv_smpp.ugv_task_business_context (
+  scope_hash text PRIMARY KEY CHECK (scope_hash ~ '^[0-9a-f]{64}$'),
+  scope_key text NOT NULL,
+  device_id text NOT NULL DEFAULT current_setting('smpp.device_id'),
+  gowm_binding_id uuid NOT NULL DEFAULT current_setting('smpp.binding_id')::uuid
+    REFERENCES gowm_device.device_service_binding(binding_id),
+  smpp_service_key text NOT NULL DEFAULT current_setting('smpp.service_key'),
+  source_session_key text NOT NULL DEFAULT current_setting('smpp.source_session_key'),
+  task_id text NOT NULL,
+  external_execution_id text NOT NULL,
+  context_revision bigint NOT NULL CHECK (context_revision >= 0),
+  effective_plan_revision bigint NOT NULL CHECK (effective_plan_revision >= 0),
+  payload jsonb NOT NULL,
+  updated_at timestamptz NOT NULL
+);
+CREATE INDEX ugv_task_business_context_task_idx
+  ON ugv_smpp.ugv_task_business_context(device_id,smpp_service_key,task_id,external_execution_id);
+
+CREATE TABLE ugv_smpp.ugv_task_business_object_version (
+  scope_hash text NOT NULL CHECK (scope_hash ~ '^[0-9a-f]{64}$'),
+  scope_key text NOT NULL,
+  device_id text NOT NULL DEFAULT current_setting('smpp.device_id'),
+  gowm_binding_id uuid NOT NULL DEFAULT current_setting('smpp.binding_id')::uuid
+    REFERENCES gowm_device.device_service_binding(binding_id),
+  smpp_service_key text NOT NULL DEFAULT current_setting('smpp.service_key'),
+  source_session_key text NOT NULL DEFAULT current_setting('smpp.source_session_key'),
+  object_kind text NOT NULL CHECK (object_kind IN ('artifact','action','input_request','intervention')),
+  object_id text NOT NULL,
+  revision bigint NOT NULL CHECK (revision > 0),
+  payload jsonb NOT NULL,
+  written_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  PRIMARY KEY (scope_hash,object_kind,object_id,revision)
+);
+CREATE INDEX ugv_task_business_object_scope_idx
+  ON ugv_smpp.ugv_task_business_object_version(device_id,smpp_service_key,scope_hash);
+
+CREATE TABLE ugv_smpp.ugv_task_business_command (
+  scope_hash text NOT NULL CHECK (scope_hash ~ '^[0-9a-f]{64}$'),
+  scope_key text NOT NULL,
+  device_id text NOT NULL DEFAULT current_setting('smpp.device_id'),
+  gowm_binding_id uuid NOT NULL DEFAULT current_setting('smpp.binding_id')::uuid
+    REFERENCES gowm_device.device_service_binding(binding_id),
+  smpp_service_key text NOT NULL DEFAULT current_setting('smpp.service_key'),
+  source_session_key text NOT NULL DEFAULT current_setting('smpp.source_session_key'),
+  command_id text NOT NULL,
+  command_type text NOT NULL CHECK (command_type IN ('input_response','intervention')),
+  request_hash text NOT NULL CHECK (request_hash ~ '^[0-9a-f]{64}$'),
+  state text NOT NULL CHECK (state IN ('accepted','applied','rejected')),
+  payload jsonb NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  PRIMARY KEY (scope_hash,command_id)
+);
+CREATE INDEX ugv_task_business_command_created_idx
+  ON ugv_smpp.ugv_task_business_command(device_id,smpp_service_key,scope_hash,created_at);
+CREATE UNIQUE INDEX ugv_task_business_command_entry_fence_idx
+  ON ugv_smpp.ugv_task_business_command(scope_hash, (payload->>'entryKey'))
+  WHERE state IN ('accepted', 'applied') AND payload ? 'entryKey';
+CREATE UNIQUE INDEX ugv_task_business_command_runtime_sequence_idx
+  ON ugv_smpp.ugv_task_business_command(scope_hash, command_type, (payload->>'runtimeCommandSequence'))
+  WHERE payload ? 'runtimeCommandSequence';
+
+CREATE TABLE ugv_smpp.ugv_task_business_content (
+  scope_hash text NOT NULL CHECK (scope_hash ~ '^[0-9a-f]{64}$'),
+  scope_key text NOT NULL,
+  device_id text NOT NULL DEFAULT current_setting('smpp.device_id'),
+  gowm_binding_id uuid NOT NULL DEFAULT current_setting('smpp.binding_id')::uuid
+    REFERENCES gowm_device.device_service_binding(binding_id),
+  smpp_service_key text NOT NULL DEFAULT current_setting('smpp.service_key'),
+  source_session_key text NOT NULL DEFAULT current_setting('smpp.source_session_key'),
+  artifact_id text NOT NULL,
+  revision bigint NOT NULL CHECK (revision > 0),
+  handle text NOT NULL,
+  media_type text NOT NULL,
+  size_bytes bigint NOT NULL CHECK (size_bytes >= 0),
+  sha256 text NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
+  expires_at timestamptz,
+  bytes bytea NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  PRIMARY KEY (scope_hash, handle),
+  UNIQUE (scope_hash, artifact_id, revision, handle)
+);
+CREATE INDEX ugv_task_business_content_version_idx
+  ON ugv_smpp.ugv_task_business_content(device_id,smpp_service_key,scope_hash,artifact_id,revision);
+CREATE FUNCTION ugv_smpp.reject_task_business_content_mutation()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'ARTIFACT_CONTENT_IMMUTABLE' USING ERRCODE='55000';
+END;
+$$;
+CREATE TRIGGER ugv_task_business_content_immutable
+  BEFORE UPDATE OR DELETE ON ugv_smpp.ugv_task_business_content
+  FOR EACH ROW EXECUTE FUNCTION ugv_smpp.reject_task_business_content_mutation();
+
+-- The current GOWM pool fixes these settings per connection. RLS defends all
+-- reads and writes if a query omits an explicit scope predicate.
+ALTER TABLE ugv_smpp.ugv_task_business_context ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ugv_smpp.ugv_task_business_context FORCE ROW LEVEL SECURITY;
+CREATE POLICY smpp_task_business_scope ON ugv_smpp.ugv_task_business_context
+  USING (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'))
+  WITH CHECK (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'));
+
+ALTER TABLE ugv_smpp.ugv_task_business_object_version ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ugv_smpp.ugv_task_business_object_version FORCE ROW LEVEL SECURITY;
+CREATE POLICY smpp_task_business_scope ON ugv_smpp.ugv_task_business_object_version
+  USING (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'))
+  WITH CHECK (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'));
+
+ALTER TABLE ugv_smpp.ugv_task_business_command ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ugv_smpp.ugv_task_business_command FORCE ROW LEVEL SECURITY;
+CREATE POLICY smpp_task_business_scope ON ugv_smpp.ugv_task_business_command
+  USING (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'))
+  WITH CHECK (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'));
+
+ALTER TABLE ugv_smpp.ugv_task_business_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ugv_smpp.ugv_task_business_content FORCE ROW LEVEL SECURITY;
+CREATE POLICY smpp_task_business_scope ON ugv_smpp.ugv_task_business_content
+  USING (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'))
+  WITH CHECK (device_id=current_setting('smpp.device_id')
+     AND gowm_binding_id=current_setting('smpp.binding_id')::uuid
+     AND smpp_service_key=current_setting('smpp.service_key')
+     AND source_session_key=current_setting('smpp.source_session_key'));
+
+CREATE FUNCTION ugv_smpp.reject_task_business_scope_mutation()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.scope_hash IS DISTINCT FROM OLD.scope_hash
+     OR NEW.scope_key IS DISTINCT FROM OLD.scope_key
+     OR NEW.device_id IS DISTINCT FROM OLD.device_id
+     OR NEW.gowm_binding_id IS DISTINCT FROM OLD.gowm_binding_id
+     OR NEW.smpp_service_key IS DISTINCT FROM OLD.smpp_service_key
+     OR NEW.source_session_key IS DISTINCT FROM OLD.source_session_key THEN
+    RAISE EXCEPTION 'GOWM_BUSINESS_SCOPE_IMMUTABLE' USING ERRCODE='55000';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER gowm_task_business_scope_immutable
+  BEFORE UPDATE ON ugv_smpp.ugv_task_business_context
+  FOR EACH ROW EXECUTE FUNCTION ugv_smpp.reject_task_business_scope_mutation();
+CREATE TRIGGER gowm_task_business_scope_immutable
+  BEFORE UPDATE ON ugv_smpp.ugv_task_business_command
+  FOR EACH ROW EXECUTE FUNCTION ugv_smpp.reject_task_business_scope_mutation();
+
+REVOKE ALL ON ugv_smpp.ugv_task_business_context,
+  ugv_smpp.ugv_task_business_object_version,
+  ugv_smpp.ugv_task_business_command,
+  ugv_smpp.ugv_task_business_content FROM PUBLIC, ugv_smpp_app;
+GRANT USAGE ON SCHEMA ugv_smpp TO ugv_smpp_app;
+-- Both startup verifiers are read-only. The owner, not SMPP startup, grants
+-- access to the version markers used to verify the installed core and overlay.
+GRANT SELECT ON public.schema_migration,
+  ugv_smpp.gowm_install_history TO ugv_smpp_app;
+GRANT SELECT,INSERT,UPDATE ON ugv_smpp.ugv_task_business_context,
+  ugv_smpp.ugv_task_business_command TO ugv_smpp_app;
+GRANT SELECT,INSERT ON ugv_smpp.ugv_task_business_object_version TO ugv_smpp_app;
+GRANT SELECT,INSERT ON ugv_smpp.ugv_task_business_content TO ugv_smpp_app;

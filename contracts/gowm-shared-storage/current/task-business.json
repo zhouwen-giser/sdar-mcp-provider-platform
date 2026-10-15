@@ -1,0 +1,6 @@
+{
+  "schema": "gowm.task-business-storage/v1",
+  "family": "UGV_PROVIDER",
+  "migrationFile": "030_task_business_versions.sql",
+  "installedSha256": "ed4b9491616b61dbf31668086a20f63a0379c75f746382653f76a3879f1be95b"
+}

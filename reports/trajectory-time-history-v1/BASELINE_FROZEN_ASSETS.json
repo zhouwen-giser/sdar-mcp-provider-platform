@@ -1,0 +1,383 @@
+{
+  "baselineCommit": "ae345aa4e4b8d78b14a65092ab89139c6a50a0d8",
+  "baselineFrozenAssets": [
+    {
+      "path": "contracts/gowm-shared-storage/current/consumed-schema.json",
+      "sha256": "7cc39a538c1ff71803ffa79f8202ffd6e7322ea9f8d11613fc62905d68cf02fd",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/schema-consumption-matrix.json",
+      "sha256": "059456ff51a47d9f98c930acd04ec800e2792d0b8aaa17e5493a902d8fac944c",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/source.json",
+      "sha256": "4338b0f9f6adfcac60eacede90ed22db5008e8bd65e6fe1a8094b7a724201bd2",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business-runtime.json",
+      "sha256": "83baa6cac5b1ca446bdbc3250a68c94943f39a733a83e3520c5d168fab58f1af",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business.json",
+      "sha256": "1be2997f512907d75851eb01fb5bf05d811b2f14098979acd6f0a8fedd66c169",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/BASELINE.json",
+      "sha256": "a99649741aaf2e1c653ee78f8c0aa53cb0d88be6fb46ce13e77fe3923b9146dc",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/ENDPOINT_SOURCE_MAP.json",
+      "sha256": "1ebf9c52c29044a0c14d19d73841a1822559a1d1ddef72f4abe399569ff1a396",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/ERROR_SOURCE_MAP.json",
+      "sha256": "3b72501425815462f7bbc11e5b080dc3baab3677bcea82d5701840d755ca2b6b",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/FREEZE_EXCEPTIONS.json",
+      "sha256": "810d23ef507deaffbd44c4359139596b7adb0ce17ef7c4cb3352ba038d9c82e5",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/OPERATION_EXAMPLE_MAP.json",
+      "sha256": "0470e02636243e622ccda45e4b651e245bd0e5ef591e16dc954f2936ef9d212b",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/REMOTE_SOURCE_EVIDENCE.json",
+      "sha256": "b39c72e7c49c9bd5a40b0dd947de6c747fc8806092cbce21006d1e38e1c94bf7",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/SCHEMA_SOURCE_MAP.json",
+      "sha256": "9fe428e34f92854fea8d951105da7705870b6d6c94929daedd13902c628ee1c4",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/breaking-baseline/openapi.bundle.json",
+      "sha256": "4ca73526d4a63d9954ffe6dea05d313aa9d7457079b76bb69d74b0e986f7ba13",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/conformance-cases/no-forbidden-surfaces.json",
+      "sha256": "037654d2b591f8b7b00a4074ea96b77eabfc7a13ba77ead1af8e029cb3237917",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/conformance-cases/source-map-complete.json",
+      "sha256": "1b8b5bd3a04fe2a04ab870ccad89fe7bc843157310da8ff34262851af64aaf2d",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/contract-candidate.json",
+      "sha256": "1b47a1fcaf45be7af9902204922ce4fe40095b2bfdb878f3e34b35a5b300164f",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/contract-lock.json",
+      "sha256": "24d12d2885089aec5171d4db08e31cbb6b0deb9dd9de8af6991104b92948fc6a",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/audit-event.json",
+      "sha256": "80fd364ad3c894eecadbab09a41dcad88f8d120e3de7c12a5318827f157408e7",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/configuration-draft.json",
+      "sha256": "4808fae71ce0499222014d7e3da99278d0366c57e389b40b8de7f52534d507b7",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/configuration-publication-result.json",
+      "sha256": "f5d2c3ef753a1652d821f420da0c18d47d2e73146c9ffb162eeba954f63f6c67",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/effective-configuration-preview.json",
+      "sha256": "003257a2927135c30d7c2ab6aa4c88ca0f1a4741b1b3c84a6353579b6714f5e6",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/problem.json",
+      "sha256": "131538274a6ce5c95bfe3477b2d8d5f3247ff49292dace08bbba8919a5e3b462",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/provider-package.json",
+      "sha256": "13ba1570c3f30aa002c96f42a2a5da0ca284a82725416a7da041b7214cf97a6d",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/provider-resource-binding.json",
+      "sha256": "95b303fd0ca060d360a8c3c5e79978f9e27a1ec576e4d7082d1a7f8ec869b9c5",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/provider-type.json",
+      "sha256": "51e09a7df7af7817c2bf903214c3b24f17adb183b39cbefae18155f2e8c24007",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/provider.json",
+      "sha256": "96d43154ac57448cfd79fecb7433698a8a8c46377413e67bc3ef7b9d892d5325",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/registry-diff.json",
+      "sha256": "628ca58ff1b84e9389e746fd11ba76fd4ae44d985cd46e78be66809da80ba6f6",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/registry-snapshot.json",
+      "sha256": "299200a7ebabce906fcc4e2c64074b5e2066c93e9325badf088ac0c9aa0f5ede",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/resource.json",
+      "sha256": "f85f2d8c3f4d44d37db80a3d90a26c18bbb9ad2b2f8623634467fbaa6ea4834b",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/runtime-deployment-intent.json",
+      "sha256": "a2eb3573e91e40506384155902add754be578ab16a724b6baa73b7565395658c",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/runtime-deployment.json",
+      "sha256": "43ccd7b10ffbe59cbe098e5c05378079c8082850d32244b66a9aafec7ab63605",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/examples/runtime-process.json",
+      "sha256": "9de17f50eaa3312bffff98d80cd0b2b2be3cd28b4062ebc3a06e532a2037f9a9",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/AuditEvent.schema.json",
+      "sha256": "5aa97569354b46af46411edf6af257a950c4c2abd51b6b3da76792cfd9c1a0ee",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigRevision.schema.json",
+      "sha256": "6961c97d077609f99193fb0a08b72f6f4d63581b1028bd3f541fbfde5deaf59d",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationBusinessKey.schema.json",
+      "sha256": "f1f4d21bfc9ffb145547514849baa3023dae30d7d3260d7a1dc82457af02845e",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationContent.schema.json",
+      "sha256": "834606b517c490c386db3de662342cb1e43ea5c2b1eae3d4fb27c954264fcb84",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationDraft.schema.json",
+      "sha256": "94760daeb6763d2f4d3199fba0ef1b2f87879a7ff3fd0f6cd696ccd1804883a9",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationPublicationResult.schema.json",
+      "sha256": "43aa61d15b00bcd77c22e19fcf124c5c659ecb6d3a9d0f3cab5ed790da470618",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationTarget.schema.json",
+      "sha256": "ecd5ad6464281dc71d3a025e4e81fa4b25760e7cd92c064dbbcfa7e819f9cd2a",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationValidationIssue.schema.json",
+      "sha256": "2055ce6e1e0ead2df64df90562779edfbb2e7d8185be02f715c2b1c279fca7e9",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ConfigurationValue.schema.json",
+      "sha256": "37c20eb9298c1c14b0fae0bc9aae4bd647fb08b19006bcb08f8399a5653815a8",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/EffectiveConfigurationPreview.schema.json",
+      "sha256": "84ca8463fbb658f1488066ee8e10e4644871257dab30d0d9b6e6d29d03910913",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/PageInfo.schema.json",
+      "sha256": "8d7902fc63f88659c482b766c6f36cf76412b503fae85010fd5fdba183079be4",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ProblemCode.schema.json",
+      "sha256": "3de4b7adfe21b45babdc7c69ba0d37349dbe1244bd3933cfe873b4665771ccd5",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ProblemDetails.schema.json",
+      "sha256": "909bdcb0c170a4c8f7e69144b2c168c46e1898648e612b400045f683c4772ed1",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/Provider.schema.json",
+      "sha256": "07f164ccf3d1ec6b32ed8b33fde86f8cbfc68419171f95c57240dbf2e7a07d5e",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ProviderPackage.schema.json",
+      "sha256": "bfc97695598b34f1836e5331b07151c2e6e9a1079d370d7afe4efd87156674e1",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ProviderResourceBinding.schema.json",
+      "sha256": "c84cfac6913d24ccb1cdf2f40f99e8a369d038a9f8a2c9cf10071a2ab3401d66",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/ProviderType.schema.json",
+      "sha256": "a06db546cdac5f95bf8b0cd7bc296053cb3511148599f51d3871c799f98a3338",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RegistryDiff.schema.json",
+      "sha256": "3deb04e5a5679453b6b05c72206c984d0ab18b69b581996a151e125cf8fec152",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RegistryProviderChange.schema.json",
+      "sha256": "d67a604c0fbf64322ba4df6e3076a6dc9346f9d153d5bb8cf2c6f4587b8ea177",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RegistryProviderProjection.schema.json",
+      "sha256": "5ddfadaee42d7e4436dfee2c951e44046498eded49d5520fef7988e1cc306acb",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RegistrySnapshot.schema.json",
+      "sha256": "2b1551357c79f2d914a9e496d1d17917b630aa93e19d836e356d8577d9623b9c",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RegistrySnapshotDocument.schema.json",
+      "sha256": "1d0011fb623f08900941e5c4461546ab43e1acf493b0704a4e6d583af358461f",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/Resource.schema.json",
+      "sha256": "bdf12e7de71c7d746ad15eed898e02712baf9cf74f5829c9b7e8af5fe49b5045",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RuntimeDeployment.schema.json",
+      "sha256": "b8abe4da646ae05898ca502743339fcc3d825c4cff2f3d8bb102c096ba7f30d7",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RuntimeDeploymentIntent.schema.json",
+      "sha256": "c270e34ad60710ea6bf99fe008b54d533fb40e3539ccfc22a89f8b28445ba06f",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RuntimeProcess.schema.json",
+      "sha256": "f1938e4956b3c74157554e86fbeb62f6b1942b221525180c8b48519264324d00",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/RuntimeProcessLogReference.schema.json",
+      "sha256": "b09a4c4e06a1d40dd806d71c425adfcb7b30da589d494f6ea75f0ffcfabea701",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/SecretRef.schema.json",
+      "sha256": "af466232b9a429ccec262897ffd56270227865af9c5fe87dce89f2fbefaef1ac",
+      "unchanged": true
+    },
+    {
+      "path": "contracts/pms-console-api/v1/schemas/components.schema.json",
+      "sha256": "e5c4ea2105ef112e252b729418678f53c9f3359e0914701ab97b57f146ea55b9",
+      "unchanged": true
+    },
+    {
+      "path": "examples/gowm-shared-storage/task-business-airport-navigation.example.json",
+      "sha256": "f86bb359203529c0e37a75ee1437d325b6bf9f438b1f1a0905daa016e0c16a15",
+      "unchanged": true
+    },
+    {
+      "path": "examples/gowm-shared-storage/task-business-profile.example.json",
+      "sha256": "dd6dbd90acd47cde4bcfbfb2b51fcc0f7a863735c6ea5e010b74855a7e0fb890",
+      "unchanged": true
+    },
+    {
+      "path": "proto/io/sdar/mcp/tasks/adapter/v1/adapter.proto",
+      "sha256": "51fc10abc7fc3740d5b6dad4ea5c66996a9b95f48757bc623756ccffce5ccf89",
+      "unchanged": true
+    },
+    {
+      "path": "proto/io/sdar/mcp/tasks/telemetry/v1/provider_telemetry.proto",
+      "sha256": "7c0623b7620d2ea50c9b317071d1d2bffceef5125debf74ed889133302008674",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/artifact.schema.json",
+      "sha256": "30ee236f236fd1758c236906e92db2b47830c993a639b430d9cff2b27b8e8cc9",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/core.schema.json",
+      "sha256": "c2df666d828f9cbe7b0dd83467eba7f9a85dd13c5ee0854573596dc9d7cb4a90",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/examples/conditional-write-wire.json",
+      "sha256": "ee9650ca1da7fc27c806ae169806c7f2955d2204f1c96063389ed81bfcb50ae1",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/examples/negative-catalog.json",
+      "sha256": "5ea52db0cca24f02df283b4d746533414aebf0c04fa278c9e4e9dde5f1898d49",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/examples/positive-catalog.json",
+      "sha256": "715648f6decd0ba622ec0ba3cc7aad33424e6b1cbe8f0cdc4ab8c11d542b5562",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/examples/public-action-changed.json",
+      "sha256": "597106656f9a80ee34e6938804460d743f317a7d833b40e7b1b831fd1c79280f",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/examples/source-action-changed.json",
+      "sha256": "7503c64f45a557e2d3b2e5a11dec3245d866e4f5cc3427fc94b62e9d8e49ced3",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/interaction.schema.json",
+      "sha256": "9d71f04e20b51b08930bec0f15e408d2dfafb816e1e64f8144c76e3f0dbdb4d1",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/legacy-adapter-surface.json",
+      "sha256": "597bd669378c965511f90de2071a06f7bfdcbfe02b4c857fa010bb227a44f9da",
+      "unchanged": true
+    },
+    {
+      "path": "protocol/task-business/v1/operation-profile.schema.json",
+      "sha256": "c6bacd16d74f5fc858a2f85dfe6ae729160ddac109406a1b852246536be9d5a7",
+      "unchanged": true
+    }
+  ],
+  "allUnchanged": true,
+  "siteOperations": "NOT_RUN",
+  "realDeviceQualification": "NOT_RUN"
+}

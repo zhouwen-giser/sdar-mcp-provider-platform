@@ -1,0 +1,29 @@
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/ugv-business/persistence/task-business-postgres.test.ts tests/integration/ugv-task-business-public-postgres.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+ ❯ tests/ugv-business/persistence/task-business-postgres.test.ts (22 tests | 1 failed) 1788ms
+     × commits two business source events with one Context revision and rolls back failed source writes 31ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-business/persistence/task-business-postgres.test.ts > native PostgreSQL task business Store > commits two business source events with one Context revision and rolls back failed source writes
+Error: SOURCE_CURSOR_EXPIRED
+ ❯ PostgresProviderStore.replayBusinessEvents packages/provider-adapter-kit/src/postgres-store.ts:638:13
+    636|     if (afterSourceSequence > maximum) throw new Error("SOURCE_CURSOR_…
+    637|     if (maximum > 0n && afterSourceSequence + 1n < minimum)
+    638|       throw new Error("SOURCE_CURSOR_EXPIRED");
+       |             ^
+    639|     const result = await this.pool.query<{ payload: AdapterBusinessEve…
+    640|       `SELECT payload FROM ${this.tables.businessEventLog}
+ ❯ tests/ugv-business/persistence/task-business-postgres.test.ts:1880:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 25 passed (26)
+   Start at  09:16:23
+   Duration  11.50s (transform 1.33s, setup 0ms, import 2.73s, tests 8.52s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,69 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts (4 tests | 4 failed) 2147ms
+     × publishes a PostgreSQL navigation Task, destination and observed trajectory through public reads and SSE 82ms
+     × relays submitted and synthetic applied Intervention facts through native source, public HTTP/SSE and the consumer reducer 4ms
+     × relays one synthetic failed Intervention without replacing the active route through public HTTP/SSE 4ms
+     × reads native PostgreSQL Recon Context and in-Profile Action descriptors through public /mcp chunks 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-task-business-public-postgres.test.ts > UGV public business Runtime and Adapter integration > publishes a PostgreSQL navigation Task, destination and observed trajectory through public reads and SSE
+TypeError: Cannot read properties of undefined (reading 'speedKmh')
+ ❯ request tests/integration/ugv-task-business-public-postgres.test.ts:235:46
+    233|           vehicle_id: "ugv1",
+    234|           available: true,
+    235|           speed_kmh: observed.chassis.motion.speedKmh ?? 0,
+       |                                              ^
+    236|           chassis_task: observed.chassis.mission,
+    237|           eo_task: observed.payload.eoTask,
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts:297:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/integration/ugv-task-business-public-postgres.test.ts > UGV public business Runtime and Adapter integration > relays submitted and synthetic applied Intervention facts through native source, public HTTP/SSE and the consumer reducer
+TypeError: Cannot read properties of undefined (reading 'speedKmh')
+ ❯ request tests/integration/ugv-task-business-public-postgres.test.ts:235:46
+    233|           vehicle_id: "ugv1",
+    234|           available: true,
+    235|           speed_kmh: observed.chassis.motion.speedKmh ?? 0,
+       |                                              ^
+    236|           chassis_task: observed.chassis.mission,
+    237|           eo_task: observed.payload.eoTask,
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts:697:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/integration/ugv-task-business-public-postgres.test.ts > UGV public business Runtime and Adapter integration > relays one synthetic failed Intervention without replacing the active route through public HTTP/SSE
+TypeError: Cannot read properties of undefined (reading 'speedKmh')
+ ❯ request tests/integration/ugv-task-business-public-postgres.test.ts:235:46
+    233|           vehicle_id: "ugv1",
+    234|           available: true,
+    235|           speed_kmh: observed.chassis.motion.speedKmh ?? 0,
+       |                                              ^
+    236|           chassis_task: observed.chassis.mission,
+    237|           eo_task: observed.payload.eoTask,
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts:1079:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration/ugv-task-business-public-postgres.test.ts > UGV public business Runtime and Adapter integration > reads native PostgreSQL Recon Context and in-Profile Action descriptors through public /mcp chunks
+TypeError: Cannot read properties of undefined (reading 'speedKmh')
+ ❯ request tests/integration/ugv-task-business-public-postgres.test.ts:235:46
+    233|           vehicle_id: "ugv1",
+    234|           available: true,
+    235|           speed_kmh: observed.chassis.motion.speedKmh ?? 0,
+       |                                              ^
+    236|           chassis_task: observed.chassis.mission,
+    237|           eo_task: observed.payload.eoTask,
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts:1376:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  07:04:13
+   Duration  5.63s (transform 2.09s, setup 0ms, import 3.27s, tests 2.15s, environment 0ms)
+

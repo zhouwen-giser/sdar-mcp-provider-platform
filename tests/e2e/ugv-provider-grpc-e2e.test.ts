@@ -39,6 +39,7 @@ describe("UGV Adapter gRPC E2E", () => {
     const runtime = new UgvProviderRuntime(
       {
         providerId: "isr.vehicle.ugv.ugv1",
+        executionMode: "simulation",
         freshness: {
           chassis: 3000,
           mission: 3000,
@@ -150,6 +151,7 @@ describe("UGV Adapter gRPC E2E", () => {
     const runtime = new UgvProviderRuntime(
       {
         providerId: "isr.vehicle.ugv.ugv1",
+        executionMode: "simulation",
         freshness: { chassis: 3000, mission: 3000, health: 5000, target: 3000, payload: 3000 },
         allowNavigationWithRecon: true,
         fireRequiresChassisStopped: true,

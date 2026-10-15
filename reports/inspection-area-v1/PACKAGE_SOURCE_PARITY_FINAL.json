@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "sourceArchive": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/source-final-v5/smpp-sz-gowm-175cc2594300-dc52023fa084.tar.gz",
+  "sourceArchiveSha256": "e0ce60827f0557a6de81e77b906f6a9107e07507373237778a665dfe405eba02",
+  "sourceRevision": "175cc25943003d8dad31dd2fc946993301e33a28-worktree-dc52023fa084",
+  "runtimeEntries": 1014,
+  "postGateChanges": {
+    "reason": "CI-owned infrastructure and qualified MQTT fixture; configuration inventory and exact test count include four declared inspection/trajectory settings; production modules unchanged",
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "beforeSha256": "5e65025b119914fa8e7ff9ad957a4329e61a59a537e015c2d4a5914472e9977d",
+        "afterSha256": "a9635300cdde2ae10e4d3f25b976ee92b292f555d91338236d0fe48d48dc4a37"
+      },
+      {
+        "path": ".github/workflows/release-candidate.yml",
+        "beforeSha256": "a5b8e916e36c402bfe54b588d1ca5cea106cbf581098ab7b9d625ae907b39ebd",
+        "afterSha256": "1b1192439a2dcc09f16959f8d978109825476ab73e4caa84fc430a599dde24c4"
+      },
+      {
+        "path": "scripts/inspection/isolated-env.mjs",
+        "beforeSha256": "ec340d25dedcbe1707ce5f4dc7b0862889a80f48009cacfdbd9d6e292e443039",
+        "afterSha256": "9ce864f013ef73af5bc9f94adead5a1425cb53d47be19a7ccf9b9474dae93267"
+      },
+      {
+        "path": "scripts/inspection/provider-harness.ts",
+        "beforeSha256": "a797543332a826e5977e3fa8d66d94ced643dabacb1fe4e2d3e659892481b767",
+        "afterSha256": "5cc6d8a2da3a91459acb0f628fd770572bb8c5c81f7994b1c325852de545773c"
+      },
+      {
+        "path": "docs/configuration/CONFIG_INVENTORY.json",
+        "beforeSha256": "7d485a07c24200fc9eb24cd70dae5519339ee61249159e62f8fd39987d89c66a",
+        "afterSha256": "c2b7db2e4b5cc0235c899d6f50c946f5c550f248ca1c161deea54a0067f17da1"
+      },
+      {
+        "path": "packages/runtime-configuration-contract/src/providers/ugv.test.ts",
+        "beforeSha256": "5f33d194bcb57d80f47881266e06bd1ab2f8a814d2937463eff8971b4f08cc0c",
+        "afterSha256": "4e847d3bae97be7e52e53e9423189e20bb66059fa9cb026783908769c93219bc"
+      },
+      {
+        "path": "tests/provider-platform-e2e/ugv/vendor-managed.test.ts",
+        "beforeSha256": "f89946b475a0c91c7c9c5b0ad6fd5fcbea400643c33a05707cdcf6858a53f993",
+        "afterSha256": "7bb6b92b49f83a89711f3d47f87a259ecdcd6ad160a28c0830e650ae5de4bb1d"
+      },
+      {
+        "path": "scripts/run-release-artifact-smoke.mjs",
+        "beforeSha256": "05d194b30435b3429e8d193ed4264548f4febd70b2c8e6de00e17bc0c1ac0628",
+        "afterSha256": "aee739315393814b11f1b12b58b114ca76162d2d3f36a232dc67d39298ae6994"
+      }
+    ],
+    "validation": "smpp-inspection-ci-integration-02: all 13 lifecycle/public tests passed on newly created PostgreSQL 17 and MQTT; cleanup passed; ci-context-01: 23 workflow regressions passed; GitHub rejected job-level runner.temp, now uses allowed github run identity in private /tmp path; runtime bytes unchanged; ci-config-contract-01: all 46 configuration-contract checks passed, exact inventory equality retained; vendor-mode-01: original five tests pass with explicit simulation fixture; Worker exact filesystem list includes its existing contracts directory; production unchanged"
+  },
+  "sourceRoot": "/tmp/smpp-inspection-v1-20261014/deployment/smpp-source-final-v5",
+  "images": {
+    "runtime": "smpp-inspection/runtime:175cc25943003d8dad31dd2fc946993301e33a28-worktree-dc52023fa084",
+    "adapter": "smpp-inspection/adapter:175cc25943003d8dad31dd2fc946993301e33a28-worktree-dc52023fa084"
+  },
+  "unionArchive": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/united-final-v5/smpp-gowm-gdps-gsap-wsgs-377e8764fecf7f77.tar.gz",
+  "telemetryArchive": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/telemetry-final-v5/smpp-gowm-gdps-gsap-wsgs-telemetry-fe559b1e4ef8bfd8.tar.gz"
+}

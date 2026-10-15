@@ -1,0 +1,32 @@
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/ugv-business/persistence/task-business-postgres.test.ts tests/integration/ugv-task-business-public-postgres.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts (4 tests | 1 failed) 17644ms
+     × relays one synthetic failed Intervention without replacing the active route through public HTTP/SSE 50ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-task-business-public-postgres.test.ts > UGV public business Runtime and Adapter integration > relays one synthetic failed Intervention without replacing the active route through public HTTP/SSE
+AssertionError: {"jsonrpc":"2.0","id":"e5a778a4-f6cd-44a4-a305-4c777d15e388","result":{"resultType":"complete","content":[{"type":"text","text":"UGV_STATE_STALE"}],"isError":true,"structuredContent":{"outcome":"admission_rejected","reasonCode":"UGV_STATE_STALE","retryable":true,"completedAt":"2026-09-30T02:19:21.206Z"}}}: expected 'complete' to be 'task' // Object.is equality
+
+Expected: "task"
+Received: "complete"
+
+ ❯ tests/integration/ugv-task-business-public-postgres.test.ts:1047:43
+    1045|     expect(created.statusCode, created.body).toBe(200);
+    1046|     const task = (created.json() as { result: { resultType: string; ta…
+    1047|     expect(task.resultType, created.body).toBe("task");
+       |                                           ^
+    1048|     const execution = await providerStore.getExecution(task.taskId);
+    1049|     if (!execution) throw new Error("SYNTHETIC_FAILED_EXECUTION_MISSIN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 25 passed (26)
+   Start at  10:19:08
+   Duration  31.34s (transform 4.53s, setup 0ms, import 9.43s, tests 20.91s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

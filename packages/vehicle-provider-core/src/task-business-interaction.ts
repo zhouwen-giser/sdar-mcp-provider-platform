@@ -1,7 +1,8 @@
 import { isDeepStrictEqual } from "node:util";
-import { Ajv2020 } from "ajv/dist/2020.js";
+import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
+import type { RuntimeBusinessResponder } from "../../domain/src/business-responder.js";
 import {
   BusinessObjectRefSchema,
   TaskBusinessIdentitySchema,
@@ -451,18 +452,30 @@ export function assertInterventionTransition(
     throw new Error("INTERVENTION_STATE_TRANSITION_INVALID");
 }
 
-export interface TrustedResponder {
-  source: "runtime_authorization_context";
-  actorType: "user" | "agent" | "operator";
-  verified: boolean;
+export const TrustedResponderSchema = z.discriminatedUnion("source", [
+  z
+    .object({
+      source: z.literal("runtime_authorization_context"),
+      actorType: z.enum(["user", "agent", "operator"]),
+      verified: z.literal(true),
+    })
+    .strict(),
+  z
+    .object({
+      source: z.literal("runtime_development_policy"),
+      actorType: z.literal("development_anonymous"),
+      verified: z.literal(false),
+    })
+    .strict(),
+]);
+export type TrustedResponder = z.infer<typeof TrustedResponderSchema>;
+
+/** Development policy is explicit audit provenance, never a claim of a verified human. */
+export function taskBusinessResponder(responder: RuntimeBusinessResponder): TrustedResponder {
+  return responder.source === "development"
+    ? { source: "runtime_development_policy", actorType: "development_anonymous", verified: false }
+    : { source: "runtime_authorization_context", actorType: responder.actorType, verified: true };
 }
-export const TrustedResponderSchema = z
-  .object({
-    source: z.literal("runtime_authorization_context"),
-    actorType: z.enum(["user", "agent", "operator"]),
-    verified: z.literal(true),
-  })
-  .strict();
 
 export function assertRequiredInputOpenAt(request: RequiredInput, now: Date): void {
   RequiredInputSchema.parse(request);
@@ -486,7 +499,7 @@ export function assertInterventionAvailableAt(intervention: RuntimeIntervention,
 export function assessRequiredInputResponse(
   request: RequiredInput,
   command: RequiredInputResponseCommand,
-  responder: TrustedResponder,
+  responder: unknown,
   currentContextRevision: number,
   currentSubjectBinding: RequiredInput["subjectBinding"],
   now: Date,
@@ -505,9 +518,11 @@ export function assessRequiredInputResponse(
     throw new Error("INPUT_BINDING_INVALID");
   }
   assertRequiredInputOpenAt(request, now);
+  const parsedResponder = TrustedResponderSchema.safeParse(responder);
   if (
-    !TrustedResponderSchema.safeParse(responder).success ||
-    responder.actorType !== request.requiredResponder
+    !parsedResponder.success ||
+    (parsedResponder.data.source !== "runtime_development_policy" &&
+      parsedResponder.data.actorType !== request.requiredResponder)
   ) {
     throw new Error("RESPONDER_NOT_AUTHORIZED");
   }
@@ -599,11 +614,29 @@ function assertCommandInputSchema(
   if (!validate(value)) throw new Error(inputError);
 }
 
+// Persisted entries are parsed repeatedly during observation/recovery. Cache only
+// JSON schemas by complete content, never by a mutable object or a reused $id.
+const entryValidators = new Map<string, ValidateFunction>();
 function compileBusinessEntryInputSchema(schema: Record<string, unknown>, errorCode: string) {
-  const ajv = new Ajv2020({ strict: false, allErrors: true });
-  addFormatsImport.default(ajv);
   try {
-    return ajv.compile(schema);
+    const serialized = JSON.stringify(schema);
+    const copy: unknown = JSON.parse(serialized);
+    const cacheable = Buffer.byteLength(serialized) <= 65_536 && isDeepStrictEqual(copy, schema);
+    const cached = cacheable ? entryValidators.get(serialized) : undefined;
+    if (cached) return cached;
+    const ajv = new Ajv2020({ strict: false, allErrors: true });
+    addFormatsImport.default(ajv);
+    // An independent copy prevents later caller mutation from changing a cached
+    // validator's referenced enum/const values under an earlier content key.
+    const validate = ajv.compile(cacheable ? (copy as Record<string, unknown>) : schema);
+    if (cacheable) {
+      if (entryValidators.size >= 64) {
+        const oldest = entryValidators.keys().next().value;
+        if (oldest !== undefined) entryValidators.delete(oldest);
+      }
+      entryValidators.set(serialized, validate);
+    }
+    return validate;
   } catch {
     throw new Error(errorCode);
   }

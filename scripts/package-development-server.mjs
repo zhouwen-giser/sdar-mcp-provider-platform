@@ -12,6 +12,7 @@ import { dirname, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { taskBusinessMigration } from "../deploy/gowm-task-business/install.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -28,6 +29,8 @@ for (let i = 0; i < args.length; i += 2) {
   else throw Error("Invalid arguments; use --help");
 }
 const out = resolve(outputDir ?? resolve(root, "artifacts"));
+// Pin the exact explicit owner SQL before assembling source/prebuilt images.
+taskBusinessMigration();
 execFileSync(
   process.execPath,
   [resolve(root, "deploy/development/server/package.mjs"), "check-template"],
@@ -50,7 +53,7 @@ const files = [
 ]
   .filter(
     (p) =>
-      !/(^|\/)(reports|artifacts|node_modules|\.git|\.codex|\.agents|state|secrets)(\/|$)/.test(
+      !/(^|\/)(reports|artifacts|node_modules|__pycache__|\.git|\.codex|\.agents|state|secrets)(\/|$)/.test(
         p,
       ) &&
       (!/(^|\/)\.env($|\.(?!example$))/.test(p) ||
@@ -58,7 +61,8 @@ const files = [
       p !== "SOURCE_REVISION" &&
       !p.startsWith("deploy/development/server/config/") &&
       !resolve(root, p).startsWith(`${out}/`) &&
-      !/\.(token|pem|key|pfx|p12|log)$/.test(p),
+      (!/\.(token|pem|key|pfx|p12|log|pyc|pyo|tsbuildinfo)$/.test(p) ||
+        p === "contracts/ugv-trajectory-history/v1/examples/SIMULATED_PUBLIC_KEY.pem"),
   )
   .filter((p) => {
     try {

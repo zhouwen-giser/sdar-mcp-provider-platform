@@ -28,11 +28,17 @@ import {
   RequiredInputResponseCommandSchema,
   RequiredInputSchema,
   RuntimeInterventionSchema,
+  RuntimeInterventionCommandSchema,
+  TrustedResponderSchema,
   type BusinessAction,
   type RequiredInput,
   type RuntimeIntervention,
 } from "../../vehicle-provider-core/src/task-business-interaction.js";
 import type { ProviderExecution } from "./types.js";
+import type {
+  ProjectionEvidence,
+  TrajectoryProjectionWrite,
+} from "../../trajectory-history/src/contract.js";
 
 /** Construct only from the already admitted Provider execution, never request JSON. */
 export class BoundExecutionScope {
@@ -390,6 +396,8 @@ export const BusinessCommandRecordSchema = z
       .string()
       .regex(/^[1-9][0-9]{0,18}$/)
       .optional(),
+    /** Original admission provenance; optional for pre-existing ledger records. */
+    responder: TrustedResponderSchema.optional(),
     identity: TaskBusinessIdentitySchema,
     requestHash: z.string().regex(/^[a-f0-9]{64}$/),
     responseHash: z
@@ -398,6 +406,8 @@ export const BusinessCommandRecordSchema = z
       .optional(),
     /** Persisted only for an admitted input reply, so recovery can replay its effect. */
     inputResponse: RequiredInputResponseCommandSchema.shape.result.optional(),
+    /** Admitted semantic request for recovery in the existing command ledger. */
+    interventionRequest: RuntimeInterventionCommandSchema.optional(),
     state: z.enum(["accepted", "applied", "rejected"]),
     resultCode: z.string().min(1).max(256).optional(),
     resultRefs: z.array(BusinessObjectRefSchema).optional(),
@@ -406,6 +416,26 @@ export const BusinessCommandRecordSchema = z
   })
   .strict()
   .superRefine((command, ctx) => {
+    if (command.interventionRequest) {
+      const request = command.interventionRequest;
+      const semantic = Object.fromEntries(
+        Object.entries(request).filter(([key]) => key !== "commandId"),
+      );
+      if (
+        command.commandType !== "intervention" ||
+        request.commandId !== command.commandId ||
+        request.taskId !== command.identity.taskId ||
+        request.executionId !== command.identity.executionId ||
+        command.entryKey !== `intervention:${request.interventionId}` ||
+        createHash("sha256").update(canonicalJson(semantic)).digest("hex") !== command.requestHash
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "INTERVENTION_REQUEST_BINDING_INVALID",
+          path: ["interventionRequest"],
+        });
+      }
+    }
     if (command.commandType === "input_response" && !command.responseHash) {
       ctx.addIssue({
         code: "custom",
@@ -695,6 +725,8 @@ export interface BusinessChangeSet {
   contents?: readonly BusinessContentWrite[];
   /** Terminal result of a previously claimed command, saved with the object changes. */
   command?: BusinessCommandRecord;
+  /** Opt-in extension; committed atomically without changing the frozen Artifact shape. */
+  trajectoryEvidence?: readonly TrajectoryProjectionWrite[];
 }
 
 export interface BusinessContentWrite {
@@ -1099,6 +1131,11 @@ export async function loadTaskBusinessSnapshotPage(
 
 /** Same observable port for Memory and the native/shared PostgreSQL implementations. */
 export interface TaskBusinessStore {
+  getTrajectoryProjectionEvidence(
+    scope: BoundExecutionScope,
+    artifactId: string,
+    revision: number,
+  ): Promise<ProjectionEvidence | undefined>;
   getContext(scope: BoundExecutionScope): Promise<TaskBusinessContext | undefined>;
   getContextSnapshot(scope: BoundExecutionScope): Promise<TaskBusinessSnapshot | undefined>;
   getContextSnapshotPage(

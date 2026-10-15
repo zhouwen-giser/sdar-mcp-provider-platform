@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "sdar.ugv-task-business-settings/1.0-rc2",
+  "enabled": true,
+  "visualLockOwner": "provider",
+  "decisionMode": "user_required",
+  "maxWaitMs": 300000,
+  "onExpire": "release_and_resume_scan",
+  "onDismiss": "release_and_resume_scan",
+  "coordinates": {
+    "frameId": "isr.airport.display-centres/v1",
+    "transformRef": "isr.airport.linear-gnss/v1"
+  },
+  "trajectory": { "minSamples": 2, "sampleEveryMs": 1000 },
+  "footprint": { "mode": "estimated", "model": "isr.airport.eo-range-sector/v1" },
+  "coverage": { "mode": "device_reported" },
+  "adjustments": { "navigation": true, "reconnaissance": false },
+  "contentMode": "inline_up_to_limit",
+  "maxInlineArtifactBytes": 65536
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "bucket": "pass",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634045",
+    "name": "static",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231633891",
+    "name": "task-business-ugv",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231652833",
+    "name": "release-artifacts",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231633993",
+    "name": "development-tests",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634845",
+    "name": "pms-api-production",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634932",
+    "name": "provider-regression",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634632",
+    "name": "runtime-ci",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634639",
+    "name": "worker-pm2-production",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634588",
+    "name": "worker-lease-safety",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634652",
+    "name": "platform-e2e",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform/actions/runs/37132978147/job/111231634774",
+    "name": "runtime-compose",
+    "state": "SKIPPED"
+  }
+]

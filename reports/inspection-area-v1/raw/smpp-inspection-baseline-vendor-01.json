@@ -1,0 +1,17 @@
+{
+  "name": "smpp-inspection-baseline-vendor-01",
+  "command": "python3",
+  "args": [
+    "/tmp/smpp-inspection-v1-20261014/deployment/baseline-vendor.py"
+  ],
+  "startedAt": "2026-10-14T13:22:15.156Z",
+  "completedAt": "2026-10-14T13:22:17.949Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceAfter": "c9d275bc9a218732f3f51ebe3fafeda1f11f26331baa9dc9060f8cf2391fa2a2",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-baseline-vendor-01.log",
+  "logSha256": "464d01a7a38c3f28c08cbab07e5a03c8be4a98733247df30073743abcedda38e"
+}

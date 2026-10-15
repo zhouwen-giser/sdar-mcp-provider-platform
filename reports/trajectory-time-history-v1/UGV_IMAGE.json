@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "smpp.trajectory-history-image/1",
+  "reference": "smpp-trajectory-history-ugv:cfda8c7f2f65",
+  "imageId": "sha256:62137de6e09d1d60150e90c22d90f1c3eba4a88bd42171ba52b5e7180cfffb45",
+  "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+  "sizeBytes": 102522360,
+  "user": "node",
+  "layers": 16,
+  "buildReceipt": "reports/trajectory-time-history-v1/raw/m3-ugv-image-build-02.json",
+  "openReceipt": "reports/trajectory-time-history-v1/raw/m3-ugv-image-open-02.json",
+  "ownerChecksum": "2fbd6f3b929201734d04ad03f4f70202729ac7b9b8dcd2fa0843252ca24d4ddd",
+  "runtimeDdl": false,
+  "evidenceClass": "ACTUAL_LOCAL_IMAGE_WITH_ISOLATED_SIMULATED_GOWM",
+  "deployment19100": "NOT_RUN"
+}

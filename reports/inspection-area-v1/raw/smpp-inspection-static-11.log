@@ -1,0 +1,5 @@
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ tsc --noEmit -p tsconfig.json

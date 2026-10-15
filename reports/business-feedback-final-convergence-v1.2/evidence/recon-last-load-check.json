@@ -1,0 +1,54 @@
+{
+  "at": "2026-09-30T01:21:48.605Z",
+  "operation": "ugv_area_recon_get_status",
+  "readOnly": true,
+  "value": {
+    "status": 9,
+    "status_label": "被中断",
+    "scan_mode": 1,
+    "scan_mode_label": "区域侦察",
+    "scan_pitch": 0,
+    "out_of_range": false,
+    "scan_num": 0,
+    "progress": 0,
+    "coverage": 0,
+    "coverage_covered": 0,
+    "coverage_total": 0,
+    "coverage_incomplete": false,
+    "coverage_reason": "",
+    "eo_fov": 120,
+    "camera_fault": false,
+    "work_mode": 1,
+    "recon_type": 1,
+    "load_status": 4,
+    "load_status_label": "故障",
+    "lock": {
+      "stage": 1,
+      "target_id": 0,
+      "role_name": "",
+      "duration_sec": 0
+    },
+    "attack_ready": false,
+    "last_cmd_ack": {
+      "seq": 600995,
+      "ok": true,
+      "message": "配置完成: 区域侦察 区域 4 点。光电机位当前不可用，未做可覆盖性预检(见载荷设备异常)",
+      "data": {
+        "coverability": {
+          "coverable": "unknown",
+          "coverable_label": "未预检(机位不可用)",
+          "region_min_dist_m": null,
+          "region_max_dist_m": null,
+          "detection_range_m": 140
+        }
+      }
+    },
+    "region": null,
+    "online": true,
+    "gimbal": {
+      "yaw": 0,
+      "pitch": 0,
+      "zoom": 1
+    }
+  }
+}

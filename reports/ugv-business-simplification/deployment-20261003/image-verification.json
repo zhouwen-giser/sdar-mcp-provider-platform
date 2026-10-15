@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "revision": "0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+  "images": [
+    {
+      "side": "runtime",
+      "tag": "smpp-gowm/runtime:0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+      "imageId": "sha256:718701d2219b7f60b88a87d99fa9eba37e1b0f9913aba24f75230893fb043f15",
+      "checks": ["DEPENDENCIES_DEVELOPMENT_LIVE_SEMANTICS_PASS"]
+    },
+    {
+      "side": "adapter",
+      "tag": "smpp-gowm/adapter:0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+      "imageId": "sha256:326e993b900c470287374a40160dfff1d3575c3bb5b3f8696938f821611e57f7",
+      "checks": ["DEPENDENCIES_DEVELOPMENT_LIVE_SEMANTICS_PASS", "PROFILE_PASS"]
+    }
+  ]
+}

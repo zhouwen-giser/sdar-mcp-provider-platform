@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "smpp.trajectory-history-cleanup/1",
+  "status": "PASS",
+  "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+  "taskOwnedContainerIdsVerifiedAbsent": [
+    "d552cf184d2a279e7f3cb532ad816612ff45949c5a15442fb48776030a3f470b",
+    "ea7d54aae2d93b0a7bd58eef0a4e2080730792185c20f060253eab2cc09f212a",
+    "32922abb982b84fc0e1cabdb444306efeb4862a64e437d7a51fb627c7a12ebd5",
+    "abc69f4cf05bcf0b3657cc2992698ccad1e003c64a680c8026bed553af79e99c"
+  ],
+  "ownerCheckedBeforeRemovalIn": "m3-isolated-cleanup-01",
+  "firstRemovalSucceeded": true,
+  "firstInventoryFormattingFailure": "Preserved locally; failed after exact owner-checked removal, resolved by ID-only verification.",
+  "otherContainersUntouched": true,
+  "siteOperations": "NOT_RUN",
+  "deployment19100": "NOT_RUN"
+}

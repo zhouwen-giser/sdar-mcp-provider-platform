@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-09-29T04:48:13.310Z",
+  "source": "dashboard.plan_route/route_candidates",
+  "request": {
+    "longitude": 106.81312856,
+    "latitude": 29.72041222
+  },
+  "response": {
+    "ok": true,
+    "candidates": [
+      {
+        "id": "straight",
+        "label": "主线直线",
+        "color": "#00e5ff",
+        "points": [
+          [-340.1802673339844, 100],
+          [-310.47035402744126, 100],
+          [-280.76044072089815, 100],
+          [-251.0505274143551, 100],
+          [-221.34061410781197, 100],
+          [-191.63070080126886, 100]
+        ],
+        "length_m": 148.5,
+        "num_points": 6
+      }
+    ],
+    "error": null,
+    "target": "ugv"
+  }
+}

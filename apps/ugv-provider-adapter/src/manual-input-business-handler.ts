@@ -1,3 +1,4 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import type { AdapterBusinessEvent } from "../../../packages/adapter-protocol/src/index.js";
 import {
   BoundExecutionScope,
@@ -31,7 +32,7 @@ export class UgvManualInputBusinessHandler {
     execution: ProviderExecution,
     requestId: string,
   ): Promise<RequiredInput> {
-    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+    if (!isReconOperation(execution.operationName) || !execution.taskBusinessContextExpected)
       throw new Error("UGV_INPUT_EXECUTION_INVALID");
     const scope = BoundExecutionScope.fromExecution(execution);
     const { request } = await this.#currentRequest(scope, requestId);
@@ -44,7 +45,7 @@ export class UgvManualInputBusinessHandler {
     execution: ProviderExecution,
     requestId: string,
   ): Promise<"applied" | "none"> {
-    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+    if (!isReconOperation(execution.operationName) || !execution.taskBusinessContextExpected)
       throw new Error("UGV_INPUT_EXECUTION_INVALID");
     const scope = BoundExecutionScope.fromExecution(execution);
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -139,14 +140,14 @@ export class UgvManualInputBusinessHandler {
   }): Promise<"applied" | "duplicate"> {
     const { execution } = input;
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true
     )
       throw new Error("UGV_INPUT_EXECUTION_INVALID");
     const command = RequiredInputResponseCommandSchema.parse(input.command);
     const responder = TrustedResponderSchema.parse(input.responder);
     if (
-      responder.actorType !== "user" ||
+      (responder.source !== "runtime_development_policy" && responder.actorType !== "user") ||
       command.result.action !== "accept" ||
       command.result.value === undefined
     )
@@ -267,12 +268,12 @@ export class UgvManualInputBusinessHandler {
     release: (request: RequiredInput) => Promise<void>;
   }): Promise<"applied" | "duplicate"> {
     const { execution } = input;
-    if (execution.operationName !== "vehicle_area_recon" || !execution.taskBusinessContextExpected)
+    if (!isReconOperation(execution.operationName) || !execution.taskBusinessContextExpected)
       throw new Error("UGV_INPUT_EXECUTION_INVALID");
     const command = RequiredInputResponseCommandSchema.parse(input.command);
     const responder = TrustedResponderSchema.parse(input.responder);
     if (
-      responder.actorType !== "user" ||
+      (responder.source !== "runtime_development_policy" && responder.actorType !== "user") ||
       !["decline", "cancel"].includes(command.result.action) ||
       command.result.value !== undefined
     )

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "smpp.trajectory-local-environment/1",
+  "recordedAt": "2026-10-13T04:33:08.393Z",
+  "node": "v22.23.2",
+  "pnpm": "11.13.1",
+  "python": "/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+  "evidenceClass": "ISOLATED_LOCAL_SIMULATED",
+  "containers": [
+    {
+      "id": "d552cf184d2a279e7f3cb532ad816612ff45949c5a15442fb48776030a3f470b",
+      "name": "/smpp-trajectory-history-test-7742e8cbd2",
+      "image": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "imageId": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "owner": "trajectory-history-authority",
+      "state": "running",
+      "ports": [
+        {
+          "containerPort": "5432/tcp",
+          "hostIp": "127.0.0.1",
+          "hostPort": "32994"
+        }
+      ]
+    },
+    {
+      "id": "32922abb982b84fc0e1cabdb444306efeb4862a64e437d7a51fb627c7a12ebd5",
+      "name": "/smpp-trajectory-history-mqtt-aee4352bab",
+      "image": "38c0da4f2ef8",
+      "imageId": "sha256:38c0da4f2ef84284d47b3b3eeea1cb3bdeabe81ee10caf0cd5c5ff61ee3ea408",
+      "owner": "trajectory-history-authority",
+      "state": "running",
+      "ports": [
+        {
+          "containerPort": "1883/tcp",
+          "hostIp": "127.0.0.1",
+          "hostPort": "56677"
+        }
+      ]
+    },
+    {
+      "id": "abc69f4cf05bcf0b3657cc2992698ccad1e003c64a680c8026bed553af79e99c",
+      "name": "/smpp-trajectory-gowm-test-05726aaba9",
+      "image": "20e7e39aa763",
+      "imageId": "sha256:20e7e39aa7638d0a0ac70df277a2b13c5d034cb5a91c1f74aa3f0a7c4fb7ec8f",
+      "owner": "trajectory-history-authority",
+      "state": "running",
+      "ports": [
+        {
+          "containerPort": "5432/tcp",
+          "hostIp": "127.0.0.1",
+          "hostPort": "32997"
+        }
+      ]
+    }
+  ],
+  "gowmOwnerSourceCommit": "cd4d748878390bb7a9ed93af3ed6a6c36cc4069f",
+  "deviceQualification": "NOT_RUN",
+  "siteOperations": "NOT_RUN",
+  "deployment19100": "NOT_RUN",
+  "privateSecretsScannedFiles": 111,
+  "privateSecretsFound": 0
+}

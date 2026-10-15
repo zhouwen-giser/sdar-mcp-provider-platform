@@ -33,6 +33,7 @@ const factSchema = z
     sourceTopic: z.string().min(1).max(256),
     observedAt: z.iso.datetime({ offset: true }),
     position: positionSchema,
+    receptionId: z.uuid().optional(),
   })
   .strict();
 export type NavigationPositionFact = z.infer<typeof factSchema>;
@@ -60,9 +61,14 @@ export class NavigationTrajectoryProcessor {
     >,
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
     readonly maxGapMs: number,
+    readonly sampleEveryMs = 0,
+    readonly receptionEvidenceEnabled = false,
+    readonly receptionStreamId?: string,
   ) {
     if (!Number.isFinite(maxGapMs) || maxGapMs <= 0)
       throw new Error("TRAJECTORY_GAP_THRESHOLD_INVALID");
+    if (!Number.isSafeInteger(sampleEveryMs) || sampleEveryMs < 0)
+      throw new Error("TRAJECTORY_SAMPLE_INTERVAL_INVALID");
   }
 
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
@@ -104,6 +110,10 @@ export class NavigationTrajectoryProcessor {
             throw new Error("TRAJECTORY_SAME_TIME_POSITION_CONFLICT");
           return "duplicate";
         }
+        // The persisted last sample enforces the declared projection interval
+        // across restarts; raw MQTT and physical confirmation remain full-rate.
+        if (millisecondsBetweenIsoTimestamps(fact.observedAt, last.observedAt) < this.sampleEveryMs)
+          return "duplicate";
       }
       const oldRef = current.activeRefs.trajectory;
       if (oldRef !== undefined && oldRef.kind !== "artifact")
@@ -258,6 +268,20 @@ export class NavigationTrajectoryProcessor {
             expectedContextRevision: current.contextRevision,
             context,
             objects: [{ kind: "artifact", value: artifact }],
+            ...(this.receptionEvidenceEnabled
+              ? {
+                  trajectoryEvidence: [
+                    {
+                      artifactId: artifact.artifactId,
+                      revision: artifact.revision,
+                      missionId: fact.missionId,
+                      sampleEveryMilliseconds: this.sampleEveryMs,
+                      receptionId: fact.receptionId ?? null,
+                      sourceStreamId: this.receptionStreamId ?? null,
+                    },
+                  ],
+                }
+              : {}),
           },
           [{ body, description: reasonCode, reasonCode, severityHint: "info" }],
         );

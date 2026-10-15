@@ -1,0 +1,26 @@
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check && pnpm audit:dependencies && pnpm sbom:check && pnpm deployment:check && pnpm container:check && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm test:recovery && pnpm test:security && pnpm test:e2e && pnpm test:conformance && pnpm capacity:baseline
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts
+  33:7  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/integration/ugv-inspection-public-task.test.ts
+   44:11  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+   86:23  error  ["_meta"] is better written in dot notation                            @typescript-eslint/dot-notation
+  138:28  error  ["resultType"] is better written in dot notation                       @typescript-eslint/dot-notation
+  139:43  error  ["taskId"] is better written in dot notation                           @typescript-eslint/dot-notation
+  147:75  error  ["status"] is better written in dot notation                           @typescript-eslint/dot-notation
+  149:76  error  ["result"] is better written in dot notation                           @typescript-eslint/dot-notation
+  153:23  error  ["structuredContent"] is better written in dot notation                @typescript-eslint/dot-notation
+  162:26  error  ["structuredContent"] is better written in dot notation                @typescript-eslint/dot-notation
+  168:24  error  ["snapshot"] is better written in dot notation                         @typescript-eslint/dot-notation
+  187:44  error  ["isError"] is better written in dot notation                          @typescript-eslint/dot-notation
+
+✖ 11 problems (11 errors, 0 warnings)
+  9 errors and 0 warnings potentially fixable with the `--fix` option.
+
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.

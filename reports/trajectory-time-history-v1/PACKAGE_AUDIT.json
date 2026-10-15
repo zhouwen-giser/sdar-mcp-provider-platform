@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "smpp.trajectory-history-package-audit/1",
+  "status": "PASS",
+  "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+  "archiveSha256": "7ae25a2bce05972581e7012f4cff4542741c7c2e28cf393d268278cfc5049b9a",
+  "checkedFiles": 182,
+  "privateCredentialSourcesChecked": 4,
+  "privateCredentialsFound": 0,
+  "compressedSourceAlsoChecked": true,
+  "extractedBytesVerified": true,
+  "frozenSourceVerified": true,
+  "finalGateRawLogDigestsVerified": true,
+  "realDeviceQualification": "NOT_RUN",
+  "siteOperations": "NOT_RUN",
+  "deployment19100": "NOT_RUN"
+}

@@ -448,6 +448,30 @@ describe("Goal 10 UGV Device MCP protocol binding", () => {
     expect(failures[2]).toBe("42");
   });
 
+  it("preserves an accepted recon mission when skipped preflight reports unknown distances", () => {
+    const result = {
+      ...commonResult(10, 0),
+      res: true,
+      fail_data: "",
+      coverability: {
+        coverable: "unknown",
+        coverable_label: "未预检(机位不可用)",
+        region_min_dist_m: null,
+        region_max_dist_m: null,
+        detection_range_m: 140,
+      },
+    };
+    expect(() => validateUgvToolResult("ugv_area_recon_configure", result)).not.toThrow();
+    for (const coverability of [
+      { ...result.coverability, coverable: "full" },
+      { ...result.coverability, detection_range_m: null },
+      { ...result.coverability, region_min_dist_m: -1 },
+    ])
+      expect(() =>
+        validateUgvToolResult("ugv_area_recon_configure", { ...result, coverability }),
+      ).toThrow(UncertainMutatingDeviceCallError);
+  });
+
   it("validates downstream business success instead of trusting MCP isError", () => {
     expect(new Set(Object.keys(UGV_DEVICE_RESULT_POLICIES))).toEqual(
       new Set(UGV_DEVICE_TOOL_ALLOWLIST),

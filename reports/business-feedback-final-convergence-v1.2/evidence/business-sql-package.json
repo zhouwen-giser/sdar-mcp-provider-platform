@@ -1,0 +1,9 @@
+{
+  "schema": "smpp-business-sql-package-check/v1",
+  "status": "PASS",
+  "kind": "temporary source package verification, not final united release",
+  "archive": "/tmp/bff-sql-package-verification/smpp-sz-gowm-5a2482aa5df2-254a9bd857f5.tar.gz",
+  "archiveSha256": "e61dbd60b3527b436c4cee31e1afdfef11601382719405271f6d5e51bbb20f46",
+  "sqlSha256": "ed4b9491616b61dbf31668086a20f63a0379c75f746382653f76a3879f1be95b",
+  "deploymentRun": false
+}

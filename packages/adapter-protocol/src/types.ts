@@ -1,3 +1,5 @@
+import type { RuntimeBusinessResponder } from "../../domain/src/business-responder.js";
+
 export const ADAPTER_PROTOCOL_VERSION = "1.0";
 
 export interface RequestMetadata {
@@ -137,12 +139,8 @@ export interface McpTaskInputResponse {
     action: "accept" | "decline" | "cancel";
     content?: unknown;
   };
-  /** Provenance supplied by Runtime after authentication and durable intake. */
-  verifiedResponder?: {
-    actorType: "user" | "agent" | "operator";
-    actorId: string;
-    source: "jwt_hs256" | "trusted_headers";
-  };
+  /** Provenance supplied by Runtime after configured authorization and durable intake. */
+  verifiedResponder?: RuntimeBusinessResponder;
 }
 
 export interface StartOperationResponse {

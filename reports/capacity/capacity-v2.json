@@ -1,44 +1,44 @@
 {
   "version": "2.0.0-rc.1",
-  "generatedAt": "2026-09-02T10:31:26.816Z",
+  "generatedAt": "2026-10-14T00:55:43.550Z",
   "environment": {
-    "node": "v22.23.1",
+    "node": "v22.23.2",
     "platform": "linux/x64",
-    "cpuLogicalCount": 12,
-    "memoryBytes": 16636125184,
+    "cpuLogicalCount": 48,
+    "memoryBytes": 168221470720,
     "database": "TEST_DATABASE_URL target (credentials redacted)",
     "topology": "two Runtime replicas, shared PostgreSQL, single TypeScript Adapter"
   },
   "workloads": {
     "synchronousTool": {
       "iterations": 100,
-      "durationMs": 1013.4994399999996,
-      "throughputPerSecond": 98.66803675786939,
+      "durationMs": 815.1426480000009,
+      "throughputPerSecond": 122.67791440597018,
       "latencyMs": {
-        "p50": 9.714216000000306,
-        "p95": 12.755271000001812,
-        "p99": 16.551606999997603,
-        "max": 55.47664399999849
+        "p50": 7.329827999998088,
+        "p95": 11.421887000000424,
+        "p99": 14.617904999999155,
+        "max": 48.118821999996726
       }
     },
     "concurrentTaskAdmission": {
       "tasks": 1000,
       "runtimeReplicas": 2,
-      "durationMs": 73110.121528,
-      "tasksPerSecond": 13.677996686368742
+      "durationMs": 43691.449338,
+      "tasksPerSecond": 22.88777358388669
     },
     "slowAdapterDatabaseAvailability": {
       "adapterResponseDelayMs": 15000,
-      "databaseQueryDurationMs": 0.7604190000001836,
+      "databaseQueryDurationMs": 0.8156509999998889,
       "databaseQueryCompletedBeforeAdapterResponse": true,
-      "taskId": "3b47f8c7-cd8e-4a14-aa6f-f8434225a596"
+      "taskId": "1ec20856-4e47-4291-a69f-7c7d49307df0"
     },
     "durableCommandDispatcher": {
       "commands": 500,
       "runtimeReplicas": 2,
       "duplicateAdapterSideEffects": 0,
-      "durationMs": 61019.92412000001,
-      "commandsPerSecond": 8.194044932221065,
+      "durationMs": 47410.997577999995,
+      "commandsPerSecond": 10.546076343941214,
       "result": {
         "claimed": 484,
         "acknowledged": 484,
@@ -51,7 +51,7 @@
     },
     "scheduledScan": {
       "futureTasks": 32,
-      "durationMs": 16.56410199997481,
+      "durationMs": 10.025823999996646,
       "result": {
         "started": 0,
         "missed": 0,
@@ -63,9 +63,9 @@
     },
     "watchdogScan": {
       "overdueTasks": 16,
-      "durationMs": 821.7976250000065,
+      "durationMs": 657.4020329999912,
       "result": {
-        "watchdogStops": 10,
+        "watchdogStops": 15,
         "reconciled": 0,
         "durableStopRequests": 16
       }
@@ -74,20 +74,20 @@
       "100": {
         "requested": 100,
         "returned": 100,
-        "durationMs": 13.231371000001673,
-        "candidatesPerSecond": 7557.795786996477
+        "durationMs": 5.582013000006555,
+        "candidatesPerSecond": 17914.684182907236
       },
       "500": {
         "requested": 500,
         "returned": 500,
-        "durationMs": 49.642388999986,
-        "candidatesPerSecond": 10072.037427532769
+        "durationMs": 21.20906299998751,
+        "candidatesPerSecond": 23574.827421668484
       },
       "1000": {
         "requested": 1000,
         "returned": 1000,
-        "durationMs": 69.93458100000862,
-        "candidatesPerSecond": 14299.077590811286
+        "durationMs": 39.86663500001305,
+        "candidatesPerSecond": 25083.631964415174
       }
     },
     "observationOutboxGrowth": {
@@ -110,10 +110,10 @@
         },
         "after": {
           "rows": 3596,
-          "bytes": 6561792
+          "bytes": 6971392
         },
         "rows": 3596,
-        "bytes": 6529024
+        "bytes": 6938624
       }
     },
     "runtimeImage": {
@@ -121,11 +121,11 @@
       "measurementEnvironment": "linux/x64 Docker Engine",
       "image": "sdar-runtime:v2-audit-primary",
       "base": "node:22-bookworm-slim",
-      "sizeBytes": 102947850,
+      "sizeBytes": 103154065,
       "sizeLimitEnforced": false,
       "user": "node",
       "layers": 11,
-      "filesystemHash": "f4a41d296c71c4e45769a9241a02f71b6d2d797b0b5ed9fc103882b2c3fef3e8",
+      "filesystemHash": "4bb863f7963c77f8931ea24f72a58c64ac07675274968d5197f9850e10333502",
       "frozenLockfile": true,
       "productionDependenciesOnly": true,
       "containsTestsDocsOrReferences": false,

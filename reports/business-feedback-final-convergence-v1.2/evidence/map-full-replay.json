@@ -1,0 +1,26 @@
+{
+  "schema": "smpp.recon-public-payload-replay/v1",
+  "status": "PASS",
+  "sourceSha256": "fbf4335fa3039aa787c773bbae8b6208c17b480b71748907a6660a9d645c626e",
+  "taskIds": ["b88855b2-7715-4f47-a4b3-311aa8d2bc9a", "8aa01432-eb79-4e2d-a395-409ab4b24678"],
+  "checkedAt": "2026-09-30T03:56:10.814Z",
+  "windows": [
+    {
+      "window": "continue_observation",
+      "snapshots": 38,
+      "events": 63,
+      "duplicateReplays": 63
+    },
+    {
+      "window": "decline",
+      "snapshots": 55,
+      "events": 103,
+      "duplicateReplays": 103
+    }
+  ],
+  "externalSdarQualified": false,
+  "scope": "Offline replay of actual selected parsed public notifications and full validated Context through SMPP public normalizer/reducer; not external SDAR or byte-level transport replay.",
+  "standaloneSnapshots": 8,
+  "completeContexts": 101,
+  "selectedNotifications": 166
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "smpp.recon-public-handoff/v1",
+  "status": "LOCAL_REAL_PUBLIC_PASS_EXTERNAL_SDAR_PENDING",
+  "createdAt": "2026-09-30T02:50:52.918890+00:00",
+  "source": "../recon-public-attempt-17.json",
+  "sourceSha256": "caf4c1d1f37dd2c93c458cd9f3953d3e67c0030f9a38510d64ff7045bec379e1",
+  "taskIds": ["a3c0a208-ef97-459f-afee-0dc346941d7c", "2b9a9455-92f8-4c80-8931-de92f318c82f"],
+  "sceneInstanceId": "smpp-bff-test-a0af6ae8-d19d-490f-8252-81d03c0603d6",
+  "files": [
+    {
+      "path": "continue_observation.stream.ndjson",
+      "records": 454,
+      "sha256": "5a126e175decd6a63d09a8d58da741cae9b91425a40106268e3c309d017f5ae9",
+      "bytes": 768356
+    },
+    {
+      "path": "decline.stream.ndjson",
+      "records": 1148,
+      "sha256": "61bb3d823a12ea451adcc34613b3b6c14010ec0cc8c139c34a6060af1ec2bd78",
+      "bytes": 2087067
+    },
+    {
+      "path": "snapshots.ndjson",
+      "records": 6,
+      "sha256": "1b639b984ff1a5f950991943b0affbc80d34bf1af6333b836e876e8ad0832e02",
+      "bytes": 342683
+    },
+    {
+      "path": "input-decisions.ndjson",
+      "records": 6,
+      "sha256": "35b013f0ce9809c4ae408c02346d948a898cb85919402db14635d52318d29f95",
+      "bytes": 7265
+    },
+    {
+      "path": "device-observations.ndjson",
+      "records": 9,
+      "sha256": "cd6f7ab3a1d6bdbe2f0b6fab22c5a3a19f6770c2abee0101b702b9e5a4022c38",
+      "bytes": 7630
+    }
+  ],
+  "records": 1623,
+  "completeContexts": 54,
+  "selectedOriginalNotifications": 76,
+  "fireEnabled": false,
+  "externalSdarQualified": false
+}

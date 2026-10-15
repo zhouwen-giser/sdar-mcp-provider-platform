@@ -1,0 +1,33 @@
+{
+  "workflow": "V-EDIT",
+  "status": "PUBLIC_RUNTIME_POSITIVE_PASS",
+  "realQualification": true,
+  "qualificationScope": "local production Runtime + actual software planner/device, selected disposable GOWM shared installation",
+  "taskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+  "sceneInstanceId": "smpp-bff-test-f286a981-3bce-417f-a71d-df662736cfc8",
+  "missions": ["47564", "47565", "47566"],
+  "effectivePlanRevisions": [1, 2, 3],
+  "twoAdjustmentsApplied": true,
+  "processRestart": {
+    "beforePids": [725940, 725993],
+    "afterPids": [726395, 726454],
+    "journalUnchanged": true
+  },
+  "originalArgumentsImmutable": true,
+  "publicSseEvents": {
+    "initial": 15,
+    "recovered": 39
+  },
+  "evidence": [
+    "evidence/navigation-public-restart.json",
+    "evidence/navigation-summary.json",
+    "evidence/navigation-final-local.log",
+    "evidence/navigation-final-gowm.log"
+  ],
+  "remaining": [
+    "same-candidate V-OBS and V-INPUT",
+    "external SDAR consumption",
+    "final hosted CI and independent full-goal audit",
+    "remote deployment qualification"
+  ]
+}

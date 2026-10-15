@@ -118,11 +118,15 @@ beforeAll(async () => {
   adapterRuntime = new UgvProviderRuntime(
     {
       providerId,
+      executionMode: "simulation",
+      fireEnabled: false,
       resourceId: "vehicle:ugv1",
       freshness: { chassis: 3_000, mission: 3_000, health: 5_000, target: 3_000, payload: 3_000 },
       allowNavigationWithRecon: true,
       fireRequiresChassisStopped: true,
       pollIntervalMs: 60_000,
+      // Dense synthetic samples exercise exact public Artifact versioning.
+      trajectorySampleEveryMs: 0,
     },
     providerStore,
     ingress,
@@ -185,6 +189,57 @@ async function request(
   name?: string,
   subject = "ugvb-public-pg-user",
 ) {
+  if (
+    method === "tools/call" &&
+    ["vehicle_navigate", "vehicle_area_recon"].includes(String(params.name))
+  ) {
+    // The fixture is a healthy, continuously observed device. Refresh its current
+    // telemetry at admission; retain mission IDs and states rather than resetting ownership.
+    const observed = ingress.snapshot();
+    const position = observed.chassis.position;
+    if (position)
+      ingress.handle(
+        "/ugv/gnss",
+        Buffer.from(
+          JSON.stringify({
+            entity_id: "ugv1",
+            longitude: position.longitude,
+            latitude: position.latitude,
+          }),
+        ),
+      );
+    ingress.handle(
+      "/ugv/component_status",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "ugv1",
+          power_battery: 0,
+          lvbattery: 0,
+          fuel: 0,
+          water_temp: 0,
+          motor: 0,
+          sensor: 0,
+          gnss: 0,
+          comms: 0,
+          weapon: 0,
+          navigation: 0,
+        }),
+      ),
+    );
+    ingress.handle(
+      "status/ugv",
+      Buffer.from(
+        JSON.stringify({
+          vehicle_id: "ugv1",
+          available: true,
+          speed_kmh: observed.chassis.speedKmh ?? 0,
+          chassis_task: observed.chassis.mission,
+          eo_task: observed.payload.eoTask,
+          weapon_task: observed.payload.weapon,
+        }),
+      ),
+    );
+  }
   const response = await fetch(httpRuntimeUrl, {
     method: "POST",
     headers: {

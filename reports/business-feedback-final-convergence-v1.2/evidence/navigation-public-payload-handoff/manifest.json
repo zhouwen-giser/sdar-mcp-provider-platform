@@ -1,0 +1,75 @@
+{
+  "schema": "smpp.navigation-public-payload-handoff/v1",
+  "createdAt": "2026-09-29T07:47:34.931096+00:00",
+  "sourceFile": "../navigation-public-payloads.json",
+  "sourceSha256": "3f4eb8824a4b5a04e7f097aca687e60109fdbbb627948be4e6efa68455a093d3",
+  "replayEvidence": "../navigation-public-payload-replay.json",
+  "taskId": "c572b7d9-468c-45d7-a657-ae21b8a34201",
+  "sceneInstanceId": "smpp-bff-test-a0af6ae8-d19d-490f-8252-81d03c0603d6",
+  "captureStartedAt": "2026-09-29T07:41:29.525Z",
+  "captureCompletedAt": "2026-09-29T07:42:35.067Z",
+  "fireEnabled": false,
+  "files": [
+    {
+      "file": "stream-initial.ndjson",
+      "records": 57,
+      "sha256": "29ef83a4e4c2a451845be43a93eb90b34f5694298548fc7b910a97cceb0eea5f",
+      "kind": "Actual probe output with full Context and original parsed notifications."
+    },
+    {
+      "file": "notifications-initial.ndjson",
+      "records": 7,
+      "sha256": "652d69e0ce4f15fdce43f76de8f4d9a3a484b30a7a51dfabdacab6b4cd69f984",
+      "kind": "Original selected parsed JSON-RPC notifications; not byte-level SSE framing."
+    },
+    {
+      "file": "stream-recovered.ndjson",
+      "records": 211,
+      "sha256": "3da7d6b43c4715ffa92e1eb32d2c6ceee6efdf9e44096cff4f98eeb2491c601f",
+      "kind": "Actual probe output with full Context and original parsed notifications."
+    },
+    {
+      "file": "notifications-recovered.ndjson",
+      "records": 31,
+      "sha256": "9874db6a720b9a6ec8b3a67c7398b005f651732de30846c4e611e110ab3f2ee9",
+      "kind": "Original selected parsed JSON-RPC notifications; not byte-level SSE framing."
+    },
+    {
+      "file": "snapshots.ndjson",
+      "records": 19,
+      "sha256": "d4d6d72ea5f1427061d6ab79c70f3e07f8e4630b1aff356dcca00b796b322242",
+      "kind": "Full validated Context plus exact hydrated object versions and public resume cursor."
+    },
+    {
+      "file": "intervention-1.ndjson",
+      "records": 25,
+      "sha256": "d815657fab73731b909ea6c7c1a26de087bd5075066ff8fd8c46c3e75d94e3d2",
+      "kind": "Actual guarded public command receipt/application records."
+    },
+    {
+      "file": "intervention-2.ndjson",
+      "records": 31,
+      "sha256": "a91411da3ee7578694ac56896459b6aafd0dddb7f3de8bb71012e0bef162021d",
+      "kind": "Actual guarded public command receipt/application records."
+    },
+    {
+      "file": "task-result.ndjson",
+      "records": 1,
+      "sha256": "a4e563daaee61c0f839a9f6b91b4e63fd35d7d7c9eda9a95d41b596c77de6f73",
+      "kind": "Actual public terminal Task result."
+    }
+  ],
+  "verification": {
+    "completeContexts": 19,
+    "selectedNotifications": 38,
+    "reducerReplay": "PASS",
+    "duplicateReplay": "PASS",
+    "externalSdarQualified": false
+  },
+  "limitations": [
+    "Parsed selected JSON-RPC notifications, not complete HTTP/SSE byte framing.",
+    "Only normalized/applied events for the selected Task/source are captured; unrelated, rejected and duplicate messages are excluded.",
+    "Full Context is the validated/hydrated public value; response headers and signed snapshot tokens are omitted.",
+    "No V-OBS/V-INPUT, external SDAR, final Goal completion or remote deployment qualification."
+  ]
+}

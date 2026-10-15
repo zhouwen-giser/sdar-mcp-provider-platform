@@ -19,6 +19,33 @@ const state = {
   gimbal: { id: 3001, state: 0, progress: 0 },
   lockedTargetId: 101,
 };
+const isolatedObservations =
+  process.env.MOCK_UGV_ISOLATED_OBSERVATIONS === "true" && !!process.send;
+if (isolatedObservations) {
+  for (const track of [state.mission, state.weapon, state.gimbal]) {
+    track.state = -1;
+    track.progress = 0;
+  }
+  process.on("message", (value: unknown) => {
+    const observation = z
+      .object({
+        id: z.string(),
+        kind: z.literal("mission_observation"),
+        missionId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+        state: z.number().int().min(0).max(5),
+        progress: z.number().min(0).max(100),
+      })
+      .strict()
+      .safeParse(value);
+    if (!observation.success) return;
+    const accepted = observation.data.missionId === state.mission.id;
+    if (accepted) {
+      state.mission.state = observation.data.state;
+      state.mission.progress = observation.data.progress;
+    }
+    process.send?.({ id: observation.data.id, accepted });
+  });
+}
 
 function server(): McpServer {
   const instance = new McpServer({ name: "mock-ugv-device-mcp", version: "1.0.0" });
@@ -42,7 +69,7 @@ function server(): McpServer {
 
 function call(name: string, args: Record<string, unknown>): Record<string, unknown> {
   if (["ugv_path_follow_mission", "ugv_return_home", "ugv_move_distance"].includes(name)) {
-    state.mission.id = suppliedMissionId(args, state.mission.id);
+    state.mission.id = suppliedMissionId(args, state.mission.id + (isolatedObservations ? 1 : 0));
     state.mission.state = 0;
     state.mission.progress = 0;
     return common(state.mission.id, 0, "mission accepted");
@@ -85,7 +112,7 @@ function call(name: string, args: Record<string, unknown>): Record<string, unkno
     state.reconnaissance.status = command === 1 || command === 3 ? 5 : command === 2 ? 8 : 9;
     return {
       ...common(state.reconnaissance.id, command === 4 ? 3 : 1, `recon command ${command}`),
-      cmd_res: 0,
+      cmd_res: 1,
       fail_data: "",
     };
   }
@@ -98,7 +125,7 @@ function call(name: string, args: Record<string, unknown>): Record<string, unkno
         1,
         args.lock === true ? "target locked" : "target unlocked",
       ),
-      cmd_res: 0,
+      cmd_res: 1,
       fail_data: "",
     };
   }
@@ -159,9 +186,9 @@ function call(name: string, args: Record<string, unknown>): Record<string, unkno
       available: true,
       heading: 0,
       veh_speed: 0,
-      chassis_task: state.mission,
-      eo_task: state.gimbal,
-      weapon_task: state.weapon,
+      chassis_task: wireTrack(state.mission),
+      eo_task: wireTrack(state.gimbal),
+      weapon_task: wireTrack(state.weapon),
       gimbal: { yaw: 0, pitch: 0, zoom: 1 },
     };
   if (name === "get_capabilities")
@@ -177,7 +204,7 @@ function call(name: string, args: Record<string, unknown>): Record<string, unkno
   }
   if (name === "ugv_area_recon_reset") {
     state.reconnaissance.status = 1;
-    return { ...common(state.reconnaissance.id, 4, "recon reset"), cmd_res: 0, fail_data: "" };
+    return { ...common(state.reconnaissance.id, 4, "recon reset"), cmd_res: 1, fail_data: "" };
   }
   return common(0, 4, "mock command completed");
 }
@@ -252,6 +279,10 @@ function common(missionId: number, missionState: number, message: string) {
     message,
     error_code: 0,
   };
+}
+
+function wireTrack(track: { id: number; state: number; progress: number }) {
+  return track.state === -1 ? { state: -1, progress: track.progress } : track;
 }
 
 const http = createServer(async (request, response) => {

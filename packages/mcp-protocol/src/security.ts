@@ -15,7 +15,7 @@ export type AuthenticationOptions =
 
 export type AuthorizationResolver = (request: IncomingMessage) => AuthorizationContext;
 
-type ResponderType = NonNullable<AuthorizationContext["verifiedResponder"]>["actorType"];
+type ResponderType = "user" | "agent" | "operator";
 interface AuthenticatedIdentity {
   subject: string;
   tenant: string;
@@ -43,15 +43,23 @@ export function createAuthorizationResolver(options: AuthenticationOptions): Aut
         .digest("hex"),
       executionMode: modeHeader,
       simulationId,
-      ...(identity.actorType === undefined || identity.actorSource === undefined
-        ? {}
-        : {
+      ...(options.mode === "development"
+        ? {
             verifiedResponder: {
-              actorType: identity.actorType,
-              actorId: identity.subject,
-              source: identity.actorSource,
+              actorType: "development_anonymous" as const,
+              actorId: "development-anonymous" as const,
+              source: "development" as const,
             },
-          }),
+          }
+        : identity.actorType === undefined || identity.actorSource === undefined
+          ? {}
+          : {
+              verifiedResponder: {
+                actorType: identity.actorType,
+                actorId: identity.subject,
+                source: identity.actorSource,
+              },
+            }),
       correlationId: correlationId(request),
     };
   };

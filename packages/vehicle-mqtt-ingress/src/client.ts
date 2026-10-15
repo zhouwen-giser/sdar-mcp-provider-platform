@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { connect, type IClientOptions, type MqttClient } from "mqtt";
 import type { VehicleSnapshot } from "../../vehicle-provider-core/src/index.js";
 import type { VehicleMqttIngress } from "./ingress.js";
@@ -23,6 +24,27 @@ export interface UgvMqttClientOptions {
   sessionMode: "clean" | "persistent";
   reconnectMinMs: number;
   reconnectMaxMs: number;
+  receptionJournal?: VehicleReceptionJournal;
+}
+
+export interface RawMqttReception {
+  receptionId: string;
+  receivedAt: string;
+  monotonicNanoseconds: string;
+  topic: string;
+  payload: Buffer;
+  qos: 0 | 1 | 2;
+  packetId: number | null;
+  duplicateDeliveryHint: boolean;
+  retainedDelivery: boolean;
+}
+
+/** Optional entrance journal; returns true only for a durably retained source-scope receipt. */
+export interface VehicleReceptionJournal {
+  record(reception: RawMqttReception): Promise<boolean>;
+  disconnected(): Promise<void>;
+  failed(): Promise<void>;
+  stopped(): Promise<void>;
 }
 
 export class VehicleMqttClient {
@@ -30,6 +52,8 @@ export class VehicleMqttClient {
   #subscriptionsReady = false;
   #validIngressObserved = false;
   #connectionGeneration = 0;
+  #disconnectRecorded = true;
+  readonly #pendingReceptions = new WeakMap<object, Promise<void>>();
   constructor(
     readonly options: UgvMqttClientOptions,
     readonly ingress: VehicleMqttIngress<VehicleSnapshot>,
@@ -46,11 +70,20 @@ export class VehicleMqttClient {
     // MQTT.js drains buffered packets via nextTick. Yield between packets so a
     // continuous simulator feed cannot starve database, gRPC, or timer callbacks.
     // Keep its serial completion/acknowledgement path; do not drop lifecycle events.
-    client.handleMessage = (_packet, callback) => {
-      setImmediate(callback);
+    client.handleMessage = (packet, callback) => {
+      const pending = this.#pendingReceptions.get(packet);
+      if (!pending) {
+        setImmediate(callback);
+        return;
+      }
+      void pending.then(
+        () => setImmediate(callback),
+        () => callback(new Error("VEHICLE_RECEPTION_JOURNAL_FAILED")),
+      );
     };
     this.#client = client;
     client.on("connect", () => {
+      this.#disconnectRecorded = false;
       const generation = ++this.#connectionGeneration;
       this.#subscriptionsReady = false;
       this.#validIngressObserved = false;
@@ -85,12 +118,55 @@ export class VehicleMqttClient {
     client.on("close", () => this.#markDisconnected());
     if (this.requireValidatedIngress) client.on("error", () => this.#markDisconnected());
     client.on("message", (topic, payload, packet) => {
+      const journal = this.options.receptionJournal;
+      if (journal) {
+        // Capture before parsing or asynchronous queuing. MQTT acknowledgement
+        // waits for durable admission; the default non-journal path stays intact.
+        const receivedAt = new Date().toISOString();
+        const monotonicNanoseconds = process.hrtime.bigint().toString();
+        const reception: RawMqttReception = {
+          receptionId: randomUUID(),
+          receivedAt,
+          monotonicNanoseconds,
+          topic,
+          payload: Buffer.from(payload),
+          qos: packet.qos,
+          packetId: packet.messageId ?? null,
+          duplicateDeliveryHint: packet.dup,
+          retainedDelivery: packet.retain,
+        };
+        const pending = Promise.resolve()
+          .then(() => journal.record(reception))
+          .then((retained) => {
+            try {
+              this.ingress.handle(
+                topic,
+                reception.payload,
+                packet.retain,
+                reception.receivedAt,
+                retained ? reception.receptionId : undefined,
+              );
+              this.#recordValidatedIngress();
+            } catch {
+              // Rejected input remains in the journal; no invalid state is applied.
+            }
+          })
+          .catch(async () => {
+            this.#markDisconnected();
+            await journal.failed().catch(() => undefined);
+            // Durable capture failure requires a fresh writer session. Close
+            // this transport so unacknowledged QoS frames can be redelivered.
+            client.options.reconnectPeriod = 0;
+            client.end(true);
+            throw Error("VEHICLE_RECEPTION_JOURNAL_FAILED");
+          });
+        this.#pendingReceptions.set(packet, pending);
+        void pending.catch(() => undefined);
+        return;
+      }
       try {
         this.ingress.handle(topic, payload, packet.retain);
-        if (this.requireValidatedIngress) {
-          this.#validIngressObserved = true;
-          if (this.#subscriptionsReady) this.ingress.setConnected(true);
-        }
+        this.#recordValidatedIngress();
       } catch {
         // Malformed messages are isolated; callers observe rejection telemetry separately.
       }
@@ -104,9 +180,20 @@ export class VehicleMqttClient {
         client.end(false, {}, (error) => (error === undefined ? resolve() : reject(error))),
       );
     this.#markDisconnected();
+    await this.options.receptionJournal?.stopped();
+  }
+
+  #recordValidatedIngress(): void {
+    if (this.requireValidatedIngress) {
+      this.#validIngressObserved = true;
+      if (this.#subscriptionsReady) this.ingress.setConnected(true);
+    }
   }
 
   #markDisconnected(): void {
+    if (this.options.receptionJournal && !this.#disconnectRecorded)
+      void this.options.receptionJournal.disconnected().catch(() => undefined);
+    this.#disconnectRecorded = true;
     this.#connectionGeneration++;
     this.#subscriptionsReady = false;
     this.#validIngressObserved = false;

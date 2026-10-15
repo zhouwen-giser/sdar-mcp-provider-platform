@@ -89,7 +89,6 @@ export class AdapterBusinessEventSourceClient {
         ? { afterSourceSequence: lease.lastPersistedSourceSequence }
         : {}),
     });
-    let latestSourceSequence = lease.lastPersistedSourceSequence;
     let retryInFlight = false;
     let rotationRequested = false;
     const wasRotationRequested = (): boolean => rotationRequested;
@@ -101,7 +100,7 @@ export class AdapterBusinessEventSourceClient {
     const retry = setInterval(() => {
       if (retryInFlight || rotationRequested) return;
       retryInFlight = true;
-      void this.#queueFinalization(latestSourceSequence)
+      void this.#queueFinalization()
         .then((outcome) => {
           if (outcome === "rotated") stopForRotation();
         })
@@ -118,7 +117,6 @@ export class AdapterBusinessEventSourceClient {
     retry.unref();
     try {
       await consumeStream(stream, async (event) => {
-        latestSourceSequence = event.sourceSequence;
         const outcome = await this.#handleEvent(lease, event);
         if (outcome === "rotated") stopForRotation();
       });
@@ -238,11 +236,11 @@ export class AdapterBusinessEventSourceClient {
       });
       return "rotated";
     }
-    return this.#queueFinalization(fact.sourceSequence);
+    return this.#queueFinalization();
   }
 
-  #queueFinalization(sourceSequence: string): Promise<FinalizationOutcome> {
-    const work = this.#finalization.then(() => this.#finalizeBuffered(sourceSequence));
+  #queueFinalization(): Promise<FinalizationOutcome> {
+    const work = this.#finalization.then(() => this.#finalizeBuffered());
     this.#finalization = work.then(
       () => undefined,
       () => undefined,
@@ -250,7 +248,7 @@ export class AdapterBusinessEventSourceClient {
     return work;
   }
 
-  async #finalizeBuffered(sourceSequence: string): Promise<FinalizationOutcome> {
+  async #finalizeBuffered(): Promise<FinalizationOutcome> {
     // A Task-scoped source event may arrive before Runtime persists its external Execution ID.
     // Retry the durable inbox while the source stream stays open, even without another event.
     for (let index = 0; index < 100; index += 1) {
@@ -282,6 +280,15 @@ export class AdapterBusinessEventSourceClient {
         continue;
       }
       if (prepared === "terminal" && this.options.deliverySemantics === "durable_at_least_once") {
+        // Several buffered events can fail mapping without any new source
+        // arrival. Each barrier needs its own rotation identity, not the last
+        // received sequence shared by all those failures.
+        const barrierId = await this.repository.terminalSourceBarrierId(
+          this.options.providerId,
+          this.options.sourceId,
+          this.options.sourceStreamId,
+        );
+        if (barrierId === undefined) return "idle";
         this.#increment("sdar_business_event_source_mapping_failed_total", {
           sourceId: this.options.sourceId,
         });
@@ -293,7 +300,7 @@ export class AdapterBusinessEventSourceClient {
               this.options.providerId,
               "SOURCE_MAPPING_FAILED",
               [this.options.sourceId],
-              `${this.options.sourceStreamId}:mapping:${sourceSequence}`,
+              `${this.options.sourceStreamId}:mapping-inbox:${barrierId}`,
               this.#generationRetentionMs,
             ),
         );

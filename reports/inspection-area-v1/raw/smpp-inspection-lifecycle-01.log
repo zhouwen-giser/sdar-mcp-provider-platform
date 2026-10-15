@@ -1,0 +1,26 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts (4 tests | 4 skipped) 11471ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP
+Error: INSPECTION_ISOLATED_WAIT_TIMEOUT
+ ❯ until tests/integration/ugv-inspection-postgres-mqtt.test.ts:66:9
+     64|     await new Promise((resolve) => setTimeout(resolve, 20));
+     65|   }
+     66|   throw Error("INSPECTION_ISOLATED_WAIT_TIMEOUT");
+       |         ^
+     67| }
+     68| async function publish(topic: string, value: unknown, retained = false…
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts:265:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 skipped (4)
+   Start at  01:23:04
+   Duration  14.19s (transform 1.60s, setup 0ms, import 2.52s, tests 11.47s, environment 0ms)
+

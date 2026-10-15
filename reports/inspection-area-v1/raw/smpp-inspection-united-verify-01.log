@@ -1,0 +1,35 @@
+Archive closure and SMPP/GOWM storage contracts: PASS
+Fresh extracted initialization: PASS
+Repeated initialization and Compose configuration: PASS
+Port conflicts and disabled UGV startup guards: PASS
+{
+  "status": "PASS",
+  "package": "smpp-gowm-gdps-gsap-wsgs-fb9d2ed4932e3f53.tar.gz",
+  "sha256": "ba22e91676a11c3e453ca3a4ee3ce420ddb2b507a057cdd846c76bca84bc90b4",
+  "checks": {
+    "archiveAndNestedInventories": "PASS",
+    "originalWsgsPackagePreserved": "PASS",
+    "smppGowmStorageCompatibility": "PASS",
+    "credentialAndGeneratedFileExclusions": "PASS",
+    "freshInit": "PASS",
+    "repeatInitPreservesCredentialsAndUserConfiguration": "PASS",
+    "composeConfiguration": "PASS",
+    "sharedDatabaseAndNetworkMapping": "PASS",
+    "privateFilePermissions": "PASS",
+    "apiPortConflictBlocked": "PASS",
+    "disabledUgvBlockedBeforeStartup": "PASS",
+    "noContainersStarted": "PASS",
+    "extractedSmppSourceBuild": "NOT_RUN"
+  },
+  "configurationFixture": {
+    "ugvIngestEnabled": false,
+    "modelPolicy": "MODEL_OPTIONAL",
+    "smppPort": 29100
+  },
+  "delivery": "ONLINE_SOURCE_BUILD",
+  "siteAcceptance": "NOT_RUN",
+  "realModel": "NOT_RUN",
+  "realMqtt": "NOT_RUN",
+  "deviceControl": "NOT_RUN",
+  "credentialsIncluded": false
+}

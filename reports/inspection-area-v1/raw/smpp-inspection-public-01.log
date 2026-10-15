@@ -1,0 +1,97 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (5 tests | 4 failed) 5194ms
+     × retains honest full inspection results and exact task identity 120ms
+     × retains honest findings inspection results and exact task identity 57ms
+     × retains honest missing inspection results and exact task identity 59ms
+     × retains honest partial inspection results and exact task identity 57ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest full inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"4c35206c-3042-42cb-93a0-b86e9101a7d7","error":{"code":-32602,"message":"Invalid Task timing parameters.","data":{"reasonCode":"INVALID_TASK_TIMING"}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:111:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest findings inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"2cd4876f-a227-47f2-bae6-6ff8507f7787","error":{"code":-32602,"message":"Invalid Task timing parameters.","data":{"reasonCode":"INVALID_TASK_TIMING"}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:111:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest missing inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"114a8ffc-b049-46db-b3f6-095743974ec3","error":{"code":-32602,"message":"Invalid Task timing parameters.","data":{"reasonCode":"INVALID_TASK_TIMING"}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:111:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: {"jsonrpc":"2.0","id":"92dc9db0-adaa-416f-a3af-09f0afb2b3b9","error":{"code":-32602,"message":"Invalid Task timing parameters.","data":{"reasonCode":"INVALID_TASK_TIMING"}}}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:84:33
+     82|   });
+     83|   const body = await response.text();
+     84|   expect(response.status, body).toBe(expectedStatus);
+       |                                 ^
+     85|   return JSON.parse(body) as { result?: Record<string, unknown>; error…
+     86| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:111:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  03:47:01
+   Duration  5.46s (transform 54ms, setup 0ms, import 76ms, tests 5.19s, environment 0ms)
+

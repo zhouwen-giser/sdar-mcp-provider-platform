@@ -1,0 +1,17 @@
+{
+  "name": "smpp-inspection-format-01",
+  "command": "pnpm",
+  "args": [
+    "format:check"
+  ],
+  "startedAt": "2026-10-13T18:10:11.349Z",
+  "completedAt": "2026-10-13T18:10:48.500Z",
+  "exitCode": 1,
+  "signal": null,
+  "status": "FAIL",
+  "sourceBefore": "2ea8add56584230fc80c46df923a7b749e09400f636a8e12bd5738447f93071c",
+  "sourceAfter": "2ea8add56584230fc80c46df923a7b749e09400f636a8e12bd5738447f93071c",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-format-01.log",
+  "logSha256": "5c45b0d7c31cf83b42ca702275da9aff2cd46ae9ca181ce4aba750208c4f64d8"
+}

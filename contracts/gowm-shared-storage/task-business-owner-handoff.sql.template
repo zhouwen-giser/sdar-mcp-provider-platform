@@ -4,6 +4,7 @@
 -- Owner substitutes :smpp_app_role, installs in its versioned migration chain,
 -- records the installed SHA-256 in ugv_smpp.gowm_install_history, and publishes
 -- contracts/gowm-shared-storage/current/task-business.json.
+-- Continue the existing UGV_PROVIDER family, file 030_task_business_versions.sql.
 
 CREATE TABLE ugv_smpp.ugv_task_business_context (
   scope_hash text PRIMARY KEY CHECK (scope_hash ~ '^[0-9a-f]{64}$'),
@@ -175,6 +176,10 @@ REVOKE ALL ON ugv_smpp.ugv_task_business_context,
   ugv_smpp.ugv_task_business_command,
   ugv_smpp.ugv_task_business_content FROM PUBLIC;
 GRANT USAGE ON SCHEMA ugv_smpp TO :smpp_app_role;
+-- Both startup verifiers are read-only. The owner, not SMPP startup, grants
+-- access to the version markers used to verify the installed core and overlay.
+GRANT SELECT ON public.schema_migration,
+  ugv_smpp.gowm_install_history TO :smpp_app_role;
 GRANT SELECT,INSERT,UPDATE ON ugv_smpp.ugv_task_business_context,
   ugv_smpp.ugv_task_business_command TO :smpp_app_role;
 GRANT SELECT,INSERT ON ugv_smpp.ugv_task_business_object_version TO :smpp_app_role;

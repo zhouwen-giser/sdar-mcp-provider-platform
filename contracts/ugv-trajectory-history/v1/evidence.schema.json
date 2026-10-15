@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "ugv.trajectory-artifact-evidence/1.0"
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "taskId": {
+              "type": "string"
+            },
+            "executionId": {
+              "type": "string"
+            },
+            "providerId": {
+              "type": "string"
+            },
+            "resourceId": {
+              "type": "string"
+            },
+            "operationName": {
+              "type": "string",
+              "const": "vehicle_navigate"
+            },
+            "correlationId": {
+              "type": "string"
+            },
+            "simulationId": {
+              "type": "string"
+            }
+          },
+          "required": ["taskId", "executionId", "providerId", "resourceId", "operationName"],
+          "additionalProperties": false
+        },
+        "artifactId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "artifactGeometrySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "projectionPolicy": {
+          "type": "string",
+          "const": "SAMPLED_GEOMETRY_NOT_FULL_RECEPTION_HISTORY"
+        },
+        "sampleEveryMilliseconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missionBinding": {
+          "type": "object",
+          "properties": {
+            "missionId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "authority": {
+              "type": "string",
+              "const": "PROVIDER_CURRENT_MISSION_AND_UNIQUE_ACTIVE_EXECUTION"
+            },
+            "deviceExecutionOwnership": {
+              "type": "string",
+              "const": "NOT_ATTESTED"
+            }
+          },
+          "required": ["missionId", "authority", "deviceExecutionOwnership"],
+          "additionalProperties": false
+        },
+        "points": {
+          "minItems": 1,
+          "maxItems": 256,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "coordinateIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "coordinate": {
+                "minItems": 2,
+                "maxItems": 3,
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "reception": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "scope": {
+                        "type": "object",
+                        "properties": {
+                          "providerId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "resourceId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "deviceId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "deviceIdentityAuthority": {
+                            "type": "string",
+                            "enum": ["GOWM_DEVICE_BINDING", "PROVIDER_RESOURCE_CONFIGURATION"]
+                          },
+                          "streamId": {
+                            "type": "string",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "sourceSessionKey": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "smppServiceKey": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "bindingId": {
+                            "type": "string",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          }
+                        },
+                        "required": [
+                          "providerId",
+                          "resourceId",
+                          "deviceId",
+                          "deviceIdentityAuthority",
+                          "streamId",
+                          "sourceSessionKey"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "receptionId": {
+                        "type": "string",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "sequence": {
+                        "type": "string",
+                        "pattern": "^(0|[1-9][0-9]{0,18})$"
+                      },
+                      "entryHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "originalMessageSha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "providerReceivedAt": {
+                        "type": "object",
+                        "properties": {
+                          "utc": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          "owner": {
+                            "type": "string",
+                            "const": "PROVIDER_MQTT_MESSAGE_CALLBACK"
+                          },
+                          "clockId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "resolution": {
+                            "type": "string",
+                            "const": "MILLISECOND"
+                          },
+                          "synchronization": {
+                            "type": "string",
+                            "const": "UNVERIFIED"
+                          },
+                          "accuracyBoundMilliseconds": {
+                            "type": "null"
+                          },
+                          "processMonotonicNanoseconds": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          }
+                        },
+                        "required": [
+                          "utc",
+                          "owner",
+                          "clockId",
+                          "resolution",
+                          "synchronization",
+                          "accuracyBoundMilliseconds",
+                          "processMonotonicNanoseconds"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "evidenceClass": {
+                        "type": "string",
+                        "enum": ["SIMULATED", "UNQUALIFIED_SOURCE"]
+                      }
+                    },
+                    "required": [
+                      "scope",
+                      "receptionId",
+                      "sequence",
+                      "entryHash",
+                      "originalMessageSha256",
+                      "providerReceivedAt",
+                      "evidenceClass"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "receptionTimeQuality": {
+                "type": "string",
+                "enum": ["ENTRANCE_RECEIPT_LINKED", "UNKNOWN_LEGACY_OR_UNJOURNALED"]
+              }
+            },
+            "required": ["coordinateIndex", "coordinate", "reception", "receptionTimeQuality"],
+            "additionalProperties": false
+          }
+        },
+        "deviceGenerationHistory": {
+          "type": "string",
+          "const": "UNKNOWN_PRODUCER_BOUNDARIES_NOT_ATTESTED"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "identity",
+        "artifactId",
+        "revision",
+        "artifactGeometrySha256",
+        "projectionPolicy",
+        "sampleEveryMilliseconds",
+        "missionBinding",
+        "points",
+        "deviceGenerationHistory"
+      ],
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "const": "Ed25519"
+        },
+        "keyId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{86}$"
+        }
+      },
+      "required": ["algorithm", "keyId", "value"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["evidence", "signature"],
+  "additionalProperties": false
+}

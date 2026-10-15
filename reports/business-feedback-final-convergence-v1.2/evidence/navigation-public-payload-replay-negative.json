@@ -1,0 +1,31 @@
+{
+  "schema": "smpp.navigation-public-payload-replay-negative/v1",
+  "status": "PASS",
+  "scope": "Intentional offline mutations of copies; original real capture unchanged.",
+  "cases": [
+    {
+      "case": "missing-context",
+      "result": "REJECTED",
+      "reason": "FULL_CONTEXT_REQUIRED",
+      "exitCode": 1
+    },
+    {
+      "case": "missing-notification",
+      "result": "REJECTED",
+      "reason": "ORIGINAL_NOTIFICATION_REQUIRED",
+      "exitCode": 1
+    },
+    {
+      "case": "foreign-task",
+      "result": "REJECTED",
+      "reason": "BUSINESS_EVENT_TASK_BINDING_INVALID",
+      "exitCode": 1
+    },
+    {
+      "case": "old-projection-only-capture",
+      "result": "REJECTED",
+      "reason": "FULL_PUBLIC_PAYLOAD_CAPTURE_REQUIRED",
+      "exitCode": 1
+    }
+  ]
+}

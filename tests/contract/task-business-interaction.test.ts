@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   BusinessActionSchema,
   RequiredInputResponseCommandSchema,
@@ -287,6 +287,41 @@ describe("task business interactions", () => {
         new Date(at),
       ),
     ).not.toThrow();
+  });
+
+  it("reuses identical entry schemas while validating every response and schema mutation", () => {
+    const schema = {
+      $id: "urn:test:business-entry-compiled-cache",
+      type: "object",
+      properties: { decision: { enum: ["continue_observation"] } },
+      required: ["decision"],
+      additionalProperties: false,
+    };
+    const original = structuredClone(schema);
+    const compile = vi.spyOn(Ajv2020.prototype, "compile");
+    const assess = (inputSchema: typeof schema, decision: string) =>
+      assessRequiredInputResponse(
+        { ...pending, inputSchema },
+        { ...inputCommand, result: { action: "accept", value: { decision } } },
+        verifiedUser,
+        3,
+        subjectBinding,
+        new Date(at),
+      );
+    try {
+      for (let i = 0; i < 20; i++)
+        expect(() => assess(structuredClone(schema), "continue_observation")).not.toThrow();
+      expect(compile).toHaveBeenCalledTimes(1);
+      expect(() => assess(schema, "unlisted_decision")).toThrow("INVALID_INPUT_RESPONSE");
+      schema.properties.decision.enum[0] = "changed_decision";
+      expect(() => assess(schema, "continue_observation")).toThrow("INVALID_INPUT_RESPONSE");
+      expect(() => assess(schema, "changed_decision")).not.toThrow();
+      expect(() => assess(original, "continue_observation")).not.toThrow();
+      expect(() => assess(original, "changed_decision")).toThrow("INVALID_INPUT_RESPONSE");
+      expect(compile).toHaveBeenCalledTimes(2);
+    } finally {
+      compile.mockRestore();
+    }
   });
 
   it("maps input cancel to its explicit dismiss policy and preserves request identity", () => {

@@ -396,6 +396,7 @@ function validateImage(name, image, inspection) {
     runtime: ["dist", "migrations", "node_modules", "proto"],
     api: ["dist", "migrations", "node_modules", "packages", "provider-packages"],
     worker: [
+      "contracts",
       "dist",
       "migrations",
       "node_modules",

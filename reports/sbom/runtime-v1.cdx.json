@@ -12,7 +12,7 @@
     "properties": [
       {
         "name": "sdar:pnpm-lock-sha256",
-        "value": "2ed99c9a7e51355be6cdecbb7e9b61505bcc267322c1ff09634e59334865308e"
+        "value": "82c591ab314b4db4c1db2f89e1a83e101b94e177da306c008457d7e661affd5a"
       }
     ]
   },
@@ -62,8 +62,8 @@
     {
       "type": "library",
       "name": "@grpc/grpc-js",
-      "version": "1.14.4",
-      "purl": "pkg:npm/%40grpc/grpc-js@1.14.4"
+      "version": "1.14.5",
+      "purl": "pkg:npm/%40grpc/grpc-js@1.14.5"
     },
     {
       "type": "library",
@@ -86,8 +86,8 @@
     {
       "type": "library",
       "name": "@modelcontextprotocol/sdk",
-      "version": "1.29.0",
-      "purl": "pkg:npm/%40modelcontextprotocol/sdk@1.29.0"
+      "version": "1.31.0",
+      "purl": "pkg:npm/%40modelcontextprotocol/sdk@1.31.0"
     },
     {
       "type": "library",
@@ -571,12 +571,6 @@
     },
     {
       "type": "library",
-      "name": "ajv",
-      "version": "8.20.0",
-      "purl": "pkg:npm/ajv@8.20.0"
-    },
-    {
-      "type": "library",
       "name": "amp-message",
       "version": "0.1.2",
       "purl": "pkg:npm/amp-message@0.1.2"
@@ -604,12 +598,6 @@
       "name": "ansis",
       "version": "4.0.0-node10",
       "purl": "pkg:npm/ansis@4.0.0-node10"
-    },
-    {
-      "type": "library",
-      "name": "anymatch",
-      "version": "3.1.3",
-      "purl": "pkg:npm/anymatch@3.1.3"
     },
     {
       "type": "library",
@@ -656,14 +644,8 @@
     {
       "type": "library",
       "name": "basic-ftp",
-      "version": "5.3.1",
-      "purl": "pkg:npm/basic-ftp@5.3.1"
-    },
-    {
-      "type": "library",
-      "name": "binary-extensions",
-      "version": "2.3.0",
-      "purl": "pkg:npm/binary-extensions@2.3.0"
+      "version": "6.2.1",
+      "purl": "pkg:npm/basic-ftp@6.2.1"
     },
     {
       "type": "library",
@@ -676,12 +658,6 @@
       "name": "body-parser",
       "version": "2.3.0",
       "purl": "pkg:npm/body-parser@2.3.0"
-    },
-    {
-      "type": "library",
-      "name": "braces",
-      "version": "3.0.3",
-      "purl": "pkg:npm/braces@3.0.3"
     },
     {
       "type": "library",
@@ -728,8 +704,8 @@
     {
       "type": "library",
       "name": "chokidar",
-      "version": "3.6.0",
-      "purl": "pkg:npm/chokidar@3.6.0"
+      "version": "4.0.3",
+      "purl": "pkg:npm/chokidar@4.0.3"
     },
     {
       "type": "library",
@@ -1052,32 +1028,26 @@
     {
       "type": "library",
       "name": "fast-uri",
-      "version": "3.1.6",
-      "purl": "pkg:npm/fast-uri@3.1.6"
+      "version": "3.1.7",
+      "purl": "pkg:npm/fast-uri@3.1.7"
     },
     {
       "type": "library",
       "name": "fast-uri",
-      "version": "4.1.3",
-      "purl": "pkg:npm/fast-uri@4.1.3"
+      "version": "4.1.4",
+      "purl": "pkg:npm/fast-uri@4.1.4"
     },
     {
       "type": "library",
       "name": "fastify",
-      "version": "5.10.0",
-      "purl": "pkg:npm/fastify@5.10.0"
+      "version": "5.12.2",
+      "purl": "pkg:npm/fastify@5.12.2"
     },
     {
       "type": "library",
       "name": "fastq",
       "version": "1.20.1",
       "purl": "pkg:npm/fastq@1.20.1"
-    },
-    {
-      "type": "library",
-      "name": "fill-range",
-      "version": "7.1.1",
-      "purl": "pkg:npm/fill-range@7.1.1"
     },
     {
       "type": "library",
@@ -1111,12 +1081,6 @@
     },
     {
       "type": "library",
-      "name": "fsevents",
-      "version": "2.3.3",
-      "purl": "pkg:npm/fsevents@2.3.3"
-    },
-    {
-      "type": "library",
       "name": "function-bind",
       "version": "1.1.2",
       "purl": "pkg:npm/function-bind@1.1.2"
@@ -1144,12 +1108,6 @@
       "name": "get-uri",
       "version": "6.0.5",
       "purl": "pkg:npm/get-uri@6.0.5"
-    },
-    {
-      "type": "library",
-      "name": "glob-parent",
-      "version": "5.1.2",
-      "purl": "pkg:npm/glob-parent@5.1.2"
     },
     {
       "type": "library",
@@ -1255,33 +1213,9 @@
     },
     {
       "type": "library",
-      "name": "is-binary-path",
-      "version": "2.1.0",
-      "purl": "pkg:npm/is-binary-path@2.1.0"
-    },
-    {
-      "type": "library",
-      "name": "is-extglob",
-      "version": "2.1.1",
-      "purl": "pkg:npm/is-extglob@2.1.1"
-    },
-    {
-      "type": "library",
       "name": "is-fullwidth-code-point",
       "version": "3.0.0",
       "purl": "pkg:npm/is-fullwidth-code-point@3.0.0"
-    },
-    {
-      "type": "library",
-      "name": "is-glob",
-      "version": "4.0.3",
-      "purl": "pkg:npm/is-glob@4.0.3"
-    },
-    {
-      "type": "library",
-      "name": "is-number",
-      "version": "7.0.0",
-      "purl": "pkg:npm/is-number@7.0.0"
     },
     {
       "type": "library",
@@ -1310,8 +1244,8 @@
     {
       "type": "library",
       "name": "js-yaml",
-      "version": "4.3.1",
-      "purl": "pkg:npm/js-yaml@4.3.1"
+      "version": "4.3.2",
+      "purl": "pkg:npm/js-yaml@4.3.2"
     },
     {
       "type": "library",
@@ -1447,12 +1381,6 @@
     },
     {
       "type": "library",
-      "name": "normalize-path",
-      "version": "3.0.0",
-      "purl": "pkg:npm/normalize-path@3.0.0"
-    },
-    {
-      "type": "library",
       "name": "number-allocator",
       "version": "1.0.14",
       "purl": "pkg:npm/number-allocator@1.0.14"
@@ -1567,12 +1495,6 @@
     },
     {
       "type": "library",
-      "name": "picomatch",
-      "version": "2.3.2",
-      "purl": "pkg:npm/picomatch@2.3.2"
-    },
-    {
-      "type": "library",
       "name": "pidusage",
       "version": "4.0.1",
       "purl": "pkg:npm/pidusage@4.0.1"
@@ -1657,6 +1579,12 @@
     },
     {
       "type": "library",
+      "name": "process-warning",
+      "version": "5.1.1",
+      "purl": "pkg:npm/process-warning@5.1.1"
+    },
+    {
+      "type": "library",
       "name": "process",
       "version": "0.11.10",
       "purl": "pkg:npm/process@0.11.10"
@@ -1670,8 +1598,8 @@
     {
       "type": "library",
       "name": "proxy-addr",
-      "version": "2.0.7",
-      "purl": "pkg:npm/proxy-addr@2.0.7"
+      "version": "2.0.8",
+      "purl": "pkg:npm/proxy-addr@2.0.8"
     },
     {
       "type": "library",
@@ -1748,8 +1676,8 @@
     {
       "type": "library",
       "name": "readdirp",
-      "version": "3.6.0",
-      "purl": "pkg:npm/readdirp@3.6.0"
+      "version": "4.1.2",
+      "purl": "pkg:npm/readdirp@4.1.2"
     },
     {
       "type": "library",
@@ -1996,12 +1924,6 @@
       "name": "thread-stream",
       "version": "4.2.0",
       "purl": "pkg:npm/thread-stream@4.2.0"
-    },
-    {
-      "type": "library",
-      "name": "to-regex-range",
-      "version": "5.0.1",
-      "purl": "pkg:npm/to-regex-range@5.0.1"
     },
     {
       "type": "library",

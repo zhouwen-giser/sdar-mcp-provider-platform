@@ -1,0 +1,36 @@
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+ ❯ tests/ugv-simulation/device-mcp-contract.test.ts (20 tests | 10 failed) 38ms
+     × publishes a validated real capture during an outage without enabling offline mutations 7ms
+     × keeps the Streamable HTTP NPC client on the resilient shared call path 2ms
+     × reconnects and retries a dropped read response within the configured bound 0ms
+     × reconnects a read after the remote server expires its Streamable HTTP session 0ms
+     × classifies a lost mutating response as uncertain and never retries it 0ms
+     × opens only the failing tool circuit and recovers through a half-open probe 0ms
+     × allows only one in-flight half-open probe 0ms
+     × does not mask an accepted mutation when local audit persistence fails 0ms
+     × records a structured downstream rejection as rejected, not protocol_error 0ms
+     × uses MCP isError as rejection evidence and treats contradictory success as uncertain 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP protocol binding > publishes a validated real capture during an outage without enabling offline mutations
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > keeps the Streamable HTTP NPC client on the resilient shared call path
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > reconnects and retries a dropped read response within the configured bound
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > reconnects a read after the remote server expires its Streamable HTTP session
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > classifies a lost mutating response as uncertain and never retries it
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > opens only the failing tool circuit and recovers through a half-open probe
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > allows only one in-flight half-open probe
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > does not mask an accepted mutation when local audit persistence fails
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > records a structured downstream rejection as rejected, not protocol_error
+ FAIL  tests/ugv-simulation/device-mcp-contract.test.ts > Goal 10 UGV Device MCP transport safety > uses MCP isError as rejection evidence and treats contradictory success as uncertain
+Error: listen EPERM: operation not permitted 127.0.0.1
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  10 failed | 25 passed (35)
+   Start at  10:46:11
+   Duration  2.72s (transform 703ms, setup 0ms, import 2.04s, tests 305ms, environment 0ms)
+

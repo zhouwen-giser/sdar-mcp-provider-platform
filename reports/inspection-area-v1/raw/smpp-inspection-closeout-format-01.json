@@ -1,0 +1,23 @@
+{
+  "name": "smpp-inspection-closeout-format-01",
+  "command": "pnpm",
+  "args": [
+    "exec",
+    "prettier",
+    "--check",
+    "docs/execplans/inspection-area-v1.md",
+    "reports/inspection-area-v1/*.json",
+    "reports/inspection-area-v1/*.md",
+    "reports/inspection-area-v1/*.ts"
+  ],
+  "startedAt": "2026-10-15T08:21:57.229Z",
+  "completedAt": "2026-10-15T08:21:59.095Z",
+  "exitCode": 0,
+  "signal": null,
+  "status": "PASS",
+  "sourceBefore": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+  "sourceAfter": "574ec49adf17ee389e2e5c167394dc887067b9ea92a024a2b052749fceb007c0",
+  "sourceUnchanged": true,
+  "log": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/inspection-area-v1/raw/smpp-inspection-closeout-format-01.log",
+  "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+}

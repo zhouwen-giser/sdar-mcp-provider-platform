@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "revision": "367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+  "images": [
+    {
+      "side": "runtime",
+      "id": "sha256:0d19c47f66823a94e8a4573bbf35969d9841ad7568ab0e9ade4febde5f70710a",
+      "size": 102481634,
+      "tag": "smpp-gowm/runtime:367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+      "checks": ["RUNTIME_DEPENDENCIES_PASS"]
+    },
+    {
+      "side": "adapter",
+      "id": "sha256:7360257db16ff201efd627cbf3c7bc761b2f73abc34ee78321aeff1635de512e",
+      "size": 102615867,
+      "tag": "smpp-gowm/adapter:367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881",
+      "checks": [
+        "RUNTIME_DEPENDENCIES_PASS",
+        "{\"footprint\":{\"mode\":\"estimated\",\"model\":\"isr.airport.eo-range-sector/v1\"},\"adjustments\":{\"navigation\":true,\"reconnaissance\":false},\"decisionMode\":\"user_required\"}"
+      ]
+    }
+  ]
+}

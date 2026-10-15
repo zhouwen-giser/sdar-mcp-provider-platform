@@ -1,3 +1,5 @@
+import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
+import { RECON_CORRELATIONS } from "./recon-execution-correlation.js";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
@@ -23,6 +25,7 @@ const targetFactSchema = z
   .object({
     schemaVersion: z.literal("ugv.recon-target-fact/1"),
     missionId: id,
+    correlation: z.enum(RECON_CORRELATIONS).optional(),
     observationSessionId: id,
     sensorId: id,
     sourceTargetId: id,
@@ -70,7 +73,7 @@ export class TargetBusinessProcessor {
   async apply(execution: ProviderExecution, input: unknown): Promise<"committed" | "duplicate"> {
     const fact = targetFactSchema.parse(input);
     if (
-      execution.operationName !== "vehicle_area_recon" ||
+      !isReconOperation(execution.operationName) ||
       execution.taskBusinessContextExpected !== true ||
       execution.downstreamMissionIds.at(-1) !== fact.missionId ||
       fact.observationSessionId !== fact.missionId ||
@@ -334,6 +337,13 @@ export class TargetBusinessProcessor {
         ...current,
         contextRevision: current.contextRevision + 1,
         activeRefs,
+        summary: {
+          ...current.summary,
+          properties: {
+            ...current.summary.properties,
+            ...(fact.correlation ? { reconTargetCorrelation: fact.correlation } : {}),
+          },
+        },
         artifactRefs: [...current.artifactRefs, ref, ...(trackRef === undefined ? [] : [trackRef])],
         updatedAt:
           compareIsoTimestamps(fact.observedAt, current.updatedAt) > 0

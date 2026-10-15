@@ -1,3 +1,6 @@
+import { isDeepStrictEqual } from "node:util";
+import { buildProjectionEvidence } from "../../trajectory-history/src/projection.js";
+import type { ProjectionEvidence } from "../../trajectory-history/src/contract.js";
 import {
   assertActionTransition,
   assertInterventionTransition,
@@ -53,6 +56,7 @@ interface ScopeState {
   latest: Map<string, number>;
   commands: Map<string, BusinessCommandRecord>;
   contents: Map<string, StoredBusinessContent>;
+  trajectoryEvidence: Map<string, ProjectionEvidence>;
 }
 
 const emptyState = (): ScopeState => ({
@@ -60,12 +64,24 @@ const emptyState = (): ScopeState => ({
   latest: new Map(),
   commands: new Map(),
   contents: new Map(),
+  trajectoryEvidence: new Map(),
 });
 const objectKey = (ref: Pick<BusinessObjectRef, "kind" | "id">): string =>
   JSON.stringify([ref.kind, ref.id]);
 
 /** In-process adapter for component tests and explicitly selected non-live use. */
 export class MemoryTaskBusinessStore implements TaskBusinessStore {
+  getTrajectoryProjectionEvidence(
+    scope: BoundExecutionScope,
+    artifactId: string,
+    revision: number,
+  ) {
+    assertBoundExecutionScope(scope);
+    const value = this.#scopes
+      .get(scope.key())
+      ?.trajectoryEvidence.get(JSON.stringify([artifactId, revision]));
+    return Promise.resolve(value ? structuredClone(value) : undefined);
+  }
   readonly #scopes = new Map<string, ScopeState>();
   readonly #businessEvents: AdapterBusinessEvent[] = [];
 
@@ -283,6 +299,7 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
         latest: new Map(state.latest),
         commands: new Map(state.commands),
         contents: state.contents,
+        trajectoryEvidence: state.trajectoryEvidence,
       };
       let events: AdapterBusinessEvent[] | undefined;
       if (options?.publishInterventionSubmission) {
@@ -366,6 +383,7 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
         latest: new Map(previous.latest),
         commands: new Map(previous.commands),
         contents: new Map(previous.contents),
+        trajectoryEvidence: new Map(previous.trajectoryEvidence),
       };
       const changedKeys = new Set<string>();
       const published: BusinessObjectVersion[] = [];
@@ -462,7 +480,9 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
           claimed.responseHash !== command.responseHash ||
           claimed.createdAt !== command.createdAt ||
           claimed.entryKey !== command.entryKey ||
-          claimed.runtimeCommandSequence !== command.runtimeCommandSequence
+          claimed.runtimeCommandSequence !== command.runtimeCommandSequence ||
+          !isDeepStrictEqual(claimed.responder, command.responder) ||
+          !isDeepStrictEqual(claimed.interventionRequest, command.interventionRequest)
         ) {
           throw new Error("COMMAND_ID_CONFLICT");
         }
@@ -483,6 +503,22 @@ export class MemoryTaskBusinessStore implements TaskBusinessStore {
         if (staged.contents.has(content.handle))
           throw new Error("ARTIFACT_CONTENT_HANDLE_CONFLICT");
         staged.contents.set(content.handle, { ...content, bytes: Uint8Array.from(content.bytes) });
+      }
+      for (const write of changeSet.trajectoryEvidence ?? []) {
+        const version = published.find(
+          (candidate) =>
+            candidate.kind === "artifact" && candidate.value.artifactId === write.artifactId,
+        );
+        if (version?.kind !== "artifact")
+          throw Error("TRAJECTORY_EVIDENCE_ARTIFACT_NOT_IN_CHANGESET");
+        const key = JSON.stringify([write.artifactId, write.revision]);
+        if (staged.trajectoryEvidence.has(key))
+          throw Error("TRAJECTORY_EVIDENCE_DUPLICATE_IN_CHANGESET");
+        const prior = staged.trajectoryEvidence.get(
+          JSON.stringify([write.artifactId, write.revision - 1]),
+        );
+        // Memory mode has no durable source receipt authority and must not accept a fabricated ID.
+        staged.trajectoryEvidence.set(key, buildProjectionEvidence(version.value, write, prior));
       }
       // One synchronous map replacement is the in-memory transaction boundary.
       this.#scopes.set(scope.key(), staged);

@@ -1,0 +1,36 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (6 tests | 6 skipped) 12568ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts [ tests/integration/ugv-inspection-public-task.test.ts ]
+Error: FIXTURE_EXIT: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:127
+  throw Error("ISOLATED_FIXTURE_TIMEOUT");
+        ^
+
+Error: ISOLATED_FIXTURE_TIMEOUT
+    at until (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:127:9)
+    at async <anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:214:1)
+
+Node.js v22.23.2
+
+ ❯ until scripts/inspection/provider-harness.ts:127:9
+ ❯ <anonymous> scripts/inspection/provider-harness.ts:214:1
+ ❯ ChildProcess.<anonymous> tests/integration/ugv-inspection-public-task.test.ts:26:14
+     24|     child.once("exit", () => {
+     25|       clearTimeout(timer);
+     26|       reject(Error("FIXTURE_EXIT: " + failure));
+       |              ^
+     27|     });
+     28|     child.on("message", (value) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  7 passed | 6 skipped (13)
+   Start at  10:51:37
+   Duration  21.98s (transform 1.75s, setup 0ms, import 2.64s, tests 18.97s, environment 0ms)
+

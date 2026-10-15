@@ -1,3 +1,8 @@
+import {
+  isReconOperation,
+  INSPECTION_OPERATION,
+  inspectionReconArguments,
+} from "../../vehicle-provider-core/src/inspection.js";
 import type { UgvDeviceToolName } from "./tool-allowlist.js";
 import { DeviceToolRejectedError, UncertainMutatingDeviceCallError } from "./errors.js";
 import {
@@ -37,6 +42,8 @@ export interface UgvFailedStartMutationCall extends UgvStartMutationCall {
 }
 
 export interface ExecuteUgvStartFlowOptions {
+  /** Inspection-only, durable nonzero identity; the configure receipt must echo it. */
+  requestedMissionId?: string;
   /** Called before a dependent mutating follow-up is dispatched. */
   onMissionId?: (canonicalMissionId: string, numericMissionId: number) => void | Promise<void>;
   /** Persists durable intent and dispatching state immediately before transport. */
@@ -90,6 +97,12 @@ export async function executeUgvStartFlow(
       responseReturned = true;
       downstreamResult = structuredClone(downstream);
       const result = validateUgvToolResult(call.name, downstream, call.arguments);
+      if (
+        phase === "PRIMARY" &&
+        options.requestedMissionId !== undefined &&
+        String(missionIdFromUgvResult(call.name, result)) !== options.requestedMissionId
+      )
+        throw Error("UGV_INSPECTION_MISSION_ID_NOT_ECHOED");
       results.push(structuredClone(result));
       const missionId = missionIdFromUgvResult(call.name, result);
       const canonicalMissionId =
@@ -135,7 +148,15 @@ export async function executeUgvStartFlow(
   };
 
   const initialCalls = startDeviceCalls(operationName, argumentsValue);
-  if (operationName === "vehicle_navigate" || operationName === "vehicle_area_recon") {
+  if (options.requestedMissionId !== undefined) {
+    if (
+      operationName !== "vehicle_inspect_area" ||
+      initialCalls[0]?.name !== "ugv_area_recon_configure"
+    )
+      throw Error("UGV_INSPECTION_MISSION_OPTION_INVALID");
+    initialCalls[0].arguments.mission_id = parseUgvMissionId(options.requestedMissionId);
+  }
+  if (operationName === "vehicle_navigate" || isReconOperation(operationName)) {
     if (options.resumeFromMissionId !== undefined) {
       const missionId = parseUgvMissionId(options.resumeFromMissionId);
       missionIds.push(missionId);
@@ -201,7 +222,14 @@ export function startDeviceCalls(
   argumentsValue: Record<string, unknown>,
 ): DeviceToolCall[] {
   if (operationName === "vehicle_navigate") return [navigate(argumentsValue)];
-  if (operationName === "vehicle_area_recon") return [reconConfigure(argumentsValue)];
+  if (isReconOperation(operationName))
+    return [
+      reconConfigure(
+        operationName === INSPECTION_OPERATION
+          ? inspectionReconArguments(argumentsValue)
+          : argumentsValue,
+      ),
+    ];
   if (operationName === "vehicle_track_target")
     return [
       buildUgvTargetLockCall(
@@ -231,7 +259,7 @@ export function buildUgvStartFollowupCall(
       name: "ugv_mission_control",
       arguments: { action: "start", mission_id: parsed },
     };
-  if (operationName === "vehicle_area_recon")
+  if (isReconOperation(operationName))
     return {
       name: "ugv_area_recon_control",
       arguments: { cmd_type: 1, mission_id: parsed },
@@ -255,7 +283,7 @@ export function controlDeviceCalls(
         },
       },
     ];
-  if (operationName === "vehicle_area_recon")
+  if (isReconOperation(operationName))
     return [
       {
         name: "ugv_area_recon_control",

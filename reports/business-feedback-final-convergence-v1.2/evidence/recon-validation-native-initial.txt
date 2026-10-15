@@ -1,0 +1,39 @@
+$ node scripts/require-env.mjs TEST_DATABASE_URL && vitest run tests/ugv-business/persistence/task-business-postgres.test.ts tests/integration/ugv-task-business-public-postgres.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+ ❯ tests/ugv-business/persistence/task-business-postgres.test.ts (22 tests | 1 failed) 1857ms
+     × commits two business source events with one Context revision and rolls back failed source writes 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-business/persistence/task-business-postgres.test.ts > native PostgreSQL task business Store > commits two business source events with one Context revision and rolls back failed source writes
+AssertionError: expected [ '8', '9' ] to deeply equal [ '1', '2' ]
+
+- Expected
++ Received
+
+  [
+-   "1",
+-   "2",
++   "8",
++   "9",
+  ]
+
+ ❯ tests/ugv-business/persistence/task-business-postgres.test.ts:1866:69
+    1864|         [feedback("test.first", 1), feedback("test.second", 1)],
+    1865|       );
+    1866|       expect(committed.events.map((event) => event.sourceSequence)).to…
+       |                                                                     ^
+    1867|         String(beforeSequence + 1n),
+    1868|         String(beforeSequence + 2n),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 25 passed (26)
+   Start at  09:13:31
+   Duration  11.44s (transform 1.23s, setup 0ms, import 2.66s, tests 8.52s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

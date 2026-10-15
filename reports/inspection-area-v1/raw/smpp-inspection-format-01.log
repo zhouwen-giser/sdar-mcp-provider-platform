@@ -1,0 +1,7 @@
+$ prettier --check .
+Checking formatting...
+[warn] reports/inspection-area-v1/raw/smpp-inspection-typecheck-01.json
+[warn] reports/inspection-area-v1/raw/smpp-inspection-typecheck-02.json
+[warn] reports/inspection-area-v1/raw/smpp-inspection-typecheck-03.json
+[warn] Code style issues found in 3 files. Run Prettier with --write to fix.
+[ELIFECYCLE] Command failed with exit code 1.

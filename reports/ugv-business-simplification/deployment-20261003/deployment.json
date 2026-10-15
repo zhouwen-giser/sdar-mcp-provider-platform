@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "deployedAt": "2026-10-03T15:33:13.148339+00:00",
+  "revision": "0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+  "sourceSha256": "e1e39b0246e6d6a3cfcee82a3e309e1b27f3d8a9a999fa50149ec5052aae5004",
+  "server": "/mnt/data/smpp-v13-20261003-0a4a7c36865d/source/deploy/development/server",
+  "previousServer": "/mnt/data/smpp-business-feedback-20260930/smpp-gowm-gdps-gsap-cbabdfc23eefc58e/smpp/deploy/development/server",
+  "preservedOtherContainers": 78,
+  "sharedBindingPreserved": true,
+  "namedVolumesPreserved": true,
+  "mode": "live",
+  "authMode": "development",
+  "fireEnabled": false,
+  "futureSkewMs": 3000,
+  "containers": [
+    {
+      "name": "/smpp-gowm-runtime-1",
+      "image": "smpp-gowm/runtime:0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+      "imageId": "sha256:718701d2219b7f60b88a87d99fa9eba37e1b0f9913aba24f75230893fb043f15",
+      "id": "a12e436ffb5aef307a4d58bcda534e6dda9bdadd55fe448cfec3cf2de9457ec2"
+    },
+    {
+      "name": "/smpp-gowm-adapter-1",
+      "image": "smpp-gowm/adapter:0a4a7c36865d4c9920a4e65857c0903e9ef12533",
+      "imageId": "sha256:326e993b900c470287374a40160dfff1d3575c3bb5b3f8696938f821611e57f7",
+      "id": "f11a79e42155d463a5fd235f6eea3e086106074051907f3047546ee8c91ecedd"
+    }
+  ]
+}

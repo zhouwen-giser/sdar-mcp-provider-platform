@@ -1,0 +1,98 @@
+{
+  "schema": "smpp.navigation-attempt-history/v1",
+  "attempts": [
+    {
+      "runId": "259b8e36-b606-497e-8035-4117a46376f2",
+      "startedAt": "2026-09-29T06:29:39.674Z",
+      "status": "FAILED",
+      "reason": "PUBLIC_NAVIGATION_PROFILE_MISSING",
+      "completedAt": "2026-09-29T06:29:50.892Z",
+      "attempt": 1,
+      "cleanupStatus": null
+    },
+    {
+      "runId": "3bfb2d86-caa0-41aa-9bd0-51cc25959f8f",
+      "startedAt": "2026-09-29T06:31:22.154Z",
+      "status": "FAILED",
+      "reason": "PUBLIC_TASK_CREATE_FAILED:{\"resultType\":\"complete\",\"content\":[{\"type\":\"text\",\"text\":\"GOWM_BUSINESS_SCOPE_MISMATCH\"}],\"isError\":true,\"structuredContent\":{\"outcome\":\"admission_rejected\",\"reasonCode\":\"GOWM_BUSINESS_SCOPE_MISMATCH\",\"retryable\":false,\"completedAt\":\"2026-09-29T06:31:27.289Z\"}}",
+      "completedAt": "2026-09-29T06:31:27.443Z",
+      "attempt": 2,
+      "cleanupStatus": null
+    },
+    {
+      "runId": "55d1eb8c-a81e-48a5-8a8d-66179b83102f",
+      "startedAt": "2026-09-29T06:34:24.520Z",
+      "status": "FAILED",
+      "taskId": "21ff031c-99ab-4a78-af90-eddfecdc5b8c",
+      "reason": "UGV_INTERVENTION_PROBE_BINDING_MISMATCH",
+      "completedAt": "2026-09-29T06:35:29.022Z",
+      "attempt": 3,
+      "cleanupStatus": "cancelled"
+    },
+    {
+      "runId": "b9a8feeb-5270-432f-8299-60d29bd11d49",
+      "startedAt": "2026-09-29T06:42:36.031Z",
+      "status": "FAILED",
+      "taskId": "eaa51b57-1e93-49e1-a566-4fc09fcd094d",
+      "reason": "UGV_INTERVENTION_PROBE_RPC_FAILED:BUSINESS_INTERVENTION_TASK_NOT_RUNNING",
+      "completedAt": "2026-09-29T06:45:47.048Z",
+      "attempt": 4,
+      "cleanupStatus": "cancelled"
+    },
+    {
+      "runId": "91488f65-94f8-4485-8865-e0427511a91c",
+      "startedAt": "2026-09-29T06:46:29.658Z",
+      "status": "FAILED",
+      "taskId": "6c4be82d-7620-4204-96d6-5969d1c12ced",
+      "reason": "UGV_INTERVENTION_PROBE_RPC_FAILED:TASK_BUSINESS_RUNTIME_FAILURE",
+      "completedAt": "2026-09-29T06:50:40.452Z",
+      "attempt": 5,
+      "cleanupStatus": "cancelled"
+    },
+    {
+      "attempt": 6,
+      "status": "FAILED_BEFORE_TASK",
+      "evidence": "local diagnostic log bff-navigation-public-6.log"
+    },
+    {
+      "runId": "8fe0742a-555a-41bf-bd89-3418ea8e5c92",
+      "startedAt": "2026-09-29T06:53:37.661Z",
+      "status": "FAILED",
+      "taskId": "e92cd38b-577e-4b3b-ac0b-8a24aee3413c",
+      "reason": "PUBLIC_TASK_TERMINAL:failed",
+      "completedAt": "2026-09-29T06:54:30.346Z",
+      "attempt": 7,
+      "cleanupStatus": "failed"
+    },
+    {
+      "runId": "84734dd2-1c95-4240-8273-8d847db40f32",
+      "startedAt": "2026-09-29T06:58:29.193Z",
+      "status": "FAILED",
+      "taskId": "1c81fd3d-33fc-4178-a488-0a8be9da7dc6",
+      "reason": "PUBLIC_SSE_NOT_QUALIFIED",
+      "completedAt": "2026-09-29T06:59:10.227Z",
+      "attempt": 8,
+      "cleanupStatus": "completed"
+    },
+    {
+      "runId": "d5b58ac6-807d-40dd-9684-2c61f6f2ccee",
+      "startedAt": "2026-09-29T07:01:35.920Z",
+      "status": "FAILED",
+      "taskId": "2ca2f327-a506-4ca8-821e-85bfffe84b79",
+      "reason": "BUSINESS_PROBE_REFRESH_LIMIT",
+      "completedAt": "2026-09-29T07:02:02.522Z",
+      "attempt": 9,
+      "cleanupStatus": "cancelled"
+    },
+    {
+      "runId": "2e308e87-ffc8-41ce-b627-20630b0834e6",
+      "startedAt": "2026-09-29T07:04:33.192Z",
+      "status": "PUBLIC_NAVIGATION_AND_PROCESS_RESTART_PASS",
+      "taskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+      "completedAt": "2026-09-29T07:05:38.174Z",
+      "attempt": 10,
+      "cleanupStatus": null
+    }
+  ],
+  "notes": "Failures retained separately. Early source-only and contract tests used the first disposable installation and produced events without public Task mappings. Final public acceptance uses a separate complete installation; no source-state resets or history deletion were used to clear those barriers."
+}

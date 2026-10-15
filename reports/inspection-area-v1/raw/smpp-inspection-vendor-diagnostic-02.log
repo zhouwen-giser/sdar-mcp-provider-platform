@@ -1,0 +1,43 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+stdout | reports/inspection-area-v1/debug/vendor-managed.test.ts > vendor_managed UGV Provider platform integration > qualifies one UGV task/execution with idempotency, terminal, evidence and Mission closure
+VENDOR_NAVIGATION_ACTUAL {"first":{"kind":"result","result":{"content":[{"type":"text","text":"UGV_EXECUTION_MODE_MISMATCH"}],"isError":true,"structuredContent":{"outcome":"admission_rejected","reasonCode":"UGV_EXECUTION_MODE_MISMATCH","retryable":false,"completedAt":"2026-10-14T13:24:05.770Z"}}},"replay":{"kind":"result","result":{"content":[{"text":"UGV_EXECUTION_MODE_MISMATCH","type":"text"}],"isError":true,"structuredContent":{"outcome":"admission_rejected","retryable":false,"reasonCode":"UGV_EXECUTION_MODE_MISMATCH","completedAt":"2026-10-14T13:24:05.770Z"}}}}
+
+ ❯ reports/inspection-area-v1/debug/vendor-managed.test.ts (5 tests | 2 failed) 2837ms
+     × qualifies one UGV task/execution with idempotency, terminal, evidence and Mission closure 25ms
+     × recovers an after-commit response loss by reconciling the original UGV execution 34ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  reports/inspection-area-v1/debug/vendor-managed.test.ts > vendor_managed UGV Provider platform integration > qualifies one UGV task/execution with idempotency, terminal, evidence and Mission closure
+Error: UGV_TASK_REQUIRED
+ ❯ reports/inspection-area-v1/debug/vendor-managed.test.ts:334:64
+    332|     );
+    333|     console.log("VENDOR_NAVIGATION_ACTUAL", JSON.stringify({first,repl…
+    334|     if (first.kind !== "task" || replay.kind !== "task") throw new Err…
+       |                                                                ^
+    335|     const taskId = String(first.task.taskId);
+    336|     expect(replay.task.taskId).toBe(taskId);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  reports/inspection-area-v1/debug/vendor-managed.test.ts > vendor_managed UGV Provider platform integration > recovers an after-commit response loss by reconciling the original UGV execution
+Error: ADAPTER_RECONCILE_NOT_FOUND_UNCERTAIN
+ ❯ TaskEngine.#executeOperation packages/task-engine/src/engine.ts:423:17
+    421|         );
+    422|         if (existingAdmission?.state === "UNCERTAIN") {
+    423|           throw new Error("ADAPTER_RECONCILE_NOT_FOUND_UNCERTAIN");
+       |                 ^
+    424|         }
+    425|       } else {
+ ❯ reports/inspection-area-v1/debug/vendor-managed.test.ts:460:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  21:23:58
+   Duration  7.41s (transform 3.02s, setup 0ms, import 4.39s, tests 2.84s, environment 0ms)
+

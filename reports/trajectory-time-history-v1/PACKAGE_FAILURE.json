@@ -1,0 +1,19 @@
+{
+  "status": "FAILED_NOT_DELIVERED",
+  "sourceCommit": "784763c2fb7c5b5740c229e1b0f75673771a587a",
+  "command": [
+    "node",
+    "scripts/trajectory-history/create-delivery.mjs",
+    "784763c2fb7c5b5740c229e1b0f75673771a587a"
+  ],
+  "exitCode": 1,
+  "sourceChangedDuringRun": false,
+  "rawLog": "reports/trajectory-time-history-v1/raw/m3-package-export-ignore-01.log",
+  "rawLogSha256": "f30a2d03f1f8c6e130ec1ad3f4848139b8603ca524e0a552845e4e4f6d8d5c2d",
+  "missingFrozenSourceFiles": [".env.example"],
+  "changedSourceFiles": [],
+  "extraSourceFiles": [],
+  "failedArchive": "artifacts/trajectory-history/failed/smpp-trajectory-history-784763c2fb7c-export-ignore.tar.gz",
+  "failedArchiveSha256": "f9df62db7843f8e6dc65b958e01b6adb4ca03c4dd4f99694e4c2eebc61368d0b",
+  "resolution": "Export every frozen input explicitly; extracted-byte audit remains mandatory."
+}

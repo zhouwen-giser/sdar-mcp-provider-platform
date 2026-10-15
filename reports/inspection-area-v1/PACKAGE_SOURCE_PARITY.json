@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "requiredRuntimeEntries": 1014,
+  "sourceRevision": "acbf8b5396f31da1452988f5aca8924b4318500e-worktree-f0c1ae3808e3",
+  "sourceRoot": "/tmp/smpp-inspection-v1-20261014/deployment/smpp-source-acbf8b5396f3",
+  "sourceArchiveSha256": "4025e12efb513253806fec14c273f9ea88ca1dbeb7c7447b30d2e0778a7ba041",
+  "scope": [
+    "apps",
+    "packages",
+    "proto",
+    "migrations",
+    "schemas",
+    "scripts",
+    "contracts",
+    "Dockerfile",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml"
+  ],
+  "metadataAndDeploymentExamplesExcludedFromComparison": true
+}

@@ -22,7 +22,10 @@ export function loadUgvProviderConfig(env: NodeJS.ProcessEnv = process.env) {
         JSON.parse(readFileSync(config.UGV_TASK_BUSINESS_PROFILE_PATH, "utf8")) as unknown,
       )
     : DISABLED_UGV_TASK_BUSINESS_SETTINGS;
-  assertUgvTaskBusinessSettingsSupported(taskBusinessSettings);
+  assertUgvTaskBusinessSettingsSupported(
+    taskBusinessSettings,
+    config.UGV_NAVIGATION_PLANNER_MODE === "isr_airport",
+  );
   return { ...config, taskBusinessSettings, ...(gowmStorage ? { gowmStorage } : {}) };
 }
 export type UgvProviderConfig = ReturnType<typeof loadUgvProviderConfig>;

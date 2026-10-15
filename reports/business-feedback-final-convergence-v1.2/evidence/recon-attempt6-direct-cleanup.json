@@ -1,0 +1,75 @@
+{
+  "at": "2026-09-30T02:02:16.262Z",
+  "purpose": "cleanup failed public qualification; mission from persisted accepted journal; not business acceptance",
+  "calls": [
+    {
+      "at": "2026-09-30T02:02:16.405Z",
+      "name": "ugv_area_recon_control",
+      "args": {
+        "cmd_type": 4,
+        "mission_id": 47576
+      },
+      "value": {
+        "mission_id": 47576,
+        "state": 3,
+        "state_label": "已终止",
+        "message": "已停止，云台回到初始角度",
+        "error_code": 0,
+        "cmd_res": 1
+      }
+    },
+    {
+      "at": "2026-09-30T02:02:16.411Z",
+      "name": "ugv_area_recon_get_status",
+      "args": {},
+      "value": {
+        "status": 9,
+        "status_label": "被中断",
+        "scan_mode": 1,
+        "scan_mode_label": "区域侦察",
+        "scan_pitch": 0,
+        "out_of_range": false,
+        "scan_num": 1,
+        "progress": 100,
+        "coverage": 100,
+        "coverage_covered": 424,
+        "coverage_total": 424,
+        "coverage_incomplete": true,
+        "coverage_reason": "仍有 10 处未被视场扫到，覆盖率 97%",
+        "eo_fov": 120,
+        "camera_fault": false,
+        "work_mode": 1,
+        "recon_type": 1,
+        "load_status": 2,
+        "load_status_label": "就绪",
+        "lock": {
+          "stage": 1,
+          "target_id": 0,
+          "role_name": "",
+          "duration_sec": 0
+        },
+        "attack_ready": false,
+        "last_cmd_ack": {
+          "seq": 601005,
+          "ok": true,
+          "message": "已停止，云台回到初始角度"
+        },
+        "region": {
+          "type": 5,
+          "points": [
+            [-238.0867632009165, -142.02952979991338],
+            [-241.5031740012131, -94.57249700007786],
+            [-180.01668520135695, -88.99022700003393],
+            [-155.422757600046, -147.61290520004877]
+          ]
+        },
+        "online": true,
+        "gimbal": {
+          "yaw": 0,
+          "pitch": 0,
+          "zoom": 1
+        }
+      }
+    }
+  ]
+}

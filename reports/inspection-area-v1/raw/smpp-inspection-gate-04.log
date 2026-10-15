@@ -1,0 +1,14 @@
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm proto:check && pnpm audit:dependencies && pnpm sbom:check && pnpm deployment:check && pnpm container:check && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm test:recovery && pnpm test:security && pnpm test:e2e && pnpm test:conformance && pnpm capacity:baseline
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts
+  37:29  error  `url` is deprecated. Use `z.url()` instead                                                                           @typescript-eslint/no-deprecated
+  42:3   error  Unnecessary conditional, comparison is always false, since `"inspection-area-v1" !== "inspection-area-v1"` is false  @typescript-eslint/no-unnecessary-condition
+
+✖ 2 problems (2 errors, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.

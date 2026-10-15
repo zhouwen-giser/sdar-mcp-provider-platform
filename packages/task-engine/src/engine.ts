@@ -30,6 +30,7 @@ import {
   InvalidParamsError,
   CommandInProgressError,
   isTerminalState,
+  isRuntimeBusinessResponder,
   systemClock,
   TechnicalExecutionError,
   unknownAvailability,
@@ -49,6 +50,7 @@ import type {
 } from "../../persistence-postgres/src/index.js";
 import { OperationSnapshotRepository } from "../../persistence-postgres/src/index.js";
 import {
+  inspectionStoppedTransition,
   sanitizedAdapterResultPayload,
   synchronousResult,
   validatedSnapshotTransition,
@@ -57,6 +59,7 @@ import { mapTaskToDetailedTask, type DetailedTaskProjection } from "./detailed-t
 import { diagnosticResponseLossLeaseId, type TaskAdapterGateway } from "./diagnostic-gateway.js";
 import {
   RuntimeInterventionCommandSchema,
+  taskBusinessResponder,
   type RuntimeInterventionCommand,
 } from "../../vehicle-provider-core/src/task-business-interaction.js";
 
@@ -1072,7 +1075,7 @@ export class TaskEngine {
       throw new InvalidParamsError("BUSINESS_EXECUTION_ID_MISMATCH");
     }
     const verified = authorization.verifiedResponder;
-    if (!verified?.actorId || !["jwt_hs256", "trusted_headers"].includes(verified.source)) {
+    if (!isRuntimeBusinessResponder(verified)) {
       throw new CapabilityNotSupportedError("RESPONDER_NOT_AUTHORIZED");
     }
     const semantic = Object.fromEntries(
@@ -1087,11 +1090,7 @@ export class TaskEngine {
         commandId: command.commandId,
         semanticHash,
         command,
-        responder: {
-          source: "runtime_authorization_context",
-          actorType: verified.actorType,
-          verified: true,
-        },
+        responder: taskBusinessResponder(verified),
         verifiedActorId: verified.actorId,
       },
     );
@@ -1337,11 +1336,8 @@ function assertBusinessInputResponder(
     throw new AdapterContractError("BUSINESS_INPUT_METADATA_INVALID");
   const responder = authorization.verifiedResponder;
   if (
-    responder === undefined ||
-    responder.actorType !== fields.requiredResponder ||
-    typeof responder.actorId !== "string" ||
-    responder.actorId.length === 0 ||
-    !["jwt_hs256", "trusted_headers"].includes(responder.source)
+    !isRuntimeBusinessResponder(responder) ||
+    (responder.source !== "development" && responder.actorType !== fields.requiredResponder)
   )
     throw new CapabilityNotSupportedError("RESPONDER_NOT_AUTHORIZED");
 }
@@ -1619,22 +1615,28 @@ function stopTransition(
   snapshot: ExecutionSnapshot,
   completedAt: Date,
 ): SnapshotTransition {
+  const retain = (transition: SnapshotTransition) =>
+    inspectionStoppedTransition(operation, snapshot, transition);
   if (snapshot.state === "CANCELLED" && task.stopReason === "DEADLINE_REACHED") {
-    return deadlineReached(snapshot.message, completedAt);
+    return retain(deadlineReached(snapshot.message, completedAt));
   }
   if (snapshot.state === "CANCELLED" && task.stopReason === "START_WINDOW_MISSED") {
-    return startWindowMissedTransition(
-      snapshot.message,
-      completedAt,
-      sanitizedAdapterResultPayload(snapshot),
+    return retain(
+      startWindowMissedTransition(
+        snapshot.message,
+        completedAt,
+        sanitizedAdapterResultPayload(snapshot),
+      ),
     );
   }
   if (task.stopReason === "START_WINDOW_MISSED" && isTerminalTaskState(snapshot.state)) {
-    return startWindowMissedWithAdapterResultTransition(
-      snapshot,
-      task,
-      completedAt,
-      "START_WINDOW_MISSED",
+    return retain(
+      startWindowMissedWithAdapterResultTransition(
+        snapshot,
+        task,
+        completedAt,
+        "START_WINDOW_MISSED",
+      ),
     );
   }
   return validatedSnapshotTransition(operation, snapshot);

@@ -1,0 +1,140 @@
+{
+  "workflow": "V-NAV",
+  "status": "PUBLIC_RUNTIME_POSITIVE_PASS",
+  "taskId": "8a3d2d0b-5cf7-4e07-96a8-193b3cad6267",
+  "sceneInstanceId": "smpp-bff-test-f286a981-3bce-417f-a71d-df662736cfc8",
+  "candidateSourceFingerprintSha256": "422cf1cfda8fb51fd4ad3babcd59bb5d684cf64879475ba41fea6c3799dbb6db",
+  "scope": "Local production Runtime and Provider, actual software planner and simulator, disposable complete GOWM SMPP installation/application role.",
+  "routes": [
+    {
+      "missionId": "47564",
+      "candidateRef": {
+        "kind": "artifact",
+        "id": "route-47564",
+        "revision": 1
+      },
+      "adoptedRef": {
+        "kind": "artifact",
+        "id": "route-47564",
+        "revision": 2
+      },
+      "geometrySha256": "944e4fc9aa5cd6e1d757d8f7ac96f1b23240436f8563f6ad29a69e43e9801c5f",
+      "pointCount": 14,
+      "source": {
+        "method": "isr.airport.dashboard.road-planner/v1",
+        "producer": "device_planner",
+        "sourceRecordRef": "95bb2fd71e7e5aaf42834fd4457b0f257a35eac6f0a14c80a8193b1da235c713",
+        "sourceRevision": "1"
+      }
+    },
+    {
+      "missionId": "47565",
+      "candidateRef": {
+        "kind": "artifact",
+        "id": "route-47565",
+        "revision": 1
+      },
+      "adoptedRef": {
+        "kind": "artifact",
+        "id": "route-47565",
+        "revision": 2
+      },
+      "geometrySha256": "525d6ef6808425bbe57750765644e23ad4ce446da500c02a0f4cd6127615a6c5",
+      "pointCount": 7,
+      "source": {
+        "method": "isr.airport.dashboard.road-planner/v1",
+        "producer": "device_planner",
+        "sourceRecordRef": "0b986ddc6d92ee19baeabfccc9b3757124903387def263ee63a0419f8380ef7c",
+        "sourceRevision": "1"
+      }
+    },
+    {
+      "missionId": "47566",
+      "candidateRef": {
+        "kind": "artifact",
+        "id": "route-47566",
+        "revision": 1
+      },
+      "adoptedRef": {
+        "kind": "artifact",
+        "id": "route-47566",
+        "revision": 2
+      },
+      "geometrySha256": "5676650734f5e73ae26de51ac816c2a2318e94951655406b0685e577d465f201",
+      "pointCount": 3,
+      "source": {
+        "method": "isr.airport.dashboard.road-planner/v1",
+        "producer": "device_planner",
+        "sourceRecordRef": "5d152619d83557e7b1dbd9b22d0df747ee0a50e29a5227d5133ccbc4db318284",
+        "sourceRevision": "1"
+      }
+    }
+  ],
+  "routeAndTrajectoryDistinct": true,
+  "trajectoryObjectVersions": 7,
+  "effectivePlanRevisions": [1, 2, 3],
+  "finalTaskStatus": "completed",
+  "finalContextPhase": {
+    "code": "execution.succeeded",
+    "since": "2026-09-29T07:05:21.551Z",
+    "reasonCode": "UGV_DEVICE_TASK_COMPLETED"
+  },
+  "finalResult": {
+    "status": "completed",
+    "routeRef": {
+      "id": "route-47566",
+      "kind": "artifact",
+      "revision": 2
+    },
+    "missionId": "47566",
+    "observedAt": "2026-09-29T07:05:21.541Z",
+    "resourceId": "vehicle:qualification-a",
+    "destination": {
+      "latitude": 29.72041222,
+      "longitude": 106.81312856
+    },
+    "endPosition": {
+      "crs": "EPSG:4326",
+      "type": "geodetic",
+      "latitude": 29.720405,
+      "longitude": 106.813116
+    },
+    "missionState": 4,
+    "finalSpeedKmh": 0,
+    "startPosition": {
+      "crs": "EPSG:4326",
+      "type": "geodetic",
+      "latitude": 29.720403,
+      "longitude": 106.812734
+    },
+    "finalHeadingDeg": 89.45646667480469,
+    "snapshotRevision": "19805ea132da070c7b03179e2cbf83451e6dbe0c65e784d9ebb0ccdfc02c2a30",
+    "positionAuthority": {
+      "field": "chassis.position.geodetic",
+      "topic": "status/ugv1",
+      "cursor": "oc1.eyJ2ZXJzaW9uIjoxLCJraW5kIjoiZmllbGQiLCJmaWVsZCI6ImNoYXNzaXMucG9zaXRpb24uZ2VvZGV0aWMiLCJ0b3BpYyI6InN0YXR1cy91Z3YxIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMDktMjlUMDc6MDU6MjEuNTM5WiIsInRpbWVBdXRob3JpdHkiOiJpbmdlc3QiLCJpbmdlc3RTZXF1ZW5jZSI6NjE4OCwicGF5bG9hZEhhc2giOiI1NWIyZGMwMGEyNzExOWFhNjU1MzNiMjI1Y2FiNzcyNTBjODZlZjA2YTExZThjYTg1ZmY2MmFmZDU3YWE1NjYzIn0",
+      "observedAt": "2026-09-29T07:05:21.539Z",
+      "timeAuthority": "ingest"
+    },
+    "correlationStrength": "STRICT_CORRELATED",
+    "destinationDistanceM": 1.4545230713233517,
+    "observationAuthority": "post_dispatch",
+    "effectivePlanRevision": 3,
+    "observedDisplacementM": 36.88956690366575,
+    "stationaryAtCompletion": true
+  },
+  "publicSseEvents": {
+    "initial": 15,
+    "recovered": 39
+  },
+  "evidence": [
+    "evidence/navigation-public-restart.json",
+    "evidence/navigation-public-handoff/manifest.json"
+  ],
+  "excludedClaims": [
+    "external SDAR",
+    "remote deployment",
+    "all four workflows",
+    "same-candidate final Goal qualification"
+  ]
+}

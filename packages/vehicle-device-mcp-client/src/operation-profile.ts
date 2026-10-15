@@ -110,6 +110,28 @@ export const UGV_OPERATION_PROFILES = [
     capabilityPolicy: { deviceRequirement: "required", advertisedByDefault: true },
     riskLevel: "MEDIUM",
   },
+  {
+    operationName: "vehicle_inspect_area",
+    execution: "TASK_REQUIRED",
+    tracks: ["eo"],
+    variants: [selectorOnlyVariant("area", ["scanMode"], ["area", 1], true)],
+    phases: {
+      start: requiredTools(
+        "ugv_area_recon_configure",
+        "ugv_area_recon_control",
+        "ugv_area_recon_get_status",
+      ),
+      pause: requiredTools("ugv_area_recon_control"),
+      resume: requiredTools("ugv_area_recon_control"),
+      cancel: requiredTools("ugv_area_recon_control"),
+      read: requiredTools("ugv_area_recon_control"),
+    },
+    resultPolicy: resultPolicy("ugv.area_recon.v1"),
+    observationPolicy: { requiredFreshnessDomains: ["payload"] },
+    timeoutPolicy: { authority: "runtime_task" },
+    capabilityPolicy: { deviceRequirement: "required", advertisedByDefault: false },
+    riskLevel: "MEDIUM",
+  },
   taskOperation({
     operationName: "vehicle_track_target",
     tracks: ["eo"],

@@ -1,0 +1,73 @@
+{
+  "schema": "smpp.navigation-source-package-check/v1",
+  "status": "PASS",
+  "recordedAt": "2026-09-29T07:20:25.056101+00:00",
+  "archive": "/tmp/bff-navigation-package-final/smpp-sz-gowm-5a2482aa5df2-3a6892c45b36.tar.gz",
+  "archiveSha256": "3106cbedd04e30fd54c12074fa77c86798284083eb4d996cdc174a2591bafe49",
+  "kind": "source package; not a Docker image or united deployment release",
+  "remoteDeployed": false,
+  "checkedFiles": [
+    {
+      "path": "deploy/gowm-task-business/install.mjs",
+      "sha256": "3cbcbb1e9e03ae13f2de31d0a88befb85683e65b51fd143041614723e28c2866",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "deploy/gowm-task-business/install.d.mts",
+      "sha256": "3ee514da3294488f2ab41dbb68b3f19f6349043edc6388096b69e4a2b828257c",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "deploy/development/server/prepare-gowm.mjs",
+      "sha256": "7f72dd0a686e60faa22220e09393224a252cd6c8f77446269f7467379ff9994f",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/main.ts",
+      "sha256": "d484a8065452420a28bd42425ea6fb85257839b612b95d28e18caba867907fc5",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "apps/ugv-provider-adapter/src/navigation-planner.ts",
+      "sha256": "34e383b07d1ae0a0bef6873a5cf943340f890687be9e3570ab1dc74576aa8464",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "examples/gowm-shared-storage/task-business-airport-navigation.example.json",
+      "sha256": "f86bb359203529c0e37a75ee1437d325b6bf9f438b1f1a0905daa016e0c16a15",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "deploy/development/server/.env.example",
+      "sha256": "4b44fd4519b7669c68d153760068dfa0528d7077f0dfe1e658be8ab6190427ea",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business-runtime.json",
+      "sha256": "83baa6cac5b1ca446bdbc3250a68c94943f39a733a83e3520c5d168fab58f1af",
+      "matchesWorkspace": true
+    },
+    {
+      "path": "contracts/gowm-shared-storage/current/task-business.json",
+      "sha256": "1be2997f512907d75851eb01fb5bf05d811b2f14098979acd6f0a8fedd66c169",
+      "matchesWorkspace": true
+    }
+  ],
+  "migrations": [
+    {
+      "path": "deploy/gowm-task-business/027_task_business_intervention_command.sql",
+      "family": "SMPP_RUNTIME",
+      "sha256": "0acf7444a7acfbe295fc809804a7a83d247411c4b97fc2db6cd704291205d624",
+      "matchesContract": true
+    },
+    {
+      "path": "deploy/gowm-task-business/030_task_business_versions.sql",
+      "family": "UGV_PROVIDER",
+      "sha256": "ed4b9491616b61dbf31668086a20f63a0379c75f746382653f76a3879f1be95b",
+      "matchesContract": true
+    }
+  ],
+  "defaultFireEnabled": false,
+  "excludedPrivateAndGeneratedDirectories": true,
+  "candidateHashesVerified": 65
+}

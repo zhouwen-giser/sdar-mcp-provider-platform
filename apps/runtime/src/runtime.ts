@@ -1346,11 +1346,16 @@ function requiredOutboxWebhookUrl(config: RuntimeConfig): string {
   return config.OUTBOX_WEBHOOK_URL;
 }
 
-async function updateOperationalGauges(
+const operationalGaugeQueries = new WeakSet<Pool>();
+
+export async function updateOperationalGauges(
   pool: Pool,
-  telemetry: ProviderTelemetry | undefined,
+  telemetry: Pick<ProviderTelemetry, "metric"> | undefined,
 ): Promise<void> {
-  if (telemetry === undefined) return;
+  // A slow statistics query must not queue another query on every scheduler
+  // tick and exhaust the same pool used by Task admission and control.
+  if (telemetry === undefined || operationalGaugeQueries.has(pool)) return;
+  operationalGaugeQueries.add(pool);
   try {
     const counts = await pool.query<{
       active_tasks: string;
@@ -1390,6 +1395,8 @@ async function updateOperationalGauges(
     );
   } catch {
     // Metrics collection is best effort and never affects Runtime readiness or Task state.
+  } finally {
+    operationalGaugeQueries.delete(pool);
   }
 }
 

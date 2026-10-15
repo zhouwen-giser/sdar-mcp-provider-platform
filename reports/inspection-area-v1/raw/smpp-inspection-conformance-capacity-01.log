@@ -1,0 +1,40 @@
+$ node scripts/require-env.mjs TEST_DATABASE_URL && pnpm build && node scripts/run-conformance.mjs
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+Collecting grpcio==1.76.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 1))
+  Using cached grpcio-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.7 kB)
+Collecting grpcio-tools==1.76.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 2))
+  Using cached grpcio_tools-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (5.3 kB)
+Collecting protobuf==6.33.0 (from -r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 3))
+  Using cached protobuf-6.33.0-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+Collecting typing-extensions~=4.12 (from grpcio==1.76.0->-r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 1))
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting setuptools (from grpcio-tools==1.76.0->-r /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/examples/mock-adapter-python/requirements.txt (line 2))
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Using cached grpcio-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (6.6 MB)
+Using cached grpcio_tools-1.76.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.7 MB)
+Using cached protobuf-6.33.0-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Installing collected packages: typing-extensions, setuptools, protobuf, grpcio, grpcio-tools
+
+Successfully installed grpcio-1.76.0 grpcio-tools-1.76.0 protobuf-6.33.0 setuptools-84.0.0 typing-extensions-4.16.0
+INFO:root:Python mock Adapter listening on 127.0.0.1:43465
+INFO:root:Python mock Adapter listening on 127.0.0.1:34349
+Expanded Adapter conformance PASS; Runtime Profile scope is partial and resource safety is not claimed (typescript, python)
+$ node scripts/require-env.mjs TEST_DATABASE_URL && pnpm build && node scripts/run-capacity-baseline.mjs
+$ pnpm proto:generate && tsc -p tsconfig.build.json
+$ node scripts/generate-proto.mjs
+[capacity] initialize
+[capacity] slow-adapter-pool
+[capacity] slow-adapter-side-effect-observed
+[capacity] slow-adapter-database-query-complete
+[capacity] slow-adapter-response-complete
+[capacity] workloads
+[capacity] dispatcher
+[capacity] scheduled-scan
+[capacity] watchdog-scan
+[capacity] recovery-candidate-scans
+[capacity] durable-growth-and-image
+[capacity] complete
+{"version":"2.0.0-rc.1","generatedAt":"2026-10-13T21:19:07.802Z","environment":{"node":"v22.23.2","platform":"linux/x64","cpuLogicalCount":48,"memoryBytes":168221470720,"database":"TEST_DATABASE_URL target (credentials redacted)","topology":"two Runtime replicas, shared PostgreSQL, single TypeScript Adapter"},"workloads":{"synchronousTool":{"iterations":100,"durationMs":773.2235460000011,"throughputPerSecond":129.32870515559787,"latencyMs":{"p50":6.913358000001608,"p95":12.22857699999804,"p99":20.45903299999918,"max":40.96460699999807}},"concurrentTaskAdmission":{"tasks":1000,"runtimeReplicas":2,"durationMs":40940.890135,"tasksPerSecond":24.425458183800185},"slowAdapterDatabaseAvailability":{"adapterResponseDelayMs":15000,"databaseQueryDurationMs":0.6994389999999839,"databaseQueryCompletedBeforeAdapterResponse":true,"taskId":"b2077df0-2a5e-4f28-891f-c344fcb62830"},"durableCommandDispatcher":{"commands":500,"runtimeReplicas":2,"duplicateAdapterSideEffects":0,"durationMs":48118.716738999996,"commandsPerSecond":10.390967047438993,"result":{"claimed":484,"acknowledged":484,"retried":0,"rejected":0,"exhausted":0,"terminal":0,"durableAcknowledged":500}},"scheduledScan":{"futureTasks":32,"durationMs":13.03431200000341,"result":{"started":0,"missed":0,"deferred":0,"deadlineStops":0,"watchdogStops":0,"reconciled":0}},"watchdogScan":{"overdueTasks":16,"durationMs":753.1067290000065,"result":{"watchdogStops":16,"reconciled":0,"durableStopRequests":16}},"recoveryCandidateScans":{"100":{"requested":100,"returned":100,"durationMs":6.599549000005936,"candidatesPerSecond":15152.550575790869},"500":{"requested":500,"returned":500,"durationMs":26.748091000001295,"candidatesPerSecond":18692.92279587264},"1000":{"requested":1000,"returned":1000,"durationMs":41.78508700001112,"candidatesPerSecond":23931.98319773114}},"observationOutboxGrowth":{"observations":{"before":{"rows":0,"bytes":32768},"after":{"rows":1581,"bytes":565248},"rows":1581,"bytes":532480},"outbox":{"before":{"rows":0,"bytes":32768},"after":{"rows":3597,"bytes":6373376},"rows":3597,"bytes":6340608}},"runtimeImage":{"schemaVersion":1,"measurementEnvironment":"linux/x64 Docker Engine","image":"sdar-runtime:v2-audit-primary","base":"node:22-bookworm-slim","sizeBytes":103149095,"sizeLimitEnforced":false,"user":"node","layers":11,"filesystemHash":"16916eebe9e24b9edb3632138f724c5594805f77465415ba597925798b185d9e","frozenLockfile":true,"productionDependenciesOnly":true,"containsTestsDocsOrReferences":false,"containsTypescriptOrVitest":false,"containsProtoAndMigrations":true,"reproducibleFilesystemAndConfig":true}},"interpretation":{"productionSlo":false,"recoveryScope":"Measures the real PostgreSQL candidate-selection/materialization path; Adapter reconciliation latency is resource-specific.","thresholds":"Only correctness/regression bounds are enforced: pool progress under 500ms, exact claims/counts, positive durable growth, and non-root reproducible image policy; image size is recorded without a fixed ceiling."}}

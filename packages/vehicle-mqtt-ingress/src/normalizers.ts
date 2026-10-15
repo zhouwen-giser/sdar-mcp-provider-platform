@@ -41,6 +41,7 @@ function normalizeVehicleMqttObservation(
   topic: UgvMqttTopic,
   value: unknown,
   object: Record<string, unknown> | undefined,
+  preserveUnknownCodes = true,
 ): NormalizedMqttObservation {
   const base = observationBase(value, object, topic === "/ugv/status");
   switch (topic) {
@@ -84,7 +85,7 @@ function normalizeVehicleMqttObservation(
       };
     case "status/ugv":
     case "/ugv/status":
-      return composite(object, base);
+      return composite(object, base, preserveUnknownCodes);
     case "status/ugv1":
       return ugvAggregateStatus(object, base);
     case "/ugv/system_state":
@@ -133,7 +134,7 @@ function normalizeVehicleMqttObservation(
     case "/ugv/mission_state":
       return {
         ...base,
-        patch: { chassis: { mission: track(object, false) } },
+        patch: { chassis: { mission: track(object, false, preserveUnknownCodes) } },
         domains: ["mission"],
       };
     case "/ugv/nav_state": {
@@ -164,7 +165,7 @@ function normalizeVehicleMqttObservation(
     case "/ugv/target/gnss":
       return { ...base, patch: {}, domains: ["target"] };
     case "/ugv/area_recon/status":
-      return reconStatus(object, base);
+      return reconStatus(object, base, preserveUnknownCodes);
     case "/ugv/area_recon/targets":
       return reconTargets(object, base);
     case "/ugv/area_recon/exception":
@@ -183,7 +184,7 @@ export function normalizeNpcTankMqttObservation(
   try {
     if (topic === "status/npc_tank1")
       return npcAggregateStatus(object, observationBase(value, object));
-    return normalizeVehicleMqttObservation(npcEquivalentUgvTopic(topic), value, object);
+    return normalizeVehicleMqttObservation(npcEquivalentUgvTopic(topic), value, object, false);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("UGV_"))
       throw new Error(error.message.replace(/^UGV_/, "NPC_TANK_"), { cause: error });
@@ -211,6 +212,7 @@ export function deduplicateVehicleTargets(targets: readonly VehicleTarget[]): Ve
 function composite(
   object: Record<string, unknown> | undefined,
   base: Omit<NormalizedMqttObservation, "patch" | "domains">,
+  preserveUnknownCodes: boolean,
 ): NormalizedMqttObservation {
   if (object === undefined) throw new Error("UGV_MQTT_STATUS_INVALID");
   if (object.available === false)
@@ -224,9 +226,15 @@ function composite(
       },
       domains: [],
     };
-  const chassisTask = record(object.chassis_task) ? track(object.chassis_task, true) : undefined;
-  const eoTask = record(object.eo_task) ? track(object.eo_task, true) : undefined;
-  const weaponTask = record(object.weapon_task) ? track(object.weapon_task, true) : undefined;
+  const chassisTask = record(object.chassis_task)
+    ? track(object.chassis_task, true, preserveUnknownCodes)
+    : undefined;
+  const eoTask = record(object.eo_task)
+    ? track(object.eo_task, true, preserveUnknownCodes)
+    : undefined;
+  const weaponTask = record(object.weapon_task)
+    ? track(object.weapon_task, true, preserveUnknownCodes)
+    : undefined;
   const speedKmh = optionalNumber(object.speed_kmh ?? object.veh_speed);
   const heading = optionalNumber(object.heading);
   const packetLossRate = optionalNumber(object.packet_loss_rate);
@@ -447,13 +455,14 @@ function detectedObjects(
 function reconStatus(
   object: Record<string, unknown> | undefined,
   base: Omit<NormalizedMqttObservation, "patch" | "domains">,
+  preserveUnknownCodes: boolean,
 ): NormalizedMqttObservation {
   if (object === undefined) throw new Error("UGV_MQTT_RECON_STATUS_INVALID");
-  const motionStatus = reconMotionStatus(object.status);
+  const motionStatus = reconMotionStatus(object.status, preserveUnknownCodes);
   const cameraFault = optionalBoolean(object.camera_fault);
   const progress = optionalPercent(object.progress);
   const coverage = statusCoverage(object);
-  const lock = reconLock(object.lock);
+  const lock = reconLock(object.lock, preserveUnknownCodes);
   const lastCommandAck = reconCommandAck(object.last_cmd_ack);
   const coverability =
     reconCoverability(object.coverability) ?? lastCommandAck?.coverability ?? undefined;
@@ -464,6 +473,7 @@ function reconStatus(
   const scanModeValue = scanMode(object.scan_mode);
   const scanModeLabel = scalarText(object.scan_mode_label);
   const scanPitchDeg = optionalNumber(object.scan_pitch);
+  const eoFovDeg = optionalNumber(object.eo_fov);
   const outOfRange = optionalBoolean(object.out_of_range);
   const scanCount = optionalInteger(object.scan_num);
   const workMode = optionalInteger(object.work_mode);
@@ -486,6 +496,7 @@ function reconStatus(
           ...(scanModeValue === undefined ? {} : { scanMode: scanModeValue }),
           ...(scanModeLabel === undefined ? {} : { scanModeLabel }),
           ...(scanPitchDeg === undefined ? {} : { scanPitchDeg }),
+          ...(eoFovDeg === undefined ? {} : { eoFovDeg }),
           ...(outOfRange === undefined ? {} : { outOfRange }),
           ...(cameraFault === undefined
             ? {}
@@ -694,17 +705,17 @@ function statusCoverage(object: Record<string, unknown>): ReconCoverageObservati
   };
 }
 
-function reconLock(value: unknown) {
+function reconLock(value: unknown, preserveUnknownCodes: boolean) {
   if (value === undefined || value === null) return undefined;
   if (!record(value)) throw new Error("UGV_MQTT_RECON_LOCK_INVALID");
   const stageValue = optionalInteger(value.stage);
-  if (stageValue !== undefined && !new Set([1, 2, 3, 4]).has(stageValue))
+  if (!preserveUnknownCodes && stageValue !== undefined && !new Set([1, 2, 3, 4]).has(stageValue))
     throw new Error("UGV_MQTT_RECON_LOCK_STAGE_INVALID");
   const targetId = value.target_id === undefined ? undefined : id(value.target_id);
   const roleName = scalarText(value.role_name);
   const durationSec = optionalNonnegativeNumber(value.duration_sec);
   return {
-    ...(stageValue === undefined ? {} : { stage: stageValue as 1 | 2 | 3 | 4 }),
+    ...(stageValue === undefined ? {} : { stage: stageValue }),
     ...(targetId === undefined || targetId === "0" ? {} : { targetId }),
     ...(roleName === undefined ? {} : { roleName }),
     ...(durationSec === undefined ? {} : { durationSec }),
@@ -877,7 +888,11 @@ function optionalCoordinate(
   return value === undefined ? undefined : parser(value);
 }
 
-function track(object: Record<string, unknown> | undefined, compositeTrack: boolean) {
+function track(
+  object: Record<string, unknown> | undefined,
+  compositeTrack: boolean,
+  preserveUnknownCodes: boolean,
+) {
   if (object === undefined) throw new Error("UGV_MQTT_TASK_TRACK_INVALID");
   const state = integer(object.state) as VehicleTaskState;
   const negativeIdleSentinel =
@@ -885,7 +900,11 @@ function track(object: Record<string, unknown> | undefined, compositeTrack: bool
     state === -1 &&
     (object.id === undefined || object.id === -1) &&
     (object.type === undefined || object.type === -1);
-  if (!new Set([0, 1, 2, 3, 4, 5]).has(state as number) && !negativeIdleSentinel)
+  if (
+    (!preserveUnknownCodes || state === -1) &&
+    !new Set([0, 1, 2, 3, 4, 5]).has(state as number) &&
+    !negativeIdleSentinel
+  )
     throw new Error("UGV_MQTT_TASK_STATE_INVALID");
   const emptySentinel = object.id === -1 || negativeIdleSentinel;
   // The captured rich NPC status can report an active track with id=-1 while
@@ -906,11 +925,14 @@ function track(object: Record<string, unknown> | undefined, compositeTrack: bool
   };
 }
 
-function reconMotionStatus(value: unknown): ReconMotionStatus {
+function reconMotionStatus(value: unknown, preserveUnknownCodes: boolean): ReconMotionStatus {
   const parsed = integer(value);
-  if (!new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 99]).has(parsed))
+  if (
+    !preserveUnknownCodes &&
+    !new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 99]).has(parsed)
+  )
     throw new Error("UGV_MQTT_RECON_MOTION_STATUS_INVALID");
-  return parsed as ReconMotionStatus;
+  return parsed;
 }
 
 function scanMode(value: unknown): 1 | 2 | undefined {

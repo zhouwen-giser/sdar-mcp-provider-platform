@@ -1,0 +1,32 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-postgres-mqtt.test.ts (4 tests | 4 failed) 1310ms
+     × persists discoveries, valid empty reports and source/mission isolation under the inspection identity 31ms
+     × distinguishes absent target reports and partial coverage from a qualified empty scan 20ms
+     × uses native pause/resume/cancel and idempotent recovery without a second dispatch 5ms
+     × stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > persists discoveries, valid empty reports and source/mission isolation under the inspection identity
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > distinguishes absent target reports and partial coverage from a qualified empty scan
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > uses native pause/resume/cancel and idempotent recovery without a second dispatch
+ FAIL  tests/integration/ugv-inspection-postgres-mqtt.test.ts > ISOLATED inspection: real PostgreSQL, MQTT and HTTP Device MCP > stops at the fixed scan budget, waits for physical acknowledgement and retains a timeout report
+Error: UGV_STATE_STALE
+ ❯ UgvProviderRuntime.#start apps/ugv-provider-adapter/src/runtime.ts:775:54
+    773|     }
+    774|     const decision = this.availability(input.operationName, input.argu…
+    775|     if (decision.availability !== "AVAILABLE") throw new Error(decisio…
+       |                                                      ^
+    776|     const preemptedExecutions =
+    777|       input.operationName === "vehicle_emergency_stop"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  01:24:20
+   Duration  4.30s (transform 1.87s, setup 0ms, import 2.79s, tests 1.31s, environment 0ms)
+

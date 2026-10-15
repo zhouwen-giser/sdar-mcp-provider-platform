@@ -1,0 +1,7 @@
+{
+  "JOINT_RECEIPT.json": {
+    "original": "raw/joint-receipt-original.json",
+    "originalSha256": "d261e5224923ae85256a69c59d2a83dc8c49ebfe34a4a9cc11636bb11f1648be",
+    "formattedCopyOnly": true
+  }
+}

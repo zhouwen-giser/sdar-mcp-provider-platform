@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "at": "2026-09-30T08:05:30.923976+00:00",
+  "archive": "/home/zhouwen/web-download/sdar-mcp-provider-platform/artifacts/united/smpp-gowm-gdps-gsap-cbabdfc23eefc58e.tar.gz",
+  "sha256": "3ef8541190ec0f158214c4cf14c3455b0cfc19b80fce53a353cafbc34b857bb7",
+  "reproducible": true,
+  "checksummedFiles": 8,
+  "manifest": {
+    "schemaVersion": 1,
+    "base": {
+      "name": "gowm-gdps-analysis-dev-server-0.1.0.tar.gz",
+      "sha256": "321700fd62de81f19b3a7e1e92f2ea22ba538be5ea94aef02bc5633711f95f52"
+    },
+    "gowm": {
+      "name": "gowm-dev-server-0.7.1.tar.gz",
+      "sha256": "62fd9970d399039df7c7c138e8534f73c294e33836f629f64e56da3a4a91eb81"
+    },
+    "baseRoot": "gowm-gdps-analysis-dev-server-0.1.0",
+    "baseSourceSha256": "21f723f58ee9dc65247d43c69c2602d7bb1edb05139cf210225f0d4cbc170a5b",
+    "smpp": {
+      "name": "smpp-sz-gowm-367910c75f4f-352317bb9881.tar.gz",
+      "sha256": "7fd9aa041b56857fed179dbd901de9159614fa224caf844706252152ebfd795b",
+      "revision": "367910c75f4ffa3969aed1f612b77d74a6518ed4-worktree-352317bb9881"
+    },
+    "credentialPolicy": "Reuse upstream private business-connections.env; no passwords in archive",
+    "deploymentHost": "sz-gowm"
+  }
+}

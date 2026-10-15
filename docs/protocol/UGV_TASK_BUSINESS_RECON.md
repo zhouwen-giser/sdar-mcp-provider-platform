@@ -2,9 +2,19 @@
 
 An admitted area scan stores `recon.area` as a requested `OGC:CRS84` polygon. A circular scan has no polygon request. Both modes start with separate `recon.coverage_plan` and `recon.covered_area` Artifacts marked `not_produced_yet`; neither is inferred from the configured region. The current UGV interface does not publish a scan plan, so `activeRefs` contains no effective scan plan.
 
-The Runtime requires an exact `/ugv/area_recon/status` message with a mission ID and `motionStatus` before strict binding to the persisted Execution and its post-dispatch status cursor. In the 2026-09-28 live scan, the status messages had no `mission_id` or `id`, including during scanning, visual lock and release. The current production gate therefore cannot project those live messages into a Task Context. With a qualified mission-bound source, `ReconBusinessProcessor` updates the Context phase from `motionStatus`, not from chassis MissionState. If the _same status message_ includes coverage percent or counts, it records them in `summary.properties.reconCoverage`, with the effective `areaRevision`, source time and an `ARTIFACT_CHANGED` event. The `recon.covered_area` Artifact remains `unavailable` while the source has no usable grid frame and origin. Its earlier versions remain readable.
+The Runtime resolves each exact status, targets, lock and coverage packet under
+the [Recon correlation contract](UGV_RECON_CORRELATION_CONTRACT.md). Explicit
+mission/session identity must match; absent identity permits fresh non-retained
+current-execution inference when the same resource has exactly one active Recon
+Execution. Context summary records the correlation type. The old anonymous-source
+audit remains valid but no longer requires an upstream change.
 
-A fresh status without a mission ID clears any ID retained in the merged vehicle snapshot. A status with a different mission ID also clears the previous mission's progress, coverage, lock and command/exception fields before applying its own fields. Partial coverage and exception patches do not clear the current ID. Target projection separately requires a `mission_id` on the exact target-list payload that matches the current status and Execution. A later unbound target message or poll cannot inherit an older mission's correlation; these guards do not turn the live unbound feeds into qualified sources.
+`ReconBusinessProcessor` maps `motionStatus` to the business phase independently
+of chassis MissionState. Coverage statistics can come from the same status packet
+or a qualified coverage packet with current scanning status. Lock stages 2/3 do
+not prove scanning coverage. Statistics still do not provide geometry without a
+qualified frame/grid. A missing source identity is never filled from a sticky
+mission field; the explicit Execution inference is separately recorded.
 
 For an area scan, coverage initially belongs to the exact original requested `recon.area` revision 1. A later requested or candidate area Artifact does not change that basis. An adopted area must be a new available `recon.area` version with `semantics: planned`, named by `activeRefs.reconEffectiveArea`; its `areaRevision` must exceed the exact previous effective area's revision. The Memory and native PostgreSQL Stores require that switch, the incremented effective plan revision, a new `recon.covered_area` version marked `not_produced_yet` with `COVERAGE_RESET_FOR_NEW_AREA`, removal of the old coverage summary/cursor, and two Artifact changes plus a Context metadata event in one commit. An applied `recon.adjust_area` must name the adopted area and reset coverage as command results; a rejected adjustment cannot switch the effective area. The old coverage version stays readable as history.
 

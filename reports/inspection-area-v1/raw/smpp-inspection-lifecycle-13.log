@@ -1,0 +1,61 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/integration/ugv-inspection-public-task.test.ts (5 tests | 5 failed) 4999ms
+     × retains honest full inspection results and exact task identity 117ms
+     × retains honest findings inspection results and exact task identity 61ms
+     × retains honest missing inspection results and exact task identity 65ms
+     × retains honest partial inspection results and exact task identity 55ms
+     × rejects illegal geometry before any physical task starts 57ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest full inspection results and exact task identity
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest findings inspection results and exact task identity
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest missing inspection results and exact task identity
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > retains honest partial inspection results and exact task identity
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:83:27
+     81|     }),
+     82|   });
+     83|   expect(response.status).toBe(200);
+       |                           ^
+     84|   return (await response.json()) as { result?: Record<string, unknown>…
+     85| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:110:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/integration/ugv-inspection-public-task.test.ts > ISOLATED formal MCP Task -> gRPC -> PostgreSQL adapter -> MQTT/device MCP > rejects illegal geometry before any physical task starts
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ rpc tests/integration/ugv-inspection-public-task.test.ts:83:27
+     81|     }),
+     82|   });
+     83|   expect(response.status).toBe(200);
+       |                           ^
+     84|   return (await response.json()) as { result?: Record<string, unknown>…
+     85| }
+ ❯ tests/integration/ugv-inspection-public-task.test.ts:161:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  5 failed | 37 passed (42)
+   Start at  03:45:59
+   Duration  14.21s (transform 1.82s, setup 0ms, import 4.27s, tests 9.20s, environment 1ms)
+

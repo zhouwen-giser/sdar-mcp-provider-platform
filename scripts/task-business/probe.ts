@@ -60,7 +60,7 @@ if (mode === "intervention" && interventionManifest && !inputManifest && !mcpUrl
   }
 } else if (mode !== "read-only" || inputManifest || interventionManifest || !mcpUrl || !taskId) {
   process.stderr.write(
-    "Usage: pnpm task-business:probe --mcp-url URL --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n       pnpm task-business:probe --mode input --input-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n       pnpm task-business:probe --mode intervention --intervention-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n",
+    "Usage: pnpm task-business:probe --mcp-url URL --task-id UUID [--max-events N] [--duration-ms N] [--max-page-bytes N] [--capture-public-payloads] [--artifact-id ID [--artifact-revision N] [--artifact-chunk-bytes N]]\n       pnpm task-business:probe --mode input --input-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n       pnpm task-business:probe --mode intervention --intervention-manifest MANIFEST.json (requires SMPP_TASK_BUSINESS_PROBE_TOKEN)\n",
   );
   process.exitCode = 2;
 } else {
@@ -80,6 +80,7 @@ if (mode === "intervention" && interventionManifest && !inputManifest && !mcpUrl
   void runReadOnlyTaskBusinessProbe({
     mcpUrl,
     taskId,
+    capturePublicPayloads: process.argv.includes("--capture-public-payloads"),
     ...(process.env.SMPP_TASK_BUSINESS_PROBE_TOKEN
       ? { bearerToken: process.env.SMPP_TASK_BUSINESS_PROBE_TOKEN }
       : {}),

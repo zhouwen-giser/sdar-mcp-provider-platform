@@ -9,6 +9,7 @@ import {
 import { runReadOnlyTaskBusinessProbe } from "./read-only-probe.js";
 import {
   createWriteProbeClient,
+  simulationProbeFetch,
   isProbeRecord as record,
   type ProbeRecord,
 } from "./write-probe-client.js";
@@ -25,6 +26,7 @@ export const UgvInterventionProbeManifestSchema = z
     executionId: id,
     providerId: id,
     resourceId: id,
+    correlationId: id.optional(),
     interventionId: id,
     interventionRevision: z.number().int().positive(),
     effectivePlanRevision: z.number().int().nonnegative(),
@@ -49,7 +51,7 @@ export async function runUgvInterventionProbe(input: {
   wait?: (ms: number) => Promise<void>;
 }): Promise<void> {
   const manifest = UgvInterventionProbeManifestSchema.parse(input.manifest);
-  const fetchImpl = input.fetchImpl ?? fetch;
+  const fetchImpl = simulationProbeFetch(input.fetchImpl ?? fetch, manifest.sceneInstanceId);
   const now = input.now ?? (() => new Date());
   const wait = input.wait ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
   const request = createWriteProbeClient({
@@ -68,7 +70,7 @@ export async function runUgvInterventionProbe(input: {
     providerId: manifest.providerId,
     resourceId: manifest.resourceId,
     operationName: "vehicle_navigate",
-    simulationId: manifest.sceneInstanceId,
+    ...(manifest.correlationId === undefined ? {} : { correlationId: manifest.correlationId }),
   };
   const command = RuntimeInterventionCommandSchema.parse({
     schemaVersion: "sdar.runtime-intervention-command/1.0-rc2",
@@ -109,14 +111,20 @@ export async function runUgvInterventionProbe(input: {
         }
       },
     });
+    const snapshotIdentity = record(summary?.identity) ? summary.identity : undefined;
     if (
       !summary ||
       !selected ||
       !record(summary.activeRefs) ||
       !Number.isSafeInteger(summary.contextRevision) ||
       !Number.isSafeInteger(summary.effectivePlanRevision) ||
-      !isDeepStrictEqual(summary.identity, identity) ||
-      !isDeepStrictEqual(selected.identity, identity) ||
+      !snapshotIdentity ||
+      !Object.entries(identity).every(([key, value]) =>
+        isDeepStrictEqual(snapshotIdentity[key], value),
+      ) ||
+      (snapshotIdentity.simulationId !== undefined &&
+        snapshotIdentity.simulationId !== manifest.sceneInstanceId) ||
+      !isDeepStrictEqual(selected.identity, snapshotIdentity) ||
       selected.interventionType !== "navigation.adjust_plan" ||
       selected.effectivePlanRevision !== manifest.effectivePlanRevision
     )

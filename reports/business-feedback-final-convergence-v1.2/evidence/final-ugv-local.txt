@@ -1,0 +1,10 @@
+$ vitest run tests/contract/ugv-airport-map-geometry.test.ts tests/contract/ugv-recon-execution-correlation.test.ts tests/contract/ugv-navigation-planner.test.ts tests/contract/ugv-navigation-trajectory.test.ts tests/integration/ugv-provider-auto-lock.test.ts tests/contract/ugv-manual-acceptance.test.ts tests/contract/ugv-intervention-probe.test.ts tests/contract/ugv-manual-input-probe.test.ts tests/contract/task-business-read-only-probe.test.ts tests/contract/ugv-native-lock-business-processor.test.ts tests/contract/ugv-target-business-processor.test.ts tests/integration/ugv-required-input-producer.test.ts tests/contract/task-business-command-service.test.ts tests/contract/task-business-interaction.test.ts tests/e2e/ugv-task-business-read-e2e.test.ts tests/contract/ugv-navigation-business-processor.test.ts tests/contract/ugv-recon-business-processor.test.ts tests/contract/ugv-footprint-business-processor.test.ts tests/contract/ugv-task-business-config.test.ts tests/integration/ugv-provider-adapter.test.ts
+
+ RUN  v4.1.10 /home/zhouwen/web-download/sdar-mcp-provider-platform
+
+
+ Test Files  20 passed (20)
+      Tests  324 passed (324)
+   Start at  11:49:02
+   Duration  19.58s (transform 1.81s, setup 0ms, import 11.15s, tests 5.59s, environment 2ms)
+

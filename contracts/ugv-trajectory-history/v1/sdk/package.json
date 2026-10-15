@@ -1,0 +1,17 @@
+{
+  "name": "@smpp/trajectory-history-proof",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./proof.js",
+    "./artifact": "./projection.js",
+    "./schemas": "./contract.js"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  }
+}

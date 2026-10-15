@@ -47,7 +47,79 @@ export interface ProviderExecution {
   executionContext: ExecutionContextRecord;
   /** Set only for newly admitted executions whose business Context must be initialized. */
   taskBusinessContextExpected?: boolean;
+  /** Scope-qualified inspection source receipts; durable alongside the original execution. */
+  inspectionEvidence?: {
+    version: 1;
+    deadlineAt: string;
+    requestedMissionId?: string;
+    budgetExceeded?: boolean;
+    targetReport?: {
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      count: number;
+      complete: boolean;
+    };
+    coverageReport?: {
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      coverage: Record<string, unknown>;
+    };
+    exceptions?: {
+      sourceVersion?: string;
+      targetId?: string;
+      targetType?: string;
+      longitude?: number;
+      latitude?: number;
+      cursor: string;
+      observedAt: string;
+      missionId: string;
+      correlation: string;
+      kind: string;
+      errorCode: number | null;
+      reason: string | null;
+    }[];
+    missingEvidence: string[];
+  };
   downstreamMissionIds: string[];
+  /** Exact real-planner output persisted before Device MCP submission. */
+  navigationPlan?: {
+    planId: string;
+    sourceRecordId: string;
+    routeSource: string;
+    observedAt: string;
+    waypoints: { longitude: number; latitude: number }[];
+  };
+  /** Cache of the atomic business Context authority; never changes admission arguments. */
+  effectiveNavigation?: {
+    missionId: string;
+    planId: string;
+    planRevision: number;
+    routeRef: { kind: "artifact"; id: string; revision: number };
+    requested: {
+      waypoints: { longitude: number; latitude: number; altitude?: number | undefined }[];
+      density: "adaptive" | "dense" | "medium" | "sparse";
+    };
+    destination: { longitude: number; latitude: number; altitude?: number | undefined };
+    adoptedAt: string;
+    commandId?: string | undefined;
+  };
+  /** Recoverable steps in the existing execution, while effective mission stays unchanged. */
+  navigationReplacement?: {
+    commandId: string;
+    previousMissionId: string;
+    phase: "stopping" | "planning" | "submitting" | "starting" | "awaiting_adoption" | "failed";
+    requested: NonNullable<ProviderExecution["effectiveNavigation"]>["requested"];
+    createdAt: string;
+    deadlineAt: string;
+    baseline: Record<string, unknown>;
+    observationCursors: Record<string, string>;
+    plan?: NonNullable<ProviderExecution["navigationPlan"]>;
+    missionId?: string;
+  };
   diagnosticBehavior?: {
     capabilityId: SmppDiagnosticCapabilityId;
     leaseId: string;

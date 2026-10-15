@@ -1,0 +1,172 @@
+{
+  "schema": "smpp.recon-readonly-source-check/v1",
+  "startedAt": "2026-09-29T07:23:26.599Z",
+  "mode": "READ_ONLY",
+  "mutations": 0,
+  "mcp": {
+    "tools": [
+      "ugv_path_follow_mission",
+      "ugv_return_home",
+      "ugv_move_distance",
+      "ugv_mission_control",
+      "ugv_motion_stop",
+      "get_status",
+      "get_capabilities",
+      "ugv_area_recon_configure",
+      "ugv_area_recon_control",
+      "ugv_area_recon_lock",
+      "ugv_area_recon_get_status",
+      "ugv_area_recon_get_targets",
+      "ugv_area_recon_reset",
+      "ugv_area_recon_attack_confirm",
+      "ugv_gimbal_move"
+    ],
+    "ugv_area_recon_get_status": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"status\": 1,\n  \"status_label\": \"空闲\",\n  \"scan_mode\": 1,\n  \"scan_mode_label\": \"区域侦察\",\n  \"scan_pitch\": 0.0,\n  \"out_of_range\": false,\n  \"scan_num\": 0,\n  \"progress\": 0,\n  \"coverage\": 0,\n  \"coverage_covered\": 0,\n  \"coverage_total\": 0,\n  \"coverage_incomplete\": false,\n  \"coverage_reason\": \"\",\n  \"eo_fov\": 120.0,\n  \"camera_fault\": false,\n  \"work_mode\": 1,\n  \"recon_type\": 1,\n  \"load_status\": 1,\n  \"load_status_label\": \"空闲\",\n  \"lock\": {\n    \"stage\": 1,\n    \"target_id\": 0,\n    \"role_name\": \"\",\n    \"duration_sec\": 0\n  },\n  \"attack_ready\": false,\n  \"last_cmd_ack\": null,\n  \"region\": null,\n  \"online\": true,\n  \"gimbal\": {\n    \"yaw\": 0.0,\n    \"pitch\": 0.0,\n    \"zoom\": 1.0\n  }\n}"
+        }
+      ],
+      "isError": false
+    },
+    "ugv_area_recon_get_targets": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"targets\": [],\n  \"message\": \"最近 10.0s 无检测目标\"\n}"
+        }
+      ],
+      "isError": false
+    }
+  },
+  "mqtt": {
+    "/ugv/area_recon/status": {
+      "count": 121,
+      "samples": [
+        {
+          "receivedAt": "2026-09-29T07:23:32.584Z",
+          "retained": false,
+          "payload": {
+            "status": 1,
+            "status_label": "空闲",
+            "scan_mode": 1,
+            "scan_mode_label": "区域侦察",
+            "scan_pitch": 0,
+            "out_of_range": false,
+            "scan_num": 0,
+            "progress": 0,
+            "coverage": 0,
+            "coverage_covered": 0,
+            "coverage_total": 0,
+            "coverage_incomplete": false,
+            "coverage_reason": "",
+            "eo_fov": 120,
+            "camera_fault": false,
+            "work_mode": 1,
+            "recon_type": 1,
+            "load_status": 1,
+            "load_status_label": "空闲",
+            "lock": {
+              "stage": 1,
+              "target_id": 0,
+              "role_name": "",
+              "duration_sec": 0
+            },
+            "attack_ready": false,
+            "last_cmd_ack": null,
+            "region": null
+          }
+        },
+        {
+          "receivedAt": "2026-09-29T07:23:32.641Z",
+          "retained": false,
+          "payload": {
+            "status": 1,
+            "status_label": "空闲",
+            "scan_mode": 1,
+            "scan_mode_label": "区域侦察",
+            "scan_pitch": 0,
+            "out_of_range": false,
+            "scan_num": 0,
+            "progress": 0,
+            "coverage": 0,
+            "coverage_covered": 0,
+            "coverage_total": 0,
+            "coverage_incomplete": false,
+            "coverage_reason": "",
+            "eo_fov": 120,
+            "camera_fault": false,
+            "work_mode": 1,
+            "recon_type": 1,
+            "load_status": 1,
+            "load_status_label": "空闲",
+            "lock": {
+              "stage": 1,
+              "target_id": 0,
+              "role_name": "",
+              "duration_sec": 0
+            },
+            "attack_ready": false,
+            "last_cmd_ack": null,
+            "region": null
+          }
+        },
+        {
+          "receivedAt": "2026-09-29T07:23:32.687Z",
+          "retained": false,
+          "payload": {
+            "status": 1,
+            "status_label": "空闲",
+            "scan_mode": 1,
+            "scan_mode_label": "区域侦察",
+            "scan_pitch": 0,
+            "out_of_range": false,
+            "scan_num": 0,
+            "progress": 0,
+            "coverage": 0,
+            "coverage_covered": 0,
+            "coverage_total": 0,
+            "coverage_incomplete": false,
+            "coverage_reason": "",
+            "eo_fov": 120,
+            "camera_fault": false,
+            "work_mode": 1,
+            "recon_type": 1,
+            "load_status": 1,
+            "load_status_label": "空闲",
+            "lock": {
+              "stage": 1,
+              "target_id": 0,
+              "role_name": "",
+              "duration_sec": 0
+            },
+            "attack_ready": false,
+            "last_cmd_ack": null,
+            "region": null
+          }
+        }
+      ]
+    },
+    "/ugv/area_recon/coverage": {
+      "count": 1,
+      "samples": [
+        {
+          "receivedAt": "2026-09-29T07:23:31.145Z",
+          "retained": false,
+          "payload": {
+            "run_id": 0,
+            "scan_mode": 1,
+            "cell_size": 3,
+            "coverage": 0,
+            "covered_n": 0,
+            "total": 0,
+            "covered": []
+          }
+        }
+      ]
+    }
+  },
+  "errors": [],
+  "completedAt": "2026-09-29T07:23:32.725Z"
+}

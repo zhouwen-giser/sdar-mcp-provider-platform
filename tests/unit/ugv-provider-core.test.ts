@@ -230,6 +230,7 @@ describe("UGV task, track, availability and fire boundaries", () => {
       "vehicle_laser_range",
       "vehicle_navigate",
       "vehicle_area_recon",
+      "vehicle_inspect_area",
       "vehicle_track_target",
       "vehicle_control_gimbal",
       "vehicle_fire_weapon",

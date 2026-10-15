@@ -154,13 +154,13 @@ describe("Runtime business input responder boundary", () => {
     expect(accepted).toEqual(["decision-a"]);
   });
 
-  it("rejects agent and unverified claimed-user responses before durable acceptance", async () => {
+  it("rejects agent and anonymous claimed-user responses before durable acceptance", async () => {
     const { engine, accepted } = fixture();
     await expect(
       engine.updateTaskInputResponses("task-a", { "decision-a": response }, scoped("agent")),
     ).rejects.toMatchObject({ reasonCode: "RESPONDER_NOT_AUTHORIZED" });
-    const development = createAuthorizationResolver({ mode: "development" });
-    const claimedUser = development(
+    const anonymous = createAuthorizationResolver({ mode: "anonymous" });
+    const claimedUser = anonymous(
       headerRequest({
         "x-sdar-subject": "test-user-proxy",
         "x-sdar-actor-type": "user",
@@ -172,6 +172,21 @@ describe("Runtime business input responder boundary", () => {
       engine.updateTaskInputResponses("task-a", { "decision-a": response }, claimedUser),
     ).rejects.toMatchObject({ reasonCode: "RESPONDER_NOT_AUTHORIZED" });
     expect(accepted).toEqual([]);
+  });
+
+  it("accepts anonymous development policy without trusting supplied actor headers", async () => {
+    const development = createAuthorizationResolver({ mode: "development" });
+    for (const headers of [{}, { "x-sdar-actor-type": "operator" }]) {
+      const { engine, accepted } = fixture();
+      const authorization = development(headerRequest(headers));
+      await engine.updateTaskInputResponses("task-a", { "decision-a": response }, authorization);
+      expect(accepted).toEqual(["decision-a"]);
+      expect(authorization.verifiedResponder).toEqual({
+        actorType: "development_anonymous",
+        actorId: "development-anonymous",
+        source: "development",
+      });
+    }
   });
 
   it("rejects missing or mismatched Provider request metadata", async () => {
