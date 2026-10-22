@@ -393,14 +393,9 @@ export class TaskEngine {
           );
           throw error;
         }
-        await this.#repository.recordReconciliationResult(
-          taskId,
-          "found",
-          externalExecutionId,
-          true,
-          this.clock.now(),
-        );
-        return this.#publishReconciled(
+        // Hosted stores can scope audit rows through the published Task. Commit
+        // the identity-validated snapshot first; recovery never calls Start again.
+        const published = await this.#publishReconciled(
           operation,
           intent,
           externalExecutionId,
@@ -410,6 +405,14 @@ export class TaskEngine {
           timing,
           anchors,
         );
+        await this.#repository.recordReconciliationResult(
+          taskId,
+          "found",
+          externalExecutionId,
+          true,
+          this.clock.now(),
+        );
+        return published;
       }
       if (reconciliation.status === "NOT_FOUND") {
         await this.#repository.recordReconciliationResult(

@@ -4,6 +4,7 @@ import {
   parseInspectionInput,
 } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import { buildInspectionResult } from "./inspection-report.js";
+import { MutationQueue } from "./mutation-queue.js";
 import { isReconOperation } from "../../../packages/vehicle-provider-core/src/inspection.js";
 import {
   projectUgvBusinessSemantics,
@@ -216,6 +217,11 @@ export interface StartUgvOperation {
   arguments: Record<string, unknown>;
   argumentHash: string;
   executionContext: ExecutionContextRecord;
+  signal?: AbortSignal;
+}
+
+function assertStartRequestActive(input: StartUgvOperation): void {
+  if (input.signal?.aborted) throw new Error("UGV_START_REQUEST_CANCELLED");
 }
 
 function qualificationFailureReason(
@@ -265,7 +271,7 @@ export class UgvProviderRuntime {
   #unsubscribeToolHealth: (() => void) | undefined;
   #unsubscribeDeviceConnection: (() => void) | undefined;
   #unsubscribeCallObservation: (() => void) | undefined;
-  #mutationTail: Promise<void> = Promise.resolve();
+  readonly #mutations = new MutationQueue();
   readonly #inspectionPacketPersistence = new Map<string, Promise<void>>();
   readonly #pendingPriorityControls = new Map<string, Set<{ identity: CommandIdentity }>>();
   readonly #pendingEmergencyStops = new Set<{ taskId: string; resourceId: string }>();
@@ -516,14 +522,11 @@ export class UgvProviderRuntime {
         this.#captureMapSource(topic, applied);
       });
       void published.catch(() => undefined);
-      void this.#serializeMutation(async () => {
-        try {
-          await published;
-          await this.#observe(snapshot, topic, applied);
-        } finally {
+      void this.#serializeMutation(() => this.#observe(snapshot, topic, applied), published)
+        .finally(() => {
           if (applied) this.#inspectionPacketPersistence.delete(applied.cursor);
-        }
-      });
+        })
+        .catch(() => undefined);
     });
     this.#refreshReadiness();
     this.#poller = setInterval(() => void this.pollActive(), this.options.pollIntervalMs);
@@ -551,7 +554,7 @@ export class UgvProviderRuntime {
     this.#unsubscribeCallObservation?.();
     this.#unsubscribeDeviceConnection?.();
     await this.#dependencyInitialization?.catch(() => undefined);
-    await this.#mutationTail.catch(() => undefined);
+    await this.#mutations.idle();
     await this.device.close();
     await this.store.close();
   }
@@ -793,8 +796,20 @@ export class UgvProviderRuntime {
   start(
     input: StartUgvOperation,
   ): Promise<{ externalExecutionId: string; initialSnapshot: Record<string, unknown> }> {
+    if (SYNC_OPERATIONS.has(input.operationName)) {
+      try {
+        validateStart(input, this.options);
+        return this.#synchronous(input);
+      } catch (error) {
+        return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+    const start = () => {
+      assertStartRequestActive(input);
+      return this.#start(input);
+    };
     if (input.operationName !== "vehicle_emergency_stop")
-      return this.#serializeMutation(() => this.#start(input));
+      return this.#serializeMutation(start, undefined, true);
     try {
       validateStart(input, this.options);
     } catch (error) {
@@ -807,7 +822,7 @@ export class UgvProviderRuntime {
       resourceId: this.options.resourceId ?? "vehicle:ugv1",
     };
     this.#pendingEmergencyStops.add(entry);
-    return this.#serializeMutation(() => this.#start(input)).finally(() => {
+    return this.#serializeMutation(start, undefined, true).finally(() => {
       this.#pendingEmergencyStops.delete(entry);
     });
   }
@@ -937,12 +952,14 @@ export class UgvProviderRuntime {
           await this.#putExecution(execution);
         }
         if (input.operationName === "vehicle_emergency_stop") {
+          assertStartRequestActive(input);
           await this.#dispatchEmergencyStop(
             input.taskId,
             await this.#emergencyStopArguments(input.arguments),
           );
         } else {
           execution = await this.#prepareNavigationPlan(execution);
+          assertStartRequestActive(input);
           await executeUgvStartFlow(
             input.operationName,
             navigationDispatchArguments(execution),
@@ -1356,17 +1373,19 @@ export class UgvProviderRuntime {
     if (identity.commandSequence === "-1")
       return Promise.reject(new Error("COMMAND_SEQUENCE_RESERVED"));
     if (command === "resume")
-      return this.#serializeMutation(() => this.#command(command, identity));
+      return this.#serializeMutation(() => this.#command(command, identity), undefined, true);
     const key = identity.taskId;
     const pending =
       this.#pendingPriorityControls.get(key) ?? new Set<{ identity: CommandIdentity }>();
     const entry = { identity };
     pending.add(entry);
     this.#pendingPriorityControls.set(key, pending);
-    return this.#serializeMutation(() => this.#command(command, identity)).finally(() => {
-      pending.delete(entry);
-      if (pending.size === 0) this.#pendingPriorityControls.delete(key);
-    });
+    return this.#serializeMutation(() => this.#command(command, identity), undefined, true).finally(
+      () => {
+        pending.delete(entry);
+        if (pending.size === 0) this.#pendingPriorityControls.delete(key);
+      },
+    );
   }
 
   async #command(
@@ -4986,13 +5005,12 @@ export class UgvProviderRuntime {
     );
   }
 
-  #serializeMutation<T>(work: () => Promise<T>): Promise<T> {
-    const result = this.#mutationTail.then(work, work);
-    this.#mutationTail = result.then(
-      () => undefined,
-      () => undefined,
-    );
-    return result;
+  #serializeMutation<T>(
+    work: () => Promise<T>,
+    prerequisite?: Promise<unknown>,
+    control = false,
+  ): Promise<T> {
+    return this.#mutations.enqueue(work, prerequisite, control);
   }
 
   async #emergencyStopArguments(

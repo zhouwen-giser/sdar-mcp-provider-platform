@@ -374,12 +374,21 @@ export class PostgresReceptionStore {
   }
   /** Serializes one bounded page/seal against append and explicit owner retention. */
   async fenced<T>(action: (client: PoolClient) => Promise<T>): Promise<T> {
-    return this.transaction(action);
+    // A disconnected reader must not hold the capture fence indefinitely while
+    // counting a large retained range. A timeout fails the proof without trimming it.
+    return this.transaction(action, true);
   }
-  private async transaction<T>(action: (client: PoolClient) => Promise<T>): Promise<T> {
+  private async transaction<T>(
+    action: (client: PoolClient) => Promise<T>,
+    boundedRead = false,
+  ): Promise<T> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
+      if (boundedRead) {
+        await client.query("SET LOCAL lock_timeout='1000ms'");
+        await client.query("SET LOCAL statement_timeout='5000ms'");
+      }
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,718081))", [
         this.identityHash,
       ]);

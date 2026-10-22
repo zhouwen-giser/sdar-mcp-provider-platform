@@ -60,6 +60,8 @@ export interface StartVehicleOperation {
   arguments: Record<string, unknown>;
   argumentHash: string;
   executionContext: ExecutionContextRecord;
+  /** Transport cancellation fences queued admission, never a dispatched device mutation. */
+  signal?: AbortSignal;
 }
 
 export interface VehicleCommandIdentity {
@@ -224,8 +226,11 @@ export class VehicleProviderGrpcServer {
         callback(null, { profileVersion: "1.0", checkedAt: timestamp(checkedAt), checks });
       },
       startOperation: (call: Unary<StartRequest>, callback: grpc.sendUnaryData<unknown>) => {
+        const controller = new AbortController();
+        call.once("cancelled", () => controller.abort());
+        if (call.cancelled) controller.abort();
         void this.runtime
-          .start(startInput(call.request))
+          .start({ ...startInput(call.request), signal: controller.signal })
           .then((accepted) => callback(null, { result: "accepted", accepted }))
           .catch((error: unknown) => {
             if (error instanceof SmppDiagnosticResponseLossError) {

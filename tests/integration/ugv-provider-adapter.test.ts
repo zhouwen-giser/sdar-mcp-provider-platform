@@ -59,6 +59,87 @@ afterEach(async () => {
 });
 
 describe("UGV long-running operation integration", () => {
+  it("does not block queries or emergency admission on pending snapshot persistence", async () => {
+    const f = await createFixture();
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const put = f.store.putSnapshot.bind(f.store);
+    f.store.putSnapshot = async (record) => {
+      await pending;
+      await put(record);
+    };
+    status(f.ingress, {});
+    try {
+      const query = await f.runtime.start(
+        startInput("read-pending", "vehicle_get_capabilities", { resourceId: "vehicle:ugv1" }),
+      );
+      expect(query.initialSnapshot.state).toBe("SUCCEEDED");
+      const stop = await f.runtime.start(
+        startInput("stop-pending", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+      );
+      expect(stop.initialSnapshot.state).toBe("ACCEPTED");
+      expect(f.device.calls.filter((call) => call.name === "ugv_motion_stop")).toHaveLength(1);
+    } finally {
+      release();
+    }
+  });
+
+  it("fences cancelled starts before recording or dispatching an execution", async () => {
+    const f = await createFixture();
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      f.runtime.start({
+        ...startInput("cancelled-admission", "vehicle_emergency_stop", {
+          resourceId: "vehicle:ugv1",
+        }),
+        signal: controller.signal,
+      }),
+    ).rejects.toThrow("UGV_START_REQUEST_CANCELLED");
+    expect(await f.store.getExecution("cancelled-admission")).toBeUndefined();
+    expect(f.device.calls.filter((call) => call.name === "ugv_motion_stop")).toHaveLength(0);
+  });
+
+  it("does not dispatch a start cancelled while another writer is running", async () => {
+    const f = await createFixture();
+    const get = f.store.getExecution.bind(f.store);
+    let release!: () => void;
+    let entered!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const reached = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    let held = false;
+    f.store.getExecution = async (taskId) => {
+      if (taskId === "running-admission" && !held) {
+        held = true;
+        entered();
+        await pending;
+      }
+      return get(taskId);
+    };
+    const first = f.runtime.start(
+      startInput("running-admission", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+    );
+    await reached;
+    const controller = new AbortController();
+    const queued = f.runtime.start({
+      ...startInput("queued-cancelled", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+      signal: controller.signal,
+    });
+    const rejection = expect(queued).rejects.toThrow("UGV_START_REQUEST_CANCELLED");
+    controller.abort();
+    release();
+    await first;
+    await rejection;
+    expect(await f.store.getExecution("queued-cancelled")).toBeUndefined();
+    expect(f.device.calls.filter((call) => call.name === "ugv_motion_stop")).toHaveLength(1);
+  });
+
   it("reconciles mission transitions immediately but keeps heartbeats on the configured cadence", async () => {
     let now = Date.now();
     const f = await createFixture(false, new MemoryProviderStore(), {

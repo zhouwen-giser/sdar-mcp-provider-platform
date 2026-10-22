@@ -58,6 +58,80 @@ afterAll(async () => {
 });
 
 describe("exact SMPP reconciliation audit", () => {
+  it("publishes a recovered failed execution before a hosted Task-scoped FOUND audit, without dispatch", async () => {
+    const recoveredId = randomUUID();
+    await pool.query(
+      `INSERT INTO admission_intent
+      (task_id,provider_id,operation_name,operation_snapshot_id,authorization_context_hash,execution_mode,simulation_id,arguments,argument_hash,state,accepted_at,not_before,latest_start_at,timing)
+      SELECT $1,provider_id,operation_name,operation_snapshot_id,authorization_context_hash,execution_mode,simulation_id,arguments,argument_hash,state,accepted_at,not_before,latest_start_at,timing
+      FROM admission_intent WHERE task_id=$2`,
+      [recoveredId, taskId],
+    );
+    await pool.query(`ALTER TABLE smpp_reconciliation_audit ADD CONSTRAINT hosted_task_scope
+      FOREIGN KEY(task_id) REFERENCES provider_task(task_id) NOT VALID`);
+    let physicalStarts = 0;
+    const gateway = {
+      reconcileExecution: () =>
+        Promise.resolve({
+          status: "FOUND",
+          externalExecutionId: "external-failed",
+          snapshot: {
+            taskId: recoveredId,
+            externalExecutionId: "external-failed",
+            operationName: "navigate",
+            argumentHash: "c".repeat(64),
+            executionContext: {
+              authorizationContextHash: "b".repeat(64),
+              executionMode: "simulation",
+              simulationId: "sim-1",
+            },
+            state: "TECHNICAL_FAILED",
+            revision: "3",
+            reasonCode: "STOP_CONFIRMATION_TIMEOUT",
+            message: "Stop was dispatched; confirmation timed out.",
+            retryable: false,
+          },
+        }),
+      startOperation: () => {
+        physicalStarts++;
+        throw Error("MUST_NOT_REDISPATCH");
+      },
+    } as unknown as TaskAdapterGateway;
+    const repository = new TaskRepository(pool);
+    const engine = new TaskEngine(
+      { providerId: "provider-a" } as ValidatedManifest,
+      new Map([["navigate", snapshotId]]),
+      gateway,
+      repository,
+    );
+    try {
+      const admission = await repository.getAdmission(recoveredId);
+      if (!admission) throw Error("MISSING_ADMISSION");
+      const result = await engine.recoverAdmission(admission, {
+        name: "navigate",
+        execution: "TASK_REQUIRED",
+      } as ValidatedOperation);
+      expect(result).toMatchObject({
+        kind: "task",
+        task: { taskId: recoveredId, status: "failed" },
+      });
+      expect(await repository.getById(recoveredId)).toMatchObject({
+        internalState: "TERMINAL_FAILED",
+      });
+      expect(
+        await new SmppDiagnosticRepository(pool).listReconciliationResults(recoveredId),
+      ).toMatchObject([{ status: "found", identityValidated: true }]);
+      expect(physicalStarts).toBe(0);
+      await engine.recoverAdmission(admission, {
+        name: "navigate",
+        execution: "TASK_REQUIRED",
+      } as ValidatedOperation);
+      expect(physicalStarts).toBe(0);
+    } finally {
+      await pool.query("ALTER TABLE smpp_reconciliation_audit DROP CONSTRAINT hosted_task_scope");
+    }
+  });
+
   it("fails UNCERTAIN + NOT_FOUND closed without a physical redispatch", async () => {
     let physicalStarts = 0;
     const gateway = {

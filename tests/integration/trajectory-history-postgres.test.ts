@@ -51,6 +51,34 @@ function receipt(sessionId = session): ReceptionReceipt {
 }
 
 describe.skipIf(!enabled)("SIMULATED trajectory receipt history / real isolated PostgreSQL", () => {
+  it("bounds history SQL and releases the capture fence after cancellation", async () => {
+    await expect(
+      store.fenced((client) => client.query("SELECT pg_sleep(10)")),
+    ).rejects.toMatchObject({ code: "57014" });
+    await expect(
+      store.fenced((client) => client.query("SELECT 1 AS available")),
+    ).resolves.toMatchObject({ rows: [{ available: 1 }] });
+  });
+
+  it("bounds history fence waits without changing the capture writer", async () => {
+    const holder = await pool.connect();
+    try {
+      await holder.query("BEGIN");
+      await holder.query("SELECT pg_advisory_xact_lock(hashtextextended($1,718081))", [
+        store.identityHash,
+      ]);
+      await expect(store.fenced((client) => client.query("SELECT 1"))).rejects.toMatchObject({
+        code: "55P03",
+      });
+    } finally {
+      await holder.query("ROLLBACK");
+      holder.release();
+    }
+    await expect(
+      store.fenced((client) => client.query("SELECT 1 AS available")),
+    ).resolves.toMatchObject({ rows: [{ available: 1 }] });
+  });
+
   beforeAll(async () => {
     if (!configurationFile) throw Error("ISOLATED_HISTORY_CONFIG_REQUIRED");
     const config = JSON.parse(readFileSync(configurationFile, "utf8")) as { databaseUrl: string };
