@@ -16,7 +16,12 @@ request correlation: it selects an actual candidate only if its start/end and
 ordered vias match the request within the declared 20 m airport road-snap
 boundary. Unrelated or malformed broadcasts are ignored until the bounded
 timeout. The consumer uses the inspected airport transform:
-`lon = 106.81485 + x / 111320`, `lat = 29.71950 + y / 110540`.
+`lon = 106.81485 + x / 111320`, `lat = 29.71950 - y / 110540`.
+The running 2026-10-22 dashboard's `toGnss` and independent fresh GNSS/nav-state
+pairs establish south-positive world Y. The earlier plus-sign policy was wrong
+for this running source: it reflected the start and caused valid route candidates
+to fail the geometry fence. Both request and selected-route conversion now use
+the qualified minus sign; the geometry fence and exact candidate binding remain.
 It cannot be used for a different scene without qualifying its coordinate policy.
 The stable plan/source IDs are hashes of selected planner content; source time
 is SMPP receive time. They are not asserted to be device-issued identities.

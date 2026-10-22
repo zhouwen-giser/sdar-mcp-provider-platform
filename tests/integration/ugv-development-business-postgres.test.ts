@@ -36,7 +36,7 @@ const providerSchema = `ugvb_dev_provider_${suffix}`;
 const providerId = "isr.vehicle.ugv.development-wire";
 const gps = (x: number, y = 100) => ({
   longitude: 106.81485 + x / 111320,
-  latitude: 29.7195 + y / 110540,
+  latitude: 29.7195 - y / 110540,
 });
 let admin: Pool;
 let runtime: RuntimeApplication;

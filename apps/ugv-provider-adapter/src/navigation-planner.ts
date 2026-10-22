@@ -30,13 +30,14 @@ export interface NavigationPlanner {
   plan(request: NavigationPlanningRequest): Promise<NavigationPlan>;
 }
 
-// This is the existing airport simulator's published planner coordinate policy,
-// not a generic WGS84 conversion. A different scene needs a qualified transform.
+// The qualified airport dashboard uses world Y increasing southward (toGnss).
+// This scene-specific policy is also consistent with live GNSS/nav_state pairs.
+// A different scene needs a qualified transform.
 const airport = { longitude: 106.81485, latitude: 29.7195, xScale: 111320, yScale: 110540 };
 export const AIRPORT_ROUTE_SOURCE = "isr.airport.dashboard.road-planner/v1";
 const xy = (p: z.infer<typeof point>): [number, number] => [
   (p.longitude - airport.longitude) * airport.xScale,
-  (p.latitude - airport.latitude) * airport.yScale,
+  (airport.latitude - p.latitude) * airport.yScale,
 ];
 const distance = (a: readonly number[], b: readonly number[]): number =>
   Math.hypot((a[0] ?? NaN) - (b[0] ?? NaN), (a[1] ?? NaN) - (b[1] ?? NaN));
@@ -97,7 +98,7 @@ export function selectAirportRoute(
   const waypoints = candidate.points.map(([x, y]) =>
     point.parse({
       longitude: airport.longitude + x / airport.xScale,
-      latitude: airport.latitude + y / airport.yScale,
+      latitude: airport.latitude - y / airport.yScale,
     }),
   );
   return {

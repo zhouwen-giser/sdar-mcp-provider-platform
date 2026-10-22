@@ -6,7 +6,7 @@ import {
 
 const gps = (x: number, y: number) => ({
   longitude: 106.81485 + x / 111320,
-  latitude: 29.7195 + y / 110540,
+  latitude: 29.7195 - y / 110540,
 });
 const request = { start: gps(-340, 100), waypoints: [gps(-192, 100)] };
 const candidate = {
@@ -26,6 +26,45 @@ afterEach(() => {
 });
 
 describe("existing airport road-planner intake", () => {
+  it("matches independently observed live GNSS and south-positive planner coordinates", () => {
+    const liveRequest = {
+      start: { longitude: 106.81270504013868, latitude: 29.720283541372073 },
+      waypoints: [{ longitude: 106.81307318, latitude: 29.71952521 }],
+    };
+    const liveCandidate = {
+      id: "live-south-positive",
+      points: [
+        [-238.7769317626953, -86.61266326904297],
+        [-197.7956024003845, -2.786713400048839],
+      ],
+      num_points: 2,
+      length_m: 94,
+    };
+    const plan = selectAirportRoute(
+      { ok: true, target: "ugv", candidates: [liveCandidate] },
+      liveRequest,
+      at,
+    );
+    expect(plan.waypoints[0]?.latitude).toBeCloseTo(liveRequest.start.latitude, 10);
+    expect(plan.waypoints.at(-1)?.latitude).toBeCloseTo(29.71952521, 10);
+    expect(plan.waypoints.at(-1)?.longitude).toBeCloseTo(106.81307318, 10);
+    expect(() =>
+      selectAirportRoute(
+        {
+          ok: true,
+          target: "ugv",
+          candidates: [
+            {
+              ...liveCandidate,
+              points: liveCandidate.points.map(([x, y]) => [x ?? NaN, -(y ?? NaN)]),
+            },
+          ],
+        },
+        liveRequest,
+        at,
+      ),
+    ).toThrow("UGV_PLANNER_REQUEST_GEOMETRY_MISMATCH");
+  });
   it("preserves the selected planner points and stable source fingerprint", () => {
     const plan = selectAirportRoute(response, request, at);
     expect(plan.waypoints).toEqual(candidate.points.map((p) => gps(p[0] ?? NaN, p[1] ?? NaN)));
@@ -138,6 +177,11 @@ describe("existing airport road-planner intake", () => {
     expect(socket.sent[0]).toBe("40");
     const packet: unknown = JSON.parse((socket.sent[1] ?? "").slice(2));
     expect(Array.isArray(packet) ? packet[0] : undefined).toBe("plan_route");
+    expect(Array.isArray(packet) ? packet[1] : undefined).toEqual({
+      target: "ugv",
+      points: [[expect.closeTo(-192, 6), expect.closeTo(100, 6)]],
+      density: "adaptive",
+    });
   });
   it("fails closed on timeout and transport failure without leaving the planner busy", async () => {
     class FakeSocket extends EventTarget {
