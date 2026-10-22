@@ -81,6 +81,14 @@ describe("UGV long-running operation integration", () => {
       );
       expect(stop.initialSnapshot.state).toBe("ACCEPTED");
       expect(f.device.calls.filter((call) => call.name === "ugv_motion_stop")).toHaveLength(1);
+      await expect(f.runtime.get("stop-pending")).resolves.toMatchObject({
+        taskId: "stop-pending",
+      });
+      await expect(
+        f.runtime.reconcile(
+          startInput("stop-pending", "vehicle_emergency_stop", { resourceId: "vehicle:ugv1" }),
+        ),
+      ).resolves.toMatchObject({ status: "FOUND" });
     } finally {
       release();
     }

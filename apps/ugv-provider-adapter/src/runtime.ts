@@ -1358,12 +1358,20 @@ export class UgvProviderRuntime {
       : decision;
   }
 
-  get(taskId: string): Promise<ProviderExecution | undefined> {
-    return this.#serializeMutation(async () => {
-      const execution = await this.store.getExecution(taskId);
-      if (execution === undefined) return undefined;
-      return this.#refresh(execution);
-    });
+  async get(taskId: string): Promise<ProviderExecution | undefined> {
+    const stored = await this.store.getExecution(taskId);
+    if (stored && isTerminal(stored.state)) return stored;
+    // Tasks without business projections need no observation-log barrier. Their
+    // own fresh track/cursor checks still gate every physical transition.
+    return this.#serializeMutation(
+      async () => {
+        const execution = await this.store.getExecution(taskId);
+        if (execution === undefined) return undefined;
+        return this.#refresh(execution);
+      },
+      undefined,
+      stored !== undefined && !stored.taskBusinessContextExpected,
+    );
   }
 
   command(
@@ -1992,10 +2000,15 @@ export class UgvProviderRuntime {
     }
   }
 
-  reconcile(
+  async reconcile(
     input: StartUgvOperation & { externalExecutionId?: string },
   ): Promise<Record<string, unknown>> {
-    return this.#serializeMutation(() => this.#reconcile(input));
+    const stored = await this.store.getExecution(input.taskId);
+    return this.#serializeMutation(
+      () => this.#reconcile(input),
+      undefined,
+      stored !== undefined && (!stored.taskBusinessContextExpected || isTerminal(stored.state)),
+    );
   }
 
   async #reconcile(
@@ -2022,7 +2035,10 @@ export class UgvProviderRuntime {
         message: "Execution identity conflicts.",
         retryable: false,
       };
-    if (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected)
+    if (
+      !isTerminal(execution.state) &&
+      (!this.device.connected() || !this.ingress.snapshot().connectivity.mqttConnected)
+    )
       return {
         status: "TRANSIENT_UNAVAILABLE",
         externalExecutionId: execution.externalExecutionId,
@@ -2030,7 +2046,7 @@ export class UgvProviderRuntime {
         message: "MQTT and Device MCP cannot jointly confirm the execution.",
         retryable: true,
       };
-    const refreshed = await this.#refresh(execution);
+    const refreshed = isTerminal(execution.state) ? execution : await this.#refresh(execution);
     return {
       status: "FOUND",
       snapshot: await this.executionSnapshot(refreshed),
