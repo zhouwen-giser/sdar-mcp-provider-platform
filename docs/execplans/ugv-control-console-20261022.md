@@ -49,8 +49,12 @@ Credentials are outside Git under the operator-owned 0700 state directory. Deplo
 
 - [x] Default HTTP transport, LAN origin allowlist, HTTP session cookie and protocol-aware health check; retain credentials, records and existing TLS files for rollback.
 - [x] Replace secure-context-only browser randomUUID with cryptographic UUID generation that works on LAN HTTP. Isolated browser lifecycle tests explicitly remove randomUUID.
-- [ ] Validate configuration/authentication and browser controls, build and deploy the HTTP image, refresh the deployment bundle and record direct LAN HTTP acceptance.
+- [x] Validate configuration/authentication and browser controls, build and deploy the HTTP image, refresh the deployment bundle and record direct LAN HTTP acceptance.
 
 HTTP verification before release: 44 console cases and 2 browser cases passed; app typecheck/build, changed-source ESLint and console/deployment Prettier passed. Browser coverage seeds a previous HTTPS Secure cookie and removes randomUUID before submitting isolated navigation/lifecycle commands. HTTP uses `ugv_session_http`, preserving HttpOnly/SameSite and session revocation while avoiding a collision with the previous HTTPS cookie.
+
+HTTP release source: `99e35266fd562a26a97bb66cfa99d36b98e303fc`, image `smpp/ugv-control-console:20261023-http-99e3526`, image ID `sha256:ead44a82266d9bb505ffb1c365aaab36f4fec0fc57b430099d30e30d60e30413`. Container healthy; direct `http://17.26.1.20:19101/health/ready` returned 200 without redirect and the HTTPS probe failed with EPROTO as expected for HTTP. Real LAN browser acceptance at `2026-10-23T05:34:02Z` passed login with a previous Secure cookie, HTTP session attributes, non-secure-context API availability, 13 actual tools, all device reads and imported Task detail; no page errors, no desktop/mobile overflow and zero live controls. Existing platform containers/mounts and five private files were verified unchanged. Owned isolated PostgreSQL/MQTT fixtures were removed.
+
+Updated bundle: `/mnt/data/ugv-control-console-http-20261023/ugv-control-console-99e35266fd56.tar.gz`, SHA-256 `b128e3c66b4ddaf1dfa8dfd6e7444968d756d16e42af6e7ff9a815017f894825`; internal and outer checks passed. `REPORT.md`, `SUMMARY.json` and `EVIDENCE_SHA256SUMS` record commands, exit codes and evidence. This closeout changes only the plan; the image and source bundle pin the implementation commit above.
 
 Evidence directory: `/mnt/data/ugv-control-console-http-20261023`.
