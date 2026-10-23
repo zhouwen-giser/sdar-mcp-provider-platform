@@ -58,3 +58,11 @@ HTTP release source: `99e35266fd562a26a97bb66cfa99d36b98e303fc`, image `smpp/ugv
 Updated bundle: `/mnt/data/ugv-control-console-http-20261023/ugv-control-console-99e35266fd56.tar.gz`, SHA-256 `b128e3c66b4ddaf1dfa8dfd6e7444968d756d16e42af6e7ff9a815017f894825`; internal and outer checks passed. `REPORT.md`, `SUMMARY.json` and `EVIDENCE_SHA256SUMS` record commands, exit codes and evidence. This closeout changes only the plan; the image and source bundle pin the implementation commit above.
 
 Evidence directory: `/mnt/data/ugv-control-console-http-20261023`.
+
+## Navigation freshness recovery — 2026-10-23
+
+- [x] Reproduced `UGV_STATE_STALE` with a complete navigation availability request. Native chassis/health/mission/payload timestamps were about 6 seconds ahead of the station; position reception was current. Two Cloudflare NTP probes measured the station clock approximately 6.4 seconds behind UTC. systemd-timesyncd had no successful samples, with `ntp.ubuntu.com` resolved to proxy fake IP `198.18.0.49` and repeated timeouts.
+- [x] Installed only `/etc/systemd/timesyncd.conf.d/70-smpp-clock-sync.conf`, pointing the existing synchronization service at the provider's documented IPs `162.159.200.1` and `162.159.200.123`, and restarted systemd-timesyncd. The second NTP sample measured a 38.783 ms offset, synchronized=yes. Application code, freshness limits and device clocks were unchanged.
+- [x] Rechecked navigation twice through the console API: `available / UGV_AVAILABLE`; observed source ages 51–70 ms and 336–351 ms. The four pre-existing console commands remained rejected records with no Task IDs; command count stayed four and no physical action was dispatched during recovery.
+
+Evidence: `/mnt/data/ugv-navigation-freshness-20261023/REPORT.md`, `SUMMARY.json`, before/after availability snapshots, NTP probes and synchronization status. The persistent station NTP drop-in fixes the earlier clock blocker recorded above. Existing deployment images and database records remain in place.
