@@ -66,3 +66,14 @@ Evidence directory: `/mnt/data/ugv-control-console-http-20261023`.
 - [x] Rechecked navigation twice through the console API: `available / UGV_AVAILABLE`; observed source ages 51–70 ms and 336–351 ms. The four pre-existing console commands remained rejected records with no Task IDs; command count stayed four and no physical action was dispatched during recovery.
 
 Evidence: `/mnt/data/ugv-navigation-freshness-20261023/REPORT.md`, `SUMMARY.json`, before/after availability snapshots, NTP probes and synchronization status. The persistent station NTP drop-in fixes the earlier clock blocker recorded above. Existing deployment images and database records remain in place.
+
+## Reconnaissance availability recovery — 2026-10-23
+
+- [x] Read the actual console state and raw non-retained MQTT. `/ugv/area_recon/status` reports idle/unlocked, while fresh `/ugv/status` repeatedly reports EO task 2630 in state 1 (running). The old recon Task ed90ab34-2c7b-4508-8a33-5b7c54d59c51 uses native mission 38871 and remains stopping after earlier preemption. No persisted execution owns native 2630. The current external occupancy is a separate device fact.
+- [x] Implement automatic availability refresh after an explicit check, expiry-aware result labels and external EO diagnostics. Parameter edits invalidate the request; physical commands remain explicit actions.
+- [ ] Run isolated expiry, auto-release, late-response and external occupancy regressions; build/deploy the console update and refresh its bundle.
+- [ ] Resolve the live external EO occupancy if the operator authorizes interrupting task 2630, then verify the actual device report and Task receipts. Do not infer channel release from the separate recon idle report.
+
+Evidence: `/mnt/data/ugv-recon-channel-recovery-20261023`. Operator approval requested for interrupting the unowned external EO task; continue independent UI work while waiting.
+
+Pre-release checks: 4 isolated browser cases passed (including automatic recovery after channel release, expiry labels and late responses after parameter edits); 2 targeted adapter occupancy cases passed (96 unrelated cases skipped). Console build/typecheck, root typecheck and changed-source ESLint passed. The initial new browser test had unsafe-any lint errors; typed JSON parsing repaired those before the successful run. No deployed adapter logic or physical interlock has been relaxed.

@@ -3603,6 +3603,37 @@ describe("UGV long-running operation integration", () => {
     });
   });
 
+  it("keeps an external EO track occupied after recon stops until the EO track itself ends", async () => {
+    const fixture = await createFixture();
+    reconStatus(fixture.ingress, 1, 0);
+    fixture.ingress.handle(
+      "status/ugv",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "ugv1",
+          eo_task: { id: 2630, type: -1, state: 1, progress: 0 },
+        }),
+      ),
+    );
+    expect(fixture.runtime.snapshot().payload.reconnaissance.motionStatus).toBe(1);
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "DISABLED",
+      reasonCode: "UGV_EXTERNAL_EO_TRACK_BUSY",
+    });
+    fixture.ingress.handle(
+      "status/ugv",
+      Buffer.from(
+        JSON.stringify({
+          entity_id: "ugv1",
+          eo_task: { id: 2630, type: -1, state: 3, progress: 0 },
+        }),
+      ),
+    );
+    expect(fixture.runtime.availability("vehicle_area_recon", reconArgs())).toMatchObject({
+      availability: "AVAILABLE",
+    });
+  });
+
   it("dispatches primary emergency stop when every optional cleanup tool is missing", async () => {
     const device = new MockUgvDeviceMcpClient(new Set(["ugv_motion_stop"]));
     const fixture = await createFixture(false, new MemoryProviderStore(), {}, device);

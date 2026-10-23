@@ -50,6 +50,7 @@ export const reasons: Record<string, string> = {
   UGV_MQTT_UNAVAILABLE: "MQTT 链路不可用",
   UGV_DEVICE_MCP_UNAVAILABLE: "设备 MCP 链路不可用",
   UGV_EO_TRACK_BUSY: "光电通道被占用",
+  UGV_EXTERNAL_EO_TRACK_BUSY: "设备报告光电任务仍在执行，通道尚未释放",
   UGV_CHASSIS_TRACK_BUSY: "底盘通道被占用",
   CATALOG_CHANGED_REFRESH_REQUIRED: "能力目录已更新，请刷新参数",
   MCP_TRANSPORT_UNCERTAIN: "MCP 连接中断，请求结果未确认",

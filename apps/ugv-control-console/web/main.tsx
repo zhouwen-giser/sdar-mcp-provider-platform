@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
+import { AvailabilityNotice } from "./AvailabilityNotice.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
 import { parseCoordinates, regionArguments, type Point } from "../shared/coordinates.js";
 import {
@@ -193,8 +194,16 @@ function Console() {
     [pitch, setPitch] = useState("0"),
     [zoom, setZoom] = useState(""),
     [targetId, setTargetId] = useState("");
-  const [preflight, setPreflight] = useState<Json>(),
-    [previewBusy, setPreviewBusy] = useState(false);
+  const [previewRequest, setPreviewRequest] = useState<{ request: Json; generation: number }>();
+  const previewGeneration = useRef(0);
+  const preview = useQuery({
+    queryKey: ["availability", previewRequest],
+    queryFn: () => api<Json>("/availability", previewRequest?.request),
+    enabled: !!previewRequest && !!session.data,
+    refetchInterval: 2000,
+  });
+  const preflight = preview.data,
+    previewBusy = preview.isFetching;
   const targetData = record(data.vehicle_get_targets),
     targets = array(targetData.targets).map(record);
   const position = record(chassis.position);
@@ -274,7 +283,7 @@ function Console() {
     maxElapsedMs: Number(budget) * 1000,
   });
   useEffect(
-    () => setPreflight(undefined),
+    () => setPreviewRequest(undefined),
     [
       toolName,
       mode,
@@ -300,6 +309,7 @@ function Console() {
     ],
   );
   const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["availability"] });
     void qc.invalidateQueries({ queryKey: ["tasks"] });
     void qc.invalidateQueries({ queryKey: ["commands"] });
     void qc.invalidateQueries({ queryKey: ["task", selected] });
@@ -335,15 +345,11 @@ function Console() {
   };
   const inspectAvailable = () => {
     setNotice(undefined);
-    setPreviewBusy(true);
     try {
-      void api<Json>("/availability", { tool: toolName, arguments: build(), timing: timing() })
-        .then(setPreflight)
-        .catch(setNotice)
-        .finally(() => setPreviewBusy(false));
+      const request = { tool: toolName, arguments: build(), timing: timing() };
+      setPreviewRequest({ request, generation: ++previewGeneration.current });
     } catch (e) {
       setNotice(e);
-      setPreviewBusy(false);
     }
   };
   if (session.isPending) return <div className="loading">正在连接控制台…</div>;
@@ -755,24 +761,9 @@ function Console() {
                 </div>
                 <small>默认立即启动，启动容差 60 秒。</small>
               </details>
+              <ErrorNote error={preview.error} />
               {preflight && (
-                <div
-                  className={`notice ${preflight.availability === "available" ? "success" : "warning"}`}
-                >
-                  <strong>
-                    {preflight.availability === "available" ? "当前可用" : "当前不可执行"}
-                  </strong>
-                  <div>
-                    {describe(
-                      Error(
-                        text(preflight.reasonCode) ||
-                          text(preflight.description) ||
-                          text(preflight.availability),
-                      ),
-                    )}
-                  </div>
-                  <small>检查有效至 {when(preflight.validUntil)}；提交时会再次核实。</small>
-                </div>
+                <AvailabilityNotice result={preflight} pending={previewBusy} snapshot={state} />
               )}
               <div className="submit-row">
                 <button disabled={!compatible || previewBusy} onClick={inspectAvailable}>

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { password } from "../test/fixture.js";
+import { array, record } from "../shared/model.js";
 test("operator login, coordinate preview, shared task and original-task lifecycle", async ({
   page,
   browser,
@@ -72,4 +73,88 @@ test("polygon validation rejects a self-intersection before a control call", asy
   await page.getByRole("button", { name: "执行区域检查" }).click();
   await expect(page.getByRole("alert")).toContainText("自交");
   expect(controlCalls).toBe(0);
+});
+
+test("expired availability refreshes after the EO channel is released without dispatching", async ({
+  page,
+}) => {
+  let busy = true,
+    checks = 0,
+    controls = 0;
+  page.on("request", (r) => {
+    if (r.url().endsWith("/api/commands") && r.method() === "POST") controls++;
+  });
+  await page.route("**/api/device", async (route) => {
+    const response = await route.fetch(),
+      value = record((await response.json()) as unknown);
+    record(record(value.data).vehicle_get_state).payload = {
+      eoTask: { id: "2630", state: busy ? 1 : 3 },
+      reconnaissance: { motionStatus: 1 },
+    };
+    await route.fulfill({ json: value });
+  });
+  await page.route("**/api/availability", async (route) => {
+    checks++;
+    const request = record(route.request().postDataJSON() as unknown);
+    expect(request.tool).toBe("vehicle_area_recon");
+    expect(record(array(record(record(request.arguments).area).polygon)[0])).toEqual({
+      longitude: 106.8128,
+      latitude: 29.7205,
+    });
+    await route.fulfill({
+      json: {
+        availability: busy ? "disabled" : "available",
+        reasonCode: busy ? "UGV_EXTERNAL_EO_TRACK_BUSY" : "UGV_AVAILABLE",
+        validUntil: new Date(Date.now() + 1000).toISOString(),
+      },
+    });
+  });
+  await page.goto("/");
+  await page.getByLabel("密码", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "进入控制台" }).click();
+  await page.getByRole("tab", { name: "区域侦察", exact: true }).click();
+  await page
+    .getByLabel("WGS84 坐标", { exact: true })
+    .fill("106.8128,29.7205\n106.8131,29.7203\n106.8133,29.7207");
+  await page.getByRole("button", { name: "检查可用性" }).click();
+  await expect(page.getByText("设备光电任务 2630", { exact: false })).toBeVisible();
+  await expect(page.getByText(/检查已过期/)).toBeVisible();
+  await expect(page.getByText("当前不可执行", { exact: true })).not.toBeVisible();
+  busy = false;
+  await expect(page.getByText("当前可用", { exact: true })).toBeVisible({ timeout: 6000 });
+  expect(checks).toBeGreaterThan(1);
+  expect(controls).toBe(0);
+});
+
+test("late availability for edited coordinates never becomes the current result", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let checks = 0;
+  await page.route("**/api/availability", async (route) => {
+    checks++;
+    await held;
+    await route.fulfill({
+      json: {
+        availability: "available",
+        reasonCode: "UGV_AVAILABLE",
+        validUntil: new Date(Date.now() + 10000).toISOString(),
+      },
+    });
+  });
+  await page.goto("/");
+  await page.getByLabel("密码", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "进入控制台" }).click();
+  await page.getByLabel("WGS84 坐标", { exact: true }).fill("106.813,29.719");
+  await page.getByRole("button", { name: "检查可用性" }).click();
+  await expect.poll(() => checks).toBe(1);
+  await page.getByLabel("WGS84 坐标", { exact: true }).fill("106.814,29.720");
+  const response = page.waitForResponse("**/api/availability");
+  release();
+  await response;
+  await expect(page.getByText("当前可用", { exact: true })).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "检查可用性" })).toBeEnabled();
 });
