@@ -14,7 +14,7 @@ Base c23f0ec includes the deployed f67fd0a navigation repair. Work in the alread
 - [x] Fastify backend: login/session/origin guard, fixed upstream MCP, independent PostgreSQL migration and durable command journal, task import/actions and full business snapshot/artifact reads.
 - [x] React operator UI: state overview, coordinate controls, scalable schematic, task history and task/business actions, SSE refresh and diagnostics/report export.
 - [x] Isolated protocol, persistence, concurrency, recovery and browser verification, plus real Runtime/adapter/MQTT/PostgreSQL integration where available.
-- [ ] Docker image, reproducible bundle, secret/certificate provisioning, LAN 19101 deployment and read-only acceptance.
+- [x] Docker image, reproducible bundle, secret/certificate provisioning, LAN 19101 deployment and read-only acceptance.
 
 ## Decisions
 
@@ -33,4 +33,14 @@ Record commands, exit codes, source/image hashes, bundle checksum and acceptance
 - Read-only field check at 2026-10-22T16:49:24Z: login 200, 13 published tools, all four state reads without errors, MQTT and Device MCP online, resource vehicle:ugv, imported old Task ed90ab34-2c7b-4508-8a33-5b7c54d59c51 still working/stopping. Live control command count is 0. Native chassis/health/payload source times remain about six seconds ahead of the platform; no freshness guard was relaxed.
 - Scoped forwarding repair is limited to this console, Runtime 8080, PostgreSQL 5432 and published 19101. Restored the temporary shared-bridge route_localnet setting to its original 0; the console's own edge bridge carries loopback support.
 
-Final source/image/bundle and field browser receipts will be recorded after release deployment. Credentials are outside Git under the operator-owned 0700 state directory.
+## Release and acceptance — 2026-10-23
+
+- Implementation source: `9842a7f9a155e7905f6d7ff6ab2a5c238e423d11`. Image `smpp/ugv-control-console:20261023-9842a7f`, ID `sha256:c501f5b8556a55d404e0ceb599b98d338b894ac67e5c9553af2fd8dbb209aab5`. Image label and bundled source pin this implementation commit; this later closeout changes only this document.
+- Healthy deployed container `smpp-ugv-control-console`, LAN URL `https://17.26.1.20:19101`. Local loopback health also passed. Preserved the existing Runtime/adapter/PostgreSQL container IDs, images and mounts and all five operator secret/certificate files. The primary checkout retains its existing united packaging changes.
+- Final isolated browser rerun: 2 passed. Total automated cases: 53 (40 console, 7 provider lifecycle, 4 subnet policy, 2 browser). App/root typecheck and build, changed-file ESLint/Prettier and frozen protocol validation passed.
+- Real browser acceptance at `2026-10-23T01:41:52Z`: authenticated LAN login, 13 actual tools, all four device reads without errors, imported Task detail shown, no JavaScript errors, no desktop/mobile horizontal overflow and zero control submissions. Desktop/mobile screenshots inspected. The local browser's system proxy caused `ERR_NETWORK_CHANGED`; the successful LAN run used a direct connection (`--no-proxy-server`). HTTPS test context allowed this generated site certificate; operator computers should trust the deployed `tls.crt`.
+- Bundle `/mnt/data/ugv-control-console-20261022/ugv-control-console-9842a7f9a155.tar.gz`, SHA-256 `cf6e16dc2990f08ca0eec8c0fac3fedb9c707db9654b3198773d9569e71b37ee`. All seven internal file checks and the outer archive check passed. No deployment credentials are included.
+- Evidence and command receipts: `/mnt/data/ugv-control-console-20261022/REPORT.md`, `SUMMARY.json`, `EVIDENCE_SHA256SUMS`. Isolated PostgreSQL/MQTT fixtures are removed after acceptance.
+- Physical control acceptance remains pending operator execution. Native source timestamps remain approximately six seconds ahead of position/platform time, and imported Task `ed90ab34-2c7b-4508-8a33-5b7c54d59c51` remains `working/stopping`. The UI preserves those facts; no freshness or lifecycle guard was relaxed and this task issued no field control command.
+
+Credentials are outside Git under the operator-owned 0700 state directory. Deployment has a previous image configuration for rollback; database records, operator credentials and certificate persist.
