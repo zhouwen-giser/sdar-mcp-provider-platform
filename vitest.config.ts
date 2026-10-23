@@ -9,6 +9,11 @@ export default defineConfig({
     pool: "forks",
     fileParallelism: false,
     maxWorkers: 1,
-    exclude: [...configDefaults.exclude, "dist/**", "tests/e2e/pms-console-real/**"],
+    exclude: [
+      ...configDefaults.exclude,
+      "dist/**",
+      "tests/e2e/pms-console-real/**",
+      "apps/ugv-control-console/**",
+    ],
   },
 });

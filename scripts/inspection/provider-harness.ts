@@ -386,6 +386,29 @@ process.on("message", (value: unknown) => {
         process.send?.({ id: request.id, result: { ready: true } });
         return;
       }
+      if (request.action === "control_observation") {
+        const state = request.mode === "paused" ? 8 : request.mode === "cancelled" ? 9 : 5;
+        for (const run of active) {
+          const missionId = run.downstreamMissionIds.at(-1);
+          if (run.operationName !== "vehicle_inspect_area" || !missionId) continue;
+          await publish("/ugv/area_recon/status", {
+            entity_id: "ugv1",
+            mission_id: missionId,
+            status: state,
+            scan_mode: 1,
+            online: true,
+            camera_fault: false,
+            out_of_range: false,
+            progress: 0,
+            coverage: 0,
+            coverage_incomplete: true,
+            lock: { stage: 1, target_id: 0 },
+            attack_ready: false,
+          });
+        }
+        process.send?.({ id: request.id, result: { observed: active.length } });
+        return;
+      }
       if (request.action !== "observe") throw Error("FIXTURE_COMMAND_UNSUPPORTED");
       for (const run of active) {
         const missionId = run.downstreamMissionIds.at(-1);

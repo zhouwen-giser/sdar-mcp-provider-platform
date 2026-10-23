@@ -213,7 +213,10 @@
     "task-business:manual-acceptance": "node --import tsx scripts/ugv-mcp-manual-acceptance.mjs",
     "test:task-business:gowm-template": "node scripts/require-env.mjs SMPP_GOWM_BUSINESS_TEMPLATE_TEST_URL && SMPP_GOWM_BUSINESS_TEMPLATE_TEST_ENABLE=true vitest run tests/integration/gowm-task-business-owner-template-postgres.test.ts tests/contract/gowm-task-business-gate.test.ts",
     "verify:task-business:ugv": "node scripts/require-env.mjs SMPP_GOWM_SHARED_OPEN_TEST_CONFIG_FILE && pnpm task-business:check && pnpm typecheck && pnpm test:task-business:ugv-local && pnpm test:task-business:ugv-gowm",
-    "test:task-business:gowm-deployment": "node scripts/require-env.mjs SMPP_GOWM_BUSINESS_DEPLOY_TEST_URL && vitest run tests/integration/gowm-task-business-deployment-postgres.test.ts"
+    "test:task-business:gowm-deployment": "node scripts/require-env.mjs SMPP_GOWM_BUSINESS_DEPLOY_TEST_URL && vitest run tests/integration/gowm-task-business-deployment-postgres.test.ts",
+    "build:ugv-console": "pnpm --filter @sdar/ugv-control-console build",
+    "test:ugv-console": "pnpm --filter @sdar/ugv-control-console test",
+    "test:ugv-console:e2e": "pnpm --filter @sdar/ugv-control-console test:e2e"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.5",

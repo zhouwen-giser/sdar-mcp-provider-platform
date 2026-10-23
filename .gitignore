@@ -18,3 +18,8 @@ generated-python/
 .codex/
 artifacts/
 /SOURCE_REVISION
+
+# Standalone UGV console generated output
+apps/ugv-control-console/build/
+apps/ugv-control-console/test-results/
+apps/ugv-control-console/playwright-report/

@@ -18,6 +18,7 @@ COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/pa
 COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
 COPY apps/pms-api/package.json apps/pms-api/package.json
 COPY apps/pms-web/package.json apps/pms-web/package.json
+COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
 COPY apps/pms-worker/package.json apps/pms-worker/package.json
 COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
 COPY packages/catalog-manager/package.json packages/catalog-manager/package.json

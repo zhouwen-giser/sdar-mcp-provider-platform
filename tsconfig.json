@@ -28,5 +28,10 @@
     "tests/**/*.ts",
     "vitest.config.ts"
   ],
-  "exclude": ["dist", "node_modules", "packages/adapter-protocol/generated"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "packages/adapter-protocol/generated",
+    "apps/ugv-control-console"
+  ]
 }

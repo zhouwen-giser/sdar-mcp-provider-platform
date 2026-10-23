@@ -9,6 +9,8 @@ export default tseslint.config(
     ignores: [
       ".codex/**",
       "**/dist/**",
+      "apps/ugv-control-console/build/**",
+      "apps/ugv-control-console/test-results/**",
       "coverage/**",
       "node_modules/**",
       "packages/adapter-protocol/generated/**",
