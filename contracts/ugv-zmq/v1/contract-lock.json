@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "ugv.zmq-contract-lock/1",
+  "sourceLockSha256": "f18372a49c7b39d9e41df1f7016c870d9d7763228b378bc3717d4815c548aca6",
+  "files": [
+    {
+      "path": "packages/vehicle-zmq-contract/package.json",
+      "sha256": "b79d03476084d79cd482983663c226a0ad7ef17ad36eee363b8f045954a9f536"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/index.ts",
+      "sha256": "6aaa9eadcbb2b956f15f7ee53e03edbfcfe81125f0564495a42e477951868433"
+    },
+    {
+      "path": "deploy/ugv-zmq/task-business.candidate.json",
+      "sha256": "dc69a034bf8eb38747b58b241bd987b25594d403e20ee7b36d898d92e74fcea4"
+    },
+    {
+      "path": "contracts/ugv-zmq/v1/known-gaps.json",
+      "sha256": "98b1f9ea4092ae02730ea068855ea23a5ba667edfc0f5135a445bbe874ae71de"
+    },
+    {
+      "path": "contracts/ugv-zmq/v1/message-inventory.json",
+      "sha256": "cf70a655e52934fceabb14083196a13c159e0522962dff1d63a124c70cc08a9d"
+    },
+    {
+      "path": "contracts/ugv-zmq/v1/fixtures/chassis-reference.json",
+      "sha256": "40bbf35a469bffe5289a731bca84270fb2b328645be48609f1038081ee266740"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/error.ts",
+      "sha256": "fd79cdc3dcb36d42e633e79da218b45686523b004ec5a26273f3ce49268f7887"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/json.ts",
+      "sha256": "1c4bdec9454321585f5d0d5e04ba1cd9d360d20804408d002b6bf3a10d1a3600"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/chassis.ts",
+      "sha256": "f0bad05428f4abef6d602e7dcd515b34e658ad63aadd2570c3c1bb18c3af8d90"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/schema.ts",
+      "sha256": "ae42ad71382c1d8a0d905ff800e00a98fae8301797c9d88e0c080fd50991b329"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/wire.ts",
+      "sha256": "1a701b759faaf82d766fe44aac44d81bba692c4f5bead1f9aa592abcd0364f87"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/profile.ts",
+      "sha256": "e2e6e0d365a88170affdadb69306a6ded53341cf0fb3315a1957ea9cb1983b46"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/capture.ts",
+      "sha256": "37df36d396e2b7daffdf3729675d2e2e2ed7adb8062d09d98f38e9a27b2e032e"
+    }
+  ]
+}

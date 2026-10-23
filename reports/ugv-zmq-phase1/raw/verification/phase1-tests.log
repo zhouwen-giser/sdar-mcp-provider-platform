@@ -1,0 +1,10 @@
+$ vitest run tests/ugv-zmq
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  3 passed (3)
+      Tests  47 passed (47)
+   Start at  23:17:34
+   Duration  2.64s (transform 1.02s, setup 0ms, import 1.65s, tests 472ms, environment 0ms)
+

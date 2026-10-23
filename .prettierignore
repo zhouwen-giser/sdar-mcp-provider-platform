@@ -37,3 +37,8 @@ reports/trajectory-time-history-v1/raw/**
 
 # Immutable inspection command receipts and logs are addressed by their original SHA-256.
 reports/inspection-area-v1/raw/**
+
+# Byte-pinned user protocol snapshots, independent reference vectors and passive wire evidence.
+contracts/ugv-zmq/v1/sources/**
+contracts/ugv-zmq/v1/fixtures/**
+reports/ugv-zmq-phase1/raw/**

@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "ugv.zmq-passive-capture/1",
+  "startedAt": "2026-10-23T15:09:42.097Z",
+  "finishedAt": "2026-10-23T15:09:43.532Z",
+  "durationMs": 1000,
+  "businessCommandsSent": 0,
+  "method": "ZMQ SUB subscriptions only; retain first two messages per observed topic/message ID",
+  "bindingVersion": "zeromq@6.8.0",
+  "libzmqVersion": "4.3.5",
+  "records": [
+    {
+      "component": "chassis",
+      "endpoint": "tcp://192.168.2.63:11001",
+      "prefix": "ipc_message:",
+      "endpointConfirmation": "candidate-not-operator-confirmed",
+      "counts": {
+        "268435456": 1,
+        "268435457": 1,
+        "268435458": 93,
+        "268435488": 1,
+        "268435489": 1
+      },
+      "samples": [
+        {
+          "receivedAt": "2026-10-23T15:09:42.122Z",
+          "frames": [
+            {
+              "bytes": 248,
+              "base64": "aXBjX21lc3NhZ2U6AgAAEAEAAAAAAAAAAAAAAAAAAADUACTjNlbp8wUAAAAx3KFeg14GADHcoV6DXgYAARwEU2/0s1pAxutBQ/C3PUAAAK5bzUB/QAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAANqiYONZZi8/EpFx4///3j6A4AEAAADAOgAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgBAdJfz//+8/5Tod4llmHz9lILbf///OPp6XB/cma/69ulEHUcetZkHorDL+THRKQQAArlvNQH9AAAAAAAAAAAABAQM=",
+              "sha256": "1af093526e90f27bea075615fa2d10d16220c1d33ae1d68566be4a8beae74117"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.133Z",
+          "frames": [
+            {
+              "bytes": 248,
+              "base64": "aXBjX21lc3NhZ2U6AgAAEAEAAAAAAAAAAAAAAAAAAADUAJ/Blnvp8wUAAACjBKJeg14GAKMEol6DXgYAARwEU2/0s1pAxutBQ/C3PUAAAK5bzUB/QAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAANqiYONZZi8/EpFx4///3j6A4AEAAADAOgAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgBAdJfz//+8/5Tod4llmHz9lILbf///OPp6XB/cma/69ulEHUcetZkHorDL+THRKQQAArlvNQH9AAAAAAAAAAAABAQM=",
+              "sha256": "40a27b8df548b670de5d2c9a3c2c0c8b5bde7f0d93a9bd9fd93340d334e00d2e"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.456Z",
+          "frames": [
+            {
+              "bytes": 40,
+              "base64": "aXBjX21lc3NhZ2U6IQAAEAEAAAAAAAAAAAAAAAAAAAAEAMCEAAAAAA==",
+              "sha256": "84b356739238cd4b720eebc60e215d308ed0c8fd659d756eb32d27481b7499e6"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.456Z",
+          "frames": [
+            {
+              "bytes": 52,
+              "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQAMmZAQFVVQVBAAAAAAAAAAAAAA==",
+              "sha256": "c7e30a4075cbd770b2e5b883796970eb27c752c29aaec9c8353752dce86b3553"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.456Z",
+          "frames": [
+            {
+              "bytes": 56,
+              "base64": "aXBjX21lc3NhZ2U6IAAAEAEAAAAAAAAAAAAAAAAAAAAUAOHDLLdKPirvDD8AAGRCxC0xSYNvCkc=",
+              "sha256": "036e7682e938474f6ff1d54635fb70d11bf4e829d075725790fb2b8419e1d2ec"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.456Z",
+          "frames": [
+            {
+              "bytes": 43,
+              "base64": "aXBjX21lc3NhZ2U6AAAAEAEAAAAAAAAAAAAAAAAAAAAHALxGGwEAAAIEZA==",
+              "sha256": "640f2e4fbcc4fdb7377652849967c400b56afee492ba0e38fd2421af2f5f3bf8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "eo",
+      "endpoint": "tcp://192.168.2.63:5556",
+      "prefix": "isr/isr-01/",
+      "endpointConfirmation": "candidate-not-operator-confirmed",
+      "counts": {
+        "isr/isr-01/device_status": 1,
+        "isr/isr-01/task_status": 1
+      },
+      "samples": [
+        {
+          "receivedAt": "2026-10-23T15:09:42.958Z",
+          "frames": [
+            {
+              "bytes": 24,
+              "base64": "aXNyL2lzci0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "9046687c2239c8df8fa1686f18b061276f8974e127182f825b6dbaa3327b6311"
+            },
+            {
+              "bytes": 385,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJjYW1lcmFfb25saW5lIjp0cnVlLCJkYXRhX29yaWdpbiI6InNpbXVsYXRlZCIsImZhdWx0X2NvZGUiOm51bGwsImZhdWx0X21lc3NhZ2UiOm51bGwsImdpbWJhbF9vbmxpbmUiOnRydWUsImdpbWJhbF9waXRjaF9yYWQiOjAuMCwiZ2ltYmFsX3lhd19yYWQiOi0wLjAsIm1vZGUiOiJpZGxlIiwibmF2aWdhdGlvbl92YWxpZCI6dHJ1ZSwicmVhZHkiOnRydWUsInRlbGVjb250cm9sIjpudWxsLCJ6b29tX3JhdGlvIjpudWxsfSwiZGV2aWNlX2lkIjoiaXNyLTAxIiwia2luZCI6ImV2ZW50IiwicHJvdG9jb2wiOiIyLjIiLCJwdWJsaXNoZWRfYXRfdXRjX21zIjoxNzkyNzY4MTgyNDkxLCJ0b3BpYyI6ImRldmljZV9zdGF0dXMifQ==",
+              "sha256": "277ec5fcb1bd22dd39a1a6caf1745a734c7748a7e29e5e0a96dfa8614c27357e"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:42.958Z",
+          "frames": [
+            {
+              "bytes": 22,
+              "base64": "aXNyL2lzci0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "da89dd515cb363e87ce5011e933548a122000da148099d45d48071c1cf4456a2"
+            },
+            {
+              "bytes": 586,
+              "base64": "eyJkYXRhIjp7ImNvbW1hbmQiOnsibWV0aG9kIjoiVGFza0NvbnRyb2wiLCJyZWFzb24iOiJERUFETElORV9FWENFRURFRCIsInJlcXVlc3RfaWQiOiJ3Zi02MWQ2MWY4OS1jYzUyLTQ0YjctOS1wYXUtOTBkYjllMTM0NzE3Iiwic3RhdGUiOiJmYWlsZWQiLCJ0YXNrX2lkIjoidGFzay05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNDYxNSJ9LCJ0YXNrIjp7ImNvbXBsZXRlZF9jeWNsZXMiOm51bGwsImNvdmVyYWdlX2NvbXBsZXRlIjpudWxsLCJjb3ZlcmFnZV9yYXRpbyI6bnVsbCwicHJvZ3Jlc3NfcmF0aW8iOm51bGwsInJlYXNvbiI6IkRFQURMSU5FX0VYQ0VFREVEIiwicmVtYWluaW5nX21zIjowLCJzdGF0ZSI6ImZhaWxlZCIsInRhc2tfaWQiOiJ0YXNrLTliMTk5M2Y2LWM1NmUtNGY4My1hOTg3LTIyN2Q3MTY5MDY3NC00NjE1IiwidGFza190eXBlIjoiQXJlYVNlYXJjaCIsInRvdGFsX2N5Y2xlcyI6bnVsbH19LCJkZXZpY2VfaWQiOiJpc3ItMDEiLCJraW5kIjoiZXZlbnQiLCJwcm90b2NvbCI6IjIuMiIsInB1Ymxpc2hlZF9hdF91dGNfbXMiOjE3OTI3NjgxODI0OTIsInRvcGljIjoidGFza19zdGF0dXMifQ==",
+              "sha256": "652782fd8629a9e78809db3d9fceb2cad90b58381853dcb5eadef8b572b12172"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "simulationEffect",
+      "endpoint": "tcp://192.168.2.63:5558",
+      "prefix": "artillery/artillery-01/",
+      "endpointConfirmation": "candidate-not-operator-confirmed",
+      "counts": {
+        "artillery/artillery-01/device_status": 1,
+        "artillery/artillery-01/task_status": 1
+      },
+      "samples": [
+        {
+          "receivedAt": "2026-10-23T15:09:43.032Z",
+          "frames": [
+            {
+              "bytes": 36,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "8e1242fd7fcc10854451a9a1b2c41c0e7420bb69512097c1b708a20ac3be5580"
+            },
+            {
+              "bytes": 217,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJmYXVsdF9jb2RlIjpudWxsLCJmYXVsdF9tZXNzYWdlIjpudWxsLCJtb2RlIjoiaWRsZSIsInJlYWR5Ijp0cnVlfSwiZGV2aWNlX2lkIjoiYXJ0aWxsZXJ5LTAxIiwia2luZCI6ImV2ZW50IiwicHJvdG9jb2wiOiIxLjAiLCJwdWJsaXNoZWRfYXRfdXRjX21zIjoxNzkyNzY4MTgyNTY3LCJ0b3BpYyI6ImRldmljZV9zdGF0dXMifQ==",
+              "sha256": "a6128542586beeae21498368a3384576b01b52ad25bd744a1c5ed9d7b4c3fe41"
+            }
+          ]
+        },
+        {
+          "receivedAt": "2026-10-23T15:09:43.032Z",
+          "frames": [
+            {
+              "bytes": 34,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "7cf32b2db65941fd4c295d2757d5e805ba0598e71acd79d664d256c0d07da02a"
+            },
+            {
+              "bytes": 510,
+              "base64": "eyJkYXRhIjp7InRhc2siOnsiZWZmZWN0IjoiZGVzdHJveWVkIiwiZXhlY3V0aW9uX2ZpbmlzaGVkIjp0cnVlLCJwb3NpdGlvbiI6eyJlbGxpcHNvaWRfaGVpZ2h0X20iOjUwMC4xMTk5OTk5OTczMTc4LCJsYXRpdHVkZV9kZWciOjI5LjcyMDYwODU1OTMwNzcwNiwibG9uZ2l0dWRlX2RlZyI6MTA2LjgxMzAyODI5MzAzNDJ9LCJyZWFzb24iOm51bGwsInJlcXVlc3RfaWQiOiJ3Zi02MWQ2MWY4OS1jYzUyLTQ0YjctOS1zdHItMzUtNzRkOWY1NmYiLCJzdGF0ZSI6InN1Y2NlZWRlZCIsInRhcmdldF9pZCI6ImRldC05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNDYxNiIsInRhc2tfaWQiOiJhdHRhY2stODc3ZDkwYTgtZDdkMi00YjEzLTk4YTEtZDc3Mjk4ZmExMDQ3LTYifX0sImRldmljZV9pZCI6ImFydGlsbGVyeS0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMS4wIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5Mjc2ODE4MjU2NywidG9waWMiOiJ0YXNrX3N0YXR1cyJ9",
+              "sha256": "efc60088b9d687cdd81520e8fd4579f0c596c136c485f5b62868986b90d8035f"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

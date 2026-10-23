@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "ugv.zmq-phase1-verification/1",
+  "recordedAt": "2026-10-23T15:21:51.348170Z",
+  "baselineCommit": "d26002f127a4152ee1dc034950501be2f182b6ea",
+  "branch": "codex/ugv-zmq-phase1-20261023",
+  "sourceIdentity": "The delivery Git commit pins the final source tree; contract-lock.json independently pins executable wire contract inputs.",
+  "workingDirectory": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "nodeVersion": "22.23.2",
+  "pnpmVersion": "11.13.1",
+  "commandPathPrefix": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin",
+  "businessCommandsSent": 0,
+  "runtimeAdmission": "not_published",
+  "commands": [
+    {
+      "command": "pnpm test:ugv-zmq",
+      "exitCode": 0,
+      "result": "47 tests / 3 files passed",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-tests.log",
+      "logSha256": "500243cfd37f794817a26cd1948ac62fca1332df7b22a32cc8f19e97259b5997"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "command": "pnpm exec eslint packages/vehicle-zmq-contract/src scripts/ugv-zmq tests/ugv-zmq",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-build.log",
+      "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+    },
+    {
+      "command": "pnpm protocol:check:frozen",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-frozen-protocol.log",
+      "logSha256": "ea6a746f74fff4889742e38bc934df3136a014eeca2a115c2246b2f1cdaca4b4"
+    },
+    {
+      "command": "pnpm zmq:contract:check",
+      "exitCode": 0,
+      "result": "17 pinned files / 3 logical contracts verified",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-contract-check.log",
+      "logSha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b"
+    },
+    {
+      "command": "pnpm zmq:preflight --profile deploy/ugv-zmq/deployment.candidate.json --capture reports/ugv-zmq-phase1/raw/passive-publications-20261023.json --report reports/ugv-zmq-phase1/G0-candidate.json",
+      "exitCode": 2,
+      "result": "expected: G0 prerequisites unresolved; 18 passive samples valid",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-preflight.log",
+      "logSha256": "3ff03761e518f96f5713946f99aa6cd1e1c00c2dc9fff6ea371c972a3a0efe26"
+    },
+    {
+      "command": "node --import tsx scripts/ugv-zmq/passive-capture.mjs --profile deploy/ugv-zmq/deployment.candidate.json --binding-directory /tmp/ugv-zmq-phase1-probe/node_modules/zeromq --out /mnt/data/ugv-zmq-migration-20261023/phase1-passive-tool-verification.json --duration-ms 1000",
+      "exitCode": 0,
+      "result": "SUB only; 10 retained samples",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-passive-tool.log",
+      "logSha256": "c708e5b7e9d68837f189947d275b3c0c63916f2274a2e16c46a3ac5b0f3c68ad"
+    },
+    {
+      "command": "pnpm zmq:preflight --profile deploy/ugv-zmq/deployment.candidate.json --capture reports/ugv-zmq-phase1/raw/passive-helper-verification-20261023.json --report reports/ugv-zmq-phase1/G0-passive-helper-verification.json",
+      "exitCode": 2,
+      "result": "expected: G0 prerequisites unresolved; 10 passive samples valid",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-passive-tool-validation.log",
+      "logSha256": "a2e196afded1cf51d178d1a85c86bf7071b78aa2d8bf8a3364ff93f8aa815cc3"
+    },
+    {
+      "command": "docker inspect --format '{{json .Name}} {{json .Config.Image}} {{json .Image}} {{json .State.Status}} {{json .NetworkSettings.Ports}}' gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1 gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1 smpp-ugv-control-console",
+      "exitCode": 0,
+      "result": "read-only image identity and port observation",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-running-images.log",
+      "logSha256": "8659653a19d66dcd76a47e5f513ece35d67cd66c804faec1bcd821b414e11199"
+    },
+    {
+      "command": "pnpm exec prettier --check package.json pnpm-lock.yaml packages/vehicle-zmq-contract contracts/ugv-zmq/v1 deploy/ugv-zmq scripts/ugv-zmq tests/ugv-zmq docs/design/ugv-zmq-migration-20261023.md docs/design/ugv-zmq-migration-review-20261023.md docs/execplans/ugv-zmq-migration-20261023.md reports/ugv-zmq-phase1",
+      "exitCode": 0,
+      "result": "passed; immutable source/reference/raw bytes excluded by .prettierignore",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-format-check.log",
+      "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "expected: preserved source document has two trailing-space lines and an extra EOF blank line",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-source-whitespace-check.log",
+      "logSha256": "f3213773f5393fdfab2f9e663254ca91da8e054afcb5b1a95020e537c1ee2526"
+    },
+    {
+      "command": "git diff --cached --check -- . ':(exclude)contracts/ugv-zmq/v1/sources/**' ':(exclude)reports/ugv-zmq-phase1/raw/**'",
+      "exitCode": 0,
+      "result": "passed; immutable original protocol snapshots and raw evidence excluded",
+      "log": "reports/ugv-zmq-phase1/raw/verification/phase1-diff-check.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "contracts/ugv-zmq/v1/source-lock.json",
+      "sha256": "f18372a49c7b39d9e41df1f7016c870d9d7763228b378bc3717d4815c548aca6"
+    },
+    {
+      "path": "contracts/ugv-zmq/v1/contract-lock.json",
+      "sha256": "9783166e5b15b4fa8159fcb1c02c7c6e0e8f7f937fad14325bd3012350fb9f02"
+    },
+    {
+      "path": "deploy/ugv-zmq/deployment.candidate.json",
+      "sha256": "5ddadaad0ac43df393167fe6f602cded62fa48facb1eb67543e19e055fd92c0c"
+    },
+    {
+      "path": "reports/ugv-zmq-phase1/raw/passive-publications-20261023.json",
+      "sha256": "b41cae49120f654367dcbe11b1b50bb07c04fabb429958f0a7ba1ca0edc0f3af"
+    },
+    {
+      "path": "reports/ugv-zmq-phase1/raw/passive-helper-verification-20261023.json",
+      "sha256": "9c8c641d35c824da97029fc9a712ee269be8d83e6d124d8e51c4119400043bb6"
+    },
+    {
+      "path": "reports/ugv-zmq-phase1/operator-confirmations.json",
+      "sha256": "d879f02884ad36c0c81796f152cf2e254b7b55711bfd4d0fe9fbd008f9862a63"
+    }
+  ]
+}

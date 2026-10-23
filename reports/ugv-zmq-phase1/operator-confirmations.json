@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "ugv.zmq-operator-confirmations/1",
+  "recordedAt": "2026-10-23T15:23:21.177095Z",
+  "authority": "direct_human_reply_in_current_chat",
+  "reply": "是",
+  "confirmedFacts": {
+    "chassisHost": "192.168.2.63",
+    "eoHost": "192.168.2.63",
+    "simulationEffectHost": "192.168.2.63"
+  },
+  "scope": "Host confirmation only. No additional identity, port, ownership or planner policy inferred from the short reply.",
+  "unconfirmed": [
+    "controllerSystemId",
+    "authoritativeDeviceBindings",
+    "simulationId",
+    "providerBinding",
+    "sourceSessionKey",
+    "planner7879Policy",
+    "timeAndCoordinates",
+    "opticalGeometryAndLimits",
+    "serverImplementation",
+    "providerGoldenFrames"
+  ],
+  "completesDeploymentIdentityEvidence": false,
+  "runtimeAdmission": "not_published"
+}

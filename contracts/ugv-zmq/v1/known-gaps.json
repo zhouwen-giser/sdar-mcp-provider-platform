@@ -1,0 +1,29 @@
+[
+  {
+    "code": "CHASSIS_FEEDBACK_UNCORRELATED",
+    "description": "Task feedback and motion control omit a task/request identity; mode/task status omit source sequence and producer epoch.",
+    "resolution": "requires_provider_contract_or_implementation_evidence",
+    "blocks": ["navigation.point", "navigation.route", "navigation.returnHome"]
+  },
+  {
+    "code": "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+    "description": "No service epoch or durable request lookup proves an unresolved action across service restart.",
+    "resolution": "requires_provider_contract_or_implementation_evidence",
+    "blocks": [
+      "navigation.point",
+      "navigation.route",
+      "navigation.returnHome",
+      "recon.area",
+      "recon.circular",
+      "camera.position",
+      "camera.zoom",
+      "simulation.effect"
+    ]
+  },
+  {
+    "code": "INSPECTION_SOURCE_STREAM_NOT_RECOVERABLE",
+    "description": "Per-frame publication may be lost/truncated without task-level sequence, complete summary or full report retrieval.",
+    "resolution": "requires_provider_contract_or_implementation_evidence",
+    "blocks": ["inspection.complete"]
+  }
+]

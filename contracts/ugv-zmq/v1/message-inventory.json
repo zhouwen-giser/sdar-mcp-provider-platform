@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "ugv.zmq-message-inventory/1",
+  "chassis": {
+    "protocolVersion": "2.0",
+    "framing": "single_frame_ascii_topic_colon_binary_little_endian",
+    "payloadMaximumBytes": 65535,
+    "headerBytes": 24,
+    "checksum": "CRC-16/CCITT-FALSE-payload-only",
+    "ad_remote_command": [1, 2, 3, 4, 32],
+    "call_task": [10, 11, 13],
+    "ipc_message": [
+      268435456, 268435457, 268435458, 268435460, 268435488, 268435489, 268435492, 268435496
+    ],
+    "modeRetry": {
+      "waitMilliseconds": 3000,
+      "maximumTransmissions": 3,
+      "retriesApplyTo": "same_mode_setting_only"
+    },
+    "taskFeedbackHasMissionId": false,
+    "periodicTaskStatusHasProducerEpoch": false
+  },
+  "eo": {
+    "protocolVersion": "2.2",
+    "framing": "single_json_request_response_two_frame_topic_json_publication",
+    "jsonMaximumBytes": 65536,
+    "topicMaximumBytes": 128,
+    "requestMethods": ["AreaSearch", "CircularSearch", "TaskControl", "TeleControl"],
+    "publicationTopics": ["device_status", "task_status", "targetlist", "tracklist"],
+    "areaVertices": 4,
+    "areaMustBeStrictConvex": true,
+    "durableRequestLookup": false,
+    "producerEpoch": false,
+    "fullReportReplay": false
+  },
+  "simulationEffect": {
+    "protocolVersion": "1.0",
+    "framing": "single_json_request_response_two_frame_topic_json_publication",
+    "jsonMaximumBytes": 65536,
+    "topicMaximumBytes": 128,
+    "requestMethods": ["AttackTarget"],
+    "publicationTopics": ["device_status", "task_status"],
+    "executionBackendDeclaredByDocument": "ROS_CARLA_referee",
+    "cancelAfterAcceptance": false,
+    "durableRequestLookup": false,
+    "producerEpoch": false
+  },
+  "unsupportedEquivalents": [
+    "native_patrol_task",
+    "relative_distance_motion",
+    "external_target_selection",
+    "standalone_range_request",
+    "global_emergency_stop_confirmation"
+  ]
+}

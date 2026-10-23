@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "ugv.zmq-source-lock/1",
+  "frozenAt": "2026-10-23",
+  "status": "candidate",
+  "contracts": [
+    {
+      "component": "chassis",
+      "protocolVersion": "2.0",
+      "sourcePath": "/home/sz/Documents/zmq/自驾ZMQ对接协议.md",
+      "snapshot": "sources/chassis-v2.0.md",
+      "sha256": "0f15a181f841f2429069f5b7a12a6310ba858b9f2dc1b154fd55e8234c2d2f91",
+      "bytes": 15825,
+      "authority": "user_supplied_document",
+      "providerImplementationVerified": false
+    },
+    {
+      "component": "eo",
+      "protocolVersion": "2.2",
+      "sourcePath": "/home/sz/Documents/zmq/光电ZMQ对接协议.md",
+      "snapshot": "sources/eo-v2.2.md",
+      "sha256": "54aaba0483bfc8df93b8761a345b890ba836ec6c707387906a0a0bba05b6f7ea",
+      "bytes": 50180,
+      "authority": "user_supplied_document",
+      "providerImplementationVerified": false
+    },
+    {
+      "component": "simulationEffect",
+      "protocolVersion": "1.0",
+      "sourcePath": "/home/sz/Documents/zmq/仿真效果ZMQ对接协议.md",
+      "snapshot": "sources/simulation-effect-v1.0.md",
+      "sha256": "f1785ddd3b4ea97636dd0986dfa09641e11c4c03017261fd0263309ad56b7d44",
+      "bytes": 23616,
+      "authority": "user_supplied_document",
+      "providerImplementationVerified": false,
+      "presentationRevision": {
+        "authority": "operator_requested_terminology_revision",
+        "originalSnapshot": "sources/simulation-effect-v1.0-original.md",
+        "originalSha256": "e3cd63525b5f7f06131d6ce048d2563bd7cfc4c6708db881b8d7c2b32dfa92a0",
+        "originalBytes": 22506
+      }
+    }
+  ]
+}

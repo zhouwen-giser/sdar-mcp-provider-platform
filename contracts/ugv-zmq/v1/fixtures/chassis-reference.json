@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "ugv.zmq-reference-fixtures/1",
+  "provenance": "constructed_reference_not_provider_confirmed",
+  "builder": "Python struct little-endian and binascii.crc_hqx; independent of TypeScript implementation",
+  "crcCheckVector": {
+    "ascii": "123456789",
+    "expected": 10673
+  },
+  "vectors": [
+    {
+      "name": "mode-target-point",
+      "hex": "61645f72656d6f74655f636f6d6d616e643a010000000100000000002000ffffffffffffffff04001c1f03000000",
+      "sha256": "cf3e0b78e4c2a9974775ec30c95e1633740ad03200e26c0d0f428fa029e6d028",
+      "expected": {
+        "topic": "ad_remote_command",
+        "messageId": 1,
+        "systemId": "9007199254740993",
+        "targetSystemId": "18446744073709551615",
+        "body": {
+          "type": "mode",
+          "value": 3
+        }
+      }
+    },
+    {
+      "name": "two-point-path",
+      "hex": "63616c6c5f7461736b3a0b000000010000000000000000000000000000004200dc6829000000020000009cc420b072b83d40158c4aea04b45a400000000000000000013a0000002a3a92cb7fb83d402b1895d409b45a4000000000000000000200000000",
+      "sha256": "7ebc420904653651da4c0854d560afcf536b039675a1f377ea36f09e5cb805c6",
+      "expected": {
+        "topic": "call_task",
+        "messageId": 11,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "body": {
+          "type": "pathFollow",
+          "missionId": 41,
+          "taskPoints": [
+            {
+              "latitude": 29.7205,
+              "longitude": 106.8128,
+              "headingAngle": 0.0,
+              "property": 1,
+              "reserved": 58
+            },
+            {
+              "latitude": 29.7207,
+              "longitude": 106.8131,
+              "headingAngle": 0.0,
+              "property": 2,
+              "reserved": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "turnaround-feedback-v421",
+      "hex": "6970635f6d6573736167653a2800001001000000000000000000000000000000170081d001020000000080d55d06b47fc5010040d7c90a40d7c90a",
+      "sha256": "6c3bbfce8f1f154ddc51a936fa51484cc7ac8df9d024a37c81bca85e5961ec21",
+      "expected": {
+        "topic": "ipc_message",
+        "messageId": 268435496,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "body": {
+          "type": "missionFeedback",
+          "status": 1,
+          "missionCorrelation": "not_provided",
+          "turnaroundPoints": [
+            {
+              "type": 0,
+              "longitudeRaw": 106812800,
+              "latitudeRaw": 29720500,
+              "position": {
+                "longitude": 106.8128,
+                "latitude": 29.7205
+              }
+            },
+            {
+              "type": 0,
+              "longitudeRaw": 181000000,
+              "latitudeRaw": 181000000,
+              "position": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "two-failsafe-items",
+      "hex": "6970635f6d6573736167653a21000010010000000000000000000000000000001600a11402000000000300000032000000020100000007000000",
+      "sha256": "b35aed0804f1f6d25c7e93343dcba55e35518b1e947f1b01eda63407d22652f0",
+      "expected": {
+        "topic": "ipc_message",
+        "messageId": 268435489,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "body": {
+          "type": "failsafe",
+          "faults": [
+            {
+              "faultType": 0,
+              "faultLevel": 3,
+              "errorCode": 50
+            },
+            {
+              "faultType": 2,
+              "faultLevel": 1,
+              "errorCode": 7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "localization-uint64-and-order",
+      "hex": "6970635f6d6573736167653a0200001001000000000000000000000000000000d4001828ffffffffffffffff010000000000200000903bb8805e060001158c4aea04b45a409cc420b072b83d400000000000001440000000000000f43f000000000000e03f00000000000000009a9999999999b93f9a9999999999c93f333333333333d33f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f0000000000000000000000000000000000000000000000000000000000005940000000000000694000000000000008407b14ae47e17a843f010403",
+      "sha256": "7621957da3daf3a7efe451f50d94849fa26050b0a9baed9b74d100d03d7f4bbd",
+      "expected": {
+        "topic": "ipc_message",
+        "messageId": 268435458,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "body": {
+          "type": "localization",
+          "timeUs": "18446744073709551615",
+          "systemTimeUs": "9007199254740993",
+          "utcTimeUs": "1792756800000000",
+          "timebase": "unconfirmed",
+          "longitude": 106.8128,
+          "latitude": 29.7205,
+          "velocityEnu": [
+            1.25,
+            0.5,
+            0.0
+          ]
+        }
+      }
+    }
+  ]
+}

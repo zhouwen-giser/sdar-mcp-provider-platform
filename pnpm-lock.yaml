@@ -485,6 +485,12 @@ importers:
 
   packages/vehicle-provider-core: {}
 
+  packages/vehicle-zmq-contract:
+    dependencies:
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
 packages:
 
   '@asamuzakjp/css-color@6.0.5':

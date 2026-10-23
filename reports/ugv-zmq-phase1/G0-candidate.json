@@ -1,0 +1,456 @@
+{
+  "schemaVersion": "ugv.zmq-g0-report/1",
+  "g0Ready": false,
+  "runtimeAdmission": "not_published",
+  "missing": [
+    "SIMULATION_ID_UNCONFIRMED",
+    "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+    "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+    "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+    "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+    "PLANNER_POLICY_UNCONFIRMED",
+    "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+    "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+    "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+    "EVIDENCE_CAPABILITYSCOPE_MISSING",
+    "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+    "EVIDENCE_PLANNERPOLICY_MISSING",
+    "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+  ],
+  "decisions": [
+    {
+      "operation": "state.read",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "navigation.point",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "CHASSIS_FEEDBACK_UNCORRELATED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "navigation.route",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "CHASSIS_FEEDBACK_UNCORRELATED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "navigation.returnHome",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "CHASSIS_FEEDBACK_UNCORRELATED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "recon.area",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "recon.circular",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "camera.position",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "camera.zoom",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "inspection.complete",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "INSPECTION_SOURCE_STREAM_NOT_RECOVERABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    },
+    {
+      "operation": "simulation.effect",
+      "blockers": [
+        "SIMULATION_ID_UNCONFIRMED",
+        "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+        "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+        "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+        "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+        "PLANNER_POLICY_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING",
+        "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+      ],
+      "runtimeAdmission": "not_published"
+    }
+  ],
+  "generatedAt": "2026-10-23T15:17:34.325Z",
+  "profileSha256": "5ddadaad0ac43df393167fe6f602cded62fa48facb1eb67543e19e055fd92c0c",
+  "contract": {
+    "schemaVersion": "ugv.zmq-lock-verification/1",
+    "sourceDocuments": 3,
+    "checkedFiles": [
+      "packages/vehicle-zmq-contract/package.json",
+      "packages/vehicle-zmq-contract/src/index.ts",
+      "deploy/ugv-zmq/task-business.candidate.json",
+      "contracts/ugv-zmq/v1/known-gaps.json",
+      "contracts/ugv-zmq/v1/message-inventory.json",
+      "contracts/ugv-zmq/v1/fixtures/chassis-reference.json",
+      "packages/vehicle-zmq-contract/src/error.ts",
+      "packages/vehicle-zmq-contract/src/json.ts",
+      "packages/vehicle-zmq-contract/src/chassis.ts",
+      "packages/vehicle-zmq-contract/src/schema.ts",
+      "packages/vehicle-zmq-contract/src/wire.ts",
+      "packages/vehicle-zmq-contract/src/profile.ts",
+      "packages/vehicle-zmq-contract/src/capture.ts",
+      "contracts/ugv-zmq/v1/sources/chassis-v2.0.md",
+      "contracts/ugv-zmq/v1/sources/eo-v2.2.md",
+      "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0.md",
+      "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0-original.md"
+    ],
+    "status": "verified"
+  },
+  "capture": {
+    "schemaVersion": "ugv.zmq-capture-report/1",
+    "startedAt": "2026-10-23T14:52:14.955Z",
+    "finishedAt": "2026-10-23T14:52:21.359Z",
+    "businessCommandsSent": 0,
+    "allComponentsObserved": true,
+    "records": [
+      {
+        "component": "chassis",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "counts": {
+          "268435456": 6,
+          "268435457": 6,
+          "268435458": 579,
+          "268435488": 6,
+          "268435489": 6
+        },
+        "samples": [
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:14.971Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435458,
+            "messageType": "localization",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:14.981Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435458,
+            "messageType": "localization",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.095Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435489,
+            "messageType": "failsafe",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.095Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435457,
+            "messageType": "systemState",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.096Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435488,
+            "messageType": "performance",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.097Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435456,
+            "messageType": "missionState",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.095Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435489,
+            "messageType": "failsafe",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.095Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435457,
+            "messageType": "systemState",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.098Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435488,
+            "messageType": "performance",
+            "versionEvidence": "selected_contract_not_in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.098Z",
+            "systemId": "1",
+            "targetSystemId": "0",
+            "messageId": 268435456,
+            "messageType": "missionState",
+            "versionEvidence": "selected_contract_not_in_band"
+          }
+        ],
+        "validSamples": 10,
+        "invalidSamples": 0,
+        "evidenceClass": "passive_observation_not_control_qualification"
+      },
+      {
+        "component": "eo",
+        "endpoint": "tcp://192.168.2.63:5556",
+        "counts": {
+          "isr/isr-01/device_status": 7,
+          "isr/isr-01/task_status": 6
+        },
+        "samples": [
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.158Z",
+            "deviceId": "isr-01",
+            "topic": "device_status",
+            "protocol": "2.2",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.159Z",
+            "deviceId": "isr-01",
+            "topic": "task_status",
+            "protocol": "2.2",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.159Z",
+            "deviceId": "isr-01",
+            "topic": "device_status",
+            "protocol": "2.2",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.159Z",
+            "deviceId": "isr-01",
+            "topic": "task_status",
+            "protocol": "2.2",
+            "versionEvidence": "in_band"
+          }
+        ],
+        "validSamples": 4,
+        "invalidSamples": 0,
+        "evidenceClass": "passive_observation_not_control_qualification"
+      },
+      {
+        "component": "simulationEffect",
+        "endpoint": "tcp://192.168.2.63:5558",
+        "counts": {
+          "artillery/artillery-01/device_status": 6,
+          "artillery/artillery-01/task_status": 6
+        },
+        "samples": [
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.869Z",
+            "deviceId": "artillery-01",
+            "topic": "device_status",
+            "protocol": "1.0",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:15.869Z",
+            "deviceId": "artillery-01",
+            "topic": "task_status",
+            "protocol": "1.0",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.863Z",
+            "deviceId": "artillery-01",
+            "topic": "device_status",
+            "protocol": "1.0",
+            "versionEvidence": "in_band"
+          },
+          {
+            "valid": true,
+            "receivedAt": "2026-10-23T14:52:16.863Z",
+            "deviceId": "artillery-01",
+            "topic": "task_status",
+            "protocol": "1.0",
+            "versionEvidence": "in_band"
+          }
+        ],
+        "validSamples": 4,
+        "invalidSamples": 0,
+        "evidenceClass": "passive_observation_not_control_qualification"
+      }
+    ]
+  },
+  "authority": "static_contract_and_supplied_evidence_not_runtime_or_control_acceptance"
+}

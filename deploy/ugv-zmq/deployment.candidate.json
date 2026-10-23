@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "ugv.zmq-deployment/1",
+  "status": "candidate",
+  "executionDomain": { "mode": "simulation", "simulationId": null },
+  "providerBinding": { "providerId": null, "resourceId": null, "sourceSessionKey": null },
+  "components": {
+    "chassis": {
+      "protocolVersion": "2.0",
+      "commandEndpoint": "tcp://192.168.2.63:10001",
+      "publicationEndpoint": "tcp://192.168.2.63:11001",
+      "systemId": "1",
+      "controllerSystemId": null
+    },
+    "eo": {
+      "protocolVersion": "2.2",
+      "commandEndpoint": "tcp://192.168.2.63:5555",
+      "publicationEndpoint": "tcp://192.168.2.63:5556",
+      "deviceId": "isr-01"
+    },
+    "simulationEffect": {
+      "protocolVersion": "1.0",
+      "commandEndpoint": "tcp://192.168.2.63:5557",
+      "publicationEndpoint": "tcp://192.168.2.63:5558",
+      "deviceId": "artillery-01"
+    }
+  },
+  "planner": { "policy": "pending", "endpoint": "http://192.168.2.63:7879" },
+  "intendedOperations": [
+    "state.read",
+    "navigation.point",
+    "navigation.route",
+    "navigation.returnHome",
+    "recon.area",
+    "recon.circular",
+    "camera.position",
+    "camera.zoom",
+    "inspection.complete",
+    "simulation.effect"
+  ],
+  "evidence": {
+    "deploymentIdentity": null,
+    "timeAndCoordinates": null,
+    "opticalGeometryAndLimits": null,
+    "capabilityScope": null,
+    "serverImplementation": null,
+    "plannerPolicy": null,
+    "providerGoldenFrames": null
+  }
+}

@@ -11,6 +11,9 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
+    "zmq:contract:check": "node --import tsx scripts/ugv-zmq/check-contracts.ts",
+    "zmq:preflight": "node --import tsx scripts/ugv-zmq/preflight.ts",
+    "test:ugv-zmq": "vitest run tests/ugv-zmq",
     "package:development-server": "python3 scripts/package-united-deployment.py",
     "package:wsgs-united-server": "python3 scripts/package-wsgs-united-deployment.py",
     "clean": "rm -rf dist coverage packages/adapter-protocol/generated",
