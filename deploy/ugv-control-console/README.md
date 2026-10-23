@@ -1,10 +1,10 @@
 # 无人车 MCP 控制台
 
-独立中文控制台，默认 HTTPS 19101。通过 SMPP 冻结 MCP 2026-07-28 连接当前无人车，支持坐标输入、简图、导航、侦察、检查、云台、跟踪、任务控制、人工观察决策与导航计划调整。目录和实际可用性决定能否提交。
+独立中文控制台，默认 HTTP 19101。通过 SMPP 冻结 MCP 2026-07-28 连接当前无人车，支持坐标输入、简图、导航、侦察、检查、云台、跟踪、任务控制、人工观察决策与导航计划调整。目录和实际可用性决定能否提交。
 
 ## 部署包安装
 
-Linux 主机需要 Docker Compose、Node.js 22、OpenSSL、iproute2，且已有运行中的 SMPP Runtime 与 PostgreSQL。
+Linux 主机需要 Docker Compose、Node.js 22、iproute2，且已有运行中的 SMPP Runtime 与 PostgreSQL。
 
 ```bash
 sha256sum -c SHA256SUMS
@@ -17,9 +17,9 @@ node deploy.mjs
 
 面板入口使用专用桥接网络，默认网段 `10.252.244.0/24`，通过 `UGV_CONSOLE_EDGE_SUBNET` 可指定其他专用网段。部署前会检查已有 Docker 子网、主机路由以及 `UGV_CONSOLE_PROTECTED_ADDRESSES`（默认当前设备 `192.168.2.63`），冲突时拒绝创建。共享数据库网络保持内部网络，入口网络不采用 Docker 自动分配地址。
 
-默认配置和密钥目录：`~/.smpp-debug/ugv-control-console`。脚本生成随机初始密码、密码哈希、会话密钥、数据库密码和站点证书。账号及初始密码保存在权限 0600 的 `operator-login.txt`，密码不会输出到部署日志。再次运行会复用密钥与账号。
+默认配置和密钥目录：`~/.smpp-debug/ugv-control-console`。脚本生成随机初始密码、密码哈希、会话密钥和数据库密码。账号及初始密码保存在权限 0600 的 `operator-login.txt`，密码不会输出到部署日志。再次运行会复用密钥与账号。
 
-打开 `deployment.json` 中的访问地址，例如 `https://17.26.1.20:19101`。默认站点证书包含主机名和检测到的局域网 IP。将 `tls.crt` 导入操作电脑的受信任证书存储，再重新打开页面；也可以设置 `UGV_CONSOLE_TLS_KEY_FILE` / `UGV_CONSOLE_TLS_CERT_FILE` 提供组织证书。额外主机名通过 `UGV_CONSOLE_PUBLIC_HOSTS` 逗号分隔配置。
+打开 `deployment.json` 中的访问地址，例如 `http://17.26.1.20:19101`。默认 `UGV_CONSOLE_PROTOCOL=http`，局域网直接访问。额外主机名通过 `UGV_CONSOLE_PUBLIC_HOSTS` 逗号分隔配置。登录保持 HttpOnly、SameSite=Strict 会话及同源校验；HTTP 会话不设置 Secure 属性。
 
 已有上游认证时，用 `UGV_CONSOLE_UPSTREAM_AUTHORIZATION_FILE` 提供完整 Authorization 头值。该文件仅挂载到后端，不会发送至浏览器。面板单账号登录用于本地访问及审计，上游 Task 授权域独立保持一致。
 
@@ -49,7 +49,7 @@ SMPP_INSPECTION_TEST_CONFIG_FILE=/absolute/private/config.json pnpm --filter @sd
 docker build -f deploy/ugv-control-console/Dockerfile --build-arg VCS_REF="$(git rev-parse HEAD)" -t smpp/ugv-control-console:local .
 ```
 
-独立配置项见 `server/config.ts`。只有显式 `UGV_CONSOLE_INSECURE_LOCAL=true` 且绑定 loopback 才允许无 TLS 的开发实例。
+独立配置项见 `server/config.ts`。默认 HTTP 绑定 `0.0.0.0`，来源白名单使用 HTTP 地址。开发时可设置 `UGV_CONSOLE_INSECURE_LOCAL=true` 将绑定限制为 loopback。
 
 ## 更新与回退
 

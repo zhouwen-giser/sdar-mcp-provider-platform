@@ -16,6 +16,9 @@ const postgres =
   process.env.UGV_CONSOLE_POSTGRES_CONTAINER ?? "gowm-analysis-dev-f3dc6f4b8e-postgres-1";
 const image = process.env.UGV_CONSOLE_IMAGE;
 if (!image) throw Error("UGV_CONSOLE_IMAGE_REQUIRED");
+const protocol = process.env.UGV_CONSOLE_PROTOCOL ?? "http";
+if (protocol !== "http" && protocol !== "https") throw Error("CONSOLE_PROTOCOL_INVALID");
+const secure = protocol === "https";
 const stateDir = resolve(
   process.env.UGV_CONSOLE_STATE_DIR ?? join(homedir(), ".smpp-debug", "ugv-control-console"),
 );
@@ -131,7 +134,7 @@ const hosts = [
 if (hosts.some((value) => !/^([a-zA-Z0-9_.-]+)$/.test(value))) throw Error("PUBLIC_HOST_INVALID");
 const keyFile = process.env.UGV_CONSOLE_TLS_KEY_FILE ?? join(stateDir, "tls.key"),
   certFile = process.env.UGV_CONSOLE_TLS_CERT_FILE ?? join(stateDir, "tls.crt");
-if (!existsSync(keyFile) || !existsSync(certFile)) {
+if (secure && (!existsSync(keyFile) || !existsSync(certFile))) {
   if (process.env.UGV_CONSOLE_TLS_KEY_FILE || process.env.UGV_CONSOLE_TLS_CERT_FILE)
     throw Error("CONFIGURED_TLS_FILES_REQUIRED");
   const san = hosts
@@ -178,12 +181,17 @@ const compose = {
       environment: {
         UGV_CONSOLE_HOST: "0.0.0.0",
         UGV_CONSOLE_PORT: "19101",
+        UGV_CONSOLE_PROTOCOL: protocol,
         UGV_CONSOLE_MCP_URL: `http://${runtime}:8080/mcp`,
-        UGV_CONSOLE_ORIGINS: hosts.map((h) => `https://${h}:19101`).join(","),
+        UGV_CONSOLE_ORIGINS: hosts.map((h) => `${protocol}://${h}:19101`).join(","),
         UGV_CONSOLE_CREDENTIALS_FILE: "/run/secrets/credentials.json",
         UGV_CONSOLE_DATABASE_URL_FILE: "/run/secrets/database-url",
-        UGV_CONSOLE_TLS_KEY_FILE: "/run/secrets/tls.key",
-        UGV_CONSOLE_TLS_CERT_FILE: "/run/secrets/tls.crt",
+        ...(secure
+          ? {
+              UGV_CONSOLE_TLS_KEY_FILE: "/run/secrets/tls.key",
+              UGV_CONSOLE_TLS_CERT_FILE: "/run/secrets/tls.crt",
+            }
+          : {}),
         ...(upstreamAuthFile
           ? { UGV_CONSOLE_UPSTREAM_AUTHORIZATION_FILE: "/run/secrets/upstream-auth" }
           : {}),
@@ -191,8 +199,9 @@ const compose = {
       volumes: [
         `${credentialsFile}:/run/secrets/credentials.json:ro`,
         `${dbFile}:/run/secrets/database-url:ro`,
-        `${keyFile}:/run/secrets/tls.key:ro`,
-        `${certFile}:/run/secrets/tls.crt:ro`,
+        ...(secure
+          ? [`${keyFile}:/run/secrets/tls.key:ro`, `${certFile}:/run/secrets/tls.crt:ro`]
+          : []),
         ...(upstreamAuthFile ? [`${resolve(upstreamAuthFile)}:/run/secrets/upstream-auth:ro`] : []),
       ],
       networks: ["edge", "station"],
@@ -223,10 +232,15 @@ const receipt = {
   postgres,
   network,
   composeFile,
-  urls: hosts.map((h) => `https://${h}:19101`),
+  protocol,
+  urls: hosts.map((h) => `${protocol}://${h}:19101`),
   loginFile: join(stateDir, "operator-login.txt"),
-  certificate: certFile,
-  certificateSha256: createHash("sha256").update(readFileSync(certFile)).digest("hex"),
+  ...(secure
+    ? {
+        certificate: certFile,
+        certificateSha256: createHash("sha256").update(readFileSync(certFile)).digest("hex"),
+      }
+    : {}),
 };
 writeFileSync(join(stateDir, "deployment.json"), JSON.stringify(receipt, null, 2) + "\n", {
   mode: 0o600,

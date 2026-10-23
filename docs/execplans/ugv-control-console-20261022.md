@@ -2,7 +2,7 @@
 
 ## Objective
 
-Ship a standalone Chinese UGV operator console on LAN HTTPS port 19101, connected only through the frozen SMPP MCP endpoint. Coordinate forms and a scalable schematic, one operator account, shared PostgreSQL command/task journal, no dispatch on reconnect or restart.
+Ship a standalone Chinese UGV operator console on LAN HTTP port 19101 (user transport change on 2026-10-23), connected only through the frozen SMPP MCP endpoint. Coordinate forms and a scalable schematic, one operator account, shared PostgreSQL command/task journal, no dispatch on reconnect or restart.
 
 ## Source and constraints
 
@@ -18,7 +18,7 @@ Base c23f0ec includes the deployed f67fd0a navigation repair. Work in the alread
 
 ## Decisions
 
-One deployment-configured operator; HTTPS with deployment certificate or generated site certificate; 8-hour HttpOnly sessions. PostgreSQL schema ugv_control_console with separate migration. All writes require UUID commandId and durable intent before dispatch. Repeated UUID with changed content conflicts. Unknown dispatch outcomes never auto retry. Task index covers this console and imported IDs, not all Runtime tasks. Read availability before ordinary tool calls; stop has an independent path. Only supported dedicated UGV operations can dispatch. Unknown or disabled operations remain unavailable.
+One deployment-configured operator; HTTP by the user's 2026-10-23 request; 8-hour HttpOnly and SameSite=Strict sessions. PostgreSQL schema ugv_control_console with separate migration. All writes require UUID commandId and durable intent before dispatch. Repeated UUID with changed content conflicts. Unknown dispatch outcomes never auto retry. Task index covers this console and imported IDs, not all Runtime tasks. Read availability before ordinary tool calls; stop has an independent path. Only supported dedicated UGV operations can dispatch. Unknown or disabled operations remain unavailable.
 
 ## Evidence
 
@@ -44,3 +44,13 @@ Record commands, exit codes, source/image hashes, bundle checksum and acceptance
 - Physical control acceptance remains pending operator execution. Native source timestamps remain approximately six seconds ahead of position/platform time, and imported Task `ed90ab34-2c7b-4508-8a33-5b7c54d59c51` remains `working/stopping`. The UI preserves those facts; no freshness or lifecycle guard was relaxed and this task issued no field control command.
 
 Credentials are outside Git under the operator-owned 0700 state directory. Deployment has a previous image configuration for rollback; database records, operator credentials and certificate persist.
+
+## HTTP change requested by user — 2026-10-23
+
+- [x] Default HTTP transport, LAN origin allowlist, HTTP session cookie and protocol-aware health check; retain credentials, records and existing TLS files for rollback.
+- [x] Replace secure-context-only browser randomUUID with cryptographic UUID generation that works on LAN HTTP. Isolated browser lifecycle tests explicitly remove randomUUID.
+- [ ] Validate configuration/authentication and browser controls, build and deploy the HTTP image, refresh the deployment bundle and record direct LAN HTTP acceptance.
+
+HTTP verification before release: 44 console cases and 2 browser cases passed; app typecheck/build, changed-source ESLint and console/deployment Prettier passed. Browser coverage seeds a previous HTTPS Secure cookie and removes randomUUID before submitting isolated navigation/lifecycle commands. HTTP uses `ugv_session_http`, preserving HttpOnly/SameSite and session revocation while avoiding a collision with the previous HTTPS cookie.
+
+Evidence directory: `/mnt/data/ugv-control-console-http-20261023`.

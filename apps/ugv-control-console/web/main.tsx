@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, describe, download } from "./api.js";
+import { newCommandId } from "./command-id.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
 import { parseCoordinates, regionArguments, type Point } from "../shared/coordinates.js";
 import {
@@ -117,7 +118,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
         <button className="primary" disabled={busy}>
           {busy ? "正在登录…" : "进入控制台 →"}
         </button>
-        <small>通过受保护的同源连接访问设备控制接口</small>
+        <small>通过同源接口访问设备控制功能</small>
       </form>
     </main>
   );
@@ -307,7 +308,7 @@ function Console() {
   const submit = async (command: Omit<Command, "commandId" | "catalogHash">, stop = false) => {
     (stop ? setStopPending : setSending)(true);
     setNotice(undefined);
-    const request: Command = { ...command, commandId: crypto.randomUUID(), catalogHash };
+    const request: Command = { ...command, commandId: newCommandId(), catalogHash };
     try {
       const result = await api<CommandRow>("/commands", request);
       if (result.taskId) setSelected(result.taskId);

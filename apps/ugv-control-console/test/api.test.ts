@@ -24,6 +24,9 @@ beforeAll(async () => {
     payload: { username: "operator", password },
   });
   expect(response.statusCode).toBe(200);
+  expect(response.headers["set-cookie"]).toContain("ugv_session_http=");
+  expect(response.headers["set-cookie"]).toContain("HttpOnly; SameSite=Strict");
+  expect(response.headers["set-cookie"]).not.toContain("; Secure");
   cookie = String(response.headers["set-cookie"]).split(";")[0];
 });
 afterAll(async () => f?.close());

@@ -6,6 +6,19 @@ test("operator login, coordinate preview, shared task and original-task lifecycl
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.context().addCookies([
+    {
+      name: "ugv_session",
+      value: "previous-https-session",
+      url: "https://127.0.0.1:19105",
+      secure: true,
+      httpOnly: true,
+      sameSite: "Strict",
+    },
+  ]);
+  await page.addInitScript(() => {
+    Object.defineProperty(crypto, "randomUUID", { value: undefined });
+  });
   await page.goto("/");
   await page.getByLabel("账号", { exact: true }).fill("operator");
   await page.getByLabel("密码", { exact: true }).fill(password);

@@ -19,9 +19,10 @@ FROM ${NODE_BASE_IMAGE} AS runtime
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="SMPP UGV Control Console" org.opencontainers.image.revision=$VCS_REF
 ENV NODE_ENV=production
+ENV UGV_CONSOLE_PROTOCOL=http
 WORKDIR /app
 COPY --from=build --chown=node:node /release/ ./
 USER node
 EXPOSE 19101
-HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD ["node","--input-type=module","-e","import https from 'node:https';const r=https.get('https://127.0.0.1:19101/health/ready',{rejectUnauthorized:false},s=>{s.resume();process.exitCode=s.statusCode===200?0:1});r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exitCode=1})"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD ["node","--input-type=module","-e","const secure=process.env.UGV_CONSOLE_PROTOCOL==='https';const {get}=await import(secure?'node:https':'node:http');const r=get(`${secure?'https':'http'}://127.0.0.1:19101/health/ready`,secure?{rejectUnauthorized:false}:{},s=>{s.resume();process.exitCode=s.statusCode===200?0:1});r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exitCode=1})"]
 CMD ["node","build/server/main.js"]

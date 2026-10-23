@@ -29,6 +29,7 @@ function containsTask(value: unknown, taskId: string, depth = 0): boolean {
   );
 }
 export function createApp(config: Config, service: Service) {
+  const cookieName = config.secure ? "ugv_session" : "ugv_session_http";
   const app = Fastify({
     ...(config.tls ? { https: config.tls } : {}),
     bodyLimit: 1048576,
@@ -65,8 +66,8 @@ export function createApp(config: Config, service: Service) {
     if (
       request.url.startsWith("/api/") &&
       request.url.split("?")[0] !== "/api/session/login" &&
-      (!verifySession(config.credentials, request.headers.cookie) ||
-        !(await service.store.sessionAllowed(sessionToken(request.headers.cookie))))
+      (!verifySession(config.credentials, request.headers.cookie, Date.now(), cookieName) ||
+        !(await service.store.sessionAllowed(sessionToken(request.headers.cookie, cookieName))))
     )
       return reply.code(401).send({ reasonCode: "LOGIN_REQUIRED" });
   });
@@ -115,7 +116,7 @@ export function createApp(config: Config, service: Service) {
     await service.store.createSession(token);
     reply.header(
       "set-cookie",
-      `ugv_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800${config.secure ? "; Secure" : ""}`,
+      `${cookieName}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800${config.secure ? "; Secure" : ""}`,
     );
     return { username: config.credentials.username };
   });
@@ -126,10 +127,10 @@ export function createApp(config: Config, service: Service) {
     }),
   );
   app.post("/api/session/logout", async (request, reply) => {
-    await service.store.revokeSession(sessionToken(request.headers.cookie));
+    await service.store.revokeSession(sessionToken(request.headers.cookie, cookieName));
     reply.header(
       "set-cookie",
-      `ugv_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${config.secure ? "; Secure" : ""}`,
+      `${cookieName}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${config.secure ? "; Secure" : ""}`,
     );
     return { ok: true };
   });
@@ -269,7 +270,7 @@ export function createApp(config: Config, service: Service) {
       }
     };
     const heartbeat = setInterval(() => {
-      if (!verifySession(config.credentials, request.headers.cookie)) {
+      if (!verifySession(config.credentials, request.headers.cookie, Date.now(), cookieName)) {
         controller.abort();
         return;
       }

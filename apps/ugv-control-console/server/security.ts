@@ -27,22 +27,23 @@ export function session(c: Credentials, now = Date.now()): string {
   ).toString("base64url");
   return `${body}.${createHmac("sha256", c.sessionSecret).update(body).digest("base64url")}`;
 }
-export function sessionToken(cookie: string | undefined) {
+export function sessionToken(cookie: string | undefined, name = "ugv_session") {
   return (
     (cookie ?? "")
       .split(";")
       .map((s) => s.trim())
-      .find((s) => s.startsWith("ugv_session="))
-      ?.slice(12) ?? ""
+      .find((s) => s.startsWith(`${name}=`))
+      ?.slice(name.length + 1) ?? ""
   );
 }
 export function verifySession(
   c: Credentials,
   cookie: string | undefined,
   now = Date.now(),
+  name = "ugv_session",
 ): boolean {
   try {
-    const token = sessionToken(cookie);
+    const token = sessionToken(cookie, name);
     if (!token) return false;
     const [body, signature, ...rest] = token.split(".");
     if (!body || !signature || rest.length) return false;
