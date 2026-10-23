@@ -69,11 +69,17 @@ Evidence: `/mnt/data/ugv-navigation-freshness-20261023/REPORT.md`, `SUMMARY.json
 
 ## Reconnaissance availability recovery — 2026-10-23
 
-- [x] Read the actual console state and raw non-retained MQTT. `/ugv/area_recon/status` reports idle/unlocked, while fresh `/ugv/status` repeatedly reports EO task 2630 in state 1 (running). The old recon Task ed90ab34-2c7b-4508-8a33-5b7c54d59c51 uses native mission 38871 and remains stopping after earlier preemption. No persisted execution owns native 2630. The current external occupancy is a separate device fact.
+- [x] Read the actual console state and raw non-retained MQTT. `/ugv/area_recon/status` reports idle/unlocked, while fresh `/ugv/status` repeatedly reports EO task 2630 in state 1 (running). The old recon Task ed90ab34-2c7b-4508-8a33-5b7c54d59c51 uses native mission 38871 and remains stopping after earlier preemption. No persisted execution owns native 2630; its source is uncorrelated. The EO report must still govern channel occupancy independently of the recon submodule's idle report.
 - [x] Implement automatic availability refresh after an explicit check, expiry-aware result labels and external EO diagnostics. Parameter edits invalidate the request; physical commands remain explicit actions.
-- [ ] Run isolated expiry, auto-release, late-response and external occupancy regressions; build/deploy the console update and refresh its bundle.
-- [ ] Resolve the live external EO occupancy if the operator authorizes interrupting task 2630, then verify the actual device report and Task receipts. Do not infer channel release from the separate recon idle report.
+- [x] Run isolated expiry, auto-release, late-response and external occupancy regressions; build/deploy the console update and refresh its bundle.
+- [x] Apply the operator's explicit scope selection: page automatic rechecking only. Do not interrupt or release EO task 2630. This release sends no physical control requests.
 
-Evidence: `/mnt/data/ugv-recon-channel-recovery-20261023`. Operator approval requested for interrupting the unowned external EO task; continue independent UI work while waiting.
+Evidence: `/mnt/data/ugv-recon-channel-recovery-20261023`. The operator answered “仅修复页面自动复核”; physical recovery is outside this release's scope.
 
 Pre-release checks: 4 isolated browser cases passed (including automatic recovery after channel release, expiry labels and late responses after parameter edits); 2 targeted adapter occupancy cases passed (96 unrelated cases skipped). Console build/typecheck, root typecheck and changed-source ESLint passed. The initial new browser test had unsafe-any lint errors; typed JSON parsing repaired those before the successful run. No deployed adapter logic or physical interlock has been relaxed.
+
+Release source: `18d6754326849058f0a72f0aa52bc701513e1f5c`; image `smpp/ugv-control-console:20261023-availability-18d6754`, ID `sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b`. Container healthy. Loopback and LAN HTTP ready endpoints returned 200; the served JavaScript SHA-256 matches the local build and contains the new expiry diagnostics and 2-second refresh. Live acceptance used HTTP/API/static-asset checks; browser automation covered only the isolated fixture.
+
+At `2026-10-23T06:44:12Z` (14:44 Asia/Shanghai), the authenticated read-only area-recon check returned `available / UGV_AVAILABLE`; the device now reported EO task 2631 in state 4 with progress 100. No physical stop or reset was sent by this release. Console command count changed from five to seven during the work, so an unchanged command-count claim is not applicable; the acceptance script calls only login, state, availability, command/task reads and logout. Existing Runtime/adapter/PostgreSQL IDs, images and mounts and all five private files were verified unchanged. Isolated PostgreSQL/MQTT fixtures were removed.
+
+Bundle: `/mnt/data/ugv-recon-channel-recovery-20261023/ugv-control-console-18d675432684.tar.gz`, SHA-256 `0118efcf8fe3213810ea9e88d9b096d56972ce011e34942f92abe0efa24d5fa8`. All seven internal file checks and the outer checksum passed. `REPORT.md`, `SUMMARY.json` and `EVIDENCE_SHA256SUMS` record commands, exit codes and evidence hashes. This closeout changes only this plan; image and bundled source remain pinned to the implementation commit above.
