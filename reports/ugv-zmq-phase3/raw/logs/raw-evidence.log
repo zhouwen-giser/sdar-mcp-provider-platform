@@ -1,0 +1,9 @@
+{
+  "classification": "SIMULATED_ONLY",
+  "sessions": 27,
+  "entries": 2114,
+  "receptions": 1880,
+  "referencedEntries": 81,
+  "rawSha256": "11015dac92dea2282b0711fe099a724a17e1652e538888037c6c1ca4b78318d3",
+  "storedSha256": "54a613fa2833992ee381dd0ae9bfa3d08cec89176fba6c5218aadaecb8d173c6"
+}

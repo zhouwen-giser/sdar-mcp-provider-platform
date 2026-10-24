@@ -1,0 +1,304 @@
+{
+  "schemaVersion": "ugv.zmq-phase3-verification/1",
+  "generatedAt": "2026-10-24T06:40:59.712818+00:00",
+  "baselineCommit": "6ade28aeabf65720207d47a29cb3a6aa267e25ea",
+  "branch": "codex/ugv-zmq-phase3-20261024",
+  "classification": "ISOLATED_SIMULATOR_ONLY",
+  "testCounts": {
+    "southboundContract": 48,
+    "observer": 21,
+    "control": 20,
+    "observerPostgresNative": 8,
+    "controlPostgresNative": 21,
+    "total": 118
+  },
+  "runtimeAdmission": "not_published",
+  "g0Ready": false,
+  "missingG0Prerequisites": 12,
+  "sourceManifest": {
+    "path": "reports/ugv-zmq-phase3/source-manifest.json",
+    "sha256": "534c2f02e3e692778b522186ee2a747ddc575d05b4517d79aab110cce21b0dee"
+  },
+  "rawVerification": {
+    "classification": "SIMULATED_ONLY",
+    "sessions": 27,
+    "entries": 2114,
+    "receptions": 1880,
+    "referencedEntries": 81,
+    "rawSha256": "11015dac92dea2282b0711fe099a724a17e1652e538888037c6c1ca4b78318d3",
+    "storedSha256": "54a613fa2833992ee381dd0ae9bfa3d08cec89176fba6c5218aadaecb8d173c6"
+  },
+  "commands": [
+    {
+      "name": "native-control-postgres",
+      "argv": ["node", "node_modules/vitest/vitest.mjs", "run", "tests/ugv-zmq-control-postgres/"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 20.856,
+      "log": "reports/ugv-zmq-phase3/raw/logs/native-control-postgres.log.gz",
+      "sha256": "00741305567484de9befa58ea58ce39968bcbb1bd03479eaae786f441ca56d2b",
+      "encoding": "gzip",
+      "uncompressedSha256": "7ffd8480d693a4c62fe7be7bf33a65d66172e2811020b4ba94454843f60e89a2"
+    },
+    {
+      "name": "native-observer-postgres",
+      "argv": ["node", "node_modules/vitest/vitest.mjs", "run", "tests/ugv-zmq-observer-postgres/"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 7.578,
+      "log": "reports/ugv-zmq-phase3/raw/logs/native-observer-postgres.log.gz",
+      "sha256": "16aee132c42bc4a8ffde72e0f4d16b877927abda8fb2ac3532aea64688d91d7a",
+      "encoding": "gzip",
+      "uncompressedSha256": "95f4bcede1ede554f37f31d1c9c0b4ceac56373e224939b4a83d474daa85d06c"
+    },
+    {
+      "name": "contracts",
+      "argv": ["node", "--import", "tsx", "scripts/ugv-zmq/check-contracts.ts"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.365,
+      "log": "reports/ugv-zmq-phase3/raw/logs/contracts.log",
+      "sha256": "c5eb8a606eef0a5bbf8deb4e71efbe2bdb0f573b6b87834d1c77b2c6a09eae35"
+    },
+    {
+      "name": "preflight-unqualified",
+      "argv": ["node", "--import", "tsx", "scripts/ugv-zmq/preflight.ts"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "elapsedSeconds": 0.365,
+      "log": "reports/ugv-zmq-phase3/raw/logs/preflight-unqualified.log",
+      "sha256": "33b9c06d547c928dc7a4768be14b9c493378798f170103eab4a936f9fea076dd"
+    },
+    {
+      "name": "frozen-northbound",
+      "argv": ["node", "scripts/protocol/check-frozen-contract.mjs"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.064,
+      "log": "reports/ugv-zmq-phase3/raw/logs/frozen-northbound.log",
+      "sha256": "38f5f2e11e15c3314a2fba84f3374772e950fc8c988fe127aabf35867dd5a4ae"
+    },
+    {
+      "name": "types",
+      "argv": ["node", "node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.json"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 19.904,
+      "log": "reports/ugv-zmq-phase3/raw/logs/types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unit-contract-observer-control",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/ugv-zmq/",
+        "tests/ugv-zmq-observer/",
+        "tests/ugv-zmq-control/"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 4.523,
+      "log": "reports/ugv-zmq-phase3/raw/logs/unit-contract-observer-control.log.gz",
+      "sha256": "7c885f7860e951aa050a749e238129f9bb1a55c127670517cf7a81264e786d79",
+      "encoding": "gzip",
+      "uncompressedSha256": "09f4469069a74817b39b07e4402bce205726193567dd442ebb1c14f71cdc6126"
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "packages/vehicle-zmq-control/src",
+        "packages/vehicle-zmq-observer/src/observer.ts",
+        "packages/vehicle-zmq-observer/src/driver.ts",
+        "tests/ugv-zmq-control/",
+        "tests/ugv-zmq-control-postgres/",
+        "scripts/ugv-zmq/verify-control-evidence.ts"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 9.835,
+      "log": "reports/ugv-zmq-phase3/raw/logs/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "proto-generate",
+      "argv": ["node", "scripts/generate-proto.mjs"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.615,
+      "log": "reports/ugv-zmq-phase3/raw/logs/proto-generate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build",
+      "argv": ["node", "node_modules/typescript/bin/tsc", "-p", "tsconfig.build.json"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 19.051,
+      "log": "reports/ugv-zmq-phase3/raw/logs/build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "raw-evidence",
+      "argv": [
+        "node",
+        "dist/scripts/ugv-zmq/verify-control-evidence.js",
+        "reports/ugv-zmq-phase3/raw/simulated-receptions.ndjson.gz",
+        "reports/ugv-zmq-phase3/raw/control-results.json"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.468,
+      "log": "reports/ugv-zmq-phase3/raw/logs/raw-evidence.log",
+      "sha256": "029a2eaeaf10828fa866a35a8a05b7ab9383b696bf4cdae0c46cc97775af6138"
+    },
+    {
+      "name": "format",
+      "argv": [
+        "node",
+        "node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "packages/vehicle-zmq-control",
+        "packages/vehicle-zmq-observer/src/observer.ts",
+        "packages/vehicle-zmq-observer/src/driver.ts",
+        "tests/ugv-zmq-control",
+        "tests/ugv-zmq-control-postgres",
+        "scripts/ugv-zmq/verify-control-evidence.ts",
+        "deploy/ugv-zmq/CONTROL.md",
+        "docs/design/ugv-zmq-migration-20261023.md",
+        "docs/execplans/ugv-zmq-migration-20261023.md",
+        "docs/execplans/ugv-zmq-control-phase3-20261024.md",
+        "reports/ugv-zmq-phase3/REPORT.md",
+        "reports/ugv-zmq-phase3/source-manifest.json",
+        "reports/ugv-zmq-phase3/verification.json",
+        "package.json"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.718,
+      "log": "reports/ugv-zmq-phase3/raw/logs/format.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "name": "diff-check",
+      "argv": ["git", "diff", "--cached", "--check"],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.016,
+      "log": "reports/ugv-zmq-phase3/raw/logs/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "reports/ugv-zmq-phase3/raw/cleanup.json",
+      "bytes": 308,
+      "sha256": "49812f78c64a882d8ad6a38f8d3a23b3471aca887d2597e056c15833b57b0873"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/control-results.json",
+      "bytes": 188892,
+      "sha256": "e6d1476a59112c35397cefcc65726f23105366a710231a44c809af56f923b78c"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/environment.json",
+      "bytes": 2003,
+      "sha256": "143790bd2e0c91fbd9af680f9aea1b285755b2b25cec6a37093932c4bbf47b1a"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/contracts.log",
+      "bytes": 1018,
+      "sha256": "c5eb8a606eef0a5bbf8deb4e71efbe2bdb0f573b6b87834d1c77b2c6a09eae35"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/frozen-northbound.log",
+      "bytes": 91,
+      "sha256": "38f5f2e11e15c3314a2fba84f3374772e950fc8c988fe127aabf35867dd5a4ae"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/native-control-postgres.log.gz",
+      "sha256": "00741305567484de9befa58ea58ce39968bcbb1bd03479eaae786f441ca56d2b",
+      "bytes": 218,
+      "uncompressedSha256": "7ffd8480d693a4c62fe7be7bf33a65d66172e2811020b4ba94454843f60e89a2"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/native-observer-postgres.log.gz",
+      "sha256": "16aee132c42bc4a8ffde72e0f4d16b877927abda8fb2ac3532aea64688d91d7a",
+      "bytes": 216,
+      "uncompressedSha256": "95f4bcede1ede554f37f31d1c9c0b4ceac56373e224939b4a83d474daa85d06c"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/preflight-unqualified.log",
+      "bytes": 9439,
+      "sha256": "33b9c06d547c928dc7a4768be14b9c493378798f170103eab4a936f9fea076dd"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/proto-generate.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/raw-evidence.log",
+      "bytes": 296,
+      "sha256": "029a2eaeaf10828fa866a35a8a05b7ab9383b696bf4cdae0c46cc97775af6138"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/unit-contract-observer-control.log.gz",
+      "sha256": "7c885f7860e951aa050a749e238129f9bb1a55c127670517cf7a81264e786d79",
+      "bytes": 219,
+      "uncompressedSha256": "09f4469069a74817b39b07e4402bce205726193567dd442ebb1c14f71cdc6126"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/simulated-receptions.ndjson.gz",
+      "bytes": 398840,
+      "sha256": "54a613fa2833992ee381dd0ae9bfa3d08cec89176fba6c5218aadaecb8d173c6"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/format.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "reports/ugv-zmq-phase3/raw/logs/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "No control command sent to 192.168.2.63.",
+    "No running Runtime/adapter/console image or port changed.",
+    "Simulated wire execution and receiver integrity are not field stopping or source-epoch qualification.",
+    "Formal MCP, TaskBusiness, GOWM routes, catalog and SDAR assembly remain later gates."
+  ]
+}

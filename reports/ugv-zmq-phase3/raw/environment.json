@@ -1,0 +1,77 @@
+{
+  "classification": "SIMULATED_ONLY",
+  "node": "v22.23.2",
+  "pnpm": "11.13.1",
+  "native": {
+    "libzmq": "4.3.5",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "postgres": "17.10",
+  "postgresImage": "postgres:17.10-alpine3.23",
+  "postgresImageId": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+  "runningServices": [
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "imageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "ports": {
+        "8080/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "19100"
+          }
+        ],
+        "9229/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9229"
+          }
+        ]
+      }
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1",
+      "imageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "ports": {
+        "7010/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "17010"
+          }
+        ],
+        "9229/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9230"
+          }
+        ]
+      }
+    },
+    {
+      "name": "/smpp-ugv-control-console",
+      "imageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+      "ports": {
+        "19101/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "19101"
+          }
+        ]
+      }
+    }
+  ],
+  "primaryWorktreeStatus": [
+    " M .gitignore",
+    " M deploy/united/README.md",
+    " M deploy/united/deploy.mjs",
+    " M deploy/united/extract.py",
+    " M package.json",
+    " M scripts/package-development-server.mjs",
+    " M scripts/package-united-deployment.py",
+    "?? deploy/united-wsgs/",
+    "?? scripts/package-wsgs-united-deployment.py",
+    "?? scripts/united_bundle.py",
+    "?? scripts/verify-wsgs-united-deployment.py",
+    "?? tests/deployment/"
+  ]
+}

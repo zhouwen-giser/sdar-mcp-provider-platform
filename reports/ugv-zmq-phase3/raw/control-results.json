@@ -1,0 +1,4473 @@
+{
+  "classification": "SIMULATED_ONLY",
+  "evidence": [
+    {
+      "case": "camera",
+      "taskId": "e50febb9-b330-430e-b9d8-c998775dbcfc",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "25",
+              "entryHash": "93f558f64f02eb84aaa61dda0114714e269ffae3ad07e9fcb0ca1aba835dd9b8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "33",
+              "entryHash": "5558e2d6e131c8dd9c8a4e68edbdd0bf625649d9dcde0432ec151d11377dd41e",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "16c22cebcecd2d7942c0712a575ce83251f1c89bd352d22d2d8b1fba7b07cbd8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "baa9d5f4d1d8acc04b2e3273cfc56a0a8e57bffc30aebc35dbcaeee4d51657a8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "56",
+              "entryHash": "f5b57ebcdf3c5800df7c1cb6e9440279685ba1e8df5f8ec16db6b35b6ae34c15",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "b480c75a6520b78a83bbdb9a3dde947b337319ba3f712bd47ea04a6eb1a2159f",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "e50febb9-b330-430e-b9d8-c998775dbcfc",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 20,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:02.861Z",
+        "updatedAt": "2026-10-24T06:34:03.104Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_CAMERA_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:03.104Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:02.857Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 7,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0xODc3ODJhZS0zNGY0LTQzNDUtOWM1Yi1lOTg4ODNlMzQxM2EiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-27b77788-62a6-484a-846a-757c109c431f",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-187782ae-34f4-4345-9c5b-e98883e3413a"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-187782ae-34f4-4345-9c5b-e98883e3413a"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:02.878Z",
+              "requestId": "req-187782ae-34f4-4345-9c5b-e98883e3413a",
+              "dispatchAt": "2026-10-24T06:34:02.887Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:02.897Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "b29d4a18-883e-4dc0-bbaa-7b39b2b9bb3d",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "4f242ac3dfb34c8569a2942dc5ce556739a8e72ea35f5854e746592ef09ac0b3",
+          "startedAt": "2026-10-24T06:34:02.864Z",
+          "deadlineAt": "2026-10-24T06:34:12.864Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "41152fca5854b6d327384d0daddd63130dd547d4768e5cb8d4ce7125eb341e0a",
+            "ce37ccaf710c024a23ed9466c9d008ab22c97d20b98697e0eea7d5deda75b9a5",
+            "f247e70a99701f9ee317f919cc22238b298e279859201e87b129676a12478416"
+          ],
+          "lastCommand": "zmq-camera-27b77788-62a6-484a-846a-757c109c431f",
+          "modeAttempt": 0,
+          "requestHash": "864f7aaf613e429d46c4b750603de1c74be82a06822a2ce558478761473fe5bd",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS04NmU0MTRmZC0wZjJjLTRlMTQtODk0Mi02OGZmYjJjZmRjM2UiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-59912748-d584-4535-bd0b-7e440bf63dac",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:02.885Z",
+            "requestId": "req-86e414fd-0f2c-4e14-8942-68ffb2cfdc3e",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 6,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 6,
+          "taskBaseline": 6,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "25",
+              "entryHash": "93f558f64f02eb84aaa61dda0114714e269ffae3ad07e9fcb0ca1aba835dd9b8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "33",
+              "entryHash": "5558e2d6e131c8dd9c8a4e68edbdd0bf625649d9dcde0432ec151d11377dd41e",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "16c22cebcecd2d7942c0712a575ce83251f1c89bd352d22d2d8b1fba7b07cbd8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "baa9d5f4d1d8acc04b2e3273cfc56a0a8e57bffc30aebc35dbcaeee4d51657a8",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "56",
+              "entryHash": "f5b57ebcdf3c5800df7c1cb6e9440279685ba1e8df5f8ec16db6b35b6ae34c15",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "b480c75a6520b78a83bbdb9a3dde947b337319ba3f712bd47ea04a6eb1a2159f",
+              "sessionId": "cfd071df-2784-4c88-84ba-371cce942269",
+              "partitionHash": "1a3af2cba2119f23bb40ce80230710f5c58749c2e33d827e4bd6165d67c2e2f9"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "864f7aaf613e429d46c4b750603de1c74be82a06822a2ce558478761473fe5bd",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "4b2a6de5-9a62-44bc-b9ec-cd05af7b2ec3",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "26cb7132-1831-4f79-9765-8a917797aeb6",
+        "downstreamMissionIds": []
+      },
+      "journal": [
+        {
+          "phase": "PRIMARY",
+          "state": "ACCEPTED",
+          "stepId": "zmq-camera-27b77788-62a6-484a-846a-757c109c431f",
+          "taskId": "e50febb9-b330-430e-b9d8-c998775dbcfc",
+          "toolName": "TeleControl",
+          "resultHash": "0f6a198907e2d12ec73f0ff2524033afb60ddfb297034d74c13398c4cf0a9af1",
+          "completedAt": "2026-10-24T06:34:02.897Z",
+          "argumentHash": "35a049ebbce29829c7d657335697f1fdc84c9a33e5bb1cfcc9944bd2d116c406",
+          "dispatchedAt": "2026-10-24T06:34:02.887Z",
+          "intentPersistedAt": "2026-10-24T06:34:02.878Z"
+        },
+        {
+          "phase": "CANCEL",
+          "state": "INTENT_PERSISTED",
+          "stepId": "zmq-stop-59912748-d584-4535-bd0b-7e440bf63dac",
+          "taskId": "e50febb9-b330-430e-b9d8-c998775dbcfc",
+          "toolName": "TeleControl",
+          "argumentHash": "b06de0d02c8d741362bc3d83811c6e33c53ade11875d254d9184cd1256d3af95",
+          "intentPersistedAt": "2026-10-24T06:34:02.885Z"
+        }
+      ],
+      "committed": 62
+    },
+    {
+      "case": "navigation",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "23",
+              "entryHash": "30ed3f99fc44e302f340148df25fcfea690f0c95e1f4d6e1b9e2076b7fb7a63b",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "8463fe9c977e547374c9ba79422095fb255358e603d57ad6b0d26d12d56471bf",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "56",
+              "entryHash": "b3504312d456395268786cf943ff663fc38cfb968b8b7b5429f76378ea5f9be2",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "82",
+              "entryHash": "6d31de835cd7cce1831eec415aed90b5010c7f790a92f810d73e6914eb161a9f",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "97",
+              "entryHash": "bae19c8a7ad5e41622b95b53e4a4c915436c9a268560345f9b445231649d7551",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "104",
+              "entryHash": "040f2b91ee4fe8cf0df3170442e6b0745185f60afb6ac2c3ab5c1f7baa787d99",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "107",
+              "entryHash": "54fa37243547039a7814ab385bfb4bff318ae21f280f0e871cbd4efc5a40afc4",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "1495467335",
+          "nativeOutcome": "completed",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "b5fd40b8-2d41-4f1f-83ba-4d4004659f6a",
+        "tracks": [
+          "chassis"
+        ],
+        "evidence": [],
+        "revision": 30,
+        "arguments": {
+          "operation": {
+            "name": "navigation.point",
+            "params": {
+              "destination": {
+                "latitude": 29.71952521,
+                "longitude": 106.81307318
+              },
+              "speedLimitMps": 1,
+              "obstacleAvoidance": true
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:03.374Z",
+        "updatedAt": "2026-10-24T06:34:03.724Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_TASK_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:03.724Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:03.372Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 78,
+          "commands": [
+            {
+              "action": "mode",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAP7/////////AQAAAAAAAAAEABwfAwAAAA=="
+              ],
+              "method": "chassis.mode",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-mode-b931d2c7-aad8-401e-afb5-169da4cbbfa2",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.391Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.395Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.399Z"
+            },
+            {
+              "action": "speed",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAP7/////////AQAAAAAAAAAEAORYAACAPw=="
+              ],
+              "method": "chassis.speed",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-speed-566eb063-0c61-4657-a4bf-d14ba64a655b",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.411Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.416Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.422Z"
+            },
+            {
+              "action": "obstacle",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAP7/////////AQAAAAAAAAABANHxAQ=="
+              ],
+              "method": "chassis.obstacle",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-obstacle-68527237-9d44-4cd3-934f-e6f3caf9721f",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.428Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.431Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.438Z"
+            },
+            {
+              "action": "configure",
+              "frames": [
+                "Y2FsbF90YXNrOgoAAAD+/////////wEAAAAAAAAAJQAPaEcFI1kBAAAA+JjdzTK4PUC0VhdkCbRaQAAAAAAAAAAAAgAAAAA="
+              ],
+              "method": "chassis.configure",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-configure-1e13b0de-960f-43b2-b119-93e2b6f23a5d",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.445Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.453Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.457Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEAHTyAQAAAA=="
+              ],
+              "method": "chassis.start",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-start-31dff299-e1ab-44fd-a2eb-b682ac2b2ef0",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.499Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.502Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.507Z"
+            },
+            {
+              "action": "pause",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEAKhpAgAAAA=="
+              ],
+              "method": "chassis.pause",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-pause-3b5891d2-c3d9-4f6c-a2a6-cc8764fb5ef4",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.531Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.535Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.540Z"
+            },
+            {
+              "action": "resume",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEABwfAwAAAA=="
+              ],
+              "method": "chassis.resume",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-resume-d81b6762-bb4e-451b-81da-8473d4f10dfd",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:03.668Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:03.673Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.677Z"
+            }
+          ],
+          "controls": [
+            {
+              "hash": "e7b3624c62487c689d962575b55c7c3fb27e920f178159641607a43910789a45",
+              "action": "pause",
+              "commandId": "5cdd9954-f58c-472e-918f-12a556d2703c"
+            },
+            {
+              "hash": "13d674a67eb0ca7509fa542d4207c45e1464b8b80bc9fc41406010c7c1f7fba7",
+              "action": "resume",
+              "commandId": "54b29534-508a-4eca-94b7-07cb87186054"
+            }
+          ],
+          "commandId": "452ddd77-e917-4a7b-8192-0b5f7b996c9b",
+          "component": "chassis",
+          "occupancy": "released",
+          "scopeHash": "d27132c6fbc20e00b7d0c8b8776533f0dcb44a27485f7d0a9f3a6bacea11f28a",
+          "startedAt": "2026-10-24T06:34:03.377Z",
+          "deadlineAt": "2026-10-24T06:34:13.377Z",
+          "generation": 0,
+          "modeSentAt": "2026-10-24T06:34:03.391Z",
+          "stopReason": "NATIVE_COMPLETED",
+          "stopSentAt": "2026-10-24T06:34:03.720Z",
+          "writerKeys": [
+            "80f6bb1cc8bfbad534039f9795d8259e60fe665fabdf5093119c92c5535a3638",
+            "d89eb5b1ee033a32f3c0614a552b798d58faab6b11011cfb2cde3b738865345c",
+            "f841240d68631b39b89ccee5760fe6a57c7aeb299323788d9cdbab421737e95e"
+          ],
+          "lastCommand": "zmq-resume-d81b6762-bb4e-451b-81da-8473d4f10dfd",
+          "modeAttempt": 1,
+          "requestHash": "80ed8defcc1b9011565e77b1b90a5558c8c6897d4616bc33c2346996ccb60786",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEADFOBAAAAA=="
+            ],
+            "method": "chassis.stop",
+            "status": "intent",
+            "stepId": "zmq-stop-b770ee8e-ec5b-4e67-9d5e-e9ab6fdc3a17",
+            "response": null,
+            "component": "chassis",
+            "createdAt": "2026-10-24T06:34:03.449Z",
+            "requestId": null,
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 10,
+          "nativeReason": null,
+          "nativeTaskId": "1495467335",
+          "stopBaseline": 92,
+          "taskBaseline": 24,
+          "nativeOutcome": "completed",
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "23",
+              "entryHash": "30ed3f99fc44e302f340148df25fcfea690f0c95e1f4d6e1b9e2076b7fb7a63b",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "8463fe9c977e547374c9ba79422095fb255358e603d57ad6b0d26d12d56471bf",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "56",
+              "entryHash": "b3504312d456395268786cf943ff663fc38cfb968b8b7b5429f76378ea5f9be2",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "82",
+              "entryHash": "6d31de835cd7cce1831eec415aed90b5010c7f790a92f810d73e6914eb161a9f",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "97",
+              "entryHash": "bae19c8a7ad5e41622b95b53e4a4c915436c9a268560345f9b445231649d7551",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "104",
+              "entryHash": "040f2b91ee4fe8cf0df3170442e6b0745185f60afb6ac2c3ab5c1f7baa787d99",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            },
+            {
+              "ordinal": "107",
+              "entryHash": "54fa37243547039a7814ab385bfb4bff318ae21f280f0e871cbd4efc5a40afc4",
+              "sessionId": "21e542e7-cafa-4fba-a5b2-d573c72ab8c1",
+              "partitionHash": "65dbe9adb4b00ec5203f94a2813bbae81c42501b99fe7c827ae6772ad979ec58"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:06.720Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "80ed8defcc1b9011565e77b1b90a5558c8c6897d4616bc33c2346996ccb60786",
+        "operationName": "navigation.point",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "a57f037c-6503-449f-b479-a58cf64932aa",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "7a9de6c3-2973-4289-b904-4aec87a37e4e",
+        "downstreamMissionIds": [
+          "1495467335"
+        ]
+      },
+      "commands": [
+        {
+          "component": "chassis",
+          "at": 1792823643399,
+          "request": {
+            "type": "mode",
+            "value": 3
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643422,
+          "request": {
+            "type": "speedLimit",
+            "metresPerSecond": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643438,
+          "request": {
+            "type": "obstacleAvoidance",
+            "value": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643458,
+          "request": {
+            "type": "targetPoint",
+            "missionId": 1495467335,
+            "taskPoints": [
+              {
+                "latitude": 29.71952521,
+                "longitude": 106.81307318,
+                "headingAngle": 0,
+                "property": 2,
+                "reserved": 0
+              }
+            ]
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643507,
+          "request": {
+            "type": "motionControl",
+            "value": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643541,
+          "request": {
+            "type": "motionControl",
+            "value": 2
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823643677,
+          "request": {
+            "type": "motionControl",
+            "value": 3
+          }
+        }
+      ],
+      "archive": {
+        "status": "stopped",
+        "pendingRecords": 0,
+        "pendingBytes": 0,
+        "committedEvents": 113,
+        "receivedMessages": 104,
+        "committedReceptions": 104,
+        "unconfirmedReceptions": 0,
+        "locallyDiscardedMessages": 0,
+        "failureCode": null,
+        "failureRecorded": null
+      }
+    },
+    {
+      "case": "optical_lifecycle",
+      "final": {
+        "state": "CANCELLED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "17",
+              "entryHash": "2f4c58d5ab628dc3835ead20f33f2b546af53fdcebddba7ec9e8222308db5bf2",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "26",
+              "entryHash": "a3a33c3b420cea8132931bbec40c6f1a4a0133eac4871d7fad2dcc5cc00a8f0e",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "ccb977b4131dac420766613ee28e90c7ee00154e60feafba9841e15086006c78",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "5512a82dd24c2edeb663e0f3fc7965e1e3ad6077e6bdb029b13f33000e4c3fac",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "49",
+              "entryHash": "30e845e183349ee0194235d98d9be9c91c7d0f8a2a6896564aa6cb60a0bafdde",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "50",
+              "entryHash": "7b06f37d72491dc845e280d8d8a81f049106f85cc1a7af28f3e90728c1b3ad99",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "native-7e557500-a99c-446f-b010-fc940db9667d",
+          "nativeOutcome": "canceled",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "0408bf80-c063-4e09-81ec-e3b524358e36",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 23,
+        "arguments": {
+          "operation": {
+            "name": "recon.area",
+            "params": {
+              "region_wgs84": [
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                }
+              ],
+              "search_strategy": "recognize",
+              "task_timeout_ms": 300000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:03.964Z",
+        "updatedAt": "2026-10-24T06:34:04.108Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "CLIENT_REQUESTED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:04.108Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:03.960Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 35,
+          "commands": [
+            {
+              "action": "configure",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1lMDIwNDc4NS04NGRlLTQ5OTUtYTkyYS04Yjk0ZWRmODNiYTAiLCJtZXRob2QiOiJBcmVhU2VhcmNoIiwicGFyYW1zIjp7InJlZ2lvbl93Z3M4NCI6W3sibGF0aXR1ZGVfZGVnIjoyOSwibG9uZ2l0dWRlX2RlZyI6MTA2LCJlbGxpcHNvaWRfaGVpZ2h0X20iOjEwfSx7ImxhdGl0dWRlX2RlZyI6MjksImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNiwiZWxsaXBzb2lkX2hlaWdodF9tIjoxMH1dLCJ0YXNrX3RpbWVvdXRfbXMiOjk5ODksInNlYXJjaF9zdHJhdGVneSI6InJlY29nbml6ZSJ9fQ=="
+              ],
+              "method": "AreaSearch",
+              "status": "accepted",
+              "stepId": "zmq-configure-3c269357-73e6-47ef-9373-da651c5b9583",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "AreaSearch",
+                "command": {
+                  "state": "accepted",
+                  "method": "AreaSearch",
+                  "reason": null,
+                  "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+                  "request_id": "req-e0204785-84de-4995-a92a-8b94edf83ba0"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-e0204785-84de-4995-a92a-8b94edf83ba0"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:03.977Z",
+              "requestId": "req-e0204785-84de-4995-a92a-8b94edf83ba0",
+              "dispatchAt": "2026-10-24T06:34:03.981Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:03.989Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS03MzMyMGQyOS04MTM5LTQzNmItODllOS05ZWExYWM1NGQwNmQiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTdlNTU3NTAwLWE5OWMtNDQ2Zi1iMDEwLWZjOTQwZGI5NjY3ZCIsImFjdGlvbiI6InN0YXJ0In19"
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-start-f9045ae4-db4a-4e0b-89e3-452d96e8e215",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+                  "request_id": "req-73320d29-8139-436b-89e9-9ea1ac54d06d"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-73320d29-8139-436b-89e9-9ea1ac54d06d"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.002Z",
+              "requestId": "req-73320d29-8139-436b-89e9-9ea1ac54d06d",
+              "dispatchAt": "2026-10-24T06:34:04.008Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:04.014Z"
+            },
+            {
+              "action": "pause",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS03Nzc3Y2IxNS0zM2FkLTQ5NjAtOTNmYS03NWNjN2QzMTA2YmQiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTdlNTU3NTAwLWE5OWMtNDQ2Zi1iMDEwLWZjOTQwZGI5NjY3ZCIsImFjdGlvbiI6InBhdXNlIn19"
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-pause-25c95f46-acba-492f-ad28-29993568d860",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+                  "request_id": "req-7777cb15-33ad-4960-93fa-75cc7d3106bd"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-7777cb15-33ad-4960-93fa-75cc7d3106bd"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.033Z",
+              "requestId": "req-7777cb15-33ad-4960-93fa-75cc7d3106bd",
+              "dispatchAt": "2026-10-24T06:34:04.036Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:04.042Z"
+            },
+            {
+              "action": "resume",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hOTQ2ODA3Ny05Y2VjLTQ1MDMtYThmZS0wZGEyNmUwYzdlOWYiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTdlNTU3NTAwLWE5OWMtNDQ2Zi1iMDEwLWZjOTQwZGI5NjY3ZCIsImFjdGlvbiI6InJlc3VtZSJ9fQ=="
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-resume-9b639c65-67b0-4b5a-84c3-0ccd51b0d7c9",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+                  "request_id": "req-a9468077-9cec-4503-a8fe-0da26e0c7e9f"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-a9468077-9cec-4503-a8fe-0da26e0c7e9f"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.060Z",
+              "requestId": "req-a9468077-9cec-4503-a8fe-0da26e0c7e9f",
+              "dispatchAt": "2026-10-24T06:34:04.063Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:04.068Z"
+            },
+            {
+              "action": "stop",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS00MzlhMWU4Zi0wZjA1LTQzMDItODZjOS1lNDk4NTBiMmU1YWYiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTdlNTU3NTAwLWE5OWMtNDQ2Zi1iMDEwLWZjOTQwZGI5NjY3ZCIsImFjdGlvbiI6InN0b3AifX0="
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-stop-51831bd4-b539-4c59-af19-6987bbb3e272",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+                  "request_id": "req-439a1e8f-0f05-4302-86c9-e49850b2e5af"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-439a1e8f-0f05-4302-86c9-e49850b2e5af"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.006Z",
+              "requestId": "req-439a1e8f-0f05-4302-86c9-e49850b2e5af",
+              "dispatchAt": "2026-10-24T06:34:04.094Z",
+              "generation": 1,
+              "completedAt": "2026-10-24T06:34:04.100Z"
+            }
+          ],
+          "controls": [
+            {
+              "hash": "1c77d98b043d43f0a81dfc9f52396d53bcc32d97e717e340f0dad017f2398a62",
+              "action": "pause",
+              "commandId": "b4c58fb7-a029-4c7c-bf4e-2570af049d24"
+            },
+            {
+              "hash": "c80bf5ee7b35b661d02b62491c213f4481767b85520c2e267c76d2adfe1988e4",
+              "action": "resume",
+              "commandId": "ef145420-7600-44e8-8533-9bedc39b6b8c"
+            },
+            {
+              "hash": "6f7b193fefbb814709be3b4a5b80f569da06480441a928ebd1a2dfda13a05da8",
+              "action": "cancel",
+              "commandId": "d7fb48e2-f270-47d2-858e-4ed835d4d226"
+            }
+          ],
+          "commandId": "030fe32c-ba10-4d86-977f-b617ac16d254",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "3431e6d891546fa640cd2bd7bef4c475e2e9b17bbbe0250a9bce127f35ad32d4",
+          "startedAt": "2026-10-24T06:34:03.966Z",
+          "deadlineAt": "2026-10-24T06:34:13.966Z",
+          "generation": 1,
+          "modeSentAt": null,
+          "stopReason": "CLIENT_REQUESTED",
+          "stopSentAt": "2026-10-24T06:34:04.097Z",
+          "writerKeys": [
+            "2f26744a68d3739b65ea46cd50e70833072bf7bf303e4c2035d1e2eb7b8328ca",
+            "4c15d1d2c436d2b87e14242156b45002cfc13664394fdb398f24b2d7ddffe2cb",
+            "5074baf42249dd2e948852ae07074933cae835cb8fd5d74d1ba0f8bb3545a59e"
+          ],
+          "lastCommand": "zmq-stop-51831bd4-b539-4c59-af19-6987bbb3e272",
+          "modeAttempt": 0,
+          "requestHash": "1f5f2eeecbba8b2c68b9695568acc74cc4e3ec62035b0cbc5195e491898995f3",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS00MzlhMWU4Zi0wZjA1LTQzMDItODZjOS1lNDk4NTBiMmU1YWYiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTdlNTU3NTAwLWE5OWMtNDQ2Zi1iMDEwLWZjOTQwZGI5NjY3ZCIsImFjdGlvbiI6InN0b3AifX0="
+            ],
+            "method": "TaskControl",
+            "status": "intent",
+            "stepId": "zmq-stop-51831bd4-b539-4c59-af19-6987bbb3e272",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:04.006Z",
+            "requestId": "req-439a1e8f-0f05-4302-86c9-e49850b2e5af",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": "native-7e557500-a99c-446f-b010-fc940db9667d",
+          "stopBaseline": 35,
+          "taskBaseline": 6,
+          "nativeOutcome": "canceled",
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "17",
+              "entryHash": "2f4c58d5ab628dc3835ead20f33f2b546af53fdcebddba7ec9e8222308db5bf2",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "26",
+              "entryHash": "a3a33c3b420cea8132931bbec40c6f1a4a0133eac4871d7fad2dcc5cc00a8f0e",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "ccb977b4131dac420766613ee28e90c7ee00154e60feafba9841e15086006c78",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "5512a82dd24c2edeb663e0f3fc7965e1e3ad6077e6bdb029b13f33000e4c3fac",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "49",
+              "entryHash": "30e845e183349ee0194235d98d9be9c91c7d0f8a2a6896564aa6cb60a0bafdde",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            },
+            {
+              "ordinal": "50",
+              "entryHash": "7b06f37d72491dc845e280d8d8a81f049106f85cc1a7af28f3e90728c1b3ad99",
+              "sessionId": "6e146e9b-42b4-4de1-8d31-b95ea5c419a8",
+              "partitionHash": "af7d48ba94fa6e0e2d07a67458ddbc70e88ed0280addfe2eff6d44c71a8453f4"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:07.097Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": "2026-10-24T06:34:04.087Z"
+        },
+        "argumentHash": "1f5f2eeecbba8b2c68b9695568acc74cc4e3ec62035b0cbc5195e491898995f3",
+        "operationName": "recon.area",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "e4c9c21d-92ac-4c86-bc38-80dd86cf109d",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "2a06ad9d-f6db-4b3c-a26a-1bc621679bee",
+        "downstreamMissionIds": [
+          "native-7e557500-a99c-446f-b010-fc940db9667d"
+        ]
+      },
+      "commands": [
+        {
+          "component": "eo",
+          "at": 1792823643986,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-e0204785-84de-4995-a92a-8b94edf83ba0",
+            "method": "AreaSearch",
+            "params": {
+              "region_wgs84": [
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                }
+              ],
+              "task_timeout_ms": 9989,
+              "search_strategy": "recognize"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823644013,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-73320d29-8139-436b-89e9-9ea1ac54d06d",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+              "action": "start"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823644041,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-7777cb15-33ad-4960-93fa-75cc7d3106bd",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+              "action": "pause"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823644067,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-a9468077-9cec-4503-a8fe-0da26e0c7e9f",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+              "action": "resume"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823644099,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-439a1e8f-0f05-4302-86c9-e49850b2e5af",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-7e557500-a99c-446f-b010-fc940db9667d",
+              "action": "stop"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": "stop_during_mode_and_100hz",
+      "requestToSimulatorReceiptMs": 23,
+      "archive": {
+        "status": "stopped",
+        "pendingRecords": 0,
+        "pendingBytes": 0,
+        "committedEvents": 47,
+        "receivedMessages": 38,
+        "committedReceptions": 38,
+        "unconfirmedReceptions": 0,
+        "locallyDiscardedMessages": 0,
+        "failureCode": null,
+        "failureRecorded": null
+      }
+    },
+    {
+      "case": "lost_req_receipt",
+      "final": {
+        "state": "CANCELLED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "52",
+              "entryHash": "487dbd0fe4ee35124c2a3676cb9f2d4b1bcaae7f94a1a07985bbc335d4a1adcd",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "aebdfffc95f19f7447a620e8fd547eefeb38947ba47a0da6df0ea84934695981",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "131",
+              "entryHash": "64c78c33bd07a263bb9c29c2247b864f473b07867c1cf689798b09647c11980c",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "125",
+              "entryHash": "247830348bcb1798d4a47e3053b197d091daf9a8698620e8726700e5694d23b7",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "96000de5-b7d6-49f6-beb8-56adad36d1ea",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 13,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:04.859Z",
+        "updatedAt": "2026-10-24T06:34:05.591Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "CLIENT_REQUESTED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:05.591Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:04.858Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 55,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS01ZTViMjZhYy03Njk4LTRiNzgtYjcyOS1lYmYxYjhhNjIxMjkiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "uncertain",
+              "stepId": "zmq-camera-4d166805-a48c-4290-8ca3-716f714c5628",
+              "response": null,
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.873Z",
+              "requestId": "req-5e5b26ac-7698-4b78-b729-ebf1b8a62129",
+              "dispatchAt": "2026-10-24T06:34:04.879Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:05.133Z"
+            },
+            {
+              "action": "stop",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0wMjUyMDE1Zi0xYmY0LTQ5MjgtYTlmOC02MmQzYTFjOGM5OGUiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+              ],
+              "method": "TeleControl",
+              "status": "uncertain",
+              "stepId": "zmq-stop-f76a5f0c-af25-4c24-9179-6c333d2d669d",
+              "response": null,
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:04.876Z",
+              "requestId": "req-0252015f-1bf4-4928-a9f8-62d3a1c8c98e",
+              "dispatchAt": "2026-10-24T06:34:05.150Z",
+              "generation": 1,
+              "completedAt": "2026-10-24T06:34:05.404Z"
+            }
+          ],
+          "controls": [
+            {
+              "hash": "3fb29024fd4e4b458d4c0cb27f25d2adc0cadf339a9794d4dd128ca13adae7e1",
+              "action": "cancel",
+              "commandId": "aef85600-191d-480c-90db-b2f7d1c2c0b5"
+            }
+          ],
+          "commandId": "9063b1a5-d881-4a68-bd14-2fe80ae9763d",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "9625734517b036b4643a993bc557af4b5da1633ca607bcab7541c7f48e0fb7ea",
+          "startedAt": "2026-10-24T06:34:04.861Z",
+          "deadlineAt": "2026-10-24T06:34:14.861Z",
+          "generation": 1,
+          "modeSentAt": null,
+          "stopReason": "CLIENT_REQUESTED",
+          "stopSentAt": "2026-10-24T06:34:05.153Z",
+          "writerKeys": [
+            "6997ef7c78f12ab1c4d0a2f19aec8be7268b2d22fb12e9fdcfaf54ab81865918",
+            "9a601e320496422406b8f5a6e93965ef104b74afede31457dca94e90b2dba664",
+            "b012dbe277ea147234a30198d23b5a237c8587317d02401366dbd474cdc95074"
+          ],
+          "lastCommand": "zmq-stop-f76a5f0c-af25-4c24-9179-6c333d2d669d",
+          "modeAttempt": 0,
+          "requestHash": "68a9704f332f2b70b495a37fa85a5cf1e5254d824db4a356f326ccf59b41bd31",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0wMjUyMDE1Zi0xYmY0LTQ5MjgtYTlmOC02MmQzYTFjOGM5OGUiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-f76a5f0c-af25-4c24-9179-6c333d2d669d",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:04.876Z",
+            "requestId": "req-0252015f-1bf4-4928-a9f8-62d3a1c8c98e",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 5,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 55,
+          "taskBaseline": 5,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "52",
+              "entryHash": "487dbd0fe4ee35124c2a3676cb9f2d4b1bcaae7f94a1a07985bbc335d4a1adcd",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "aebdfffc95f19f7447a620e8fd547eefeb38947ba47a0da6df0ea84934695981",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "131",
+              "entryHash": "64c78c33bd07a263bb9c29c2247b864f473b07867c1cf689798b09647c11980c",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            },
+            {
+              "ordinal": "125",
+              "entryHash": "247830348bcb1798d4a47e3053b197d091daf9a8698620e8726700e5694d23b7",
+              "sessionId": "200e3a30-cd6e-4190-9e3b-ae5ce75ea57b",
+              "partitionHash": "17c48aaf25d6e17496c9ea73378315bcc4b36cf84d8400d42a4cc1e54a8f1423"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:08.153Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": "2026-10-24T06:34:05.146Z"
+        },
+        "argumentHash": "68a9704f332f2b70b495a37fa85a5cf1e5254d824db4a356f326ccf59b41bd31",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "e33d0a40-a076-47e6-a773-b869d1d48da7",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "04dd94eb-7797-434f-8f07-70614a029909",
+        "downstreamMissionIds": []
+      },
+      "commandCount": 2,
+      "requestToSimulatorReceiptMs": 441,
+      "limitation": "REP can delay receiving stop; client dispatch bound does not qualify device stopping"
+    },
+    {
+      "case": "execution_write_lock_stop",
+      "requestToSimulatorReceiptMs": 506,
+      "durablePrearmedIntent": true
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "before_intent",
+      "taskId": "e66f2518-05ef-4955-8eb1-5d099f426715",
+      "countAtCrash": 0,
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "22",
+              "entryHash": "b4b121bf15b9c9aecc3874cd411a9a206cf2b1b693fe4793c7b8a4201ef31bdd",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "c6fa6bade294390559aee04b5a06550382f44f8d556af88b0aaae32843102a54",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "833ac4dc5cc25826a30e46029ed944ca9044baac0c2f87fc864b11c5ae419c57",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "62017a74516ded494ae0a7ad0e1ff7c2b7c62849c5e0ae8b749a46f64907d62e",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "c80f545843dd7bba354f4ecb7bcc569d56ba1326e63e84b505ad4797571636ef",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "57",
+              "entryHash": "15179b3f753558f9ab14a1452a371ed34e9c09467485f79893587d821a4ac9d2",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "e66f2518-05ef-4955-8eb1-5d099f426715",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 22,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:07.868Z",
+        "updatedAt": "2026-10-24T06:34:08.219Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_CAMERA_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:08.219Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:07.042Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 7,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS03ZjZmOWY3Ny1jOTVjLTQyZTEtOTlmYS1jNDA5OGM1OTQ2NjQiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-f8459be5-a445-49ea-9e6c-d20a62c03ecb",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-7f6f9f77-c95c-42e1-99fa-c4098c594664"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-7f6f9f77-c95c-42e1-99fa-c4098c594664"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:07.997Z",
+              "requestId": "req-7f6f9f77-c95c-42e1-99fa-c4098c594664",
+              "dispatchAt": "2026-10-24T06:34:08.002Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:08.008Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "ecb5cce4-bd01-42f4-8a09-1c11bb9063a8",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "993c350f23927d72240704366da3ea3d70477e13e77fe70aa10d5b8219e8c7d9",
+          "startedAt": "2026-10-24T06:34:07.872Z",
+          "deadlineAt": "2026-10-24T06:34:17.872Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "1dd6cbfc6817c1a93936bface8740463baa5d290354e8444242226c9d8663225",
+            "349b69677fa12f2a82ccbe9c1eb88cf2be4c10bbeded8a2e5c5c2369ba02e0a1",
+            "b5b67cdae93ec05d5484fab7926f1507ef748b0921de97c0d77caf60850477be"
+          ],
+          "lastCommand": "zmq-camera-f8459be5-a445-49ea-9e6c-d20a62c03ecb",
+          "modeAttempt": 0,
+          "requestHash": "4fbd351f590b3295118de2f9515623277d70e2ebb85cf2516954e9e0cf3c3488",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS04MjMwNWFhZS0wYTg2LTQxODktYTUyNy1jY2YxY2ZjZDE3NjAiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-387f5d04-08ee-4581-bc33-f02deaebb5ec",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:08.000Z",
+            "requestId": "req-82305aae-0a86-4189-a527-ccf1cfcd1760",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 6,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 6,
+          "taskBaseline": 6,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "22",
+              "entryHash": "b4b121bf15b9c9aecc3874cd411a9a206cf2b1b693fe4793c7b8a4201ef31bdd",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "c6fa6bade294390559aee04b5a06550382f44f8d556af88b0aaae32843102a54",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "833ac4dc5cc25826a30e46029ed944ca9044baac0c2f87fc864b11c5ae419c57",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "62017a74516ded494ae0a7ad0e1ff7c2b7c62849c5e0ae8b749a46f64907d62e",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "c80f545843dd7bba354f4ecb7bcc569d56ba1326e63e84b505ad4797571636ef",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            },
+            {
+              "ordinal": "57",
+              "entryHash": "15179b3f753558f9ab14a1452a371ed34e9c09467485f79893587d821a4ac9d2",
+              "sessionId": "8954bf4f-4387-49a9-b40a-6fea5487e4dc",
+              "partitionHash": "7b8b6e097c422e88a25f251fd7ee5b1e384199f7f0b98bcfd34d85ec73be40d9"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "4fbd351f590b3295118de2f9515623277d70e2ebb85cf2516954e9e0cf3c3488",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "adff9e29-f64a-4e23-ba2a-480aee746ea5",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "ab84fa59-8dfd-4fd7-883a-b0473d738b07",
+        "downstreamMissionIds": []
+      },
+      "finalCommandCount": 1
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "after_intent",
+      "taskId": "fbf740f7-fc1f-499c-bbfe-51e8ab5d2310",
+      "countAtCrash": 0,
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "16",
+              "entryHash": "bd77aa61793fbe384624690bf4e088dcac66ad0c51b8ab9b1220e7435ab73918",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "22",
+              "entryHash": "189488820e83251c116ce833ee803107938aec87b8085a3d94c19c8257568826",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "30",
+              "entryHash": "f9b9c552d4ff80b77b2d6b0ddd1adf64193018ec738681e22c8dc8bd63044dd4",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "38",
+              "entryHash": "1f88a27641a08b4d1364cbd1aef7e298111dc64f3dbff85a024c9602798c1a3a",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "46",
+              "entryHash": "8ddf2a91dea80c65daa06f38e740f5be65c1663b3d5cd3cb99c731ad9b7b0ced",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "51",
+              "entryHash": "e41d2678e1e7bbdf55f50a179f77926e765dfc0f1e03d3786fca78af3c8da570",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "fbf740f7-fc1f-499c-bbfe-51e8ab5d2310",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 26,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:09.047Z",
+        "updatedAt": "2026-10-24T06:34:09.356Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_CAMERA_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:09.356Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:08.377Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 4,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS01M2Q2ZDVmYS05OTE5LTQ4ZmMtOGEzMy1kMjE0OTZlYWY5ZmMiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-ebf460c8-b28a-4d51-9d23-a1008c9dd0e2",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-53d6d5fa-9919-48fc-8a33-d21496eaf9fc"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-53d6d5fa-9919-48fc-8a33-d21496eaf9fc"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:09.053Z",
+              "requestId": "req-53d6d5fa-9919-48fc-8a33-d21496eaf9fc",
+              "dispatchAt": "2026-10-24T06:34:09.142Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:09.147Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "c0ccd1bb-8828-4b75-a27b-5f9c366142dc",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "17c34ed0f37ae8063affc498a1df92c4f8867edc0ce384ccccc38b34fce9784e",
+          "startedAt": "2026-10-24T06:34:09.051Z",
+          "deadlineAt": "2026-10-24T06:34:19.051Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "72564a86adeafe466156772d459ed79f05cc052ce32b4da48a0bc758a37800f3",
+            "7c87fd262498b6497bcb5d9be557e38aa68ecf0fa5adce9e6fafc6b2ccf6c7d7",
+            "c3b51446ae48bde35e57b07514ac7b6a175094c153249867fefc48944a8ae39f"
+          ],
+          "lastCommand": "zmq-camera-ebf460c8-b28a-4d51-9d23-a1008c9dd0e2",
+          "modeAttempt": 0,
+          "requestHash": "db80d7e12c43c54db468aa3b48976f14a3c9cf4bc121ed11951954efac161b28",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0wODA4YTAxNS1lNTRkLTQ1N2MtOTc2YS1hMGRhYzg5N2NhMjUiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-00914404-dd3b-4622-b713-08ebbeeb85e3",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:09.138Z",
+            "requestId": "req-0808a015-e54d-457c-976a-a0dac897ca25",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 5,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 5,
+          "taskBaseline": 5,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "16",
+              "entryHash": "bd77aa61793fbe384624690bf4e088dcac66ad0c51b8ab9b1220e7435ab73918",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "22",
+              "entryHash": "189488820e83251c116ce833ee803107938aec87b8085a3d94c19c8257568826",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "30",
+              "entryHash": "f9b9c552d4ff80b77b2d6b0ddd1adf64193018ec738681e22c8dc8bd63044dd4",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "38",
+              "entryHash": "1f88a27641a08b4d1364cbd1aef7e298111dc64f3dbff85a024c9602798c1a3a",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "46",
+              "entryHash": "8ddf2a91dea80c65daa06f38e740f5be65c1663b3d5cd3cb99c731ad9b7b0ced",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            },
+            {
+              "ordinal": "51",
+              "entryHash": "e41d2678e1e7bbdf55f50a179f77926e765dfc0f1e03d3786fca78af3c8da570",
+              "sessionId": "65af2a00-caa5-4690-a896-3a0e3b78e072",
+              "partitionHash": "5c02bab2ab9606940ec3ee76f887e8992f2a70a4a945261c3b7a145cc20874d6"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "db80d7e12c43c54db468aa3b48976f14a3c9cf4bc121ed11951954efac161b28",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "7360b574-672d-45e6-a26d-566d65639d93",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "6ecd10bf-1aee-46ae-a67f-e7309ccbd56e",
+        "downstreamMissionIds": []
+      },
+      "finalCommandCount": 1
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "before_dispatch",
+      "taskId": "c6a1939a-bceb-48a2-9627-416cda96dcd6",
+      "countAtCrash": 0,
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "c6a1939a-bceb-48a2-9627-416cda96dcd6",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 4,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:10.226Z",
+        "updatedAt": "2026-10-24T06:34:10.336Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_RESTART_OUTCOME_UNKNOWN",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:10.335Z",
+        "zmqControl": {
+          "stage": "uncertain",
+          "timing": {
+            "startAt": "2026-10-24T06:34:09.508Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 7,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0xOTY3YTcyOC04NTJmLTRiMTAtYTY2MC1lZjVkYzdmNjk3NzEiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "intent",
+              "stepId": "zmq-camera-4861199a-b6f5-44f6-9562-82d0b1fb3923",
+              "response": null,
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:10.232Z",
+              "requestId": "req-1967a728-852f-4b10-a660-ef5dc7f69771",
+              "dispatchAt": null,
+              "generation": 0,
+              "completedAt": null
+            }
+          ],
+          "controls": [],
+          "commandId": "02b6d6a4-da50-4ed3-a485-e6d43ce4c8ab",
+          "component": "eo",
+          "occupancy": "held",
+          "scopeHash": "6949edd5a97aa63a86595a2fed3be22f12bc1335789f9fc9f107af3c89cd4eaf",
+          "startedAt": "2026-10-24T06:34:10.230Z",
+          "deadlineAt": "2026-10-24T06:34:20.230Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "2f7f40278319766c9e3dd3a998d543b9cd853af786dc5d5bb4c0ac5117a7d0d0",
+            "6926051ee72128c0c2da94f4330c63feea86a025e2cde95a1375fbfa3dae53f2",
+            "70b62f03071141abca3e6cf65bc5c19414f14ee47e83e468f844b2b5cc93cb79"
+          ],
+          "lastCommand": "zmq-camera-4861199a-b6f5-44f6-9562-82d0b1fb3923",
+          "modeAttempt": 0,
+          "requestHash": "763b18fcfce0552b4b2caeaee3149c256f8f3380cd72e855552be751226247fd",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hM2NhZWU2MS0yNzlkLTQ5NDYtODcyMC0zOTRjNjViNDE0NGYiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-e4e8a02e-2572-4ea9-85d4-8a3572fd65ac",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:10.238Z",
+            "requestId": "req-a3caee61-279d-4946-8720-394c65b4144f",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 6,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 6,
+          "taskBaseline": 6,
+          "nativeOutcome": null,
+          "stopConfirmed": false,
+          "latestEvidence": [],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "763b18fcfce0552b4b2caeaee3149c256f8f3380cd72e855552be751226247fd",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "ffc10669-69e1-4810-a953-fb9c92ea70c9",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "0692af17-0cf0-4949-b043-2cc266cf48d4",
+        "downstreamMissionIds": []
+      },
+      "finalCommandCount": 0
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "after_send",
+      "taskId": "40dd6c62-a222-49f8-84e7-1f6acb4ffeb8",
+      "countAtCrash": 1,
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "40dd6c62-a222-49f8-84e7-1f6acb4ffeb8",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 5,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:11.516Z",
+        "updatedAt": "2026-10-24T06:34:11.623Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_RESTART_OUTCOME_UNKNOWN",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:11.622Z",
+        "zmqControl": {
+          "stage": "uncertain",
+          "timing": {
+            "startAt": "2026-10-24T06:34:10.843Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 6,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0xMDM5ZDUxYy02MTg3LTQ3N2ItODNlOC1mYjdhYTUwM2NjYmUiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "dispatching",
+              "stepId": "zmq-camera-d75c358a-d85f-401f-9006-e58c9b9aa0eb",
+              "response": null,
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:11.526Z",
+              "requestId": "req-1039d51c-6187-477b-83e8-fb7aa503ccbe",
+              "dispatchAt": "2026-10-24T06:34:11.537Z",
+              "generation": 0,
+              "completedAt": null
+            }
+          ],
+          "controls": [],
+          "commandId": "729cefbc-5cf7-465e-80ef-d318096c99e3",
+          "component": "eo",
+          "occupancy": "held",
+          "scopeHash": "695e186c03bd4bb0d46a261a160408f6426805adc71e9a1d6970ccb2312a701c",
+          "startedAt": "2026-10-24T06:34:11.522Z",
+          "deadlineAt": "2026-10-24T06:34:21.522Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "5fbb6fe4b7389f4afe94657bedcb2d0272318343eacccd8962bad8a381d5466b",
+            "94e94b142f7338a0e010e7067052a544c8e7f80e5bf145c61ed3e8a8d4f88be2",
+            "9900d028530408f87a492dbd66cae43f2880612a06a8927f9638d8e1c8d3d907"
+          ],
+          "lastCommand": "zmq-camera-d75c358a-d85f-401f-9006-e58c9b9aa0eb",
+          "modeAttempt": 0,
+          "requestHash": "f350c2bb75a7df9c970f7385918467a5037175d91a09e4808086c1de21ab04b5",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hNzExOWIzYy01MDg3LTQ5N2QtYTNhNi1mZGQ0ZTc5N2U4MDciLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-4cc2311f-aeda-4f70-82ba-4159c3ed86e2",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:11.534Z",
+            "requestId": "req-a7119b3c-5087-497d-a3a6-fdd4e797e807",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 5,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 5,
+          "taskBaseline": 5,
+          "nativeOutcome": null,
+          "stopConfirmed": false,
+          "latestEvidence": [],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "f350c2bb75a7df9c970f7385918467a5037175d91a09e4808086c1de21ab04b5",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "65dec9a2-cd76-476c-944b-1429d6387032",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "57ca8a28-7edf-4f9c-82f8-ab10010b84ca",
+        "downstreamMissionIds": []
+      },
+      "finalCommandCount": 1
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "before_identity",
+      "taskId": "ca53b66f-d695-4cdb-b9c1-245db2c1f154",
+      "countAtCrash": 1,
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [],
+          "nativeReason": null,
+          "nativeTaskId": "native-062a8292-da73-4ca1-8034-098a9c4d6204",
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "ca53b66f-d695-4cdb-b9c1-245db2c1f154",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 4,
+        "arguments": {
+          "operation": {
+            "name": "recon.area",
+            "params": {
+              "region_wgs84": [
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                }
+              ],
+              "search_strategy": "recognize",
+              "task_timeout_ms": 300000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:12.821Z",
+        "updatedAt": "2026-10-24T06:34:12.926Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_RESTART_OUTCOME_UNKNOWN",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:12.926Z",
+        "zmqControl": {
+          "stage": "uncertain",
+          "timing": {
+            "startAt": "2026-10-24T06:34:12.095Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 7,
+          "commands": [
+            {
+              "action": "configure",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0wZGNjOWMwMi1mNDZlLTRiZDYtYjllNi1jNTJjODFiNTQwOTYiLCJtZXRob2QiOiJBcmVhU2VhcmNoIiwicGFyYW1zIjp7InJlZ2lvbl93Z3M4NCI6W3sibGF0aXR1ZGVfZGVnIjoyOSwibG9uZ2l0dWRlX2RlZyI6MTA2LCJlbGxpcHNvaWRfaGVpZ2h0X20iOjEwfSx7ImxhdGl0dWRlX2RlZyI6MjksImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNiwiZWxsaXBzb2lkX2hlaWdodF9tIjoxMH1dLCJ0YXNrX3RpbWVvdXRfbXMiOjk5OTcsInNlYXJjaF9zdHJhdGVneSI6InJlY29nbml6ZSJ9fQ=="
+              ],
+              "method": "AreaSearch",
+              "status": "dispatching",
+              "stepId": "zmq-configure-cb60650f-da06-4e66-bacc-20bfbb4768fa",
+              "response": null,
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:12.828Z",
+              "requestId": "req-0dcc9c02-f46e-4bd6-b9e6-c52c81b54096",
+              "dispatchAt": "2026-10-24T06:34:12.834Z",
+              "generation": 0,
+              "completedAt": null
+            }
+          ],
+          "controls": [],
+          "commandId": "490f28b2-81b1-4c57-a5fa-9543bbf78a3c",
+          "component": "eo",
+          "occupancy": "held",
+          "scopeHash": "a785429e9b5408c1a5720a52b79aff2526ce88aefcc162e34a1b4d02b6781857",
+          "startedAt": "2026-10-24T06:34:12.825Z",
+          "deadlineAt": "2026-10-24T06:34:22.825Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "d285a152b26ae4730e9cb8fed2a8667593a480bd46bd464ce6e18783e2777d4e",
+            "d5bec670adb36f1ab130ec7c1b9dddaf18ebb73ee2d2f9e6d820a221f34ffebe",
+            "e49bde5eb9ae1cbda00f4a196b4373b2bc7fa9d120639524ba772c9054767bd9"
+          ],
+          "lastCommand": "zmq-configure-cb60650f-da06-4e66-bacc-20bfbb4768fa",
+          "modeAttempt": 0,
+          "requestHash": "930ca1f7a07ac17692f93601bc40ebc6beddc48e7350c05ecf68d13fcc2d9867",
+          "fallbackStop": null,
+          "modeBaseline": 6,
+          "nativeReason": null,
+          "nativeTaskId": "native-062a8292-da73-4ca1-8034-098a9c4d6204",
+          "stopBaseline": 6,
+          "taskBaseline": 7,
+          "nativeOutcome": null,
+          "stopConfirmed": false,
+          "latestEvidence": [],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "930ca1f7a07ac17692f93601bc40ebc6beddc48e7350c05ecf68d13fcc2d9867",
+        "operationName": "recon.area",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "4f0bda8e-baf8-444a-a24e-a62a06408e9e",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "238511b7-44ff-4e01-8d64-c787e7fc6bea",
+        "downstreamMissionIds": [
+          "native-062a8292-da73-4ca1-8034-098a9c4d6204"
+        ]
+      },
+      "finalCommandCount": 1
+    },
+    {
+      "case": "SIGKILL",
+      "checkpoint": "before_terminal",
+      "taskId": "cc91a63e-8cda-4895-bb2c-d3c311546fdb",
+      "countAtCrash": 1,
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [
+            {
+              "ordinal": "20",
+              "entryHash": "a885efe24d4512fffa72181f3962ee28e010e6f52d3846409272073c6591b2ee",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "24",
+              "entryHash": "f6f8d3da174ee4c1424b7ed301215304c7b2314cadb3d99a521c204a707d30d2",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "c1d204e315b20190311f1bebcd7407e648d235b5e20550afdfd9f596cf0c8d17",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "c44587d9ccc88f682c9deee03eb225a33f4aec99da92f05c9265578224203506",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "792a278b7e242674f5ee78d36d9df4df9c1f7e0fecce67d6ed0ad7dc9cd508ef",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "cc91a63e-8cda-4895-bb2c-d3c311546fdb",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 20,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:14.152Z",
+        "updatedAt": "2026-10-24T06:34:14.456Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_RESTART_OUTCOME_UNKNOWN",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:14.456Z",
+        "zmqControl": {
+          "stage": "uncertain",
+          "timing": {
+            "startAt": "2026-10-24T06:34:13.430Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 7,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1lM2ZiMjgzMy1iNGQ5LTQwZjktYWRlMS02ZTVjZGVlZjNiMjMiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjIwMDB9fQ=="
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-45b0d933-f1d8-49f1-8955-dbd29d1c311e",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-e3fb2833-b4d9-40f9-ade1-6e5cdeef3b23"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-e3fb2833-b4d9-40f9-ade1-6e5cdeef3b23"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:14.160Z",
+              "requestId": "req-e3fb2833-b4d9-40f9-ade1-6e5cdeef3b23",
+              "dispatchAt": "2026-10-24T06:34:14.170Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:14.179Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "9c0ac90e-a4e4-4d21-9573-6c6f63efc740",
+          "component": "eo",
+          "occupancy": "held",
+          "scopeHash": "a950b5df46fb805084e7f47521fdb44a2d5aa56547668779b8f417e7fa5484cd",
+          "startedAt": "2026-10-24T06:34:14.156Z",
+          "deadlineAt": "2026-10-24T06:34:24.156Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "2f3d6c20a455c153568d80fbb89f52c0b47cbbcaf7510186a60017fe9beb1538",
+            "962fa05dba63f171c6678fe6cb7936f50cae4a87655f55788e72ce3d8495dd19",
+            "ad73540ee26c128323416f5a0b89710ddda275f37ba96a66b104b38b26bda087"
+          ],
+          "lastCommand": "zmq-camera-45b0d933-f1d8-49f1-8955-dbd29d1c311e",
+          "modeAttempt": 0,
+          "requestHash": "77d489e6223821da575cf37740d5fd1516304e68788d47bb9b7fba68fc44e9bb",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0yYTRlOTU0Ni04OTMwLTQzZmItYjViNS00M2U5MzU5ZWEwODAiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-201e0719-0be3-4575-9b00-88a1317fedae",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:14.167Z",
+            "requestId": "req-2a4e9546-8930-43fb-b5b5-43e9359ea080",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 7,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 7,
+          "taskBaseline": 7,
+          "nativeOutcome": null,
+          "stopConfirmed": false,
+          "latestEvidence": [
+            {
+              "ordinal": "20",
+              "entryHash": "a885efe24d4512fffa72181f3962ee28e010e6f52d3846409272073c6591b2ee",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "24",
+              "entryHash": "f6f8d3da174ee4c1424b7ed301215304c7b2314cadb3d99a521c204a707d30d2",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "c1d204e315b20190311f1bebcd7407e648d235b5e20550afdfd9f596cf0c8d17",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "40",
+              "entryHash": "c44587d9ccc88f682c9deee03eb225a33f4aec99da92f05c9265578224203506",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            },
+            {
+              "ordinal": "48",
+              "entryHash": "792a278b7e242674f5ee78d36d9df4df9c1f7e0fecce67d6ed0ad7dc9cd508ef",
+              "sessionId": "adfe0a8e-96f1-4614-8528-e6e8745112f8",
+              "partitionHash": "ea0340d74c3ae75db8e33b6ff6f20aaf8a07cc295bfc11d1cc899c1ac203b9ec"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "77d489e6223821da575cf37740d5fd1516304e68788d47bb9b7fba68fc44e9bb",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "ad39418d-9eef-47e2-9782-665af40551cd",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "bd3995ed-9dd2-4229-a2f9-567d03764f26",
+        "downstreamMissionIds": []
+      },
+      "finalCommandCount": 1
+    },
+    {
+      "case": "camera.zoom",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "16",
+              "entryHash": "fa89c21850ed10f251aadd9e3341ecaa8ea9d6ef68a67581fd26b4f731dfde2a",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "21",
+              "entryHash": "eca263073bbbb1ea6756f18c6f3ced28a5c8a60d7ae677a53eff22201794ddc1",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "6717dce002ded08ea28d56b520fa6ad0376573b84bb22451a2ac5e54cfef3601",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "2eda70516442fb74f8c54e762f0f0928369dd289ec689680ba2eaa7065675545",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "150b2b69d36c686adf6ff4fa2461c6b65988a8a27bc9244ad28eadaab0124869",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "51",
+              "entryHash": "83083cc48efb3eeb20e2e656f3bf3c9e90117ce75e6d2e4a31ab1a165a887335",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "f0e0bbfd-c544-43b6-a064-74a00c67d9de",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 24,
+        "arguments": {
+          "operation": {
+            "name": "camera.zoom",
+            "params": {
+              "zoom_ratio": 2,
+              "zoom_timeout_ms": 1000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:15.022Z",
+        "updatedAt": "2026-10-24T06:34:15.249Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_CAMERA_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:15.249Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:15.021Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 5,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1mNjkwN2E1NC1kOTZmLTQwMTEtYmJlYy01Y2Q4NGZlOTFmZTAiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJ6b29tIiwiem9vbV9yYXRpbyI6Miwiem9vbV90aW1lb3V0X21zIjoxMDAwfX0="
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-dccc1e61-184f-4c3d-bebf-2f76750d065c",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-f6907a54-d96f-4011-bbec-5cd84fe91fe0"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-f6907a54-d96f-4011-bbec-5cd84fe91fe0"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:15.035Z",
+              "requestId": "req-f6907a54-d96f-4011-bbec-5cd84fe91fe0",
+              "dispatchAt": "2026-10-24T06:34:15.041Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:15.046Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "2a61230c-bde4-44d8-9087-ef4e736c579e",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "ce6b887bcc9b768cc74ab6abf788b27661d924b62813a3caa447a96f0ac9bb8d",
+          "startedAt": "2026-10-24T06:34:15.024Z",
+          "deadlineAt": "2026-10-24T06:34:25.024Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "652b2c97f9bc8698edcdffbb5a0992ce55bd0b7988f330456912c1a945a43204",
+            "8060ca50f6bb227d4ac1c77a6bea2c0dc8a32e18b0e9f7a45421d4e0081209a3",
+            "ddf3d3cde92e13e150fa3cc1df77dd30e9bf5ff979728054aca2531282de604d"
+          ],
+          "lastCommand": "zmq-camera-dccc1e61-184f-4c3d-bebf-2f76750d065c",
+          "modeAttempt": 0,
+          "requestHash": "8a2bee3edd18463f87da864d056502245dfc3f6eff373cdbf29f97845b08dc6a",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hMDZlYWNmZi0xMmI5LTQ4ZjUtOTliOS0wNGFhNmRmMmZlMjAiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-b3b38345-e50b-4730-a070-24819e061058",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:15.039Z",
+            "requestId": "req-a06eacff-12b9-48f5-99b9-04aa6df2fe20",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 4,
+          "taskBaseline": 4,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "16",
+              "entryHash": "fa89c21850ed10f251aadd9e3341ecaa8ea9d6ef68a67581fd26b4f731dfde2a",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "21",
+              "entryHash": "eca263073bbbb1ea6756f18c6f3ced28a5c8a60d7ae677a53eff22201794ddc1",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "6717dce002ded08ea28d56b520fa6ad0376573b84bb22451a2ac5e54cfef3601",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "2eda70516442fb74f8c54e762f0f0928369dd289ec689680ba2eaa7065675545",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "150b2b69d36c686adf6ff4fa2461c6b65988a8a27bc9244ad28eadaab0124869",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            },
+            {
+              "ordinal": "51",
+              "entryHash": "83083cc48efb3eeb20e2e656f3bf3c9e90117ce75e6d2e4a31ab1a165a887335",
+              "sessionId": "254e88c4-b0d8-4aac-bdfe-7424fafdaca7",
+              "partitionHash": "f35816a0b1a6bad018a344465d114f2f7abb38913b40751319afa9133a912838"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "8a2bee3edd18463f87da864d056502245dfc3f6eff373cdbf29f97845b08dc6a",
+        "operationName": "camera.zoom",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "ca4bb36f-d56b-4ed8-a2aa-e3fcd4891fc6",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "c9d51698-c931-4d04-8540-adb2178786be",
+        "downstreamMissionIds": []
+      }
+    },
+    {
+      "case": "camera.velocity",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "17",
+              "entryHash": "baf75b20987ec36c25d6ad8e8fa3f097c738b328e66f9510a063612d153dd349",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "20",
+              "entryHash": "13f8de1c8c9468c81720978a3b8f2b88f77b81a9b8894103922ab379edde5ab2",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "b8d1bc0eb697854a144b996697826f957873b29497372d3af4823533c28a9702",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "d9b54b40c00ed9f2c29312ed5d750afc6f12adebc0c545b378a64482200e43a2",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "71d969193139eaf93f772a670518c92d536a8f348835785961aafdd4356ac3ae",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "a2357c579efb40c688af7881ffc5a4b55260d4a30f4032e25e33413bc52ebb42",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "144bf5034dd1e59b6710e1fc0e2e76b29a6139ac616a2a1577fbd21d599dd11a",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "68",
+              "entryHash": "7a0d0ea5e85498c5ddef02f9e780f89999d7595f41fa41b1f6001b3ebc31beaa",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "97415e77-dcf4-4e83-9ca5-84ac77f26b95",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 29,
+        "arguments": {
+          "operation": {
+            "name": "camera.velocity",
+            "params": {
+              "hold_ms": 300,
+              "yaw_rate_rad_s": 0.1,
+              "pitch_rate_rad_s": 0
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:15.452Z",
+        "updatedAt": "2026-10-24T06:34:15.786Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_CAMERA_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:15.786Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:15.449Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 6,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1mNGYyZmE3Zi1hZmFmLTRlNzAtOGY3ZS00MjA3NGM2OTZiYjgiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJ2ZWxvY2l0eSIsInlhd19yYXRlX3JhZF9zIjowLjEsInBpdGNoX3JhdGVfcmFkX3MiOjAsImhvbGRfbXMiOjMwMH19"
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-c31718e4-38c3-4e32-80e4-083cb957ad77",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-f4f2fa7f-afaf-4e70-8f7e-42074c696bb8"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-f4f2fa7f-afaf-4e70-8f7e-42074c696bb8"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:15.468Z",
+              "requestId": "req-f4f2fa7f-afaf-4e70-8f7e-42074c696bb8",
+              "dispatchAt": "2026-10-24T06:34:15.476Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:15.481Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "58538735-a391-4039-b826-31dcc8f77bb8",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "8968d2a27802ca469045ec8189d9a4d90d9d87b721a949f86d1d53ad50507d30",
+          "startedAt": "2026-10-24T06:34:15.454Z",
+          "deadlineAt": "2026-10-24T06:34:25.454Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "4758eb3c10f344cb585e8d92c0b0963786704c2d5c9706a90699d328ccee2ead",
+            "7d17f6a7f2d40f7295b3cade4c5641d0704954bbb4740e7e91b38e8d192605ef",
+            "f57632399a31368a0f2e623aa1be706d41c69d2d64f65d3cf0af238d9fffc631"
+          ],
+          "lastCommand": "zmq-camera-c31718e4-38c3-4e32-80e4-083cb957ad77",
+          "modeAttempt": 0,
+          "requestHash": "f799d7e6cd692f1b0ca2ef123a026f17267ff870df9a5cecaea37eec9ff9bdfe",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS05YzE1OTMxYy1mYzczLTRlMGMtODYzMS0xNTNkMGI3NzY3YmUiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-70d5c630-1b27-41f3-b933-81bd57372153",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:15.473Z",
+            "requestId": "req-9c15931c-fc73-4e0c-8631-153d0b7767be",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 4,
+          "taskBaseline": 4,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "17",
+              "entryHash": "baf75b20987ec36c25d6ad8e8fa3f097c738b328e66f9510a063612d153dd349",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "20",
+              "entryHash": "13f8de1c8c9468c81720978a3b8f2b88f77b81a9b8894103922ab379edde5ab2",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "b8d1bc0eb697854a144b996697826f957873b29497372d3af4823533c28a9702",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "d9b54b40c00ed9f2c29312ed5d750afc6f12adebc0c545b378a64482200e43a2",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "71d969193139eaf93f772a670518c92d536a8f348835785961aafdd4356ac3ae",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "a2357c579efb40c688af7881ffc5a4b55260d4a30f4032e25e33413bc52ebb42",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "144bf5034dd1e59b6710e1fc0e2e76b29a6139ac616a2a1577fbd21d599dd11a",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            },
+            {
+              "ordinal": "68",
+              "entryHash": "7a0d0ea5e85498c5ddef02f9e780f89999d7595f41fa41b1f6001b3ebc31beaa",
+              "sessionId": "9c1122cc-cd05-473c-a26c-84444f1dd010",
+              "partitionHash": "9af31643c829b7ab49d494d6c4f3fc9a3e75e166630fbf7e263363903a6eacb3"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "f799d7e6cd692f1b0ca2ef123a026f17267ff870df9a5cecaea37eec9ff9bdfe",
+        "operationName": "camera.velocity",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "c55ef924-3d50-45af-853a-eed587c2f031",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "3a47b27e-bda7-4f81-96c1-4c3f7f93e023",
+        "downstreamMissionIds": []
+      }
+    },
+    {
+      "case": "navigation.route",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "24",
+              "entryHash": "7d217c5d4ccfa3c56823d24072cf990345c5a57e95dc1c476ac42ae5c07a4b03",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "47",
+              "entryHash": "1f0c16a082cb061b237aa87ebdf4c5c73fdf6226d5e0d77d68fe73e65039608a",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "55",
+              "entryHash": "a2cf18a0891f0e3d321fde61fc455719951dffb79955a34c51d47bdf4225b050",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "69",
+              "entryHash": "6d45a095461b7853c48f3f6d2203433125873651c14d7eea9a8e991bc0b19262",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "87",
+              "entryHash": "15ad7495956c532170a01e52dac9513845dc9dcb8d473463960ecec89379028e",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "90",
+              "entryHash": "ed1f689967a0d39d4970b0b6059ab4c9a676f1a0cc883e9c02f844756df622a6",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "1701094562",
+          "nativeOutcome": "completed",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "40be2c2b-4d10-4177-9fec-9e22afb33d7c",
+        "tracks": [
+          "chassis"
+        ],
+        "evidence": [],
+        "revision": 22,
+        "arguments": {
+          "operation": {
+            "name": "navigation.route",
+            "params": {
+              "waypoints": [
+                {
+                  "latitude": 29.72,
+                  "longitude": 106.81
+                }
+              ],
+              "speedLimitMps": 1,
+              "obstacleAvoidance": true
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:16.022Z",
+        "updatedAt": "2026-10-24T06:34:16.316Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_TASK_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:16.316Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:16.018Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 41,
+          "commands": [
+            {
+              "action": "mode",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAP7/////////AQAAAAAAAAAEAHTyAQAAAA=="
+              ],
+              "method": "chassis.mode",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-mode-4116b270-a2ce-4e0c-95ea-05f02f0863b5",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.040Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.043Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.047Z"
+            },
+            {
+              "action": "speed",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAP7/////////AQAAAAAAAAAEAORYAACAPw=="
+              ],
+              "method": "chassis.speed",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-speed-81bf4e4f-ad87-4887-826e-2e202ebffd74",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.056Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.058Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.062Z"
+            },
+            {
+              "action": "obstacle",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAP7/////////AQAAAAAAAAABANHxAQ=="
+              ],
+              "method": "chassis.obstacle",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-obstacle-09991036-16cf-4357-a38a-3e06c39f7813",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.067Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.069Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.072Z"
+            },
+            {
+              "action": "configure",
+              "frames": [
+                "Y2FsbF90YXNrOgsAAAD+/////////wEAAAAAAAAAJQCPkaKkZGUBAAAAuB6F61G4PUCkcD0K17NaQAAAAAAAAAAAAgAAAAA="
+              ],
+              "method": "chassis.configure",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-configure-cda03d0c-0fdf-4091-b9f7-528ce09c55d0",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.076Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.094Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.097Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEAHTyAQAAAA=="
+              ],
+              "method": "chassis.start",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-start-de509658-69ef-4c56-9ea9-96a6f533e27c",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.138Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.141Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.144Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "c351f931-d6ea-4593-9a94-4ad62f066818",
+          "component": "chassis",
+          "occupancy": "released",
+          "scopeHash": "48aeaa761ce06897b96879693891892045b58d6eef73328d97f16001f4056276",
+          "startedAt": "2026-10-24T06:34:16.025Z",
+          "deadlineAt": "2026-10-24T06:34:26.025Z",
+          "generation": 0,
+          "modeSentAt": "2026-10-24T06:34:16.040Z",
+          "stopReason": "NATIVE_COMPLETED",
+          "stopSentAt": "2026-10-24T06:34:16.210Z",
+          "writerKeys": [
+            "54b1e7a9791be8f1cdf9691977ab46634d4d85a3f8c2c5b80491598733a03c91",
+            "c9f4c0341dccf4cc51aa90130e85dadb6b77bc9dfa942b7e093e9b16e63ba873",
+            "e654e56f9fe4772bfa198691349dabe2af197dd8812f5b85d549c126c9526140"
+          ],
+          "lastCommand": "zmq-start-de509658-69ef-4c56-9ea9-96a6f533e27c",
+          "modeAttempt": 1,
+          "requestHash": "ce538b6dba3649f53840c19d7f7008ec79311788f9be90eb1100513739d54e68",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEADFOBAAAAA=="
+            ],
+            "method": "chassis.stop",
+            "status": "intent",
+            "stepId": "zmq-stop-8a3a45a8-35a6-4032-996b-7b32800b8438",
+            "response": null,
+            "component": "chassis",
+            "createdAt": "2026-10-24T06:34:16.078Z",
+            "requestId": null,
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 11,
+          "nativeReason": null,
+          "nativeTaskId": "1701094562",
+          "stopBaseline": 57,
+          "taskBaseline": 23,
+          "nativeOutcome": "completed",
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "24",
+              "entryHash": "7d217c5d4ccfa3c56823d24072cf990345c5a57e95dc1c476ac42ae5c07a4b03",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "47",
+              "entryHash": "1f0c16a082cb061b237aa87ebdf4c5c73fdf6226d5e0d77d68fe73e65039608a",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "55",
+              "entryHash": "a2cf18a0891f0e3d321fde61fc455719951dffb79955a34c51d47bdf4225b050",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "69",
+              "entryHash": "6d45a095461b7853c48f3f6d2203433125873651c14d7eea9a8e991bc0b19262",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "87",
+              "entryHash": "15ad7495956c532170a01e52dac9513845dc9dcb8d473463960ecec89379028e",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            },
+            {
+              "ordinal": "90",
+              "entryHash": "ed1f689967a0d39d4970b0b6059ab4c9a676f1a0cc883e9c02f844756df622a6",
+              "sessionId": "a6ea2e10-f061-4c69-8f28-f3f0bc102725",
+              "partitionHash": "7d902b48e53fb861286b50a5164813aa060e3fb5ed1c3525e9295ae66c668932"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:19.210Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "ce538b6dba3649f53840c19d7f7008ec79311788f9be90eb1100513739d54e68",
+        "operationName": "navigation.route",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "8f7cb25e-95c4-4599-9b8e-607d843eca8b",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "ffe2540e-5214-4955-9d00-359a30199f8b",
+        "downstreamMissionIds": [
+          "1701094562"
+        ]
+      },
+      "commands": [
+        {
+          "component": "chassis",
+          "at": 1792823656047,
+          "request": {
+            "type": "mode",
+            "value": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656062,
+          "request": {
+            "type": "speedLimit",
+            "metresPerSecond": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656072,
+          "request": {
+            "type": "obstacleAvoidance",
+            "value": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656097,
+          "request": {
+            "type": "pathFollow",
+            "missionId": 1701094562,
+            "taskPoints": [
+              {
+                "latitude": 29.72,
+                "longitude": 106.81,
+                "headingAngle": 0,
+                "property": 2,
+                "reserved": 0
+              }
+            ]
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656144,
+          "request": {
+            "type": "motionControl",
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "case": "navigation.returnHome",
+      "final": {
+        "state": "SUCCEEDED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "14",
+              "entryHash": "5bfaa208745eaeb0b1f6481811cc45472e1579129c92780cadfd5cf0557908c9",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "39218551495202e3a79c59f761955ccceeb4696c8be61d024a560c62b6ce6404",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "41",
+              "entryHash": "baadc22496d7906ac733a6aba8395d7f2d17a72935dbb5a862b0d039260edea3",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "a6788cb40905248c5afdfbc78854847f34a2abd5799f8f64b5d2e3be5ce3563c",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "70",
+              "entryHash": "ea2064240dd8f705cc5cf29ea1c7eb91d8dfc71dbf2d8fbfbf0bd9846205cb0d",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "73",
+              "entryHash": "54e97ae15cdad0b74e420f43b8fab6a6428192de1ee9a83f8645b1c3be2ab7d1",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "2731823430",
+          "nativeOutcome": "completed",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "c5bf15d2-f616-4e7d-8844-52b0599ffdff",
+        "tracks": [
+          "chassis"
+        ],
+        "evidence": [],
+        "revision": 22,
+        "arguments": {
+          "operation": {
+            "name": "navigation.returnHome",
+            "params": {
+              "waypoints": [],
+              "returnType": 0,
+              "speedLimitMps": 1,
+              "obstacleAvoidance": true
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:16.491Z",
+        "updatedAt": "2026-10-24T06:34:16.740Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_TASK_COMPLETED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:16.740Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:16.489Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 29,
+          "commands": [
+            {
+              "action": "mode",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAP7/////////AQAAAAAAAAAEADFOBAAAAA=="
+              ],
+              "method": "chassis.mode",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-mode-8edfdd39-ea32-436e-98d5-2cf5b528abcd",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.496Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.499Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.502Z"
+            },
+            {
+              "action": "speed",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAP7/////////AQAAAAAAAAAEAORYAACAPw=="
+              ],
+              "method": "chassis.speed",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-speed-45706cb5-5d01-4942-bce0-6e598a7b5323",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.510Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.512Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.515Z"
+            },
+            {
+              "action": "obstacle",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAP7/////////AQAAAAAAAAABANHxAQ=="
+              ],
+              "method": "chassis.obstacle",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-obstacle-c738ca27-aa9c-477e-bdf1-bebc3c93dc67",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.518Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.521Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.524Z"
+            },
+            {
+              "action": "configure",
+              "frames": [
+                "Y2FsbF90YXNrOg0AAAD+/////////wEAAAAAAAAACQBUe0ZR1KIAAAAAAA=="
+              ],
+              "method": "chassis.configure",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-configure-679c2e3f-b039-4a06-bc64-ad1b1bd59aab",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.527Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.533Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.536Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEAHTyAQAAAA=="
+              ],
+              "method": "chassis.start",
+              "status": "sent_unconfirmed",
+              "stepId": "zmq-start-6ea6f1b8-fd34-48ba-98e5-f3ea3a60965d",
+              "response": null,
+              "component": "chassis",
+              "createdAt": "2026-10-24T06:34:16.572Z",
+              "requestId": null,
+              "dispatchAt": "2026-10-24T06:34:16.575Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:16.578Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "f431482f-d922-40b5-b30a-0bdf8abc69ff",
+          "component": "chassis",
+          "occupancy": "released",
+          "scopeHash": "751a989cecff1dc4c9e376c9d4a4655f211796b8f5ebaf09dd3047dddbe301a0",
+          "startedAt": "2026-10-24T06:34:16.494Z",
+          "deadlineAt": "2026-10-24T06:34:26.494Z",
+          "generation": 0,
+          "modeSentAt": "2026-10-24T06:34:16.496Z",
+          "stopReason": "NATIVE_COMPLETED",
+          "stopSentAt": "2026-10-24T06:34:16.637Z",
+          "writerKeys": [
+            "23eceeee814c4956aba3fd612f5ff1dbef18a0c361356feac0e94f6e21a978e6",
+            "81be6d59be6dbd3468a66e08de45b5717c1c63806ec25aafbc36452779626d42",
+            "c7078e4f4b8c7f441b5b527c8a1c5ae890bc66703625c40aa21804eb3e646041"
+          ],
+          "lastCommand": "zmq-start-6ea6f1b8-fd34-48ba-98e5-f3ea3a60965d",
+          "modeAttempt": 1,
+          "requestHash": "fd8df9c51871651d299de2600b49cb98b6922ff498989ffa87c06b1b886a85b5",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAP7/////////AQAAAAAAAAAEADFOBAAAAA=="
+            ],
+            "method": "chassis.stop",
+            "status": "intent",
+            "stepId": "zmq-stop-7511fb8a-9695-4b39-8ee2-b79240e97517",
+            "response": null,
+            "component": "chassis",
+            "createdAt": "2026-10-24T06:34:16.530Z",
+            "requestId": null,
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": "2731823430",
+          "stopBaseline": 44,
+          "taskBaseline": 14,
+          "nativeOutcome": "completed",
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "14",
+              "entryHash": "5bfaa208745eaeb0b1f6481811cc45472e1579129c92780cadfd5cf0557908c9",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "39218551495202e3a79c59f761955ccceeb4696c8be61d024a560c62b6ce6404",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "41",
+              "entryHash": "baadc22496d7906ac733a6aba8395d7f2d17a72935dbb5a862b0d039260edea3",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "a6788cb40905248c5afdfbc78854847f34a2abd5799f8f64b5d2e3be5ce3563c",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "70",
+              "entryHash": "ea2064240dd8f705cc5cf29ea1c7eb91d8dfc71dbf2d8fbfbf0bd9846205cb0d",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            },
+            {
+              "ordinal": "73",
+              "entryHash": "54e97ae15cdad0b74e420f43b8fab6a6428192de1ee9a83f8645b1c3be2ab7d1",
+              "sessionId": "ee6efef2-a8f8-4d66-a146-654c1aa9edbd",
+              "partitionHash": "c508124e8f0a8e613d32edfe6ba15851429fa20f984094abb1c0c8e91411f18a"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:19.637Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "CHASSIS_FEEDBACK_UNCORRELATED",
+            "MODE_PUBLICATION_ORDER_UNVERIFIED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "fd8df9c51871651d299de2600b49cb98b6922ff498989ffa87c06b1b886a85b5",
+        "operationName": "navigation.returnHome",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "daf5139e-3db1-4bba-bfa0-4ef82f2aba10",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "0a9bca76-9c0a-4ec1-8e0d-e8360adc49b7",
+        "downstreamMissionIds": [
+          "2731823430"
+        ]
+      },
+      "commands": [
+        {
+          "component": "chassis",
+          "at": 1792823656502,
+          "request": {
+            "type": "mode",
+            "value": 4
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656515,
+          "request": {
+            "type": "speedLimit",
+            "metresPerSecond": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656524,
+          "request": {
+            "type": "obstacleAvoidance",
+            "value": 1
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656536,
+          "request": {
+            "type": "returnHome",
+            "missionId": 2731823430,
+            "returnType": 0,
+            "taskPoints": []
+          }
+        },
+        {
+          "component": "chassis",
+          "at": 1792823656578,
+          "request": {
+            "type": "motionControl",
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "case": "sector_lifecycle",
+      "final": {
+        "state": "CANCELLED",
+        "result": {
+          "occupancy": "released",
+          "sourceRefs": [
+            {
+              "ordinal": "24",
+              "entryHash": "8db59e1d38a9d02df535eac5da9ac9d18393b3a6669c5d8063941d70547a5bda",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "c98b0b07b00fc5c345b591411c62dab31140bf261af76c64f280d0f7e07d0208",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "3a19b46bff46141e3ff214e8735c124ca631fb772157d25bf07a64b094351ea1",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "37",
+              "entryHash": "286a7fa681e562c5ee71c192ec267b467b69e816567f3c768f1e75b0b84aed29",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+          "nativeOutcome": "canceled",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": true,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "81bfe636-bf83-482b-8f4d-75758aeb332a",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 15,
+        "arguments": {
+          "operation": {
+            "name": "recon.circular",
+            "params": {
+              "pitch_rad": 0,
+              "scan_mode": "sector",
+              "cycle_count": 1,
+              "yaw_span_rad": 1,
+              "yaw_center_rad": 0,
+              "search_strategy": "recognize",
+              "task_timeout_ms": 5000,
+              "yaw_speed_rad_s": 0.5
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:17.181Z",
+        "updatedAt": "2026-10-24T06:34:17.255Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "CLIENT_REQUESTED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:17.255Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:17.178Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 22,
+          "commands": [
+            {
+              "action": "configure",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1lNDMzZDhlYi1jY2YxLTRiYWMtYWIwOC1kNzViZjg3MzU2MmEiLCJtZXRob2QiOiJDaXJjdWxhclNlYXJjaCIsInBhcmFtcyI6eyJzY2FuX21vZGUiOiJzZWN0b3IiLCJ5YXdfY2VudGVyX3JhZCI6MCwieWF3X3NwYW5fcmFkIjoxLCJwaXRjaF9yYWQiOjAsInlhd19zcGVlZF9yYWRfcyI6MC41LCJjeWNsZV9jb3VudCI6MSwidGFza190aW1lb3V0X21zIjo1MDAwLCJzZWFyY2hfc3RyYXRlZ3kiOiJyZWNvZ25pemUifX0="
+              ],
+              "method": "CircularSearch",
+              "status": "accepted",
+              "stepId": "zmq-configure-4349ee29-dd61-4bba-9999-c299cfa4ee03",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "CircularSearch",
+                "command": {
+                  "state": "accepted",
+                  "method": "CircularSearch",
+                  "reason": null,
+                  "task_id": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+                  "request_id": "req-e433d8eb-ccf1-4bac-ab08-d75bf873562a"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-e433d8eb-ccf1-4bac-ab08-d75bf873562a"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:17.193Z",
+              "requestId": "req-e433d8eb-ccf1-4bac-ab08-d75bf873562a",
+              "dispatchAt": "2026-10-24T06:34:17.197Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:17.201Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS0xM2RjYjM1YS05NzBiLTQwMzAtYTdiNC00MDhmODBhNzg2ZDUiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTVkODdjN2FmLTE2NDYtNGU4ZS04ZGM5LTMwMGQxZGU3ZjAzZSIsImFjdGlvbiI6InN0YXJ0In19"
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-start-e6f966c6-5350-4eff-a4ae-abee1493ee57",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+                  "request_id": "req-13dcb35a-970b-4030-a7b4-408f80a786d5"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-13dcb35a-970b-4030-a7b4-408f80a786d5"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:17.209Z",
+              "requestId": "req-13dcb35a-970b-4030-a7b4-408f80a786d5",
+              "dispatchAt": "2026-10-24T06:34:17.214Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:17.218Z"
+            },
+            {
+              "action": "stop",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hZjBhZGRmOC0wZjRiLTQ5ZTQtYTcxYi1lZDcyZWJiMzgwOGUiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTVkODdjN2FmLTE2NDYtNGU4ZS04ZGM5LTMwMGQxZGU3ZjAzZSIsImFjdGlvbiI6InN0b3AifX0="
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-stop-f0ea9875-da10-458c-8f6e-992b98bfbfea",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+                  "request_id": "req-af0addf8-0f4b-49e4-a71b-ed72ebb3808e"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-af0addf8-0f4b-49e4-a71b-ed72ebb3808e"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:17.211Z",
+              "requestId": "req-af0addf8-0f4b-49e4-a71b-ed72ebb3808e",
+              "dispatchAt": "2026-10-24T06:34:17.244Z",
+              "generation": 1,
+              "completedAt": "2026-10-24T06:34:17.248Z"
+            }
+          ],
+          "controls": [
+            {
+              "hash": "66c61472d1978bc918182dcded35391126969d639d6f5260a60a90940dbe9668",
+              "action": "cancel",
+              "commandId": "76a0f941-8e05-4aaf-941e-aefc49a5fb58"
+            }
+          ],
+          "commandId": "9b45a076-9c7c-4993-8978-261bedb715b7",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "af40bdb0b2e5e9704065d6b5c0a6221d0206411c02c4670324a0cf195d8a9830",
+          "startedAt": "2026-10-24T06:34:17.182Z",
+          "deadlineAt": "2026-10-24T06:34:27.182Z",
+          "generation": 1,
+          "modeSentAt": null,
+          "stopReason": "CLIENT_REQUESTED",
+          "stopSentAt": "2026-10-24T06:34:17.247Z",
+          "writerKeys": [
+            "412ac8d5fa552d27a1499fe485438e9c129329b4734f851de15137ef1571c318",
+            "990bf2b0241e20d58554fba2f5078967fa9cdc5e169d16de5811d382184bf918",
+            "fe90b4b67f722b454fbace901dff47e5073e8adaa020db375095cb2583d70279"
+          ],
+          "lastCommand": "zmq-stop-f0ea9875-da10-458c-8f6e-992b98bfbfea",
+          "modeAttempt": 0,
+          "requestHash": "67811ac3d362b14f84734631925bf5bdd8dc546617368569e0f7ff4237807ce4",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hZjBhZGRmOC0wZjRiLTQ5ZTQtYTcxYi1lZDcyZWJiMzgwOGUiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLTVkODdjN2FmLTE2NDYtNGU4ZS04ZGM5LTMwMGQxZGU3ZjAzZSIsImFjdGlvbiI6InN0b3AifX0="
+            ],
+            "method": "TaskControl",
+            "status": "intent",
+            "stepId": "zmq-stop-f0ea9875-da10-458c-8f6e-992b98bfbfea",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:17.211Z",
+            "requestId": "req-af0addf8-0f4b-49e4-a71b-ed72ebb3808e",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 7,
+          "nativeReason": null,
+          "nativeTaskId": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+          "stopBaseline": 22,
+          "taskBaseline": 8,
+          "nativeOutcome": "canceled",
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "24",
+              "entryHash": "8db59e1d38a9d02df535eac5da9ac9d18393b3a6669c5d8063941d70547a5bda",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "c98b0b07b00fc5c345b591411c62dab31140bf261af76c64f280d0f7e07d0208",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "3a19b46bff46141e3ff214e8735c124ca631fb772157d25bf07a64b094351ea1",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            },
+            {
+              "ordinal": "37",
+              "entryHash": "286a7fa681e562c5ee71c192ec267b467b69e816567f3c768f1e75b0b84aed29",
+              "sessionId": "6ba20d5d-571e-4cd3-aef5-7608288a5ffd",
+              "partitionHash": "d2eaf22371197f3a7b75fb3f5a91c232a46b7cbdc207002a67848363429a8610"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:20.247Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ],
+          "stopRequestedAt": "2026-10-24T06:34:17.240Z"
+        },
+        "argumentHash": "67811ac3d362b14f84734631925bf5bdd8dc546617368569e0f7ff4237807ce4",
+        "operationName": "recon.circular",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "4ca5512b-ee17-4fb6-b947-bb26bed2a7ea",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "78aac6d5-71be-4f70-9b27-69dff0eae274",
+        "downstreamMissionIds": [
+          "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e"
+        ]
+      },
+      "commands": [
+        {
+          "component": "eo",
+          "at": 1792823657200,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-e433d8eb-ccf1-4bac-ab08-d75bf873562a",
+            "method": "CircularSearch",
+            "params": {
+              "scan_mode": "sector",
+              "yaw_center_rad": 0,
+              "yaw_span_rad": 1,
+              "pitch_rad": 0,
+              "yaw_speed_rad_s": 0.5,
+              "cycle_count": 1,
+              "task_timeout_ms": 5000,
+              "search_strategy": "recognize"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823657217,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-13dcb35a-970b-4030-a7b4-408f80a786d5",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+              "action": "start"
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823657247,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-af0addf8-0f4b-49e4-a71b-ed72ebb3808e",
+            "method": "TaskControl",
+            "params": {
+              "task_id": "native-5d87c7af-1646-4e8e-8dc9-300d1de7f03e",
+              "action": "stop"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": "deadline_stop_unconfirmed_then_late",
+      "originalResult": {
+        "occupancy": "held",
+        "sourceRefs": [
+          {
+            "ordinal": "20",
+            "entryHash": "91521ed8380866a017148a3e02e9587702c74a0ad22bc5d97c1d74ab9b2a423b",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "28",
+            "entryHash": "b930ffcec28479eb5e0b3a161d33399f1f06774bd8356066a67ac9fd35f4e2cb",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "36",
+            "entryHash": "1bb5799a0c95bbe5dbdce9abff448e224f523df10dd8ed48ffb61bdff2f00e6b",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "44",
+            "entryHash": "cbd818f929a04641d3ab6ef11bdaa27732aa80da111de9846bf063fef58bcf8d",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "52",
+            "entryHash": "3c6dc0e2384d6c781110810037776c05de17ff84377341ccc5876564aa3adc9e",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "60",
+            "entryHash": "f054b67fcdd0067ad04d4383a7165babeef89c998f20aab4d4b0209cb9236018",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "68",
+            "entryHash": "25fe1b21c6f7b6bf2a74c25efd50bca56a3dd9a9a118479ec4c9532ef1673990",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          },
+          {
+            "ordinal": "77",
+            "entryHash": "9ed1ed6cda5e82d74343600cb207e3e14c6f4ed93e2e28046127c9a1c629383d",
+            "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+            "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+          }
+        ],
+        "nativeReason": null,
+        "nativeTaskId": null,
+        "nativeOutcome": null,
+        "qualification": "isolated_simulator_only",
+        "schemaVersion": "ugv.zmq-control-result/1",
+        "stopConfirmed": false,
+        "missingEvidence": [
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "PHYSICAL_STOP_UNCONFIRMED"
+        ],
+        "runtimeAdmission": "not_published"
+      },
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [
+            {
+              "ordinal": "20",
+              "entryHash": "91521ed8380866a017148a3e02e9587702c74a0ad22bc5d97c1d74ab9b2a423b",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "28",
+              "entryHash": "b930ffcec28479eb5e0b3a161d33399f1f06774bd8356066a67ac9fd35f4e2cb",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "36",
+              "entryHash": "1bb5799a0c95bbe5dbdce9abff448e224f523df10dd8ed48ffb61bdff2f00e6b",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "cbd818f929a04641d3ab6ef11bdaa27732aa80da111de9846bf063fef58bcf8d",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "3c6dc0e2384d6c781110810037776c05de17ff84377341ccc5876564aa3adc9e",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "f054b67fcdd0067ad04d4383a7165babeef89c998f20aab4d4b0209cb9236018",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "68",
+              "entryHash": "25fe1b21c6f7b6bf2a74c25efd50bca56a3dd9a9a118479ec4c9532ef1673990",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "77",
+              "entryHash": "9ed1ed6cda5e82d74343600cb207e3e14c6f4ed93e2e28046127c9a1c629383d",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "PHYSICAL_STOP_UNCONFIRMED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "c03ffbc3-d9b0-4f77-a3d5-7cc800d2c379",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 41,
+        "arguments": {
+          "operation": {
+            "name": "camera.position",
+            "params": {
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 2000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:17.462Z",
+        "updatedAt": "2026-10-24T06:34:20.919Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_STOP_UNCONFIRMED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:20.905Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T06:34:17.460Z",
+            "maxElapsedMs": 400,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 73,
+          "commands": [
+            {
+              "action": "camera",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1hNjllNmYwZi1kMTEwLTRhMWQtODRkNy0zOGVjMTlhMzBkMzgiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJwb3NpdGlvbiIsInlhd19yYWQiOjAuNSwicGl0Y2hfcmFkIjowLCJtb3ZlX3RpbWVvdXRfbXMiOjM4N319"
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-camera-5f566ea4-6c5c-49f7-9352-15f464ec327f",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-a69e6f0f-d110-4a1d-84d7-38ec19a30d38"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-a69e6f0f-d110-4a1d-84d7-38ec19a30d38"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:17.476Z",
+              "requestId": "req-a69e6f0f-d110-4a1d-84d7-38ec19a30d38",
+              "dispatchAt": "2026-10-24T06:34:17.482Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:17.486Z"
+            },
+            {
+              "action": "stop",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS01MjQ3MmQxYS1mMGUwLTRjNWYtYjFhNi02OTNiMTM4YjRlZGIiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+              ],
+              "method": "TeleControl",
+              "status": "accepted",
+              "stepId": "zmq-stop-f8f1173e-df01-4eae-959d-b5cc6bc2d0b0",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TeleControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TeleControl",
+                  "reason": null,
+                  "task_id": null,
+                  "request_id": "req-52472d1a-f0e0-4c5f-b1a6-693b138b4edb"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-52472d1a-f0e0-4c5f-b1a6-693b138b4edb"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:17.480Z",
+              "requestId": "req-52472d1a-f0e0-4c5f-b1a6-693b138b4edb",
+              "dispatchAt": "2026-10-24T06:34:17.880Z",
+              "generation": 1,
+              "completedAt": "2026-10-24T06:34:17.885Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "70fb18e9-c2b6-44ee-9987-11fcd7c441ff",
+          "component": "eo",
+          "occupancy": "released",
+          "scopeHash": "58bd95af71748b8dd286c84582015b3595516abae5900affb9bf333538ba9966",
+          "startedAt": "2026-10-24T06:34:17.463Z",
+          "deadlineAt": "2026-10-24T06:34:17.863Z",
+          "generation": 1,
+          "modeSentAt": null,
+          "stopReason": "DEADLINE_EXCEEDED",
+          "stopSentAt": "2026-10-24T06:34:17.883Z",
+          "writerKeys": [
+            "10f04d542b628dd018b3cd32ac2e94f5d813b55b5de7f0a9b634a3d92e07c23e",
+            "67ee0465b4a5eb02e591538b1548fdfe1441b3355f080bc7f3af957be5d5612b",
+            "89a124d46280f6a6d690a3793ddcc15a48fc1ab4327414658309201c731b0062"
+          ],
+          "lastCommand": "zmq-stop-f8f1173e-df01-4eae-959d-b5cc6bc2d0b0",
+          "modeAttempt": 0,
+          "requestHash": "999f1af777c9fc287242bf9d1940bf5b2821e3fb917b5a922f3d18e01ce3dd0a",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS01MjQ3MmQxYS1mMGUwLTRjNWYtYjFhNi02OTNiMTM4YjRlZGIiLCJtZXRob2QiOiJUZWxlQ29udHJvbCIsInBhcmFtcyI6eyJhY3Rpb24iOiJzdG9wIn19"
+            ],
+            "method": "TeleControl",
+            "status": "intent",
+            "stepId": "zmq-stop-f8f1173e-df01-4eae-959d-b5cc6bc2d0b0",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:17.480Z",
+            "requestId": "req-52472d1a-f0e0-4c5f-b1a6-693b138b4edb",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": null,
+          "stopBaseline": 73,
+          "taskBaseline": 4,
+          "nativeOutcome": null,
+          "stopConfirmed": true,
+          "latestEvidence": [
+            {
+              "ordinal": "36",
+              "entryHash": "1bb5799a0c95bbe5dbdce9abff448e224f523df10dd8ed48ffb61bdff2f00e6b",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "44",
+              "entryHash": "cbd818f929a04641d3ab6ef11bdaa27732aa80da111de9846bf063fef58bcf8d",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "52",
+              "entryHash": "3c6dc0e2384d6c781110810037776c05de17ff84377341ccc5876564aa3adc9e",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "60",
+              "entryHash": "f054b67fcdd0067ad04d4383a7165babeef89c998f20aab4d4b0209cb9236018",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "68",
+              "entryHash": "25fe1b21c6f7b6bf2a74c25efd50bca56a3dd9a9a118479ec4c9532ef1673990",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "77",
+              "entryHash": "9ed1ed6cda5e82d74343600cb207e3e14c6f4ed93e2e28046127c9a1c629383d",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "569",
+              "entryHash": "bbbb639deccf2d1f6744365ccdbed239602c6720c6cd6f05369af5407fad61e8",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            },
+            {
+              "ordinal": "566",
+              "entryHash": "52cb85f20655a700670d0edfffed05186afad27222a2a9be10b95e63d678a8f3",
+              "sessionId": "eae91fb4-4a3e-41fd-9779-e68b2e5ad7d0",
+              "partitionHash": "20584d4f1ead19bf1be3ca61fbf0e812053a4f63f97c493a51db84346af05f49"
+            }
+          ],
+          "stopDeadlineAt": "2026-10-24T06:34:20.883Z",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "PHYSICAL_STOP_UNCONFIRMED"
+          ],
+          "stopRequestedAt": "2026-10-24T06:34:17.875Z"
+        },
+        "argumentHash": "999f1af777c9fc287242bf9d1940bf5b2821e3fb917b5a922f3d18e01ce3dd0a",
+        "operationName": "camera.position",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "21172a91-af0c-429c-8b37-dc1ec4d79311",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "159693d1-4167-40c0-838e-20a7a2f94d69",
+        "downstreamMissionIds": []
+      },
+      "commands": [
+        {
+          "component": "eo",
+          "at": 1792823657486,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-a69e6f0f-d110-4a1d-84d7-38ec19a30d38",
+            "method": "TeleControl",
+            "params": {
+              "action": "position",
+              "yaw_rad": 0.5,
+              "pitch_rad": 0,
+              "move_timeout_ms": 387
+            }
+          }
+        },
+        {
+          "component": "eo",
+          "at": 1792823657884,
+          "request": {
+            "protocol": "2.2",
+            "kind": "request",
+            "device_id": "isr-01",
+            "request_id": "req-52472d1a-f0e0-4c5f-b1a6-693b138b4edb",
+            "method": "TeleControl",
+            "params": {
+              "action": "stop"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": "source_interruption_and_native_id_reuse",
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "occupancy": "held",
+          "sourceRefs": [
+            {
+              "ordinal": "17",
+              "entryHash": "20762c422d7b61a05f108d26f750d1085aaeaeb5d7209a14da3aad80ae4df287",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            },
+            {
+              "ordinal": "25",
+              "entryHash": "af2da60a80d43e1dc5c44190402a6d519cb8b690fdb5828a98acd7ebfb567ad1",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "e2cac5fb4ebe49b3af7ed66d7ab693ef6ff411547f24017f0d6a3fcc025dd6f9",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            }
+          ],
+          "nativeReason": null,
+          "nativeTaskId": "native-fb57c016-e419-4610-94c9-a22ce84eb5da",
+          "nativeOutcome": null,
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-control-result/1",
+          "stopConfirmed": false,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+            "SOURCE_CONNECTION_INTERRUPTED"
+          ],
+          "runtimeAdmission": "not_published"
+        },
+        "taskId": "6c66400c-e360-4c62-b275-2fad350c2fdd",
+        "tracks": [
+          "eo"
+        ],
+        "evidence": [],
+        "revision": 11,
+        "arguments": {
+          "operation": {
+            "name": "recon.area",
+            "params": {
+              "region_wgs84": [
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                {
+                  "latitude_deg": 29.001,
+                  "longitude_deg": 106,
+                  "ellipsoid_height_m": 10
+                }
+              ],
+              "search_strategy": "recognize",
+              "task_timeout_ms": 300000
+            }
+          }
+        },
+        "createdAt": "2026-10-24T06:34:21.208Z",
+        "updatedAt": "2026-10-24T06:34:21.321Z",
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "ZMQ_SOURCE_RESTART_UNVERIFIABLE",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T06:34:21.321Z",
+        "zmqControl": {
+          "stage": "uncertain",
+          "timing": {
+            "startAt": "2026-10-24T06:34:21.206Z",
+            "maxElapsedMs": 10000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 11,
+          "commands": [
+            {
+              "action": "configure",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1lYTIwZTMwMi05ZDVmLTQ5Y2EtYTI5MS0wY2VkMjU0ZWUwMDAiLCJtZXRob2QiOiJBcmVhU2VhcmNoIiwicGFyYW1zIjp7InJlZ2lvbl93Z3M4NCI6W3sibGF0aXR1ZGVfZGVnIjoyOSwibG9uZ2l0dWRlX2RlZyI6MTA2LCJlbGxpcHNvaWRfaGVpZ2h0X20iOjEwfSx7ImxhdGl0dWRlX2RlZyI6MjksImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNi4wMDEsImVsbGlwc29pZF9oZWlnaHRfbSI6MTB9LHsibGF0aXR1ZGVfZGVnIjoyOS4wMDEsImxvbmdpdHVkZV9kZWciOjEwNiwiZWxsaXBzb2lkX2hlaWdodF9tIjoxMH1dLCJ0YXNrX3RpbWVvdXRfbXMiOjk5ODgsInNlYXJjaF9zdHJhdGVneSI6InJlY29nbml6ZSJ9fQ=="
+              ],
+              "method": "AreaSearch",
+              "status": "accepted",
+              "stepId": "zmq-configure-fc377d34-b5db-462d-a166-c45261da4822",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "AreaSearch",
+                "command": {
+                  "state": "accepted",
+                  "method": "AreaSearch",
+                  "reason": null,
+                  "task_id": "native-fb57c016-e419-4610-94c9-a22ce84eb5da",
+                  "request_id": "req-ea20e302-9d5f-49ca-a291-0ced254ee000"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-ea20e302-9d5f-49ca-a291-0ced254ee000"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:21.222Z",
+              "requestId": "req-ea20e302-9d5f-49ca-a291-0ced254ee000",
+              "dispatchAt": "2026-10-24T06:34:21.225Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:21.230Z"
+            },
+            {
+              "action": "start",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS1lMjM4OGFhYi02MzYwLTQxYTAtOGZmZC1hNjIzYWFmODkxMTkiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLWZiNTdjMDE2LWU0MTktNDYxMC05NGM5LWEyMmNlODRlYjVkYSIsImFjdGlvbiI6InN0YXJ0In19"
+              ],
+              "method": "TaskControl",
+              "status": "accepted",
+              "stepId": "zmq-start-49f30ce3-dcd0-4645-bce1-d873e7408e72",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "TaskControl",
+                "command": {
+                  "state": "accepted",
+                  "method": "TaskControl",
+                  "reason": null,
+                  "task_id": "native-fb57c016-e419-4610-94c9-a22ce84eb5da",
+                  "request_id": "req-e2388aab-6360-41a0-8ffd-a623aaf89119"
+                },
+                "protocol": "2.2",
+                "device_id": "isr-01",
+                "response_id": "req-e2388aab-6360-41a0-8ffd-a623aaf89119"
+              },
+              "component": "eo",
+              "createdAt": "2026-10-24T06:34:21.239Z",
+              "requestId": "req-e2388aab-6360-41a0-8ffd-a623aaf89119",
+              "dispatchAt": "2026-10-24T06:34:21.245Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T06:34:21.250Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "3b438923-02f7-419a-9b12-f7dcdc734932",
+          "component": "eo",
+          "occupancy": "held",
+          "scopeHash": "9cd0058fd62c3d1d41c7219a07aaf5b8e163fb28cb9c300e7054884d29036f40",
+          "startedAt": "2026-10-24T06:34:21.210Z",
+          "deadlineAt": "2026-10-24T06:34:31.210Z",
+          "generation": 1,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "7fd40030997815285d7fc673a059a23644a77e0510091ef4de4aa8dc1f610986",
+            "8fe371ac25ad34f13185c5e672f1f71ae135d99d5b64a980b64a0a26ce5103c2",
+            "f5102f8ea2904437a170caa75d1f89379c93c191b281e5eed936ffa0d1fd5cc0"
+          ],
+          "lastCommand": "zmq-start-49f30ce3-dcd0-4645-bce1-d873e7408e72",
+          "modeAttempt": 0,
+          "requestHash": "27e4179de0d0acb4539ab8e58dae3548946140702a5a5d846412693c258efa7b",
+          "fallbackStop": {
+            "action": "stop",
+            "frames": [
+              "eyJwcm90b2NvbCI6IjIuMiIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiaXNyLTAxIiwicmVxdWVzdF9pZCI6InJlcS02OTAzOWI2NS1hN2JiLTQ4NzQtYWRhMS1mYTQzNmI2NmNjNmUiLCJtZXRob2QiOiJUYXNrQ29udHJvbCIsInBhcmFtcyI6eyJ0YXNrX2lkIjoibmF0aXZlLWZiNTdjMDE2LWU0MTktNDYxMC05NGM5LWEyMmNlODRlYjVkYSIsImFjdGlvbiI6InN0b3AifX0="
+            ],
+            "method": "TaskControl",
+            "status": "intent",
+            "stepId": "zmq-stop-dd7e12ad-61c9-4b41-8024-f4a6682159cc",
+            "response": null,
+            "component": "eo",
+            "createdAt": "2026-10-24T06:34:21.242Z",
+            "requestId": "req-69039b65-a7bb-4874-ada1-fa436b66cc6e",
+            "dispatchAt": null,
+            "generation": 0,
+            "completedAt": null
+          },
+          "modeBaseline": 4,
+          "nativeReason": null,
+          "nativeTaskId": "native-fb57c016-e419-4610-94c9-a22ce84eb5da",
+          "stopBaseline": 4,
+          "taskBaseline": 6,
+          "nativeOutcome": null,
+          "stopConfirmed": false,
+          "latestEvidence": [
+            {
+              "ordinal": "17",
+              "entryHash": "20762c422d7b61a05f108d26f750d1085aaeaeb5d7209a14da3aad80ae4df287",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            },
+            {
+              "ordinal": "25",
+              "entryHash": "af2da60a80d43e1dc5c44190402a6d519cb8b690fdb5828a98acd7ebfb567ad1",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            },
+            {
+              "ordinal": "32",
+              "entryHash": "e2cac5fb4ebe49b3af7ed66d7ab693ef6ff411547f24017f0d6a3fcc025dd6f9",
+              "sessionId": "ca69c089-4095-46e3-bee4-d814f117769b",
+              "partitionHash": "3a91bd4325dd32551257600e2263f27bf808be905d7a2d97a86f0e76ac4896f4"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+            "SOURCE_CONNECTION_INTERRUPTED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "27e4179de0d0acb4539ab8e58dae3548946140702a5a5d846412693c258efa7b",
+        "operationName": "recon.area",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "6462217e-084d-424b-acc5-a6aaaed78de2",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "e64081a3-810d-4dca-b4f3-76b6488a075c",
+        "downstreamMissionIds": [
+          "native-fb57c016-e419-4610-94c9-a22ce84eb5da"
+        ]
+      },
+      "commandCount": 2
+    }
+  ]
+}

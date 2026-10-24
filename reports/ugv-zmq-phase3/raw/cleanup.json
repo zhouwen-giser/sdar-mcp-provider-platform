@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-24T06:39:50.239372+00:00",
+  "temporaryPostgresContainer": "ugv-zmq-phase3-e0526e21",
+  "removalExitCode": 0,
+  "privateCredentialFilesRemoved": [
+    "postgres.env",
+    "postgres-test.json"
+  ],
+  "retainedEvidence": "reports/ugv-zmq-phase3/raw/",
+  "productionVolumesModified": false
+}

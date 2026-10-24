@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "ugv.zmq-phase3-source-manifest/1",
+  "baselineCommit": "6ade28aeabf65720207d47a29cb3a6aa267e25ea",
+  "branch": "codex/ugv-zmq-phase3-20261024",
+  "classification": "ISOLATED_SIMULATOR_ONLY",
+  "files": [
+    {
+      "path": ".prettierignore",
+      "bytes": 1888,
+      "sha256": "c30229a2e4598e6b1823035e1f087b80baa0f76c8dcd3f6b98f3dd8f5e72cbb8"
+    },
+    {
+      "path": "deploy/ugv-zmq/CONTROL.md",
+      "bytes": 7852,
+      "sha256": "4a8a9e77fbce10fc3c23a94d678354dcb6163049956934e196e37d3d0588e296"
+    },
+    {
+      "path": "docs/design/ugv-zmq-migration-20261023.md",
+      "bytes": 45402,
+      "sha256": "7dae0bb39181df81ddd45fa4da4547be8bd016c84cd7bb193f5824d8506d859c"
+    },
+    {
+      "path": "docs/execplans/ugv-zmq-control-phase3-20261024.md",
+      "bytes": 5349,
+      "sha256": "be048d0748b5e144a0bbee2fdae3f83dd10971e871a3def2406ba329f605a151"
+    },
+    {
+      "path": "docs/execplans/ugv-zmq-migration-20261023.md",
+      "bytes": 8617,
+      "sha256": "799863cf69741b019dd88e2ca2cb679595790e3e13529bc663e599e78cc34aad"
+    },
+    {
+      "path": "package.json",
+      "bytes": 30288,
+      "sha256": "a96d1ae1570fc6fa3ab125a622e599de27ffd04ff645bc826df7a2d8b3715a2d"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/package.json",
+      "bytes": 236,
+      "sha256": "3cc65670ac05ff9a034b5bea9359b5c5b328a014392b9909e8635b75d168764c"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/engine.ts",
+      "bytes": 53583,
+      "sha256": "82fed55794b4bb41391176544973affd7d57b9f63f5669319a541d8f739ec6d3"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/index.ts",
+      "bytes": 149,
+      "sha256": "1539945230081fc43ef1028245ed539a741aa57bc327af5a86f5adcc5e689c94"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/model.ts",
+      "bytes": 9673,
+      "sha256": "4f72cfc5c9ca32f34978d1c8cdd6f573f35edd59751ce8c87e08906ecbe35fe1"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/queue.ts",
+      "bytes": 1315,
+      "sha256": "b66a3a63602a567651800da95a1fa76f024067485956930dccfa3e2dff25e633"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/repository.ts",
+      "bytes": 6383,
+      "sha256": "4ea36fa0cde78a8240c643d94c18d8fe907fc6135beb7afd17b803563221e4c2"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/transport.ts",
+      "bytes": 3425,
+      "sha256": "16e3594a5fb894cdbc474772b14c87ea6e0774e761f7308c6e37b050ce3d7f35"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/wire.ts",
+      "bytes": 5630,
+      "sha256": "a66b959433052579aa5ff8e3737e74eb53e9975181642b8af4a7938b33394a85"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/driver.ts",
+      "bytes": 4120,
+      "sha256": "c56fa37214d48c505f0f7b7dce1b09f856a5a3870ea2869bea32e1349c4c2440"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/observer.ts",
+      "bytes": 8641,
+      "sha256": "a13cdd202314761d0d51228cd94e2493adf449ef54d2f258a0eea38c4664d8b7"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 207754,
+      "sha256": "829b0ff2cc6823bb460f76acb0008c8b34faa5c8a18174b9e25d095e978bf38d"
+    },
+    {
+      "path": "scripts/ugv-zmq/verify-control-evidence.ts",
+      "bytes": 3783,
+      "sha256": "b1c2401b50eed6f4384a52e9ba7e06eaeb682722dc4e45a3cb6a083140711dd7"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/control.test.ts",
+      "bytes": 23690,
+      "sha256": "035fd4838e9e870f5a11a01f63e39b9b54413833806364dcfc658f63fe97855c"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/crash-child.ts",
+      "bytes": 3316,
+      "sha256": "3049aadcb34919d8a86b7de800c64d900d95a34daddf848d89068d4a4215ef72"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/harness.ts",
+      "bytes": 3908,
+      "sha256": "9c76590137501194363f4476cbd94cfa8d686a81aa61685688908c9d8c6ad020"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/simulator.ts",
+      "bytes": 10843,
+      "sha256": "3ba3dae1e272d70b62013eb85d058152af3038b06696627f5261740be563e86d"
+    },
+    {
+      "path": "tests/ugv-zmq-control/control.test.ts",
+      "bytes": 17882,
+      "sha256": "1796605f31e5f5ed51ec76f4546de3c2c6fbd63ab00b1351fdb20ee1a5957f64"
+    },
+    {
+      "path": "tests/ugv-zmq-control/helpers.ts",
+      "bytes": 9859,
+      "sha256": "8af494ad4ddbc326f6d5b47e8eae7c0d204f41e1436ae4461b86de5c34b78f44"
+    }
+  ]
+}

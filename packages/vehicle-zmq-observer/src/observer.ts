@@ -10,6 +10,7 @@ import {
   gap,
   stamp,
   type ArchiveSession,
+  type ArchiveEntry,
   type ClockStamp,
   type ObservationArchive,
   type ObservationEvent,
@@ -40,6 +41,7 @@ export class ZmqObservationObserver {
   #pump: Promise<void> | undefined;
   #failure: Promise<void> | undefined;
   #stopping: Promise<void> | undefined;
+  readonly #committedListeners = new Set<(entry: ArchiveEntry) => void>();
   onFailure: (() => void) | undefined;
   constructor(
     readonly profile: DeploymentProfile,
@@ -53,6 +55,11 @@ export class ZmqObservationObserver {
   }
   get sessionId() {
     return this.#session?.sessionId ?? null;
+  }
+  /** Consumers see confirmed archive entries only; consumer failure does not undo a commit. */
+  subscribeCommitted(listener: (entry: ArchiveEntry) => void): () => void {
+    this.#committedListeners.add(listener);
+    return () => this.#committedListeners.delete(listener);
   }
   async start(): Promise<void> {
     if (this.#started) throw Error("ZMQ_OBSERVER_ALREADY_STARTED");
@@ -146,7 +153,16 @@ export class ZmqObservationObserver {
         try {
           const entries = await this.archive.append(batch.map((item) => item.event));
           if (entries.length !== batch.length) throw Error("ZMQ_ARCHIVE_BATCH_RECEIPT_UNCONFIRMED");
-          for (const entry of entries) this.state.apply(entry.payload);
+          for (const entry of entries) {
+            this.state.apply(entry.payload);
+            for (const listener of this.#committedListeners) {
+              try {
+                listener(structuredClone(entry));
+              } catch {
+                this.#committedListeners.delete(listener);
+              }
+            }
+          }
           this.health.committedEvents += entries.length;
           this.health.committedReceptions += entries.filter(
             (entry) => entry.payload.type === "reception",

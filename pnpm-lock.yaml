@@ -494,6 +494,18 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
 
+  packages/vehicle-zmq-control:
+    dependencies:
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+      zeromq:
+        specifier: 6.8.0
+        version: 6.8.0
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   packages/vehicle-zmq-observer:
     dependencies:
       pg:

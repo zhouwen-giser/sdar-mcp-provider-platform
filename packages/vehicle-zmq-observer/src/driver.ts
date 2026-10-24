@@ -1,10 +1,13 @@
-import { Subscriber } from "zeromq";
+import { Context, Subscriber } from "zeromq";
 import { COMPONENTS, type Component, type ObserverSettings } from "./config.js";
 import { stamp } from "./model.js";
 import type { ZmqObservationObserver } from "./observer.js";
 
 /** Publication subscriptions only. This driver cannot construct a command socket. */
 export class ZmqSubscriptionDriver {
+  // ZeroMQ.js monitor addresses use native object pointers. A fresh context keeps
+  // delayed monitor teardown from colliding with a later receiver's reused pointer.
+  readonly #context = new Context({ ioThreads: 1, maxSockets: 32, blocky: false });
   #sockets: Subscriber[] = [];
   #tasks: Promise<void>[] = [];
   #stopped = false;
@@ -27,6 +30,7 @@ export class ZmqSubscriptionDriver {
     try {
       for (const component of COMPONENTS) {
         const socket = new Subscriber({
+          context: this.#context,
           receiveTimeout: 250,
           receiveHighWaterMark: this.settings.receiveHighWaterMark,
           maxMessageSize: 70_000,

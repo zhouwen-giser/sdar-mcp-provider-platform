@@ -2,7 +2,7 @@
 
 ## Scope and current phase
 
-Implement the reviewed migration design in explicit phases. The user authorized phase 1 and, after the 2026-10-24 audit, phase 2. Phase 1: freeze the three southbound contracts and deployment dependencies, establish verifiable wire fixtures and a fail-closed qualification record. Later phases introduce live observation ingestion, task execution, inspection/simulation outcomes, deployment and rollback. Phase 1 does not publish or qualify a new control operation by itself.
+Implement the reviewed migration design in explicit phases. The user authorized phase 1, phase 2 after the 2026-10-24 audit, and continued phase 3 after the phase 2 delivery. Phase 1: freeze the three southbound contracts and deployment dependencies, establish verifiable wire fixtures and a fail-closed qualification record. Later phases introduce live observation ingestion, task execution, inspection/simulation outcomes, deployment and rollback. Phase 1 does not publish or qualify a new control operation by itself.
 
 Source baseline: `d26002f127a4152ee1dc034950501be2f182b6ea`. Reuse the attached worktree `/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform`, branch `codex/ugv-zmq-phase1-20261023`. Preserve the primary checkout's existing united packaging changes.
 
@@ -32,7 +32,7 @@ The source deliverable is complete when snapshots are reproducibly verified, doc
 
 1. Contract/dependency freeze and qualification foundation (local deliverable complete; external G0 clearance pending).
 2. Read-only ZMQ observation, provenance and reception storage (implemented and verified; see the phase 2 ExecPlan; field localization/target publications not observed).
-3. Navigation/camera task lifecycle, bounded scheduling, recovery and stopping.
+3. Navigation/camera task lifecycle, bounded scheduling, recovery and stopping (implemented in isolation; see the phase 3 ExecPlan and report; control publication remains gated).
 4. Inspection evidence, simulation effect task/result query and operator UI.
 5. Governed publication, single-writer handoff and deployment package.
 6. Field acceptance and tested rollback/disabled diagnostic mode.
@@ -56,3 +56,9 @@ Audit scope: source-lock, wire tests, candidate configuration and fail-closed pr
 Phase 2 worktree branch: `codex/ugv-zmq-phase2-20261024`. Implement subscription-only transport, immutable raw reception/provenance, normalized versioned read-only state, diagnostic freshness/gap handling, bounded persistence and query, plus isolated protocol/PostgreSQL/fault tests and bounded real passive verification. Preserve running services and legacy DTO/history decoding. Details and outcomes will be maintained in a phase 2 ExecPlan.
 
 Phase 2 implementation and evidence are recorded in `docs/execplans/ugv-zmq-observation-phase2-20261024.md` and `reports/ugv-zmq-phase2/REPORT.md`. First-stage G0 control qualification remains pending; the observer uses unqualified diagnostic scope.
+
+## Phase 3 — 2026-10-24
+
+Continuation implements the isolated foundation task loop in `packages/vehicle-zmq-control`: existing Provider JSONB/journal persistence, native command transports, component queues, bounded timing, pause/resume/cancel, physical checks, endpoint writer ownership, restart uncertainty and prearmed stopping under write failure. No running Runtime/console deployment is switched. Details: `docs/execplans/ugv-zmq-control-phase3-20261024.md`, `deploy/ugv-zmq/CONTROL.md` and `reports/ugv-zmq-phase3/REPORT.md`.
+
+Phase 4 remains inspection/source-evidence degradation, simulation effect execution/results and operator-facing integration. Phase 5 must assemble the formal MCP/TaskBusiness/catalog/SDAR and storage routes and pass deployment/handoff gates. Isolated completion does not clear G0, G1 or the field parts of G2–G6.
