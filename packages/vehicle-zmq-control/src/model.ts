@@ -157,6 +157,15 @@ export const StartControl = z
         correlationId: id,
       })
       .strict(),
+    /** A formal Provider admission preserves its public identity independently of native operation. */
+    admission: z
+      .object({
+        operationName: id,
+        argumentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        arguments: z.record(z.string(), z.unknown()),
+      })
+      .strict()
+      .optional(),
     timing: z
       .object({
         startAt: z.iso.datetime(),
@@ -174,6 +183,15 @@ export const ControlSettings = z
     contractSha256: z.string().regex(/^[a-f0-9]{64}$/),
     observerPartitionHash: z.string().regex(/^[a-f0-9]{64}$/),
     observerSessionId: z.uuid(),
+    storageBinding: z
+      .object({
+        deviceId: z.string().min(1),
+        bindingId: z.uuid(),
+        serviceKey: z.string().min(1),
+        sourceSessionKey: z.string().min(1),
+      })
+      .strict()
+      .optional(),
     transportTimeoutMs: z.number().int().min(25).max(1000).default(250),
     databaseTimeoutMs: z.number().int().min(100).max(2000).default(500),
     stateFreshForMs: z.number().int().min(100).max(3000).default(3000),
@@ -337,6 +355,7 @@ export interface ZmqControlState {
   missingEvidence: string[];
 }
 export interface ZmqExecution extends ProviderExecution {
+  zmqAdmission?: NonNullable<StartControl["admission"]>;
   zmqControl: ZmqControlState;
   zmqInspection?: InspectionSummary;
   /** Supplemental facts are independent of the immutable terminal tool result/Context. */

@@ -1,3 +1,5 @@
+import { NATIVE_CONTROL_TOOLS, nativeToolReason } from "./zmq-native.js";
+export { NATIVE_CONTROL_TOOLS, nativeContract, nativeCatalogReason } from "./zmq-native.js";
 import { parseCoordinates, validatePolygon } from "./coordinates.js";
 import { array, record, text, taskProfile, type Json, type Tool } from "./model.js";
 
@@ -108,8 +110,13 @@ const ordered = (v: unknown): unknown =>
       : v;
 const canonical = (v: unknown): string =>
   v === undefined ? "undefined" : JSON.stringify(ordered(v));
+export const isZmqControl = (name: string) =>
+  [...NATIVE_CONTROL_TOOLS, ZMQ_INSPECT, EFFECT_APPLY].includes(name);
 export function zmqToolReason(tool: Tool | undefined, resourceId: string): string | null {
   if (!tool) return "TOOL_UNPUBLISHED";
+  if (NATIVE_CONTROL_TOOLS.includes(tool.name)) {
+    return nativeToolReason(tool, resourceId);
+  }
   if (![ZMQ_INSPECT, EFFECT_APPLY, INSPECTION_RESULT, EFFECT_RESULT].includes(tool.name))
     return null;
   const expected = zmqConsoleTool(tool.name, resourceId);

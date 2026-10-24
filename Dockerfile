@@ -47,6 +47,9 @@ COPY packages/runtime-deployment/package.json packages/runtime-deployment/packag
 COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
 COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
 COPY packages/secret-store/package.json packages/secret-store/package.json
+COPY packages/vehicle-zmq-contract/package.json packages/vehicle-zmq-contract/package.json
+COPY packages/vehicle-zmq-observer/package.json packages/vehicle-zmq-observer/package.json
+COPY packages/vehicle-zmq-control/package.json packages/vehicle-zmq-control/package.json
 COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
 COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
 COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
@@ -391,3 +394,13 @@ CMD ["node", "dist/apps/mock-npc-tank-device-mcp/src/main.js"]
 
 FROM runtime AS mock-npc-tank-mqtt-publisher
 CMD ["node", "dist/apps/mock-npc-tank-mqtt-publisher/src/main.js"]
+
+# This candidate still refuses non-loopback command targets and unqualified field control.
+FROM ugv-real-adapter AS ugv-zmq-candidate
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SMPP native ZMQ candidate (isolated qualification)" org.opencontainers.image.revision="${VCS_REF}"
+COPY --from=build --chown=root:root /workspace/dist/apps/ugv-zmq-provider-adapter /app/dist/apps/ugv-zmq-provider-adapter
+COPY --from=build --chown=root:root /workspace/dist/scripts/ugv-zmq /app/dist/scripts/ugv-zmq
+COPY --from=build --chown=root:root /workspace/contracts/ugv-zmq /app/contracts/ugv-zmq
+COPY --from=build --chown=root:root /workspace/deploy/ugv-zmq /app/deploy/ugv-zmq
+CMD ["node", "dist/apps/ugv-zmq-provider-adapter/src/main.js"]

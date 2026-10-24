@@ -15,10 +15,12 @@ import {
 import { validatePolygon } from "../shared/coordinates.js";
 import {
   ZMQ_INSPECT,
+  isZmqControl,
   EFFECT_APPLY,
   INSPECTION_RESULT,
   EFFECT_RESULT,
   zmqToolReason,
+  nativeCatalogReason,
   validateZmqGeometry,
 } from "../shared/zmq.js";
 import { businessSnapshot, readArtifact } from "./business.js";
@@ -67,6 +69,10 @@ export class Service {
     const state = tools.find((t) => t.name === "vehicle_get_state");
     const resourceId = text(record(record(state?.inputSchema.properties).resourceId).const);
     if (!resourceId) throw Error("UGV_RESOURCE_BINDING_UNRESOLVED");
+    if (provider.providerType === "isr.vehicle.ugv.zmq") {
+      const reason = nativeCatalogReason(tools, resourceId);
+      if (reason) throw Error(reason);
+    }
     return {
       provider,
       extensions,
@@ -128,13 +134,13 @@ export class Service {
     const reason = zmqToolReason(tool, c.resourceId);
     if (reason) throw Error(reason);
     if (
-      [ZMQ_INSPECT, EFFECT_APPLY, INSPECTION_RESULT, EFFECT_RESULT].includes(name) &&
+      (isZmqControl(name) || [INSPECTION_RESULT, EFFECT_RESULT].includes(name)) &&
       (this.mcp.headers["x-sdar-execution-mode"] !== "simulation" ||
         !this.mcp.headers["x-sdar-simulation-id"])
     )
       throw Error("ZMQ_SIMULATION_DOMAIN_REQUIRED");
     validateSchema(tool.inputSchema, args);
-    if (name === ZMQ_INSPECT) validateZmqGeometry(args);
+    if (name === ZMQ_INSPECT || name === "vehicle_zmq_area_recon") validateZmqGeometry(args);
     const isControl = (CONTROL_TOOLS as readonly string[]).includes(name);
     if (
       isControl &&
@@ -170,7 +176,7 @@ export class Service {
     const catalog = await this.catalog();
     this.validateTool(catalog, toolName, args);
     if (
-      [ZMQ_INSPECT, EFFECT_APPLY].includes(toolName) &&
+      isZmqControl(toolName) &&
       (!timing ||
         timing.maxElapsedMs < 1000 ||
         timing.maxElapsedMs > 300000 ||
@@ -308,7 +314,7 @@ export class Service {
         throw Error("TASK_RESULT_INTEGRITY_FAILED");
       previous = revision;
     }
-    if (page.nextRevision !== previous || (page.hasMore === true && !rows.length))
+    if (page.nextRevision !== previous || (page.hasMore && !rows.length))
       throw Error("TASK_RESULT_CURSOR_INVALID");
     return result;
   }

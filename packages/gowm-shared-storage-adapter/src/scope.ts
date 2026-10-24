@@ -13,6 +13,11 @@ export function storageScope(queryable: object): GowmStorageConfig | undefined {
 export function scoped(queryable: object): boolean {
   return scopes.has(queryable);
 }
+/** Unresolved physical occupancy spans retired service/binding identities on this device. */
+export function deviceScopePredicate(queryable: object, alias: string): string {
+  if (!scoped(queryable)) return "TRUE";
+  return `${identifier(alias)}.device_id=current_setting('smpp.device_id')`;
+}
 /** GOWM retains the native outbox's global event_key unique constraint. */
 export function storedEventKey(queryable: object, key: string): string {
   const config = storageScope(queryable);

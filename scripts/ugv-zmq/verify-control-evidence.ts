@@ -95,7 +95,7 @@ for (const line of raw.toString().split("\n").filter(Boolean)) {
 }
 const outcome = z
   .object({
-    classification: z.literal("SIMULATED_ONLY"),
+    classification: z.enum(["SIMULATED_ONLY", "ISOLATED_FORMAL_RUNTIME_SIMULATED_ONLY"]),
     evidence: z.array(z.record(z.string(), z.unknown())),
   })
   .parse(JSON.parse(readFileSync(results, "utf8")) as unknown);
@@ -143,7 +143,7 @@ for (const item of outcome.evidence) {
 process.stdout.write(
   JSON.stringify(
     {
-      classification: "SIMULATED_ONLY",
+      classification: outcome.classification,
       sessions: heads.size,
       entries,
       receptions,

@@ -178,10 +178,18 @@ export class UgvTaskBusinessContextService {
     readonly providerId: string,
     readonly resourceId: string,
     readonly notifyCommitted: (event: AdapterBusinessEvent) => void,
+    readonly projection?: {
+      operations: ReadonlySet<string>;
+      requestedArtifacts(
+        execution: ProviderExecution,
+        identity: TaskBusinessIdentity,
+      ): TaskArtifact[];
+      terminalProperties(execution: ProviderExecution): Record<string, unknown>;
+    },
   ) {}
 
   supports(operationName: string): boolean {
-    return businessOperations.has(operationName);
+    return (this.projection?.operations ?? businessOperations).has(operationName);
   }
 
   readOnlyProfile(
@@ -231,7 +239,7 @@ export class UgvTaskBusinessContextService {
     if (await this.business.getContext(scope)) return;
     const identity = scopeBusinessIdentity(scope);
     const requestedNavigation = requestedNavigationIntent(execution, identity);
-    const artifacts = [
+    const artifacts = this.projection?.requestedArtifacts(execution, identity) ?? [
       ...(requestedNavigation === undefined ? [] : [requestedNavigation]),
       ...requestedReconArtifacts(execution, identity),
     ];
@@ -357,6 +365,7 @@ export class UgvTaskBusinessContextService {
         properties: {
           ...current.summary.properties,
           executionState: execution.state,
+          ...this.projection?.terminalProperties(execution),
           ...(execution.operationName === INSPECTION_OPERATION
             ? {
                 inspectionReport: execution.result?.inspectionReport ?? null,

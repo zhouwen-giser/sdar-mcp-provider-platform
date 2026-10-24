@@ -6,7 +6,7 @@ import { z } from "zod";
 import { ProtocolGaps } from "../../packages/vehicle-zmq-contract/src/index.js";
 
 export const contractRoot = resolve(
-  dirname(fileURLToPath(import.meta.url)),
+  dirname(fileURLToPath(import.meta.url).replace(/\/dist\/scripts\//, "/scripts/")),
   "../../contracts/ugv-zmq/v1",
 );
 const lockedFile = z

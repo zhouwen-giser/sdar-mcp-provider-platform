@@ -18,6 +18,10 @@ export const CONTROL_TOOLS = [
   "vehicle_control_gimbal",
   "vehicle_track_target",
   "vehicle_emergency_stop",
+  "vehicle_zmq_navigate",
+  "vehicle_zmq_area_recon",
+  "vehicle_zmq_circular_recon",
+  "vehicle_zmq_camera",
   "vehicle_zmq_inspect_area",
   "simulation_apply_effect",
 ] as const;

@@ -91,6 +91,7 @@ export class ZmqControlEngine {
     readonly repository: ControlRepository,
     readonly transport: CommandTransport,
     readonly clock: ControlClock = systemClock,
+    readonly hooks?: { persisted(execution: ZmqExecution): Promise<void> },
   ) {
     if (
       controlScope(scope.profile, scope.settings).hash !== scope.hash ||
@@ -327,10 +328,11 @@ export class ZmqControlEngine {
     )
       throw Error("ZMQ_DEPLOYMENT_LIMIT_EXCEEDED");
   }
-  async start(input: unknown): Promise<ZmqExecution> {
+  async start(input: unknown, signal?: AbortSignal): Promise<ZmqExecution> {
     const request = StartControl.parse(input),
       hash = sha256(canonical(request));
     return this.#admission.enqueue(async () => {
+      if (signal?.aborted) throw Error("ZMQ_ADMISSION_CANCELLED");
       const previous =
         (await this.repository.findCommand(request.commandId)) ??
         (await this.repository.get(request.taskId));
@@ -364,8 +366,11 @@ export class ZmqControlEngine {
       const e: ZmqExecution = {
         taskId: request.taskId,
         externalExecutionId: randomUUID(),
-        operationName: request.operation.name,
-        argumentHash: hash,
+        operationName: request.admission?.operationName ?? request.operation.name,
+        argumentHash: request.admission?.argumentHash ?? hash,
+        ...(request.admission
+          ? { zmqAdmission: request.admission, taskBusinessContextExpected: true }
+          : {}),
         providerId: this.scope.profile.providerBinding.providerId ?? "",
         resourceId: request.resourceId,
         tracks: [component],
@@ -431,14 +436,20 @@ export class ZmqControlEngine {
           ],
         },
       };
+      if (signal?.aborted) throw Error("ZMQ_ADMISSION_CANCELLED");
       this.#commandReservations.set(request.commandId, hash);
       try {
         await this.repository.save(e);
+        await this.hooks?.persisted(structuredClone(e));
       } catch (error) {
         this.#healthy = false;
         throw error;
       } finally {
         this.#commandReservations.delete(request.commandId);
+      }
+      if (signal?.aborted) {
+        await this.finish(e, "BUSINESS_FAILED", "ZMQ_ADMISSION_CANCELLED", true);
+        return structuredClone(e);
       }
       const accepted = structuredClone(e);
       this.#active.set(component, e);
@@ -852,7 +863,7 @@ export class ZmqControlEngine {
     return structuredClone({
       schemaVersion: "ugv.zmq-effect-result/1",
       qualification: "isolated_simulator_only",
-      runtimeAdmission: "not_published",
+      runtimeAdmission: e.zmqAdmission ? "isolated_runtime" : "not_published",
       requestAccepted: e.zmqControl.commands.some(
         (c) => c.action === "effect" && c.status === "accepted",
       ),
@@ -1863,7 +1874,7 @@ export class ZmqControlEngine {
     return structuredClone({
       schemaVersion: "ugv.zmq-control-result/1",
       qualification: "isolated_simulator_only",
-      runtimeAdmission: "not_published",
+      runtimeAdmission: e.zmqAdmission ? "isolated_runtime" : "not_published",
       nativeTaskId: s.nativeTaskId,
       nativeOutcome: s.nativeOutcome,
       nativeReason: s.nativeReason,
@@ -1935,6 +1946,7 @@ export class ZmqControlEngine {
     e.updatedAt = this.at();
     try {
       await this.repository.save(e);
+      await this.hooks?.persisted(structuredClone(e));
       this.#dirty.delete(e.taskId);
     } catch (error) {
       this.#dirty.add(e.taskId);

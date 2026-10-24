@@ -6,7 +6,14 @@ import { newCommandId } from "./command-id.js";
 import { AvailabilityNotice } from "./AvailabilityNotice.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
 import { ZmqResults } from "./ZmqResults.js";
-import { ZMQ_INSPECT, EFFECT_APPLY, inspectionArguments, zmqToolReason } from "../shared/zmq.js";
+import {
+  NATIVE_CONTROL_TOOLS,
+  isZmqControl,
+  ZMQ_INSPECT,
+  EFFECT_APPLY,
+  inspectionArguments,
+  zmqToolReason,
+} from "../shared/zmq.js";
 import { parseCoordinates, regionArguments, type Point } from "../shared/coordinates.js";
 import {
   array,
@@ -31,6 +38,10 @@ const labels: Record<string, string> = {
   vehicle_control_gimbal: "云台",
   vehicle_track_target: "目标跟踪",
   vehicle_emergency_stop: "紧急停止",
+  vehicle_zmq_navigate: "ZMQ 导航",
+  vehicle_zmq_area_recon: "ZMQ 区域侦察",
+  vehicle_zmq_circular_recon: "ZMQ 环视",
+  vehicle_zmq_camera: "ZMQ 云台",
   [ZMQ_INSPECT]: "ZMQ 区域检查",
   [EFFECT_APPLY]: "仿真效果",
 };
@@ -212,6 +223,7 @@ function Console() {
   const [ellipsoidHeight, setEllipsoidHeight] = useState(""),
     [searchStrategy, setSearchStrategy] = useState("recognize"),
     [effectIndex, setEffectIndex] = useState("");
+  const [nativeParameters, setNativeParameters] = useState("{}");
   const [previewRequest, setPreviewRequest] = useState<{ request: Json; generation: number }>();
   const previewGeneration = useRef(0);
   const preview = useQuery({
@@ -244,6 +256,12 @@ function Console() {
   }
   const build = (): Json => {
     if (!resourceId) throw Error("资源绑定尚未解析");
+    if (NATIVE_CONTROL_TOOLS.includes(toolName)) {
+      const value = JSON.parse(nativeParameters) as unknown;
+      if (!value || typeof value !== "object" || Array.isArray(value))
+        throw Error("ZMQ 参数必须为 JSON 对象");
+      return { ...record(value), resourceId };
+    }
     if (toolName === "vehicle_navigate") {
       let mission: Json = { type: mode };
       if (mode === "point" || mode === "route") {
@@ -406,8 +424,7 @@ function Console() {
     taskProfile(currentTool).profileVersion === "1.0" &&
     taskProfile(currentTool).idempotency === "server_managed" &&
     !zmqToolReason(currentTool, resourceId) &&
-    (![ZMQ_INSPECT, EFFECT_APPLY].includes(toolName) ||
-      session.data?.executionMode === "simulation");
+    (!isZmqControl(toolName) || session.data.executionMode === "simulation");
   return (
     <div className="console">
       <header className="topbar">
@@ -696,6 +713,24 @@ function Console() {
                       onChange={(e) => setScanSpeed(e.target.value)}
                     />
                   </label>
+                </>
+              )}
+              {NATIVE_CONTROL_TOOLS.includes(toolName) && (
+                <>
+                  <label>
+                    ZMQ 参数（JSON，不含 resourceId）
+                    <textarea
+                      aria-label="ZMQ 原生参数"
+                      value={nativeParameters}
+                      onChange={(e) => setNativeParameters(e.target.value)}
+                      rows={12}
+                    />
+                  </label>
+                  <p className="muted">
+                    导航坐标为
+                    WGS84，经度在前、纬度在后；速度为米/秒。云台角度为弧度。区域须四个严格凸顶点并逐点提供椭球高。参数将按当前发布合同校验。
+                  </p>
+                  <JsonView value={currentTool?.inputSchema} title="查看本工具的参数格式" />
                 </>
               )}
               {((toolName === "vehicle_navigate" && ["point", "route"].includes(mode)) ||

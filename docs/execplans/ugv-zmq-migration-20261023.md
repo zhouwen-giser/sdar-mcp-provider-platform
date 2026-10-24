@@ -66,3 +66,16 @@ Phase 4 remains inspection/source-evidence degradation, simulation effect execut
 ## Phase 4 — 2026-10-24
 
 Continued on `codex/ugv-zmq-phase4-20261024`: bounded inspection observations and coverage/source degradation, identity-scoped immutable result revisions, one-shot simulation effect lifecycle and late supplemental results, candidate console forms/query/export and native browser integration. See `docs/execplans/ugv-zmq-results-phase4-20261024.md` and `deploy/ugv-zmq/RESULTS.md`. Formal publication, storage routing, source qualification and real service deployment remain gated for phase 5.
+
+## Phase 5 — formal isolated increment, 2026-10-24/25
+
+Branch `codex/ugv-zmq-phase5-20261024` connects the native Provider through the existing gRPC and
+formal MCP Runtime, preserves public Task identity/timing and frozen TaskBusiness, and adds the
+strict `zmq_v1_12` catalog, owner SQL routing, readonly handoff diagnostics, exact SDAR consumer
+candidate and console native forms. Details and current verification state are maintained in
+`docs/execplans/ugv-zmq-formal-phase5-20261024.md` and `reports/ugv-zmq-phase5/REPORT.md`.
+
+Phase 5 remains in progress: actual SDAR governance/native Skill execution and patrol successor,
+complete GOWM deployment qualification, G0 source acceptance and fenced site handoff are open.
+The delivery package is an isolated qualification candidate. Current 19100/19101 services are
+outside this cutover; real source bindings and implementation/golden-frame evidence are still needed.

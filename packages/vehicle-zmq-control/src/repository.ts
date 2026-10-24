@@ -1,3 +1,11 @@
+import {
+  scopePredicate,
+  deviceScopePredicate,
+  scopeColumns,
+  scopeValues,
+  assertCurrentRoute,
+  resolveDeviceContext,
+} from "../../gowm-shared-storage-adapter/src/index.js";
 import type { Pool, PoolClient } from "pg";
 import type { PostgresProviderStore } from "../../provider-adapter-kit/src/postgres-store.js";
 import type {
@@ -38,7 +46,7 @@ export class PostgresControlRepository implements ControlRepository {
     readonly pool: Pool,
     readonly scope: ControlScope,
   ) {
-    if (store.pool !== pool || store.gowm || store.tables.execution !== "ugv_execution")
+    if (store.pool !== pool || store.tables.execution !== "ugv_execution")
       throw Error("ZMQ_CONTROL_STORE_BINDING_UNSUPPORTED");
     if (pool.totalCount && pool.options.query_timeout !== scope.settings.databaseTimeoutMs)
       throw Error("ZMQ_CONTROL_BOUNDED_DATABASE_POOL_REQUIRED");
@@ -49,6 +57,25 @@ export class PostgresControlRepository implements ControlRepository {
   async start(): Promise<void> {
     if (this.#started) throw Error("ZMQ_CONTROL_REPOSITORY_ALREADY_STARTED");
     this.#started = true;
+    if (this.store.gowm) {
+      const owner = this.store.gowm,
+        b = this.scope.settings.storageBinding;
+      if (
+        !b ||
+        b.deviceId !== owner.allowedDeviceIds[0] ||
+        b.bindingId !== owner.bindingId ||
+        b.serviceKey !== owner.serviceKey ||
+        b.sourceSessionKey !== owner.sourceSessionKey
+      )
+        throw Error("ZMQ_CONTROL_OWNER_SCOPE_MISMATCH");
+      await assertCurrentRoute(this.pool, this.store.gowm);
+      const binding = await resolveDeviceContext(this.pool, this.store.gowm, {
+        providerId: this.scope.profile.providerBinding.providerId ?? "",
+        resourceId: this.scope.profile.providerBinding.resourceId ?? "",
+      });
+      if (binding.sourceSessionKey !== this.scope.profile.providerBinding.sourceSessionKey)
+        throw Error("ZMQ_CONTROL_OWNER_SOURCE_MISMATCH");
+    } else if (this.scope.settings.storageBinding) throw Error("ZMQ_CONTROL_OWNER_SCOPE_MISMATCH");
     const lease = await this.pool.connect();
     lease.on("error", () => {
       this.#lost = true;
@@ -64,7 +91,7 @@ export class PostgresControlRepository implements ControlRepository {
       await lease.query("SELECT task_id FROM ugv_execution LIMIT 0");
       await lease.query("SELECT step_id FROM ugv_mutation_journal LIMIT 0");
       const predecessors = await lease.query(
-        "SELECT 1 FROM ugv_execution WHERE payload->'zmqControl'->>'occupancy'='held' AND payload->'zmqControl'->>'scopeHash'<>$1 AND payload->'zmqControl'->'writerKeys' ?| $2::text[] LIMIT 1",
+        `SELECT 1 FROM ugv_execution WHERE (${deviceScopePredicate(this.pool, "ugv_execution")}) AND payload->'zmqControl'->>'occupancy'='held' AND payload->'zmqControl'->>'scopeHash'<>$1 AND payload->'zmqControl'->'writerKeys' ?| $2::text[] LIMIT 1`,
         [this.scope.hash, this.scope.writerKeys],
       );
       if (predecessors.rowCount) throw Error("ZMQ_UNRESOLVED_PREDECESSOR_SCOPE");
@@ -91,14 +118,14 @@ export class PostgresControlRepository implements ControlRepository {
   }
   async pending(): Promise<ZmqExecution[]> {
     const result = await this.pool.query<{ payload: ZmqExecution }>(
-      "SELECT payload FROM ugv_execution WHERE payload->'zmqControl'->>'scopeHash'=$1 AND (payload->'zmqControl'->>'occupancy'='held' OR payload->'zmqControl'->>'stage'<>'terminal') ORDER BY created_at",
+      `SELECT payload FROM ugv_execution WHERE (${scopePredicate(this.pool, "ugv_execution", "ugv_execution")}) AND payload->'zmqControl'->>'scopeHash'=$1 AND (payload->'zmqControl'->>'occupancy'='held' OR payload->'zmqControl'->>'stage'<>'terminal') ORDER BY created_at`,
       [this.scope.hash],
     );
     return result.rows.map((row) => row.payload);
   }
   async findCommand(commandId: string): Promise<ZmqExecution | undefined> {
     const result = await this.pool.query<{ payload: ZmqExecution }>(
-      "SELECT payload FROM ugv_execution WHERE payload->'zmqControl'->>'scopeHash'=$1 AND (payload->'zmqControl'->>'commandId'=$2 OR payload->'zmqControl'->'controls' @> $3::jsonb) LIMIT 1",
+      `SELECT payload FROM ugv_execution WHERE (${scopePredicate(this.pool, "ugv_execution", "ugv_execution")}) AND payload->'zmqControl'->>'scopeHash'=$1 AND (payload->'zmqControl'->>'commandId'=$2 OR payload->'zmqControl'->'controls' @> $3::jsonb) LIMIT 1`,
       [this.scope.hash, commandId, JSON.stringify([{ commandId }])],
     );
     return result.rows[0]?.payload;
@@ -109,7 +136,7 @@ export class PostgresControlRepository implements ControlRepository {
     exceptTaskId: string,
   ): Promise<boolean> {
     const result = await this.pool.query(
-      "SELECT 1 FROM ugv_execution WHERE task_id<>$1 AND payload->'zmqControl'->>'component'=$2 AND payload->'zmqControl'->>'nativeTaskId'=$3 LIMIT 1",
+      `SELECT 1 FROM ugv_execution WHERE (${deviceScopePredicate(this.pool, "ugv_execution")}) AND task_id<>$1 AND payload->'zmqControl'->>'component'=$2 AND payload->'zmqControl'->>'nativeTaskId'=$3 LIMIT 1`,
       [exceptTaskId, component, nativeTaskId],
     );
     return result.rowCount !== 0;
@@ -126,6 +153,11 @@ export class PostgresControlRepository implements ControlRepository {
     )
       throw Error("ZMQ_TASK_ID_CONFLICT");
     await this.store.putExecution(e);
+    if (this.store.gowm) {
+      const stored = await this.store.getExecution(e.taskId);
+      if (!stored?.deviceContext) throw Error("ZMQ_OWNER_EXECUTION_NOT_PERSISTED");
+      e.deviceContext = stored.deviceContext;
+    }
   }
   async appendResult(draft: ResultDraft): Promise<ResultRecord> {
     await this.assertWriter();
@@ -138,7 +170,7 @@ export class PostgresControlRepository implements ControlRepository {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,790026))", [binding]);
       const existing = await client.query<{ snapshot: ResultRecord }>(
-        "SELECT snapshot FROM ugv_state_snapshot WHERE revision=$1",
+        `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND revision=$1`,
         [key],
       );
       if (existing.rows[0]) {
@@ -148,7 +180,7 @@ export class PostgresControlRepository implements ControlRepository {
         return existing.rows[0].snapshot;
       }
       const latest = await client.query<{ revision: number }>(
-        "SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb",
+        `SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb`,
         [JSON.stringify(draft.identity)],
       );
       const record: ResultRecord = {
@@ -158,7 +190,7 @@ export class PostgresControlRepository implements ControlRepository {
         contentHash: hash,
       };
       await client.query(
-        "INSERT INTO ugv_state_snapshot(revision,observed_at,snapshot) VALUES($1,$2,$3)",
+        `INSERT INTO ugv_state_snapshot(${scopeColumns(this.pool, "ugv_state_snapshot")}revision,observed_at,snapshot) VALUES(${scopeValues(this.pool, "ugv_state_snapshot")}$1,$2,$3)`,
         [key, draft.receivedAt, record],
       );
       await client.query("COMMIT");
@@ -174,7 +206,7 @@ export class PostgresControlRepository implements ControlRepository {
     resultPage(identity, [], afterRevision, limit);
     if (identity.scopeHash !== this.scope.hash) throw Error("ZMQ_EXECUTION_SCOPE_MISMATCH");
     const rows = await this.pool.query<{ snapshot: ResultRecord }>(
-      "SELECT snapshot FROM ugv_state_snapshot WHERE snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3",
+      `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
       [JSON.stringify(identity), afterRevision, limit + 1],
     );
     return resultPage(

@@ -14,7 +14,10 @@ for (let i = 0; i < args.length; i += 2) {
     throw Error("ZMQ_PREFLIGHT_ARGUMENTS_INVALID");
   options.set(key, value);
 }
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const root = resolve(
+  dirname(fileURLToPath(import.meta.url).replace(/\/dist\/scripts\//, "/scripts/")),
+  "../..",
+);
 const read = (path: string): unknown => JSON.parse(readFileSync(path, "utf8")) as unknown;
 const profilePath = resolve(
   options.get("--profile") ?? resolve(root, "deploy/ugv-zmq/deployment.candidate.json"),

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createHash } from "node:crypto";
 import {
+  nativeContract,
   inspectionArguments,
   zmqConsoleTool,
   zmqToolReason,
@@ -8,7 +9,7 @@ import {
   EFFECT_APPLY,
   EFFECT_RESULT,
 } from "../shared/zmq.js";
-import { classifyTask } from "../shared/model.js";
+import { classifyTask, record } from "../shared/model.js";
 import { Service } from "../server/service.js";
 import { fakeMcp } from "./fixture.js";
 import type { Store } from "../server/store.js";
@@ -129,8 +130,9 @@ describe("restricted ZMQ console contracts", () => {
         "vehicle:ugv",
       ),
     ).toBe("ZMQ_CONSOLE_CONTRACT_MISMATCH");
-    tool._meta!["io.sdar/taskExecution"] = {
-      ...(tool._meta!["io.sdar/taskExecution"] as object),
+    if (!tool._meta) throw Error("FIXTURE_TOOL_METADATA_REQUIRED");
+    tool._meta["io.sdar/taskExecution"] = {
+      ...record(tool._meta["io.sdar/taskExecution"]),
       supportsCancellation: true,
     };
     expect(zmqToolReason(tool, "vehicle:ugv")).toBe("ZMQ_TASK_PROFILE_MISMATCH");
@@ -211,5 +213,17 @@ describe("restricted ZMQ console contracts", () => {
     f.result.page.identity.externalExecutionId = "execution-1";
     f.result.page.nextRevision = 0;
     await expect(f.service.supplement("task-1")).rejects.toThrow("CURSOR_INVALID");
+  });
+});
+
+describe("formal native console contracts", () => {
+  it("accepts exact native controls and rejects schema or business policy drift", () => {
+    const t = nativeContract("vehicle_zmq_camera", "vehicle:ugv");
+    expect(t).toBeDefined();
+    expect(zmqToolReason(t, "vehicle:ugv")).toBeNull();
+    if (!t) throw Error("FIXTURE_TOOL_REQUIRED");
+    const drift = structuredClone(t);
+    drift.outputSchema = {};
+    expect(zmqToolReason(drift, "vehicle:ugv")).toBe("ZMQ_NATIVE_CONTRACT_MISMATCH");
   });
 });

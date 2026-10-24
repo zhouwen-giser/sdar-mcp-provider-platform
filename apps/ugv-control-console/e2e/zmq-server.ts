@@ -14,8 +14,9 @@ import {
   SimulatedZmqDevices,
   releaseSimulatorEndpoints,
 } from "../../../tests/ugv-zmq-control-postgres/simulator.js";
-import { area, request, TestClock } from "../../../tests/ugv-zmq-control/helpers.js";
+import { area, request, TestClock, present } from "../../../tests/ugv-zmq-control/helpers.js";
 import { Store } from "../server/store.js";
+import { zmqOperation } from "../../../packages/vehicle-zmq-control/src/catalog.js";
 import { Mcp } from "../server/mcp.js";
 import { Service } from "../server/service.js";
 import { createApp } from "../server/app.js";
@@ -27,11 +28,13 @@ import {
   INSPECTION_RESULT,
   EFFECT_RESULT,
   zmqConsoleTool,
+  nativeContract,
+  NATIVE_CONTROL_TOOLS,
 } from "../shared/zmq.js";
 import { password } from "../test/fixture.js";
 
 const { databaseUrl } = JSON.parse(
-  readFileSync(process.env.SMPP_ZMQ_TEST_CONFIG_FILE!, "utf8"),
+  readFileSync(present(process.env.SMPP_ZMQ_TEST_CONFIG_FILE), "utf8"),
 ) as { databaseUrl: string };
 const schema = "zmq_browser_" + randomUUID().replaceAll("-", ""),
   owner = new Pool({ connectionString: databaseUrl });
@@ -52,13 +55,13 @@ try {
 const devices = new SimulatedZmqDevices();
 devices.effectDelayMs = 1500;
 // Geometry produces a miss: source reports 106.001 while this simulated entity is farther away.
-devices.simulatedWorld.get("object-1")!.longitude += 1;
+present(devices.simulatedWorld.get("object-1")).longitude += 1;
 const profile = await devices.start(),
   runtime = await boot(databaseUrl, schema, profile),
   context = {
     authorizationContextHash: "d".repeat(64),
     executionMode: "simulation" as const,
-    simulationId: profile.executionDomain.simulationId!,
+    simulationId: present(profile.executionDomain.simulationId),
     correlationId: "SIMULATED-browser",
   };
 await runtime.ready();
@@ -73,7 +76,7 @@ function input(operation: Operation, key: string = randomUUID(), timing?: Json) 
     req = request(clock, operation, {
       taskId: key,
       commandId: key,
-      resourceId: profile.providerBinding.resourceId!,
+      resourceId: present(profile.providerBinding.resourceId),
       executionContext: context,
       timing: {
         startAt: start.mode === "scheduled" ? text(start.scheduledAt) : new Date().toISOString(),
@@ -113,10 +116,19 @@ await publishSource();
 const sourceTimer = setInterval(() => {
   void publishSource();
 }, 500);
-const resourceId = profile.providerBinding.resourceId!,
+const resourceId = present(profile.providerBinding.resourceId),
   tools = [ZMQ_INSPECT, EFFECT_APPLY, INSPECTION_RESULT, EFFECT_RESULT].map((name) =>
     zmqConsoleTool(name, resourceId),
   );
+for (const name of NATIVE_CONTROL_TOOLS) {
+  const tool = nativeContract(name, resourceId);
+  if (!tool) throw Error("TEST_NATIVE_CONTRACT_REQUIRED");
+  tools.push(tool);
+}
+const adapt = (name: string, args: unknown) =>
+  NATIVE_CONTROL_TOOLS.includes(name)
+    ? zmqOperation(name, record(args))
+    : operationFromConsoleCandidate(name, args);
 for (const name of [
   "vehicle_get_state",
   "vehicle_get_capabilities",
@@ -165,7 +177,8 @@ const mcp = new Mcp(
   "http://isolated-native-zmq-test/mcp",
   upstreamHeaders,
   async (_url, options) => {
-    const { method, params: p } = JSON.parse(String(options?.body)) as {
+    if (typeof options?.body !== "string") throw Error("TEST_JSON_BODY_REQUIRED");
+    const { method, params: p } = JSON.parse(options.body) as {
       method: string;
       params: Json;
     };
@@ -185,10 +198,7 @@ const mcp = new Mcp(
     else if (method === "tools/list") result = { tools };
     else if (method === "io.sdar/taskExecution/checkAvailability") {
       const check = record(array(p.checks)[0]),
-        adapted = operationFromConsoleCandidate(
-          text(check.operationName),
-          record(check.arguments).value,
-        ),
+        adapted = adapt(text(check.operationName), record(check.arguments).value),
         available = await runtime.engine.checkAvailability(adapted.operation, context);
       result = {
         results: [
@@ -235,7 +245,7 @@ const mcp = new Mcp(
                 Number(args.afterRevision),
               );
       } else {
-        const adapted = operationFromConsoleCandidate(name, args),
+        const adapted = adapt(name, args),
           meta = record(record(p._meta)["io.sdar/taskExecution"]),
           e = await runtime.engine.start(
             input(adapted.operation, text(meta.idempotencyKey), record(meta.timing)),

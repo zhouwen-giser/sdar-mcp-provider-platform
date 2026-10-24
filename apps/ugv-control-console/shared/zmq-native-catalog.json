@@ -1,0 +1,5065 @@
+{
+  "schemaVersion": "ugv.zmq-provider-catalog-contract/1",
+  "profile": "zmq_v1_12",
+  "tools": [
+    {
+      "name": "vehicle_get_state",
+      "description": "ZMQ v1 vehicle_get_state; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": ["chassis", "payload", "health", "targets"]
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": ["resourceId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.vehicle-observation-state/2.0"
+              },
+              "generatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              "partitionHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sessionId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "const": "not_published"
+              },
+              "readOnly": {
+                "type": "boolean",
+                "const": true
+              },
+              "deploymentBinding": {
+                "type": "string",
+                "const": "unqualified_diagnostic"
+              },
+              "sourceProducerEpoch": {
+                "type": "null"
+              },
+              "channels": {
+                "type": "object",
+                "properties": {
+                  "chassis": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "eo": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "simulationEffect": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["chassis", "eo", "simulationEffect"],
+                "additionalProperties": false
+              },
+              "observations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "type": "string",
+                      "enum": ["chassis", "eo", "simulationEffect"]
+                    },
+                    "receivedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "ageMs": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "receiptFresh": {
+                      "type": "boolean"
+                    },
+                    "sourceFreshness": {
+                      "type": "string",
+                      "const": "unverified"
+                    },
+                    "receptionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "diagnostics": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "observation": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "protocolVersion": {
+                          "type": "string",
+                          "maxLength": 16
+                        },
+                        "versionEvidence": {
+                          "type": "string",
+                          "enum": ["in_band", "selected_contract_not_in_band"]
+                        },
+                        "deviceId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "nativeTaskId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "nativeRequestId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "runtimeTaskId": {
+                          "type": "null"
+                        },
+                        "sourceProducerEpoch": {
+                          "type": "null"
+                        },
+                        "sourceTime": {
+                          "type": "object",
+                          "properties": {
+                            "unit": {
+                              "type": "string",
+                              "enum": ["utc_ms", "unconfirmed_us", "not_supplied"]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 32
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": ["unit", "value"],
+                          "additionalProperties": false
+                        },
+                        "acquisitionUtcMs": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reportedOrigin": {
+                          "type": "string",
+                          "enum": ["measured", "simulated", "replay", "unattested"]
+                        },
+                        "position": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "longitude": {
+                                  "type": "number",
+                                  "minimum": -180,
+                                  "maximum": 180
+                                },
+                                "latitude": {
+                                  "type": "number",
+                                  "minimum": -90,
+                                  "maximum": 90
+                                },
+                                "altitude": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "altitudeDatum": {
+                                  "type": "string",
+                                  "const": "unconfirmed"
+                                },
+                                "crs": {
+                                  "type": "string",
+                                  "const": "OGC:CRS84"
+                                }
+                              },
+                              "required": [
+                                "longitude",
+                                "latitude",
+                                "altitude",
+                                "altitudeDatum",
+                                "crs"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "data": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "protocolVersion",
+                        "versionEvidence",
+                        "deviceId",
+                        "nativeTaskId",
+                        "nativeRequestId",
+                        "runtimeTaskId",
+                        "sourceProducerEpoch",
+                        "sourceTime",
+                        "acquisitionUtcMs",
+                        "reportedOrigin",
+                        "position",
+                        "data"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "component",
+                    "receivedAt",
+                    "ageMs",
+                    "receiptFresh",
+                    "sourceFreshness",
+                    "receptionId",
+                    "diagnostics",
+                    "observation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "archive": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["starting", "running", "stopping", "stopped", "failed"]
+                  },
+                  "pendingRecords": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pendingBytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedEvents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "receivedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unconfirmedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "locallyDiscardedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "failureCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "failureRecorded": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "pendingRecords",
+                  "pendingBytes",
+                  "committedEvents",
+                  "receivedMessages",
+                  "committedReceptions",
+                  "unconfirmedReceptions",
+                  "locallyDiscardedMessages",
+                  "failureCode",
+                  "failureRecorded"
+                ],
+                "additionalProperties": false
+              },
+              "continuity": {
+                "type": "string",
+                "const": "upstream_loss_and_producer_epoch_unverified"
+              },
+              "completeEvidence": {
+                "type": "boolean",
+                "const": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "generatedAt",
+              "partitionHash",
+              "sessionId",
+              "runtimeAdmission",
+              "readOnly",
+              "deploymentBinding",
+              "sourceProducerEpoch",
+              "channels",
+              "observations",
+              "diagnostics",
+              "archive",
+              "continuity",
+              "completeEvidence"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_get_state",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    },
+    {
+      "name": "vehicle_get_capabilities",
+      "description": "ZMQ v1 vehicle_get_capabilities; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          }
+        },
+        "required": ["resourceId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "const": "ugv.zmq-provider-capabilities/1"
+              }
+            },
+            "required": ["schemaVersion"],
+            "additionalProperties": true
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_get_capabilities",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    },
+    {
+      "name": "vehicle_get_payload_status",
+      "description": "ZMQ v1 vehicle_get_payload_status; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          }
+        },
+        "required": ["resourceId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.vehicle-observation-state/2.0"
+              },
+              "generatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              "partitionHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sessionId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "const": "not_published"
+              },
+              "readOnly": {
+                "type": "boolean",
+                "const": true
+              },
+              "deploymentBinding": {
+                "type": "string",
+                "const": "unqualified_diagnostic"
+              },
+              "sourceProducerEpoch": {
+                "type": "null"
+              },
+              "channels": {
+                "type": "object",
+                "properties": {
+                  "chassis": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "eo": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "simulationEffect": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["chassis", "eo", "simulationEffect"],
+                "additionalProperties": false
+              },
+              "observations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "type": "string",
+                      "enum": ["chassis", "eo", "simulationEffect"]
+                    },
+                    "receivedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "ageMs": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "receiptFresh": {
+                      "type": "boolean"
+                    },
+                    "sourceFreshness": {
+                      "type": "string",
+                      "const": "unverified"
+                    },
+                    "receptionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "diagnostics": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "observation": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "protocolVersion": {
+                          "type": "string",
+                          "maxLength": 16
+                        },
+                        "versionEvidence": {
+                          "type": "string",
+                          "enum": ["in_band", "selected_contract_not_in_band"]
+                        },
+                        "deviceId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "nativeTaskId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "nativeRequestId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "runtimeTaskId": {
+                          "type": "null"
+                        },
+                        "sourceProducerEpoch": {
+                          "type": "null"
+                        },
+                        "sourceTime": {
+                          "type": "object",
+                          "properties": {
+                            "unit": {
+                              "type": "string",
+                              "enum": ["utc_ms", "unconfirmed_us", "not_supplied"]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 32
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": ["unit", "value"],
+                          "additionalProperties": false
+                        },
+                        "acquisitionUtcMs": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reportedOrigin": {
+                          "type": "string",
+                          "enum": ["measured", "simulated", "replay", "unattested"]
+                        },
+                        "position": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "longitude": {
+                                  "type": "number",
+                                  "minimum": -180,
+                                  "maximum": 180
+                                },
+                                "latitude": {
+                                  "type": "number",
+                                  "minimum": -90,
+                                  "maximum": 90
+                                },
+                                "altitude": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "altitudeDatum": {
+                                  "type": "string",
+                                  "const": "unconfirmed"
+                                },
+                                "crs": {
+                                  "type": "string",
+                                  "const": "OGC:CRS84"
+                                }
+                              },
+                              "required": [
+                                "longitude",
+                                "latitude",
+                                "altitude",
+                                "altitudeDatum",
+                                "crs"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "data": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "protocolVersion",
+                        "versionEvidence",
+                        "deviceId",
+                        "nativeTaskId",
+                        "nativeRequestId",
+                        "runtimeTaskId",
+                        "sourceProducerEpoch",
+                        "sourceTime",
+                        "acquisitionUtcMs",
+                        "reportedOrigin",
+                        "position",
+                        "data"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "component",
+                    "receivedAt",
+                    "ageMs",
+                    "receiptFresh",
+                    "sourceFreshness",
+                    "receptionId",
+                    "diagnostics",
+                    "observation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "archive": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["starting", "running", "stopping", "stopped", "failed"]
+                  },
+                  "pendingRecords": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pendingBytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedEvents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "receivedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unconfirmedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "locallyDiscardedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "failureCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "failureRecorded": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "pendingRecords",
+                  "pendingBytes",
+                  "committedEvents",
+                  "receivedMessages",
+                  "committedReceptions",
+                  "unconfirmedReceptions",
+                  "locallyDiscardedMessages",
+                  "failureCode",
+                  "failureRecorded"
+                ],
+                "additionalProperties": false
+              },
+              "continuity": {
+                "type": "string",
+                "const": "upstream_loss_and_producer_epoch_unverified"
+              },
+              "completeEvidence": {
+                "type": "boolean",
+                "const": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "generatedAt",
+              "partitionHash",
+              "sessionId",
+              "runtimeAdmission",
+              "readOnly",
+              "deploymentBinding",
+              "sourceProducerEpoch",
+              "channels",
+              "observations",
+              "diagnostics",
+              "archive",
+              "continuity",
+              "completeEvidence"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_get_payload_status",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    },
+    {
+      "name": "vehicle_get_targets",
+      "description": "ZMQ v1 vehicle_get_targets; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          }
+        },
+        "required": ["resourceId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.vehicle-observation-state/2.0"
+              },
+              "generatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              "partitionHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sessionId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "const": "not_published"
+              },
+              "readOnly": {
+                "type": "boolean",
+                "const": true
+              },
+              "deploymentBinding": {
+                "type": "string",
+                "const": "unqualified_diagnostic"
+              },
+              "sourceProducerEpoch": {
+                "type": "null"
+              },
+              "channels": {
+                "type": "object",
+                "properties": {
+                  "chassis": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "eo": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "simulationEffect": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": ["connecting", "connected", "disconnected", "closed"]
+                      },
+                      "lastReceptionAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lastValidCommittedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "receiptFresh": {
+                        "type": "boolean"
+                      },
+                      "sourceFreshness": {
+                        "type": "string",
+                        "const": "unverified"
+                      },
+                      "diagnostics": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "lastReceptionAt",
+                      "lastValidCommittedAt",
+                      "receiptFresh",
+                      "sourceFreshness",
+                      "diagnostics"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["chassis", "eo", "simulationEffect"],
+                "additionalProperties": false
+              },
+              "observations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "type": "string",
+                      "enum": ["chassis", "eo", "simulationEffect"]
+                    },
+                    "receivedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "ageMs": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "receiptFresh": {
+                      "type": "boolean"
+                    },
+                    "sourceFreshness": {
+                      "type": "string",
+                      "const": "unverified"
+                    },
+                    "receptionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "diagnostics": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "observation": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "protocolVersion": {
+                          "type": "string",
+                          "maxLength": 16
+                        },
+                        "versionEvidence": {
+                          "type": "string",
+                          "enum": ["in_band", "selected_contract_not_in_band"]
+                        },
+                        "deviceId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "nativeTaskId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "nativeRequestId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "runtimeTaskId": {
+                          "type": "null"
+                        },
+                        "sourceProducerEpoch": {
+                          "type": "null"
+                        },
+                        "sourceTime": {
+                          "type": "object",
+                          "properties": {
+                            "unit": {
+                              "type": "string",
+                              "enum": ["utc_ms", "unconfirmed_us", "not_supplied"]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 32
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": ["unit", "value"],
+                          "additionalProperties": false
+                        },
+                        "acquisitionUtcMs": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reportedOrigin": {
+                          "type": "string",
+                          "enum": ["measured", "simulated", "replay", "unattested"]
+                        },
+                        "position": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "longitude": {
+                                  "type": "number",
+                                  "minimum": -180,
+                                  "maximum": 180
+                                },
+                                "latitude": {
+                                  "type": "number",
+                                  "minimum": -90,
+                                  "maximum": 90
+                                },
+                                "altitude": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "altitudeDatum": {
+                                  "type": "string",
+                                  "const": "unconfirmed"
+                                },
+                                "crs": {
+                                  "type": "string",
+                                  "const": "OGC:CRS84"
+                                }
+                              },
+                              "required": [
+                                "longitude",
+                                "latitude",
+                                "altitude",
+                                "altitudeDatum",
+                                "crs"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "data": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "protocolVersion",
+                        "versionEvidence",
+                        "deviceId",
+                        "nativeTaskId",
+                        "nativeRequestId",
+                        "runtimeTaskId",
+                        "sourceProducerEpoch",
+                        "sourceTime",
+                        "acquisitionUtcMs",
+                        "reportedOrigin",
+                        "position",
+                        "data"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "component",
+                    "receivedAt",
+                    "ageMs",
+                    "receiptFresh",
+                    "sourceFreshness",
+                    "receptionId",
+                    "diagnostics",
+                    "observation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "archive": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["starting", "running", "stopping", "stopped", "failed"]
+                  },
+                  "pendingRecords": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pendingBytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedEvents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "receivedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "committedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unconfirmedReceptions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "locallyDiscardedMessages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "failureCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "failureRecorded": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "pendingRecords",
+                  "pendingBytes",
+                  "committedEvents",
+                  "receivedMessages",
+                  "committedReceptions",
+                  "unconfirmedReceptions",
+                  "locallyDiscardedMessages",
+                  "failureCode",
+                  "failureRecorded"
+                ],
+                "additionalProperties": false
+              },
+              "continuity": {
+                "type": "string",
+                "const": "upstream_loss_and_producer_epoch_unverified"
+              },
+              "completeEvidence": {
+                "type": "boolean",
+                "const": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "generatedAt",
+              "partitionHash",
+              "sessionId",
+              "runtimeAdmission",
+              "readOnly",
+              "deploymentBinding",
+              "sourceProducerEpoch",
+              "channels",
+              "observations",
+              "diagnostics",
+              "archive",
+              "continuity",
+              "completeEvidence"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_get_targets",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    },
+    {
+      "name": "vehicle_zmq_navigate",
+      "description": "ZMQ v1 vehicle_zmq_navigate; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "navigation.point"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "type": "object",
+                        "properties": {
+                          "longitude": {
+                            "type": "number",
+                            "minimum": -180,
+                            "exclusiveMaximum": 180
+                          },
+                          "latitude": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90
+                          }
+                        },
+                        "required": ["longitude", "latitude"],
+                        "additionalProperties": false
+                      },
+                      "speedLimitMps": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 30
+                      },
+                      "obstacleAvoidance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["destination", "speedLimitMps", "obstacleAvoidance"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "navigation.route"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "waypoints": {
+                        "minItems": 1,
+                        "maxItems": 2000,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "longitude": {
+                              "type": "number",
+                              "minimum": -180,
+                              "exclusiveMaximum": 180
+                            },
+                            "latitude": {
+                              "type": "number",
+                              "minimum": -90,
+                              "maximum": 90
+                            }
+                          },
+                          "required": ["longitude", "latitude"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "speedLimitMps": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 30
+                      },
+                      "obstacleAvoidance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["waypoints", "speedLimitMps", "obstacleAvoidance"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "navigation.returnHome"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "returnType": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "const": 0
+                          },
+                          {
+                            "type": "number",
+                            "const": 1
+                          }
+                        ]
+                      },
+                      "waypoints": {
+                        "maxItems": 2000,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "longitude": {
+                              "type": "number",
+                              "minimum": -180,
+                              "exclusiveMaximum": 180
+                            },
+                            "latitude": {
+                              "type": "number",
+                              "minimum": -90,
+                              "maximum": 90
+                            }
+                          },
+                          "required": ["longitude", "latitude"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "speedLimitMps": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 30
+                      },
+                      "obstacleAvoidance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["returnType", "waypoints", "speedLimitMps", "obstacleAvoidance"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": ["resourceId", "operation"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-control-result/1"
+              },
+              "qualification": {
+                "type": "string",
+                "const": "isolated_simulator_only"
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "enum": ["not_published", "isolated_runtime"]
+              },
+              "nativeTaskId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeOutcome": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stopConfirmed": {
+                "type": "boolean"
+              },
+              "occupancy": {
+                "type": "string",
+                "enum": ["held", "released"]
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partitionHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ordinal": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "entryHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "qualification",
+              "runtimeAdmission",
+              "nativeTaskId",
+              "nativeOutcome",
+              "nativeReason",
+              "stopConfirmed",
+              "occupancy",
+              "missingEvidence",
+              "sourceRefs"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "task_cancel",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_zmq_navigate",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": true,
+          "supportsPauseResume": true,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "vehicle_zmq_area_recon",
+      "description": "ZMQ v1 vehicle_zmq_area_recon; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resourceId", "area"],
+        "properties": {
+          "resourceId": {
+            "const": "__RESOURCE_ID__"
+          },
+          "area": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["crs", "vertices", "searchStrategy"],
+            "properties": {
+              "crs": {
+                "const": "OGC:CRS84"
+              },
+              "vertices": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["longitude", "latitude", "ellipsoidHeightM"],
+                  "properties": {
+                    "longitude": {
+                      "type": "number",
+                      "minimum": -180,
+                      "exclusiveMaximum": 180
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "ellipsoidHeightM": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "searchStrategy": {
+                "enum": ["recognize", "track"]
+              }
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-control-result/1"
+              },
+              "qualification": {
+                "type": "string",
+                "const": "isolated_simulator_only"
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "enum": ["not_published", "isolated_runtime"]
+              },
+              "nativeTaskId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeOutcome": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stopConfirmed": {
+                "type": "boolean"
+              },
+              "occupancy": {
+                "type": "string",
+                "enum": ["held", "released"]
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partitionHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ordinal": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "entryHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "qualification",
+              "runtimeAdmission",
+              "nativeTaskId",
+              "nativeOutcome",
+              "nativeReason",
+              "stopConfirmed",
+              "occupancy",
+              "missingEvidence",
+              "sourceRefs"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "task_cancel",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-console/1",
+          "operation": "vehicle_zmq_area_recon",
+          "protocol": "2.2"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": true,
+          "supportsPauseResume": true,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "vehicle_zmq_circular_recon",
+      "description": "ZMQ v1 vehicle_zmq_circular_recon; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "scan_mode": {
+                "type": "string",
+                "enum": ["circular", "sector"]
+              },
+              "yaw_center_rad": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": -3.141592653589793,
+                    "exclusiveMaximum": 3.141592653589793
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "yaw_span_rad": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "exclusiveMaximum": 6.283185307179586
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pitch_rad": {
+                "type": "number",
+                "minimum": -1.5707963267948966,
+                "maximum": 1.5707963267948966
+              },
+              "yaw_speed_rad_s": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "cycle_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              },
+              "task_timeout_ms": {
+                "type": "integer",
+                "minimum": 1000,
+                "maximum": 3600000
+              },
+              "search_strategy": {
+                "type": "string",
+                "enum": ["recognize", "track"]
+              }
+            },
+            "required": [
+              "scan_mode",
+              "yaw_center_rad",
+              "yaw_span_rad",
+              "pitch_rad",
+              "yaw_speed_rad_s",
+              "cycle_count",
+              "task_timeout_ms",
+              "search_strategy"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["resourceId", "params"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-control-result/1"
+              },
+              "qualification": {
+                "type": "string",
+                "const": "isolated_simulator_only"
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "enum": ["not_published", "isolated_runtime"]
+              },
+              "nativeTaskId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeOutcome": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stopConfirmed": {
+                "type": "boolean"
+              },
+              "occupancy": {
+                "type": "string",
+                "enum": ["held", "released"]
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partitionHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ordinal": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "entryHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "qualification",
+              "runtimeAdmission",
+              "nativeTaskId",
+              "nativeOutcome",
+              "nativeReason",
+              "stopConfirmed",
+              "occupancy",
+              "missingEvidence",
+              "sourceRefs"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "task_cancel",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_zmq_circular_recon",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": true,
+          "supportsPauseResume": true,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "vehicle_zmq_camera",
+      "description": "ZMQ v1 vehicle_zmq_camera; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "const": "__RESOURCE_ID__"
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "camera.position"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "yaw_rad": {
+                        "type": "number",
+                        "minimum": -3.141592653589793,
+                        "exclusiveMaximum": 3.141592653589793
+                      },
+                      "pitch_rad": {
+                        "type": "number",
+                        "minimum": -1.5707963267948966,
+                        "maximum": 1.5707963267948966
+                      },
+                      "move_timeout_ms": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 10000
+                      }
+                    },
+                    "required": ["yaw_rad", "pitch_rad", "move_timeout_ms"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "camera.zoom"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "zoom_ratio": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "zoom_timeout_ms": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 10000
+                      }
+                    },
+                    "required": ["zoom_ratio", "zoom_timeout_ms"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "camera.velocity"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "yaw_rate_rad_s": {
+                        "type": "number"
+                      },
+                      "pitch_rate_rad_s": {
+                        "type": "number"
+                      },
+                      "hold_ms": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 1000
+                      }
+                    },
+                    "required": ["yaw_rate_rad_s", "pitch_rate_rad_s", "hold_ms"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "params"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": ["resourceId", "operation"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-control-result/1"
+              },
+              "qualification": {
+                "type": "string",
+                "const": "isolated_simulator_only"
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "enum": ["not_published", "isolated_runtime"]
+              },
+              "nativeTaskId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeOutcome": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nativeReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stopConfirmed": {
+                "type": "boolean"
+              },
+              "occupancy": {
+                "type": "string",
+                "enum": ["held", "released"]
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partitionHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ordinal": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "entryHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "qualification",
+              "runtimeAdmission",
+              "nativeTaskId",
+              "nativeOutcome",
+              "nativeReason",
+              "stopConfirmed",
+              "occupancy",
+              "missingEvidence",
+              "sourceRefs"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "task_cancel",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-provider/1",
+          "operation": "vehicle_zmq_camera",
+          "protocol": "native-v1"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": true,
+          "supportsPauseResume": true,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "vehicle_zmq_inspect_area",
+      "description": "ZMQ v1 vehicle_zmq_inspect_area; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resourceId", "area"],
+        "properties": {
+          "resourceId": {
+            "const": "__RESOURCE_ID__"
+          },
+          "area": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["crs", "vertices", "searchStrategy"],
+            "properties": {
+              "crs": {
+                "const": "OGC:CRS84"
+              },
+              "vertices": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["longitude", "latitude", "ellipsoidHeightM"],
+                  "properties": {
+                    "longitude": {
+                      "type": "number",
+                      "minimum": -180,
+                      "exclusiveMaximum": 180
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "ellipsoidHeightM": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "searchStrategy": {
+                "enum": ["recognize", "track"]
+              }
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-inspection-result/1"
+              },
+              "outcome": {
+                "type": "string",
+                "const": "partial"
+              },
+              "inspectionReport": {
+                "type": "object",
+                "properties": {
+                  "completion": {
+                    "type": "string",
+                    "enum": ["partial", "unavailable"]
+                  },
+                  "complete": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "sourceStreamComplete": {
+                    "type": "null"
+                  },
+                  "targetReportCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "validEmptyFrameCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "absenceConclusion": {
+                    "type": "string",
+                    "enum": [
+                      "observations_received",
+                      "no_observations_in_received_frames",
+                      "unavailable"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "completion",
+                  "complete",
+                  "sourceStreamComplete",
+                  "targetReportCount",
+                  "validEmptyFrameCount",
+                  "absenceConclusion",
+                  "note"
+                ],
+                "additionalProperties": false
+              },
+              "anomalies": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "observationKind": {
+                      "type": "string",
+                      "enum": ["detection", "track"]
+                    },
+                    "targetType": {
+                      "type": "string"
+                    },
+                    "sourceTargetId": {
+                      "type": "string"
+                    },
+                    "frameId": {
+                      "type": "string"
+                    },
+                    "trackId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "sourceRef": {
+                      "type": "string"
+                    },
+                    "sourceRecordRevision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "observedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "longitude": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latitude": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ellipsoidHeightM": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "rangeSource": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "confidence": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "pixel": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "dataOrigin": {
+                      "type": "string",
+                      "const": "simulated"
+                    }
+                  },
+                  "required": [
+                    "observationKind",
+                    "targetType",
+                    "sourceTargetId",
+                    "frameId",
+                    "trackId",
+                    "sourceRef",
+                    "sourceRecordRevision",
+                    "observedAt",
+                    "longitude",
+                    "latitude",
+                    "ellipsoidHeightM",
+                    "rangeSource",
+                    "confidence",
+                    "pixel",
+                    "dataOrigin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "observationCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "uniqueEntityCount": {
+                "type": "null"
+              },
+              "coverageEvidence": {
+                "type": "object",
+                "properties": {
+                  "ratio": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "complete": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "conflict": {
+                    "type": "boolean"
+                  },
+                  "sourceRef": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "partitionHash": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "sessionId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "ordinal": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "entryHash": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "declaredAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "footprints": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "ratio",
+                  "complete",
+                  "conflict",
+                  "sourceRef",
+                  "declaredAt",
+                  "footprints"
+                ],
+                "additionalProperties": false
+              },
+              "correlationStrength": {
+                "type": "string",
+                "const": "native_task_and_receiver_session_producer_epoch_unattested"
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "truncated": {
+                "type": "boolean"
+              },
+              "sourceTruncated": {
+                "type": "boolean"
+              },
+              "fullReceivedReport": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  },
+                  "lastRevision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "includes": {
+                    "type": "string",
+                    "const": "platform_retained_reports_only"
+                  }
+                },
+                "required": ["query", "lastRevision", "includes"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "outcome",
+              "inspectionReport",
+              "anomalies",
+              "observationCount",
+              "uniqueEntityCount",
+              "coverageEvidence",
+              "correlationStrength",
+              "missingEvidence",
+              "truncated",
+              "sourceTruncated",
+              "fullReceivedReport"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "task_cancel",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-console/1",
+          "operation": "vehicle_zmq_inspect_area",
+          "protocol": "2.2"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": true,
+          "supportsPauseResume": true,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "simulation_apply_effect",
+      "description": "ZMQ v1 simulation_apply_effect; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resourceId", "targetId", "position", "observation"],
+        "properties": {
+          "resourceId": {
+            "const": "__RESOURCE_ID__"
+          },
+          "targetId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "position": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["longitude_deg", "latitude_deg", "ellipsoid_height_m"],
+            "properties": {
+              "longitude_deg": {
+                "type": "number",
+                "minimum": -180,
+                "exclusiveMaximum": 180
+              },
+              "latitude_deg": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "ellipsoid_height_m": {
+                "type": ["number", "null"]
+              }
+            }
+          },
+          "observation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["taskId", "externalExecutionId", "revision"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "externalExecutionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-effect-result/1"
+              },
+              "qualification": {
+                "type": "string",
+                "const": "isolated_simulator_only"
+              },
+              "runtimeAdmission": {
+                "type": "string",
+                "enum": ["not_published", "isolated_runtime"]
+              },
+              "requestAccepted": {
+                "type": "boolean"
+              },
+              "nativeTaskId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "executionState": {
+                "type": "string"
+              },
+              "executionFinished": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "effect": {
+                "type": "string",
+                "enum": ["unknown", "hit", "miss", "destroyed"]
+              },
+              "outcome": {
+                "type": "string"
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partitionHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ordinal": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "entryHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                  "additionalProperties": false
+                }
+              },
+              "supplementalResultRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "resultQuery": {
+                "type": "string",
+                "const": "simulation_get_effect_result"
+              },
+              "historySource": {
+                "type": "string",
+                "const": "platform_retained_only"
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "qualification",
+              "runtimeAdmission",
+              "requestAccepted",
+              "nativeTaskId",
+              "executionState",
+              "executionFinished",
+              "effect",
+              "outcome",
+              "missingEvidence",
+              "sourceRefs",
+              "supplementalResultRevision",
+              "resultQuery",
+              "historySource"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "side_effecting",
+          "execution": "task_required",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "forbidden"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-console/1",
+          "operation": "simulation_apply_effect",
+          "protocol": "1.0"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "task_required",
+          "availability": "dynamic",
+          "supportsScheduling": true,
+          "supportsMaxElapsed": true,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": true,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        },
+        "io.sdar/taskBusiness": {
+          "schemaVersion": "sdar.task-business-operation-profile/1.0-rc2",
+          "profileVersion": "1.0-rc2",
+          "availability": "available",
+          "source": {
+            "sourceId": "vehicle.business",
+            "deliverySemantics": "durable_at_least_once",
+            "replaySupported": true
+          },
+          "artifactTypes": [],
+          "actionTypes": [],
+          "requiredInputTypes": [],
+          "interventionTypes": [],
+          "methods": {
+            "contextGet": "io.sdar/taskBusiness/context/get",
+            "snapshotPartGet": "io.sdar/taskBusiness/snapshotParts/get",
+            "artifactGet": "io.sdar/taskBusiness/artifacts/get",
+            "eventsListen": "io.sdar/businessEvents/listen",
+            "contentGet": true,
+            "inputUpdate": false,
+            "interventionApply": false
+          },
+          "semantics": {
+            "artifact": ["observed"],
+            "coordinateFrames": [],
+            "observationClockDomains": ["utc"]
+          },
+          "limits": {
+            "maxInlineArtifactBytes": 65536,
+            "maxWaitMs": 300000,
+            "trajectoryMinSamples": 2
+          },
+          "policy": {
+            "visualLockOwner": "disabled",
+            "decisionMode": "none",
+            "onExpire": "end_observation",
+            "onDismiss": "end_observation",
+            "footprintMode": "disabled",
+            "coverageMode": "disabled"
+          },
+          "qualification": {
+            "routeAdoption": "not_supported",
+            "footprint": "not_supported",
+            "automaticVisualLock": "not_supported",
+            "runtimeReplan": "not_supported"
+          }
+        }
+      }
+    },
+    {
+      "name": "vehicle_get_inspection_result",
+      "description": "ZMQ v1 vehicle_get_inspection_result; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resourceId", "taskId", "executionId", "afterRevision", "limit"],
+        "properties": {
+          "resourceId": {
+            "const": "__RESOURCE_ID__"
+          },
+          "taskId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "executionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "afterRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-inspection-result/1"
+              },
+              "outcome": {
+                "type": "string",
+                "const": "partial"
+              },
+              "inspectionReport": {
+                "type": "object",
+                "properties": {
+                  "completion": {
+                    "type": "string",
+                    "enum": ["partial", "unavailable"]
+                  },
+                  "complete": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "sourceStreamComplete": {
+                    "type": "null"
+                  },
+                  "targetReportCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "validEmptyFrameCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "absenceConclusion": {
+                    "type": "string",
+                    "enum": [
+                      "observations_received",
+                      "no_observations_in_received_frames",
+                      "unavailable"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "completion",
+                  "complete",
+                  "sourceStreamComplete",
+                  "targetReportCount",
+                  "validEmptyFrameCount",
+                  "absenceConclusion",
+                  "note"
+                ],
+                "additionalProperties": false
+              },
+              "anomalies": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "observationKind": {
+                      "type": "string",
+                      "enum": ["detection", "track"]
+                    },
+                    "targetType": {
+                      "type": "string"
+                    },
+                    "sourceTargetId": {
+                      "type": "string"
+                    },
+                    "frameId": {
+                      "type": "string"
+                    },
+                    "trackId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "sourceRef": {
+                      "type": "string"
+                    },
+                    "sourceRecordRevision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "observedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "longitude": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latitude": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ellipsoidHeightM": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "rangeSource": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "confidence": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "pixel": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "dataOrigin": {
+                      "type": "string",
+                      "const": "simulated"
+                    }
+                  },
+                  "required": [
+                    "observationKind",
+                    "targetType",
+                    "sourceTargetId",
+                    "frameId",
+                    "trackId",
+                    "sourceRef",
+                    "sourceRecordRevision",
+                    "observedAt",
+                    "longitude",
+                    "latitude",
+                    "ellipsoidHeightM",
+                    "rangeSource",
+                    "confidence",
+                    "pixel",
+                    "dataOrigin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "observationCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "uniqueEntityCount": {
+                "type": "null"
+              },
+              "coverageEvidence": {
+                "type": "object",
+                "properties": {
+                  "ratio": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "complete": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "conflict": {
+                    "type": "boolean"
+                  },
+                  "sourceRef": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "partitionHash": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "sessionId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "ordinal": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "entryHash": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "declaredAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "footprints": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "ratio",
+                  "complete",
+                  "conflict",
+                  "sourceRef",
+                  "declaredAt",
+                  "footprints"
+                ],
+                "additionalProperties": false
+              },
+              "correlationStrength": {
+                "type": "string",
+                "const": "native_task_and_receiver_session_producer_epoch_unattested"
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "truncated": {
+                "type": "boolean"
+              },
+              "sourceTruncated": {
+                "type": "boolean"
+              },
+              "fullReceivedReport": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  },
+                  "lastRevision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "includes": {
+                    "type": "string",
+                    "const": "platform_retained_reports_only"
+                  }
+                },
+                "required": ["query", "lastRevision", "includes"],
+                "additionalProperties": false
+              },
+              "identity": {
+                "type": "object",
+                "properties": {
+                  "scopeHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resourceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "taskId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "externalExecutionId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "operationName": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "authorizationContextHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "const": "simulation"
+                  },
+                  "simulationId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "scopeHash",
+                  "providerId",
+                  "resourceId",
+                  "taskId",
+                  "externalExecutionId",
+                  "operationName",
+                  "authorizationContextHash",
+                  "executionMode",
+                  "simulationId"
+                ],
+                "additionalProperties": false
+              },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "schemaVersion": {
+                    "type": "string",
+                    "const": "ugv.zmq-result-page/1"
+                  },
+                  "identity": {
+                    "type": "object",
+                    "properties": {
+                      "scopeHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "providerId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "resourceId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "taskId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "externalExecutionId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "operationName": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "authorizationContextHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "executionMode": {
+                        "type": "string",
+                        "const": "simulation"
+                      },
+                      "simulationId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "scopeHash",
+                      "providerId",
+                      "resourceId",
+                      "taskId",
+                      "externalExecutionId",
+                      "operationName",
+                      "authorizationContextHash",
+                      "executionMode",
+                      "simulationId"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "records": {
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "schemaVersion": {
+                          "type": "string",
+                          "const": "ugv.zmq-result-record/1"
+                        },
+                        "identity": {
+                          "type": "object",
+                          "properties": {
+                            "scopeHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "providerId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "resourceId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "taskId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "externalExecutionId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "operationName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "authorizationContextHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "executionMode": {
+                              "type": "string",
+                              "const": "simulation"
+                            },
+                            "simulationId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "scopeHash",
+                            "providerId",
+                            "resourceId",
+                            "taskId",
+                            "externalExecutionId",
+                            "operationName",
+                            "authorizationContextHash",
+                            "executionMode",
+                            "simulationId"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["inspection_frame", "coverage", "effect"]
+                        },
+                        "sourceRef": {
+                          "type": "object",
+                          "properties": {
+                            "partitionHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "sessionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "ordinal": {
+                              "type": "string",
+                              "pattern": "^[0-9]+$"
+                            },
+                            "entryHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            }
+                          },
+                          "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                          "additionalProperties": false
+                        },
+                        "receivedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        },
+                        "content": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "contentHash": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "schemaVersion",
+                        "identity",
+                        "kind",
+                        "sourceRef",
+                        "receivedAt",
+                        "content",
+                        "revision",
+                        "contentHash"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "nextRevision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hasMore": {
+                    "type": "boolean"
+                  },
+                  "historySource": {
+                    "type": "string",
+                    "const": "platform_retained_only"
+                  }
+                },
+                "required": [
+                  "schemaVersion",
+                  "identity",
+                  "records",
+                  "nextRevision",
+                  "hasMore",
+                  "historySource"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "outcome",
+              "inspectionReport",
+              "anomalies",
+              "observationCount",
+              "uniqueEntityCount",
+              "coverageEvidence",
+              "correlationStrength",
+              "missingEvidence",
+              "truncated",
+              "sourceTruncated",
+              "fullReceivedReport",
+              "identity",
+              "page"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-console/1",
+          "operation": "vehicle_get_inspection_result",
+          "protocol": "2.2"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    },
+    {
+      "name": "simulation_get_effect_result",
+      "description": "ZMQ v1 simulation_get_effect_result; isolated simulator qualification; no complete source history or field control claim.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resourceId", "taskId", "executionId", "afterRevision", "limit"],
+        "properties": {
+          "resourceId": {
+            "const": "__RESOURCE_ID__"
+          },
+          "taskId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "executionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "afterRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "ugv.zmq-effect-query/1"
+              },
+              "identity": {
+                "type": "object",
+                "properties": {
+                  "scopeHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "providerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resourceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "taskId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "externalExecutionId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "operationName": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "authorizationContextHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "const": "simulation"
+                  },
+                  "simulationId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "scopeHash",
+                  "providerId",
+                  "resourceId",
+                  "taskId",
+                  "externalExecutionId",
+                  "operationName",
+                  "authorizationContextHash",
+                  "executionMode",
+                  "simulationId"
+                ],
+                "additionalProperties": false
+              },
+              "originalTask": {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "terminalAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["state", "reasonCode", "terminalAt", "result"],
+                "additionalProperties": false
+              },
+              "latestRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "latest": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "occupancy": {
+                "type": "string",
+                "enum": ["held", "released"]
+              },
+              "executionFinished": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "missingEvidence": {
+                "maxItems": 256,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "schemaVersion": {
+                    "type": "string",
+                    "const": "ugv.zmq-result-page/1"
+                  },
+                  "identity": {
+                    "type": "object",
+                    "properties": {
+                      "scopeHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "providerId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "resourceId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "taskId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "externalExecutionId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "operationName": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "authorizationContextHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "executionMode": {
+                        "type": "string",
+                        "const": "simulation"
+                      },
+                      "simulationId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "scopeHash",
+                      "providerId",
+                      "resourceId",
+                      "taskId",
+                      "externalExecutionId",
+                      "operationName",
+                      "authorizationContextHash",
+                      "executionMode",
+                      "simulationId"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "records": {
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "schemaVersion": {
+                          "type": "string",
+                          "const": "ugv.zmq-result-record/1"
+                        },
+                        "identity": {
+                          "type": "object",
+                          "properties": {
+                            "scopeHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "providerId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "resourceId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "taskId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "externalExecutionId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "operationName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "authorizationContextHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "executionMode": {
+                              "type": "string",
+                              "const": "simulation"
+                            },
+                            "simulationId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "scopeHash",
+                            "providerId",
+                            "resourceId",
+                            "taskId",
+                            "externalExecutionId",
+                            "operationName",
+                            "authorizationContextHash",
+                            "executionMode",
+                            "simulationId"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["inspection_frame", "coverage", "effect"]
+                        },
+                        "sourceRef": {
+                          "type": "object",
+                          "properties": {
+                            "partitionHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "sessionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "ordinal": {
+                              "type": "string",
+                              "pattern": "^[0-9]+$"
+                            },
+                            "entryHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            }
+                          },
+                          "required": ["partitionHash", "sessionId", "ordinal", "entryHash"],
+                          "additionalProperties": false
+                        },
+                        "receivedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        },
+                        "content": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "contentHash": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "schemaVersion",
+                        "identity",
+                        "kind",
+                        "sourceRef",
+                        "receivedAt",
+                        "content",
+                        "revision",
+                        "contentHash"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "nextRevision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hasMore": {
+                    "type": "boolean"
+                  },
+                  "historySource": {
+                    "type": "string",
+                    "const": "platform_retained_only"
+                  }
+                },
+                "required": [
+                  "schemaVersion",
+                  "identity",
+                  "records",
+                  "nextRevision",
+                  "hasMore",
+                  "historySource"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "identity",
+              "originalTask",
+              "latestRevision",
+              "latest",
+              "occupancy",
+              "executionFinished",
+              "missingEvidence",
+              "page"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["outcome", "reasonCode", "retryable", "completedAt"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "_meta": {
+        "io.sdar/tool-execution-semantics": {
+          "effect": "read_only",
+          "execution": "synchronous",
+          "cancellation": "unsupported",
+          "idempotency": "server_managed",
+          "replay": "allowed"
+        },
+        "io.sdar/ugvZmq": {
+          "consoleContract": "ugv.zmq-console/1",
+          "operation": "simulation_get_effect_result",
+          "protocol": "1.0"
+        },
+        "io.sdar/taskExecution": {
+          "profileVersion": "1.0",
+          "taskBehavior": "synchronous_only",
+          "availability": "dynamic",
+          "supportsScheduling": false,
+          "supportsMaxElapsed": false,
+          "supportsCancellation": false,
+          "supportsPauseResume": false,
+          "supportsObservations": false,
+          "supportsInputRequired": false,
+          "idempotency": "server_managed"
+        },
+        "io.sdar/resourceBinding": {
+          "mode": "ARGUMENT_REFERENCE",
+          "resourceIdJsonPointer": "/resourceId"
+        }
+      }
+    }
+  ]
+}

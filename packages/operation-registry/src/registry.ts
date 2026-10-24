@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { ZMQ_PROVIDER_TOOLS, zmqTool } from "../../vehicle-zmq-control/src/catalog.js";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import {
   jsonToProtoStruct,
@@ -115,6 +116,7 @@ export class OperationRegistry {
   constructor() {
     this.#ajv = new Ajv2020({ strict: true, allErrors: true, validateFormats: true });
     this.#ajv.addFormat("date-time", (value: string) => !Number.isNaN(Date.parse(value)));
+    this.#ajv.addFormat("uuid", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   }
 
   validate(manifest: ProviderManifest): ValidatedManifest {
@@ -122,6 +124,13 @@ export class OperationRegistry {
   }
 
   #validate(manifest: ProviderManifest, verifyBusinessSource: boolean): ValidatedManifest {
+    const zmq = manifest.providerType === "isr.vehicle.ugv.zmq";
+    if (
+      zmq &&
+      canonicalize(manifest.operations.map((o) => o.name).sort()) !==
+        canonicalize([...ZMQ_PROVIDER_TOOLS].sort())
+    )
+      throw Error("ZMQ_CATALOG_TOOL_SET_MISMATCH");
     if (manifest.adapterProtocolVersion !== "1.0") throw new Error("UNSUPPORTED_ADAPTER_PROTOCOL");
     if (!PROVIDER_ID.test(manifest.providerId)) throw new Error("INVALID_PROVIDER_ID");
     if (!PROVIDER_TYPE.test(manifest.providerType)) throw new Error("INVALID_PROVIDER_TYPE");
@@ -144,6 +153,7 @@ export class OperationRegistry {
         return source;
       });
     if (businessEventSources.length > 16) throw new Error("INVALID_BUSINESS_EVENT_SOURCE_COUNT");
+    let zmqResource: string | undefined;
     const normalized = manifest.operations.map((operation) => {
       if (!OPERATION_NAME.test(operation.name)) throw new Error("INVALID_OPERATION_NAME");
       if (names.has(operation.name)) throw new Error("DUPLICATE_OPERATION_NAME");
@@ -174,6 +184,41 @@ export class OperationRegistry {
       }
       const inputSchema = protoStructToJson(operation.inputSchema);
       const outputSchema = protoStructToJson(operation.outputSchema);
+      if (zmq) {
+        const resource = (inputSchema.properties as Record<string, { const?: unknown }> | undefined)
+          ?.resourceId?.const;
+        if (
+          typeof resource !== "string" ||
+          !resource.trim() ||
+          (zmqResource !== undefined && zmqResource !== resource)
+        )
+          throw Error("ZMQ_CATALOG_RESOURCE_INVALID");
+        zmqResource = resource;
+        const expected = zmqTool(operation.name, resource),
+          profile = expected._meta["io.sdar/taskExecution"];
+        const expectedCaps = {
+          availability: true,
+          scheduling: profile.supportsScheduling,
+          maxElapsed: profile.supportsMaxElapsed,
+          cancel: profile.supportsCancellation,
+          pauseResume: profile.supportsPauseResume,
+          inputRequired: false,
+          idempotency: true,
+          observations: profile.supportsObservations,
+        };
+        if (
+          canonicalize(inputSchema) !== canonicalize(expected.inputSchema) ||
+          canonicalize(outputSchema) !== canonicalize(expected.outputSchema) ||
+          canonicalize(operation.capabilities) !== canonicalize(expectedCaps) ||
+          canonicalize(businessFeedbackProfile ?? null) !==
+            canonicalize(expected._meta["io.sdar/taskBusiness"] ?? null) ||
+          (operation.execution === "TASK_REQUIRED") !==
+            (profile.taskBehavior === "task_required") ||
+          canonicalize(operation.resourceBinding) !==
+            canonicalize(expected._meta["io.sdar/resourceBinding"])
+        )
+          throw Error("ZMQ_CATALOG_CONTRACT_MISMATCH");
+      }
       for (const schema of [inputSchema, outputSchema]) {
         const bytes = Buffer.byteLength(JSON.stringify(schema));
         if (bytes > 262_144) throw new Error("MANIFEST_SCHEMA_TOO_LARGE");
@@ -234,6 +279,28 @@ export class OperationRegistry {
               anyOf: [operation.outputSchema, BUSINESS_RESULT_SCHEMA],
             },
             _meta: {
+              ...(zmq
+                ? {
+                    "io.sdar/tool-execution-semantics": zmqTool(
+                      operation.name,
+                      String(
+                        (operation.inputSchema.properties as Record<string, { const: unknown }>)
+                          .resourceId?.const,
+                      ),
+                    )._meta["io.sdar/tool-execution-semantics"],
+                  }
+                : {}),
+              ...(zmq
+                ? {
+                    "io.sdar/ugvZmq": zmqTool(
+                      operation.name,
+                      String(
+                        (operation.inputSchema.properties as Record<string, { const: unknown }>)
+                          .resourceId?.const,
+                      ),
+                    )._meta["io.sdar/ugvZmq"],
+                  }
+                : {}),
               "io.sdar/taskExecution": {
                 profileVersion: "1.0",
                 taskBehavior: taskBehavior(operation.execution),

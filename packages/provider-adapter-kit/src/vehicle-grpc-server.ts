@@ -23,6 +23,16 @@ interface StartRequest {
   arguments?: unknown;
   argumentHash?: string;
   executionContext?: Record<string, unknown>;
+  timing?: VehicleTaskTiming;
+}
+/** Exact protobuf timing, retained at the transport boundary for new adapters. */
+export interface VehicleTaskTiming {
+  start?: {
+    mode?: string;
+    scheduledAt?: { seconds?: string; nanos?: number };
+    startToleranceMs?: string | number;
+  };
+  maxElapsedMs?: string | number;
 }
 interface CommandRequest {
   identity?: Record<string, unknown>;
@@ -60,6 +70,7 @@ export interface StartVehicleOperation {
   arguments: Record<string, unknown>;
   argumentHash: string;
   executionContext: ExecutionContextRecord;
+  timing?: VehicleTaskTiming;
   /** Transport cancellation fences queued admission, never a dispatched device mutation. */
   signal?: AbortSignal;
 }
@@ -79,18 +90,27 @@ export interface VehicleBusinessReadIdentity {
   executionContext: ExecutionContextRecord;
 }
 
-export interface VehicleAdapterRuntime {
+export interface VehicleAdapterRuntime<Snapshot = VehicleSnapshot> {
   readonly events: NodeJS.EventEmitter;
-  snapshot(): VehicleSnapshot;
+  snapshot(): Snapshot;
   availability(
     operationName: string,
     argumentsValue: Record<string, unknown>,
-  ): AvailabilityDecision;
+  ): AvailabilityDecision | Promise<AvailabilityDecision>;
+  checkAvailability?(
+    operationName: string,
+    argumentsValue: Record<string, unknown>,
+    executionContext?: ExecutionContextRecord,
+    timing?: VehicleTaskTiming,
+  ): AvailabilityDecision | Promise<AvailabilityDecision>;
   start(input: StartVehicleOperation): Promise<{
     externalExecutionId: string;
     initialSnapshot: Record<string, unknown>;
   }>;
-  get(taskId: string): Promise<ProviderExecution | undefined>;
+  get(
+    taskId: string,
+    identity?: VehicleBusinessReadIdentity,
+  ): Promise<ProviderExecution | undefined>;
   reconcile(
     input: StartVehicleOperation & { externalExecutionId?: string },
   ): Promise<Record<string, unknown>>;
@@ -149,7 +169,7 @@ export interface VehicleAdapterRuntime {
   ): Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
-export class VehicleProviderGrpcServer {
+export class VehicleProviderGrpcServer<Snapshot = VehicleSnapshot> {
   readonly #server = new grpc.Server();
   #started = false;
   constructor(
@@ -162,11 +182,11 @@ export class VehicleProviderGrpcServer {
       tlsKeyPath?: string;
       internalErrorCode: string;
       manifest(): Record<string, unknown>;
-      resource(snapshot: VehicleSnapshot): Record<string, unknown>;
+      resource(snapshot: Snapshot): Record<string, unknown>;
     },
-    readonly runtime: VehicleAdapterRuntime,
+    readonly runtime: VehicleAdapterRuntime<Snapshot>,
     readonly store: ProviderStore,
-    readonly businessEvents: VehicleBusinessEventHub,
+    readonly businessEvents: Pick<VehicleBusinessEventHub, "subscribe">,
   ) {
     this.#server.addService(adapterServiceDefinition(), this.#handlers());
   }
@@ -187,7 +207,17 @@ export class VehicleProviderGrpcServer {
   }
   close(): Promise<void> {
     return this.#started
-      ? new Promise((resolve) => this.#server.tryShutdown(() => resolve()))
+      ? new Promise((resolve) => {
+          const timer = setTimeout(() => {
+            this.#server.forceShutdown();
+            resolve();
+          }, 5000);
+          timer.unref();
+          this.#server.tryShutdown(() => {
+            clearTimeout(timer);
+            resolve();
+          });
+        })
       : Promise.resolve();
   }
   #handlers(): grpc.UntypedServiceImplementation {
@@ -201,29 +231,44 @@ export class VehicleProviderGrpcServer {
         }),
       checkAvailability: (
         call: Unary<{
-          checks?: { requestId?: string; operationName?: string; arguments?: unknown }[];
+          executionContext?: Record<string, unknown>;
+          checks?: {
+            requestId?: string;
+            operationName?: string;
+            arguments?: unknown;
+            timing?: VehicleTaskTiming;
+          }[];
         }>,
         callback: grpc.sendUnaryData<unknown>,
       ) => {
         const checkedAt = new Date().toISOString();
-        const checks = (call.request.checks ?? []).map((check) => {
-          const operationName = check.operationName ?? "";
-          const decision = this.runtime.availability(
-            operationName,
-            protoStructToJson(check.arguments),
-          );
-          return {
-            requestId: check.requestId ?? "",
-            operationName,
-            ...decision,
-            reservationMode: "NONE",
-            validUntil: timestamp(new Date(Date.parse(checkedAt) + 1000).toISOString()),
-            estimatedDelayMs: "0",
-            possibleEffects:
-              operationName === "vehicle_emergency_stop" ? ["local_track_preemption"] : [],
-          };
-        });
-        callback(null, { profileVersion: "1.0", checkedAt: timestamp(checkedAt), checks });
+        void Promise.all(
+          (call.request.checks ?? []).map(async (check) => {
+            const operationName = check.operationName ?? "";
+            const decision = await (this.runtime.checkAvailability
+              ? this.runtime.checkAvailability(
+                  operationName,
+                  protoStructToJson(check.arguments),
+                  context(call.request.executionContext),
+                  check.timing,
+                )
+              : this.runtime.availability(operationName, protoStructToJson(check.arguments)));
+            return {
+              requestId: check.requestId ?? "",
+              operationName,
+              ...decision,
+              reservationMode: "NONE",
+              validUntil: timestamp(new Date(Date.parse(checkedAt) + 1000).toISOString()),
+              estimatedDelayMs: "0",
+              possibleEffects:
+                operationName === "vehicle_emergency_stop" ? ["local_track_preemption"] : [],
+            };
+          }),
+        )
+          .then((checks) =>
+            callback(null, { profileVersion: "1.0", checkedAt: timestamp(checkedAt), checks }),
+          )
+          .catch((error: unknown) => callback(serviceError(error, this.options.internalErrorCode)));
       },
       startOperation: (call: Unary<StartRequest>, callback: grpc.sendUnaryData<unknown>) => {
         const controller = new AbortController();
@@ -247,9 +292,9 @@ export class VehicleProviderGrpcServer {
             });
           });
       },
-      getExecution: (call: Unary<{ taskId?: string }>, callback: grpc.sendUnaryData<unknown>) => {
+      getExecution: (call: Unary<BusinessReadRequest>, callback: grpc.sendUnaryData<unknown>) => {
         void this.runtime
-          .get(call.request.taskId ?? "")
+          .get(call.request.taskId ?? "", businessReadIdentity(call.request))
           .then(async (execution) => {
             if (execution === undefined) callback(notFound());
             else callback(null, await this.runtime.executionSnapshot(execution));
@@ -482,7 +527,7 @@ export class VehicleProviderGrpcServer {
       },
       streamExecutionEvents: (
         call: grpc.ServerWritableStream<
-          { execution?: { taskId?: string }; afterRevision?: string | number },
+          { execution?: BusinessReadRequest; afterRevision?: string | number },
           unknown
         >,
       ) => {
@@ -506,7 +551,7 @@ export class VehicleProviderGrpcServer {
         this.runtime.events.on(taskId, listener);
         subscription.attach(() => this.runtime.events.off(taskId, listener));
         void this.runtime
-          .get(taskId)
+          .get(taskId, businessReadIdentity(call.request.execution ?? {}))
           .then(async (execution) => {
             if (subscription.isClosed()) return;
             if (execution === undefined) {
@@ -646,6 +691,7 @@ function startInput(request: StartRequest): StartVehicleOperation {
     arguments: protoStructToJson(request.arguments),
     argumentHash: request.argumentHash ?? "",
     executionContext: context(request.executionContext),
+    ...(request.timing === undefined ? {} : { timing: request.timing }),
   };
 }
 function commandIdentity(value: Record<string, unknown> | undefined): VehicleCommandIdentity {

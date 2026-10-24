@@ -1,0 +1,20 @@
+# Explicit isolated qualification only. No default service is started.
+services:
+  zmq-provider-candidate:
+    profiles: [qualification]
+    image: ${ZMQ_PROVIDER_IMAGE:?pin the qualified candidate image}
+    network_mode: host
+    read_only: true
+    init: true
+    restart: "no"
+    environment:
+      UGV_ZMQ_PROVIDER_CONFIG_FILE: /run/secrets/provider.json
+    volumes:
+      - ${ZMQ_PROVIDER_CONFIG_FILE:?private isolated configuration}:/run/secrets/provider.json:ro
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+# Run a separately configured qualification Runtime on an unused loopback HTTP port.
+# Its ADAPTER_ENDPOINT must name the exact loopback port in provider.json.
+# The current 19100/19101 services and their storage/keys are never selected here.
