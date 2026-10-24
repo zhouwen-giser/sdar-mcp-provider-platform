@@ -1,0 +1,405 @@
+{
+  "schemaVersion": "ugv.zmq-phase2-verification/1",
+  "recordedAt": "2026-10-24T03:08:16.047333Z",
+  "baselineCommit": "0bbf5ee223e9a51a71725de7af3b718b9a4ed03a",
+  "branch": "codex/ugv-zmq-phase2-20261024",
+  "sourceIdentity": "Final delivery Git commit plus the following SHA-256 source fingerprint. Historical phase 1 report hashes remain bound to their original commit.",
+  "nodeVersion": "22.23.2",
+  "pnpmVersion": "11.13.1",
+  "zeromqVersion": "6.8.0",
+  "libzmqVersion": "4.3.5",
+  "workingDirectory": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "commandPathPrefix": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin",
+  "businessCommandsSent": 0,
+  "runtimeAdmission": "not_published",
+  "controlG0Ready": false,
+  "temporaryDatabase": "isolated tmpfs PostgreSQL; removed after evidence export; no existing database volumes modified",
+  "commands": [
+    {
+      "command": "pnpm test:ugv-zmq",
+      "exitCode": 0,
+      "result": "48 tests passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/phase1-tests.log",
+      "logSha256": "aca04d992b6555744b41b6048f8145a5b6128f57565e4889b0c3ca0db682f802"
+    },
+    {
+      "command": "pnpm zmq:contract:check",
+      "exitCode": 0,
+      "result": "17 locked inputs verified",
+      "log": "reports/ugv-zmq-phase2/raw/verification/phase1-contract.log",
+      "logSha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b"
+    },
+    {
+      "command": "pnpm zmq:preflight --capture reports/ugv-zmq-phase1/raw/passive-publications-20261023.json --report reports/ugv-zmq-phase2/phase1-recheck-G0.json",
+      "exitCode": 2,
+      "result": "expected: 12 external prerequisites remain; controller ID no longer blocks",
+      "log": "reports/ugv-zmq-phase2/raw/verification/phase1-preflight.log",
+      "logSha256": "07ae366c05b42fb20f4c98bb2a0dce477ec3c5967b407e991f0197075711d5d8"
+    },
+    {
+      "command": "pnpm test:ugv-zmq-observer",
+      "exitCode": 0,
+      "result": "21 tests passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/observer-unit.log",
+      "logSha256": "39e4235350a6bdfacee53dffb5dcba71bc9b7fe7bfc9c47f21e4390e88e51a24"
+    },
+    {
+      "command": "SMPP_ZMQ_TEST_CONFIG_FILE=/mnt/data/ugv-zmq-phase2-20261024/postgres-test.json SMPP_ZMQ_EVIDENCE_DIR=/mnt/data/ugv-zmq-phase2-20261024 pnpm test:ugv-zmq-observer:postgres",
+      "exitCode": 0,
+      "result": "8 tests passed; real isolated PostgreSQL and native loopback ZMQ",
+      "log": "reports/ugv-zmq-phase2/raw/verification/postgres.log",
+      "logSha256": "0abb03905998f5ba5b98bdebd8da831870598be02e7852f42a5f5dbb70d9cd79"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "command": "pnpm exec eslint packages/vehicle-zmq-observer apps/ugv-zmq-observer tests/ugv-zmq-observer tests/ugv-zmq-observer-postgres packages/vehicle-zmq-contract/src/profile.ts tests/ugv-zmq/profile.test.ts",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/build.log",
+      "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+    },
+    {
+      "command": "pnpm protocol:check:frozen",
+      "exitCode": 0,
+      "result": "passed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/frozen-protocol.log",
+      "logSha256": "ea6a746f74fff4889742e38bc934df3136a014eeca2a115c2246b2f1cdaca4b4"
+    },
+    {
+      "command": "pnpm install",
+      "exitCode": 0,
+      "result": "pinned zeromq 6.8.0 and workspace dependencies installed",
+      "log": "reports/ugv-zmq-phase2/raw/verification/dependencies-install.log",
+      "logSha256": "8e85c45af52517c29cfe1a1b5e111d519d0ee156b3af16bef5fe8cb17059641e"
+    },
+    {
+      "command": "node --import tsx /mnt/data/ugv-zmq-phase2-20261024/passive-site-smoke.mjs",
+      "exitCode": 0,
+      "result": "source CLI owner install/start/HTTP/raw/archive/shutdown verified; 48 valid actual passive publications",
+      "log": "reports/ugv-zmq-phase2/raw/verification/site-smoke.log",
+      "logSha256": "c73d89afa8574e74109c9676541cc2e6d22f362b81e47d135e565ee577ce83f2"
+    },
+    {
+      "command": "node --import tsx /mnt/data/ugv-zmq-phase2-20261024/compiled-site-smoke.mjs",
+      "exitCode": 0,
+      "result": "compiled CLI verified; 48 valid actual passive publications",
+      "log": "reports/ugv-zmq-phase2/raw/verification/compiled-site-smoke.log",
+      "logSha256": "54bdaa805c37ce2242d874e039dcb71ae007f30869e4729792d2198dcb82d397"
+    },
+    {
+      "command": "docker inspect --format '{{json .Name}} {{json .Config.Image}} {{json .Image}} {{json .State.Status}} {{json .NetworkSettings.Ports}}' gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1 gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1 smpp-ugv-control-console",
+      "exitCode": 0,
+      "result": "same image IDs, running states and ports as phase 1",
+      "log": "reports/ugv-zmq-phase2/raw/verification/running-images.log",
+      "logSha256": "8659653a19d66dcd76a47e5f513ece35d67cd66c804faec1bcd821b414e11199"
+    },
+    {
+      "command": "docker rm -f smpp-zmq-phase2-postgres-20261024",
+      "exitCode": 0,
+      "result": "temporary tmpfs PostgreSQL removed after raw evidence export",
+      "log": "reports/ugv-zmq-phase2/raw/verification/cleanup.log",
+      "logSha256": "dbba2fcbb6ecf7201b4e919e83626cc841b7c07632b742bcc419fa87c0887ef2"
+    },
+    {
+      "command": "pnpm exec prettier --check package.json pnpm-workspace.yaml packages/vehicle-zmq-contract/src/profile.ts tests/ugv-zmq/profile.test.ts packages/vehicle-zmq-observer apps/ugv-zmq-observer tests/ugv-zmq-observer tests/ugv-zmq-observer-postgres contracts/ugv-zmq/v1/README.md contracts/ugv-zmq/v1/contract-lock.json deploy/ugv-zmq docs/design/ugv-zmq-migration-20261023.md docs/execplans/ugv-zmq-migration-20261023.md docs/execplans/ugv-zmq-observation-phase2-20261024.md reports/ugv-zmq-phase2",
+      "exitCode": 0,
+      "result": "editable source/docs passed; raw evidence excluded",
+      "log": "reports/ugv-zmq-phase2/raw/verification/format-check.log",
+      "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": "git diff --cached --check -- . ':(exclude)reports/ugv-zmq-phase2/raw/**'",
+      "exitCode": 0,
+      "result": "editable diff passed; original raw receipts/logs preserved",
+      "log": "reports/ugv-zmq-phase2/raw/verification/diff-check.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node --input-type=module -e 'import {version} from \"zeromq\"; console.log(JSON.stringify({node:process.version,libzmq:version,architecture:process.arch,platform:process.platform}))'",
+      "exitCode": 0,
+      "result": "actual installed Node/native library identity",
+      "log": "reports/ugv-zmq-phase2/raw/verification/native-environment.log",
+      "logSha256": "a6bca28fcc764e7b585eb0a9ba284087e858da12dbb67861a446a4380efd2dab"
+    },
+    {
+      "command": "docker image inspect --format '{{.Id}} {{.Architecture}}' postgres:17.10-alpine3.23",
+      "exitCode": 0,
+      "result": "isolated PostgreSQL image identity",
+      "log": "reports/ugv-zmq-phase2/raw/verification/postgres-image.log",
+      "logSha256": "c614a12572a83d98717ce855db32c0f2ba46ecc27ae478e5b7c1140d775ff2b4"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": ".prettierignore",
+      "sha256": "73b5ae5f80ca7c9b2f1d01690cc2939460a4449718758d40f79ec36b88bf4047"
+    },
+    {
+      "path": "apps/ugv-zmq-observer/src/api.ts",
+      "sha256": "16a864eb604311829fecc491a7e32903f95efd70ba30aab7f88f0ae4c5afd14e"
+    },
+    {
+      "path": "apps/ugv-zmq-observer/src/config.ts",
+      "sha256": "845e9a405834564b1ec099da1a5c649a0c040731149fe3edde627a9e47af282e"
+    },
+    {
+      "path": "apps/ugv-zmq-observer/src/main.ts",
+      "sha256": "a673326866bbe20e7977c66eb6d203258d51e9cdfa06f31226f11796e3302e11"
+    },
+    {
+      "path": "apps/ugv-zmq-observer/src/migrate.ts",
+      "sha256": "2b154caf41a17748a0d51ecfcee579b7b2e10371f2d34ab2a3dfb19ed03cd712"
+    },
+    {
+      "path": "contracts/ugv-zmq/v1/contract-lock.json",
+      "sha256": "e46a87603f04935eb4f3726b971e992a5973aeaa889418e1635b582ef7d45d9e"
+    },
+    {
+      "path": "deploy/ugv-zmq/deployment.candidate.json",
+      "sha256": "2f09f16cbc5d86b344005d101175bd56cba71d4d8e2302d60c902d2d79eaed16"
+    },
+    {
+      "path": "deploy/ugv-zmq/migrations/001_observation_archive.sql",
+      "sha256": "91b7c32d3d07762a122eaf40cda7eed90bb9717cf408022e41fcd68421fda0b6"
+    },
+    {
+      "path": "deploy/ugv-zmq/observer.settings.json",
+      "sha256": "f5f8473f8ef76d4a7eeaea88a0c01030e8b552b9af89391935f88c177f730534"
+    },
+    {
+      "path": "package.json",
+      "sha256": "14065d8d6661686ea0c1a7996a1aae888a74689442782aa2d63f53854c3f6729"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/profile.ts",
+      "sha256": "d97e81e85bb35d8012f74d212dae14410e1cc983ac4f185e4b0559fbf75dddef"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/package.json",
+      "sha256": "c2510d432046e607e02efed89b1eeeec8d94e44d0d2f0233156e5cd20cb1cabc"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/config.ts",
+      "sha256": "531ba8ba1f6c052452425c6b75ec4a0a13f860da36f936d13c1af8702e3f1a78"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/driver.ts",
+      "sha256": "fd9689ae30c28f13db9933cb1f7e93a27618c8623cc3705b6fcfd81c07d40bb0"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/index.ts",
+      "sha256": "7ac8f47561863e6b931e83bfdae293122c40250623e0d6f698ba6b513c9d6634"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/model.ts",
+      "sha256": "4ca6197cd7f59c7975f19b689edc95c73329f73929a543d38d9517314312fa62"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/normalize.ts",
+      "sha256": "980a53295335c97124439662d224cf4153ddca3001823801c4aef8e77297c53d"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/observer.ts",
+      "sha256": "337b8a1879b00a1887fc0a1d9e73e4735cafab2c5a47ffc90b499376c20e0262"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/postgres.ts",
+      "sha256": "1d65e20383563899966d748347af16d566b92fb3909b74a9b7b6b02c270ca39c"
+    },
+    {
+      "path": "packages/vehicle-zmq-observer/src/state.ts",
+      "sha256": "dd314ae961eade39e82b17e68e1f32449760cf28ac18fa587c7feff584152feb"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c8e29f49cd8acae3388edabf994bdbd332305f04b051806e11093d771401f8fa"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "9d8c27591736ce5c5948455a5ea94b1ad6d79f361ea8cc50fa928a0777d6ee07"
+    },
+    {
+      "path": "tests/ugv-zmq/profile.test.ts",
+      "sha256": "94a8abc2043cdaa290fd3cf441179b44a7e7fcea97ff323bfdf22fc35d354d47"
+    },
+    {
+      "path": "tests/ugv-zmq-observer/helpers.ts",
+      "sha256": "176c8f8bfc0cfa3cbd8fe4609192527d50172e9cb3f83494f0c30c7d1a668b61"
+    },
+    {
+      "path": "tests/ugv-zmq-observer/normalize.test.ts",
+      "sha256": "7441a4041b159d9dc6fd54107aa5ed722fe78c127e4c63eda41523caa0808d65"
+    },
+    {
+      "path": "tests/ugv-zmq-observer/observer.test.ts",
+      "sha256": "adafd24863076fecf49923ee65d37568f7c017cdf131d71981557cea212a46a3"
+    },
+    {
+      "path": "tests/ugv-zmq-observer-postgres/archive.test.ts",
+      "sha256": "3293319ef57ad15c15656f15e509a4ee511cde10847d06aa5f2645f216a60e10"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "reports/ugv-zmq-phase2/REPORT.md",
+      "sha256": "b3d0743034ee504361117f8f6f1b1ec8cac765774d7f15ad90363fb0159a1df4"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/capacity-simulated.json",
+      "sha256": "aff97cfc7ef4c73132319d4969ae6458771653de6c9a60004f5bffa1506f2ea7"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/phase1-recheck-G0.json",
+      "sha256": "b3cfc8db624c2d1e1b28a9dbd4b528736eef851cfaa98b1a42bbd57d8072929b"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/phase1-recheck.json",
+      "sha256": "593412a8a5a6143e7c0fd9291f39aefbb46874339d90b41ff18ee59d3ce701f9"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-archive-entries.ndjson.gz",
+      "sha256": "290593c50c74b9f3cb5b51862b6b3f31f07f56efaf2e6592b7b472377c780994"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-observer.log",
+      "sha256": "70f6492d8655151f119eeb30e68b0ab83858c49d6183d8150edfa3fc1933cb7e"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-owner-install.log",
+      "sha256": "13fb9ee8fa090018aca7b5b6bbf4d17ed4e6ad9765e452f3d71d3fa0b7b24016"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-passive-report.json",
+      "sha256": "89b60ee9c2a159e78afc9c7f0138a7e8c23279ab44a33787703dfc9edeaa1c98"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-read-api.json",
+      "sha256": "6a415610357bddd08cd87104cc2b1d4ffce191a31980030cc7553ea3de6fa5ee"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/compiled-site-smoke.mjs.source.txt",
+      "sha256": "3455f8bc1695f2baa8947cd1c023af855a233dda8556a1637532d9ba7749bb37"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/passive-site-smoke.mjs.source.txt",
+      "sha256": "9f301c260d97da4eb92231c2b4bb46d40ed8d0c77561c9639df13b05414c40df"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/source-site-archive-entries.ndjson.gz",
+      "sha256": "7ab3a04dcb8a89189fd5e91a37c15a0784085d44a7e0797063400bf299e64f78"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/source-site-observer.log",
+      "sha256": "782addb1ac700cae89285b23c4aa14e7d0feb1a2d49f15f313daed136b7816ff"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/source-site-owner-install.log",
+      "sha256": "13fb9ee8fa090018aca7b5b6bbf4d17ed4e6ad9765e452f3d71d3fa0b7b24016"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/source-site-passive-report.json",
+      "sha256": "17db50f222943a1968904e474da7ce76b3e5dfd028ca47011e6910aa3dd36ee7"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/source-site-read-api.json",
+      "sha256": "bfdb08ff0403fdfd0dccb05f2bdbabcd7120f7e8299e175fd9be110870a903bc"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/build.log",
+      "sha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/cleanup.log",
+      "sha256": "dbba2fcbb6ecf7201b4e919e83626cc841b7c07632b742bcc419fa87c0887ef2"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/compiled-site-smoke.log",
+      "sha256": "54bdaa805c37ce2242d874e039dcb71ae007f30869e4729792d2198dcb82d397"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/dependencies-install.log",
+      "sha256": "8e85c45af52517c29cfe1a1b5e111d519d0ee156b3af16bef5fe8cb17059641e"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/format-check.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/frozen-protocol.log",
+      "sha256": "ea6a746f74fff4889742e38bc934df3136a014eeca2a115c2246b2f1cdaca4b4"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/native-environment.log",
+      "sha256": "a6bca28fcc764e7b585eb0a9ba284087e858da12dbb67861a446a4380efd2dab"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/observer-unit.log",
+      "sha256": "39e4235350a6bdfacee53dffb5dcba71bc9b7fe7bfc9c47f21e4390e88e51a24"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/phase1-contract.log",
+      "sha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/phase1-preflight.log",
+      "sha256": "07ae366c05b42fb20f4c98bb2a0dce477ec3c5967b407e991f0197075711d5d8"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/phase1-tests.log",
+      "sha256": "aca04d992b6555744b41b6048f8145a5b6128f57565e4889b0c3ca0db682f802"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/postgres-image.log",
+      "sha256": "c614a12572a83d98717ce855db32c0f2ba46ecc27ae478e5b7c1140d775ff2b4"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/postgres.log",
+      "sha256": "0abb03905998f5ba5b98bdebd8da831870598be02e7852f42a5f5dbb70d9cd79"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/running-images.log",
+      "sha256": "8659653a19d66dcd76a47e5f513ece35d67cd66c804faec1bcd821b414e11199"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/site-smoke.log",
+      "sha256": "c73d89afa8574e74109c9676541cc2e6d22f362b81e47d135e565ee577ce83f2"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/raw/verification/typecheck.log",
+      "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/site-compiled.json",
+      "sha256": "89b60ee9c2a159e78afc9c7f0138a7e8c23279ab44a33787703dfc9edeaa1c98"
+    },
+    {
+      "path": "reports/ugv-zmq-phase2/site-source.json",
+      "sha256": "17db50f222943a1968904e474da7ce76b3e5dfd028ca47011e6910aa3dd36ee7"
+    }
+  ],
+  "postgresTestImage": {
+    "tag": "postgres:17.10-alpine3.23",
+    "id": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4"
+  }
+}

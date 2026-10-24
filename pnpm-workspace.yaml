@@ -25,6 +25,7 @@ allowBuilds:
   esbuild: true
   grpc-tools: true
   protobufjs: true
+  zeromq: true
 
 auditConfig:
   ignoreGhsas:

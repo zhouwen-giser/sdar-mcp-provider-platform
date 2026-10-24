@@ -1,0 +1,1963 @@
+{
+  "/health": {
+    "readOnly": true,
+    "status": "running",
+    "archive": {
+      "status": "running",
+      "pendingRecords": 4,
+      "pendingBytes": 5105,
+      "committedEvents": 22,
+      "receivedMessages": 20,
+      "committedReceptions": 16,
+      "unconfirmedReceptions": 0,
+      "locallyDiscardedMessages": 0,
+      "failureCode": null,
+      "failureRecorded": null
+    },
+    "channels": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:35.827Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:35.827Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:36.070Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:36.070Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:36.297Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:36.297Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "runtimeAdmission": "not_published"
+  },
+  "/v2/state": {
+    "schemaVersion": "ugv.vehicle-observation-state/2.0",
+    "generatedAt": "2026-10-24T02:57:36.870Z",
+    "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+    "sessionId": "d00417c0-edb2-410a-8651-d239a4803160",
+    "runtimeAdmission": "not_published",
+    "readOnly": true,
+    "deploymentBinding": "unqualified_diagnostic",
+    "sourceProducerEpoch": null,
+    "channels": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:36.828Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:36.828Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:36.070Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:36.070Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-24T02:57:36.297Z",
+        "lastValidCommittedAt": "2026-10-24T02:57:36.297Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "observations": [
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-24T02:57:36.826Z",
+        "ageMs": 44.161603,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "90584653-45db-434a-88f4-0a9abfe598ba",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "failsafe",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "failsafe",
+            "faults": []
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-24T02:57:36.827Z",
+        "ageMs": 43.382288,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "f02ac797-4308-4d8f-a4d2-debf7a7be680",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "systemState",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "systemState",
+            "runState": 1,
+            "mode": 1,
+            "speedLimitMetresPerSecond": 8.333333015441895,
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "errorCodes": []
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-24T02:57:36.827Z",
+        "ageMs": 43.040285,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "c23f1b90-cb56-474c-b416-ac40fbcf0b05",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "performance",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "performance",
+            "cpuUsage": 0.18683543801307678,
+            "memoryUsage": 0.5547442436218262,
+            "temperature": 60,
+            "uploadBytesPerSecond": 80403.90625,
+            "downloadBytesPerSecond": 16104.59375
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-24T02:57:36.828Z",
+        "ageMs": 42.812984,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "a8a4782a-62f8-47d2-b0dd-6ad842fd1236",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "missionState",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": "292",
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "missionState",
+            "missionId": 292,
+            "missionType": 2,
+            "state": 4,
+            "progress": 100
+          }
+        }
+      },
+      {
+        "component": "eo",
+        "receivedAt": "2026-10-24T02:57:36.069Z",
+        "ageMs": 801.032715,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "de4bf486-805b-48c3-a452-3e1610c90acc",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "device_status",
+          "protocolVersion": "2.2",
+          "versionEvidence": "in_band",
+          "deviceId": "isr-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792810655911"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "simulated",
+          "position": null,
+          "data": {
+            "mode": "idle",
+            "ready": false,
+            "data_origin": "simulated",
+            "camera_online": false,
+            "gimbal_online": true,
+            "navigation_valid": false,
+            "gimbal_yaw_rad": 0.9670328851735271,
+            "gimbal_pitch_rad": -0.19999999999999987,
+            "zoom_ratio": null,
+            "active_task_id": null,
+            "telecontrol": null,
+            "fault_code": null,
+            "fault_message": null
+          }
+        }
+      },
+      {
+        "component": "eo",
+        "receivedAt": "2026-10-24T02:57:36.070Z",
+        "ageMs": 800.21008,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "93c677c2-c81b-488d-ba63-7f2179954616",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "task_status",
+          "protocolVersion": "2.2",
+          "versionEvidence": "in_band",
+          "deviceId": "isr-01",
+          "nativeTaskId": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+          "nativeRequestId": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9",
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792810655911"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "task": {
+              "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+              "task_type": "CircularSearch",
+              "state": "failed",
+              "remaining_ms": 0,
+              "progress_ratio": 0.000030555555555555554,
+              "coverage_ratio": null,
+              "coverage_complete": null,
+              "completed_cycles": 0,
+              "total_cycles": 10000,
+              "reason": "DEADLINE_EXCEEDED"
+            },
+            "command": {
+              "request_id": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9",
+              "state": "failed",
+              "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+              "reason": "DEADLINE_EXCEEDED",
+              "method": "TaskControl"
+            }
+          }
+        }
+      },
+      {
+        "component": "simulationEffect",
+        "receivedAt": "2026-10-24T02:57:36.296Z",
+        "ageMs": 574.14443,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "25eab141-c2a4-480c-9738-e8c2b5fbc4f9",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "device_status",
+          "protocolVersion": "1.0",
+          "versionEvidence": "in_band",
+          "deviceId": "artillery-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792810656137"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "mode": "idle",
+            "ready": true,
+            "active_task_id": null,
+            "fault_code": null,
+            "fault_message": null
+          }
+        }
+      },
+      {
+        "component": "simulationEffect",
+        "receivedAt": "2026-10-24T02:57:36.297Z",
+        "ageMs": 573.550377,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "833ed17b-0aec-4ecb-bef6-605ad431e6b9",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "task_status",
+          "protocolVersion": "1.0",
+          "versionEvidence": "in_band",
+          "deviceId": "artillery-01",
+          "nativeTaskId": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+          "nativeRequestId": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792810656137"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "task": {
+              "task_id": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+              "request_id": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+              "target_id": "det-9b1993f6-c56e-4f83-a987-227d71690674-5696",
+              "position": {
+                "latitude_deg": 29.720608559307706,
+                "longitude_deg": 106.8130282930342,
+                "ellipsoid_height_m": 500.1199999973178
+              },
+              "state": "succeeded",
+              "execution_finished": true,
+              "effect": "destroyed",
+              "reason": null
+            }
+          }
+        }
+      }
+    ],
+    "archive": {
+      "status": "running",
+      "pendingRecords": 0,
+      "pendingBytes": 0,
+      "committedEvents": 26,
+      "receivedMessages": 20,
+      "committedReceptions": 20,
+      "unconfirmedReceptions": 0,
+      "locallyDiscardedMessages": 0,
+      "failureCode": null,
+      "failureRecorded": null
+    },
+    "continuity": "upstream_loss_and_producer_epoch_unverified",
+    "completeEvidence": false
+  },
+  "/v2/capabilities": {
+    "schemaVersion": "ugv.vehicle-observation-capabilities/2.0",
+    "source": "zmq_contract",
+    "readOnly": true,
+    "runtimeAdmission": "not_published",
+    "controlAvailable": false,
+    "deploymentBinding": "unqualified_diagnostic",
+    "observationEndpoints": [
+      {
+        "component": "chassis",
+        "endpoint": "tcp://192.168.2.63:11001"
+      },
+      {
+        "component": "eo",
+        "endpoint": "tcp://192.168.2.63:5556"
+      },
+      {
+        "component": "simulationEffect",
+        "endpoint": "tcp://192.168.2.63:5558"
+      }
+    ],
+    "intendedOperations": [
+      {
+        "operation": "state.read",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "navigation.point",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "navigation.route",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "navigation.returnHome",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "recon.area",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "recon.circular",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "camera.position",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "camera.zoom",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "inspection.complete",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      },
+      {
+        "operation": "simulation.effect",
+        "qualified": false,
+        "reason": "CONTROL_AND_SOURCE_QUALIFICATION_PENDING"
+      }
+    ]
+  },
+  "/v2/storage": {
+    "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+    "usedCanonicalPayloadBytes": "34132",
+    "payloadBudgetBytes": "1073741824",
+    "entryCount": "26",
+    "schemaPhysicalBytes": "294912",
+    "physicalMeasurementScope": "entire_observer_schema_including_other_partitions",
+    "retentionPolicy": "append_only_no_automatic_pruning",
+    "upstreamLossCount": null
+  },
+  "/v2/sessions": {
+    "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+    "sessions": [
+      {
+        "sessionId": "d00417c0-edb2-410a-8651-d239a4803160",
+        "startedAt": "2026-10-24T02:57:34.282Z",
+        "status": "open",
+        "lastOrdinal": "26",
+        "headHash": "d712831911968ed04b176017b3ef41d43495e4c1f320cdd6d97cfb82bed0e4b1",
+        "genesisHash": "c7a82f95aaa265210a26fa536489a88256a1d2048fa28752e16a638d0ac9f779",
+        "failureCode": null
+      }
+    ]
+  },
+  "/v2/receptions?sessionId=d00417c0-edb2-410a-8651-d239a4803160&after=0&limit=100": {
+    "schemaVersion": "ugv.zmq-observation-page/2.0",
+    "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+    "sessionId": "d00417c0-edb2-410a-8651-d239a4803160",
+    "anchorHash": "c7a82f95aaa265210a26fa536489a88256a1d2048fa28752e16a638d0ac9f779",
+    "entries": [
+      {
+        "ordinal": "1",
+        "previousHash": "c7a82f95aaa265210a26fa536489a88256a1d2048fa28752e16a638d0ac9f779",
+        "entryHash": "a6ec548087cd99cd091790c9d52db6172c70570f4425eec62ccde120e21c7aa5",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "292699af-d7c3-4784-b171-186d0e021801",
+          "receivedAt": "2026-10-24T02:57:34.300Z",
+          "monotonicNs": "10712261993792691",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "chassis",
+          "state": "connecting"
+        }
+      },
+      {
+        "ordinal": "2",
+        "previousHash": "a6ec548087cd99cd091790c9d52db6172c70570f4425eec62ccde120e21c7aa5",
+        "entryHash": "eea5bbe2a2b3da4b0e54e31a36fb1a8655afe2ecbda79ebfb29b1b872ce33165",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "5d40cd65-6be6-42a8-b4b9-0d9d6c539213",
+          "receivedAt": "2026-10-24T02:57:34.301Z",
+          "monotonicNs": "10712261994337429",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "eo",
+          "state": "connecting"
+        }
+      },
+      {
+        "ordinal": "3",
+        "previousHash": "eea5bbe2a2b3da4b0e54e31a36fb1a8655afe2ecbda79ebfb29b1b872ce33165",
+        "entryHash": "45da4689ecc5ab7202b2746913a821c5419e245650ce5dbc2e98c57fa105898f",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "e44fba03-7b83-44ff-ac16-bac07bad07a7",
+          "receivedAt": "2026-10-24T02:57:34.301Z",
+          "monotonicNs": "10712261994491580",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "simulationEffect",
+          "state": "connecting"
+        }
+      },
+      {
+        "ordinal": "4",
+        "previousHash": "45da4689ecc5ab7202b2746913a821c5419e245650ce5dbc2e98c57fa105898f",
+        "entryHash": "20517b9b31e78addb0a5c1855df15c9e36a2f8f81e9f4488f44a580420420576",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "f5831ca8-91af-4c6f-96c0-c689ef0c773e",
+          "receivedAt": "2026-10-24T02:57:34.314Z",
+          "monotonicNs": "10712262007199729",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "chassis",
+          "state": "connected"
+        }
+      },
+      {
+        "ordinal": "5",
+        "previousHash": "20517b9b31e78addb0a5c1855df15c9e36a2f8f81e9f4488f44a580420420576",
+        "entryHash": "54efba56f210083f0e7042f18312887a5de51fbd05c4c06886cabc3dae898f00",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "aee438e4-aa23-4367-b61b-adb21862c699",
+          "receivedAt": "2026-10-24T02:57:34.314Z",
+          "monotonicNs": "10712262007300759",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "eo",
+          "state": "connected"
+        }
+      },
+      {
+        "ordinal": "6",
+        "previousHash": "54efba56f210083f0e7042f18312887a5de51fbd05c4c06886cabc3dae898f00",
+        "entryHash": "c02aeea1995544fd0af268013fab1019e22e0d2156d83f8f87b9796610de553c",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "ada50964-63b3-4577-b980-aca052b0f7ec",
+          "receivedAt": "2026-10-24T02:57:34.314Z",
+          "monotonicNs": "10712262007368009",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "transport",
+          "component": "simulationEffect",
+          "state": "connected"
+        }
+      },
+      {
+        "ordinal": "7",
+        "previousHash": "c02aeea1995544fd0af268013fab1019e22e0d2156d83f8f87b9796610de553c",
+        "entryHash": "775fd2b9a068d1e1c6aa8b5da705dcebbb225f497a189e15c5b5757976ebfc19",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "945e1971-af0b-4a4d-8bff-7f65fc574c07",
+          "receivedAt": "2026-10-24T02:57:34.826Z",
+          "monotonicNs": "10712262519110437",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "1",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 40,
+          "rawComplete": true,
+          "multipartSha256": "5139277c324e1c2d5780ae3197e40ecf3fa87ce88b1667bc85c449f28a1573b7",
+          "frames": [
+            {
+              "bytes": 40,
+              "base64": "aXBjX21lc3NhZ2U6IQAAEAEAAAAAAAAAAAAAAAAAAAAEAMCEAAAAAA==",
+              "sha256": "84b356739238cd4b720eebc60e215d308ed0c8fd659d756eb32d27481b7499e6"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "failsafe",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "failsafe",
+              "faults": []
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "8",
+        "previousHash": "775fd2b9a068d1e1c6aa8b5da705dcebbb225f497a189e15c5b5757976ebfc19",
+        "entryHash": "8fb79d94640a501bfb20f5954f848360782e88dcb0228489f926be72c8fab2df",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "3b4e2d7a-a0ca-4768-b37a-193677e7e49d",
+          "receivedAt": "2026-10-24T02:57:34.828Z",
+          "monotonicNs": "10712262520953929",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "2",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 52,
+          "rawComplete": true,
+          "multipartSha256": "eb362fa59376ed85c2efeaae52c904b2dfaa907e931c8c877ec7d3340dbaaf79",
+          "frames": [
+            {
+              "bytes": 52,
+              "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQAMmZAQFVVQVBAAAAAAAAAAAAAA==",
+              "sha256": "c7e30a4075cbd770b2e5b883796970eb27c752c29aaec9c8353752dce86b3553"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "systemState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "mode": 1,
+              "type": "systemState",
+              "runState": 1,
+              "errorCodes": [],
+              "videoConfig": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "speedLimitMetresPerSecond": 8.333333015441895
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "9",
+        "previousHash": "8fb79d94640a501bfb20f5954f848360782e88dcb0228489f926be72c8fab2df",
+        "entryHash": "d6cfe41f1e71da7f5cc0662405b64b478308af304e6f787d0e658e61bc5650ff",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "7303d98f-ef71-4dc0-a769-b757a6599ee6",
+          "receivedAt": "2026-10-24T02:57:34.828Z",
+          "monotonicNs": "10712262521365279",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "3",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 56,
+          "rawComplete": true,
+          "multipartSha256": "3d583070835d500478a150d30301348e79c7af1b9755e63f62b5f2cf8fafa44b",
+          "frames": [
+            {
+              "bytes": 56,
+              "base64": "aXBjX21lc3NhZ2U6IAAAEAEAAAAAAAAAAAAAAAAAAAAUAMV6aak5Piv6DT8AAGRCo/ygRypdfEY=",
+              "sha256": "efe8d485ed338c8bdfc941d496e258386a184a6ca226f6b8f726e93ad4695f7f"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "performance",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "performance",
+              "cpuUsage": 0.18131031095981598,
+              "memoryUsage": 0.5545985102653503,
+              "temperature": 57,
+              "uploadBytesPerSecond": 82425.2734375,
+              "downloadBytesPerSecond": 16151.291015625
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "10",
+        "previousHash": "d6cfe41f1e71da7f5cc0662405b64b478308af304e6f787d0e658e61bc5650ff",
+        "entryHash": "18d35d3dc3db8eefb36b320d85c950389a974b9ec705c0fc7b04f6af10b27906",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "68f57003-b30a-4c7a-b2cc-92c80ff384a8",
+          "receivedAt": "2026-10-24T02:57:34.828Z",
+          "monotonicNs": "10712262521724996",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "4",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 43,
+          "rawComplete": true,
+          "multipartSha256": "14e37bac3d3d4d46c2ab4e787ecf6e4ad48f1ef281f7500221d9337dbf5f22d9",
+          "frames": [
+            {
+              "bytes": 43,
+              "base64": "aXBjX21lc3NhZ2U6AAAAEAEAAAAAAAAAAAAAAAAAAAAHANiVJAEAAAIEZA==",
+              "sha256": "7c86b20747821259263b7ceccc503f34077d0777e31308d2c8443b366b3c8b4a"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "missionState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": "292",
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "missionState",
+              "state": 4,
+              "progress": 100,
+              "missionId": 292,
+              "missionType": 2
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "11",
+        "previousHash": "18d35d3dc3db8eefb36b320d85c950389a974b9ec705c0fc7b04f6af10b27906",
+        "entryHash": "ad0da8b7a91baec041b9d7cf005b2d571d48e79cd07d0364facf2822cbe3eacb",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "046df4a3-705b-4e03-8e8f-11024d4ad0ae",
+          "receivedAt": "2026-10-24T02:57:35.070Z",
+          "monotonicNs": "10712262763565036",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "5",
+          "component": "eo",
+          "endpoint": "tcp://192.168.2.63:5556",
+          "frameCount": 2,
+          "wireBytes": 443,
+          "rawComplete": true,
+          "multipartSha256": "a17bfe08ac55c1258667d746fd32ad0413be77ce3293f3ff05bd479d9ce1b142",
+          "frames": [
+            {
+              "bytes": 24,
+              "base64": "aXNyL2lzci0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "9046687c2239c8df8fa1686f18b061276f8974e127182f825b6dbaa3327b6311"
+            },
+            {
+              "bytes": 419,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJjYW1lcmFfb25saW5lIjpmYWxzZSwiZGF0YV9vcmlnaW4iOiJzaW11bGF0ZWQiLCJmYXVsdF9jb2RlIjpudWxsLCJmYXVsdF9tZXNzYWdlIjpudWxsLCJnaW1iYWxfb25saW5lIjp0cnVlLCJnaW1iYWxfcGl0Y2hfcmFkIjotMC4xOTk5OTk5OTk5OTk5OTk4NywiZ2ltYmFsX3lhd19yYWQiOjAuOTY3MDMyODg1MTczNTI3MSwibW9kZSI6ImlkbGUiLCJuYXZpZ2F0aW9uX3ZhbGlkIjpmYWxzZSwicmVhZHkiOmZhbHNlLCJ0ZWxlY29udHJvbCI6bnVsbCwiem9vbV9yYXRpbyI6bnVsbH0sImRldmljZV9pZCI6Imlzci0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMi4yIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NDkxMSwidG9waWMiOiJkZXZpY2Vfc3RhdHVzIn0=",
+              "sha256": "d057f51a1a35dbcab7ddca12073670e0dc09cc9514d55843b61747270bc134c8"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "device_status",
+            "protocolVersion": "2.2",
+            "versionEvidence": "in_band",
+            "deviceId": "isr-01",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810654911"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "simulated",
+            "position": null,
+            "data": {
+              "mode": "idle",
+              "ready": false,
+              "fault_code": null,
+              "zoom_ratio": null,
+              "data_origin": "simulated",
+              "telecontrol": null,
+              "camera_online": false,
+              "fault_message": null,
+              "gimbal_online": true,
+              "active_task_id": null,
+              "gimbal_yaw_rad": 0.9670328851735271,
+              "gimbal_pitch_rad": -0.19999999999999987,
+              "navigation_valid": false
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "12",
+        "previousHash": "ad0da8b7a91baec041b9d7cf005b2d571d48e79cd07d0364facf2822cbe3eacb",
+        "entryHash": "732e47c349018bf6238340a474c078952bac0f717c944d433c910ba61fcd9a20",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "728c7335-7db0-4178-a4d7-17eb2c6ea018",
+          "receivedAt": "2026-10-24T02:57:35.073Z",
+          "monotonicNs": "10712262766762214",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "6",
+          "component": "eo",
+          "endpoint": "tcp://192.168.2.63:5556",
+          "frameCount": 2,
+          "wireBytes": 628,
+          "rawComplete": true,
+          "multipartSha256": "e1edbe27d8ab86226e6f6232d561db8fccb679bb6a0d3fa592074b63ed69ae2a",
+          "frames": [
+            {
+              "bytes": 22,
+              "base64": "aXNyL2lzci0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "da89dd515cb363e87ce5011e933548a122000da148099d45d48071c1cf4456a2"
+            },
+            {
+              "bytes": 606,
+              "base64": "eyJkYXRhIjp7ImNvbW1hbmQiOnsibWV0aG9kIjoiVGFza0NvbnRyb2wiLCJyZWFzb24iOiJERUFETElORV9FWENFRURFRCIsInJlcXVlc3RfaWQiOiJ3Zi01YWI1OThkNS04YzFiLTQ1ZmQtYi1wYXUtOWFiMTUwMTdmMGQ5Iiwic3RhdGUiOiJmYWlsZWQiLCJ0YXNrX2lkIjoidGFzay05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNjE0MSJ9LCJ0YXNrIjp7ImNvbXBsZXRlZF9jeWNsZXMiOjAsImNvdmVyYWdlX2NvbXBsZXRlIjpudWxsLCJjb3ZlcmFnZV9yYXRpbyI6bnVsbCwicHJvZ3Jlc3NfcmF0aW8iOjMuMDU1NTU1NTU1NTU1NTU1NGUtMDUsInJlYXNvbiI6IkRFQURMSU5FX0VYQ0VFREVEIiwicmVtYWluaW5nX21zIjowLCJzdGF0ZSI6ImZhaWxlZCIsInRhc2tfaWQiOiJ0YXNrLTliMTk5M2Y2LWM1NmUtNGY4My1hOTg3LTIyN2Q3MTY5MDY3NC02MTQxIiwidGFza190eXBlIjoiQ2lyY3VsYXJTZWFyY2giLCJ0b3RhbF9jeWNsZXMiOjEwMDAwfX0sImRldmljZV9pZCI6Imlzci0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMi4yIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NDkxMSwidG9waWMiOiJ0YXNrX3N0YXR1cyJ9",
+              "sha256": "a5bd67f94d3d7a2705a71accf2e3f3ae49f5562b5621011b7e32edf1a7f1a34c"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "task_status",
+            "protocolVersion": "2.2",
+            "versionEvidence": "in_band",
+            "deviceId": "isr-01",
+            "nativeTaskId": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+            "nativeRequestId": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9",
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810654911"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "task": {
+                "state": "failed",
+                "reason": "DEADLINE_EXCEEDED",
+                "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+                "task_type": "CircularSearch",
+                "remaining_ms": 0,
+                "total_cycles": 10000,
+                "coverage_ratio": null,
+                "progress_ratio": 0.000030555555555555554,
+                "completed_cycles": 0,
+                "coverage_complete": null
+              },
+              "command": {
+                "state": "failed",
+                "method": "TaskControl",
+                "reason": "DEADLINE_EXCEEDED",
+                "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+                "request_id": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9"
+              }
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "13",
+        "previousHash": "732e47c349018bf6238340a474c078952bac0f717c944d433c910ba61fcd9a20",
+        "entryHash": "bb1355238f476d174e91148c87e8b6c5fe5e06eb28ee5ef06126d4ad84fec343",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "22abf35c-a5ca-4b90-b2f0-a9d3947c1262",
+          "receivedAt": "2026-10-24T02:57:35.295Z",
+          "monotonicNs": "10712262988111674",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "7",
+          "component": "simulationEffect",
+          "endpoint": "tcp://192.168.2.63:5558",
+          "frameCount": 2,
+          "wireBytes": 253,
+          "rawComplete": true,
+          "multipartSha256": "e2769e53f8f6be918a6b9c3b8ee1b6c9957c81b58fe085a1fb8bf49424b21057",
+          "frames": [
+            {
+              "bytes": 36,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "8e1242fd7fcc10854451a9a1b2c41c0e7420bb69512097c1b708a20ac3be5580"
+            },
+            {
+              "bytes": 217,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJmYXVsdF9jb2RlIjpudWxsLCJmYXVsdF9tZXNzYWdlIjpudWxsLCJtb2RlIjoiaWRsZSIsInJlYWR5Ijp0cnVlfSwiZGV2aWNlX2lkIjoiYXJ0aWxsZXJ5LTAxIiwia2luZCI6ImV2ZW50IiwicHJvdG9jb2wiOiIxLjAiLCJwdWJsaXNoZWRfYXRfdXRjX21zIjoxNzkyODEwNjU1MTM3LCJ0b3BpYyI6ImRldmljZV9zdGF0dXMifQ==",
+              "sha256": "18d38c9731121389dc7cbf461dad34d59351072564275456a0a73e8b3dbffadb"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "device_status",
+            "protocolVersion": "1.0",
+            "versionEvidence": "in_band",
+            "deviceId": "artillery-01",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810655137"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "mode": "idle",
+              "ready": true,
+              "fault_code": null,
+              "fault_message": null,
+              "active_task_id": null
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "14",
+        "previousHash": "bb1355238f476d174e91148c87e8b6c5fe5e06eb28ee5ef06126d4ad84fec343",
+        "entryHash": "cd661fc903fd195b76afbcf2352dc0912f885a7ce001c3c696372c3d909211ce",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "543be805-8c3c-43f6-ba69-83bfe3278255",
+          "receivedAt": "2026-10-24T02:57:35.296Z",
+          "monotonicNs": "10712262989458181",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "8",
+          "component": "simulationEffect",
+          "endpoint": "tcp://192.168.2.63:5558",
+          "frameCount": 2,
+          "wireBytes": 544,
+          "rawComplete": true,
+          "multipartSha256": "e1b1d2c0899e6b1a4e61728f3c054dfe80f1b906b733e58da687bd1ff541533e",
+          "frames": [
+            {
+              "bytes": 34,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "7cf32b2db65941fd4c295d2757d5e805ba0598e71acd79d664d256c0d07da02a"
+            },
+            {
+              "bytes": 510,
+              "base64": "eyJkYXRhIjp7InRhc2siOnsiZWZmZWN0IjoiZGVzdHJveWVkIiwiZXhlY3V0aW9uX2ZpbmlzaGVkIjp0cnVlLCJwb3NpdGlvbiI6eyJlbGxpcHNvaWRfaGVpZ2h0X20iOjUwMC4xMTk5OTk5OTczMTc4LCJsYXRpdHVkZV9kZWciOjI5LjcyMDYwODU1OTMwNzcwNiwibG9uZ2l0dWRlX2RlZyI6MTA2LjgxMzAyODI5MzAzNDJ9LCJyZWFzb24iOm51bGwsInJlcXVlc3RfaWQiOiJ3Zi1kY2M1MmYxMy0zZTc1LTQ1NTYtYi1zdHItMjctNzFhYjAzMGUiLCJzdGF0ZSI6InN1Y2NlZWRlZCIsInRhcmdldF9pZCI6ImRldC05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNTY5NiIsInRhc2tfaWQiOiJhdHRhY2stODc3ZDkwYTgtZDdkMi00YjEzLTk4YTEtZDc3Mjk4ZmExMDQ3LTgifX0sImRldmljZV9pZCI6ImFydGlsbGVyeS0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMS4wIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NTEzNywidG9waWMiOiJ0YXNrX3N0YXR1cyJ9",
+              "sha256": "396971e243f75a7a1d372d93607e0333a8279f7f3a97ca1e6b4c7f2b7523b1c4"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "task_status",
+            "protocolVersion": "1.0",
+            "versionEvidence": "in_band",
+            "deviceId": "artillery-01",
+            "nativeTaskId": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+            "nativeRequestId": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810655137"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "task": {
+                "state": "succeeded",
+                "effect": "destroyed",
+                "reason": null,
+                "task_id": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+                "position": {
+                  "latitude_deg": 29.720608559307706,
+                  "longitude_deg": 106.8130282930342,
+                  "ellipsoid_height_m": 500.1199999973178
+                },
+                "target_id": "det-9b1993f6-c56e-4f83-a987-227d71690674-5696",
+                "request_id": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+                "execution_finished": true
+              }
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "15",
+        "previousHash": "cd661fc903fd195b76afbcf2352dc0912f885a7ce001c3c696372c3d909211ce",
+        "entryHash": "b48cce93e98af37bef3bdd62ff72d6f20f917059c2ce1a9f40f70e5d68dcda4a",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "6d24c2b5-fc0a-4320-bf4c-18b165ce6a75",
+          "receivedAt": "2026-10-24T02:57:35.826Z",
+          "monotonicNs": "10712263519470137",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "9",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 40,
+          "rawComplete": true,
+          "multipartSha256": "5139277c324e1c2d5780ae3197e40ecf3fa87ce88b1667bc85c449f28a1573b7",
+          "frames": [
+            {
+              "bytes": 40,
+              "base64": "aXBjX21lc3NhZ2U6IQAAEAEAAAAAAAAAAAAAAAAAAAAEAMCEAAAAAA==",
+              "sha256": "84b356739238cd4b720eebc60e215d308ed0c8fd659d756eb32d27481b7499e6"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "failsafe",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "failsafe",
+              "faults": []
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "16",
+        "previousHash": "b48cce93e98af37bef3bdd62ff72d6f20f917059c2ce1a9f40f70e5d68dcda4a",
+        "entryHash": "f07a7f484108291abbcb886e89d2fa0fe3ac38e84e7a0bc962e6c2a9873d7f53",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "4737f29e-8258-4d9b-a3e6-fecf5063601e",
+          "receivedAt": "2026-10-24T02:57:35.827Z",
+          "monotonicNs": "10712263520189526",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "10",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 52,
+          "rawComplete": true,
+          "multipartSha256": "eb362fa59376ed85c2efeaae52c904b2dfaa907e931c8c877ec7d3340dbaaf79",
+          "frames": [
+            {
+              "bytes": 52,
+              "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQAMmZAQFVVQVBAAAAAAAAAAAAAA==",
+              "sha256": "c7e30a4075cbd770b2e5b883796970eb27c752c29aaec9c8353752dce86b3553"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "systemState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "mode": 1,
+              "type": "systemState",
+              "runState": 1,
+              "errorCodes": [],
+              "videoConfig": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "speedLimitMetresPerSecond": 8.333333015441895
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "17",
+        "previousHash": "f07a7f484108291abbcb886e89d2fa0fe3ac38e84e7a0bc962e6c2a9873d7f53",
+        "entryHash": "2de7a3aa9459d3e12d84fccc6fdfe4d0a4957167c7aa70c13eb4597a1dc0fdba",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "f6d2c4d5-5aa3-4935-af7c-cb2b25c45d2b",
+          "receivedAt": "2026-10-24T02:57:35.827Z",
+          "monotonicNs": "10712263520496135",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "11",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 56,
+          "rawComplete": true,
+          "multipartSha256": "b00f6e030020876ff1b33fe1e3d69468ce89ffd39568b3ad969aa616ce100e14",
+          "frames": [
+            {
+              "bytes": 56,
+              "base64": "aXBjX21lc3NhZ2U6IAAAEAEAAAAAAAAAAAAAAAAAAAAUAOY9sRM7PmUADj8AAFRCr46HR2zYTkY=",
+              "sha256": "8c72f617203abfd675eea93fe2cb9cb31c7dab0bcf5f3916e502736daf0f58d8"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "performance",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "performance",
+              "cpuUsage": 0.18269230425357819,
+              "memoryUsage": 0.5546935200691223,
+              "temperature": 53,
+              "uploadBytesPerSecond": 69405.3671875,
+              "downloadBytesPerSecond": 13238.10546875
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "18",
+        "previousHash": "2de7a3aa9459d3e12d84fccc6fdfe4d0a4957167c7aa70c13eb4597a1dc0fdba",
+        "entryHash": "691e476993519bd02392e31ed97c0f87d8f3a2de547a7edcadd7b467f088515e",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "54d06360-c6a9-4461-9afe-594ab53e5dd9",
+          "receivedAt": "2026-10-24T02:57:35.827Z",
+          "monotonicNs": "10712263520696618",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "12",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 43,
+          "rawComplete": true,
+          "multipartSha256": "14e37bac3d3d4d46c2ab4e787ecf6e4ad48f1ef281f7500221d9337dbf5f22d9",
+          "frames": [
+            {
+              "bytes": 43,
+              "base64": "aXBjX21lc3NhZ2U6AAAAEAEAAAAAAAAAAAAAAAAAAAAHANiVJAEAAAIEZA==",
+              "sha256": "7c86b20747821259263b7ceccc503f34077d0777e31308d2c8443b366b3c8b4a"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "missionState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": "292",
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "missionState",
+              "state": 4,
+              "progress": 100,
+              "missionId": 292,
+              "missionType": 2
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "19",
+        "previousHash": "691e476993519bd02392e31ed97c0f87d8f3a2de547a7edcadd7b467f088515e",
+        "entryHash": "33a5347af9f5ea51969541dbd13c736c9e9f109103758a60ea6193e969f1eec3",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "de4bf486-805b-48c3-a452-3e1610c90acc",
+          "receivedAt": "2026-10-24T02:57:36.069Z",
+          "monotonicNs": "10712263762630032",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "13",
+          "component": "eo",
+          "endpoint": "tcp://192.168.2.63:5556",
+          "frameCount": 2,
+          "wireBytes": 443,
+          "rawComplete": true,
+          "multipartSha256": "74717a385d620a3e0e00e69bedf0f7b1409a1c0bb3154868d01d1d5dbddeeb99",
+          "frames": [
+            {
+              "bytes": 24,
+              "base64": "aXNyL2lzci0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "9046687c2239c8df8fa1686f18b061276f8974e127182f825b6dbaa3327b6311"
+            },
+            {
+              "bytes": 419,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJjYW1lcmFfb25saW5lIjpmYWxzZSwiZGF0YV9vcmlnaW4iOiJzaW11bGF0ZWQiLCJmYXVsdF9jb2RlIjpudWxsLCJmYXVsdF9tZXNzYWdlIjpudWxsLCJnaW1iYWxfb25saW5lIjp0cnVlLCJnaW1iYWxfcGl0Y2hfcmFkIjotMC4xOTk5OTk5OTk5OTk5OTk4NywiZ2ltYmFsX3lhd19yYWQiOjAuOTY3MDMyODg1MTczNTI3MSwibW9kZSI6ImlkbGUiLCJuYXZpZ2F0aW9uX3ZhbGlkIjpmYWxzZSwicmVhZHkiOmZhbHNlLCJ0ZWxlY29udHJvbCI6bnVsbCwiem9vbV9yYXRpbyI6bnVsbH0sImRldmljZV9pZCI6Imlzci0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMi4yIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NTkxMSwidG9waWMiOiJkZXZpY2Vfc3RhdHVzIn0=",
+              "sha256": "de0cac280954220ea24ef7f77ce1010183a7fcc14f766fe079a5759cda49e018"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "device_status",
+            "protocolVersion": "2.2",
+            "versionEvidence": "in_band",
+            "deviceId": "isr-01",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810655911"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "simulated",
+            "position": null,
+            "data": {
+              "mode": "idle",
+              "ready": false,
+              "fault_code": null,
+              "zoom_ratio": null,
+              "data_origin": "simulated",
+              "telecontrol": null,
+              "camera_online": false,
+              "fault_message": null,
+              "gimbal_online": true,
+              "active_task_id": null,
+              "gimbal_yaw_rad": 0.9670328851735271,
+              "gimbal_pitch_rad": -0.19999999999999987,
+              "navigation_valid": false
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "20",
+        "previousHash": "33a5347af9f5ea51969541dbd13c736c9e9f109103758a60ea6193e969f1eec3",
+        "entryHash": "2761028acec5c11091142a43f832ee69b606e3705cd7a1917d42aef4e992e41a",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "93c677c2-c81b-488d-ba63-7f2179954616",
+          "receivedAt": "2026-10-24T02:57:36.070Z",
+          "monotonicNs": "10712263763452667",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "14",
+          "component": "eo",
+          "endpoint": "tcp://192.168.2.63:5556",
+          "frameCount": 2,
+          "wireBytes": 628,
+          "rawComplete": true,
+          "multipartSha256": "2440c18391c98c32326e4b528e31b8afb8d0c191a1a099b64e98f49f27a778f7",
+          "frames": [
+            {
+              "bytes": 22,
+              "base64": "aXNyL2lzci0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "da89dd515cb363e87ce5011e933548a122000da148099d45d48071c1cf4456a2"
+            },
+            {
+              "bytes": 606,
+              "base64": "eyJkYXRhIjp7ImNvbW1hbmQiOnsibWV0aG9kIjoiVGFza0NvbnRyb2wiLCJyZWFzb24iOiJERUFETElORV9FWENFRURFRCIsInJlcXVlc3RfaWQiOiJ3Zi01YWI1OThkNS04YzFiLTQ1ZmQtYi1wYXUtOWFiMTUwMTdmMGQ5Iiwic3RhdGUiOiJmYWlsZWQiLCJ0YXNrX2lkIjoidGFzay05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNjE0MSJ9LCJ0YXNrIjp7ImNvbXBsZXRlZF9jeWNsZXMiOjAsImNvdmVyYWdlX2NvbXBsZXRlIjpudWxsLCJjb3ZlcmFnZV9yYXRpbyI6bnVsbCwicHJvZ3Jlc3NfcmF0aW8iOjMuMDU1NTU1NTU1NTU1NTU1NGUtMDUsInJlYXNvbiI6IkRFQURMSU5FX0VYQ0VFREVEIiwicmVtYWluaW5nX21zIjowLCJzdGF0ZSI6ImZhaWxlZCIsInRhc2tfaWQiOiJ0YXNrLTliMTk5M2Y2LWM1NmUtNGY4My1hOTg3LTIyN2Q3MTY5MDY3NC02MTQxIiwidGFza190eXBlIjoiQ2lyY3VsYXJTZWFyY2giLCJ0b3RhbF9jeWNsZXMiOjEwMDAwfX0sImRldmljZV9pZCI6Imlzci0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMi4yIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NTkxMSwidG9waWMiOiJ0YXNrX3N0YXR1cyJ9",
+              "sha256": "1a552efb95dfbc21762c7f3778d96db22a6fa6dbd55e8b8063985bf9b68f86cb"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "task_status",
+            "protocolVersion": "2.2",
+            "versionEvidence": "in_band",
+            "deviceId": "isr-01",
+            "nativeTaskId": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+            "nativeRequestId": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9",
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810655911"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "task": {
+                "state": "failed",
+                "reason": "DEADLINE_EXCEEDED",
+                "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+                "task_type": "CircularSearch",
+                "remaining_ms": 0,
+                "total_cycles": 10000,
+                "coverage_ratio": null,
+                "progress_ratio": 0.000030555555555555554,
+                "completed_cycles": 0,
+                "coverage_complete": null
+              },
+              "command": {
+                "state": "failed",
+                "method": "TaskControl",
+                "reason": "DEADLINE_EXCEEDED",
+                "task_id": "task-9b1993f6-c56e-4f83-a987-227d71690674-6141",
+                "request_id": "wf-5ab598d5-8c1b-45fd-b-pau-9ab15017f0d9"
+              }
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "21",
+        "previousHash": "2761028acec5c11091142a43f832ee69b606e3705cd7a1917d42aef4e992e41a",
+        "entryHash": "f3b04efeb22bdf712bc0f3b444db23672de0dfef99bdfcac0017342401929bb2",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "25eab141-c2a4-480c-9738-e8c2b5fbc4f9",
+          "receivedAt": "2026-10-24T02:57:36.296Z",
+          "monotonicNs": "10712263989518317",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "15",
+          "component": "simulationEffect",
+          "endpoint": "tcp://192.168.2.63:5558",
+          "frameCount": 2,
+          "wireBytes": 253,
+          "rawComplete": true,
+          "multipartSha256": "a666b603a5efa597feee2688c0b977a5310beb53c00b6cd13d5c131ec8ed47cc",
+          "frames": [
+            {
+              "bytes": 36,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS9kZXZpY2Vfc3RhdHVz",
+              "sha256": "8e1242fd7fcc10854451a9a1b2c41c0e7420bb69512097c1b708a20ac3be5580"
+            },
+            {
+              "bytes": 217,
+              "base64": "eyJkYXRhIjp7ImFjdGl2ZV90YXNrX2lkIjpudWxsLCJmYXVsdF9jb2RlIjpudWxsLCJmYXVsdF9tZXNzYWdlIjpudWxsLCJtb2RlIjoiaWRsZSIsInJlYWR5Ijp0cnVlfSwiZGV2aWNlX2lkIjoiYXJ0aWxsZXJ5LTAxIiwia2luZCI6ImV2ZW50IiwicHJvdG9jb2wiOiIxLjAiLCJwdWJsaXNoZWRfYXRfdXRjX21zIjoxNzkyODEwNjU2MTM3LCJ0b3BpYyI6ImRldmljZV9zdGF0dXMifQ==",
+              "sha256": "c89cc4ed7016637395d69ed7ead8926d78b236413df81a33638575e0fe8f046d"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "device_status",
+            "protocolVersion": "1.0",
+            "versionEvidence": "in_band",
+            "deviceId": "artillery-01",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810656137"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "mode": "idle",
+              "ready": true,
+              "fault_code": null,
+              "fault_message": null,
+              "active_task_id": null
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "22",
+        "previousHash": "f3b04efeb22bdf712bc0f3b444db23672de0dfef99bdfcac0017342401929bb2",
+        "entryHash": "217a864c4620379d89f769d88d3896fc4733ed6b931e2d2182cfa2532ed3c8fc",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "833ed17b-0aec-4ecb-bef6-605ad431e6b9",
+          "receivedAt": "2026-10-24T02:57:36.297Z",
+          "monotonicNs": "10712263990112370",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "16",
+          "component": "simulationEffect",
+          "endpoint": "tcp://192.168.2.63:5558",
+          "frameCount": 2,
+          "wireBytes": 544,
+          "rawComplete": true,
+          "multipartSha256": "8553c433b5d6954c589a79e5e86848a03b14f234c77f398a81fd061d130acd10",
+          "frames": [
+            {
+              "bytes": 34,
+              "base64": "YXJ0aWxsZXJ5L2FydGlsbGVyeS0wMS90YXNrX3N0YXR1cw==",
+              "sha256": "7cf32b2db65941fd4c295d2757d5e805ba0598e71acd79d664d256c0d07da02a"
+            },
+            {
+              "bytes": 510,
+              "base64": "eyJkYXRhIjp7InRhc2siOnsiZWZmZWN0IjoiZGVzdHJveWVkIiwiZXhlY3V0aW9uX2ZpbmlzaGVkIjp0cnVlLCJwb3NpdGlvbiI6eyJlbGxpcHNvaWRfaGVpZ2h0X20iOjUwMC4xMTk5OTk5OTczMTc4LCJsYXRpdHVkZV9kZWciOjI5LjcyMDYwODU1OTMwNzcwNiwibG9uZ2l0dWRlX2RlZyI6MTA2LjgxMzAyODI5MzAzNDJ9LCJyZWFzb24iOm51bGwsInJlcXVlc3RfaWQiOiJ3Zi1kY2M1MmYxMy0zZTc1LTQ1NTYtYi1zdHItMjctNzFhYjAzMGUiLCJzdGF0ZSI6InN1Y2NlZWRlZCIsInRhcmdldF9pZCI6ImRldC05YjE5OTNmNi1jNTZlLTRmODMtYTk4Ny0yMjdkNzE2OTA2NzQtNTY5NiIsInRhc2tfaWQiOiJhdHRhY2stODc3ZDkwYTgtZDdkMi00YjEzLTk4YTEtZDc3Mjk4ZmExMDQ3LTgifX0sImRldmljZV9pZCI6ImFydGlsbGVyeS0wMSIsImtpbmQiOiJldmVudCIsInByb3RvY29sIjoiMS4wIiwicHVibGlzaGVkX2F0X3V0Y19tcyI6MTc5MjgxMDY1NjEzNywidG9waWMiOiJ0YXNrX3N0YXR1cyJ9",
+              "sha256": "cdbea44385366e44c90c1649697bcc43ee511d9ce79ec3db197cfabd8ea0d2ef"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "task_status",
+            "protocolVersion": "1.0",
+            "versionEvidence": "in_band",
+            "deviceId": "artillery-01",
+            "nativeTaskId": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+            "nativeRequestId": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "utc_ms",
+              "value": "1792810656137"
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "task": {
+                "state": "succeeded",
+                "effect": "destroyed",
+                "reason": null,
+                "task_id": "attack-877d90a8-d7d2-4b13-98a1-d77298fa1047-8",
+                "position": {
+                  "latitude_deg": 29.720608559307706,
+                  "longitude_deg": 106.8130282930342,
+                  "ellipsoid_height_m": 500.1199999973178
+                },
+                "target_id": "det-9b1993f6-c56e-4f83-a987-227d71690674-5696",
+                "request_id": "wf-dcc52f13-3e75-4556-b-str-27-71ab030e",
+                "execution_finished": true
+              }
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+          ]
+        }
+      },
+      {
+        "ordinal": "23",
+        "previousHash": "217a864c4620379d89f769d88d3896fc4733ed6b931e2d2182cfa2532ed3c8fc",
+        "entryHash": "c5a871d2afb6d014a831c9e33b283f4d5a2e12b6106484274e60797f4aeb88ac",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "90584653-45db-434a-88f4-0a9abfe598ba",
+          "receivedAt": "2026-10-24T02:57:36.826Z",
+          "monotonicNs": "10712264519501144",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "17",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 40,
+          "rawComplete": true,
+          "multipartSha256": "5139277c324e1c2d5780ae3197e40ecf3fa87ce88b1667bc85c449f28a1573b7",
+          "frames": [
+            {
+              "bytes": 40,
+              "base64": "aXBjX21lc3NhZ2U6IQAAEAEAAAAAAAAAAAAAAAAAAAAEAMCEAAAAAA==",
+              "sha256": "84b356739238cd4b720eebc60e215d308ed0c8fd659d756eb32d27481b7499e6"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "failsafe",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "failsafe",
+              "faults": []
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "24",
+        "previousHash": "c5a871d2afb6d014a831c9e33b283f4d5a2e12b6106484274e60797f4aeb88ac",
+        "entryHash": "ca2b027b54ed322f4acc86a5e89f375ba7ef26aa6ecf0cf2a4dafe84b358a9c8",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "f02ac797-4308-4d8f-a4d2-debf7a7be680",
+          "receivedAt": "2026-10-24T02:57:36.827Z",
+          "monotonicNs": "10712264520280459",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "18",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 52,
+          "rawComplete": true,
+          "multipartSha256": "eb362fa59376ed85c2efeaae52c904b2dfaa907e931c8c877ec7d3340dbaaf79",
+          "frames": [
+            {
+              "bytes": 52,
+              "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQAMmZAQFVVQVBAAAAAAAAAAAAAA==",
+              "sha256": "c7e30a4075cbd770b2e5b883796970eb27c752c29aaec9c8353752dce86b3553"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "systemState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "mode": 1,
+              "type": "systemState",
+              "runState": 1,
+              "errorCodes": [],
+              "videoConfig": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "speedLimitMetresPerSecond": 8.333333015441895
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "25",
+        "previousHash": "ca2b027b54ed322f4acc86a5e89f375ba7ef26aa6ecf0cf2a4dafe84b358a9c8",
+        "entryHash": "4011d565743be2d4c90d86d7aa81230d2f432e00115d92fae97c8cd90e0404af",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "c23f1b90-cb56-474c-b416-ac40fbcf0b05",
+          "receivedAt": "2026-10-24T02:57:36.827Z",
+          "monotonicNs": "10712264520622462",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "19",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 56,
+          "rawComplete": true,
+          "multipartSha256": "b406b1c5ff3d2e240e7271f53264dabe82a95866cf92ac588393251bcfd6eb3a",
+          "frames": [
+            {
+              "bytes": 56,
+              "base64": "aXBjX21lc3NhZ2U6IAAAEAEAAAAAAAAAAAAAAAAAAAAUAIgzylE/PrgDDj8AAHBC9AmdR2Cie0Y=",
+              "sha256": "efac74525f39fc8bc45574f5b2dac76162f2dbd3bffd3020bb954923abd2b13e"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "performance",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": null,
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "performance",
+              "cpuUsage": 0.18683543801307678,
+              "memoryUsage": 0.5547442436218262,
+              "temperature": 60,
+              "uploadBytesPerSecond": 80403.90625,
+              "downloadBytesPerSecond": 16104.59375
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      },
+      {
+        "ordinal": "26",
+        "previousHash": "4011d565743be2d4c90d86d7aa81230d2f432e00115d92fae97c8cd90e0404af",
+        "entryHash": "d712831911968ed04b176017b3ef41d43495e4c1f320cdd6d97cfb82bed0e4b1",
+        "payload": {
+          "schemaVersion": "ugv.zmq-observation-event/2.0",
+          "eventId": "a8a4782a-62f8-47d2-b0dd-6ad842fd1236",
+          "receivedAt": "2026-10-24T02:57:36.828Z",
+          "monotonicNs": "10712264520849763",
+          "clockId": "zmq-receiver:f537b404-23cf-4e16-a30c-3981c1f55608",
+          "type": "reception",
+          "receiveSequence": "20",
+          "component": "chassis",
+          "endpoint": "tcp://192.168.2.63:11001",
+          "frameCount": 1,
+          "wireBytes": 43,
+          "rawComplete": true,
+          "multipartSha256": "14e37bac3d3d4d46c2ab4e787ecf6e4ad48f1ef281f7500221d9337dbf5f22d9",
+          "frames": [
+            {
+              "bytes": 43,
+              "base64": "aXBjX21lc3NhZ2U6AAAAEAEAAAAAAAAAAAAAAAAAAAAHANiVJAEAAAIEZA==",
+              "sha256": "7c86b20747821259263b7ceccc503f34077d0777e31308d2c8443b366b3c8b4a"
+            }
+          ],
+          "valid": true,
+          "validationCode": null,
+          "observation": {
+            "key": "missionState",
+            "protocolVersion": "2.0",
+            "versionEvidence": "selected_contract_not_in_band",
+            "deviceId": "1",
+            "nativeTaskId": "292",
+            "nativeRequestId": null,
+            "runtimeTaskId": null,
+            "sourceProducerEpoch": null,
+            "sourceTime": {
+              "unit": "not_supplied",
+              "value": null
+            },
+            "acquisitionUtcMs": null,
+            "reportedOrigin": "unattested",
+            "position": null,
+            "data": {
+              "type": "missionState",
+              "state": 4,
+              "progress": 100,
+              "missionId": 292,
+              "missionType": 2
+            }
+          },
+          "projectable": true,
+          "diagnostics": [
+            "SOURCE_CONTINUITY_UNVERIFIED",
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "REPEATED_WIRE_BYTES",
+            "SOURCE_TIME_NOT_SUPPLIED"
+          ]
+        }
+      }
+    ],
+    "nextCursor": null,
+    "sessionHeadHash": "d712831911968ed04b176017b3ef41d43495e4c1f320cdd6d97cfb82bed0e4b1",
+    "proof": "local_hash_chain_unsigned",
+    "sourceContinuity": "unverified"
+  },
+  "raw": {
+    "sessionId": "d00417c0-edb2-410a-8651-d239a4803160",
+    "ordinal": "7",
+    "entryHash": "775fd2b9a068d1e1c6aa8b5da705dcebbb225f497a189e15c5b5757976ebfc19",
+    "multipartSha256": "5139277c324e1c2d5780ae3197e40ecf3fa87ce88b1667bc85c449f28a1573b7",
+    "frames": [
+      {
+        "bytes": 40,
+        "base64": "aXBjX21lc3NhZ2U6IQAAEAEAAAAAAAAAAAAAAAAAAAAEAMCEAAAAAA==",
+        "sha256": "84b356739238cd4b720eebc60e215d308ed0c8fd659d756eb32d27481b7499e6"
+      }
+    ],
+    "proof": "local_hash_chain_unsigned"
+  }
+}

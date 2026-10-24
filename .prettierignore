@@ -42,3 +42,4 @@ reports/inspection-area-v1/raw/**
 contracts/ugv-zmq/v1/sources/**
 contracts/ugv-zmq/v1/fixtures/**
 reports/ugv-zmq-phase1/raw/**
+reports/ugv-zmq-phase2/raw/**

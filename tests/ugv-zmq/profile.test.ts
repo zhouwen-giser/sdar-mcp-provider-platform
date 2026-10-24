@@ -32,7 +32,7 @@ describe("ZMQ deployment contract and G0", () => {
     const report = assessDeployment(profile(), gaps(), () => false);
     expect(report.g0Ready).toBe(false);
     expect(report.missing).toContain("SIMULATION_ID_UNCONFIRMED");
-    expect(report.missing).toContain("CONTROLLER_SYSTEM_ID_UNCONFIRMED");
+    expect(report.missing).not.toContain("CONTROLLER_SYSTEM_ID_UNCONFIRMED");
     expect(report.decisions.find((d) => d.operation === "navigation.point")?.blockers).toContain(
       "CHASSIS_FEEDBACK_UNCORRELATED",
     );
@@ -40,6 +40,23 @@ describe("ZMQ deployment contract and G0", () => {
       "INSPECTION_SOURCE_STREAM_NOT_RECOVERABLE",
     );
     expect(report.runtimeAdmission).toBe("not_published");
+  });
+  it("defaults an omitted controller ID without assigning a wire sender ID", () => {
+    const input = read("deploy/ugv-zmq/deployment.candidate.json");
+    const p = DeploymentProfile.parse(input);
+    expect(p.components.chassis.controllerSystemId).toBeNull();
+    expect(
+      DeploymentProfile.parse({
+        ...p,
+        components: {
+          ...p.components,
+          chassis: { ...p.components.chassis, controllerSystemId: undefined },
+        },
+      }).components.chassis.controllerSystemId,
+    ).toBeNull();
+    expect(assessDeployment(input, gaps(), () => false).missing).not.toContain(
+      "CONTROLLER_SYSTEM_ID_UNCONFIRMED",
+    );
   });
   it("separates a complete static read-only candidate from runtime publication", () => {
     const p = profile();

@@ -22,7 +22,7 @@ pnpm zmq:preflight --profile deploy/ugv-zmq/deployment.candidate.json --capture 
 
 Contract checking exits 0 only when all locked bytes match. Preflight exits 1 on invalid input/integrity errors, 2 on unresolved G0 conditions or nonconforming passive samples, and 0 only when the supplied static candidate prerequisites are complete for its intended scope. **Even exit 0 retains `runtimeAdmission=not_published`.** Evidence-reference hashes attest integrity, not the truth of provider/operator attestations; their authority and scope must be reviewed. Merely inserting a test fixture path cannot legitimately replace provider-confirmed evidence.
 
-The shipped candidate is expected to return 2: controller system ID, simulation run/provider binding, policy/physical/time agreements, provider source/golden frames and capability signoff remain unconfirmed. The known protocol recovery/association/completeness gaps additionally block affected control/full-result guarantees. Developers may proceed with isolated foundations; runtime control qualification belongs to later stages.
+The shipped candidate is expected to return 2: simulation run/provider binding, policy/physical/time agreements, provider source/golden frames and capability signoff remain unconfirmed. The known protocol recovery/association/completeness gaps additionally block affected control/full-result guarantees. Developers may proceed with isolated foundations; runtime control qualification belongs to later stages.
 
 ## Passive evidence collected
 
@@ -46,3 +46,5 @@ Use a new output path; original raw receipts are immutable evidence. The tool ne
 After reviewing an intentional source/validator change, regenerate constructed reference vectors if necessary, format editable files, explicitly run `node scripts/ugv-zmq/freeze-contracts.mjs --write`, review the changed hashes and rerun the checks. Source snapshots and raw/reference bytes are excluded from automatic formatting. Do not relabel constructed vectors as real captures or silently replace a provider document with a corrected interpretation.
 
 Ambiguities retained from the documents include the missing native patrol task, optical rejection example using `result` instead of `command`, explanatory non-JSON examples, ambiguous command accepted wording, and missing producer epoch/timebase details. Strict validators follow the stated envelope/tables; raw mismatches must be diagnosed rather than loosely accepted.
+
+On 2026-10-24 the operator made the controller system ID optional. An omitted field normalizes to null and no longer adds a global G0 blocker. Read-only SUB reception never uses a controller identity; future command encoding requires its own explicit, confirmed header/default semantics.

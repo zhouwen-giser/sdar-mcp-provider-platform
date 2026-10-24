@@ -1,0 +1,49 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import {spawn} from 'node:child_process';
+import {createInterface} from 'node:readline';
+import {pathToFileURL} from 'node:url';
+import {setTimeout as delay} from 'node:timers/promises';
+import {gzipSync} from 'node:zlib';
+const root=process.cwd(),out='/mnt/data/ugv-zmq-phase2-20261024/compiled-site';
+const require=createRequire(root+'/package.json'),{Pool}=require('pg');
+const {PostgresObservationArchive,ObserverSettings,observerIdentity,sha256,reconstructFrames}=await import(pathToFileURL(root+'/packages/vehicle-zmq-observer/src/index.ts').href);
+const {DeploymentProfile}=await import(pathToFileURL(root+'/packages/vehicle-zmq-contract/src/index.ts').href);
+const config=JSON.parse(readFileSync('/mnt/data/ugv-zmq-phase2-20261024/postgres-test.json','utf8'));
+const settings=ObserverSettings.parse({...JSON.parse(readFileSync('deploy/ugv-zmq/observer.settings.json','utf8')),schema:'zmq_phase2_site_20261024',diagnosticPartition:'smpp-zmq-site-diagnostic-20261024',port:0});
+const settingsPath=out+'/site-observer.settings.json';writeFileSync(settingsPath,JSON.stringify(settings,null,2)+'\n');
+const env={...process.env,UGV_ZMQ_OBSERVATION_DATABASE_URL:config.databaseUrl,UGV_ZMQ_OBSERVER_SETTINGS_FILE:settingsPath,UGV_ZMQ_OBSERVER_DURATION_MS:'6000'};
+function command(file){return [file.replace(/^apps\//,'dist/apps/').replace(/\.ts$/,'.js')];}
+function run(file){return new Promise((resolve,reject)=>{const c=spawn(process.execPath,command(file),{cwd:root,env});let stdout='',stderr='';c.stdout.on('data',b=>stdout+=b);c.stderr.on('data',b=>stderr+=b);c.on('error',reject);c.on('exit',code=>resolve({code,stdout,stderr}));});}
+const migration=await run('apps/ugv-zmq-observer/src/migrate.ts');writeFileSync(out+'/site-owner-install.log',migration.stdout+migration.stderr);if(migration.code!==0)throw Error('OWNER_INSTALL_FAILED');
+const child=spawn(process.execPath,command('apps/ugv-zmq-observer/src/main.ts'),{cwd:root,env});
+let stdout='',stderr='',readyResolve,readyReject;
+const readyPromise=new Promise((resolve,reject)=>{readyResolve=resolve;readyReject=reject;});
+const lines=createInterface({input:child.stdout});
+child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
+lines.on('line',line=>{try{const v=JSON.parse(line);if(v.event==='ready')readyResolve(v);}catch{}});
+const exit=new Promise((resolve,reject)=>{child.on('error',reject);child.on('exit',code=>{readyReject(Error('OBSERVER_EXITED_BEFORE_READY'));resolve(code);});});
+let ready;const timer=setTimeout(()=>readyReject(Error('READY_TIMEOUT')),4000);
+try{ready=await readyPromise;}finally{clearTimeout(timer);}
+await delay(2500);
+const responses={};
+for(const path of ['/health','/v2/state','/v2/capabilities','/v2/storage','/v2/sessions',`/v2/receptions?sessionId=${ready.sessionId}&after=0&limit=100`]){const r=await fetch(ready.address+path);if(!r.ok)throw Error('READ_API_FAILED');responses[path]=await r.json();}
+const first=responses[`/v2/receptions?sessionId=${ready.sessionId}&after=0&limit=100`].entries.find(e=>e.payload.type==='reception');
+if(first){const r=await fetch(`${ready.address}/v2/receptions/${ready.sessionId}/${first.ordinal}/raw`);if(!r.ok)throw Error('RAW_READ_FAILED');responses.raw=await r.json();if(responses.raw.entryHash!==first.entryHash)throw Error('RAW_HASH_MISMATCH');}
+writeFileSync(out+'/site-read-api.json',JSON.stringify(responses,null,2)+'\n');
+const code=await exit;writeFileSync(out+'/site-observer.log',stdout+stderr);if(code!==0)throw Error('OBSERVER_FAILED');
+const profileBytes=readFileSync('deploy/ugv-zmq/deployment.candidate.json'),profile=DeploymentProfile.parse(JSON.parse(profileBytes));
+const scope=observerIdentity(profile,settings.diagnosticPartition,sha256(profileBytes),sha256(readFileSync('contracts/ugv-zmq/v1/contract-lock.json')));
+const pool=new Pool({connectionString:config.databaseUrl,max:3});
+try{
+ const archive=new PostgresObservationArchive(pool,scope,settings),entries=[];let cursor='0';
+ do{const page=await archive.page(ready.sessionId,cursor,200);entries.push(...page.entries);cursor=page.nextCursor??'';}while(cursor);
+ const counts={chassis:{valid:0,invalid:0},eo:{valid:0,invalid:0},simulationEffect:{valid:0,invalid:0}},diagnostics={};let rawBytes=0;
+ for(const e of entries){const p=e.payload;if(p.type==='reception'){reconstructFrames(p);counts[p.component][p.valid?'valid':'invalid']++;rawBytes+=p.wireBytes;for(const d of p.diagnostics)diagnostics[d]=(diagnostics[d]??0)+1;}}
+ const ndjson=Buffer.from(entries.map(e=>JSON.stringify(e)).join('\n')+'\n'),compressed=gzipSync(ndjson);
+ writeFileSync(out+'/site-archive-entries.ndjson',ndjson);writeFileSync(out+'/site-archive-entries.ndjson.gz',compressed);
+ const session=(await archive.sessions()).find(s=>s.sessionId===ready.sessionId);
+ const report={evidenceClass:'actual_passive_publications_unqualified_diagnostic',sourceHostConfirmation:'192.168.2.63 confirmed by operator',sessionId:ready.sessionId,partitionHash:scope.partitionHash,sessionStatus:session?.status,entryCount:entries.length,counts,rawBytes,diagnostics,headHash:session?.headHash,archiveNdjsonSha256:sha256(ndjson),archiveGzipSha256:sha256(compressed),businessCommandsSent:0,runtimeAdmission:'not_published',sourceProducerEpoch:null,continuity:'unverified',ownerInstallExitCode:migration.code,observerExitCode:code,storage:await archive.storage()};
+ writeFileSync(out+'/site-passive-report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+ if(Object.values(counts).some(c=>c.valid===0||c.invalid>0))process.exitCode=2;
+}finally{await pool.end();}

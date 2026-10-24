@@ -48,7 +48,7 @@
     },
     {
       "path": "packages/vehicle-zmq-contract/src/profile.ts",
-      "sha256": "e2e6e0d365a88170affdadb69306a6ded53341cf0fb3315a1957ea9cb1983b46"
+      "sha256": "d97e81e85bb35d8012f74d212dae14410e1cc983ac4f185e4b0559fbf75dddef"
     },
     {
       "path": "packages/vehicle-zmq-contract/src/capture.ts",

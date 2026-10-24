@@ -1,6 +1,6 @@
 # UGV 南向 ZMQ 迁移范围与缺口评估
 
-日期：2026-10-23。状态：第一阶段本地合同基础已实现并验证，详见 `docs/execplans/ugv-zmq-migration-20261023.md` 和 `reports/ugv-zmq-phase1/REPORT.md`。G0 的部署身份、服务端证据及约定仍待确认；当前运行实例保持原配置。
+日期：2026-10-23，更新：2026-10-24。状态：第一阶段本地合同基础已实现并复查；第二阶段只读观测与存档已实现并验证，详见 `docs/execplans/ugv-zmq-migration-20261023.md` 和 `reports/ugv-zmq-phase2/REPORT.md`。G0 的部署身份、服务端证据及约定仍待确认；当前运行实例保持原配置。
 
 本次迁移需要同时改造南向通信、任务身份与恢复、能力合同、观测证据和控制面板。浏览器仍通过面板后端访问 SMPP MCP Runtime；MCP 继续作为北向接口。ZMQ 用于替换设备侧的 MCP/MQTT 接入。
 

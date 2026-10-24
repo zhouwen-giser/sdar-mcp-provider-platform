@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "ugv.zmq-observer-settings/1",
+  "diagnosticPartition": "smpp-zmq-local-diagnostic",
+  "schema": "ugv_zmq_observation",
+  "host": "127.0.0.1",
+  "port": 19102,
+  "maxPendingRecords": 4096,
+  "maxPendingBytes": 16777216,
+  "maxBatchRecords": 128,
+  "maxBatchBytes": 1048576,
+  "flushIntervalMs": 25,
+  "receiveHighWaterMark": 2048,
+  "maxArchivePayloadBytes": 1073741824,
+  "stateFreshForMs": 5000,
+  "positionFreshForMs": 2000,
+  "maxSourceClockSkewMs": 5000,
+  "databaseTimeoutMs": 2000,
+  "shutdownTimeoutMs": 10000
+}

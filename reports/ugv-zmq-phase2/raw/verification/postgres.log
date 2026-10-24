@@ -1,0 +1,10 @@
+$ node scripts/require-env.mjs SMPP_ZMQ_TEST_CONFIG_FILE && vitest run tests/ugv-zmq-observer-postgres/
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  10:53:56
+   Duration  7.02s (transform 331ms, setup 0ms, import 508ms, tests 6.31s, environment 0ms)
+

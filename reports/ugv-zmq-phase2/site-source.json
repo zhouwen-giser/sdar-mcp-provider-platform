@@ -1,0 +1,48 @@
+{
+  "evidenceClass": "actual_passive_publications_unqualified_diagnostic",
+  "sourceHostConfirmation": "192.168.2.63 confirmed by operator",
+  "sessionId": "d00417c0-edb2-410a-8651-d239a4803160",
+  "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+  "sessionStatus": "closed",
+  "entryCount": 57,
+  "counts": {
+    "chassis": {
+      "valid": 24,
+      "invalid": 0
+    },
+    "eo": {
+      "valid": 12,
+      "invalid": 0
+    },
+    "simulationEffect": {
+      "valid": 12,
+      "invalid": 0
+    }
+  },
+  "rawBytes": 12354,
+  "diagnostics": {
+    "SOURCE_CONTINUITY_UNVERIFIED": 48,
+    "SOURCE_PRODUCER_EPOCH_UNATTESTED": 48,
+    "SOURCE_TIME_NOT_SUPPLIED": 24,
+    "REPEATED_WIRE_BYTES": 15
+  },
+  "headHash": "a5e21cc6b42a2101dcf494fc861e802c13a186277f45eb96e315193b64cf3213",
+  "archiveNdjsonSha256": "5b87f6b3eb7e4d3c88c2ed43383e54701cd191629ebe101edf8f3add8e275ece",
+  "archiveGzipSha256": "7ab3a04dcb8a89189fd5e91a37c15a0784085d44a7e0797063400bf299e64f78",
+  "businessCommandsSent": 0,
+  "runtimeAdmission": "not_published",
+  "sourceProducerEpoch": null,
+  "continuity": "unverified",
+  "ownerInstallExitCode": 0,
+  "observerExitCode": 0,
+  "storage": {
+    "partitionHash": "f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7",
+    "usedCanonicalPayloadBytes": "84542",
+    "payloadBudgetBytes": "1073741824",
+    "entryCount": "57",
+    "schemaPhysicalBytes": "376832",
+    "physicalMeasurementScope": "entire_observer_schema_including_other_partitions",
+    "retentionPolicy": "append_only_no_automatic_pruning",
+    "upstreamLossCount": null
+  }
+}

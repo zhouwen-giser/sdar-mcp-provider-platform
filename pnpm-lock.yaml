@@ -103,6 +103,9 @@ importers:
       ws:
         specifier: 8.21.0
         version: 8.21.0
+      zeromq:
+        specifier: 6.8.0
+        version: 6.8.0
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -487,6 +490,18 @@ importers:
 
   packages/vehicle-zmq-contract:
     dependencies:
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
+  packages/vehicle-zmq-observer:
+    dependencies:
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
+      zeromq:
+        specifier: 6.8.0
+        version: 6.8.0
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -1011,6 +1026,7 @@ packages:
   '@opentelemetry/sdk-trace-node@2.9.0':
     resolution: {integrity: sha512-ec9a7ps37huy5itYk0MalaZdSLlM6AXWp/FhtEjgMpp5leEGojBDvAl/UWttQnkMZOvFHKzRESn8TD3yKTF5nQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -1691,6 +1707,10 @@ packages:
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
+
+  cmake-ts@1.0.2:
+    resolution: {integrity: sha512-5l++JHE7MxFuyV/OwJf3ek7ZZN1aGPFPM5oUz6AnK5inQAPe4TFXRMz5sA2qg2FRgByPWdqO+gSfIPo8GzoKNQ==}
+    hasBin: true
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -2454,6 +2474,10 @@ packages:
   netmask@2.1.1:
     resolution: {integrity: sha512-eonl3sLUha+S1GzTPxychyhnUzKyeQkZ7jLjKrBagJgPla13F+uQ71HgpFefyHgqrjEbCPkDArxYsjY8/+gLKA==}
     engines: {node: '>= 0.4.0'}
+
+  node-addon-api@8.9.2:
+    resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -3363,6 +3387,10 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zeromq@6.8.0:
+    resolution: {integrity: sha512-0LBpwZKNn4e6YZRDuHVvzXsSHlCx6nTk2B0O9KWQ2vUe3lau7PYPcmnFpJfOwEUTNcKn39x4GgzVU+dQyIJnNg==}
+    engines: {node: '>= 12'}
 
   zod-to-json-schema@3.25.2:
     resolution: {integrity: sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==}
@@ -4526,6 +4554,8 @@ snapshots:
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
+  cmake-ts@1.0.2: {}
+
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -5297,6 +5327,8 @@ snapshots:
   neo-async@2.6.2: {}
 
   netmask@2.1.1: {}
+
+  node-addon-api@8.9.2: {}
 
   node-domexception@1.0.0: {}
 
@@ -6211,6 +6243,11 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
+
+  zeromq@6.8.0:
+    dependencies:
+      cmake-ts: 1.0.2
+      node-addon-api: 8.9.2
 
   zod-to-json-schema@3.25.2(zod@4.4.3):
     dependencies:

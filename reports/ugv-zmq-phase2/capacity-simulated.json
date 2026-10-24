@@ -1,0 +1,18 @@
+{
+  "test": "SIMULATED native loopback + real isolated PostgreSQL",
+  "scheduledHz": 100,
+  "sent": 500,
+  "elapsedMs": 4998.703534,
+  "measuredSendHz": 100.0259360450401,
+  "receivedTotal": 504,
+  "committedReceptions": 504,
+  "wireBytes": 125309,
+  "locallyDiscardedMessages": 0,
+  "upstreamContinuity": "unverified",
+  "sourceProducerEpoch": null,
+  "proof": "local_hash_chain_unsigned",
+  "sessionId": "500425d5-be58-403b-8a30-fe82279fa63e",
+  "partitionHash": "e4d5edf74c0cb522b7bc5db253db1f34ddbe06bc7b7f31f17b02a7fa1d9e2bff",
+  "headHash": "160351ffe46f33e15851db77d96f7ba77abfe06ac6cc8afe4415d0c64be658d4",
+  "businessCommandsSent": 0
+}

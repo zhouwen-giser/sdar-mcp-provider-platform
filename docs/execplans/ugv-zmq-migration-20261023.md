@@ -2,7 +2,7 @@
 
 ## Scope and current phase
 
-Implement the reviewed migration design in explicit phases. The user authorized phase 1: freeze the three southbound contracts and deployment dependencies, establish verifiable wire fixtures and a fail-closed qualification record. Later phases introduce live observation ingestion, task execution, inspection/simulation outcomes, deployment and rollback. Phase 1 does not publish or qualify a new control operation by itself.
+Implement the reviewed migration design in explicit phases. The user authorized phase 1 and, after the 2026-10-24 audit, phase 2. Phase 1: freeze the three southbound contracts and deployment dependencies, establish verifiable wire fixtures and a fail-closed qualification record. Later phases introduce live observation ingestion, task execution, inspection/simulation outcomes, deployment and rollback. Phase 1 does not publish or qualify a new control operation by itself.
 
 Source baseline: `d26002f127a4152ee1dc034950501be2f182b6ea`. Reuse the attached worktree `/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform`, branch `codex/ugv-zmq-phase1-20261023`. Preserve the primary checkout's existing united packaging changes.
 
@@ -31,7 +31,7 @@ The source deliverable is complete when snapshots are reproducibly verified, doc
 ## Later phases
 
 1. Contract/dependency freeze and qualification foundation (local deliverable complete; external G0 clearance pending).
-2. Read-only ZMQ observation, provenance and reception storage.
+2. Read-only ZMQ observation, provenance and reception storage (implemented and verified; see the phase 2 ExecPlan; field localization/target publications not observed).
 3. Navigation/camera task lifecycle, bounded scheduling, recovery and stopping.
 4. Inspection evidence, simulation effect task/result query and operator UI.
 5. Governed publication, single-writer handoff and deployment package.
@@ -46,3 +46,13 @@ Validation: 47 tests passed in three files; root typecheck/build, targeted ESLin
 G0 remains pending: 13 missing deployment/evidence prerequisites, plus the per-operation protocol gaps in `contracts/ugv-zmq/v1/known-gaps.json`. The preflight intentionally returns exit 2 with `g0Ready=false` and `runtimeAdmission=not_published`. Provider/controller/simulation binding, coordinate/time/physical limits, 7879 policy, capability signoff, implementation provenance and provider golden frames require external confirmation. No phase 2 runtime observation driver or live control has been qualified by these tests.
 
 Reviewable evidence: `reports/ugv-zmq-phase1/REPORT.md`, `verification.json`, `G0-candidate.json` and `raw/`. The report fixes the baseline, Node/pnpm versions, exact commands, exit codes and SHA-256 hashes. The delivery commit identifies the final source tree; subsequent provider input must be a reviewed update to the candidate.
+
+## Phase 1 recheck / phase 2 authorization — 2026-10-24
+
+The operator requested a default/omitted controller ID and authorized phase 2 after auditing phase 1. Controller ID is now optional, normalized to null; no sending value is inferred. It is removed from the global missing-input list. Historical phase 1 reports describe commit `0bbf5ee223e9a51a71725de7af3b718b9a4ed03a`; new audit results are recorded separately.
+
+Audit scope: source-lock, wire tests, candidate configuration and fail-closed preflight. Full control qualification still requires the unresolved provider agreements and guarantees. The local phase 1 completion criteria are independent of that later control release gate. Phase 2 may ingest observations in an explicitly unbound diagnostic partition while required deployment bindings remain unknown; it must not publish an operational state as qualified.
+
+Phase 2 worktree branch: `codex/ugv-zmq-phase2-20261024`. Implement subscription-only transport, immutable raw reception/provenance, normalized versioned read-only state, diagnostic freshness/gap handling, bounded persistence and query, plus isolated protocol/PostgreSQL/fault tests and bounded real passive verification. Preserve running services and legacy DTO/history decoding. Details and outcomes will be maintained in a phase 2 ExecPlan.
+
+Phase 2 implementation and evidence are recorded in `docs/execplans/ugv-zmq-observation-phase2-20261024.md` and `reports/ugv-zmq-phase2/REPORT.md`. First-stage G0 control qualification remains pending; the observer uses unqualified diagnostic scope.

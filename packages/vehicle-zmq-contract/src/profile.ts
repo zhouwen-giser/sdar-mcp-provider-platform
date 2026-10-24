@@ -79,7 +79,8 @@ export const DeploymentProfile = z
             commandEndpoint: endpoint,
             publicationEndpoint: endpoint,
             systemId: uint64.nullable(),
-            controllerSystemId: uint64.nullable(),
+            // SUB observation has no sender header. Omission leaves the control identity unspecified.
+            controllerSystemId: uint64.nullable().default(null),
           })
           .strict(),
         eo: z
@@ -164,8 +165,6 @@ export function assessDeployment(
     if (profile.providerBinding[key] === null)
       missing.push(`PROVIDER_BINDING_${key.toUpperCase()}_UNCONFIRMED`);
   if (profile.components.chassis.systemId === null) missing.push("CHASSIS_SYSTEM_ID_UNCONFIRMED");
-  if (profile.components.chassis.controllerSystemId === null)
-    missing.push("CONTROLLER_SYSTEM_ID_UNCONFIRMED");
   if (
     profile.planner.policy === "pending" ||
     (profile.planner.policy === "retain" && profile.planner.endpoint === null)

@@ -1,0 +1,14 @@
+{
+  "name": "@sdar/vehicle-zmq-observer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "pg": "8.22.0",
+    "zeromq": "6.8.0",
+    "zod": "4.4.3"
+  }
+}

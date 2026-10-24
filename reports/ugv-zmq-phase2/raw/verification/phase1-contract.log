@@ -1,0 +1,25 @@
+$ node --import tsx scripts/ugv-zmq/check-contracts.ts
+{
+  "schemaVersion": "ugv.zmq-lock-verification/1",
+  "sourceDocuments": 3,
+  "checkedFiles": [
+    "packages/vehicle-zmq-contract/package.json",
+    "packages/vehicle-zmq-contract/src/index.ts",
+    "deploy/ugv-zmq/task-business.candidate.json",
+    "contracts/ugv-zmq/v1/known-gaps.json",
+    "contracts/ugv-zmq/v1/message-inventory.json",
+    "contracts/ugv-zmq/v1/fixtures/chassis-reference.json",
+    "packages/vehicle-zmq-contract/src/error.ts",
+    "packages/vehicle-zmq-contract/src/json.ts",
+    "packages/vehicle-zmq-contract/src/chassis.ts",
+    "packages/vehicle-zmq-contract/src/schema.ts",
+    "packages/vehicle-zmq-contract/src/wire.ts",
+    "packages/vehicle-zmq-contract/src/profile.ts",
+    "packages/vehicle-zmq-contract/src/capture.ts",
+    "contracts/ugv-zmq/v1/sources/chassis-v2.0.md",
+    "contracts/ugv-zmq/v1/sources/eo-v2.2.md",
+    "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0.md",
+    "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0-original.md"
+  ],
+  "status": "verified"
+}

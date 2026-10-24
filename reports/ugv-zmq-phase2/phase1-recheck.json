@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "ugv.zmq-phase1-audit/1",
+  "auditedAt": "2026-10-24T03:04:59.588848Z",
+  "baselineCommit": "0bbf5ee223e9a51a71725de7af3b718b9a4ed03a",
+  "operatorChange": "Controller ID may be omitted; normalizes to null; no sending value inferred.",
+  "localPhase1CriteriaComplete": true,
+  "testsPassed": 48,
+  "sourceLockVerified": true,
+  "controllerIdBlocksQualification": false,
+  "g0Ready": false,
+  "missingG0Prerequisites": 12,
+  "runtimeAdmission": "not_published",
+  "phase2Admission": "read_only_unqualified_diagnostic_only",
+  "contractLockSha256": "e46a87603f04935eb4f3726b971e992a5973aeaa889418e1635b582ef7d45d9e",
+  "historicalReportCommit": "0bbf5ee223e9a51a71725de7af3b718b9a4ed03a",
+  "historicalReportsModified": false
+}

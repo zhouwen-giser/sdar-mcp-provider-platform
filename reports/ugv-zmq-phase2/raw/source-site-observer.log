@@ -1,0 +1,2 @@
+{"event":"ready","readOnly":true,"address":"http://127.0.0.1:38913","sessionId":"d00417c0-edb2-410a-8651-d239a4803160","partitionHash":"f3462f201061fd8364b6c4ade7b5e70cf1f7326dad5befc0a5af0239d2ac4cd7","runtimeAdmission":"not_published"}
+{"event":"stopped","sessionId":"d00417c0-edb2-410a-8651-d239a4803160","archive":{"status":"stopped","pendingRecords":0,"pendingBytes":0,"committedEvents":57,"receivedMessages":48,"committedReceptions":48,"unconfirmedReceptions":0,"locallyDiscardedMessages":0,"failureCode":null,"failureRecorded":null},"businessCommandsSent":0}

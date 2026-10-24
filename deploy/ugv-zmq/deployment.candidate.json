@@ -1,15 +1,21 @@
 {
   "schemaVersion": "ugv.zmq-deployment/1",
   "status": "candidate",
-  "executionDomain": { "mode": "simulation", "simulationId": null },
-  "providerBinding": { "providerId": null, "resourceId": null, "sourceSessionKey": null },
+  "executionDomain": {
+    "mode": "simulation",
+    "simulationId": null
+  },
+  "providerBinding": {
+    "providerId": null,
+    "resourceId": null,
+    "sourceSessionKey": null
+  },
   "components": {
     "chassis": {
       "protocolVersion": "2.0",
       "commandEndpoint": "tcp://192.168.2.63:10001",
       "publicationEndpoint": "tcp://192.168.2.63:11001",
-      "systemId": "1",
-      "controllerSystemId": null
+      "systemId": "1"
     },
     "eo": {
       "protocolVersion": "2.2",
@@ -24,7 +30,10 @@
       "deviceId": "artillery-01"
     }
   },
-  "planner": { "policy": "pending", "endpoint": "http://192.168.2.63:7879" },
+  "planner": {
+    "policy": "pending",
+    "endpoint": "http://192.168.2.63:7879"
+  },
   "intendedOperations": [
     "state.read",
     "navigation.point",
