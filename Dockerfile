@@ -403,4 +403,7 @@ COPY --from=build --chown=root:root /workspace/dist/apps/ugv-zmq-provider-adapte
 COPY --from=build --chown=root:root /workspace/dist/scripts/ugv-zmq /app/dist/scripts/ugv-zmq
 COPY --from=build --chown=root:root /workspace/contracts/ugv-zmq /app/contracts/ugv-zmq
 COPY --from=build --chown=root:root /workspace/deploy/ugv-zmq /app/deploy/ugv-zmq
+# G0 verifies the frozen contract source bytes as well as the executable schemas.
+COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/package.json /app/packages/vehicle-zmq-contract/package.json
+COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/src /app/packages/vehicle-zmq-contract/src
 CMD ["node", "dist/apps/ugv-zmq-provider-adapter/src/main.js"]

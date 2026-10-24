@@ -29,6 +29,10 @@
 镜像保留原生 ZeroMQ 运行依赖。`compose.formal-candidate.yaml` 所有服务均需显式 qualification
 profile，不包含实际站点凭据或会自动启动的服务。
 
+镜像回归：在 `--network none --read-only` 下加载 Provider 和原生 ZeroMQ；运行
+`node dist/scripts/ugv-zmq/preflight.js` 必须完成 17 项冻结输入校验并因 G0 缺少 12 项而退出 2。
+缺少合同源文件导致的文件读取错误不能计为“正确拒绝现场准入”。
+
 Provider 私有 JSON 配置权限必须为 0600：databaseUrl、observationDatabaseUrl、profile、
 observerSettings、controlSettings、host=127.0.0.1、port。profile/limits/observer 的格式来自对应
 Zod Schema，测试 fixture 只能用于隔离模拟器。controllerSystemId 缺省仍为 null，禁止猜测。
